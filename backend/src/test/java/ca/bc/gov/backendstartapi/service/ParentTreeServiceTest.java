@@ -39,7 +39,7 @@ class ParentTreeServiceTest {
   }
 
   @Test
-  @DisplayName("Caculate parent tree values should succeed")
+  @DisplayName("Calculate parent tree values should succeed")
   void calculatePtVals_successTest() {
     // Using species FDC as example
 
@@ -109,7 +109,7 @@ class ParentTreeServiceTest {
 
     List<OrchardParentTreeValsDto> orchardPtVals = List.of(pt4032, pt4033, pt4079, pt4080);
 
-    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);
+    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0);
 
     /* ********* ORACLE GEOSPATIAL MOCK DATA ********* */
     List<GeospatialOracleResDto> oracleMockSmpGeoData =
@@ -131,7 +131,13 @@ class ParentTreeServiceTest {
 
     /* ********* GENETIC WORTH SERVICE MOCK DATA ********* */
     BigDecimal mockNeValue = new BigDecimal(3.8247490490);
-    when(geneticWorthService.calculateNe(reqDto.orchardPtVals())).thenReturn(mockNeValue);
+    BigDecimal coancestry = null;
+    BigDecimal varSumOrchGameteContr = null;
+    BigDecimal varSumNeNoSmpContrib = null;
+    Integer smpParentsOutside = 0;
+    when(geneticWorthService.calculateNe(
+            coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside))
+        .thenReturn(mockNeValue);
     when(geneticWorthService.calculateGeneticWorth(reqDto.orchardPtVals())).thenReturn(List.of());
 
     /* ********* SERVICE TESTS ********* */
@@ -178,9 +184,15 @@ class ParentTreeServiceTest {
     when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(badPtId))).thenReturn(List.of());
 
     List<OrchardParentTreeValsDto> orchardPtVals = List.of();
-    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);
+    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0);
 
-    when(geneticWorthService.calculateNe(reqDto.orchardPtVals())).thenReturn(BigDecimal.ZERO);
+    BigDecimal coancestry = null;
+    BigDecimal varSumOrchGameteContr = null;
+    BigDecimal varSumNeNoSmpContrib = null;
+    Integer smpParentsOutside = 0;
+    when(geneticWorthService.calculateNe(
+            coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside))
+        .thenReturn(BigDecimal.ZERO);
     when(geneticWorthService.calculateGeneticWorth(reqDto.orchardPtVals())).thenReturn(List.of());
 
     assertThrows(

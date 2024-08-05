@@ -310,9 +310,35 @@ let g_tested_parent_trees_pct: number | null; // NUMBER(3);
 let g_untested_parent_trees_pct: number | null; // NUMBER(3);
 let g_is_lot_split: boolean | null; // BOOLEAN;
 //-- Record to hold previous values
-let r_previous: any; // seedlot%ROWTYPE;
+let r_previous: object; // seedlot%ROWTYPE;
 //-- Record to hold parent tree contribution calculations
-  
+
+function nvlNumber(variable: number | null, value: number): number {
+  if (variable == null) {
+    return value;
+  }
+  return variable;
+}
+
+function nvlString(variable: string | null, value: string): string {
+  if (variable == null) {
+    return value;
+  }
+  return variable;
+}
+
+function rTrim(value: string | null, search: string): string {
+  const strVal = nvlString(value, '');
+  if (strVal.lastIndexOf(search) == strVal.length -1) {
+    return strVal.substring(0, strVal.length-1);
+  }
+  return strVal;
+}
+
+function getFakeResultFromSql<Type>(sql: string, arg: Type): Type {
+  return arg;
+}
+ 
 interface t_pt_calc {
   collection_elevation: number; // seedlot.collection_elevation%TYPE
   collection_elevation_min: number; // seedlot.collection_elevation_min%TYPE
@@ -384,8 +410,8 @@ const CONST_CLASS_A_COPY_MAX  : string; // CONSTANT VARCHAR2(5) = '62999';
  *             they have already been retrieved.
  */
 function get_previous_seedlot_values(p_force: boolean = false) {
-  // Previous: SELECT * FROM seedlotWHERE seedlot_number = g_seedlot_number;
-  // --if record == empty or caller specified FORCE option
+  // Previous: SELECT * FROM seedlot WHERE seedlot_number = g_seedlot_number;
+  // --if record is empty or caller specified FORCE option
   if (r_previous.seedlot_number == null || p_force) {
     // OPEN c_previous;
     // FETCH c_previous INTO r_previous;
@@ -1393,7 +1419,7 @@ function get_new_bgc(p_seedlot_number: string): string {
   let v_bgc_string: string = '';
   
   // -- We are in trouble if (there's no Geometry entry for the seedlot...
-  // -- retrieve && set the seedlot geometry capture method.
+  // -- retrieve and set the seedlot geometry capture method.
   spr_seedlot_geometry.init(p_seedlot_number);
   spr_seedlot_geometry.set_seedlot_number(p_seedlot_number);
   spr_seedlot_geometry.get();
@@ -1411,7 +1437,7 @@ function get_new_spz(p_seedlot_number: string): string {
   let v_spzb: string = '';
 
   //-- We are in trouble if (there's no Geometry entry for the seedlot...
-  //-- retrieve && set the seedlot geometry capture method.
+  //-- retrieve and set the seedlot geometry capture method.
   spr_seedlot_geometry.init(p_seedlot_number);
   spr_seedlot_geometry.set_seedlot_number(p_seedlot_number);
   spr_seedlot_geometry.get();
@@ -1430,7 +1456,7 @@ function is_collection_lat_empty(): boolean {
 function is_collection_long_empty(): boolean {
   return g_collection_long_deg == null && g_collection_long_min == null && g_collection_long_sec == null;
 }
-// -->Area of use can == replaced for these statuses even if (it == specified
+// -->Area of use can is replaced for these statuses even if it is specified
 function is_area_of_use_status(): boolean {
   const list: string[] = ['INC', 'PND'];
   let g_seedlot_status_code_not_null = g_seedlot_status_code == null? '' : g_seedlot_status_code;
@@ -1440,7 +1466,7 @@ function replace_area_of_use(p_check_value: number | string | null): boolean {
   return is_area_of_use_status() || p_check_value == null;
 }
 function is_area_of_use_elev_empty(): boolean {
-  return g_elevation_min == null&& g_elevation_max == null;
+  return g_elevation_min == null && g_elevation_max == null;
 }
 function is_area_of_use_lat_min_empty(): boolean {
   return g_latitude_deg_min == null && g_latitude_min_min == null && g_latitude_sec_min == null;
@@ -1460,7 +1486,7 @@ function is_area_of_use_long_max_empty(): boolean {
 function is_area_of_use_long_empty(): boolean {
   return is_area_of_use_long_min_empty() && is_area_of_use_long_max_empty();
 }
-// -->Lots approved on or after 2005-04-01 must adhere to Chief Forester's St&&ards
+// -->Lots approved on or after 2005-04-01 must adhere to Chief Forester's Standards
 function is_lot_under_CFS(): boolean {
   return g_approved_timestamp == null || g_approved_timestamp >= new Date('2005-04-01');
 }
@@ -1798,7 +1824,7 @@ function set_elevation(p_value: number) {
   g_elevation = p_value;
   gb_elevation = 'Y';
 }
-function set_elevation_min(p_value: number) {
+function set_elevation_min(p_value: number | null) {
   g_elevation_min = p_value;
   gb_elevation_min = 'Y';
 }
@@ -2088,7 +2114,7 @@ function apply_superior_prov_limits() {
     seed_plan_zone_code: string;
   }
   
-  //--Limits && SPZ's for B Class sup provenance
+  //--Limits and SPZ's for B Class sup provenance
   /* CURSOR c_sup IS
   SELECT sp.genetic_worth_code
         , sp.genetic_worth_rating
@@ -2104,8 +2130,8 @@ function apply_superior_prov_limits() {
     FROM superior_provenance sp
         , superior_provenance_plan_zone spz
     WHERE sp.provenance_id = g_provenance_id
-      && sp.vegetation_code = g_vegetation_code
-      && spz.provenance_id = sp.provenance_id
+      AND sp.vegetation_code = g_vegetation_code
+      AND spz.provenance_id = sp.provenance_id
     ORDER BY spz.seed_plan_zone_code;*/
     
   b_first_row_processed = false;
@@ -2153,7 +2179,7 @@ function apply_superior_prov_limits() {
           set_elevation_min(g_collection_elevation - c_sup[r_sup].limit_down_elevation);
           set_elevation_max(g_collection_elevation + c_sup[r_sup].limit_up_elevation);
         } else {
-          // --Take Min && Max Elevation directly from table
+          // --Take Min and Max Elevation directly from table
           set_elevation_min (c_sup[r_sup].limit_elevation_min);
         }
       }
@@ -2162,10 +2188,10 @@ function apply_superior_prov_limits() {
         // --Set Area of Use Min/Max Elevation
         // -->limits can be up/down or a min/max
         if (c_sup[r_sup].limit_up_elevation != null) {
-          // --Calculate min && max based on Collection Mean Elev
+          // --Calculate min and max based on Collection Mean Elev
           set_elevation_max(g_collection_elevation + c_sup[r_sup].limit_up_elevation);
         } else {
-          // --Take Min && Max Elevation directly from table
+          // --Take Min and Max Elevation directly from table
           set_elevation_max(c_sup[r_sup].limit_elevation_max);
         }
       }
@@ -2214,7 +2240,12 @@ function apply_superior_prov_limits() {
   }
 
   if (replace_area_of_use(g_spz_list)) {
-    set_spz_list(RTRIM(v_spz_list, ','));
+    // Original: https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/RTRIM.html
+    //set_spz_list(RTRIM(v_spz_list, ','));
+    if (v_spz_list.lastIndexOf(',') == v_spz_list.length-1) {
+      v_spz_list = v_spz_list.substring(0, v_spz_list.length-1);
+    }
+    set_spz_list(v_spz_list);
   }
 }
 
@@ -2223,21 +2254,21 @@ function apply_superior_prov_limits() {
  * Purpose:    Apply NO superior provenance limits for Class B lots from within British Columbia (BC Source=Y)
  */
 function apply_no_superior_prov_limits() {
-  let e_no_limits_found: Error; // EXCEPTION;
+  let e_no_limits_found: Error | null = null; // EXCEPTION;
   // --Limits for B Class non-superior provenance
   // CURSOR c_limit IS:
   interface ic_limit {
     transfer_limit_skey: string;
-    site_min_latdeg: string;
-    site_max_latdeg: string;
-    limit_north_latdeg: string;
-    limit_north_latmnt: string;
-    limit_south_latdeg: string;
-    limit_south_latmnt: string;
-    limit_east_longdeg: string;
-    limit_east_longmnt: string;
-    limit_west_longdeg: string;
-    limit_west_longmnt: string;
+    site_min_latdeg: number;
+    site_max_latdeg: number;
+    limit_north_latdeg: number;
+    limit_north_latmnt: number;
+    limit_south_latdeg: number;
+    limit_south_latmnt: number;
+    limit_east_longdeg: number;
+    limit_east_longmnt: number;
+    limit_west_longdeg: number;
+    limit_west_longmnt: number;
     limit_up_elevatn: number;
     limit_down_elevatn: number;
   }
@@ -2256,15 +2287,12 @@ function apply_no_superior_prov_limits() {
         , limit_up_elevatn
         , limit_down_elevatn
     FROM transfer_limit
-    WHERE
-          (   vegetation_code = g_vegetation_code
-            || vegetation_code == null)
-      && genetic_class_code = g_genetic_class_code
-      && superior_prvnc_ind = NVL(g_superior_prvnc_ind,'N')
-      && coast_interior_code = spr_get_spz_type(g_seed_plan_zone_code)
-      && (   seed_plan_zone_code = g_seed_plan_zone_code
-            || seed_plan_zone_code == null)
-      && g_collection_lat_deg BETWEEN site_min_latdeg && site_max_latdeg
+    WHERE (vegetation_code = g_vegetation_code || vegetation_code is null)
+      AND genetic_class_code = g_genetic_class_code
+      AND superior_prvnc_ind = NVL(g_superior_prvnc_ind, 'N')
+      AND coast_interior_code = spr_get_spz_type(g_seed_plan_zone_code)
+      AND (seed_plan_zone_code = g_seed_plan_zone_code || seed_plan_zone_code is null)
+      AND g_collection_lat_deg BETWEEN site_min_latdeg AND site_max_latdeg
     ORDER BY vegetation_code, seed_plan_zone_code;
   */
   let r_limit: number = 0; // c_limit%ROWTYPE;
@@ -2290,7 +2318,7 @@ function apply_no_superior_prov_limits() {
   // --Derive Non Superior Provenance limits
   // OPEN c_limit; FETCH c_limit INTO r_limit; CLOSE c_limit;
   if (c_limit[r_limit].transfer_limit_skey == null) {
-    throw new Error('e_no_limits_found');
+    e_no_limits_found = new Error('e_no_limits_found');
   }
   // --Set Area of Use Min/Max Elevation
   g_collection_elevation = g_collection_elevation == null? 0 : g_collection_elevation;
@@ -2298,8 +2326,8 @@ function apply_no_superior_prov_limits() {
   if (is_area_of_use_status() || g_elevation_min == null) {
     set_elevation_min(g_collection_elevation - c_limit[r_limit].limit_down_elevatn);
   }
-  // -->Ensure elevation == at least 1m
-  set_elevation_min(GREATEST(g_elevation_min,1));
+  // -->Ensure elevation is at least 1m
+  set_elevation_min(Math.max(nvlNumber(g_elevation_min,0),1));
   if (is_area_of_use_status() || g_elevation_max == null) {
     set_elevation_max(g_collection_elevation + c_limit[r_limit].limit_up_elevatn);
   }
@@ -2310,8 +2338,8 @@ function apply_no_superior_prov_limits() {
   g_latitude_deg_min = g_latitude_deg_min == null? 0 : g_latitude_deg_min;
   if (is_area_of_use_status() || is_area_of_use_lat_min_empty()) {
     // -->Min
-    set_latitude_deg_min(g_collection_lat_deg - NVL(c_limit[r_limit].limit_south_latdeg,0));
-    set_latitude_min_min(g_collection_lat_min - NVL(c_limit[r_limit].limit_south_latmnt,0));
+    set_latitude_deg_min(g_collection_lat_deg - nvlNumber(c_limit[r_limit].limit_south_latdeg,0));
+    set_latitude_min_min(g_collection_lat_min - nvlNumber(c_limit[r_limit].limit_south_latmnt,0));
     set_latitude_sec_min(g_collection_lat_sec);
     // -->Adjust for provincial boundary at 48 00 00
     if (g_latitude_min_min < 0) {
@@ -2325,66 +2353,58 @@ function apply_no_superior_prov_limits() {
     }
   }
   // --Set Area of Use Max Lat
-  g_latitude_min_max = g_latitude_min_max == null? 0 : g_latitude_min_max;
-  g_latitude_deg_max = g_latitude_deg_max == null? 0 : g_latitude_deg_max;
   if (is_area_of_use_status() || is_area_of_use_lat_max_empty()) {
     // -->Max
-    set_latitude_deg_max(g_collection_lat_deg + NVL(c_limit[r_limit].limit_north_latdeg,0));
-    set_latitude_min_max(g_collection_lat_min + NVL(c_limit[r_limit].limit_north_latmnt,0));
+    set_latitude_deg_max(g_collection_lat_deg + nvlNumber(c_limit[r_limit].limit_north_latdeg,0));
+    set_latitude_min_max(g_collection_lat_min + nvlNumber(c_limit[r_limit].limit_north_latmnt,0));
     set_latitude_sec_max(g_collection_lat_sec);
     // -->Adjust for provincial boundary at 60 00 00
-    if (g_latitude_min_max > 60) {
-      set_latitude_deg_max(g_latitude_deg_max + 1);
-      set_latitude_min_max(g_latitude_min_max - 60);
+    if (nvlNumber(g_latitude_min_max, 0) > 60) {
+      set_latitude_deg_max(nvlNumber(g_latitude_deg_max, 0) + 1);
+      set_latitude_min_max(nvlNumber(g_latitude_min_max, 0) - 60);
     }
-    if (g_latitude_deg_max > 60) {
+    if (nvlNumber(g_latitude_deg_max, 0) > 60) {
       set_latitude_deg_max(60);
       set_latitude_min_max(0);
       set_latitude_sec_max(0);
     }
   }
   // --Set Area of Use Min Long
-  g_collection_long_deg = g_collection_long_deg == null? 0 : g_collection_long_deg;
-  g_collection_long_min = g_collection_long_min == null? 0 : g_collection_long_min;
-  g_longitude_min_min = g_longitude_min_min == null? 0 : g_longitude_min_min;
-  g_longitude_deg_min = g_longitude_deg_min == null? 0 : g_longitude_deg_min;
   if (is_area_of_use_status() || is_area_of_use_long_min_empty()) {
     // -->Min
-    set_longitude_deg_min(g_collection_long_deg - NVL(c_limit[r_limit].limit_east_longdeg,0));
-    set_longitude_min_min(g_collection_long_min - NVL(c_limit[r_limit].limit_east_longmnt,0));
+    set_longitude_deg_min(nvlNumber(g_collection_long_deg, 0) - nvlNumber(c_limit[r_limit].limit_east_longdeg,0));
+    set_longitude_min_min(nvlNumber(g_collection_long_min, 0) - nvlNumber(c_limit[r_limit].limit_east_longmnt,0));
     set_longitude_sec_min(g_collection_long_sec);
     // -->Adjust for provincial boundary at 114 00 00
-    if (g_longitude_min_min < 0) {
-      set_longitude_deg_min(g_longitude_deg_min - 1);
-      set_longitude_min_min(g_longitude_min_min + 60);
+    if (nvlNumber(g_longitude_min_min, 0) < 0) {
+      set_longitude_deg_min(nvlNumber(g_longitude_deg_min, 0) - 1);
+      set_longitude_min_min(nvlNumber(g_longitude_min_min, 0) + 60);
     }
-    if (g_longitude_deg_min < 114) {
+    if (nvlNumber(g_longitude_deg_min, 0) < 114) {
       set_longitude_deg_min(114);
       set_longitude_min_min(0);
       set_longitude_sec_min(0);
     }
   }
   // --Set Area of Use Min Long
-  g_longitude_min_max = g_longitude_min_max == null? 0 : g_longitude_min_max;
-  g_longitude_deg_max = g_longitude_deg_max == null? 0 : g_longitude_deg_max;
   if (is_area_of_use_status() || is_area_of_use_long_max_empty()) {
     // -->Max
-    set_longitude_deg_max(g_collection_long_deg + NVL(c_limit[r_limit].limit_west_longdeg,0));
-    set_longitude_min_max(g_collection_long_min + NVL(c_limit[r_limit].limit_west_longmnt,0));
+    set_longitude_deg_max(nvlNumber(g_collection_long_deg, 0) + nvlNumber(c_limit[r_limit].limit_west_longdeg,0));
+    set_longitude_min_max(nvlNumber(g_collection_long_min, 0) + nvlNumber(c_limit[r_limit].limit_west_longmnt,0));
     set_longitude_sec_max(g_collection_long_sec);
     // -->Adjust for provincial boundary at 140 00 00
-    if (g_longitude_min_max > 60) {
-      set_longitude_deg_max((g_longitude_deg_max == null ? 0 : g_longitude_deg_max) + 1);
-      set_longitude_min_max((g_longitude_min_max == null ? 0 : g_longitude_min_max) - 60);
+    if (nvlNumber(g_longitude_min_max, 0) > 60) {
+      set_longitude_deg_max(nvlNumber(g_longitude_deg_max, 0) + 1);
+      set_longitude_min_max(nvlNumber(g_longitude_min_max, 0) - 60);
     }
-    if (g_longitude_deg_max > 140) {
+    if (nvlNumber(g_longitude_deg_max, 0) > 140) {
       set_longitude_deg_max(140);
       set_longitude_min_max(0);
       set_longitude_sec_max(0);
     }
   }
   if (e_no_limits_found) {
-    throw new Error(e_no_limits_found);
+    throw e_no_limits_found;
   }
 }
 
@@ -2393,62 +2413,69 @@ function apply_no_superior_prov_limits() {
  * Purpose:  Get the SPZB that all Untested Parent Trees have in common.
  *           if (>1 SPZB found) { returns null
  */
-function get_untested_common_spz(): string; {
+function get_untested_common_spz(): string | null {
   let v_spz: string; // parent_tree.seed_plan_zone_code%TYPE;
-  /*
-  BEGIN
+
+  let sql = `
     SELECT DISTINCT pt.seed_plan_zone_code
-      INTO v_spz
-      FROM parent_tree pt
-          , seedlot_parent_tree_gen_qlty sptgq
-          , seedlot_parent_tree spt  --select from temp table for recalc
-      WHERE spt.seedlot_number = g_seedlot_number
-        && spt.seedlot_number = sptgq.seedlot_number
-        && spt.parent_tree_id = sptgq.parent_tree_id
-        && pt.parent_tree_id = spt.parent_tree_id
-        && sptgq.untested_ind = 'Y';
-  EXCEPTION
-    WHEN TOO_MANY_ROWS || NO_DATA_FOUND) {
-      null;
-  END
-  */
-  v_spz = sql_result;
-  return (v_spz);
+    FROM parent_tree pt
+      , seedlot_parent_tree_gen_qlty sptgq
+      , seedlot_parent_tree spt  --select from temp table for recalc
+    WHERE spt.seedlot_number = g_seedlot_number
+      AND spt.seedlot_number = sptgq.seedlot_number
+      AND spt.parent_tree_id = sptgq.parent_tree_id
+      AND pt.parent_tree_id = spt.parent_tree_id
+      AND sptgq.untested_ind = 'Y';
+  `;
+
+  v_spz = getFakeResultFromSql<string>(sql, '');
+  if (v_spz == 'TOO_MANY_ROWS' || 'NO_DATA_FOUND') {
+    throw new Error(v_spz);
+    return null;
+  }
+
+  return v_spz;
 }
 
 /*
  * Procedure: get_a_class_area_of_use_spz
- * Purpose:   Get primary && non-primary SPZ's for A class lot.
+ * Purpose:   Get primary and non-primary SPZ's for A class lot.
  */
 function get_a_class_area_of_use_spz() {
   // CURSOR c_tested IS:
-  /*
-  SELECT spz.seed_plan_zone_code
-        , spz.primary_ind
+  interface ic_tested {
+    seed_plan_zone_code: string;
+    primary_ind: string;
+  }
+  
+  const sql = `
+    SELECT spz.seed_plan_zone_code , spz.primary_ind
     FROM tested_pt_area_of_use_spz spz
       ,  tested_pt_area_of_use aou
     WHERE aou.seed_plan_unit_id = g_seed_plan_unit_id
-      && spz.tested_pt_area_of_use_id = aou.tested_pt_area_of_use_id
+      AND spz.tested_pt_area_of_use_id = aou.tested_pt_area_of_use_id
     ORDER BY 2 DESC;
-  */
+  `;
+
+  let c_tested: ic_tested[] = getFakeResultFromSql<ic_tested[]>(sql, []);
   
-  //--Always reset for INC,PND
+  // --Always reset for INC,PND
   if (replace_area_of_use(g_spz_list)) {
     // --Tested Parent Trees
-    if (['TPT','CUS'].includes(g_seedlot_source_code) && g_seed_plan_unit_id != null) {
+    if (['TPT','CUS'].includes(nvlString(g_seedlot_source_code, '')) && g_seed_plan_unit_id != null) {
       // --Get primary/secondary SPZ's (primary sorted first)
       set_spz_list(null);
-      for (r_tested in c_tested) {
-        set_spz_list(g_spz_list || r_tested.seed_plan_zone_code || ',');
+      for (let r_tested in c_tested) {
+        set_spz_list(g_spz_list || c_tested[r_tested].seed_plan_zone_code || ',');
       }
     }
     // --Untested Parent Trees
     else if (g_seedlot_source_code == 'UPT') {
-      // --Primary SPZ == the SPZ that all PT's share
-      set_spz_list(get_untested_common_spz);
+      // --Primary SPZ is the SPZ that all PT's share
+      set_spz_list(get_untested_common_spz());
     }
     // --Remove trailing comma
-    set_spz_list(RTRIM(g_spz_list,','));
+    set_spz_list(rTrim(g_spz_list, ','));
   }
 }
 
@@ -2468,8 +2495,8 @@ function get_tested_area_of_use_geog() {
         , tested_pt_area_of_use_spu included_spus
         , seed_plan_unit spu
     WHERE primary_spu.seed_plan_unit_id = g_seed_plan_unit_id
-      && included_spus.tested_pt_area_of_use_id = primary_spu.tested_pt_area_of_use_id
-      && included_spus.seed_plan_unit_id = spu.seed_plan_unit_id;
+      AND included_spus.tested_pt_area_of_use_id = primary_spu.tested_pt_area_of_use_id
+      AND included_spus.seed_plan_unit_id = spu.seed_plan_unit_id;
   */
   let r_tested: any; // c_tested%ROWTYPE;
   if (g_seed_plan_unit_id != null) {
@@ -2544,14 +2571,11 @@ function get_untested_area_of_use_geog() {
         , limit_up_elevatn
         , limit_down_elevatn
     FROM transfer_limit
-    WHERE
-          (   vegetation_code = g_vegetation_code
-            || vegetation_code == null)
-      && genetic_class_code = g_genetic_class_code
-      && coast_interior_code = spr_get_spz_type(v_spz)
-      && (   seed_plan_zone_code = v_spz
-            || seed_plan_zone_code == null)
-      && g_collection_lat_deg BETWEEN site_min_latdeg && site_max_latdeg
+    WHERE ( vegetation_code = g_vegetation_code || vegetation_code is null)
+      AND genetic_class_code = g_genetic_class_code
+      AND coast_interior_code = spr_get_spz_type(v_spz)
+      AND (seed_plan_zone_code = v_spz || seed_plan_zone_code is null)
+      AND g_collection_lat_deg BETWEEN site_min_latdeg AND site_max_latdeg
     ORDER BY vegetation_code, seed_plan_zone_code;
     */
     
@@ -2564,25 +2588,25 @@ function get_untested_area_of_use_geog() {
   }
   // --Set Area of Use Min/Max Elevation
   if (replace_area_of_use(g_elevation_min)) {
-    set_elevation_min(g_collection_elevation - NVL(r_limit.limit_down_elevatn,0));
+    set_elevation_min(g_collection_elevation - nvl(r_limit.limit_down_elevatn,0));
   }
   if (replace_area_of_use(g_elevation_max)) {
-    set_elevation_max(g_collection_elevation + NVL(r_limit.limit_up_elevatn,0));
+    set_elevation_max(g_collection_elevation + nvl(r_limit.limit_up_elevatn,0));
   }
-  // -->Ensure elevation == at least 1m
-  set_elevation_min(GREATEST(g_elevation_min,1));
+  // -->Ensure elevation is at least 1m
+  set_elevation_min(Math.max(nvlNumber(g_elevation_min,0),1));
   // --Set Area of Use Min/Max Lat
   // -->Min
   if (is_area_of_use_lat_min_empty() || is_area_of_use_status()) {
-    set_latitude_deg_min(NVL(g_collection_lat_deg,0) - NVL(r_limit.limit_south_latdeg,0));
-    set_latitude_min_min(g_collection_lat_min - NVL(r_limit.limit_south_latmnt,0));
+    set_latitude_deg_min(nvlNumber(g_collection_lat_deg, 0) - nvlValue(r_limit.limit_south_latdeg,0));
+    set_latitude_min_min(nvlNumber(g_collection_lat_min, 0) - nvlNumber(r_limit.limit_south_latmnt,0));
     set_latitude_sec_min(g_collection_lat_sec);
     // -->Adjust for provincial boundary at 48 00 00
-    if (g_latitude_min_min < 0) {
-      set_latitude_deg_min(NVL(g_latitude_deg_min,0) - 1);
-      set_latitude_min_min(g_latitude_min_min + 60);
+    if (nvlNumber(g_latitude_min_min, 0) < 0) {
+      set_latitude_deg_min(nvlNumber(g_latitude_deg_min,0) - 1);
+      set_latitude_min_min(nvlNumber(g_latitude_min_min, 0) + 60);
     }
-    if (g_latitude_deg_min < 48) {
+    if (nvlNumber(g_latitude_deg_min, 0) < 48) {
       set_latitude_deg_min(48);
       set_latitude_min_min(0);
       set_latitude_sec_min(0);
@@ -2590,15 +2614,15 @@ function get_untested_area_of_use_geog() {
   }
   // -->Max
   if (is_area_of_use_lat_max_empty() || is_area_of_use_status()) {
-    set_latitude_deg_max(g_collection_lat_deg + NVL(r_limit.limit_north_latdeg,0));
-    set_latitude_min_max(g_collection_lat_min + NVL(r_limit.limit_north_latmnt,0));
+    set_latitude_deg_max(g_collection_lat_deg + nvl(r_limit.limit_north_latdeg,0));
+    set_latitude_min_max(g_collection_lat_min + nvl(r_limit.limit_north_latmnt,0));
     set_latitude_sec_max(g_collection_lat_sec);
     // -->Adjust for provincial boundary at 60 00 00
-    if (g_latitude_min_max > 60) {
-      set_latitude_deg_max(NVL(g_latitude_deg_max,0) + 1);
-      set_latitude_min_max(NVL(g_latitude_min_max,0) - 60);
+    if (nvlNumber(g_latitude_min_max, 0) > 60) {
+      set_latitude_deg_max(nvl(g_latitude_deg_max,0) + 1);
+      set_latitude_min_max(nvl(g_latitude_min_max,0) - 60);
     }
-    if (g_latitude_deg_max > 60) {
+    if (nvlNumber(g_latitude_deg_max, 0) > 60) {
       set_latitude_deg_max(60);
       set_latitude_min_max(0);
       set_latitude_sec_max(0);
@@ -2607,15 +2631,15 @@ function get_untested_area_of_use_geog() {
   // --Set Area of Use Min/Max Long
   // -->Min
   if (is_area_of_use_long_min_empty() || is_area_of_use_status()) {
-    set_longitude_deg_min(g_collection_long_deg - NVL(r_limit.limit_east_longdeg,0));
-    set_longitude_min_min(g_collection_long_min - NVL(r_limit.limit_east_longmnt,0));
+    set_longitude_deg_min(nvlNumber(g_collection_long_deg, 0) - nvlNumber(r_limit.limit_east_longdeg,0));
+    set_longitude_min_min(nvlNumber(g_collection_long_min, 0) - nvlNumber(r_limit.limit_east_longmnt,0));
     set_longitude_sec_min(g_collection_long_sec);
     // -->Adjust for provincial boundary at 114 00 00
-    if (g_longitude_min_min < 0) {
-      set_longitude_deg_min(NVL(g_longitude_deg_min,0) - 1);
-      set_longitude_min_min(NVL(g_longitude_min_min,0) + 60);
+    if (nvlNumber(g_longitude_min_min, 0) < 0) {
+      set_longitude_deg_min(nvlNumber(g_longitude_deg_min,0) - 1);
+      set_longitude_min_min(nvlNumber(g_longitude_min_min,0) + 60);
     }
-    if (g_longitude_deg_min < 114) {
+    if (nvlNumber(g_longitude_deg_min, 0) < 114) {
       set_longitude_deg_min(114);
       set_longitude_min_min(0);
       set_longitude_sec_min(0);
@@ -2623,15 +2647,15 @@ function get_untested_area_of_use_geog() {
   }
   // -->Max
   if (is_area_of_use_long_max_empty() || is_area_of_use_status()) {
-    set_longitude_deg_max(g_collection_long_deg + NVL(r_limit.limit_west_longdeg,0));
-    set_longitude_min_max(g_collection_long_min + NVL(r_limit.limit_west_longmnt,0));
+    set_longitude_deg_max(nvlNumber(g_collection_long_deg, 0) + nvlNumber(r_limit.limit_west_longdeg,0));
+    set_longitude_min_max(nvlNumber(g_collection_long_min, 0) + nvlNumber(r_limit.limit_west_longmnt,0));
     set_longitude_sec_max(g_collection_long_sec);
     // -->Adjust for provincial boundary at 140 00 00
-    if (g_longitude_min_max > 60) {
-      set_longitude_deg_max(NVL(g_longitude_deg_max,0) + 1);
-      set_longitude_min_max(NVL(g_longitude_min_max,0) - 60);
+    if (nvlNumber(g_longitude_min_max, 0) > 60) {
+      set_longitude_deg_max(nvlNumber(g_longitude_deg_max,0) + 1);
+      set_longitude_min_max(nvlNumber(g_longitude_min_max,0) - 60);
     }
-    if (g_longitude_deg_max > 140) {
+    if (nvlNumber(g_longitude_deg_max, 0) > 140) {
       set_longitude_deg_max(140);
       set_longitude_min_max(0);
       set_longitude_sec_max(0);
@@ -2651,7 +2675,7 @@ function get_a_class_area_of_use_geog() {
   if (g_seedlot_source_code == 'TPT') {
     get_tested_area_of_use_geog();
   }
-  // --Untested Parent Trees && Custom Lots
+  // --Untested Parent Trees and Custom Lots
   else if (['UPT','CUS'].includes(g_seedlot_source_code)) {
     get_untested_area_of_use_geog();
   }
@@ -2659,11 +2683,11 @@ function get_a_class_area_of_use_geog() {
 
 /*
  * Procedure: get_area_of_use
- * Purpose:   Derive area of use for A && B class lots.
+ * Purpose:   Derive area of use for A and B class lots.
  *            For certain statuses, defined by is_area_of_use_status(),
- *            Area of Use == always recalculated && replaced.
- *            For other statuses, each Area of Use item == only recalculated
- *            if (it has been blanked-out (i.e. == null) by the user.
+ *            Area of Use is always recalculated and replaced.
+ *            For other statuses, each Area of Use item is only recalculated
+ *            if it has been blanked-out (i.e. is null) by the user.
  */
 function get_area_of_use() {
   // --Blank area of use information for status where it will be replaced
@@ -2704,7 +2728,7 @@ function get_area_of_use() {
 
 /*
  * Procedure: provenance_is_valid_for_spp
- * Purpose:   Return true if (Provenance == valid for species, otherwise return false.
+ * Purpose:   Return true if Provenance is valid for species, otherwise return false.
  */
 function provenance_is_valid_for_spp(): boolean {
   let v_count: number; // NUMBER(10);
@@ -2713,7 +2737,7 @@ function provenance_is_valid_for_spp(): boolean {
     INTO v_count
     FROM superior_provenance
     WHERE provenance_id = g_provenance_id
-      && vegetation_code = g_vegetation_code;
+      AND vegetation_code = g_vegetation_code;
   */
   v_count = resultsql;
   return v_count > 0;
@@ -2721,7 +2745,7 @@ function provenance_is_valid_for_spp(): boolean {
 
 /*
  * Procedure: spu_is_valid_for_species
- * Purpose:   Return true if (Seed Plan Unit == valid for species, otherwise return false.
+ * Purpose:   Return true if Seed Plan Unit is valid for species, otherwise return false.
  */
 function spu_is_valid_for_species(): boolean {
   let v_count: number; // NUMBER(10);
@@ -2731,8 +2755,8 @@ function spu_is_valid_for_species(): boolean {
     FROM seed_plan_unit spu
         , seed_plan_zone spz
     WHERE spu.seed_plan_unit_id = g_seed_plan_unit_id
-      && spz.seed_plan_zone_id = spu.seed_plan_zone_id
-      && spz.vegetation_code = g_vegetation_code;
+      AND spz.seed_plan_zone_id = spu.seed_plan_zone_id
+      AND spz.vegetation_code = g_vegetation_code;
   */
   v_count = resultsql;
   return v_count > 0;
@@ -2740,7 +2764,7 @@ function spu_is_valid_for_species(): boolean {
 
 /*
  * Procedure: orchard_is_valid_for_species
- * Purpose:   Return true if (Orchard passed-in == valid for species, otherwise return false.
+ * Purpose:   Return true if Orchard passed-in is valid for species, otherwise return false.
  */
 function orchard_is_valid_for_species(p_orchard_id: string): boolean {
   let v_count: number; // NUMBER(10);
@@ -2764,42 +2788,42 @@ function set_mean_area_of_use_geography() {
   // --           Transfer Limits.
   // -->Mean Elevation
   if (g_elevation_min == g_elevation_max) {
-    // --->mean matches min && max
-    set_elevation(g_elevation_max);
+    // --->mean matches min and max
+    set_elevation(nvlNumber(g_elevation_max, 0));
   } else {
     // --->default to collection elevation
-    set_elevation(g_collection_elevation);
+    set_elevation(nvlNumber(g_collection_elevation, 0));
   }
   // -->Mean Latitude
   if (g_latitude_deg_min == g_latitude_deg_max && g_latitude_min_min == g_latitude_min_max && g_latitude_sec_min == g_latitude_sec_max) {
-    // --->mean matches min && max
-    set_latitude_degrees(g_latitude_deg_max);
-    set_latitude_minutes(g_latitude_min_max);
-    set_latitude_seconds(g_latitude_sec_max);
+    // --->mean matches min and max
+    set_latitude_degrees(nvlNumber(g_latitude_deg_max, 0));
+    set_latitude_minutes(nvlNumber(g_latitude_min_max, 0));
+    set_latitude_seconds(nvlNumber(g_latitude_sec_max, 0));
   } else {
     // --->default to mean collection lat
-    set_latitude_degrees(g_collection_lat_deg);
-    set_latitude_minutes(g_collection_lat_min);
-    set_latitude_seconds(g_collection_lat_sec);
+    set_latitude_degrees(nvlNumber(g_collection_lat_deg, 0));
+    set_latitude_minutes(nvlNumber(g_collection_lat_min, 0));
+    set_latitude_seconds(nvlNumber(g_collection_lat_sec, 0));
   }
   // -->Mean Longitude
   if (g_longitude_deg_min == g_longitude_deg_max && g_longitude_min_min == g_longitude_min_max && g_longitude_sec_min == g_longitude_sec_max) {
-    // --->mean matches min && max
-    set_longitude_degrees(g_longitude_deg_max);
-    set_longitude_minutes(g_longitude_min_max);
-    set_longitude_seconds(g_longitude_sec_max);
+    // --->mean matches min and max
+    set_longitude_degrees(nvlNumber(g_longitude_deg_max, 0));
+    set_longitude_minutes(nvlNumber(g_longitude_min_max, 0));
+    set_longitude_seconds(nvlNumber(g_longitude_sec_max, 0));
   } else {
     // --->default to mean collection long
-    set_longitude_degrees(g_collection_long_deg);
-    set_longitude_minutes(g_collection_long_min);
-    set_longitude_seconds(g_collection_long_sec);
+    set_longitude_degrees(nvlNumber(g_collection_long_deg, 0));
+    set_longitude_minutes(nvlNumber(g_collection_long_min, 0));
+    set_longitude_seconds(nvlNumber(g_collection_long_sec, 0));
   }
 }
 
 /*
  * Procedure: load_array
  * Purpose:   Populate array from saved data if (array != present.
- *            if (p_get_current_tests == True:
+ *            if p_get_current_tests is True:
  *             - Populate the BV/CV-G value in the array (whether passed-in
  *               or just generated as described above) with gq value flagged
  *               for use in calc .
@@ -2815,30 +2839,30 @@ function load_array(p_pt_arrayZ: any[], p_get_current_tests: boolean) {
   FROM parent_tree_genetic_quality ptgq
       , parent_tree pt
   WHERE pt.parent_tree_id = p_parent_tree_id
-    && pt.parent_tree_reg_status_code = 'APP'
-    && pt.active_ind = 'Y'
-    && ptgq.parent_tree_id = pt.parent_tree_id
-    && ptgq.seed_plan_unit_id = p_seed_plan_unit_id
-    && ptgq.genetic_type_code = p_genetic_type_code
-    && ptgq.genetic_worth_code = p_genetic_worth_code
-    && ptgq.genetic_worth_calc_ind = 'Y';
+    AND pt.parent_tree_reg_status_code = 'APP'
+    AND pt.active_ind = 'Y'
+    AND ptgq.parent_tree_id = pt.parent_tree_id
+    AND ptgq.seed_plan_unit_id = p_seed_plan_unit_id
+    AND ptgq.genetic_type_code = p_genetic_type_code
+    AND ptgq.genetic_worth_code = p_genetic_worth_code
+    AND ptgq.genetic_worth_calc_ind = 'Y';
   */
   
   // CURSOR c_refresh_list IS:
   /*
   SELECT parent_tree_id, parent_tree_number
-    , NVL(bv_AD_est, cv_AD_est)  AD_estimated_ind
-    , NVL(bv_DFS_est,cv_DFS_est) DFS_estimated_ind
-    , NVL(bv_DFU_est,cv_DFU_est) DFU_estimated_ind
-    , NVL(bv_DFW_est,cv_DFW_est) DFW_estimated_ind
-    , NVL(bv_DSB_est,cv_DSB_est) DSB_estimated_ind
-    , NVL(bv_DSC_est,cv_DSC_est) DSC_estimated_ind
-    , NVL(bv_DSG_est,cv_DSG_est) DSG_estimated_ind
-    , NVL(bv_GVO_est,cv_GVO_est) GVO_estimated_ind
-    , NVL(bv_IWS_est,cv_IWS_est) IWS_estimated_ind
-    , NVL(bv_WDU_est,cv_WDU_est) WDU_estimated_ind
-    , NVL(bv_WVE_est,cv_WVE_est) WVE_estimated_ind
-    , NVL(bv_WWD_est,cv_WWD_est) WWD_estimated_ind
+    , nvl(bv_AD_est, cv_AD_est)  AD_estimated_ind
+    , nvl(bv_DFS_est,cv_DFS_est) DFS_estimated_ind
+    , nvl(bv_DFU_est,cv_DFU_est) DFU_estimated_ind
+    , nvl(bv_DFW_est,cv_DFW_est) DFW_estimated_ind
+    , nvl(bv_DSB_est,cv_DSB_est) DSB_estimated_ind
+    , nvl(bv_DSC_est,cv_DSC_est) DSC_estimated_ind
+    , nvl(bv_DSG_est,cv_DSG_est) DSG_estimated_ind
+    , nvl(bv_GVO_est,cv_GVO_est) GVO_estimated_ind
+    , nvl(bv_IWS_est,cv_IWS_est) IWS_estimated_ind
+    , nvl(bv_WDU_est,cv_WDU_est) WDU_estimated_ind
+    , nvl(bv_WVE_est,cv_WVE_est) WVE_estimated_ind
+    , nvl(bv_WWD_est,cv_WWD_est) WWD_estimated_ind
     , untested_ind , bv_AD, bv_DFS, bv_DFU, bv_DFW
     , bv_DSB, bv_DSC, bv_DSG, bv_GVO , bv_IWS, bv_WDU, bv_WVE, bv_WWD
     , cv_AD, cv_DFS, cv_DFU, cv_DFW , cv_DSB, cv_DSC, cv_DSG, cv_GVO
@@ -2890,14 +2914,14 @@ function load_array(p_pt_arrayZ: any[], p_get_current_tests: boolean) {
             PARENT_TREE pt
             LEFT OUTER JOIN PARENT_TREE fem_pt on pt.parent_tree_id = fem_pt.parent_tree_id
             LEFT OUTER JOIN SEEDLOT_PARENT_TREE spt on pt.parent_tree_id = spt.parent_tree_id
-            LEFT OUTER JOIN SEEDLOT_PARENT_TREE_SMP_MIX sptsm on pt.parent_tree_id = sptsm.parent_tree_id && spt.seedlot_number = sptsm.seedlot_number
-            LEFT OUTER JOIN SEEDLOT_PARENT_TREE_GEN_QLTY sptgq on spt.parent_tree_id = sptgq.parent_tree_id && spt.seedlot_number = sptgq.seedlot_number
-            LEFT OUTER JOIN PARENT_TREE_GENETIC_QUALITY gq on sptgq.parent_tree_id = gq.parent_tree_id && gq.genetic_worth_calc_ind = 'Y'
-            JOIN GENETIC_WORTH_CODE gwc on sptgq.genetic_worth_code = gwc.genetic_worth_code --&& sptsm.genetic_worth_code = gwc.genetic_worth_code
-            JOIN GENETIC_TYPE_CODE gtc on sptgq.genetic_type_code = gtc.genetic_type_code --&& sptsm.genetic_type_code = gtc.genetic_type_code
+            LEFT OUTER JOIN SEEDLOT_PARENT_TREE_SMP_MIX sptsm on pt.parent_tree_id = sptsm.parent_tree_id AND spt.seedlot_number = sptsm.seedlot_number
+            LEFT OUTER JOIN SEEDLOT_PARENT_TREE_GEN_QLTY sptgq on spt.parent_tree_id = sptgq.parent_tree_id AND spt.seedlot_number = sptgq.seedlot_number
+            LEFT OUTER JOIN PARENT_TREE_GENETIC_QUALITY gq on sptgq.parent_tree_id = gq.parent_tree_id AND gq.genetic_worth_calc_ind = 'Y'
+            JOIN GENETIC_WORTH_CODE gwc on sptgq.genetic_worth_code = gwc.genetic_worth_code --AND sptsm.genetic_worth_code = gwc.genetic_worth_code
+            JOIN GENETIC_TYPE_CODE gtc on sptgq.genetic_type_code = gtc.genetic_type_code --AND sptsm.genetic_type_code = gtc.genetic_type_code
         WHERE pt.parent_tree_reg_status_code = 'APP'
-          && spt.seedlot_number = g_seedlot_number
-          && pt.active_ind = 'Y'
+          AND spt.seedlot_number = g_seedlot_number
+          AND pt.active_ind = 'Y'
     )
     PIVOT
     (MAX(estimated_ind) est
@@ -2932,7 +2956,7 @@ function load_array(p_pt_arrayZ: any[], p_get_current_tests: boolean) {
   */
   let r_refresh_list: string; // c_refresh_list%ROWTYPE;
   let r_contrib: string; // spar_parent_tree_contrib_temp%ROWTYPE;
-  let v_prev_parent_tree_id: numver; //spar_parent_tree_contrib_temp.parent_tree_id%TYPE;
+  let v_prev_parent_tree_id: number; //spar_parent_tree_contrib_temp.parent_tree_id%TYPE;
 
   if (p_pt_array == null) {
     // --Set indicator to be used in query
@@ -3070,28 +3094,28 @@ function load_array(p_pt_arrayZ: any[], p_get_current_tests: boolean) {
         r_contrib.untested_ind = r_refresh_list.untested_ind;
       }
       // --Saved values
-      r_contrib.revision_count = r_contrib.revision_count == null? r_refresh_list.revision_count : r_contrib.revision_count;
+      r_contrib.revision_count = nvlValue(r_contrib.revision_count, r_refresh_list.revision_count);
       r_contrib.cone_count = r_contrib.cone_count == null? r_refresh_list.cone_count : r_contrib.cone_count;
-      r_contrib.pollen_count = NVL(r_contrib.pollen_count,r_refresh_list.pollen_count);
-      r_contrib.smp_success_pct = NVL(r_contrib.smp_success_pct,r_refresh_list.smp_success_pct);
-      r_contrib.smp_mix_bv_AD = NVL(r_contrib.smp_mix_bv_AD,r_refresh_list.smp_mix_bv_AD);
-      r_contrib.smp_mix_bv_DFS = NVL(r_contrib.smp_mix_bv_DFS,r_refresh_list.smp_mix_bv_DFS);
-      r_contrib.smp_mix_bv_DFU = NVL(r_contrib.smp_mix_bv_DFU,r_refresh_list.smp_mix_bv_DFU);
-      r_contrib.smp_mix_bv_DFW = NVL(r_contrib.smp_mix_bv_DFW,r_refresh_list.smp_mix_bv_DFW);
-      r_contrib.smp_mix_bv_DSB = NVL(r_contrib.smp_mix_bv_DSB,r_refresh_list.smp_mix_bv_DSB);
-      r_contrib.smp_mix_bv_DSC = NVL(r_contrib.smp_mix_bv_DSC,r_refresh_list.smp_mix_bv_DSC);
-      r_contrib.smp_mix_bv_DSG = NVL(r_contrib.smp_mix_bv_DSG,r_refresh_list.smp_mix_bv_DSG);
-      r_contrib.smp_mix_bv_GVO = NVL(r_contrib.smp_mix_bv_GVO,r_refresh_list.smp_mix_bv_GVO);
-      r_contrib.smp_mix_bv_IWS = NVL(r_contrib.smp_mix_bv_IWS,r_refresh_list.smp_mix_bv_IWS);
-      r_contrib.smp_mix_bv_WDU = NVL(r_contrib.smp_mix_bv_WDU,r_refresh_list.smp_mix_bv_WDU);
-      r_contrib.smp_mix_bv_WVE = NVL(r_contrib.smp_mix_bv_WVE,r_refresh_list.smp_mix_bv_WVE);
-      r_contrib.smp_mix_bv_WWD = NVL(r_contrib.smp_mix_bv_WWD,r_refresh_list.smp_mix_bv_WWD);
-      r_contrib.smp_mix_latitude_degrees = NVL(r_contrib.smp_mix_latitude_degrees,r_refresh_list.smp_mix_latitude_degrees);
-      r_contrib.smp_mix_latitude_minutes = NVL(r_contrib.smp_mix_latitude_minutes,r_refresh_list.smp_mix_latitude_minutes);
-      r_contrib.smp_mix_longitude_degrees = NVL(r_contrib.smp_mix_longitude_degrees,r_refresh_list.smp_mix_longitude_degrees);
-      r_contrib.smp_mix_longitude_minutes = NVL(r_contrib.smp_mix_longitude_minutes,r_refresh_list.smp_mix_longitude_minutes);
-      r_contrib.smp_mix_elevation = NVL(r_contrib.smp_mix_elevation,r_refresh_list.smp_mix_elevation);
-      r_contrib.non_orchard_pollen_contam_pct = NVL(r_contrib.non_orchard_pollen_contam_pct,r_refresh_list.non_orchard_pollen_contam_pct);
+      r_contrib.pollen_count = nvl(r_contrib.pollen_count,r_refresh_list.pollen_count);
+      r_contrib.smp_success_pct = nvl(r_contrib.smp_success_pct,r_refresh_list.smp_success_pct);
+      r_contrib.smp_mix_bv_AD = nvlValue(r_contrib.smp_mix_bv_AD,r_refresh_list.smp_mix_bv_AD);
+      r_contrib.smp_mix_bv_DFS = nvlValue(r_contrib.smp_mix_bv_DFS,r_refresh_list.smp_mix_bv_DFS);
+      r_contrib.smp_mix_bv_DFU = nvlValue(r_contrib.smp_mix_bv_DFU,r_refresh_list.smp_mix_bv_DFU);
+      r_contrib.smp_mix_bv_DFW = nvlValue(r_contrib.smp_mix_bv_DFW,r_refresh_list.smp_mix_bv_DFW);
+      r_contrib.smp_mix_bv_DSB = nvlValue(r_contrib.smp_mix_bv_DSB,r_refresh_list.smp_mix_bv_DSB);
+      r_contrib.smp_mix_bv_DSC = nvlValue(r_contrib.smp_mix_bv_DSC,r_refresh_list.smp_mix_bv_DSC);
+      r_contrib.smp_mix_bv_DSG = nvlValue(r_contrib.smp_mix_bv_DSG,r_refresh_list.smp_mix_bv_DSG);
+      r_contrib.smp_mix_bv_GVO = nvlValue(r_contrib.smp_mix_bv_GVO,r_refresh_list.smp_mix_bv_GVO);
+      r_contrib.smp_mix_bv_IWS = nvlValue(r_contrib.smp_mix_bv_IWS,r_refresh_list.smp_mix_bv_IWS);
+      r_contrib.smp_mix_bv_WDU = nvlValue(r_contrib.smp_mix_bv_WDU,r_refresh_list.smp_mix_bv_WDU);
+      r_contrib.smp_mix_bv_WVE = nvlValue(r_contrib.smp_mix_bv_WVE,r_refresh_list.smp_mix_bv_WVE);
+      r_contrib.smp_mix_bv_WWD = nvlValue(r_contrib.smp_mix_bv_WWD,r_refresh_list.smp_mix_bv_WWD);
+      r_contrib.smp_mix_latitude_degrees = nvlValue(r_contrib.smp_mix_latitude_degrees,r_refresh_list.smp_mix_latitude_degrees);
+      r_contrib.smp_mix_latitude_minutes = nvlValue(r_contrib.smp_mix_latitude_minutes,r_refresh_list.smp_mix_latitude_minutes);
+      r_contrib.smp_mix_longitude_degrees = nvlValue(r_contrib.smp_mix_longitude_degrees,r_refresh_list.smp_mix_longitude_degrees);
+      r_contrib.smp_mix_longitude_minutes = nvlValue(r_contrib.smp_mix_longitude_minutes,r_refresh_list.smp_mix_longitude_minutes);
+      r_contrib.smp_mix_elevation = nvl(r_contrib.smp_mix_elevation,r_refresh_list.smp_mix_elevation);
+      r_contrib.non_orchard_pollen_contam_pct = nvl(r_contrib.non_orchard_pollen_contam_pct,r_refresh_list.non_orchard_pollen_contam_pct);
       // --Save previous parent tree AND get next row
       v_prev_parent_tree_id = r_refresh_list.parent_tree_id;
       // FETCH c_refresh_list INTO r_refresh_list;
@@ -3479,7 +3503,7 @@ function load_array(p_pt_arrayZ: any[], p_get_current_tests: boolean) {
  *            -All calculations taken from the 2004 version of the
  *             Seedlot Certification Template (Excel).
  *            -Excel treats empty cells as 0 for calculations so
- *             NVL(__,0) == used liberally.
+ *             nvl(__,0) is used liberally.
  *            -CURRENTLY ONLY CALCULATES GW-G.
  */
 function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
@@ -3734,7 +3758,7 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
   let v_a_smp_mix_longitude_minutes: number; //NUMBER;
   let v_a_smp_mix_elevation: number; //NUMBER;
   let v_a_non_orchard_pollen_contam: number; //NUMBER;
-  // -- replace smp mix if (latest bv calculated.
+  // -- replace smp mix if latest bv calculated.
   let v_smp_records_exist: boolean; //BOOLEAN;
   let v_old_smp_mix_bv_AD: number; //NUMBER;
   let v_old_smp_mix_bv_DFS: number; //NUMBER;
@@ -3783,9 +3807,10 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
   let b_bv_WVE_not_estimated: boolean = false;
   let b_bv_WWD_not_estimated: boolean = false;
       
-  // --Get current GQ values if required && load array from saved data if not passed
+  // --Get current GQ values if required and load array from saved data if not passed
   load_array(p_pt,p_get_current_tests);
-  // --Contam pollen bv used in calc - use set value if (it has been set, otherwise
+  
+  // --Contam pollen bv used in calc - use set value if it has been set, otherwise
   // --use the previous value...in either case, convert null to 0 as Excel would
   if (gb_contaminant_pollen_bv == 'Y') {
     v_contaminant_pollen_bv = g_contaminant_pollen_bv == null? 0 : g_contaminant_pollen_bv;
@@ -3795,12 +3820,12 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
   // --SMP Parents Outside used in calc - use set value if it has been set, otherwise
   // --use the previous value...in either case, convert null to 0 as Excel would
   if (gb_smp_parents_outside == 'Y') {
-    v_smp_parents_outside = g_smp_parents_outside == null? 0 : g_smp_parents_outside;
+    v_smp_parents_outside = nvlNumber(g_smp_parents_outside, 0);
   } else {
-    v_smp_parents_outside = r_previous.smp_parents_outside == null? 0 : r_previous.smp_parents_outside;
+    v_smp_parents_outside = nvlNumber(r_previous.smp_parents_outside, 0);
   }
   
-  // --First pass to calculate simple sums used in row-based calcs and to check if (all bv d/r/m are estimated.
+  // --First pass to calculate simple sums used in row-based calcs and to check if all bv d/r/m are estimated.
   for (let i in p_pt.COUNT) {
     v_total_cone_count = v_total_cone_count + (p_pt[i].cone_count == null? 0 : p_pt[i].cone_count);
     v_total_pollen_count = v_total_pollen_count + (p_pt[i].pollen_count == null ? 0 : p_pt[i].pollen_count);
@@ -3845,7 +3870,7 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
   // --Second pass to calculate total male gw contribution orchard pollen (uses v_total_pollen_count from first pass)
   for (let i in p_pt.COUNT) {
     // --col:W
-    if (v_total_pollen_count = 0) {
+    if (v_total_pollen_count == 0) {
       v_parent_prop_orch_poll = 0;
     } else {
       v_parent_prop_orch_poll = (p_pt[i].pollen_count == null? 0 : p_pt[i].pollen_count) / v_total_pollen_count;
@@ -3879,10 +3904,10 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
   }
 
   // -- recalculate the smp mix values (only if (smp records exist for seedlot).
-  v_smp_records_exist = spr_001a_smp_calculation.smp_records_exist(get_seedlot_number);
+  v_smp_records_exist = spr_001a_smp_calculation.smp_records_exist(get_seedlot_number());
   if (v_smp_records_exist) {
-    spr_001a_smp_calculation.recalculate(get_seedlot_number,get_seedlot_status_code,
-        get_vegetation_code, get_orchard_id, get_secondary_orchard_id, get_seed_plan_unit_id,'N','N',
+    spr_001a_smp_calculation.recalculate(get_seedlot_number(), get_seedlot_status_code(),
+        get_vegetation_code(), get_orchard_id(), get_secondary_orchard_id(), get_seed_plan_unit_id(), 'N','N',
         v_smp_parents_outside, v_old_smp_mix_bv_AD, v_old_smp_mix_bv_DFS, v_old_smp_mix_bv_DFU,
         v_old_smp_mix_bv_DFW, v_old_smp_mix_bv_DSB, v_old_smp_mix_bv_DSC, v_old_smp_mix_bv_DSG,
         v_old_smp_mix_bv_GVO, v_old_smp_mix_bv_IWS, v_old_smp_mix_bv_WDU, v_old_smp_mix_bv_WVE,
@@ -3890,18 +3915,18 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
         v_old_smp_mix_long_deg, v_old_smp_mix_long_min, g_error_message);
     
     if (p_get_current_tests) {
-      spr_001a_smp_calculation.recalculate(get_seedlot_number, get_seedlot_status_code, 
-          get_vegetation_code, get_orchard_id, get_secondary_orchard_id, get_seed_plan_unit_id,'Y',
+      spr_001a_smp_calculation.recalculate(get_seedlot_number(), get_seedlot_status_code(), 
+          get_vegetation_code(), get_orchard_id(), get_secondary_orchard_id(), get_seed_plan_unit_id(), 'Y',
           'N', v_smp_parents_outside, v_new_smp_mix_bv_AD, v_new_smp_mix_bv_DFS,
           v_new_smp_mix_bv_DFU, v_new_smp_mix_bv_DFW, v_new_smp_mix_bv_DSB, v_new_smp_mix_bv_DSC,
           v_new_smp_mix_bv_DSG, v_new_smp_mix_bv_GVO, v_new_smp_mix_bv_IWS, v_new_smp_mix_bv_WDU,
           v_new_smp_mix_bv_WVE, v_new_smp_mix_bv_WWD, v_new_smp_mix_elevation, v_new_smp_mix_lat_deg,
           v_new_smp_mix_lat_min, v_new_smp_mix_long_deg, v_new_smp_mix_long_min, g_error_message);
     }
-    g_smp_parents_outside = v_smp_parents_outside == null? 0 : v_smp_parents_outside;
+    g_smp_parents_outside = nvlNumber(v_smp_parents_outside, 0);
   }
   
-  // --Third pass to calc values that depend on totals derived above && the remainder
+  // --Third pass to calc values that depend on totals derived above and the remainder
   for (let i in p_pt.COUNT) {
     // --ignore rows without cone or pollen count
     if (p_pt[i].cone_count != null || p_pt[i].pollen_count != null) {
@@ -4036,7 +4061,7 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
       spr_get_pt_geog(p_pt[i].parent_tree_id,v_pt_elevation,v_pt_latitude_degrees,v_pt_latitude_minutes,
           v_pt_latitude_seconds, v_pt_longitude_degrees, v_pt_longitude_minutes, v_pt_longitude_seconds);
       // -->Set to 0 if null as Excel would
-      v_pt_elevation = NVL(v_pt_elevation,0);
+      v_pt_elevation = nvl(v_pt_elevation,0);
       v_pt_latitude_degrees = v_pt_latitude_degrees == null? 0 : v_pt_latitude_degrees;
       v_pt_latitude_minutes = v_pt_latitude_minutes == null? 0 : v_pt_latitude_minutes;
       v_pt_latitude_seconds = v_pt_latitude_seconds == null? 0 : v_pt_latitude_seconds;
@@ -4161,7 +4186,7 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
       v_sum_p_total_gw_WVE_contrib = v_sum_p_total_gw_WVE_contrib + (v_p_total_gw_WVE_contrib == null? 0 : v_p_total_gw_WVE_contrib);
       v_sum_p_total_gw_WWD_contrib = v_sum_p_total_gw_WWD_contrib + (v_p_total_gw_WWD_contrib == null? 0 : v_p_total_gw_WWD_contrib);
       // --col:AE
-      if (v_total_pollen_count = 0) {
+      if (v_total_pollen_count == 0) {
         v_p_prop_contrib = v_female_crop_pop;
       } else {
         v_p_prop_contrib = (v_female_crop_pop + v_parent_prop_orch_poll) / 2;
@@ -4242,7 +4267,7 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
       // --col:AO
       v_ne_no_smp_contrib = Math.pow(v_p_prop_contrib, 2);
       v_sum_ne_no_smp_contrib = v_sum_ne_no_smp_contrib + v_ne_no_smp_contrib;
-      // --col:AP (xls did /100 so left in for comparison && * 100 at end to get smp success %)
+      // --col:AP (xls did /100 so left in for comparison and * 100 at end to get smp success %)
       v_smp_success_wtd_by_f_p = (v_female_crop_pop * v_a_smp_success_pct) / 100;
       v_sum_smp_success_wtd_by_f_p = v_sum_smp_success_wtd_by_f_p + v_smp_success_wtd_by_f_p;
       // --col:AQ
@@ -4334,7 +4359,7 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
   
   if (g_coancestry != null) {
     // --Effective Population Size with Coancestry considered
-    if (g_coancestry = 0) {
+    if (g_coancestry == 0) {
       v_effective_pop_size = 0;
     } else {
       v_effective_pop_size = 0.5/g_coancestry;
@@ -4344,7 +4369,7 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
     v_effective_pop_size = Math.round(1/(v_sum_orch_gamete_contr + ( Math.power(0.25/(2*v_smp_parents_outside),2) * v_smp_parents_outside )) ,1);
   } else {
     // --Effective Population Size
-    if (v_sum_orch_gamete_contr = 0) {
+    if (v_sum_orch_gamete_contr == 0) {
       v_effective_pop_size = 0;
     } else {
       v_effective_pop_size = Math.round(1/v_sum_ne_no_smp_contrib,1);
@@ -4352,13 +4377,13 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
   }
 
   if (v_total_parent_trees > 0) {
-    v_lat_deg = Math.trunc(v_sum_wtd_lat_p_&&_smp_poll/3600);
-    v_lat_min = Math.trunc(MOD(v_sum_wtd_lat_p_&&_smp_poll,3600)/60);
-    v_lat_sec = Math.trunc(MOD(v_sum_wtd_lat_p_&&_smp_poll,60));
-    v_long_deg = Math.trunc(v_sum_wtd_long_p_&&_smp_poll/3600);
-    v_long_min = Math.trunc(MOD(v_sum_wtd_long_p_&&_smp_poll,3600)/60);
-    v_long_sec = Math.trunc(MOD(v_sum_wtd_long_p_&&_smp_poll,60));
-    v_elev = Math.round(v_sum_wtd_elev_p_&&_smp_poll);
+    v_lat_deg = Math.trunc(v_sum_wtd_lat_p_and_smp_poll/3600);
+    v_lat_min = Math.trunc(MOD(v_sum_wtd_lat_p_and_smp_poll,3600)/60);
+    v_lat_sec = Math.trunc(MOD(v_sum_wtd_lat_p_and_smp_poll,60));
+    v_long_deg = Math.trunc(v_sum_wtd_long_p_and_smp_poll/3600);
+    v_long_min = Math.trunc(MOD(v_sum_wtd_long_p_and_smp_poll,3600)/60);
+    v_long_sec = Math.trunc(MOD(v_sum_wtd_long_p_and_smp_poll,60));
+    v_elev = Math.round(v_sum_wtd_elev_p_and_smp_poll);
     v_smp_mean_bv_AD  = Math.round(v_avg_smp_mix_bv_AD,1);
     v_smp_mean_bv_DFS = Math.round(v_avg_smp_mix_bv_DFS,1);
     v_smp_mean_bv_DFU = Math.round(v_avg_smp_mix_bv_DFU,1);
@@ -4451,9 +4476,9 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
 /*
  * Procedure: set_pt_contrib
  * Purpose:   Set Mean Collection Geography, Genetic Worth (GW),
- *            Effective Population Size (Ne) && other values calculated
+ *            Effective Population Size (Ne) and other values calculated
  *            based on Parent Tree Contribution.
- *            p_replace_values = true forces replacing of calculated values
+ *            p_replace_values is true forces replacing of calculated values
  *            (otherwise they are only replaced based on status or the user
  *             blanking-out the current value)
  */
@@ -4484,7 +4509,7 @@ function set_pt_contrib(p_replace_values: boolean) {
   const CONST_DEFAULT_CUSTOM_GW_WWD  : number = SPR_CONSTANTS.CONST_DEFAULT_GEN_QLTY_WWD;
   let b_all_gw_blank: boolean = false;
   
-  // --Collection Elev (do mean/min/max as a unit since only mean is on the page && can be blanked for replacing)
+  // --Collection Elev (do mean/min/max as a unit since only mean is on the page and can be blanked for replacing)
   if (replace_area_of_use(g_collection_elevation) || p_replace_values) {
     set_collection_elevation(r_pt_contrib.collection_elevation);
     set_collection_elevation_min(r_pt_contrib.collection_elevation_min);
@@ -4562,7 +4587,7 @@ function set_pt_contrib(p_replace_values: boolean) {
   if (replace_area_of_use(_effective_pop_size) || p_replace_values) {
     set_effective_pop_size(r_pt_contrib.effective_pop_size);
   }
-  // --Total Parent Trees && ratio untested && tested
+  // --Total Parent Trees and ratio untested and tested
   set_total_parent_trees(r_pt_contrib.total_parent_trees);
   g_tested_parent_trees_pct = r_pt_contrib.pct_tested_parent_trees;
     
@@ -4672,7 +4697,7 @@ function set_pt_contrib(p_replace_values: boolean) {
       set_gw_DSB(r_pt_contrib.gw_DSB);
     }
   }
-  // --Genetic Worth - Com&&ra blister rust
+  // --Genetic Worth - Comandra blister rust
   if (is_area_of_use_status() || p_replace_values || b_all_gw_blank) {
     set_gw_DSC(null);
     if (g_seedlot_source_code == 'UPT' && r_pt_contrib.gw_DSC != null) {
@@ -4795,9 +4820,8 @@ function set_pt_contrib(p_replace_values: boolean) {
 
 /*
  * Procedure: recalc_all
- * Purpose:   Determines context (A or B class, BC Source, etc) &&
- *            recalculate all defaults && derives Area of Use information
- *            in context.
+ * Purpose:   Determines context (A or B class, BC Source, etc) and
+ *            recalculate all defaults and derives Area of Use information in context.
  * p_get_current_tests ignored if is_area_of_use_status()
  */
 function recalc_all(p_pt_arrayZ: any[], p_get_current_tests: boolean, p_replace_values: boolean, p_role_list: string) {
@@ -4841,7 +4865,7 @@ function recalc_all(p_pt_arrayZ: any[], p_get_current_tests: boolean, p_replace_
     set_superior_prvnc_ind(null);
     set_provenance_id(null);
     set_collection_locn_desc(null);
-    set_coll_st&&ard_met_ind(null);
+    set_coll_standard_met_ind(null);
     set_nmbr_trees_from_code(null);
     set_collection_bgc_ind(null);
     set_collection_spz_ind(null);
@@ -4880,14 +4904,14 @@ function recalc_all(p_pt_arrayZ: any[], p_get_current_tests: boolean, p_replace_
     set_seed_plan_zone_code(null);
     set_collection_spz_ind(null);
     set_seed_coast_area_code(null);
-    set_coll_st&&ard_met_ind(null);
+    set_coll_standard_met_ind(null);
   }
 
   if (g_superior_prvnc_ind == 'Y') {
     set_collection_locn_desc(null);
   } else if (g_superior_prvnc_ind == 'N') {
     set_provenance_id(null);
-    set_coll_st&&ard_met_ind(null);
+    set_coll_standard_met_ind(null);
     // --No GW for Non-Sup Prov B Lots
     set_gw_AD(null);
     set_gw_DFS(null);
@@ -4913,7 +4937,7 @@ function recalc_all(p_pt_arrayZ: any[], p_get_current_tests: boolean, p_replace_
     set_orchard_id(null);
     set_secondary_orchard_id(null);
     set_seed_plan_unit_id(null);
-  } else if (g_vegetation_code != NVL(r_previous.vegetation_code,'~')) {
+  } else if (g_vegetation_code != nvl(r_previous.vegetation_code,'~')) {
     // --Check species-specific information
     // -->provenanance
     if (g_provenance_id != null && !provenance_is_valid_for_spp()) {
@@ -4950,7 +4974,7 @@ function recalc_all(p_pt_arrayZ: any[], p_get_current_tests: boolean, p_replace_
 function valid_lot_number_range(p_seedlot_number: string): boolean {
   let b_lot_number_valid: boolean = true;
 
-  // --Check ranges (for pre-numbered FS721 && FS721A forms already issued)
+  // --Check ranges (for pre-numbered FS721 and FS721A forms already issued)
   if (g_genetic_class_code == 'A') {
     if (parseInt(g_seedlot_number) <= parseInt(CONST_CLASS_A_LOTNUM_MIN)-1 || parseInt(g_seedlot_number) >= parseInt(CONST_CLASS_B_LOTNUM_MAX)+1) {
       g_error_message = g_error_message || 'spar.web.error.usr.new_lot_number:'
@@ -4972,7 +4996,7 @@ function valid_lot_number_range(p_seedlot_number: string): boolean {
 
 /*
  * Procedure: validate_lot_number
- * Purpose:   if (lot number specified on add, ensure it != a dup and that it == in acceptable range for entry
+ * Purpose:   if lot number specified on add, ensure it is not a dup and that it is in acceptable range for entry
  */
 function validate_lot_number() {
   let v_temp_num: number; // NUMBER(1);
@@ -5000,7 +5024,7 @@ function validate_lot_number() {
 
 /*
  * Procedure: validate_seedlot_cancel
- * Purpose:   Check whether it == OK to cancel seedlot
+ * Purpose:   Check whether it is OK to cancel seedlot
  */
 function validate_seedlot_cancel(p_role_listZ: string, p_action_nameZ: string) {
   let temp_code: string; // SEEDLOT.SEEDLOT_NUMBER%TYPE;
@@ -5016,7 +5040,7 @@ function validate_seedlot_cancel(p_role_listZ: string, p_action_nameZ: string) {
   SELECT SEEDLOT_NUMBER, SEEDLOT_STATUS_CODE
   INTO temp_code, status_code
   FROM SEEDLOT
-  WHERE SEEDLOT_NUMBER = g_seedlot_number && REVISION_COUNT = g_revision_count;
+  WHERE SEEDLOT_NUMBER = g_seedlot_number AND REVISION_COUNT = g_revision_count;
   */
   // -- check if user has authority to cancel
   if (g_seedlot_status_code == 'CAN') {
@@ -5043,7 +5067,7 @@ function validate_seedlot_cancel(p_role_listZ: string, p_action_nameZ: string) {
 
 /*
  * Procedure: validate_seedlot_cancel (OVERLOADED)
- * Purpose:   Check whether it == OK to cancel seedlot - NEW RULES.
+ * Purpose:   Check whether it is OK to cancel seedlot - NEW RULES.
  *            Assumes interface has validated user's auth to CANcel.
  */
 function validate_seedlot_cancel() {
@@ -5076,7 +5100,7 @@ function validate_seedlot_cancel() {
 
 /*
  * Procedure: validate_genetic_worth_change
- * Purpose:   Check whether it == OK to change genetic worth
+ * Purpose:   Check whether it is OK to change genetic worth
  */
 function validate_genetic_worth_change(p_role_listZ: string, p_action_nameZ: string) {
   let temp_code: string; // SEEDLOT.SEEDLOT_NUMBER%TYPE;
@@ -5088,18 +5112,18 @@ function validate_genetic_worth_change(p_role_listZ: string, p_action_nameZ: str
   gen_class_authority = Spr_Check_Field_Authority(p_role_list, 'CHANGE GENETIC CLASS', P_action_name);
   
   if (g_revision_count != null) {
-    // -- don't bother WITH updates if (lot NOT FOUND
+    // -- don't bother WITH updates if lot NOT FOUND
     /*
     SELECT SEEDLOT_NUMBER, SEEDLOT_STATUS_CODE, GENETIC_CLASS_CODE
     INTO TEMP_CODE, STATUS_CODE, PREV_GENETIC_CLASS_CODE
     FROM SEEDLOT
-    WHERE SEEDLOT_NUMBER = g_seedlot_number && REVISION_COUNT = g_revision_count;
+    WHERE SEEDLOT_NUMBER = g_seedlot_number AND REVISION_COUNT = g_revision_count;
     */
     temp_code = resultsql;
     status_code = resultsql;
     prev_genetic_class_code = resultsql;
     
-    //-- check if (genetic class has changed
+    //-- check if genetic class has changed
     if (prev_genetic_class_code != null && g_genetic_class_code != prev_genetic_class_code && gen_class_authority == 'N') {
       g_error_message = g_error_message || 'spar.web.error.usr.class.insufficientauthority;';
     }
@@ -5108,7 +5132,7 @@ function validate_genetic_worth_change(p_role_listZ: string, p_action_nameZ: str
 
 /*
  * Procedure: validate_genetic_class
- * Purpose:   Genetic Class && Collection Source cannot be null
+ * Purpose:   Genetic Class and Collection Source cannot be null
  */
 function validate_genetic_class() {
   if (g_genetic_class_code == null || g_collection_source_code == null) {
@@ -5134,7 +5158,7 @@ function validate_org(p_user_org_unit_no: number) {
  */
 function validate_orchard_id() {
   if (g_orchard_id == null && g_collection_source_code.substring(1, 1) == 'A' && r_previous.genetic_class_code == 'A' && r_previous.orchard_id != null) {
-    g_error_message = g_error_message ||  'spar.web.error.usr.m&&atory:Orchard ID, Genetic Class, A;';
+    g_error_message = g_error_message ||  'spar.web.error.usr.mandatory:Orchard ID, Genetic Class, A;';
   }
 }
 
@@ -5144,25 +5168,25 @@ function validate_orchard_id() {
  */
 function validate_collection_locn() {
   if (g_collection_locn_desc == null && g_collection_source_code.subtring(1,1) == 'B' && r_previous.genetic_class_code == 'B' && r_previous.collection_locn_desc != null) {
-    g_error_message = g_error_message ||  'spar.web.error.usr.m&&atory:Collection LOCATION, Genetic Class, B;';
+    g_error_message = g_error_message ||  'spar.web.error.usr.mandatory:Collection LOCATION, Genetic Class, B;';
   }
 }
 
 /*
  * Procedure: validate_coast_geo
- * Purpose:   Ensure Coast geographic location code == entered if (previously entered
+ * Purpose:   Ensure Coast geographic location code is entered if previously entered
  */
 function validate_coast_geo (p_spz1Z: string) {
   if (g_seed_coast_area_code == null && r_previous.seed_coast_area_code != null
       && r_previous.genetic_class_code == 'B' && g_genetic_class_code == 'B' && p_spz1 == 'M'
       && r_previous.seed_plan_zone_code != null) {
-    g_error_message = g_error_message ||  'spar.web.error.usr.spz_coastal_geo_area_m&&atory;';
+    g_error_message = g_error_message ||  'spar.web.error.usr.spz_coastal_geo_area_mandatory;';
   }
 }
 
 /*
  * Procedure: validate_mean_elevation
- * Purpose:   Ensure mean elevation == entered
+ * Purpose:   Ensure mean elevation is entered
  */
 function validate_mean_elevation() {
   if ((g_elevation == null? 0 : g_elevation) == 0 && r_previous.elevation > 0) {
@@ -5172,7 +5196,7 @@ function validate_mean_elevation() {
 
 /*
  * Procedure: validate_mean_latitude
- * Purpose:   Ensure mean latitude == entered
+ * Purpose:   Ensure mean latitude is entered
  */
 function validate_mean_latitude() {
   if ((g_latitude_degrees == null? 0 : g_latitude_degrees) == 0 && r_previous.latitude_degrees > 0) {
@@ -5182,7 +5206,7 @@ function validate_mean_latitude() {
 
 /*
  * Procedure: validate_min_latitude
- * Purpose:   Ensure min latitude == entered
+ * Purpose:   Ensure min latitude is entered
  */
 function validate_min_latitude() {
   if ((g_latitude_deg_min == null? 0 : g_latitude_deg_min) == 0 && r_previous.latitude_deg_min > 0) {
@@ -5192,7 +5216,7 @@ function validate_min_latitude() {
 
 /*
  * Procedure: validate_max_latitude
- * Purpose:   Ensure max latitude == entered
+ * Purpose:   Ensure max latitude is entered
  */
 function validate_max_latitude() {
   if ((g_latitude_deg_max == null? 0 : g_latitude_deg_max) == 0 && r_previous.latitude_deg_max > 0) {
@@ -5202,7 +5226,7 @@ function validate_max_latitude() {
 
 /*
  * Procedure: validate_mean_longitude
- * Purpose:   Ensure mean longitude == entered
+ * Purpose:   Ensure mean longitude is entered
  */
 function validate_mean_longitude() {
   if ((g_longitude_degrees == null? 0 : g_longitude_degrees) == 0 && r_previous.longitude_degrees > 0) {
@@ -5212,7 +5236,7 @@ function validate_mean_longitude() {
 
 /*
  * Procedure: validate_min_longitude
- * Purpose:   Ensure min longitude == entered
+ * Purpose:   Ensure min longitude is entered
  */
 function validate_min_longitude() {
   if ((g_longitude_deg_min == null? 0 : g_longitude_deg_min) == 0 && r_previous.longitude_deg_min > 0) {
@@ -5222,7 +5246,7 @@ function validate_min_longitude() {
 
 /*
  * Procedure: validate_max_longitude
- * Purpose:   Ensure max longitude == entered
+ * Purpose:   Ensure max longitude is entered
  */
 function validate_max_longitude() {
   if ((g_longitude_deg_max == null? 0 : g_longitude_deg_max) = 0 && r_previous.longitude_deg_max > 0) {
@@ -5232,17 +5256,17 @@ function validate_max_longitude() {
 
 /*
  * Procedure: validate_bgc_zone
- *  Purpose:  Ensure bgc zone == entered
+ *  Purpose:  Ensure bgc zone is entered
  */
 function validate_bgc_zone() {
   if (g_bgc_zone_code == null && r_previous.bgc_zone_code != null && r_previous.genetic_class_code == 'B' && g_genetic_class_code == 'B') {
-    g_error_message = g_error_message ||  'spar.web.error.usr.m&&atory:BGC Zone, Genetic Class, B;';
+    g_error_message = g_error_message ||  'spar.web.error.usr.mandatory:BGC Zone, Genetic Class, B;';
   }
 }
 
 /*
  * Procedure: validate_collection_start
- * Purpose:   Ensure collection start date == entered
+ * Purpose:   Ensure collection start date is entered
  */
 function validate_collection_start() {
   if (g_collection_start_date == null && r_previous.collection_start_date != null) {
@@ -5252,7 +5276,7 @@ function validate_collection_start() {
 
 /*
  * Procedure: validate_collection_end
- * Purpose:   Ensure collection end date == entered
+ * Purpose:   Ensure collection end date is entered
  */
 function validate_collection_end() {
   if (g_collection_end_date == null && r_previous.collection_end_date != null) {
@@ -5262,7 +5286,7 @@ function validate_collection_end() {
 
 /*
  * Procedure:  validate_vol_per_container
- * Purpose:    Ensure volume per container == entered
+ * Purpose:    Ensure volume per container is entered
  */
 function validate_vol_per_container() {
   if ((g_vol_per_container == null? 0 : g_vol_per_container) == 0 && (r_previous.vol_per_container == null? 0 : r_previous.vol_per_container) != 0) {
@@ -5272,17 +5296,17 @@ function validate_vol_per_container() {
 
 /*
  * Procedure: validate_nmbr_trees
- * Purpose:   Ensure number of trees collected == entered
+ * Purpose:   Ensure number of trees collected is entered
  */
 function validate_nmbr_trees() {
   if (g_nmbr_trees_from_code == null && r_previous.nmbr_trees_from_code != null && r_previous.genetic_class_code == 'B' && g_genetic_class_code == 'B') {
-    g_error_message = g_error_message ||  'spar.web.error.usr.m&&atory:NUMBER OF Trees Collected FROM, Genetic Class, B;';
+    g_error_message = g_error_message ||  'spar.web.error.usr.mandatory:NUMBER OF Trees Collected FROM, Genetic Class, B;';
   }
 }
 
 /*
  * Procedure: validate_cone_collection
- * Purpose:   Ensure cone collection method == entered
+ * Purpose:   Ensure cone collection method is entered
  */
 function validate_cone_collection() {
   if (g_cone_collection_method_cd == null && r_previous.cone_collection_method_code != null) {
@@ -5292,7 +5316,7 @@ function validate_cone_collection() {
 
 /*
  * Procedure: validate_vegetation_code
- * Purpose:   Ensure vegetation code != blank
+ * Purpose:   Ensure vegetation code is not blank
  */
 function validate_vegetation_code() {
   if (g_vegetation_code == null) {
@@ -5301,18 +5325,18 @@ function validate_vegetation_code() {
 }
 
 /*
- * Procedure: validate_coast_geo_m&&atory
- * Purpose:   Ensure Coast geographic location code != blank
+ * Procedure: validate_coast_geo_mandatory
+ * Purpose:   Ensure Coast geographic location code is not blank
  */
 function validate_coast_geo_mandatory(p_spz1Z: string) {
   if (g_seedlot_status_code != 'COM' && g_seed_coast_area_code == null && g_genetic_class_code == 'B' && p_spz1 == 'M' ) {
-    g_error_message = g_error_message ||  'spar.web.error.usr.spz_coastal_geo_area_m&&atory;';
+    g_error_message = g_error_message ||  'spar.web.error.usr.spz_coastal_geo_area_mandatory;';
   }
 }
 
 /*
  * Procedure: validate_superior_provenance
- * Purpose:  Ensure species && provenance agree
+ * Purpose:   Ensure species and provenance agree
  */
 function validate_superior_provenance() {
   // CURSOR c_prov IS:
@@ -5330,7 +5354,7 @@ function validate_superior_provenance() {
       g_error_message = g_error_message || 'spar.web.error.usr.no.superior.prov;';
     }
   }
-  // --== Collection Provenance valid for Species?
+  // --Is Collection Provenance valid for Species?
   if (g_provenance_id != null && g_vegetation_code != null && !provenance_is_valid_for_spp()) {
     if (r_prov.vegetation_code != g_vegetation_code) {
       g_error_message = g_error_message || 'spar.web.error.usr.lot_spp:Collection Provenance selected;';
@@ -5341,7 +5365,7 @@ function validate_superior_provenance() {
 /*
  * Procedure: validate_b_sup_prov_geog
  * Purpose:   Validate collection geography based on superior provenance.
- *            Currently only ELEVATION == validated. We may be able to
+ *            Currently only ELEVATION is validated. We may be able to
  *            validate 8km radius rule spatially in future.
  */
 function validate_b_sup_prov_geog() {
@@ -5351,7 +5375,7 @@ function validate_b_sup_prov_geog() {
         , collection_elevation_min
         , collection_elevation_max
     FROM superior_provenance
-    WHERE provenance_id = g_provenance_id && vegetation_code = g_vegetation_code;
+    WHERE provenance_id = g_provenance_id and vegetation_code = g_vegetation_code;
   */
   let r_prov: any; // c_prov%ROWTYPE;
   
@@ -5359,7 +5383,7 @@ function validate_b_sup_prov_geog() {
   /*
   SELECT seed_plan_zone_code
     FROM superior_provenance_plan_zone
-    WHERE provenance_id = r_prov.provenance_id && seed_plan_zone_code = g_seed_plan_zone_code;
+    WHERE provenance_id = r_prov.provenance_id and seed_plan_zone_code = g_seed_plan_zone_code;
   */
   let r_prov_spz: any; // c_prov_spz%ROWTYPE;
 
@@ -5398,7 +5422,7 @@ function validate_b_sup_prov_geog() {
 
 /*
  * Procedure: validate_orchard_for_spp
- * Purpose:   Ensure species && orchard agree
+ * Purpose:   Ensure species and orchard agree
  */
 function validate_orchard_for_spp(p_orchard_id: string, p_msg: string) {
   // CURSOR c_orchard IS:
@@ -5419,7 +5443,7 @@ function validate_orchard_for_spp(p_orchard_id: string, p_msg: string) {
 
 /*
  * Procedure: validate_collection_spz_for_spp
- * Purpose:   Ensure species && spz agree
+ * Purpose:   Ensure species and spz agree
  */
 function validate_spz_spp(p_spz: string, p_msg: string) {
   // CURSOR c_spz IS:
@@ -5427,8 +5451,8 @@ function validate_spz_spp(p_spz: string, p_msg: string) {
   SELECT seed_plan_zone_id
     FROM seed_plan_zone
     WHERE seed_plan_zone_code = p_spz
-      && (vegetation_code = g_vegetation_code || vegetation_code == null)
-      && genetic_class_code = g_genetic_class_code;
+      AND (vegetation_code = g_vegetation_code || vegetation_code is null)
+      AND genetic_class_code = g_genetic_class_code;
   */
   let r_spz: any; // c_spz%ROWTYPE;
 
@@ -5441,8 +5465,8 @@ function validate_spz_spp(p_spz: string, p_msg: string) {
 }
 
 /*
- * Procedure: validate_m&&atory_APP
- * Purpose:   Performs m&&atory validation for status of APP && above
+ * Procedure: validate_mandatory_APP
+ * Purpose:   Performs mandatory validation for status of APP and above
  */
 function validate_mandatory_APP(p_value: string, p_msg: string) {
   if (['INC','PND','CAN','SUB'].includes(g_seedlot_status_code) && p_value == null) {
@@ -5489,7 +5513,7 @@ function validate_tested_untested_ratio() {
                                         ||TO_CHAR(CONST_UNTESTED_PT_RATIO)||'%,Tested,'
                                         ||TO_CHAR(r_pt_contrib.pct_tested_parent_trees)||';';
     }
-    // --Lots under Chief Forester's St&&ards must have Parent Trees
+    // --Lots under Chief Forester's Standards must have Parent Trees
   }
 
 }
@@ -5507,7 +5531,7 @@ function validate_seedlot_source_code() {
     SELECT DECODE(COUNT('x'), 0, 'Y', 'N')
     INTO v_primary_spu_selected_ind
     FROM seed_plan_unit spu
-    WHERE spu.seed_plan_unit_id = g_seed_plan_unit_id && spu.primary_ind = 'N';
+    WHERE spu.seed_plan_unit_id = g_seed_plan_unit_id AND spu.primary_ind = 'N';
     */
     v_primary_spu_selected_ind = resultsql;
     if (v_primary_spu_selected_ind == 'N') {
@@ -5518,7 +5542,7 @@ function validate_seedlot_source_code() {
 
 /*
  * Procedure: validate_collection_elevation_min_max
- * Purpose:   Ensure the range between collection elevation min/max == within
+ * Purpose:   Ensure the range between collection elevation min/max is within
  *            the CFS specified range for B class lots
  */
 function validate_colln_elev_min_max() {
@@ -5533,19 +5557,17 @@ function validate_colln_elev_min_max() {
         , max_collection_elevation_range
     FROM transfer_limit tl
     WHERE
-          (   vegetation_code = g_vegetation_code
-          || vegetation_code == null)
-      && genetic_class_code = g_genetic_class_code
-      && superior_prvnc_ind = NVL(g_superior_prvnc_ind,'N')
-      && coast_interior_code = spr_get_spz_type(g_seed_plan_zone_code)
-      && (   seed_plan_zone_code = g_seed_plan_zone_code
-          || seed_plan_zone_code == null)
-      && g_collection_lat_deg BETWEEN site_min_latdeg && site_max_latdeg
+          (   vegetation_code = g_vegetation_code || vegetation_code is null)
+      AND genetic_class_code = g_genetic_class_code
+      AND superior_prvnc_ind = nvl(g_superior_prvnc_ind,'N')
+      AND coast_interior_code = spr_get_spz_type(g_seed_plan_zone_code)
+      AND ( seed_plan_zone_code = g_seed_plan_zone_code || seed_plan_zone_code is null)
+      AND g_collection_lat_deg BETWEEN site_min_latdeg AND site_max_latdeg
     ORDER BY vegetation_code NULLS LAST, seed_plan_zone_code NULLS LAST;
     */
   
   if (g_genetic_class_code == 'B' && g_collection_elevation_min != null && g_collection_elevation_max != null) {
-    // --Derive collection elevation range limits (sorted so first record == all we need look at)
+    // --Derive collection elevation range limits (sorted so first record is all we need look at)
     // OPEN c_limit; FETCH c_limit INTO r_limit; CLOSE c_limit;
     if (r_limit.transfer_limit_skey == null) {
       throw new Error(e_no_limits_found);
@@ -5560,9 +5582,9 @@ function validate_colln_elev_min_max() {
 
 /*
  * Procedure: validate (New Spr01 Registration validations)
- * Purpose:   Assumes m&&atory validations are done in interface except
- *            for Collection Geography && Area of Use information.
- *            Performs cross-validations interface != capable of.
+ * Purpose:   Assumes mandatory validations are done in interface except
+ *            for Collection Geography and Area of Use information.
+ *            Performs cross-validations interface is not capable of.
 */
 function validate(p_user_org_unit_no: number) {
   let v_spz_list: string; // g_spz_list%TYPE;
@@ -5587,7 +5609,7 @@ function validate(p_user_org_unit_no: number) {
     if (g_genetic_class_code == 'B') {
       validate_mandatory_APP(g_collection_elevation_min, 'Collection Elevation Min');
       validate_mandatory_APP(g_collection_elevation_max, 'Collection Elevation Max');
-      // --validate maximum range between min && max elev for B class
+      // --validate maximum range between min and max elev for B class
       validate_colln_elev_min_max();
     } else if (g_genetic_Class_code == 'A') {
       validate_seedlot_source_code();
@@ -5624,7 +5646,7 @@ function validate(p_user_org_unit_no: number) {
       validate_spz_spp(v_spz,'Area of Use SPZ');
       v_spz_count = v_spz_count+1;
     }
-    // -- if superior provenance == N, only one SPZ == allowed
+    // -- if superior provenance is N, only one SPZ is allowed
     if (g_superior_prvnc_ind == 'N' && v_spz_count > 1) {
       g_error_message = g_error_message || 'spar.web.error.usr.database.provenanceNo_SPZ_Limit;';
     }
@@ -5696,7 +5718,7 @@ function get_seedlot_spz_id_list(p_seedlot_number :string): string {
   /*
   SELECT spr_get_seed_plan_zone_Id(spz.SEED_PLAN_ZONE_CODE, seedlot.genetic_class_code, seedlot.vegetation_code) AS spz_id
     FROM seedlot_plan_zone spz, SEEDLOT seedlot
-    WHERE spz.seedlot_number = seedlot.seedlot_number && spz.seedlot_number = p_seedlot_number;
+    WHERE spz.seedlot_number = seedlot.seedlot_number and spz.seedlot_number = p_seedlot_number;
   */
   let v_spz_list: string; // VARCHAR2(100);
   
@@ -5711,8 +5733,8 @@ function get_seedlot_spz_id_list(p_seedlot_number :string): string {
 /*
  * Procedure: is_lot_split
  * Purpose:   Returns true of the lot has been split, otherwise returns false.
- *            Currently, the only was to tell if (a lot has been split == if
- *            the lot has an ASP request && has heritage.
+ *            Currently, the only was to tell if a lot has been split is if
+ *            the lot has an ASP request and has heritage.
  */
 function is_lot_split (p_seedlot_number :string): boolean {
   // CURSOR c_asp IS
@@ -5721,8 +5743,8 @@ function is_lot_split (p_seedlot_number :string): boolean {
     FROM request_seedlot rs
         , spar_request sr
     WHERE rs.seedlot_number = p_seedlot_number
-      && sr.request_skey = rs.request_skey
-      && sr.request_type_code = 'ASP';
+      AND sr.request_skey = rs.request_skey
+      AND sr.request_type_code = 'ASP';
   */
   
   // CURSOR c_heritage IS:
@@ -5746,19 +5768,17 @@ function is_lot_split (p_seedlot_number :string): boolean {
 
 /*
  * Procedure: get
- * Purpose:   Retrieve ONE Seedlot row && associated Genetic Worth && Seed Plan Zone information.
+ * Purpose:   Retrieve ONE Seedlot row and associated Genetic Worth and Seed Plan Zone information.
  * Security:  HQ users can access all; otherwise:
- *            if (user == a client or BCTS, access == allowed by
- *              applicant_client_number = user client number
- *            if (user == an org, access == allowed by
- *               applicant_client_number = org unit resolving to a client number
+ *            if user is a client or BCTS, access is allowed by applicant_client_number = user client number
+ *            if user is an org, access is allowed by applicant_client_number = org unit resolving to a client number
  */
 function get(p_user_client_number: string, p_user_org_unit_no: number) {
   let v_user_client_number: string; // g_applicant_client_number%TYPE;
   let v_tested: number; // NUMBER(5);
   let v_total: number; // NUMBER(5);
   
-  // --if user != a client, resolve org to its client number
+  // --if user is not a client, resolve org to its client number
   v_user_client_number = p_user_client_number == null? sil_get_org_cli_number(p_user_org_unit_no) : p_user_client_number;
   /*
   SELECT * INTO
@@ -5777,7 +5797,7 @@ function get(p_user_client_number: string, p_user_org_unit_no: number) {
     ,g_org_unit_no
     ,g_collection_locn_desc
     ,g_provenance_id
-    ,g_coll_st&&ard_met_ind
+    ,g_coll_standard_met_ind
     ,g_collection_elevation
     ,g_collection_elevation_min
     ,g_collection_elevation_max
@@ -5896,7 +5916,7 @@ function get(p_user_client_number: string, p_user_org_unit_no: number) {
         ,s.org_unit_no
         ,s.collection_locn_desc
         ,s.provenance_id
-        ,s.collection_st&&ard_met_ind
+        ,s.collection_standard_met_ind
         ,s.collection_elevation
         ,s.collection_elevation_min
         ,s.collection_elevation_max
@@ -5991,7 +6011,7 @@ function get(p_user_client_number: string, p_user_org_unit_no: number) {
       FROM seedlot s
            , seedlot_genetic_worth gw
     WHERE s.seedlot_number = g_seedlot_number
-      && (s.applicant_client_number = v_user_client_number
+      AND (s.applicant_client_number = v_user_client_number
            || s.applicant_client_number IN (select client_number
                                               from org_client_xref
                                              where client_number = v_user_client_number
@@ -5999,9 +6019,9 @@ function get(p_user_client_number: string, p_user_org_unit_no: number) {
            || s.seedlot_number IN (select seedlot_number
                                      from seedlot_owner_quantity
                                     where seedlot_number = g_seedlot_number
-                                      && client_number = v_user_client_number)
+                                      AND client_number = v_user_client_number)
            || sil_get_org_level(p_user_org_unit_no) = 'H')
-      && gw.seedlot_number(+) = s.seedlot_number
+      AND gw.seedlot_number(+) = s.seedlot_number
   )
   PIVOT
    (MAX(genetic_worth_rtng)
@@ -6038,7 +6058,7 @@ function set_status_defaults() {
     get_previous_seedlot_values();
   }
   // --if approving, set approved userid/timestamp
-  if (g_seedlot_status_code == 'APP' && NVL(r_previous.seedlot_status_code,'~') != 'APP' && r_previous.approved_userid == null) {
+  if (g_seedlot_status_code == 'APP' && nvl(r_previous.seedlot_status_code,'~') != 'APP' && r_previous.approved_userid == null) {
     set_approved_userid(g_update_userid);
     set_approved_timestamp(new Date());
     // --In case skipped SUB status, set declaration data to approver
@@ -6048,7 +6068,7 @@ function set_status_defaults() {
     }
   }
   // --if(submitting, set declared userid/timestamp
-  if (g_seedlot_status_code == 'SUB' && NVL(r_previous.seedlot_status_code,'~') != 'SUB' && r_previous.declared_userid == null) {
+  if (g_seedlot_status_code == 'SUB' && nvl(r_previous.seedlot_status_code,'~') != 'SUB' && r_previous.declared_userid == null) {
     set_declared_userid(g_update_userid);
     set_declared_timestamp(new Date());
   }
@@ -6069,7 +6089,7 @@ function add() {
       SELECT MAX(TO_NUMBER(seedlot_number)) + 1
         INTO v_seedlot_number
         FROM seedlot
-      WHERE seedlot_number BETWEEN CONST_CLASS_B_LOTNUM_MIN && TO_CHAR(TO_NUMBER(CONST_CLASS_B_LOTNUM_MAX)-1 );
+      WHERE seedlot_number BETWEEN CONST_CLASS_B_LOTNUM_MIN AND TO_CHAR(TO_NUMBER(CONST_CLASS_B_LOTNUM_MAX)-1 );
       */
       if (v_seedlot_number >= CONST_CLASS_B_LOTNUM_MAX) {
         throw new Error(e_error_generating_lot_number);
@@ -6083,7 +6103,7 @@ function add() {
       SELECT MAX(TO_NUMBER(seedlot_number)) + 1
         INTO v_seedlot_number
         FROM seedlot
-      WHERE seedlot_number BETWEEN CONST_CLASS_A_LOTNUM_MIN && TO_CHAR(TO_NUMBER(CONST_CLASS_A_LOTNUM_MAX)-1 );
+      WHERE seedlot_number BETWEEN CONST_CLASS_A_LOTNUM_MIN AND TO_CHAR(TO_NUMBER(CONST_CLASS_A_LOTNUM_MAX)-1 );
       */
       if (v_seedlot_number >= CONST_CLASS_A_LOTNUM_MAX) {
         throw new Error(e_error_generating_lot_number);
@@ -6131,7 +6151,7 @@ function add() {
     bec_version_id, collection_lat_sec, collection_long_sec, latitude_seconds, longitude_seconds,
     seed_plan_zone_code, applicant_client_locn, applicant_client_number, applicant_email_address,
     bc_source_ind, biotech_processes_ind, collection_area_radius, collection_bgc_ind,
-    collection_seed_plan_zone_ind, collection_st&&ard_met_ind, cone_collection_method2_code,
+    collection_seed_plan_zone_ind, collection_standard_met_ind, cone_collection_method2_code,
     contaminant_pollen_bv, controlled_cross_ind, declared_userid, declared_timestamp, female_gametic_mthd_code,
     latitude_sec_max, latitude_sec_min, longitude_sec_max, longitude_sec_min, male_gametic_mthd_code,
     orchard_comment, orchard_contamination_pct, pollen_contamination_ind, pollen_contamination_mthd_code,
@@ -6278,7 +6298,7 @@ function change() {
         ,collection_area_radius           = DECODE(gb_collection_area_radius,'Y',g_collection_area_radius,collection_area_radius)
         ,collection_bgc_ind               = DECODE(gb_collection_bgc_ind,'Y',g_collection_bgc_ind,collection_bgc_ind)
         ,collection_seed_plan_zone_ind    = DECODE(gb_collection_spz_ind,'Y',g_collection_spz_ind,collection_seed_plan_zone_ind)
-        ,collection_st&&ard_met_ind      = DECODE(gb_coll_st&&ard_met_ind,'Y',g_coll_st&&ard_met_ind,collection_st&&ard_met_ind)
+        ,collection_standard_met_ind      = DECODE(gb_coll_standard_met_ind,'Y',g_coll_standard_met_ind,collection_standard_met_ind)
         ,cone_collection_method2_code     = DECODE(gb_cone_collection_method2_cd,'Y',g_cone_collection_method2_cd,cone_collection_method2_code)
         ,contaminant_pollen_bv            = DECODE(gb_contaminant_pollen_bv,'Y',g_contaminant_pollen_bv,contaminant_pollen_bv)
         ,controlled_cross_ind             = DECODE(gb_controlled_cross_ind,'Y',g_controlled_cross_ind,controlled_cross_ind)
@@ -6310,8 +6330,8 @@ function change() {
         ,update_userid                    = g_update_userid
         ,update_timestamp                 = SYSDATE
         ,revision_count                   = revision_count + 1
-    WHERE seedlot_number                   = g_seedlot_number
-      && revision_count                   = g_revision_count
+    WHERE seedlot_number                  = g_seedlot_number
+      AND revision_count                  = g_revision_count
     RETURNING revision_count, update_timestamp
         INTO g_revision_count, g_update_timestamp;
   */
@@ -6329,7 +6349,7 @@ function change() {
 function remove() {
   /*  
   DELETE FROM seedlot
-  WHERE seedlot_number = g_seedlot_number && revision_count = g_revision_count;
+  WHERE seedlot_number = g_seedlot_number AND revision_count = g_revision_count;
   */
 }
 
@@ -6341,19 +6361,19 @@ function validate_new_copy_lot_number(p_new_copy_seedlot_number: string) {
   let v_count: number = 0;
   let b_valid: boolean = true;
   
-  // -- Check if the lot number already exists && not INC status.
+  // -- Check if the lot number already exists AND not INC status.
   /*
   SELECT COUNT('x')
     INTO v_count
     FROM seedlot
-    WHERE seedlot_number = p_new_copy_seedlot_number && seedlot_status_code != 'INC'
+    WHERE seedlot_number = p_new_copy_seedlot_number AND seedlot_status_code != 'INC'
       || p_new_copy_seedlot_number = g_seedlot_number;
   */
   if (v_count > 0) {
     g_error_message = g_error_message || 'spar.web.error.spr01.usr.seedlot.copy.overwrite:' || 'INC;';
   }
   
-  // -- Make sure entered lot number == a valid one.
+  // -- Make sure entered lot number is a valid one.
   // --Check ranges (for pre-numbered FS721 and FS721A forms already issued)
   if (g_genetic_class_code == 'A') {
     // WARN: Possible BUG found in the line below.
@@ -6388,7 +6408,7 @@ function copy_seedlot(p_new_copy_seedlot_number: string, p_userid: string) {
       SELECT MAX(TO_NUMBER(seedlot_number)) + 1
         INTO v_seedlot_number
         FROM seedlot
-        WHERE seedlot_number BETWEEN CONST_CLASS_B_COPY_MIN && CONST_CLASS_B_COPY_MAX;
+        WHERE seedlot_number BETWEEN CONST_CLASS_B_COPY_MIN AND CONST_CLASS_B_COPY_MAX;
       */
       if (v_seedlot_number == null || v_seedlot_number >= CONST_CLASS_B_COPY_MAX) {
         throw new Error(e_error_generating_lot_number);
@@ -6398,7 +6418,7 @@ function copy_seedlot(p_new_copy_seedlot_number: string, p_userid: string) {
       SELECT MAX(TO_NUMBER(seedlot_number)) + 1
         INTO v_seedlot_number
         FROM seedlot
-        WHERE seedlot_number BETWEEN CONST_CLASS_A_COPY_MIN && CONST_CLASS_A_COPY_MAX;
+        WHERE seedlot_number BETWEEN CONST_CLASS_A_COPY_MIN AND CONST_CLASS_A_COPY_MAX;
       */
       if (v_seedlot_number == null || v_seedlot_number >= CONST_CLASS_A_COPY_MAX) {
         throw new Error(e_error_generating_lot_number);
@@ -6417,7 +6437,7 @@ function copy_seedlot(p_new_copy_seedlot_number: string, p_userid: string) {
       WHERE seedlot_number = g_seedlot_number;
     */
 
-    // -- if lot already exists, delete its child records, && overwrite seedlot record.
+    // -- if lot already exists, delete its child records, and overwrite seedlot record.
     /*
     SELECT COUNT('x')
       INTO v_count
@@ -6547,7 +6567,7 @@ function copy_seedlot(p_new_copy_seedlot_number: string, p_userid: string) {
             , seedlot_comment                = v_seedlot_comment
             , temporary_storage_start_date   = g_temporary_storage_start_dt
             , temporary_storage_end_date     = g_temporary_storage_end_date
-            , collection_st&&ard_met_ind    = g_coll_st&&ard_met_ind
+            , collection_sandard_met_ind     = g_coll_standard_met_ind
             , applicant_email_address        = g_applicant_email_address
             , biotech_processes_ind          = g_biotech_processes_ind
             , pollen_contamination_ind       = g_pollen_contamination_ind
@@ -6587,8 +6607,8 @@ function copy_seedlot(p_new_copy_seedlot_number: string, p_userid: string) {
         WHERE seedlot_number = v_new_seedlot_number;
       */
     } else {
-      // -- Copy the SEEDLOT record, with status of INC && userid/timestamp to the
-      // -- current user's && current date.
+      // -- Copy the SEEDLOT record, with status of INC and userid/timestamp to the
+      // -- current user's and current date.
       /*
       INSERT INTO seedlot
             (seedlot_number
@@ -6681,7 +6701,7 @@ function copy_seedlot(p_new_copy_seedlot_number: string, p_userid: string) {
             , seedlot_comment
             , temporary_storage_start_date
             , temporary_storage_end_date
-            , collection_st&&ard_met_ind
+            , collection_standard_met_ind
             , applicant_email_address
             , biotech_processes_ind
             , pollen_contamination_ind
@@ -6808,7 +6828,7 @@ function copy_seedlot(p_new_copy_seedlot_number: string, p_userid: string) {
             , v_seedlot_comment
             , temporary_storage_start_date
             , temporary_storage_end_date
-            , collection_st&&ard_met_ind
+            , collection_standard_met_ind
             , applicant_email_address
             , biotech_processes_ind
             , pollen_contamination_ind
@@ -6997,7 +7017,7 @@ function get_rank_a_germ_test_type(p_seedlot_number: string): string {
   /*
   SELECT seedlot_test_code
     FROM seedlot_test
-    WHERE seedlot_number = p_seedlot_number && current_test_ind = 'Y' AND preferred_prep_rnk = 'A';
+    WHERE seedlot_number = p_seedlot_number AND current_test_ind = 'Y' AND preferred_prep_rnk = 'A';
   */
   let r_test: any; // c_test%ROWTYPE;
   
@@ -7039,7 +7059,7 @@ function get_original_tpg(p_seedlot_number: string): number {
   */
   let r_lot: any; // c_lot%ROWTYPE;
 
-  // --First row returned == original germ
+  // --First row returned is original germ
   // CURSOR c_germ IS:
   /*
   SELECT s.germination_pct
@@ -7049,7 +7069,7 @@ function get_original_tpg(p_seedlot_number: string): number {
   */
   let r_germ: any; // c_germ%ROWTYPE;
 
-  // --First row returned == original spg
+  // --First row returned is original spg
   // CURSOR c_spg IS
   /*
   SELECT s.seeds_per_gram
@@ -7077,10 +7097,9 @@ function get_original_tpg(p_seedlot_number: string): number {
            , swng_crctn_factor
         FROM sowing_rule_factor sr
        WHERE sr.genetic_class_code = p_genetic_class_code
-         && (   sr.vegetation_code = p_vegetation_code
-              || sr.vegetation_code == null)
-         && sr.min_grmntn_pct <= p_germ_pct
-         && sr.max_grmntn_pct >= p_germ_pct
+         AND ( sr.vegetation_code = p_vegetation_code || sr.vegetation_code is null)
+         AND sr.min_grmntn_pct <= p_germ_pct
+         AND sr.max_grmntn_pct >= p_germ_pct
       ORDER BY sr.vegetation_code NULLS LAST;
   */
   let r_sow_rule: any; // c_sow_rule%ROWTYPE;
@@ -7139,7 +7158,7 @@ function get_original_potential_trees(p_seedlot_number: string): number {
 
 /*
  * Procedure: is_seedlot_b_plus
- * Purpose:   Returns true if the seedlot == B+(i.e. B class with superior provenance)
+ * Purpose:   Returns true if the seedlot is B+(i.e. B class with superior provenance)
  */
 function is_seedlot_b_plus(p_seedlot_number :string): boolean {
   // CURSOR c_lot IS:
@@ -7159,7 +7178,7 @@ function is_seedlot_b_plus(p_seedlot_number :string): boolean {
 
 /*
  * Procedure: is_seedlot_b_not_supprov
- * Purpose:   Returns true if (the seedlot == B && != of superior provenance. (i.e. B class with superior provenance of N)
+ * Purpose:   Returns true if the seedlot is B and is not of superior provenance. (i.e. B class with superior provenance of N)
  */
 function is_seedlot_b_not_supprov(p_seedlot_number: string): boolean {
   // CURSOR c_lot IS:

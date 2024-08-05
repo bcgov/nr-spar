@@ -56,56 +56,86 @@ public class ParentTreeService {
         ptVals.orchardPtVals().size(),
         ptVals.smpMixIdAndProps().size());
 
-    // BigDecimal neValue = geneticWorthService.calculateNe(ptVals.orchardPtVals());
-    BigDecimal coancestry = null;
+    final BigDecimal zero = BigDecimal.ZERO;
+    
+    // First pass
+    BigDecimal varTotalConeCount = zero;
+    BigDecimal varTotalPollenCount = zero;
+    for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
+      varTotalConeCount = varTotalConeCount.add(orchardPtVals.coneCount());
+      varTotalPollenCount = varTotalPollenCount.add(orchardPtVals.pollenCount());
+    }
 
-    BigDecimal varTotalConeCount =
-        ptVals.orchardPtVals().stream()
-            .map(OrchardParentTreeValsDto::coneCount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    // Second pass
+    BigDecimal varParentPropOrchPoll = null;
+    for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
+      BigDecimal ptPollenCount = orchardPtVals.pollenCount();
 
-    BigDecimal varTotalPollenCount =
-        ptVals.orchardPtVals().stream()
-            .map(OrchardParentTreeValsDto::pollenCount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+      // --col:W
+      if (varTotalPollenCount.compareTo(BigDecimal.ZERO) == 0) {
+        varParentPropOrchPoll = BigDecimal.ZERO;
+      } else {
+        varParentPropOrchPoll = ptPollenCount.divide(varTotalPollenCount, DIVISION_SCALE, halfUp);
+      }
+    }
 
-    // Get the v_sum_orch_gamete_contr:
-    BigDecimal varSumOrchGameteContr = BigDecimal.ZERO;
-    BigDecimal varFemaleCropPop = BigDecimal.ZERO;
-    BigDecimal varParentPropOrchPoll = BigDecimal.ZERO;
-    BigDecimal varOrchGameteContr = null;
+    // Third pass
+    BigDecimal varSumOrchGameteContr = zero;
+    BigDecimal varOrchGameteContr = zero;
+    BigDecimal varSumNeNoSmpContrib = zero;
+    BigDecimal varFemaleCropPop = null;
+    BigDecimal varParPropContrib = null;
+    BigDecimal varNeNoSmpContrib = null;
     for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
       boolean hasConeCount = orchardPtVals.coneCount().compareTo(BigDecimal.ZERO) > 0;
       boolean hasPollenCount = orchardPtVals.pollenCount().compareTo(BigDecimal.ZERO) > 0;
+      // --Ignore rows without cone or pollen count
       if (hasConeCount || hasPollenCount) {
+        BigDecimal ptPollenCount = orchardPtVals.pollenCount();
+        BigDecimal ptConeCount = orchardPtVals.coneCount();
+
         // --col:V
         if (varTotalConeCount.compareTo(BigDecimal.ZERO) == 0) {
           varFemaleCropPop = BigDecimal.ZERO;
         } else {
-          varFemaleCropPop =
-              orchardPtVals.coneCount().divide(varTotalConeCount, DIVISION_SCALE, halfUp);
+          varFemaleCropPop = ptConeCount.divide(varTotalConeCount, DIVISION_SCALE, halfUp);
         }
 
         // --col:W
         if (varTotalConeCount.compareTo(BigDecimal.ZERO) == 0) {
           varParentPropOrchPoll = BigDecimal.ZERO;
         } else {
-          varParentPropOrchPoll =
-              orchardPtVals.pollenCount().divide(varTotalPollenCount, DIVISION_SCALE, halfUp);
+          varParentPropOrchPoll = ptPollenCount.divide(varTotalPollenCount, DIVISION_SCALE, halfUp);
         }
 
-        // --col:AQ
-        BigDecimal threeQuarters = new BigDecimal("0.75");
-        BigDecimal threeQuartTimesParentPropOrch = threeQuarters.multiply(varParentPropOrchPoll);
-        BigDecimal femaleCropPropDiv = varFemaleCropPop.add(threeQuartTimesParentPropOrch);
-        femaleCropPropDiv = femaleCropPropDiv.divide(new BigDecimal("2.2"), DIVISION_SCALE, halfUp);
-        varOrchGameteContr = femaleCropPropDiv.pow(2);
+        // --col:AE
+        if (varTotalPollenCount.compareTo(BigDecimal.ZERO) == 0) {
+          varParPropContrib = varFemaleCropPop;
+        } else {
+          varParPropContrib =
+              varFemaleCropPop
+                  .add(varParentPropOrchPoll)
+                  .divide(new BigDecimal("2"), DIVISION_SCALE, halfUp);
+        }
 
+        // --col:AO
+        varNeNoSmpContrib = varParPropContrib.pow(2);
+        varSumNeNoSmpContrib = varSumNeNoSmpContrib.add(varNeNoSmpContrib);
+
+        // --col:AQ
+        varOrchGameteContr =
+            varFemaleCropPop
+                .add(new BigDecimal("0.75").multiply(varParentPropOrchPoll))
+                .divide(new BigDecimal(2))
+                .pow(2);
         varSumOrchGameteContr = varSumOrchGameteContr.add(varOrchGameteContr);
       }
     }
 
-    BigDecimal neValue = calculateNe(coancestry, varSumOrchGameteContr);
+    BigDecimal coancestry = null;
+    BigDecimal neValue =
+        geneticWorthService.calculateNe(
+            coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, ptVals.smpParentsOutside());
 
     CalculatedParentTreeValsDto calculatedVals = new CalculatedParentTreeValsDto();
     calculatedVals.setNeValue(neValue);
@@ -123,68 +153,6 @@ public class ParentTreeService {
         new PtCalculationResDto(calculatedGws, calculatedVals, smpMixGeoData);
 
     return summaryDto;
-  }
-
-  /**
-   * Calculate the Ne value (Effective Population Size.
-   *
-   * @param globalCoancestry The coancestry value for the Ne calculation.
-   * @param varSumOrchGameteContr The sum or gamete for the Orchard.
-   * @return BigDecimal representing the Ne value.
-   */
-  public BigDecimal calculateNe(BigDecimal globalCoancestry, BigDecimal varSumOrchGameteContr) {
-    BigDecimal varEffectivePopSize = BigDecimal.ZERO;
-    BigDecimal varSmpParentsOutside = null;
-    // globalBoolSmpParentsOutside: starts with 'N', then if called the set method, it becomes an
-    // 'Y' however, the only place that calls the set method is on the recalc() function. So I
-    // understand this will be 'N' for the first calculation, and 'Y' for the others.
-    // I'll keep as 'N', simulating to be always the first time, for now.
-    char globalBoolSmpParentsOutside = 'N';
-    BigDecimal previousSmpParentsOutside = getPreviousParentTreeOutside(globalCoancestry); // <- review here
-
-    if (globalBoolSmpParentsOutside == 'Y') {
-      varSmpParentsOutside =
-          varSmpParentsOutside == null ? BigDecimal.ZERO : varSmpParentsOutside;
-    } else {
-      varSmpParentsOutside =
-          previousSmpParentsOutside == null ? BigDecimal.ZERO : previousSmpParentsOutside;
-    }
-
-    if (globalCoancestry != null) {
-      // --Effective Population Size with Coancestry considered
-      if (globalCoancestry.compareTo(BigDecimal.ZERO) != 0) {
-        varEffectivePopSize = BigDecimal.ZERO;
-      } else {
-        varEffectivePopSize =
-            new BigDecimal("0.5").divide(varEffectivePopSize, DIVISION_SCALE, halfUp);
-      }
-    } else if (varSmpParentsOutside.compareTo(BigDecimal.ZERO) != 0) {
-      // --Effective Population Size with SMP (for Growth)
-      // Original equation: varEffectivePopSize = Math.round(1/(v_sum_orch_gamete_contr + (
-      // Math.power(0.25/(2*varSmpParentsOutside),2) * varSmpParentsOutside )) ,1);
-      BigDecimal oneQuarter = new BigDecimal("0.25");
-      BigDecimal two = new BigDecimal("2");
-      BigDecimal twoTimesSmpParentOutside = two.multiply(varSmpParentsOutside);
-      BigDecimal oneQuarterDividedByTwoTimesSmpParent =
-          oneQuarter.divide(twoTimesSmpParentOutside, DIVISION_SCALE, halfUp);
-      BigDecimal power = oneQuarterDividedByTwoTimesSmpParent.pow(2);
-      BigDecimal powerPlusParentTreeOutside = power.multiply(varSmpParentsOutside);
-      BigDecimal sumOrchGameteContrPower = varSumOrchGameteContr.add(powerPlusParentTreeOutside);
-      varEffectivePopSize = ONE.divide(sumOrchGameteContrPower, DIVISION_SCALE, halfUp);
-      varEffectivePopSize = varEffectivePopSize.setScale(1, halfUp);
-    }
-
-    return varEffectivePopSize;
-  }
-
-  private BigDecimal getPreviousParentTreeOutside(BigDecimal globalCoancestry) {
-    SparLog.info("Temporary previous always null");
-    BigDecimal previous = null;
-    if (globalCoancestry != null) {
-      SparLog.info("Received globalCoancestry {}", globalCoancestry);
-      previous = BigDecimal.ZERO;
-    }
-    return previous;
   }
 
   /**
@@ -359,7 +327,7 @@ public class ParentTreeService {
        *  STEP 2
        *  AG:
        *  v_p_contrib_lat_no_smp_poll :=
-       *      v_coll_lat * (v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200));
+       *      v_coll_lat * (varParPropContrib-((v_female_crop_pop*v_a_smp_success_pct)/200));
        *
        *  STEP 1
        *  AJ:
@@ -397,7 +365,7 @@ public class ParentTreeService {
       // Mean Long = SUM(Wtd. Long. with parent and SMP pollen)
       // Wtd Long. with parent and SMP pollen is defined in Certification Template Col w/ id
       // AN
-      // Calculations are similar to those of Lat's, but wiht long values
+      // Calculations are similar to those of Lat's, but with long values
       BigDecimal smpMixLong = smpMixGeoData.getMeanLongitude();
 
       BigDecimal smpPollWtdContribLong =
@@ -416,7 +384,7 @@ public class ParentTreeService {
       // Mean Elev. = SUM(Wtd. elev with parent and SMP pollen)
       // Wtd elev. with parent and SMP pollen is defined in Certification Template Col w/ id
       // AL
-      // Calculations are similar to those of Lat's, but wiht elevation values
+      // Calculations are similar to those of Lat's, but with elevation values
       BigDecimal smpMixElev = new BigDecimal(smpMixGeoData.getMeanElevation());
 
       BigDecimal smpPollWtdContribElev =
@@ -451,7 +419,7 @@ public class ParentTreeService {
   /**
    * Calculate the proportion for parent contribution without SMP Pollen.
    *
-   * @return prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
+   * @return prop = varParPropContrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
    */
   private BigDecimal calcProportion(
       OrchardParentTreeValsDto ptValDto, BigDecimal femaleCropPop, BigDecimal totalPollenCount) {
@@ -470,12 +438,12 @@ public class ParentTreeService {
     }
 
     /*
-     * REFERENCE v_p_prop_contrib
+     * REFERENCE varParPropContrib
      * --col:AE
      * IF v_total_pollen_count = 0 THEN
-     *  v_p_prop_contrib := v_female_crop_pop;
+     *  varParPropContrib := v_female_crop_pop;
      * ELSE
-     *  v_p_prop_contrib := (v_female_crop_pop + v_parent_prop_orch_poll) / 2;
+     *  varParPropContrib := (v_female_crop_pop + v_parent_prop_orch_poll) / 2;
      */
     BigDecimal parentPropContrib;
     if (totalPollenCount.equals(BigDecimal.ZERO)) {
@@ -486,7 +454,7 @@ public class ParentTreeService {
 
     BigDecimal smpSuccessPerc = new BigDecimal(ptValDto.smpSuccessPerc()).divide(PERC_DIVISOR);
 
-    // prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
+    // prop = varParPropContrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
     BigDecimal prop =
         parentPropContrib.subtract((femaleCropPop).multiply(smpSuccessPerc).divide(PROP_DIVISOR));
 

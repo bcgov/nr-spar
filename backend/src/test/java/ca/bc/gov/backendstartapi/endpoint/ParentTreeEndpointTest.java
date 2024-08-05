@@ -113,7 +113,8 @@ class ParentTreeEndpointTest {
                 "parentTreeId": 22,
                 "proportion": 90
               }
-            ]
+            ],
+            "smpParentsOutside": 0
           }
         """;
 
