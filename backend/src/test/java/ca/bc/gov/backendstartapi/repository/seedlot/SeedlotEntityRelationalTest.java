@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.repository.seedlot;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -10,6 +11,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,16 +22,19 @@ abstract class SeedlotEntityRelationalTest {
   protected GeneticClassRepository geneticClassRepository;
   protected GeneticWorthRepository geneticWorthRepository;
   protected SeedlotSourceRepository seedlotSourceRepository;
+  protected SeedlotStatusRepository seedlotStatusRepository;
 
   protected SeedlotEntityRelationalTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       GeneticWorthRepository geneticWorthRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository) {
     this.seedlotRepository = seedlotRepository;
     this.geneticClassRepository = geneticClassRepository;
     this.geneticWorthRepository = geneticWorthRepository;
     this.seedlotSourceRepository = seedlotSourceRepository;
+    this.seedlotStatusRepository = seedlotStatusRepository;
   }
 
   protected Seedlot createSeedlot(String id) {
@@ -48,12 +53,18 @@ abstract class SeedlotEntityRelationalTest {
     var seedlotSource = new SeedlotSourceEntity("CUS", "Custom Lot", effectiveDateRange, null);
     seedlotSourceRepository.saveAndFlush(seedlotSource);
 
+    EffectiveDateRange range =
+        new EffectiveDateRange(LocalDate.now().minusYears(3L), LocalDate.now().plusYears(15L));
+    var seedlotStatus = new SeedlotStatusEntity("PND", "Pending", range);
+    seedlotStatusRepository.saveAndFlush(seedlotStatus);
+
     var seedlot = new Seedlot(id);
 
     seedlot.setComment("A seedlot.");
     seedlot.setApplicantClientNumber("00000001");
     seedlot.setApplicantLocationCode("02");
     seedlot.setApplicantEmailAddress("applicant@email.com");
+    seedlot.setSeedlotStatus(seedlotStatus);
 
     seedlot.setVegetationCode("VEG");
     seedlot.setGeneticClass(geneticClass);
@@ -63,16 +74,16 @@ abstract class SeedlotEntityRelationalTest {
 
     seedlot.setCollectionClientNumber("00000003");
     seedlot.setCollectionLocationCode("04");
-    seedlot.setCollectionStartDate(LocalDateTime.now());
-    seedlot.setCollectionEndDate(LocalDateTime.now());
+    seedlot.setCollectionStartDate(LocalDate.now());
+    seedlot.setCollectionEndDate(LocalDate.now());
     seedlot.setNumberOfContainers(new BigDecimal(10));
     seedlot.setContainerVolume(new BigDecimal(20));
     seedlot.setTotalConeVolume(new BigDecimal(200));
 
     seedlot.setInterimStorageClientNumber("00000005");
     seedlot.setInterimStorageLocationCode("06");
-    seedlot.setInterimStorageStartDate(LocalDateTime.now());
-    seedlot.setInterimStorageEndDate(LocalDateTime.now());
+    seedlot.setInterimStorageStartDate(LocalDate.now());
+    seedlot.setInterimStorageEndDate(LocalDate.now());
     seedlot.setInterimStorageFacilityCode("007");
 
     seedlot.setFemaleGameticContributionMethod("F");
@@ -92,12 +103,12 @@ abstract class SeedlotEntityRelationalTest {
 
     seedlot.setExtractionClientNumber("00000009");
     seedlot.setExtractionLocationCode("10");
-    seedlot.setExtractionStartDate(LocalDateTime.now());
-    seedlot.setExtractionEndDate(LocalDateTime.now());
+    seedlot.setExtractionStartDate(LocalDate.now());
+    seedlot.setExtractionEndDate(LocalDate.now());
     seedlot.setStorageClientNumber("00000011");
     seedlot.setStorageLocationCode("12");
-    seedlot.setTemporaryStorageStartDate(LocalDateTime.now());
-    seedlot.setTemporaryStorageEndDate(LocalDateTime.now());
+    seedlot.setTemporaryStorageStartDate(LocalDate.now());
+    seedlot.setTemporaryStorageEndDate(LocalDate.now());
 
     seedlot.setDeclarationOfTrueInformationUserId("user1");
     seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());

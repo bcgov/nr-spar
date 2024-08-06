@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
@@ -31,6 +32,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -166,7 +168,7 @@ public class SeedlotEndpoint {
   /**
    * Created a new Seedlot in the system.
    *
-   * @param createDto A {@link SeedlotCreateDto} containig all required field to get a new
+   * @param createDto A {@link SeedlotCreateDto} containing all required field to get a new
    *     registration started.
    * @return A {@link SeedlotStatusResponseDto} with all created values.
    */
@@ -206,7 +208,10 @@ public class SeedlotEndpoint {
           @RequestBody
           @Valid
           SeedlotCreateDto createDto) {
+    long started = Instant.now().toEpochMilli();
     SeedlotStatusResponseDto response = seedlotService.createSeedlot(createDto);
+    long finished = Instant.now().toEpochMilli();
+    SparLog.info("Time spent: {} ms - create seedlot first step", (finished - started));
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
@@ -454,9 +459,12 @@ public class SeedlotEndpoint {
           @PathVariable
           String seedlotNumber,
       @RequestBody SeedlotFormSubmissionDto form) {
+    long started = Instant.now().toEpochMilli();
     boolean isTscAdmin = loggedUserService.isTscAdminLogged();
     SeedlotStatusResponseDto createDto =
         seedlotService.updateSeedlotWithForm(seedlotNumber, form, isTscAdmin, true, "SUB");
+    long finished = Instant.now().toEpochMilli();
+    SparLog.info("Time spent: {} ms - submit seedlot regular form", (finished - started));
     return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
   }
 

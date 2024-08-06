@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeSmpMixId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -37,7 +38,7 @@ public class SeedlotParentTreeSmpMix {
   @Id
   @JoinColumn(name = "seedlot_number", referencedColumnName = "seedlot_number")
   @JoinColumn(name = "parent_tree_id", referencedColumnName = "parent_tree_id")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private SeedlotParentTree seedlotParentTree;
 
@@ -48,7 +49,7 @@ public class SeedlotParentTreeSmpMix {
 
   @Id
   @JoinColumn(name = "genetic_worth_code")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private GeneticWorthEntity geneticWorth;
 

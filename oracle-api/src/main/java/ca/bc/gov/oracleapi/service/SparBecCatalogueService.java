@@ -21,7 +21,8 @@ public class SparBecCatalogueService {
    * null.
    */
   public Map<String, String> getBecDescriptionsByCode(List<String> becZoneCodes) {
-    SparLog.info("Begin service request to find the description of a given BEC zone code");
+    SparLog.info(
+        "Begin service request to find the description of a given BEC zone code {}", becZoneCodes);
 
     if (becZoneCodes.isEmpty()) {
       SparLog.info("No BEC Zone code param, returning empty values for BEC zone descriptions");
