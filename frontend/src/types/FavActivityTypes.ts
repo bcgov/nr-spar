@@ -3,7 +3,6 @@ export type FavActivityType = {
   type: string;
   image: string;
   header: string;
-  description?: string;
   link: string;
   highlighted: boolean;
 }
