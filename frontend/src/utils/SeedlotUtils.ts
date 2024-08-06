@@ -48,8 +48,8 @@ export const covertRawToDisplayObj = (seedlot: SeedlotType, vegCodeData: MultiOp
   createdAt: luxon.fromISO(seedlot.auditInformation.entryTimestamp).toFormat(MONTH_DAY_YEAR),
   lastUpdatedAt: luxon.fromISO(seedlot.auditInformation.updateTimestamp)
     .toFormat(MONTH_DAY_YEAR),
-  approvedAt: seedlot.seedlotStatus.seedlotStatusCode === 'APP'
-    ? luxon.fromISO(seedlot.seedlotStatus.updateTimestamp).toFormat(MONTH_DAY_YEAR)
+  approvedAt: seedlot.seedlotStatus.seedlotStatusCode === 'APP' && seedlot.approvedTimestamp
+    ? luxon.fromISO(seedlot.approvedTimestamp).toFormat(MONTH_DAY_YEAR)
     : '--'
 });
 
