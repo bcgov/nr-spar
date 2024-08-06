@@ -10,4 +10,6 @@ public interface SeedlotCollectionMethodRepository
     extends JpaRepository<SeedlotCollectionMethod, SeedlotCollectionMethodId> {
 
   List<SeedlotCollectionMethod> findAllBySeedlot_id(String seedlotNumber);
+
+  void deleteAllBySeedlot_id(String seedlotNumber);
 }

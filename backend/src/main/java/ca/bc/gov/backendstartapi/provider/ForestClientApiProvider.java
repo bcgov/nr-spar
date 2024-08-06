@@ -355,9 +355,9 @@ public class ForestClientApiProvider implements Provider {
     if (Arrays.stream(environment.getActiveProfiles())
         .anyMatch(env -> !env.equalsIgnoreCase("prod"))) {
       String byPass = environment.getProperty("BYPASS_FOREST_CLIENT");
-      SparLog.info("BYPASS_FOREST_CLIENT={}", byPass);
+      SparLog.debug("BYPASS_FOREST_CLIENT={}", byPass);
       boolean shouldMockValue = "Y".equals(byPass);
-      SparLog.info("Should mock ForestClient API request: {}", shouldMockValue);
+      SparLog.debug("Should mock ForestClient API request: {}", shouldMockValue);
       return shouldMockValue;
     }
     return false;

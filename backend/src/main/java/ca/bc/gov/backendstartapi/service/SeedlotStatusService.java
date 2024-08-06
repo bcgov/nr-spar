@@ -72,4 +72,14 @@ public class SeedlotStatusService {
 
     return optionalSeedlot;
   }
+
+  /**
+   * Get a Seedlot Status entity by id.
+   *
+   * @param id The status code.
+   * @return Optional of a Seedlot Status Entity.
+   */
+  public Optional<SeedlotStatusEntity> findById(String id) {
+    return seedlotStatusRepository.findById(id);
+  }
 }
