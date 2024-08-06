@@ -35,9 +35,9 @@ parameters:
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
-    value: 50m
+    value: 10m
   - name: CPU_LIMIT
-    value: 100m
+    value: 30m
   - name: MEMORY_REQUEST
     value: 150Mi
   - name: MEMORY_LIMIT
