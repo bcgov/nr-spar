@@ -715,7 +715,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                     </div>
                     {
                       // Check if it's fetching parent tree data
-                      (!disableOptions && allParentTreeQuery.isFetching && orchardQuery.fetchStatus === 'fetching')
+                      (!disableOptions && (allParentTreeQuery.isFetching || orchardQuery.fetchStatus === 'fetching'))
                         ? (
                           <DataTableSkeleton
                             showToolbar={false}
