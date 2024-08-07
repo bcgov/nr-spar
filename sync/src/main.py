@@ -46,6 +46,9 @@ def generate_db_config(type_,schema_,settings):
         }
     return dbconfig
 
+def get_build_number():
+    return os.environ.get("BUILD_NUMBER")
+
 def required_variables_exists():
     ret = True
     
@@ -110,6 +113,12 @@ def read_settings():
 
 def main() -> None:
     definition_of_yes = ["Y","YES","1","T","TRUE","t","true"]
+
+    build_number = get_build_number()
+    print("<------------------ b.u.i.l.d  n.u.m.b.e.r ----------------->")
+    print(f"Running Sync BUILD NUMBER: {build_number}")
+    print("<------------------ b.u.i.l.d  n.u.m.b.e.r ----------------->")
+
     # print(os.environ.get("TEST_MODE"))
     if os.environ.get("TEST_MODE") is None:
         print("Error: test mode variable is None")
