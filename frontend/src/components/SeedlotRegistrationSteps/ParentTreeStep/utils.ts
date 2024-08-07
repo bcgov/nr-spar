@@ -30,6 +30,7 @@ import {
   DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate,
   MAX_NE_DECIMAL, INVALID_NE_DECIMAL_MSG, MIN_NE, MAX_NE, INVALID_NE_RANGE_MSG
 } from './constants';
+import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -286,27 +287,18 @@ export const processParentTreeData = (
 };
 
 /**
- * Determines if selected orchards contains a least one parent tree.
+ * Get a list of parent tree numbers that are under the selected orchard.
  */
-export const hasParentTreesForSelectedOrchards = (
-  orchardIds: (string | undefined)[],
-  data: ParentTreeGeneticQualityType[]
-): boolean => {
-  const proceed = true;
-  const stop = false;
-  let hasParentTrees = false;
-
-  // Loop through every parent tree data obj
-  // and stop as soon as a tree is found with the matching orchard id.
-  data.every((parentTree) => {
-    if (orchardIds.includes(parentTree.orchardId)) {
-      hasParentTrees = true;
-      return stop;
-    }
-    return proceed;
+export const getParentTreesForSelectedOrchards = (
+  selectedOrchardIds: (string | undefined)[],
+  data: ParentTreeByVegCodeResType
+): string[] => {
+  const filteredKeys = Object.keys(data).filter((key) => {
+    const { orchardIds } = data[key];
+    return orchardIds.some((orchardId) => selectedOrchardIds.includes(orchardId));
   });
 
-  return hasParentTrees;
+  return filteredKeys;
 };
 
 export const getMixRowTemplate = (): RowItem => {

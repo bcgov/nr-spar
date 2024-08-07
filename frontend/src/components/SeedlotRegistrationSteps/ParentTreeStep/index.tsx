@@ -15,7 +15,7 @@ import {
 import {
   View, Settings, Upload, Add
 } from '@carbon/icons-react';
-import { getAllParentTrees } from '../../../api-service/orchardAPI';
+import { getAllParentTrees } from '../../../api-service/parentTreeAPI';
 import { postFile } from '../../../api-service/seedlotAPI';
 import CheckboxType from '../../../types/CheckboxType';
 import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUtils';
@@ -56,7 +56,7 @@ import {
   getTabString, processOrchards, combineObjectValues, calcSummaryItems,
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
   addNewMixRow, calcMixTabInfoItems, fillMixTable,
-  hasParentTreesForSelectedOrchards
+  getParentTreesForSelectedOrchards
 } from './utils';
 import EditGenWorth from './EditGenWorth';
 
@@ -190,7 +190,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
 
   // Parent trees Query
   const allParentTreeQuery = useQuery({
-    queryKey: ['orchards', 'parent-trees', 'vegetation-codes', seedlotSpecies.code],
+    queryKey: ['parent-trees', 'vegetation-codes', seedlotSpecies.code],
     queryFn: () => (
       getAllParentTrees(seedlotSpecies.code)
     ),
@@ -210,17 +210,25 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
       && allParentTreeQuery.isFetched
       && allParentTreeQuery.data
     ) {
-      if (hasParentTreesForSelectedOrchards(orchardsData, allParentTreeQuery.data)) {
+      // List of parent tree numbers
+      const parentTreesUnderSelectedOrchards = getParentTreesForSelectedOrchards(
+        orchardsData,
+        allParentTreeQuery.data
+      );
+
+      console.log(parentTreesUnderSelectedOrchards);
+
+      if (parentTreesUnderSelectedOrchards.length > 0) {
         setDisableOptions(false);
-        processParentTreeData(
-          allParentTreeQuery.data,
-          state,
-          orchardsData,
-          currentPage,
-          currPageSize,
-          setSlicedRows,
-          setStepData
-        );
+        // processParentTreeData(
+        //   allParentTreeQuery.data,
+        //   state,
+        //   orchardsData,
+        //   currentPage,
+        //   currPageSize,
+        //   setSlicedRows,
+        //   setStepData
+        // );
         if (controlReviewData) {
           setControlReviewData(false);
         }

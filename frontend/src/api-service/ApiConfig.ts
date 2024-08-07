@@ -51,7 +51,9 @@ const ApiConfig = {
 
   orchardsVegCode: `${oracleServerHost}/api/orchards/vegetation-code`,
 
-  areaOfUseSpzList: `${oracleServerHost}/api/area-of-use/spz-list/vegetation-code`
+  areaOfUseSpzList: `${oracleServerHost}/api/area-of-use/spz-list/vegetation-code`,
+
+  parentTreeByVegCode: `${oracleServerHost}/api/parent-trees/vegetation-codes/{vegCode}`
 };
 
 export default ApiConfig;
