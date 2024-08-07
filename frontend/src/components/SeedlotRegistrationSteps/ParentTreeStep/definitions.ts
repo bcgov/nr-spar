@@ -2,7 +2,6 @@ import React from 'react';
 import { StringInputType } from '../../../types/FormInputType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
 
 export type TabTypes = 'coneTab' | 'successTab' | 'mixTab';
@@ -108,10 +107,6 @@ export type CompUploadResponse = {
 export type MixUploadResponse = {
   parentTreeNumber: number,
   pollenVolume: number
-}
-
-export type AllParentTreeMap = {
-  [key: string]: ParentTreeGeneticQualityType
 }
 
 export type InputErrorNotifProps = {

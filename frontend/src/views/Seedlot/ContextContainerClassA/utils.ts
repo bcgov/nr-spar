@@ -909,18 +909,18 @@ export const convertParentTree = (
   const parentTreePayload: Array<ParentTreeFormSubmitType> = [];
 
   // Each key is a parent tree number
-  Object.keys(parentTreeData.tableRowData).forEach((key: string) => {
+  Object.keys(parentTreeData.tableRowData).forEach((ptNum: string) => {
     parentTreePayload.push({
       seedlotNumber,
-      parentTreeId: parentTreeData.allParentTreeData[key].parentTreeId,
-      parentTreeNumber: parentTreeData.allParentTreeData[key].parentTreeNumber,
-      coneCount: +parentTreeData.tableRowData[key].coneCount.value,
-      pollenCount: +parentTreeData.tableRowData[key].pollenCount.value,
-      smpSuccessPct: +parentTreeData.tableRowData[key].smpSuccessPerc.value,
-      nonOrchardPollenContamPct: +parentTreeData.tableRowData[key].nonOrchardPollenContam.value,
-      amountOfMaterial: +parentTreeData.tableRowData[key].volume.value,
-      proportion: +parentTreeData.tableRowData[key].proportion.value,
-      parentTreeGeneticQualities: parentTreeData.allParentTreeData[key].parentTreeGeneticQualities
+      parentTreeId: parentTreeData.allParentTreeData[ptNum].parentTreeId,
+      parentTreeNumber: ptNum,
+      coneCount: +parentTreeData.tableRowData[ptNum].coneCount.value,
+      pollenCount: +parentTreeData.tableRowData[ptNum].pollenCount.value,
+      smpSuccessPct: +parentTreeData.tableRowData[ptNum].smpSuccessPerc.value,
+      nonOrchardPollenContamPct: +parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value,
+      amountOfMaterial: +parentTreeData.tableRowData[ptNum].volume.value,
+      proportion: +parentTreeData.tableRowData[ptNum].proportion.value,
+      parentTreeGeneticQualities: parentTreeData.tableRowData[ptNum].parentTreeGeneticQualities
     });
   });
 
@@ -928,31 +928,31 @@ export const convertParentTree = (
 };
 
 export const convertSmpParentTree = (
-  smpParentTreeData: ParentTreeStepDataObj,
+  parentTreeStepData: ParentTreeStepDataObj,
   seedlotNumber: string
 ): Array<ParentTreeFormSubmitType> => {
-  const { allParentTreeData } = smpParentTreeData;
+  const { allParentTreeData } = parentTreeStepData;
   const smpMixPayload: Array<ParentTreeFormSubmitType> = [];
 
-  if (smpParentTreeData.mixTabData) {
-    Object.keys(smpParentTreeData.mixTabData).forEach((key: string) => {
+  if (parentTreeStepData.mixTabData) {
+    Object.keys(parentTreeStepData.mixTabData).forEach((key: string) => {
       // Each key is a line in the table, so we need to get
       // the parent tree value that the user set and use it
-      const curParentTree = smpParentTreeData.mixTabData[key].parentTreeNumber.value;
-      if (allParentTreeData[curParentTree]) {
+      const curParentTreeNum = parentTreeStepData.mixTabData[key].parentTreeNumber.value;
+      if (allParentTreeData[curParentTreeNum]) {
         smpMixPayload.push({
           seedlotNumber,
-          parentTreeId: smpParentTreeData.allParentTreeData[curParentTree].parentTreeId,
-          parentTreeNumber: smpParentTreeData.allParentTreeData[curParentTree].parentTreeNumber,
-          coneCount: +smpParentTreeData.mixTabData[key].coneCount.value,
-          pollenCount: +smpParentTreeData.mixTabData[key].pollenCount.value,
-          smpSuccessPct: +smpParentTreeData.mixTabData[key].smpSuccessPerc.value,
-          nonOrchardPollenContamPct: +smpParentTreeData
+          parentTreeId: parentTreeStepData.allParentTreeData[curParentTreeNum].parentTreeId,
+          parentTreeNumber: curParentTreeNum,
+          coneCount: +parentTreeStepData.mixTabData[key].coneCount.value,
+          pollenCount: +parentTreeStepData.mixTabData[key].pollenCount.value,
+          smpSuccessPct: +parentTreeStepData.mixTabData[key].smpSuccessPerc.value,
+          nonOrchardPollenContamPct: +parentTreeStepData
             .mixTabData[key].nonOrchardPollenContam.value,
-          amountOfMaterial: +smpParentTreeData.mixTabData[key].volume.value,
-          proportion: +smpParentTreeData.mixTabData[key].proportion.value,
-          parentTreeGeneticQualities: smpParentTreeData
-            .allParentTreeData[curParentTree].parentTreeGeneticQualities
+          amountOfMaterial: +parentTreeStepData.mixTabData[key].volume.value,
+          proportion: +parentTreeStepData.mixTabData[key].proportion.value,
+          parentTreeGeneticQualities: parentTreeStepData
+            .allParentTreeData[curParentTreeNum].parentTreeGeneticQualities
         });
       }
     });

@@ -62,6 +62,7 @@ import EditGenWorth from './EditGenWorth';
 
 import './styles.scss';
 import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
+import getGeneticWorthList from '../../../api-service/GeneticWorthAPI';
 
 type ParentTreeStepProps = {
   // Determines whether this component is used on the seedlot review screen
@@ -202,7 +203,16 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
     queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
-    enabled: !isFormSubmitted
+    enabled: !isFormSubmitted,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  const geneticWorthListQuery = useQuery({
+    queryKey: ['genetic-worth'],
+    queryFn: getGeneticWorthList,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
   });
 
   /**
@@ -216,6 +226,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
       && (Object.keys(state.tableRowData).length === 0 || controlReviewData)
       && allParentTreeQuery.isFetched
       && allParentTreeQuery.data
+      && geneticWorthListQuery.status === 'success'
     ) {
       // List of parent tree numbers
       const parentTreesUnderSelectedOrchards = getParentTreesForSelectedOrchards(
@@ -714,8 +725,13 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                       </TableToolbar>
                     </div>
                     {
-                      // Check if it's fetching parent tree data
-                      (!disableOptions && (allParentTreeQuery.isFetching || orchardQuery.fetchStatus === 'fetching'))
+                      // Check if it's fetching parent tree and dependencies data
+                      (!disableOptions
+                       && (allParentTreeQuery.fetchStatus === 'fetching'
+                          || orchardQuery.fetchStatus === 'fetching'
+                          || geneticWorthListQuery.fetchStatus === 'fetching'
+                       )
+                      )
                         ? (
                           <DataTableSkeleton
                             showToolbar={false}

@@ -10,6 +10,7 @@ import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
+import { utcToLocalFormat } from '../../../../utils/DateUtils';
 
 const ExtractionStorageReviewRead = () => {
   const {
@@ -67,9 +68,7 @@ const ExtractionStorageReviewRead = () => {
                 <ReadOnlyInput
                   id="extraction-start-date"
                   label="Extraction start date"
-                  value={
-                    luxon.fromISO(state.extraction.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                  }
+                  value={utcToLocalFormat(state.extraction.startDate.value)}
                   showSkeleton={isFetchingData}
                 />
               </Column>
@@ -77,9 +76,7 @@ const ExtractionStorageReviewRead = () => {
                 <ReadOnlyInput
                   id="extraction-end-date"
                   label="Extraction end date"
-                  value={
-                    luxon.fromISO(state.extraction.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                  }
+                  value={utcToLocalFormat(state.extraction.endDate.value)}
                   showSkeleton={isFetchingData}
                 />
               </Column>
@@ -121,9 +118,7 @@ const ExtractionStorageReviewRead = () => {
                 <ReadOnlyInput
                   id="storage-start-date"
                   label="Storage start date"
-                  value={
-                    luxon.fromISO(state.seedStorage.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                  }
+                  value={utcToLocalFormat(state.seedStorage.startDate.value)}
                   showSkeleton={isFetchingData}
                 />
               </Column>
@@ -131,9 +126,7 @@ const ExtractionStorageReviewRead = () => {
                 <ReadOnlyInput
                   id="storage-end-date"
                   label="Storage end date"
-                  value={
-                    luxon.fromISO(state.seedStorage.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                  }
+                  value={utcToLocalFormat(state.seedStorage.endDate.value)}
                   showSkeleton={isFetchingData}
                 />
               </Column>

@@ -62,6 +62,7 @@ import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -1082,7 +1083,7 @@ public class SeedlotService {
     String userId = loggedUserService.getLoggedUserId();
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     seedlot.setDeclarationOfTrueInformationUserId(userId);
-    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
+    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now(Clock.systemUTC()));
 
     SparLog.info(
         "Declaration data set, for seedlot {} for user {} at {}",

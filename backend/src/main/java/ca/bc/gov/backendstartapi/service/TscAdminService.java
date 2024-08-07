@@ -15,6 +15,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,7 @@ public class TscAdminService {
     // Update the Seedlot instance only
     if (status.equals("APP")) {
       seedlotEntity.setApprovedUserId(loggedUserService.getLoggedUserId());
-      seedlotEntity.setApprovedTimestamp(LocalDateTime.now());
+      seedlotEntity.setApprovedTimestamp(LocalDateTime.now(Clock.systemUTC()));
     }
 
     seedlotEntity.setSeedlotStatus(seedlotStatus.get());

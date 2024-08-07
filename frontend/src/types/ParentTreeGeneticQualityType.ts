@@ -17,15 +17,3 @@ export type SingleParentTreeGeneticObj = {
   geneticWorthCode: keyof typeof GenWorthCodeEnum;
   geneticQualityValue: number | null;
 };
-
-/**
- * The type returned from get parent trees by species endpoint.
- */
-export type ParentTreeGeneticQualityType = {
-  [key: string]: any;
-  parentTreeId: number;
-  parentTreeNumber: string;
-  orchardId: string;
-  spu: number;
-  parentTreeGeneticQualities: Array<SingleParentTreeGeneticObj>;
-}

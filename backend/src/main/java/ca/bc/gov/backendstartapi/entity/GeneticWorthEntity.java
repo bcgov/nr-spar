@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,9 @@ public class GeneticWorthEntity extends CodeDescriptionEntity {
   @Id
   @Column(name = "genetic_worth_code", length = 3)
   private String geneticWorthCode;
+
+  @Column(name = "default_bv")
+  private BigDecimal defaultBv;
 
   public GeneticWorthEntity(
       String geneticWorthCode, String description, EffectiveDateRange effectiveDateRange) {

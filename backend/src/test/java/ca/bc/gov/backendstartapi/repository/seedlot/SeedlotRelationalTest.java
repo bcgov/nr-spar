@@ -8,6 +8,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,9 @@ class SeedlotRelationalTest extends SeedlotEntityRelationalTest {
     assertEquals("user1", audit.getUpdateUserId());
     assertNotNull(audit.getEntryTimestamp());
     assertEquals(audit.getEntryTimestamp(), audit.getUpdateTimestamp());
-    assertTrue(audit.getEntryTimestamp().until(LocalDateTime.now(), ChronoUnit.SECONDS) < 5);
+    assertTrue(
+        audit.getEntryTimestamp().until(LocalDateTime.now(Clock.systemUTC()), ChronoUnit.SECONDS)
+            < 5);
     assertEquals(0, savedSeedlot.getRevisionCount());
   }
 
@@ -63,7 +66,10 @@ class SeedlotRelationalTest extends SeedlotEntityRelationalTest {
     assertEquals(newUpdateUserId, newAuditInfo.getUpdateUserId());
     assertTrue(updateTimestamp.isBefore(newAuditInfo.getUpdateTimestamp()));
     assertTrue(
-        newAuditInfo.getUpdateTimestamp().until(LocalDateTime.now(), ChronoUnit.SECONDS) < 5);
+        newAuditInfo
+                .getUpdateTimestamp()
+                .until(LocalDateTime.now(Clock.systemUTC()), ChronoUnit.SECONDS)
+            < 5);
     assertEquals(revisionCount + 1, newSavedSeedlot.getRevisionCount());
   }
 }

@@ -12,6 +12,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -37,8 +38,8 @@ class SeedlotCollectionMethodServiceTest {
     return new SeedlotFormCollectionDto(
         "00012797",
         "02",
-        LocalDateTime.now(),
-        LocalDateTime.now(),
+        LocalDateTime.now(Clock.systemUTC()),
+        LocalDateTime.now(Clock.systemUTC()),
         new BigDecimal("2"),
         new BigDecimal("4"),
         new BigDecimal("8"),

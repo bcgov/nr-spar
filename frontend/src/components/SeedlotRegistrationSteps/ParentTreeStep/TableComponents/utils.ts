@@ -3,7 +3,7 @@ import validator from 'validator';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
 
 import {
-  AllParentTreeMap, RowDataDictType, RowItem, StrTypeRowItem
+  RowDataDictType, RowItem, StrTypeRowItem
 } from '../definitions';
 import { getMixRowTemplate, calcSum, populateStrInputId } from '../utils';
 import {
@@ -13,8 +13,12 @@ import {
 } from '../constants';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import { isFloatWithinRange } from '../../../../utils/NumberUtils';
+import { ParentTreeByVegCodeResType } from '../../../../types/ParentTreeTypes';
 
-export const isPtNumberInvalid = (ptNumber: string, allParentTreeData: AllParentTreeMap) => (
+export const isPtNumberInvalid = (
+  ptNumber: string,
+  allParentTreeData: ParentTreeByVegCodeResType
+) => (
   !Object.keys(allParentTreeData).includes(ptNumber)
 );
 

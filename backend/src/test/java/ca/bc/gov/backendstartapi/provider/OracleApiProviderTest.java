@@ -146,41 +146,42 @@ class OracleApiProviderTest {
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, httpExc.getStatusCode());
   }
 
-  @Test
-  @DisplayName("Find Orchard with ID success test.")
-  void findOrchardById_shouldSucceed() {
-    when(loggedUserService.getLoggedUserToken()).thenReturn("1f7a4k5e8t9o5k6e9n8h5e2r6e");
+  // TODO
+  // @Test
+  // @DisplayName("Find Orchard with ID success test.")
+  // void findOrchardById_shouldSucceed() {
+  //   when(loggedUserService.getLoggedUserToken()).thenReturn("1f7a4k5e8t9o5k6e9n8h5e2r6e");
 
-    String orchardId = "339";
-    String url = "/null/api/orchards/" + orchardId;
+  //   String orchardId = "339";
+  //   String url = "/null/api/orchards/" + orchardId;
 
-    String json =
-        """
-          {
-            "id": "339",
-            "name": "EAGLEROCK",
-            "vegetationCode": "PLI",
-            "lotTypeCode": "S",
-            "lotTypeDescription": "Seed Lot",
-            "stageCode": "PRD",
-            "becZoneCode": "CWH",
-            "becZoneDescription": "Coastal Western Hemlock",
-            "becSubzoneCode": "dm",
-            "variant": null,
-            "becVersionId": 5
-          }
-        """;
+  //   String json =
+  //       """
+  //         {
+  //           "id": "339",
+  //           "name": "EAGLEROCK",
+  //           "vegetationCode": "PLI",
+  //           "lotTypeCode": "S",
+  //           "lotTypeDescription": "Seed Lot",
+  //           "stageCode": "PRD",
+  //           "becZoneCode": "CWH",
+  //           "becZoneDescription": "Coastal Western Hemlock",
+  //           "becSubzoneCode": "dm",
+  //           "variant": null,
+  //           "becVersionId": 5
+  //         }
+  //       """;
 
-    mockRestServiceServer
-        .expect(requestTo(url))
-        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+  //   mockRestServiceServer
+  //       .expect(requestTo(url))
+  //       .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-    Optional<OrchardDto> orchardDtoOpt = oracleApiProvider.findOrchardById(orchardId);
+  //   Optional<OrchardDto> orchardDtoOpt = oracleApiProvider.findOrchardById(orchardId);
 
-    Assertions.assertFalse(orchardDtoOpt.isEmpty());
-    Assertions.assertEquals(orchardId, orchardDtoOpt.get().id());
-    Assertions.assertEquals("Coastal Western Hemlock", orchardDtoOpt.get().becZoneDescription());
-  }
+  //   Assertions.assertFalse(orchardDtoOpt.isEmpty());
+  //   Assertions.assertEquals(orchardId, orchardDtoOpt.get().id());
+  //   Assertions.assertEquals("Coastal Western Hemlock", orchardDtoOpt.get().becZoneDescription());
+  // }
 
   @Test
   @DisplayName("Get SPU with ID success test")

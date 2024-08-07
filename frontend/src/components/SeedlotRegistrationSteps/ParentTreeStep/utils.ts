@@ -6,11 +6,12 @@ import { isFloatWithinRange } from '../../../utils/NumberUtils';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
 import { recordKeys } from '../../../utils/RecordUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
-import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { StringInputType } from '../../../types/FormInputType';
 import { PtValsCalcReqPayload, CalcPayloadResType, OrchardParentTreeValsType } from '../../../types/PtCalcTypes';
 import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
+import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
+import OrchardDataType from '../../../types/OrchardDataType';
 
 import {
   getConeCountErrMsg, getNonOrchardContamErrMsg, getPollenCountErrMsg,
@@ -30,7 +31,6 @@ import {
   DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate,
   MAX_NE_DECIMAL, INVALID_NE_DECIMAL_MSG, MIN_NE, MAX_NE, INVALID_NE_RANGE_MSG
 } from './constants';
-import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -235,7 +235,12 @@ export const populateStrInputId = (idPrefix: string, row: RowItem): RowItem => {
 };
 
 export const processParentTreeData = (
-  data: ParentTreeGeneticQualityType[],
+  // List of Parent Tree under a species
+  allParentTreeData: ParentTreeByVegCodeResType,
+  // List of Orchard under a species
+  orchardData: OrchardDataType[],
+  // List of parent tree number under selected orchard(s)
+  orchardParentTreeList: string[],
   state: ParentTreeStepDataObj,
   orchardIds: (string | undefined)[],
   currentPage: number,
@@ -244,7 +249,6 @@ export const processParentTreeData = (
   setStepData: Function
 ) => {
   const modifiedState = { ...state };
-  const allParentTreeData = {};
   let tableRowData: RowDataDictType = structuredClone(state.tableRowData);
 
   data.forEach((parentTree) => {
@@ -282,7 +286,6 @@ export const processParentTreeData = (
     setSlicedRows
   );
 
-  // Only set data if tableRowData is not empty, otherwise a inf loop will occur.
   setStepData('parentTreeStep', modifiedState);
 };
 

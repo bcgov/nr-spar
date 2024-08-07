@@ -11,6 +11,7 @@ import getFacilityTypes from '../../../../api-service/facilityTypesAPI';
 import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
+import { utcToLocalFormat } from '../../../../utils/DateUtils';
 
 const InterimReviewRead = () => {
   const {
@@ -74,7 +75,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-start-date"
             label="Storage start date"
-            value={luxon.fromISO(state.startDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
+            value={utcToLocalFormat(state.startDate.value)}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -82,7 +83,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-end-date"
             label="Storage end date"
-            value={luxon.fromISO(state.endDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
+            value={utcToLocalFormat(state.endDate.value)}
             showSkeleton={isFetchingData}
           />
         </Column>
