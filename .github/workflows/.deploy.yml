@@ -104,8 +104,8 @@ jobs:
 
   deploy:
     name: Deploy
-    if: needs.init.outputs.deploy_core == 'true'
     environment: ${{ inputs.environment }}
+    if: needs.init.outputs.deploy_core == 'true'
     needs: [init]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -157,6 +157,7 @@ jobs:
   # ETL testing will only run on Pull Requests if the sync/ directory is modified
   sync:
     name: Deploy (sync)
+    environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_sync == 'true'
     needs: [init]
     runs-on: ubuntu-latest
