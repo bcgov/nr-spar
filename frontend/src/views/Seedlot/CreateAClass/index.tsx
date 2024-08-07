@@ -71,7 +71,6 @@ const CreateAClass = () => {
       <Row className="page-title-row">
         <PageTitle
           title="Create A-class seedlot"
-          subtitle={null}
           enableFavourite
           activity="registerAClass"
         />
