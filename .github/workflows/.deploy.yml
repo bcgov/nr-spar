@@ -28,10 +28,12 @@ on:
         description: Run Cypress tests if the core apps have changed (excludes sync)
         value: ${{ jobs.init.outputs.deploy_core }}
 
+# Set environment at workflow/top level
+environment: ${{ inputs.environment }}
+
 jobs:
   init:
     name: Deploy (init)
-    environment: ${{ inputs.environment }}
     outputs:
       fam-modded-zone: ${{ steps.fam-modded-zone.outputs.fam-modded-zone }}
       deploy_core: ${{ steps.triggers.outputs.core }}
@@ -105,7 +107,6 @@ jobs:
   deploy:
     name: Deploy
     if: needs.init.outputs.deploy_core == 'true'
-    environment: ${{ inputs.environment }}
     needs: [init]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
