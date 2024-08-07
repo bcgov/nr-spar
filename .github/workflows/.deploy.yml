@@ -28,12 +28,10 @@ on:
         description: Run Cypress tests if the core apps have changed (excludes sync)
         value: ${{ jobs.init.outputs.deploy_core }}
 
-# Set environment at workflow/top level
-environment: ${{ inputs.environment }}
-
 jobs:
   init:
     name: Deploy (init)
+    environment: ${{ inputs.environment }}
     outputs:
       fam-modded-zone: ${{ steps.fam-modded-zone.outputs.fam-modded-zone }}
       deploy_core: ${{ steps.triggers.outputs.core }}
@@ -106,6 +104,7 @@ jobs:
 
   deploy:
     name: Deploy
+    environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_core == 'true'
     needs: [init]
     runs-on: ubuntu-22.04
@@ -158,6 +157,7 @@ jobs:
   # ETL testing will only run on Pull Requests if the sync/ directory is modified
   sync:
     name: Deploy (sync)
+    environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_sync == 'true'
     needs: [init]
     runs-on: ubuntu-latest
