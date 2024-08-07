@@ -1,6 +1,8 @@
 package ca.bc.gov.oracleapi.entity;
 
+import org.hibernate.type.YesNoConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -34,9 +36,11 @@ public class ParentTreeEntity {
   @Column(name = "LOCAL_NUMBER", length = 20)
   private String localNumber;
 
+  @Convert(converter = YesNoConverter.class)
   @Column(name = "ACTIVE_IND")
   private Boolean active;
 
+  @Convert(converter = YesNoConverter.class)
   @Column(name = "TESTED_IND")
   private Boolean tested;
 
