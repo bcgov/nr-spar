@@ -61,6 +61,7 @@ import {
 import EditGenWorth from './EditGenWorth';
 
 import './styles.scss';
+import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
 
 type ParentTreeStepProps = {
   // Determines whether this component is used on the seedlot review screen
@@ -196,6 +197,12 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     ),
     staleTime: THREE_HOURS, // will not refetch for 3 hours
     cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
+  });
+
+  const orchardQuery = useQuery({
+    queryKey: ['orchards', seedlotSpecies.code],
+    queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
+    enabled: !isFormSubmitted
   });
 
   /**
@@ -708,7 +715,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                     </div>
                     {
                       // Check if it's fetching parent tree data
-                      (!disableOptions && allParentTreeQuery.isFetching)
+                      (!disableOptions && allParentTreeQuery.isFetching && orchardQuery.fetchStatus === 'fetching')
                         ? (
                           <DataTableSkeleton
                             showToolbar={false}

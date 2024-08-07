@@ -852,11 +852,11 @@ public class SeedlotService {
     inMemoryDto.setPrimarySpuId(primarySpuId);
 
     // Not sure why it's called Bgc in seedlot instead of Bec in orchard
-    seedlot.setBgcZoneCode(orchardDto.becZoneCode());
-    seedlot.setBgcZoneDescription(orchardDto.becZoneDescription());
-    seedlot.setBgcSubzoneCode(orchardDto.becSubzoneCode());
-    seedlot.setVariant(orchardDto.variant());
-    seedlot.setBecVersionId(orchardDto.becVersionId());
+    seedlot.setBgcZoneCode(orchardDto.getBecZoneCode());
+    seedlot.setBgcZoneDescription(orchardDto.getBecZoneDescription());
+    seedlot.setBgcSubzoneCode(orchardDto.getBecSubzoneCode());
+    seedlot.setVariant(orchardDto.getVariant());
+    seedlot.setBecVersionId(orchardDto.getBecVersionId());
     seedlot.setSeedPlanUnitId(primarySpuId);
 
     SparLog.info("BEC values set");

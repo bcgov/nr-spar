@@ -32,6 +32,8 @@ const ApiConfig = {
 
   seedlots: `${serverHost}/api/seedlots`,
 
+  orchardsVegCode: `${serverHost}/api/orchards/vegetation-codes`,
+
   tscAdmin: `${serverHost}/api/tsc-admin`,
 
   tscSeedlotEdit: `${serverHost}/api/tsc-admin/seedlots/{seedlotNumber}/edit`,
@@ -48,8 +50,6 @@ const ApiConfig = {
   facilityTypes: `${oracleServerHost}/api/facility-types`,
 
   oracleOrchards: `${oracleServerHost}/api/orchards`,
-
-  orchardsVegCode: `${oracleServerHost}/api/orchards/vegetation-code`,
 
   areaOfUseSpzList: `${oracleServerHost}/api/area-of-use/spz-list/vegetation-code`,
 
