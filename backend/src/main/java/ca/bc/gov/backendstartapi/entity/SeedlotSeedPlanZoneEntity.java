@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotSeedPlanZoneId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -32,7 +33,7 @@ public class SeedlotSeedPlanZoneEntity {
   // region Identifier
   @Id
   @JoinColumn(name = "seedlot_number")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private Seedlot seedlot;
 
@@ -42,7 +43,7 @@ public class SeedlotSeedPlanZoneEntity {
   private String spzCode;
 
   // endregion
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "genetic_class_code")
   @NonNull
   private GeneticClassEntity geneticClass;

@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.entity.idclass.TestedPtAreaOfUseSpzId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -26,14 +27,14 @@ import org.hibernate.type.YesNoConverter;
 @Table(name = "TESTED_PT_AREA_OF_USE_SPZ")
 public class TestedPtAreaOfUseSpz {
   @Id
-  @JoinColumn(name = "TESTED_PT_AREA_OF_USE_ID")
-  @ManyToOne
+  @JoinColumn(name = "TESTED_PT_AREA_OF_USE_ID", updatable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private TestedPtAreaOfUse testedPtAreaOfUse;
 
   @Id
-  @JoinColumn(name = "SEED_PLAN_ZONE_CODE")
-  @ManyToOne
+  @JoinColumn(name = "SEED_PLAN_ZONE_CODE", updatable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private SeedPlanZoneCode seedPlanZoneCode;
 

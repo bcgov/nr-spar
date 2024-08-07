@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /** This record represents the seedlot form step 6. */
 @Schema(description = "Seedlot extration and storage information. Form step 6")
@@ -34,7 +34,7 @@ public record SeedlotFormExtractionDto(
               """,
             example = "2023/11/23",
             nullable = true)
-        LocalDateTime extractionStDate,
+        LocalDate extractionStDate,
     @Schema(
             description =
                 """
@@ -43,7 +43,7 @@ public record SeedlotFormExtractionDto(
               """,
             example = "2023/11/23",
             nullable = true)
-        LocalDateTime extractionEndDate,
+        LocalDate extractionEndDate,
     @Schema(
             description =
                 """
@@ -66,9 +66,9 @@ public record SeedlotFormExtractionDto(
             description = "Commencement date of temporary Seedlot storage.",
             example = "2023/11/23",
             nullable = true)
-        LocalDateTime temporaryStrgStartDate,
+        LocalDate temporaryStrgStartDate,
     @Schema(
             description = "End date of Seedlot temporary storage.",
             example = "2023/11/23",
             nullable = true)
-        LocalDateTime temporaryStrgEndDate) {}
+        LocalDate temporaryStrgEndDate) {}
