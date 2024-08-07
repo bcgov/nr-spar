@@ -86,6 +86,10 @@ public class SaveSeedlotFormService {
       entityToSave.setProgressStatus(parsedProgressStatus);
     }
 
+    relatedSeedlot.setAuditInformation(loggedUserService.createAuditCurrentUser());
+
+    seedlotRepository.save(relatedSeedlot);
+
     SaveSeedlotProgressEntityClassA saved = saveSeedlotProgressRepositoryClassA.save(entityToSave);
 
     SparLog.info("A-class seedlot progress for seedlot number {} saved!", seedlotNumber);

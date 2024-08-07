@@ -13,6 +13,7 @@ import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
@@ -34,9 +35,14 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
       SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository,
       GeneticWorthRepository geneticWorthRepository,
       MethodOfPaymentRepository methodOfPaymentRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository) {
     super(
-        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
+        seedlotRepository,
+        geneticClassRepository,
+        geneticWorthRepository,
+        seedlotSourceRepository,
+        seedlotStatusRepository);
     repository = seedlotOwnerQuantityRepository;
     this.methodOfPaymentRepository = methodOfPaymentRepository;
   }
@@ -44,7 +50,6 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
   @Test
   void create() {
     var seedlot = createSeedlot("00000");
-    var seedlotOwnerQuantity = new SeedlotOwnerQuantity(seedlot, "00020", "21");
 
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
@@ -53,6 +58,7 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
 
     var methodOfPayment =
         new MethodOfPaymentEntity("ITC", "Invoice to Client Address", effectiveDateRange);
+    var seedlotOwnerQuantity = new SeedlotOwnerQuantity(seedlot, "00020", "21", methodOfPayment);
     methodOfPaymentRepository.saveAndFlush(methodOfPayment);
 
     seedlotOwnerQuantity.setOriginalPercentageOwned(new BigDecimal(0));
