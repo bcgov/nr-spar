@@ -165,7 +165,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
               <Row className="title-row">
                 <PageTitle
                   title="Applicant and seedlot information"
-                  subtitle="Edit your seedlot's applicant and seedlot information"
+                  subtitle={null}
                 />
               </Row>
             </>
