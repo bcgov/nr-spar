@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -81,8 +80,7 @@ public class OrchardEndpoint {
             description = "An array of parent tree dto.",
             content =
                 @Content(
-                    array =
-                        @ArraySchema(schema = @Schema(implementation = OrchardDto.class)),
+                    array = @ArraySchema(schema = @Schema(implementation = OrchardDto.class)),
                     mediaType = "application/json")),
         @ApiResponse(
             responseCode = "401",
