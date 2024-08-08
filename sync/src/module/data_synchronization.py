@@ -66,7 +66,9 @@ def execute_instance(oracle_config, postgres_config, track_config):
             #if not data_sync_ctl.validate_execution_map(execution_map):
             #    raise ETLConfigurationException ("ETL configuration validation failed")
             
-            process_seedlots(oracle_config, postgres_config, track_config, track_db_conn, schedule_times)
+            seedlot_metrics = process_seedlots(oracle_config, postgres_config, track_config, track_db_conn, schedule_times)
+            if "ERROR" in seedlot_metrics:
+                raise Exception(seedlot_metrics["ERROR"])
         
         # Exception when validate_execution_map is false
         except ETLConfigurationException:
@@ -352,6 +354,8 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                             logger.critical("A fatal error has occurred", exc_info = True)
                             log_message =f"Error type: {type(err)}: {err}" 
                             metrics['end_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                            metrics.setdefault('ERROR', '')
+                            metrics['ERROR'] += log_message + "\r\n"
                             data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],metrics)
                     seedlot_metrics['processes'] = processlst
                     seedlotlst.append(seedlot_metrics)
@@ -361,6 +365,8 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                 logger.critical("A fatal error has occurred", exc_info = True)
                 log_message =f"Error type: {type(err)}: {err}" 
                 metrics['end_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                metrics.setdefault('ERROR', '')
+                metrics['ERROR'] += log_message + "\r\n"
                 data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],metrics)
             
             #data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
