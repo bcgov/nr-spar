@@ -15,6 +15,7 @@ import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/cont
 import { pageText, PageSizesConfig } from '../constants';
 import {
   EditableCellProps,
+  GeneticWorthInputType,
   HeaderObj, RowItem, StrTypeRowItem, TabTypes
 } from '../definitions';
 import {
@@ -211,10 +212,24 @@ const renderTableCell = (
   isFormSubmitted: boolean,
   editOnReview? : boolean
 ) => {
-  const className = header.editable ? 'td-no-padding' : null;
-  if (header.id === 'actions') {
+  const headerId = header.id;
+  let className = header.editable ? 'td-no-padding' : undefined;
+
+  // Apply red color style for estimated gen worth
+  if (applicableGenWorths.includes(headerId)
+    && (rowData[(headerId as keyof RowItem)] as GeneticWorthInputType).isEstimated
+  ) {
+    const redCellClass = 'td-red-cell';
+    if (!className) {
+      className = redCellClass;
+    } else {
+      className = `${className} ${redCellClass}`;
+    }
+  }
+
+  if (headerId === 'actions') {
     return (
-      <TableCell key={`${header.id}-${rowData.rowId}`} className={className} id={`${rowData.rowId}-action-btn-del`}>
+      <TableCell key={`${headerId}-${rowData.rowId}`} className={className} id={`${rowData.rowId}-action-btn-del`}>
         <DeleteActionBtn
           rowData={rowData}
           applicableGenWorths={applicableGenWorths}
@@ -223,9 +238,9 @@ const renderTableCell = (
       </TableCell>
     );
   }
-  if (header.id !== 'isMixTab' && header.id !== 'rowId') {
+  if (headerId !== 'isMixTab' && headerId !== 'rowId') {
     return (
-      <TableCell key={header.id} className={className} id={rowData[header.id].id}>
+      <TableCell key={headerId} className={className} id={rowData[headerId].id}>
         {
           header.editable
             ? (
@@ -238,9 +253,7 @@ const renderTableCell = (
                 geneticWorthList={geneticWorthList}
               />
             )
-            : (
-              rowData[header.id as keyof StrTypeRowItem].value
-            )
+            : rowData[headerId as keyof StrTypeRowItem].value
         }
       </TableCell>
     );
