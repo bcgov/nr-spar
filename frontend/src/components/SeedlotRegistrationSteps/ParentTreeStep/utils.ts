@@ -144,9 +144,11 @@ export const calcSummaryItems = (
   setSummaryConfig(modifiedSummaryConfig);
 };
 
-export const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
+export const getOutsideParentTreeNum = (
+  state: ParentTreeStepDataObj,
+  primarySpu: number
+): string => {
   let sum = 0;
-  const insidePtNums = Object.keys(state.tableRowData);
   const ptNumsInMixTab: string[] = [];
   Object.values(state.mixTabData).forEach((row) => {
     if (
@@ -158,7 +160,10 @@ export const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string =>
   });
 
   ptNumsInMixTab.forEach((ptNum) => {
-    if (!insidePtNums.includes(ptNum)) {
+    const parentTree = state.allParentTreeData[ptNum];
+    const validSpuIds = Object.keys(parentTree.geneticQualitiesBySpu).map((n) => parseInt(n, 10));
+
+    if (!validSpuIds.includes(primarySpu)) {
       sum += 1;
     }
   });
@@ -173,16 +178,21 @@ export const calcMixTabInfoItems = (
   applicableGenWorths: string[],
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: Function,
-  popSizeAndDiversityConfig: InfoSectionConfigType,
   setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
-  state: ParentTreeStepDataObj
+  state: ParentTreeStepDataObj,
+  orchardData: OrchardDataType[],
+  primaryOrchardId: string
 ) => {
   if (!disableOptions) {
     const modifiedSummaryConfig = { ...summaryConfig };
     const tableRows = Object.values(state.mixTabData);
 
+    const primaryOrchard = orchardData.find((orchardDto) => orchardDto.id === primaryOrchardId);
+
+    const primarySpu = primaryOrchard?.spuId ?? -1;
+
     // Calc number of SMP parents from outside
-    const numOfOutsidePt = getOutsideParentTreeNum(state);
+    const numOfOutsidePt = getOutsideParentTreeNum(state, primarySpu);
     modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = numOfOutsidePt;
     setPopSizeAndDiversityConfig((prevPop) => ({
       ...prevPop,

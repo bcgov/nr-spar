@@ -72,7 +72,6 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
           calculateGenWorthQuery.mutate(
             generatePtValCalcPayload(
               state,
-              geneticWorthDict,
               seedlotSpecies
             )
           );

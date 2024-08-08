@@ -161,6 +161,14 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     [state.tableRowData]
   );
 
+  const orchardQuery = useQuery({
+    queryKey: ['orchards', seedlotSpecies.code],
+    queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
+    enabled: !isFormSubmitted,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
   // Effects 'SMP mix' tab
   useEffect(
     () => {
@@ -179,9 +187,10 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
         applicableGenWorths,
         weightedGwInfoItems,
         setWeightedGwInfoItems,
-        popSizeAndDiversityConfig,
         setPopSizeAndDiversityConfig,
-        state
+        state,
+        orchardQuery.data ?? [],
+        orchardStep.orchards.primaryOrchard.value.code
       );
     },
     [state.mixTabData, disableOptions]
@@ -195,14 +204,6 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     ),
     staleTime: THREE_HOURS, // will not refetch for 3 hours
     cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
-  });
-
-  const orchardQuery = useQuery({
-    queryKey: ['orchards', seedlotSpecies.code],
-    queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
-    enabled: !isFormSubmitted,
-    staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
   });
 
   const geneticWorthListQuery = useQuery({
