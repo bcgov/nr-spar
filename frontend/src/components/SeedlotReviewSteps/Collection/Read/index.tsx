@@ -1,12 +1,10 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
-import { DateTime as luxon } from 'luxon';
 import { useQuery } from '@tanstack/react-query';
 
 import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
-import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 import getConeCollectionMethod from '../../../../api-service/coneCollectionMethodAPI';

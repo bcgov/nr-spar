@@ -50,13 +50,15 @@ import {
   reviewDataInstructions, calculateInstructions
 } from './constants';
 import {
-  TabTypes, HeaderObj, RowItem
+  TabTypes, HeaderObj, RowItem,
+  GeneticWorthDictType
 } from './definitions';
 import {
-  getTabString, processOrchards, combineObjectValues, calcSummaryItems,
+  getTabString, combineObjectValues, calcSummaryItems,
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
   addNewMixRow, calcMixTabInfoItems, fillMixTable,
-  getParentTreesForSelectedOrchards
+  getParentTreesForSelectedOrchards,
+  areOrchardsValid
 } from './utils';
 import EditGenWorth from './EditGenWorth';
 
@@ -95,9 +97,6 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     isFetchingData
   } = useContext(ClassAContext);
 
-  const [orchardsData, setOrchardsData] = useState<string[]>(
-    () => processOrchards(orchardStep)
-  );
   const [currentTab, setCurrentTab] = useState<TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
     structuredClone(headerTemplate)
@@ -139,10 +138,8 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
 
   useEffect(
     () => {
-      const processedOrchard = processOrchards(orchardStep);
-      const disabled = processedOrchard.length === 0;
+      const disabled = !areOrchardsValid(orchardStep);
       setDisableOptions(disabled);
-      setOrchardsData(processedOrchard);
     },
     [orchardStep.orchards]
   );
@@ -220,33 +217,34 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
    * Re-populate table if it is emptied by users and data is cached
    */
   useEffect(() => {
-    const disabled = orchardsData.length === 0;
     if (
-      !disabled
+      !disableOptions
       && (Object.keys(state.tableRowData).length === 0 || controlReviewData)
-      && allParentTreeQuery.isFetched
-      && allParentTreeQuery.data
+      && allParentTreeQuery.status === 'success'
+      && orchardQuery.status === 'success'
       && geneticWorthListQuery.status === 'success'
     ) {
       // List of parent tree numbers
       const parentTreesUnderSelectedOrchards = getParentTreesForSelectedOrchards(
-        orchardsData,
+        orchardStep,
         allParentTreeQuery.data
       );
 
-      console.log(parentTreesUnderSelectedOrchards);
-
       if (parentTreesUnderSelectedOrchards.length > 0) {
         setDisableOptions(false);
-        // processParentTreeData(
-        //   allParentTreeQuery.data,
-        //   state,
-        //   orchardsData,
-        //   currentPage,
-        //   currPageSize,
-        //   setSlicedRows,
-        //   setStepData
-        // );
+        processParentTreeData(
+          allParentTreeQuery.data,
+          orchardQuery.data,
+          parentTreesUnderSelectedOrchards,
+          geneticWorthListQuery.data,
+          seedlotSpecies,
+          state,
+          orchardStep.orchards.primaryOrchard.value.code,
+          currentPage,
+          currPageSize,
+          setSlicedRows,
+          setStepData
+        );
         if (controlReviewData) {
           setControlReviewData(false);
         }
@@ -255,10 +253,12 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
         setIsOrchardEmpty(true);
       }
     }
-  }, [state.tableRowData, allParentTreeQuery.isFetched]);
+  }, [
+    state.tableRowData, allParentTreeQuery.status,
+    disableOptions, geneticWorthListQuery.status
+  ]);
 
   useEffect(() => configHeaderOpt(
-    geneticWorthDict,
     seedlotSpecies,
     headerConfig,
     genWorthInfoItems,
@@ -296,7 +296,16 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
-      fillMixTable(res.data, applicableGenWorths, state, setStepData);
+      fillMixTable(
+        res.data,
+        applicableGenWorths,
+        state,
+        setStepData,
+        // Assume the data will be loaded once user is able to upload files
+        geneticWorthListQuery.data ?? [],
+        orchardQuery.data ?? [],
+        orchardStep.orchards.primaryOrchard.value.code
+      );
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
@@ -396,7 +405,9 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                 </Row>
                 <UnrelatedGenWorth
                   isRead={isReviewRead}
-                  validGenWorth={geneticWorthDict[seedlotSpecies.code]}
+                  validGenWorth={
+                    geneticWorthDict[seedlotSpecies.code as keyof GeneticWorthDictType]
+                  }
                 />
                 <InfoSectionDivider />
               </>
@@ -587,12 +598,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
             </TabList>
             <FlexGrid className="parent-tree-tab-container">
               {
-                renderNotification(
-                  state,
-                  currentTab,
-                  orchardsData,
-                  setStepData
-                )
+                renderNotification(currentTab)
               }
               <InputErrorNotification state={state} headerConfig={headerConfig} />
               <UploadWarnNotification
@@ -774,9 +780,8 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                                   slicedMixRows,
                                   headerConfig,
                                   applicableGenWorths,
-                                  state,
-                                  setStepData,
-                                  seedlotSpecies,
+                                  orchardQuery.data ?? [],
+                                  geneticWorthListQuery.data ?? [],
                                   isFormSubmitted,
                                   (isReviewDisplay && !isReviewRead)
                                 )

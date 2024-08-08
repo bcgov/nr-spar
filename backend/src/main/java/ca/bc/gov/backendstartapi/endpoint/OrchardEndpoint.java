@@ -82,7 +82,7 @@ public class OrchardEndpoint {
             content =
                 @Content(
                     array =
-                        @ArraySchema(schema = @Schema(implementation = SameSpeciesTreeDto.class)),
+                        @ArraySchema(schema = @Schema(implementation = OrchardDto.class)),
                     mediaType = "application/json")),
         @ApiResponse(
             responseCode = "401",

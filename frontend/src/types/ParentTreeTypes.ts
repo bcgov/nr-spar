@@ -5,7 +5,7 @@ export type ParentTreeByVegCodeDto = {
   testedInd: boolean,
   orchardIds: string[],
   geneticQualitiesBySpu: {
-    [spuId: number]: SingleParentTreeGeneticObj
+    [spuId: number]: SingleParentTreeGeneticObj[]
   }
 }
 

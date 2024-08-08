@@ -1,10 +1,15 @@
 import React from 'react';
 import { StringInputType } from '../../../types/FormInputType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
+import OrchardDataType from '../../../types/OrchardDataType';
+import { GeneticWorthDto } from '../../../types/GeneticWorthType';
 
 export type TabTypes = 'coneTab' | 'successTab' | 'mixTab';
+
+type EstimatedGwType = { isEstimated: boolean };
+
+export type GeneticWorthInputType = StringInputType & EstimatedGwType;
 
 export type StrTypeRowItem = {
   parentTreeNumber: StringInputType,
@@ -14,30 +19,30 @@ export type StrTypeRowItem = {
   nonOrchardPollenContam: StringInputType,
   volume: StringInputType,
   proportion: StringInputType,
-  ad: StringInputType,
-  dfs: StringInputType,
-  dfu: StringInputType,
-  dfw: StringInputType,
-  dsb: StringInputType,
-  dsc: StringInputType,
-  gvo: StringInputType,
-  wdu: StringInputType,
-  wwd: StringInputType,
-  dsg: StringInputType,
-  iws: StringInputType,
-  wve: StringInputType,
-  w_ad: StringInputType,
-  w_dfs: StringInputType,
-  w_dfu: StringInputType,
-  w_dfw: StringInputType,
-  w_dsb: StringInputType,
-  w_dsc: StringInputType,
-  w_gvo: StringInputType,
-  w_wdu: StringInputType,
-  w_wwd: StringInputType,
-  w_dsg: StringInputType,
-  w_iws: StringInputType,
-  w_wve: StringInputType
+  ad: GeneticWorthInputType,
+  dfs: GeneticWorthInputType,
+  dfu: GeneticWorthInputType,
+  dfw: GeneticWorthInputType,
+  dsb: GeneticWorthInputType,
+  dsc: GeneticWorthInputType,
+  gvo: GeneticWorthInputType,
+  wdu: GeneticWorthInputType,
+  wwd: GeneticWorthInputType,
+  dsg: GeneticWorthInputType,
+  iws: GeneticWorthInputType,
+  wve: GeneticWorthInputType,
+  w_ad: GeneticWorthInputType,
+  w_dfs: GeneticWorthInputType,
+  w_dfu: GeneticWorthInputType,
+  w_dfw: GeneticWorthInputType,
+  w_dsb: GeneticWorthInputType,
+  w_dsc: GeneticWorthInputType,
+  w_gvo: GeneticWorthInputType,
+  w_wdu: GeneticWorthInputType,
+  w_wwd: GeneticWorthInputType,
+  w_dsg: GeneticWorthInputType,
+  w_iws: GeneticWorthInputType,
+  w_wve: GeneticWorthInputType
 }
 
 export type PrimitiveRowItem = {
@@ -78,8 +83,10 @@ export type NotifCtrlType = {
   }
 }
 
+type SpeciesWithGenWorth = 'CW'| 'PLI' |'FDC' | 'PW' | 'DR' | 'EP' | 'FDI' | 'HW' | 'LW' | 'PY' | 'SS' | 'SX' | 'UNKNOWN';
+
 export type GeneticWorthDictType = {
-  [key: string]: Array<string>
+  [key in SpeciesWithGenWorth]: string[]
 }
 
 export type InfoSectionConfigType = {
@@ -123,10 +130,9 @@ export type EditableCellProps = {
   rowData: RowItem,
   header: HeaderObj,
   applicableGenWorths: string[],
-  state: ParentTreeStepDataObj,
-  setStepData: Function,
-  seedlotSpecies: MultiOptionsObj,
-  readOnly: boolean
+  readOnly: boolean,
+  orchardData: OrchardDataType[],
+  geneticWorthList: GeneticWorthDto[]
 };
 
 export type MeanGeomInfoSectionConfigType = {

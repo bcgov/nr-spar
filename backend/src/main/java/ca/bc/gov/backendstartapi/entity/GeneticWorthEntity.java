@@ -25,8 +25,12 @@ public class GeneticWorthEntity extends CodeDescriptionEntity {
   private BigDecimal defaultBv;
 
   public GeneticWorthEntity(
-      String geneticWorthCode, String description, EffectiveDateRange effectiveDateRange) {
+      String geneticWorthCode,
+      String description,
+      EffectiveDateRange effectiveDateRange,
+      BigDecimal defaultBv) {
     super(description, effectiveDateRange);
     this.geneticWorthCode = geneticWorthCode;
+    this.defaultBv = defaultBv;
   }
 }

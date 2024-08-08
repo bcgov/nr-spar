@@ -15,5 +15,5 @@ export enum GenWorthCodeEnum {
 export type SingleParentTreeGeneticObj = {
   geneticTypeCode: 'BV' | 'CV';
   geneticWorthCode: keyof typeof GenWorthCodeEnum;
-  geneticQualityValue: number | null;
+  geneticQualityValue: number;
 };

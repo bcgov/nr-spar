@@ -375,10 +375,13 @@ class SeedlotServiceTest {
     when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId))
         .thenReturn(List.of(spzEntity));
     when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId)).thenReturn(Optional.empty());
+    BigDecimal defaultBv = BigDecimal.ZERO;
 
     SeedlotGeneticWorth seedlotGenWor =
         new SeedlotGeneticWorth(
-            seedlotEntity, new GeneticWorthEntity("GVO", "", null), new AuditInformation("userId"));
+            seedlotEntity,
+            new GeneticWorthEntity("GVO", "", null, defaultBv),
+            new AuditInformation("userId"));
     seedlotGenWor.setGeneticQualityValue(new BigDecimal("18"));
     seedlotGenWor.setTestedParentTreeContributionPercentage(new BigDecimal("88"));
 
@@ -502,7 +505,7 @@ class SeedlotServiceTest {
         new SeedlotParentTreeGeneticQuality(
             spt,
             sptgqDto.geneticTypeCode(),
-            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
             sptgqDto.geneticQualityValue(),
             audit);
 
@@ -524,7 +527,7 @@ class SeedlotServiceTest {
         new SeedlotParentTreeSmpMix(
             spt,
             sptgqDto.geneticTypeCode(),
-            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
             sptgqDto.geneticQualityValue(),
             audit);
 
@@ -532,7 +535,9 @@ class SeedlotServiceTest {
 
     SeedlotGeneticWorth seedlotGenWor =
         new SeedlotGeneticWorth(
-            seedlotEntity, new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null), audit);
+            seedlotEntity,
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
+            audit);
 
     final List<SeedlotGeneticWorth> genWorthData = List.of(seedlotGenWor);
 

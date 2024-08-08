@@ -8,6 +8,7 @@ import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,12 +49,20 @@ public class OrchardService {
    * @param active determine if the SPU should be active or not.
    * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
    */
-  public List<ActiveOrchardSpuEntity> findAllSpu(boolean active) {
-    SparLog.info("Finding all orchard seed planning unit by active state {}", active);
+  public List<ActiveOrchardSpuEntity> findAllSpu(Boolean active) {
+    String activeState = active == null ? "All" : active.toString();
 
-    List<ActiveOrchardSpuEntity> list =
-        activeOrchardSeedPlanningUnitRepository.findAllByActive(active);
-    SparLog.info("{} orchard seed planning unit by active state found", list.size());
+    SparLog.info("Finding all orchard seed planning unit by active state {}", activeState);
+
+    List<ActiveOrchardSpuEntity> list = new ArrayList<>();
+
+    if (active == null) {
+      list = activeOrchardSeedPlanningUnitRepository.findAll();
+    } else {
+      list = activeOrchardSeedPlanningUnitRepository.findAllByActive(active);
+    }
+    SparLog.info(
+        "{} orchard seed planning unit by active state {} found", list.size(), activeState);
 
     return list;
   }
@@ -116,7 +125,7 @@ public class OrchardService {
    */
   public List<OrchardDto> findAllOrchardsByVegCode(String vegCode) {
     SparLog.info("Finding parent trees by veg code with code {}", vegCode);
-    List<ActiveOrchardSpuEntity> spuList = findAllSpu(true);
+    List<ActiveOrchardSpuEntity> spuList = findAllSpu(null);
     Map<String, Integer> orchardSpuMap = new HashMap<>();
 
     spuList.stream()

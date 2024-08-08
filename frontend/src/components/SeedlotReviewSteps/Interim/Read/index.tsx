@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
-import { DateTime as luxon } from 'luxon';
 import { useQuery } from '@tanstack/react-query';
 
 import ReadOnlyInput from '../../../ReadOnlyInput';
@@ -8,7 +7,6 @@ import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/cont
 import { getMultiOptList } from '../../../../utils/MultiOptionsUtils';
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import getFacilityTypes from '../../../../api-service/facilityTypesAPI';
-import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 import { utcToLocalFormat } from '../../../../utils/DateUtils';

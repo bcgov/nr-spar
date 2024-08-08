@@ -43,7 +43,8 @@ abstract class SeedlotEntityRelationalTest {
     geneticClassRepository.saveAndFlush(geneticClass);
 
     var geneticWorth =
-        new GeneticWorthEntity("AD", "Animal browse resistance (deer)", effectiveDateRange);
+        new GeneticWorthEntity(
+            "AD", "Animal browse resistance (deer)", effectiveDateRange, BigDecimal.ZERO);
     geneticWorthRepository.saveAndFlush(geneticWorth);
 
     var seedlotSource = new SeedlotSourceEntity("CUS", "Custom Lot", effectiveDateRange, null);
