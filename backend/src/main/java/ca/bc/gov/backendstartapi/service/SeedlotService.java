@@ -52,14 +52,12 @@ import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
+import ca.bc.gov.backendstartapi.util.ValueUtil;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -68,7 +66,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -91,19 +88,13 @@ public class SeedlotService {
 
   private final SeedlotSourceRepository seedlotSourceRepository;
 
-  private final SeedlotStatusRepository seedlotStatusRepository;
-
   private final GeneticClassRepository geneticClassRepository;
 
   private final LoggedUserService loggedUserService;
 
   private final SeedlotCollectionMethodService seedlotCollectionMethodService;
 
-  private final SeedlotCollectionMethodRepository seedlotCollectionMethodRepository;
-
   private final SeedlotOwnerQuantityService seedlotOwnerQuantityService;
-
-  private final SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository;
 
   private final SeedlotOrchardService seedlotOrchardService;
 
@@ -146,7 +137,7 @@ public class SeedlotService {
     Seedlot seedlot = new Seedlot(nextSeedlotNumber(createDto.geneticClassCode()));
 
     Optional<SeedlotStatusEntity> seedLotStatusEntity =
-        seedlotStatusRepository.findById(Constants.CLASS_A_SEEDLOT_STATUS);
+        seedlotStatusService.findById(Constants.CLASS_A_SEEDLOT_STATUS);
     seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(InvalidSeedlotRequestException::new));
 
     seedlot.setApplicantClientNumber(createDto.applicantClientNumber());
@@ -194,7 +185,7 @@ public class SeedlotService {
         seedlotRepository.findNextSeedlotNumber(
             Constants.CLASS_A_SEEDLOT_NUM_MIN, Constants.CLASS_A_SEEDLOT_NUM_MAX);
 
-    if (Objects.isNull(seedlotNumber)) {
+    if (!ValueUtil.hasValue(seedlotNumber)) {
       seedlotNumber = Constants.CLASS_A_SEEDLOT_NUM_MIN;
     }
 
@@ -534,9 +525,7 @@ public class SeedlotService {
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
     List<Integer> seedlotCollectionList =
-        seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
-            .map(col -> col.getConeCollectionMethod().getConeCollectionMethodCode())
-            .collect(Collectors.toList());
+        seedlotCollectionMethodService.getAllSeedlotCollectionMethodsBySeedlot(seedlotInfo.getId());
 
     // Divide the seedlot data to each respective step
     SeedlotFormCollectionDto collectionStep =
@@ -552,7 +541,7 @@ public class SeedlotService {
             seedlotCollectionList);
 
     List<SeedlotFormOwnershipDto> ownershipStep =
-        seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
+        seedlotOwnerQuantityService.findAllBySeedlot(seedlotInfo.getId()).stream()
             .filter(
                 owner ->
                     owner.getOriginalPercentageOwned() != null
@@ -789,7 +778,7 @@ public class SeedlotService {
       // Calculate Seedlot GeoSpatial (for Seedlot, mean latitude, mean longitude, mean elevation)
       // Calculate Genetic Worth
       // Update Seedlot Ne, collection elevation, and collection lat long
-      // Saved the Seedlot calculated Genetic Worth
+      // Saves the Seedlot calculated Genetic Worth
       setParentTreeContribution(
           seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
 
@@ -880,7 +869,11 @@ public class SeedlotService {
         ptCalculationResDto.calculatedPtVals().getGeospatialData();
 
     // Ne value
-    seedlot.setEffectivePopulationSize(ptCalculationResDto.calculatedPtVals().getNeValue());
+    if (!ValueUtil.isValueEqual(
+        ptCalculationResDto.calculatedPtVals().getNeValue(),
+        seedlot.getEffectivePopulationSize())) {
+      seedlot.setEffectivePopulationSize(ptCalculationResDto.calculatedPtVals().getNeValue());
+    }
 
     // Elevation
     seedlot.setCollectionElevation(collectionGeoData.getMeanElevation());
@@ -982,7 +975,7 @@ public class SeedlotService {
     SparLog.info("Begin to set Area of Use values");
 
     Integer activeSpuId = inMemoryDto.getPrimarySpuId();
-    if (Objects.isNull(activeSpuId)) {
+    if (!ValueUtil.hasValue(activeSpuId)) {
       ActiveOrchardSpuEntity activeSpuEntity =
           orchardService
               .findSpuIdByOrchardWithActive(primaryOrchardId, true)
@@ -1098,8 +1091,14 @@ public class SeedlotService {
 
     seedlot.setInterimStorageClientNumber(formStep3.intermStrgClientNumber());
     seedlot.setInterimStorageLocationCode(formStep3.intermStrgLocnCode());
-    seedlot.setInterimStorageStartDate(formStep3.intermStrgStDate());
-    seedlot.setInterimStorageEndDate(formStep3.intermStrgEndDate());
+    if (!ValueUtil.isValueEqual(
+        seedlot.getInterimStorageStartDate(), formStep3.intermStrgStDate())) {
+      seedlot.setInterimStorageStartDate(formStep3.intermStrgStDate());
+    }
+    if (!ValueUtil.isValueEqual(
+        seedlot.getInterimStorageEndDate(), formStep3.intermStrgEndDate())) {
+      seedlot.setInterimStorageEndDate(formStep3.intermStrgEndDate());
+    }
     seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
     // If the facility type is Other, then a description is required.
     SparLog.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
@@ -1146,12 +1145,22 @@ public class SeedlotService {
 
     seedlot.setExtractionClientNumber(formStep6.extractoryClientNumber());
     seedlot.setExtractionLocationCode(formStep6.extractoryLocnCode());
-    seedlot.setExtractionStartDate(formStep6.extractionStDate());
-    seedlot.setExtractionEndDate(formStep6.extractionEndDate());
+    if (!ValueUtil.isValueEqual(seedlot.getExtractionStartDate(), formStep6.extractionStDate())) {
+      seedlot.setExtractionStartDate(formStep6.extractionStDate());
+    }
+    if (!ValueUtil.isValueEqual(seedlot.getExtractionEndDate(), formStep6.extractionEndDate())) {
+      seedlot.setExtractionEndDate(formStep6.extractionEndDate());
+    }
 
     seedlot.setStorageClientNumber(formStep6.storageClientNumber());
     seedlot.setStorageLocationCode(formStep6.storageLocnCode());
-    seedlot.setTemporaryStorageStartDate(formStep6.temporaryStrgStartDate());
-    seedlot.setTemporaryStorageEndDate(formStep6.temporaryStrgEndDate());
+    if (!ValueUtil.isValueEqual(
+        seedlot.getTemporaryStorageStartDate(), formStep6.temporaryStrgStartDate())) {
+      seedlot.setTemporaryStorageStartDate(formStep6.temporaryStrgStartDate());
+    }
+    if (!ValueUtil.isValueEqual(
+        seedlot.getTemporaryStorageEndDate(), formStep6.temporaryStrgEndDate())) {
+      seedlot.setTemporaryStorageEndDate(formStep6.temporaryStrgEndDate());
+    }
   }
 }

@@ -104,8 +104,8 @@ jobs:
 
   deploy:
     name: Deploy
-    if: needs.init.outputs.deploy_core == 'true'
     environment: ${{ inputs.environment }}
+    if: needs.init.outputs.deploy_core == 'true'
     needs: [init]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -148,7 +148,7 @@ jobs:
             -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
             ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
-            ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=2' || '' }}
+            ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=1' || '' }}
             ${{ matrix.parameters }}
           verification_path: ${{ matrix.verification_path }}
           verification_retry_attempts: 5
@@ -157,6 +157,7 @@ jobs:
   # ETL testing will only run on Pull Requests if the sync/ directory is modified
   sync:
     name: Deploy (sync)
+    environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_sync == 'true'
     needs: [init]
     runs-on: ubuntu-latest

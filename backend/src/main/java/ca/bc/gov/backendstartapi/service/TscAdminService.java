@@ -15,6 +15,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.util.ValueUtil;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -203,7 +204,10 @@ public class TscAdminService {
   public void overrideSeedlotCollElevLatLong(
       Seedlot seedlot, SeedlotReviewGeoInformationDto seedlotReviewDto) {
     // Ne value
-    seedlot.setEffectivePopulationSize(seedlotReviewDto.effectivePopulationSize());
+    if (!ValueUtil.isValueEqual(
+        seedlot.getEffectivePopulationSize(), seedlotReviewDto.effectivePopulationSize())) {
+      seedlot.setEffectivePopulationSize(seedlotReviewDto.effectivePopulationSize());
+    }
 
     // Elevation
     seedlot.setCollectionElevation(seedlotReviewDto.meanElevation());

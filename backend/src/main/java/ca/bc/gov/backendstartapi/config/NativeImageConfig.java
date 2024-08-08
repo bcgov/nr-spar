@@ -57,6 +57,7 @@ import ca.bc.gov.backendstartapi.enums.LongitudeCodeEnum;
 import ca.bc.gov.backendstartapi.enums.parser.ConeAndPollenCountHeader;
 import ca.bc.gov.backendstartapi.enums.parser.CsvParsingHeader;
 import ca.bc.gov.backendstartapi.enums.parser.SmpMixHeader;
+import ca.bc.gov.backendstartapi.util.ValueUtil;
 import ca.bc.gov.backendstartapi.vo.parser.ConeAndPollenCount;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
@@ -136,6 +137,7 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     CsvParsingHeader.class,
     SmpMixHeader.class,
     SeedlotSaveInMemoryDto.class,
+    ValueUtil.class,
 })
 @ImportRuntimeHints(value = {HttpServletRequestRuntimeHint.class})
 public class NativeImageConfig {
