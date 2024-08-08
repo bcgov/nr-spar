@@ -203,6 +203,23 @@ const EditableCell = ({
   return textInput;
 };
 
+/**
+ * Adds a bracket to estimated genetic worth value.
+ */
+const formatTextOnlyCellValue = (
+  rowData: RowItem,
+  headerId: string,
+  text: string,
+  applicableGenWorths: string[]
+): string => {
+  if (applicableGenWorths.includes(headerId)
+    && (rowData[(headerId as keyof RowItem)] as GeneticWorthInputType).isEstimated
+  ) {
+    return `(${text})`;
+  }
+  return text;
+};
+
 const renderTableCell = (
   rowData: RowItem,
   header: HeaderObj,
@@ -253,7 +270,12 @@ const renderTableCell = (
                 geneticWorthList={geneticWorthList}
               />
             )
-            : rowData[headerId as keyof StrTypeRowItem].value
+            : formatTextOnlyCellValue(
+              rowData,
+              headerId,
+              rowData[headerId as keyof StrTypeRowItem].value,
+              applicableGenWorths
+            )
         }
       </TableCell>
     );
