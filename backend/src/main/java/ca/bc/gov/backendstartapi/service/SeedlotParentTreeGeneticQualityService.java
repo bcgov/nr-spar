@@ -94,7 +94,7 @@ public class SeedlotParentTreeGeneticQualityService {
 
         sptgq.setQualityValueEstimated(seedlotGenQltyDto.isEstimated());
 
-        // untested_ind = Y if ptgq value is estimated and pt.tested_ind = N
+        // untested_ind = True if estimated = True and pt.tested_ind = False
         sptgq.setParentTreeUntested(
             !seedlotGenQltyDto.isTested() && seedlotGenQltyDto.isEstimated());
 
