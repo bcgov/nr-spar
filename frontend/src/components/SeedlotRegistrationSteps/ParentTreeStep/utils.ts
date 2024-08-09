@@ -673,7 +673,8 @@ export const generatePtValCalcPayload = (
   const { tableRowData, mixTabData } = state;
   const payload: PtValsCalcReqPayload = {
     orchardPtVals: [],
-    smpMixIdAndProps: []
+    smpMixIdAndProps: [],
+    smpParentsOutside: 0
   };
   const rows = Object.values(tableRowData);
   const genWorthTypes = geneticWorthDict[seedlotSpecies.code];
@@ -705,6 +706,9 @@ export const generatePtValCalcPayload = (
       });
     }
   });
+
+  // SMP Parents from Outside
+  payload.smpParentsOutside = 0;
 
   return payload;
 };

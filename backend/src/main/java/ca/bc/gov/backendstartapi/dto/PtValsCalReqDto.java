@@ -10,4 +10,5 @@ import java.util.List;
         "An object representing the request body for the parent tree and SMP values calculations.")
 public record PtValsCalReqDto(
     @NotNull List<OrchardParentTreeValsDto> orchardPtVals,
-    @NotNull List<GeospatialRequestDto> smpMixIdAndProps) {}
+    @NotNull List<GeospatialRequestDto> smpMixIdAndProps,
+    @NotNull Integer smpParentsOutside) {}

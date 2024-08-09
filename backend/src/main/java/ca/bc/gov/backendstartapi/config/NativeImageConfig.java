@@ -64,9 +64,7 @@ import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
-/**
- * This class holds configurations for building Cloud Native images.
- */
+/** This class holds configurations for building Cloud Native images. */
 @Configuration
 @RegisterReflectionForBinding({
     DescribedEnumDto.class,
@@ -140,6 +138,4 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     ValueUtil.class,
 })
 @ImportRuntimeHints(value = {HttpServletRequestRuntimeHint.class})
-public class NativeImageConfig {
-
-}
+public class NativeImageConfig {}
