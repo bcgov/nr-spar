@@ -93,7 +93,10 @@ public class SeedlotParentTreeGeneticQualityService {
                 loggedUserService.createAuditCurrentUser());
 
         sptgq.setQualityValueEstimated(seedlotGenQltyDto.isEstimated());
-        sptgq.setParentTreeUntested(!seedlotGenQltyDto.isTested());
+
+        // untested_ind = Y if ptgq value is estimated and pt.tested_ind = N
+        sptgq.setParentTreeUntested(
+            !seedlotGenQltyDto.isTested() && seedlotGenQltyDto.isEstimated());
 
         seedlotPtToInsert.add(sptgq);
       }
