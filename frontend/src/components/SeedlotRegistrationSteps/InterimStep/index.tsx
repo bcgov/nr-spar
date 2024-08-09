@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import moment from 'moment';
 
 import {
   Column,
@@ -19,13 +18,12 @@ import ScrollToTop from '../../ScrollToTop';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
 
 import getFacilityTypes from '../../../api-service/facilityTypesAPI';
-import { now } from '../../../utils/DateUtils';
+import { dateStringToISO, now } from '../../../utils/DateUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
 
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import InterimForm from './definitions';
 import {
   DATE_FORMAT, MAX_FACILITY_DESC_CHAR, clientAndCodeTextConfig, pageTexts
 } from './constants';
@@ -66,11 +64,10 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
 
   // This function validates changes on both start and end dates
   // of the storage information
-  const validateStorageDates = (curState: InterimForm) => {
+  const validateStorageDates = (curStartDate: string, curEndDate: string) => {
     // Check if the start date is set before the end date
-    if (curState.startDate.value !== '' && curState.endDate.value !== '') {
-      return moment(curState.endDate.value, 'YYYY/MM/DD')
-        .isBefore(moment(curState.startDate.value, 'YYYY/MM/DD'));
+    if (curStartDate !== '' && curEndDate !== '') {
+      return curEndDate < curStartDate;
     }
     return false;
   };
@@ -83,14 +80,16 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
       clonedState.endDate.value = stringDate;
     }
 
-    const isInvalid = validateStorageDates(clonedState);
+    const isoStartDate = dateStringToISO(clonedState.startDate.value);
+    const isoEndDate = dateStringToISO(clonedState.endDate.value);
+
+    const isInvalid = validateStorageDates(isoStartDate, isoEndDate);
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
 
     // Validate if end date is after collection end date
     if (!isStart && !isInvalid) {
-      clonedState.endDate.isInvalid = moment(clonedState.endDate.value, 'YYYY/MM/DD')
-        .isBefore(moment(endDate.value, 'YYYY/MM/DD'));
+      clonedState.endDate.isInvalid = isoEndDate < dateStringToISO(endDate.value);
     }
     setStepData('interimStep', clonedState);
   };
