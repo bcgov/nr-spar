@@ -40,8 +40,8 @@ export const inputText = (isReview?: boolean) => ({
   date: {
     extraction: {
       labelText: {
-        start: `Extraction start date${!isReview ? ' (optional' : ''}`,
-        end: `Extraction end date${!isReview ? ' (optional' : ''}`
+        start: `Extraction start date${!isReview ? ' (optional)' : ''}`,
+        end: `Extraction end date${!isReview ? ' (optional)' : ''}`
       },
       notification: {
         title: 'Extraction start and end dates',
@@ -50,8 +50,8 @@ export const inputText = (isReview?: boolean) => ({
     },
     storage: {
       labelText: {
-        start: `Storage start date${!isReview ? ' (optional' : ''}`,
-        end: `Storage end date${!isReview ? ' (optional' : ''}`
+        start: `Storage start date${!isReview ? ' (optional)' : ''}`,
+        end: `Storage end date${!isReview ? ' (optional)' : ''}`
       },
       notification: {
         title: 'Storage start and end dates',
