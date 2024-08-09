@@ -384,7 +384,8 @@ public class SeedlotService {
                 parentTreeGenQual.getGeneticTypeCode(),
                 parentTreeGenQual.getGeneticWorth().getGeneticWorthCode(),
                 parentTreeGenQual.getGeneticQualityValue(),
-                !parentTreeGenQual.getParentTreeUntested(),
+                // We cannot know this for sure, see explaination down below.
+                null,
                 parentTreeGenQual.getQualityValueEstimated());
         parentTreeGenQualList.add(parentTreeGenQualDto);
       }
@@ -392,6 +393,18 @@ public class SeedlotService {
 
     return parentTreeGenQualList;
   }
+
+  /*
+   * Explaination for isTested is unknown
+   * What we know: untested_ind = True if estimated = True and pt.tested_ind = False
+   *
+   * - If untestedInd is true and estimatedInd is true:
+   *     - testedInd is definitely false.
+   * - If untestedInd is false and estimatedInd is true:
+   *     - testedInd is definitely true.
+   * - If estimatedInd is false:
+   *     - The value of testedInd cannot be determined from untestedInd alone.
+   */
 
   /**
    * Auxiliar function to get the genetic quality for each seedlot's SMP Mix parent tree.
