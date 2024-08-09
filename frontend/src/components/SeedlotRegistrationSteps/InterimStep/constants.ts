@@ -29,7 +29,8 @@ export const pageTexts = {
     labelTextEnd: 'Storage end date',
     placeholder: 'yyyy/mm/dd',
     helperText: 'year/month/day',
-    invalidText: 'Please enter a valid date'
+    invalidText: 'Please enter a valid date',
+    invalidDateBeforeCollection: 'The storage end date can\'t be set before collection end date'
   },
   storageFacility: {
     labelText: 'Storage facility type',
