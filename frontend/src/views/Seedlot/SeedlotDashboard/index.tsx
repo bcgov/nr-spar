@@ -15,7 +15,6 @@ const SeedlotDashboard = () => (
     <Row className="title-row">
       <PageTitle
         title="Seedlots"
-        subtitle="Register and manage your seedlots"
         enableFavourite
         activity="seedlots"
       />

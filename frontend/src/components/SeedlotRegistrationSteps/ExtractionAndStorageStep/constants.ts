@@ -5,7 +5,7 @@ export const DATE_FORMAT = 'Y/m/d';
 export const extractorTextConfig: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'extractor-use-tsc',
-    labelText: 'The extractory agency is the Tree Seed Center (TSC)'
+    labelText: 'The extractory agency is the Tree Seed Centre (TSC)'
   },
   agencyInput: {
     titleText: 'Extractory agency acronym',
@@ -20,7 +20,7 @@ export const extractorTextConfig: ClientAndCodeInputTextType = {
 export const storageTextConfig: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'storage-use-tsc',
-    labelText: 'The seed storage agency is the Tree Seed Center (TSC)'
+    labelText: 'The seed storage agency is the Tree Seed Centre (TSC)'
   },
   agencyInput: {
     titleText: 'Seed storage agency acronym',

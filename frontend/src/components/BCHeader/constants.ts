@@ -64,7 +64,7 @@ export const navItems = [
         disabled: true
       },
       {
-        name: 'Tree seed center',
+        name: 'Tree seed centre',
         icon: 'Enterprise',
         link: '#',
         disabled: true
