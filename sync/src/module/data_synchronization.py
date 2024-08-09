@@ -37,6 +37,7 @@ def execute_instance(oracle_config, postgres_config, track_config):
     current_cwd = path.join(path.abspath(path.dirname(__file__).split('src')[0]) , "config")
     logger.info('Initializing Tracking Database Connection')
     is_error = False
+    job_return_code = 1 #fail
     
     with db_conn.database_connection(track_config) as track_db_conn:
         temp_time = time.time()
@@ -85,10 +86,12 @@ def execute_instance(oracle_config, postgres_config, track_config):
         logger.info('***** ETL Process finished with error *****')
         logger.info(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
         run_status = "FAILURE"
+        job_return_code = 1
     else:
         stored_metrics["time_process"]=timedelta(seconds=sync_elapsed_time)
         print_process_metrics(stored_metrics)
         run_status = "SUCCESS"
+        job_return_code = 0
     
     data_sync_ctl.update_execution_log(database_conn=track_db_conn, 
                     database_schema=track_config['schema'],
@@ -97,6 +100,7 @@ def execute_instance(oracle_config, postgres_config, track_config):
                     run_status=run_status)
 
     logger.info('***** Finish ETL Run *****')
+    return job_return_code
 
 def identifyQueryParams(query, db_type, params) -> object: 
     if db_type == 'ORACLE':

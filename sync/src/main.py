@@ -114,6 +114,7 @@ def read_settings():
 def main() -> int:
     try:
         definition_of_yes = ["Y","YES","1","T","TRUE","t","true"]
+        job_return_code = 0
 
         build_number = get_build_number()
         print("<------------------ b.u.i.l.d  n.u.m.b.e.r ----------------->")
@@ -136,6 +137,7 @@ def main() -> int:
                 required_variables_exists()
                 testPostgresConnection(settings["postgres"])
                 testOracleConnection(settings["oracle"])
+                job_return_code = 1
                 # Vault disabled
                 # testVault()
             else:            
@@ -146,20 +148,20 @@ def main() -> int:
                 dbOracle = generate_db_config("ORACLE","THE",settings["oracle"]) 
                 dbPostgres = generate_db_config("POSTGRES","spar",settings["postgres"])
                 
-                execute_etl(dbPostgres, dbOracle)
+                job_return_code = execute_etl(dbPostgres, dbOracle)
 
                 print("-------------------------------------")
                 print("ETL Main process finished ")
                 print("-------------------------------------")
-        return 0 #success
+        return job_return_code
     
     except Exception as err:
         return 1 #failure
 
 # MAIN Execution
-def execute_etl(dbPostgres, dbOracle) -> None:
+def execute_etl(dbPostgres, dbOracle):
     loggingBasicConfig(level=loggingDEBUG, stream=sys.stdout)
-    data_sync.execute_instance( oracle_config = dbOracle, postgres_config = dbPostgres ,track_config = dbPostgres)
+    return data_sync.execute_instance( oracle_config = dbOracle, postgres_config = dbPostgres ,track_config = dbPostgres)
 
 if __name__ == '__main__':
     sys.exit(main())
