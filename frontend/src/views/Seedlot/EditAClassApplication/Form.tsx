@@ -49,7 +49,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(),
+    queryFn: getVegCodes,
     select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS

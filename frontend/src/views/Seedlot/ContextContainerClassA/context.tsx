@@ -52,7 +52,8 @@ export type ClassAContextType = {
   >,
   getSeedlotPayload: (
     allStepData: AllStepData,
-    seedlotNumber: string | undefined
+    seedlotNumber: string | undefined,
+    vegCode: string
   ) => SeedlotAClassSubmitType,
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => void,
   saveProgressStatus: MutationStatusType,

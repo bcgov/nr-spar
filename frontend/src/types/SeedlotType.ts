@@ -262,12 +262,12 @@ export type ParentTreeFormSubmitType = {
 export type ExtractionFormSubmitType = {
   extractoryClientNumber: string,
   extractoryLocnCode: string,
-  extractionStDate: string,
-  extractionEndDate: string,
+  extractionStDate: string | null,
+  extractionEndDate: string | null,
   storageClientNumber: string,
   storageLocnCode: string,
-  temporaryStrgStartDate: string,
-  temporaryStrgEndDate: string
+  temporaryStrgStartDate: string | null
+  temporaryStrgEndDate: string | null
 }
 
 export type SeedlotAClassSubmitType = {

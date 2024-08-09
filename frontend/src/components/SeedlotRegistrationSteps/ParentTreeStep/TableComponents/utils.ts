@@ -3,7 +3,8 @@ import validator from 'validator';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
 
 import {
-  AllParentTreeMap, RowDataDictType, RowItem, StrTypeRowItem
+  GeneticWorthInputType,
+  RowDataDictType, RowItem, StrTypeRowItem
 } from '../definitions';
 import { getMixRowTemplate, calcSum, populateStrInputId } from '../utils';
 import {
@@ -13,8 +14,13 @@ import {
 } from '../constants';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import { isFloatWithinRange } from '../../../../utils/NumberUtils';
+import { ParentTreeByVegCodeResType } from '../../../../types/ParentTreeTypes';
+import { GeneticWorthDto } from '../../../../types/GeneticWorthType';
 
-export const isPtNumberInvalid = (ptNumber: string, allParentTreeData: AllParentTreeMap) => (
+export const isPtNumberInvalid = (
+  ptNumber: string,
+  allParentTreeData: ParentTreeByVegCodeResType
+) => (
   !Object.keys(allParentTreeData).includes(ptNumber)
 );
 
@@ -26,19 +32,69 @@ const isPtNumberDuplicate = (rowId: string, ptNumber: string, mixTabData: RowDat
     )).length > 0
 );
 
+/**
+ * Populate genetic worth data for an smp mix row.
+ */
 export const populateRowData = (
   rowData: RowItem,
   ptNumber: string,
-  state: ParentTreeStepDataObj
+  state: ParentTreeStepDataObj,
+  geneticWorthList: GeneticWorthDto[],
+  applicableGenWorths: string[],
+  primarySpu: number
 ): RowItem => {
-  const ptData = state.allParentTreeData[ptNumber];
-  const newRow = { ...rowData };
-  ptData.parentTreeGeneticQualities.forEach((genObj) => {
-    const genName = genObj.geneticWorthCode.toLocaleLowerCase() as keyof StrTypeRowItem;
-    newRow[genName].value = String(genObj.geneticQualityValue);
-  });
+  const newRowData = { ...rowData };
 
-  return newRow;
+  const { allParentTreeData } = state;
+
+  const parentTree = allParentTreeData[ptNumber];
+
+  const genWorthBySpu = parentTree.geneticQualitiesBySpu;
+
+  const validSpuIds = Object.keys(genWorthBySpu).map((key) => parseInt(key, 10));
+
+  // If parent tree has gen worth data under the primary orchard's SPU then use them
+  // Else use default from the gen worth list
+  if (validSpuIds.includes(primarySpu)) {
+    const parentTreeGenWorthVals = genWorthBySpu[primarySpu];
+    applicableGenWorths.forEach((gwCode) => {
+      const loweredGwCode = gwCode.toLowerCase() as keyof RowItem;
+      const matchedGwObj = parentTreeGenWorthVals
+        .find((gwObj) => gwObj.geneticWorthCode.toLowerCase() === loweredGwCode);
+
+      if (matchedGwObj) {
+        (newRowData[loweredGwCode] as GeneticWorthInputType)
+          .value = String(matchedGwObj.geneticQualityValue);
+      } else {
+        // Assign Default GW value
+        const foundGwDto = geneticWorthList
+          .find((gwDto) => gwDto.code.toLowerCase() === loweredGwCode);
+
+        const defaultBv = foundGwDto ? foundGwDto.defaultBv.toFixed(1) : '0.0';
+        if (foundGwDto) {
+          (newRowData[loweredGwCode] as GeneticWorthInputType)
+            .value = defaultBv;
+          (newRowData[loweredGwCode] as GeneticWorthInputType)
+            .isEstimated = true;
+        }
+      }
+    });
+  } else {
+    applicableGenWorths.forEach((gwCode) => {
+      const loweredGwCode = gwCode.toLowerCase() as keyof RowItem;
+      const foundGwDto = geneticWorthList
+        .find((gwDto) => gwDto.code.toLowerCase() === loweredGwCode);
+      const defaultBv = foundGwDto ? foundGwDto.defaultBv.toFixed(1) : '0.0';
+      if (foundGwDto) {
+        (newRowData[loweredGwCode] as GeneticWorthInputType)
+          .value = defaultBv;
+        (newRowData[loweredGwCode] as GeneticWorthInputType)
+          .isEstimated = true;
+      }
+    });
+  }
+
+  return newRowData;
 };
 
 const cleanRowData = (rowId: string, ptNumber?: string): RowItem => {
@@ -177,7 +233,9 @@ export const handleInput = (
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function,
-  seedlotSpecies: MultiOptionsObj
+  seedlotSpecies: MultiOptionsObj,
+  geneticWorthList: GeneticWorthDto[],
+  primarySpu: number
 ) => {
   const clonedState = structuredClone(state);
   let mixTabData = { ...clonedState.mixTabData };
@@ -190,7 +248,14 @@ export const handleInput = (
       isInvalid = isPtNumberInvalid(inputValue, state.allParentTreeData);
       isDuplicate = isPtNumberDuplicate(rowData.rowId, inputValue, state.mixTabData);
       if (!isInvalid) {
-        const populatedRow = populateRowData(rowData, inputValue, state);
+        const populatedRow = populateRowData(
+          rowData,
+          inputValue,
+          state,
+          geneticWorthList,
+          applicableGenWorths,
+          primarySpu
+        );
         mixTabData[rowData.rowId] = populatedRow;
         const rowVolume = populatedRow.volume.value;
         mixTabData = calculateSmpRow(rowVolume, rowData, mixTabData, applicableGenWorths);

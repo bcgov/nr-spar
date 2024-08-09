@@ -5,6 +5,7 @@ type OrchardDataType = {
   lotTypeCode: string;
   lotTypeDescription: string;
   stageCode: string;
+  spuId: number | null;
 }
 
 export default OrchardDataType;

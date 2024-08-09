@@ -85,7 +85,7 @@ const SeedlotReviewContent = () => {
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(),
+    queryFn: getVegCodes,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -133,7 +133,7 @@ const SeedlotReviewContent = () => {
   const {
     allStepData, genWorthVals, geoInfoVals,
     areaOfUseData, isFetchingData, seedlotData,
-    calculatedValues
+    calculatedValues, seedlotSpecies
   } = useContext(ClassAContext);
 
   const verifyFormData = (): boolean => {
@@ -218,7 +218,7 @@ const SeedlotReviewContent = () => {
   };
 
   const generatePaylod = (): TscSeedlotEditPayloadType => {
-    const regFormPayload = getSeedlotPayload(allStepData, seedlotNumber);
+    const regFormPayload = getSeedlotPayload(allStepData, seedlotNumber, seedlotSpecies.code);
 
     const applicantAndSeedlotInfo: SeedlotPatchPayloadType = {
       applicantEmailAddress: applicantData.email.value,

@@ -4,15 +4,16 @@ import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimSte
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
-import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import { RowDataDictType, NotifCtrlType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import { SeedlotProgressPayloadType } from '../../../types/SeedlotType';
+import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
 
 export type ParentTreeStepDataObj = {
   tableRowData: RowDataDictType, // table row data used in Cone & Pollen and the SMP Success tabs
-  allParentTreeData: AllParentTreeMap // Contains all parent tree numbers under a species
+  allParentTreeData: ParentTreeByVegCodeResType, // Contains all parent tree numbers under a species
   mixTabData: RowDataDictType, // table row data used exclusively for SMP mix tab
   notifCtrl: NotifCtrlType
 }

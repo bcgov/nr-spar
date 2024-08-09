@@ -7,6 +7,7 @@ import ca.bc.gov.oracleapi.dto.GeospatialRespondDto;
 import ca.bc.gov.oracleapi.dto.ListItemDto;
 import ca.bc.gov.oracleapi.dto.OrchardDto;
 import ca.bc.gov.oracleapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.oracleapi.dto.ParentTreeByVegCodeDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeGeneticQualityDto;
@@ -41,6 +42,7 @@ import org.springframework.context.annotation.ImportRuntimeHints;
   PaginatedViaQuery.class,
   PaginationParameters.class,
   ModelMapper.class,
+  ParentTreeByVegCodeDto.class
 })
 @ImportRuntimeHints(value = {HttpServletRequestRuntimeHint.class})
 public class NativeImageConfig {}

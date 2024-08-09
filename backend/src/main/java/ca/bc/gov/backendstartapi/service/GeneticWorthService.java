@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
@@ -27,16 +28,17 @@ public class GeneticWorthService {
   }
 
   /** Fetch all valid genetic worth from the repository. */
-  public List<CodeDescriptionDto> getAllGeneticWorth() {
+  public List<GeneticWorthDto> getAllGeneticWorth() {
     SparLog.info("Fetching all genetic worth");
-    List<CodeDescriptionDto> resultList = new ArrayList<>();
+    List<GeneticWorthDto> resultList = new ArrayList<>();
 
     geneticWorthRepository.findAll().stream()
-        .filter(method -> method.isValid())
+        .filter(gw -> gw.isValid())
         .forEach(
-            method -> {
-              CodeDescriptionDto methodToAdd =
-                  new CodeDescriptionDto(method.getGeneticWorthCode(), method.getDescription());
+            gw -> {
+              GeneticWorthDto methodToAdd =
+                  new GeneticWorthDto(
+                      gw.getGeneticWorthCode(), gw.getDescription(), gw.getDefaultBv());
               resultList.add(methodToAdd);
             });
 
@@ -73,9 +75,9 @@ public class GeneticWorthService {
     List<GeneticWorthTraitsDto> calculated = new ArrayList<>();
 
     // Iterate over all traits
-    List<CodeDescriptionDto> geneticWorths = getAllGeneticWorth();
+    List<GeneticWorthDto> geneticWorths = getAllGeneticWorth();
 
-    for (CodeDescriptionDto trait : geneticWorths) {
+    for (GeneticWorthDto trait : geneticWorths) {
       BigDecimal calculatedValue = null;
       BigDecimal percentage = calcGeneticTraitThreshold(traitsDto, trait);
 

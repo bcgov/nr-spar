@@ -12,6 +12,8 @@ const ApiConfig = {
 
   geneticClasses: `${serverHost}/api/genetic-classes`,
 
+  geneticWothList: `${serverHost}/api/genetic-worth`,
+
   methodsOfPayment: `${serverHost}/api/methods-of-payment`,
 
   orchards: `${serverHost}/api/orchards`,
@@ -32,6 +34,8 @@ const ApiConfig = {
 
   seedlots: `${serverHost}/api/seedlots`,
 
+  orchardsVegCode: `${serverHost}/api/orchards/vegetation-codes`,
+
   tscAdmin: `${serverHost}/api/tsc-admin`,
 
   tscSeedlotEdit: `${serverHost}/api/tsc-admin/seedlots/{seedlotNumber}/edit`,
@@ -49,9 +53,9 @@ const ApiConfig = {
 
   oracleOrchards: `${oracleServerHost}/api/orchards`,
 
-  orchardsVegCode: `${oracleServerHost}/api/orchards/vegetation-code`,
+  areaOfUseSpzList: `${oracleServerHost}/api/area-of-use/spz-list/vegetation-code`,
 
-  areaOfUseSpzList: `${oracleServerHost}/api/area-of-use/spz-list/vegetation-code`
+  parentTreeByVegCode: `${oracleServerHost}/api/parent-trees/vegetation-codes/{vegCode}`
 };
 
 export default ApiConfig;

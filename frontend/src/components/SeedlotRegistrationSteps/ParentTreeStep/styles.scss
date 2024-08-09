@@ -336,7 +336,16 @@
         display: none;
       }
     }
+  }
 
+  .td-red-cell {
+    color: var(--#{vars.$bcgov-prefix}-text-error, #B32001);
+  }
+
+  tr:hover {
+    .td-red-cell {
+      color: var(--#{vars.$bcgov-prefix}-text-error, #B32001);
+    }
   }
 
   .#{vars.$bcgov-prefix}--overflow-menu__wrapper .#{vars.$bcgov-prefix}--btn--disabled {

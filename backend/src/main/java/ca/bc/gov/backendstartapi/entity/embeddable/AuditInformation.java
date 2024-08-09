@@ -6,6 +6,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import lombok.Generated;
 import lombok.Getter;
@@ -46,12 +47,12 @@ public class AuditInformation implements Serializable {
 
   @PrePersist
   private void prePersist() {
-    entryTimestamp = LocalDateTime.now();
+    entryTimestamp = LocalDateTime.now(Clock.systemUTC());
     updateTimestamp = entryTimestamp;
   }
 
   @PreUpdate
   private void preUpdate() {
-    updateTimestamp = LocalDateTime.now();
+    updateTimestamp = LocalDateTime.now(Clock.systemUTC());
   }
 }

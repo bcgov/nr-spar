@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.GeneticWorthService;
@@ -66,7 +67,15 @@ public class GeneticWorthEndpoint {
                               @Schema(
                                   type = "string",
                                   description = "The description of a genetic worth",
-                                  example = "Animal browse resistance (deer)"))
+                                  example = "Animal browse resistance (deer)")),
+                      @SchemaProperty(
+                          name = "defaultBv",
+                          schema =
+                              @Schema(
+                                  type = "number",
+                                  format = "float",
+                                  description = "The default breeding value",
+                                  example = "0.0"))
                     })),
         @ApiResponse(
             responseCode = "401",
@@ -74,7 +83,7 @@ public class GeneticWorthEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<CodeDescriptionDto> getAllGeneticWorth() {
+  public List<GeneticWorthDto> getAllGeneticWorth() {
     return geneticWorthService.getAllGeneticWorth();
   }
 

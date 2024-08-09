@@ -8,8 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthDto;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.service.GeneticWorthService;
+import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,11 +40,13 @@ class GeneticWorthEndpointTest {
   @DisplayName("getAllGeneticWorthTest")
   void getAllGeneticWorthTest() throws Exception {
 
-    CodeDescriptionDto firstMethod =
-        new CodeDescriptionDto("AD", "Animal browse resistance (deer)");
-    CodeDescriptionDto secondMethod =
-        new CodeDescriptionDto(
-            "DFS", "Disease resistance for Dothistroma needle blight (Dothistroma septosporum)");
+    GeneticWorthDto firstMethod =
+        new GeneticWorthDto("AD", "Animal browse resistance (deer)", BigDecimal.ZERO);
+    GeneticWorthDto secondMethod =
+        new GeneticWorthDto(
+            "DFS",
+            "Disease resistance for Dothistroma needle blight (Dothistroma septosporum)",
+            BigDecimal.ZERO);
 
     when(geneticWorthService.getAllGeneticWorth()).thenReturn(List.of(firstMethod, secondMethod));
 
