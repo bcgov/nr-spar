@@ -26,6 +26,10 @@ export const utcToLocalFormat = (utcDate: string | null | undefined): string => 
 /**
  * Convert local date to UTC date.
  */
-export const localDateToUtcFormat = (localDate: string): string => luxon
-  .fromFormat(localDate, 'yyyy/MM/dd', { zone: 'America/Vancouver' })
-  .toUTC().toFormat(UTC_YEAR_MONTH_DAY);
+export const localDateToUtcFormat = (localDate: string): string | null => {
+  if (!localDate) {
+    return null;
+  }
+  return luxon.fromFormat(localDate, 'yyyy/MM/dd', { zone: 'America/Vancouver' })
+    .toUTC().toFormat(UTC_YEAR_MONTH_DAY);
+};

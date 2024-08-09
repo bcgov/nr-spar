@@ -69,7 +69,7 @@ class SmpMixGeneticQualityServiceTest {
     when(geneticWorthEntityDao.getGeneticWorthEntity("GVO")).thenReturn(Optional.of(genEntity));
 
     ParentTreeGeneticQualityDto qualityDto =
-        new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"), null,null);
+        new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"), null, null);
 
     SeedlotFormParentTreeSmpDto seedlotFormParentTreeDto =
         new SeedlotFormParentTreeSmpDto(

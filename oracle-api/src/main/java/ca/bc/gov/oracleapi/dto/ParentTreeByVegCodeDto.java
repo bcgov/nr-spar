@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/** An object that contains a parent tree data and its genetic worth values by SPU ID. */
 @Getter
 @Setter
 @ToString

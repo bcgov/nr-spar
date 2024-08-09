@@ -24,6 +24,7 @@ public class GeneticWorthEntity extends CodeDescriptionEntity {
   @Column(name = "default_bv")
   private BigDecimal defaultBv;
 
+  /** Constructor. */
   public GeneticWorthEntity(
       String geneticWorthCode,
       String description,

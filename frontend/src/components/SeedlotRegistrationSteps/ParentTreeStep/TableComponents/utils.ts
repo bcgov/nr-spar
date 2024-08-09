@@ -16,7 +16,6 @@ import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import { isFloatWithinRange } from '../../../../utils/NumberUtils';
 import { ParentTreeByVegCodeResType } from '../../../../types/ParentTreeTypes';
 import { GeneticWorthDto } from '../../../../types/GeneticWorthType';
-import OrchardDataType from '../../../../types/OrchardDataType';
 
 export const isPtNumberInvalid = (
   ptNumber: string,
@@ -41,9 +40,8 @@ export const populateRowData = (
   ptNumber: string,
   state: ParentTreeStepDataObj,
   geneticWorthList: GeneticWorthDto[],
-  orchardData: OrchardDataType[],
   applicableGenWorths: string[],
-  primaryOrchardId: string
+  primarySpu: number
 ): RowItem => {
   const newRowData = { ...rowData };
 
@@ -54,9 +52,6 @@ export const populateRowData = (
   const genWorthBySpu = parentTree.geneticQualitiesBySpu;
 
   const validSpuIds = Object.keys(genWorthBySpu).map((key) => parseInt(key, 10));
-
-  const primarySpu = orchardData
-    .find((orchardDto) => orchardDto.id === primaryOrchardId)?.spuId ?? -1;
 
   // If parent tree has gen worth data under the primary orchard's SPU then use them
   // Else use default from the gen worth list
@@ -239,9 +234,8 @@ export const handleInput = (
   state: ParentTreeStepDataObj,
   setStepData: Function,
   seedlotSpecies: MultiOptionsObj,
-  orchardData: OrchardDataType[],
   geneticWorthList: GeneticWorthDto[],
-  primaryOrchardId: string
+  primarySpu: number
 ) => {
   const clonedState = structuredClone(state);
   let mixTabData = { ...clonedState.mixTabData };
@@ -259,9 +253,8 @@ export const handleInput = (
           inputValue,
           state,
           geneticWorthList,
-          orchardData,
           applicableGenWorths,
-          primaryOrchardId
+          primarySpu
         );
         mixTabData[rowData.rowId] = populatedRow;
         const rowVolume = populatedRow.volume.value;

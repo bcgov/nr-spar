@@ -32,7 +32,8 @@ public record ParentTreeGeneticQualityDto(
                 """,
             example = "18")
         BigDecimal geneticQualityValue,
-    @Schema(description = "Whether the parent tree is tested", example = "true") Boolean isTested,
+    @Schema(description = "Whether the parent tree is tested", example = "true")
+        Boolean isParentTreeTested,
     @Schema(
             description = "Whether the genetic quality value is using default value.",
             example = "false")

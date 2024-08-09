@@ -303,7 +303,8 @@ const ContextContainerClassA = ({ children }: props) => {
         ({
           code: orchard.id,
           description: orchard.name,
-          label: `${orchard.id} - ${orchard.name} - ${orchard.lotTypeCode} - ${orchard.stageCode}`
+          label: `${orchard.id} - ${orchard.name} - ${orchard.lotTypeCode} - ${orchard.stageCode}`,
+          spuId: orchard.spuId
         })
       ))
       .sort((a, b) => Number(a.code) - Number(b.code))

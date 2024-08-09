@@ -351,12 +351,12 @@ export const initExtractionStorageState = (
       },
       startDate: {
         id: 'ext-start-date',
-        value: extractionStepData.extractionStDate,
+        value: extractionStepData.extractionStDate ?? '',
         isInvalid: false
       },
       endDate: {
         id: 'ext-end-date',
-        value: extractionStepData.extractionEndDate,
+        value: extractionStepData.extractionEndDate ?? '',
         isInvalid: false
       }
     },
@@ -378,12 +378,12 @@ export const initExtractionStorageState = (
       },
       startDate: {
         id: 'str-start-date',
-        value: extractionStepData.temporaryStrgStartDate,
+        value: extractionStepData.temporaryStrgStartDate ?? '',
         isInvalid: false
       },
       endDate: {
         id: 'str-end-date',
-        value: extractionStepData.temporaryStrgEndDate,
+        value: extractionStepData.temporaryStrgEndDate ?? '',
         isInvalid: false
       }
     }
@@ -847,8 +847,9 @@ export const checkAllStepsCompletion = (
 export const convertCollection = (collectionData: CollectionForm): CollectionFormSubmitType => ({
   collectionClientNumber: collectionData.collectorAgency.value,
   collectionLocnCode: collectionData.locationCode.value,
-  collectionStartDate: localDateToUtcFormat(collectionData.startDate.value),
-  collectionEndDate: localDateToUtcFormat(collectionData.endDate.value),
+  // Assume the date values are present as validation has occurred before payload is generated
+  collectionStartDate: localDateToUtcFormat(collectionData.startDate.value)!,
+  collectionEndDate: localDateToUtcFormat(collectionData.endDate.value)!,
   noOfContainers: +collectionData.numberOfContainers.value,
   volPerContainer: +collectionData.volumePerContainers.value,
   clctnVolume: +collectionData.volumeOfCones.value,
@@ -874,8 +875,9 @@ export const convertOwnership = (
 export const convertInterim = (interimData: InterimForm): InterimFormSubmitType => ({
   intermStrgClientNumber: interimData.agencyName.value,
   intermStrgLocnCode: interimData.locationCode.value,
-  intermStrgStDate: localDateToUtcFormat(interimData.startDate.value),
-  intermStrgEndDate: localDateToUtcFormat(interimData.endDate.value),
+  // Assume the date values are present as validation has occurred before payload is generated
+  intermStrgStDate: localDateToUtcFormat(interimData.startDate.value)!,
+  intermStrgEndDate: localDateToUtcFormat(interimData.endDate.value)!,
   intermOtherFacilityDesc: interimData.facilityOtherType.value,
   intermFacilityCode: interimData.facilityType.value
 });
@@ -911,7 +913,7 @@ const generateParentTreeGenQualPayload = (
   ptRow: RowItem,
   applicableGenWorths: string[]
 ): SingleParentTreeGeneticObj[] => {
-  const payload = [];
+  const payload: SingleParentTreeGeneticObj[] = [];
 
   applicableGenWorths.forEach((genWorthCode) => {
     const gwCode = genWorthCode as keyof RowItem;
@@ -926,7 +928,7 @@ const generateParentTreeGenQualPayload = (
     payload.push(ptGeneticObj);
   });
 
-  return [];
+  return payload;
 };
 
 export const convertParentTree = (

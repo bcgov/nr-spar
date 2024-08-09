@@ -2,7 +2,6 @@ import React from 'react';
 import { StringInputType } from '../../../types/FormInputType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
-import OrchardDataType from '../../../types/OrchardDataType';
 import { GeneticWorthDto } from '../../../types/GeneticWorthType';
 
 export type TabTypes = 'coneTab' | 'successTab' | 'mixTab';
@@ -131,7 +130,6 @@ export type EditableCellProps = {
   header: HeaderObj,
   applicableGenWorths: string[],
   readOnly: boolean,
-  orchardData: OrchardDataType[],
   geneticWorthList: GeneticWorthDto[]
 };
 

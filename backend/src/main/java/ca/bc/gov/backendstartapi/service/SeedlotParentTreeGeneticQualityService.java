@@ -96,7 +96,7 @@ public class SeedlotParentTreeGeneticQualityService {
 
         // untested_ind = True if estimated = True and pt.tested_ind = False
         sptgq.setParentTreeUntested(
-            !seedlotGenQltyDto.isTested() && seedlotGenQltyDto.isEstimated());
+            !seedlotGenQltyDto.isParentTreeTested() && seedlotGenQltyDto.isEstimated());
 
         seedlotPtToInsert.add(sptgq);
       }

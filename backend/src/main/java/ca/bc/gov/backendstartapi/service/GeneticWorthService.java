@@ -37,7 +37,8 @@ public class GeneticWorthService {
         .forEach(
             gw -> {
               GeneticWorthDto methodToAdd =
-                  new GeneticWorthDto(gw.getGeneticWorthCode(), gw.getDescription(), gw.getDefaultBv());
+                  new GeneticWorthDto(
+                      gw.getGeneticWorthCode(), gw.getDescription(), gw.getDefaultBv());
               resultList.add(methodToAdd);
             });
 

@@ -11,7 +11,6 @@ import { StringInputType } from '../../../types/FormInputType';
 import { PtValsCalcReqPayload, CalcPayloadResType, OrchardParentTreeValsType } from '../../../types/PtCalcTypes';
 import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
 import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
-import OrchardDataType from '../../../types/OrchardDataType';
 import { GeneticWorthDto } from '../../../types/GeneticWorthType';
 
 import {
@@ -180,16 +179,11 @@ export const calcMixTabInfoItems = (
   setWeightedGwInfoItems: Function,
   setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
   state: ParentTreeStepDataObj,
-  orchardData: OrchardDataType[],
-  primaryOrchardId: string
+  primarySpu: number
 ) => {
   if (!disableOptions) {
     const modifiedSummaryConfig = { ...summaryConfig };
     const tableRows = Object.values(state.mixTabData);
-
-    const primaryOrchard = orchardData.find((orchardDto) => orchardDto.id === primaryOrchardId);
-
-    const primarySpu = primaryOrchard?.spuId ?? -1;
 
     // Calc number of SMP parents from outside
     const numOfOutsidePt = getOutsideParentTreeNum(state, primarySpu);
@@ -234,15 +228,13 @@ export const populateStrInputId = (idPrefix: string, row: RowItem): RowItem => {
 export const processParentTreeData = (
   // List of Parent Tree under a species
   allParentTreeData: ParentTreeByVegCodeResType,
-  // List of Orchard under a species
-  orchardData: OrchardDataType[],
   // List of parent tree number under selected orchard(s)
   orchardParentTreeList: string[],
   // List of genetic worth data
   geneticWorthList: GeneticWorthDto[],
   seedlotSpecies: MultiOptionsObj,
   state: ParentTreeStepDataObj,
-  primaryOrchardId: string,
+  primarySpu: number,
   currentPage: number,
   currPageSize: number,
   setSlicedRows: Function,
@@ -250,9 +242,6 @@ export const processParentTreeData = (
 ) => {
   const modifiedState = { ...state };
   let tableRowData: RowDataDictType = structuredClone(state.tableRowData);
-
-  const primarySpu = orchardData
-    .find((orchardDto) => orchardDto.id === primaryOrchardId)?.spuId ?? -1;
 
   const speciesKey = Object.keys(geneticWorthDict).includes(seedlotSpecies.code)
     ? seedlotSpecies.code.toUpperCase()
@@ -816,8 +805,7 @@ export const fillMixTable = (
   state: ParentTreeStepDataObj,
   setStepData: Function,
   geneticWorthList: GeneticWorthDto[],
-  orchardData: OrchardDataType[],
-  primaryOrchardId: string
+  primarySpu: number
 ) => {
   let newRows = {};
   const clonedState = structuredClone(state);
@@ -841,9 +829,8 @@ export const fillMixTable = (
         ptNumber,
         state,
         geneticWorthList,
-        orchardData,
         applicableGenWorths,
-        primaryOrchardId
+        primarySpu
       );
     }
 

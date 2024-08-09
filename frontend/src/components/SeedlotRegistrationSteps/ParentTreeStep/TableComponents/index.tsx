@@ -143,7 +143,6 @@ const EditableCell = ({
   header,
   applicableGenWorths,
   readOnly,
-  orchardData,
   geneticWorthList
 }: EditableCellProps) => {
   const {
@@ -183,9 +182,8 @@ const EditableCell = ({
           state,
           setStepData,
           seedlotSpecies,
-          orchardData,
           geneticWorthList,
-          orchardStep.orchards.primaryOrchard.value.code
+          orchardStep.orchards.primaryOrchard.value.spuId
         );
       }}
       invalid={rowData[headerId].isInvalid}
@@ -266,7 +264,6 @@ const renderTableCell = (
                 header={header}
                 applicableGenWorths={applicableGenWorths}
                 readOnly={isFormSubmitted && !editOnReview}
-                orchardData={orchardData}
                 geneticWorthList={geneticWorthList}
               />
             )

@@ -65,7 +65,13 @@ const PopSize = () => {
           id="smp-parents-from-outside"
           label="Number of SMP parents from outside"
           value={
-            formatEmptyStr(getOutsideParentTreeNum(allStepData.parentTreeStep), true)
+            formatEmptyStr(
+              getOutsideParentTreeNum(
+                allStepData.parentTreeStep,
+                allStepData.orchardStep.orchards.primaryOrchard.value.spuId
+              ),
+              true
+            )
           }
           showSkeleton={isFetchingData || isCalculatingPt}
         />

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** This class represents a response body when a genetic worth entity is requested */
+/** This class represents a response body when a genetic worth entity is requested. */
 @Getter
 @Setter
 @NoArgsConstructor

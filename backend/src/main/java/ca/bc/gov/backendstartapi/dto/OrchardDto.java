@@ -67,5 +67,5 @@ public class OrchardDto {
   private Integer becVersionId;
 
   @Schema(description = "Seed Plan Unit id", example = "7")
-  private Integer SpuId;
+  private Integer spuId;
 }
