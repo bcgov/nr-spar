@@ -137,7 +137,7 @@ public class OrchardService {
     list.forEach(
         orchardDto -> orchardDto.setSpuId(orchardSpuMap.getOrDefault(orchardDto.getId(), null)));
 
-    SparLog.info("{} parent tree by veg code found.", list.size());
+    SparLog.info("{} orchards by veg code found.", list.size());
     return list;
   }
 }
