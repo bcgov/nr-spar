@@ -131,7 +131,7 @@ class SeedlotServiceTest {
   }
 
   private ParentTreeGeneticQualityDto createParentTreeGenQuaDto() {
-    return new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"));
+    return new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"), null, null);
   }
 
   private SeedlotFormParentTreeSmpDto createParentTreeDto(Integer parentTreeId) {

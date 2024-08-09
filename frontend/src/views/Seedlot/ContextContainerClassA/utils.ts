@@ -7,10 +7,12 @@ import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/Orchar
 import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import {
-  DEFAULT_MIX_PAGE_ROWS, MAX_DECIMAL_DIGITS, notificationCtrlObj,
+  DEFAULT_MIX_PAGE_ROWS, geneticWorthDict, MAX_DECIMAL_DIGITS, notificationCtrlObj,
   rowTemplate
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import {
+  GeneticWorthDictType,
+  GeneticWorthInputType,
   InfoSectionConfigType, RowDataDictType, RowItem,
   StrTypeRowItem
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
@@ -26,7 +28,7 @@ import {
   OrchardFormSubmitType, ParentTreeFormSubmitType, RichSeedlotType,
   SeedlotAClassSubmitType, SingleOwnerFormSubmitType
 } from '../../../types/SeedlotType';
-import { dateStringToISO } from '../../../utils/DateUtils';
+import { localDateToUtcFormat } from '../../../utils/DateUtils';
 import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
@@ -43,6 +45,8 @@ import {
   AreaOfUseDataType,
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
+import { GenWorthCodeEnum, SingleParentTreeGeneticObj } from '../../../types/ParentTreeGeneticQualityType';
+import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
 
 export const initProgressBar = (
   currentStep: number,
@@ -843,8 +847,8 @@ export const checkAllStepsCompletion = (
 export const convertCollection = (collectionData: CollectionForm): CollectionFormSubmitType => ({
   collectionClientNumber: collectionData.collectorAgency.value,
   collectionLocnCode: collectionData.locationCode.value,
-  collectionStartDate: dateStringToISO(collectionData.startDate.value),
-  collectionEndDate: dateStringToISO(collectionData.endDate.value),
+  collectionStartDate: localDateToUtcFormat(collectionData.startDate.value),
+  collectionEndDate: localDateToUtcFormat(collectionData.endDate.value),
   noOfContainers: +collectionData.numberOfContainers.value,
   volPerContainer: +collectionData.volumePerContainers.value,
   clctnVolume: +collectionData.volumeOfCones.value,
@@ -870,8 +874,8 @@ export const convertOwnership = (
 export const convertInterim = (interimData: InterimForm): InterimFormSubmitType => ({
   intermStrgClientNumber: interimData.agencyName.value,
   intermStrgLocnCode: interimData.locationCode.value,
-  intermStrgStDate: dateStringToISO(interimData.startDate.value),
-  intermStrgEndDate: dateStringToISO(interimData.endDate.value),
+  intermStrgStDate: localDateToUtcFormat(interimData.startDate.value),
+  intermStrgEndDate: localDateToUtcFormat(interimData.endDate.value),
   intermOtherFacilityDesc: interimData.facilityOtherType.value,
   intermFacilityCode: interimData.facilityType.value
 });
@@ -902,9 +906,33 @@ export const convertOrchard = (
   });
 };
 
+const generateParentTreeGenQualPayload = (
+  allParentTreeData: ParentTreeByVegCodeResType,
+  ptRow: RowItem,
+  applicableGenWorths: string[]
+): SingleParentTreeGeneticObj[] => {
+  const payload = [];
+
+  applicableGenWorths.forEach((genWorthCode) => {
+    const gwCode = genWorthCode as keyof RowItem;
+    const gwObj = (ptRow[gwCode] as GeneticWorthInputType);
+    const ptGeneticObj: SingleParentTreeGeneticObj = {
+      geneticTypeCode: 'BV',
+      geneticWorthCode: gwCode.toUpperCase() as keyof typeof GenWorthCodeEnum,
+      geneticQualityValue: Number(parseFloat(gwObj.value).toFixed(1)),
+      isParentTreeTested: allParentTreeData[ptRow.parentTreeNumber.value].testedInd,
+      isEstimated: gwObj.isEstimated
+    };
+    payload.push(ptGeneticObj);
+  });
+
+  return [];
+};
+
 export const convertParentTree = (
   parentTreeData: ParentTreeStepDataObj,
-  seedlotNumber: string
+  seedlotNumber: string,
+  applicableGenWorths: string[]
 ): Array<ParentTreeFormSubmitType> => {
   const parentTreePayload: Array<ParentTreeFormSubmitType> = [];
 
@@ -920,7 +948,11 @@ export const convertParentTree = (
       nonOrchardPollenContamPct: +parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value,
       amountOfMaterial: +parentTreeData.tableRowData[ptNum].volume.value,
       proportion: +parentTreeData.tableRowData[ptNum].proportion.value,
-      parentTreeGeneticQualities: parentTreeData.tableRowData[ptNum].parentTreeGeneticQualities
+      parentTreeGeneticQualities: generateParentTreeGenQualPayload(
+        parentTreeData.allParentTreeData,
+        parentTreeData.tableRowData[ptNum],
+        applicableGenWorths
+      )
     });
   });
 
@@ -929,7 +961,8 @@ export const convertParentTree = (
 
 export const convertSmpParentTree = (
   parentTreeStepData: ParentTreeStepDataObj,
-  seedlotNumber: string
+  seedlotNumber: string,
+  applicableGenWorths: string[]
 ): Array<ParentTreeFormSubmitType> => {
   const { allParentTreeData } = parentTreeStepData;
   const smpMixPayload: Array<ParentTreeFormSubmitType> = [];
@@ -951,8 +984,11 @@ export const convertSmpParentTree = (
             .mixTabData[key].nonOrchardPollenContam.value,
           amountOfMaterial: +parentTreeStepData.mixTabData[key].volume.value,
           proportion: +parentTreeStepData.mixTabData[key].proportion.value,
-          parentTreeGeneticQualities: parentTreeStepData
-            .allParentTreeData[curParentTreeNum].parentTreeGeneticQualities
+          parentTreeGeneticQualities: generateParentTreeGenQualPayload(
+            parentTreeStepData.allParentTreeData,
+            parentTreeStepData.mixTabData[key],
+            applicableGenWorths
+          )
         });
       }
     });
@@ -966,12 +1002,12 @@ export const convertExtraction = (
 ): ExtractionFormSubmitType => ({
   extractoryClientNumber: extractionData.extraction.agency.value,
   extractoryLocnCode: extractionData.extraction.locationCode.value,
-  extractionStDate: dateStringToISO(extractionData.extraction.startDate.value),
-  extractionEndDate: dateStringToISO(extractionData.extraction.endDate.value),
+  extractionStDate: localDateToUtcFormat(extractionData.extraction.startDate.value),
+  extractionEndDate: localDateToUtcFormat(extractionData.extraction.endDate.value),
   storageClientNumber: extractionData.seedStorage.agency.value,
   storageLocnCode: extractionData.seedStorage.locationCode.value,
-  temporaryStrgStartDate: dateStringToISO(extractionData.seedStorage.startDate.value),
-  temporaryStrgEndDate: dateStringToISO(extractionData.seedStorage.endDate.value)
+  temporaryStrgStartDate: localDateToUtcFormat(extractionData.seedStorage.startDate.value),
+  temporaryStrgEndDate: localDateToUtcFormat(extractionData.seedStorage.endDate.value)
 });
 
 export const getSeedlotSubmitErrDescription = (err: AxiosError): ErrorDescriptionType => {
@@ -1016,19 +1052,36 @@ export const getBreadcrumbs = (seedlotNumber: string) => [
 
 export const getSeedlotPayload = (
   allStepData: AllStepData,
-  seedlotNumber: string | undefined
-): SeedlotAClassSubmitType => ({
-  seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
-  seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
-  seedlotFormInterimDto: convertInterim(allStepData.interimStep),
-  seedlotFormOrchardDto: convertOrchard(
-    allStepData.orchardStep,
-    allStepData.parentTreeStep.tableRowData
-  ),
-  seedlotFormParentTreeDtoList: convertParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
-  seedlotFormParentTreeSmpDtoList: convertSmpParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
-  seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
-});
+  seedlotNumber: string | undefined,
+  vegCode: string
+): SeedlotAClassSubmitType => {
+  const speciesKey = Object.keys(geneticWorthDict).includes(vegCode)
+    ? vegCode.toUpperCase()
+    : 'UNKNOWN';
+
+  const applicableGenWorths = geneticWorthDict[speciesKey as keyof GeneticWorthDictType];
+
+  return ({
+    seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
+    seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
+    seedlotFormInterimDto: convertInterim(allStepData.interimStep),
+    seedlotFormOrchardDto: convertOrchard(
+      allStepData.orchardStep,
+      allStepData.parentTreeStep.tableRowData
+    ),
+    seedlotFormParentTreeDtoList: convertParentTree(
+      allStepData.parentTreeStep,
+      (seedlotNumber ?? ''),
+      applicableGenWorths
+    ),
+    seedlotFormParentTreeSmpDtoList: convertSmpParentTree(
+      allStepData.parentTreeStep,
+      (seedlotNumber ?? ''),
+      applicableGenWorths
+    ),
+    seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
+  });
+};
 
 export const initEmptySteps = () => ({
   collectionStep: initCollectionState('', emptyCollectionStep),

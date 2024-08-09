@@ -29,9 +29,8 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -156,7 +155,7 @@ class SeedlotFormPutTest {
 
     // step 5
     ParentTreeGeneticQualityDto ptgqDto =
-        new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"));
+        new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"), null, null);
     SeedlotFormParentTreeSmpDto parentTreeDto =
         new SeedlotFormParentTreeSmpDto(
             "87",

@@ -383,7 +383,9 @@ public class SeedlotService {
             new ParentTreeGeneticQualityDto(
                 parentTreeGenQual.getGeneticTypeCode(),
                 parentTreeGenQual.getGeneticWorth().getGeneticWorthCode(),
-                parentTreeGenQual.getGeneticQualityValue());
+                parentTreeGenQual.getGeneticQualityValue(),
+                !parentTreeGenQual.getParentTreeUntested(),
+                parentTreeGenQual.getQualityValueEstimated());
         parentTreeGenQualList.add(parentTreeGenQualDto);
       }
     }
@@ -421,7 +423,9 @@ public class SeedlotService {
               new ParentTreeGeneticQualityDto(
                   sptSmpMixGenQual.getGeneticTypeCode(),
                   sptSmpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
-                  sptSmpMixGenQual.getGeneticQualityValue());
+                  sptSmpMixGenQual.getGeneticQualityValue(),
+                  null,
+                  null);
           smpMixGenQualList.add(parentTreeGenQualDto);
         }
       }
@@ -433,7 +437,9 @@ public class SeedlotService {
               new ParentTreeGeneticQualityDto(
                   smpMixGenQual.getGeneticTypeCode(),
                   smpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
-                  smpMixGenQual.getGeneticQualityValue());
+                  smpMixGenQual.getGeneticQualityValue(),
+                  null,
+                  null);
           smpMixGenQualList.add(parentTreeGenQualDto);
         }
       }

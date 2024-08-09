@@ -5,15 +5,12 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
-import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +87,7 @@ class OrchardServiceTest {
         .thenReturn(List.of(activeOrchardSpu));
 
     ParentTreeGeneticQualityDto geneticQualityDto =
-        new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18.0"));
+        new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18.0"), null, null);
 
     ParentTreeGeneticInfoDto parentDto =
         new ParentTreeGeneticInfoDto(
@@ -171,7 +168,8 @@ class OrchardServiceTest {
   //   ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu("1", true);
   //   when(orchardService.findAllSpu(true)).thenReturn(List.of(activeOrchardSpu));
 
-  //   List<SameSpeciesTreeDto> responseFromService = orchardService.findParentTreesByVegCode(vegCode);
+  //   List<SameSpeciesTreeDto> responseFromService =
+  // orchardService.findParentTreesByVegCode(vegCode);
 
   //   Assertions.assertNotNull(responseFromService);
   //   Assertions.assertEquals(testList.size(), responseFromService.size());

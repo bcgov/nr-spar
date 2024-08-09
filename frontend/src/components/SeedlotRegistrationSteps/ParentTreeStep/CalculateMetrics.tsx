@@ -7,7 +7,6 @@ import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context
 import { PtValsCalcReqPayload } from '../../../types/PtCalcTypes';
 import postForCalculation from '../../../api-service/parentTreeAPI';
 import { fillCalculatedInfo, generatePtValCalcPayload } from './utils';
-import { geneticWorthDict } from './constants';
 
 type props = {
   disableOptions: boolean,

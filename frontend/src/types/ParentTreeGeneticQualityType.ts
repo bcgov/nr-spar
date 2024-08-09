@@ -13,7 +13,9 @@ export enum GenWorthCodeEnum {
 }
 
 export type SingleParentTreeGeneticObj = {
-  geneticTypeCode: 'BV' | 'CV';
-  geneticWorthCode: keyof typeof GenWorthCodeEnum;
-  geneticQualityValue: number;
+  geneticTypeCode: 'BV' | 'CV',
+  geneticWorthCode: keyof typeof GenWorthCodeEnum,
+  geneticQualityValue: number,
+  isParentTreeTested?: boolean, // refers to the testedInd on PARENT_TREE_GENETIC_QUALITY
+  isEstimated?: boolean // refers to whether the genetic quality value is using default
 };
