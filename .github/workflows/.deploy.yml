@@ -86,7 +86,7 @@ jobs:
             -p ORACLE_SYNC_USER='${{ vars.ORACLE_SYNC_USER }}'
             -p ORACLE_SYNC_PASSWORD='${{ secrets.ORACLE_SYNC_PASSWORD }}'
             -p ORACLE_CERT_SECRET='${{ secrets.ORACLE_CERT_SECRET }}'
-            -P ORACLE_HOST='${{ vars.ORACLE_HOST }}'
+            -p ORACLE_HOST='${{ vars.ORACLE_HOST }}'
 
       - name: Database
         if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
