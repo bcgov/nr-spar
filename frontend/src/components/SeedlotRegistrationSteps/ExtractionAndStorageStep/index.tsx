@@ -14,6 +14,7 @@ import Subtitle from '../../Subtitle';
 import ScrollToTop from '../../ScrollToTop';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import { now } from '../../../utils/DateUtils';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
 import { tscAgencyObj, tscLocationCode } from '../../../views/Seedlot/ContextContainerClassA/constants';
@@ -42,9 +43,6 @@ const ExtractionAndStorage = (
 
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
-
-  const today = new Date();
-  const maxDate = today.toISOString().split('T')[0].replace(/-/g, '/');
 
   const setClientAndCode = (
     agency: StringInputType,
@@ -131,7 +129,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="extractionStartDate"
             dateFormat={DATE_FORMAT}
-            maxDate={maxDate}
+            maxDate={now}
             value={state.extraction.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(true, 'extraction', selectedDate);
@@ -155,7 +153,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="extractionEndDate"
             dateFormat={DATE_FORMAT}
-            maxDate={maxDate}
+            maxDate={now}
             value={state.extraction.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(false, 'extraction', selectedDate);
@@ -221,7 +219,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageStartDate"
             dateFormat={DATE_FORMAT}
-            maxDate={!isReview ? maxDate : null}
+            maxDate={!isReview ? now : undefined}
             value={state.seedStorage.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(true, 'seedStorage', selectedDate);
@@ -245,7 +243,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageEndDate"
             dateFormat={DATE_FORMAT}
-            maxDate={!isReview ? maxDate : null}
+            maxDate={!isReview ? now : undefined}
             value={state.seedStorage.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(false, 'seedStorage', selectedDate);

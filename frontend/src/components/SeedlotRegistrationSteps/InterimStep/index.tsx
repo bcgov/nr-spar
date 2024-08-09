@@ -19,6 +19,7 @@ import ScrollToTop from '../../ScrollToTop';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
 
 import getFacilityTypes from '../../../api-service/facilityTypesAPI';
+import { now } from '../../../utils/DateUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
@@ -47,9 +48,6 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
   } = useContext(ClassAContext);
 
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
-
-  const today = new Date();
-  const maxDate = today.toISOString().split('T')[0].replace(/-/g, '/');
 
   const setClientAndCode = (
     clientInput: StringInputType,
@@ -189,7 +187,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             datePickerType="single"
             name="startDate"
             dateFormat={DATE_FORMAT}
-            maxDate={!isReview ? maxDate : null}
+            maxDate={!isReview ? now : undefined}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(true, selectedDate);
@@ -214,7 +212,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             name="endDate"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
-            maxDate={!isReview ? maxDate : null}
+            maxDate={!isReview ? now : undefined}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(false, selectedDate);

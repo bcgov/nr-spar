@@ -16,6 +16,7 @@ import moment from 'moment';
 import validator from 'validator';
 
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import { now } from '../../../utils/DateUtils';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 
 import Subtitle from '../../Subtitle';
@@ -47,9 +48,6 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
     defaultCode,
     isFormSubmitted
   } = useContext(ClassAContext);
-
-  const today = new Date();
-  const maxDate = today.toISOString().split('T')[0].replace(/-/g, '/');
 
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
 
@@ -183,7 +181,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             readOnly={isFormSubmitted && !isReview}
-            maxDate={!isReview ? maxDate : null}
+            maxDate={!isReview ? now : undefined}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDateChange(true, selectedDate);
@@ -207,7 +205,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
-            maxDate={!isReview ? maxDate : null}
+            maxDate={!isReview ? now : undefined}
             readOnly={isFormSubmitted && !isReview}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
