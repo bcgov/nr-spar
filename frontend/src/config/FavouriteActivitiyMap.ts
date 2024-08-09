@@ -7,7 +7,6 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     type: 'seedlots',
     image: 'SoilMoistureField',
     header: 'Seedlots',
-    description: 'Register and manage your seedlots',
     link: ROUTES.SEEDLOTS,
     highlighted: false
   },
@@ -24,7 +23,6 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     type: 'mySeedlots',
     image: 'TableSplit',
     header: 'My Seedlots',
-    description: 'Check and manage your own seedlots',
     link: ROUTES.MY_SEEDLOTS,
     highlighted: false
   },
@@ -33,7 +31,6 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     type: 'reviewSeedlots',
     image: 'TableSplit',
     header: 'Review Seedlots',
-    description: 'Check all seedlots that are waiting for approval',
     link: ROUTES.TSC_SEEDLOTS_TABLE,
     highlighted: false
   },
@@ -42,7 +39,6 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     type: 'default',
     image: 'Unknown',
     header: 'Unknown activity: ',
-    description: 'Please remove this invalid activity',
     link: '#',
     highlighted: false
   }
