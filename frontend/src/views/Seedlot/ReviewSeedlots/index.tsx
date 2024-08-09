@@ -1,4 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useState
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -16,6 +20,7 @@ import AuthContext from '../../../contexts/AuthContext';
 import SeedlotTable from '../../../components/SeedlotTable';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
+import focusById from '../../../utils/FocusUtils';
 
 import './styles.scss';
 
@@ -25,6 +30,7 @@ const ReviewSeedlots = () => {
   const userId = user?.userId ?? '';
 
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
+  const [seedlotInputErr, setSeedlotInputErr] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isTscAdmin) {
@@ -57,7 +63,12 @@ const ReviewSeedlots = () => {
             labelText=""
             placeholder="Enter seedlot number"
             value={seedlotNumber}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSeedlotNumber(e.target.value)}
+            invalid={seedlotInputErr}
+            invalidText="Please, enter a seedlot number"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setSeedlotInputErr(false);
+              setSeedlotNumber(e.target.value);
+            }}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
           />
         </Column>
@@ -66,7 +77,14 @@ const ReviewSeedlots = () => {
             kind="primary"
             size="md"
             renderIcon={ArrowRight}
-            onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber))}
+            onClick={() => {
+              if (seedlotNumber) {
+                navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber));
+              } else {
+                setSeedlotInputErr(true);
+                focusById('go-to-seedlot-input');
+              }
+            }}
           >
             Go to seedlot
           </Button>

@@ -102,7 +102,7 @@ const SeedlotTable = (
    * Show skeleton while fetching.
    */
   if (getAllSeedlotQueryByUser.isFetching || vegCodeQuery.isFetching) {
-    return <DataTableSkeleton showToolbar={false} />;
+    return <DataTableSkeleton showToolbar={false} showHeader={false} />;
   }
 
   /**

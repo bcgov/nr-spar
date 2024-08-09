@@ -36,4 +36,8 @@
   .#{vars.$bcgov-prefix}--modal-footer .#{vars.$bcgov-prefix}--btn {
     height: 0;
   }
+
+  .submit-notification {
+    max-inline-size: none;
+  }
 }

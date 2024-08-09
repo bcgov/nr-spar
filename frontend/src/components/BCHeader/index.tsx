@@ -186,7 +186,7 @@ const BCHeader = () => {
                           key={navItem.name}
                           className={navItem.disabled ? 'disabled-side-nav-option' : ''}
                           renderIcon={Icons[navItem.icon]}
-                          isActive={window.location.pathname === navItem.link}
+                          isActive={window.location.pathname.includes(navItem.link)}
                           onClick={navItem.disabled ? null : () => navigate(navItem.link)}
                         >
                           {navItem.name}
