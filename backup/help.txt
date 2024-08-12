@@ -1,0 +1,6 @@
+docker build -t backup .
+
+docker run -it \
+  --network=host \
+ -v .:/mnt/bkp \
+ backup
