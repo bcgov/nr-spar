@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,6 +71,7 @@ public class TscAdminEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @CrossOrigin(exposedHeaders = "X-TOTAL-COUNT")
   @RoleAccessConfig({"SPAR_TSC_ADMIN"})
   public ResponseEntity<List<Seedlot>> getSeedlotsForReviewing(
       @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
