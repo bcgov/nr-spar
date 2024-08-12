@@ -104,6 +104,16 @@ const SeedlotDetails = () => {
     select: (data) => data.seedlot
   });
 
+  const getActBtnLabel = (): string => {
+    if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
+      return 'Review seedlot';
+    }
+    if (seedlotData?.seedlotStatus === 'Submitted') {
+      return 'View your seedlot';
+    }
+    return 'Edit seedlot form';
+  };
+
   useEffect(() => {
     if (seedlotQuery.isFetched || seedlotQuery.isFetchedAfterMount || seedlotQuery.status === 'success') {
       covertToDisplayObj(seedlotQuery.data);
@@ -157,10 +167,15 @@ const SeedlotDetails = () => {
                   enableFavourite
                 />
                 <ComboButton
-                  title="Edit seedlot form"
+                  title={getActBtnLabel()}
                   items={manageOptions}
                   menuOptionsClass="edit-seedlot-form"
-                  titleBtnFunc={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
+                  titleBtnFunc={() => navigate(addParamToPath(
+                    isTscAdmin && seedlotData?.seedlotStatus !== 'Submitted'
+                      ? ROUTES.SEEDLOT_A_CLASS_REVIEW
+                      : ROUTES.SEEDLOT_A_CLASS_REGISTRATION,
+                    seedlotNumber ?? ''
+                  ))}
                 />
               </>
             )
