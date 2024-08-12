@@ -132,12 +132,12 @@ public class OrchardService {
         .forEach(
             spuObj -> orchardSpuMap.put(spuObj.getOrchardId(), spuObj.getSeedPlanningUnitId()));
 
-    List<OrchardDto> list = oracleApiProvider.findOrchardsByVegCode(vegCode);
+    List<OrchardDto> orchardList = oracleApiProvider.findOrchardsByVegCode(vegCode);
 
-    list.forEach(
+    orchardList.forEach(
         orchardDto -> orchardDto.setSpuId(orchardSpuMap.getOrDefault(orchardDto.getId(), null)));
 
-    SparLog.info("{} orchards by veg code found.", list.size());
-    return list;
+    SparLog.info("{} orchards by veg code found.", orchardList.size());
+    return orchardList;
   }
 }
