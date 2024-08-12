@@ -40,7 +40,6 @@ const MySeedlots = () => {
         <Column className="no-padding-col" sm={4} md={6} lg={12} xlg={12}>
           <PageTitle
             title={tableText.pageTitle}
-            subtitle={tableText.pageSubtitle}
             enableFavourite
             activity="mySeedlots"
           />

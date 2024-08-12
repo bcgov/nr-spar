@@ -49,7 +49,6 @@ const ReviewSeedlots = () => {
         <Column className="no-padding-col" sm={4} md={6} lg={12} xlg={12}>
           <PageTitle
             title="Review seedlots"
-            subtitle="Check all seedlots that are waiting for approval"
             enableFavourite
             activity="reviewSeedlots"
           />

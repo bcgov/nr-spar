@@ -164,7 +164,6 @@ const SeedlotDetails = () => {
               <>
                 <PageTitle
                   title={`Seedlot ${seedlotQuery.data?.id}`}
-                  subtitle="Check and manage this seedlot"
                   enableFavourite
                 />
                 <ComboButton

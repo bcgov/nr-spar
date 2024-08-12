@@ -604,8 +604,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Next')
       .click();
 
-    cy.get('ul.spar-seedlot-reg-progress-bar').scrollIntoView({ easing: 'linear' });
-
     // Check step complete status
     cy.get(`.${prefix}--progress-step--complete`)
       .contains('Orchard');
