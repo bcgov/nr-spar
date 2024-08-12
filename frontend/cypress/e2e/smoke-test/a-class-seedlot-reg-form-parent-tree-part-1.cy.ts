@@ -200,7 +200,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .eq(0)
       .find('button')
       .as('clickShowHideBtn')
-      .click();
+      .click({force: true});
 
     cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
@@ -218,7 +218,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Click 'Comandra blister rust (DSC)' checkbox
     cy.get('@clickShowHideBtn')
-      .click();
+      .click({force: true});
 
     cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
@@ -234,7 +234,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Click 'Western gall rust (DSG)' checkbox
     cy.get('@clickShowHideBtn')
-      .click();
+      .click({force: true});
 
     cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
@@ -250,7 +250,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Click 'Volume growth (GVO)' checkbox
     cy.get('@clickShowHideBtn')
-      .click();
+      .click({force: true});
 
     cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
