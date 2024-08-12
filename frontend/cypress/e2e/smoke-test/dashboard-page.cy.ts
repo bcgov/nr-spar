@@ -5,7 +5,6 @@ import prefix from '../../../src/styles/classPrefix';
 
 describe('Dashboard page test', () => {
   let dashboardPageData: {
-    subtitle: string,
     emptySectionTitle: string,
     emptySectionSubtitle: string
   };
@@ -26,10 +25,6 @@ describe('Dashboard page test', () => {
    */
   it('should load and display dashboard page correctly', () => {
     cy.isPageTitle(NavigationLabels.Dashboard);
-
-    cy.get('.title-section')
-      .find('.subtitle-section')
-      .should('have.text', dashboardPageData.subtitle);
   });
 
   it('should display empty favourite activities section correctly', () => {

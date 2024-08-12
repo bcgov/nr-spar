@@ -148,16 +148,16 @@ const getPageText = () => ({
   errorDescription,
   coneTab: {
     tabTitle: 'Cone and pollen count',
-    tableDescription: "Enter the estimative of Cone and pollen count for the orchard's seedlot (*required)",
+    tableDescription: "Enter the cone and pollen count estimate for the orchard's seedlot (*required)",
     toggleName: 'Show breeding value',
     cleanModalHeading: getCleanTableDesc('Cone and pollen count')
   },
   successTab: {
     tabTitle: 'SMP success on parent',
-    tableDescription: "Enter the estimative of SMP success for the orchard's seedlot",
+    tableDescription: "Enter the SMP success estimate for the orchard's seedlot",
     toggleName: 'Show SMP mix used on parent',
     cleanModalHeading: getCleanTableDesc('SMP success on parent'),
-    defaultCheckBoxDesc: 'Enter the same SMP success on parent or Non-orchard pollen contaminant to all parent trees',
+    defaultCheckBoxDesc: 'Enter the same SMP success on parent or non-orchard pollen contaminant to all parent trees',
     smpInputLabel: 'SMP Success on parent (%)',
     pollenCotamInputLabel: 'Non-orchard pollen contaminant (%)'
   },
@@ -604,8 +604,7 @@ export const SummarySectionConfig = {
     }
   },
   mixTab: {
-    title: 'Breeding value SMP mix used',
-    description: 'Check the breeding value of SMP mix used on parent',
+    title: 'Breeding value SMP mix used on parent',
     infoItems: {
       parentsOutside: {
         name: 'Number of SMP parents from outside',

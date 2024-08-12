@@ -505,8 +505,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
               <>
                 <DetailSection>
                   <DescriptionBox
-                    header="Breeding value of SMP mix used"
-                    description="Check the breeding value of SMP mix used on parent"
+                    header="Breeding value of SMP mix used on parent"
                   />
                   <InfoSection
                     infoItems={
@@ -526,7 +525,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                     {/* -------- SMP mix mean geospatial data -------- */}
                     <Row className="info-section-sub-title">
                       <DescriptionBox
-                        header="SMP Mix geospatial summary"
+                        header="SMP mix geospatial summary"
                       />
                     </Row>
                     {

@@ -85,7 +85,6 @@ const FavouriteCard = ({
       </div>
       <div className="fav-card-content">
         <p className="fav-card-title-large">{favObject.header}</p>
-        <p className="fav-card-content-description">{favObject.description}</p>
       </div>
     </Tile>
   );
