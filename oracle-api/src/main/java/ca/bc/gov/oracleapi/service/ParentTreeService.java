@@ -59,7 +59,12 @@ public class ParentTreeService {
     return resultList;
   }
 
-  /** Find all parent trees under a vegCode. */
+  /**
+   * Find all parent trees under a vegCode.
+   *
+   * @param vegCode the vegetation code to search on.
+   * @return A {@link Map} where Key = Parent Tree Number, Value = {@link ParentTreeByVegCodeDto}.
+   */
   public Map<String, ParentTreeByVegCodeDto> findParentTreesWithVegCode(String vegCode) {
     SparLog.info("Finding all parent trees under VegCode: {}", vegCode);
 
