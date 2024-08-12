@@ -17,7 +17,7 @@ public interface ParentTreeRepository extends JpaRepository<ParentTreeEntity, Lo
          """
           SELECT PT.PARENT_TREE_ID AS \"parentTreeId\",
             PT.PARENT_TREE_NUMBER AS \"parentTreeNumber\",
-            O.ORCHARD_ID AS \"orchardId\",
+            PTO.ORCHARD_ID AS \"orchardId\",
             PTSPU.SEED_PLAN_UNIT_ID AS \"spu\",
             PT.TESTED_IND AS \"tested\",
             Q.GENETIC_TYPE_CODE AS \"geneticTypeCode\",
@@ -25,9 +25,9 @@ public interface ParentTreeRepository extends JpaRepository<ParentTreeEntity, Lo
             Q.GENETIC_QUALITY_VALUE AS \"geneticQualityValue\"
           FROM parent_tree PT
           JOIN parent_tree_orchard PTO ON PTO.parent_tree_id = PT.parent_tree_id
-          JOIN orchard O ON O.orchard_id = PTO.orchard_id
           LEFT JOIN parent_tree_seed_plan_unit PTSPU ON PTSPU.parent_tree_id = PT.parent_tree_id
           LEFT JOIN parent_tree_genetic_quality Q ON PT.parent_tree_id = Q.parent_tree_id
+            AND Q.seed_plan_unit_id = PTSPU.seed_plan_unit_id
             AND Q.genetic_worth_calc_ind = 'Y'
           WHERE PT.VEGETATION_CODE = ?1
             AND PT.ACTIVE_IND = 'Y'
