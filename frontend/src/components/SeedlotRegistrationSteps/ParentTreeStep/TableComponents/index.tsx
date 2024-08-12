@@ -6,11 +6,13 @@ import {
 import { TrashCan } from '@carbon/icons-react';
 
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
+import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import PaginationChangeType from '../../../../types/PaginationChangeType';
+import MultiOptionsObj from '../../../../types/MultiOptionsObject';
+import OrchardDataType from '../../../../types/OrchardDataType';
+import { GeneticWorthDto } from '../../../../types/GeneticWorthType';
 import blurOnEnter from '../../../../utils/KeyboardUtil';
 import { handlePagination } from '../../../../utils/PaginationUtils';
-import MultiOptionsObj from '../../../../types/MultiOptionsObject';
-import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 
 import { pageText, PageSizesConfig } from '../constants';
 import {
@@ -21,11 +23,9 @@ import {
 import {
   applyValueToAll, areOrchardsValid, toggleColumn, toggleNotification
 } from '../utils';
-import { deleteMixRow, handleInput } from './utils';
-
 import '../styles.scss';
-import OrchardDataType from '../../../../types/OrchardDataType';
-import { GeneticWorthDto } from '../../../../types/GeneticWorthType';
+
+import { deleteMixRow, handleInput } from './utils';
 
 export const renderColOptions = (
   headerConfig: Array<HeaderObj>,
