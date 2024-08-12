@@ -143,26 +143,46 @@ export const calcSummaryItems = (
   setSummaryConfig(modifiedSummaryConfig);
 };
 
+/**
+ * Returns true if a parent tree's cone and pollen count are larger than 0.
+ */
+const isPtContributing = (pt: RowItem): boolean => (
+  Number(pt.coneCount.value) + Number(pt.pollenCount.value) > 0
+);
+
+/**
+ * Calculate the number of SMP parent from outside.
+ *
+ * If Volume (Amount of material) is not 0
+ *    AND no cone and pollen count exist for a parent tree number
+ *
+ * Then Add 1 to the # of SMP P.T. from outside.
+ */
 export const getOutsideParentTreeNum = (
   state: ParentTreeStepDataObj,
-  primarySpu: number
+  orchardPtNums: string[]
 ): string => {
   let sum = 0;
+
+  // All parent tree numbers in SMP mix where volume is > 0
   const ptNumsInMixTab: string[] = [];
   Object.values(state.mixTabData).forEach((row) => {
     if (
       row.parentTreeNumber?.value.length
       && !row.parentTreeNumber.isInvalid
+      && Number(row.volume.value) > 0
     ) {
       ptNumsInMixTab.push(row.parentTreeNumber.value);
     }
   });
 
-  ptNumsInMixTab.forEach((ptNum) => {
-    const parentTree = state.allParentTreeData[ptNum];
-    const validSpuIds = Object.keys(parentTree.geneticQualitiesBySpu).map((n) => parseInt(n, 10));
+  const { tableRowData } = state;
 
-    if (!validSpuIds.includes(primarySpu)) {
+  ptNumsInMixTab.forEach((ptNum) => {
+    if (
+      !orchardPtNums.includes(ptNum)
+      || (ptNum in tableRowData && !isPtContributing(tableRowData[ptNum]))
+    ) {
       sum += 1;
     }
   });
@@ -179,14 +199,14 @@ export const calcMixTabInfoItems = (
   setWeightedGwInfoItems: Function,
   setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
   state: ParentTreeStepDataObj,
-  primarySpu: number
+  orchardPts: string[]
 ) => {
   if (!disableOptions) {
     const modifiedSummaryConfig = { ...summaryConfig };
     const tableRows = Object.values(state.mixTabData);
 
     // Calc number of SMP parents from outside
-    const numOfOutsidePt = getOutsideParentTreeNum(state, primarySpu);
+    const numOfOutsidePt = getOutsideParentTreeNum(state, orchardPts);
     modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = numOfOutsidePt;
     setPopSizeAndDiversityConfig((prevPop) => ({
       ...prevPop,

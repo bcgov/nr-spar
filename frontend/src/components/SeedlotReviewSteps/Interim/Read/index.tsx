@@ -9,7 +9,6 @@ import { getForestClientByNumberOrAcronym } from '../../../../api-service/forest
 import getFacilityTypes from '../../../../api-service/facilityTypesAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
-import { utcToLocalFormat } from '../../../../utils/DateUtils';
 
 const InterimReviewRead = () => {
   const {
@@ -73,7 +72,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-start-date"
             label="Storage start date"
-            value={utcToLocalFormat(state.startDate.value)}
+            value={state.startDate.value}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -81,7 +80,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-end-date"
             label="Storage end date"
-            value={utcToLocalFormat(state.endDate.value)}
+            value={state.endDate.value}
             showSkeleton={isFetchingData}
           />
         </Column>

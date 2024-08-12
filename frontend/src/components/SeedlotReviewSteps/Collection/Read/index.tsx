@@ -9,7 +9,6 @@ import { getForestClientByNumberOrAcronym } from '../../../../api-service/forest
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 import getConeCollectionMethod from '../../../../api-service/coneCollectionMethodAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
-import { utcToLocalFormat } from '../../../../utils/DateUtils';
 
 import { formatCollectionMethods } from '../utils';
 import GeoInfo from '../GeoInfo';
@@ -75,7 +74,7 @@ const CollectionReviewRead = () => {
           <ReadOnlyInput
             id="collection-start-date"
             label="Collection start date"
-            value={utcToLocalFormat(allStepData.collectionStep.startDate.value)}
+            value={allStepData.collectionStep.startDate.value}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -83,7 +82,7 @@ const CollectionReviewRead = () => {
           <ReadOnlyInput
             id="collection-end-date"
             label="Collection end date"
-            value={utcToLocalFormat(allStepData.collectionStep.endDate.value)}
+            value={allStepData.collectionStep.endDate.value}
             showSkeleton={isFetchingData}
           />
         </Column>

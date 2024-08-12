@@ -72,7 +72,7 @@ export type HeaderObj = {
 };
 
 export type RowDataDictType = {
-  [key: string]: RowItem
+  [ptNum: string]: RowItem
 }
 
 export type NotifCtrlType = {

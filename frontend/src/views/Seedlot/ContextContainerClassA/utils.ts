@@ -28,7 +28,7 @@ import {
   OrchardFormSubmitType, ParentTreeFormSubmitType, RichSeedlotType,
   SeedlotAClassSubmitType, SingleOwnerFormSubmitType
 } from '../../../types/SeedlotType';
-import { localDateToUtcFormat } from '../../../utils/DateUtils';
+import { localDateToUtcFormat, utcToIsoSlashStyle } from '../../../utils/DateUtils';
 import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
@@ -80,12 +80,12 @@ export const initCollectionState = (
   },
   startDate: {
     id: 'collection-start-date',
-    value: collectionStepData.collectionStartDate,
+    value: utcToIsoSlashStyle(collectionStepData.collectionStartDate),
     isInvalid: false
   },
   endDate: {
     id: 'collection-end-date',
-    value: collectionStepData.collectionEndDate,
+    value: utcToIsoSlashStyle(collectionStepData.collectionEndDate),
     isInvalid: false
   },
   numberOfContainers: {
@@ -162,12 +162,12 @@ export const initInterimState = (
   },
   startDate: {
     id: 'storage-start-date',
-    value: interimStepData.intermStrgStDate,
+    value: utcToIsoSlashStyle(interimStepData.intermStrgStDate),
     isInvalid: false
   },
   endDate: {
     id: 'storage-end-date',
-    value: interimStepData.intermStrgEndDate,
+    value: utcToIsoSlashStyle(interimStepData.intermStrgEndDate),
     isInvalid: false
   },
   facilityType: {
@@ -351,12 +351,12 @@ export const initExtractionStorageState = (
       },
       startDate: {
         id: 'ext-start-date',
-        value: extractionStepData.extractionStDate ?? '',
+        value: utcToIsoSlashStyle(extractionStepData.extractionStDate),
         isInvalid: false
       },
       endDate: {
         id: 'ext-end-date',
-        value: extractionStepData.extractionEndDate ?? '',
+        value: utcToIsoSlashStyle(extractionStepData.extractionEndDate),
         isInvalid: false
       }
     },
@@ -378,12 +378,12 @@ export const initExtractionStorageState = (
       },
       startDate: {
         id: 'str-start-date',
-        value: extractionStepData.temporaryStrgStartDate ?? '',
+        value: utcToIsoSlashStyle(extractionStepData.temporaryStrgStartDate),
         isInvalid: false
       },
       endDate: {
         id: 'str-end-date',
-        value: extractionStepData.temporaryStrgEndDate ?? '',
+        value: utcToIsoSlashStyle(extractionStepData.temporaryStrgEndDate),
         isInvalid: false
       }
     }

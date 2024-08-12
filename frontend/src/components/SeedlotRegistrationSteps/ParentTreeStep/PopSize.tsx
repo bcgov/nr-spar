@@ -8,7 +8,9 @@ import { formatEmptyStr } from '../../SeedlotReviewSteps/ParentTrees/utils';
 import ReadOnlyInput from '../../ReadOnlyInput';
 import { getOutsideParentTreeNum, validateEffectivePopSize } from './utils';
 
-const PopSize = () => {
+type PopSizeProps = { orchardPts: string[] }
+
+const PopSize = ({ orchardPts } : PopSizeProps) => {
   const {
     isFetchingData,
     isCalculatingPt,
@@ -68,7 +70,7 @@ const PopSize = () => {
             formatEmptyStr(
               getOutsideParentTreeNum(
                 allStepData.parentTreeStep,
-                allStepData.orchardStep.orchards.primaryOrchard.value.spuId
+                orchardPts
               ),
               true
             )

@@ -8,7 +8,6 @@ import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/cont
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
-import { utcToLocalFormat } from '../../../../utils/DateUtils';
 
 const ExtractionStorageReviewRead = () => {
   const {
@@ -66,7 +65,7 @@ const ExtractionStorageReviewRead = () => {
                 <ReadOnlyInput
                   id="extraction-start-date"
                   label="Extraction start date"
-                  value={utcToLocalFormat(state.extraction.startDate.value)}
+                  value={state.extraction.startDate.value}
                   showSkeleton={isFetchingData}
                 />
               </Column>
@@ -74,7 +73,7 @@ const ExtractionStorageReviewRead = () => {
                 <ReadOnlyInput
                   id="extraction-end-date"
                   label="Extraction end date"
-                  value={utcToLocalFormat(state.extraction.endDate.value)}
+                  value={state.extraction.endDate.value}
                   showSkeleton={isFetchingData}
                 />
               </Column>
@@ -116,7 +115,7 @@ const ExtractionStorageReviewRead = () => {
                 <ReadOnlyInput
                   id="storage-start-date"
                   label="Storage start date"
-                  value={utcToLocalFormat(state.seedStorage.startDate.value)}
+                  value={state.seedStorage.startDate.value}
                   showSkeleton={isFetchingData}
                 />
               </Column>
@@ -124,7 +123,7 @@ const ExtractionStorageReviewRead = () => {
                 <ReadOnlyInput
                   id="storage-end-date"
                   label="Storage end date"
-                  value={utcToLocalFormat(state.seedStorage.endDate.value)}
+                  value={state.seedStorage.endDate.value}
                   showSkeleton={isFetchingData}
                 />
               </Column>

@@ -200,7 +200,10 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
           setWeightedGwInfoItems,
           setPopSizeAndDiversityConfig,
           state,
-          orchardStep.orchards.primaryOrchard.value.spuId
+          getParentTreesForSelectedOrchards(
+            orchardStep,
+            state.allParentTreeData
+          )
         );
       }
     },
@@ -423,7 +426,11 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
         {
           isReviewDisplay && !isReviewRead
             ? (
-              <PopSize />
+              <PopSize orchardPts={getParentTreesForSelectedOrchards(
+                orchardStep,
+                state.allParentTreeData
+              )}
+              />
             )
             : (
               <InfoSection

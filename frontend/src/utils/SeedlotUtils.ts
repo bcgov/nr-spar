@@ -6,7 +6,7 @@ import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../shared-constants/shared-constants';
 import { getForestClientLabel } from './ForestClientUtils';
-import { utcToLocalFormat } from './DateUtils';
+import { utcToApStyle } from './DateUtils';
 
 /**
  * Generate a species label in the form of `{code} - {description}`.
@@ -41,12 +41,12 @@ export const covertRawToDisplayObj = (seedlot: SeedlotType, vegCodeData: MultiOp
   entryUserId: seedlot.declarationOfTrueInformationUserId
     ? seedlot.declarationOfTrueInformationUserId
     : '--',
-  entryTimestamp: utcToLocalFormat(seedlot.declarationOfTrueInformationTimestamp),
+  entryTimestamp: utcToApStyle(seedlot.declarationOfTrueInformationTimestamp),
   applicantAgency: seedlot.applicantClientNumber,
   locationCode: seedlot.applicantLocationCode,
-  createdAt: utcToLocalFormat(seedlot.auditInformation.entryTimestamp),
-  lastUpdatedAt: utcToLocalFormat(seedlot.auditInformation.updateTimestamp),
-  approvedAt: utcToLocalFormat(seedlot.approvedTimestamp)
+  createdAt: utcToApStyle(seedlot.auditInformation.entryTimestamp),
+  lastUpdatedAt: utcToApStyle(seedlot.auditInformation.updateTimestamp),
+  approvedAt: utcToApStyle(seedlot.approvedTimestamp)
 });
 
 /**

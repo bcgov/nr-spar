@@ -3,7 +3,6 @@ import { Column, Row, FlexGrid } from '@carbon/react';
 
 import ReadOnlyInput from '../../ReadOnlyInput';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import { utcToLocalFormat } from '../../../utils/DateUtils';
 
 const AuditInfo = () => {
   const {
@@ -30,7 +29,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="created-at"
             label="Created at:"
-            value={utcToLocalFormat(seedlotData?.auditInformation.entryTimestamp)}
+            value={seedlotData?.auditInformation.entryTimestamp}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -48,7 +47,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="last-updated-at"
             label="Last updated at:"
-            value={utcToLocalFormat(seedlotData?.auditInformation.updateTimestamp)}
+            value={seedlotData?.auditInformation.updateTimestamp}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -66,7 +65,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="submitted-at"
             label="Submitted at:"
-            value={utcToLocalFormat(seedlotData?.declarationOfTrueInformationTimestamp)}
+            value={seedlotData?.declarationOfTrueInformationTimestamp}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -84,7 +83,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="approved-at"
             label="Approved at:"
-            value={utcToLocalFormat(seedlotData?.approvedTimestamp)}
+            value={seedlotData?.approvedTimestamp ?? undefined}
             showSkeleton={isFetchingData}
           />
         </Column>
