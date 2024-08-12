@@ -21,7 +21,7 @@ public class GeneticWorthEntity extends CodeDescriptionEntity {
   @Column(name = "genetic_worth_code", length = 3)
   private String geneticWorthCode;
 
-  @Column(name = "default_bv")
+  @Column(name = "default_bv", nullable = false, precision = 3, scale = 1)
   private BigDecimal defaultBv;
 
   /** Constructor. */
