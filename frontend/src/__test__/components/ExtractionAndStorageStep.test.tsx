@@ -41,9 +41,9 @@ describe.skip('Extraction and Storage Step test', () => {
   it('should have the correct labels', () => {
     const content = {
       title: 'Extraction information',
-      subtitle: 'Enter the extractory agency information and extraction’s star and end dates for this seedlot',
+      subtitle: 'Enter the extractory agency information and extraction’s start and end dates for this seedlot',
       titleTemporary: 'Temporary seed storage',
-      subtitleTemporary: 'Enter the seed storage agency information and storage’s star and end dates for this seedlot'
+      subtitleTemporary: 'Enter the seed storage agency information and storage’s start and end dates for this seedlot'
     }
     const titleBox = component.getElementsByClassName('extraction-information-title')[0];
     expect(titleBox).toHaveTextContent(content.title);
