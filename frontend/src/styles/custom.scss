@@ -382,7 +382,6 @@ label.#{vars.$bcgov-prefix}--label--disabled {
   color: var(--#{vars.$bcgov-prefix}-text-disabled, #939395);
 }
 
-
 .general-data-table-pagination {
   border-top: none;
 
@@ -430,4 +429,8 @@ label.#{vars.$bcgov-prefix}--label--disabled {
 
 .#{vars.$bcgov-prefix}--breadcrumb .#{vars.$bcgov-prefix}--link {
   cursor: pointer;
+}
+
+.#{vars.$bcgov-prefix}--loading-overlay {
+  z-index: 10000;
 }
