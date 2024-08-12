@@ -10,7 +10,7 @@ const textConfig = {
   uploadedFileIconDesc: 'Delete file',
   notification: {
     title: 'Note:',
-    description: 'When uploading a file all previously filled data within the table will be replaced'
+    description: 'When uploading a file, all previously filled data in the table will be replaced.'
   },
   buttons: {
     cancel: 'Cancel',
