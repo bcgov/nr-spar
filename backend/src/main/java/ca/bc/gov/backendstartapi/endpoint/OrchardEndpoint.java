@@ -7,7 +7,6 @@ import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -75,13 +74,7 @@ public class OrchardEndpoint {
       description = "Returns a list containing all parent trees under a species (VegCode).")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "An array of parent tree dto.",
-            content =
-                @Content(
-                    array = @ArraySchema(schema = @Schema(implementation = OrchardDto.class)),
-                    mediaType = "application/json")),
+        @ApiResponse(responseCode = "200", description = "An array of parent tree dto."),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",

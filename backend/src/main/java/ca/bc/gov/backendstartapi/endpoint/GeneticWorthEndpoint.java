@@ -8,10 +8,8 @@ import ca.bc.gov.backendstartapi.service.GeneticWorthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.SchemaProperty;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,35 +46,7 @@ public class GeneticWorthEndpoint {
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "An array of objects containing code and description for each value.",
-            content =
-                @Content(
-                    array = @ArraySchema(schema = @Schema(type = "object")),
-                    mediaType = "application/json",
-                    schemaProperties = {
-                      @SchemaProperty(
-                          name = "code",
-                          schema =
-                              @Schema(
-                                  type = "string",
-                                  description = "This object represents a genetic worth code",
-                                  example = "AD")),
-                      @SchemaProperty(
-                          name = "description",
-                          schema =
-                              @Schema(
-                                  type = "string",
-                                  description = "The description of a genetic worth",
-                                  example = "Animal browse resistance (deer)")),
-                      @SchemaProperty(
-                          name = "defaultBv",
-                          schema =
-                              @Schema(
-                                  type = "number",
-                                  format = "float",
-                                  description = "The default breeding value",
-                                  example = "0.0"))
-                    })),
+            description = "An array of objects containing code and description for each value."),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
