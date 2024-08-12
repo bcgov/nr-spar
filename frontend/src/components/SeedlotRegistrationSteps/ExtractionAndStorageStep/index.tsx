@@ -43,6 +43,8 @@ const ExtractionAndStorage = (
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
 
+  const inputTextObj = inputText(isReview);
+
   const setClientAndCode = (
     agency: StringInputType,
     locationCode: StringInputType,
@@ -95,11 +97,11 @@ const ExtractionAndStorage = (
       <ScrollToTop enabled={!isReview} />
       <Row className="extraction-information-title">
         <Column className="section-title" sm={4} md={8} lg={16}>
-          <h2>{inputText.extractionTitle.titleText}</h2>
+          <h2>{inputTextObj.extractionTitle.titleText}</h2>
           {
             !isReview
               ? (
-                <Subtitle text={inputText.extractionTitle.subtitleText} />
+                <Subtitle text={inputTextObj.extractionTitle.subtitleText} />
               )
               : null
           }
@@ -136,12 +138,12 @@ const ExtractionAndStorage = (
           >
             <DatePickerInput
               id={state.extraction.startDate.id}
-              labelText={inputText.date.extraction.labelText.start}
-              helperText={inputText.date.helperText}
-              placeholder={inputText.date.placeholder}
+              labelText={inputTextObj.date.extraction.labelText.start}
+              helperText={inputTextObj.date.helperText}
+              placeholder={inputTextObj.date.placeholder}
               invalid={state.extraction.startDate.isInvalid}
-              invalidText={inputText.date.invalidText}
-              disabled={state.extraction.useTSC.value}
+              invalidText={inputTextObj.date.invalidText}
+              disabled={state.extraction.useTSC.value && !isReview}
               autoComplete="off"
             />
           </DatePicker>
@@ -159,12 +161,12 @@ const ExtractionAndStorage = (
           >
             <DatePickerInput
               id={state.extraction.endDate.id}
-              labelText={inputText.date.extraction.labelText.end}
-              helperText={inputText.date.helperText}
-              placeholder={inputText.date.placeholder}
+              labelText={inputTextObj.date.extraction.labelText.end}
+              helperText={inputTextObj.date.helperText}
+              placeholder={inputTextObj.date.placeholder}
               invalid={state.extraction.endDate.isInvalid}
-              invalidText={inputText.date.invalidText}
-              disabled={state.extraction.useTSC.value}
+              invalidText={inputTextObj.date.invalidText}
+              disabled={state.extraction.useTSC.value && !isReview}
               autoComplete="off"
             />
           </DatePicker>
@@ -174,8 +176,8 @@ const ExtractionAndStorage = (
             <InlineNotification
               lowContrast
               kind="info"
-              title={inputText.date.extraction.notification.title}
-              subtitle={inputText.date.extraction.notification.subtitle}
+              title={inputTextObj.date.extraction.notification.title}
+              subtitle={inputTextObj.date.extraction.notification.subtitle}
               onCloseButtonClick={() => { setIsExtractorHintOpen(false); }}
             />
           )}
@@ -183,11 +185,11 @@ const ExtractionAndStorage = (
       </Row>
       <Row className="temporary-seed-storage-title">
         <Column className="section-title" sm={4} md={8} lg={16}>
-          <h2>{inputText.storageTitle.titleText}</h2>
+          <h2>{inputTextObj.storageTitle.titleText}</h2>
           {
             !isReview
               ? (
-                <Subtitle text={inputText.storageTitle.subtitleText} />
+                <Subtitle text={inputTextObj.storageTitle.subtitleText} />
               )
               : null
           }
@@ -224,12 +226,12 @@ const ExtractionAndStorage = (
           >
             <DatePickerInput
               id={state.seedStorage.startDate.id}
-              labelText={inputText.date.storage.labelText.start}
-              helperText={inputText.date.helperText}
-              placeholder={inputText.date.placeholder}
+              labelText={inputTextObj.date.storage.labelText.start}
+              helperText={inputTextObj.date.helperText}
+              placeholder={inputTextObj.date.placeholder}
               invalid={state.seedStorage.startDate.isInvalid}
-              invalidText={inputText.date.invalidText}
-              disabled={state.seedStorage.useTSC.value}
+              invalidText={inputTextObj.date.invalidText}
+              disabled={state.seedStorage.useTSC.value && !isReview}
               autoComplete="off"
             />
           </DatePicker>
@@ -247,12 +249,12 @@ const ExtractionAndStorage = (
           >
             <DatePickerInput
               id={state.seedStorage.endDate.id}
-              labelText={inputText.date.storage.labelText.end}
-              helperText={inputText.date.helperText}
-              placeholder={inputText.date.placeholder}
+              labelText={inputTextObj.date.storage.labelText.end}
+              helperText={inputTextObj.date.helperText}
+              placeholder={inputTextObj.date.placeholder}
               invalid={state.seedStorage.endDate.isInvalid}
-              invalidText={inputText.date.invalidText}
-              disabled={state.seedStorage.useTSC.value}
+              invalidText={inputTextObj.date.invalidText}
+              disabled={state.seedStorage.useTSC.value && !isReview}
               autoComplete="off"
             />
           </DatePicker>
@@ -262,8 +264,8 @@ const ExtractionAndStorage = (
             <InlineNotification
               lowContrast
               kind="info"
-              title={inputText.date.storage.notification.title}
-              subtitle={inputText.date.storage.notification.subtitle}
+              title={inputTextObj.date.storage.notification.title}
+              subtitle={inputTextObj.date.storage.notification.subtitle}
               onCloseButtonClick={() => { setIsStorageHintOpen(false); }}
             />
           )}
