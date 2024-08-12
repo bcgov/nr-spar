@@ -384,7 +384,7 @@ public class SeedlotService {
                 parentTreeGenQual.getGeneticTypeCode(),
                 parentTreeGenQual.getGeneticWorth().getGeneticWorthCode(),
                 parentTreeGenQual.getGeneticQualityValue(),
-                // We cannot know this for sure, see explaination down below.
+                // We cannot know this for sure, see explanation down below.
                 null,
                 parentTreeGenQual.getQualityValueEstimated());
         parentTreeGenQualList.add(parentTreeGenQualDto);
@@ -395,7 +395,7 @@ public class SeedlotService {
   }
 
   /*
-   * Explaination for isTested is unknown
+   * Explanation for isTested is unknown
    * What we know: untested_ind = True if estimated = True and pt.tested_ind = False
    *
    * - If untestedInd is true and estimatedInd is true:
