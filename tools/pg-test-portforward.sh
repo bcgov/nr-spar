@@ -49,10 +49,9 @@ fi
 
 # 3. Get DB name, user and password
 echo "Getting credentials..."
-SECRETS=$(oc extract secret/nr-spar-$TARGET_ENV-database -n b9d53b-$TARGET_ENV --to=- 2> /dev/null)
-DB_NAME=$(echo $SECRETS | cut -d ' ' -f 1)
-DB_USER=$(echo $SECRETS | cut -d ' ' -f 3)
-DB_PASS=$(echo $SECRETS | cut -d ' ' -f 2)
+DB_NAME=$(oc extract secret/nr-spar-$TARGET_ENV-database -n b9d53b-$TARGET_ENV --keys=database-name --to=- 2> /dev/null)
+DB_USER=$(oc extract secret/nr-spar-$TARGET_ENV-database -n b9d53b-$TARGET_ENV --keys=database-user --to=- 2> /dev/null)
+DB_PASS=$(oc extract secret/nr-spar-$TARGET_ENV-database -n b9d53b-$TARGET_ENV --keys=database-password --to=- 2> /dev/null)
 echo "Use this information to set up the database connection with '$TARGET_ENV' on your end:"
 echo "- DB_HOST = localhost"
 echo "- DB_PORT = $PORT"
