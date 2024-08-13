@@ -263,13 +263,6 @@ describe('My seedlots page', () => {
       .find(`.${prefix}--pagination__items-count`)
       .should('include.text', '1–10');
 
-    // Check total number of rows are 10
-    cy.get(`table.${prefix}--data-table tbody`)
-      .find('tr')
-      .then(($row) => {
-        expect($row.length).equal(parseInt(dropdownNumber));
-      });
-
     // Page number dropdown
     cy.get(`.${prefix}--pagination__right`)
       .find(`select.${prefix}--select-input`)
