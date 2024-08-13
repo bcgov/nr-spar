@@ -280,4 +280,52 @@ class GeneticWorthServiceTest {
     Assertions.assertNull(summaryDto.get(1).calculatedValue());
     Assertions.assertEquals(BigDecimal.ZERO, summaryDto.get(1).testedParentTreePerc());
   }
+
+  @Test
+  @DisplayName("calculate Ne happy path should succeed")
+  void calculateNe_happyPath_shouldSucceed() {
+    BigDecimal coancestry = null;
+    BigDecimal varSumOrchGameteContr = new BigDecimal("0.03166229849840373670515625");
+    BigDecimal varSumNeNoSmpContrib = new BigDecimal("0.04141688878940975160");
+    Integer smpParentsOutside = 1;
+
+    BigDecimal neValue =
+        geneticWorthService.calculateNe(
+            coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside);
+
+    Assertions.assertNotNull(neValue);
+    Assertions.assertEquals(new BigDecimal("21.1"), neValue);
+  }
+
+  @Test
+  @DisplayName("calculate Ne with coancestry value should succeed")
+  void calculateNe_withCoancestryValue_shouldSucceed() {
+    BigDecimal coancestry = BigDecimal.ONE;
+    BigDecimal varSumOrchGameteContr = BigDecimal.ZERO;
+    BigDecimal varSumNeNoSmpContrib = BigDecimal.ZERO;
+    Integer smpParentsOutside = 0;
+
+    BigDecimal neValue =
+        geneticWorthService.calculateNe(
+            coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside);
+
+    Assertions.assertNotNull(neValue);
+    Assertions.assertEquals(new BigDecimal("0.5"), neValue);
+  }
+
+  @Test
+  @DisplayName("calculate Ne without coancestry value should succeed")
+  void calculateNe_withouCoancestryValue_shouldSucceed() {
+    BigDecimal coancestry = BigDecimal.ZERO;
+    BigDecimal varSumOrchGameteContr = new BigDecimal("0.03166229849840373670515625");
+    BigDecimal varSumNeNoSmpContrib = new BigDecimal("0.04141688878940975160");
+    Integer smpParentsOutside = 3;
+
+    BigDecimal neValue =
+        geneticWorthService.calculateNe(
+            coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside);
+
+    Assertions.assertNotNull(neValue);
+    Assertions.assertEquals(new BigDecimal("0.0"), neValue);
+  }
 }

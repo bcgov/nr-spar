@@ -75,9 +75,9 @@ public class GeneticWorthService {
     List<GeneticWorthTraitsDto> calculated = new ArrayList<>();
 
     // Iterate over all traits
-    List<GeneticWorthDto> geneticWorths = getAllGeneticWorth();
+    List<GeneticWorthDto> geneticWorthList = getAllGeneticWorth();
 
-    for (GeneticWorthDto trait : geneticWorths) {
+    for (GeneticWorthDto trait : geneticWorthList) {
       BigDecimal calculatedValue = null;
       BigDecimal percentage = calcGeneticTraitThreshold(traitsDto, trait);
 
@@ -100,33 +100,61 @@ public class GeneticWorthService {
   /**
    * Does the Ne calculation (effective population size).
    *
-   * @param traitsDto A {@link List} of {@link OrchardParentTreeValsDto} with the traits and values
-   *     to be calculated.
+   * @param coancestry The coancestry value.
+   * @param varSumOrchGameteContr The sum value of the Orchard gamete contribution.
+   * @param varSumNeNoSmpContrib The sum value of the Ne number of SMP contribution.
+   * @param smpParentsOutside The number of SMP parent tree from outside the orchard.
    * @return A {@link BigDecimal} representing the calculated value.
    */
-  public BigDecimal calculateNe(List<OrchardParentTreeValsDto> traitsDto) {
+  public BigDecimal calculateNe(
+      BigDecimal coancestry,
+      BigDecimal varSumOrchGameteContr,
+      BigDecimal varSumNeNoSmpContrib,
+      Integer smpParentsOutside) {
     SparLog.info("Started Ne calculation");
-    BigDecimal malePollenSum = reducePollenCount(traitsDto);
-    BigDecimal femaleConeSum = reduceConeCount(traitsDto);
+    BigDecimal varEffectivePopSize = null;
 
-    BigDecimal piSquareSum = BigDecimal.ZERO;
-    for (OrchardParentTreeValsDto dto : traitsDto) {
-      BigDecimal pi = calculatePi(dto.pollenCount(), dto.coneCount(), malePollenSum, femaleConeSum);
-      BigDecimal piSquare = pi.multiply(pi);
+    final int scale = 10;
+    final RoundingMode halfUp = RoundingMode.HALF_UP;
+    BigDecimal zero = BigDecimal.ZERO;
+    BigDecimal one = BigDecimal.ONE;
 
-      piSquareSum = piSquareSum.add(piSquare);
-      SparLog.debug("calculateNe - piSquareSum {}", piSquareSum);
+    if (coancestry != null) {
+      // --Effective Population Size with Coancestry considered
+      if (coancestry.compareTo(zero) == 0) {
+        varEffectivePopSize = zero;
+      } else {
+        varEffectivePopSize = new BigDecimal("0.5").divide(coancestry, scale, halfUp);
+      }
+    } else if (smpParentsOutside > 0) {
+      // --Effective Population Size with SMP (for Growth)
+      // Original equation: varEffectivePopSize = Math.round(1/(v_sum_orch_gamete_contr + (
+      // Math.power(0.25/(2*varSmpParentsOutside),2) * varSmpParentsOutside )) ,1);
+      varEffectivePopSize =
+          one.divide(
+              (varSumOrchGameteContr.add(
+                  new BigDecimal("0.25")
+                      .divide(
+                          new BigDecimal("2").multiply(new BigDecimal(smpParentsOutside)),
+                          scale,
+                          halfUp)
+                      .pow(2)
+                      .multiply(new BigDecimal(smpParentsOutside)))),
+              scale,
+              halfUp);
+    } else {
+      // --Effective Population Size
+      if (varSumOrchGameteContr.compareTo(zero) == 0) {
+        varEffectivePopSize = zero;
+      } else {
+        // varEffectivePopSize = Math.round(1 / varSumNeNoSmpContrib);
+        varEffectivePopSize = one.divide(varSumNeNoSmpContrib, scale, halfUp);
+      }
     }
 
-    if (piSquareSum.compareTo(BigDecimal.ZERO) == 0) {
-      SparLog.debug("calculateNe - piSquareSum is zero!");
-      return BigDecimal.ZERO;
-    }
+    SparLog.debug("calculateNe - neValue {}", varEffectivePopSize);
 
-    BigDecimal neValue = BigDecimal.ONE.divide(piSquareSum, 10, RoundingMode.HALF_UP);
-    SparLog.debug("calculateNe - neValue {}", neValue);
-
-    return neValue.setScale(1, RoundingMode.HALF_UP);
+    return varEffectivePopSize.setScale(1, halfUp);
   }
 
   /**
@@ -156,7 +184,7 @@ public class GeneticWorthService {
   }
 
   /**
-   * Calculate the threshold of a genetic trait. To be used to check if a given trait mets the
+   * Calculate the threshold of a genetic trait. To be used to check if a given trait met the
    * minimum of 70% of parent tree contribution.
    *
    * @param traitsDto A {@link List} of {@link OrchardParentTreeValsDto} with the traits and values
