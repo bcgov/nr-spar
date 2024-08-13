@@ -5,7 +5,7 @@ export const DATE_FORMAT = 'Y/m/d';
 export const extractorTextConfig: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'extractor-use-tsc',
-    labelText: 'The extractory agency is the Tree Seed Center (TSC)'
+    labelText: 'The extractory agency is the Tree Seed Centre (TSC)'
   },
   agencyInput: {
     titleText: 'Extractory agency acronym',
@@ -20,7 +20,7 @@ export const extractorTextConfig: ClientAndCodeInputTextType = {
 export const storageTextConfig: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'storage-use-tsc',
-    labelText: 'The seed storage agency is the Tree Seed Center (TSC)'
+    labelText: 'The seed storage agency is the Tree Seed Centre (TSC)'
   },
   agencyInput: {
     titleText: 'Seed storage agency acronym',
@@ -32,7 +32,7 @@ export const storageTextConfig: ClientAndCodeInputTextType = {
   }
 };
 
-export const inputText = {
+export const inputText = (isReview?: boolean) => ({
   extractionTitle: {
     titleText: 'Extraction information',
     subtitleText: 'Enter the extractory agency information and extraction\'s start and end dates for this seedlot'
@@ -40,8 +40,8 @@ export const inputText = {
   date: {
     extraction: {
       labelText: {
-        start: 'Extraction start date (optional)',
-        end: 'Extraction end date (optional)'
+        start: `Extraction start date${!isReview ? ' (optional)' : ''}`,
+        end: `Extraction end date${!isReview ? ' (optional)' : ''}`
       },
       notification: {
         title: 'Extraction start and end dates',
@@ -50,8 +50,8 @@ export const inputText = {
     },
     storage: {
       labelText: {
-        start: 'Storage start date (optional)',
-        end: 'Storage end date (optional)'
+        start: `Storage start date${!isReview ? ' (optional)' : ''}`,
+        end: `Storage end date${!isReview ? ' (optional)' : ''}`
       },
       notification: {
         title: 'Storage start and end dates',
@@ -66,4 +66,4 @@ export const inputText = {
     titleText: 'Temporary seed storage',
     subtitleText: 'Enter the seed storage agency information and storage\'s start and end dates for this seedlot'
   }
-};
+});

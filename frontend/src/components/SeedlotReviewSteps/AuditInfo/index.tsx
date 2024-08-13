@@ -1,10 +1,8 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
-import { DateTime as luxon } from 'luxon';
 
 import ReadOnlyInput from '../../ReadOnlyInput';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import { MONTH_DAY_YEAR } from '../../../config/DateFormat';
 
 const AuditInfo = () => {
   const {
@@ -31,11 +29,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="created-at"
             label="Created at:"
-            value={
-              seedlotData?.auditInformation.entryTimestamp
-                ? luxon.fromISO(seedlotData.auditInformation.entryTimestamp.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                : '--'
-            }
+            value={seedlotData?.auditInformation.entryTimestamp}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -53,11 +47,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="last-updated-at"
             label="Last updated at:"
-            value={
-              seedlotData?.auditInformation.updateTimestamp
-                ? luxon.fromISO(seedlotData.auditInformation.updateTimestamp.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                : '--'
-            }
+            value={seedlotData?.auditInformation.updateTimestamp}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -75,11 +65,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="submitted-at"
             label="Submitted at:"
-            value={
-              seedlotData?.declarationOfTrueInformationTimestamp
-                ? luxon.fromISO(seedlotData.declarationOfTrueInformationTimestamp.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                : '--'
-            }
+            value={seedlotData?.declarationOfTrueInformationTimestamp}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -97,11 +83,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="approved-at"
             label="Approved at:"
-            value={
-              seedlotData?.approvedTimestamp
-                ? luxon.fromISO(seedlotData.approvedTimestamp.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                : '--'
-            }
+            value={seedlotData?.approvedTimestamp ?? undefined}
             showSkeleton={isFetchingData}
           />
         </Column>

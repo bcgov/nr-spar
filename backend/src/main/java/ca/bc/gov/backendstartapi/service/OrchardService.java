@@ -1,13 +1,14 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,12 +49,20 @@ public class OrchardService {
    * @param active determine if the SPU should be active or not.
    * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
    */
-  public List<ActiveOrchardSpuEntity> findAllSpu(boolean active) {
-    SparLog.info("Finding all orchard seed planning unit by active state {}", active);
+  public List<ActiveOrchardSpuEntity> findAllSpu(Boolean active) {
+    String activeState = active == null ? "All" : active.toString();
 
-    List<ActiveOrchardSpuEntity> list =
-        activeOrchardSeedPlanningUnitRepository.findAllByActive(active);
-    SparLog.info("{} orchard seed planning unit by active state found", list.size());
+    SparLog.info("Finding all orchard seed planning unit by active state {}", activeState);
+
+    List<ActiveOrchardSpuEntity> list = new ArrayList<>();
+
+    if (active == null) {
+      list = activeOrchardSeedPlanningUnitRepository.findAll();
+    } else {
+      list = activeOrchardSeedPlanningUnitRepository.findAllByActive(active);
+    }
+    SparLog.info(
+        "{} orchard seed planning unit by active state {} found", list.size(), activeState);
 
     return list;
   }
@@ -109,25 +118,26 @@ public class OrchardService {
   }
 
   /**
-   * Finds all parent trees from every orchard with the provided vegCode.
+   * Finds all orchards with the provided vegCode from Oracle API.
    *
    * @param vegCode Orchard's identification.
-   * @return An {@link List} of {@link SameSpeciesTreeDto} from oracle-api
+   * @return An {@link List} of {@link OrchardDto} from oracle-api + spuID.
    */
-  public List<SameSpeciesTreeDto> findParentTreesByVegCode(String vegCode) {
+  public List<OrchardDto> findAllOrchardsByVegCode(String vegCode) {
     SparLog.info("Finding parent trees by veg code with code {}", vegCode);
-    List<ActiveOrchardSpuEntity> spuList = findAllSpu(true);
-    Map<String, String> orchardSpuMap = new HashMap<>();
+    List<ActiveOrchardSpuEntity> spuList = findAllSpu(null);
+    Map<String, Integer> orchardSpuMap = new HashMap<>();
 
     spuList.stream()
         .forEach(
-            spuObj ->
-                orchardSpuMap.put(
-                    spuObj.getOrchardId(), String.valueOf(spuObj.getSeedPlanningUnitId())));
+            spuObj -> orchardSpuMap.put(spuObj.getOrchardId(), spuObj.getSeedPlanningUnitId()));
 
-    List<SameSpeciesTreeDto> list =
-        oracleApiProvider.findParentTreesByVegCode(vegCode.toUpperCase(), orchardSpuMap);
-    SparLog.info("{} parent tree by veg code found.", list.size());
-    return list;
+    List<OrchardDto> orchardList = oracleApiProvider.findOrchardsByVegCode(vegCode);
+
+    orchardList.forEach(
+        orchardDto -> orchardDto.setSpuId(orchardSpuMap.getOrDefault(orchardDto.getId(), null)));
+
+    SparLog.info("{} orchards by veg code found.", orchardList.size());
+    return orchardList;
   }
 }

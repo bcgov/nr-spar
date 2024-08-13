@@ -109,7 +109,7 @@ const ContextContainerClassA = ({ children }: props) => {
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(),
+    queryFn: getVegCodes,
     select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
@@ -303,7 +303,8 @@ const ContextContainerClassA = ({ children }: props) => {
         ({
           code: orchard.id,
           description: orchard.name,
-          label: `${orchard.id} - ${orchard.name} - ${orchard.lotTypeCode} - ${orchard.stageCode}`
+          label: `${orchard.id} - ${orchard.name} - ${orchard.lotTypeCode} - ${orchard.stageCode}`,
+          spuId: orchard.spuId
         })
       ))
       .sort((a, b) => Number(a.code) - Number(b.code))

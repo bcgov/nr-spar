@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
-import { DateTime as luxon } from 'luxon';
 import { useQuery } from '@tanstack/react-query';
 
 import ReadOnlyInput from '../../../ReadOnlyInput';
@@ -8,7 +7,6 @@ import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/cont
 import { getMultiOptList } from '../../../../utils/MultiOptionsUtils';
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import getFacilityTypes from '../../../../api-service/facilityTypesAPI';
-import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 
@@ -74,7 +72,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-start-date"
             label="Storage start date"
-            value={luxon.fromISO(state.startDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
+            value={state.startDate.value}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -82,7 +80,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-end-date"
             label="Storage end date"
-            value={luxon.fromISO(state.endDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
+            value={state.endDate.value}
             showSkeleton={isFetchingData}
           />
         </Column>
