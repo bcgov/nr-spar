@@ -280,4 +280,20 @@ class GeneticWorthServiceTest {
     Assertions.assertNull(summaryDto.get(1).calculatedValue());
     Assertions.assertEquals(BigDecimal.ZERO, summaryDto.get(1).testedParentTreePerc());
   }
+
+  @Test
+  @DisplayName("calculate Ne happy path should succeed")
+  void calculateNe_happyPath_shouldSucceed() {
+    BigDecimal coancestry = null;
+    BigDecimal varSumOrchGameteContr = new BigDecimal("0.03166229849840373670515625");
+    BigDecimal varSumNeNoSmpContrib = new BigDecimal("0.04141688878940975160");
+    Integer smpParentsOutside = 1;
+
+    BigDecimal neValue =
+        geneticWorthService.calculateNe(
+            coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside);
+
+    Assertions.assertNotNull(neValue);
+    Assertions.assertEquals(new BigDecimal("21.1"), neValue);
+  }
 }
