@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AxiosError } from 'axios';
 import {
   Row, Column, TextInput, Checkbox, Tooltip,
-  InlineLoading, ActionableNotification, FlexGrid, TextInputSkeleton
+  InlineLoading, ActionableNotification, FlexGrid
 } from '@carbon/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import validator from 'validator';
@@ -15,6 +15,7 @@ import { ClientNumLocCodeType } from '../../types/ForestClientTypes/ForestClient
 import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { StringInputType } from '../../types/FormInputType';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
+import prefix from '../../styles/classPrefix';
 
 import ClientAndCodeInputProps from './definitions';
 import supportTexts, { getErrorMessageTitle } from './constants';
@@ -56,10 +57,6 @@ const ClientAndCodeInput = ({
       : supportTexts.locationCode.invalidText
   );
 
-  const [locationCodeHelperText, setLocationCodeHelperText] = useState<string>(
-    supportTexts.locationCode.helperTextDisabled
-  );
-
   useEffect(() => {
     const areValsDefault = getIsDefaultVal();
 
@@ -99,9 +96,7 @@ const ClientAndCodeInput = ({
       isInvalid
     };
 
-    setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
     setClientAndCode(clientInput, updatedLocationCode);
-
     setShowLocCodeValidationStatus(true);
   };
 
@@ -143,7 +138,7 @@ const ClientAndCodeInput = ({
       } else {
         setInvalidLocationMessage(supportTexts.locationCode.invalidLocationForSelectedAgency);
       }
-      updateAfterLocValidation(true);
+      updateAfterLocValidation(true, locationCodeInput.value);
     },
     onSuccess: (data) => {
       setShowErrorBanner(false);
@@ -195,12 +190,6 @@ const ClientAndCodeInput = ({
   });
 
   const handleDefaultCheckBox = (checked: boolean) => {
-    setLocationCodeHelperText(
-      checked
-        ? supportTexts.locationCode.helperTextEnabled
-        : supportTexts.locationCode.helperTextDisabled
-    );
-
     const updatedAgency: StringInputType = {
       ...clientInput,
       value: checked ? defaultClientNumber ?? '' : '',
@@ -240,11 +229,16 @@ const ClientAndCodeInput = ({
     }
   };
 
+  const [openAgnTooltip, setOpenAgnTooltip] = useState<boolean>(false);
+  const [openLocTooltip, setOpenLocTooltip] = useState<boolean>(false);
+
   const renderLoading = (
     isLoading: boolean,
     isSuccess: boolean,
     showLoadingStatus: boolean,
-    idPrefix: string
+    idPrefix: string,
+    crtlTooltip: boolean,
+    setCtrlTooltip: Function
   ) => {
     if (
       (isLoading || isSuccess)
@@ -254,11 +248,25 @@ const ClientAndCodeInput = ({
       const loadingStatus = isSuccess ? 'finished' : 'active';
       return (
         <Tooltip
-          className="input-loading-tooltip"
+          className={crtlTooltip ? `${prefix}--popover--open input-loading-tooltip` : 'input-loading-tooltip'}
           label={tooltipLabel}
           id={`${idPrefix}-loading-status-tooltip`}
+          // These mouse handlers are necessary because
+          // removing tabIndex=-1 would not trigger
+          // the tooltip (for some "carbon" reason)
+          onMouseOver={() => {
+            setCtrlTooltip(true);
+          }}
+          onMouseOut={() => {
+            setCtrlTooltip(false);
+          }}
         >
-          <button className="tooltip-trigger" type="button" aria-label="loading-status-display">
+          <button
+            tabIndex={-1}
+            type="button"
+            className="tooltip-trigger"
+            aria-label="loading-status-display"
+          >
             <InlineLoading
               status={loadingStatus}
             />
@@ -270,6 +278,18 @@ const ClientAndCodeInput = ({
   };
 
   const handleAgencyBlur = (value: string) => {
+    if (!value && locationCodeInput.value) {
+      setShowClientValidationStatus(false);
+      setShowLocCodeValidationStatus(false);
+      const updatedLocationCode = {
+        ...locationCodeInput,
+        isInvalid: true
+      };
+      setInvalidLocationMessage(supportTexts.locationCode.invalidEmptyAgency);
+      setClientAndCode(clientInput, updatedLocationCode);
+      return;
+    }
+
     if (!value) {
       setShowClientValidationStatus(false);
       return;
@@ -303,27 +323,13 @@ const ClientAndCodeInput = ({
     setShowLocCodeValidationStatus(true);
 
     if (clientInput.value) {
+      setClientAndCode(clientInput, updatedLocationCode);
       validateLocationCodeMutation.mutate({
         clientNumber: clientInput.value,
         locationCode: formattedCode
       });
     }
   };
-
-  if (forestClientQuery.fetchStatus === 'fetching') {
-    return (
-      <FlexGrid className="agency-information-section">
-        <Row className="agency-information-row">
-          <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
-            <TextInputSkeleton />
-          </Column>
-          <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
-            <TextInputSkeleton />
-          </Column>
-        </Row>
-      </FlexGrid>
-    );
-  }
 
   return (
     <FlexGrid className="agency-information-section">
@@ -385,7 +391,9 @@ const ClientAndCodeInput = ({
                 validateClientAcronymMutation.isLoading,
                 validateClientAcronymMutation.isSuccess,
                 showClientValidationStatus,
-                clientInput.id
+                clientInput.id,
+                openAgnTooltip,
+                setOpenAgnTooltip
               )
             }
           </div>
@@ -404,7 +412,11 @@ const ClientAndCodeInput = ({
               enableCounter
               placeholder={!clientInput.value ? '' : supportTexts.locationCode.placeholder}
               labelText={textConfig.locationCode.labelText}
-              helperText={(readOnly || (showCheckbox && isDefault)) ? null : locationCodeHelperText}
+              helperText={
+                (readOnly || (showCheckbox && isDefault))
+                  ? null
+                  : supportTexts.locationCode.helperTextEnabled
+              }
               invalid={locationCodeInput.isInvalid && !validateLocationCodeMutation.isLoading}
               invalidText={((showCheckbox && isDefault) && locationCodeInput.value === '')
                 ? supportTexts.locationCode.invalidTextInterimSpecific
@@ -413,7 +425,7 @@ const ClientAndCodeInput = ({
                 (showCheckbox && isDefault)
                 || readOnly || clientInput.isInvalid || validateLocationCodeMutation.isLoading
               }
-              disabled={!clientInput.value || (isDefault && locationCodeInput.value === '')}
+              disabled={(isDefault && locationCodeInput.value === '')}
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
               onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                 if (!e.target.readOnly) {
@@ -426,7 +438,9 @@ const ClientAndCodeInput = ({
                 validateLocationCodeMutation.isLoading,
                 validateLocationCodeMutation.isSuccess,
                 showLocCodeValidationStatus,
-                locationCodeInput.id
+                locationCodeInput.id,
+                openLocTooltip,
+                setOpenLocTooltip
               )
             }
           </div>
@@ -486,7 +500,6 @@ const ClientAndCodeInput = ({
                       formatDisplayedAcronym(client.acronym);
                       formatDisplayedLocCode(client.locationCode);
 
-                      setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
                       setClientAndCode(selectedClient, selectedLocationCode);
                     }}
                   />
