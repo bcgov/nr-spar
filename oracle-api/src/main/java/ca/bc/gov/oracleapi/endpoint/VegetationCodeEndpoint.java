@@ -106,7 +106,7 @@ public class VegetationCodeEndpoint {
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   @PaginatedViaQuery
   public List<VegetationCode> findEffectiveByCodeOrDescription(
-      @RequestParam(name = "search", defaultValue = "")
+      @RequestParam(name = "search", defaultValue = "", required = true)
           @Parameter(
               description =
                   """

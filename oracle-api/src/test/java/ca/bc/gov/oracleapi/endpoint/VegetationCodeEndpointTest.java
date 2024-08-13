@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -60,7 +61,8 @@ class VegetationCodeEndpointTest {
     mockMvc
         .perform(get("/api/vegetation-codes/C1").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andReturn();
   }
 
   @Test
@@ -82,7 +84,8 @@ class VegetationCodeEndpointTest {
                 .with(csrf().asHeader())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
-        .andExpect(content().string(""));
+        .andExpect(content().string(""))
+        .andReturn();
   }
 
   @Test
@@ -105,7 +108,8 @@ class VegetationCodeEndpointTest {
                 .with(csrf().asHeader())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andReturn();
   }
 
   @Test
@@ -121,7 +125,8 @@ class VegetationCodeEndpointTest {
                 .with(csrf().asHeader())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andReturn();
   }
 
   @Test
@@ -136,7 +141,8 @@ class VegetationCodeEndpointTest {
             get("/api/vegetation-codes?search=1&page=-1")
                 .with(csrf().asHeader())
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andReturn();
   }
 
   @Test
@@ -159,6 +165,33 @@ class VegetationCodeEndpointTest {
             get("/api/vegetation-codes?search=1&perPage=0")
                 .with(csrf().asHeader())
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Find effective by code or description happy path should succeed")
+  void findEffectiveByCodeOrDescription_happyPath_shouldSucceed() throws Exception {
+    VegetationCode vc =
+        new VegetationCode(
+            "C1",
+            "Code 1",
+            LocalDate.of(2020, 1, 1),
+            LocalDate.of(2025, 1, 1),
+            LocalDateTime.now());
+
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<VegetationCode> vegPage = new PageImpl<VegetationCode>(List.of(vc));
+
+    when(vegetationCodeRepository.findByCodeOrDescription("1", pageable)).thenReturn(vegPage);
+
+    mockMvc
+        .perform(
+            get("/api/vegetation-codes?search=1&page=0&perPage=1")
+                .with(csrf().asHeader())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andReturn();
   }
 }

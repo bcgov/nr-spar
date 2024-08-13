@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
@@ -175,4 +176,19 @@ class OrchardServiceTest {
   //   Assertions.assertEquals(testList.size(), responseFromService.size());
   //   Assertions.assertEquals(testList, responseFromService);
   // }
+
+  @Test
+  @DisplayName("Find all spu happy path should succeed")
+  void findAllSpu_happyPath_shouldSucceed() {
+    ActiveOrchardSpuEntity activeOrchardSpuEntity = mock(ActiveOrchardSpuEntity.class);
+
+    when(activeOrchardSeedPlanningUnitRepository.findAllByActive(true))
+        .thenReturn(List.of(activeOrchardSpuEntity));
+
+    List<ActiveOrchardSpuEntity> list = orchardService.findAllSpu(true);
+
+    Assertions.assertNotNull(list);
+    Assertions.assertFalse(list.isEmpty());
+    Assertions.assertEquals(1, list.size());
+  }
 }
