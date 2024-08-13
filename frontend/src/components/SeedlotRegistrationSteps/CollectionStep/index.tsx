@@ -15,7 +15,7 @@ import {
 import validator from 'validator';
 
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
-import { dateStringToISO, now } from '../../../utils/DateUtils';
+import { now, utcToIsoSlashStyle } from '../../../utils/DateUtils';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 
 import Subtitle from '../../Subtitle';
@@ -73,8 +73,8 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
 
     clonedState[dateType].value = value;
 
-    const isoStartDate = dateStringToISO(clonedState.startDate.value);
-    const isoEndDate = dateStringToISO(clonedState.endDate.value);
+    const isoStartDate = utcToIsoSlashStyle(clonedState.startDate.value);
+    const isoEndDate = utcToIsoSlashStyle(clonedState.endDate.value);
 
     const isInvalid = isoEndDate < isoStartDate;
 

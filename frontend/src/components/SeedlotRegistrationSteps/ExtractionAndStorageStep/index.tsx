@@ -13,7 +13,7 @@ import Subtitle from '../../Subtitle';
 import ScrollToTop from '../../ScrollToTop';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import { dateStringToISO, now } from '../../../utils/DateUtils';
+import { now, utcToIsoSlashStyle } from '../../../utils/DateUtils';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
 import { tscAgencyObj, tscLocationCode } from '../../../views/Seedlot/ContextContainerClassA/constants';
@@ -63,8 +63,8 @@ const ExtractionAndStorage = (
 
   // This function validates changes on both start and end dates
   const validateStorageDates = (curState: ExtractionStorageForm, extractionOrStorage: ('extraction' | 'seedStorage')) => {
-    const startDate = dateStringToISO(curState[extractionOrStorage].startDate.value);
-    const endDate = dateStringToISO(curState[extractionOrStorage].endDate.value);
+    const startDate = utcToIsoSlashStyle(curState[extractionOrStorage].startDate.value);
+    const endDate = utcToIsoSlashStyle(curState[extractionOrStorage].endDate.value);
 
     // Check if the start date is set before the end date
     if (startDate !== '' && endDate !== '') {
