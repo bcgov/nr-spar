@@ -31,9 +31,9 @@ parameters:
   - name: CPU_LIMIT
     value: 30m
   - name: MEMORY_REQUEST
-    value: 30Mi
+    value: 20Mi
   - name: MEMORY_LIMIT
-    value: 50Mi
+    value: 40Mi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"
@@ -163,6 +163,12 @@ objects:
         - type: Resource
           resource:
             name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80
+        - type: Resource
+          resource:
+            name: memory
             target:
               type: Utilization
               averageUtilization: 80

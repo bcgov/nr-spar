@@ -25,13 +25,13 @@ parameters:
     description: Where to mount the PVC, subpath (e.g. data/)
     value: /var/lib/postgresql
   - name: CPU_REQUEST
-    value: 50m
+    value: 25m
   - name: CPU_LIMIT
-    value: 115m
+    value: 75m
   - name: MEMORY_REQUEST
-    value: 150Mi
+    value: 100Mi
   - name: MEMORY_LIMIT
-    value: 250Mi
+    value: 200Mi
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
