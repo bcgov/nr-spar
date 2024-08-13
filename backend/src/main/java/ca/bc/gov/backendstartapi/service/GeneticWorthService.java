@@ -121,7 +121,7 @@ public class GeneticWorthService {
 
     if (coancestry != null) {
       // --Effective Population Size with Coancestry considered
-      if (coancestry.compareTo(zero) != 0) {
+      if (coancestry.compareTo(zero) == 0) {
         varEffectivePopSize = zero;
       } else {
         varEffectivePopSize = new BigDecimal("0.5").divide(coancestry, scale, halfUp);
