@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.type.YesNoConverter;
 
 /** This class represents a Parent Tree of an {@link Orchard} in the database. */
 @Getter
@@ -34,9 +36,11 @@ public class ParentTreeEntity {
   @Column(name = "LOCAL_NUMBER", length = 20)
   private String localNumber;
 
+  @Convert(converter = YesNoConverter.class)
   @Column(name = "ACTIVE_IND")
   private Boolean active;
 
+  @Convert(converter = YesNoConverter.class)
   @Column(name = "TESTED_IND")
   private Boolean tested;
 

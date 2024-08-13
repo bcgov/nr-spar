@@ -382,7 +382,6 @@ label.#{vars.$bcgov-prefix}--label--disabled {
   color: var(--#{vars.$bcgov-prefix}-text-disabled, #939395);
 }
 
-
 .general-data-table-pagination {
   border-top: none;
 
@@ -413,6 +412,25 @@ label.#{vars.$bcgov-prefix}--label--disabled {
   color: var(--#{vars.$bcgov-prefix}-button-danger-secondary, colors.$red-70);
 }
 
+.danger-tertiary-btn:hover,
+.danger-tertiary-btn:active {
+  background-color: var(--#{vars.$bcgov-prefix}-button-danger-secondary, colors.$red-70);
+}
+
+.danger-tertiary-btn:focus {
+  background-color: var(--#{vars.$bcgov-prefix}-button-danger-secondary, colors.$red-70);
+  box-shadow: inset 0 0 0 1px var(--#{vars.$bcgov-prefix}-button-focus-color, colors.$red-70), inset 0 0 0 2px var(--#{vars.$bcgov-prefix}-background, #FFFFFF);
+  border-color: colors.$red-70;
+}
+
 .ul-disc {
   list-style-type: disc;
+}
+
+.#{vars.$bcgov-prefix}--breadcrumb .#{vars.$bcgov-prefix}--link {
+  cursor: pointer;
+}
+
+.#{vars.$bcgov-prefix}--loading-overlay {
+  z-index: 10000;
 }
