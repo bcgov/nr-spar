@@ -727,13 +727,14 @@ const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): numbe
 
 export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
-  seedlotSpecies: MultiOptionsObj
+  seedlotSpecies: MultiOptionsObj,
+  orchardPts: string[]
 ): PtValsCalcReqPayload => {
   const { tableRowData, mixTabData } = state;
   const payload: PtValsCalcReqPayload = {
     orchardPtVals: [],
     smpMixIdAndProps: [],
-    smpParentsOutside: 0
+    smpParentsOutside: '0'
   };
   const rows = Object.values(tableRowData);
   const genWorthTypes = geneticWorthDict[seedlotSpecies.code as keyof GeneticWorthDictType];
@@ -767,7 +768,7 @@ export const generatePtValCalcPayload = (
   });
 
   // SMP Parents from Outside
-  payload.smpParentsOutside = 0;
+  payload.smpParentsOutside = getOutsideParentTreeNum(state, orchardPts);
 
   return payload;
 };

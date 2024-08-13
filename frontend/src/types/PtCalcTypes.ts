@@ -44,5 +44,5 @@ export type GeospatialRequestDto = {
 export type PtValsCalcReqPayload = {
   orchardPtVals: OrchardParentTreeValsType[],
   smpMixIdAndProps: GeospatialRequestDto[],
-  smpParentsOutside: number
+  smpParentsOutside: string
 }
