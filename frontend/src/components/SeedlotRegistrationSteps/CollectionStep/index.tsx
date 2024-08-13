@@ -300,7 +300,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
                 >
                   {
                     (coneCollectionMethodsQuery.data as MultiOptionsObj[])
-                      .sort((a,b) => a.description.localeCompare(b.description))
+                      .sort((a, b) => a.description.localeCompare(b.description))
                       .map((method) => (
                         <Checkbox
                           key={method.code}
@@ -311,7 +311,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
                           checked={state.selectedCollectionCodes.value.includes(method.code)}
                           onChange={() => handleCollectionMethods(method.code)}
                         />
-                    ))
+                      ))
                   }
                 </CheckboxGroup>
               )

@@ -1,12 +1,10 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
-import { DateTime as luxon } from 'luxon';
 import { useQuery } from '@tanstack/react-query';
 
 import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
-import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
@@ -59,32 +57,30 @@ const ExtractionStorageReviewRead = () => {
           />
         </Column>
       </Row>
-      <Row>
-        <Column className="info-col" sm={4} md={4} lg={4}>
-          <ReadOnlyInput
-            id="extraction-start-date"
-            label="Extraction start date"
-            value={
-              state.extraction.startDate.value
-                ? luxon.fromISO(state.extraction.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                : ''
-            }
-            showSkeleton={isFetchingData}
-          />
-        </Column>
-        <Column className="info-col" sm={4} md={4} lg={4}>
-          <ReadOnlyInput
-            id="extraction-end-date"
-            label="Extraction end date"
-            value={
-              state.extraction.endDate.value
-                ? luxon.fromISO(state.extraction.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                : ''
-            }
-            showSkeleton={isFetchingData}
-          />
-        </Column>
-      </Row>
+      {
+        state.extraction.startDate.value && state.extraction.endDate.value
+          ? (
+            <Row>
+              <Column className="info-col" sm={4} md={4} lg={4}>
+                <ReadOnlyInput
+                  id="extraction-start-date"
+                  label="Extraction start date"
+                  value={state.extraction.startDate.value}
+                  showSkeleton={isFetchingData}
+                />
+              </Column>
+              <Column className="info-col" sm={4} md={4} lg={4}>
+                <ReadOnlyInput
+                  id="extraction-end-date"
+                  label="Extraction end date"
+                  value={state.extraction.endDate.value}
+                  showSkeleton={isFetchingData}
+                />
+              </Column>
+            </Row>
+          )
+          : null
+      }
 
       <Divider />
 
@@ -111,32 +107,30 @@ const ExtractionStorageReviewRead = () => {
           />
         </Column>
       </Row>
-      <Row>
-        <Column className="info-col" sm={4} md={4} lg={4}>
-          <ReadOnlyInput
-            id="storage-start-date"
-            label="Storage start date"
-            value={
-              state.seedStorage.startDate.value
-                ? luxon.fromISO(state.seedStorage.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                : ''
-            }
-            showSkeleton={isFetchingData}
-          />
-        </Column>
-        <Column className="info-col" sm={4} md={4} lg={4}>
-          <ReadOnlyInput
-            id="storage-end-date"
-            label="Storage end date"
-            value={
-              state.seedStorage.endDate.value
-                ? luxon.fromISO(state.seedStorage.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                : ''
-            }
-            showSkeleton={isFetchingData}
-          />
-        </Column>
-      </Row>
+      {
+        state.seedStorage.startDate.value && state.seedStorage.endDate.value
+          ? (
+            <Row>
+              <Column className="info-col" sm={4} md={4} lg={4}>
+                <ReadOnlyInput
+                  id="storage-start-date"
+                  label="Storage start date"
+                  value={state.seedStorage.startDate.value}
+                  showSkeleton={isFetchingData}
+                />
+              </Column>
+              <Column className="info-col" sm={4} md={4} lg={4}>
+                <ReadOnlyInput
+                  id="storage-end-date"
+                  label="Storage end date"
+                  value={state.seedStorage.endDate.value}
+                  showSkeleton={isFetchingData}
+                />
+              </Column>
+            </Row>
+          )
+          : null
+      }
     </FlexGrid>
   );
 };

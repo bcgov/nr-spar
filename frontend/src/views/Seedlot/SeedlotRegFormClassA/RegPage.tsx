@@ -48,7 +48,8 @@ const RegPage = () => {
     saveProgressStatus,
     isFetchingData,
     seedlotData,
-    getFormDraftQuery
+    getFormDraftQuery,
+    seedlotSpecies
   } = useContext(ClassAContext);
 
   const reloadFormDraft = () => getFormDraftQuery.refetch();
@@ -224,7 +225,9 @@ const RegPage = () => {
                         && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC')
                       }
                       submitFn={() => {
-                        submitSeedlot.mutate(getSeedlotPayload(allStepData, seedlotNumber));
+                        submitSeedlot.mutate(
+                          getSeedlotPayload(allStepData, seedlotNumber, seedlotSpecies.code)
+                        );
                       }}
                       setStepFn={(e: number) => {
                         updateProgressStatus(e, formStep);
