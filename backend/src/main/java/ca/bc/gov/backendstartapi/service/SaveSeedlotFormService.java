@@ -82,18 +82,25 @@ public class SaveSeedlotFormService {
             seedLotStatusEntity.orElseThrow(SeedlotStatusNotFoundException::new));
       }
     } else {
-      // Revision Count verification
-      Integer prevRevCount = data.revisionCount();
-      Integer currRevCount = optionalEntityToSave.get().getRevisionCount();
 
-      if (prevRevCount != null && !prevRevCount.equals(currRevCount)) {
-        // Conflict detected
-        SparLog.info(
-            "Save progress failed due to revision count mismatch, prev revision count: {}, curr"
-                + " revision count: {}",
-            prevRevCount,
-            currRevCount);
-        throw new RevisionCountMismatchException();
+      // Revision Count verification only for pending seedlots
+      if (relatedSeedlot
+          .getSeedlotStatus()
+          .getSeedlotStatusCode()
+          .equals(Constants.PENDING_SEEDLOT_STATUS)) {
+
+        Integer prevRevCount = data.revisionCount();
+        Integer currRevCount = optionalEntityToSave.get().getRevisionCount();
+
+        if (prevRevCount != null && !prevRevCount.equals(currRevCount)) {
+          // Conflict detected
+          SparLog.info(
+              "Save progress failed due to revision count mismatch, prev revision count: {}, curr"
+                  + " revision count: {}",
+              prevRevCount,
+              currRevCount);
+          throw new RevisionCountMismatchException();
+        }
       }
 
       SparLog.info(
