@@ -66,24 +66,14 @@ public class ParentTreeService {
       varTotalPollenCount = varTotalPollenCount.add(orchardPtVals.pollenCount());
     }
 
-    // Second pass
-    BigDecimal varParentPropOrchPoll = null;
-    for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
-      BigDecimal ptPollenCount = orchardPtVals.pollenCount();
-
-      // --col:W
-      if (varTotalPollenCount.compareTo(BigDecimal.ZERO) == 0) {
-        varParentPropOrchPoll = BigDecimal.ZERO;
-      } else {
-        varParentPropOrchPoll = ptPollenCount.divide(varTotalPollenCount, DIVISION_SCALE, halfUp);
-      }
-    }
+    // Second pass - No needed, since only --col:W it's in there, which is already on the third pass
+    BigDecimal varParentPropOrchPoll = zero;
 
     // Third pass
     BigDecimal varSumOrchGameteContr = zero;
-    BigDecimal varOrchGameteContr = zero;
+    BigDecimal varOrchGameteContr;
     BigDecimal varSumNeNoSmpContrib = zero;
-    BigDecimal varFemaleCropPop = null;
+    BigDecimal varFemaleCropPop = zero;
     BigDecimal varParPropContrib = null;
     BigDecimal varNeNoSmpContrib = null;
     for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
@@ -95,16 +85,12 @@ public class ParentTreeService {
         BigDecimal ptConeCount = orchardPtVals.coneCount();
 
         // --col:V
-        if (varTotalConeCount.compareTo(BigDecimal.ZERO) == 0) {
-          varFemaleCropPop = BigDecimal.ZERO;
-        } else {
+        if (varTotalConeCount.compareTo(BigDecimal.ZERO) > 0) {
           varFemaleCropPop = ptConeCount.divide(varTotalConeCount, DIVISION_SCALE, halfUp);
         }
 
         // --col:W
-        if (varTotalConeCount.compareTo(BigDecimal.ZERO) == 0) {
-          varParentPropOrchPoll = BigDecimal.ZERO;
-        } else {
+        if (varTotalConeCount.compareTo(BigDecimal.ZERO) > 0) {
           varParentPropOrchPoll = ptPollenCount.divide(varTotalPollenCount, DIVISION_SCALE, halfUp);
         }
 
