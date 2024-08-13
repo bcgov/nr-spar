@@ -295,17 +295,19 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
                   id={state.selectedCollectionCodes.id}
                 >
                   {
-                    (coneCollectionMethodsQuery.data as MultiOptionsObj[]).map((method) => (
-                      <Checkbox
-                        key={method.code}
-                        id={`cone-collection-method-checkbox-${method.code}`}
-                        name={method.label}
-                        labelText={method.description}
-                        readOnly={isFormSubmitted && !isReview}
-                        checked={state.selectedCollectionCodes.value.includes(method.code)}
-                        onChange={() => handleCollectionMethods(method.code)}
-                      />
-                    ))
+                    (coneCollectionMethodsQuery.data as MultiOptionsObj[])
+                      .sort((a, b) => a.description.localeCompare(b.description))
+                      .map((method) => (
+                        <Checkbox
+                          key={method.code}
+                          id={`cone-collection-method-checkbox-${method.code}`}
+                          name={method.label}
+                          labelText={method.description}
+                          readOnly={isFormSubmitted && !isReview}
+                          checked={state.selectedCollectionCodes.value.includes(method.code)}
+                          onChange={() => handleCollectionMethods(method.code)}
+                        />
+                      ))
                   }
                 </CheckboxGroup>
               )

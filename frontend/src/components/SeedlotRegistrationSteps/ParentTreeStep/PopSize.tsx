@@ -8,7 +8,9 @@ import { formatEmptyStr } from '../../SeedlotReviewSteps/ParentTrees/utils';
 import ReadOnlyInput from '../../ReadOnlyInput';
 import { getOutsideParentTreeNum, validateEffectivePopSize } from './utils';
 
-const PopSize = () => {
+type PopSizeProps = { orchardPts: string[] }
+
+const PopSize = ({ orchardPts } : PopSizeProps) => {
   const {
     isFetchingData,
     isCalculatingPt,
@@ -65,7 +67,13 @@ const PopSize = () => {
           id="smp-parents-from-outside"
           label="Number of SMP parents from outside"
           value={
-            formatEmptyStr(getOutsideParentTreeNum(allStepData.parentTreeStep), true)
+            formatEmptyStr(
+              getOutsideParentTreeNum(
+                allStepData.parentTreeStep,
+                orchardPts
+              ),
+              true
+            )
           }
           showSkeleton={isFetchingData || isCalculatingPt}
         />

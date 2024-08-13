@@ -194,8 +194,8 @@
 .parent-tree-tab-container {
   padding: 2.5rem 0 0.25rem 0;
   background-color: var(--#{vars.$bcgov-prefix}-layer-01);
-  margin-left: -2rem;
-  margin-right: -2rem;
+  margin-left: -2.5rem;
+  margin-right: -2.5rem;
 
   .description-box-container {
     padding-left: 0;
@@ -344,7 +344,16 @@
         display: none;
       }
     }
+  }
 
+  .td-red-cell {
+    color: var(--#{vars.$bcgov-prefix}-text-error, #B32001);
+  }
+
+  tr:hover {
+    .td-red-cell {
+      color: var(--#{vars.$bcgov-prefix}-text-error, #B32001);
+    }
   }
 
   .#{vars.$bcgov-prefix}--overflow-menu__wrapper .#{vars.$bcgov-prefix}--btn--disabled {

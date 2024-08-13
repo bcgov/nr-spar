@@ -32,7 +32,7 @@ export default defineConfig({
     ],
     chromeWebSecurity: false,
     retries: {
-      runMode: 2
+      runMode: 0
     },
     defaultCommandTimeout: TEN_SECONDS,
     video: true,

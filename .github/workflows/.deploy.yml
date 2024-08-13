@@ -86,6 +86,7 @@ jobs:
             -p ORACLE_SYNC_USER='${{ vars.ORACLE_SYNC_USER }}'
             -p ORACLE_SYNC_PASSWORD='${{ secrets.ORACLE_SYNC_PASSWORD }}'
             -p ORACLE_CERT_SECRET='${{ secrets.ORACLE_CERT_SECRET }}'
+            -p ORACLE_HOST='${{ vars.ORACLE_HOST }}'
 
       - name: Database
         if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
@@ -148,7 +149,7 @@ jobs:
             -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
             ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
-            ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=2' || '' }}
+            ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=1' || '' }}
             ${{ matrix.parameters }}
           verification_path: ${{ matrix.verification_path }}
           verification_retry_attempts: 5

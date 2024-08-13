@@ -36,6 +36,9 @@ public class SameSpeciesTreeDto {
   @Schema(description = "The seed plan unit this tree belongs to.", example = "7")
   private Long spu;
 
+  @Schema(description = "Whether the tree is tested.", example = "True")
+  private Boolean tested;
+
   private List<ParentTreeGeneticQualityDto> parentTreeGeneticQualities;
 
   public SameSpeciesTreeDto() {

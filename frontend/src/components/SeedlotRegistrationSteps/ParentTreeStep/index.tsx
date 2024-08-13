@@ -15,7 +15,7 @@ import {
 import {
   View, Settings, Upload, Add
 } from '@carbon/icons-react';
-import { getAllParentTrees } from '../../../api-service/orchardAPI';
+import { getAllParentTrees } from '../../../api-service/parentTreeAPI';
 import { postFile } from '../../../api-service/seedlotAPI';
 import CheckboxType from '../../../types/CheckboxType';
 import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUtils';
@@ -50,17 +50,21 @@ import {
   reviewDataInstructions, calculateInstructions
 } from './constants';
 import {
-  TabTypes, HeaderObj, RowItem
+  TabTypes, HeaderObj, RowItem,
+  GeneticWorthDictType
 } from './definitions';
 import {
-  getTabString, processOrchards, combineObjectValues, calcSummaryItems,
+  getTabString, combineObjectValues, calcSummaryItems,
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
   addNewMixRow, calcMixTabInfoItems, fillMixTable,
-  hasParentTreesForSelectedOrchards
+  getParentTreesForSelectedOrchards,
+  areOrchardsValid
 } from './utils';
 import EditGenWorth from './EditGenWorth';
 
 import './styles.scss';
+import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
+import getGeneticWorthList from '../../../api-service/GeneticWorthAPI';
 
 type ParentTreeStepProps = {
   // Determines whether this component is used on the seedlot review screen
@@ -93,9 +97,6 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     isFetchingData
   } = useContext(ClassAContext);
 
-  const [orchardsData, setOrchardsData] = useState<string[]>(
-    () => processOrchards(orchardStep)
-  );
   const [currentTab, setCurrentTab] = useState<TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
     structuredClone(headerTemplate)
@@ -137,10 +138,8 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
 
   useEffect(
     () => {
-      const processedOrchard = processOrchards(orchardStep);
-      const disabled = processedOrchard.length === 0;
+      const disabled = !areOrchardsValid(orchardStep);
       setDisableOptions(disabled);
-      setOrchardsData(processedOrchard);
     },
     [orchardStep.orchards]
   );
@@ -162,35 +161,17 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     [state.tableRowData]
   );
 
-  // Effects 'SMP mix' tab
-  useEffect(
-    () => {
-      sliceTableRowData(
-        Object.values(state.mixTabData),
-        currentMixPage,
-        currMixPageSize,
-        true,
-        'parentTreeNumber',
-        setSlicedMixRows
-      );
-      calcMixTabInfoItems(
-        disableOptions,
-        summaryConfig,
-        setSummaryConfig,
-        applicableGenWorths,
-        weightedGwInfoItems,
-        setWeightedGwInfoItems,
-        popSizeAndDiversityConfig,
-        setPopSizeAndDiversityConfig,
-        state
-      );
-    },
-    [state.mixTabData, disableOptions]
-  );
+  const orchardQuery = useQuery({
+    queryKey: ['orchards', seedlotSpecies.code],
+    queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
+    enabled: !isFormSubmitted,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
 
   // Parent trees Query
   const allParentTreeQuery = useQuery({
-    queryKey: ['orchards', 'parent-trees', 'vegetation-codes', seedlotSpecies.code],
+    queryKey: ['parent-trees', 'vegetation-codes', seedlotSpecies.code],
     queryFn: () => (
       getAllParentTrees(seedlotSpecies.code)
     ),
@@ -198,24 +179,71 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
+  // Effects 'SMP mix' tab
+  useEffect(
+    () => {
+      if (Object.keys(state.allParentTreeData).length > 0) {
+        sliceTableRowData(
+          Object.values(state.mixTabData),
+          currentMixPage,
+          currMixPageSize,
+          true,
+          'parentTreeNumber',
+          setSlicedMixRows
+        );
+        calcMixTabInfoItems(
+          disableOptions,
+          summaryConfig,
+          setSummaryConfig,
+          applicableGenWorths,
+          weightedGwInfoItems,
+          setWeightedGwInfoItems,
+          setPopSizeAndDiversityConfig,
+          state,
+          getParentTreesForSelectedOrchards(
+            orchardStep,
+            state.allParentTreeData
+          )
+        );
+      }
+    },
+    [state.mixTabData, disableOptions, state.allParentTreeData]
+  );
+
+  const geneticWorthListQuery = useQuery({
+    queryKey: ['genetic-worth'],
+    queryFn: getGeneticWorthList,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
   /**
    * Populate table when data is first fetched
    * Re-populate table if it is emptied by users and data is cached
    */
   useEffect(() => {
-    const disabled = orchardsData.length === 0;
     if (
-      !disabled
+      !disableOptions
       && (Object.keys(state.tableRowData).length === 0 || controlReviewData)
-      && allParentTreeQuery.isFetched
-      && allParentTreeQuery.data
+      && allParentTreeQuery.status === 'success'
+      && orchardQuery.status === 'success'
+      && geneticWorthListQuery.status === 'success'
     ) {
-      if (hasParentTreesForSelectedOrchards(orchardsData, allParentTreeQuery.data)) {
+      // List of parent tree numbers
+      const parentTreesUnderSelectedOrchards = getParentTreesForSelectedOrchards(
+        orchardStep,
+        allParentTreeQuery.data
+      );
+
+      if (parentTreesUnderSelectedOrchards.length > 0) {
         setDisableOptions(false);
         processParentTreeData(
           allParentTreeQuery.data,
+          parentTreesUnderSelectedOrchards,
+          geneticWorthListQuery.data,
+          seedlotSpecies,
           state,
-          orchardsData,
+          orchardStep.orchards.primaryOrchard.value.spuId,
           currentPage,
           currPageSize,
           setSlicedRows,
@@ -229,10 +257,12 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
         setIsOrchardEmpty(true);
       }
     }
-  }, [state.tableRowData, allParentTreeQuery.isFetched]);
+  }, [
+    state.tableRowData, allParentTreeQuery.status,
+    disableOptions, geneticWorthListQuery.status
+  ]);
 
   useEffect(() => configHeaderOpt(
-    geneticWorthDict,
     seedlotSpecies,
     headerConfig,
     genWorthInfoItems,
@@ -270,7 +300,15 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
-      fillMixTable(res.data, applicableGenWorths, state, setStepData);
+      fillMixTable(
+        res.data,
+        applicableGenWorths,
+        state,
+        setStepData,
+        // Assume the data will be loaded once user is able to upload files
+        geneticWorthListQuery.data ?? [],
+        orchardStep.orchards.primaryOrchard.value.spuId
+      );
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
@@ -370,7 +408,9 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                 </Row>
                 <UnrelatedGenWorth
                   isRead={isReviewRead}
-                  validGenWorth={geneticWorthDict[seedlotSpecies.code]}
+                  validGenWorth={
+                    geneticWorthDict[seedlotSpecies.code as keyof GeneticWorthDictType]
+                  }
                 />
                 <InfoSectionDivider />
               </>
@@ -386,7 +426,11 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
         {
           isReviewDisplay && !isReviewRead
             ? (
-              <PopSize />
+              <PopSize orchardPts={getParentTreesForSelectedOrchards(
+                orchardStep,
+                state.allParentTreeData
+              )}
+              />
             )
             : (
               <InfoSection
@@ -468,8 +512,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
               <>
                 <DetailSection>
                   <DescriptionBox
-                    header="Breeding value of SMP mix used"
-                    description="Check the breeding value of SMP mix used on parent"
+                    header="Breeding value of SMP mix used on parent"
                   />
                   <InfoSection
                     infoItems={
@@ -489,7 +532,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                     {/* -------- SMP mix mean geospatial data -------- */}
                     <Row className="info-section-sub-title">
                       <DescriptionBox
-                        header="SMP Mix geospatial summary"
+                        header="SMP mix geospatial summary"
                       />
                     </Row>
                     {
@@ -561,12 +604,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
             </TabList>
             <FlexGrid className="parent-tree-tab-container">
               {
-                renderNotification(
-                  state,
-                  currentTab,
-                  orchardsData,
-                  setStepData
-                )
+                renderNotification(currentTab)
               }
               <InputErrorNotification state={state} headerConfig={headerConfig} />
               <UploadWarnNotification
@@ -699,8 +737,13 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                       </TableToolbar>
                     </div>
                     {
-                      // Check if it's fetching parent tree data
-                      (!disableOptions && allParentTreeQuery.isFetching)
+                      // Check if it's fetching parent tree and dependencies data
+                      (!disableOptions
+                       && (allParentTreeQuery.fetchStatus === 'fetching'
+                          || orchardQuery.fetchStatus === 'fetching'
+                          || geneticWorthListQuery.fetchStatus === 'fetching'
+                       )
+                      )
                         ? (
                           <DataTableSkeleton
                             showToolbar={false}
@@ -744,9 +787,8 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                                   slicedMixRows,
                                   headerConfig,
                                   applicableGenWorths,
-                                  state,
-                                  setStepData,
-                                  seedlotSpecies,
+                                  orchardQuery.data ?? [],
+                                  geneticWorthListQuery.data ?? [],
                                   isFormSubmitted,
                                   (isReviewDisplay && !isReviewRead)
                                 )

@@ -41,7 +41,7 @@ const SeedlotTable = (
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(),
+    queryFn: getVegCodes,
     select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS, // will not refetch for 3 hours
     cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
@@ -102,7 +102,7 @@ const SeedlotTable = (
    * Show skeleton while fetching.
    */
   if (getAllSeedlotQueryByUser.isFetching || vegCodeQuery.isFetching) {
-    return <DataTableSkeleton showToolbar={false} />;
+    return <DataTableSkeleton showToolbar={false} showHeader={false} />;
   }
 
   /**
