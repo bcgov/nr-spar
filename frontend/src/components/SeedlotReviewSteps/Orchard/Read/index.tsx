@@ -19,7 +19,7 @@ const OrchardReviewRead = () => {
         </Column>
       </Row>
       <Row>
-        <Column sm={4} md={4} lg={4}>
+        <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id={state.orchards.primaryOrchard.id}
             label="Orchard ID or number"
@@ -31,7 +31,7 @@ const OrchardReviewRead = () => {
         state.orchards.secondaryOrchard.value.label
           ? (
             <Row>
-              <Column sm={4} md={4} lg={4}>
+              <Column className="info-col" sm={4} md={4} lg={4}>
                 <ReadOnlyInput
                   id={state.orchards.secondaryOrchard.id}
                   label="Orchard ID or number"

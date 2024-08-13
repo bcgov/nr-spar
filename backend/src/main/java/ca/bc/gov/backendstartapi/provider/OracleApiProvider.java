@@ -6,13 +6,11 @@ import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -93,34 +91,26 @@ public class OracleApiProvider implements Provider {
    * @return An {@link List} of {@link ParentTreeDto}
    */
   @Override
-  public List<SameSpeciesTreeDto> findParentTreesByVegCode(
-      String vegCode, Map<String, String> orchardSpuMap) {
-    String oracleApiUrl =
-        String.format("%s/api/orchards/parent-trees/vegetation-codes/{vegCode}", rootUri);
+  public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
+    String oracleApiUrl = String.format("%s/api/orchards/vegetation-codes/{vegCode}", rootUri);
 
-    SparLog.info(
-        "Starting {} - {} request to {}", PROVIDER, "findParentTreesByVegCode", oracleApiUrl);
-
-    HttpEntity<Map<String, String>> requestEntity =
-        new HttpEntity<>(orchardSpuMap, addHttpHeaders());
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "findOrchardsByVegCode", oracleApiUrl);
 
     try {
-      ResponseEntity<List<SameSpeciesTreeDto>> parentTreesResult =
+      ResponseEntity<List<OrchardDto>> orchardsResult =
           restTemplate.exchange(
               oracleApiUrl,
-              HttpMethod.POST,
-              requestEntity,
-              new ParameterizedTypeReference<List<SameSpeciesTreeDto>>() {},
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<List<OrchardDto>>() {},
               createParamsMap("vegCode", vegCode));
-      List<SameSpeciesTreeDto> list = parentTreesResult.getBody();
+      List<OrchardDto> list = orchardsResult.getBody();
       int size = list == null ? 0 : list.size();
-      SparLog.info(
-          "POST spu to oracle to get parent trees with vegCode - Success response with size: {}!",
-          size);
+      SparLog.info("GET orchards by vegCode from Oracle - Success response with size: {}!", size);
       return list;
     } catch (HttpClientErrorException httpExc) {
       SparLog.error(
-          "POST spu to oracle to get parent trees with vegCode - Response code error: {}, {}",
+          "GET orchards by vegCode from Oracle - Response code error: {}, {}",
           httpExc.getStatusCode(),
           httpExc.getMessage());
       throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
