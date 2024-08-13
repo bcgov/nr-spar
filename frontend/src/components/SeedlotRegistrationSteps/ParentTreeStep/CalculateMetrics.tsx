@@ -6,7 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import { PtValsCalcReqPayload } from '../../../types/PtCalcTypes';
 import postForCalculation from '../../../api-service/parentTreeAPI';
-import { fillCalculatedInfo, generatePtValCalcPayload } from './utils';
+import { fillCalculatedInfo, generatePtValCalcPayload, getParentTreesForSelectedOrchards } from './utils';
 
 type props = {
   disableOptions: boolean,
@@ -17,6 +17,7 @@ type props = {
 const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: props) => {
   const {
     allStepData: { parentTreeStep: state },
+    allStepData: { orchardStep },
     genWorthInfoItems,
     setGenWorthInfoItems,
     seedlotSpecies,
@@ -71,7 +72,11 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
           calculateGenWorthQuery.mutate(
             generatePtValCalcPayload(
               state,
-              seedlotSpecies
+              seedlotSpecies,
+              getParentTreesForSelectedOrchards(
+                orchardStep,
+                state.allParentTreeData
+              )
             )
           );
 
