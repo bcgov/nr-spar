@@ -3,13 +3,11 @@ import prefix from '../../../src/styles/classPrefix';
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP success on parent)', () => {
   let regFormData: {
     parentTree: {
-      title: string;
-      subtitle: string;
-      coneTitle: string;
-      coneSubtitle: string;
-      coneErrorMsg: string;
-      pollenErrorMsg: string;
-      conePollenErrorMsg: string;
+      smpSuccessTitle: string;
+      smpSuccessSubtitle: string;
+      smpSuccessErrorMsg: string;
+      nonOrchardErrorMsg: string;
+      smpSuccessNonOrchardErrorMsg: string;
     }
   };
 
@@ -35,5 +33,15 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
           .click();
       });
     });
+  });
+
+  it('Page title and subtitles', () => {
+    cy.get('.parent-tree-step-table-container')
+      .find('h4')
+      .should('have.text', regFormData.parentTree.smpSuccessTitle);
+
+    cy.get('.parent-tree-step-table-container')
+      .find(`p.${prefix}--data-table-header__description`)
+      .should('have.text', regFormData.parentTree.smpSuccessSubtitle);
   });
 });
