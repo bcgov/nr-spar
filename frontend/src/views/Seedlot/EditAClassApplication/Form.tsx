@@ -49,7 +49,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(),
+    queryFn: getVegCodes,
     select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
@@ -165,7 +165,6 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
               <Row className="title-row">
                 <PageTitle
                   title="Applicant and seedlot information"
-                  subtitle="Edit your seedlot's applicant and seedlot information"
                 />
               </Row>
             </>
