@@ -17,7 +17,6 @@ const Dashboard = () => (
       <Column>
         <PageTitle
           title="Dashboard"
-          subtitle=""
         />
       </Column>
     </Row>

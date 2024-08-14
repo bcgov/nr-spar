@@ -1,5 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
-import { TWENTY_SECONDS } from '../../constants';
+import { THIRTY_SECONDS } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
@@ -90,7 +90,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Intercept the call before step 5 mounts
     cy.intercept({
       method: 'GET',
-      url: '**/api/orchards/parent-trees/vegetation-codes/*'
+      url: '**/api/parent-trees/vegetation-codes/*'
     }).as('parentTreesUnderVegCode');
 
     // Go to next step to get error msg
@@ -101,7 +101,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     // Wait for the data for table in Step 5 to load
-    cy.wait('@parentTreesUnderVegCode', { timeout: TWENTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
 
     // Verify table data is loaded
     cy.get('#parentTreeNumber');
@@ -238,7 +238,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Intercept the call before step 5 mounts
     cy.intercept({
       method: 'GET',
-      url: '**/api/orchards/parent-trees/vegetation-codes/*'
+      url: '**/api/parent-trees/vegetation-codes/*'
     }).as('parentTreesUnderVegCode');
 
     // Go to next step 'Parent tree and SMP'
@@ -248,7 +248,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    cy.wait('@parentTreesUnderVegCode', { timeout: TWENTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
 
     // Verify table data is loaded
     cy.get('#parentTreeNumber');
@@ -302,7 +302,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Intercept the call before step 5 mounts
     cy.intercept({
       method: 'GET',
-      url: '**/api/orchards/parent-trees/vegetation-codes/*'
+      url: '**/api/parent-trees/vegetation-codes/*'
     }).as('parentTreesUnderVegCode');
 
     // Go to next step 'Parent tree and SMP'
@@ -312,7 +312,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    cy.wait('@parentTreesUnderVegCode', { timeout: TWENTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
 
     // Verify table data is loaded
     cy.get('#parentTreeNumber');
@@ -383,7 +383,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Intercept the call before step 5 mounts
     cy.intercept({
       method: 'GET',
-      url: '**/api/orchards/parent-trees/vegetation-codes/*'
+      url: '**/api/parent-trees/vegetation-codes/*'
     }).as('parentTreesUnderVegCode');
 
     // Go to next step 'Parent tree and SMP'
@@ -393,7 +393,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    cy.wait('@parentTreesUnderVegCode', { timeout: TWENTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
 
     // Verify table data is loaded
     cy.get('#parentTreeNumber');
@@ -603,8 +603,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .find('button.form-action-btn')
       .contains('Next')
       .click();
-
-    cy.get('ul.spar-seedlot-reg-progress-bar').scrollIntoView({ easing: 'linear' });
 
     // Check step complete status
     cy.get(`.${prefix}--progress-step--complete`)

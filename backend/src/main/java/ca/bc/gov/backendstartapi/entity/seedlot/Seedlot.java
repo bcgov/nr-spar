@@ -154,6 +154,9 @@ public class Seedlot implements Serializable {
   @Column(name = "pollen_contamination_mthd_code", length = 4)
   private String pollenContaminationMethodCode;
 
+  @Column(name = "coancestry", precision = 20, scale = 10)
+  private BigDecimal coancestry;
+
   // endregion
 
   // region Parent tree & SMP

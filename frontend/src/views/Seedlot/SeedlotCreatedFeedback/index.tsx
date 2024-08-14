@@ -95,7 +95,7 @@ const SeedlotCreatedFeedback = () => {
                   size="lg"
                   className="btn-scf"
                 >
-                  Seedlot&apos;s main screen
+                  Seedlots main screen
                 </Button>
               </Column>
             </Row>

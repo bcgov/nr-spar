@@ -16,7 +16,7 @@ import './styles.scss';
 
 interface PageTitleProps {
   title: string;
-  subtitle: string | React.ReactNode;
+  subtitle?: string | React.ReactNode;
   enableFavourite?: boolean;
   activity?: string;
 }
@@ -80,7 +80,11 @@ const PageTitle = ({
             : null
         }
       </div>
-      <Subtitle text={subtitle} />
+      {
+        subtitle
+          ? <Subtitle text={subtitle} />
+          : null
+      }
     </Column>
   );
 };
