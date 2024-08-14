@@ -5,6 +5,7 @@ import ca.bc.gov.oracleapi.dto.GeospatialRequestDto;
 import ca.bc.gov.oracleapi.dto.GeospatialRespondDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeByVegCodeDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.oracleapi.dto.ParentTreeNodeDto;
 import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
 import ca.bc.gov.oracleapi.entity.projection.ParentTreeProj;
 import ca.bc.gov.oracleapi.repository.ParentTreeRepository;
@@ -37,78 +38,141 @@ public class ParentTreeService {
 
     List<ParentTreeEntity> ptEntityList = parentTreeRepository.findAllByIdIn(idList);
 
+    Optional<ParentTreeEntity> hasAnyNullElevation =
+        ptEntityList.stream().filter(tree -> tree.getElevation() == null).findAny();
+
+    Map<Long, ParentTreeNodeDto> map;
+
+    // If there's one or more null elevation, go up on the hierarchy
+    if (hasAnyNullElevation.isPresent()) {
+      map = checkParentTreeHierarchy(ptEntityList);
+      //SparLog.info("final map list = {}", map.values());
+    } else {
+      map = new HashMap<>();
+      ptEntityList.forEach((pt) -> map.put(pt.getId(), new ParentTreeNodeDto(pt)));
+    }
+
     List<GeospatialRespondDto> resultList = new ArrayList<>();
+    for (Map.Entry<Long, ParentTreeNodeDto> entry : map.entrySet()) {
+      Long parentTreeId = entry.getKey();
+      int latitudeDegrees = 0;
+      int latitudeMinutes = 0;
+      int latitudeSeconds = 0;
+      int longitudeDegrees = 0;
+      int longitudeMinutes = 0;
+      int longitudeSeconds = 0;
 
-    Boolean isEmpty = ptEntityList.stream().filter(tree -> tree.getElevation() == null).count() == 0;
+      // navigate the tree here!
+      ParentTreeNodeDto root = entry.getValue();
+      root.print(0);
+      int elevation = root.getParentTreeElevation();
+      SparLog.info("meanElevation {}", elevation);
 
-    Integer count = 1;
+      GeospatialRespondDto dto =
+          new GeospatialRespondDto(
+              parentTreeId,
+              latitudeDegrees,
+              latitudeMinutes,
+              latitudeSeconds,
+              longitudeDegrees,
+              longitudeMinutes,
+              longitudeSeconds,
+              elevation);
 
-    Integer countCtrl = 0;
-
-
-    List<ParentTreeEntity> finaList = new ArrayList<>();
-
-    if (isEmpty) {
-      finaList.addAll(ptEntityList);
+      resultList.add(dto);
     }
-
-    while(!isEmpty && countCtrl < 5) {
-      List<Long> testList = new ArrayList<>();
-      for(ParentTreeEntity ptEntity: ptEntityList) {
-        if (ptEntity.getElevation() == null) {
-          if (ptEntity.getFemaleParentTreeId() != null) {
-            testList.add(ptEntity.getFemaleParentTreeId());
-          }
-          if (ptEntity.getMaleParentTreeId() != null) {
-            testList.add(ptEntity.getMaleParentTreeId());
-          }
-        } else {
-          finaList.add(ptEntity);
-        }
-      }
-      // testList = ptEntityList.stream().filter(tree -> tree.getElevation() == null).map(ParentTreeEntity::getId).toList();
-      SparLog.info("test list = {}", testList);
-      ptEntityList = parentTreeRepository.findAllByIdIn(testList);
-      SparLog.info("cur list = {}", ptEntityList);
-      isEmpty = ptEntityList.stream().filter(tree -> tree.getElevation() == null).count() == 0;
-      if (isEmpty) {
-        finaList.addAll(ptEntityList);
-      }
-      SparLog.info("is empty {}", isEmpty);
-      count++;
-      countCtrl++;
-      SparLog.info("hierarchy level {}", count);
-    }
-
-    SparLog.info("final list = {}", finaList);
-
-    finaList.forEach(
-        (pt) -> {
-          GeospatialRespondDto dto =
-              new GeospatialRespondDto(
-                  pt.getId(),
-                  Optional.ofNullable(pt.getLatitudeDegrees()).orElse(0),
-                  Optional.ofNullable(pt.getLatitudeMinutes()).orElse(0),
-                  Optional.ofNullable(pt.getLatitudeSeconds()).orElse(0),
-                  Optional.ofNullable(pt.getLongitudeDegrees()).orElse(0),
-                  Optional.ofNullable(pt.getLongitudeMinutes()).orElse(0),
-                  Optional.ofNullable(pt.getLongitudeSeconds()).orElse(0),
-                  Optional.ofNullable(pt.getElevation()).orElse(0));
-
-          resultList.add(dto);
-        });
 
     SparLog.info("{} records found for lat long data", resultList.size());
     return resultList;
   }
 
-  // private List<ParentTreeEntity> findUpperHierarchyTrees(List<ParentTreeEntity> pt) {
-  //   List<Long> testList = new ArrayList<>();
+  private Map<Long, ParentTreeNodeDto> checkParentTreeHierarchy(
+      List<ParentTreeEntity> ptEntityList) {
+    int maxLevel = 5;
 
-  //   testList = pt.stream().filter(tree -> tree.getElevation() == null).map(ParentTreeEntity::getId).toList();
+    Map<Long, ParentTreeNodeDto> resultMap = new HashMap<>();
+    Map<Long, List<Long>> parentTreeRelationMap = new HashMap<>();
 
-  //   return parentTreeRepository.findAllByIdIn(testList);
-  // }
+    // Create root level
+    for (ParentTreeEntity ptEntity : ptEntityList) {
+      resultMap.putIfAbsent(ptEntity.getId(), new ParentTreeNodeDto(ptEntity));
+    }
+
+    for (int i = 0; i < maxLevel; i++) {
+      SparLog.info("hierarchy level {}", i);
+
+      List<Long> testList = new ArrayList<>();
+      for (ParentTreeEntity ptEntity : ptEntityList) {
+        if (ptEntity.getElevation() == null) {
+          parentTreeRelationMap.put(ptEntity.getId(), new ArrayList<>());
+
+          if (ptEntity.getFemaleParentTreeId() != null) {
+            testList.add(ptEntity.getFemaleParentTreeId());
+            parentTreeRelationMap.get(ptEntity.getId()).add(ptEntity.getFemaleParentTreeId());
+          }
+          if (ptEntity.getMaleParentTreeId() != null) {
+            testList.add(ptEntity.getMaleParentTreeId());
+            parentTreeRelationMap.get(ptEntity.getId()).add(ptEntity.getMaleParentTreeId());
+          }
+        }
+      }
+
+      List<ParentTreeEntity> nextLevelList = parentTreeRepository.findAllByIdIn(testList);
+      // SparLog.info("nextLevelList list = {}", nextLevelList);
+
+      for (ParentTreeEntity ptEntity : nextLevelList) {
+        // SparLog.info("Looking for root node id {}", ptEntity.getId());
+        for (Map.Entry<Long, List<Long>> entry : parentTreeRelationMap.entrySet()) {
+          if (entry.getValue().contains(ptEntity.getId())) {
+            // SparLog.info("Found list contains (parentTreeRelationMap)! list: {}, key: {}", entry.getValue(), entry.getKey());
+            // does the magic
+            Long originalPtId = entry.getKey();
+            
+            // it should not be null
+            if (resultMap.get(originalPtId) == null) {
+              for (Map.Entry<Long, List<Long>> entryTwo : parentTreeRelationMap.entrySet()) {
+                if (entryTwo.getValue().contains(originalPtId)) {
+                  // SparLog.info("Maybe this is the root!? {}", entryTwo.getKey());
+                  originalPtId = entryTwo.getKey();
+                  break;
+                }
+              }
+              //throw new RuntimeException("Original Parent Tree Node root is null!");
+            }
+            // female is always the first
+            if (entry.getValue().size() > 0) {
+              Long female = entry.getValue().get(0);
+              if (female.equals(ptEntity.getId())) {
+                // SparLog.info("{} is female!", ptEntity.getId());
+                resultMap.get(originalPtId).add(female, ptEntity);
+              }
+            }
+            // male is optional
+            if (entry.getValue().size() > 1) {
+              Long male = entry.getValue().get(1);
+              if (male.equals(ptEntity.getId())) {
+                // SparLog.info("{} is male!", ptEntity.getId());
+                resultMap.get(originalPtId).add(male, ptEntity);
+              }
+            }
+            break;
+          }
+        }
+      }
+
+      boolean allElevationFound =
+          nextLevelList.stream().filter(tree -> tree.getElevation() == null).count() == 0;
+      if (allElevationFound) {
+        // SparLog.info("All elevations has been found. Leaving!");
+        break;
+      } else {
+        // SparLog.info("Not all elevations has been found. Going up on the hierarchy!");
+        ptEntityList = new ArrayList<>(nextLevelList);
+      }
+    }
+
+    return resultMap;
+  }
 
   /**
    * Find all parent trees under a vegCode.
