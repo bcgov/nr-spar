@@ -79,7 +79,7 @@ SELECT
     s.applicant_client_number,
     s.applicant_email_address,
     s.applicant_locn_code                AS applicant_client_locn,
-    s.approved_timestamp,
+    s.approved_timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles' AS approved_timestamp,
     replace(s.approved_userid, '\', '@') approved_userid  -- 'Replacing @ to \ for Provider@User
 	,CASE WHEN s.bc_source_ind THEN 'Y' ELSE 'N' END as bc_source_ind
 	,S.bec_version_id
@@ -99,7 +99,7 @@ SELECT
 	,S.collection_elevation_max
 	,S.collection_elevation_min
 	,CASE WHEN s.seedlot_status_code = 'PND' THEN drft.collection_end_date
-          ELSE s.collection_end_date
+          ELSE s.collection_end_date::date
      END                                        as collection_end_date
 	,s.collection_latitude_code
 	,s.collection_latitude_deg			   		as collection_lat_deg
@@ -110,7 +110,7 @@ SELECT
 	,s.collection_longitude_min            		as collection_long_min
 	,s.collection_longitude_sec            		as collection_long_sec
 	,CASE WHEN s.seedlot_status_code = 'PND' THEN drft.collection_start_date
-          ELSE s.collection_start_date
+          ELSE s.collection_start_date::date
      END                                        as collection_start_date
 	,CASE WHEN s.seedlot_status_code = 'PND' THEN drft.cone_collection_method_code
           ELSE scm1.cone_collection_method_code
@@ -120,16 +120,16 @@ SELECT
      END                                        as cone_collection_method2_code
 	,s.contaminant_pollen_bv
 	,CASE WHEN s.controlled_cross_ind = True THEN 'Y' WHEN  controlled_cross_ind = False THEN 'N' ELSE '' END as CONTROLLED_CROSS_IND
-	,s.declared_timestamp
+	,s.declared_timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles' AS declared_timestamp
 	,REPLACE(s.declared_userid,'\', '@') declared_userid  -- 'Replacing @ to \ for Provider@User
 	,s.effective_pop_size
 	,s.elevation
 	,s.elevation_max
 	,s.elevation_min
-	,s.entry_timestamp
+	,s.entry_timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles' AS entry_timestamp
 	,REPLACE(s.entry_userid,'\', '@') entry_userid  -- 'Replacing @ to \ for Provider@User
-	,S.extraction_end_date
-	,S.extraction_st_date
+	,S.extraction_end_date::date
+	,S.extraction_st_date::date
 	,CASE WHEN s.seedlot_status_code = 'PND' THEN drft.extrct_cli_number
           ELSE s.extractory_client_number 
      END                       as extrct_cli_number
@@ -143,9 +143,9 @@ SELECT
      END                        as interm_facility_code
 	,s.interm_strg_locn_code           			as interm_strg_client_locn
 	,S.interm_strg_client_number        
-	,S.interm_strg_end_date
+	,S.interm_strg_end_date::date
 	,S.interm_strg_locn
-	,S.interm_strg_st_date
+	,S.interm_strg_st_date::date
 	,S.latitude_deg_max
 	,S.latitude_deg_min
 	,S.latitude_degrees
@@ -193,7 +193,7 @@ SELECT
 	,s.temporary_strg_start_date::date  as temporary_storage_start_date
 	,CASE WHEN s.to_be_registrd_ind THEN 'Y' Else 'N' END as to_be_registrd_ind
 	,s.total_parent_trees	
-	,s.update_timestamp
+	,s.update_timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles' AS update_timestamp
 	,REPLACE(s.update_userid,'\', '@') update_userid  -- 'Replacing @ to \ for Provider@User
 	,s.variant                                          
 	,s.vegetation_code

@@ -12,7 +12,7 @@ import {
 } from '@carbon/icons-react';
 import { Beforeunload } from 'react-beforeunload';
 
-import { getSeedlotById } from '../../../api-service/seedlotAPI';
+import { getSeedlotById, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
@@ -66,6 +66,7 @@ import {
 } from './utils';
 import { GenWorthValType } from './definitions';
 import { SaveStatusModalText } from './constants';
+import { completeProgressConfig } from '../ContextContainerClassA/constants';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
@@ -326,6 +327,35 @@ const SeedlotReviewContent = () => {
     }
   });
 
+  const updateDraftMutation = useMutation({
+    mutationFn: (
+      // It will be used later at onSuccess
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _variables: PutTscSeedlotMutationObj
+    ) => putAClassSeedlotProgress(
+      seedlotNumber ?? '',
+      {
+        allStepData,
+        progressStatus: completeProgressConfig,
+        // We don't know the previous revision count
+        revisionCount: -1
+      }
+    ),
+    onSuccess: (_data, variables) => (
+      tscSeedlotMutation.mutate(variables)
+    ),
+    onError: (err: AxiosError) => {
+      toast.error(
+        <ErrorToast
+          title="Edit seedlot failed"
+          subtitle={`Cannot save seedlot. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    },
+    retry: 0
+  });
+
   const statusOnlyMutaion = useMutation({
     mutationFn: (
       { seedlotNum, statusOnSave }: Omit<PutTscSeedlotMutationObj, 'payload'>
@@ -349,6 +379,9 @@ const SeedlotReviewContent = () => {
     }
   });
 
+  /**
+   * The handler for the button that is floating on the bottom right.
+   */
   const handleEditSaveBtn = () => {
     // If the form is in read mode, then enable edit mode only.
     if (isReadMode) {
@@ -361,11 +394,14 @@ const SeedlotReviewContent = () => {
 
     if (isFormDataValid) {
       const payload = generatePaylod();
-      tscSeedlotMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'SUB', payload });
+      updateDraftMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'SUB', payload });
       setIsReadMode(!isReadMode);
     }
   };
 
+  /**
+   * The handler for the send back to pending or approve buttons.
+   */
   const handleSaveAndStatus = (statusOnSave: StatusOnSaveType) => {
     if (isReadMode) {
       statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave });
@@ -373,7 +409,7 @@ const SeedlotReviewContent = () => {
       const isFormDataValid = verifyFormData();
       if (isFormDataValid) {
         const payload = generatePaylod();
-        tscSeedlotMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave, payload });
+        updateDraftMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave, payload });
       }
     }
   };
@@ -412,7 +448,11 @@ const SeedlotReviewContent = () => {
   return (
     <FlexGrid className="seedlot-review-grid">
       <Loading
-        active={tscSeedlotMutation.isLoading || isFetchingData}
+        active={
+          updateDraftMutation.isLoading
+          || tscSeedlotMutation.isLoading
+          || isFetchingData
+        }
       />
       <Button
         kind="secondary"
@@ -686,7 +726,7 @@ const SeedlotReviewContent = () => {
                       closeSaveStatusModal();
                       handleSaveAndStatus('PND');
                     }}
-                    disabled={tscSeedlotMutation.isLoading}
+                    disabled={tscSeedlotMutation.isLoading || updateDraftMutation.isLoading}
                   >
                     Send back to pending
                   </Button>
@@ -699,7 +739,7 @@ const SeedlotReviewContent = () => {
                       handleSaveAndStatus('APP');
                     }}
                     renderIcon={Checkmark}
-                    disabled={tscSeedlotMutation.isLoading}
+                    disabled={tscSeedlotMutation.isLoading || updateDraftMutation.isLoading}
                   >
                     Approve seedlot
                   </Button>

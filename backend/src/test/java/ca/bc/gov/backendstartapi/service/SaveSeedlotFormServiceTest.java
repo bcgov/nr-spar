@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
@@ -31,6 +32,7 @@ class SaveSeedlotFormServiceTest {
   @Mock SaveSeedlotProgressRepositoryClassA saveSeedlotProgressRepositoryClassA;
   @Mock SeedlotRepository seedlotRepository;
   @Mock LoggedUserService loggedUserService;
+  @Mock SeedlotStatusService seedlotStatusService;
 
   private SaveSeedlotFormService saveSeedlotFormService;
 
@@ -38,13 +40,20 @@ class SaveSeedlotFormServiceTest {
 
   private Seedlot testSeedlot = new Seedlot(SEEDLOT_NUMBER);
 
+  private SeedlotStatusEntity pndStatus = new SeedlotStatusEntity("PND", null, null);
+
   @BeforeEach
   void setup() {
     saveSeedlotFormService =
         new SaveSeedlotFormService(
-            saveSeedlotProgressRepositoryClassA, seedlotRepository, loggedUserService);
+            saveSeedlotProgressRepositoryClassA,
+            seedlotRepository,
+            loggedUserService,
+            seedlotStatusService);
 
     when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
+    when(seedlotStatusService.findById(any())).thenReturn(Optional.of(pndStatus));
 
     testSeedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
   }
@@ -71,6 +80,8 @@ class SaveSeedlotFormServiceTest {
   @Test
   @DisplayName("Save seedlot progress with missing seedlot should succeed.")
   void saveSeedlotProgress_shouldSucceed() throws Exception {
+
+    testSeedlot.setSeedlotStatus(pndStatus);
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(testSeedlot));
 

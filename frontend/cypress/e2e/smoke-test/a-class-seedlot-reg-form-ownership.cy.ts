@@ -289,7 +289,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.saveSeedlotRegFormProgress();
   });
 
-  it.only('Funding source and method of payment default values and change the values', () => {
+  it('Funding source and method of payment default values and change the values', () => {
     // Expand the funding source combo box
     cy.get('#ownership-funding-source-0')
       .should('have.value', '')
