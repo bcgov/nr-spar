@@ -23,7 +23,7 @@ jobs:
       - uses: bcgov-nr/action-builder-ghcr@v2.2.0
         id: build
         with:
-          build_args: |
+          build_args:
             --build-arg BUILD_NUMBER=${{ github.event.number }}
             "BUILDKIT_INLINE_CACHE=1"
           package: ${{ matrix.package }}
