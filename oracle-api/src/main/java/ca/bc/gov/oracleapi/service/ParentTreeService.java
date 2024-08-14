@@ -35,11 +35,54 @@ public class ParentTreeService {
     SparLog.info("Getting lat long elevation data for {} parent tree id(s)", ptIds);
     List<Long> idList = ptIds.stream().map(GeospatialRequestDto::parentTreeId).toList();
 
-    List<ParentTreeEntity> ptEntityList = parentTreeRepository.findAllIn(idList);
+    List<ParentTreeEntity> ptEntityList = parentTreeRepository.findAllByIdIn(idList);
 
     List<GeospatialRespondDto> resultList = new ArrayList<>();
 
-    ptEntityList.forEach(
+    Boolean isEmpty = ptEntityList.stream().filter(tree -> tree.getElevation() == null).count() == 0;
+
+    Integer count = 1;
+
+    Integer countCtrl = 0;
+
+
+    List<ParentTreeEntity> finaList = new ArrayList<>();
+
+    if (isEmpty) {
+      finaList.addAll(ptEntityList);
+    }
+
+    while(!isEmpty && countCtrl < 5) {
+      List<Long> testList = new ArrayList<>();
+      for(ParentTreeEntity ptEntity: ptEntityList) {
+        if (ptEntity.getElevation() == null) {
+          if (ptEntity.getFemaleParentTreeId() != null) {
+            testList.add(ptEntity.getFemaleParentTreeId());
+          }
+          if (ptEntity.getMaleParentTreeId() != null) {
+            testList.add(ptEntity.getMaleParentTreeId());
+          }
+        } else {
+          finaList.add(ptEntity);
+        }
+      }
+      // testList = ptEntityList.stream().filter(tree -> tree.getElevation() == null).map(ParentTreeEntity::getId).toList();
+      SparLog.info("test list = {}", testList);
+      ptEntityList = parentTreeRepository.findAllByIdIn(testList);
+      SparLog.info("cur list = {}", ptEntityList);
+      isEmpty = ptEntityList.stream().filter(tree -> tree.getElevation() == null).count() == 0;
+      if (isEmpty) {
+        finaList.addAll(ptEntityList);
+      }
+      SparLog.info("is empty {}", isEmpty);
+      count++;
+      countCtrl++;
+      SparLog.info("hierarchy level {}", count);
+    }
+
+    SparLog.info("final list = {}", finaList);
+
+    finaList.forEach(
         (pt) -> {
           GeospatialRespondDto dto =
               new GeospatialRespondDto(
@@ -58,6 +101,14 @@ public class ParentTreeService {
     SparLog.info("{} records found for lat long data", resultList.size());
     return resultList;
   }
+
+  // private List<ParentTreeEntity> findUpperHierarchyTrees(List<ParentTreeEntity> pt) {
+  //   List<Long> testList = new ArrayList<>();
+
+  //   testList = pt.stream().filter(tree -> tree.getElevation() == null).map(ParentTreeEntity::getId).toList();
+
+  //   return parentTreeRepository.findAllByIdIn(testList);
+  // }
 
   /**
    * Find all parent trees under a vegCode.

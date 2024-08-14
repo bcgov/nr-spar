@@ -41,7 +41,7 @@ class ParentTreeServiceTest {
     ptreeEntity.setLongitudeSeconds(0);
     ptreeEntity.setElevation(451);
 
-    when(parentTreeRepository.findAllIn(List.of(4110L))).thenReturn(List.of(ptreeEntity));
+    when(parentTreeRepository.findAllByIdIn(List.of(4110L))).thenReturn(List.of(ptreeEntity));
 
     List<GeospatialRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new GeospatialRequestDto(4110L));
@@ -62,7 +62,7 @@ class ParentTreeServiceTest {
   @Test
   @DisplayName("getPtGeoSpatialData_emptyTest")
   void getPtGeoSpatialData_emptyTest() {
-    when(parentTreeRepository.findAllIn(List.of(4110L))).thenReturn(List.of());
+    when(parentTreeRepository.findAllByIdIn(List.of(4110L))).thenReturn(List.of());
 
     List<GeospatialRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new GeospatialRequestDto(4110L));
