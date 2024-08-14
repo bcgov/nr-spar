@@ -23,7 +23,7 @@ const awsconfig = {
     domain: env.VITE_AWS_DOMAIN || 'prod-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com',
     scope: ['openid'],
     redirectSignIn: `${window.location.origin}/`,
-    redirectSignOut: env.VITE_REDIRECT_SIGN_OUT || signOutUrl,
+    redirectSignOut: signOutUrl,
     responseType: 'code'
   },
   federationTarget: 'COGNITO_USER_POOLS'
