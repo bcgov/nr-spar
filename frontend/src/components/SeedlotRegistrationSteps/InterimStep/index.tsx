@@ -18,7 +18,7 @@ import ScrollToTop from '../../ScrollToTop';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
 
 import getFacilityTypes from '../../../api-service/facilityTypesAPI';
-import { now, utcToIsoSlashStyle } from '../../../utils/DateUtils';
+import { now } from '../../../utils/DateUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
@@ -80,16 +80,16 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
       clonedState.endDate.value = stringDate;
     }
 
-    const isoStartDate = utcToIsoSlashStyle(clonedState.startDate.value);
-    const isoEndDate = utcToIsoSlashStyle(clonedState.endDate.value);
-
-    const isInvalid = validateStorageDates(isoStartDate, isoEndDate);
+    const isInvalid = validateStorageDates(
+      clonedState.startDate.value,
+      clonedState.endDate.value
+    );
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
 
     // Validate if end date is after collection end date
     if (!isStart && !isInvalid) {
-      clonedState.endDate.isInvalid = isoEndDate < utcToIsoSlashStyle(endDate.value);
+      clonedState.endDate.isInvalid = clonedState.endDate.value < endDate.value;
     }
     setStepData('interimStep', clonedState);
   };
