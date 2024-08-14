@@ -27,7 +27,6 @@ export const utcToApStyle = (utcDate: string | null | undefined): string => {
  * Convert UTC timestamp to ISO 8601 style with slashes (e.g. 2023/10/26)
  */
 export const utcToIsoSlashStyle = (utcDate: string | null | undefined): string => {
-  console.log(utcDate);
   if (!utcDate) {
     return '';
   }

@@ -111,51 +111,57 @@ def read_settings():
         print(f"A fatal error has occurred when trying to load settings.yml ({type(err)}): {err}")
         
 
-def main() -> None:
-    definition_of_yes = ["Y","YES","1","T","TRUE","t","true"]
+def main() -> int:
+    try:
+        definition_of_yes = ["Y","YES","1","T","TRUE","t","true"]
+        job_return_code = 0
 
-    build_number = get_build_number()
-    print("<------------------ b.u.i.l.d  n.u.m.b.e.r ----------------->")
-    print(f"Running Sync BUILD NUMBER: {build_number}")
-    print("<------------------ b.u.i.l.d  n.u.m.b.e.r ----------------->")
+        build_number = get_build_number()
+        print("<------------------ b.u.i.l.d  n.u.m.b.e.r ----------------->")
+        print(f"Running Sync BUILD NUMBER: {build_number}")
+        print("<------------------ b.u.i.l.d  n.u.m.b.e.r ----------------->")
 
-    # print(os.environ.get("TEST_MODE"))
-    if os.environ.get("TEST_MODE") is None:
-        print("Error: test mode variable is None")
-    elif os.environ.get("EXECUTION_ID") is None:
-        print("Error: EXECUTION_ID is None, no execution defined to be executed in this run.")
-    else:
-        this_is_a_test = os.environ.get("TEST_MODE")
-        settings = read_settings()
-        print("<------------------ settings ----------------->")
-        print(settings)
-        print("<------------------ settings ----------------->")
-        if this_is_a_test in definition_of_yes:
-            print("Executing in Test mode")
-            required_variables_exists()
-            testPostgresConnection(settings["postgres"])
-            testOracleConnection(settings["oracle"])
-            # Vault disabled
-            # testVault()
-        else:            
-            print("-------------------------------------")
-            print("Starting ETL main process ")
-            print("-------------------------------------")
-            
-            dbOracle = generate_db_config("ORACLE","THE",settings["oracle"]) 
-            dbPostgres = generate_db_config("POSTGRES","spar",settings["postgres"])
-            
-            execute_etl(dbPostgres, dbOracle)
+        # print(os.environ.get("TEST_MODE"))
+        if os.environ.get("TEST_MODE") is None:
+            print("Error: test mode variable is None")
+        elif os.environ.get("EXECUTION_ID") is None:
+            print("Error: EXECUTION_ID is None, no execution defined to be executed in this run.")
+        else:
+            this_is_a_test = os.environ.get("TEST_MODE")
+            settings = read_settings()
+            print("<------------------ settings ----------------->")
+            print(settings)
+            print("<------------------ settings ----------------->")
+            if this_is_a_test in definition_of_yes:
+                print("Executing in Test mode")
+                required_variables_exists()
+                testPostgresConnection(settings["postgres"])
+                testOracleConnection(settings["oracle"])
+                # Vault disabled
+                # testVault()
+            else:            
+                print("-------------------------------------")
+                print("Starting ETL main process ")
+                print("-------------------------------------")
+                
+                dbOracle = generate_db_config("ORACLE","THE",settings["oracle"]) 
+                dbPostgres = generate_db_config("POSTGRES","spar",settings["postgres"])
+                
+                job_return_code = execute_etl(dbPostgres, dbOracle)
 
-            print("-------------------------------------")
-            print("ETL Main process finished ")
-            print("-------------------------------------")
+                print("-------------------------------------")
+                print("ETL Main process finished ")
+                print("-------------------------------------")
+        return job_return_code
+    
+    except Exception as err:
+        return 1 #failure
 
 # MAIN Execution
-def execute_etl(dbPostgres, dbOracle) -> None:
+def execute_etl(dbPostgres, dbOracle):
     loggingBasicConfig(level=loggingDEBUG, stream=sys.stdout)
-    data_sync.execute_instance( oracle_config = dbOracle, postgres_config = dbPostgres ,track_config = dbPostgres)
+    return data_sync.execute_instance( oracle_config = dbOracle, postgres_config = dbPostgres ,track_config = dbPostgres)
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
 
