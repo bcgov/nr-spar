@@ -8,7 +8,8 @@ import {
   InlineLoading,
   InlineNotification,
   ActionableNotification,
-  Loading
+  Loading,
+  ProgressIndicatorSkeleton
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
@@ -89,17 +90,23 @@ const RegPage = () => {
         </Row>
         <Row>
           <Column className="seedlot-registration-progress">
-            <SeedlotRegistrationProgress
-              progressStatus={
-                seedlotData?.seedlotStatus.seedlotStatusCode === 'PND' || seedlotData?.seedlotStatus.seedlotStatusCode === 'INC'
+            {
+            seedlotData
+              ? (
+                <SeedlotRegistrationProgress
+                  progressStatus={
+                seedlotData.seedlotStatus.seedlotStatusCode === 'PND' || seedlotData.seedlotStatus.seedlotStatusCode === 'INC'
                   ? progressStatus
                   : completeProgressConfig
               }
-              interactFunction={(e: number) => {
-                updateProgressStatus(e, formStep);
-                setStep((e - formStep));
-              }}
-            />
+                  interactFunction={(e: number) => {
+                    updateProgressStatus(e, formStep);
+                    setStep((e - formStep));
+                  }}
+                />
+              )
+              : <ProgressIndicatorSkeleton />
+          }
           </Column>
         </Row>
         {
