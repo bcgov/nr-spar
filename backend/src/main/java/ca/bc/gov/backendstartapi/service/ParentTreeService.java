@@ -39,7 +39,8 @@ public class ParentTreeService {
   static BigDecimal PERC_DIVISOR = new BigDecimal(100);
   static BigDecimal HALF_DIVISOR = new BigDecimal(2);
   static BigDecimal PROP_DIVISOR = new BigDecimal(200);
-  static BigDecimal MAX_PROPORTION = new BigDecimal(1);
+  static BigDecimal ONE = BigDecimal.ONE;
+  static RoundingMode halfUp = RoundingMode.HALF_UP;
 
   /**
    * Does the calculation for each genetic trait. PS: if the threshold of 70% of contribution from
@@ -55,7 +56,72 @@ public class ParentTreeService {
         ptVals.orchardPtVals().size(),
         ptVals.smpMixIdAndProps().size());
 
-    BigDecimal neValue = geneticWorthService.calculateNe(ptVals.orchardPtVals());
+    final BigDecimal zero = BigDecimal.ZERO;
+    
+    // First pass
+    BigDecimal varTotalConeCount = zero;
+    BigDecimal varTotalPollenCount = zero;
+    for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
+      varTotalConeCount = varTotalConeCount.add(orchardPtVals.coneCount());
+      varTotalPollenCount = varTotalPollenCount.add(orchardPtVals.pollenCount());
+    }
+
+    // Second pass - No needed, since only --col:W it's in there, which is already on the third pass
+    BigDecimal varParentPropOrchPoll = zero;
+
+    // Third pass
+    BigDecimal varSumOrchGameteContr = zero;
+    BigDecimal varOrchGameteContr;
+    BigDecimal varSumNeNoSmpContrib = zero;
+    BigDecimal varFemaleCropPop = zero;
+    BigDecimal varParPropContrib = null;
+    BigDecimal varNeNoSmpContrib = null;
+    for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
+      boolean hasConeCount = orchardPtVals.coneCount().compareTo(BigDecimal.ZERO) > 0;
+      boolean hasPollenCount = orchardPtVals.pollenCount().compareTo(BigDecimal.ZERO) > 0;
+      // --Ignore rows without cone or pollen count
+      if (hasConeCount || hasPollenCount) {
+        BigDecimal ptPollenCount = orchardPtVals.pollenCount();
+        BigDecimal ptConeCount = orchardPtVals.coneCount();
+
+        // --col:V
+        if (varTotalConeCount.compareTo(BigDecimal.ZERO) > 0) {
+          varFemaleCropPop = ptConeCount.divide(varTotalConeCount, DIVISION_SCALE, halfUp);
+        }
+
+        // --col:W
+        if (varTotalConeCount.compareTo(BigDecimal.ZERO) > 0) {
+          varParentPropOrchPoll = ptPollenCount.divide(varTotalPollenCount, DIVISION_SCALE, halfUp);
+        }
+
+        // --col:AE
+        if (varTotalPollenCount.compareTo(BigDecimal.ZERO) == 0) {
+          varParPropContrib = varFemaleCropPop;
+        } else {
+          varParPropContrib =
+              varFemaleCropPop
+                  .add(varParentPropOrchPoll)
+                  .divide(new BigDecimal("2"), DIVISION_SCALE, halfUp);
+        }
+
+        // --col:AO
+        varNeNoSmpContrib = varParPropContrib.pow(2);
+        varSumNeNoSmpContrib = varSumNeNoSmpContrib.add(varNeNoSmpContrib);
+
+        // --col:AQ
+        varOrchGameteContr =
+            varFemaleCropPop
+                .add(new BigDecimal("0.75").multiply(varParentPropOrchPoll))
+                .divide(new BigDecimal(2))
+                .pow(2);
+        varSumOrchGameteContr = varSumOrchGameteContr.add(varOrchGameteContr);
+      }
+    }
+
+    BigDecimal coancestry = null;
+    BigDecimal neValue =
+        geneticWorthService.calculateNe(
+            coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, ptVals.smpParentsOutside());
 
     CalculatedParentTreeValsDto calculatedVals = new CalculatedParentTreeValsDto();
     calculatedVals.setNeValue(neValue);
@@ -104,7 +170,7 @@ public class ParentTreeService {
         oracleDtoList.stream()
             .collect(Collectors.toMap(GeospatialOracleResDto::parentTreeId, Function.identity()));
 
-    // Accumulators of weigthed values, convert DMS to minutes (legacy algo) then sum it up.
+    // Accumulators of weighted values, convert DMS to minutes (legacy algo) then sum it up.
     BigDecimal meanLatMinSum = BigDecimal.ZERO;
     BigDecimal meanLongMinSum = BigDecimal.ZERO;
     BigDecimal meanElevationSum = BigDecimal.ZERO;
@@ -124,7 +190,7 @@ public class ParentTreeService {
       // Definition: weighted value = proportion * value
 
       BigDecimal proportion = dto.proportion();
-      if (proportion.compareTo(MAX_PROPORTION) >= 0) {
+      if (proportion.compareTo(ONE) >= 0) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             String.format(
@@ -247,7 +313,7 @@ public class ParentTreeService {
        *  STEP 2
        *  AG:
        *  v_p_contrib_lat_no_smp_poll :=
-       *      v_coll_lat * (v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200));
+       *      v_coll_lat * (varParPropContrib-((v_female_crop_pop*v_a_smp_success_pct)/200));
        *
        *  STEP 1
        *  AJ:
@@ -285,7 +351,7 @@ public class ParentTreeService {
       // Mean Long = SUM(Wtd. Long. with parent and SMP pollen)
       // Wtd Long. with parent and SMP pollen is defined in Certification Template Col w/ id
       // AN
-      // Calculations are similar to those of Lat's, but wiht long values
+      // Calculations are similar to those of Lat's, but with long values
       BigDecimal smpMixLong = smpMixGeoData.getMeanLongitude();
 
       BigDecimal smpPollWtdContribLong =
@@ -304,7 +370,7 @@ public class ParentTreeService {
       // Mean Elev. = SUM(Wtd. elev with parent and SMP pollen)
       // Wtd elev. with parent and SMP pollen is defined in Certification Template Col w/ id
       // AL
-      // Calculations are similar to those of Lat's, but wiht elevation values
+      // Calculations are similar to those of Lat's, but with elevation values
       BigDecimal smpMixElev = new BigDecimal(smpMixGeoData.getMeanElevation());
 
       BigDecimal smpPollWtdContribElev =
@@ -339,7 +405,7 @@ public class ParentTreeService {
   /**
    * Calculate the proportion for parent contribution without SMP Pollen.
    *
-   * @return prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
+   * @return prop = varParPropContrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
    */
   private BigDecimal calcProportion(
       OrchardParentTreeValsDto ptValDto, BigDecimal femaleCropPop, BigDecimal totalPollenCount) {
@@ -358,12 +424,12 @@ public class ParentTreeService {
     }
 
     /*
-     * REFERENCE v_p_prop_contrib
+     * REFERENCE varParPropContrib
      * --col:AE
      * IF v_total_pollen_count = 0 THEN
-     *  v_p_prop_contrib := v_female_crop_pop;
+     *  varParPropContrib := v_female_crop_pop;
      * ELSE
-     *  v_p_prop_contrib := (v_female_crop_pop + v_parent_prop_orch_poll) / 2;
+     *  varParPropContrib := (v_female_crop_pop + v_parent_prop_orch_poll) / 2;
      */
     BigDecimal parentPropContrib;
     if (totalPollenCount.equals(BigDecimal.ZERO)) {
@@ -374,7 +440,7 @@ public class ParentTreeService {
 
     BigDecimal smpSuccessPerc = new BigDecimal(ptValDto.smpSuccessPerc()).divide(PERC_DIVISOR);
 
-    // prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
+    // prop = varParPropContrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
     BigDecimal prop =
         parentPropContrib.subtract((femaleCropPop).multiply(smpSuccessPerc).divide(PROP_DIVISOR));
 
