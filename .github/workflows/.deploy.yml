@@ -127,7 +127,7 @@ jobs:
               -p FAM_MODDED_ZONE=${{ needs.init.outputs.fam-modded-zone }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
-              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
+              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ secrets.VITE_USER_POOLS_WEB_CLIENT_ID }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
