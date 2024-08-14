@@ -3,9 +3,9 @@ SELECT
 , sgw.genetic_worth_code
 , sgw.genetic_quality_value                genetic_worth_rtng                   
 , REPLACE(sgw.entry_userid,'\', '@') as entry_userid
-, sgw.entry_timestamp
+, sgw.entry_timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles' AS entry_timestamp
 , REPLACE(sgw.update_userid,'\', '@') as update_userid
-, sgw.update_timestamp
+, sgw.update_timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles' AS update_timestamp
 , sgw.revision_count
  FROM spar.seedlot_genetic_worth sgw
  JOIN spar.seedlot s

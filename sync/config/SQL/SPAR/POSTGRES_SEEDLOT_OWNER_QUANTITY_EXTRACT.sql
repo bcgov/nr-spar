@@ -60,12 +60,7 @@ SELECT drft.seedlot_number
   , json_array_elements(cast(all_step_data->'ownershipStep' as json)) ownerdata
  WHERE drft.seedlot_number = %(p_seedlot_number)s
    AND s.seedlot_status_code = 'PND'
-   AND ownerdata->'ownerAgency'->>'isInvalid' = 'false'
-   AND ownerdata->'ownerCode'->>'isInvalid' = 'false'
-   AND ownerdata->'ownerPortion'->>'isInvalid' = 'false'
-   AND ownerdata->'reservedPerc'->>'isInvalid' = 'false'
-   AND ownerdata->'surplusPerc'->>'isInvalid' = 'false'
-   AND ownerdata->'fundingSource'->>'isInvalid' = 'false'
+   AND NOT(drft.all_step_data @? '$.ownershipStep[*].*.isInvalid ? (@ == true)')
 ORDER BY 1
        , 2
        , 3

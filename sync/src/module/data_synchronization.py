@@ -37,6 +37,7 @@ def execute_instance(oracle_config, postgres_config, track_config):
     current_cwd = path.join(path.abspath(path.dirname(__file__).split('src')[0]) , "config")
     logger.info('Initializing Tracking Database Connection')
     is_error = False
+    job_return_code = 1 #fail
     
     with db_conn.database_connection(track_config) as track_db_conn:
         temp_time = time.time()
@@ -66,7 +67,9 @@ def execute_instance(oracle_config, postgres_config, track_config):
             #if not data_sync_ctl.validate_execution_map(execution_map):
             #    raise ETLConfigurationException ("ETL configuration validation failed")
             
-            process_seedlots(oracle_config, postgres_config, track_config, track_db_conn, schedule_times)
+            seedlot_metrics = process_seedlots(oracle_config, postgres_config, track_config, track_db_conn, schedule_times)
+            if "ERROR" in seedlot_metrics:
+                raise Exception(seedlot_metrics["ERROR"])
         
         # Exception when validate_execution_map is false
         except ETLConfigurationException:
@@ -83,10 +86,12 @@ def execute_instance(oracle_config, postgres_config, track_config):
         logger.info('***** ETL Process finished with error *****')
         logger.info(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
         run_status = "FAILURE"
+        job_return_code = 1
     else:
         stored_metrics["time_process"]=timedelta(seconds=sync_elapsed_time)
         print_process_metrics(stored_metrics)
         run_status = "SUCCESS"
+        job_return_code = 0
     
     data_sync_ctl.update_execution_log(database_conn=track_db_conn, 
                     database_schema=track_config['schema'],
@@ -95,6 +100,7 @@ def execute_instance(oracle_config, postgres_config, track_config):
                     run_status=run_status)
 
     logger.info('***** Finish ETL Run *****')
+    return job_return_code
 
 def identifyQueryParams(query, db_type, params) -> object: 
     if db_type == 'ORACLE':
@@ -352,6 +358,8 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                             logger.critical("A fatal error has occurred", exc_info = True)
                             log_message =f"Error type: {type(err)}: {err}" 
                             metrics['end_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                            metrics.setdefault('ERROR', '')
+                            metrics['ERROR'] += log_message + "\r\n"
                             data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],metrics)
                     seedlot_metrics['processes'] = processlst
                     seedlotlst.append(seedlot_metrics)
@@ -361,6 +369,8 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                 logger.critical("A fatal error has occurred", exc_info = True)
                 log_message =f"Error type: {type(err)}: {err}" 
                 metrics['end_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                metrics.setdefault('ERROR', '')
+                metrics['ERROR'] += log_message + "\r\n"
                 data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],metrics)
             
             #data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
