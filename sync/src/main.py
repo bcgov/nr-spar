@@ -137,7 +137,6 @@ def main() -> int:
                 required_variables_exists()
                 testPostgresConnection(settings["postgres"])
                 testOracleConnection(settings["oracle"])
-                job_return_code = 1
                 # Vault disabled
                 # testVault()
             else:            
