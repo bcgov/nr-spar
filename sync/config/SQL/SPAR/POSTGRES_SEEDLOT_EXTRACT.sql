@@ -32,11 +32,11 @@ WITH seedlot_coll_methods
             else null 
        end as secondary_orchard_id
      , CAST(case when all_step_data->'collectionStep'->'startDate'->>'isInvalid' = 'false'
-                 then all_step_data->'collectionStep'->'startDate'->>'value'
+                 then NULLIF(all_step_data->'collectionStep'->'startDate'->>'value','')
                  else null 
                   end AS DATE)  as collection_start_date
      , CAST(case when all_step_data->'collectionStep'->'endDate'->>'isInvalid' = 'false'
-                 then all_step_data->'collectionStep'->'endDate'->>'value'
+                 then NULLIF(all_step_data->'collectionStep'->'endDate'->>'value','')
                  else null
                   end AS DATE) as collection_end_date
      , case when all_step_data->'collectionStep'->'collectorAgency'->>'isInvalid' = 'false'
