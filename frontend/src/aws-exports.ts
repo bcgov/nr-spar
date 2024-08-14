@@ -4,13 +4,17 @@ import { env } from './env';
 const ZONE = env.VITE_ZONE ? env.VITE_ZONE.toLocaleLowerCase() : 'dev';
 const retUrlEnv = ZONE !== 'prod' && ZONE !== 'test' ? 'dev' : ZONE;
 
+const retUrlString = ZONE === 'prod'
+  ? 'https://loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/logout'
+  : `https://${retUrlEnv}.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/logout`;
+
 // [https://logon7.gov.bc.ca] for PROD and [https://logontest7.gov.bc.ca] for everyting else
 const logoutDomain = ZONE === 'prod' ? 'https://logon7.gov.bc.ca' : 'https://logontest7.gov.bc.ca';
 
 const signOutUrl = [
   `${logoutDomain}/clp-cgi/logoff.cgi`,
   '?retnow=1',
-  `&returl=https://${retUrlEnv}.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/logout`,
+  `&returl=${retUrlString}`,
   `?redirect_uri=${window.location.origin}/`
 ].join('');
 
