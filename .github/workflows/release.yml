@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'The tag set to deploy; e.g. prod or PR number'
+        description: 'The tag set to deploy; e.g. latest or PR number'
         required: true
 
 concurrency:

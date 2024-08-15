@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 # Receive build number as argument, retain as environment variable
-ARG BUILD_NUMBER=0
+ARG BUILD_NUMBER
 ENV BUILD_NUMBER=${BUILD_NUMBER}
 
 # Packages and nonroot user
