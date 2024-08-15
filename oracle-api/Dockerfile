@@ -2,16 +2,14 @@ FROM ghcr.io/graalvm/native-image:22.3.3 AS build
 
 # Copy
 WORKDIR /app
-COPY pom.xml mvnw ./
-COPY src ./src
-COPY .mvn/ ./.mvn
-COPY InstallCert.java .
+COPY . ./
 
 # Build
 RUN ./mvnw package -Pnative -DskipTests -Dskip.unit.tests=true && \
-  javac InstallCert.java
+    javac InstallCert.java
 
-  ### Deployer
+
+### Deployer
 FROM eclipse-temurin:17.0.11_9-jdk-jammy AS deploy
 
 # Java vars
