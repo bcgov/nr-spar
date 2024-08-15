@@ -6,12 +6,10 @@ set -eux
 # Run and verify job
 
 # Login
-if [ ! -z "${1}" ]; then
-  echo "Missing oc_token secret"
-  exit 1
+if [ ! -z "${1:-}" ]; then
+  oc login --token=${1} --server=https://api.silver.devops.gov.bc.ca:6443
+  oc project  #Safeguard!
 fi
-oc login --token=${{ secrets.oc_token }} --server=https://api.silver.devops.gov.bc.ca:6443
-oc project  #Safeguard!
 
 # Create job
 CRONJOB=nr-spar-1502-sync
