@@ -2622,22 +2622,6 @@ CREATE TRIGGER trg_seedlot_audit_DIU
  AFTER INSERT OR UPDATE OR DELETE ON spar.seedlot 
  FOR EACH ROW EXECUTE PROCEDURE spar.seedlot_if_modified_func();
 
-create table spar.ETL_EXECUTION_LOG(
-from_timestamp timestamp not null,
-to_timestamp   timestamp not null,
-run_status varchar(100) not null,
-updated_at  timestamp   default now() not null,
-created_at  timestamp   default now() not null
-);
-
-
-comment on table spar.ETL_EXECUTION_LOG is 'ETL Tool monitoring table to store execution current instance of batch processing interfaces';
-comment on column spar.ETL_EXECUTION_LOG.from_timestamp             is 'From timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
-comment on column spar.ETL_EXECUTION_LOG.to_timestamp               is 'To timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
-comment on column spar.ETL_EXECUTION_LOG.run_status                 is 'Status of ETL execution'; 
-comment on column spar.ETL_EXECUTION_LOG.updated_at                 is 'Timestamp of the last time this record was updated'; 
-comment on column spar.ETL_EXECUTION_LOG.created_at                 is 'Timestamp of the time this record was created'; 
-
 alter table spar.seedlot
   add column approved_timestamp     timestamp,
   add column approved_userid        varchar(30);
@@ -4490,6 +4474,23 @@ comment on column spar.ETL_EXECUTION_MAP.retry_errors        		    is 'If true, 
 comment on column spar.ETL_EXECUTION_MAP.updated_at                 is 'Timestamp of the last time this record was updated'; 
 comment on column spar.ETL_EXECUTION_MAP.created_at                 is 'Timestamp of the time this record was created'; 
 
+create table spar.ETL_EXECUTION_LOG(
+from_timestamp timestamp not null,
+to_timestamp   timestamp not null,
+run_status varchar(100) not null,
+updated_at  timestamp   default now() not null,
+created_at  timestamp   default now() not null
+);
+
+
+comment on table spar.ETL_EXECUTION_LOG is 'ETL Tool monitoring table to store execution current instance of batch processing interfaces';
+comment on column spar.ETL_EXECUTION_LOG.from_timestamp             is 'From timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
+comment on column spar.ETL_EXECUTION_LOG.to_timestamp               is 'To timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
+comment on column spar.ETL_EXECUTION_LOG.run_status                 is 'Status of ETL execution'; 
+comment on column spar.ETL_EXECUTION_LOG.updated_at                 is 'Timestamp of the last time this record was updated'; 
+comment on column spar.ETL_EXECUTION_LOG.created_at                 is 'Timestamp of the time this record was created'; 
+
+
 create table spar.ETL_EXECUTION_SCHEDULE(
 interface_id 	varchar(100) not null,
 execution_id 	integer      not null,
@@ -4512,7 +4513,7 @@ comment on column spar.ETL_EXECUTION_SCHEDULE.created_at         is 'Timestamp o
 
 create table spar.etl_execution_log_hist
 ( entry_timestamp timestamp(6) not null default current_timestamp
-, log_details jsonb not null)
+, log_details jsonb not null);
 
 comment on table  spar.ETL_EXECUTION_LOG_HIST is 'ETL Tool monitoring table to store all executed instances of batch processing interfaces';
 comment on column spar.ETL_EXECUTION_LOG_HIST.entry_timestamp      		  is 'The timestamp when the record was inserted';

@@ -136,9 +136,11 @@ public class SeedlotService {
 
     Seedlot seedlot = new Seedlot(nextSeedlotNumber(createDto.geneticClassCode()));
 
+    // Newly created seedlot has a status of INCOMPLETE, will change to PENDING once a row is
+    // created in the table seedlot_registration_a_class_save
     Optional<SeedlotStatusEntity> seedLotStatusEntity =
-        seedlotStatusService.findById(Constants.CLASS_A_SEEDLOT_STATUS);
-    seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(InvalidSeedlotRequestException::new));
+        seedlotStatusService.findById(Constants.INCOMPLETE_SEEDLOT_STATUS);
+    seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(SeedlotStatusNotFoundException::new));
 
     seedlot.setApplicantClientNumber(createDto.applicantClientNumber());
     seedlot.setApplicantLocationCode(createDto.applicantLocationCode());
@@ -147,11 +149,11 @@ public class SeedlotService {
 
     Optional<GeneticClassEntity> classEntity =
         geneticClassRepository.findById(createDto.geneticClassCode().toString());
-    seedlot.setGeneticClass(classEntity.orElseThrow(InvalidSeedlotRequestException::new));
+    seedlot.setGeneticClass(classEntity.orElseThrow(GeneticClassNotFoundException::new));
 
     Optional<SeedlotSourceEntity> seedlotSourceEntity =
         seedlotSourceRepository.findById(createDto.seedlotSourceCode());
-    seedlot.setSeedlotSource(seedlotSourceEntity.orElseThrow(InvalidSeedlotRequestException::new));
+    seedlot.setSeedlotSource(seedlotSourceEntity.orElseThrow(SeedlotSourceNotFoundException::new));
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
@@ -880,7 +882,7 @@ public class SeedlotService {
     List<OrchardParentTreeValsDto> orchardPtVals = convertToPtVals(orchardPtDtoList);
     List<GeospatialRequestDto> smpMixIdAndProps = convertToGeoRes(smpPtDtoList);
 
-    PtValsCalReqDto ptValsCalReqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);
+    PtValsCalReqDto ptValsCalReqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0);
 
     PtCalculationResDto ptCalculationResDto = parentTreeService.calculatePtVals(ptValsCalReqDto);
 

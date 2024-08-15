@@ -31,6 +31,9 @@ parameters:
   - name: ORACLE_SYNC_USER
     description: Oracle database username for Sync
     value: proxy_fsa_spar_sync_user
+  - name: VITE_USER_POOLS_WEB_CLIENT_ID
+    description: Cognito user pools web client ID
+    required: true
 objects:
   - apiVersion: v1
     kind: Secret
@@ -63,6 +66,14 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       forest-client-api-key: ${FORESTCLIENTAPI_KEY}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-frontend
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      vite-user-pools-web-client-id: ${VITE_USER_POOLS_WEB_CLIENT_ID}
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:

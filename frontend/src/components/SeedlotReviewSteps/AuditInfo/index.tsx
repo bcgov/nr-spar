@@ -3,6 +3,7 @@ import { Column, Row, FlexGrid } from '@carbon/react';
 
 import ReadOnlyInput from '../../ReadOnlyInput';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import { utcToIsoSlashStyle } from '../../../utils/DateUtils';
 
 const AuditInfo = () => {
   const {
@@ -29,7 +30,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="created-at"
             label="Created at:"
-            value={seedlotData?.auditInformation.entryTimestamp}
+            value={utcToIsoSlashStyle(seedlotData?.auditInformation.entryTimestamp)}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -47,7 +48,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="last-updated-at"
             label="Last updated at:"
-            value={seedlotData?.auditInformation.updateTimestamp}
+            value={utcToIsoSlashStyle(seedlotData?.auditInformation.updateTimestamp)}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -65,7 +66,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="submitted-at"
             label="Submitted at:"
-            value={seedlotData?.declarationOfTrueInformationTimestamp}
+            value={utcToIsoSlashStyle(seedlotData?.declarationOfTrueInformationTimestamp)}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -83,7 +84,7 @@ const AuditInfo = () => {
           <ReadOnlyInput
             id="approved-at"
             label="Approved at:"
-            value={seedlotData?.approvedTimestamp ?? undefined}
+            value={utcToIsoSlashStyle(seedlotData?.approvedTimestamp)}
             showSkeleton={isFetchingData}
           />
         </Column>

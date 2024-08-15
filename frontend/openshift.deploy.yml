@@ -52,9 +52,6 @@ parameters:
   - name: VITE_USER_POOLS_ID
     description: AWS Cognito Pools ID
     required: true
-  - name: VITE_USER_POOLS_WEB_CLIENT_ID
-    description: AWS Cognito Web Client ID
-    required: true
 objects:
   - apiVersion: apps/v1
     kind: Deployment
@@ -63,7 +60,7 @@ objects:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
-      replicas: 1
+      replicas: ${{MIN_REPLICAS}}
       selector:
         matchLabels:
           deployment: ${NAME}-${ZONE}-${COMPONENT}
@@ -98,7 +95,10 @@ objects:
                 - name: VITE_USER_POOLS_ID
                   value: ${VITE_USER_POOLS_ID}
                 - name: VITE_USER_POOLS_WEB_CLIENT_ID
-                  value: ${VITE_USER_POOLS_WEB_CLIENT_ID}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-frontend
+                      key: vite-user-pools-web-client-id
                 - name: VITE_ZONE
                   value: ${FAM_MODDED_ZONE}
               resources:
