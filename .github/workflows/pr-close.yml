@@ -18,5 +18,5 @@ jobs:
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       cleanup: label
-      packages: database backend frontend oracle-api sync common
+      packages: database backend frontend oracle-api sync
 
