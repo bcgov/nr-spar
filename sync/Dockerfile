@@ -4,6 +4,8 @@ FROM python:3.12-slim
 ARG BUILD_NUMBER
 ENV BUILD_NUMBER=${BUILD_NUMBER}
 
+RUN echo "Build number: ${BUILD_NUMBER}" && blorf
+
 # Packages and nonroot user
 RUN apt update && \
     apt install -y --no-install-recommends gcc libpq-dev python3-dev && \
