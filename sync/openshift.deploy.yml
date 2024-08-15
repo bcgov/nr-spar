@@ -30,10 +30,6 @@ parameters:
     value: "false"
 
   ### Usually a bad idea - not recommended
-  - name: CRON_MINUTES
-    description: Random number, 0-60, for scheduling cronjobs
-    from: "[0-5]{1}[0-9]{1}"
-    generate: expression
   - name: JOB_BACKOFF_LIMIT
     description: "The number of attempts to try for a successful job outcome"
     value: "3"
