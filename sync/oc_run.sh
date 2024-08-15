@@ -12,7 +12,7 @@ if [ ! -z "${1:-}" ]; then
 fi
 
 # Create job
-CRONJOB=nr-spar-1502-sync
+CRONJOB=nr-spar-test-sync
 RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
 oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
