@@ -24,7 +24,7 @@ jobs:
         id: build
         with:
           build_args:
-            --build-arg BUILD_NUMBER=${{ github.event.number }}
+            --build-arg=BUILD_NUMBER="${{ github.event.number }}"
             "BUILDKIT_INLINE_CACHE=1"
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
