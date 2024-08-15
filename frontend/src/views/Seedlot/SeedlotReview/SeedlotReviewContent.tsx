@@ -53,6 +53,7 @@ import ClassAContext from '../ContextContainerClassA/context';
 import { validateRegForm } from '../CreateAClass/utils';
 import {
   getSeedlotPayload,
+  initOwnershipState,
   validateCollectionStep, validateExtractionStep, validateInterimStep, validateOrchardStep,
   validateOwnershipStep, validateParentStep, verifyCollectionStepCompleteness,
   verifyExtractionStepCompleteness,
@@ -66,7 +67,8 @@ import {
 } from './utils';
 import { GenWorthValType } from './definitions';
 import { SaveStatusModalText } from './constants';
-import { completeProgressConfig } from '../ContextContainerClassA/constants';
+import { completeProgressConfig, emptyOwnershipStep, initialProgressConfig } from '../ContextContainerClassA/constants';
+import { AllStepData, ProgressIndicatorConfig } from '../ContextContainerClassA/definitions';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
@@ -327,35 +329,6 @@ const SeedlotReviewContent = () => {
     }
   });
 
-  const updateDraftMutation = useMutation({
-    mutationFn: (
-      // It will be used later at onSuccess
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _variables: PutTscSeedlotMutationObj
-    ) => putAClassSeedlotProgress(
-      seedlotNumber ?? '',
-      {
-        allStepData,
-        progressStatus: completeProgressConfig,
-        // We don't know the previous revision count
-        revisionCount: -1
-      }
-    ),
-    onSuccess: (_data, variables) => (
-      tscSeedlotMutation.mutate(variables)
-    ),
-    onError: (err: AxiosError) => {
-      toast.error(
-        <ErrorToast
-          title="Edit seedlot failed"
-          subtitle={`Cannot save seedlot. Please try again later. ${err.code}: ${err.message}`}
-        />,
-        ErrToastOption
-      );
-    },
-    retry: 0
-  });
-
   const statusOnlyMutaion = useMutation({
     mutationFn: (
       { seedlotNum, statusOnSave }: Omit<PutTscSeedlotMutationObj, 'payload'>
@@ -377,6 +350,67 @@ const SeedlotReviewContent = () => {
       }
       setIsReadMode(true);
     }
+  });
+
+  /**
+   * This is only used when we send SUB seedlots back to pending when
+   * we migrate historical data from Oracle to Postgres. PND seedlots on Oracle
+   * will come in as SUB, so we need to manually send them back to PND in order to
+   * generate a draft json object in the seedlot_registration_a_class_save table.
+   */
+  const getAllStepDataForPayload = ():AllStepData => {
+    const allData = { ...allStepData };
+    if (allData.ownershipStep.length === 0) {
+      const emptyOwner = initOwnershipState('', emptyOwnershipStep)[0];
+      emptyOwner.ownerAgency.value = seedlotData?.applicantClientNumber ?? '';
+      emptyOwner.ownerCode.value = seedlotData?.applicantLocationCode ?? '';
+      allData.ownershipStep = [emptyOwner];
+    }
+    return allData;
+  };
+
+  const getProgressStatus = (): ProgressIndicatorConfig => {
+    let progStatusPayload = completeProgressConfig;
+    if (allStepData.ownershipStep.length === 0) {
+      progStatusPayload = initialProgressConfig;
+    }
+
+    return progStatusPayload;
+  };
+
+  const updateDraftMutation = useMutation({
+    mutationFn: (
+      // It will be used later at onSuccess
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _variables?: PutTscSeedlotMutationObj
+    ) => (
+      putAClassSeedlotProgress(
+        seedlotNumber ?? '',
+        {
+          allStepData: getAllStepDataForPayload(),
+          progressStatus: getProgressStatus(),
+          // We don't know the previous revision count
+          revisionCount: -1
+        }
+      )
+    ),
+    onSuccess: (_data, variables) => {
+      if (variables) {
+        tscSeedlotMutation.mutate(variables);
+      } else {
+        statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'PND' });
+      }
+    },
+    onError: (err: AxiosError) => {
+      toast.error(
+        <ErrorToast
+          title="Edit seedlot failed"
+          subtitle={`Cannot save seedlot. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    },
+    retry: 0
   });
 
   /**
@@ -403,6 +437,13 @@ const SeedlotReviewContent = () => {
    * The handler for the send back to pending or approve buttons.
    */
   const handleSaveAndStatus = (statusOnSave: StatusOnSaveType) => {
+    // This if statement is to deal with a special situation
+    // see getAllStepDataForDraftPayload's doc for more detail.
+    if (allStepData.ownershipStep.length === 0 && statusOnSave === 'PND') {
+      updateDraftMutation.mutate(undefined);
+      return;
+    }
+
     if (isReadMode) {
       statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave });
     } else {
