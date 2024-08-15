@@ -194,7 +194,7 @@ jobs:
 
           # Login
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ secrets.oc_namespace }} #Safeguard!
+          oc project ${{ vars.oc_namespace }} #Safeguard!
 
           # Exit on errors or unset variables
           set -eu
