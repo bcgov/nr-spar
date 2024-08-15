@@ -35,7 +35,7 @@ parameters:
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
-    value: 256Mi
+    value: 1Gi
   - name: DB_PASSWORD
     description: Password for the PostgreSQL connection user
     required: true
