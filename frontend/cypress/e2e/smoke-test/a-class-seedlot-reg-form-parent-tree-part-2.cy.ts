@@ -44,4 +44,32 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
       .find(`p.${prefix}--data-table-header__description`)
       .should('have.text', regFormData.parentTree.smpSuccessSubtitle);
   });
+
+  it('check checkbox default state', () => {
+    cy.get('[for="smp-default-vals-checkbox"]')
+      .should('have.text', '');
+
+    cy.get('#smp-default-vals-checkbox')
+      .should('not.be.checked');
+
+    cy.get('#smp-default-vals-checkbox')
+      .check();
+
+    cy.get('.smp-default-input-row')
+      .should('be.visible');
+  });
+
+  it('change checkbox default state', () => {
+    cy.get('#smp-default-vals-checkbox')
+      .check({force: true});
+
+    cy.get('.smp-default-input-row')
+      .should('be.visible');
+
+    cy.get('#default-smp-success-input')
+      .type('5');
+
+    cy.get('#default-pollen-contam-input')
+      .type('5');
+  });
 });
