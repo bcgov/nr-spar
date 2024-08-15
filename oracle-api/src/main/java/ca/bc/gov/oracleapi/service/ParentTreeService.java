@@ -61,6 +61,10 @@ public class ParentTreeService {
       ParentTreeNodeDto root = entry.getValue();
       root.print(0);
       ParentTreeGeoNodeDto elevation = root.getParentTreeElevation();
+      if (elevation == null) {
+        SparLog.error("No elevation for Parent tree ID {}", parentTreeId);
+        continue;
+      }
       SparLog.info("meanElevation {}", elevation.getElevation());
 
       GeospatialRespondDto dto =
@@ -115,16 +119,52 @@ public class ParentTreeService {
       List<ParentTreeEntity> nextLevelList = parentTreeRepository.findAllByIdIn(testList);
       // SparLog.info("nextLevelList list = {}", nextLevelList);
 
+      for (Map.Entry<Long, List<Long>> entry : parentTreeRelationMap.entrySet()) {
+        Long sonPtId = entry.getKey();
+        List<Long> femaleAndMaleParentsIds = entry.getValue();
+
+        for (ParentTreeEntity ptEntity : nextLevelList) {
+          if (femaleAndMaleParentsIds.contains(ptEntity.getId())) {
+            if (resultMap.get(sonPtId) == null) {
+              for (Map.Entry<Long, List<Long>> entryTwo : parentTreeRelationMap.entrySet()) {
+                if (entryTwo.getValue().contains(sonPtId)) {
+                  // SparLog.info("Maybe this is the root!? {}", entryTwo.getKey());
+                  sonPtId = entryTwo.getKey();
+                  break;
+                }
+              }
+            }
+            // female is always the first
+            if (entry.getValue().size() > 0) {
+              Long female = entry.getValue().get(0);
+              if (female.equals(ptEntity.getId())) {
+                // SparLog.info("{} is female!", ptEntity.getId());
+                resultMap.get(sonPtId).add(female, ptEntity);
+              }
+            }
+            // male is optional
+            if (entry.getValue().size() > 1) {
+              Long male = entry.getValue().get(1);
+              if (male.equals(ptEntity.getId())) {
+                // SparLog.info("{} is male!", ptEntity.getId());
+                resultMap.get(sonPtId).add(male, ptEntity);
+              }
+            }
+          }
+        }
+      }
+
+      /*
       for (ParentTreeEntity ptEntity : nextLevelList) {
         // SparLog.info("Looking for root node id {}", ptEntity.getId());
+        Long keyToRemove = null;
         for (Map.Entry<Long, List<Long>> entry : parentTreeRelationMap.entrySet()) {
-          if (entry.getValue().contains(ptEntity.getId())) {
-            // SparLog.info("Found list contains (parentTreeRelationMap)! list: {}, key: {}",
-            // entry.getValue(), entry.getKey());
-            // does the magic
-            Long originalPtId = entry.getKey();
+          Long originalPtId = entry.getKey();
+          SparLog.info("Son id: {}", originalPtId);
+          List<Long> femaleAndMaleIds = entry.getValue();
 
-            // it should not be null
+          if (femaleAndMaleIds.contains(ptEntity.getId())) {
+            keyToRemove = originalPtId;
             if (resultMap.get(originalPtId) == null) {
               for (Map.Entry<Long, List<Long>> entryTwo : parentTreeRelationMap.entrySet()) {
                 if (entryTwo.getValue().contains(originalPtId)) {
@@ -133,7 +173,6 @@ public class ParentTreeService {
                   break;
                 }
               }
-              // throw new RuntimeException("Original Parent Tree Node root is null!");
             }
             // female is always the first
             if (entry.getValue().size() > 0) {
@@ -154,7 +193,13 @@ public class ParentTreeService {
             break;
           }
         }
+
+        // remove key
+        if (keyToRemove != null) {
+          parentTreeRelationMap.remove(keyToRemove);
+        }
       }
+      */
 
       boolean allElevationFound =
           nextLevelList.stream().filter(tree -> tree.getElevation() == null).count() == 0;

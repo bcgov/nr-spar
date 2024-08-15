@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.dto;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -54,16 +55,22 @@ public class ParentTreeNodeDto {
     ParentTreeGeoNodeDto femaleElevation = new ParentTreeGeoNodeDto();
     if (current.femaleParent != null) {
       femaleElevation =
-          getParentsMeanElevation(
-              current.femaleParent,
-              current.femaleParent.femaleParent,
-              current.femaleParent.maleParent);
+          Optional.ofNullable(
+                  getParentsMeanElevation(
+                      current.femaleParent,
+                      current.femaleParent.femaleParent,
+                      current.femaleParent.maleParent))
+              .orElse(new ParentTreeGeoNodeDto());
     }
     ParentTreeGeoNodeDto maleElevation = new ParentTreeGeoNodeDto();
     if (current.maleParent != null) {
       maleElevation =
-          getParentsMeanElevation(
-              current.maleParent, current.maleParent.femaleParent, current.maleParent.maleParent);
+          Optional.ofNullable(
+                  getParentsMeanElevation(
+                      current.maleParent,
+                      current.maleParent.femaleParent,
+                      current.maleParent.maleParent))
+              .orElse(new ParentTreeGeoNodeDto());
     }
     if (maleElevation.getElevationIntVal() == 0 && femaleElevation.getElevationIntVal() > 0) {
       return femaleElevation;
@@ -73,23 +80,37 @@ public class ParentTreeNodeDto {
           (maleElevation.getElevationIntVal() + femaleElevation.getElevationIntVal()) / noOfParents;
 
       // all other calculations
-      int calc = (femaleElevation.getLatitudeDegreesIntVal()*3600) + (femaleElevation.getLatitudeMinutesIntVal()*60) + femaleElevation.getLatitudeSecondsIntVal();
-      calc = calc + (maleElevation.getLatitudeDegreesIntVal()*3600) +  (maleElevation.getLatitudeMinutesIntVal()*60) + maleElevation.getLatitudeSecondsIntVal();
-      // --derive mean 
+      int calc =
+          (femaleElevation.getLatitudeDegreesIntVal() * 3600)
+              + (femaleElevation.getLatitudeMinutesIntVal() * 60)
+              + femaleElevation.getLatitudeSecondsIntVal();
+      calc =
+          calc
+              + (maleElevation.getLatitudeDegreesIntVal() * 3600)
+              + (maleElevation.getLatitudeMinutesIntVal() * 60)
+              + maleElevation.getLatitudeSecondsIntVal();
+      // --derive mean
       calc = calc / noOfParents;
-      int latitudeDegrees = calc/3600;
+      int latitudeDegrees = calc / 3600;
       int buff = calc % 3600;
-      int latitudeMinutes = buff/60;
+      int latitudeMinutes = buff / 60;
       buff = calc % 60;
       int latitudeSeconds = buff;
 
-      calc = (femaleElevation.getLongitudeDegreesIntVal()*3600) +  (femaleElevation.getLongitudeMinutesIntVal()*60) + femaleElevation.getLongitudeSecondsIntVal();
-      calc = calc + (maleElevation.getLongitudeDegreesIntVal()*3600) + (maleElevation.getLongitudeMinutesIntVal()*60) + maleElevation.getLongitudeSecondsIntVal();
-      // --derive mean 
+      calc =
+          (femaleElevation.getLongitudeDegreesIntVal() * 3600)
+              + (femaleElevation.getLongitudeMinutesIntVal() * 60)
+              + femaleElevation.getLongitudeSecondsIntVal();
+      calc =
+          calc
+              + (maleElevation.getLongitudeDegreesIntVal() * 3600)
+              + (maleElevation.getLongitudeMinutesIntVal() * 60)
+              + maleElevation.getLongitudeSecondsIntVal();
+      // --derive mean
       calc = calc / noOfParents;
-      int longitudeDegrees = calc/3600;
+      int longitudeDegrees = calc / 3600;
       buff = calc % 3600;
-      int longitudeMinutes = buff/60;
+      int longitudeMinutes = buff / 60;
       buff = calc % 60;
       int longitudeSeconds = buff;
 
