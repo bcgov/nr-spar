@@ -9,7 +9,6 @@ Containerfile
 Dockerfile
 openshift.*.y*ml
 docker-compose*.y*ml
-mvn.cmd
 
 # Node
 **/node_modules/
