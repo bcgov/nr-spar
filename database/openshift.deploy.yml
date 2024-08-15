@@ -118,6 +118,8 @@ objects:
                     - bash
                     - '-ce'
                     - exec pg_isready -U $POSTGRES_USER -d "dbname=$POSTGRES_DB" -h 127.0.0.1 -p 5432
+                periodSeconds: 30
+                timeoutSeconds: 10
               env:
                 - name: POSTGRES_DB
                   valueFrom:
