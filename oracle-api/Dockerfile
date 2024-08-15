@@ -21,6 +21,12 @@ ENV LC_ALL=en_CA.UTF-8
 WORKDIR /app
 COPY --from=build /app/target/nr-spar-oracle-api ./nr-spar-oracle-api
 COPY --from=build /app/*.class ./artifacts/
+COPY --from=build /app/install_cert.sh ./
+
+# Permissions
+RUN chmod g+w /app && \
+    chmod g+x /app/install_cert.sh && \
+    chmod g+w ${JAVA_HOME}/lib/security/cacerts
 
 # User, port and healthcheck
 USER 1001
