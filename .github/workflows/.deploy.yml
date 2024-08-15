@@ -191,4 +191,4 @@ jobs:
 
       - name: Run sync ETL
         if: github.event_name == 'pull_request'
-        run: ./sync/oc_run.sh ${{ secrets.oc_token }}
+        run: ./sync/oc_run.sh ${{ inputs.tag }} ${{ secrets.oc_token }}
