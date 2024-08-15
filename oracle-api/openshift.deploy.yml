@@ -94,7 +94,13 @@ objects:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           initContainers:
             - name: ${NAME}-${ZONE}-${COMPONENT}-init
-              image: ${REGISTRY}/${ORG}/${NAME}/common:${TAG}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  cd /app
+                  ./install_cert.sh
+              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               imagePullPolicy: Always
               env:
                 - name: DATABASE_HOST
