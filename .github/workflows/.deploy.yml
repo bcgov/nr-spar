@@ -177,7 +177,7 @@ jobs:
           parameters:
             -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
-            ${{ github.event_name == 'pull_request' && '-p TEST_MODE=true' || '' }}
+            ${{ inputs.target == 'test' && '-p TEST_MODE=false' || '-p TEST_MODE=true' }}
 
       - name: Override OpenShift version
         if: github.event_name == 'pull_request'
