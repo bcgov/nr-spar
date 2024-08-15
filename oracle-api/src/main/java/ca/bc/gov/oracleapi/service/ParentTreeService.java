@@ -5,6 +5,7 @@ import ca.bc.gov.oracleapi.dto.GeospatialRequestDto;
 import ca.bc.gov.oracleapi.dto.GeospatialRespondDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeByVegCodeDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.oracleapi.dto.ParentTreeGeoNodeDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeNodeDto;
 import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
 import ca.bc.gov.oracleapi.entity.projection.ParentTreeProj;
@@ -46,7 +47,7 @@ public class ParentTreeService {
     // If there's one or more null elevation, go up on the hierarchy
     if (hasAnyNullElevation.isPresent()) {
       map = checkParentTreeHierarchy(ptEntityList);
-      //SparLog.info("final map list = {}", map.values());
+      // SparLog.info("final map list = {}", map.values());
     } else {
       map = new HashMap<>();
       ptEntityList.forEach((pt) -> map.put(pt.getId(), new ParentTreeNodeDto(pt)));
@@ -55,29 +56,23 @@ public class ParentTreeService {
     List<GeospatialRespondDto> resultList = new ArrayList<>();
     for (Map.Entry<Long, ParentTreeNodeDto> entry : map.entrySet()) {
       Long parentTreeId = entry.getKey();
-      int latitudeDegrees = 0;
-      int latitudeMinutes = 0;
-      int latitudeSeconds = 0;
-      int longitudeDegrees = 0;
-      int longitudeMinutes = 0;
-      int longitudeSeconds = 0;
 
       // navigate the tree here!
       ParentTreeNodeDto root = entry.getValue();
       root.print(0);
-      int elevation = root.getParentTreeElevation();
-      SparLog.info("meanElevation {}", elevation);
+      ParentTreeGeoNodeDto elevation = root.getParentTreeElevation();
+      SparLog.info("meanElevation {}", elevation.getElevation());
 
       GeospatialRespondDto dto =
           new GeospatialRespondDto(
               parentTreeId,
-              latitudeDegrees,
-              latitudeMinutes,
-              latitudeSeconds,
-              longitudeDegrees,
-              longitudeMinutes,
-              longitudeSeconds,
-              elevation);
+              elevation.getLatitudeDegreesIntVal(),
+              elevation.getLatitudeMinutesIntVal(),
+              elevation.getLatitudeSecondsIntVal(),
+              elevation.getLongitudeDegreesIntVal(),
+              elevation.getLongitudeMinutesIntVal(),
+              elevation.getLongitudeSecondsIntVal(),
+              elevation.getElevation());
 
       resultList.add(dto);
     }
@@ -124,10 +119,11 @@ public class ParentTreeService {
         // SparLog.info("Looking for root node id {}", ptEntity.getId());
         for (Map.Entry<Long, List<Long>> entry : parentTreeRelationMap.entrySet()) {
           if (entry.getValue().contains(ptEntity.getId())) {
-            // SparLog.info("Found list contains (parentTreeRelationMap)! list: {}, key: {}", entry.getValue(), entry.getKey());
+            // SparLog.info("Found list contains (parentTreeRelationMap)! list: {}, key: {}",
+            // entry.getValue(), entry.getKey());
             // does the magic
             Long originalPtId = entry.getKey();
-            
+
             // it should not be null
             if (resultMap.get(originalPtId) == null) {
               for (Map.Entry<Long, List<Long>> entryTwo : parentTreeRelationMap.entrySet()) {
@@ -137,7 +133,7 @@ public class ParentTreeService {
                   break;
                 }
               }
-              //throw new RuntimeException("Original Parent Tree Node root is null!");
+              // throw new RuntimeException("Original Parent Tree Node root is null!");
             }
             // female is always the first
             if (entry.getValue().size() > 0) {

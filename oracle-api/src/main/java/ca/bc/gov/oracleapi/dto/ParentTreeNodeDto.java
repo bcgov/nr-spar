@@ -13,6 +13,7 @@ public class ParentTreeNodeDto {
   private final ParentTreeEntity value;
   private ParentTreeNodeDto femaleParent;
   private ParentTreeNodeDto maleParent;
+  private ParentTreeGeoNodeDto geoNode;
 
   /**
    * Creates a Parent Tree Node.
@@ -21,6 +22,7 @@ public class ParentTreeNodeDto {
    */
   public ParentTreeNodeDto(ParentTreeEntity value) {
     this.value = value;
+    this.geoNode = new ParentTreeGeoNodeDto(value);
   }
 
   /**
@@ -44,12 +46,12 @@ public class ParentTreeNodeDto {
     }
   }
 
-  private int getParentsMeanElevation(
+  private ParentTreeGeoNodeDto getParentsMeanElevation(
       ParentTreeNodeDto current, ParentTreeNodeDto femaleNode, ParentTreeNodeDto maleNode) {
-    if (current.value.getElevation() != null) {
-      return current.value.getElevation();
+    if (current.geoNode.getElevation() != null) {
+      return current.geoNode;
     }
-    int femaleElevation = 0;
+    ParentTreeGeoNodeDto femaleElevation = new ParentTreeGeoNodeDto();
     if (current.femaleParent != null) {
       femaleElevation =
           getParentsMeanElevation(
@@ -57,19 +59,51 @@ public class ParentTreeNodeDto {
               current.femaleParent.femaleParent,
               current.femaleParent.maleParent);
     }
-    int maleElevation = 0;
+    ParentTreeGeoNodeDto maleElevation = new ParentTreeGeoNodeDto();
     if (current.maleParent != null) {
       maleElevation =
           getParentsMeanElevation(
               current.maleParent, current.maleParent.femaleParent, current.maleParent.maleParent);
     }
-    if (maleElevation == 0 && femaleElevation > 0) {
+    if (maleElevation.getElevationIntVal() == 0 && femaleElevation.getElevationIntVal() > 0) {
       return femaleElevation;
-    } else if (maleElevation > 0 && femaleElevation > 0) {
-      int mean = (maleElevation + femaleElevation) / 2;
-      return mean;
+    } else if (maleElevation.getElevationIntVal() > 0 && femaleElevation.getElevationIntVal() > 0) {
+      int noOfParents = 2;
+      int meanElevation =
+          (maleElevation.getElevationIntVal() + femaleElevation.getElevationIntVal()) / noOfParents;
+
+      // all other calculations
+      int calc = (femaleElevation.getLatitudeDegreesIntVal()*3600) + (femaleElevation.getLatitudeMinutesIntVal()*60) + femaleElevation.getLatitudeSecondsIntVal();
+      calc = calc + (maleElevation.getLatitudeDegreesIntVal()*3600) +  (maleElevation.getLatitudeMinutesIntVal()*60) + maleElevation.getLatitudeSecondsIntVal();
+      // --derive mean 
+      calc = calc / noOfParents;
+      int latitudeDegrees = calc/3600;
+      int buff = calc % 3600;
+      int latitudeMinutes = buff/60;
+      buff = calc % 60;
+      int latitudeSeconds = buff;
+
+      calc = (femaleElevation.getLongitudeDegreesIntVal()*3600) +  (femaleElevation.getLongitudeMinutesIntVal()*60) + femaleElevation.getLongitudeSecondsIntVal();
+      calc = calc + (maleElevation.getLongitudeDegreesIntVal()*3600) + (maleElevation.getLongitudeMinutesIntVal()*60) + maleElevation.getLongitudeSecondsIntVal();
+      // --derive mean 
+      calc = calc / noOfParents;
+      int longitudeDegrees = calc/3600;
+      buff = calc % 3600;
+      int longitudeMinutes = buff/60;
+      buff = calc % 60;
+      int longitudeSeconds = buff;
+
+      ParentTreeGeoNodeDto meanNode = new ParentTreeGeoNodeDto();
+      meanNode.setElevation(meanElevation);
+      meanNode.setLatitudeDegrees(latitudeDegrees);
+      meanNode.setLatitudeMinutes(latitudeMinutes);
+      meanNode.setLatitudeSeconds(latitudeSeconds);
+      meanNode.setLongitudeDegrees(longitudeDegrees);
+      meanNode.setLongitudeMinutes(longitudeMinutes);
+      meanNode.setLongitudeSeconds(longitudeSeconds);
+      return meanNode;
     }
-    return 0;
+    return null;
   }
 
   /**
@@ -77,8 +111,9 @@ public class ParentTreeNodeDto {
    *
    * @return an integer representing the mean elevation.
    */
-  public int getParentTreeElevation() {
-    int elevation = getParentsMeanElevation(this, this.femaleParent, this.maleParent);
+  public ParentTreeGeoNodeDto getParentTreeElevation() {
+    ParentTreeGeoNodeDto elevation =
+        getParentsMeanElevation(this, this.femaleParent, this.maleParent);
     return elevation;
   }
 
