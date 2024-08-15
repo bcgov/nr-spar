@@ -76,7 +76,7 @@ objects:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
-      replicas: 1
+      replicas: ${MIN_REPLICAS}
       selector:
         matchLabels:
           deployment: ${NAME}-${ZONE}-${COMPONENT}
