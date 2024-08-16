@@ -49,6 +49,8 @@ const SeedlotDetails = () => {
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
   const [applicantData, setApplicantData] = useState<SeedlotApplicantType>();
 
+  const minitryOfForestId = '00012797';
+
   const isSubmitSuccess = searchParams.get('isSubmitSuccess') === 'true';
 
   const statusOnSave = searchParams.get('statusOnSave') as StatusOnSaveType | null;
@@ -141,6 +143,17 @@ const SeedlotDetails = () => {
     }
   };
 
+  const createBreadcrumbItems = () => {
+    const crumbsList = [];
+    crumbsList.push({ name: 'Seedlots', path: ROUTES.SEEDLOTS });
+    if (isTscAdmin && seedlotData?.applicantAgency !== minitryOfForestId) {
+      crumbsList.push({ name: 'Review Seedlots', path: ROUTES.TSC_SEEDLOTS_TABLE });
+    } else {
+      crumbsList.push({ name: 'My seedlots', path: ROUTES.MY_SEEDLOTS });
+    }
+    return crumbsList;
+  };
+
   useEffect(() => {
     if (forestClientQuery.isFetched && seedlotQuery.isFetchedAfterMount) {
       covertToClientObj();
@@ -150,11 +163,7 @@ const SeedlotDetails = () => {
   return (
     <FlexGrid className="seedlot-details-page">
       <Row className="seedlot-details-breadcrumb">
-        <Breadcrumbs crumbs={[
-          { name: 'Seedlots', path: ROUTES.SEEDLOTS },
-          { name: 'My seedlots', path: ROUTES.MY_SEEDLOTS }
-        ]}
-        />
+        <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="page-title">
         <Column className={windowSize.innerWidth < MEDIUM_SCREEN_WIDTH ? 'summary-title-flex-col' : 'summary-title-flex-row'}>
