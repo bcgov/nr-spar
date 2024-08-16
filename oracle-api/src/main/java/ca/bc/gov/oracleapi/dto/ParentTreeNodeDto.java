@@ -155,7 +155,7 @@ public class ParentTreeNodeDto {
   }
 
   /**
-   * Prints the current note.
+   * Prints the current node.
    *
    * @param level Current level in the tree
    */
