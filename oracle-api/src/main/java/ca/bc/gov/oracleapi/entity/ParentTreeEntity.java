@@ -73,4 +73,9 @@ public class ParentTreeEntity {
 
   @Column(name = "ELEVATION")
   private Integer elevation;
+
+  @Override
+  public String toString() {
+    return getId().toString();
+  }
 }

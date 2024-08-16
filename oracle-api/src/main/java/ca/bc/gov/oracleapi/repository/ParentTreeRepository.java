@@ -9,8 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 /** This class holds methods for retrieving {@link ParentTreeEntity} data from the database. */
 public interface ParentTreeRepository extends JpaRepository<ParentTreeEntity, Long> {
 
-  @Query("from ParentTreeEntity where id in ?1")
-  List<ParentTreeEntity> findAllIn(List<Long> ids);
+  List<ParentTreeEntity> findAllByIdIn(List<Long> ids);
 
   @Query(
       value =
