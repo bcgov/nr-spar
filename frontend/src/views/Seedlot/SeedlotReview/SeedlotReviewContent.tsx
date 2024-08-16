@@ -8,9 +8,10 @@ import {
 } from '@carbon/react';
 import { toast } from 'react-toastify';
 import {
-  Edit, Save, Pending, Checkmark
+  Edit, Save, Pending, Checkmark, Warning
 } from '@carbon/icons-react';
 import { Beforeunload } from 'react-beforeunload';
+import { DateTime as luxon } from 'luxon';
 
 import { getSeedlotById, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -68,7 +69,7 @@ import {
 import { GenWorthValType } from './definitions';
 import { SaveStatusModalText } from './constants';
 import { completeProgressConfig, emptyOwnershipStep, initialProgressConfig } from '../ContextContainerClassA/constants';
-import { AllStepData, ProgressIndicatorConfig } from '../ContextContainerClassA/definitions';
+import { AllStepData } from '../ContextContainerClassA/definitions';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
@@ -369,37 +370,24 @@ const SeedlotReviewContent = () => {
     return allData;
   };
 
-  const getProgressStatus = (): ProgressIndicatorConfig => {
-    let progStatusPayload = completeProgressConfig;
-    if (allStepData.ownershipStep.length === 0) {
-      progStatusPayload = initialProgressConfig;
-    }
-
-    return progStatusPayload;
-  };
-
   const updateDraftMutation = useMutation({
     mutationFn: (
       // It will be used later at onSuccess
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _variables?: PutTscSeedlotMutationObj
+      _variables: PutTscSeedlotMutationObj
     ) => (
       putAClassSeedlotProgress(
-        seedlotNumber ?? '',
+        seedlotNumber!,
         {
-          allStepData: getAllStepDataForPayload(),
-          progressStatus: getProgressStatus(),
+          allStepData,
+          progressStatus: completeProgressConfig,
           // We don't know the previous revision count
           revisionCount: -1
         }
       )
     ),
     onSuccess: (_data, variables) => {
-      if (variables) {
-        tscSeedlotMutation.mutate(variables);
-      } else {
-        statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'PND' });
-      }
+      tscSeedlotMutation.mutate(variables);
     },
     onError: (err: AxiosError) => {
       toast.error(
@@ -414,11 +402,42 @@ const SeedlotReviewContent = () => {
   });
 
   /**
+   * Used for handling migrated pending seedlots from oracle.
+   */
+  const createDraftForPendMutation = useMutation({
+    mutationFn: () => (
+      putAClassSeedlotProgress(
+        seedlotNumber!,
+        {
+          allStepData: getAllStepDataForPayload(),
+          progressStatus: initialProgressConfig,
+          // We don't know the previous revision count
+          revisionCount: -1
+        }
+      )
+    ),
+    onSuccess: () => {
+      statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'PND' });
+    },
+    onError: (err: AxiosError) => {
+      toast.error(
+        <ErrorToast
+          title="Creat draft for seedlot failed"
+          subtitle={`Cannot creat draft for seedlot. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    },
+    retry: 0
+  });
+
+  /**
    * The handler for the button that is floating on the bottom right.
    */
   const handleEditSaveBtn = () => {
-    // If the form is in read mode, then enable edit mode only.
-    if (isReadMode) {
+    // If the form is in read mode, then enable edit mode only,
+    // but wait for parent tree data to load first.
+    if (isReadMode && Object.keys(allStepData.parentTreeStep.allParentTreeData).length > 0) {
       setIsReadMode(!isReadMode);
       return;
     }
@@ -437,13 +456,6 @@ const SeedlotReviewContent = () => {
    * The handler for the send back to pending or approve buttons.
    */
   const handleSaveAndStatus = (statusOnSave: StatusOnSaveType) => {
-    // This if statement is to deal with a special situation
-    // see getAllStepDataForDraftPayload's doc for more detail.
-    if (allStepData.ownershipStep.length === 0 && statusOnSave === 'PND') {
-      updateDraftMutation.mutate(undefined);
-      return;
-    }
-
     if (isReadMode) {
       statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave });
     } else {
@@ -583,9 +595,7 @@ const SeedlotReviewContent = () => {
           {
             isReadMode
               ? <InterimReviewRead />
-              : (
-                <InterimReviewEdit />
-              )
+              : <InterimReviewEdit />
           }
         </Column>
       </Row>
@@ -698,6 +708,23 @@ const SeedlotReviewContent = () => {
                   onClick={() => openSaveStatusModal('APP')}
                 >
                   Approve seedlot
+                </Button>
+              </Column>
+            </Row>
+          )
+          : null
+      }
+      {
+        (luxon.local().setZone('America/Vancouver').toISODate() ?? '' < '2024-08-17')
+          ? (
+            <Row className="action-button-row">
+              <Column className="action-button-col" sm={4} md={4} lg={8}>
+                <Button
+                  kind="danger"
+                  renderIcon={Warning}
+                  onClick={() => createDraftForPendMutation.mutate()}
+                >
+                  Hisotrical SUB to PND (DEV ONLY!)
                 </Button>
               </Column>
             </Row>
