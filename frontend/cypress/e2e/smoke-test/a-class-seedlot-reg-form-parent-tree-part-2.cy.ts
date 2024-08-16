@@ -193,5 +193,14 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     cy.get('#224-nonOrchardPollenContam-value-input')
       .should('have.value', '2');
+
+    // Change values of first rows
+    cy.get('#212-smpSuccessPerc-value-input')
+      .type('0')
+      .blur();
+
+    cy.get('#212-nonOrchardPollenContam-value-input')
+      .type('0')
+      .blur();
   });
 });
