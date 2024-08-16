@@ -12,15 +12,6 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: REGISTRY
-    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
-    value: ghcr.io
-  - name: ORG
-    description: Organization name
-    value: bcgov
-  - name: PVC_MOUNT_PATH
-    description: Where to mount the PVC, subpath (e.g. data/)
-    value: /var/lib/postgresql
   - name: CPU_REQUEST
     value: 25m
   - name: CPU_LIMIT
@@ -137,7 +128,7 @@ objects:
                       key: database-user
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}
-                  mountPath: ${PVC_MOUNT_PATH}
+                  mountPath: /var/lib/postgresql
               terminationMessagePath: "/dev/termination-log"
               terminationMessagePolicy: File
               imagePullPolicy: Always
