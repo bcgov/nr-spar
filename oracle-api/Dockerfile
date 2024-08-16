@@ -12,6 +12,10 @@ RUN ./mvnw package -Pnative -DskipTests -Dskip.unit.tests=true && \
 ### Deployer
 FROM eclipse-temurin:17.0.11_9-jdk-jammy AS deploy
 
+# Receive build number as argument, retain as environment variable
+ARG BUILD_NUMBER
+ENV BUILD_NUMBER=${BUILD_NUMBER}
+
 # Java vars
 ENV LANG=en_CA.UTF-8
 ENV LANGUAGE=en_CA.UTF-8
