@@ -21,8 +21,7 @@ parameters:
   - name: MEMORY_LIMIT
     value: 4Gi
   - name: DB_PVC_SIZE
-    description: Volume space available for data, e.g. 512Mi, 2Gi.
-    displayName: Database Volume Capacity
+    description: Volume space available for data, e.g. 512Mi, 2Gi
     value: 1.8Gi
   - name: DB_PASSWORD
     description: Password for the PostgreSQL connection user
