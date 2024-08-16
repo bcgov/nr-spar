@@ -280,6 +280,14 @@
     th {
       vertical-align: baseline;
       padding-top: 1rem;
+
+      .#{vars.$bcgov-prefix}--definition-term {
+        cursor:auto;
+      }
+
+      .#{vars.$bcgov-prefix}--definition-term:focus {
+        outline: 0;
+      }
     }
   }
 
