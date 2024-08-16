@@ -11,6 +11,7 @@ const supportTexts = {
     helperTextEnabled: '2-digit code identifying the agency\'s address',
     invalidLocationForSelectedAgency: 'This location code is not valid for the selected agency, please enter a valid one or change the agency',
     invalidText: 'Please enter a valid 2-digit code identifying the agency\'s address',
+    invalidEmptyAgency: 'Please enter an agency for the current location code',
     invalidTextInterimSpecific: 'Please specify a collector location code to proceed',
     requestErrorHelper: 'Location code validation failed. Please retry verification'
   }
