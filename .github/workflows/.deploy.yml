@@ -79,6 +79,7 @@ jobs:
           overwrite: true
           parameters:
             -p ZONE=${{ inputs.target }}
+            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
@@ -100,7 +101,6 @@ jobs:
           overwrite: false
           parameters:
             -p ZONE=${{ inputs.target }}
-            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MEMORY_REQUEST=100Mi' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MEMORY_LIMIT=200Mi' || '' }}

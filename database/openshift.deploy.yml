@@ -23,21 +23,7 @@ parameters:
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi
     value: 1.8Gi
-  - name: DB_PASSWORD
-    description: Password for the PostgreSQL connection user
-    required: true
 objects:
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      database-name: ${NAME}
-      database-password: ${DB_PASSWORD}
-      database-port: "5432"
-      database-user: ${NAME}
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
