@@ -27,6 +27,8 @@ public class ParentTreeService {
 
   private final ParentTreeRepository parentTreeRepository;
 
+  private static final Integer MAX_LEVELS = 5;
+
   /**
    * Gets latitude, longite and elevation data for each parent tree given a list of Parent Tree ids.
    *
@@ -38,34 +40,30 @@ public class ParentTreeService {
     List<Long> idList = ptIds.stream().map(GeospatialRequestDto::parentTreeId).toList();
 
     List<ParentTreeEntity> ptEntityList = parentTreeRepository.findAllByIdIn(idList);
-
-    Optional<ParentTreeEntity> hasAnyNullElevation =
-        ptEntityList.stream().filter(tree -> tree.getElevation() == null).findAny();
-
-    Map<Long, ParentTreeNodeDto> map;
+    Map<Long, ParentTreeNodeDto> parentTreeRootMap;
 
     // If there's one or more null elevation, go up on the hierarchy
-    if (hasAnyNullElevation.isPresent()) {
-      map = checkParentTreeHierarchy(ptEntityList);
-      // SparLog.info("final map list = {}", map.values());
+    boolean isAnyMissing = parentTreeListHasAnyElevationMissing(ptEntityList);
+    if (isAnyMissing) {
+      parentTreeRootMap = checkParentTreeHierarchy(ptEntityList);
     } else {
-      map = new HashMap<>();
-      ptEntityList.forEach((pt) -> map.put(pt.getId(), new ParentTreeNodeDto(pt)));
+      parentTreeRootMap = new HashMap<>();
+      ptEntityList.forEach((pt) -> parentTreeRootMap.put(pt.getId(), new ParentTreeNodeDto(pt)));
     }
 
     List<GeospatialRespondDto> resultList = new ArrayList<>();
-    for (Map.Entry<Long, ParentTreeNodeDto> entry : map.entrySet()) {
-      Long parentTreeId = entry.getKey();
+    for (Map.Entry<Long, ParentTreeNodeDto> rootEntry : parentTreeRootMap.entrySet()) {
+      Long parentTreeId = rootEntry.getKey();
 
       // navigate the tree here!
-      ParentTreeNodeDto root = entry.getValue();
-      root.print(0);
+      ParentTreeNodeDto root = rootEntry.getValue();
+      SparLog.debug(root.printLevel(0));
+
       ParentTreeGeoNodeDto elevation = root.getParentTreeElevation();
       if (elevation == null) {
         SparLog.error("No elevation for Parent tree ID {}", parentTreeId);
         continue;
       }
-      SparLog.info("meanElevation {}", elevation.getElevation());
 
       GeospatialRespondDto dto =
           new GeospatialRespondDto(
@@ -87,9 +85,10 @@ public class ParentTreeService {
 
   private Map<Long, ParentTreeNodeDto> checkParentTreeHierarchy(
       List<ParentTreeEntity> ptEntityList) {
-    int maxLevel = 5;
-
+    // Map to store a combination of a ParentTree ID and it's parents in the tree architecture.
     Map<Long, ParentTreeNodeDto> resultMap = new HashMap<>();
+
+    // Map to store a combination of a ParentTree ID and it's direct parents, for easily access
     Map<Long, List<Long>> parentTreeRelationMap = new HashMap<>();
 
     // Create root level
@@ -97,13 +96,16 @@ public class ParentTreeService {
       resultMap.putIfAbsent(ptEntity.getId(), new ParentTreeNodeDto(ptEntity));
     }
 
-    for (int i = 0; i < maxLevel; i++) {
-      SparLog.info("hierarchy level {}", i);
+    for (int i = 0; i < MAX_LEVELS; i++) {
+      SparLog.debug("Hierarchy level {}", i);
 
       List<Long> testList = new ArrayList<>();
+      
+      // Loop through all ParentTree records, getting their female and male parents for the ones
+      // that has no elevation data
       for (ParentTreeEntity ptEntity : ptEntityList) {
         if (ptEntity.getElevation() == null) {
-          parentTreeRelationMap.put(ptEntity.getId(), new ArrayList<>());
+          parentTreeRelationMap.put(ptEntity.getId(), new ArrayList<>(2));
 
           if (ptEntity.getFemaleParentTreeId() != null) {
             testList.add(ptEntity.getFemaleParentTreeId());
@@ -116,103 +118,73 @@ public class ParentTreeService {
         }
       }
 
+      // Query from the DB all female and male parents (gathered from the loop above)
       List<ParentTreeEntity> nextLevelList = parentTreeRepository.findAllByIdIn(testList);
-      // SparLog.info("nextLevelList list = {}", nextLevelList);
 
+      // Loop through the relation of ParentTree ids and its parents
       for (Map.Entry<Long, List<Long>> entry : parentTreeRelationMap.entrySet()) {
-        Long sonPtId = entry.getKey();
+        // The 'sonParentTreeId' represents the parent tree without elevation data
+        Long sonParentTreeId = entry.getKey();
+
+        // The 'femaleAndMaleParentsIds' represents their parents ids
         List<Long> femaleAndMaleParentsIds = entry.getValue();
 
+        // Loop through the list of parent tree from DB, aiming to connect them with their sons
         for (ParentTreeEntity ptEntity : nextLevelList) {
+
+          // If 'femaleAndMaleParentsIds' contains the current parent tree id, it means that the
+          // current parent tree id is one of the parents, it could be either the female or male.
           if (femaleAndMaleParentsIds.contains(ptEntity.getId())) {
-            if (resultMap.get(sonPtId) == null) {
+            
+            // If resultMap doesn't have 'sonParentTreeId' key, it means this is not the first level
+            // and it should look at the 'parentTreeRelationMap' who has ALL the parent tree
+            // 'son-parents' relation
+            if (resultMap.get(sonParentTreeId) == null) {
+              SparLog.debug("Key (sonParentTreeId) not found for PT id {}", sonParentTreeId);
               for (Map.Entry<Long, List<Long>> entryTwo : parentTreeRelationMap.entrySet()) {
-                if (entryTwo.getValue().contains(sonPtId)) {
-                  // SparLog.info("Maybe this is the root!? {}", entryTwo.getKey());
-                  sonPtId = entryTwo.getKey();
+                if (entryTwo.getValue().contains(sonParentTreeId)) {
+                  sonParentTreeId = entryTwo.getKey();
                   break;
                 }
               }
             }
-            // female is always the first
-            if (entry.getValue().size() > 0) {
-              Long female = entry.getValue().get(0);
-              if (female.equals(ptEntity.getId())) {
-                // SparLog.info("{} is female!", ptEntity.getId());
-                resultMap.get(sonPtId).add(female, ptEntity);
-              }
+            
+            // Get female parent tree data and connect with son. Female is always the first
+            Long femaleParentTreeId = femaleAndMaleParentsIds.get(0);
+            if (femaleParentTreeId.equals(ptEntity.getId())) {
+              SparLog.debug("{} is female parent of {}", ptEntity.getId(), sonParentTreeId);
+              resultMap.get(sonParentTreeId).add(femaleParentTreeId, ptEntity);
             }
-            // male is optional
-            if (entry.getValue().size() > 1) {
-              Long male = entry.getValue().get(1);
-              if (male.equals(ptEntity.getId())) {
-                // SparLog.info("{} is male!", ptEntity.getId());
-                resultMap.get(sonPtId).add(male, ptEntity);
+
+            // Get male parent tree data and connect with son. Male is optional
+            if (femaleAndMaleParentsIds.size() > 1) {
+              Long maleParentTreeId = entry.getValue().get(1);
+              if (maleParentTreeId.equals(ptEntity.getId())) {
+                SparLog.debug("{} is male parent of {}", ptEntity.getId(), sonParentTreeId);
+                resultMap.get(sonParentTreeId).add(maleParentTreeId, ptEntity);
               }
             }
           }
         }
       }
 
-      /*
-      for (ParentTreeEntity ptEntity : nextLevelList) {
-        // SparLog.info("Looking for root node id {}", ptEntity.getId());
-        Long keyToRemove = null;
-        for (Map.Entry<Long, List<Long>> entry : parentTreeRelationMap.entrySet()) {
-          Long originalPtId = entry.getKey();
-          SparLog.info("Son id: {}", originalPtId);
-          List<Long> femaleAndMaleIds = entry.getValue();
-
-          if (femaleAndMaleIds.contains(ptEntity.getId())) {
-            keyToRemove = originalPtId;
-            if (resultMap.get(originalPtId) == null) {
-              for (Map.Entry<Long, List<Long>> entryTwo : parentTreeRelationMap.entrySet()) {
-                if (entryTwo.getValue().contains(originalPtId)) {
-                  // SparLog.info("Maybe this is the root!? {}", entryTwo.getKey());
-                  originalPtId = entryTwo.getKey();
-                  break;
-                }
-              }
-            }
-            // female is always the first
-            if (entry.getValue().size() > 0) {
-              Long female = entry.getValue().get(0);
-              if (female.equals(ptEntity.getId())) {
-                // SparLog.info("{} is female!", ptEntity.getId());
-                resultMap.get(originalPtId).add(female, ptEntity);
-              }
-            }
-            // male is optional
-            if (entry.getValue().size() > 1) {
-              Long male = entry.getValue().get(1);
-              if (male.equals(ptEntity.getId())) {
-                // SparLog.info("{} is male!", ptEntity.getId());
-                resultMap.get(originalPtId).add(male, ptEntity);
-              }
-            }
-            break;
-          }
-        }
-
-        // remove key
-        if (keyToRemove != null) {
-          parentTreeRelationMap.remove(keyToRemove);
-        }
-      }
-      */
-
-      boolean allElevationFound =
-          nextLevelList.stream().filter(tree -> tree.getElevation() == null).count() == 0;
-      if (allElevationFound) {
-        // SparLog.info("All elevations has been found. Leaving!");
+      // After loop through all records, check if all parents now has elevation data
+      // If yes, leave. If not, keep going up looking for the parent's parent
+      boolean isAnyMissing = parentTreeListHasAnyElevationMissing(nextLevelList);
+      if (!isAnyMissing) {
+        SparLog.debug("All elevations has been found. Leaving!");
         break;
       } else {
-        // SparLog.info("Not all elevations has been found. Going up on the hierarchy!");
+        SparLog.debug("Not all elevations has been found. Going up on the hierarchy!");
         ptEntityList = new ArrayList<>(nextLevelList);
       }
     }
 
     return resultMap;
+  }
+
+  private boolean parentTreeListHasAnyElevationMissing(List<ParentTreeEntity> list) {
+    return list.stream().filter(tree -> tree.getElevation() == null).count() > 0;
   }
 
   /**

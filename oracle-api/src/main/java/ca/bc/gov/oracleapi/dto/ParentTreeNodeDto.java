@@ -47,6 +47,16 @@ public class ParentTreeNodeDto {
     }
   }
 
+  /**
+   * Get a Parent tree's parent elevation (and all lat and long mean values), recursively, looking
+   * at parent's parent and finding the 'mean' value when required. The calculation piece of code
+   * was brought exactly as is in SPR_GET_PT_GEOG.prc file on SPAR Legacy.
+   *
+   * @param current Current node in the tree
+   * @param femaleNode Female parent node in the tree
+   * @param maleNode Male parent node in the tree
+   * @return A female node if female has data, or a new node with mean values from female and male.
+   */
   private ParentTreeGeoNodeDto getParentsMeanElevation(
       ParentTreeNodeDto current, ParentTreeNodeDto femaleNode, ParentTreeNodeDto maleNode) {
     if (current.geoNode.getElevation() != null) {
@@ -143,15 +153,16 @@ public class ParentTreeNodeDto {
    *
    * @param level Current level in the tree
    */
-  public void print(int level) {
+  public String printLevel(int level) {
     String message = String.format("Level %d - %s", level, toString());
     SparLog.info(message);
     if (femaleParent != null) {
-      femaleParent.print(level + 1);
+      return femaleParent.printLevel(level + 1);
     }
     if (maleParent != null) {
-      maleParent.print(level + 1);
+      return maleParent.printLevel(level + 1);
     }
+    return message;
   }
 
   /** Gets the string version of the node. */
