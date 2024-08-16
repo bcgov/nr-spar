@@ -7,6 +7,9 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: DB_PASSWORD
+    description: Password for the PostgreSQL connection user
+    required: true
   - name: FORESTCLIENTAPI_KEY
     required: true
   - name: ORACLE_HOST
@@ -35,6 +38,17 @@ parameters:
     description: Cognito user pools web client ID
     required: true
 objects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-database
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      database-name: ${NAME}
+      database-password: ${DB_PASSWORD}
+      database-port: "5432"
+      database-user: ${NAME}
   - apiVersion: v1
     kind: Secret
     metadata:
