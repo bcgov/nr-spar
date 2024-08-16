@@ -21,3 +21,5 @@ export const LARGE_SCREEN_WIDTH = 1056;
 export const TSC_ADMIN_ROLE = 'SPAR_TSC_ADMIN';
 
 export const PLACE_HOLDER = '--';
+
+export const MINISTRY_OF_FOREST_ID = '00012797';
