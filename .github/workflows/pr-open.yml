@@ -18,7 +18,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [database, backend, frontend, oracle-api, sync]
+        package: [backend, frontend, oracle-api, sync]
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.2.0
         id: build
