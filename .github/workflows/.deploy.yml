@@ -97,7 +97,7 @@ jobs:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
-          file: database/openshift.deploy.yml
+          file: common/openshift.database.yml
           overwrite: false
           parameters:
             -p ZONE=${{ inputs.target }}

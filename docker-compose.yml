@@ -29,7 +29,7 @@ services:
       <<: *postgres-vars
     volumes:
       - "/pgdata"
-      - "./database/init_db:/init_db"
+      - "./common/init_db:/init_db"
     ports: ["5432:5432"]
     healthcheck:
       test: psql -q -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1'
