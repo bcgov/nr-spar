@@ -34,8 +34,8 @@ const InterimReviewRead = () => {
     cacheTime: THREE_HALF_HOURS
   });
 
-  const getFacilityTypeLabel = (interimType: string) => {
-    if (facilityTypesQuery.data) {
+  const getFacilityTypeLabel = (interimType: string | null) => {
+    if (facilityTypesQuery.data && interimType) {
       const selectedType = facilityTypesQuery.data.filter((type) => type.code === interimType);
       return selectedType[0].label;
     }

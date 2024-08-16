@@ -8,9 +8,10 @@ import {
 } from '@carbon/react';
 import { toast } from 'react-toastify';
 import {
-  Edit, Save, Pending, Checkmark
+  Edit, Save, Pending, Checkmark, Warning
 } from '@carbon/icons-react';
 import { Beforeunload } from 'react-beforeunload';
+import { DateTime as luxon } from 'luxon';
 
 import { getSeedlotById, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -55,6 +56,7 @@ import ClassAContext from '../ContextContainerClassA/context';
 import { validateRegForm } from '../CreateAClass/utils';
 import {
   getSeedlotPayload,
+  initOwnershipState,
   validateCollectionStep, validateExtractionStep, validateInterimStep, validateOrchardStep,
   validateOwnershipStep, validateParentStep, verifyCollectionStepCompleteness,
   verifyExtractionStepCompleteness,
@@ -68,7 +70,8 @@ import {
 } from './utils';
 import { GenWorthValType } from './definitions';
 import { SaveStatusModalText } from './constants';
-import { completeProgressConfig } from '../ContextContainerClassA/constants';
+import { completeProgressConfig, emptyOwnershipStep, initialProgressConfig } from '../ContextContainerClassA/constants';
+import { AllStepData } from '../ContextContainerClassA/definitions';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
@@ -331,35 +334,6 @@ const SeedlotReviewContent = () => {
     }
   });
 
-  const updateDraftMutation = useMutation({
-    mutationFn: (
-      // It will be used later at onSuccess
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _variables: PutTscSeedlotMutationObj
-    ) => putAClassSeedlotProgress(
-      seedlotNumber ?? '',
-      {
-        allStepData,
-        progressStatus: completeProgressConfig,
-        // We don't know the previous revision count
-        revisionCount: -1
-      }
-    ),
-    onSuccess: (_data, variables) => (
-      tscSeedlotMutation.mutate(variables)
-    ),
-    onError: (err: AxiosError) => {
-      toast.error(
-        <ErrorToast
-          title="Edit seedlot failed"
-          subtitle={`Cannot save seedlot. Please try again later. ${err.code}: ${err.message}`}
-        />,
-        ErrToastOption
-      );
-    },
-    retry: 0
-  });
-
   const statusOnlyMutaion = useMutation({
     mutationFn: (
       { seedlotNum, statusOnSave }: Omit<PutTscSeedlotMutationObj, 'payload'>
@@ -384,11 +358,90 @@ const SeedlotReviewContent = () => {
   });
 
   /**
+   * This is only used when we send SUB seedlots back to pending when
+   * we migrate historical data from Oracle to Postgres. PND seedlots on Oracle
+   * will come in as SUB, so we need to manually send them back to PND in order to
+   * generate a draft json object in the seedlot_registration_a_class_save table.
+   */
+  const getAllStepDataForPayload = ():AllStepData => {
+    const allData = { ...allStepData };
+    if (allData.ownershipStep.length === 0) {
+      const emptyOwner = initOwnershipState('', emptyOwnershipStep)[0];
+      emptyOwner.ownerAgency.value = seedlotData?.applicantClientNumber ?? '';
+      emptyOwner.ownerCode.value = seedlotData?.applicantLocationCode ?? '';
+      allData.ownershipStep = [emptyOwner];
+    }
+    return allData;
+  };
+
+  const updateDraftMutation = useMutation({
+    mutationFn: (
+      // It will be used later at onSuccess
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _variables: PutTscSeedlotMutationObj
+    ) => (
+      putAClassSeedlotProgress(
+        seedlotNumber!,
+        {
+          allStepData,
+          progressStatus: completeProgressConfig,
+          // We don't know the previous revision count
+          revisionCount: -1
+        }
+      )
+    ),
+    onSuccess: (_data, variables) => {
+      tscSeedlotMutation.mutate(variables);
+    },
+    onError: (err: AxiosError) => {
+      toast.error(
+        <ErrorToast
+          title="Edit seedlot failed"
+          subtitle={`Cannot save seedlot. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    },
+    retry: 0
+  });
+
+  /**
+   * Used for handling migrated pending seedlots from oracle.
+   */
+  const createDraftForPendMutation = useMutation({
+    mutationFn: () => (
+      putAClassSeedlotProgress(
+        seedlotNumber!,
+        {
+          allStepData: getAllStepDataForPayload(),
+          progressStatus: initialProgressConfig,
+          // We don't know the previous revision count
+          revisionCount: -1
+        }
+      )
+    ),
+    onSuccess: () => {
+      statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'PND' });
+    },
+    onError: (err: AxiosError) => {
+      toast.error(
+        <ErrorToast
+          title="Creat draft for seedlot failed"
+          subtitle={`Cannot creat draft for seedlot. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    },
+    retry: 0
+  });
+
+  /**
    * The handler for the button that is floating on the bottom right.
    */
   const handleEditSaveBtn = () => {
-    // If the form is in read mode, then enable edit mode only.
-    if (isReadMode) {
+    // If the form is in read mode, then enable edit mode only,
+    // but wait for parent tree data to load first.
+    if (isReadMode && Object.keys(allStepData.parentTreeStep.allParentTreeData).length > 0) {
       setIsReadMode(!isReadMode);
       return;
     }
@@ -554,9 +607,7 @@ const SeedlotReviewContent = () => {
           {
             isReadMode
               ? <InterimReviewRead />
-              : (
-                <InterimReviewEdit />
-              )
+              : <InterimReviewEdit />
           }
         </Column>
       </Row>
@@ -669,6 +720,23 @@ const SeedlotReviewContent = () => {
                   onClick={() => openSaveStatusModal('APP')}
                 >
                   Approve seedlot
+                </Button>
+              </Column>
+            </Row>
+          )
+          : null
+      }
+      {
+        (luxon.local().setZone('America/Vancouver').toISODate() ?? '' < '2024-08-17')
+          ? (
+            <Row className="action-button-row">
+              <Column className="action-button-col" sm={4} md={4} lg={8}>
+                <Button
+                  kind="danger"
+                  renderIcon={Warning}
+                  onClick={() => createDraftForPendMutation.mutate()}
+                >
+                  Hisotrical SUB to PND (DEV ONLY!)
                 </Button>
               </Column>
             </Row>

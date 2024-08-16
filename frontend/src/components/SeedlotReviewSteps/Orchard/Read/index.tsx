@@ -64,7 +64,7 @@ const OrchardReviewRead = () => {
           <ReadOnlyInput
             id="orchard-female-gametic"
             label="Female gametic contribution methodology"
-            value={state.femaleGametic.value.label}
+            value={state.femaleGametic.value?.label}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -74,7 +74,7 @@ const OrchardReviewRead = () => {
           <ReadOnlyInput
             id="orchard-male-gametic"
             label="Male gametic contribution methodology"
-            value={state.maleGametic.value.label}
+            value={state.maleGametic.value?.label}
             showSkeleton={isFetchingData}
           />
         </Column>
