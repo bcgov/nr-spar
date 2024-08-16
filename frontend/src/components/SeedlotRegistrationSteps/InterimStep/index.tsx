@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import moment from 'moment';
 
 import {
   Column,
@@ -19,12 +18,12 @@ import ScrollToTop from '../../ScrollToTop';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
 
 import getFacilityTypes from '../../../api-service/facilityTypesAPI';
+import { now } from '../../../utils/DateUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
 
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import InterimForm from './definitions';
 import {
   DATE_FORMAT, MAX_FACILITY_DESC_CHAR, clientAndCodeTextConfig, pageTexts
 } from './constants';
@@ -41,6 +40,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
     allStepData: { interimStep: state },
     allStepData: { collectionStep: { collectorAgency } },
     allStepData: { collectionStep: { locationCode: collectorCode } },
+    allStepData: { collectionStep: { endDate } },
     setStepData,
     isFormSubmitted
   } = useContext(ClassAContext);
@@ -64,11 +64,10 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
 
   // This function validates changes on both start and end dates
   // of the storage information
-  const validateStorageDates = (curState: InterimForm) => {
+  const validateStorageDates = (curStartDate: string, curEndDate: string) => {
     // Check if the start date is set before the end date
-    if (curState.startDate.value !== '' && curState.endDate.value !== '') {
-      return moment(curState.endDate.value, 'YYYY/MM/DD')
-        .isBefore(moment(curState.startDate.value, 'YYYY/MM/DD'));
+    if (curStartDate !== '' && curEndDate !== '') {
+      return curEndDate < curStartDate;
     }
     return false;
   };
@@ -81,9 +80,17 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
       clonedState.endDate.value = stringDate;
     }
 
-    const isInvalid = validateStorageDates(clonedState);
+    const isInvalid = validateStorageDates(
+      clonedState.startDate.value,
+      clonedState.endDate.value
+    );
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
+
+    // Validate if end date is after collection end date
+    if (!isStart && !isInvalid) {
+      clonedState.endDate.isInvalid = clonedState.endDate.value < endDate.value;
+    }
     setStepData('interimStep', clonedState);
   };
 
@@ -179,6 +186,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             datePickerType="single"
             name="startDate"
             dateFormat={DATE_FORMAT}
+            maxDate={!isReview ? now : undefined}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(true, selectedDate);
@@ -203,6 +211,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             name="endDate"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
+            maxDate={!isReview ? now : undefined}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(false, selectedDate);
@@ -214,8 +223,15 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
               labelText={pageTexts.storageDate.labelTextEnd}
               helperText={pageTexts.storageDate.helperText}
               placeholder={pageTexts.storageDate.placeholder}
-              invalid={state.startDate.isInvalid}
-              invalidText={pageTexts.storageDate.invalidText}
+              invalid={state.endDate.isInvalid}
+              // If start date field is invalid, it means that the end date is also
+              // invalid and the error message can stay the same, else, shows the
+              // exclusive end date error message
+              invalidText={
+                state.startDate.isInvalid
+                  ? pageTexts.storageDate.invalidText
+                  : pageTexts.storageDate.invalidDateBeforeCollection
+              }
               readOnly={isFormSubmitted}
               autoComplete="off"
             />
