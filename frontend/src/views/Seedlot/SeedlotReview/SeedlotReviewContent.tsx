@@ -715,6 +715,8 @@ const SeedlotReviewContent = () => {
           : null
       }
       {
+        // this and its related code such as createDraftForPendMutation
+        // needs to be deleted in the future
         (luxon.local().setZone('America/Vancouver').toISODate() ?? '' < '2024-08-17')
           ? (
             <Row className="action-button-row">
