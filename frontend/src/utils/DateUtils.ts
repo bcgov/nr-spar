@@ -4,6 +4,9 @@ import { MONTH_DAY_YEAR, ISO_YEAR_MONTH_DAY_DASH, ISO_YEAR_MONTH_DAY_SLASH } fro
 
 const DEFAULT_LOCAL_TIMEZONE = 'America/Vancouver';
 
+// Get today's date and time
+export const now = luxon.now().setZone('America/Vancouver').toFormat('yyyy/MM/dd');
+
 export const formatDate = (date: string) => {
   if (date) {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };

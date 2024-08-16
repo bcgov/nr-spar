@@ -42,6 +42,9 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         ignored: ['**/coverage/**', '**/cypress-coverage/**', '**/cypress/**']
       }
     },
+    preview: {
+        port: 3000
+    },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
