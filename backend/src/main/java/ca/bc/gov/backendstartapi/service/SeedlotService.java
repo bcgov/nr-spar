@@ -591,18 +591,23 @@ public class SeedlotService {
     List<SeedlotOrchard> seedlotOrchards =
         seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotInfo.getId());
 
-    List<SeedlotOrchard> filteredPrimaryOrchard =
-        seedlotOrchards.stream().filter(so -> so.getIsPrimary()).toList();
+    String primaryOrchardId = null;
 
-    String primaryOrchardId =
-        filteredPrimaryOrchard.isEmpty()
-            ? filteredPrimaryOrchard.get(0).getOrchardId()
-            : seedlotOrchards.get(0).getOrchardId();
+    if (!seedlotOrchards.isEmpty()) {
+      List<SeedlotOrchard> filteredPrimaryOrchard =
+          seedlotOrchards.stream().filter(so -> so.getIsPrimary()).toList();
 
-    Optional<String> secondaryOrchardId =
-        seedlotOrchards.size() > 1
-            ? Optional.of(seedlotOrchards.get(1).getOrchardId())
-            : Optional.empty();
+      primaryOrchardId =
+          filteredPrimaryOrchard.isEmpty()
+              ? null
+              : filteredPrimaryOrchard.get(0).getOrchardId();
+    }
+
+    Optional<String> secondaryOrchardId = Optional.empty();
+
+    if (seedlotOrchards.size() > 1 && !seedlotOrchards.get(1).getIsPrimary()) {
+      secondaryOrchardId = Optional.of(seedlotOrchards.get(1).getOrchardId());
+    }
 
     SeedlotFormOrchardDto orchardStep =
         new SeedlotFormOrchardDto(
