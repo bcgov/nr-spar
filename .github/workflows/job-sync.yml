@@ -23,5 +23,6 @@ jobs:
           oc version
         working-directory: /usr/local/bin/
 
+      - uses: actions/checkout@v4
       - name: ETL Sync
         run: ./sync/oc_run.sh test ${{ secrets.oc_token }}
