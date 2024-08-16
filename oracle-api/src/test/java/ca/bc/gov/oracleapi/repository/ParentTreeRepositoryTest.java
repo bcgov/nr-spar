@@ -25,7 +25,8 @@ class ParentTreeRepositoryTest {
   @Test
   @DisplayName("findAllByIdInTest")
   void findAllByIdInTest() {
-    List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllByIdIn(List.of(4032L, 4033L));
+    List<ParentTreeEntity> parentTreeList =
+        parentTreeRepository.findAllByIdIn(List.of(4032L, 4033L));
 
     assertFalse(parentTreeList.isEmpty());
     assertEquals(2, parentTreeList.size());

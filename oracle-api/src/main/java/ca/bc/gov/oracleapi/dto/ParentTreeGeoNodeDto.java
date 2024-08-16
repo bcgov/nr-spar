@@ -5,6 +5,7 @@ import java.util.Optional;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** This class represents a GeoNode with all elevation, lat and long mean values. */
 @Setter
 @NoArgsConstructor
 public class ParentTreeGeoNodeDto {
@@ -17,7 +18,7 @@ public class ParentTreeGeoNodeDto {
   private Integer longitudeMinutes;
   private Integer longitudeSeconds;
 
-  public ParentTreeGeoNodeDto(ParentTreeEntity entity) {
+  ParentTreeGeoNodeDto(ParentTreeEntity entity) {
     this.elevation = entity.getElevation();
     this.latitudeDegrees = entity.getLatitudeDegrees();
     this.latitudeMinutes = entity.getLatitudeMinutes();

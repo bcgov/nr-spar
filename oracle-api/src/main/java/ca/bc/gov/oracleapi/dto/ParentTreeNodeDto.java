@@ -86,10 +86,14 @@ public class ParentTreeNodeDto {
       return femaleElevation;
     } else if (maleElevation.getElevationIntVal() > 0 && femaleElevation.getElevationIntVal() > 0) {
       int noOfParents = 2;
+      ParentTreeGeoNodeDto meanNode = new ParentTreeGeoNodeDto();
+
+      // Elevation
       int meanElevation =
           (maleElevation.getElevationIntVal() + femaleElevation.getElevationIntVal()) / noOfParents;
+      meanNode.setElevation(meanElevation);
 
-      // all other calculations
+      // All other calculations (Lat and Long)
       int calc =
           (femaleElevation.getLatitudeDegreesIntVal() * 3600)
               + (femaleElevation.getLatitudeMinutesIntVal() * 60)
@@ -102,10 +106,15 @@ public class ParentTreeNodeDto {
       // --derive mean
       calc = calc / noOfParents;
       int latitudeDegrees = calc / 3600;
+      meanNode.setLatitudeDegrees(latitudeDegrees);
+
       int buff = calc % 3600;
       int latitudeMinutes = buff / 60;
+      meanNode.setLatitudeMinutes(latitudeMinutes);
+
       buff = calc % 60;
       int latitudeSeconds = buff;
+      meanNode.setLatitudeSeconds(latitudeSeconds);
 
       calc =
           (femaleElevation.getLongitudeDegreesIntVal() * 3600)
@@ -119,19 +128,16 @@ public class ParentTreeNodeDto {
       // --derive mean
       calc = calc / noOfParents;
       int longitudeDegrees = calc / 3600;
+      meanNode.setLongitudeDegrees(longitudeDegrees);
+
       buff = calc % 3600;
       int longitudeMinutes = buff / 60;
+      meanNode.setLongitudeMinutes(longitudeMinutes);
+
       buff = calc % 60;
       int longitudeSeconds = buff;
-
-      ParentTreeGeoNodeDto meanNode = new ParentTreeGeoNodeDto();
-      meanNode.setElevation(meanElevation);
-      meanNode.setLatitudeDegrees(latitudeDegrees);
-      meanNode.setLatitudeMinutes(latitudeMinutes);
-      meanNode.setLatitudeSeconds(latitudeSeconds);
-      meanNode.setLongitudeDegrees(longitudeDegrees);
-      meanNode.setLongitudeMinutes(longitudeMinutes);
       meanNode.setLongitudeSeconds(longitudeSeconds);
+
       return meanNode;
     }
     return null;
