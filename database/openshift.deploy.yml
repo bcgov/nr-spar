@@ -93,7 +93,7 @@ objects:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
             - name: ${NAME}-${ZONE}
-              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
+              image: postgis/postgis:15-master
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}

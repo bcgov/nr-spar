@@ -24,7 +24,7 @@ x-frontend: &frontend
 services:
   database:
     container_name: database
-    build: ./database
+    image: postgis/postgis:15-master
     environment:
       <<: *postgres-vars
     volumes:
