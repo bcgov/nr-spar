@@ -274,4 +274,123 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
       .find('#gvo')
       .should('exist');
   });
+
+  it('Check \'More Options\' button functionality', () => {
+    // Check Download file option
+    cy.get(`.${prefix}--toolbar-content > span`)
+      .eq(1)
+      .find('button')
+      .as('clickMoreOptionsBtn')
+      .click();
+
+    cy.get('ul.parent-tree-table-option-menu')
+      .find('li')
+      .contains('Download table template')
+      .click();
+
+    cy.readFile(`${Cypress.config('downloadsFolder')}/Seedlot_composition_template.csv`);
+
+    // Click 'Clean table data' option
+    cy.get('@clickMoreOptionsBtn')
+      .click();
+
+    cy.get('ul.parent-tree-table-option-menu')
+      .find('li')
+      .contains('Clean table data')
+      .as('clickCleanTableBtn')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .should('be.visible');
+
+    // Check Cancel button of 'Clean table data' dialog box
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .find('button')
+      .contains('Cancel')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .should('not.be.visible');
+
+    // Check 'X' button of 'Clean table data' dialog box
+    cy.get('@clickMoreOptionsBtn')
+      .click();
+
+    cy.get('@clickCleanTableBtn')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .find('button[aria-label="close"]')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .should('not.be.visible');
+
+    // Check 'Clean table data' button of 'Clean table data' dialog box
+    cy.get('@clickMoreOptionsBtn')
+      .click();
+
+    cy.get('@clickCleanTableBtn')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .find('button')
+      .contains('Clean table data')
+      .click();
+
+    // Check values in 'SMP success on parent (%)' and 'Non-orchard pollen contam. (%)' columns of the table
+    cy.get('#212-smpSuccessPerc-value-input')
+      .should('have.value', '');
+
+    cy.get('#212-nonOrchardPollenContam-value-input')
+      .should('have.value', '');
+
+    cy.get('#219-smpSuccessPerc-value-input')
+      .should('have.value', '');
+
+    cy.get('#219-nonOrchardPollenContam-value-input')
+      .should('have.value', '');
+
+    // Check upload button functionality
+    cy.get('button.upload-button')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('be.visible');
+
+    cy.get('button')
+      .contains('Cancel')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('not.be.visible');
+
+    // Check file upload functionality
+    cy.get('button.upload-button')
+      .click({force: true});
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--file`)
+      .find(`input.${prefix}--file-input`)
+      .selectFile('cypress/fixtures/Seedlot_composition_template.csv', {force: true});
+
+    cy.get('button')
+      .contains('Import file and continue')
+      .click();
+
+    // Compare values in 'SMP success on parent (%)' and 'Non-orchard pollen contam. (%)' columns of the table with the csv file
+    cy.get('#212-smpSuccessPerc-value-input')
+      .should('have.value', '1');
+
+    cy.get('#212-nonOrchardPollenContam-value-input')
+      .should('have.value', '46');
+
+    cy.get('#219-smpSuccessPerc-value-input')
+      .should('have.value', '2');
+
+    cy.get('#219-nonOrchardPollenContam-value-input')
+      .should('have.value', '22');
+  });
 });
