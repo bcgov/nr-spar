@@ -75,7 +75,7 @@ export const initCollectionState = (
   },
   locationCode: {
     id: 'collection-location-code',
-    value: collectionStepData.collectionLocnCode,
+    value: collectionStepData.collectionLocnCode ?? '',
     isInvalid: false
   },
   startDate: {
@@ -90,17 +90,17 @@ export const initCollectionState = (
   },
   numberOfContainers: {
     id: 'collection-num-of-container',
-    value: String(collectionStepData.noOfContainers),
+    value: collectionStepData.noOfContainers?.toString() ?? '',
     isInvalid: false
   },
   volumePerContainers: {
     id: 'collection-vol-per-container',
-    value: String(collectionStepData.volPerContainer),
+    value: collectionStepData.volPerContainer?.toString() ?? '',
     isInvalid: false
   },
   volumeOfCones: {
     id: 'collection-vol-of-cones',
-    value: String(collectionStepData.clctnVolume),
+    value: collectionStepData.clctnVolume?.toString() ?? '',
     isInvalid: false
   },
   selectedCollectionCodes: {
@@ -110,7 +110,7 @@ export const initCollectionState = (
   },
   comments: {
     id: 'collection-comments',
-    value: collectionStepData.seedlotComment,
+    value: collectionStepData.seedlotComment ?? '',
     isInvalid: false
   }
 });
@@ -125,14 +125,16 @@ export const initOwnershipState = (
     const ownerState = createOwnerTemplate(index, curOwner);
 
     ownerState.ownerAgency.value = defaultAgencyNumber;
-
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
-    if (methodsOfPayment && fundingSource) {
+
+    if (methodsOfPayment && methodsOfPayment.length > 0) {
       const payment = methodsOfPayment
         .filter((data: MultiOptionsObj) => data.code === curOwner.methodOfPaymentCode)[0];
+      ownerState.methodOfPayment.value = payment;
+    }
+    if (fundingSource && fundingSource.length > 0) {
       const fundSource = fundingSource
         .filter((data: MultiOptionsObj) => data.code === curOwner.sparFundSrceCode)[0];
-      ownerState.methodOfPayment.value = payment;
       ownerState.fundingSource.value = fundSource;
     }
     return ownerState;
@@ -157,7 +159,7 @@ export const initInterimState = (
   },
   locationCode: {
     id: 'interim-location-code',
-    value: interimStepData.intermStrgLocnCode,
+    value: interimStepData.intermStrgLocnCode ?? '',
     isInvalid: false
   },
   startDate: {
@@ -172,12 +174,12 @@ export const initInterimState = (
   },
   facilityType: {
     id: 'storage-facility-type',
-    value: interimStepData.intermFacilityCode,
+    value: interimStepData.intermFacilityCode ?? '',
     isInvalid: false
   },
   facilityOtherType: {
     id: 'storage-other-type-input',
-    value: interimStepData.intermOtherFacilityDesc,
+    value: interimStepData.intermOtherFacilityDesc ?? '',
     isInvalid: false
   }
 });
@@ -346,7 +348,7 @@ export const initExtractionStorageState = (
       },
       locationCode: {
         id: 'ext-location-code',
-        value: useTSCExtract ? tscLocationCode : extractionStepData.extractoryLocnCode,
+        value: useTSCExtract ? tscLocationCode : (extractionStepData.extractoryLocnCode ?? ''),
         isInvalid: false
       },
       startDate: {
@@ -373,7 +375,7 @@ export const initExtractionStorageState = (
       },
       locationCode: {
         id: 'str-location-code',
-        value: useTSCStorage ? tscLocationCode : extractionStepData.storageLocnCode,
+        value: useTSCStorage ? tscLocationCode : (extractionStepData.storageLocnCode ?? ''),
         isInvalid: false
       },
       startDate: {
@@ -479,28 +481,28 @@ export const verifyCollectionStepCompleteness = (
   let isComplete = true;
   let idToFocus = '';
 
-  if (!collectionData.collectorAgency.value.length) {
+  if (!collectionData.collectorAgency.value) {
     isComplete = false;
     idToFocus = collectionData.collectorAgency.id;
-  } else if (!collectionData.locationCode.value.length) {
+  } else if (!collectionData.locationCode.value) {
     isComplete = false;
     idToFocus = collectionData.locationCode.id;
-  } else if (!collectionData.startDate.value.length) {
+  } else if (!collectionData.startDate.value) {
     isComplete = false;
     idToFocus = collectionData.startDate.id;
-  } else if (!collectionData.endDate.value.length) {
+  } else if (!collectionData.endDate.value) {
     isComplete = false;
     idToFocus = collectionData.endDate.id;
-  } else if (!collectionData.numberOfContainers.value.length) {
+  } else if (!collectionData.numberOfContainers.value) {
     isComplete = false;
     idToFocus = collectionData.numberOfContainers.id;
-  } else if (!collectionData.volumePerContainers.value.length) {
+  } else if (!collectionData.volumePerContainers.value) {
     isComplete = false;
     idToFocus = collectionData.volumePerContainers.id;
-  } else if (!collectionData.volumeOfCones.value.length) {
+  } else if (!collectionData.volumeOfCones.value) {
     isComplete = false;
     idToFocus = collectionData.volumeOfCones.id;
-  } else if (!collectionData.selectedCollectionCodes.value.length) {
+  } else if (!collectionData.selectedCollectionCodes.value) {
     isComplete = false;
     // Have to hard code id to focus as they are generated dynamically,
     // assuming that there will always be a code 1 in the list of collection methods.
@@ -525,19 +527,19 @@ export const verifyOwnershipStepCompleteness = (
   let idToFocus = '';
 
   for (let i = 0; i < ownershipData.length; i += 1) {
-    if (!ownershipData[i].ownerAgency.value.length) {
+    if (!ownershipData[i].ownerAgency.value) {
       isComplete = false;
       idToFocus = ownershipData[i].ownerAgency.id;
-    } else if (!ownershipData[i].ownerCode.value.length) {
+    } else if (!ownershipData[i].ownerCode.value) {
       isComplete = false;
       idToFocus = ownershipData[i].ownerCode.id;
-    } else if (!ownershipData[i].ownerPortion.value.length) {
+    } else if (!ownershipData[i].ownerPortion.value) {
       isComplete = false;
       idToFocus = ownershipData[i].ownerPortion.id;
-    } else if (!ownershipData[i].reservedPerc.value.length) {
+    } else if (!ownershipData[i].reservedPerc.value) {
       isComplete = false;
       idToFocus = ownershipData[i].reservedPerc.id;
-    } else if (!ownershipData[i].surplusPerc.value.length) {
+    } else if (!ownershipData[i].surplusPerc.value) {
       isComplete = false;
       idToFocus = ownershipData[i].surplusPerc.id;
     } else if (

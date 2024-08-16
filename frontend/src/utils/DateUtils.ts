@@ -1,8 +1,11 @@
 import { DateTime as luxon } from 'luxon';
 import { PLACE_HOLDER } from '../shared-constants/shared-constants';
-import { MONTH_DAY_YEAR, ISO_YEAR_MONTH_DAY_DASH, ISO_YEAR_MONTH_DAY_SLASH } from '../config/DateFormat';
+import { MONTH_DAY_YEAR, ISO_YEAR_MONTH_DAY_SLASH, ISO_YEAR_MONTH_DAY_DASH } from '../config/DateFormat';
 
 const DEFAULT_LOCAL_TIMEZONE = 'America/Vancouver';
+
+// Get today's date and time
+export const now = luxon.now().setZone('America/Vancouver').toFormat('yyyy/MM/dd');
 
 export const formatDate = (date: string) => {
   if (date) {
@@ -30,7 +33,7 @@ export const utcToIsoSlashStyle = (utcDate: string | null | undefined): string =
   if (!utcDate) {
     return '';
   }
-  return luxon.fromISO(utcDate, { zone: 'utc' })
+  return luxon.fromISO(utcDate)
     .setZone(DEFAULT_LOCAL_TIMEZONE).toFormat(ISO_YEAR_MONTH_DAY_SLASH);
 };
 
@@ -41,6 +44,6 @@ export const localDateToUtcFormat = (localDate: string): string | null => {
   if (!localDate) {
     return null;
   }
-  return luxon.fromFormat(localDate, 'yyyy/MM/dd', { zone: 'America/Vancouver' })
-    .toUTC().toFormat(ISO_YEAR_MONTH_DAY_DASH);
+  return luxon.fromFormat(localDate, 'yyyy/MM/dd', { zone: DEFAULT_LOCAL_TIMEZONE })
+    .startOf('day').toUTC().toFormat(ISO_YEAR_MONTH_DAY_DASH);
 };
