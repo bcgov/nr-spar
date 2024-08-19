@@ -6,13 +6,13 @@ set -eux
 # Run and verify job
 
 # Login
-if [ ! -z "${1:-}" ]; then
-  oc login --token=${1} --server=https://api.silver.devops.gov.bc.ca:6443
+if [ ! -z "${2:-}" ]; then
+  oc login --token=${2} --server=https://api.silver.devops.gov.bc.ca:6443
   oc project  #Safeguard!
 fi
 
 # Create job
-CRONJOB=nr-spar-1502-sync
+CRONJOB=nr-spar-${1:-test}-sync
 RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
 oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 

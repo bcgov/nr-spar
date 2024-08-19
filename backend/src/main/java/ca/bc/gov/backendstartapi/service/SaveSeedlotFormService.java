@@ -58,6 +58,7 @@ public class SaveSeedlotFormService {
 
     SaveSeedlotProgressEntityClassA entityToSave;
     // If an entity exist then update the values, otherwise make a new entity.
+    // The SUB status check is to create a draft for historical Oracle seedlots.
     if (optionalEntityToSave.isEmpty()) {
       SparLog.info(
           "First time saving A-class seedlot progress for seedlot number {}", seedlotNumber);

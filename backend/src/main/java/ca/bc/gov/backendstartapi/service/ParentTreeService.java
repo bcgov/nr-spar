@@ -90,7 +90,7 @@ public class ParentTreeService {
         }
 
         // --col:W
-        if (varTotalConeCount.compareTo(BigDecimal.ZERO) > 0) {
+        if (varTotalPollenCount.compareTo(BigDecimal.ZERO) > 0) {
           varParentPropOrchPoll = ptPollenCount.divide(varTotalPollenCount, DIVISION_SCALE, halfUp);
         }
 

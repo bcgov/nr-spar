@@ -15,6 +15,10 @@ RUN ./mvnw -B package -Pnative -DskipTests
 FROM gcr.io/distroless/java-base:nonroot AS deploy
 ARG PORT=8090
 
+# Receive build number as argument, retain as environment variable
+ARG BUILD_NUMBER
+ENV BUILD_NUMBER=${BUILD_NUMBER}
+
 # Copy
 WORKDIR /app
 COPY --from=build /app/target/nr-spar-backend ./nr-spar-backend

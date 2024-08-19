@@ -4513,7 +4513,7 @@ comment on column spar.ETL_EXECUTION_SCHEDULE.created_at         is 'Timestamp o
 
 create table spar.etl_execution_log_hist
 ( entry_timestamp timestamp(6) not null default current_timestamp
-, log_details jsonb not null)
+, log_details jsonb not null);
 
 comment on table  spar.ETL_EXECUTION_LOG_HIST is 'ETL Tool monitoring table to store all executed instances of batch processing interfaces';
 comment on column spar.ETL_EXECUTION_LOG_HIST.entry_timestamp      		  is 'The timestamp when the record was inserted';
