@@ -69,8 +69,8 @@ objects:
         requests:
           storage: ${CERT_PVC_SIZE}
       storageClassName: netapp-file-standard
-  - kind: Deployment
-    apiVersion: apps/v1
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
       labels:
         app: ${NAME}-${ZONE}
