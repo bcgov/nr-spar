@@ -27,68 +27,32 @@ import ServiceStatus from './views/ServiceStatus';
 
 Amplify.configure(awsconfig);
 
-// Constants
 const HTTP_STATUS_TO_NOT_RETRY = [400, 401, 403, 404];
 const MAX_RETRIES = 3;
 
-// Route Definitions
-const roleSelectionRoutes: RouteObject[] = [
+const queryClient = new QueryClient(
   {
-    path: ROUTES.ALL_ROUTES,
-    element: <LoginOrgSelection />
-  }
-];
-
-const signedRoutes: RouteObject[] = [
-  {
-    path: ROUTES.ROOT,
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: <Layout />,
-        children: BrowserRoutes
-      }
-    ]
-  },
-  {
-    path: ROUTES.ALL_ROUTES,
-    element: <FourOhFour />
-  }
-];
-
-const notSignedRoutes: RouteObject[] = [
-  {
-    path: ROUTES.ALL_ROUTES,
-    element: <Landing />
-  }
-];
-
-const sharedRoutes: RouteObject[] = [
-  {
-    path: ROUTES.SERVICE_STATUS,
-    element: <ServiceStatus />
-  }
-];
-
-// Query Client Setup
-const createQueryClient = () => new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      retry: (failureCount, error) => {
-        if (failureCount > MAX_RETRIES) return false;
-        if (isAxiosError(error)) {
-          const status = error.response?.status;
-          if (status && HTTP_STATUS_TO_NOT_RETRY.includes(status)) {
+    defaultOptions: {
+      queries: {
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        // Do not retry on errors defined above
+        retry: (failureCount, error) => {
+          if (failureCount > MAX_RETRIES) {
             return false;
           }
+          if (isAxiosError(error)) {
+            const status = error.response?.status;
+            if (status && HTTP_STATUS_TO_NOT_RETRY.includes(status)) {
+              return false;
+            }
+          }
+          return true;
         }
-        return true;
       }
     }
   }
-});
+);
 
 /**
  * Create an app structure containing all the routes.
@@ -100,9 +64,47 @@ const App: React.FC = () => {
 
   useEffect(() => {
     isCurrentAuthUser(window.location.pathname);
-  }, [isCurrentAuthUser]);
+  }, []);
 
-  const selectBrowserRoutes = (): RouteObject[] => {
+  const roleSelectionRoutes: RouteObject[] = [
+    {
+      path: ROUTES.ALL_ROUTES,
+      element: <LoginOrgSelection />
+    }
+  ];
+
+  const signedRoutes: RouteObject[] = [
+    {
+      path: ROUTES.ROOT,
+      element: <ProtectedRoute />,
+      children: [
+        {
+          element: <Layout />,
+          children: BrowserRoutes
+        }
+      ]
+    },
+    {
+      path: ROUTES.ALL_ROUTES,
+      element: <FourOhFour />
+    }
+  ];
+
+  const notSignedRoutes: RouteObject[] = [
+    {
+      path: ROUTES.ALL_ROUTES,
+      element: <Landing />
+    }
+  ];
+
+  const sharedRoutes: RouteObject[] = [
+    {
+      path: ROUTES.SERVICE_STATUS,
+      element: <ServiceStatus />
+    }
+  ];
+
+  const selectBrowserRoutes = () => {
     if (!signed) {
       return notSignedRoutes;
     }
@@ -112,14 +114,18 @@ const App: React.FC = () => {
     return roleSelectionRoutes;
   };
 
-  const router = createBrowserRouter([...selectBrowserRoutes(), ...sharedRoutes]);
+  const getBrowserRouter = () => {
+    const selectedRoutes = selectBrowserRoutes();
+    selectedRoutes.push(...sharedRoutes);
+    return createBrowserRouter(selectedRoutes);
+  };
 
   return (
     <ClassPrefix prefix={prefix}>
       <ThemePreference>
-        <QueryClientProvider client={createQueryClient()}>
+        <QueryClientProvider client={queryClient}>
           <ToastContainer />
-          <RouterProvider router={router} />
+          <RouterProvider router={getBrowserRouter()} />
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ThemePreference>

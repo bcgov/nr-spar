@@ -10,7 +10,7 @@ export const SPAR_DEPENDENCIES: DependencyDefinition[] = [
   {
     name: `Oracle Backend${env.VITE_ZONE ? ` ${env.VITE_ZONE}` : ''}`,
     queryKey: 'oracle-backend-healthcheck',
-    healthCheckUrl: `${env.VITE_ORACLE_SERVER_URL}/health`
+    healthCheckUrl: `${env.VITE_ORACLE_SERVER_URL}/actuator/health`
   },
   {
     name: 'Forest Access Management API',
