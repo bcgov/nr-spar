@@ -425,7 +425,7 @@ const OrchardStep = ({
       {
         renderOrchardButtons()
       }
-      <Row className="seedlot-orchard-title-row">
+      <Row className="seedlot-gamete-title-row">
         <Column className="section-title" sm={4} md={8} lg={16}>
           <h2>{orchardStepText.gameteSection.title}</h2>
           {
@@ -562,7 +562,7 @@ const OrchardStep = ({
           }
         </Column>
       </Row>
-      <Row>
+      <Row className="orchard-row">
         <Column sm={4} md={8} lg={16}>
           <RadioButtonGroup
             id={state.hasPollenContamination.id}
