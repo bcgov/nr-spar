@@ -393,4 +393,32 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
     cy.get('#219-nonOrchardPollenContam-value-input')
       .should('have.value', '22');
   });
+
+  it('Calculate Metrics button', () => {
+    // Check info sections not visible in DOM
+    cy.get('.info-section-sub-title')
+      .should('not.exist');
+
+    // Click 'Calculate metrics' button
+    cy.get('.gen-worth-cal-row')
+      .find('button')
+      .contains('Calculate metrics')
+      .click();
+
+    // Check info sections visible in DOM
+    cy.get('.info-section-sub-title')
+      .find(`.${prefix}--col`)
+      .contains('Genetic worth and percent of Tested parent tree contribution')
+      .should('be.visible');
+
+    cy.get('.info-section-sub-title')
+      .find(`.${prefix}--col`)
+      .contains('Effective population size and diversity')
+      .should('be.visible');
+
+    cy.get('.info-section-sub-title')
+      .find(`.${prefix}--col`)
+      .contains('Orchard parent tree geospatial summary')
+      .should('be.visible');
+  });
 });
