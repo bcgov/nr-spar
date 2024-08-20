@@ -9,8 +9,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  sync:
-    name: Sync
+  sync-test:
+    environment: test
+    name: Sync (TEST)
     runs-on: ubuntu-latest
     steps:
       - name: Override OpenShift version
@@ -24,9 +25,22 @@ jobs:
 
       - uses: actions/checkout@v4
       - name: ETL (TEST)
-        environment: test
         run: ./sync/oc_run.sh test ${{ secrets.oc_token }}
 
+  sync-prod:
+    environment: prod
+    name: Sync (PROD)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Override OpenShift version
+        env:
+          OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
+        run: |
+          # Download and extract with retry, continuing on error
+          (wget ${{ env.OC }} -qcO - | tar -xzvf - oc)|| !! || true
+          oc version
+        working-directory: /usr/local/bin/
+
+      - uses: actions/checkout@v4
       - name: ETL (PROD)
-        environment: prod
         run: ./sync/oc_run.sh prod ${{ secrets.oc_token }}
