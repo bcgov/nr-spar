@@ -49,10 +49,12 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
+import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
@@ -131,7 +133,7 @@ class SeedlotServiceTest {
   }
 
   private ParentTreeGeneticQualityDto createParentTreeGenQuaDto() {
-    return new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"));
+    return new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"), null, null);
   }
 
   private SeedlotFormParentTreeSmpDto createParentTreeDto(Integer parentTreeId) {
@@ -178,9 +180,11 @@ class SeedlotServiceTest {
   @DisplayName("createSeedlotSuccessTest")
   void createSeedlotTest_happyPath_shouldSucceed() {
     when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
+    String incStatusCode = "INC";
 
-    SeedlotStatusEntity statusEntity = new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
-    when(seedlotStatusService.findById("PND")).thenReturn(Optional.of(statusEntity));
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
 
     SeedlotSourceEntity sourceEntity =
         new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE, null);
@@ -222,34 +226,31 @@ class SeedlotServiceTest {
   void createSeedlotTest_noSeedlotStatus_shouldThrowException() {
     when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
 
-    when(seedlotStatusService.findById("PND")).thenReturn(Optional.empty());
+    when(seedlotStatusService.findById(any())).thenReturn(Optional.empty());
 
-    Exception exc =
-        Assertions.assertThrows(
-            InvalidSeedlotRequestException.class,
-            () -> {
-              seedlotService.createSeedlot(createSeedlotDto());
-            });
-
-    Assertions.assertEquals(BAD_REQUEST_STR, exc.getMessage());
+    Assertions.assertThrows(
+        SeedlotStatusNotFoundException.class,
+        () -> {
+          seedlotService.createSeedlot(createSeedlotDto());
+        });
   }
 
   @Test
   @DisplayName("createSeedlotAClassWithoutGeneticClassEntity")
   void createSeedlotTest_noGeneticClass_shouldThrowException() {
-    SeedlotStatusEntity statusEntity = new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
-    when(seedlotStatusService.findById("PND")).thenReturn(Optional.of(statusEntity));
+    String incStatusCode = "INC";
+
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
 
     when(geneticClassRepository.findById("A")).thenReturn(Optional.empty());
 
-    Exception exc =
-        Assertions.assertThrows(
-            InvalidSeedlotRequestException.class,
-            () -> {
-              seedlotService.createSeedlot(createSeedlotDto());
-            });
-
-    Assertions.assertEquals(BAD_REQUEST_STR, exc.getMessage());
+    Assertions.assertThrows(
+        GeneticClassNotFoundException.class,
+        () -> {
+          seedlotService.createSeedlot(createSeedlotDto());
+        });
   }
 
   @Test
@@ -257,22 +258,22 @@ class SeedlotServiceTest {
   void createSeedlotTest_noSeedlotSource_shouldThrowException() {
     when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
 
-    SeedlotStatusEntity statusEntity = new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
-    when(seedlotStatusService.findById("PND")).thenReturn(Optional.of(statusEntity));
+    String incStatusCode = "INC";
+
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
 
     GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
     when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));
 
     when(seedlotSourceRepository.findById("TPT")).thenReturn(Optional.empty());
 
-    Exception exc =
-        Assertions.assertThrows(
-            InvalidSeedlotRequestException.class,
-            () -> {
-              seedlotService.createSeedlot(createSeedlotDto());
-            });
-
-    Assertions.assertEquals(BAD_REQUEST_STR, exc.getMessage());
+    Assertions.assertThrows(
+        SeedlotSourceNotFoundException.class,
+        () -> {
+          seedlotService.createSeedlot(createSeedlotDto());
+        });
   }
 
   @Test
@@ -364,10 +365,13 @@ class SeedlotServiceTest {
     when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId))
         .thenReturn(List.of(spzEntity));
     when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId)).thenReturn(Optional.empty());
+    BigDecimal defaultBv = BigDecimal.ZERO;
 
     SeedlotGeneticWorth seedlotGenWor =
         new SeedlotGeneticWorth(
-            seedlotEntity, new GeneticWorthEntity("GVO", "", null), new AuditInformation("userId"));
+            seedlotEntity,
+            new GeneticWorthEntity("GVO", "", null, defaultBv),
+            new AuditInformation("userId"));
     seedlotGenWor.setGeneticQualityValue(new BigDecimal("18"));
     seedlotGenWor.setTestedParentTreeContributionPercentage(new BigDecimal("88"));
 
@@ -491,7 +495,7 @@ class SeedlotServiceTest {
         new SeedlotParentTreeGeneticQuality(
             spt,
             sptgqDto.geneticTypeCode(),
-            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
             sptgqDto.geneticQualityValue(),
             audit);
 
@@ -513,7 +517,7 @@ class SeedlotServiceTest {
         new SeedlotParentTreeSmpMix(
             spt,
             sptgqDto.geneticTypeCode(),
-            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
             sptgqDto.geneticQualityValue(),
             audit);
 
@@ -521,7 +525,9 @@ class SeedlotServiceTest {
 
     SeedlotGeneticWorth seedlotGenWor =
         new SeedlotGeneticWorth(
-            seedlotEntity, new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null), audit);
+            seedlotEntity,
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
+            audit);
 
     final List<SeedlotGeneticWorth> genWorthData = List.of(seedlotGenWor);
 

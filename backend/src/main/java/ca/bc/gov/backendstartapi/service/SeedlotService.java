@@ -60,6 +60,7 @@ import ca.bc.gov.backendstartapi.security.UserInfo;
 import ca.bc.gov.backendstartapi.util.ValueUtil;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -135,9 +136,11 @@ public class SeedlotService {
 
     Seedlot seedlot = new Seedlot(nextSeedlotNumber(createDto.geneticClassCode()));
 
+    // Newly created seedlot has a status of INCOMPLETE, will change to PENDING once a row is
+    // created in the table seedlot_registration_a_class_save
     Optional<SeedlotStatusEntity> seedLotStatusEntity =
-        seedlotStatusService.findById(Constants.CLASS_A_SEEDLOT_STATUS);
-    seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(InvalidSeedlotRequestException::new));
+        seedlotStatusService.findById(Constants.INCOMPLETE_SEEDLOT_STATUS);
+    seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(SeedlotStatusNotFoundException::new));
 
     seedlot.setApplicantClientNumber(createDto.applicantClientNumber());
     seedlot.setApplicantLocationCode(createDto.applicantLocationCode());
@@ -146,11 +149,11 @@ public class SeedlotService {
 
     Optional<GeneticClassEntity> classEntity =
         geneticClassRepository.findById(createDto.geneticClassCode().toString());
-    seedlot.setGeneticClass(classEntity.orElseThrow(InvalidSeedlotRequestException::new));
+    seedlot.setGeneticClass(classEntity.orElseThrow(GeneticClassNotFoundException::new));
 
     Optional<SeedlotSourceEntity> seedlotSourceEntity =
         seedlotSourceRepository.findById(createDto.seedlotSourceCode());
-    seedlot.setSeedlotSource(seedlotSourceEntity.orElseThrow(InvalidSeedlotRequestException::new));
+    seedlot.setSeedlotSource(seedlotSourceEntity.orElseThrow(SeedlotSourceNotFoundException::new));
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
@@ -382,13 +385,28 @@ public class SeedlotService {
             new ParentTreeGeneticQualityDto(
                 parentTreeGenQual.getGeneticTypeCode(),
                 parentTreeGenQual.getGeneticWorth().getGeneticWorthCode(),
-                parentTreeGenQual.getGeneticQualityValue());
+                parentTreeGenQual.getGeneticQualityValue(),
+                // We cannot know this for sure, see explanation down below.
+                null,
+                parentTreeGenQual.getQualityValueEstimated());
         parentTreeGenQualList.add(parentTreeGenQualDto);
       }
     }
 
     return parentTreeGenQualList;
   }
+
+  /*
+   * Explanation for isTested is unknown
+   * What we know: untested_ind = True if estimated = True and pt.tested_ind = False
+   *
+   * - If untestedInd is true and estimatedInd is true:
+   *     - testedInd is definitely false.
+   * - If untestedInd is false and estimatedInd is true:
+   *     - testedInd is definitely true.
+   * - If estimatedInd is false:
+   *     - The value of testedInd cannot be determined from untestedInd alone.
+   */
 
   /**
    * Auxiliar function to get the genetic quality for each seedlot's SMP Mix parent tree.
@@ -420,7 +438,9 @@ public class SeedlotService {
               new ParentTreeGeneticQualityDto(
                   sptSmpMixGenQual.getGeneticTypeCode(),
                   sptSmpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
-                  sptSmpMixGenQual.getGeneticQualityValue());
+                  sptSmpMixGenQual.getGeneticQualityValue(),
+                  null,
+                  null);
           smpMixGenQualList.add(parentTreeGenQualDto);
         }
       }
@@ -432,7 +452,9 @@ public class SeedlotService {
               new ParentTreeGeneticQualityDto(
                   smpMixGenQual.getGeneticTypeCode(),
                   smpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
-                  smpMixGenQual.getGeneticQualityValue());
+                  smpMixGenQual.getGeneticQualityValue(),
+                  null,
+                  null);
           smpMixGenQualList.add(parentTreeGenQualDto);
         }
       }
@@ -553,7 +575,9 @@ public class SeedlotService {
                         owner.getOriginalPercentageOwned(),
                         owner.getOriginalPercentageReserved(),
                         owner.getOriginalPercentageSurplus(),
-                        owner.getMethodOfPayment().getMethodOfPaymentCode(),
+                        owner.getMethodOfPayment() != null
+                            ? owner.getMethodOfPayment().getMethodOfPaymentCode()
+                            : null,
                         owner.getFundingSourceCode()))
             .collect(Collectors.toList());
 
@@ -569,18 +593,21 @@ public class SeedlotService {
     List<SeedlotOrchard> seedlotOrchards =
         seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotInfo.getId());
 
-    List<SeedlotOrchard> filteredPrimaryOrchard =
-        seedlotOrchards.stream().filter(so -> so.getIsPrimary()).toList();
+    String primaryOrchardId = null;
 
-    String primaryOrchardId =
-        filteredPrimaryOrchard.isEmpty()
-            ? filteredPrimaryOrchard.get(0).getOrchardId()
-            : seedlotOrchards.get(0).getOrchardId();
+    if (!seedlotOrchards.isEmpty()) {
+      List<SeedlotOrchard> filteredPrimaryOrchard =
+          seedlotOrchards.stream().filter(so -> so.getIsPrimary()).toList();
 
-    Optional<String> secondaryOrchardId =
-        seedlotOrchards.size() > 1
-            ? Optional.of(seedlotOrchards.get(1).getOrchardId())
-            : Optional.empty();
+      primaryOrchardId =
+          filteredPrimaryOrchard.isEmpty() ? null : filteredPrimaryOrchard.get(0).getOrchardId();
+    }
+
+    Optional<String> secondaryOrchardId = Optional.empty();
+
+    if (seedlotOrchards.size() > 1 && !seedlotOrchards.get(1).getIsPrimary()) {
+      secondaryOrchardId = Optional.of(seedlotOrchards.get(1).getOrchardId());
+    }
 
     SeedlotFormOrchardDto orchardStep =
         new SeedlotFormOrchardDto(
@@ -841,11 +868,11 @@ public class SeedlotService {
     inMemoryDto.setPrimarySpuId(primarySpuId);
 
     // Not sure why it's called Bgc in seedlot instead of Bec in orchard
-    seedlot.setBgcZoneCode(orchardDto.becZoneCode());
-    seedlot.setBgcZoneDescription(orchardDto.becZoneDescription());
-    seedlot.setBgcSubzoneCode(orchardDto.becSubzoneCode());
-    seedlot.setVariant(orchardDto.variant());
-    seedlot.setBecVersionId(orchardDto.becVersionId());
+    seedlot.setBgcZoneCode(orchardDto.getBecZoneCode());
+    seedlot.setBgcZoneDescription(orchardDto.getBecZoneDescription());
+    seedlot.setBgcSubzoneCode(orchardDto.getBecSubzoneCode());
+    seedlot.setVariant(orchardDto.getVariant());
+    seedlot.setBecVersionId(orchardDto.getBecVersionId());
     seedlot.setSeedPlanUnitId(primarySpuId);
 
     SparLog.info("BEC values set");
@@ -860,7 +887,7 @@ public class SeedlotService {
     List<OrchardParentTreeValsDto> orchardPtVals = convertToPtVals(orchardPtDtoList);
     List<GeospatialRequestDto> smpMixIdAndProps = convertToGeoRes(smpPtDtoList);
 
-    PtValsCalReqDto ptValsCalReqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);
+    PtValsCalReqDto ptValsCalReqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0);
 
     PtCalculationResDto ptCalculationResDto = parentTreeService.calculatePtVals(ptValsCalReqDto);
 
@@ -1075,7 +1102,7 @@ public class SeedlotService {
     String userId = loggedUserService.getLoggedUserId();
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     seedlot.setDeclarationOfTrueInformationUserId(userId);
-    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
+    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now(Clock.systemUTC()));
 
     SparLog.info(
         "Declaration data set, for seedlot {} for user {} at {}",

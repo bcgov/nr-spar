@@ -79,6 +79,7 @@ jobs:
           overwrite: true
           parameters:
             -p ZONE=${{ inputs.target }}
+            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
@@ -87,6 +88,7 @@ jobs:
             -p ORACLE_SYNC_PASSWORD='${{ secrets.ORACLE_SYNC_PASSWORD }}'
             -p ORACLE_CERT_SECRET='${{ secrets.ORACLE_CERT_SECRET }}'
             -p ORACLE_HOST='${{ vars.ORACLE_HOST }}'
+            -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ secrets.VITE_USER_POOLS_WEB_CLIENT_ID }}
 
       - name: Database
         if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
@@ -95,13 +97,13 @@ jobs:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
-          file: database/openshift.deploy.yml
+          file: common/openshift.database.yml
           overwrite: false
           parameters:
-            -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
-            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
+            ${{ github.event_name == 'pull_request' && '-p MEMORY_REQUEST=100Mi' || '' }}
+            ${{ github.event_name == 'pull_request' && '-p MEMORY_LIMIT=200Mi' || '' }}
 
   deploy:
     name: Deploy
@@ -127,7 +129,6 @@ jobs:
               -p FAM_MODDED_ZONE=${{ needs.init.outputs.fam-modded-zone }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
-              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -175,7 +176,8 @@ jobs:
           parameters:
             -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
-            -p TEST_MODE=true
+            ${{ github.event_name == 'pull_request' && '-p TEST_MODE=true' || '' }}
+
 
       - name: Override OpenShift version
         if: github.event_name == 'pull_request'
@@ -189,25 +191,4 @@ jobs:
 
       - name: Run sync ETL
         if: github.event_name == 'pull_request'
-        run: |
-          # Run and verify job
-
-          # Login
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ secrets.oc_namespace }} #Safeguard!
-
-          # Exit on errors or unset variables
-          set -eu
-
-          # Create job
-          CRONJOB=nr-spar-${{ inputs.target }}-sync
-          RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
-          oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
-
-          # Follow
-          oc wait --for=condition=ready pod --selector=job-name=${RUN_JOB} --timeout=1m
-          oc logs -l job-name=${RUN_JOB} --tail=50 --follow
-
-          # Verify successful completion
-          oc wait --for jsonpath='{.status.phase}'=Succeeded pod --selector=job-name=${RUN_JOB} --timeout=1m
-          echo "Job successful!"
+        run: ./sync/oc_run.sh ${{ inputs.tag }} ${{ secrets.oc_token }}

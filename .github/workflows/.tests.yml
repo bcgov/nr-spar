@@ -26,7 +26,7 @@ jobs:
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://nr-spar-${{ inputs.target }}-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
-      VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
+      VITE_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.VITE_USER_POOLS_WEB_CLIENT_ID }}
       VITE_ZONE: TEST
     runs-on: ubuntu-22.04
     steps:

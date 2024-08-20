@@ -8,7 +8,8 @@ import {
   InlineLoading,
   InlineNotification,
   ActionableNotification,
-  Loading
+  Loading,
+  ProgressIndicatorSkeleton
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
@@ -48,7 +49,8 @@ const RegPage = () => {
     saveProgressStatus,
     isFetchingData,
     seedlotData,
-    getFormDraftQuery
+    getFormDraftQuery,
+    seedlotSpecies
   } = useContext(ClassAContext);
 
   const reloadFormDraft = () => getFormDraftQuery.refetch();
@@ -88,17 +90,23 @@ const RegPage = () => {
         </Row>
         <Row>
           <Column className="seedlot-registration-progress">
-            <SeedlotRegistrationProgress
-              progressStatus={
-                seedlotData?.seedlotStatus.seedlotStatusCode === 'PND' || seedlotData?.seedlotStatus.seedlotStatusCode === 'INC'
+            {
+            seedlotData
+              ? (
+                <SeedlotRegistrationProgress
+                  progressStatus={
+                seedlotData.seedlotStatus.seedlotStatusCode === 'PND' || seedlotData.seedlotStatus.seedlotStatusCode === 'INC'
                   ? progressStatus
                   : completeProgressConfig
               }
-              interactFunction={(e: number) => {
-                updateProgressStatus(e, formStep);
-                setStep((e - formStep));
-              }}
-            />
+                  interactFunction={(e: number) => {
+                    updateProgressStatus(e, formStep);
+                    setStep((e - formStep));
+                  }}
+                />
+              )
+              : <ProgressIndicatorSkeleton />
+          }
           </Column>
         </Row>
         {
@@ -224,7 +232,9 @@ const RegPage = () => {
                         && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC')
                       }
                       submitFn={() => {
-                        submitSeedlot.mutate(getSeedlotPayload(allStepData, seedlotNumber));
+                        submitSeedlot.mutate(
+                          getSeedlotPayload(allStepData, seedlotNumber, seedlotSpecies.code)
+                        );
                       }}
                       setStepFn={(e: number) => {
                         updateProgressStatus(e, formStep);

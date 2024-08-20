@@ -24,12 +24,12 @@ x-frontend: &frontend
 services:
   database:
     container_name: database
-    build: ./database
+    image: postgis/postgis:15-master
     environment:
       <<: *postgres-vars
     volumes:
       - "/pgdata"
-      - "./database/init_db:/init_db"
+      - "./common/init_db:/init_db"
     ports: ["5432:5432"]
     healthcheck:
       test: psql -q -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1'

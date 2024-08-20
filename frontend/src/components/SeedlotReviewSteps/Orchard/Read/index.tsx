@@ -19,7 +19,7 @@ const OrchardReviewRead = () => {
         </Column>
       </Row>
       <Row>
-        <Column sm={4} md={4} lg={4}>
+        <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id={state.orchards.primaryOrchard.id}
             label="Orchard ID or number"
@@ -31,7 +31,7 @@ const OrchardReviewRead = () => {
         state.orchards.secondaryOrchard.value.label
           ? (
             <Row>
-              <Column sm={4} md={4} lg={4}>
+              <Column className="info-col" sm={4} md={4} lg={4}>
                 <ReadOnlyInput
                   id={state.orchards.secondaryOrchard.id}
                   label="Orchard ID or number"
@@ -64,7 +64,7 @@ const OrchardReviewRead = () => {
           <ReadOnlyInput
             id="orchard-female-gametic"
             label="Female gametic contribution methodology"
-            value={state.femaleGametic.value.label}
+            value={state.femaleGametic.value?.label}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -74,7 +74,7 @@ const OrchardReviewRead = () => {
           <ReadOnlyInput
             id="orchard-male-gametic"
             label="Male gametic contribution methodology"
-            value={state.maleGametic.value.label}
+            value={state.maleGametic.value?.label}
             showSkeleton={isFetchingData}
           />
         </Column>

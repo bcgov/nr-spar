@@ -13,6 +13,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -47,7 +48,8 @@ abstract class SeedlotEntityRelationalTest {
     geneticClassRepository.saveAndFlush(geneticClass);
 
     var geneticWorth =
-        new GeneticWorthEntity("AD", "Animal browse resistance (deer)", effectiveDateRange);
+        new GeneticWorthEntity(
+            "AD", "Animal browse resistance (deer)", effectiveDateRange, BigDecimal.ZERO);
     geneticWorthRepository.saveAndFlush(geneticWorth);
 
     var seedlotSource = new SeedlotSourceEntity("CUS", "Custom Lot", effectiveDateRange, null);
@@ -74,16 +76,16 @@ abstract class SeedlotEntityRelationalTest {
 
     seedlot.setCollectionClientNumber("00000003");
     seedlot.setCollectionLocationCode("04");
-    seedlot.setCollectionStartDate(LocalDate.now());
-    seedlot.setCollectionEndDate(LocalDate.now());
+    seedlot.setCollectionStartDate(LocalDate.now(Clock.systemUTC()));
+    seedlot.setCollectionEndDate(LocalDate.now(Clock.systemUTC()));
     seedlot.setNumberOfContainers(new BigDecimal(10));
     seedlot.setContainerVolume(new BigDecimal(20));
     seedlot.setTotalConeVolume(new BigDecimal(200));
 
     seedlot.setInterimStorageClientNumber("00000005");
     seedlot.setInterimStorageLocationCode("06");
-    seedlot.setInterimStorageStartDate(LocalDate.now());
-    seedlot.setInterimStorageEndDate(LocalDate.now());
+    seedlot.setInterimStorageStartDate(LocalDate.now(Clock.systemUTC()));
+    seedlot.setInterimStorageEndDate(LocalDate.now(Clock.systemUTC()));
     seedlot.setInterimStorageFacilityCode("007");
 
     seedlot.setFemaleGameticContributionMethod("F");
@@ -103,15 +105,15 @@ abstract class SeedlotEntityRelationalTest {
 
     seedlot.setExtractionClientNumber("00000009");
     seedlot.setExtractionLocationCode("10");
-    seedlot.setExtractionStartDate(LocalDate.now());
-    seedlot.setExtractionEndDate(LocalDate.now());
+    seedlot.setExtractionStartDate(LocalDate.now(Clock.systemUTC()));
+    seedlot.setExtractionEndDate(LocalDate.now(Clock.systemUTC()));
     seedlot.setStorageClientNumber("00000011");
     seedlot.setStorageLocationCode("12");
-    seedlot.setTemporaryStorageStartDate(LocalDate.now());
-    seedlot.setTemporaryStorageEndDate(LocalDate.now());
+    seedlot.setTemporaryStorageStartDate(LocalDate.now(Clock.systemUTC()));
+    seedlot.setTemporaryStorageEndDate(LocalDate.now(Clock.systemUTC()));
 
     seedlot.setDeclarationOfTrueInformationUserId("user1");
-    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
+    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now(Clock.systemUTC()));
     seedlot.setAuditInformation(new AuditInformation("user1"));
 
     return seedlotRepository.saveAndFlush(seedlot);

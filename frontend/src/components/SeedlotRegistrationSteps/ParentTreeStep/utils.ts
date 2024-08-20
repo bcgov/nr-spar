@@ -6,11 +6,12 @@ import { isFloatWithinRange } from '../../../utils/NumberUtils';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
 import { recordKeys } from '../../../utils/RecordUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
-import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { StringInputType } from '../../../types/FormInputType';
 import { PtValsCalcReqPayload, CalcPayloadResType, OrchardParentTreeValsType } from '../../../types/PtCalcTypes';
 import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
+import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
+import { GeneticWorthDto } from '../../../types/GeneticWorthType';
 
 import {
   getConeCountErrMsg, getNonOrchardContamErrMsg, getPollenCountErrMsg,
@@ -24,11 +25,13 @@ import { OrchardForm } from '../OrchardStep/definitions';
 import {
   RowItem, InfoSectionConfigType, RowDataDictType,
   HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType,
-  MixUploadResponse, HeaderObjId, StrTypeRowItem, MeanGeomInfoSectionConfigType
+  MixUploadResponse, HeaderObjId, StrTypeRowItem, MeanGeomInfoSectionConfigType,
+  GeneticWorthInputType
 } from './definitions';
 import {
   DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate,
-  MAX_NE_DECIMAL, INVALID_NE_DECIMAL_MSG, MIN_NE, MAX_NE, INVALID_NE_RANGE_MSG
+  MAX_NE_DECIMAL, INVALID_NE_DECIMAL_MSG, MIN_NE, MAX_NE, INVALID_NE_RANGE_MSG,
+  geneticWorthDict
 } from './constants';
 
 export const getTabString = (selectedIndex: number) => {
@@ -42,22 +45,6 @@ export const getTabString = (selectedIndex: number) => {
     default:
       return 'coneTab';
   }
-};
-
-// Returns a merged array of orchard ids, duplicated orchards are merged as one
-export const processOrchards = (orchardForm: OrchardForm): string[] => {
-  const orchardIds = [];
-  const primaryId = orchardForm.orchards.primaryOrchard.value.code;
-  const secondaryId = orchardForm.orchards.secondaryOrchard.value.code;
-
-  if (primaryId) {
-    orchardIds.push(primaryId);
-  }
-  if (secondaryId && !orchardIds.includes(secondaryId)) {
-    orchardIds.push(secondaryId);
-  }
-
-  return orchardIds;
 };
 
 export const combineObjectValues = (objs: Array<InfoSectionConfigType>): Array<InfoDisplayObj> => {
@@ -156,21 +143,46 @@ export const calcSummaryItems = (
   setSummaryConfig(modifiedSummaryConfig);
 };
 
-export const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
+/**
+ * Returns true if a parent tree's cone and pollen count are larger than 0.
+ */
+const isPtContributing = (pt: RowItem): boolean => (
+  Number(pt.coneCount.value) + Number(pt.pollenCount.value) > 0
+);
+
+/**
+ * Calculate the number of SMP parent from outside.
+ *
+ * If Volume (Amount of material) is not 0
+ *    AND no cone and pollen count exist for a parent tree number
+ *
+ * Then Add 1 to the # of SMP P.T. from outside.
+ */
+export const getOutsideParentTreeNum = (
+  state: ParentTreeStepDataObj,
+  orchardPtNums: string[]
+): string => {
   let sum = 0;
-  const insidePtNums = Object.keys(state.tableRowData);
+
+  // All parent tree numbers in SMP mix where volume is > 0
   const ptNumsInMixTab: string[] = [];
   Object.values(state.mixTabData).forEach((row) => {
     if (
       row.parentTreeNumber?.value.length
       && !row.parentTreeNumber.isInvalid
+      && Number(row.volume.value) > 0
     ) {
       ptNumsInMixTab.push(row.parentTreeNumber.value);
     }
   });
 
+  const { tableRowData } = state;
+
   ptNumsInMixTab.forEach((ptNum) => {
-    if (!insidePtNums.includes(ptNum)) {
+    if (
+      !orchardPtNums.includes(ptNum)
+      || (ptNum in tableRowData && !isPtContributing(tableRowData[ptNum]))
+    ) {
       sum += 1;
     }
   });
@@ -185,16 +197,16 @@ export const calcMixTabInfoItems = (
   applicableGenWorths: string[],
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: Function,
-  popSizeAndDiversityConfig: InfoSectionConfigType,
   setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
-  state: ParentTreeStepDataObj
+  state: ParentTreeStepDataObj,
+  orchardPts: string[]
 ) => {
   if (!disableOptions) {
     const modifiedSummaryConfig = { ...summaryConfig };
     const tableRows = Object.values(state.mixTabData);
 
     // Calc number of SMP parents from outside
-    const numOfOutsidePt = getOutsideParentTreeNum(state);
+    const numOfOutsidePt = getOutsideParentTreeNum(state, orchardPts);
     modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = numOfOutsidePt;
     setPopSizeAndDiversityConfig((prevPop) => ({
       ...prevPop,
@@ -234,37 +246,84 @@ export const populateStrInputId = (idPrefix: string, row: RowItem): RowItem => {
 };
 
 export const processParentTreeData = (
-  data: ParentTreeGeneticQualityType[],
+  // List of Parent Tree under a species
+  allParentTreeData: ParentTreeByVegCodeResType,
+  // List of parent tree number under selected orchard(s)
+  orchardParentTreeList: string[],
+  // List of genetic worth data
+  geneticWorthList: GeneticWorthDto[],
+  seedlotSpecies: MultiOptionsObj,
   state: ParentTreeStepDataObj,
-  orchardIds: (string | undefined)[],
+  primarySpu: number,
   currentPage: number,
   currPageSize: number,
   setSlicedRows: Function,
   setStepData: Function
 ) => {
   const modifiedState = { ...state };
-  const allParentTreeData = {};
   let tableRowData: RowDataDictType = structuredClone(state.tableRowData);
 
-  data.forEach((parentTree) => {
-    Object.assign(allParentTreeData, { [parentTree.parentTreeNumber]: parentTree });
-    if (
-      !Object.prototype.hasOwnProperty.call(tableRowData, parentTree.parentTreeNumber)
-      && orchardIds.includes(parentTree.orchardId)
-    ) {
-      const newRowData: RowItem = structuredClone(rowTemplate);
-      newRowData.parentTreeNumber.value = parentTree.parentTreeNumber;
-      // Assign genetic worth values
-      parentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
-        const genWorthName = singleGenWorthObj.geneticWorthCode
-          .toLowerCase() as keyof StrTypeRowItem;
+  const speciesKey = Object.keys(geneticWorthDict).includes(seedlotSpecies.code)
+    ? seedlotSpecies.code.toUpperCase()
+    : 'UNKNOWN';
 
-        if (Object.prototype.hasOwnProperty.call(newRowData, genWorthName)) {
-          newRowData[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
-        }
-      });
+  const applicableGenWorths = geneticWorthDict[speciesKey as keyof GeneticWorthDictType];
+
+  orchardParentTreeList.forEach((orchardPtNum) => {
+    if (!Object.prototype.hasOwnProperty.call(tableRowData, orchardPtNum)) {
+      const newRowData: RowItem = structuredClone(rowTemplate);
+
+      const parentTree = allParentTreeData[orchardPtNum];
+
+      newRowData.parentTreeNumber.value = orchardPtNum;
+
+      const genWorthBySpu = parentTree.geneticQualitiesBySpu;
+
+      const validSpuIds = Object.keys(genWorthBySpu).map((key) => parseInt(key, 10));
+
+      // If parent tree has gen worth data under the primary orchard's SPU then use them
+      // Else use default from the gen worth list
+      if (validSpuIds.includes(primarySpu)) {
+        const parentTreeGenWorthVals = genWorthBySpu[primarySpu];
+        applicableGenWorths.forEach((gwCode) => {
+          const loweredGwCode = gwCode.toLowerCase() as keyof RowItem;
+          const matchedGwObj = parentTreeGenWorthVals
+            .find((gwObj) => gwObj.geneticWorthCode.toLowerCase() === loweredGwCode);
+
+          if (matchedGwObj) {
+            (newRowData[loweredGwCode] as GeneticWorthInputType)
+              .value = String(matchedGwObj.geneticQualityValue);
+          } else {
+            // Assign Default GW value
+            const foundGwDto = geneticWorthList
+              .find((gwDto) => gwDto.code.toLowerCase() === loweredGwCode);
+
+            const defaultBv = foundGwDto ? foundGwDto.defaultBv.toFixed(1) : '0.0';
+            if (foundGwDto) {
+              (newRowData[loweredGwCode] as GeneticWorthInputType)
+                .value = defaultBv;
+              (newRowData[loweredGwCode] as GeneticWorthInputType)
+                .isEstimated = true;
+            }
+          }
+        });
+      } else {
+        applicableGenWorths.forEach((gwCode) => {
+          const loweredGwCode = gwCode.toLowerCase() as keyof RowItem;
+          const foundGwDto = geneticWorthList
+            .find((gwDto) => gwDto.code.toLowerCase() === loweredGwCode);
+          const defaultBv = foundGwDto ? foundGwDto.defaultBv.toFixed(1) : '0.0';
+          if (foundGwDto) {
+            (newRowData[loweredGwCode] as GeneticWorthInputType)
+              .value = defaultBv;
+            (newRowData[loweredGwCode] as GeneticWorthInputType)
+              .isEstimated = true;
+          }
+        });
+      }
+
       tableRowData = Object.assign(tableRowData, {
-        [parentTree.parentTreeNumber]: populateStrInputId(parentTree.parentTreeNumber, newRowData)
+        [orchardPtNum]: populateStrInputId(orchardPtNum, newRowData)
       });
     }
   });
@@ -281,32 +340,34 @@ export const processParentTreeData = (
     setSlicedRows
   );
 
-  // Only set data if tableRowData is not empty, otherwise a inf loop will occur.
   setStepData('parentTreeStep', modifiedState);
 };
 
 /**
- * Determines if selected orchards contains a least one parent tree.
+ * Get a list of parent tree numbers that are under the selected orchard.
  */
-export const hasParentTreesForSelectedOrchards = (
-  orchardIds: (string | undefined)[],
-  data: ParentTreeGeneticQualityType[]
-): boolean => {
-  const proceed = true;
-  const stop = false;
-  let hasParentTrees = false;
+export const getParentTreesForSelectedOrchards = (
+  orchardStepData: OrchardForm,
+  data: ParentTreeByVegCodeResType
+): string[] => {
+  const selectedOrchardIds: string[] = [];
 
-  // Loop through every parent tree data obj
-  // and stop as soon as a tree is found with the matching orchard id.
-  data.every((parentTree) => {
-    if (orchardIds.includes(parentTree.orchardId)) {
-      hasParentTrees = true;
-      return stop;
-    }
-    return proceed;
+  if (orchardStepData.orchards.primaryOrchard.value.code) {
+    selectedOrchardIds.push(orchardStepData.orchards.primaryOrchard.value.code);
+  }
+  if (
+    orchardStepData.orchards.secondaryOrchard.enabled
+    && orchardStepData.orchards.secondaryOrchard.value.code
+  ) {
+    selectedOrchardIds.push(orchardStepData.orchards.secondaryOrchard.value.code);
+  }
+
+  const filteredKeys = Object.keys(data).filter((key) => {
+    const { orchardIds } = data[key];
+    return orchardIds.some((orchardId) => selectedOrchardIds.includes(orchardId));
   });
 
-  return hasParentTrees;
+  return filteredKeys;
 };
 
 export const getMixRowTemplate = (): RowItem => {
@@ -473,7 +534,6 @@ export const toggleColumn = (
  * displayed as an option
  */
 export const configHeaderOpt = (
-  geneticWorthDict: GeneticWorthDictType,
   seedlotSpecies: MultiOptionsObj,
   headerConfig: HeaderObj[],
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
@@ -484,57 +544,58 @@ export const configHeaderOpt = (
   setApplicableGenWorths: Function,
   isReview: boolean
 ) => {
-  const speciesHasGenWorth = Object.keys(geneticWorthDict);
-  if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
-    const availableOptions = geneticWorthDict[seedlotSpecies.code];
-    setApplicableGenWorths(availableOptions);
-    const clonedHeaders = structuredClone(headerConfig);
-    let clonedGwItems = structuredClone(genWorthInfoItems);
-    let clonedWeightedGwItems = structuredClone(weightedGwInfoItems);
-    availableOptions.forEach((opt: string) => {
-      const optionIndex = headerConfig.findIndex((header) => header.id === opt);
-      // Enable option in the column customization
-      clonedHeaders[optionIndex].isAnOption = true;
+  const speciesKey = Object.keys(geneticWorthDict).includes(seedlotSpecies.code)
+    ? seedlotSpecies.code.toUpperCase()
+    : 'UNKNOWN';
 
-      // When on review mode, display all columns
-      if (isReview) {
-        clonedHeaders[optionIndex].enabled = true;
-      }
+  const availableOptions = geneticWorthDict[speciesKey as keyof GeneticWorthDictType];
+  setApplicableGenWorths(availableOptions);
+  const clonedHeaders = structuredClone(headerConfig);
+  let clonedGwItems = structuredClone(genWorthInfoItems);
+  let clonedWeightedGwItems = structuredClone(weightedGwInfoItems);
+  availableOptions.forEach((opt: string) => {
+    const optionIndex = headerConfig.findIndex((header) => header.id === opt);
+    // Enable option in the column customization
+    clonedHeaders[optionIndex].isAnOption = true;
 
-      // Enable weighted option in mix tab
-      const weightedIndex = headerConfig.findIndex((header) => header.id === `w_${opt}`);
-      if (weightedIndex > -1) {
-        clonedHeaders[weightedIndex].isAnOption = true;
-      }
+    // When on review mode, display all columns
+    if (isReview) {
+      clonedHeaders[optionIndex].enabled = true;
+    }
 
-      // Add GW input to the corresponding info section
-      const gwAbbrevName = String(clonedHeaders[optionIndex].id).toUpperCase();
-      clonedGwItems = Object.assign(clonedGwItems, {
-        [clonedHeaders[optionIndex].id]: [
-          {
-            name: `Genetic worth ${gwAbbrevName}`,
-            value: EMPTY_NUMBER_STRING
-          },
-          {
-            name: `Tested parent trees % (${gwAbbrevName})`,
-            value: EMPTY_NUMBER_STRING
-          }
-        ]
-      });
-      // Add weighted GW info to mix tab info section
-      clonedWeightedGwItems = Object.assign(clonedWeightedGwItems, {
-        [clonedHeaders[optionIndex].id]: {
-          name: `SMP Breeding Value - ${gwAbbrevName}`,
+    // Enable weighted option in mix tab
+    const weightedIndex = headerConfig.findIndex((header) => header.id === `w_${opt}`);
+    if (weightedIndex > -1) {
+      clonedHeaders[weightedIndex].isAnOption = true;
+    }
+
+    // Add GW input to the corresponding info section
+    const gwAbbrevName = String(clonedHeaders[optionIndex].id).toUpperCase();
+    clonedGwItems = Object.assign(clonedGwItems, {
+      [clonedHeaders[optionIndex].id]: [
+        {
+          name: `Genetic worth ${gwAbbrevName}`,
+          value: EMPTY_NUMBER_STRING
+        },
+        {
+          name: `Tested parent trees % (${gwAbbrevName})`,
           value: EMPTY_NUMBER_STRING
         }
-      });
+      ]
     });
-    setHeaderConfig(clonedHeaders);
-    if (Object.keys(genWorthInfoItems).length === 0) {
-      setGenWorthInfoItems(clonedGwItems);
-    }
-    setWeightedGwInfoItems(clonedWeightedGwItems);
+    // Add weighted GW info to mix tab info section
+    clonedWeightedGwItems = Object.assign(clonedWeightedGwItems, {
+      [clonedHeaders[optionIndex].id]: {
+        name: `SMP Breeding Value - ${gwAbbrevName}`,
+        value: EMPTY_NUMBER_STRING
+      }
+    });
+  });
+  setHeaderConfig(clonedHeaders);
+  if (Object.keys(genWorthInfoItems).length === 0) {
+    setGenWorthInfoItems(clonedGwItems);
   }
+  setWeightedGwInfoItems(clonedWeightedGwItems);
 };
 
 export const fillCalculatedInfo = (
@@ -656,27 +717,27 @@ export const fillCalculatedInfo = (
 };
 
 const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): number => {
-  const found = Object.values(state.allParentTreeData)
-    .find((pt) => pt.parentTreeNumber === ptNumber);
+  const foundPtNum = Object.keys(state.allParentTreeData).find((ptNum) => ptNum === ptNumber);
 
-  if (!found) {
+  if (!foundPtNum) {
     throw Error(`Cannot find parent tree id with parent tree number: ${ptNumber}`);
   }
-  return found.parentTreeId;
+  return state.allParentTreeData[foundPtNum].parentTreeId;
 };
 
 export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
-  geneticWorthDict: GeneticWorthDictType,
-  seedlotSpecies: MultiOptionsObj
+  seedlotSpecies: MultiOptionsObj,
+  orchardPts: string[]
 ): PtValsCalcReqPayload => {
   const { tableRowData, mixTabData } = state;
   const payload: PtValsCalcReqPayload = {
     orchardPtVals: [],
-    smpMixIdAndProps: []
+    smpMixIdAndProps: [],
+    smpParentsOutside: '0'
   };
   const rows = Object.values(tableRowData);
-  const genWorthTypes = geneticWorthDict[seedlotSpecies.code];
+  const genWorthTypes = geneticWorthDict[seedlotSpecies.code as keyof GeneticWorthDictType];
   rows.forEach((row) => {
     const newPayloadItem: OrchardParentTreeValsType = {
       parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
@@ -705,6 +766,9 @@ export const generatePtValCalcPayload = (
       });
     }
   });
+
+  // SMP Parents from Outside
+  payload.smpParentsOutside = getOutsideParentTreeNum(state, orchardPts);
 
   return payload;
 };
@@ -764,7 +828,9 @@ export const fillMixTable = (
   data: MixUploadResponse[],
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
-  setStepData: Function
+  setStepData: Function,
+  geneticWorthList: GeneticWorthDto[],
+  primarySpu: number
 ) => {
   let newRows = {};
   const clonedState = structuredClone(state);
@@ -783,7 +849,14 @@ export const fillMixTable = (
     newRow.parentTreeNumber.errMsg = isPtInvalid ? getPTNumberErrMsg(ptNumber) : '';
     // Populate data such as gw value
     if (!isPtInvalid) {
-      newRow = populateRowData(newRow, ptNumber, state);
+      newRow = populateRowData(
+        newRow,
+        ptNumber,
+        state,
+        geneticWorthList,
+        applicableGenWorths,
+        primarySpu
+      );
     }
 
     Object.assign(newRows, { [newRow.rowId]: populateStrInputId(newRow.rowId, newRow) });
@@ -820,4 +893,29 @@ export const validateEffectivePopSize = (inputObj: StringInputType): StringInput
   validatedObj.errMsg = undefined;
 
   return validatedObj;
+};
+
+/**
+ * Check if the secondary orchard is enabled but nothing is selected.
+ */
+export const isMissingSecondaryOrchard = (orchardStepData: OrchardForm): boolean => {
+  const { orchards } = orchardStepData;
+  return orchards.secondaryOrchard.enabled && !orchards.secondaryOrchard.value.code;
+};
+
+/**
+ * Check if orchards selections are valid.
+ */
+export const areOrchardsValid = (orchardStepData: OrchardForm): boolean => {
+  let isValid = true;
+  const { orchards } = orchardStepData;
+
+  if (!orchards.primaryOrchard.value.code) {
+    isValid = false;
+  }
+  if (isMissingSecondaryOrchard(orchardStepData)) {
+    isValid = false;
+  }
+
+  return isValid;
 };

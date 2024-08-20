@@ -12,10 +12,10 @@ import {
   TextArea,
   CheckboxSkeleton
 } from '@carbon/react';
-import moment from 'moment';
 import validator from 'validator';
 
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import { now } from '../../../utils/DateUtils';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 
 import Subtitle from '../../Subtitle';
@@ -26,7 +26,7 @@ import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { StringInputType } from '../../../types/FormInputType';
 
 import {
-  DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
+  DATE_FORMAT, agencyFieldsProps, fieldsConfig
 } from './constants';
 import {
   CollectionForm
@@ -73,8 +73,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
 
     clonedState[dateType].value = value;
 
-    const isInvalid = moment(clonedState.endDate.value, MOMENT_DATE_FORMAT)
-      .isBefore(moment(clonedState.startDate.value, MOMENT_DATE_FORMAT));
+    const isInvalid = clonedState.endDate.value < clonedState.startDate.value;
 
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
@@ -180,6 +179,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             readOnly={isFormSubmitted && !isReview}
+            maxDate={!isReview ? now : undefined}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDateChange(true, selectedDate);
@@ -203,6 +203,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
+            maxDate={!isReview ? now : undefined}
             readOnly={isFormSubmitted && !isReview}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
@@ -296,7 +297,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
                 >
                   {
                     (coneCollectionMethodsQuery.data as MultiOptionsObj[])
-                      .sort((a,b) => a.description.localeCompare(b.description))
+                      .sort((a, b) => a.description.localeCompare(b.description))
                       .map((method) => (
                         <Checkbox
                           key={method.code}
@@ -307,7 +308,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
                           checked={state.selectedCollectionCodes.value.includes(method.code)}
                           onChange={() => handleCollectionMethods(method.code)}
                         />
-                    ))
+                      ))
                   }
                 </CheckboxGroup>
               )

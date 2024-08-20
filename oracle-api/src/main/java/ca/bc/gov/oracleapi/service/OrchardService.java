@@ -283,7 +283,7 @@ public class OrchardService {
     long endingFour = Instant.now().toEpochMilli();
     SparLog.debug("Time elapsed mapping all parent tree orchard ids: {}", endingFour - endingThree);
 
-    List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllIn(parentTreeIdList);
+    List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllByIdIn(parentTreeIdList);
 
     long endingFive = Instant.now().toEpochMilli();
     SparLog.debug("Time elapsed finding all parent tree (select in): {}", endingFive - endingFour);

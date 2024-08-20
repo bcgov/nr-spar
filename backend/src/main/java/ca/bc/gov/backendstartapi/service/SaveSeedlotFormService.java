@@ -1,14 +1,17 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.JsonParsingException;
 import ca.bc.gov.backendstartapi.exception.RevisionCountMismatchException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
@@ -31,6 +34,7 @@ public class SaveSeedlotFormService {
   private final SaveSeedlotProgressRepositoryClassA saveSeedlotProgressRepositoryClassA;
   private final SeedlotRepository seedlotRepository;
   private final LoggedUserService loggedUserService;
+  private final SeedlotStatusService seedlotStatusService;
 
   /** Saves the {@link SaveSeedlotFormDtoClassA} to table. */
   public RevisionCountDto saveFormClassA(
@@ -54,6 +58,7 @@ public class SaveSeedlotFormService {
 
     SaveSeedlotProgressEntityClassA entityToSave;
     // If an entity exist then update the values, otherwise make a new entity.
+    // The SUB status check is to create a draft for historical Oracle seedlots.
     if (optionalEntityToSave.isEmpty()) {
       SparLog.info(
           "First time saving A-class seedlot progress for seedlot number {}", seedlotNumber);
@@ -63,19 +68,40 @@ public class SaveSeedlotFormService {
               parsedAllStepData,
               parsedProgressStatus,
               loggedUserService.createAuditCurrentUser());
-    } else {
-      // Revision Count verification
-      Integer prevRevCount = data.revisionCount();
-      Integer currRevCount = optionalEntityToSave.get().getRevisionCount();
 
-      if (prevRevCount != null && !prevRevCount.equals(currRevCount)) {
-        // Conflict detected
-        SparLog.info(
-            "Save progress failed due to revision count mismatch, prev revision count: {}, curr"
-                + " revision count: {}",
-            prevRevCount,
-            currRevCount);
-        throw new RevisionCountMismatchException();
+      // Update the seedlot status to pending from incomplete.
+      if (relatedSeedlot
+          .getSeedlotStatus()
+          .getSeedlotStatusCode()
+          .equals(Constants.INCOMPLETE_SEEDLOT_STATUS)) {
+        SparLog.info("Updating seedlot {} status from INC to PND", seedlotNumber);
+
+        Optional<SeedlotStatusEntity> seedLotStatusEntity =
+            seedlotStatusService.findById(Constants.PENDING_SEEDLOT_STATUS);
+
+        relatedSeedlot.setSeedlotStatus(
+            seedLotStatusEntity.orElseThrow(SeedlotStatusNotFoundException::new));
+      }
+    } else {
+
+      // Revision Count verification only for pending seedlots
+      if (relatedSeedlot
+          .getSeedlotStatus()
+          .getSeedlotStatusCode()
+          .equals(Constants.PENDING_SEEDLOT_STATUS)) {
+
+        Integer prevRevCount = data.revisionCount();
+        Integer currRevCount = optionalEntityToSave.get().getRevisionCount();
+
+        if (prevRevCount != null && !prevRevCount.equals(currRevCount)) {
+          // Conflict detected
+          SparLog.info(
+              "Save progress failed due to revision count mismatch, prev revision count: {}, curr"
+                  + " revision count: {}",
+              prevRevCount,
+              currRevCount);
+          throw new RevisionCountMismatchException();
+        }
       }
 
       SparLog.info(
