@@ -25,7 +25,7 @@ RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
 oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
 # Follow
-oc wait --for=condition=ready pod --selector=job-name=${RUN_JOB} --timeout=1m
+oc wait --for=condition=ready pod --selector=job-name=${RUN_JOB} --timeout=5m
 oc logs -l job-name=${RUN_JOB} --tail=50 --follow
 
 # Verify successful completion
