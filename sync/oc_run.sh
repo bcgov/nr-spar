@@ -1,18 +1,18 @@
 #!/bin/sh
 #
 # Exit on errors or unset variables
-set -eux
+set -eu
 
 # Run and verify job
 
 # Login
 if [ ! -z "${2:-}" ]; then
   oc login --token=${2} --server=https://api.silver.devops.gov.bc.ca:6443
-  oc project  #Safeguard!
+  oc project #Safeguard!
 fi
 
 # Create job
-CRONJOB=nr-spar-${1:-test}-sync
+CRONJOB=nr-spar-${1:-}-sync
 RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
 oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
