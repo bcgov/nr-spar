@@ -23,9 +23,10 @@ class ParentTreeRepositoryTest {
   @Autowired private ParentTreeRepository parentTreeRepository;
 
   @Test
-  @DisplayName("findAllInTest")
-  void findAllInTest() {
-    List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllIn(List.of(4032L, 4033L));
+  @DisplayName("findAllByIdInTest")
+  void findAllByIdInTest() {
+    List<ParentTreeEntity> parentTreeList =
+        parentTreeRepository.findAllByIdIn(List.of(4032L, 4033L));
 
     assertFalse(parentTreeList.isEmpty());
     assertEquals(2, parentTreeList.size());
@@ -58,7 +59,7 @@ class ParentTreeRepositoryTest {
   @Test
   @DisplayName("getPtGeoSpatialData_successTest")
   void getPtGeoSpatialData_successTest() {
-    List<ParentTreeEntity> ptreeEntity = parentTreeRepository.findAllIn(List.of(4032L));
+    List<ParentTreeEntity> ptreeEntity = parentTreeRepository.findAllByIdIn(List.of(4032L));
 
     assertFalse(ptreeEntity.isEmpty());
     assertEquals(1, ptreeEntity.size());

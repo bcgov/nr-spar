@@ -575,7 +575,9 @@ public class SeedlotService {
                         owner.getOriginalPercentageOwned(),
                         owner.getOriginalPercentageReserved(),
                         owner.getOriginalPercentageSurplus(),
-                        owner.getMethodOfPayment().getMethodOfPaymentCode(),
+                        owner.getMethodOfPayment() != null
+                            ? owner.getMethodOfPayment().getMethodOfPaymentCode()
+                            : null,
                         owner.getFundingSourceCode()))
             .collect(Collectors.toList());
 
@@ -598,9 +600,7 @@ public class SeedlotService {
           seedlotOrchards.stream().filter(so -> so.getIsPrimary()).toList();
 
       primaryOrchardId =
-          filteredPrimaryOrchard.isEmpty()
-              ? null
-              : filteredPrimaryOrchard.get(0).getOrchardId();
+          filteredPrimaryOrchard.isEmpty() ? null : filteredPrimaryOrchard.get(0).getOrchardId();
     }
 
     Optional<String> secondaryOrchardId = Optional.empty();

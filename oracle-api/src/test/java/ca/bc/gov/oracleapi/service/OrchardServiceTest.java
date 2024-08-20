@@ -216,7 +216,7 @@ class OrchardServiceTest {
     parentTree.setTested(true);
     parentTree.setBreedingProgram(true);
 
-    when(parentTreeRepository.findAllIn(any())).thenReturn(List.of(parentTree));
+    when(parentTreeRepository.findAllByIdIn(any())).thenReturn(List.of(parentTree));
 
     Long spuId = 7L;
 
