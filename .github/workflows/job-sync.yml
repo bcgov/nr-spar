@@ -12,7 +12,6 @@ jobs:
   sync:
     name: Sync
     runs-on: ubuntu-latest
-    environment: test
     steps:
       - name: Override OpenShift version
         env:
@@ -24,5 +23,10 @@ jobs:
         working-directory: /usr/local/bin/
 
       - uses: actions/checkout@v4
-      - name: ETL Sync
+      - name: ETL (TEST)
+        environment: test
         run: ./sync/oc_run.sh test ${{ secrets.oc_token }}
+
+      - name: ETL (PROD)
+        environment: prod
+        run: ./sync/oc_run.sh prod ${{ secrets.oc_token }}
