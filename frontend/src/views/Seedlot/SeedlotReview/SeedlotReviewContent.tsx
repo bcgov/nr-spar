@@ -726,7 +726,7 @@ const SeedlotReviewContent = () => {
                   renderIcon={Warning}
                   onClick={() => createDraftForPendMutation.mutate()}
                 >
-                  Hisotrical SUB to PND (DEV ONLY!)
+                  Historical SUB to PND (DEV ONLY!)
                 </Button>
               </Column>
             </Row>
