@@ -51,6 +51,8 @@ public class SecurityConfig {
                     .authenticated()
                     .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/service-status")
+                    .permitAll()
                     .anyRequest()
                     .permitAll())
         .httpBasic(AbstractHttpConfigurer::disable)

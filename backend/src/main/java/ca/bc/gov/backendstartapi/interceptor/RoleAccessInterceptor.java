@@ -39,6 +39,11 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
     // Gets the resource handler (class name and method name)
     String[] resourceHandler = handler.toString().split("#");
 
+    // Bypass status page endpoint
+    if (resourceHandler[0].contains("StatusPageEndpoint")) {
+      return true;
+    }
+
     // Gets the allowed roles (declared) and its allowed operations for the resource
     List<String> rolesRequired = getResourceRolesRequired(resourceHandler, requestUri);
 

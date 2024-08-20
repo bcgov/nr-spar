@@ -5,7 +5,7 @@ export const SPAR_DEPENDENCIES: DependencyDefinition[] = [
   {
     name: `Postgres Backend${env.VITE_ZONE ? ` ${env.VITE_ZONE}` : ''}`,
     queryKey: 'postgres-backend-healthcheck',
-    healthCheckUrl: `${env.VITE_SERVER_URL}/health`
+    healthCheckUrl: `${env.VITE_SERVER_URL}/api/status`
   },
   {
     name: `Oracle Backend${env.VITE_ZONE ? ` ${env.VITE_ZONE}` : ''}`,
