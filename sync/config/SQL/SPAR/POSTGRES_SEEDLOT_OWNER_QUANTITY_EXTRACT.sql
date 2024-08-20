@@ -61,6 +61,11 @@ SELECT drft.seedlot_number
  WHERE drft.seedlot_number = %(p_seedlot_number)s
    AND s.seedlot_status_code = 'PND'
    AND NOT(drft.all_step_data @? '$.ownershipStep[*].*.isInvalid ? (@ == true)')
+   AND ownerdata->'ownerAgency'->>'value' != ''
+   AND ownerdata->'ownerCode'->>'value' != ''
+   AND ownerdata->'ownerPortion'->>'value' != ''
+   AND ownerdata->'reservedPerc'->>'value' != ''
+   AND ownerdata->'surplusPerc'->>'value' != ''
 ORDER BY 1
        , 2
        , 3
