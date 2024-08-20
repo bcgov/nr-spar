@@ -155,6 +155,7 @@ def main() -> int:
         return job_return_code
     
     except Exception as err:
+        print(f"A fatal error has occurred ({type(err)}): {err}") 
         return 1 #failure
 
 # MAIN Execution
