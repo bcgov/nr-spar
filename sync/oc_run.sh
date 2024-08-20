@@ -3,16 +3,24 @@
 # Exit on errors or unset variables
 set -eu
 
-# Run and verify job
+# Run and verify ETL jobs in OpenShift
+#
+# Usage: ./oc_run.sh [pr#|test|prod] [optional:token]
 
-# Login
+# Check inputs
+if [ -z "${1:-}" ]; then
+  echo -e "\nAn environment input is required.  Exiting.\n"
+  exit 1
+fi
+
+# Login (optional)
 if [ ! -z "${2:-}" ]; then
   oc login --token=${2} --server=https://api.silver.devops.gov.bc.ca:6443
   oc project #Safeguard!
 fi
 
 # Create job
-CRONJOB=nr-spar-${1:-}-sync
+CRONJOB=nr-spar-${1}-sync
 RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
 oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
