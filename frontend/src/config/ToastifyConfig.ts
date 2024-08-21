@@ -4,7 +4,6 @@
  */
 
 import { ToastOptions } from 'react-toastify';
-import { SEVEN_SECONDS } from './TimeUnits';
 
 export const ErrToastOption: ToastOptions = {
   position: 'top-right',
@@ -12,6 +11,5 @@ export const ErrToastOption: ToastOptions = {
   closeButton: false,
   theme: 'dark',
   hideProgressBar: true,
-  style: { padding: 0, background: 'none', boxShadow: 'none' },
-  autoClose: SEVEN_SECONDS
+  style: { padding: 0, background: 'none', boxShadow: 'none' }
 };
