@@ -46,18 +46,18 @@
       position: sticky;
       top: 3rem;
       z-index: 1;
-      background-color: var(--#{vars.$bcgov-prefix}-layer);
+      background-color: var(--#{vars.$bcgov-prefix}-layer-02);
     }
   }
 
   .sticky-toolbar {
-    background: var(--#{vars.$bcgov-prefix}-layer);
+    background: var(--#{vars.$bcgov-prefix}-layer-02);
     z-index: 1;
     position: sticky;
     top: 8.375rem;
 
     .#{vars.$bcgov-prefix}--table-toolbar {
-      background: var(--#{vars.$bcgov-prefix}-layer);
+      background: var(--#{vars.$bcgov-prefix}-layer-02);
     }
   }
 
@@ -294,7 +294,7 @@
   .table-pagination {
     z-index: 2;
     position: relative;
-    background: var(--#{vars.$bcgov-prefix}-layer);
+    background: var(--#{vars.$bcgov-prefix}-layer-02);
 
     .#{vars.$bcgov-prefix}--select-input--inline__wrapper {
       border-left: 0;
