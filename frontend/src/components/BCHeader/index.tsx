@@ -26,8 +26,7 @@ import {
   VERSION,
   defaultPanelState,
   componentTexts,
-  navItems,
-  supportItems
+  navItems
 } from './constants';
 import { RightPanelType, HearderContainerProps } from './definitions';
 import UserButton from './UserButton';
@@ -198,7 +197,8 @@ const BCHeader = () => {
               }
             </div>
             <div>
-              <SideNavLink className="side-nav-category-name">
+              {/* Uncomment this section when the support pages are implemented. */}
+              {/* <SideNavLink className="side-nav-category-name">
                 {supportItems.name}
               </SideNavLink>
               {
@@ -212,7 +212,7 @@ const BCHeader = () => {
                     {supportItem.name}
                   </SideNavLink>
                 ))
-              }
+              } */}
               <PanelSectionName title={VERSION} />
             </div>
           </SideNav>
