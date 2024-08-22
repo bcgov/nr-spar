@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import {
   Button, FlexGrid, Row,
-  Column, Loading, Modal
+  Column, Loading, Modal,
+  InlineNotification
 } from '@carbon/react';
 import { toast } from 'react-toastify';
 import {
@@ -524,6 +525,23 @@ const SeedlotReviewContent = () => {
           subtitle={`${seedlotQuery.data?.seedlot.seedlotStatus.description} status`}
         />
       </Row>
+
+      {
+        seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'APP'
+          ? (
+            <Row>
+              <InlineNotification
+                className="seedlot-approved-notification"
+                lowContrast
+                hideCloseButton
+                kind="success"
+                title="Seedlot approved:"
+                subtitle="This seedlot have been reviewed and approved"
+              />
+            </Row>
+          )
+          : null
+      }
 
       <Row className="section-title-row">
         <Column className="section-title-col">
