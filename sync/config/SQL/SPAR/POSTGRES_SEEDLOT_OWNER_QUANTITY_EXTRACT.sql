@@ -23,24 +23,24 @@ UNION ALL
 SELECT drft.seedlot_number
      , CASE WHEN ownerdata->'ownerAgency'->>'isInvalid' = 'false'
              AND ownerdata->'ownerCode'->>'isInvalid' = 'false'
-            THEN ownerdata->'ownerAgency'->>'value'
+            THEN NULLIF(ownerdata->'ownerAgency'->>'value','')
             ELSE NULL
        END AS client_number
      , CASE WHEN ownerdata->'ownerAgency'->>'isInvalid' = 'false'
              AND ownerdata->'ownerCode'->>'isInvalid' = 'false'
-            THEN ownerdata->'ownerCode'->>'value'
+            THEN NULLIF(ownerdata->'ownerCode'->>'value','')
             ELSE NULL
        END AS client_locn_code
      , CAST(CASE WHEN ownerdata->'ownerPortion'->>'isInvalid' = 'false'
-                 THEN ownerdata->'ownerPortion'->>'value'
+                 THEN NULLIF(ownerdata->'ownerPortion'->>'value','')
                  ELSE NULL
              End AS NUMERIC)       as original_pct_owned
      , CAST(CASE WHEN ownerdata->'reservedPerc'->>'isInvalid' = 'false'
-                 THEN ownerdata->'reservedPerc'->>'value'
+                 THEN NULLIF(ownerdata->'reservedPerc'->>'value','')
                  ELSE NULL
                   END AS NUMERIC)  as original_pct_rsrvd
      , CAST(CASE WHEN ownerdata->'surplusPerc'->>'isInvalid' = 'false'
-                 Then ownerdata->'surplusPerc'->>'value'
+                 Then NULLIF(ownerdata->'surplusPerc'->>'value','')
                  ELSE NULL
                   END AS NUMERIC)  as original_pct_srpls
      , 0 qty_reserved
@@ -61,6 +61,11 @@ SELECT drft.seedlot_number
  WHERE drft.seedlot_number = %(p_seedlot_number)s
    AND s.seedlot_status_code = 'PND'
    AND NOT(drft.all_step_data @? '$.ownershipStep[*].*.isInvalid ? (@ == true)')
+   AND TRIM(ownerdata->'ownerAgency'->>'value') != ''
+   AND TRIM(ownerdata->'ownerCode'->>'value') != ''
+   AND TRIM(ownerdata->'ownerPortion'->>'value') != ''
+   AND TRIM(ownerdata->'reservedPerc'->>'value') != ''
+   AND TRIM(ownerdata->'surplusPerc'->>'value') != ''
 ORDER BY 1
        , 2
        , 3
