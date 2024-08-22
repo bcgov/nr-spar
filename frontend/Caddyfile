@@ -23,7 +23,7 @@
 		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
 		X-Content-Type-Options "nosniff"
 		Strict-Transport-Security "max-age=31536000"
-		Content-Security-Policy "base-uri 'self'; connect-src 'self' https://*.gov.bc.ca {$VITE_AWS_DOMAIN} {$VITE_SERVER_URL} https://cognito-idp.ca-central-1.amazonaws.com/; default-src 'self'; font-src 'self' https://1.www.s81c.com/; frame-src 'self' https://*.gov.bc.ca; img-src 'self'; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'unsafe-inline' 'report-sample' 'self' https://*.auth.ca-central-1.amazoncognito.com/ https://*.cloudfront.net; style-src 'report-sample' 'self'; worker-src 'none';"
+		Content-Security-Policy "base-uri 'self'; connect-src 'self' https://*.gov.bc.ca {$VITE_AWS_DOMAIN} {$VITE_SERVER_URL} https://cognito-idp.ca-central-1.amazonaws.com/; https://*.execute-api.ca-central-1.amazonaws.com; default-src 'self'; font-src 'self' https://1.www.s81c.com/; frame-src 'self' https://*.gov.bc.ca; img-src 'self'; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'unsafe-inline' 'report-sample' 'self' https://*.auth.ca-central-1.amazoncognito.com/ https://*.cloudfront.net; style-src 'report-sample' 'self'; worker-src 'none';"
 		Referrer-Policy "same-origin"
 	}
 
