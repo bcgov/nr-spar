@@ -206,6 +206,16 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Check \'Show/hide columns\' button functionality', () => {
+    // Intercept the call
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/parent-trees/vegetation-codes/*'
+    }).as('parentTreesUnderVegCode');
+
+    // Wait for the table to load
+    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.get('#parentTreeNumber');
+
     // Click 'Dothistroma needle blight (DFS)' checkbox
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(0)
