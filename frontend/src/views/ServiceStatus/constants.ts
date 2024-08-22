@@ -6,13 +6,13 @@ const ORACLE_BACKEND_ENV = env.VITE_ORACLE_SERVER_URL.includes('localhost') ? 'D
 
 export const SPAR_DEPENDENCIES: DependencyDefinition[] = [
   {
-    name: `SPAR Postgres Backend ${POSTGRES_BACKEND_ENV}`,
+    name: `SPAR Postgres Backend ${POSTGRES_BACKEND_ENV === 'DEV' ? POSTGRES_BACKEND_ENV : env.VITE_ZONE}`,
     queryKey: 'postgres-backend-healthcheck',
     healthCheckUrl: `${env.VITE_SERVER_URL}/health`,
     icon: 'DatabasePostgreSql'
   },
   {
-    name: `SPAR Oracle Backend ${ORACLE_BACKEND_ENV}`,
+    name: `SPAR Oracle Backend ${ORACLE_BACKEND_ENV === 'DEV' ? ORACLE_BACKEND_ENV : env.VITE_ZONE}`,
     queryKey: 'oracle-backend-healthcheck',
     healthCheckUrl: `${env.VITE_ORACLE_SERVER_URL}/actuator/health`,
     icon: 'IbmDb2'
