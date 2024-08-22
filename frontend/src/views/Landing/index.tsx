@@ -14,7 +14,7 @@ import Seeding from '../../assets/img/cone.jpeg';
 import LoginProviders from '../../types/LoginProviders';
 import AuthContext from '../../contexts/AuthContext';
 import { SPAR_DEPENDENCIES } from '../ServiceStatus/constants';
-import { FIFTEEN_SECONDS } from '../../config/TimeUnits';
+import { THIRTY_SECONDS } from '../../config/TimeUnits';
 
 import './styles.scss';
 
@@ -26,7 +26,7 @@ const Landing = () => {
     queries: SPAR_DEPENDENCIES.map((dependencyObj) => ({
       queryKey: [dependencyObj.queryKey],
       queryFn: () => fetch(dependencyObj.healthCheckUrl, { mode: 'no-cors' }),
-      refetchInterval: FIFTEEN_SECONDS,
+      refetchInterval: THIRTY_SECONDS,
       refetchIntervalInBackground: false,
       retry: 0
     }))
