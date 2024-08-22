@@ -106,6 +106,9 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Cone and pollen count table entries', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber');
+
     // Check error message for negative Cone count
     cy.get('#212-coneCount-value-input')
       .type('-1')
