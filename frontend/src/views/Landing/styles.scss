@@ -3,6 +3,12 @@
 .landing-grid{
   padding-right: 0;
   height: 100vh;
+
+  .dependency-notification {
+    max-width: none;
+    width: 100%;
+    margin: 2rem 0;
+  }
 }
 
 .landing-title {

@@ -26,6 +26,7 @@ const ServiceStatus = () => {
       retry: 0
     }))
   });
+
   const navigate = useNavigate();
 
   const { signed } = useContext(AuthContext);
@@ -64,10 +65,18 @@ const ServiceStatus = () => {
                     subtitle={
                       `${statusQueries.filter((query) => query.status === 'error').length} out of
                        ${SPAR_DEPENDENCIES.length} service${SPAR_DEPENDENCIES.length > 0 ? 's' : ''}
-                       ${statusQueries.filter((query) => query.status === 'error').length > 1 ? 'are' : 'is'} down.
+                       are down.
                       `
                     }
-                    title="SPAR Dependecy Failure: "
+                    /*
+                     * It's grammatically incorrect to use 'is' for singluar subject
+                     * e.g. 1 out of 4 IS down
+                     * The original correct implementation was
+                     * ${statusQueries.filter((query) => query.status === 'error')
+                     *      .length > 1 ? 'are' : 'is'}
+                     * But UX wanted it to be ARE 🤷
+                     */
+                    title="SPAR Dependency Failure: "
                     hideCloseButton
                   />
                 </Column>
