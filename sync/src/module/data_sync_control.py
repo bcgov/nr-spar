@@ -41,7 +41,7 @@ def get_scheduler(track_db_conn:object, database_schema:str) -> list:
     select_sync_id_stm = f"""
         select 
             COALESCE(MAX(to_timestamp) + INTERVAL '1 microsecond'
-                   , CURRENT_TIMESTAMP - INTERVAL '2 days') as current_start_time,
+                   , CURRENT_TIMESTAMP - INTERVAL '3 days') as current_start_time,
             CURRENT_TIMESTAMP as current_end_time,
             (select run_status
                from spar.etl_execution_log

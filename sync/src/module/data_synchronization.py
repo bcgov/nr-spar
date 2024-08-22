@@ -51,6 +51,7 @@ def execute_instance(oracle_config, postgres_config, track_config):
         
         #if job is already running, stop
         if schedule_times['last_run_status'] == "RUNNING":
+            logger.info("Critical error: previous job still RUNNING or did not report SUCCESS or FAILURE")
             raise Exception("Critical error: previous job still RUNNING or did not report SUCCESS or FAILURE")
         
         logger.info('Insert execution log - signal RUNNING')
