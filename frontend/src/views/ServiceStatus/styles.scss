@@ -2,14 +2,13 @@
   padding: 5rem 0;
 
   .status-page-row {
-    padding: 1.5rem 0rem;
+    padding: 1.5rem 0;
     margin: 0 0.5rem;
 
     .notificatione-col,
     .button-col {
       padding: 0;
     }
-
 
     .notificatione-col {
 
@@ -22,10 +21,16 @@
       }
     }
 
+
+  }
+
+  .button-row {
+    padding: 3rem 0.5rem;
+
     .button-col {
       display: flex;
-      justify-content: center;
-      button{
+
+      button {
         width: -webkit-fill-available;
         max-width: 30rem;
       }

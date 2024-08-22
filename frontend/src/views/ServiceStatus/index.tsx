@@ -106,7 +106,7 @@ const ServiceStatus = () => {
         {
           signed
             ? (
-              <Row className="status-page-row">
+              <Row className="button-row">
                 <Column className="button-col">
                   <Button kind="primary" size="lg" renderIcon={Home} onClick={() => navigate('/')}>
                     Return to main page
