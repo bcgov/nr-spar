@@ -11,24 +11,24 @@ WITH seedlot_coll_methods
   (select seedlot_number
      , case when all_step_data->'extractionStorageStep'->'extraction'->'agency'->>'isInvalid' = 'false' 
              and all_step_data->'extractionStorageStep'->'extraction'->'locationCode'->>'isInvalid' = 'false' 
-            then all_step_data->'extractionStorageStep'->'extraction'->'agency'->>'value'
+            then NULLIF(all_step_data->'extractionStorageStep'->'extraction'->'agency'->>'value','')
             else null 
        end as extrct_cli_number 
      , case when all_step_data->'extractionStorageStep'->'extraction'->'agency'->>'isInvalid' = 'false' 
              and all_step_data->'extractionStorageStep'->'extraction'->'locationCode'->>'isInvalid' = 'false' 
-            then all_step_data->'extractionStorageStep'->'extraction'->'locationCode'->>'value'
+            then NULLIF(all_step_data->'extractionStorageStep'->'extraction'->'locationCode'->>'value','')
             else null 
        end as extrct_cli_locn_cd 
      , case when all_step_data->'interimStep'->'facilityType'->>'isInvalid' = 'false' 
-            then all_step_data->'interimStep'->'facilityType'->>'value' 
+            then NULLIF(all_step_data->'interimStep'->'facilityType'->>'value' ,'')
             else null 
        end as interm_facility_code 
      , case when all_step_data->'orchardStep'->'orchards'->'primaryOrchard'->>'isInvalid' = 'false' 
-            then all_step_data->'orchardStep'->'orchards'->'primaryOrchard'->'value'->>'code'
+            then NULLIF(all_step_data->'orchardStep'->'orchards'->'primaryOrchard'->'value'->>'code','')
             else null 
        end as orchard_id
      , case when all_step_data->'orchardStep'->'orchards'->'secondaryOrchard'->>'isInvalid' = 'false' 
-            then all_step_data->'orchardStep'->'orchards'->'secondaryOrchard'->'value'->>'code'
+            then NULLIF(all_step_data->'orchardStep'->'orchards'->'secondaryOrchard'->'value'->>'code','')
             else null 
        end as secondary_orchard_id
      , CAST(case when all_step_data->'collectionStep'->'startDate'->>'isInvalid' = 'false'
@@ -41,36 +41,36 @@ WITH seedlot_coll_methods
                   end AS DATE) as collection_end_date
      , case when all_step_data->'collectionStep'->'collectorAgency'->>'isInvalid' = 'false'
              and all_step_data->'collectionStep'->'locationCode'->>'isInvalid' = 'false'
-            then all_step_data->'collectionStep'->'collectorAgency'->>'value' 
+            then NULLIF(all_step_data->'collectionStep'->'collectorAgency'->>'value' ,'')
             else null
        end as collection_cli_number
      , case when all_step_data->'collectionStep'->'collectorAgency'->>'isInvalid' = 'false'
              and all_step_data->'collectionStep'->'locationCode'->>'isInvalid' = 'false'
-            then all_step_data->'collectionStep'->'locationCode'->>'value'
+            then NULLIF(all_step_data->'collectionStep'->'locationCode'->>'value','')
             else null
        end as collection_cli_locn_cd
      , CAST(case when all_step_data->'collectionStep'->'volumeOfCones'->>'isInvalid' = 'false'
-                 then all_step_data->'collectionStep'->'volumeOfCones'->>'value'
+                 then NULLIF(all_step_data->'collectionStep'->'volumeOfCones'->>'value','')
                  else null
                   end as NUMERIC) as clctn_volume
      , CAST(case when all_step_data->'collectionStep'->'numberOfContainers'->>'isInvalid' = 'false'
-                 then all_step_data->'collectionStep'->'numberOfContainers'->>'value'
+                 then NULLIF(all_step_data->'collectionStep'->'numberOfContainers'->>'value','')
                  else null
                   end as NUMERIC) as no_of_containers
      , CAST(case when all_step_data->'collectionStep'->'volumePerContainers'->>'isInvalid' = 'false'
-                 then all_step_data->'collectionStep'->'volumePerContainers'->>'value'
+                 then NULLIF(all_step_data->'collectionStep'->'volumePerContainers'->>'value','')
                  else null
              end as NUMERIC)      as vol_per_container
      , TO_CHAR(CAST(case when all_step_data->'collectionStep'->'selectedCollectionCodes'->>'isInvalid' = 'false'
-                    then all_step_data->'collectionStep'->'selectedCollectionCodes'->'value'->>0
+                    then NULLIF(all_step_data->'collectionStep'->'selectedCollectionCodes'->'value'->>0,'')
                     else null
                 end AS NUMERIC),'FM00') as cone_collection_method_code
      , TO_CHAR(CAST(case when all_step_data->'collectionStep'->'selectedCollectionCodes'->>'isInvalid' = 'false'
-                    then all_step_data->'collectionStep'->'selectedCollectionCodes'->'value'->>1
+                    then NULLIF(all_step_data->'collectionStep'->'selectedCollectionCodes'->'value'->>1,'')
                     else null
                 end AS NUMERIC),'FM00') as cone_collection_method2_code
      , case when all_step_data->'collectionStep'->'comments'->>'isInvalid' = 'false'
-            then all_step_data->'collectionStep'->'comments'->>'value'
+            then NULLIF(all_step_data->'collectionStep'->'comments'->>'value','')
             else null
        end as seedlot_comment
   from spar.seedlot_registration_a_class_save
