@@ -9,7 +9,7 @@ import {
   TableContainer, TableToolbar, Checkbox,
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
   Button, Table, TableHead, TableRow, TableHeader,
-  DataTableSkeleton, DefinitionTooltip, Modal,
+  DataTableSkeleton, Modal,
   Accordion, AccordionItem, TextInputSkeleton
 } from '@carbon/react';
 import {
@@ -773,14 +773,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                                     )
                                       ? (
                                         <TableHeader id={header.id} key={header.id}>
-                                          <DefinitionTooltip
-                                            align="top"
-                                            openOnHover
-                                            definition={header.description}
-                                            tabIndex={-1}
-                                          >
-                                            {header.name}
-                                          </DefinitionTooltip>
+                                          {header.name}
                                         </TableHeader>
                                       )
                                       : null
