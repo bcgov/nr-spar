@@ -18,6 +18,7 @@ const Layout = () => {
       queryKey: [dependencyObj.queryKey],
       queryFn: () => fetch(dependencyObj.healthCheckUrl, { mode: 'no-cors' }),
       refetchInterval: THIRTY_SECONDS,
+      refetchIntervalInBackground: false,
       retry: 0
     }))
   });

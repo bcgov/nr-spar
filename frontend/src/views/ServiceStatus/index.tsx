@@ -22,6 +22,7 @@ const ServiceStatus = () => {
       queryKey: [dependencyObj.queryKey],
       queryFn: () => fetch(dependencyObj.healthCheckUrl, { mode: 'no-cors' }),
       refetchInterval: FIFTEEN_SECONDS,
+      refetchIntervalInBackground: false,
       retry: 0
     }))
   });
