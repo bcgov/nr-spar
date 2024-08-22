@@ -1,4 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
+import { THIRTY_SECONDS } from '../../constants';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and Pollen count)', () => {
   let regFormData: {
@@ -106,7 +107,14 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Cone and pollen count table entries', () => {
+    // Intercept the call
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/parent-trees/vegetation-codes/*'
+    }).as('parentTreesUnderVegCode');
+
     // Wait for the table to load
+    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
     cy.get('#parentTreeNumber');
 
     // Check error message for negative Cone count
@@ -486,5 +494,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .find(`.${prefix}--col`)
       .contains('Orchard parent tree geospatial summary')
       .should('be.visible');
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
   });
 });
