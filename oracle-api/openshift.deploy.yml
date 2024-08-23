@@ -55,6 +55,10 @@ parameters:
   - name: CERT_PVC_SIZE
     description: The amount of storage the cert PVC should have
     value: 25Mi
+  - name: RANDOM_EXPRESSION
+    description: Random expression to make sure deployments update
+    from: "[a-zA-Z0-9]{32}"
+    generate: expression
 objects:
   - apiVersion: v1
     kind: PersistentVolumeClaim
@@ -167,6 +171,8 @@ objects:
                   value: /cert/jssecacerts
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
+                - name: RANDOM_EXPRESSION
+                  value: ${RANDOM_EXPRESSION}
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}-certs
                   mountPath: /cert
