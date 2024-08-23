@@ -203,6 +203,9 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.get('#212-coneCount-value-input')
       .clear()
       .blur();
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Check \'Show/hide columns\' button functionality', () => {
@@ -284,9 +287,22 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.get('thead.table-header')
       .find('#gvo')
       .should('exist');
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Check \'More Options\' button functionality', () => {
+    // Intercept the call
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/parent-trees/vegetation-codes/*'
+    }).as('parentTreesUnderVegCode');
+
+    // Wait for the table to load
+    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.get('#parentTreeNumber');
+
     // Check Download file option
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(1)
@@ -424,9 +440,22 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     cy.get('#219-pollenCount-value-input')
       .should('have.value', '22');
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Pagination', () => {
+    // Intercept the call
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/parent-trees/vegetation-codes/*'
+    }).as('parentTreesUnderVegCode');
+
+    // Wait for the table to load
+    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.get('#parentTreeNumber');
+
     const dropdownNumber = '20';
     // Number of item dropdown
     cy.get(`.${prefix}--pagination__left`)
@@ -479,6 +508,16 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Calculate Metrics button', () => {
+    // Intercept the call
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/parent-trees/vegetation-codes/*'
+    }).as('parentTreesUnderVegCode');
+
+    // Wait for the table to load
+    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.get('#parentTreeNumber');
+
     // Check info sections not visible in DOM
     cy.get('.info-section-sub-title')
       .should('not.exist');
