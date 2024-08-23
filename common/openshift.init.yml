@@ -7,14 +7,15 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: DB_PASSWORD
+    description: Password for the PostgreSQL connection user
+    required: true
   - name: FORESTCLIENTAPI_KEY
     required: true
   - name: ORACLE_HOST
     description: Oracle database host
     value: nrcdb03.bcgov
-  - name: ORACLE_PORT
-    description: Oracle database port
-    value: "1543"
+    required: true
   - name: ORACLE_SERVICE
     description: Oracle service name
     value: dbq01.nrs.bcgov
@@ -33,7 +34,21 @@ parameters:
   - name: ORACLE_SYNC_USER
     description: Oracle database username for Sync
     value: proxy_fsa_spar_sync_user
+  - name: VITE_USER_POOLS_WEB_CLIENT_ID
+    description: Cognito user pools web client ID
+    required: true
 objects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-database
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      database-name: ${NAME}
+      database-password: ${DB_PASSWORD}
+      database-port: "5432"
+      database-user: ${NAME}
   - apiVersion: v1
     kind: Secret
     metadata:
@@ -43,10 +58,18 @@ objects:
     stringData:
       oracle-host: ${ORACLE_HOST}
       oracle-password: ${ORACLE_PASSWORD}
-      oracle-port: ${ORACLE_PORT}
       oracle-service: ${ORACLE_SERVICE}
       oracle-user: ${ORACLE_USER}
       oracle-secret: ${ORACLE_CERT_SECRET}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-sync
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      oracle-host: ${ORACLE_HOST}
+      oracle-service: ${ORACLE_SERVICE}
       oracle-sync-password: ${ORACLE_SYNC_PASSWORD}
       oracle-sync-user: ${ORACLE_SYNC_USER}
   - apiVersion: v1
@@ -57,6 +80,14 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       forest-client-api-key: ${FORESTCLIENTAPI_KEY}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-frontend
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      vite-user-pools-web-client-id: ${VITE_USER_POOLS_WEB_CLIENT_ID}
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:

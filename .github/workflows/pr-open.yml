@@ -18,11 +18,14 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [database, common, backend, frontend, oracle-api, sync]
+        package: [backend, frontend, oracle-api, sync]
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.2.0
         id: build
         with:
+          build_args: |
+            BUILD_NUMBER=${{ github.event.number }}
+            BUILDKIT_INLINE_CACHE=1
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
           tag_fallback: latest

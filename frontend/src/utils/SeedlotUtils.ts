@@ -5,6 +5,8 @@ import { MONTH_DAY_YEAR } from '../config/DateFormat';
 import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../shared-constants/shared-constants';
+import { getForestClientLabel } from './ForestClientUtils';
+import { utcToApStyle } from './DateUtils';
 
 /**
  * Generate a species label in the form of `{code} - {description}`.
@@ -39,17 +41,12 @@ export const covertRawToDisplayObj = (seedlot: SeedlotType, vegCodeData: MultiOp
   entryUserId: seedlot.declarationOfTrueInformationUserId
     ? seedlot.declarationOfTrueInformationUserId
     : '--',
-  entryTimestamp: seedlot.declarationOfTrueInformationTimestamp
-    ? luxon.fromISO(seedlot.declarationOfTrueInformationTimestamp).toFormat(MONTH_DAY_YEAR)
-    : '--',
+  entryTimestamp: utcToApStyle(seedlot.declarationOfTrueInformationTimestamp),
   applicantAgency: seedlot.applicantClientNumber,
   locationCode: seedlot.applicantLocationCode,
-  createdAt: luxon.fromISO(seedlot.auditInformation.entryTimestamp).toFormat(MONTH_DAY_YEAR),
-  lastUpdatedAt: luxon.fromISO(seedlot.auditInformation.updateTimestamp)
-    .toFormat(MONTH_DAY_YEAR),
-  approvedAt: seedlot.seedlotStatus.seedlotStatusCode === 'APP'
-    ? luxon.fromISO(seedlot.seedlotStatus.updateTimestamp).toFormat(MONTH_DAY_YEAR)
-    : '--'
+  createdAt: utcToApStyle(seedlot.auditInformation.entryTimestamp),
+  lastUpdatedAt: utcToApStyle(seedlot.auditInformation.updateTimestamp),
+  approvedAt: utcToApStyle(seedlot.approvedTimestamp)
 });
 
 /**
@@ -86,7 +83,7 @@ export const convertToApplicantInfoObj = (
   vegCodeData: MultiOptionsObj[],
   forestClient: ForestClientType
 ): SeedlotApplicantType => ({
-  agency: `${forestClient.clientNumber} - ${forestClient.clientName} - ${forestClient.acronym}`,
+  agency: getForestClientLabel(forestClient),
   locationCode: seedlot.applicantLocationCode,
   email: seedlot.applicantEmailAddress,
   species: getSpeciesLabelByCode(seedlot.vegetationCode, vegCodeData),

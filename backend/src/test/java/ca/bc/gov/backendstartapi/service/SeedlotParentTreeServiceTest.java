@@ -43,7 +43,7 @@ class SeedlotParentTreeServiceTest {
 
   private SeedlotFormParentTreeSmpDto createFormDto(Integer parentTreeId) {
     ParentTreeGeneticQualityDto ptgqDto =
-        new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"));
+        new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"), null, null);
     return new SeedlotFormParentTreeSmpDto(
         "85",
         parentTreeId,

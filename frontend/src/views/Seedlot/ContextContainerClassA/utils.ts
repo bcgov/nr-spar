@@ -3,21 +3,22 @@ import BigNumber from 'bignumber.js';
 import { AxiosError } from 'axios';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
-import { OrchardForm, OrchardObj } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
+import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import {
-  DEFAULT_MIX_PAGE_ROWS, MAX_DECIMAL_DIGITS, notificationCtrlObj,
+  DEFAULT_MIX_PAGE_ROWS, geneticWorthDict, MAX_DECIMAL_DIGITS, notificationCtrlObj,
   rowTemplate
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import {
+  GeneticWorthDictType,
+  GeneticWorthInputType,
   InfoSectionConfigType, RowDataDictType, RowItem,
   StrTypeRowItem
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import {
   calcAverage, calcSum, generateDefaultRows,
-  populateStrInputId,
-  processOrchards
+  populateStrInputId
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
@@ -27,12 +28,13 @@ import {
   OrchardFormSubmitType, ParentTreeFormSubmitType, RichSeedlotType,
   SeedlotAClassSubmitType, SingleOwnerFormSubmitType
 } from '../../../types/SeedlotType';
-import { dateStringToISO } from '../../../utils/DateUtils';
+import { localDateToUtcFormat, utcToIsoSlashStyle } from '../../../utils/DateUtils';
 import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getOptionsInputObj } from '../../../utils/FormInputUtils';
 import { GeoInfoValType } from '../SeedlotReview/definitions';
+import focusById from '../../../utils/FocusUtils';
 
 import {
   emptyCollectionStep, emptyExtractionStep, emptyInterimStep,
@@ -41,10 +43,10 @@ import {
 import {
   AllStepData,
   AreaOfUseDataType,
-  ClientAgenciesByCode,
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
-import focusById from '../../../utils/FocusUtils';
+import { GenWorthCodeEnum, SingleParentTreeGeneticObj } from '../../../types/ParentTreeGeneticQualityType';
+import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
 
 export const initProgressBar = (
   currentStep: number,
@@ -63,48 +65,42 @@ export const initProgressBar = (
 };
 
 export const initCollectionState = (
-  defaultAgency: MultiOptionsObj,
-  collectionStepData: CollectionFormSubmitType,
-  useDefaultAgency = true
+  defaultAgencyNumber: string,
+  collectionStepData: CollectionFormSubmitType
 ): CollectionForm => ({
-  useDefaultAgencyInfo: {
-    id: 'collection-use-default-agency',
-    value: useDefaultAgency,
-    isInvalid: false
-  },
   collectorAgency: {
     id: 'collection-collector-agency',
-    value: defaultAgency,
+    value: defaultAgencyNumber,
     isInvalid: false
   },
   locationCode: {
     id: 'collection-location-code',
-    value: collectionStepData.collectionLocnCode,
+    value: collectionStepData.collectionLocnCode ?? '',
     isInvalid: false
   },
   startDate: {
     id: 'collection-start-date',
-    value: collectionStepData.collectionStartDate,
+    value: utcToIsoSlashStyle(collectionStepData.collectionStartDate),
     isInvalid: false
   },
   endDate: {
     id: 'collection-end-date',
-    value: collectionStepData.collectionEndDate,
+    value: utcToIsoSlashStyle(collectionStepData.collectionEndDate),
     isInvalid: false
   },
   numberOfContainers: {
     id: 'collection-num-of-container',
-    value: String(collectionStepData.noOfContainers),
+    value: collectionStepData.noOfContainers?.toString() ?? '',
     isInvalid: false
   },
   volumePerContainers: {
     id: 'collection-vol-per-container',
-    value: String(collectionStepData.volPerContainer),
+    value: collectionStepData.volPerContainer?.toString() ?? '',
     isInvalid: false
   },
   volumeOfCones: {
     id: 'collection-vol-of-cones',
-    value: String(collectionStepData.clctnVolume),
+    value: collectionStepData.clctnVolume?.toString() ?? '',
     isInvalid: false
   },
   selectedCollectionCodes: {
@@ -114,34 +110,31 @@ export const initCollectionState = (
   },
   comments: {
     id: 'collection-comments',
-    value: collectionStepData.seedlotComment,
+    value: collectionStepData.seedlotComment ?? '',
     isInvalid: false
   }
 });
 
 export const initOwnershipState = (
-  defaultAgency: MultiOptionsObj,
+  defaultAgencyNumber: string,
   ownersStepData: Array<SingleOwnerFormSubmitType>,
-  useDefault?: boolean,
   methodsOfPayment?: Array<MultiOptionsObj>,
-  fundingSource?: Array<MultiOptionsObj>,
-  clientData?: ClientAgenciesByCode,
-  defaultAgencyNumber = ''
+  fundingSource?: Array<MultiOptionsObj>
 ): Array<SingleOwnerForm> => {
   const seedlotOwners: Array<SingleOwnerForm> = ownersStepData.map((curOwner, index) => {
     const ownerState = createOwnerTemplate(index, curOwner);
-    ownerState.ownerAgency.value = clientData && !useDefault
-      ? clientData[curOwner.ownerClientNumber]
-      : defaultAgency;
-    ownerState.useDefaultAgencyInfo.value = ownerState
-      .ownerAgency.value.code === defaultAgencyNumber;
+
+    ownerState.ownerAgency.value = defaultAgencyNumber;
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
-    if (methodsOfPayment && fundingSource) {
+
+    if (methodsOfPayment && methodsOfPayment.length > 0) {
       const payment = methodsOfPayment
         .filter((data: MultiOptionsObj) => data.code === curOwner.methodOfPaymentCode)[0];
+      ownerState.methodOfPayment.value = payment;
+    }
+    if (fundingSource && fundingSource.length > 0) {
       const fundSource = fundingSource
         .filter((data: MultiOptionsObj) => data.code === curOwner.sparFundSrceCode)[0];
-      ownerState.methodOfPayment.value = payment;
       ownerState.fundingSource.value = fundSource;
     }
     return ownerState;
@@ -150,7 +143,7 @@ export const initOwnershipState = (
 };
 
 export const initInterimState = (
-  defaultAgency: MultiOptionsObj,
+  defaultAgencyNumber: string,
   interimStepData: InterimFormSubmitType,
   useDefaultAgency = true
 ): InterimForm => ({
@@ -161,61 +154,48 @@ export const initInterimState = (
   },
   agencyName: {
     id: 'interim-agency',
-    value: defaultAgency,
+    value: defaultAgencyNumber,
     isInvalid: false
   },
   locationCode: {
     id: 'interim-location-code',
-    value: interimStepData.intermStrgLocnCode,
+    value: interimStepData.intermStrgLocnCode ?? '',
     isInvalid: false
   },
   startDate: {
     id: 'storage-start-date',
-    value: interimStepData.intermStrgStDate,
+    value: utcToIsoSlashStyle(interimStepData.intermStrgStDate),
     isInvalid: false
   },
   endDate: {
     id: 'storage-end-date',
-    value: interimStepData.intermStrgEndDate,
+    value: utcToIsoSlashStyle(interimStepData.intermStrgEndDate),
     isInvalid: false
   },
   facilityType: {
     id: 'storage-facility-type',
-    value: interimStepData.intermFacilityCode,
+    value: interimStepData.intermFacilityCode ?? '',
     isInvalid: false
   },
   facilityOtherType: {
     id: 'storage-other-type-input',
-    value: interimStepData.intermOtherFacilityDesc,
+    value: interimStepData.intermOtherFacilityDesc ?? '',
     isInvalid: false
   }
 });
 
 const convertToOrchardsType = (
-  orchards: Array<MultiOptionsObj> | undefined,
-  primaryOrchardId: string,
-  secondaryOrchardId: string | null
-): Array<OrchardObj> => {
-  if (orchards) {
-    const orchardsIds: string[] = [primaryOrchardId];
-    if (secondaryOrchardId) {
-      orchardsIds.push(secondaryOrchardId);
+  selectedOrchardId: string | null,
+  orchards: Array<MultiOptionsObj> | undefined
+): MultiOptionsObj => {
+  if (orchards && selectedOrchardId) {
+    const filteredOrchards = orchards.find((orchard) => orchard.code === selectedOrchardId);
+    if (filteredOrchards) {
+      return filteredOrchards;
     }
-    const filteredOrchards = orchards.filter((curOrch) => orchardsIds.includes(curOrch.code));
-    return filteredOrchards.map((curFilteredOrch, index) => ({
-      inputId: index,
-      selectedItem: curFilteredOrch,
-      isInvalid: false
-    }));
   }
 
-  return [
-    {
-      inputId: 0,
-      selectedItem: null,
-      isInvalid: false
-    }
-  ];
+  return EmptyMultiOptObj;
 };
 
 export const initOrchardState = (
@@ -224,11 +204,19 @@ export const initOrchardState = (
   gameticMethodology?: Array<MultiOptionsObj>
 ): OrchardForm => (
   {
-    orchards: convertToOrchardsType(
-      possibleOrchards,
-      orchardStepData.primaryOrchardId,
-      orchardStepData.secondaryOrchardId
-    ),
+    orchards: {
+      primaryOrchard: {
+        id: 'primary-orchard-selection',
+        value: convertToOrchardsType(orchardStepData.primaryOrchardId, possibleOrchards),
+        isInvalid: false
+      },
+      secondaryOrchard: {
+        id: 'secondary-orchard-selection',
+        value: convertToOrchardsType(orchardStepData.secondaryOrchardId, possibleOrchards),
+        isInvalid: false,
+        enabled: !!orchardStepData.secondaryOrchardId
+      }
+    },
     femaleGametic: {
       id: 'orchard-female-gametic',
       value: gameticMethodology
@@ -340,8 +328,8 @@ export const initParentTreeState = (
 };
 
 export const initExtractionStorageState = (
-  defaultExtractAgency: MultiOptionsObj,
-  defaultStorageAgency: MultiOptionsObj,
+  defaultExtractAgencyNumber: string,
+  defaultStorageAgencyNumber: string,
   extractionStepData: ExtractionFormSubmitType,
   useTSCExtract = true,
   useTSCStorage = true
@@ -354,23 +342,23 @@ export const initExtractionStorageState = (
         isInvalid: false
       },
       agency: {
-        id: 'ext-agency-combobox',
-        value: defaultExtractAgency,
+        id: 'ext-agency-number',
+        value: defaultExtractAgencyNumber,
         isInvalid: false
       },
       locationCode: {
         id: 'ext-location-code',
-        value: useTSCExtract ? tscLocationCode : extractionStepData.extractoryLocnCode,
+        value: useTSCExtract ? tscLocationCode : (extractionStepData.extractoryLocnCode ?? ''),
         isInvalid: false
       },
       startDate: {
         id: 'ext-start-date',
-        value: extractionStepData.extractionStDate,
+        value: utcToIsoSlashStyle(extractionStepData.extractionStDate),
         isInvalid: false
       },
       endDate: {
         id: 'ext-end-date',
-        value: extractionStepData.extractionEndDate,
+        value: utcToIsoSlashStyle(extractionStepData.extractionEndDate),
         isInvalid: false
       }
     },
@@ -381,23 +369,23 @@ export const initExtractionStorageState = (
         isInvalid: false
       },
       agency: {
-        id: 'str-agency-combobox',
-        value: defaultStorageAgency,
+        id: 'str-agency-number',
+        value: defaultStorageAgencyNumber,
         isInvalid: false
       },
       locationCode: {
         id: 'str-location-code',
-        value: useTSCStorage ? tscLocationCode : extractionStepData.storageLocnCode,
+        value: useTSCStorage ? tscLocationCode : (extractionStepData.storageLocnCode ?? ''),
         isInvalid: false
       },
       startDate: {
         id: 'str-start-date',
-        value: extractionStepData.temporaryStrgStartDate,
+        value: utcToIsoSlashStyle(extractionStepData.temporaryStrgStartDate),
         isInvalid: false
       },
       endDate: {
         id: 'str-end-date',
-        value: extractionStepData.temporaryStrgEndDate,
+        value: utcToIsoSlashStyle(extractionStepData.temporaryStrgEndDate),
         isInvalid: false
       }
     }
@@ -493,28 +481,28 @@ export const verifyCollectionStepCompleteness = (
   let isComplete = true;
   let idToFocus = '';
 
-  if (!collectionData.collectorAgency.value.code.length) {
+  if (!collectionData.collectorAgency.value) {
     isComplete = false;
     idToFocus = collectionData.collectorAgency.id;
-  } else if (!collectionData.locationCode.value.length) {
+  } else if (!collectionData.locationCode.value) {
     isComplete = false;
     idToFocus = collectionData.locationCode.id;
-  } else if (!collectionData.startDate.value.length) {
+  } else if (!collectionData.startDate.value) {
     isComplete = false;
     idToFocus = collectionData.startDate.id;
-  } else if (!collectionData.endDate.value.length) {
+  } else if (!collectionData.endDate.value) {
     isComplete = false;
     idToFocus = collectionData.endDate.id;
-  } else if (!collectionData.numberOfContainers.value.length) {
+  } else if (!collectionData.numberOfContainers.value) {
     isComplete = false;
     idToFocus = collectionData.numberOfContainers.id;
-  } else if (!collectionData.volumePerContainers.value.length) {
+  } else if (!collectionData.volumePerContainers.value) {
     isComplete = false;
     idToFocus = collectionData.volumePerContainers.id;
-  } else if (!collectionData.volumeOfCones.value.length) {
+  } else if (!collectionData.volumeOfCones.value) {
     isComplete = false;
     idToFocus = collectionData.volumeOfCones.id;
-  } else if (!collectionData.selectedCollectionCodes.value.length) {
+  } else if (!collectionData.selectedCollectionCodes.value) {
     isComplete = false;
     // Have to hard code id to focus as they are generated dynamically,
     // assuming that there will always be a code 1 in the list of collection methods.
@@ -539,19 +527,19 @@ export const verifyOwnershipStepCompleteness = (
   let idToFocus = '';
 
   for (let i = 0; i < ownershipData.length; i += 1) {
-    if (!ownershipData[i].ownerAgency.value.code.length) {
+    if (!ownershipData[i].ownerAgency.value) {
       isComplete = false;
       idToFocus = ownershipData[i].ownerAgency.id;
-    } else if (!ownershipData[i].ownerCode.value.length) {
+    } else if (!ownershipData[i].ownerCode.value) {
       isComplete = false;
       idToFocus = ownershipData[i].ownerCode.id;
-    } else if (!ownershipData[i].ownerPortion.value.length) {
+    } else if (!ownershipData[i].ownerPortion.value) {
       isComplete = false;
       idToFocus = ownershipData[i].ownerPortion.id;
-    } else if (!ownershipData[i].reservedPerc.value.length) {
+    } else if (!ownershipData[i].reservedPerc.value) {
       isComplete = false;
       idToFocus = ownershipData[i].reservedPerc.id;
-    } else if (!ownershipData[i].surplusPerc.value.length) {
+    } else if (!ownershipData[i].surplusPerc.value) {
       isComplete = false;
       idToFocus = ownershipData[i].surplusPerc.id;
     } else if (
@@ -586,7 +574,7 @@ export const verifyInterimStepCompleteness = (
   let isComplete = true;
   let idToFocus = '';
 
-  if (!interimData.agencyName.value.code) {
+  if (!interimData.agencyName.value) {
     isComplete = false;
     idToFocus = interimData.agencyName.id;
   } else if (!interimData.locationCode.value) {
@@ -665,22 +653,18 @@ export const verifyOrchardStepCompleteness = (
   orchardStepData: OrchardForm,
   focusOnIncomplete?: boolean
 ): boolean => {
-  let isComplete = false;
-
-  orchardStepData.orchards.forEach((orchard) => {
-    // if one of the orchard object is populated then it's complete for this field
-    if (orchard.selectedItem?.code) {
-      isComplete = true;
-    }
-  });
-
-  if (!isComplete) {
-    return isComplete;
-  }
-
+  let isComplete = true;
   let idToFocus = '';
 
-  if (!orchardStepData.femaleGametic.value.code) {
+  if (!orchardStepData.orchards.primaryOrchard.value.code) {
+    isComplete = false;
+    idToFocus = orchardStepData.orchards.primaryOrchard.id;
+  } else if (orchardStepData.orchards.secondaryOrchard.enabled
+    && !orchardStepData.orchards.secondaryOrchard.value.code
+  ) {
+    isComplete = false;
+    idToFocus = orchardStepData.orchards.secondaryOrchard.id;
+  } else if (!orchardStepData.femaleGametic.value.code) {
     isComplete = false;
     idToFocus = orchardStepData.femaleGametic.id;
   } else if (!orchardStepData.maleGametic.value.code) {
@@ -820,13 +804,13 @@ export const verifyExtractionStepCompleteness = (
   let isComplete = true;
   let idToFocus = '';
 
-  if (!extractionStepData.extraction.agency.value.code) {
+  if (!extractionStepData.extraction.agency.value) {
     isComplete = false;
     idToFocus = extractionStepData.extraction.agency.id;
   } else if (!extractionStepData.extraction.locationCode.value) {
     isComplete = false;
     idToFocus = extractionStepData.extraction.locationCode.id;
-  } else if (!extractionStepData.seedStorage.agency.value.code) {
+  } else if (!extractionStepData.seedStorage.agency.value) {
     isComplete = false;
     idToFocus = extractionStepData.seedStorage.agency.id;
   } else if (!extractionStepData.seedStorage.locationCode.value) {
@@ -863,10 +847,11 @@ export const checkAllStepsCompletion = (
 };
 
 export const convertCollection = (collectionData: CollectionForm): CollectionFormSubmitType => ({
-  collectionClientNumber: collectionData.collectorAgency.value.code,
+  collectionClientNumber: collectionData.collectorAgency.value,
   collectionLocnCode: collectionData.locationCode.value,
-  collectionStartDate: dateStringToISO(collectionData.startDate.value),
-  collectionEndDate: dateStringToISO(collectionData.endDate.value),
+  // Assume the date values are present as validation has occurred before payload is generated
+  collectionStartDate: localDateToUtcFormat(collectionData.startDate.value)!,
+  collectionEndDate: localDateToUtcFormat(collectionData.endDate.value)!,
   noOfContainers: +collectionData.numberOfContainers.value,
   volPerContainer: +collectionData.volumePerContainers.value,
   clctnVolume: +collectionData.volumeOfCones.value,
@@ -879,7 +864,7 @@ export const convertOwnership = (
   ownershipData: Array<SingleOwnerForm>
 ): Array<SingleOwnerFormSubmitType> => (
   ownershipData.map((owner: SingleOwnerForm) => ({
-    ownerClientNumber: owner.ownerAgency.value.code,
+    ownerClientNumber: owner.ownerAgency.value,
     ownerLocnCode: owner.ownerCode.value,
     originalPctOwned: +owner.ownerPortion.value,
     originalPctRsrvd: +owner.reservedPerc.value,
@@ -890,10 +875,11 @@ export const convertOwnership = (
 );
 
 export const convertInterim = (interimData: InterimForm): InterimFormSubmitType => ({
-  intermStrgClientNumber: interimData.agencyName.value.code,
+  intermStrgClientNumber: interimData.agencyName.value,
   intermStrgLocnCode: interimData.locationCode.value,
-  intermStrgStDate: dateStringToISO(interimData.startDate.value),
-  intermStrgEndDate: dateStringToISO(interimData.endDate.value),
+  // Assume the date values are present as validation has occurred before payload is generated
+  intermStrgStDate: localDateToUtcFormat(interimData.startDate.value)!,
+  intermStrgEndDate: localDateToUtcFormat(interimData.endDate.value)!,
   intermOtherFacilityDesc: interimData.facilityOtherType.value,
   intermFacilityCode: interimData.facilityType.value
 });
@@ -902,16 +888,11 @@ export const convertOrchard = (
   orchardData: OrchardForm,
   parentTreeRows: RowDataDictType
 ): OrchardFormSubmitType => {
-  const deDuppedOrchards = processOrchards(orchardData.orchards);
-  let primaryOrchardId: string = '';
-  let secondaryOrchardId = null;
-
-  if (deDuppedOrchards.length > 0) {
-    primaryOrchardId = deDuppedOrchards[0].selectedItem!.code;
-  }
-  if (deDuppedOrchards.length > 1) {
-    secondaryOrchardId = deDuppedOrchards[1].selectedItem!.code;
-  }
+  const primaryOrchardId = orchardData.orchards.primaryOrchard.value.code;
+  const secondaryOrchardId = (orchardData.orchards.primaryOrchard.value.code
+    !== orchardData.orchards.secondaryOrchard.value.code)
+    ? orchardData.orchards.secondaryOrchard.value.code
+    : null;
 
   return ({
     primaryOrchardId,
@@ -929,25 +910,53 @@ export const convertOrchard = (
   });
 };
 
+const generateParentTreeGenQualPayload = (
+  allParentTreeData: ParentTreeByVegCodeResType,
+  ptRow: RowItem,
+  applicableGenWorths: string[]
+): SingleParentTreeGeneticObj[] => {
+  const payload: SingleParentTreeGeneticObj[] = [];
+
+  applicableGenWorths.forEach((genWorthCode) => {
+    const gwCode = genWorthCode as keyof RowItem;
+    const gwObj = (ptRow[gwCode] as GeneticWorthInputType);
+    const ptGeneticObj: SingleParentTreeGeneticObj = {
+      geneticTypeCode: 'BV',
+      geneticWorthCode: gwCode.toUpperCase() as keyof typeof GenWorthCodeEnum,
+      geneticQualityValue: Number(parseFloat(gwObj.value).toFixed(1)),
+      isParentTreeTested: allParentTreeData[ptRow.parentTreeNumber.value].testedInd,
+      isEstimated: gwObj.isEstimated
+    };
+    payload.push(ptGeneticObj);
+  });
+
+  return payload;
+};
+
 export const convertParentTree = (
   parentTreeData: ParentTreeStepDataObj,
-  seedlotNumber: string
+  seedlotNumber: string,
+  applicableGenWorths: string[]
 ): Array<ParentTreeFormSubmitType> => {
   const parentTreePayload: Array<ParentTreeFormSubmitType> = [];
 
   // Each key is a parent tree number
-  Object.keys(parentTreeData.tableRowData).forEach((key: string) => {
+  Object.keys(parentTreeData.tableRowData).forEach((ptNum: string) => {
     parentTreePayload.push({
       seedlotNumber,
-      parentTreeId: parentTreeData.allParentTreeData[key].parentTreeId,
-      parentTreeNumber: parentTreeData.allParentTreeData[key].parentTreeNumber,
-      coneCount: +parentTreeData.tableRowData[key].coneCount.value,
-      pollenCount: +parentTreeData.tableRowData[key].pollenCount.value,
-      smpSuccessPct: +parentTreeData.tableRowData[key].smpSuccessPerc.value,
-      nonOrchardPollenContamPct: +parentTreeData.tableRowData[key].nonOrchardPollenContam.value,
-      amountOfMaterial: +parentTreeData.tableRowData[key].volume.value,
-      proportion: +parentTreeData.tableRowData[key].proportion.value,
-      parentTreeGeneticQualities: parentTreeData.allParentTreeData[key].parentTreeGeneticQualities
+      parentTreeId: parentTreeData.allParentTreeData[ptNum].parentTreeId,
+      parentTreeNumber: ptNum,
+      coneCount: +parentTreeData.tableRowData[ptNum].coneCount.value,
+      pollenCount: +parentTreeData.tableRowData[ptNum].pollenCount.value,
+      smpSuccessPct: +parentTreeData.tableRowData[ptNum].smpSuccessPerc.value,
+      nonOrchardPollenContamPct: +parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value,
+      amountOfMaterial: +parentTreeData.tableRowData[ptNum].volume.value,
+      proportion: +parentTreeData.tableRowData[ptNum].proportion.value,
+      parentTreeGeneticQualities: generateParentTreeGenQualPayload(
+        parentTreeData.allParentTreeData,
+        parentTreeData.tableRowData[ptNum],
+        applicableGenWorths
+      )
     });
   });
 
@@ -955,31 +964,35 @@ export const convertParentTree = (
 };
 
 export const convertSmpParentTree = (
-  smpParentTreeData: ParentTreeStepDataObj,
-  seedlotNumber: string
+  parentTreeStepData: ParentTreeStepDataObj,
+  seedlotNumber: string,
+  applicableGenWorths: string[]
 ): Array<ParentTreeFormSubmitType> => {
-  const { allParentTreeData } = smpParentTreeData;
+  const { allParentTreeData } = parentTreeStepData;
   const smpMixPayload: Array<ParentTreeFormSubmitType> = [];
 
-  if (smpParentTreeData.mixTabData) {
-    Object.keys(smpParentTreeData.mixTabData).forEach((key: string) => {
+  if (parentTreeStepData.mixTabData) {
+    Object.keys(parentTreeStepData.mixTabData).forEach((key: string) => {
       // Each key is a line in the table, so we need to get
       // the parent tree value that the user set and use it
-      const curParentTree = smpParentTreeData.mixTabData[key].parentTreeNumber.value;
-      if (allParentTreeData[curParentTree]) {
+      const curParentTreeNum = parentTreeStepData.mixTabData[key].parentTreeNumber.value;
+      if (allParentTreeData[curParentTreeNum]) {
         smpMixPayload.push({
           seedlotNumber,
-          parentTreeId: smpParentTreeData.allParentTreeData[curParentTree].parentTreeId,
-          parentTreeNumber: smpParentTreeData.allParentTreeData[curParentTree].parentTreeNumber,
-          coneCount: +smpParentTreeData.mixTabData[key].coneCount.value,
-          pollenCount: +smpParentTreeData.mixTabData[key].pollenCount.value,
-          smpSuccessPct: +smpParentTreeData.mixTabData[key].smpSuccessPerc.value,
-          nonOrchardPollenContamPct: +smpParentTreeData
+          parentTreeId: parentTreeStepData.allParentTreeData[curParentTreeNum].parentTreeId,
+          parentTreeNumber: curParentTreeNum,
+          coneCount: +parentTreeStepData.mixTabData[key].coneCount.value,
+          pollenCount: +parentTreeStepData.mixTabData[key].pollenCount.value,
+          smpSuccessPct: +parentTreeStepData.mixTabData[key].smpSuccessPerc.value,
+          nonOrchardPollenContamPct: +parentTreeStepData
             .mixTabData[key].nonOrchardPollenContam.value,
-          amountOfMaterial: +smpParentTreeData.mixTabData[key].volume.value,
-          proportion: +smpParentTreeData.mixTabData[key].proportion.value,
-          parentTreeGeneticQualities: smpParentTreeData
-            .allParentTreeData[curParentTree].parentTreeGeneticQualities
+          amountOfMaterial: +parentTreeStepData.mixTabData[key].volume.value,
+          proportion: +parentTreeStepData.mixTabData[key].proportion.value,
+          parentTreeGeneticQualities: generateParentTreeGenQualPayload(
+            parentTreeStepData.allParentTreeData,
+            parentTreeStepData.mixTabData[key],
+            applicableGenWorths
+          )
         });
       }
     });
@@ -991,14 +1004,14 @@ export const convertSmpParentTree = (
 export const convertExtraction = (
   extractionData: ExtractionStorageForm
 ): ExtractionFormSubmitType => ({
-  extractoryClientNumber: extractionData.extraction.agency.value.code,
+  extractoryClientNumber: extractionData.extraction.agency.value,
   extractoryLocnCode: extractionData.extraction.locationCode.value,
-  extractionStDate: dateStringToISO(extractionData.extraction.startDate.value),
-  extractionEndDate: dateStringToISO(extractionData.extraction.endDate.value),
-  storageClientNumber: extractionData.seedStorage.agency.value.code,
+  extractionStDate: localDateToUtcFormat(extractionData.extraction.startDate.value),
+  extractionEndDate: localDateToUtcFormat(extractionData.extraction.endDate.value),
+  storageClientNumber: extractionData.seedStorage.agency.value,
   storageLocnCode: extractionData.seedStorage.locationCode.value,
-  temporaryStrgStartDate: dateStringToISO(extractionData.seedStorage.startDate.value),
-  temporaryStrgEndDate: dateStringToISO(extractionData.seedStorage.endDate.value)
+  temporaryStrgStartDate: localDateToUtcFormat(extractionData.seedStorage.startDate.value),
+  temporaryStrgEndDate: localDateToUtcFormat(extractionData.seedStorage.endDate.value)
 });
 
 export const getSeedlotSubmitErrDescription = (err: AxiosError): ErrorDescriptionType => {
@@ -1043,81 +1056,91 @@ export const getBreadcrumbs = (seedlotNumber: string) => [
 
 export const getSeedlotPayload = (
   allStepData: AllStepData,
-  seedlotNumber: string | undefined
-): SeedlotAClassSubmitType => ({
-  seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
-  seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
-  seedlotFormInterimDto: convertInterim(allStepData.interimStep),
-  seedlotFormOrchardDto: convertOrchard(
-    allStepData.orchardStep,
-    allStepData.parentTreeStep.tableRowData
-  ),
-  seedlotFormParentTreeDtoList: convertParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
-  seedlotFormParentTreeSmpDtoList: convertSmpParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
-  seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
-});
+  seedlotNumber: string | undefined,
+  vegCode: string
+): SeedlotAClassSubmitType => {
+  const speciesKey = Object.keys(geneticWorthDict).includes(vegCode)
+    ? vegCode.toUpperCase()
+    : 'UNKNOWN';
+
+  const applicableGenWorths = geneticWorthDict[speciesKey as keyof GeneticWorthDictType];
+
+  return ({
+    seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
+    seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
+    seedlotFormInterimDto: convertInterim(allStepData.interimStep),
+    seedlotFormOrchardDto: convertOrchard(
+      allStepData.orchardStep,
+      allStepData.parentTreeStep.tableRowData
+    ),
+    seedlotFormParentTreeDtoList: convertParentTree(
+      allStepData.parentTreeStep,
+      (seedlotNumber ?? ''),
+      applicableGenWorths
+    ),
+    seedlotFormParentTreeSmpDtoList: convertSmpParentTree(
+      allStepData.parentTreeStep,
+      (seedlotNumber ?? ''),
+      applicableGenWorths
+    ),
+    seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
+  });
+};
 
 export const initEmptySteps = () => ({
-  collectionStep: initCollectionState(EmptyMultiOptObj, emptyCollectionStep),
-  ownershipStep: initOwnershipState(EmptyMultiOptObj, emptyOwnershipStep, true),
-  interimStep: initInterimState(EmptyMultiOptObj, emptyInterimStep),
+  collectionStep: initCollectionState('', emptyCollectionStep),
+  ownershipStep: initOwnershipState('', emptyOwnershipStep),
+  interimStep: initInterimState('', emptyInterimStep),
   orchardStep: initOrchardState(emptyOrchardStep),
   parentTreeStep: initParentTreeState(),
   extractionStorageStep: initExtractionStorageState(
-    tscAgencyObj,
-    tscAgencyObj,
+    tscAgencyObj.code,
+    tscAgencyObj.code,
     emptyExtractionStep
   )
 });
 
 export const resDataToState = (
   fullFormData: SeedlotAClassSubmitType,
-  defaultAgencyNumber: string | undefined,
+  defaultAgencyNumber: string,
   methodsOfPaymentData: MultiOptionsObj[],
   fundingSourcesData: MultiOptionsObj[],
   orchardQueryData: MultiOptionsObj[],
-  gameticMethodologyData: MultiOptionsObj[],
-  clientData: ClientAgenciesByCode
-): AllStepData => (
-  {
-    collectionStep: initCollectionState(
-      clientData[fullFormData.seedlotFormCollectionDto.collectionClientNumber],
-      fullFormData.seedlotFormCollectionDto,
-      fullFormData.seedlotFormCollectionDto.collectionClientNumber === defaultAgencyNumber
-    ),
-    ownershipStep: initOwnershipState(
-      EmptyMultiOptObj,
-      fullFormData.seedlotFormOwnershipDtoList,
-      false,
-      methodsOfPaymentData,
-      fundingSourcesData,
-      clientData,
-      defaultAgencyNumber
-    ),
-    interimStep: initInterimState(
-      clientData[fullFormData.seedlotFormInterimDto.intermStrgClientNumber],
-      fullFormData.seedlotFormInterimDto,
-      // eslint-disable-next-line max-len
-      fullFormData.seedlotFormInterimDto.intermStrgClientNumber === fullFormData.seedlotFormCollectionDto.collectionClientNumber
-    ),
-    orchardStep: initOrchardState(
-      fullFormData.seedlotFormOrchardDto,
-      orchardQueryData,
-      gameticMethodologyData
-    ),
-    parentTreeStep: initParentTreeState(
-      fullFormData.seedlotFormParentTreeDtoList,
-      fullFormData.seedlotFormParentTreeSmpDtoList
-    ),
-    extractionStorageStep: initExtractionStorageState(
-      clientData[fullFormData.seedlotFormExtractionDto.extractoryClientNumber],
-      clientData[fullFormData.seedlotFormExtractionDto.storageClientNumber],
-      fullFormData.seedlotFormExtractionDto,
-      fullFormData.seedlotFormExtractionDto.extractoryClientNumber === tscAgencyObj.code,
-      fullFormData.seedlotFormExtractionDto.storageClientNumber === tscAgencyObj.code
-    )
-  }
-);
+  gameticMethodologyData: MultiOptionsObj[]
+): AllStepData => ({
+  collectionStep: initCollectionState(
+    fullFormData.seedlotFormCollectionDto.collectionClientNumber,
+    fullFormData.seedlotFormCollectionDto
+  ),
+  ownershipStep: initOwnershipState(
+    defaultAgencyNumber,
+    fullFormData.seedlotFormOwnershipDtoList,
+    methodsOfPaymentData,
+    fundingSourcesData
+  ),
+  interimStep: initInterimState(
+    fullFormData.seedlotFormInterimDto.intermStrgClientNumber,
+    fullFormData.seedlotFormInterimDto,
+    fullFormData.seedlotFormInterimDto.intermStrgClientNumber
+      === fullFormData.seedlotFormCollectionDto.collectionClientNumber
+  ),
+  orchardStep: initOrchardState(
+    fullFormData.seedlotFormOrchardDto,
+    orchardQueryData,
+    gameticMethodologyData
+  ),
+  parentTreeStep: initParentTreeState(
+    fullFormData.seedlotFormParentTreeDtoList,
+    fullFormData.seedlotFormParentTreeSmpDtoList
+  ),
+  extractionStorageStep: initExtractionStorageState(
+    fullFormData.seedlotFormExtractionDto.extractoryClientNumber,
+    fullFormData.seedlotFormExtractionDto.storageClientNumber,
+    fullFormData.seedlotFormExtractionDto,
+    fullFormData.seedlotFormExtractionDto.extractoryClientNumber === tscAgencyObj.code,
+    fullFormData.seedlotFormExtractionDto.storageClientNumber === tscAgencyObj.code
+  )
+});
 
 export const fillAreaOfUseData = (
   seedlotData: RichSeedlotType,
@@ -1229,7 +1252,7 @@ export const fillCollectionGeoData = (
     },
     meanLongSec: {
       ...prevVals.meanLongMinute,
-      value: String(data.seedlot.collectionLongitudeMin)
+      value: String(data.seedlot.collectionLongitudeSec)
     },
     effectivePopSize: {
       ...prevVals.effectivePopSize,

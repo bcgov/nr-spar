@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,6 +71,7 @@ public class TscAdminEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @CrossOrigin(exposedHeaders = "X-TOTAL-COUNT")
   @RoleAccessConfig({"SPAR_TSC_ADMIN"})
   public ResponseEntity<List<Seedlot>> getSeedlotsForReviewing(
       @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
@@ -124,13 +128,16 @@ public class TscAdminEndpoint {
       @Parameter(
               name = "status",
               in = ParameterIn.PATH,
-              description = "Seedlot status to be updated to",
+              description = "Seedlot status to be updated to, either PND or APP",
               required = true,
-              example = "true",
+              example = "PND",
               schema = @Schema(type = "string", example = "true"))
           @PathVariable
           String status) {
-    tscAdminService.updateSeedlotStatus(seedlotNumber, status);
+    long started = Instant.now().toEpochMilli();
+    tscAdminService.updateSeedlotStatus(seedlotNumber, status.toUpperCase());
+    long finished = Instant.now().toEpochMilli();
+    SparLog.info("Time spent: {} ms - approve or disapprove seedlot by tsc", (finished - started));
     return ResponseEntity.noContent().build();
   }
 
@@ -184,6 +191,7 @@ public class TscAdminEndpoint {
           @RequestParam
           String statusOnSave,
       @RequestBody SeedlotFormSubmissionDto form) {
+    long started = Instant.now().toEpochMilli();
     String formattedStatus = statusOnSave.toUpperCase();
     if (!List.of("PND", "SUB", "APP").contains(formattedStatus)) {
       throw new InvalidSeedlotStatusException(formattedStatus);
@@ -191,6 +199,8 @@ public class TscAdminEndpoint {
 
     SeedlotStatusResponseDto updatedDto =
         seedlotService.updateSeedlotWithForm(seedlotNumber, form, true, false, formattedStatus);
+    long finished = Instant.now().toEpochMilli();
+    SparLog.info("Time spent: {} ms - edit seedlot review form by tsc", (finished - started));
     return ResponseEntity.status(HttpStatus.OK).body(updatedDto);
   }
 }

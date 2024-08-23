@@ -24,12 +24,12 @@ x-frontend: &frontend
 services:
   database:
     container_name: database
-    build: ./database
+    image: postgis/postgis:15-master
     environment:
       <<: *postgres-vars
     volumes:
       - "/pgdata"
-      - "./database/init_db:/init_db"
+      - "./common/init_db:/init_db"
     ports: ["5432:5432"]
     healthcheck:
       test: psql -q -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1'
@@ -48,7 +48,7 @@ services:
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
       <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
-    image: maven:3.9.8-eclipse-temurin-17
+    image: maven:3.9.9-eclipse-temurin-17
     entrypoint: sh -c './encora-cert.sh'
     working_dir: /app
     volumes:
@@ -106,7 +106,7 @@ services:
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
     profiles: ["oracle-api"]
     network_mode: host
-    image: maven:3.9.8-eclipse-temurin-17
+    image: maven:3.9.9-eclipse-temurin-17
     entrypoint: sh -c './startup.sh && mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5006"'
     working_dir: /app
     volumes: ["./oracle-api:/app"]

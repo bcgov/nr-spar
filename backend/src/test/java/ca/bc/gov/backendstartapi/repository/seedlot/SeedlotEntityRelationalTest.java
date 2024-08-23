@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.repository.seedlot;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -10,7 +11,9 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -20,16 +23,19 @@ abstract class SeedlotEntityRelationalTest {
   protected GeneticClassRepository geneticClassRepository;
   protected GeneticWorthRepository geneticWorthRepository;
   protected SeedlotSourceRepository seedlotSourceRepository;
+  protected SeedlotStatusRepository seedlotStatusRepository;
 
   protected SeedlotEntityRelationalTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       GeneticWorthRepository geneticWorthRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository) {
     this.seedlotRepository = seedlotRepository;
     this.geneticClassRepository = geneticClassRepository;
     this.geneticWorthRepository = geneticWorthRepository;
     this.seedlotSourceRepository = seedlotSourceRepository;
+    this.seedlotStatusRepository = seedlotStatusRepository;
   }
 
   protected Seedlot createSeedlot(String id) {
@@ -42,11 +48,17 @@ abstract class SeedlotEntityRelationalTest {
     geneticClassRepository.saveAndFlush(geneticClass);
 
     var geneticWorth =
-        new GeneticWorthEntity("AD", "Animal browse resistance (deer)", effectiveDateRange);
+        new GeneticWorthEntity(
+            "AD", "Animal browse resistance (deer)", effectiveDateRange, BigDecimal.ZERO);
     geneticWorthRepository.saveAndFlush(geneticWorth);
 
     var seedlotSource = new SeedlotSourceEntity("CUS", "Custom Lot", effectiveDateRange, null);
     seedlotSourceRepository.saveAndFlush(seedlotSource);
+
+    EffectiveDateRange range =
+        new EffectiveDateRange(LocalDate.now().minusYears(3L), LocalDate.now().plusYears(15L));
+    var seedlotStatus = new SeedlotStatusEntity("PND", "Pending", range);
+    seedlotStatusRepository.saveAndFlush(seedlotStatus);
 
     var seedlot = new Seedlot(id);
 
@@ -54,6 +66,7 @@ abstract class SeedlotEntityRelationalTest {
     seedlot.setApplicantClientNumber("00000001");
     seedlot.setApplicantLocationCode("02");
     seedlot.setApplicantEmailAddress("applicant@email.com");
+    seedlot.setSeedlotStatus(seedlotStatus);
 
     seedlot.setVegetationCode("VEG");
     seedlot.setGeneticClass(geneticClass);
@@ -63,16 +76,16 @@ abstract class SeedlotEntityRelationalTest {
 
     seedlot.setCollectionClientNumber("00000003");
     seedlot.setCollectionLocationCode("04");
-    seedlot.setCollectionStartDate(LocalDateTime.now());
-    seedlot.setCollectionEndDate(LocalDateTime.now());
+    seedlot.setCollectionStartDate(LocalDate.now(Clock.systemUTC()));
+    seedlot.setCollectionEndDate(LocalDate.now(Clock.systemUTC()));
     seedlot.setNumberOfContainers(new BigDecimal(10));
     seedlot.setContainerVolume(new BigDecimal(20));
     seedlot.setTotalConeVolume(new BigDecimal(200));
 
     seedlot.setInterimStorageClientNumber("00000005");
     seedlot.setInterimStorageLocationCode("06");
-    seedlot.setInterimStorageStartDate(LocalDateTime.now());
-    seedlot.setInterimStorageEndDate(LocalDateTime.now());
+    seedlot.setInterimStorageStartDate(LocalDate.now(Clock.systemUTC()));
+    seedlot.setInterimStorageEndDate(LocalDate.now(Clock.systemUTC()));
     seedlot.setInterimStorageFacilityCode("007");
 
     seedlot.setFemaleGameticContributionMethod("F");
@@ -92,15 +105,15 @@ abstract class SeedlotEntityRelationalTest {
 
     seedlot.setExtractionClientNumber("00000009");
     seedlot.setExtractionLocationCode("10");
-    seedlot.setExtractionStartDate(LocalDateTime.now());
-    seedlot.setExtractionEndDate(LocalDateTime.now());
+    seedlot.setExtractionStartDate(LocalDate.now(Clock.systemUTC()));
+    seedlot.setExtractionEndDate(LocalDate.now(Clock.systemUTC()));
     seedlot.setStorageClientNumber("00000011");
     seedlot.setStorageLocationCode("12");
-    seedlot.setTemporaryStorageStartDate(LocalDateTime.now());
-    seedlot.setTemporaryStorageEndDate(LocalDateTime.now());
+    seedlot.setTemporaryStorageStartDate(LocalDate.now(Clock.systemUTC()));
+    seedlot.setTemporaryStorageEndDate(LocalDate.now(Clock.systemUTC()));
 
     seedlot.setDeclarationOfTrueInformationUserId("user1");
-    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
+    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now(Clock.systemUTC()));
     seedlot.setAuditInformation(new AuditInformation("user1"));
 
     return seedlotRepository.saveAndFlush(seedlot);

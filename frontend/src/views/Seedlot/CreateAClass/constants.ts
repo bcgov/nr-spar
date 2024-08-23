@@ -5,7 +5,7 @@ export const InitialSeedlotRegFormData: SeedlotRegFormType = {
   client: {
     id: 'applicant-info-input',
     isInvalid: false,
-    value: EmptyMultiOptObj
+    value: ''
   },
   locationCode: {
     id: 'agency-number-input',

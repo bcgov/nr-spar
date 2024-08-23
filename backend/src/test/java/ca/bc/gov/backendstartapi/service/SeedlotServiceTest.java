@@ -49,24 +49,24 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
+import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -84,19 +84,13 @@ class SeedlotServiceTest {
 
   @Mock SeedlotSourceRepository seedlotSourceRepository;
 
-  @Mock SeedlotStatusRepository seedlotStatusRepository;
-
   @Mock GeneticClassRepository geneticClassRepository;
 
   @Mock LoggedUserService loggedUserService;
 
   @Mock SeedlotCollectionMethodService seedlotCollectionMethodService;
 
-  @Mock SeedlotCollectionMethodRepository seedlotCollectionMethodRepository;
-
   @Mock SeedlotOwnerQuantityService seedlotOwnerQuantityService;
-
-  @Mock SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository;
 
   @Mock SeedlotOrchardService seedlotOrchardService;
 
@@ -139,7 +133,7 @@ class SeedlotServiceTest {
   }
 
   private ParentTreeGeneticQualityDto createParentTreeGenQuaDto() {
-    return new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"));
+    return new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"), null, null);
   }
 
   private SeedlotFormParentTreeSmpDto createParentTreeDto(Integer parentTreeId) {
@@ -163,13 +157,10 @@ class SeedlotServiceTest {
         new SeedlotService(
             seedlotRepository,
             seedlotSourceRepository,
-            seedlotStatusRepository,
             geneticClassRepository,
             loggedUserService,
             seedlotCollectionMethodService,
-            seedlotCollectionMethodRepository,
             seedlotOwnerQuantityService,
-            seedlotOwnerQuantityRepository,
             seedlotOrchardService,
             seedlotParentTreeService,
             seedlotParentTreeGeneticQualityService,
@@ -189,9 +180,11 @@ class SeedlotServiceTest {
   @DisplayName("createSeedlotSuccessTest")
   void createSeedlotTest_happyPath_shouldSucceed() {
     when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
+    String incStatusCode = "INC";
 
-    SeedlotStatusEntity statusEntity = new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
-    when(seedlotStatusRepository.findById("PND")).thenReturn(Optional.of(statusEntity));
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
 
     SeedlotSourceEntity sourceEntity =
         new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE, null);
@@ -233,34 +226,31 @@ class SeedlotServiceTest {
   void createSeedlotTest_noSeedlotStatus_shouldThrowException() {
     when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
 
-    when(seedlotStatusRepository.findById("PND")).thenReturn(Optional.empty());
+    when(seedlotStatusService.findById(any())).thenReturn(Optional.empty());
 
-    Exception exc =
-        Assertions.assertThrows(
-            InvalidSeedlotRequestException.class,
-            () -> {
-              seedlotService.createSeedlot(createSeedlotDto());
-            });
-
-    Assertions.assertEquals(BAD_REQUEST_STR, exc.getMessage());
+    Assertions.assertThrows(
+        SeedlotStatusNotFoundException.class,
+        () -> {
+          seedlotService.createSeedlot(createSeedlotDto());
+        });
   }
 
   @Test
   @DisplayName("createSeedlotAClassWithoutGeneticClassEntity")
   void createSeedlotTest_noGeneticClass_shouldThrowException() {
-    SeedlotStatusEntity statusEntity = new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
-    when(seedlotStatusRepository.findById("PND")).thenReturn(Optional.of(statusEntity));
+    String incStatusCode = "INC";
+
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
 
     when(geneticClassRepository.findById("A")).thenReturn(Optional.empty());
 
-    Exception exc =
-        Assertions.assertThrows(
-            InvalidSeedlotRequestException.class,
-            () -> {
-              seedlotService.createSeedlot(createSeedlotDto());
-            });
-
-    Assertions.assertEquals(BAD_REQUEST_STR, exc.getMessage());
+    Assertions.assertThrows(
+        GeneticClassNotFoundException.class,
+        () -> {
+          seedlotService.createSeedlot(createSeedlotDto());
+        });
   }
 
   @Test
@@ -268,22 +258,22 @@ class SeedlotServiceTest {
   void createSeedlotTest_noSeedlotSource_shouldThrowException() {
     when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
 
-    SeedlotStatusEntity statusEntity = new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
-    when(seedlotStatusRepository.findById("PND")).thenReturn(Optional.of(statusEntity));
+    String incStatusCode = "INC";
+
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
 
     GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
     when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));
 
     when(seedlotSourceRepository.findById("TPT")).thenReturn(Optional.empty());
 
-    Exception exc =
-        Assertions.assertThrows(
-            InvalidSeedlotRequestException.class,
-            () -> {
-              seedlotService.createSeedlot(createSeedlotDto());
-            });
-
-    Assertions.assertEquals(BAD_REQUEST_STR, exc.getMessage());
+    Assertions.assertThrows(
+        SeedlotSourceNotFoundException.class,
+        () -> {
+          seedlotService.createSeedlot(createSeedlotDto());
+        });
   }
 
   @Test
@@ -375,10 +365,13 @@ class SeedlotServiceTest {
     when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId))
         .thenReturn(List.of(spzEntity));
     when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId)).thenReturn(Optional.empty());
+    BigDecimal defaultBv = BigDecimal.ZERO;
 
     SeedlotGeneticWorth seedlotGenWor =
         new SeedlotGeneticWorth(
-            seedlotEntity, new GeneticWorthEntity("GVO", "", null), new AuditInformation("userId"));
+            seedlotEntity,
+            new GeneticWorthEntity("GVO", "", null, defaultBv),
+            new AuditInformation("userId"));
     seedlotGenWor.setGeneticQualityValue(new BigDecimal("18"));
     seedlotGenWor.setTestedParentTreeContributionPercentage(new BigDecimal("88"));
 
@@ -502,7 +495,7 @@ class SeedlotServiceTest {
         new SeedlotParentTreeGeneticQuality(
             spt,
             sptgqDto.geneticTypeCode(),
-            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
             sptgqDto.geneticQualityValue(),
             audit);
 
@@ -524,7 +517,7 @@ class SeedlotServiceTest {
         new SeedlotParentTreeSmpMix(
             spt,
             sptgqDto.geneticTypeCode(),
-            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
             sptgqDto.geneticQualityValue(),
             audit);
 
@@ -532,18 +525,21 @@ class SeedlotServiceTest {
 
     SeedlotGeneticWorth seedlotGenWor =
         new SeedlotGeneticWorth(
-            seedlotEntity, new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null), audit);
+            seedlotEntity,
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
+            audit);
 
     final List<SeedlotGeneticWorth> genWorthData = List.of(seedlotGenWor);
 
     final List<SeedlotCollectionMethod> collectionMethods =
         List.of(new SeedlotCollectionMethod(seedlotEntity, new ConeCollectionMethodEntity()));
 
+    MethodOfPaymentEntity mope = new MethodOfPaymentEntity(methodOfPayment, "", null);
     SeedlotOwnerQuantity seedlotOwners =
-        new SeedlotOwnerQuantity(seedlotEntity, ownerNumber, ownerLoc);
+        new SeedlotOwnerQuantity(seedlotEntity, ownerNumber, ownerLoc, mope);
     BigDecimal originalPercentOwned = new BigDecimal(100);
     seedlotOwners.setOriginalPercentageOwned(originalPercentOwned);
-    seedlotOwners.setMethodOfPayment(new MethodOfPaymentEntity(methodOfPayment, "", null));
+    seedlotOwners.setMethodOfPayment(mope);
 
     String orchardId = "100";
 
@@ -561,9 +557,14 @@ class SeedlotServiceTest {
     when(seedlotParentTreeSmpMixService.getAllBySeedlotNumber(seedlotNumber))
         .thenReturn(parentTreeSmpMixData);
     when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(genWorthData);
-    when(seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlotNumber))
-        .thenReturn(collectionMethods);
-    when(seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotNumber))
+
+    when(seedlotCollectionMethodService.getAllSeedlotCollectionMethodsBySeedlot(seedlotNumber))
+        .thenReturn(
+            collectionMethods.stream()
+                .map(col -> col.getConeCollectionMethod().getConeCollectionMethodCode())
+                .collect(Collectors.toList()));
+
+    when(seedlotOwnerQuantityService.findAllBySeedlot(seedlotNumber))
         .thenReturn(List.of(seedlotOwners));
     when(seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotNumber))
         .thenReturn(seedlotOrchards);

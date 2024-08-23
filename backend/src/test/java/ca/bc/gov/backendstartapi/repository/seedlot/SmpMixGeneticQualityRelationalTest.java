@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SmpMixRepository;
 import java.math.BigDecimal;
@@ -34,9 +35,14 @@ class SmpMixGeneticQualityRelationalTest extends SeedlotEntityRelationalTest {
       SmpMixRepository smpMixRepository,
       SmpMixGeneticQualityRepository smpMixGeneticQualityRepository,
       GeneticWorthRepository geneticWorthRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository) {
     super(
-        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
+        seedlotRepository,
+        geneticClassRepository,
+        geneticWorthRepository,
+        seedlotSourceRepository,
+        seedlotStatusRepository);
     this.smpMixRepository = smpMixRepository;
     repository = smpMixGeneticQualityRepository;
   }

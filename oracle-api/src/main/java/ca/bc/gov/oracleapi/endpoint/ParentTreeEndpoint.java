@@ -2,20 +2,27 @@ package ca.bc.gov.oracleapi.endpoint;
 
 import ca.bc.gov.oracleapi.dto.GeospatialRequestDto;
 import ca.bc.gov.oracleapi.dto.GeospatialRespondDto;
+import ca.bc.gov.oracleapi.dto.ParentTreeByVegCodeDto;
 import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.ParentTreeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /** This class exposes resources for handling {@link ParentTreeEntity} records. */
 @Tag(
@@ -56,5 +63,24 @@ public class ParentTreeEndpoint {
           @RequestBody
           List<GeospatialRequestDto> ptIds) {
     return parentTreeService.getPtGeoSpatialData(ptIds);
+  }
+
+  /**
+   * Consumed by backend (postgres) service to retrieve a list of parent trees with a vegCode.
+   *
+   * @param vegCode a Seedlot's vegCode
+   * @return an {@link List} of Map<{@link String}, {@link ParentTreeByVegCodeDto}> with parent tree
+   *     number as the key.
+   * @throws ResponseStatusException if error occurs
+   */
+  @GetMapping("/vegetation-codes/{vegCode}")
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public Map<String, ParentTreeByVegCodeDto> findParentTreesWithVegCode(
+      @PathVariable("vegCode")
+          @Parameter(description = "The vegetation code of an orchard.")
+          @Pattern(regexp = "^[a-zA-Z]{1,8}$")
+          String vegCode) {
+
+    return parentTreeService.findParentTreesWithVegCode(vegCode.toUpperCase());
   }
 }

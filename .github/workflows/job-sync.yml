@@ -9,10 +9,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  sync:
-    name: Sync
-    runs-on: ubuntu-latest
+  sync-test:
     environment: test
+    name: Sync (TEST)
+    runs-on: ubuntu-latest
     steps:
       - name: Override OpenShift version
         env:
@@ -23,26 +23,24 @@ jobs:
           oc version
         working-directory: /usr/local/bin/
 
-      - name: ETL Sync
+      - uses: actions/checkout@v4
+      - name: ETL (TEST)
+        run: ./sync/oc_run.sh test ${{ secrets.oc_token }}
+
+  sync-prod:
+    environment: prod
+    name: Sync (PROD)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Override OpenShift version
+        env:
+          OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
         run: |
-          # Run and verify job
+          # Download and extract with retry, continuing on error
+          (wget ${{ env.OC }} -qcO - | tar -xzvf - oc)|| !! || true
+          oc version
+        working-directory: /usr/local/bin/
 
-          # Login
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ secrets.oc_namespace }} #Safeguard!
-
-          # Exit on errors or unset variables
-          set -eu
-
-          # Create job
-          CRONJOB=nr-spar-test-sync
-          RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
-          oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
-
-          # Follow
-          oc wait --for=condition=ready pod --selector=job-name=${RUN_JOB} --timeout=1m
-          oc logs -l job-name=${RUN_JOB} --tail=50 --follow
-
-          # Verify successful completion
-          oc wait --for jsonpath='{.status.phase}'=Succeeded pod --selector=job-name=${RUN_JOB} --timeout=1m
-          echo "Job successful!"
+      - uses: actions/checkout@v4
+      - name: ETL (PROD)
+        run: ./sync/oc_run.sh prod ${{ secrets.oc_token }}

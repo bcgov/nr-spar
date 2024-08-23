@@ -1,7 +1,7 @@
 # Build static files
 # Node Bullseye has npm
 FROM node:18.20.4-bullseye-slim AS build
-ENV NODE_OPTIONS "--max-old-space-size=3072"
+ENV NODE_OPTIONS="--max-old-space-size=3072"
 
 # Build
 WORKDIR /app
@@ -16,6 +16,10 @@ RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
 # Caddy serves static files
 FROM caddy:2.8.4-alpine
 RUN apk add --no-cache ca-certificates curl
+
+# Receive build number as argument, retain as environment variable
+ARG BUILD_NUMBER
+ENV BUILD_NUMBER=${BUILD_NUMBER}
 
 # Copy files and run formatting
 COPY --from=build /app/build/ /app/dist

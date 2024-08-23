@@ -1,13 +1,17 @@
 SELECT
-  seedlot_number
-, genetic_worth_code
-, genetic_quality_value                genetic_worth_rtng                   
-, REPLACE(entry_userid,'\', '@') as entry_userid
-, entry_timestamp
-, REPLACE(update_userid,'\', '@') as update_userid
-, update_timestamp
-, revision_count
+  sgw.seedlot_number
+, sgw.genetic_worth_code
+, sgw.genetic_quality_value                genetic_worth_rtng                   
+, REPLACE(sgw.entry_userid,'\', '@') as entry_userid
+, sgw.entry_timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles' AS entry_timestamp
+, REPLACE(sgw.update_userid,'\', '@') as update_userid
+, sgw.update_timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles' AS update_timestamp
+, sgw.revision_count
  FROM spar.seedlot_genetic_worth sgw
+ JOIN spar.seedlot s
+   ON s.seedlot_number = sgw.seedlot_number
 WHERE sgw.seedlot_number = %(p_seedlot_number)s
-ORDER BY seedlot_number
-       , genetic_worth_code
+  AND s.seedlot_status_code != 'PND'
+ORDER BY sgw.seedlot_number
+       , sgw.genetic_worth_code
+       

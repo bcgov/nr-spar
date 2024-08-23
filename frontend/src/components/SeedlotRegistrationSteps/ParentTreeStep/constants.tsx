@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Button } from '@carbon/react';
 import {
   HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType,
-  InfoSectionConfigType, FileConfigType, MeanGeomInfoSectionConfigType
+  InfoSectionConfigType, FileConfigType, MeanGeomInfoSectionConfigType,
+  GeneticWorthInputType
 } from './definitions';
 
 // eslint-disable-next-line import/no-unresolved
@@ -127,9 +128,11 @@ export const calculateInstructions = (
 const errorDescription = (
   <>
     To see your orchard&apos;s composition, you must first fill the
-    orchard id field in the previous step, “Orchard”.
+    orchard id fields in the previous step, “Orchard”.
     <br />
-    Please, fill the orchard ID to complete the cone and pollen table.
+    You must select a value for the secondary Orchard if you added an additional orchard.
+    <br />
+    Please, fill the orchard IDs to complete the Cone and pollen count and SMP tables.
   </>
 );
 
@@ -145,16 +148,16 @@ const getPageText = () => ({
   errorDescription,
   coneTab: {
     tabTitle: 'Cone and pollen count',
-    tableDescription: "Enter the estimative of Cone and pollen count for the orchard's seedlot (*required)",
+    tableDescription: "Enter the cone and pollen count estimate for the orchard's seedlot (*required)",
     toggleName: 'Show breeding value',
     cleanModalHeading: getCleanTableDesc('Cone and pollen count')
   },
   successTab: {
     tabTitle: 'SMP success on parent',
-    tableDescription: "Enter the estimative of SMP success for the orchard's seedlot",
+    tableDescription: "Enter the SMP success estimate for the orchard's seedlot",
     toggleName: 'Show SMP mix used on parent',
     cleanModalHeading: getCleanTableDesc('SMP success on parent'),
-    defaultCheckBoxDesc: 'Enter the same SMP success on parent or Non-orchard pollen contaminant to all parent trees',
+    defaultCheckBoxDesc: 'Enter the same SMP success on parent or non-orchard pollen contaminant to all parent trees',
     smpInputLabel: 'SMP Success on parent (%)',
     pollenCotamInputLabel: 'Non-orchard pollen contaminant (%)'
   },
@@ -182,7 +185,7 @@ const getPageText = () => ({
     title: 'Nothing to show yet!',
     emptyOrchard: 'Empty orchard(s)!'
   },
-  invalidPTNumberMsg: 'One or more of the parent tree numbers entered are invalid because these numbers might not exist within your orchard composition.',
+  invalidPTNumberMsg: 'One or more of the parent tree numbers entered are invalid because these numbers might not exist under the species.',
   errNotifEndMsg: 'Please review your entries and remember to check all pages.',
   warnNotification: {
     title: 'Invalid parent tree number detected',
@@ -221,7 +224,15 @@ export const geneticWorthDict: GeneticWorthDictType = {
   LW: ['gvo'],
   PY: ['gvo'],
   SS: ['gvo', 'iws'],
-  SX: ['gvo', 'iws']
+  SX: ['gvo', 'iws'],
+  UNKNOWN: ['gvo']
+};
+
+const gwInputTemplate: GeneticWorthInputType = {
+  id: '',
+  isInvalid: false,
+  value: '',
+  isEstimated: false
 };
 
 export const rowTemplate: RowItem = {
@@ -261,126 +272,30 @@ export const rowTemplate: RowItem = {
     isInvalid: false,
     value: ''
   },
-  ad: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  dfs: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  dfu: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  dfw: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  dsb: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  dsc: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  dsg: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  gvo: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  iws: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  wdu: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  wwd: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  wve: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_ad: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_dfs: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_dfu: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_dfw: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_dsb: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_dsc: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_dsg: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_gvo: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_iws: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_wdu: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_wwd: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  w_wve: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
+  ad: structuredClone(gwInputTemplate),
+  dfs: structuredClone(gwInputTemplate),
+  dfu: structuredClone(gwInputTemplate),
+  dfw: structuredClone(gwInputTemplate),
+  dsb: structuredClone(gwInputTemplate),
+  dsc: structuredClone(gwInputTemplate),
+  dsg: structuredClone(gwInputTemplate),
+  gvo: structuredClone(gwInputTemplate),
+  iws: structuredClone(gwInputTemplate),
+  wdu: structuredClone(gwInputTemplate),
+  wwd: structuredClone(gwInputTemplate),
+  wve: structuredClone(gwInputTemplate),
+  w_ad: structuredClone(gwInputTemplate),
+  w_dfs: structuredClone(gwInputTemplate),
+  w_dfu: structuredClone(gwInputTemplate),
+  w_dfw: structuredClone(gwInputTemplate),
+  w_dsb: structuredClone(gwInputTemplate),
+  w_dsc: structuredClone(gwInputTemplate),
+  w_dsg: structuredClone(gwInputTemplate),
+  w_gvo: structuredClone(gwInputTemplate),
+  w_iws: structuredClone(gwInputTemplate),
+  w_wdu: structuredClone(gwInputTemplate),
+  w_wwd: structuredClone(gwInputTemplate),
+  w_wve: structuredClone(gwInputTemplate),
   isMixTab: false
 };
 
@@ -689,8 +604,7 @@ export const SummarySectionConfig = {
     }
   },
   mixTab: {
-    title: 'Breeding value SMP mix used',
-    description: 'Check the breeding value of SMP mix used on parent',
+    title: 'Breeding value SMP mix used on parent',
     infoItems: {
       parentsOutside: {
         name: 'Number of SMP parents from outside',

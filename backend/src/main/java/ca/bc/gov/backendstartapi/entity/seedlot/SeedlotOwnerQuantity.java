@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOwnerQuantityId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -32,8 +33,8 @@ public class SeedlotOwnerQuantity {
 
   // region Identifier
   @Id
-  @JoinColumn(name = "seedlot_number")
-  @ManyToOne
+  @JoinColumn(name = "seedlot_number", updatable = false, nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private Seedlot seedlot;
 
@@ -58,8 +59,9 @@ public class SeedlotOwnerQuantity {
   @Column(name = "original_pct_srpls", precision = 4, scale = 1, nullable = false)
   private BigDecimal originalPercentageSurplus;
 
-  @JoinColumn(name = "method_of_payment_code")
-  @ManyToOne
+  @JoinColumn(name = "method_of_payment_code", updatable = false, nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @NonNull
   private MethodOfPaymentEntity methodOfPayment;
 
   @Column(name = "spar_fund_srce_code", length = 3)
@@ -71,14 +73,4 @@ public class SeedlotOwnerQuantity {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
-
-  /**
-   * Returns the SeedlotOwnerQuantity id, fields: seedlot number, owner cliend code, and owner
-   * client location.
-   *
-   * @return a {@link SeedlotOwnerQuantityId}
-   */
-  public SeedlotOwnerQuantityId getId() {
-    return new SeedlotOwnerQuantityId(seedlot.getId(), ownerClientNumber, ownerLocationCode);
-  }
 }

@@ -3,7 +3,6 @@ import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('Seedlot Dashboard test', () => {
   let seedlotDashboardData: {
-    subtitle: string,
     secondSectionTitle: string,
     secondSectionSubtitle: string,
     emptySectionTitle: string,
@@ -29,9 +28,6 @@ describe('Seedlot Dashboard test', () => {
 
   it('should display seedlot dashboard page title and subtitle', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
-    cy.get('.title-section')
-      .find('.subtitle-section')
-      .should('have.text', seedlotDashboardData.subtitle);
     cy.get('.recent-seedlots-title-section')
       .find('h2')
       .should('have.text', seedlotDashboardData.secondSectionTitle);
@@ -48,7 +44,7 @@ describe('Seedlot Dashboard test', () => {
         const seedlotNumber = sNumber as string;
 
         cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotSpecies`).should('have.text', species);
-        cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotStatus`).should('have.text', 'Pending');
+        cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotStatus`).should('have.text', 'Incomplete');
       });
     });
   });

@@ -1,10 +1,10 @@
-import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
+import ClientAndCodeInputTextType from '../../../types/ClientAndCodeInputTextType';
 
 export const DATE_FORMAT = 'Y/m/d';
 
 export const MAX_FACILITY_DESC_CHAR = 50;
 
-export const agencyFieldsProps: AgencyTextPropsType = {
+export const clientAndCodeTextConfig: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'useCollectorAgency',
     labelText: 'Use applicant collector agency as interim storage agency'
@@ -29,7 +29,8 @@ export const pageTexts = {
     labelTextEnd: 'Storage end date',
     placeholder: 'yyyy/mm/dd',
     helperText: 'year/month/day',
-    invalidText: 'Please enter a valid date'
+    invalidText: 'Please enter a valid date',
+    invalidDateBeforeCollection: 'The storage end date can\'t be set before collection end date'
   },
   storageFacility: {
     labelText: 'Storage facility type',

@@ -35,13 +35,13 @@ parameters:
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
-    value: 100m
+    value: 25m
   - name: CPU_LIMIT
-    value: 300m
+    value: 100m
   - name: MEMORY_REQUEST
-    value: 100Mi
+    value: 150Mi
   - name: MEMORY_LIMIT
-    value: 500Mi
+    value: 450Mi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"
@@ -64,6 +64,10 @@ parameters:
   - name: AWS_COGNITO_ISSUER_URI
     description: AWS Cognito JWT Server URI
     required: true
+  - name: RANDOM_EXPRESSION
+    description: Random expression to make sure deployments update
+    from: "[a-zA-Z0-9]{32}"
+    generate: expression
 objects:
   - apiVersion: apps/v1
     kind: Deployment
@@ -72,7 +76,7 @@ objects:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
-      replicas: 1
+      replicas: ${{MIN_REPLICAS}}
       selector:
         matchLabels:
           deployment: ${NAME}-${ZONE}-${COMPONENT}
@@ -133,6 +137,8 @@ objects:
                   value: ${DB_POOL_MAX_LIFETIME}
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
+                - name: RANDOM_EXPRESSION
+                  value: ${RANDOM_EXPRESSION}
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -201,6 +207,12 @@ objects:
         - type: Resource
           resource:
             name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80
+        - type: Resource
+          resource:
+            name: memory
             target:
               type: Utilization
               averageUtilization: 80

@@ -36,7 +36,7 @@ export type ClassAContextType = {
   seedlotSpecies: MultiOptionsObj,
   formStep: number,
   setStep: (delta: number) => void,
-  defaultAgencyObj: MultiOptionsObj,
+  defaultClientNumber: string,
   defaultCode: string,
   isFormSubmitted: boolean,
   isFormIncomplete: boolean,
@@ -52,7 +52,8 @@ export type ClassAContextType = {
   >,
   getSeedlotPayload: (
     allStepData: AllStepData,
-    seedlotNumber: string | undefined
+    seedlotNumber: string | undefined,
+    vegCode: string
   ) => SeedlotAClassSubmitType,
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => void,
   saveProgressStatus: MutationStatusType,
@@ -88,7 +89,7 @@ const ClassAContext = createContext<ClassAContextType>({
   seedlotSpecies: EmptyMultiOptObj,
   formStep: 0,
   setStep: (delta: number) => { },
-  defaultAgencyObj: EmptyMultiOptObj,
+  defaultClientNumber: '',
   defaultCode: '',
   isFormSubmitted: false,
   isFormIncomplete: true,

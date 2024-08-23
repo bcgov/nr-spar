@@ -62,9 +62,15 @@ public class OrchardService {
       }
 
       List<String> bacZones = new ArrayList<>(1);
-      bacZones.add(orchardEntity.getBecZoneCode());
+      if (orchardEntity.getBecZoneCode() != null) {
+        bacZones.add(orchardEntity.getBecZoneCode());
+      }
+
       Map<String, String> becZoneDescMap =
           sparBecCatalogueService.getBecDescriptionsByCode(bacZones);
+
+      String becZoneDescription =
+          becZoneDescMap.isEmpty() ? null : becZoneDescMap.get(orchardEntity.getBecZoneCode());
 
       OrchardDto orchardDto =
           new OrchardDto(
@@ -75,7 +81,7 @@ public class OrchardService {
               orchardLotTypeCode.getDescription(),
               orchardEntity.getStageCode(),
               orchardEntity.getBecZoneCode(),
-              becZoneDescMap.get(orchardEntity.getBecZoneCode()),
+              becZoneDescription,
               orchardEntity.getBecSubzoneCode(),
               orchardEntity.getVariant(),
               orchardEntity.getBecVersionId());
@@ -277,7 +283,7 @@ public class OrchardService {
     long endingFour = Instant.now().toEpochMilli();
     SparLog.debug("Time elapsed mapping all parent tree orchard ids: {}", endingFour - endingThree);
 
-    List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllIn(parentTreeIdList);
+    List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllByIdIn(parentTreeIdList);
 
     long endingFive = Instant.now().toEpochMilli();
     SparLog.debug("Time elapsed finding all parent tree (select in): {}", endingFive - endingFour);

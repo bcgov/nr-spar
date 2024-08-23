@@ -3,7 +3,7 @@ package ca.bc.gov.backendstartapi.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 /** This record represents the seedlot form step 1. */
@@ -36,7 +36,7 @@ public record SeedlotFormCollectionDto(
                 """,
             example = "2023/11/20")
         @NotNull
-        LocalDateTime collectionStartDate,
+        LocalDate collectionStartDate,
     @Schema(
             description =
                 """
@@ -45,7 +45,7 @@ public record SeedlotFormCollectionDto(
                 """,
             example = "2023/11/30")
         @NotNull
-        LocalDateTime collectionEndDate,
+        LocalDate collectionEndDate,
     @Schema(
             description = "The number of containers (sacks of cones) that were collected.",
             example = "2")

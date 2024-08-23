@@ -4,7 +4,6 @@ import { Column, Row, FlexGrid } from '@carbon/react';
 import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 
-import { OrchardObj } from '../../../SeedlotRegistrationSteps/OrchardStep/definitions';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 
 const OrchardReviewRead = () => {
@@ -19,29 +18,30 @@ const OrchardReviewRead = () => {
           Orchard information
         </Column>
       </Row>
+      <Row>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id={state.orchards.primaryOrchard.id}
+            label="Orchard ID or number"
+            value={state.orchards.primaryOrchard.value.label}
+          />
+        </Column>
+      </Row>
       {
-        state.orchards.map((curOrchard: OrchardObj, index: number) => (
-          <Row key={`orchard-${index + 1}`}>
-            <Column className="info-col" sm={4} md={4} lg={4}>
-              <ReadOnlyInput
-                id={`orchard-${index + 1}-number`}
-                label="Orchard ID or number"
-                value={curOrchard.selectedItem?.code ?? ''}
-                showSkeleton={isFetchingData}
-              />
-            </Column>
-            <Column className="info-col" sm={4} md={4} lg={4}>
-              <ReadOnlyInput
-                id={`orchard-${index + 1}-name`}
-                label="Orchard name"
-                value={curOrchard.selectedItem?.label ?? ''}
-                showSkeleton={isFetchingData}
-              />
-            </Column>
-          </Row>
-        ))
+        state.orchards.secondaryOrchard.value.label
+          ? (
+            <Row>
+              <Column className="info-col" sm={4} md={4} lg={4}>
+                <ReadOnlyInput
+                  id={state.orchards.secondaryOrchard.id}
+                  label="Orchard ID or number"
+                  value={state.orchards.secondaryOrchard.value.label}
+                />
+              </Column>
+            </Row>
+          )
+          : null
       }
-
       <Divider />
 
       <Row>
@@ -64,7 +64,7 @@ const OrchardReviewRead = () => {
           <ReadOnlyInput
             id="orchard-female-gametic"
             label="Female gametic contribution methodology"
-            value={state.femaleGametic.value.label}
+            value={state.femaleGametic.value?.label}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -74,7 +74,7 @@ const OrchardReviewRead = () => {
           <ReadOnlyInput
             id="orchard-male-gametic"
             label="Male gametic contribution methodology"
-            value={state.maleGametic.value.label}
+            value={state.maleGametic.value?.label}
             showSkeleton={isFetchingData}
           />
         </Column>

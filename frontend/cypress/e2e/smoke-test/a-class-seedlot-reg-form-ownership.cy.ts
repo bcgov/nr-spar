@@ -56,11 +56,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
   it('Page title and accordion title', () => {
     cy.get('.seedlot-registration-title')
       .find('h1')
-      .should('have.text', 'Seedlot Registration');
-
-    cy.get('.seedlot-registration-title')
-      .find('.seedlot-form-subtitle')
-      .should('contain.text', `Seedlot ${seedlotNum}`);
+      .should('have.text', `Registration for seedlot ${seedlotNum}`);
 
     cy.get('.ownership-header')
       .find('h3')
@@ -137,7 +133,8 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .type(testAcronym, { delay: TYPE_DELAY })
       .blur();
 
-    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+    cy.get('#ownership-agency-0-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
     // Enter invalid location code
@@ -155,7 +152,8 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .type('02', { delay: TYPE_DELAY })
       .blur();
 
-    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+    cy.get('#ownership-location-code-0-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
     // Save changes
@@ -307,29 +305,13 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-funding-source-0')
       .should('have.value', fundingSource);
 
-    // Method of Payment
+    // Default method of Payment
     cy.get('#ownership-method-payment-0')
-      .should('have.value', '')
-      .click();
-
-    const methodOfPayment = 'CSH - Cash Sale';
-
-    cy.get(`.${prefix}--list-box__menu-item__option`)
-      .contains(methodOfPayment)
-      .scrollIntoView()
-      .click();
-
-    cy.get('#ownership-method-payment-0')
-      .should('have.value', methodOfPayment);
+      .should('have.value', 'ITC - Invoice to Client Address');
 
     // Check 'x' button
     cy.get('.single-owner-combobox')
       .eq(0)
-      .find('[aria-label="Clear selected item"]')
-      .click();
-
-    cy.get('.single-owner-combobox')
-      .eq(1)
       .find('[aria-label="Clear selected item"]')
       .click();
 
@@ -346,9 +328,17 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-funding-source-0')
       .should('have.value', fundingSource);
 
-    cy.get('#ownership-method-payment-0')
-      .should('have.value', '')
+    cy.get('.single-owner-combobox')
+      .eq(1)
+      .find('[aria-label="Clear selected item"]')
       .click();
+
+    cy.get('#ownership-method-payment-0')
+      .should('have.value', '');
+
+    cy.get('#ownership-method-payment-0').click();
+
+    const methodOfPayment = 'CSH - Cash Sale';
 
     cy.get(`.${prefix}--list-box__menu-item__option`)
       .contains(methodOfPayment)
@@ -462,11 +452,9 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .find('button.form-action-btn')
       .contains('Next')
       .click();
-  
-    // Check svg with complete checkmark on Step 3
-    // FLAKY, needs investigation
-    cy.get('ul.spar-seedlot-reg-progress-bar li')
-      .eq(1)
-      .should('have.class', `${prefix}--progress-step--complete`);
+
+    // Check step complete status
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Ownership');
   });
 });

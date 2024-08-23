@@ -2,17 +2,19 @@ FROM ghcr.io/graalvm/native-image:22.3.3 AS build
 
 # Copy
 WORKDIR /app
-COPY pom.xml mvnw ./
-COPY src ./src
-COPY .mvn/ ./.mvn
-COPY InstallCert.java .
+COPY . ./
 
 # Build
 RUN ./mvnw package -Pnative -DskipTests -Dskip.unit.tests=true && \
-  javac InstallCert.java
+    javac InstallCert.java
 
-  ### Deployer
-FROM eclipse-temurin:17.0.11_9-jdk-jammy AS deploy
+
+### Deployer
+FROM eclipse-temurin:17.0.12_7-jdk-jammy AS deploy
+
+# Receive build number as argument, retain as environment variable
+ARG BUILD_NUMBER
+ENV BUILD_NUMBER=${BUILD_NUMBER}
 
 # Java vars
 ENV LANG=en_CA.UTF-8
@@ -23,6 +25,7 @@ ENV LC_ALL=en_CA.UTF-8
 WORKDIR /app
 COPY --from=build /app/target/nr-spar-oracle-api ./nr-spar-oracle-api
 COPY --from=build /app/*.class ./artifacts/
+COPY --from=build /app/install_cert.sh ./
 
 # User, port and healthcheck
 USER 1001

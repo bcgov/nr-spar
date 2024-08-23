@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import moment from 'moment';
 
 import {
   Column,
@@ -16,18 +15,17 @@ import {
 
 import Subtitle from '../../Subtitle';
 import ScrollToTop from '../../ScrollToTop';
-import ApplicantAgencyFields from '../../ApplicantAgencyFields';
+import ClientAndCodeInput from '../../ClientAndCodeInput';
 
 import getFacilityTypes from '../../../api-service/facilityTypesAPI';
+import { now } from '../../../utils/DateUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
-import { EmptyBooleanInputType } from '../../../shared-constants/shared-constants';
+import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
 
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import InterimForm from './definitions';
 import {
-  DATE_FORMAT, MAX_FACILITY_DESC_CHAR, agencyFieldsProps, pageTexts
+  DATE_FORMAT, MAX_FACILITY_DESC_CHAR, clientAndCodeTextConfig, pageTexts
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
@@ -42,31 +40,34 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
     allStepData: { interimStep: state },
     allStepData: { collectionStep: { collectorAgency } },
     allStepData: { collectionStep: { locationCode: collectorCode } },
+    allStepData: { collectionStep: { endDate } },
     setStepData,
     isFormSubmitted
   } = useContext(ClassAContext);
 
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
 
-  const setAgencyAndCode = (
-    agencyData: OptionsInputType,
-    locationCodeData: StringInputType,
-    useDefaultData: BooleanInputType
+  const setClientAndCode = (
+    clientInput: StringInputType,
+    locationCodeInput: StringInputType,
+    checkBoxInput: BooleanInputType
   ) => {
     const clonedState = structuredClone(state);
-    clonedState.agencyName = agencyData;
-    clonedState.locationCode = locationCodeData;
-    clonedState.useCollectorAgencyInfo = useDefaultData;
+    clonedState.agencyName = clientInput;
+    clonedState.locationCode = locationCodeInput;
+    if (checkBoxInput) {
+      clonedState.useCollectorAgencyInfo = checkBoxInput;
+    }
+
     setStepData('interimStep', clonedState);
   };
 
   // This function validates changes on both start and end dates
   // of the storage information
-  const validateStorageDates = (curState: InterimForm) => {
+  const validateStorageDates = (curStartDate: string, curEndDate: string) => {
     // Check if the start date is set before the end date
-    if (curState.startDate.value !== '' && curState.endDate.value !== '') {
-      return moment(curState.endDate.value, 'YYYY/MM/DD')
-        .isBefore(moment(curState.startDate.value, 'YYYY/MM/DD'));
+    if (curStartDate !== '' && curEndDate !== '') {
+      return curEndDate < curStartDate;
     }
     return false;
   };
@@ -79,9 +80,17 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
       clonedState.endDate.value = stringDate;
     }
 
-    const isInvalid = validateStorageDates(clonedState);
+    const isInvalid = validateStorageDates(
+      clonedState.startDate.value,
+      clonedState.endDate.value
+    );
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
+
+    // Validate if end date is after collection end date
+    if (!isStart && !isInvalid) {
+      clonedState.endDate.isInvalid = clonedState.endDate.value < endDate.value;
+    }
     setStepData('interimStep', clonedState);
   };
 
@@ -154,23 +163,22 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
           }
         </Column>
       </Row>
-      <ApplicantAgencyFields
+      <ClientAndCodeInput
         showCheckbox={!isReview}
         checkboxId={state.useCollectorAgencyInfo.id}
-        isDefault={isReview ? EmptyBooleanInputType : state.useCollectorAgencyInfo}
-        agency={state.agencyName}
-        locationCode={state.locationCode}
-        fieldsProps={agencyFieldsProps}
-        defaultAgency={collectorAgency.value}
-        defaultCode={collectorCode.value}
-        setAgencyAndCode={(
-          isDefault: BooleanInputType,
-          agency: OptionsInputType,
-          locationCode: StringInputType
-        ) => setAgencyAndCode(agency, locationCode, isDefault)}
-        isFormSubmitted={isFormSubmitted}
+        clientInput={state.agencyName}
+        locationCodeInput={state.locationCode}
+        textConfig={clientAndCodeTextConfig}
+        defaultClientNumber={collectorAgency.value}
+        defaultLocCode={collectorCode.value}
+        setClientAndCode={(
+          clientInput: StringInputType,
+          locationCodeInput: StringInputType,
+          checkBoxInput?: BooleanInputType
+        ) => setClientAndCode(clientInput, locationCodeInput, checkBoxInput!)}
         readOnly={isFormSubmitted && !isReview}
         maxInputColSize={6}
+        checkBoxInput={state.useCollectorAgencyInfo}
       />
       <Row className="interim-storage-row">
         <Column className="start-date-col" sm={4} md={4} lg={8} xlg={6}>
@@ -178,6 +186,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             datePickerType="single"
             name="startDate"
             dateFormat={DATE_FORMAT}
+            maxDate={!isReview ? now : undefined}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(true, selectedDate);
@@ -202,6 +211,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             name="endDate"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
+            maxDate={!isReview ? now : undefined}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(false, selectedDate);
@@ -213,8 +223,15 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
               labelText={pageTexts.storageDate.labelTextEnd}
               helperText={pageTexts.storageDate.helperText}
               placeholder={pageTexts.storageDate.placeholder}
-              invalid={state.startDate.isInvalid}
-              invalidText={pageTexts.storageDate.invalidText}
+              invalid={state.endDate.isInvalid}
+              // If start date field is invalid, it means that the end date is also
+              // invalid and the error message can stay the same, else, shows the
+              // exclusive end date error message
+              invalidText={
+                state.startDate.isInvalid
+                  ? pageTexts.storageDate.invalidText
+                  : pageTexts.storageDate.invalidDateBeforeCollection
+              }
               readOnly={isFormSubmitted}
               autoComplete="off"
             />

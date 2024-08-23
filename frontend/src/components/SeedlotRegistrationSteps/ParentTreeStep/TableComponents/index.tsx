@@ -1,26 +1,31 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import {
   OverflowMenuItem, Checkbox, TableBody, TableRow, Row, Column,
   TableCell, TextInput, ActionableNotification, Pagination, Button, Tooltip
 } from '@carbon/react';
 import { TrashCan } from '@carbon/icons-react';
+
+import { ParentTreeStepDataObj } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
+import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
+import PaginationChangeType from '../../../../types/PaginationChangeType';
+import MultiOptionsObj from '../../../../types/MultiOptionsObject';
+import OrchardDataType from '../../../../types/OrchardDataType';
+import { GeneticWorthDto } from '../../../../types/GeneticWorthType';
+import blurOnEnter from '../../../../utils/KeyboardUtil';
+import { handlePagination } from '../../../../utils/PaginationUtils';
+
 import { pageText, PageSizesConfig } from '../constants';
 import {
   EditableCellProps,
+  GeneticWorthInputType,
   HeaderObj, RowItem, StrTypeRowItem, TabTypes
 } from '../definitions';
-import { ParentTreeStepDataObj } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
-import { OrchardObj } from '../../OrchardStep/definitions';
-import PaginationChangeType from '../../../../types/PaginationChangeType';
-import blurOnEnter from '../../../../utils/KeyboardUtil';
-import { handlePagination } from '../../../../utils/PaginationUtils';
 import {
-  applyValueToAll, toggleColumn, toggleNotification
+  applyValueToAll, areOrchardsValid, toggleColumn, toggleNotification
 } from '../utils';
-import { deleteMixRow, handleInput } from './utils';
-
 import '../styles.scss';
-import MultiOptionsObj from '../../../../types/MultiOptionsObject';
+
+import { deleteMixRow, handleInput } from './utils';
 
 export const renderColOptions = (
   headerConfig: Array<HeaderObj>,
@@ -106,23 +111,29 @@ export const renderColOptions = (
 /**
  * Used to render cell that isn't a text input, e.g. delete button
  */
-const renderDeleteActionBtn = (
+type DeleteActionBtnProps = {
   rowData: RowItem,
   applicableGenWorths: string[],
-  state: ParentTreeStepDataObj,
-  setStepData: Function,
-  isFormSubmitted?: boolean,
   isReviewEdit?: boolean
-) => (
-  <Button
-    kind="ghost"
-    hasIconOnly
-    renderIcon={TrashCan}
-    iconDescription="Delete this row"
-    onClick={() => deleteMixRow(rowData, applicableGenWorths, state, setStepData)}
-    disabled={isFormSubmitted && !isReviewEdit}
-  />
-);
+}
+const DeleteActionBtn = (
+  { rowData, applicableGenWorths, isReviewEdit } : DeleteActionBtnProps
+) => {
+  const {
+    allStepData: { parentTreeStep: state },
+    setStepData, isFormSubmitted
+  } = useContext(ClassAContext);
+  return (
+    <Button
+      kind="ghost"
+      hasIconOnly
+      renderIcon={TrashCan}
+      iconDescription="Delete this row"
+      onClick={() => deleteMixRow(rowData, applicableGenWorths, state, setStepData)}
+      disabled={isFormSubmitted && !isReviewEdit}
+    />
+  );
+};
 
 /**
  * This function will wrap the input with a tooltip if it's invalid
@@ -131,11 +142,14 @@ const EditableCell = ({
   rowData,
   header,
   applicableGenWorths,
-  state,
-  setStepData,
-  seedlotSpecies,
-  readOnly
+  readOnly,
+  geneticWorthList
 }: EditableCellProps) => {
+  const {
+    allStepData: { parentTreeStep: state, orchardStep },
+    setStepData,
+    seedlotSpecies
+  } = useContext(ClassAContext);
   const headerId = header.id as keyof StrTypeRowItem;
   const ref = useRef<HTMLInputElement>(null);
 
@@ -167,7 +181,9 @@ const EditableCell = ({
           applicableGenWorths,
           state,
           setStepData,
-          seedlotSpecies
+          seedlotSpecies,
+          geneticWorthList,
+          orchardStep.orchards.primaryOrchard.value.spuId
         );
       }}
       invalid={rowData[headerId].isInvalid}
@@ -185,36 +201,61 @@ const EditableCell = ({
   return textInput;
 };
 
+/**
+ * Adds a bracket to estimated genetic worth value.
+ */
+const formatTextOnlyCellValue = (
+  rowData: RowItem,
+  headerId: string,
+  text: string,
+  applicableGenWorths: string[]
+): string => {
+  if (applicableGenWorths.includes(headerId)
+    && (rowData[(headerId as keyof RowItem)] as GeneticWorthInputType).isEstimated
+  ) {
+    return `(${text})`;
+  }
+  return text;
+};
+
 const renderTableCell = (
   rowData: RowItem,
   header: HeaderObj,
   applicableGenWorths: string[],
-  state: ParentTreeStepDataObj,
-  setStepData: Function,
-  seedlotSpecies: MultiOptionsObj,
+  orchardData: OrchardDataType[],
+  geneticWorthList: GeneticWorthDto[],
   isFormSubmitted: boolean,
   editOnReview? : boolean
 ) => {
-  const className = header.editable ? 'td-no-padding' : null;
-  if (header.id === 'actions') {
+  const headerId = header.id;
+  let className = header.editable ? 'td-no-padding' : undefined;
+
+  // Apply red color style for estimated gen worth
+  if (applicableGenWorths.includes(headerId)
+    && (rowData[(headerId as keyof RowItem)] as GeneticWorthInputType).isEstimated
+  ) {
+    const redCellClass = 'td-red-cell';
+    if (!className) {
+      className = redCellClass;
+    } else {
+      className = `${className} ${redCellClass}`;
+    }
+  }
+
+  if (headerId === 'actions') {
     return (
-      <TableCell key={`${header.id}-${rowData.rowId}`} className={className} id={`${rowData.rowId}-action-btn-del`}>
-        {
-          renderDeleteActionBtn(
-            rowData,
-            applicableGenWorths,
-            state,
-            setStepData,
-            isFormSubmitted,
-            editOnReview
-          )
-        }
+      <TableCell key={`${headerId}-${rowData.rowId}`} className={className} id={`${rowData.rowId}-action-btn-del`}>
+        <DeleteActionBtn
+          rowData={rowData}
+          applicableGenWorths={applicableGenWorths}
+          isReviewEdit={editOnReview}
+        />
       </TableCell>
     );
   }
-  if (header.id !== 'isMixTab' && header.id !== 'rowId') {
+  if (headerId !== 'isMixTab' && headerId !== 'rowId') {
     return (
-      <TableCell key={header.id} className={className} id={rowData[header.id].id}>
+      <TableCell key={headerId} className={className} id={rowData[headerId].id}>
         {
           header.editable
             ? (
@@ -222,14 +263,15 @@ const renderTableCell = (
                 rowData={rowData}
                 header={header}
                 applicableGenWorths={applicableGenWorths}
-                state={state}
-                setStepData={setStepData}
-                seedlotSpecies={seedlotSpecies}
                 readOnly={isFormSubmitted && !editOnReview}
+                geneticWorthList={geneticWorthList}
               />
             )
-            : (
-              rowData[header.id as keyof StrTypeRowItem].value
+            : formatTextOnlyCellValue(
+              rowData,
+              headerId,
+              rowData[headerId as keyof StrTypeRowItem].value,
+              applicableGenWorths
             )
         }
       </TableCell>
@@ -244,9 +286,8 @@ export const renderTableBody = (
   mixTabRows: Array<RowItem>,
   headerConfig: Array<HeaderObj>,
   applicableGenWorths: string[],
-  state: ParentTreeStepDataObj,
-  setStepData: Function,
-  seedlotSpecies: MultiOptionsObj,
+  orchardData: OrchardDataType[],
+  geneticWorthList: GeneticWorthDto[],
   isFormSubmitted: boolean,
   editOnReview?: boolean
 ) => {
@@ -270,9 +311,8 @@ export const renderTableBody = (
                       rowData,
                       clonedHeader,
                       applicableGenWorths,
-                      state,
-                      setStepData,
-                      seedlotSpecies,
+                      orchardData,
+                      geneticWorthList,
                       isFormSubmitted,
                       editOnReview
                     );
@@ -302,9 +342,8 @@ export const renderTableBody = (
                         rowData,
                         header,
                         applicableGenWorths,
-                        state,
-                        setStepData,
-                        seedlotSpecies,
+                        orchardData,
+                        geneticWorthList,
                         isFormSubmitted,
                         editOnReview
                       )
@@ -318,13 +357,13 @@ export const renderTableBody = (
   );
 };
 
-export const renderNotification = (
-  state: ParentTreeStepDataObj,
-  currentTab: TabTypes,
-  orchardsData: Array<OrchardObj>,
-  setStepData: Function
-) => {
-  if (state.notifCtrl[currentTab].showError && orchardsData.length === 0) {
+export const renderNotification = (currentTab: TabTypes) => {
+  const {
+    allStepData: { parentTreeStep: state, orchardStep },
+    setStepData
+  } = useContext(ClassAContext);
+
+  if (state.notifCtrl[currentTab].showError && !areOrchardsValid(orchardStep)) {
     return (
       <Row className="notification-row">
         <Column>

@@ -1,0 +1,25 @@
+name: PROD
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag set to deploy; e.g. latest or PR number'
+        required: false
+
+concurrency:
+  # Do not interrupt previous workflows
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-prod:
+    name: PROD
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: prod
+      tag: ${{ inputs.tag || 'prod' }}
+      target: prod

@@ -24,13 +24,13 @@ parameters:
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
-    value: 100m
+    value: 25m
   - name: CPU_LIMIT
-    value: 500m
+    value: 100m
   - name: MEMORY_REQUEST
-    value: 300Mi
+    value: 150Mi
   - name: MEMORY_LIMIT
-    value: 500Mi
+    value: 225Mi
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
@@ -44,6 +44,9 @@ parameters:
     description: Oracle API environment for OpenSearch. # One of: development, test, production
     required: false
     value: development
+  - name: DATABASE_PORT
+    description: Oracle database port
+    value: "1543"
   - name: ORACLEDB_KEYSTORE
     description: Keystore location path
   - name: AWS_COGNITO_ISSUER_URI
@@ -52,6 +55,10 @@ parameters:
   - name: CERT_PVC_SIZE
     description: The amount of storage the cert PVC should have
     value: 25Mi
+  - name: RANDOM_EXPRESSION
+    description: Random expression to make sure deployments update
+    from: "[a-zA-Z0-9]{32}"
+    generate: expression
 objects:
   - apiVersion: v1
     kind: PersistentVolumeClaim
@@ -73,7 +80,7 @@ objects:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
-      replicas: 1
+      replicas: ${{MIN_REPLICAS}}
       selector:
         matchLabels:
           deployment: ${NAME}-${ZONE}-${COMPONENT}
@@ -91,7 +98,13 @@ objects:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           initContainers:
             - name: ${NAME}-${ZONE}-${COMPONENT}-init
-              image: ${REGISTRY}/${ORG}/${NAME}/common:${TAG}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  cd /app
+                  ./install_cert.sh
+              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               imagePullPolicy: Always
               env:
                 - name: DATABASE_HOST
@@ -105,10 +118,7 @@ objects:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-secret
                 - name: DATABASE_PORT
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: oracle-port
+                  value: ${DATABASE_PORT}
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}-certs
                   mountPath: /cert
@@ -136,10 +146,7 @@ objects:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-host
                 - name: DATABASE_PORT
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: oracle-port
+                  value: ${DATABASE_PORT}
                 - name: SERVICE_NAME
                   valueFrom:
                     secretKeyRef:
@@ -164,6 +171,8 @@ objects:
                   value: /cert/jssecacerts
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
+                - name: RANDOM_EXPRESSION
+                  value: ${RANDOM_EXPRESSION}
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}-certs
                   mountPath: /cert
@@ -236,6 +245,12 @@ objects:
         - type: Resource
           resource:
             name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80
+        - type: Resource
+          resource:
+            name: memory
             target:
               type: Utilization
               averageUtilization: 80

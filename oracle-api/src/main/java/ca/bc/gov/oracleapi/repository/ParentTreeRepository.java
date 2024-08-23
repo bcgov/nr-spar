@@ -9,24 +9,30 @@ import org.springframework.data.jpa.repository.Query;
 /** This class holds methods for retrieving {@link ParentTreeEntity} data from the database. */
 public interface ParentTreeRepository extends JpaRepository<ParentTreeEntity, Long> {
 
-  @Query("from ParentTreeEntity where id in ?1")
-  List<ParentTreeEntity> findAllIn(List<Long> ids);
+  List<ParentTreeEntity> findAllByIdIn(List<Long> ids);
 
   @Query(
       value =
-          """
-            SELECT DISTINCT PT.PARENT_TREE_ID AS \"parentTreeId\",
-              PT.PARENT_TREE_NUMBER AS \"parentTreeNumber\",
-              O.ORCHARD_ID AS \"orchardId\", Q.SEED_PLAN_UNIT_ID AS \"spu\"
-            FROM PARENT_TREE PT
-            JOIN PARENT_TREE_ORCHARD PTO
-              ON PTO.PARENT_TREE_ID = PT.PARENT_TREE_ID
-            JOIN ORCHARD O
-              ON O.ORCHARD_ID = PTO.ORCHARD_ID
-            JOIN PARENT_TREE_GENETIC_QUALITY Q
-              ON PT.PARENT_TREE_ID = Q.PARENT_TREE_ID
-            WHERE PT.VEGETATION_CODE = ?1
-          """,
+         """
+          SELECT PT.PARENT_TREE_ID AS \"parentTreeId\",
+            PT.PARENT_TREE_NUMBER AS \"parentTreeNumber\",
+            PTO.ORCHARD_ID AS \"orchardId\",
+            PTSPU.SEED_PLAN_UNIT_ID AS \"spu\",
+            PT.TESTED_IND AS \"tested\",
+            Q.GENETIC_TYPE_CODE AS \"geneticTypeCode\",
+            Q.GENETIC_WORTH_CODE AS \"geneticWorthCode\",
+            Q.GENETIC_QUALITY_VALUE AS \"geneticQualityValue\"
+          FROM parent_tree PT
+          JOIN parent_tree_orchard PTO ON PTO.parent_tree_id = PT.parent_tree_id
+          LEFT JOIN parent_tree_seed_plan_unit PTSPU ON PTSPU.parent_tree_id = PT.parent_tree_id
+          LEFT JOIN parent_tree_genetic_quality Q ON PT.parent_tree_id = Q.parent_tree_id
+            AND Q.seed_plan_unit_id = PTSPU.seed_plan_unit_id
+            AND Q.genetic_worth_calc_ind = 'Y'
+          WHERE PT.VEGETATION_CODE = ?1
+            AND PT.ACTIVE_IND = 'Y'
+            AND PT.parent_tree_reg_status_code = 'APP'
+          ORDER BY PT.parent_tree_id
+        """,
       nativeQuery = true)
   List<ParentTreeProj> findAllParentTreeWithVegCode(String vegCode);
 }

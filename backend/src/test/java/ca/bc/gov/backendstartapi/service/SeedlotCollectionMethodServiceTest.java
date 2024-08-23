@@ -12,7 +12,8 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,8 +38,8 @@ class SeedlotCollectionMethodServiceTest {
     return new SeedlotFormCollectionDto(
         "00012797",
         "02",
-        LocalDateTime.now(),
-        LocalDateTime.now(),
+        LocalDate.now(Clock.systemUTC()),
+        LocalDate.now(Clock.systemUTC()),
         new BigDecimal("2"),
         new BigDecimal("4"),
         new BigDecimal("8"),
@@ -60,7 +61,7 @@ class SeedlotCollectionMethodServiceTest {
 
     ConeCollectionMethodEntity ccme = new ConeCollectionMethodEntity();
     ccme.setConeCollectionMethodCode(1);
-    when(coneCollectionMethodService.getAllValidConeCollectionMethods()).thenReturn(List.of(ccme));
+    when(coneCollectionMethodService.getAllByIdIn(List.of(1))).thenReturn(List.of(ccme));
 
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
@@ -95,8 +96,7 @@ class SeedlotCollectionMethodServiceTest {
     ConeCollectionMethodEntity ccme2 = new ConeCollectionMethodEntity();
     ccme2.setConeCollectionMethodCode(2);
 
-    when(coneCollectionMethodService.getAllValidConeCollectionMethods())
-        .thenReturn(List.of(ccme1, ccme2));
+    when(coneCollectionMethodService.getAllByIdIn(List.of(1, 2))).thenReturn(List.of(ccme1, ccme2));
 
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
@@ -134,8 +134,7 @@ class SeedlotCollectionMethodServiceTest {
     when(seedlotCollectionMethodRepository.findAllBySeedlot_id("54321"))
         .thenReturn(List.of(scm, scm2));
 
-    when(coneCollectionMethodService.getAllValidConeCollectionMethods())
-        .thenReturn(List.of(ccme1, ccme2));
+    when(coneCollectionMethodService.getAllByIdIn(List.of(1, 2))).thenReturn(List.of(ccme1, ccme2));
 
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
@@ -171,15 +170,14 @@ class SeedlotCollectionMethodServiceTest {
     when(seedlotCollectionMethodRepository.findAllBySeedlot_id("54321"))
         .thenReturn(List.of(scm, scm2));
 
-    when(coneCollectionMethodService.getAllValidConeCollectionMethods())
-        .thenReturn(List.of(ccme1, ccme2));
+    when(coneCollectionMethodService.getAllByIdIn(List.of(1))).thenReturn(List.of(ccme1, ccme2));
 
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    SeedlotFormCollectionDto formDto = createFormDto();
+    SeedlotFormCollectionDto formDto = createFormDto(1);
     seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto, true);
 
     Assertions.assertNotNull(seedlot);

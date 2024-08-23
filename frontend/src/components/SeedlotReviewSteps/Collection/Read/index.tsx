@@ -1,16 +1,15 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
-import { DateTime as luxon } from 'luxon';
 import { useQuery } from '@tanstack/react-query';
 
 import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
-import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 import getConeCollectionMethod from '../../../../api-service/coneCollectionMethodAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
+
 import { formatCollectionMethods } from '../utils';
 import GeoInfo from '../GeoInfo';
 
@@ -25,7 +24,8 @@ const CollectionReviewRead = () => {
     {
       queryKey: ['forest-clients', clientNumber],
       queryFn: () => getForestClientByNumberOrAcronym(clientNumber!),
-      enabled: !!clientNumber
+      enabled: !!clientNumber,
+      select: (fc) => getForestClientLabel(fc)
     }
   );
 
@@ -48,8 +48,8 @@ const CollectionReviewRead = () => {
           <ReadOnlyInput
             id="collection-agency-name"
             label="Cone collector agency"
-            value={agencyQuery.data ? getForestClientLabel(agencyQuery.data) : ''}
-            showSkeleton={isFetchingData || agencyQuery.isFetching}
+            value={agencyQuery.data}
+            showSkeleton={isFetchingData || agencyQuery.fetchStatus === 'fetching'}
           />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
@@ -74,9 +74,7 @@ const CollectionReviewRead = () => {
           <ReadOnlyInput
             id="collection-start-date"
             label="Collection start date"
-            value={
-              luxon.fromISO(allStepData.collectionStep.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-            }
+            value={allStepData.collectionStep.startDate.value}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -84,9 +82,7 @@ const CollectionReviewRead = () => {
           <ReadOnlyInput
             id="collection-end-date"
             label="Collection end date"
-            value={
-              luxon.fromISO(allStepData.collectionStep.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-            }
+            value={allStepData.collectionStep.endDate.value}
             showSkeleton={isFetchingData}
           />
         </Column>
