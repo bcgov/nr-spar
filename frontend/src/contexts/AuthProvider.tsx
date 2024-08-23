@@ -11,7 +11,7 @@ import { env } from '../env';
 import FamUser from '../types/FamUser';
 import LoginProviders from '../types/LoginProviders';
 import AuthContext, { AuthContextData } from './AuthContext';
-import { SPAR_REDIRECT_PATH, TSC_ADMIN_ROLE } from '../shared-constants/shared-constants';
+import { MINISTRY_OF_FOREST_ID, SPAR_REDIRECT_PATH, TSC_ADMIN_ROLE } from '../shared-constants/shared-constants';
 import { TWO_MINUTE } from '../config/TimeUnits';
 import ROUTES from '../routes/constants';
 
@@ -42,7 +42,6 @@ const findFindAndLastName = (displayName: string, provider: string): Array<strin
 
 const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] => {
   const separator = '_';
-  const minitryOfForestId = '00012797';
 
   const cognitoGroups: string[] = accessToken['cognito:groups'];
   if (!cognitoGroups) {
@@ -51,19 +50,19 @@ const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] =>
 
   const parsedClientRoles: UserClientRolesType[] = [];
 
-  cognitoGroups.forEach((cognaitoRole) => {
-    if (!cognaitoRole.includes(separator)) {
-      throw new Error(`Invalid role format with string: ${cognaitoRole}`);
+  cognitoGroups.forEach((cognitoRole) => {
+    if (!cognitoRole.includes(separator)) {
+      throw new Error(`Invalid role format with string: ${cognitoRole}`);
     }
-    const lastUnderscoreIndex = cognaitoRole.lastIndexOf(separator);
-    let role = cognaitoRole.substring(0, lastUnderscoreIndex);
-    let clientId = cognaitoRole.substring(lastUnderscoreIndex + 1);
+    const lastUnderscoreIndex = cognitoRole.lastIndexOf(separator);
+    let role = cognitoRole.substring(0, lastUnderscoreIndex);
+    let clientId = cognitoRole.substring(lastUnderscoreIndex + 1);
 
     // If the last substring after an underscore is not a number then it's a concrete role,
     // we need to manually assign it a MoF client id for now.
     if (Number.isNaN(Number(clientId))) {
-      clientId = minitryOfForestId;
-      role = cognaitoRole;
+      clientId = MINISTRY_OF_FOREST_ID;
+      role = cognitoRole;
     }
 
     // Check if a client id already exist in parsed client role
