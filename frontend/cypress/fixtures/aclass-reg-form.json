@@ -65,7 +65,7 @@
     "coneTitle": "Cone and pollen count",
     "coneSubtitle": "Enter the cone and pollen count estimate for the orchard's seedlot (*required)",
     "smpSuccessTitle": "SMP success on parent",
-    "smpSuccessSubtitle": "Enter the estimative of SMP success for the orchard's seedlot",
+    "smpSuccessSubtitle": "Enter the SMP success estimate for the orchard's seedlot",
     "calculationSMPTitle": "Calculation of SMP mix",
     "calculationSMPSubtitle": "Enter the estimative volume of SMP mix used for each clone",
     "smpSuccessCheckboxText": "Enter the same SMP success on parent or Non-orchard pollen contaminant to all parent trees",
