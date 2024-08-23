@@ -87,11 +87,11 @@ p.fav-card-title-large {
   color: var(--#{vars.$bcgov-prefix}-text-on-color)
 }
 
-.fav-card-main-highlighted .fav-card-overflow > svg{
+.fav-card-main-highlighted .fav-card-overflow > svg {
   fill: var(--#{vars.$bcgov-prefix}-icon-on-color);
 }
 
-.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open >svg{
+.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open >svg {
   fill: var(--#{vars.$bcgov-prefix}-icon-primary);
 }
 
@@ -107,7 +107,10 @@ p.fav-card-title-large {
 .fav-card-main-highlighted .fav-card-overflow:hover,
 .fav-card-main-highlighted .fav-card-overflow:focus {
   outline: 2px solid colors.$white;
-  background-color: var(--#{vars.$bcgov-prefix}-button-primary-hover);
+}
+
+.fav-card-main-highlighted .#{vars.$bcgov-prefix}--overflow-menu:hover {
+  background-color: transparent;
 }
 
 @media only screen and (max-width: 672px) {
