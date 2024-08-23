@@ -496,6 +496,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('F2 - Measured Cone Volume')
       .click();
 
+    cy.get('#orchard-female-gametic')
+      .should('have.value', 'F2 - Measured Cone Volume');
+
     cy.get('#orchard-male-gametic')
       .siblings()
       .click();
@@ -504,6 +507,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .find('ul li')
       .contains('M3 - Pollen Volume Estimate by 100% Survey')
       .click();
+
+    cy.get('#orchard-male-gametic')
+      .should('have.value', 'M3 - Pollen Volume Estimate by 100% Survey');
 
     // Change radio inputs of gamete section
     cy.get('#controlled-cross-yes')
