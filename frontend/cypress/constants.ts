@@ -8,4 +8,4 @@ export const THIRTY_SECONDS = 3 * TEN_SECONDS;
 export const TYPE_DELAY = 50;
 
 export const INVALID_EMAIL = 'test.com.br';
-export const NUM_OF_LOOPS = 1; // TODO back to 3
+export const NUM_OF_LOOPS = 3;
