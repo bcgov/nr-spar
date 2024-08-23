@@ -149,34 +149,6 @@ class OrchardServiceTest {
         "404 NOT_FOUND \"No active SPU for the given Orchard ID!\"", exc.getMessage());
   }
 
-  // TODO
-  // @Test
-  // @DisplayName("findParentTreesByVegCodeTest")
-  // void findParentTreesByVegCodeTest() {
-  //   String vegCode = "FDI";
-
-  //   SameSpeciesTreeDto firstDto =
-  //       new SameSpeciesTreeDto(Long.valueOf(123), "1000", "1", Long.valueOf(7), List.of());
-  //   SameSpeciesTreeDto secondDto =
-  //       new SameSpeciesTreeDto(Long.valueOf(456), "2000", "1", Long.valueOf(7), List.of());
-
-  //   List<SameSpeciesTreeDto> testList = List.of(firstDto, secondDto);
-
-  //   Map<String, String> testMap = new HashMap<>();
-  //   testMap.put("1", "1");
-  //   when(oracleApiProvider.findParentTreesByVegCode(vegCode, testMap)).thenReturn(testList);
-
-  //   ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu("1", true);
-  //   when(orchardService.findAllSpu(true)).thenReturn(List.of(activeOrchardSpu));
-
-  //   List<SameSpeciesTreeDto> responseFromService =
-  // orchardService.findParentTreesByVegCode(vegCode);
-
-  //   Assertions.assertNotNull(responseFromService);
-  //   Assertions.assertEquals(testList.size(), responseFromService.size());
-  //   Assertions.assertEquals(testList, responseFromService);
-  // }
-
   @Test
   @DisplayName("Find all spu happy path should succeed")
   void findAllSpu_happyPath_shouldSucceed() {
