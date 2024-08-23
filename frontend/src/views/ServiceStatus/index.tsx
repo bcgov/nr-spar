@@ -38,7 +38,7 @@ const ServiceStatus = () => {
         className="spar-header"
       >
         <SkipToContent />
-        <Link to="/" className="header-link">
+        <Link to="/dashboard" className="header-link">
           {componentTexts.headerTitle}
           <span className="header-full-name">{`${componentTexts.completeTitle}`}</span>
         </Link>
@@ -108,7 +108,7 @@ const ServiceStatus = () => {
             ? (
               <Row className="button-row">
                 <Column className="button-col">
-                  <Button kind="primary" size="lg" renderIcon={Home} onClick={() => navigate('/')}>
+                  <Button kind="primary" size="lg" renderIcon={Home} onClick={() => navigate('/dashboard')}>
                     Return to main page
                   </Button>
                 </Column>

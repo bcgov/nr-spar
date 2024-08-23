@@ -104,6 +104,12 @@ export const supportItems = {
       icon: 'Help',
       link: '#',
       disabled: true
+    },
+    {
+      name: 'Service status',
+      icon: 'CloudMonitoring',
+      link: '/service-status',
+      disabled: false
     }
   ]
 };
