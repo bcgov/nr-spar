@@ -183,6 +183,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
         cy.get('#collection-location-code')
           .should('have.value', locationCode);
+
+        // Save changes
+        cy.saveSeedlotRegFormProgress();
       });
 
     // Enter location code for linkage test
@@ -450,6 +453,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
         cy.get('#interim-location-code')
           .should('have.value', locationCode);
+
+        // Save changes
+        cy.saveSeedlotRegFormProgress();
       });
   });
 

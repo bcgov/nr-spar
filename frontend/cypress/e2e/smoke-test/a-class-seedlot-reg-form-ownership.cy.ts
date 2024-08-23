@@ -207,10 +207,10 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
         cy.get('#ownership-location-code-0')
           .should('have.value', locationCode);
-      });
 
-    // Save changes
-    cy.saveSeedlotRegFormProgress();
+        // Save changes
+        cy.saveSeedlotRegFormProgress();
+      });
   });
 
   it('Owner portion %, reserved % and surplus % display default values', () => {
