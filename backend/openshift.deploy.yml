@@ -64,6 +64,10 @@ parameters:
   - name: AWS_COGNITO_ISSUER_URI
     description: AWS Cognito JWT Server URI
     required: true
+  - name: RANDOM_EXPRESSION
+    description: Random expression to make sure deployments update
+    from: "[a-zA-Z0-9]{32}"
+    generate: expression
 objects:
   - apiVersion: apps/v1
     kind: Deployment
@@ -133,6 +137,8 @@ objects:
                   value: ${DB_POOL_MAX_LIFETIME}
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
+                - name: RANDOM_EXPRESSION
+                  value: ${RANDOM_EXPRESSION}
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}

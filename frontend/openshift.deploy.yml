@@ -52,6 +52,10 @@ parameters:
   - name: VITE_USER_POOLS_ID
     description: AWS Cognito Pools ID
     required: true
+  - name: RANDOM_EXPRESSION
+    description: Random expression to make sure deployments update
+    from: "[a-zA-Z0-9]{32}"
+    generate: expression
 objects:
   - apiVersion: apps/v1
     kind: Deployment
@@ -101,6 +105,8 @@ objects:
                       key: vite-user-pools-web-client-id
                 - name: VITE_ZONE
                   value: ${FAM_MODDED_ZONE}
+                - name: RANDOM_EXPRESSION
+                  value: ${RANDOM_EXPRESSION}
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
