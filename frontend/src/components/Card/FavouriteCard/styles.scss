@@ -107,6 +107,7 @@ p.fav-card-title-large {
 .fav-card-main-highlighted .fav-card-overflow:hover,
 .fav-card-main-highlighted .fav-card-overflow:focus {
   outline: 2px solid colors.$white;
+  background-color: var(--#{vars.$bcgov-prefix}-button-primary-hover);
 }
 
 @media only screen and (max-width: 672px) {
@@ -131,7 +132,7 @@ p.fav-card-title-large {
     justify-content: flex-start;
     align-items: center;
   }
-  
+
 }
 
 .fav-card-menu-options{

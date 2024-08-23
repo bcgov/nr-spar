@@ -43,7 +43,18 @@ const FavouriteCard = ({
   });
 
   const ActionBtn = (
-    <OverflowMenu className="fav-card-overflow" menuOptionsClass="fav-card-menu-options" aria-label={`${favObject.header} options`} flipped iconDescription="More actions">
+    <OverflowMenu
+      className="fav-card-overflow"
+      menuOptionsClass="fav-card-menu-options"
+      aria-label={`${favObject.header} options`}
+      flipped
+      iconDescription="More actions"
+      // Need to stop bubbling here so it won't trigger the
+      // the tile onKeyDown event
+      onKeyDown={(e: Event) => {
+        e.stopPropagation();
+      }}
+    >
       <OverflowMenuItem
         itemText={favObject.highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'}
         onClick={(e: Event) => {
@@ -78,6 +89,13 @@ const FavouriteCard = ({
     <Tile
       className={favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
       onClick={() => navigate(favObject.link)}
+      tabIndex={0}
+      aria-label={`Go to ${favObject.header}`}
+      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          navigate(favObject.link);
+        }
+      }}
     >
       <div className="fav-card-header">
         <Icon className="fav-card-icon" />
