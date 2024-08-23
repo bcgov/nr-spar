@@ -1,0 +1,324 @@
+kind: Template
+apiVersion: "template.openshift.io/v1"
+metadata:
+  name: ${NAME}
+labels:
+  app: ${NAME}-${ZONE}
+parameters:
+  - name: NAME
+    displayName: Name
+    description: The name assigned to all of the resources.  Use 'backup-{database name}' depending on your database provider
+    required: true
+    value: backup-postgres
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
+    required: true
+  - name: SOURCE_IMAGE_NAME
+    displayName: Source Image Name
+    description: The name of the image to use for this resource.  Use 'backup-{database name}' depending on your database provider
+    required: true
+    value: backup-postgres
+  - name: COMPONENT
+    displayName: App Name
+    description: Used to group resources together.  Defaults to backup-container
+    required: true
+    value: backup-container
+  - name: ROLE
+    displayName: ROLE
+    description: The role assigned to all of the resources.  Defaults to backup-container
+    required: true
+    value: backup-container
+  - name: NAMESPACE_NAME
+    displayName: Namespace Name
+    description: The name of the namespace being deployed to..
+    required: true
+    value: devex-von-image
+  - name: IMAGE_NAMESPACE
+    displayName: Image Namespace
+    description: The namespace of the OpenShift project containing the imagestream for the application.
+    required: true
+    value:
+  - name: DATABASE_SERVICE_NAME
+    displayName: Database Service Name
+    description: Used for backward compatibility only. Not needed when using the recommended 'backup.conf' configuration.  The name of the database service.
+    required: false
+    value: "postgresql"
+  - name: DATABASE_DEPLOYMENT_NAME
+    displayName: Database Deployment Name
+    description: The name associated to the database deployment resources.  In particular, this is used to wire up the credentials associated to the database.
+    required: true
+    value: postgresql
+  - name: DATABASE_USER_KEY_NAME
+    displayName: Database User Key Name
+    description: The database user key name stored in database deployment resources specified by DATABASE_DEPLOYMENT_NAME.
+    required: true
+    value: database-user
+  - name: DATABASE_PASSWORD_KEY_NAME
+    displayName: Database Password Key Name
+    description: The database password key name stored in database deployment resources specified by DATABASE_DEPLOYMENT_NAME.
+    required: true
+    value: database-password
+  - name: MSSQL_SA_PASSWORD
+    displayName: MSSQL SA Password
+    description: The database password to use for the local backup database.
+    required: false
+  - name: BACKUP_STRATEGY
+    displayName: Backup Strategy
+    description: The strategy to use for backups; for example daily, or rolling.
+    required: true
+    value: rolling
+  - name: BACKUP_DIR
+    displayName: The root backup directory
+    description: The name of the root backup directory.  The backup volume will be mounted to this directory.
+    required: true
+    value: /backups/
+  - name: NUM_BACKUPS
+    displayName: The number of backup files to be retained
+    description: Used for backward compatibility only.  Ignored when using the recommended `rolling` backup strategy.  The number of backup files to be retained.  Used for the `daily` backup strategy.
+    required: false
+    value: ""
+  - name: DAILY_BACKUPS
+    displayName: Number of Daily Backups to Retain
+    description: The number of daily backup files to be retained.  Used for the `rolling` backup strategy.
+    required: false
+    value: "6"
+  - name: WEEKLY_BACKUPS
+    displayName: Number of Weekly Backups to Retain
+    description: The number of weekly backup files to be retained.  Used for the `rolling` backup strategy.
+    required: false
+    value: "4"
+  - name: MONTHLY_BACKUPS
+    displayName: Number of Monthly Backups to Retain
+    description: The number of monthly backup files to be retained.  Used for the `rolling` backup strategy.
+    required: false
+    value: "1"
+  - name: BACKUP_PERIOD
+    displayName: Period (d,m,s) between backups in a format used by the sleep command
+    description: Used for backward compatibility only.  Ignored when using the recommended `backup.conf` and cron backup strategy.  Period (d,m,s) between backups in a format used by the sleep command
+    required: false
+    value: "1d"
+  - name: CONFIG_FILE_NAME
+    displayName: Config File Name
+    description: The name of the configuration file.
+    required: true
+    value: backup.conf
+  - name: CONFIG_MAP_NAME
+    displayName: Config Map Name
+    description: The name of the configuration map.
+    required: true
+    value: backup-conf
+  - name: CONFIG_MOUNT_PATH
+    displayName: Config Mount Path
+    description: The path to use to mount the config file.
+    required: true
+    value: /
+  - name: BACKUP_VOLUME_NAME
+    displayName: Backup Volume Name
+    description: The name of the persistent volume used to store the backups.
+    required: true
+    value: backup
+  - name: BACKUP_VOLUME_SIZE
+    displayName: Backup Volume Size
+    description: The size of the persistent volume used to store the backups, e.g. 512Mi, 1Gi, 2Gi.  Ensure this is sized correctly.  Refer to the container documentation for details.
+    required: true
+    value: 5Gi
+  - name: BACKUP_VOLUME_CLASS
+    displayName: Backup Volume Class
+    description: The class of the persistent volume used to store the backups; netapp-file-standard is the recommended default.
+    required: true
+    value: netapp-file-backup
+  - name: VERIFICATION_VOLUME_NAME
+    displayName: Verification Volume Name
+    description: The name for the verification volume, used for restoring and verifying backups.
+    required: false
+    value: backup-verification
+  - name: VERIFICATION_VOLUME_SIZE
+    displayName: Backup Volume Size
+    description: The size of the persistent volume used for restoring and verifying backups, e.g. 512Mi, 1Gi, 2Gi.  Ensure this is sized correctly.  It should be large enough to contain your largest database.
+    required: true
+    value: 1Gi
+  - name: VERIFICATION_VOLUME_CLASS
+    displayName: Backup Volume Class
+    description: The class of the persistent volume used for restoring and verifying backups; netapp-file-standard, netapp-block-standard.
+    required: true
+    value: netapp-file-standard
+  - name: VERIFICATION_VOLUME_MOUNT_PATH
+    displayName: Verification Volume Mount Path
+    description: The path on which to mount the verification volume.  This is used by the database server to contain the database configuration and data files. For Mongo, please use /var/lib/mongodb/data . For MSSQL, please use /var/opt/mssql/data. For MariaDB, please use /var/lib/mysql/data
+    required: true
+    value: /var/lib/pgsql/data
+  - name: CPU_REQUEST
+    displayName: Resources CPU Request
+    description: The resources CPU request (in cores) for this build.
+    required: true
+    value: 25m
+  - name: CPU_LIMIT
+    displayName: Resources CPU Limit
+    description: The resources CPU limit (in cores) for this build.
+    required: true
+    value: 75m
+  - name: MEMORY_REQUEST
+    displayName: Resources Memory Request
+    description: The resources Memory request (in Mi, Gi, etc) for this build.
+    required: true
+    value: 2Gi
+  - name: MEMORY_LIMIT
+    displayName: Resources Memory Limit
+    description: The resources Memory limit (in Mi, Gi, etc) for this build.
+    required: true
+    value: 4Gi
+objects:
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: ${BACKUP_VOLUME_NAME}
+      labels:
+        name: ${NAME}
+        app: ${COMPONENT}
+        role: ${ROLE}
+        env: ${ZONE}
+    spec:
+      storageClassName: ${BACKUP_VOLUME_CLASS}
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: ${BACKUP_VOLUME_SIZE}
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: ${VERIFICATION_VOLUME_NAME}
+      labels:
+        name: ${NAME}
+        app: ${COMPONENT}
+        role: ${ROLE}
+        env: ${ZONE}
+    spec:
+      storageClassName: ${VERIFICATION_VOLUME_CLASS}
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: ${VERIFICATION_VOLUME_SIZE}
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      strategy:
+        type: Recreate
+      ##triggers:
+      ##  - type: ConfigChange
+      ##  - type: ImageChange
+      ##    imageChangeParams:
+      ##      automatic: true
+      ##      containerNames:
+      ##        - ${NAME}
+      ##      from:
+      ##        kind: ImageStreamTag
+      ##        namespace: ${IMAGE_NAMESPACE}
+      ##        name: ${SOURCE_IMAGE_NAME}:${ZONE}
+      replicas: 1
+      selector:
+        name: ${NAME}
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-${COMPONENT}
+      template:
+        metadata:
+          labels:
+            app: ${NAME}-${ZONE}
+            deployment: ${NAME}-${ZONE}-${COMPONENT}
+        spec:
+          volumes:
+            - name: ${BACKUP_VOLUME_NAME}
+              persistentVolumeClaim:
+                claimName: ${BACKUP_VOLUME_NAME}
+            - name: ${VERIFICATION_VOLUME_NAME}
+              persistentVolumeClaim:
+                claimName: ${VERIFICATION_VOLUME_NAME}
+            - name: ${NAME}-config-volume
+              configMap:
+                name: ${CONFIG_MAP_NAME}
+                items:
+                  - key: ${CONFIG_FILE_NAME}
+                    path: ${CONFIG_FILE_NAME}
+          containers:
+            - name: ${NAME}-${ZONE}
+              image: ""
+              imagePullPolicy: Always
+              env:
+                - name: BACKUP_STRATEGY
+                  value: ${BACKUP_STRATEGY} # 'rolling'
+                - name: BACKUP_DIR
+                  value: ${BACKUP_DIR} # '/backups/'
+                - name: NUM_BACKUPS
+                  value: ${NUM_BACKUPS} # ignored if 'rolling' above
+                - name: DAILY_BACKUPS
+                  value: ${DAILY_BACKUPS} # 6 (days to retain)
+                - name: WEEKLY_BACKUPS
+                  value: ${WEEKLY_BACKUPS} # 4 (weeks)
+                - name: MONTHLY_BACKUPS
+                  value: ${MONTHLY_BACKUPS} # 1
+                - name: BACKUP_PERIOD
+                  value: ${BACKUP_PERIOD} # 1d (1 day)
+                - name: DATABASE_SERVICE_NAME
+                  value: ${DATABASE_SERVICE_NAME} # 'postgresql'
+                - name: DATABASE_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-name
+                - name: TABLE_SCHEMA
+                  value: ${NAME} # 'nr-spar'
+                - name: DATABASE_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-user
+                - name: DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-database
+                      key: database-password
+                - name: FTP_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-backup-ftp
+                      key: ftp-url
+                - name: FTP_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-backup-ftp
+                      key: ftp-user
+                - name: FTP_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-backup-ftp
+                      key: ftp-password
+                - name: WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-backup-webhook
+                      key: webhook-url
+                - name: ENVIRONMENT_FRIENDLY_NAME
+                  value: ${ZONE}
+                - name: ENVIRONMENT_NAME
+                  value: ${ZONE}
+              resources:
+                requests:
+                  cpu: ${CPU_REQUEST}
+                  memory: ${MEMORY_REQUEST}
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
+              volumeMounts:
+                - name: ${BACKUP_VOLUME_NAME}
+                  mountPath: ${BACKUP_DIR}
+                - name: ${VERIFICATION_VOLUME_NAME}
+                  mountPath: ${VERIFICATION_VOLUME_MOUNT_PATH}
+                - name: ${NAME}-config-volume
+                  mountPath: ${CONFIG_MOUNT_PATH}${CONFIG_FILE_NAME}
+                  subPath: ${CONFIG_FILE_NAME}
+
