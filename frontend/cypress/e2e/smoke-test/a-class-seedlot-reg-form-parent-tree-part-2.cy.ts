@@ -7,6 +7,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
       smpSuccessSubtitle: string;
       smpSuccessErrorMsg: string;
       nonOrchardErrorMsg: string;
+      smpSuccessCheckboxText: string;
       smpSuccessNonOrchardErrorMsg: string;
     }
   };
@@ -47,7 +48,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
   it('check checkbox default state', () => {
     cy.get('[for="smp-default-vals-checkbox"]')
-      .should('have.text', '');
+      .should('have.text', regFormData.parentTree.smpSuccessCheckboxText);
 
     cy.get('#smp-default-vals-checkbox')
       .should('not.be.checked');
