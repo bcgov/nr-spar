@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.security;
 
+import ca.bc.gov.backendstartapi.config.Constants;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -8,6 +9,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 /** This class contains methods for handling JWT requests. */
 public final class JwtSecurityUtil {
+
+  private final static List<String> concreteRoles = List.of("SPAR_MINISTRY_ORCHARD", "SPAR_TSC_ADMIN");
 
   /**
    * Gets user roles from user JWT token.
@@ -47,6 +50,11 @@ public final class JwtSecurityUtil {
                 if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
                   clientIds.add(clientNumber);
                 }
+              }
+              // Handling concrete roles with no client id affixed
+              if (concreteRoles.contains(role)
+                  && !clientIds.contains(Constants.MINITRY_OF_FORESTS_ID)) {
+                clientIds.add(Constants.MINITRY_OF_FORESTS_ID);
               }
             });
     return clientIds;
