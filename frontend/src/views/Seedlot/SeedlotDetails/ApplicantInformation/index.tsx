@@ -18,11 +18,15 @@ interface ApplicantSeedlotInformationProps {
   seedlotNumber?: string;
   applicant?: SeedlotApplicantType;
   isFetching: boolean;
+  hideEditButton: boolean;
 }
 
-const ApplicantInformation = (
-  { seedlotNumber, applicant, isFetching }: ApplicantSeedlotInformationProps
-) => {
+const ApplicantInformation = ({
+  seedlotNumber,
+  applicant,
+  isFetching,
+  hideEditButton
+}: ApplicantSeedlotInformationProps) => {
   const navigate = useNavigate();
 
   return (
@@ -146,19 +150,25 @@ const ApplicantInformation = (
           }
         </Column>
       </Row>
-      <Row>
-        <Column>
-          <Button
-            kind="tertiary"
-            size="md"
-            className="section-btn"
-            renderIcon={Edit}
-            onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? ''))}
-          >
-            Edit applicant
-          </Button>
-        </Column>
-      </Row>
+      {
+        hideEditButton
+          ? null
+          : (
+            <Row>
+              <Column>
+                <Button
+                  kind="tertiary"
+                  size="md"
+                  className="section-btn"
+                  renderIcon={Edit}
+                  onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? ''))}
+                >
+                  Edit applicant
+                </Button>
+              </Column>
+            </Row>
+          )
+      }
     </FlexGrid>
   );
 };
