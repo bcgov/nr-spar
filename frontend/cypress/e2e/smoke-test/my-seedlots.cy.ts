@@ -248,17 +248,33 @@ describe('My seedlots page', () => {
   });
 
   it('Pagination', () => {
+    const dropdownNumber = '10';
     // Number of item dropdown
     cy.get(`.${prefix}--pagination__left`)
       .find('select')
-      .as('dropdownBtn')
-      .select('10');
+      .select(dropdownNumber);
 
-    // @ngunner15 the drop down is selected with value 10, what we need here is to verify
-    // that the total number of rows on this page is actually 10.
-    // you might be able to do that by checking the total number of <tr> under <tbody>
-    cy.get('@dropdownBtn')
-      .should('have.value', '10');
+    // Wait for table body to load
+    cy.get(`table.${prefix}--data-table tbody`)
+      .find('tr')
+      .eq(2);
+
+    cy.get(`.${prefix}--pagination__left`)
+      .find(`.${prefix}--pagination__items-count`)
+      .should('include.text', '1–10');
+
+    // Page number dropdown
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`select.${prefix}--select-input`)
+      .select('2');
+
+    cy.get(`.${prefix}--pagination__left`)
+      .find(`.${prefix}--pagination__items-count`)
+      .should('include.text', '11');
+
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`select.${prefix}--select-input`)
+      .select('1');
 
     // Forward Backward buttons
     cy.get(`.${prefix}--pagination__control-buttons`)
@@ -276,8 +292,6 @@ describe('My seedlots page', () => {
     cy.get(`.${prefix}--pagination__right`)
       .find(`select.${prefix}--select-input`)
       .should('have.value', '1');
-
-    // @ngunner15 Need to test the page number dropdown
   });
 
   it('Select a seedlot row should redirect to its detail page', () => {
