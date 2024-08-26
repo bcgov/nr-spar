@@ -57,7 +57,7 @@ public class ParentTreeService {
         ptVals.smpMixIdAndProps().size());
 
     final BigDecimal zero = BigDecimal.ZERO;
-    
+
     // First pass
     BigDecimal varTotalConeCount = zero;
     BigDecimal varTotalPollenCount = zero;
@@ -190,7 +190,7 @@ public class ParentTreeService {
       // Definition: weighted value = proportion * value
 
       BigDecimal proportion = dto.proportion();
-      if (proportion.compareTo(ONE) >= 0) {
+      if (proportion.compareTo(ONE) > 0) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             String.format(
