@@ -69,7 +69,7 @@ const ServiceStatus = () => {
                       `
                     }
                     /*
-                     * It's grammatically incorrect to use 'is' for singluar subject
+                     * It's grammatically incorrect to use 'is' for singular subject
                      * e.g. 1 out of 4 IS down
                      * The original correct implementation was
                      * ${statusQueries.filter((query) => query.status === 'error')
