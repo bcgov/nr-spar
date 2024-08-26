@@ -10,6 +10,7 @@ import { Edit } from '@carbon/icons-react';
 
 import { getAClassSeedlotProgressStatus } from '../../../../api-service/seedlotAPI';
 import { ProgressIndicatorConfig } from '../../ContextContainerClassA/definitions';
+import DetailSection from '../../../../components/DetailSection';
 import SeedlotRegistrationProgress from '../../../../components/SeedlotRegistrationProgress';
 import NetworkError from '../../../../components/NetworkError';
 import { completeProgressConfig, initialProgressConfig } from '../../ContextContainerClassA/constants';
@@ -19,7 +20,6 @@ import { QueryStatusType } from '../../../../types/QueryStatusType';
 import { SeedlotStatusCode } from '../../../../types/SeedlotType';
 
 import './styles.scss';
-import DetailSection from '../../../../components/DetailSection';
 
 interface FormProgressProps {
   seedlotNumber?: string;
@@ -115,7 +115,14 @@ const FormProgress = (
             onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
             disabled={getSeedlotQueryStatus === 'loading'}
           >
-            {seedlotStatusCode === 'SUB' ? 'View your seedlot' : 'Edit seedlot form'}
+            {
+              seedlotStatusCode === 'SUB'
+              || seedlotStatusCode === 'EXP'
+              || seedlotStatusCode === 'COM'
+              || seedlotStatusCode === 'APP'
+                ? 'View your seedlot'
+                : 'Edit seedlot form'
+            }
           </Button>
         </Column>
       </Row>

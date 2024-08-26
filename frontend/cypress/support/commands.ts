@@ -105,6 +105,10 @@ Cypress.Commands.overwrite('log', (log, ...args) => {
 Cypress.Commands.add('saveSeedlotRegFormProgress', () => {
   cy.get('.seedlot-registration-button-row')
     .find('button.form-action-btn')
+    .should('not.be.disabled');
+
+  cy.get('.seedlot-registration-button-row')
+    .find('button.form-action-btn')
     .contains('Save changes')
     .click();
 

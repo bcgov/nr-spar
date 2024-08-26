@@ -7,7 +7,7 @@ on:
     inputs:
       tag:
         description: 'The tag set to deploy; e.g. latest or PR number'
-        required: true
+        required: false
 
 concurrency:
   # Do not interrupt previous workflows

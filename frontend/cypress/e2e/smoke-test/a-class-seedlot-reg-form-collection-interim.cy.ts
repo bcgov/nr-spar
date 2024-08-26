@@ -480,6 +480,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .type('2024-05-25')
       .blur();
 
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+
     cy.get('#end-date-input')
       .clear()
       .type('2024-05-26')
@@ -508,6 +511,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .clear()
       .type('Test comment')
       .blur();
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
 
     // Press next button
     cy.get('.seedlot-registration-button-row')

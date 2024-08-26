@@ -25,6 +25,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   const parentTreeSet = new Set();
   const unionParentTreeArray: string[] = [];
   const lengthOfArray = 6;
+  const F2GameticValue = 'F2 - Measured Cone Volume';
+  const M3GameticValue = 'M3 - Pollen Volume Estimate by 100% Survey';
 
   beforeEach(() => {
     // Login
@@ -452,11 +454,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .contains('F2 - Measured Cone Volume')
+      .contains(F2GameticValue)
       .click();
 
     cy.get('#orchard-female-gametic')
-      .should('have.value', 'F2 - Measured Cone Volume');
+      .should('have.value', F2GameticValue);
 
     // Select male gametic contribution methodology
     cy.get('#orchard-male-gametic')
@@ -465,11 +467,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .contains('M3 - Pollen Volume Estimate by 100% Survey')
+      .contains(M3GameticValue)
       .click();
 
     cy.get('#orchard-male-gametic')
-      .should('have.value', 'M3 - Pollen Volume Estimate by 100% Survey');
+      .should('have.value', M3GameticValue);
 
     // Check 'x' button
     cy.get('#orchard-female-gametic')
@@ -493,8 +495,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .contains('F2 - Measured Cone Volume')
+      .contains(F2GameticValue)
       .click();
+
+    cy.get('#orchard-female-gametic')
+      .should('have.value', F2GameticValue);
 
     cy.get('#orchard-male-gametic')
       .siblings()
@@ -502,8 +507,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .contains('M3 - Pollen Volume Estimate by 100% Survey')
+      .contains(M3GameticValue)
       .click();
+
+    cy.get('#orchard-male-gametic')
+      .should('have.value', M3GameticValue);
 
     // Change radio inputs of gamete section
     cy.get('#controlled-cross-yes')
@@ -597,6 +605,12 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
+  });
+
+  it('Step complete status', () => {
+    // Make sure value is loaded
+    cy.get('#orchard-breading-perc')
+      .should('have.value', '5');
 
     // Press next button
     cy.get('.seedlot-registration-button-row')
