@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
@@ -162,5 +163,59 @@ class OrchardServiceTest {
     Assertions.assertNotNull(list);
     Assertions.assertFalse(list.isEmpty());
     Assertions.assertEquals(1, list.size());
+  }
+
+  @Test
+  @DisplayName("findAllOrchardsByVegCode - valid vegCode should return orchard list")
+  void findAllOrchardsByVegCode_validVegCode_shouldReturnOrchardList() {
+    String vegCode = "BV";
+    OrchardDto orchardDto = new OrchardDto();
+    orchardDto.setId("1");
+    orchardDto.setName("Primary Orchard");
+    orchardDto.setVegetationCode(vegCode);
+
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of(orchardDto));
+
+    List<OrchardDto> result = orchardService.findAllOrchardsByVegCode(vegCode);
+
+    Assertions.assertFalse(result.isEmpty());
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals("Primary Orchard", result.get(0).getName());
+  }
+
+  @Test
+  @DisplayName("findAllOrchardsByVegCode - invalid vegCode should return empty list")
+  void findAllOrchardsByVegCode_invalidVegCode_shouldReturnEmptyList() {
+    String vegCode = "INVALID";
+
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
+
+    List<OrchardDto> result = orchardService.findAllOrchardsByVegCode(vegCode);
+
+    Assertions.assertTrue(result.isEmpty());
+  }
+
+  @Test
+  @DisplayName("findAllOrchardsByVegCode - empty vegCode should return empty list")
+  void findAllOrchardsByVegCode_emptyVegCode_shouldReturnEmptyList() {
+    String vegCode = "";
+
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
+
+    List<OrchardDto> result = orchardService.findAllOrchardsByVegCode(vegCode);
+
+    Assertions.assertTrue(result.isEmpty());
+  }
+
+  @Test
+  @DisplayName("findAllOrchardsByVegCode - null vegCode should return empty list")
+  void findAllOrchardsByVegCode_nullVegCode_shouldReturnEmptyList() {
+    String vegCode = null;
+
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
+
+    List<OrchardDto> result = orchardService.findAllOrchardsByVegCode(vegCode);
+
+    Assertions.assertTrue(result.isEmpty());
   }
 }
