@@ -32,7 +32,7 @@ jobs:
           triggers: ('${{ matrix.package }}/')
 
   deploys:
-    name: Deploys
+    name: Deploys (${{ github.event.number }})
     needs: [builds]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
