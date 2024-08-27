@@ -390,7 +390,7 @@ interface t_pt_calc {
   pct_tested_parent_trees_WVE: number; // NUMBER(3)
   pct_tested_parent_trees_WWD: number; // NUMBER(3)  
   pct_tested_parent_trees: number; // NUMBER(3)
-  pct_untested_parent_trees: number; // NUMBER(3));
+  pct_untested_parent_trees: number; // NUMBER(3)
 }
 
 let r_pt_contrib: t_pt_calc | null;
@@ -410,7 +410,7 @@ const CONST_CLASS_A_COPY_MAX  : string; // CONSTANT VARCHAR2(5) = '62999';
  *             they have already been retrieved.
  */
 function get_previous_seedlot_values(p_force: boolean = false) {
-  // Previous: SELECT * FROM seedlot WHERE seedlot_number = g_seedlot_number;
+  // Previous: SELECT * FROM seedlot WHERE seedlot_number = g_seedl ot_number;
   // --if record is empty or caller specified FORCE option
   if (r_previous.seedlot_number == null || p_force) {
     // OPEN c_previous;
