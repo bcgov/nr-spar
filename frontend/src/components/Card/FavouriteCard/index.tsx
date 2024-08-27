@@ -49,11 +49,6 @@ const FavouriteCard = ({
       aria-label={`${favObject.header} options`}
       flipped
       iconDescription="More actions"
-      // Need to stop bubbling here so it won't trigger the
-      // the tile onKeyDown event
-      onKeyDown={(e: Event) => {
-        e.stopPropagation();
-      }}
     >
       <OverflowMenuItem
         itemText={favObject.highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'}
