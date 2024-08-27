@@ -22,12 +22,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         # Get PR number for squash merges to main
-      - name: PR Number
-        id: pr
+      - id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
 
-  deploys:
-    name: TEST
+  deploys-test:
+    name: TEST Deploys (${{ needs.init.outputs.pr }})
     needs: [init]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
@@ -36,12 +35,19 @@ jobs:
       tag: ${{ needs.init.outputs.pr }}
       target: test
 
+  deploys-prod:
+    name: PROD Deploys (${{ needs.init.outputs.pr }})
+    needs: [init, deploys-test]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: prod
+      tag: ${{ needs.init.outputs.pr }}
+      target: prod
+
   promote:
     name: Promote Images
-    env:
-      target: ${{ needs.init.outputs.pr }}
-      tag: prod
-    needs: [init, deploys]
+    needs: [init, deploys-prod]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -51,20 +57,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ env.target }}
-          tags: ${{ env.tag }}
-
-      - run: |
-          # Verify tagging
-          INSPECT="docker manifest inspect ghcr.io/${{ github.repository }}/${{ matrix.package }}"
-          TARGET=$(${INSPECT}:${{ env.target }} | jq -r '.manifests[] | select(.platform.architecture=="amd64") | .digest')
-          TAG=$(${INSPECT}:${{ env.tag }} | jq -r '.manifests[] | select(.platform.architecture=="amd64") | .digest')
-          echo "TARGET: ${TARGET}"
-          echo "TAG: ${TAG}"
-          if [ "${TARGET}" != "${TAG}" ]; then
-            echo "ERROR: Tagging failed!"
-            echo "RETRY=true" >> $GITHUB_ENV
-          else
-            echo "ERROR: Tagging success!"
-            echo "RETRY=false" >> $GITHUB_ENV
-          fi
+          target: ${{ needs.init.outputs.pr }}
+          tags: prod

@@ -27,7 +27,7 @@ import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
-import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
+import { MEDIUM_SCREEN_WIDTH, MINISTRY_OF_FOREST_ID } from '../../../shared-constants/shared-constants';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import { StatusOnSaveType } from '../../../api-service/tscAdminAPI';
@@ -53,11 +53,16 @@ const SeedlotDetails = () => {
 
   const statusOnSave = searchParams.get('statusOnSave') as StatusOnSaveType | null;
 
+  const viewOnlySeedlot: boolean = seedlotData?.seedlotStatus === 'Submitted'
+    || seedlotData?.seedlotStatus === 'Expired'
+    || seedlotData?.seedlotStatus === 'Complete'
+    || seedlotData?.seedlotStatus === 'Approved';
+
   const manageOptions = [
     {
       text: 'Edit seedlot applicant',
       onClickFunction: () => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')),
-      disabled: false
+      disabled: viewOnlySeedlot
     },
     {
       text: 'Print seedlot',
@@ -108,7 +113,7 @@ const SeedlotDetails = () => {
     if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
       return 'Review seedlot';
     }
-    if (seedlotData?.seedlotStatus === 'Submitted') {
+    if (viewOnlySeedlot) {
       return 'View your seedlot';
     }
     return 'Edit seedlot form';
@@ -141,6 +146,17 @@ const SeedlotDetails = () => {
     }
   };
 
+  const createBreadcrumbItems = () => {
+    const crumbsList = [];
+    crumbsList.push({ name: 'Seedlots', path: ROUTES.SEEDLOTS });
+    if (isTscAdmin && seedlotData?.applicantAgency !== MINISTRY_OF_FOREST_ID) {
+      crumbsList.push({ name: 'Review Seedlots', path: ROUTES.TSC_SEEDLOTS_TABLE });
+    } else {
+      crumbsList.push({ name: 'My seedlots', path: ROUTES.MY_SEEDLOTS });
+    }
+    return crumbsList;
+  };
+
   useEffect(() => {
     if (forestClientQuery.isFetched && seedlotQuery.isFetchedAfterMount) {
       covertToClientObj();
@@ -150,11 +166,7 @@ const SeedlotDetails = () => {
   return (
     <FlexGrid className="seedlot-details-page">
       <Row className="seedlot-details-breadcrumb">
-        <Breadcrumbs crumbs={[
-          { name: 'Seedlots', path: ROUTES.SEEDLOTS },
-          { name: 'My seedlots', path: ROUTES.MY_SEEDLOTS }
-        ]}
-        />
+        <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="page-title">
         <Column className={windowSize.innerWidth < MEDIUM_SCREEN_WIDTH ? 'summary-title-flex-col' : 'summary-title-flex-row'}>
@@ -244,6 +256,7 @@ const SeedlotDetails = () => {
                   seedlotNumber={seedlotNumber}
                   applicant={applicantData}
                   isFetching={forestClientQuery?.isFetching}
+                  hideEditButton={!isTscAdmin && viewOnlySeedlot}
                 />
                 {
                   (

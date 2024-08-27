@@ -20,6 +20,7 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import PageTitle from '../../../components/PageTitle';
 import RowGap from '../../../components/RowGap';
+import ErrorToast from '../../../components/Toast/ErrorToast';
 import ApplicantAndSeedlotRead from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Read';
 import ApplicantAndSeedlotEdit from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Edit';
 import { SeedlotPatchPayloadType, SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
@@ -47,9 +48,10 @@ import {
   SeedPlanZoneDto, SeedlotReviewElevationLatLongDto,
   SeedlotReviewGeoInformationDto, TscSeedlotEditPayloadType
 } from '../../../types/SeedlotType';
-import ErrorToast from '../../../components/Toast/ErrorToast';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
+import AuthContext from '../../../contexts/AuthContext';
 import { GeneticTrait } from '../../../types/PtCalcTypes';
+import { getSeedlotBreadcrumbs } from '../../../utils/BreadcrumbUtils';
 
 import ClassAContext from '../ContextContainerClassA/context';
 import { validateRegForm } from '../CreateAClass/utils';
@@ -64,7 +66,7 @@ import {
 } from '../ContextContainerClassA/utils';
 
 import {
-  getBreadcrumbs, validateAreaOfUse, validateCollectGeoVals,
+  validateAreaOfUse, validateCollectGeoVals,
   validateGeneticWorth
 } from './utils';
 import { GenWorthValType } from './definitions';
@@ -87,6 +89,8 @@ const SeedlotReviewContent = () => {
   const [statusToUpdateTo, setStatusToUpdateTo] = useState<StatusOnSaveType>('PND');
 
   const { seedlotNumber } = useParams();
+
+  const { isTscAdmin } = useContext(AuthContext);
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -518,7 +522,15 @@ const SeedlotReviewContent = () => {
         {isReadMode ? 'Edit seedlot' : 'Save edit'}
       </Button>
 
-      <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber ?? '')} />
+      <Breadcrumbs
+        crumbs={
+          getSeedlotBreadcrumbs(
+            seedlotNumber!,
+            seedlotData?.applicantClientNumber!,
+            isTscAdmin
+          )
+        }
+      />
       <Row>
         <PageTitle
           title={`Review Seedlot ${seedlotQuery.data?.seedlot.id}`}
