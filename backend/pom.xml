@@ -39,7 +39,7 @@
     <sonar.organization>bcgov-sonarcloud</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <oci.revision>${project.version}</oci.revision>
-    <hibernate.version>6.5.2.Final</hibernate.version>
+    <hibernate.version>6.6.0.Final</hibernate.version>
   </properties>
 
   <profiles>
