@@ -4,7 +4,6 @@
 .seedlot-orchard-step-form {
   padding: 0;
 
-
   h2 {
     @include type.type-style('heading-03');
     margin-bottom: 0.2rem;
@@ -36,9 +35,14 @@
     margin-bottom: 2.5rem;
   }
 
+  .seedlot-gamete-title-row {
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+
   .seedlot-orchard-add-orchard,
   .pollen-methodology-checkbox {
-    margin-bottom: 1rem;
+    margin-bottom: 2.5rem;
   }
 
   .orchard-fields-review-only {
