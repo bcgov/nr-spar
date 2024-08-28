@@ -12,6 +12,8 @@ import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.util.LatLongUtil;
+import ca.bc.gov.backendstartapi.util.ValueUtil;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -61,9 +63,15 @@ public class ParentTreeService {
     // First pass
     BigDecimal varTotalConeCount = zero;
     BigDecimal varTotalPollenCount = zero;
+    Integer varTotalNonOrchardPollen = 0;
+    Integer varNumNonOrchardPollen = 0;
     for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
       varTotalConeCount = varTotalConeCount.add(orchardPtVals.coneCount());
       varTotalPollenCount = varTotalPollenCount.add(orchardPtVals.pollenCount());
+      if (ValueUtil.hasValue(orchardPtVals.nonOrchardPollenContamPct())) {
+        varTotalNonOrchardPollen += orchardPtVals.nonOrchardPollenContamPct();
+        varNumNonOrchardPollen += 1;
+      }
     }
 
     // Second pass - No needed, since only --col:W it's in there, which is already on the third pass
@@ -116,6 +124,12 @@ public class ParentTreeService {
                 .pow(2);
         varSumOrchGameteContr = varSumOrchGameteContr.add(varOrchGameteContr);
       }
+    }
+
+    // --calc avg non-orchard pollen contamination pct
+    Integer varAvgNonOrchardPollen = 0;
+    if (varNumNonOrchardPollen > 0) {
+      varAvgNonOrchardPollen = varTotalNonOrchardPollen / varNumNonOrchardPollen;
     }
 
     BigDecimal coancestry = null;

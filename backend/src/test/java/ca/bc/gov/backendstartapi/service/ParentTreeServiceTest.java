@@ -66,6 +66,7 @@ class ParentTreeServiceTest {
             new BigDecimal(12),
             new BigDecimal(33),
             23,
+            20,
             List.of(
                 new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
                 new GeneticWorthTraitsDto("gvo", new BigDecimal("18"), null, null),
@@ -78,6 +79,7 @@ class ParentTreeServiceTest {
             new BigDecimal(12),
             new BigDecimal(23),
             12,
+            10,
             List.of(
                 new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
                 new GeneticWorthTraitsDto("gvo", new BigDecimal("27"), null, null),
@@ -90,6 +92,7 @@ class ParentTreeServiceTest {
             new BigDecimal(32),
             new BigDecimal(22),
             12,
+            10,
             List.of(
                 new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
                 new GeneticWorthTraitsDto("gvo", new BigDecimal("19"), null, null),
@@ -102,6 +105,7 @@ class ParentTreeServiceTest {
             new BigDecimal(12),
             new BigDecimal(45),
             3,
+            2,
             List.of(
                 new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
                 new GeneticWorthTraitsDto("gvo", new BigDecimal("18"), null, null),

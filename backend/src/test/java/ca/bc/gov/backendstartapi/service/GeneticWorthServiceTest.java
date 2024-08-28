@@ -146,6 +146,7 @@ class GeneticWorthServiceTest {
             new BigDecimal("13"),
             new BigDecimal("48.5"),
             23,
+            20,
             List.of(dto129gvo, dto129wwd));
     requestList.add(requestDto129);
 
@@ -159,6 +160,7 @@ class GeneticWorthServiceTest {
             new BigDecimal("8.5"),
             new BigDecimal("49"),
             11,
+            10,
             List.of(dto212gvo, dto212wwd));
     requestList.add(requestDto212);
 
@@ -172,6 +174,7 @@ class GeneticWorthServiceTest {
             new BigDecimal("129.5"),
             new BigDecimal("93"),
             14,
+            12,
             List.of(dto300gvo, dto300wwd));
     requestList.add(requestDto300);
 
@@ -185,6 +188,7 @@ class GeneticWorthServiceTest {
             new BigDecimal("71.20833333"),
             new BigDecimal("35"),
             21,
+            20,
             List.of(dto3141gvo, dto3141wwd));
     requestList.add(requestDto3141);
 
@@ -198,6 +202,7 @@ class GeneticWorthServiceTest {
             new BigDecimal("42.541666667"),
             new BigDecimal("92.5"),
             16,
+            13,
             List.of(dto3144gvo, dto3144wwd));
     requestList.add(requestDto3144);
 
@@ -211,6 +216,7 @@ class GeneticWorthServiceTest {
             new BigDecimal("30.083333333"),
             new BigDecimal("27"),
             10,
+            8,
             List.of(dto3169gvo, dto3169wwd));
     requestList.add(requestDto3169);
 
@@ -224,6 +230,7 @@ class GeneticWorthServiceTest {
             new BigDecimal("6"),
             new BigDecimal("0"),
             9,
+            7,
             List.of(dto3210gvo, dto3210wwd));
     requestList.add(requestDto3210);
 
@@ -237,6 +244,7 @@ class GeneticWorthServiceTest {
             new BigDecimal("152"),
             new BigDecimal("154.5"),
             5,
+            3,
             List.of(dto3245gvo, dto3245wwd));
     requestList.add(requestDto3245);
 

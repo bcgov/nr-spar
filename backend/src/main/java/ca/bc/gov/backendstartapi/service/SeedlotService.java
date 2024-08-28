@@ -933,6 +933,7 @@ public class SeedlotService {
                       orchardPtDto.coneCount(),
                       orchardPtDto.pollenCount(),
                       orchardPtDto.smpSuccessPct(),
+                      orchardPtDto.nonOrchardPollenContamPct(),
                       getGeneticTraitList(orchardPtDto.parentTreeGeneticQualities()));
               converted.add(toAdd);
             });
