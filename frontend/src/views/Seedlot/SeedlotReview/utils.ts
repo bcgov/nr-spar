@@ -1,23 +1,6 @@
-import ROUTES from '../../../routes/constants';
 import focusById from '../../../utils/FocusUtils';
-import { addParamToPath } from '../../../utils/PathUtils';
 import { AreaOfUseDataType } from '../ContextContainerClassA/definitions';
 import { GenWorthValType, GeoInfoValType } from './definitions';
-
-export const getBreadcrumbs = (seedlotNumber: string) => [
-  {
-    name: 'Seedlots',
-    path: ROUTES.SEEDLOTS
-  },
-  {
-    name: 'My seedlots',
-    path: ROUTES.MY_SEEDLOTS
-  },
-  {
-    name: `Seedlot ${seedlotNumber}`,
-    path: `${addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber)}`
-  }
-];
 
 /**
  * Validate genetic worth values.

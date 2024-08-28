@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
+import { EmptyMultiOptObj, MINISTRY_OF_FOREST_ID } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
   CollectionFormSubmitType, ExtractionFormSubmitType, InterimFormSubmitType, OrchardFormSubmitType,
@@ -87,8 +87,8 @@ export const stepMap: StepMap = {
 };
 
 export const tscAgencyObj: MultiOptionsObj = {
-  code: '00012797',
-  label: '00012797 - Tree Seed Centre - MOF',
+  code: MINISTRY_OF_FOREST_ID,
+  label: `${MINISTRY_OF_FOREST_ID} - Tree Seed Centre - MOF`,
   description: 'Tree Seed Centre'
 };
 
