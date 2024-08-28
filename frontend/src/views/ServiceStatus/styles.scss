@@ -1,0 +1,41 @@
+.status-page-grid {
+  padding: 5rem 0;
+
+  .status-page-row {
+    padding: 1.5rem 0;
+    margin: 0 0.5rem;
+
+    .notificatione-col,
+    .button-col {
+      padding: 0;
+    }
+
+    .notificatione-col {
+
+      .status-notification {
+        max-width: none;
+      }
+
+      .bx--inline-notification__title {
+        font-weight: 600;
+      }
+    }
+  }
+
+  .button-row {
+    padding: 3rem 0.5rem;
+
+    .button-col {
+      display: flex;
+
+      button {
+        width: -webkit-fill-available;
+        max-width: 30rem;
+      }
+    }
+  }
+
+  .title {
+    text-align: center;
+  }
+}

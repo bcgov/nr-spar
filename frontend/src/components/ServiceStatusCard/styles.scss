@@ -1,0 +1,61 @@
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.service-status-row {
+  padding-top: 2rem;
+  margin: 0 0.5rem;
+
+  .service-status-col {
+    display: flex;
+    flex-direction: column;
+    min-height: 6.5rem;
+    justify-content: space-between;
+    padding: 1.2rem 2rem;
+    border: 1px solid rgba(0, 0, 0, 0.196);
+    border-radius: 0.5rem;
+
+    .top-section {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+
+      .title-and-icon {
+        display: flex;
+        flex-direction: row;
+
+        h4 {
+          font-weight: bold;
+        }
+
+        .dep-icon,
+        .dep-icon-error {
+          min-width: 2rem;
+          min-height: 2rem;
+          margin-right: 1rem;
+        }
+
+        .dep-icon {
+          fill: colors.$blue-60;
+        }
+
+        .dep-icon-error {
+          fill: colors.$red-70;
+        }
+      }
+
+
+    }
+
+    .success-svg {
+      min-width: 1.5rem;
+      min-height: 1.5rem;
+      fill: colors.$green-60;
+    }
+
+    .error-svg {
+      min-width: 1.5rem;
+      min-height: 1.5rem;
+      fill: colors.$red-60;
+    }
+  }
+}

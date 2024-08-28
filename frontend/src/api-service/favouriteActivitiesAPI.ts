@@ -1,7 +1,7 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
 import { FavActivityType, FavActivityPostType } from '../types/FavActivityTypes';
-import FavouriteActivityMap from '../config/FavouriteActivitiyMap';
+import FavouriteActivityMap from '../config/FavouriteActivityMap';
 
 export const getFavAct = () => {
   const url = ApiConfig.favouriteActivities;
