@@ -118,7 +118,7 @@ const SeedlotDataTable = (
           )
           : null
       }
-      <Table size="lg" useZebraStyles={false} className="seedlot-data-table">
+      <Table size="lg" useZebraStyles className="seedlot-data-table">
         <TableHead>
           <TableRow>
             {

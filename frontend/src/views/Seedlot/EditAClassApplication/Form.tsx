@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   ActionableNotification,
   FlexGrid,
@@ -13,26 +13,26 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import AuthContext from '../../../contexts/AuthContext';
 import { getSeedlotById, patchSeedlotApplicationInfo } from '../../../api-service/seedlotAPI';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
-import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
+import ROUTES from '../../../routes/constants';
 import { SeedlotType } from '../../../types/SeedlotType';
 import { SeedlotPatchPayloadType, SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import PageTitle from '../../../components/PageTitle';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import focusById from '../../../utils/FocusUtils';
-import ROUTES from '../../../routes/constants';
-import ErrorToast from '../../../components/Toast/ErrorToast';
-import Breadcrumbs from '../../../components/Breadcrumbs';
-import { ErrToastOption } from '../../../config/ToastifyConfig';
 import { getForestClientStringInput } from '../../../utils/ForestClientUtils';
 import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
 import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
-
-import { getBreadcrumbs } from './utils';
+import { getSeedlotBreadcrumbs } from '../../../utils/BreadcrumbUtils';
+import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
+import PageTitle from '../../../components/PageTitle';
+import ErrorToast from '../../../components/Toast/ErrorToast';
+import Breadcrumbs from '../../../components/Breadcrumbs';
+import { ErrToastOption } from '../../../config/ToastifyConfig';
 
 import './styles.scss';
 
@@ -46,6 +46,8 @@ type props = {
 const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }: props) => {
   const navigate = useNavigate();
   const { seedlotNumber } = useParams();
+
+  const { isTscAdmin } = useContext(AuthContext);
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -160,7 +162,11 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
           : (
             <>
               <Row className="breadcrumb-row">
-                <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber!)} />
+                <Breadcrumbs
+                  crumbs={
+                    getSeedlotBreadcrumbs(seedlotNumber!, applicantClientNumber!, isTscAdmin)
+                  }
+                />
               </Row>
               <Row className="title-row">
                 <PageTitle

@@ -128,3 +128,5 @@ export const SaveStatusModalText = {
     </h5>
   )
 };
+
+export const IS_DEV_FEATURE_ENABLED = false;

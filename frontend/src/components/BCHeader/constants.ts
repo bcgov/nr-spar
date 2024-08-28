@@ -26,84 +26,93 @@ export const navItems = [
         icon: 'SoilMoistureField',
         link: ROUTES.SEEDLOTS,
         disabled: false
-      },
-      {
-        name: 'Seedlings',
-        icon: 'CropGrowth',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Nurseries',
-        icon: 'CropHealth',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Orchards',
-        icon: 'MapBoundaryVegetation',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Reports',
-        icon: 'Report',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Tests',
-        icon: 'Chemistry',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Parent tree',
-        icon: 'Tree',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Tree seed centre',
-        icon: 'Enterprise',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Financial',
-        icon: 'Money',
-        link: '#',
-        disabled: true
       }
-    ]
-  },
-  {
-    name: 'Management',
-    items: [
-      {
-        name: 'Notifications',
-        icon: 'Notification',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Settings',
-        icon: 'Settings',
-        link: '#',
-        disabled: true
-      }
+      // Uncomment these as necessary :)
+      // {
+      //   name: 'Seedlings',
+      //   icon: 'CropGrowth',
+      //   link: '#',
+      //   disabled: true
+      // },
+      // {
+      //   name: 'Nurseries',
+      //   icon: 'CropHealth',
+      //   link: '#',
+      //   disabled: true
+      // },
+      // {
+      //   name: 'Orchards',
+      //   icon: 'MapBoundaryVegetation',
+      //   link: '#',
+      //   disabled: true
+      // },
+      // {
+      //   name: 'Reports',
+      //   icon: 'Report',
+      //   link: '#',
+      //   disabled: true
+      // },
+      // {
+      //   name: 'Tests',
+      //   icon: 'Chemistry',
+      //   link: '#',
+      //   disabled: true
+      // },
+      // {
+      //   name: 'Parent tree',
+      //   icon: 'Tree',
+      //   link: '#',
+      //   disabled: true
+      // },
+      // {
+      //   name: 'Tree seed centre',
+      //   icon: 'Enterprise',
+      //   link: '#',
+      //   disabled: true
+      // },
+      // {
+      //   name: 'Financial',
+      //   icon: 'Money',
+      //   link: '#',
+      //   disabled: true
+      // }
     ]
   }
+  // Uncomment these as necessary :)
+  // {
+  //   name: 'Management',
+  //   items: [
+  //     {
+  //       name: 'Notifications',
+  //       icon: 'Notification',
+  //       link: '#',
+  //       disabled: true
+  //     },
+  //     {
+  //       name: 'Settings',
+  //       icon: 'Settings',
+  //       link: '#',
+  //       disabled: true
+  //     }
+  //   ]
+  // }
 ];
 
 export const supportItems = {
   name: 'Support',
   items: [
+// Uncomment these as necessary :)
+//     {
+//       name: 'Need help?',
+//       icon: 'Help',
+//       link: '#',
+//       disabled: true
+//     },
     {
-      name: 'Need help?',
-      icon: 'Help',
-      link: '#',
-      disabled: true
+      name: 'Service status',
+      icon: 'CloudMonitoring',
+      link: '/service-status',
+      disabled: false
     }
   ]
 };

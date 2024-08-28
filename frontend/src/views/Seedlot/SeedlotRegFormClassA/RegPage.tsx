@@ -15,14 +15,16 @@ import { ArrowRight } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import Breadcrumbs from '../../../components/Breadcrumbs';
-import { getBreadcrumbs, getSeedlotSubmitErrDescription } from '../ContextContainerClassA/utils';
+import { getSeedlotSubmitErrDescription } from '../ContextContainerClassA/utils';
 import PageTitle from '../../../components/PageTitle';
 import SaveTooltipLabel from './SaveTooltip';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import RegForm from './RegForm';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
+import AuthContext from '../../../contexts/AuthContext';
 import ClassAContext from '../ContextContainerClassA/context';
 import { addParamToPath } from '../../../utils/PathUtils';
+import { getSeedlotBreadcrumbs } from '../../../utils/BreadcrumbUtils';
 import ROUTES from '../../../routes/constants';
 import { completeProgressConfig, smartSaveText } from '../ContextContainerClassA/constants';
 
@@ -55,12 +57,22 @@ const RegPage = () => {
 
   const reloadFormDraft = () => getFormDraftQuery.refetch();
 
+  const { isTscAdmin } = useContext(AuthContext);
+
   return (
     <div className="seedlot-registration-page">
       <FlexGrid fullWidth>
         <Row>
           <Column className="seedlot-registration-breadcrumb">
-            <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber!)} />
+            <Breadcrumbs
+              crumbs={
+                getSeedlotBreadcrumbs(
+                  seedlotNumber!,
+                  seedlotData?.applicantClientNumber!,
+                  isTscAdmin
+                )
+              }
+            />
           </Column>
         </Row>
         <Row>

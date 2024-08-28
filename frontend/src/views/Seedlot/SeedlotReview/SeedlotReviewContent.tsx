@@ -4,14 +4,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import {
   Button, FlexGrid, Row,
-  Column, Loading, Modal
+  Column, Loading, Modal,
+  InlineNotification
 } from '@carbon/react';
 import { toast } from 'react-toastify';
 import {
   Edit, Save, Pending, Checkmark, Warning
 } from '@carbon/icons-react';
 import { Beforeunload } from 'react-beforeunload';
-import { DateTime as luxon } from 'luxon';
 
 import { getSeedlotById, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -19,6 +19,7 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import PageTitle from '../../../components/PageTitle';
 import RowGap from '../../../components/RowGap';
+import ErrorToast from '../../../components/Toast/ErrorToast';
 import ApplicantAndSeedlotRead from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Read';
 import ApplicantAndSeedlotEdit from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Edit';
 import { SeedlotPatchPayloadType, SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
@@ -46,9 +47,10 @@ import {
   SeedPlanZoneDto, SeedlotReviewElevationLatLongDto,
   SeedlotReviewGeoInformationDto, TscSeedlotEditPayloadType
 } from '../../../types/SeedlotType';
-import ErrorToast from '../../../components/Toast/ErrorToast';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
+import AuthContext from '../../../contexts/AuthContext';
 import { GeneticTrait } from '../../../types/PtCalcTypes';
+import { getSeedlotBreadcrumbs } from '../../../utils/BreadcrumbUtils';
 
 import ClassAContext from '../ContextContainerClassA/context';
 import { validateRegForm } from '../CreateAClass/utils';
@@ -63,11 +65,11 @@ import {
 } from '../ContextContainerClassA/utils';
 
 import {
-  getBreadcrumbs, validateAreaOfUse, validateCollectGeoVals,
+  validateAreaOfUse, validateCollectGeoVals,
   validateGeneticWorth
 } from './utils';
 import { GenWorthValType } from './definitions';
-import { SaveStatusModalText } from './constants';
+import { IS_DEV_FEATURE_ENABLED, SaveStatusModalText } from './constants';
 import { completeProgressConfig, emptyOwnershipStep, initialProgressConfig } from '../ContextContainerClassA/constants';
 import { AllStepData } from '../ContextContainerClassA/definitions';
 
@@ -86,6 +88,8 @@ const SeedlotReviewContent = () => {
   const [statusToUpdateTo, setStatusToUpdateTo] = useState<StatusOnSaveType>('PND');
 
   const { seedlotNumber } = useParams();
+
+  const { isTscAdmin } = useContext(AuthContext);
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -507,23 +511,56 @@ const SeedlotReviewContent = () => {
           || isFetchingData
         }
       />
-      <Button
-        kind="secondary"
-        size="md"
-        className="edit-save-btn"
-        renderIcon={isReadMode ? Edit : Save}
-        onClick={handleEditSaveBtn}
-      >
-        {isReadMode ? 'Edit seedlot' : 'Save edit'}
-      </Button>
 
-      <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber ?? '')} />
+      {
+        // Seedlots that have 'CUS' or 'UPT' as source should not be edited.
+        seedlotData?.seedlotSource.seedlotSourceCode === 'TPT'
+          ? (
+            <Button
+              kind="secondary"
+              size="md"
+              className="edit-save-btn"
+              renderIcon={isReadMode ? Edit : Save}
+              onClick={handleEditSaveBtn}
+            >
+              {isReadMode ? 'Edit seedlot' : 'Save edit'}
+            </Button>
+          )
+          : null
+      }
+
+      <Breadcrumbs
+        crumbs={
+          getSeedlotBreadcrumbs(
+            seedlotNumber!,
+            seedlotData?.applicantClientNumber!,
+            isTscAdmin
+          )
+        }
+      />
       <Row>
         <PageTitle
           title={`Review Seedlot ${seedlotQuery.data?.seedlot.id}`}
           subtitle={`${seedlotQuery.data?.seedlot.seedlotStatus.description} status`}
         />
       </Row>
+
+      {
+        seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'APP'
+          ? (
+            <Row>
+              <InlineNotification
+                className="seedlot-approved-notification"
+                lowContrast
+                hideCloseButton
+                kind="success"
+                title="Seedlot approved:"
+                subtitle="This seedlot have been reviewed and approved"
+              />
+            </Row>
+          )
+          : null
+      }
 
       <Row className="section-title-row">
         <Column className="section-title-col">
@@ -717,7 +754,7 @@ const SeedlotReviewContent = () => {
       {
         // this and its related code such as createDraftForPendMutation
         // needs to be deleted in the future
-        (luxon.local().setZone('America/Vancouver').toISODate() ?? '' < '2024-08-17')
+        IS_DEV_FEATURE_ENABLED
           ? (
             <Row className="action-button-row">
               <Column className="action-button-col" sm={4} md={4} lg={8}>
@@ -726,7 +763,7 @@ const SeedlotReviewContent = () => {
                   renderIcon={Warning}
                   onClick={() => createDraftForPendMutation.mutate()}
                 >
-                  Hisotrical SUB to PND (DEV ONLY!)
+                  Historical SUB to PND (DEV ONLY!)
                 </Button>
               </Column>
             </Row>

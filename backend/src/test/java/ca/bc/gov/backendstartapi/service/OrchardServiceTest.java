@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
@@ -149,34 +150,6 @@ class OrchardServiceTest {
         "404 NOT_FOUND \"No active SPU for the given Orchard ID!\"", exc.getMessage());
   }
 
-  // TODO
-  // @Test
-  // @DisplayName("findParentTreesByVegCodeTest")
-  // void findParentTreesByVegCodeTest() {
-  //   String vegCode = "FDI";
-
-  //   SameSpeciesTreeDto firstDto =
-  //       new SameSpeciesTreeDto(Long.valueOf(123), "1000", "1", Long.valueOf(7), List.of());
-  //   SameSpeciesTreeDto secondDto =
-  //       new SameSpeciesTreeDto(Long.valueOf(456), "2000", "1", Long.valueOf(7), List.of());
-
-  //   List<SameSpeciesTreeDto> testList = List.of(firstDto, secondDto);
-
-  //   Map<String, String> testMap = new HashMap<>();
-  //   testMap.put("1", "1");
-  //   when(oracleApiProvider.findParentTreesByVegCode(vegCode, testMap)).thenReturn(testList);
-
-  //   ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu("1", true);
-  //   when(orchardService.findAllSpu(true)).thenReturn(List.of(activeOrchardSpu));
-
-  //   List<SameSpeciesTreeDto> responseFromService =
-  // orchardService.findParentTreesByVegCode(vegCode);
-
-  //   Assertions.assertNotNull(responseFromService);
-  //   Assertions.assertEquals(testList.size(), responseFromService.size());
-  //   Assertions.assertEquals(testList, responseFromService);
-  // }
-
   @Test
   @DisplayName("Find all spu happy path should succeed")
   void findAllSpu_happyPath_shouldSucceed() {
@@ -190,5 +163,59 @@ class OrchardServiceTest {
     Assertions.assertNotNull(list);
     Assertions.assertFalse(list.isEmpty());
     Assertions.assertEquals(1, list.size());
+  }
+
+  @Test
+  @DisplayName("findAllOrchardsByVegCode - valid vegCode should return orchard list")
+  void findAllOrchardsByVegCode_validVegCode_shouldReturnOrchardList() {
+    String vegCode = "BV";
+    OrchardDto orchardDto = new OrchardDto();
+    orchardDto.setId("1");
+    orchardDto.setName("Primary Orchard");
+    orchardDto.setVegetationCode(vegCode);
+
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of(orchardDto));
+
+    List<OrchardDto> result = orchardService.findAllOrchardsByVegCode(vegCode);
+
+    Assertions.assertFalse(result.isEmpty());
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals("Primary Orchard", result.get(0).getName());
+  }
+
+  @Test
+  @DisplayName("findAllOrchardsByVegCode - invalid vegCode should return empty list")
+  void findAllOrchardsByVegCode_invalidVegCode_shouldReturnEmptyList() {
+    String vegCode = "INVALID";
+
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
+
+    List<OrchardDto> result = orchardService.findAllOrchardsByVegCode(vegCode);
+
+    Assertions.assertTrue(result.isEmpty());
+  }
+
+  @Test
+  @DisplayName("findAllOrchardsByVegCode - empty vegCode should return empty list")
+  void findAllOrchardsByVegCode_emptyVegCode_shouldReturnEmptyList() {
+    String vegCode = "";
+
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
+
+    List<OrchardDto> result = orchardService.findAllOrchardsByVegCode(vegCode);
+
+    Assertions.assertTrue(result.isEmpty());
+  }
+
+  @Test
+  @DisplayName("findAllOrchardsByVegCode - null vegCode should return empty list")
+  void findAllOrchardsByVegCode_nullVegCode_shouldReturnEmptyList() {
+    String vegCode = null;
+
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
+
+    List<OrchardDto> result = orchardService.findAllOrchardsByVegCode(vegCode);
+
+    Assertions.assertTrue(result.isEmpty());
   }
 }
