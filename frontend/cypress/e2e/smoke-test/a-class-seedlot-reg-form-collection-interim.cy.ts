@@ -485,7 +485,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
     cy.get('#end-date-input')
       .clear()
-      .type('2024-05-26')
+      .type('2024-05-30')
       .blur();
 
     // Save changes

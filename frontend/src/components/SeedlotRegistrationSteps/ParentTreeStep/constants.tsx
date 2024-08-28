@@ -302,8 +302,8 @@ export const rowTemplate: RowItem = {
 export const headerTemplate: Array<HeaderObj> = [
   {
     id: 'parentTreeNumber',
-    name: 'Parent Tree Number',
-    description: 'Parent Tree Number',
+    name: 'Parent tree number',
+    description: 'Parent tree number',
     enabled: true,
     editable: false,
     isAnOption: false,

@@ -12,7 +12,8 @@ const ROUTES = {
   SEEDLOT_A_CLASS_REVIEW: '/seedlots/a-class/review/:seedlotNumber',
   MY_SEEDLOTS: '/seedlots/my-seedlots',
   TSC_SEEDLOTS_TABLE: '/seedlots/tsc-admin-seedlots',
-  FOUR_OH_FOUR: '/404'
+  FOUR_OH_FOUR: '/404',
+  SERVICE_STATUS: '/service-status'
 };
 
 export default ROUTES;
