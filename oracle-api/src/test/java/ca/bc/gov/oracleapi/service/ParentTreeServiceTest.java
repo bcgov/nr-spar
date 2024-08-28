@@ -146,21 +146,25 @@ class ParentTreeServiceTest {
   }
 
   @Test
-  @DisplayName("Find parent trees with veg code happy path should succeed")
+  @DisplayName("findParentTreesWithVegCode happy path, should succeed")
   void findParentTreesWithVegCode_happyPath_shouldSucceed() {
-    String vegCode = "SX";
+    List<ParentTreeProj> mockProjections = List.of(mockParentTreeProj());
+    when(parentTreeRepository.findAllParentTreeWithVegCode("BV")).thenReturn(mockProjections);
 
-    ParentTreeProj parentProj = mockParentTreeProj();
+    Map<String, ParentTreeByVegCodeDto> result = parentTreeService.findParentTreesWithVegCode("BV");
 
-    when(parentTreeRepository.findAllParentTreeWithVegCode(vegCode))
-        .thenReturn(List.of(parentProj));
-
-    Map<String, ParentTreeByVegCodeDto> response =
-        parentTreeService.findParentTreesWithVegCode(vegCode);
-
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals(1, response.size());
-    Assertions.assertTrue(response.containsKey("29"));
+    Assertions.assertEquals(1, result.size());
+    ParentTreeByVegCodeDto dto = result.get("29");
+    Assertions.assertNotNull(dto);
+    Assertions.assertEquals(20012L, dto.getParentTreeId());
+    Assertions.assertEquals("211", dto.getOrchardIds().get(0));
+    Assertions.assertEquals(
+        "BV", dto.getGeneticQualitiesBySpu().get(68L).get(0).getGeneticTypeCode());
+    Assertions.assertEquals(
+        "GVO", dto.getGeneticQualitiesBySpu().get(68L).get(0).getGeneticWorthCode());
+    Assertions.assertEquals(
+        new BigDecimal("15"),
+        dto.getGeneticQualitiesBySpu().get(68L).get(0).getGeneticQualityValue());
   }
 
   private ParentTreeEntity mock(
@@ -356,5 +360,42 @@ class ParentTreeServiceTest {
     Assertions.assertEquals(127, dtoList.get(4).longitudeDegree());
     Assertions.assertEquals(2, dtoList.get(4).longitudeMinute());
     Assertions.assertEquals(30, dtoList.get(4).longitudeSecond());
+  }
+
+  @Test
+  @DisplayName("findParentTreesWithVegCode - empty vegetation code list, should return empty map")
+  void findParentTreesWithVegCode_emptyVegetationCodeList_shouldReturnEmptyMap() {
+
+    when(parentTreeRepository.findAllParentTreeWithVegCode("")).thenReturn(new ArrayList<>());
+
+    Map<String, ParentTreeByVegCodeDto> result = parentTreeService.findParentTreesWithVegCode("");
+
+    Assertions.assertTrue(result.isEmpty());
+  }
+
+
+  @Test
+  @DisplayName("findParentTreesWithVegCode - invalid vegetation code, should return empty map")
+  void findParentTreesWithVegCode_invalidVegetationCode_shouldReturnEmptyMap() {
+
+    when(parentTreeRepository.findAllParentTreeWithVegCode("INVALID"))
+        .thenReturn(new ArrayList<>());
+
+    Map<String, ParentTreeByVegCodeDto> result =
+        parentTreeService.findParentTreesWithVegCode("INVALID");
+
+    Assertions.assertTrue(result.isEmpty());
+  }
+
+  @Test
+  @DisplayName(
+      "findParentTreesWithVegCode - repository returns empty list, should return empty map")
+  void findParentTreesWithVegCode_repositoryReturnsEmptyList_shouldReturnEmptyMap() {
+
+    when(parentTreeRepository.findAllParentTreeWithVegCode("BV")).thenReturn(new ArrayList<>());
+
+    Map<String, ParentTreeByVegCodeDto> result = parentTreeService.findParentTreesWithVegCode("BV");
+
+    Assertions.assertTrue(result.isEmpty());
   }
 }

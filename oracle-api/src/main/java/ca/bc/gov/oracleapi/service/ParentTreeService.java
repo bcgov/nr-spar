@@ -100,7 +100,7 @@ public class ParentTreeService {
       SparLog.debug("Hierarchy level {}", i);
 
       List<Long> testList = new ArrayList<>();
-      
+
       // Loop through all ParentTree records, getting their female and male parents for the ones
       // that has no elevation data
       for (ParentTreeEntity ptEntity : ptEntityList) {
@@ -135,7 +135,7 @@ public class ParentTreeService {
           // If 'femaleAndMaleParentsIds' contains the current parent tree id, it means that the
           // current parent tree id is one of the parents, it could be either the female or male.
           if (femaleAndMaleParentsIds.contains(ptEntity.getId())) {
-            
+
             // If resultMap doesn't have 'sonParentTreeId' key, it means this is not the first level
             // and it should look at the 'parentTreeRelationMap' who has ALL the parent tree
             // 'son-parents' relation
@@ -148,7 +148,7 @@ public class ParentTreeService {
                 }
               }
             }
-            
+
             // Get female parent tree data and connect with son. Female is always the first
             Long femaleParentTreeId = femaleAndMaleParentsIds.get(0);
             if (femaleParentTreeId.equals(ptEntity.getId())) {
