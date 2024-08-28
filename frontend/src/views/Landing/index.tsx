@@ -1,24 +1,36 @@
 import React, { useContext } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import {
-  Button,
-  Grid,
-  Column,
-  Loading
+  Button, Grid,
+  Column, Loading,
+  ActionableNotification
 } from '@carbon/react';
 import { Login } from '@carbon/icons-react';
+import { useQueries } from '@tanstack/react-query';
 
 import BCGovLogo from '../../components/BCGovLogo';
 import Seeding from '../../assets/img/cone.jpeg';
 import LoginProviders from '../../types/LoginProviders';
 import AuthContext from '../../contexts/AuthContext';
+import { SPAR_DEPENDENCIES } from '../ServiceStatus/constants';
+import { THIRTY_SECONDS } from '../../config/TimeUnits';
 
 import './styles.scss';
 
 const Landing = () => {
   const { signIn } = useContext(AuthContext);
   const [searchParams] = useSearchParams();
+
+  const statusQueries = useQueries({
+    queries: SPAR_DEPENDENCIES.map((dependencyObj) => ({
+      queryKey: [dependencyObj.queryKey],
+      queryFn: () => fetch(dependencyObj.healthCheckUrl, { mode: 'no-cors' }),
+      refetchInterval: THIRTY_SECONDS,
+      refetchIntervalInBackground: false,
+      retry: 0
+    }))
+  });
 
   const loginCode = searchParams.get('code');
 
@@ -29,6 +41,34 @@ const Landing = () => {
         <Column sm={4} md={5} lg={10}>
           {/* Logo */}
           <BCGovLogo />
+
+          {
+            statusQueries.filter((query) => query.status === 'error').length > 0
+              ? (
+                <ActionableNotification
+                  className="dependency-notification"
+                  kind="warning"
+                  lowContrast
+                  title="SPAR Dependency Failure"
+                  actionButtonLabel=""
+                  hideCloseButton
+                >
+                  <span className="notification-subtitle">
+                    <br />
+                    SPAR&apos;s service is impacted due to server connection issue.
+                    You can check the&nbsp;
+                    <Link
+                      target="_blank"
+                      to="/service-status"
+                    >
+                      SPAR dependency status page
+                    </Link>
+                  &nbsp;for details.
+                  </span>
+                </ActionableNotification>
+              )
+              : null
+          }
 
           {/* Welcome - Title and Subtitle */}
           <h1 data-testid="landing-title" className="landing-title">Welcome to SPAR</h1>

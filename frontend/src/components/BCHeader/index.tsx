@@ -183,7 +183,7 @@ const BCHeader = () => {
                       category.items.map((navItem) => (
                         <SideNavLink
                           key={navItem.name}
-                          className={navItem.disabled ? 'disabled-side-nav-option' : ''}
+                          className={navItem.disabled ? 'disabled-side-nav-option' : 'side-nav-option'}
                           renderIcon={Icons[navItem.icon]}
                           isActive={window.location.pathname.includes(navItem.link)}
                           onClick={navItem.disabled ? null : () => navigate(navItem.link)}
@@ -206,7 +206,7 @@ const BCHeader = () => {
                   <SideNavLink
                     key={supportItem.name}
                     renderIcon={Icons[supportItem.icon]}
-                    className={supportItem.disabled ? 'disabled-side-nav-option' : ''}
+                    className={supportItem.disabled ? 'disabled-side-nav-option' : 'side-nav-option'}
                     onClick={supportItem.disabled ? null : () => navigate(supportItem.link)}
                   >
                     {supportItem.name}

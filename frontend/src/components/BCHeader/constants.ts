@@ -98,18 +98,24 @@ export const navItems = [
   // }
 ];
 
+export const supportItems = {
+  name: 'Support',
+  items: [
 // Uncomment these as necessary :)
-// export const supportItems = {
-//   name: 'Support',
-//   items: [
 //     {
 //       name: 'Need help?',
 //       icon: 'Help',
 //       link: '#',
 //       disabled: true
-//     }
-//   ]
-// };
+//     },
+    {
+      name: 'Service status',
+      icon: 'CloudMonitoring',
+      link: '/service-status',
+      disabled: false
+    }
+  ]
+};
 
 export const componentTexts = {
   headerTitle: 'SPAR',
