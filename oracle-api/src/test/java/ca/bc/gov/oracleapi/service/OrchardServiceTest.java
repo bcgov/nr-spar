@@ -7,14 +7,12 @@ import ca.bc.gov.oracleapi.dto.OrchardDto;
 import ca.bc.gov.oracleapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeGeneticQualityDto;
-import ca.bc.gov.oracleapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.oracleapi.entity.OrchardEntity;
 import ca.bc.gov.oracleapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
 import ca.bc.gov.oracleapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.oracleapi.entity.ParentTreeOrchard;
 import ca.bc.gov.oracleapi.entity.idclass.ParentTreeOrchardId;
-import ca.bc.gov.oracleapi.entity.projection.ParentTreeProj;
 import ca.bc.gov.oracleapi.repository.OrchardRepository;
 import ca.bc.gov.oracleapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.oracleapi.repository.ParentTreeOrchardRepository;
@@ -34,8 +32,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.projection.ProjectionFactory;
-import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 
 @ExtendWith(MockitoExtension.class)
 class OrchardServiceTest {
@@ -329,49 +325,5 @@ class OrchardServiceTest {
           Assertions.assertEquals("Seed Lot", testObj.lotTypeDescription());
           Assertions.assertFalse(testObj.id().isEmpty());
         });
-  }
-
-  @Test
-  @DisplayName("findParentTreesWithVegCodeServiceTest")
-  void findParentTreesWithVegCodeServiceTest() {
-
-    ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
-    ParentTreeProj firstProj = factory.createProjection(ParentTreeProj.class);
-
-    firstProj.setParentTreeId(Long.valueOf(12345));
-    firstProj.setParentTreeNumber("456");
-    firstProj.setOrchardId("1");
-    firstProj.setSpu(Long.valueOf(7));
-
-    ParentTreeProj secondProj = factory.createProjection(ParentTreeProj.class);
-    secondProj.setParentTreeId(Long.valueOf(45678));
-    secondProj.setParentTreeNumber("678");
-    secondProj.setOrchardId("1");
-    secondProj.setSpu(Long.valueOf(7));
-
-    List<ParentTreeProj> repoResult = List.of(firstProj, secondProj);
-
-    String vegCode = "PLI";
-
-    when(parentTreeRepository.findAllParentTreeWithVegCode(vegCode)).thenReturn(repoResult);
-
-    Map<String, String> testMap = new HashMap<>();
-
-    testMap.put("1", "7");
-
-    List<SameSpeciesTreeDto> listToTest =
-        orchardService.findParentTreesWithVegCode(vegCode, testMap);
-
-    Assertions.assertEquals(repoResult.size(), listToTest.size());
-
-    Assertions.assertEquals(
-        repoResult.get(0).getParentTreeId(), listToTest.get(0).getParentTreeId());
-    Assertions.assertEquals(
-        repoResult.get(0).getParentTreeNumber(), listToTest.get(0).getParentTreeNumber());
-
-    Assertions.assertEquals(
-        repoResult.get(1).getParentTreeId(), listToTest.get(1).getParentTreeId());
-    Assertions.assertEquals(
-        repoResult.get(1).getParentTreeNumber(), listToTest.get(1).getParentTreeNumber());
   }
 }

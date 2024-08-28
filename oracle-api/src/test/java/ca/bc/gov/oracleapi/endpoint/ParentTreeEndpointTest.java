@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.endpoint;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -9,9 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.oracleapi.dto.GeospatialRequestDto;
 import ca.bc.gov.oracleapi.dto.GeospatialRespondDto;
+import ca.bc.gov.oracleapi.dto.ParentTreeByVegCodeDto;
 import ca.bc.gov.oracleapi.service.ParentTreeService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,5 +87,46 @@ class ParentTreeEndpointTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().string("[]"))
         .andReturn();
+  }
+
+  @Test
+  @DisplayName("GET /vegetation-codes/{vegCode} - valid vegCode")
+  void getParentTreeByVegCode_validVegCode_shouldReturnData() throws Exception {
+    ParentTreeByVegCodeDto dto = new ParentTreeByVegCodeDto();
+    dto.setParentTreeId(1L);
+    dto.setTestedInd(true);
+    dto.setOrchardIds(List.of("211"));
+    dto.setGeneticQualitiesBySpu(Map.of(68L, List.of()));
+
+    when(parentTreeService.findParentTreesWithVegCode("BV")).thenReturn(Map.of("29", dto));
+
+    mockMvc
+        .perform(
+            get("/api/parent-trees/vegetation-codes/BV").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.29.parentTreeId").value(1L))
+        .andExpect(jsonPath("$.29.orchardIds[0]").value("211"))
+        .andExpect(jsonPath("$.29.testedInd").value(true));
+  }
+
+  @Test
+  @DisplayName("GET /vegetation-codes/{vegCode} - invalid vegCode")
+  void getParentTreeByVegCode_invalidVegCode_shouldReturnEmpty() throws Exception {
+    when(parentTreeService.findParentTreesWithVegCode("INVALID")).thenReturn(Map.of());
+
+    mockMvc
+        .perform(
+            get("/api/parent-trees/vegetation-codes/INVALID")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isEmpty());
+  }
+
+  @Test
+  @DisplayName("GET /vegetation-codes/{vegCode} - empty vegCode")
+  void getParentTreeByVegCode_emptyVegCode_shouldReturnError() throws Exception {
+    mockMvc
+        .perform(get("/api/parent-trees/vegetation-codes/").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 }
