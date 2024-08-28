@@ -40,7 +40,7 @@
 		<sonar.organization>bcgov-sonarcloud</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <oci.revision>${project.version}</oci.revision>
-    <hibernate.version>6.5.2.Final</hibernate.version>
+    <hibernate.version>6.6.0.Final</hibernate.version>
 	</properties>
 
 	<profiles>
@@ -228,7 +228,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>3.4.0</version>
 				<executions>
 					<execution>
 						<id>integration-tests</id>
@@ -251,7 +251,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>3.4.0</version>
 				<configuration>
 					<argLine>@{argLine} -Xmx1024m</argLine>
 					<skipTests>${skip.unit.tests}</skipTests>
@@ -423,7 +423,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.4.0</version>
+				<version>3.5.0</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
