@@ -9,7 +9,7 @@ import {
   TableContainer, TableToolbar, Checkbox,
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
   Button, Table, TableHead, TableRow, TableHeader,
-  DataTableSkeleton, DefinitionTooltip, Modal,
+  DataTableSkeleton, Modal,
   Accordion, AccordionItem, TextInputSkeleton
 } from '@carbon/react';
 import {
@@ -469,43 +469,49 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                   renderRecalcSection()
                 }
                 {/* -------- Calculate Button Row -------- */}
-                <DetailSection>
-                  {
-                    renderCalcSection(false)
-                  }
-                  {
-                    showInfoSections
-                      ? (
-                        <>
-                          {
-                            renderSubSections()
-                          }
-                          {/* -------- Seedlot mean geospatial data -------- */}
-                          <Row className="info-section-sub-title">
-                            <Column>
-                              {
-                                !isReviewDisplay
-                                  ? 'Orchard parent tree geospatial summary'
-                                  : 'Collection geospatial summary'
-                              }
-                            </Column>
-                          </Row>
-                          {
-                            isReviewDisplay
-                              ? (
-                                <SpatialData isReviewRead={isReviewRead ?? false} />
-                              )
-                              : (
-                                <InfoSection
-                                  infoItems={Object.values(meanGeomInfos.seedlot)}
-                                />
-                              )
-                          }
-                        </>
-                      )
-                      : null
-                  }
-                </DetailSection>
+                {
+                  !(!isReviewDisplay && isFormSubmitted)
+                    ? (
+                      <DetailSection>
+                        {
+                          renderCalcSection(false)
+                        }
+                        {
+                          showInfoSections
+                            ? (
+                              <>
+                                {
+                                  renderSubSections()
+                                }
+                                {/* -------- Seedlot mean geospatial data -------- */}
+                                <Row className="info-section-sub-title">
+                                  <Column>
+                                    {
+                                      !isReviewDisplay
+                                        ? 'Orchard parent tree geospatial summary'
+                                        : 'Collection geospatial summary'
+                                    }
+                                  </Column>
+                                </Row>
+                                {
+                                  isReviewDisplay
+                                    ? (
+                                      <SpatialData isReviewRead={isReviewRead ?? false} />
+                                    )
+                                    : (
+                                      <InfoSection
+                                        infoItems={Object.values(meanGeomInfos.seedlot)}
+                                      />
+                                    )
+                                }
+                              </>
+                            )
+                            : null
+                        }
+                      </DetailSection>
+                    )
+                    : null
+                }
               </>
             )
             : (
@@ -528,26 +534,30 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                   renderRecalcSection()
                 }
                 {
-                  <DetailSection>
-                    {/* -------- SMP mix mean geospatial data -------- */}
-                    <Row className="info-section-sub-title">
-                      <DescriptionBox
-                        header="SMP mix geospatial summary"
-                      />
-                    </Row>
-                    {
-                      renderCalcSection(true)
-                    }
-                    {
-                      showInfoSections || isReviewDisplay
-                        ? (
-                          <InfoSection
-                            infoItems={Object.values(meanGeomInfos.smpMix)}
+                  !(!isReviewDisplay && isFormSubmitted)
+                    ? (
+                      <DetailSection>
+                        {/* -------- SMP mix mean geospatial data -------- */}
+                        <Row className="info-section-sub-title">
+                          <DescriptionBox
+                            header="SMP mix geospatial summary"
                           />
-                        )
-                        : null
-                    }
-                  </DetailSection>
+                        </Row>
+                        {
+                          renderCalcSection(true)
+                        }
+                        {
+                          showInfoSections || isReviewDisplay
+                            ? (
+                              <InfoSection
+                                infoItems={Object.values(meanGeomInfos.smpMix)}
+                              />
+                            )
+                            : null
+                        }
+                      </DetailSection>
+                    )
+                    : null
                 }
               </>
             )
@@ -763,14 +773,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                                     )
                                       ? (
                                         <TableHeader id={header.id} key={header.id}>
-                                          <DefinitionTooltip
-                                            align="top"
-                                            openOnHover
-                                            definition={header.description}
-                                            tabIndex={-1}
-                                          >
-                                            {header.name}
-                                          </DefinitionTooltip>
+                                          {header.name}
                                         </TableHeader>
                                       )
                                       : null

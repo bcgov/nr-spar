@@ -8,7 +8,7 @@ import './styles.scss';
 
 type SmallCardProps = {
   header: string,
-  actionBtn: JSX.Element
+  actionBtn: JSX.Element,
   path: string,
   image: string,
   isIcon: boolean,

@@ -33,18 +33,22 @@ svg.#{vars.$bcgov-prefix}--accordion__arrow {
 .ownership-form-container {
   margin-top: 1.25rem;
 
+  ul.#{vars.$bcgov-prefix}--accordion  {
+    border: 0;
+  }
+
   ul.#{vars.$bcgov-prefix}--accordion .#{vars.$bcgov-prefix}--accordion__title {
     padding: 1rem;
   }
 
   .single-accordion-item {
-    margin-bottom: 1rem;
+    margin-bottom: 2.5rem;
     background-color: var(--#{vars.$bcgov-prefix}-layer-01);
     border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
+    border-radius: 4px;
   }
 
   .owner-add-btn {
-    margin-top: 1.75rem;
     margin-bottom: 1rem;
   }
 
@@ -55,10 +59,15 @@ svg.#{vars.$bcgov-prefix}--accordion__arrow {
       color: var(--#{vars.$bcgov-prefix}-text-primary);
     }
 
-    .description-section {
+    .item-description-section {
       @include type.type-style('helper-text-02', true);
       color: var(--#{vars.$bcgov-prefix}-text-secondary);
     }
+  }
+
+  // Adjust margin on the client seach link
+  .applicant-client-search-row {
+    margin-bottom: 1.5rem;
   }
 
   @media only screen and (min-width: 640px) {
