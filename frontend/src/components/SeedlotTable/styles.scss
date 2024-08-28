@@ -12,6 +12,19 @@
 .seedlot-data-table {
   width: 100%;
 
+  &.#{vars.$bcgov-prefix}--data-table tbody {
+    background: var(--#{vars.$bcgov-prefix}-layer-02);
+  }
+
+  &.#{vars.$bcgov-prefix}--data-table--zebra tbody
+  tr:not(.#{vars.$bcgov-prefix}--parent-row):not(.#{vars.$bcgov-prefix}--data-table--selected):nth-child(even) {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+  }
+
+  &.#{vars.$bcgov-prefix}--data-table--zebra tbody tr:not(.#{vars.$bcgov-prefix}--parent-row):nth-child(even) td {
+    border-block-end: 0;
+  }
+
   thead th {
     background: var(--#{vars.$bcgov-prefix}-layer-01);
     background-blend-mode: multiply;
@@ -23,9 +36,5 @@
     background-color: transparent;
     border-top: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
     border-bottom: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
-  }
-
-  tbody td {
-    background: var(--#{vars.$bcgov-prefix}-layer-02);
   }
 }

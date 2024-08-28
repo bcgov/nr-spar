@@ -63,7 +63,14 @@ const StandardCard = ({
           isEmpty
             ? null
             : (
-              <IconButton className="std-card-button" kind="ghost" label="Go" align="bottom" onClick={() => { navigate(`${url}`); }}>
+              <IconButton
+                className="std-card-button"
+                kind="ghost"
+                label="Go"
+                align="bottom"
+                onClick={() => { navigate(`${url}`); }}
+                aria-label={`Go to ${header} page`}
+              >
                 <Icons.ArrowRight />
               </IconButton>
             )

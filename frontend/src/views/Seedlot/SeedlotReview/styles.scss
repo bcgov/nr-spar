@@ -141,4 +141,14 @@
       @include type.type-style('body-01');
     }
   }
+
+  .seedlot-approved-notification {
+    margin-top: 2rem;
+    margin-left: 1rem;
+    max-inline-size: none;
+
+    .#{vars.$bcgov-prefix}--inline-notification__title {
+      font-weight: bold;
+    }
+  }
 }
