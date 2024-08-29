@@ -10,7 +10,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 /** This class contains methods for handling JWT requests. */
 public final class JwtSecurityUtil {
 
-  private final static List<String> concreteRoles = List.of("SPAR_MINISTRY_ORCHARD", "SPAR_TSC_ADMIN");
+  private static final List<String> concreteRoles =
+      List.of("SPAR_MINISTRY_ORCHARD", "SPAR_TSC_ADMIN");
 
   /**
    * Gets user roles from user JWT token.
