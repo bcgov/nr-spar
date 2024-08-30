@@ -68,7 +68,7 @@ public class GeneticWorthService {
    * @return A {@link PtCalculationResDto} containing all calculated values
    */
   public List<GeneticWorthTraitsDto> calculateGeneticWorth(
-      List<OrchardParentTreeValsDto> traitsDto) {
+      List<OrchardParentTreeValsDto> ptVals) {
     SparLog.info("Starting Genetic Worth calculations");
     BigDecimal minimumThreshold = new BigDecimal("0.7");
 
@@ -79,11 +79,11 @@ public class GeneticWorthService {
 
     for (GeneticWorthDto trait : geneticWorthList) {
       BigDecimal calculatedValue = null;
-      BigDecimal percentage = calcGeneticTraitThreshold(traitsDto, trait);
+      BigDecimal percentage = calcGeneticTraitThreshold(ptVals, trait);
 
       if (percentage.compareTo(minimumThreshold) >= 0) {
         SparLog.info("Calculating Genetic Worth for {} trait", trait.getCode());
-        calculatedValue = calculateTraitGeneticWorth(traitsDto, trait);
+        calculatedValue = calculateTraitGeneticWorth(ptVals, trait);
       } else {
         SparLog.info(
             "No Genetic Worth calculations for trait {}, threshold not met.", trait.getCode());

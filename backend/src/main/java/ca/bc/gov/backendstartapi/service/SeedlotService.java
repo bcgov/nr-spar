@@ -887,7 +887,13 @@ public class SeedlotService {
     List<OrchardParentTreeValsDto> orchardPtVals = convertToPtVals(orchardPtDtoList);
     List<GeospatialRequestDto> smpMixIdAndProps = convertToGeoRes(smpPtDtoList);
 
-    PtValsCalReqDto ptValsCalReqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0);
+    // FIXME
+    Integer smpParentsOutside = 0;
+    BigDecimal contaminantPollenBv = BigDecimal.ZERO;
+
+    PtValsCalReqDto ptValsCalReqDto =
+        new PtValsCalReqDto(
+            orchardPtVals, smpMixIdAndProps, smpParentsOutside, contaminantPollenBv);
 
     PtCalculationResDto ptCalculationResDto = parentTreeService.calculatePtVals(ptValsCalReqDto);
 
@@ -950,7 +956,7 @@ public class SeedlotService {
             smpDto -> {
               GeospatialRequestDto toAdd =
                   new GeospatialRequestDto(
-                      Long.valueOf(smpDto.parentTreeId()), smpDto.proportion());
+                      Long.valueOf(smpDto.parentTreeId()), smpDto.proportion(), List.of());
               geoList.add(toAdd);
             });
 

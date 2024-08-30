@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
@@ -19,6 +20,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +76,19 @@ public class ParentTreeService {
       }
     }
 
+    // --calc avg non-orchard pollen contamination pct
+    Double varAvgNonOrchardPollen = 0D;
+    if (varNumNonOrchardPollen > 0) {
+      varAvgNonOrchardPollen = (double) varTotalNonOrchardPollen / varNumNonOrchardPollen;
+    }
+
+    Integer varOrchardContaminationPct;
+    if (varTotalNonOrchardPollen == 0) {
+      varOrchardContaminationPct = 0;
+    } else {
+      varOrchardContaminationPct = varAvgNonOrchardPollen.intValue();
+    }
+
     // Second pass - No needed, since only --col:W it's in there, which is already on the third pass
     BigDecimal varParentPropOrchPoll = zero;
 
@@ -81,20 +96,60 @@ public class ParentTreeService {
     BigDecimal varSumOrchGameteContr = zero;
     BigDecimal varOrchGameteContr;
     BigDecimal varSumNeNoSmpContrib = zero;
-    BigDecimal varFemaleCropPop = zero;
+    BigDecimal vFemaleCropPop = zero;
     BigDecimal varParPropContrib = null;
     BigDecimal varNeNoSmpContrib = null;
-    for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
-      boolean hasConeCount = orchardPtVals.coneCount().compareTo(BigDecimal.ZERO) > 0;
-      boolean hasPollenCount = orchardPtVals.pollenCount().compareTo(BigDecimal.ZERO) > 0;
+    
+    BigDecimal varSumMaleGwAdContbOrchPoll  = zero;
+    BigDecimal varSumMaleGwDfsContbOrchPoll = zero;
+    BigDecimal varSumMaleGwDfuContbOrchPoll = zero;
+    BigDecimal varSumMaleGwDfwContbOrchPoll = zero;
+    BigDecimal varSumMaleGwDsbContbOrchPoll = zero;
+    BigDecimal varSumMaleGwDscContbOrchPoll = zero;
+    BigDecimal varSumMaleGwDsgContbOrchPoll = zero;
+    BigDecimal varSumMaleGwGvoContbOrchPoll = zero;
+    BigDecimal varSumMaleGwIwsContbOrchPoll = zero;
+    BigDecimal varSumMaleGwWduContbOrchPoll = zero;
+    BigDecimal varSumMaleGwWveContbOrchPoll = zero;
+    BigDecimal varSumMaleGwWwdContbOrchPoll = zero;
+    
+    BigDecimal varMaleTotalGwAdContrib  = zero;
+    BigDecimal varMaleTotalGwDfsContrib = zero;
+    BigDecimal varMaleTotalGwDfuContrib = zero;
+    BigDecimal varMaleTotalGwDfwContrib = zero;
+    BigDecimal varMaleTotalGwDsbContrib = zero;
+    BigDecimal varMaleTotalGwDscContrib = zero;
+    BigDecimal varMaleTotalGwDsgContrib = zero;
+    BigDecimal varMaleTotalGwGvoContrib = zero;
+    BigDecimal varMaleTotalGwIwsContrib = zero;
+    BigDecimal varMaleTotalGwWduContrib = zero;
+    BigDecimal varMaleTotalGwWveContrib = zero;
+    BigDecimal varMaleTotalGwWwdContrib = zero;
+
+    BigDecimal totalGeneticWorthContrib = zero;
+    BigDecimal varSumParentTotalGwAdContrib = zero;
+    BigDecimal varSumParentTotalGwDfsContrib = zero;
+    BigDecimal varSumParentTotalGwDfuContrib = zero;
+    BigDecimal varSumParentTotalGwDfwContrib = zero;
+    BigDecimal varSumParentTotalGwDsbContrib = zero;
+    BigDecimal varSumParentTotalGwDscContrib = zero;
+    BigDecimal varSumParentTotalGwDsgContrib = zero;
+    BigDecimal varSumParentTotalGwGvoContrib = zero;
+    BigDecimal varSumParentTotalGwIwsContrib = zero;
+    BigDecimal varSumParentTotalGwWduContrib = zero;
+    BigDecimal varSumParentTotalGwWveContrib = zero;
+    BigDecimal varSumParentTotalGwWwdContrib = zero;
+    for (OrchardParentTreeValsDto parentTreeRow : ptVals.orchardPtVals()) {
+      boolean hasConeCount = parentTreeRow.coneCount().compareTo(BigDecimal.ZERO) > 0;
+      boolean hasPollenCount = parentTreeRow.pollenCount().compareTo(BigDecimal.ZERO) > 0;
       // --Ignore rows without cone or pollen count
       if (hasConeCount || hasPollenCount) {
-        BigDecimal ptPollenCount = orchardPtVals.pollenCount();
-        BigDecimal ptConeCount = orchardPtVals.coneCount();
+        BigDecimal ptPollenCount = parentTreeRow.pollenCount();
+        BigDecimal ptConeCount = parentTreeRow.coneCount();
 
         // --col:V
         if (varTotalConeCount.compareTo(BigDecimal.ZERO) > 0) {
-          varFemaleCropPop = ptConeCount.divide(varTotalConeCount, DIVISION_SCALE, halfUp);
+          vFemaleCropPop = ptConeCount.divide(varTotalConeCount, DIVISION_SCALE, halfUp);
         }
 
         // --col:W
@@ -102,12 +157,203 @@ public class ParentTreeService {
           varParentPropOrchPoll = ptPollenCount.divide(varTotalPollenCount, DIVISION_SCALE, halfUp);
         }
 
+        // Trait values
+        BigDecimal adBreedingValue  = getTraitValue(parentTreeRow, "AD");
+        BigDecimal dfsBreedingValue = getTraitValue(parentTreeRow, "DFS");
+        BigDecimal dfuBreedingValue = getTraitValue(parentTreeRow, "DFU");
+        BigDecimal dfwBreedingValue = getTraitValue(parentTreeRow, "DFW");
+        BigDecimal dsbBreedingValue = getTraitValue(parentTreeRow, "DSB");
+        BigDecimal dscBreedingValue = getTraitValue(parentTreeRow, "DSC");
+        BigDecimal dsgBreedingValue = getTraitValue(parentTreeRow, "DSG");
+        BigDecimal gvoBreedingValue = getTraitValue(parentTreeRow, "GVO");
+        BigDecimal iwsBreedingValue = getTraitValue(parentTreeRow, "IWS");
+        BigDecimal wduBreedingValue = getTraitValue(parentTreeRow, "WDU");
+        BigDecimal wveBreedingValue = getTraitValue(parentTreeRow, "WVE");
+        BigDecimal wwdBreedingValue = getTraitValue(parentTreeRow, "WWD");
+
+        // --col:X
+        BigDecimal varMaleGwAdContribOrchPoll  = varParentPropOrchPoll.multiply(adBreedingValue);
+        BigDecimal varMaleGwDfsContribOrchPoll = varParentPropOrchPoll.multiply(dfsBreedingValue);
+        BigDecimal varMaleGwDfuContribOrchPoll = varParentPropOrchPoll.multiply(dfuBreedingValue);
+        BigDecimal varMaleGwDfwContribOrchPoll = varParentPropOrchPoll.multiply(dfwBreedingValue);
+        BigDecimal varMaleGwDsbContribOrchPoll = varParentPropOrchPoll.multiply(dsbBreedingValue);
+        BigDecimal varMaleGwDscContribOrchPoll = varParentPropOrchPoll.multiply(dscBreedingValue);
+        BigDecimal varMaleGwDsgContribOrchPoll = varParentPropOrchPoll.multiply(dsgBreedingValue);
+        BigDecimal varMaleGwGvoContribOrchPoll = varParentPropOrchPoll.multiply(gvoBreedingValue);
+        BigDecimal varMaleGwIwsContribOrchPoll = varParentPropOrchPoll.multiply(iwsBreedingValue);
+        BigDecimal varMaleGwWduContribOrchPoll = varParentPropOrchPoll.multiply(wduBreedingValue);
+        BigDecimal varMaleGwWveContribOrchPoll = varParentPropOrchPoll.multiply(wveBreedingValue);
+        BigDecimal varMaleGwWwdContribOrchPoll = varParentPropOrchPoll.multiply(wwdBreedingValue);
+        
+
+        // --accumulate total SUM(x)
+        varSumMaleGwAdContbOrchPoll  = varSumMaleGwAdContbOrchPoll.add(varMaleGwAdContribOrchPoll);
+        varSumMaleGwDfsContbOrchPoll = varSumMaleGwDfsContbOrchPoll.add(varMaleGwDfsContribOrchPoll);
+        varSumMaleGwDfuContbOrchPoll = varSumMaleGwDfuContbOrchPoll.add(varMaleGwDfuContribOrchPoll);
+        varSumMaleGwDfwContbOrchPoll = varSumMaleGwDfwContbOrchPoll.add(varMaleGwDfwContribOrchPoll);
+        varSumMaleGwDsbContbOrchPoll = varSumMaleGwDsbContbOrchPoll.add(varMaleGwDsbContribOrchPoll);
+        varSumMaleGwDscContbOrchPoll = varSumMaleGwDscContbOrchPoll.add(varMaleGwDscContribOrchPoll);
+        varSumMaleGwDsgContbOrchPoll = varSumMaleGwDsgContbOrchPoll.add(varMaleGwDsgContribOrchPoll);
+        varSumMaleGwGvoContbOrchPoll = varSumMaleGwGvoContbOrchPoll.add(varMaleGwGvoContribOrchPoll);
+        varSumMaleGwIwsContbOrchPoll = varSumMaleGwIwsContbOrchPoll.add(varMaleGwIwsContribOrchPoll);
+        varSumMaleGwWduContbOrchPoll = varSumMaleGwWduContbOrchPoll.add(varMaleGwWduContribOrchPoll);
+        varSumMaleGwWveContbOrchPoll = varSumMaleGwWveContbOrchPoll.add(varMaleGwWveContribOrchPoll);
+        varSumMaleGwWwdContbOrchPoll = varSumMaleGwWwdContbOrchPoll.add(varMaleGwWwdContribOrchPoll);
+
+        // --col:Y
+        BigDecimal vfGwAdContrib  = vFemaleCropPop.multiply(adBreedingValue);
+        BigDecimal vfGwDfsContrib = vFemaleCropPop.multiply(dfsBreedingValue);
+        BigDecimal vfGwDfuContrib = vFemaleCropPop.multiply(dfuBreedingValue);
+        BigDecimal vfGwDfwContrib = vFemaleCropPop.multiply(dfwBreedingValue);
+        BigDecimal vfGwDsbContrib = vFemaleCropPop.multiply(dsbBreedingValue);
+        BigDecimal vfGwDscContrib = vFemaleCropPop.multiply(dscBreedingValue);
+        BigDecimal vfGwDsgContrib = vFemaleCropPop.multiply(dsgBreedingValue);
+        BigDecimal vfGwGvoContrib = vFemaleCropPop.multiply(gvoBreedingValue);
+        BigDecimal vfGwIwsContrib = vFemaleCropPop.multiply(iwsBreedingValue);
+        BigDecimal vfGwWduContrib = vFemaleCropPop.multiply(wduBreedingValue);
+        BigDecimal vfGwWveContrib = vFemaleCropPop.multiply(wveBreedingValue);
+        BigDecimal vfGwWwdContrib = vFemaleCropPop.multiply(wwdBreedingValue);
+
+        // --col:Z (preparing, gathering values)
+        BigDecimal adSmpMixBreedingValue  = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "AD");
+        BigDecimal dfsSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "DFS");
+        BigDecimal dfuSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "DFU");
+        BigDecimal dfwSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "DFW");
+        BigDecimal dsbSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "DSB");
+        BigDecimal dscSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "DSC");
+        BigDecimal dsgSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "DSG");
+        BigDecimal gvoSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "GVO");
+        BigDecimal iwsSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "IWS");
+        BigDecimal wduSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "WDU");
+        BigDecimal wveSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "WVE");
+        BigDecimal wwdSmpMixBreedingValue = getSmpMixTraitValue(ptVals.smpMixIdAndProps(), parentTreeRow.parentTreeId(), "WWD");
+        
+        // --col:Z
+        BigDecimal vmSmpAdContrib  = calcColumnZ(parentTreeRow.smpSuccessPerc(), adSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpDfsContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), dfsSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpDfuContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), dfuSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpDfwContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), dfwSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpDsbContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), dsbSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpDscContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), dscSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpDsgContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), dsgSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpGvoContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), gvoSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpIwsContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), iwsSmpMixBreedingValue,vFemaleCropPop);
+        BigDecimal vmSmpWduContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), wduSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpWveContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), wveSmpMixBreedingValue, vFemaleCropPop);
+        BigDecimal vmSmpWwdContrib = calcColumnZ(parentTreeRow.smpSuccessPerc(), wwdSmpMixBreedingValue, vFemaleCropPop);
+
+        // --col:AA
+        // v_m_contam_contrib := ( (1 - (v_a_smp_success_pct/100)) * (varAnotherNonOrchardPollenContam/100) * v_contaminant_pollen_bv ) * vFemaleCropPop;
+        BigDecimal partOne = zero;
+        if (parentTreeRow.smpSuccessPerc() > 0) {
+          partOne = new BigDecimal(parentTreeRow.smpSuccessPerc()).divide(PERC_DIVISOR, DIVISION_SCALE, halfUp);
+        }
+
+        BigDecimal partTwo = zero;
+        if (parentTreeRow.nonOrchardPollenContamPct() > 0) {
+          partTwo = new BigDecimal(parentTreeRow.nonOrchardPollenContamPct()).divide(PERC_DIVISOR, DIVISION_SCALE, halfUp);
+        }
+        BigDecimal partThree = BigDecimal.ONE.subtract(partOne).multiply(partTwo).multiply(ptVals.contaminantPollenBv());
+        BigDecimal vmContamContrib = partThree.multiply(vFemaleCropPop);
+
+        // --col:AB (depends on SUM(X)=v_sum_m_gw_contrib_orch_poll)
+        // v_m_orch_poll_contrib_GVO = ( ( 1 - (v_a_smp_success_pct/100) - (v_a_non_orchard_pollen_contam/100) ) * v_sum_m_gw_GVO_contb_orch_poll ) * v_female_crop_pop;
+        BigDecimal vmOrchPollContribAd  = calcColumAb(partOne, partTwo, varSumMaleGwAdContbOrchPoll,  vFemaleCropPop);
+        BigDecimal vmOrchPollContribDfs = calcColumAb(partOne, partTwo, varSumMaleGwDfsContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribDfu = calcColumAb(partOne, partTwo, varSumMaleGwDfuContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribDfw = calcColumAb(partOne, partTwo, varSumMaleGwDfwContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribDsb = calcColumAb(partOne, partTwo, varSumMaleGwDsbContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribDsc = calcColumAb(partOne, partTwo, varSumMaleGwDscContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribDsg = calcColumAb(partOne, partTwo, varSumMaleGwDsgContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribGvo = calcColumAb(partOne, partTwo, varSumMaleGwGvoContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribIws = calcColumAb(partOne, partTwo, varSumMaleGwIwsContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribWdu = calcColumAb(partOne, partTwo, varSumMaleGwWduContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribWve = calcColumAb(partOne, partTwo, varSumMaleGwWveContbOrchPoll, vFemaleCropPop);
+        BigDecimal vmOrchPollContribWwd = calcColumAb(partOne, partTwo, varSumMaleGwWwdContbOrchPoll, vFemaleCropPop);
+
+        // --col:AC (depends on prev value)
+        varMaleTotalGwAdContrib  =  vmSmpAdContrib.add(vmContamContrib).add(vmOrchPollContribAd);
+        varMaleTotalGwDfsContrib = vmSmpDfsContrib.add(vmContamContrib).add(vmOrchPollContribDfs);
+        varMaleTotalGwDfuContrib = vmSmpDfuContrib.add(vmContamContrib).add(vmOrchPollContribDfu);
+        varMaleTotalGwDfwContrib = vmSmpDfwContrib.add(vmContamContrib).add(vmOrchPollContribDfw);
+        varMaleTotalGwDsbContrib = vmSmpDsbContrib.add(vmContamContrib).add(vmOrchPollContribDsb);
+        varMaleTotalGwDscContrib = vmSmpDscContrib.add(vmContamContrib).add(vmOrchPollContribDsc);
+        varMaleTotalGwDsgContrib = vmSmpDsgContrib.add(vmContamContrib).add(vmOrchPollContribDsg);
+        varMaleTotalGwGvoContrib = vmSmpGvoContrib.add(vmContamContrib).add(vmOrchPollContribGvo);
+        varMaleTotalGwIwsContrib = vmSmpIwsContrib.add(vmContamContrib).add(vmOrchPollContribIws);
+        varMaleTotalGwWduContrib = vmSmpWduContrib.add(vmContamContrib).add(vmOrchPollContribWdu);
+        varMaleTotalGwWveContrib = vmSmpWveContrib.add(vmContamContrib).add(vmOrchPollContribWve);
+        varMaleTotalGwWwdContrib = vmSmpWwdContrib.add(vmContamContrib).add(vmOrchPollContribWwd);
+
+        // --col:AD
+        BigDecimal varParentTotalGwAdContrib;
+        BigDecimal varParentTotalGwDfsContrib;
+        BigDecimal varParentTotalGwDfuContrib;
+        BigDecimal varParentTotalGwDfwContrib;
+        BigDecimal varParentTotalGwDsbContrib;
+        BigDecimal varParentTotalGwDscContrib;
+        BigDecimal varParentTotalGwDsgContrib;
+        BigDecimal varParentTotalGwGvoContrib;
+        BigDecimal varParentTotalGwIwsContrib;
+        BigDecimal varParentTotalGwWduContrib;
+        BigDecimal varParentTotalGwWveContrib;
+        BigDecimal varParentTotalGwWwdContrib;
+        if (varTotalPollenCount.compareTo(zero) == 0) {
+          varParentTotalGwAdContrib  = vfGwAdContrib;
+          varParentTotalGwDfsContrib = vfGwDfsContrib;
+          varParentTotalGwDfuContrib = vfGwDfuContrib;
+          varParentTotalGwDfwContrib = vfGwDfwContrib;
+          varParentTotalGwDsbContrib = vfGwDsbContrib;
+          varParentTotalGwDscContrib = vfGwDscContrib;
+          varParentTotalGwDsgContrib = vfGwDsgContrib;
+          varParentTotalGwGvoContrib = vfGwGvoContrib;
+          varParentTotalGwIwsContrib = vfGwIwsContrib;
+          varParentTotalGwWduContrib = vfGwWduContrib;
+          varParentTotalGwWveContrib = vfGwWveContrib;
+          varParentTotalGwWwdContrib = vfGwWwdContrib;
+        } else {
+          BigDecimal two = new BigDecimal("2");
+
+          varParentTotalGwAdContrib  = vfGwAdContrib.add(varMaleTotalGwAdContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwDfsContrib = vfGwDfsContrib.add(varMaleTotalGwDfsContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwDfuContrib = vfGwDfuContrib.add(varMaleTotalGwDfuContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwDfwContrib = vfGwDfwContrib.add(varMaleTotalGwDfwContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwDsbContrib = vfGwDsbContrib.add(varMaleTotalGwDsbContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwDscContrib = vfGwDscContrib.add(varMaleTotalGwDscContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwDsgContrib = vfGwDsgContrib.add(varMaleTotalGwDsgContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwGvoContrib = vfGwGvoContrib.add(varMaleTotalGwGvoContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwIwsContrib = vfGwIwsContrib.add(varMaleTotalGwIwsContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwWduContrib = vfGwWduContrib.add(varMaleTotalGwWduContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwWveContrib = vfGwWveContrib.add(varMaleTotalGwWveContrib).divide(two, DIVISION_SCALE, halfUp);
+          varParentTotalGwWwdContrib = vfGwWwdContrib.add(varMaleTotalGwWwdContrib).divide(two, DIVISION_SCALE, halfUp);
+        }
+
+        // --Set total gw contrib back into array so it can be displayed/saved
+        // TODO: Review here!
+        // p_pt(i).total_genetic_worth_contrib := v_p_total_gw_GVO_contrib;
+        totalGeneticWorthContrib = varParentTotalGwGvoContrib;
+
+        // v_sum_p_total_gw_GVO_contrib := v_sum_p_total_gw_GVO_contrib + v_p_total_gw_GVO_contrib;
+        
+        varSumParentTotalGwAdContrib = varSumParentTotalGwAdContrib.add(varParentTotalGwAdContrib);
+        varSumParentTotalGwDfsContrib = varSumParentTotalGwDfsContrib.add(varParentTotalGwDfsContrib);
+        varSumParentTotalGwDfuContrib = varSumParentTotalGwDfuContrib.add(varParentTotalGwDfuContrib);
+        varSumParentTotalGwDfwContrib = varSumParentTotalGwDfwContrib.add(varParentTotalGwDfwContrib);
+        varSumParentTotalGwDsbContrib = varSumParentTotalGwDsbContrib.add(varParentTotalGwDsbContrib);
+        varSumParentTotalGwDscContrib = varSumParentTotalGwDscContrib.add(varParentTotalGwDscContrib);
+        varSumParentTotalGwDsgContrib = varSumParentTotalGwDsgContrib.add(varParentTotalGwDsgContrib);
+        varSumParentTotalGwGvoContrib = varSumParentTotalGwGvoContrib.add(varParentTotalGwGvoContrib);
+        varSumParentTotalGwIwsContrib = varSumParentTotalGwIwsContrib.add(varParentTotalGwIwsContrib);
+        varSumParentTotalGwWduContrib = varSumParentTotalGwWduContrib.add(varParentTotalGwWduContrib);
+        varSumParentTotalGwWveContrib = varSumParentTotalGwWveContrib.add(varParentTotalGwWveContrib);
+        varSumParentTotalGwWwdContrib = varSumParentTotalGwWwdContrib.add(varParentTotalGwWwdContrib);
+
         // --col:AE
         if (varTotalPollenCount.compareTo(BigDecimal.ZERO) == 0) {
-          varParPropContrib = varFemaleCropPop;
+          varParPropContrib = vFemaleCropPop;
         } else {
           varParPropContrib =
-              varFemaleCropPop
+              vFemaleCropPop
                   .add(varParentPropOrchPoll)
                   .divide(new BigDecimal("2"), DIVISION_SCALE, halfUp);
         }
@@ -118,7 +364,7 @@ public class ParentTreeService {
 
         // --col:AQ
         varOrchGameteContr =
-            varFemaleCropPop
+            vFemaleCropPop
                 .add(new BigDecimal("0.75").multiply(varParentPropOrchPoll))
                 .divide(new BigDecimal(2))
                 .pow(2);
@@ -126,11 +372,32 @@ public class ParentTreeService {
       }
     }
 
-    // --calc avg non-orchard pollen contamination pct
-    Integer varAvgNonOrchardPollen = 0;
-    if (varNumNonOrchardPollen > 0) {
-      varAvgNonOrchardPollen = varTotalNonOrchardPollen / varNumNonOrchardPollen;
-    }
+    //v_gw_GVO := ROUND(v_sum_p_total_gw_GVO_contrib);
+    BigDecimal vgwAd  = varSumParentTotalGwAdContrib; // not rounding, for now
+    BigDecimal vgwDfs = varSumParentTotalGwDfsContrib; // not rounding, for now
+    BigDecimal vgwDfu = varSumParentTotalGwDfuContrib; // not rounding, for now
+    BigDecimal vgwDfw = varSumParentTotalGwDfwContrib; // not rounding, for now
+    BigDecimal vgwDsb = varSumParentTotalGwDsbContrib; // not rounding, for now
+    BigDecimal vgwDsc = varSumParentTotalGwDscContrib; // not rounding, for now
+    BigDecimal vgwDsg = varSumParentTotalGwDsgContrib; // not rounding, for now
+    BigDecimal vgwGvo = varSumParentTotalGwGvoContrib; // not rounding, for now
+    BigDecimal vgwIws = varSumParentTotalGwIwsContrib; // not rounding, for now
+    BigDecimal vgwWdu = varSumParentTotalGwWduContrib; // not rounding, for now
+    BigDecimal vgwWve = varSumParentTotalGwWveContrib; // not rounding, for now
+    BigDecimal vgwWwd = varSumParentTotalGwWwdContrib; // not rounding, for now
+
+    SparLog.info("vgwAd: {}", vgwAd);
+    SparLog.info("vgwDfs: {}", vgwDfs);
+    SparLog.info("vgwDfu: {}", vgwDfu);
+    SparLog.info("vgwDfw: {}", vgwDfw);
+    SparLog.info("vgwDsb: {}", vgwDsb);
+    SparLog.info("vgwDsc: {}", vgwDsc);
+    SparLog.info("vgwDsg: {}", vgwDsg);
+    SparLog.info("vgwGvo: {}", vgwGvo);
+    SparLog.info("vgwIws: {}", vgwIws);
+    SparLog.info("vgwWdu: {}", vgwWdu);
+    SparLog.info("vgwWve: {}", vgwWve);
+    SparLog.info("vgwWwd: {}", vgwWwd);
 
     BigDecimal coancestry = null;
     BigDecimal neValue =
@@ -153,6 +420,50 @@ public class ParentTreeService {
         new PtCalculationResDto(calculatedGws, calculatedVals, smpMixGeoData);
 
     return summaryDto;
+  }
+
+  private BigDecimal calcColumnZ(Integer smpSuccessPerc, BigDecimal smpMixBv, BigDecimal femaleCropProp) {
+    return new BigDecimal(smpSuccessPerc)
+            .multiply(smpMixBv)
+            .divide(PERC_DIVISOR, DIVISION_SCALE, halfUp)
+            .multiply(femaleCropProp);
+  }
+
+  private BigDecimal calcColumAb(BigDecimal partOne, BigDecimal partTwo, BigDecimal varSumMaleGwGvoContbOrchPoll, BigDecimal v_female_crop_pop) {
+    BigDecimal partThree = BigDecimal.ONE.subtract(partOne).subtract(partTwo);
+    return partThree.multiply(varSumMaleGwGvoContbOrchPoll).multiply(v_female_crop_pop);
+  }
+
+  /**
+   * Finds the genetic trait value given the request dto and the trait that should be found.
+   *
+   * @param dto A {@link OrchardParentTreeValsDto} instance with the traits value.
+   * @param traitCode The trait code that should be considered.
+   * @return a BigDecimal representing the trait value or BigDecimal.ZERO otherwise.
+   */
+  private BigDecimal getTraitValue(OrchardParentTreeValsDto traitDto, String traitCode) {
+    List<GeneticWorthTraitsDto> geneticTraits = traitDto.geneticTraits();
+    Optional<GeneticWorthTraitsDto> traitOptional =
+        geneticTraits.stream()
+            .filter(x -> x.traitCode().equalsIgnoreCase(traitCode))
+            .findFirst();
+    return traitOptional.isEmpty() ? BigDecimal.ZERO : traitOptional.get().traitValue();
+  }
+
+  private BigDecimal getSmpMixTraitValue(List<GeospatialRequestDto> smpMixIdAndProps, String parentTreeId, String traitCode) {
+    Optional<GeospatialRequestDto> smpMixValuesOp = smpMixIdAndProps.stream().filter(x -> x.parentTreeId().equals(Long.parseLong(parentTreeId))).findFirst();
+    if (smpMixValuesOp.isEmpty()) {
+      return BigDecimal.ZERO;
+    }
+
+    GeospatialRequestDto smpMixValues = smpMixValuesOp.get();
+
+    List<GeneticWorthTraitsDto> geneticTraits = smpMixValues.geneticTraits();
+    Optional<GeneticWorthTraitsDto> traitOptional =
+        geneticTraits.stream()
+            .filter(x -> x.traitCode().equalsIgnoreCase(traitCode))
+            .findFirst();
+    return traitOptional.isEmpty() ? BigDecimal.ZERO : traitOptional.get().traitValue();
   }
 
   /**
