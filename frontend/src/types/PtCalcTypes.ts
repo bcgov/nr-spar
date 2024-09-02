@@ -39,8 +39,7 @@ export type OrchardParentTreeValsType = {
 
 export type GeospatialRequestDto = {
   parentTreeId: number,
-  proportion: number,
-  geneticTraits: GeneticTrait[]
+  proportion: number
 }
 
 export type PtValsCalcReqPayload = {

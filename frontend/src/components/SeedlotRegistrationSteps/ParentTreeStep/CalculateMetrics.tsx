@@ -69,6 +69,7 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
         }
         disabled={disableOptions}
         onClick={() => {
+          console.log('orchardStep.breedingPercentage.value', orchardStep.breedingPercentage.value);
           setIsCalculatingPt(true);
           calculateGenWorthQuery.mutate(
             generatePtValCalcPayload(
@@ -78,7 +79,7 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
                 orchardStep,
                 state.allParentTreeData
               ),
-              seedlotData?.pollenContaminantBreedingValue
+              orchardStep.breedingPercentage.value
             )
           );
 

@@ -642,6 +642,7 @@ public class SeedlotService {
                 orchardStep,
                 parentTreesInfo,
                 smpMixParentTreesInfo,
+                0,
                 extractionStep,
                 List.of(),
                 null,
@@ -806,7 +807,11 @@ public class SeedlotService {
       // Update Seedlot Ne, collection elevation, and collection lat long
       // Saves the Seedlot calculated Genetic Worth
       setParentTreeContribution(
-          seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
+          seedlot,
+          form.seedlotFormParentTreeDtoList(),
+          form.seedlotFormParentTreeSmpDtoList(),
+          form.smpParentsOutside(),
+          form.seedlotFormOrchardDto().contaminantPollenBv());
 
       // If there is no area of use data already set:
       // Update elevation min max, latitude min max, longitude min max, and SPZ
@@ -881,15 +886,13 @@ public class SeedlotService {
   private void setParentTreeContribution(
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> orchardPtDtoList,
-      List<SeedlotFormParentTreeSmpDto> smpPtDtoList) {
+      List<SeedlotFormParentTreeSmpDto> smpPtDtoList,
+      Integer smpParentsOutside,
+      BigDecimal contaminantPollenBv) {
 
     SparLog.info("Begin to set parent trees contribution");
     List<OrchardParentTreeValsDto> orchardPtVals = convertToPtVals(orchardPtDtoList);
     List<GeospatialRequestDto> smpMixIdAndProps = convertToGeoRes(smpPtDtoList);
-
-    // FIXME
-    Integer smpParentsOutside = 0;
-    BigDecimal contaminantPollenBv = BigDecimal.ZERO;
 
     PtValsCalReqDto ptValsCalReqDto =
         new PtValsCalReqDto(
@@ -923,6 +926,17 @@ public class SeedlotService {
 
     SparLog.info("Saving Seedlot genetic worth calculated values");
     seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, ptCalculationResDto.geneticTraits());
+
+    seedlot.setParentsOutsideTheOrchardUsedInSmp(smpParentsOutside);
+    if (!ValueUtil.isValueEqual(seedlot.getPollenContaminantBreedingValue(), contaminantPollenBv)) {
+      seedlot.setPollenContaminantBreedingValue(contaminantPollenBv);
+    }
+    // review integer x bigdecimal
+    seedlot.setNonOrchardPollenContaminationPercentage(
+        ptCalculationResDto.orchardContaminationPct().intValue());
+
+    // review integer x bigdecimal
+    seedlot.setSmpSuccessPercentage(ptCalculationResDto.smpSuccessPct().intValue());
   }
 
   private List<OrchardParentTreeValsDto> convertToPtVals(
@@ -956,7 +970,7 @@ public class SeedlotService {
             smpDto -> {
               GeospatialRequestDto toAdd =
                   new GeospatialRequestDto(
-                      Long.valueOf(smpDto.parentTreeId()), smpDto.proportion(), List.of());
+                      Long.valueOf(smpDto.parentTreeId()), smpDto.proportion());
               geoList.add(toAdd);
             });
 

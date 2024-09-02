@@ -50,13 +50,13 @@ class ParentTreeServiceTest {
 
     /* ********* SERVICE REQUEST DATA ********* */
     GeospatialRequestDto smp4033 =
-        new GeospatialRequestDto(smpPtIds.get(0), new BigDecimal("0.1935"), List.of());
+        new GeospatialRequestDto(smpPtIds.get(0), new BigDecimal("0.1935"));
     GeospatialRequestDto smp4079 =
-        new GeospatialRequestDto(smpPtIds.get(1), new BigDecimal("0.3710"), List.of());
+        new GeospatialRequestDto(smpPtIds.get(1), new BigDecimal("0.3710"));
     GeospatialRequestDto smp4080 =
-        new GeospatialRequestDto(smpPtIds.get(2), new BigDecimal("0.1935"), List.of());
+        new GeospatialRequestDto(smpPtIds.get(2), new BigDecimal("0.1935"));
     GeospatialRequestDto smp5197 =
-        new GeospatialRequestDto(smpPtIds.get(3), new BigDecimal("0.2419"), List.of());
+        new GeospatialRequestDto(smpPtIds.get(3), new BigDecimal("0.2419"));
     List<GeospatialRequestDto> smpMixIdAndProps = List.of(smp4033, smp4079, smp4080, smp5197);
 
     OrchardParentTreeValsDto pt4032 =
@@ -113,7 +113,8 @@ class ParentTreeServiceTest {
 
     List<OrchardParentTreeValsDto> orchardPtVals = List.of(pt4032, pt4033, pt4079, pt4080);
 
-    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO);
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO);
 
     /* ********* ORACLE GEOSPATIAL MOCK DATA ********* */
     List<GeospatialOracleResDto> oracleMockSmpGeoData =
@@ -142,7 +143,6 @@ class ParentTreeServiceTest {
     when(geneticWorthService.calculateNe(
             coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside))
         .thenReturn(mockNeValue);
-    when(geneticWorthService.calculateGeneticWorth(reqDto.orchardPtVals())).thenReturn(List.of());
 
     /* ********* SERVICE TESTS ********* */
     PtCalculationResDto resDtoToTest = parentTreeService.calculatePtVals(reqDto);
@@ -183,12 +183,13 @@ class ParentTreeServiceTest {
     // parent_tree_table.
     // The only time it's does not exist in the table it's when the data is malformed.
     Long badPtId = Long.valueOf(999999);
-    GeospatialRequestDto badSmp = new GeospatialRequestDto(badPtId, new BigDecimal(0.242), List.of());
+    GeospatialRequestDto badSmp = new GeospatialRequestDto(badPtId, new BigDecimal(0.242));
     List<GeospatialRequestDto> smpMixIdAndProps = List.of(badSmp);
     when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(badPtId))).thenReturn(List.of());
 
     List<OrchardParentTreeValsDto> orchardPtVals = List.of();
-    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO);
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO);
 
     BigDecimal coancestry = null;
     BigDecimal varSumOrchGameteContr = null;
@@ -197,7 +198,6 @@ class ParentTreeServiceTest {
     when(geneticWorthService.calculateNe(
             coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside))
         .thenReturn(BigDecimal.ZERO);
-    when(geneticWorthService.calculateGeneticWorth(reqDto.orchardPtVals())).thenReturn(List.of());
 
     assertThrows(
         PtGeoDataNotFoundException.class,

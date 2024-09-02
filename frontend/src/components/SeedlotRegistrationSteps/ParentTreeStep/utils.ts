@@ -729,7 +729,7 @@ export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
   seedlotSpecies: MultiOptionsObj,
   orchardPts: string[],
-  pollenContaminantBreedingValue?: number
+  pollenContaminantBreedingValue?: string
 ): PtValsCalcReqPayload => {
   const { tableRowData, mixTabData } = state;
   const payload: PtValsCalcReqPayload = {
@@ -763,20 +763,9 @@ export const generatePtValCalcPayload = (
   const smpMixRows = Object.values(mixTabData);
   smpMixRows.forEach((row) => {
     if (row.parentTreeNumber.value) {
-      const newPayloadItem: GeospatialRequestDto = {
+      payload.smpMixIdAndProps.push({
         parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
-        proportion: Number(row.proportion.value),
-        geneticTraits: []
-      };
-
-      payload.smpMixIdAndProps.push(newPayloadItem);
-
-      // Populate geneticTraits array
-      genWorthTypes.forEach((gwType) => {
-        newPayloadItem.geneticTraits.push({
-          traitCode: gwType,
-          traitValue: Number(row[gwType as keyof StrTypeRowItem].value)
-        });
+        proportion: Number(row.proportion.value)
       });
     }
   });
@@ -785,8 +774,9 @@ export const generatePtValCalcPayload = (
   payload.smpParentsOutside = getOutsideParentTreeNum(state, orchardPts);
 
   // Contaminant Pollen BV
+  payload.contaminantPollenBv = 0;
   if (pollenContaminantBreedingValue) {
-    payload.contaminantPollenBv = pollenContaminantBreedingValue;
+    payload.contaminantPollenBv = Number(pollenContaminantBreedingValue);
   }
 
   return payload;

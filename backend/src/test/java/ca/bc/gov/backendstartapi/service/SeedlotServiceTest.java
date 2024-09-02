@@ -617,6 +617,7 @@ class SeedlotServiceTest {
                 orchardId, null, null, null, null, null, null, null, null, null),
             sptDto,
             sptSmpMixDto,
+            0,
             new SeedlotFormExtractionDto(null, null, null, null, null, null, null, null),
             List.of(),
             null,
@@ -817,6 +818,7 @@ class SeedlotServiceTest {
             formOrchardDto, // SeedlotFormOrchardDto
             List.of(mock(SeedlotFormParentTreeSmpDto.class)), // List<SeedlotFormParentTreeSmpDto>
             List.of(mock(SeedlotFormParentTreeSmpDto.class)), // List<SeedlotFormParentTreeSmpDto>
+            0,
             mock(SeedlotFormExtractionDto.class), // SeedlotFormExtractionDto
             List.of(mock(SeedlotReviewSeedPlanZoneDto.class)), // List<SeedlotReviewSeedPlanZoneDto>
             mock(SeedlotReviewElevationLatLongDto.class), // SeedlotReviewElevationLatLongDto

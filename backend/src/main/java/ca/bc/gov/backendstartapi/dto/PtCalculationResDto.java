@@ -1,6 +1,8 @@
 package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 /** This class represents the JSON that will be returned by the GW calculations. */
@@ -16,4 +18,8 @@ public record PtCalculationResDto(
     @Schema(description = "Various calculated value for the orchard parent trees.")
         CalculatedParentTreeValsDto calculatedPtVals,
     @Schema(description = "The calculated mean geospatial values for SMP mix.")
-        GeospatialRespondDto smpMixMeanGeoData) {}
+        GeospatialRespondDto smpMixMeanGeoData,
+    @Schema(description = "The calculated SMP Success percentage")
+        BigDecimal smpSuccessPct,
+    @Schema(description = "The calculated Orchard Contamination percentage")
+        BigDecimal orchardContaminationPct) {}

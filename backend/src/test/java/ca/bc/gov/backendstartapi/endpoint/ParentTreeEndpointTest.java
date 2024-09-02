@@ -69,7 +69,8 @@ class ParentTreeEndpointTest {
                 "WWD", new BigDecimal("2"), new BigDecimal("32"), new BigDecimal("14")));
 
     PtCalculationResDto responseDto =
-        new PtCalculationResDto(genWorthResDrto, cacledPtValsDto, smpMixMeanDto);
+        new PtCalculationResDto(
+            genWorthResDrto, cacledPtValsDto, smpMixMeanDto, BigDecimal.ZERO, BigDecimal.ZERO);
 
     when(parentTreeService.calculatePtVals(any())).thenReturn(responseDto);
 
