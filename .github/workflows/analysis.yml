@@ -14,6 +14,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Typescript lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: bcgov-nr/action-test-and-analyse@v1.2.1
+        with:
+          commands: |
+            npm run lint
+          dir: frontend
+          node_version: "20"
+
   tests:
     name: Java CI
     if: ${{ ! github.event.pull_request.draft }}
@@ -65,7 +76,7 @@ jobs:
   results:
     name: Analysis Results
     if: always() && (!failure()) && (!cancelled())
-    needs: [tests, trivy]
+    needs: [lint, tests, trivy]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
