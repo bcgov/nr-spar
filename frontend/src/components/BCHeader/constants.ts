@@ -101,13 +101,13 @@ export const navItems = [
 export const supportItems = {
   name: 'Support',
   items: [
-// Uncomment these as necessary :)
-//     {
-//       name: 'Need help?',
-//       icon: 'Help',
-//       link: '#',
-//       disabled: true
-//     },
+  // Uncomment these as necessary :)
+  //     {
+  //       name: 'Need help?',
+  //       icon: 'Help',
+  //       link: '#',
+  //       disabled: true
+  //     },
     {
       name: 'Service status',
       icon: 'CloudMonitoring',
