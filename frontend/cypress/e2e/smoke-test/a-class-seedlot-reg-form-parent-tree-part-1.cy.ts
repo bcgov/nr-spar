@@ -34,6 +34,47 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     });
   });
 
+  // it('Select orchard option', () => {
+  //   const orchardUrl = `/seedlots/a-class-registration/${seedlotNum}/?step=4`
+  //   cy.visit(orchardUrl);
+
+  //   cy.url().should('contains', orchardUrl);
+
+  //   cy.get('#primary-orchard-selection')
+  //     .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+  //     .click();
+
+  //   cy.get(`.${prefix}--list-box--expanded`)
+  //     .find('ul li')
+  //     .as('orchardDropdown')
+  //     .contains('219 - VERNON - S - PRD')
+  //     .click();
+
+  //   // Add additional orchard
+  //   cy.get('.seedlot-orchard-add-orchard')
+  //     .find('button')
+  //     .contains('Add additional orchard')
+  //     .click();
+
+  //   cy.get('#secondary-orchard-selection')
+  //     .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+  //     .click();
+
+  //   cy.get('@orchardDropdown')
+  //     .contains('222 - VERNON - S - PRD')
+  //     .click();
+
+  //   // Go to next step to get error msg
+  //   cy.get('.seedlot-registration-progress')
+  //     .find(`button.${prefix}--progress-step-button`)
+  //     .as('progressBar')
+  //     .contains('Parent tree and SMP')
+  //     .click();
+
+  //   // Wait for the table in Step 5 to load
+  //   cy.get('#parentTreeNumber');
+  // });
+
   it('Page title and subtitles', () => {
     cy.get('.title-row')
       .find('h2')
@@ -368,7 +409,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
-      .find('button[aria-label="close"]')
+      .find('button')
+      .contains('Cancel')
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
