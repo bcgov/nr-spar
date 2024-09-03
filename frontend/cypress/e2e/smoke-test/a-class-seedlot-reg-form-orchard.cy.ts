@@ -93,7 +93,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       url: '**/api/parent-trees/vegetation-codes/*'
     }).as('parentTreesUnderVegCode');
 
-    // Go to next step to get error msg
+    // Go to next stepS
     cy.get('.seedlot-registration-progress')
       .find(`button.${prefix}--progress-step-button`)
       .as('progressBar')
@@ -113,29 +113,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
       .as('cancelOrchard')
-      .click();
-
-    // Check change orchard modal is visible
-    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
-      .should('be.visible');
-
-    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
-      .find(`h3.${prefix}--modal-header__heading`)
-      .should('have.text', regFormData.orchard.singleOrchardError);
-
-    // Check 'Cancel' button of change orchard modal
-    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
-      .find(`button.${prefix}--btn`)
-      .contains('Cancel')
-      .click();
-
-    // Check 'Change orchard' button of change orchard modal
-    cy.get('@cancelOrchard')
-      .click();
-
-    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
-      .find(`button.${prefix}--btn`)
-      .contains('Change orchard')
       .click();
 
     cy.get('#primary-orchard-selection')
@@ -167,7 +144,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('222 - VERNON - S - PRD')
       .click();
 
-    // Go to next step to get error msg
+    // Go to next step
     cy.get('.seedlot-registration-progress')
       .find(`button.${prefix}--progress-step-button`)
       .as('progressBar')
@@ -186,29 +163,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .find('button')
       .contains('Delete secondary orchard')
       .as('deleteOrchard')
-      .click();
-
-    // Check delete orchard modal is visible
-    cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
-      .should('be.visible');
-
-    cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
-      .find(`h3.${prefix}--modal-header__heading`)
-      .should('have.text', regFormData.orchard.doubleOrchardError);
-
-    // Check 'Cancel' button of change orchard modal
-    cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
-      .find(`button.${prefix}--btn`)
-      .contains('Cancel')
-      .click();
-
-    cy.get('@deleteOrchard')
-      .click();
-
-    // Check 'Delete secondary orchard' button of change orchard modal
-    cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
-      .find(`button.${prefix}--btn`)
-      .contains('Delete secondary orchard')
       .click();
 
     cy.get('#secondary-orchard-selection')
@@ -276,11 +230,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
       .click();
 
-    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
-      .find(`button.${prefix}--btn`)
-      .contains('Change orchard')
-      .click();
-
     cy.get('#primary-orchard-selection')
       .should('have.value', '');
 
@@ -338,11 +287,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Cancel orchard
     cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
-      .click();
-
-    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
-      .find(`button.${prefix}--btn`)
-      .contains('Change orchard')
       .click();
 
     cy.get('#primary-orchard-selection')
