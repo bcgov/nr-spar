@@ -1,4 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
+import { THIRTY_SECONDS } from '../../constants';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP success on parent)', () => {
   let regFormData: {
@@ -54,13 +55,16 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
       .should('not.be.checked');
 
     cy.get('#smp-default-vals-checkbox')
-      .check();
+      .check({ force: true});
 
     cy.get('.smp-default-input-row')
       .should('be.visible');
   });
 
   it('change checkbox default state', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber');
+
     cy.get('#smp-default-vals-checkbox')
       .check({force: true});
 
@@ -69,6 +73,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     // Check error msg for negative 'SMP success' value
     cy.get('#default-smp-success-input')
+      .clear()
       .type('-1')
       .blur();
 
@@ -82,6 +87,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     // Check no error message for positive 'SMP success' value
     cy.get('#default-smp-success-input')
+      .clear()
       .type('5')
       .blur();
 
@@ -90,6 +96,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     // Check error msg for decimal 'SMP success' value
     cy.get('#default-smp-success-input')
+      .clear()
       .type('0.05')
       .blur();
 
@@ -101,6 +108,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     // Check error msg for >25 'SMP success' value
     cy.get('#default-smp-success-input')
+      .clear()
       .type('26')
       .blur();
 
@@ -110,8 +118,15 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
     cy.get('@errorDialog')
       .should('have.text', regFormData.parentTree.smpSuccessErrorMsg);
 
+    // Enter values for all 'SMP success on parent (%)' cells
+    cy.get('#default-smp-success-input')
+      .clear()
+      .type('5')
+      .blur();
+
     // Check error msg for negative 'pollen contaminant' value
     cy.get('#default-pollen-contam-input')
+      .clear()
       .type('-1')
       .blur();
 
@@ -123,6 +138,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     // Check no error message for positive 'pollen contaminant' value
     cy.get('#default-pollen-contam-input')
+      .clear()
       .type('5')
       .blur();
 
@@ -131,6 +147,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     // Check error msg for decimal 'pollen contaminant' value
     cy.get('#default-pollen-contam-input')
+      .clear()
       .type('0.05')
       .blur();
 
@@ -142,6 +159,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     // Check error msg for >100 'pollen contaminant' value
     cy.get('#default-pollen-contam-input')
+      .clear()
       .type('101')
       .blur();
 
@@ -151,13 +169,9 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
     cy.get('@errorDialog')
       .should('have.text', regFormData.parentTree.nonOrchardErrorMsg);
 
-    // Enter values for all 'SMP success on parent (%)' cells
-    cy.get('#default-smp-success-input')
-      .type('5')
-      .blur();
-
     // Enter values for all 'Non-orchard pollen contam. (%)' cells
     cy.get('#default-pollen-contam-input')
+      .clear()
       .type('2')
       .blur();
 
@@ -197,15 +211,20 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     // Change values of first rows
     cy.get('#212-smpSuccessPerc-value-input')
+      .clear()
       .type('0')
       .blur();
 
     cy.get('#212-nonOrchardPollenContam-value-input')
+      .clear()
       .type('0')
       .blur();
   });
 
   it('Check \'Show/hide columns\' button functionality', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber');
+
     // Click 'Dothistroma needle blight (DFS)' checkbox
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(0)
@@ -277,6 +296,9 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
   });
 
   it('Check \'More Options\' button functionality', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber');
+
     // Check Download file option
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(1)
@@ -321,7 +343,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
-      .find('button[aria-label="close"]')
+      .find('button')
+      .contains('Cancel')
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
@@ -354,7 +377,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     // Check upload button functionality
     cy.get('button.upload-button')
-      .click();
+      .click({force: true});
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .should('be.visible');
@@ -375,7 +398,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
     cy.get(`.${prefix}--file`)
       .find(`input.${prefix}--file-input`)
-      .selectFile('cypress/fixtures/Seedlot_composition_template.csv', {force: true});
+      .selectFile('cypress/fixtures/Seedlot_composition_template_02.csv', {force: true});
 
     cy.get('button')
       .contains('Import file and continue')
