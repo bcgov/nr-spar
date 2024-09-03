@@ -115,7 +115,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Wait for the table to load
     cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
-    cy.get('#parentTreeNumber');
+    cy.get('#parentTreeNumber').scrollIntoView();
 
     // Check error message for negative Cone count
     cy.get('#212-coneCount-value-input')
@@ -217,7 +217,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Wait for the table to load
     cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
-    cy.get('#parentTreeNumber');
+    cy.get('#parentTreeNumber').scrollIntoView();
 
     // Click 'Dothistroma needle blight (DFS)' checkbox
     cy.get(`.${prefix}--toolbar-content > span`)
@@ -301,7 +301,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Wait for the table to load
     cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
-    cy.get('#parentTreeNumber');
+    cy.get('#parentTreeNumber').scrollIntoView();
 
     // Check Download file option
     cy.get(`.${prefix}--toolbar-content > span`)
@@ -457,6 +457,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
     cy.get('#parentTreeNumber');
 
+    cy.get(`.${prefix}--pagination`).scrollIntoView();
+
     const dropdownNumber = '20';
     // Number of item dropdown
     cy.get(`.${prefix}--pagination__left`)
@@ -518,6 +520,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     // Wait for the table to load
     cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
     cy.get('#parentTreeNumber');
+
+    cy.get('.info-sections-row').scrollIntoView();
 
     // Check info sections not visible in DOM
     cy.get('.info-section-sub-title')
