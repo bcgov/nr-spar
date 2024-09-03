@@ -21,6 +21,7 @@ jobs:
       - uses: bcgov-nr/action-test-and-analyse@v1.2.1
         with:
           commands: |
+            npm ci
             npm run lint
           dir: frontend
           node_version: "20"
