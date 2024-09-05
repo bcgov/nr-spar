@@ -26,7 +26,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
         cy.url().should('contains', url);
         cy.get('#parent-tree-step-tab-list-id')
           .find('button')
-          .contains('SMP success on parent')
+          .contains('Calculation of SMP mix')
           .click();
       });
     });
