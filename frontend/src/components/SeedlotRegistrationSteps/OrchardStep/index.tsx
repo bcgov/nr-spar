@@ -599,6 +599,7 @@ const OrchardStep = ({
                     defaultValue={state.breedingPercentage.value}
                     step={10}
                     disableWheel
+                    hideSteppers
                     type="number"
                     label={orchardStepText.pollenSection.breedingPercentage.label}
                     helperText={orchardStepText.pollenSection.breedingPercentage.helper}
