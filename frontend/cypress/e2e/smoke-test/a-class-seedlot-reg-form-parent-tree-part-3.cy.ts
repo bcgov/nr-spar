@@ -31,4 +31,12 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       });
     });
   });
+
+  it('Page title and subtitles', () => {
+    cy.get(`.${prefix}--data-table-header__title`)
+      .should('have.text', regFormData.parentTree.calculationTitle);
+
+    cy.get(`.${prefix}--data-table-header__description`)
+      .should('have.text', regFormData.parentTree.calculationSubtitle);
+  });
 });
