@@ -206,7 +206,11 @@ const BCHeader = () => {
                   <SideNavLink
                     key={supportItem.name}
                     renderIcon={Icons[supportItem.icon]}
-                    className={supportItem.disabled ? 'disabled-side-nav-option' : 'side-nav-option'}
+                    className={
+                    supportItem.disabled
+                      ? 'disabled-side-nav-option'
+                      : 'side-nav-option'
+                    }
                     onClick={supportItem.disabled ? null : () => navigate(supportItem.link)}
                   >
                     {supportItem.name}
