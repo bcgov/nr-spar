@@ -40,6 +40,39 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .should('have.text', regFormData.parentTree.calculationSubtitle);
   });
 
+  it('Check \'Add a new row\' button functionality', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber');
+
+    cy.get(`.${prefix}--pagination__items-count`)
+      .should('include.text', '20 items');
+
+    cy.get(`.${prefix}--toolbar-content > span`)
+      .eq(0)
+      .find('button')
+      .as('clickAddRowBtn')
+      .click({force: true});
+
+    // Check total number of rows
+    cy.get(`.${prefix}--pagination__items-count`)
+      .should('include.text', '21 items');
+
+    cy.get('@clickAddRowBtn');
+
+    // Check total number of rows
+    cy.get(`.${prefix}--pagination__items-count`)
+      .should('include.text', '22 items');
+
+    // Check delete button functionality
+    cy.get('#7-action-btn-del')
+      .find('button')
+      .click({ force: true});
+
+    // Check total number of rows
+    cy.get(`.${prefix}--pagination__items-count`)
+      .should('include.text', '21 items');
+  });
+
   it('Check \'Show/hide columns\' button functionality', () => {
     // Wait for the table to load
     cy.get('#parentTreeNumber');
