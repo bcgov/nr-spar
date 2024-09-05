@@ -449,7 +449,7 @@ const OrchardStep = ({
         </Column>
       </Row>
       <Row className="orchard-row">
-        <Column sm={4} md={8} lg={16} xlg={12} max={10}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           {
             gameticMethodologyQuery.isFetching
               ? <DropdownSkeleton />
@@ -475,7 +475,7 @@ const OrchardStep = ({
         </Column>
       </Row>
       <Row className="orchard-row">
-        <Column sm={4} md={8} lg={16} xlg={12} max={10}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           {
             gameticMethodologyQuery.isFetching
               ? <DropdownSkeleton />
@@ -592,7 +592,7 @@ const OrchardStep = ({
           ? (
             <>
               <Row className="pollen-contam-row">
-                <Column sm={4} md={8} lg={16} xlg={12}>
+                <Column sm={4} md={4} lg={8} xlg={6}>
                   <NumberInput
                     id={state.breedingPercentage.id}
                     name="breedingPercentage"
