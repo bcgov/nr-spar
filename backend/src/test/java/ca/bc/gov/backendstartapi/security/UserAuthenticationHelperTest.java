@@ -107,4 +107,39 @@ class UserAuthenticationHelperTest {
     Optional<UserInfo> userInfoOptional = userAuthenticationHelper.getUserInfo();
     Assertions.assertFalse(userInfoOptional.isPresent());
   }
+
+  @Test
+  @DisplayName("getUserInfoBusinessBceidTest")
+  void getUserInfo_longBusinessBceid_shouldBeShortened() {
+    Authentication authentication = mock(Authentication.class);
+    SecurityContext securityContext = mock(SecurityContext.class);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.isAuthenticated()).thenReturn(true);
+
+    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
+    builder.subject("SOME.VERYLONG.USERNAME.PERSON");
+    builder.header("alg", "HS256");
+    builder.header("typ", "JWT");
+    builder.claim("email", "lord.sauron@mordor.middleearth");
+    builder.claim("custom:idp_display_name", "Lord Sauron of Mordor");
+    builder.claim("custom:idp_username", "SOME.VERYLONG.USERNAME.PERSON");
+    builder.claim("custom:idp_name", "bceidbusiness");
+    builder.claim("cognito:username", "BCEID@SOME.VERYLONG.USERNAME.PERSON");
+
+    when(authentication.getPrincipal()).thenReturn(builder.build());
+
+    Optional<UserInfo> userInfoOptional = userAuthenticationHelper.getUserInfo();
+    Assertions.assertTrue(userInfoOptional.isPresent());
+
+    UserInfo userInfo = userInfoOptional.get();
+    Assertions.assertEquals("BCEIDBUSINESS@SOME.VERYLONG.US", userInfo.id());
+    Assertions.assertEquals("Lord", userInfo.firstName());
+    Assertions.assertEquals("Sauron of Mordor", userInfo.lastName());
+    Assertions.assertEquals("lord.sauron@mordor.middleearth", userInfo.email());
+    Assertions.assertEquals("Lord Sauron of Mordor", userInfo.displayName());
+    Assertions.assertEquals("SOME.VERYLONG.USERNAME.PERSON", userInfo.businessName());
+    Assertions.assertEquals(IdentityProvider.BUSINESS_BCEID, userInfo.identityProvider());
+  }
 }
