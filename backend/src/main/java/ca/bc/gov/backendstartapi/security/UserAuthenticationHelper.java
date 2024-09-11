@@ -64,6 +64,12 @@ public class UserAuthenticationHelper {
         // Email will be empty, until next FAM release
         String email = jwtPrincipal.getClaimAsString("email");
 
+        if (userId.length() > 30) {
+          String newUserId = userId.substring(0, 30);
+          SparLog.warn("UserId length bigger than 30. Cutting off. {} to {}", userId, newUserId);
+          userId = newUserId;
+        }
+
         UserInfo userInfo =
             new UserInfo(
                 userId,
