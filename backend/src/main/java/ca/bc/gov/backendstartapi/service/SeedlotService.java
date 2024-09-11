@@ -1012,7 +1012,7 @@ public class SeedlotService {
   }
 
   /**
-   * Reference Legacy Procedure: get_tested_area_of_use_geog from database/ddl/pkg/SPR_SEEDLOT.PKS
+   * Reference Legacy Procedure: get_tested_area_of_use_geog from database/ddl/pkg/SPR_SEEDLOT.PKS.
    *
    * @param seedlot the seedlot object to set data to
    * @param primaryOrchardId the primary orchard Id to find the spu for
