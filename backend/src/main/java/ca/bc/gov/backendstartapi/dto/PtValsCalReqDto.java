@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-
 import java.math.BigDecimal;
 import java.util.List;
 

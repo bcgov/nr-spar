@@ -115,7 +115,8 @@ class ParentTreeEndpointTest {
                 "proportion": 90
               }
             ],
-            "smpParentsOutside": 0
+            "smpParentsOutside": 0,
+            "contaminantPollenBv": 0
           }
         """;
 

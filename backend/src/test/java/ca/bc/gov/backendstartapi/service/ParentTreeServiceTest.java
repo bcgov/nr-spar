@@ -148,7 +148,7 @@ class ParentTreeServiceTest {
     PtCalculationResDto resDtoToTest = parentTreeService.calculatePtVals(reqDto);
 
     List<GeneticWorthTraitsDto> traitsToTest = resDtoToTest.geneticTraits();
-    assertTrue(traitsToTest.isEmpty());
+    assertFalse(traitsToTest.isEmpty());
 
     CalculatedParentTreeValsDto ptValsToTest = resDtoToTest.calculatedPtVals();
     assertFalse(mockNeValue.equals(ptValsToTest.getNeValue()));

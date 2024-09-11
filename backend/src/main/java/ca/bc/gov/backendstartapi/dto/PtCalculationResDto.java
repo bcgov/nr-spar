@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -19,7 +18,6 @@ public record PtCalculationResDto(
         CalculatedParentTreeValsDto calculatedPtVals,
     @Schema(description = "The calculated mean geospatial values for SMP mix.")
         GeospatialRespondDto smpMixMeanGeoData,
-    @Schema(description = "The calculated SMP Success percentage")
-        BigDecimal smpSuccessPct,
+    @Schema(description = "The calculated SMP Success percentage") BigDecimal smpSuccessPct,
     @Schema(description = "The calculated Orchard Contamination percentage")
         BigDecimal orchardContaminationPct) {}
