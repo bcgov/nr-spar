@@ -251,7 +251,7 @@ public class ParentTreeService {
 
   /**
    * All reference to Certification Template Col is labelled with an id such as AM, AN or AL Find
-   * these calculation definition in SPR01A_PTContribution.htm
+   * these calculation definition in SPR01A_PTContribution.htm.
    */
   private GeospatialRespondDto calcSeedlotGeoData(
       PtValsCalReqDto ptValDtos, GeospatialRespondDto smpMixGeoData) {
