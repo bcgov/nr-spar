@@ -190,17 +190,9 @@ const OrchardStep = ({
   };
 
   // Remove options that are already selected by a user
-  const removeSelectedOption = (data: MultiOptionsObj[]) => {
-    const filteredOptions: MultiOptionsObj[] = structuredClone(data);
-    const orchardId = state.orchards.primaryOrchard.value.code;
-    // The index of a matching orchard in filteredOptions
-    const orchardOptIndex = filteredOptions.findIndex((option) => option.code === orchardId);
-    if (orchardOptIndex > -1) {
-      // Remove found option
-      filteredOptions.splice(orchardOptIndex, 1);
-    }
-    return filteredOptions;
-  };
+  const filterOrchardOptions = (codeToFilter: string) => orchardQuery.data?.filter(
+    (orchards) => orchards.code !== codeToFilter
+  );
 
   const isTableEmpty = Object.keys(tableRowData).length === 0;
 
@@ -304,7 +296,7 @@ const OrchardStep = ({
                     placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
                     items={
                       orchardQuery.status === 'success'
-                        ? removeSelectedOption(orchardQuery.data)
+                        ? filterOrchardOptions(state.orchards.secondaryOrchard.value.code)
                         : []
                     }
                     selectedItem={state.orchards.primaryOrchard.value}
@@ -324,6 +316,20 @@ const OrchardStep = ({
                           });
                           setModalOpen(true);
                         } else setOrchard(true, e.selectedItem);
+                      }
+                    }
+                    // This event is necessary to track the changes when cleaning the combobox
+                    // i.e. when the user clicks on the small 'X' when there is an orchard selected
+                    onInputChange={
+                      (inputText: string) => {
+                        if (inputText === '' && !isTableEmpty) {
+                          setModalType('change');
+                          setStagedOrchard({
+                            ...state.orchards.primaryOrchard,
+                            value: EmptyMultiOptObj
+                          });
+                          setModalOpen(true);
+                        }
                       }
                     }
                     readOnly={isFormSubmitted || isReview}
@@ -359,7 +365,7 @@ const OrchardStep = ({
                       placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
                       items={
                         orchardQuery.status === 'success'
-                          ? removeSelectedOption(orchardQuery.data)
+                          ? filterOrchardOptions(state.orchards.primaryOrchard.value.code)
                           : []
                       }
                       selectedItem={state.orchards.secondaryOrchard.value}
@@ -379,6 +385,20 @@ const OrchardStep = ({
                             });
                             setModalOpen(true);
                           } else setOrchard(false, e.selectedItem);
+                        }
+                      }
+                      // This event is necessary to track the changes when cleaning the combobox
+                      // i.e. when the user clicks on the small 'X' when there is an orchard selected
+                      onInputChange={
+                        (inputText: string) => {
+                          if (inputText === '' && !isTableEmpty) {
+                            setModalType('change');
+                            setStagedOrchard({
+                              ...state.orchards.primaryOrchard,
+                              value: EmptyMultiOptObj
+                            });
+                            setModalOpen(true);
+                          }
                         }
                       }
                       readOnly={isFormSubmitted || isReview}
