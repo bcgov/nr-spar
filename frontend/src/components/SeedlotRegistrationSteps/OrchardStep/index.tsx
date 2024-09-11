@@ -388,7 +388,8 @@ const OrchardStep = ({
                         }
                       }
                       // This event is necessary to track the changes when cleaning the combobox
-                      // i.e. when the user clicks on the small 'X' when there is an orchard selected
+                      // i.e. when the user clicks on the small 'X' when there is an
+                      // orchard selected
                       onInputChange={
                         (inputText: string) => {
                           if (inputText === '' && !isTableEmpty) {
