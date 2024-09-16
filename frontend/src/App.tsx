@@ -5,9 +5,8 @@ import {
 import { Amplify } from 'aws-amplify';
 import { ClassPrefix } from '@carbon/react';
 import { ToastContainer } from 'react-toastify';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { isAxiosError } from 'axios';
+import awsconfig from './aws-exports';
 
 import prefix from './styles/classPrefix';
 import './styles/custom.scss';
@@ -15,44 +14,18 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import Layout from './layout/PrivateLayout';
 import Landing from './views/Landing';
-import awsconfig from './aws-exports';
+import FourOhFour from './views/ErrorViews/FourOhFour';
+import LoginOrgSelection from './views/LoginOrgSelection';
+import ServiceStatus from './views/ServiceStatus';
+import { NavigateProvider } from './contexts/NavigationContext';
 import AuthContext from './contexts/AuthContext';
 import BrowserRoutes from './routes';
 import ROUTES from './routes/constants';
-import FourOhFour from './views/FourOhFour';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { ThemePreference } from './utils/ThemePreference';
-import LoginOrgSelection from './views/LoginOrgSelection';
-import ServiceStatus from './views/ServiceStatus';
+import CustomQueryProvider from './components/CustomQueryProvider';
 
 Amplify.configure(awsconfig);
-
-const HTTP_STATUS_TO_NOT_RETRY = [400, 401, 403, 404];
-const MAX_RETRIES = 3;
-
-const queryClient = new QueryClient(
-  {
-    defaultOptions: {
-      queries: {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        // Do not retry on errors defined above
-        retry: (failureCount, error) => {
-          if (failureCount > MAX_RETRIES) {
-            return false;
-          }
-          if (isAxiosError(error)) {
-            const status = error.response?.status;
-            if (status && HTTP_STATUS_TO_NOT_RETRY.includes(status)) {
-              return false;
-            }
-          }
-          return true;
-        }
-      }
-    }
-  }
-);
 
 /**
  * Create an app structure containing all the routes.
@@ -120,14 +93,22 @@ const App: React.FC = () => {
     return createBrowserRouter(selectedRoutes);
   };
 
+  const browserRouter = getBrowserRouter();
+
+  const handleRedirectTo403 = () => {
+    browserRouter.navigate('/403');
+  };
+
   return (
     <ClassPrefix prefix={prefix}>
       <ThemePreference>
-        <QueryClientProvider client={queryClient}>
-          <ToastContainer />
-          <RouterProvider router={getBrowserRouter()} />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+        <NavigateProvider onRedirect={handleRedirectTo403}>
+          <CustomQueryProvider>
+            <ToastContainer />
+            <RouterProvider router={browserRouter} />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </CustomQueryProvider>
+        </NavigateProvider>
       </ThemePreference>
     </ClassPrefix>
   );
