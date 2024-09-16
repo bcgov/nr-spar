@@ -16,6 +16,8 @@ spec:
       - name: ngunner15@github
         role: ROLE_TEAM_STANDARD
       - name: sabina.donnelly@gov.bc.ca
-        role: ROLE_TEAM_STANDARD
+        role: ROLE_TEAM_MANAGER
       - name: ricardompcampos@gmail.com
+        role: ROLE_TEAM_MANAGER
+      - name: xiaopeng0202@github
         role: ROLE_TEAM_MANAGER
