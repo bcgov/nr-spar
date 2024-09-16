@@ -1,14 +1,17 @@
 package ca.bc.gov.backendstartapi.provider;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestClientTest(OracleApiProvider.class)
 class OracleApiProviderTest {
@@ -77,108 +81,6 @@ class OracleApiProviderTest {
     Assertions.assertFalse(orchardSpuDto.isPresent());
   }
 
-  // TODO
-  // @Test
-  // @DisplayName("findParentTreesByVegCodeTest")
-  // void findParentTreesByVegCodeTest() {
-  //   when(loggedUserService.getLoggedUserToken()).thenReturn("1f7a4k5e8t9o5k6e9n8h5e2r6e");
-
-  //   String vegCode = "FDC";
-  //   String url = "/null/api/orchards/parent-trees/vegetation-codes/" + vegCode;
-
-  //   String json =
-  //       """
-  //       [
-  //         {
-  //           "parentTreeId": 1003477,
-  //           "parentTreeNumber": "34",
-  //           "orchardId": "1",
-  //           "spu": 0,
-  //           "parentTreeGeneticQualities": [
-  //             {
-  //               "geneticTypeCode": "BV",
-  //               "geneticWorthCode": "GVO",
-  //               "geneticQualityValue": 18
-  //             }
-  //           ]
-  //         }
-  //       ]
-  //       """;
-
-  //   mockRestServiceServer
-  //       .expect(requestTo(url))
-  //       .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
-
-  //   Map<String, String> testMap = new HashMap<>();
-
-  //   List<SameSpeciesTreeDto> parentTreeDtoList =
-  //       oracleApiProvider.findParentTreesByVegCode(vegCode, testMap);
-
-  //   Assertions.assertFalse(parentTreeDtoList.isEmpty());
-  //   Assertions.assertEquals("1003477", parentTreeDtoList.get(0).getParentTreeId().toString());
-  //   Assertions.assertEquals("34", parentTreeDtoList.get(0).getParentTreeNumber());
-  // }
-
-  // TODO
-  // @Test
-  // @DisplayName("findParentTreesByVegCodeErrorTest")
-  // void findParentTreesByVegCodeErrorTest() throws Exception {
-  //   when(loggedUserService.getLoggedUserToken()).thenReturn("");
-
-  //   String vegCode = "LAMB";
-  //   String url = "/null/api/orchards/parent-trees/vegetation-codes/" + vegCode;
-
-  //   mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.BAD_REQUEST));
-
-  //   Map<String, String> testMap = new HashMap<>();
-
-  //   ResponseStatusException httpExc =
-  //       Assertions.assertThrows(
-  //           ResponseStatusException.class,
-  //           () -> {
-  //             oracleApiProvider.findParentTreesByVegCode(vegCode, testMap);
-  //           });
-
-  //   Assertions.assertEquals(HttpStatus.BAD_REQUEST, httpExc.getStatusCode());
-  // }
-
-  // TODO
-  // @Test
-  // @DisplayName("Find Orchard with ID success test.")
-  // void findOrchardById_shouldSucceed() {
-  //   when(loggedUserService.getLoggedUserToken()).thenReturn("1f7a4k5e8t9o5k6e9n8h5e2r6e");
-
-  //   String orchardId = "339";
-  //   String url = "/null/api/orchards/" + orchardId;
-
-  //   String json =
-  //       """
-  //         {
-  //           "id": "339",
-  //           "name": "EAGLEROCK",
-  //           "vegetationCode": "PLI",
-  //           "lotTypeCode": "S",
-  //           "lotTypeDescription": "Seed Lot",
-  //           "stageCode": "PRD",
-  //           "becZoneCode": "CWH",
-  //           "becZoneDescription": "Coastal Western Hemlock",
-  //           "becSubzoneCode": "dm",
-  //           "variant": null,
-  //           "becVersionId": 5
-  //         }
-  //       """;
-
-  //   mockRestServiceServer
-  //       .expect(requestTo(url))
-  //       .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
-
-  //   Optional<OrchardDto> orchardDtoOpt = oracleApiProvider.findOrchardById(orchardId);
-
-  //   Assertions.assertFalse(orchardDtoOpt.isEmpty());
-  //   Assertions.assertEquals(orchardId, orchardDtoOpt.get().id());
-  //   Assertions.assertEquals("Coastal Western Hemlock", orchardDtoOpt.get().becZoneDescription());
-  // }
-
   @Test
   @DisplayName("Get SPU with ID success test")
   void getSpuById_shouldSucceed() {
@@ -230,5 +132,59 @@ class OracleApiProviderTest {
     Optional<SpuDto> optSpuDto = oracleApiProvider.getSpuById(spuId);
 
     Assertions.assertTrue(optSpuDto.isEmpty());
+  }
+
+  @Test
+  @DisplayName("findOrchardsByVegCode - valid vegCode should return orchard list")
+  void findOrchardsByVegCode_validVegCode_shouldReturnOrchardList() {
+    String vegCode = "BV";
+    String url = "/null/api/orchards/vegetation-codes/BV";
+    String json = "[{ \"id\": \"1\", \"name\": \"Primary Orchard\", \"vegetationCode\": \"BV\" }]";
+
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    List<OrchardDto> result = oracleApiProvider.findOrchardsByVegCode(vegCode);
+
+    Assertions.assertFalse(result.isEmpty());
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals("Primary Orchard", result.get(0).getName());
+  }
+
+  @Test
+  @DisplayName("findOrchardsByVegCode - invalid vegCode should return empty list")
+  void findOrchardsByVegCode_invalidVegCode_shouldReturnEmptyList() {
+    String vegCode = "INVALID";
+    String url = "/null/api/orchards/vegetation-codes/INVALID";
+
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    assertThrows(
+        ResponseStatusException.class,
+        () -> {
+          oracleApiProvider.findOrchardsByVegCode(vegCode);
+        });
+  }
+
+  @Test
+  @DisplayName("findOrchardsByVegCode - empty vegCode should return empty list")
+  void findOrchardsByVegCode_emptyVegCode_shouldReturnEmptyList() {
+    String vegCode = "";
+    String url = "/null/api/orchards/vegetation-codes/";
+
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    assertThrows(
+        ResponseStatusException.class,
+        () -> {
+          oracleApiProvider.findOrchardsByVegCode(vegCode);
+        });
   }
 }

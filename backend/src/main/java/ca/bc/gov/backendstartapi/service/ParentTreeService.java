@@ -57,7 +57,7 @@ public class ParentTreeService {
         ptVals.smpMixIdAndProps().size());
 
     final BigDecimal zero = BigDecimal.ZERO;
-    
+
     // First pass
     BigDecimal varTotalConeCount = zero;
     BigDecimal varTotalPollenCount = zero;
@@ -190,7 +190,7 @@ public class ParentTreeService {
       // Definition: weighted value = proportion * value
 
       BigDecimal proportion = dto.proportion();
-      if (proportion.compareTo(ONE) >= 0) {
+      if (proportion.compareTo(ONE) > 0) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             String.format(
@@ -251,7 +251,7 @@ public class ParentTreeService {
 
   /**
    * All reference to Certification Template Col is labelled with an id such as AM, AN or AL Find
-   * these calculation definition in SPR01A_PTContribution.htm
+   * these calculation definition in SPR01A_PTContribution.htm.
    */
   private GeospatialRespondDto calcSeedlotGeoData(
       PtValsCalReqDto ptValDtos, GeospatialRespondDto smpMixGeoData) {

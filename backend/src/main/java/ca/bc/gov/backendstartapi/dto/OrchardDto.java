@@ -1,7 +1,9 @@
 package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -10,6 +12,8 @@ import lombok.Setter;
 @Schema(description = "Represents an Orchard object received from oracle-api except spuId.")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrchardDto {
   @Schema(
       description =

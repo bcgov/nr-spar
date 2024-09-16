@@ -3,6 +3,12 @@
 .main-container {
   padding-top: 5.625rem;
   padding-left: 16rem;
+
+  .dependency-notification {
+    max-width: none;
+    width: 96%;
+    margin: 2rem 2.5rem;
+  }
 }
 
 .page-content .#{vars.$bcgov-prefix}--grid {

@@ -228,7 +228,7 @@ const SeedlotDetails = () => {
                         className="seedlot-submitted-notification"
                         lowContrast
                         kind="success"
-                        title="Seedlot approved::"
+                        title="Seedlot approved:"
                         subtitle="This seedlot have been reviewed and approved"
                       />
                     )

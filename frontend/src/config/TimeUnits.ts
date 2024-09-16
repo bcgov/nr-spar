@@ -9,6 +9,13 @@ export const SEVEN_SECONDS = 7 * ONE_SECOND;
 
 export const TEN_SECONDS = 10 * ONE_SECOND;
 
+export const FIFTEEN_SECONDS = 15 * ONE_SECOND;
+
+/**
+ * Time needed to go to Mars.
+ */
+export const THIRTY_SECONDS = 30 * ONE_SECOND;
+
 export const ONE_MINUTE = 60 * ONE_SECOND;
 
 export const TWO_MINUTE = 2 * ONE_MINUTE;

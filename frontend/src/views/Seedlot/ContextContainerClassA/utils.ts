@@ -923,7 +923,7 @@ const generateParentTreeGenQualPayload = (
     const ptGeneticObj: SingleParentTreeGeneticObj = {
       geneticTypeCode: 'BV',
       geneticWorthCode: gwCode.toUpperCase() as keyof typeof GenWorthCodeEnum,
-      geneticQualityValue: Number(parseFloat(gwObj.value).toFixed(1)),
+      geneticQualityValue: Number(parseFloat(gwObj.value ? gwObj.value : '0.0').toFixed(1)),
       isParentTreeTested: allParentTreeData[ptRow.parentTreeNumber.value].testedInd,
       isEstimated: gwObj.isEstimated
     };

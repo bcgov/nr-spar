@@ -5,14 +5,12 @@ import ca.bc.gov.oracleapi.dto.OrchardDto;
 import ca.bc.gov.oracleapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeGeneticQualityDto;
-import ca.bc.gov.oracleapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.oracleapi.entity.OrchardEntity;
 import ca.bc.gov.oracleapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
 import ca.bc.gov.oracleapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.oracleapi.entity.ParentTreeOrchard;
 import ca.bc.gov.oracleapi.entity.VegetationCode;
-import ca.bc.gov.oracleapi.entity.projection.ParentTreeProj;
 import ca.bc.gov.oracleapi.repository.OrchardRepository;
 import ca.bc.gov.oracleapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.oracleapi.repository.ParentTreeOrchardRepository;
@@ -189,84 +187,6 @@ public class OrchardService {
 
     SparLog.info("{} records for not retired Orchard for VegCode: {}", resultList.size(), vegCode);
     return Optional.of(resultList);
-  }
-
-  /** Find all parent trees under a vegCode. */
-  public List<SameSpeciesTreeDto> findParentTreesWithVegCode(
-      String vegCode, Map<String, String> orchardSpuMap) {
-    SparLog.info("Finding all parent trees under VegCode: {}", vegCode);
-
-    // Step 1: Get all the parent trees under a species
-    List<ParentTreeProj> parentTrees = parentTreeRepository.findAllParentTreeWithVegCode(vegCode);
-
-    // Step 2: Convert projections to Dto
-    List<SameSpeciesTreeDto> resultList =
-        parentTrees.stream()
-            .map(
-                parentTree -> {
-                  SameSpeciesTreeDto treeDto = new SameSpeciesTreeDto();
-                  treeDto.setOrchardId(parentTree.getOrchardId());
-                  treeDto.setParentTreeId(parentTree.getParentTreeId());
-                  treeDto.setParentTreeNumber(parentTree.getParentTreeNumber());
-                  treeDto.setSpu(parentTree.getSpu());
-                  return treeDto;
-                })
-            .toList();
-
-    // Step 3 fill gen worth values
-    fillGenInfoForEachTree(resultList);
-
-    // Step 4 filter with orchard spu map
-    // The first filter makes sure that the tree has a valid orchard id that exist in the
-    // orchard-spu table
-    resultList =
-        resultList.stream()
-            .filter(treeDto -> orchardSpuMap.containsKey(treeDto.getOrchardId()))
-            .filter(
-                treeDto ->
-                    treeDto
-                        .getSpu()
-                        .equals(Long.valueOf(orchardSpuMap.get(treeDto.getOrchardId()))))
-            .toList();
-
-    SparLog.info("{} parent trees found under VegCode: {}", resultList.size(), vegCode);
-    return resultList;
-  }
-
-  private void fillGenInfoForEachTree(List<SameSpeciesTreeDto> resultList) {
-    List<Long> parentTreeIds =
-        resultList.stream()
-            .map(
-                (treeDto) -> {
-                  return treeDto.getParentTreeId();
-                })
-            .toList();
-
-    List<Long> spuList =
-        resultList.stream()
-            .map(
-                (treeDto) -> {
-                  return treeDto.getSpu();
-                })
-            .toList();
-
-    List<ParentTreeGeneticQuality> ptgqList =
-        parentTreeGeneticQualityRepository.findAllByListOfSpuAndId(
-            true, "BV", spuList, parentTreeIds);
-
-    resultList.stream()
-        .forEach(
-            (treeDto) -> {
-              List<ParentTreeGeneticQualityDto> matchedPtgqs =
-                  ptgqList.stream()
-                      .filter(
-                          ptgq ->
-                              ptgq.getParentTreeId().equals(treeDto.getParentTreeId())
-                                  && ptgq.getSeedPlanningUnitId().equals(treeDto.getSpu()))
-                      .map(ptgq -> ModelMapper.convert(ptgq, ParentTreeGeneticQualityDto.class))
-                      .toList();
-              treeDto.setParentTreeGeneticQualities(matchedPtgqs);
-            });
   }
 
   private List<ParentTreeGeneticInfoDto> findAllParentTree(

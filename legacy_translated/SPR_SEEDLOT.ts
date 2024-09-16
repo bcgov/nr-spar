@@ -390,7 +390,7 @@ interface t_pt_calc {
   pct_tested_parent_trees_WVE: number; // NUMBER(3)
   pct_tested_parent_trees_WWD: number; // NUMBER(3)  
   pct_tested_parent_trees: number; // NUMBER(3)
-  pct_untested_parent_trees: number; // NUMBER(3));
+  pct_untested_parent_trees: number; // NUMBER(3)
 }
 
 let r_pt_contrib: t_pt_calc | null;
@@ -6188,7 +6188,7 @@ function add() {
     g_interm_strg_client_locn);
   */
   if (e_error_generating_lot_number) {
-    throw new Error(g_error_message = g_error_message || 'spar.web.error.usr.gen_lot_number;';);
+    throw new Error(g_error_message = g_error_message || 'spar.web.error.usr.gen_lot_number;');
   }     
 }
 
