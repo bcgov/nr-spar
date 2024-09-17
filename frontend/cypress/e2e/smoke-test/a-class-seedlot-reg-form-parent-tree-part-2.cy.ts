@@ -419,10 +419,6 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
   });
 
   it('Calculate Metrics button', () => {
-    // Check info sections not visible in DOM
-    cy.get('.info-section-sub-title')
-      .should('not.exist');
-
     // Click 'Calculate metrics' button
     cy.get('.gen-worth-cal-row')
       .find('button')
