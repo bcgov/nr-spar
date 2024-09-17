@@ -57,7 +57,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get(`.${prefix}--pagination__items-count`)
       .should('include.text', '21 items');
 
-    cy.get('@clickAddRowBtn');
+    cy.get('@clickAddRowBtn')
+      .click({force: true});
 
     // Check total number of rows
     cy.get(`.${prefix}--pagination__items-count`)
@@ -92,7 +93,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get('.parent-tree-step-table-container')
       .find('h4')
       .as('closeShowHideDropdown')
-      .click();
+      .click({force: true});
 
     cy.get('thead.table-header')
       .find('#dfs')
@@ -108,7 +109,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .click();
 
     cy.get('@closeShowHideDropdown')
-      .click();
+      .click({force: true});
 
     cy.get('thead.table-header')
       .find('#dsc')
@@ -124,7 +125,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .click();
 
     cy.get('@closeShowHideDropdown')
-      .click();
+      .click({force: true});
 
     cy.get('thead.table-header')
       .find('#dsg')
@@ -140,7 +141,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .click();
 
     cy.get('@closeShowHideDropdown')
-      .click();
+      .click({force: true});
 
     cy.get('thead.table-header')
       .find('#gvo')
@@ -156,7 +157,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .click();
 
     cy.get('@closeShowHideDropdown')
-      .click();
+      .click({force: true});
 
     cy.get('thead.table-header')
       .find('#w_dfs')
@@ -172,7 +173,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .click();
 
     cy.get('@closeShowHideDropdown')
-      .click();
+      .click({force: true});
 
     cy.get('thead.table-header')
       .find('#w_dsc')
@@ -188,7 +189,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .click();
 
     cy.get('@closeShowHideDropdown')
-      .click();
+      .click({force: true});
 
     cy.get('thead.table-header')
       .find('#w_dsg')
@@ -204,7 +205,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .click();
 
     cy.get('@closeShowHideDropdown')
-      .click();
+      .click({force: true});
 
     cy.get('thead.table-header')
       .find('#w_gvo')
@@ -227,11 +228,11 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .contains('Download table template')
       .click();
 
-    cy.readFile(`${Cypress.config('downloadsFolder')}/Seedlot_composition_template.csv`);
+    cy.readFile(`${Cypress.config('downloadsFolder')}/SMP_Mix_Volume_template.csv`);
 
     // Click 'Clean table data' option
     cy.get('@clickMoreOptionsBtn')
-      .click();
+      .click({force: true});
 
     cy.get('ul.parent-tree-table-option-menu')
       .find('li')
@@ -253,10 +254,10 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check 'X' button of 'Clean table data' dialog box
     cy.get('@clickMoreOptionsBtn')
-      .click();
+      .click({force: true});
 
     cy.get('@clickCleanTableBtn')
-      .click();
+      .click({force: true});
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
       .find('button')
@@ -268,10 +269,10 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check 'Clean table data' button of 'Clean table data' dialog box
     cy.get('@clickMoreOptionsBtn')
-      .click();
+      .click({force: true});
 
     cy.get('@clickCleanTableBtn')
-      .click();
+      .click({force: true});
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
       .find('button')
@@ -298,5 +299,36 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .should('not.be.visible');
+
+    // Check file upload functionality
+    cy.get('button.upload-button')
+      .click({force: true});
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--file`)
+      .find(`input.${prefix}--file-input`)
+      .selectFile('cypress/fixtures/Seedlot_composition_template_03.csv', {force: true});
+
+    cy.get('button')
+      .contains('Import file and continue')
+      .click();
+
+    // Compare values in Parent tree number and Volume (ml) columns of the table with the csv file
+    cy.get('#0-parentTreeNumber-value-input')
+      .should('have.value', '212');
+
+    cy.get('#0-volume-value-input')
+      .should('have.value', '4');
+
+    cy.get('#1-parentTreeNumber-value-input')
+      .should('have.value', '222');
+
+    cy.get('#1-volume-value-input')
+      .should('have.value', '7');
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
   });
 });
