@@ -1,0 +1,25 @@
+apiVersion: ops.gov.bc.ca/v1alpha1
+kind: SysdigTeam
+metadata:
+  name: b9d53b-sysdigteam
+  namespace: b9d53b-tools
+spec:
+  team:
+    description: The Sysdig Team for SPAR Project by Team Evergreen
+    users:
+      - name: abschwenker@github
+        role: ROLE_TEAM_STANDARD
+      - name: craigyu@github
+        role: ROLE_TEAM_STANDARD
+      - name: mgaseta@github
+        role: ROLE_TEAM_STANDARD
+      - name: ngunner15@github
+        role: ROLE_TEAM_STANDARD
+      - name: sabina.donnelly@gov.bc.ca
+        role: ROLE_TEAM_MANAGER
+      - name: ricardompcampos@gmail.com
+        role: ROLE_TEAM_MANAGER
+      - name: xiaopeng0202@github
+        role: ROLE_TEAM_MANAGER
+      - name: derek.roberts@gmail.com
+        role: ROLE_TEAM_EDIT
