@@ -331,4 +331,34 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Save changes
     cy.saveSeedlotRegFormProgress();
   });
+
+  it('Calculate Metrics button', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber');
+
+    // Click 'Calculate metrics' button
+    cy.get('.gen-worth-cal-row')
+      .find('button')
+      .contains('Calculate metrics')
+      .click();
+
+    // Check info sections visible in DOM
+    cy.get('.info-section-items-row')
+      .find(`label.${prefix}--label[for="meanlatitude"]`)
+      .contains('Mean latitude')
+      .should('be.visible');
+
+    cy.get('.info-section-items-row')
+      .find(`label.${prefix}--label[for="meanlongitude"]`)
+      .contains('Mean longitude')
+      .should('be.visible');
+
+    cy.get('.info-section-items-row')
+      .find(`label.${prefix}--label[for="meanelevation"]`)
+      .contains('Mean elevation')
+      .should('be.visible');
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+  });
 });
