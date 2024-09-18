@@ -422,6 +422,15 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get(`.${prefix}--actionable-notification__title`)
       .should('have.text', regFormData.parentTree.voulmeErrorMsg);
 
+    // Check Volume error msg removal
+    cy.get('#0-volume-value-input')
+      .clear()
+      .type('0')
+      .blur();
+
+    cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
+      .should('not.exist');
+
     // Save changes
     cy.saveSeedlotRegFormProgress();
   });
