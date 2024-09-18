@@ -5,6 +5,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     parentTree: {
       calculationTitle: string;
       calculationSubtitle: string;
+      parentTreeErrorMsg: string;
+      voulmeErrorMsg: string;
     }
   };
 
@@ -327,6 +329,98 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     cy.get('#1-volume-value-input')
       .should('have.value', '7');
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+  });
+
+  it('Check invalid Parent tree numbers and Volume', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber');
+
+    // Click 'Clean table data' option
+    cy.get(`.${prefix}--toolbar-content > span`)
+      .eq(2)
+      .find('button')
+      .click({force: true});
+
+    cy.get('ul.parent-tree-table-option-menu')
+      .find('li')
+      .contains('Clean table data')
+      .click({force: true});
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .find('button')
+      .contains('Clean table data')
+      .click();
+
+    // Check invalid parent tree number error msg
+    cy.get('#0-parentTreeNumber-value-input')
+      .type('5')
+      .blur();
+
+    cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--actionable-notification__title`)
+      .should('have.text', regFormData.parentTree.parentTreeErrorMsg);
+
+    // Check invalid parent tree number error msg removal
+    cy.get('#0-parentTreeNumber-value-input')
+      .clear()
+      .type('212')
+      .blur();
+
+    cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
+      .should('not.exist');
+
+    // Check invalid parent tree number error msg for duplicate parent tree numbers
+    cy.get('#1-parentTreeNumber-value-input')
+      .type('212')
+      .blur();
+
+    cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
+      .should('be.visible');
+
+    cy.get('#1-parentTreeNumber-value-input')
+      .clear()
+      .type('222')
+      .blur();
+
+    // Check Volume error msg for negative value
+    cy.get('#0-volume-value-input')
+      .type('-1')
+      .blur();
+
+    cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--actionable-notification__title`)
+      .should('have.text', regFormData.parentTree.voulmeErrorMsg);
+
+    // Check Volume error msg for decimal value
+    cy.get('#0-volume-value-input')
+      .clear()
+      .type('2.8')
+      .blur();
+
+    cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--actionable-notification__title`)
+      .should('have.text', regFormData.parentTree.voulmeErrorMsg);
+
+    // Check Volume error msg for value > 999999
+    cy.get('#0-volume-value-input')
+      .clear()
+      .type('1000000')
+      .blur();
+
+    cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--actionable-notification__title`)
+      .should('have.text', regFormData.parentTree.voulmeErrorMsg);
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
