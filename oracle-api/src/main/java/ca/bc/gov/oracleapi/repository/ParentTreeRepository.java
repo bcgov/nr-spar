@@ -62,7 +62,7 @@ public interface ParentTreeRepository extends JpaRepository<ParentTreeEntity, Lo
             LEFT JOIN seed_plan_unit_data spud ON spud.parent_tree_id = fpt.PARENT_TREE_ID
             LEFT JOIN genetic_quality_data gqd ON gqd.parent_tree_id = fpt.PARENT_TREE_ID
               AND gqd.seed_plan_unit_id = spud.SEED_PLAN_UNIT_ID
-            ORDER BY fpt.PARENT_TREE_ID;
+            ORDER BY fpt.PARENT_TREE_ID
          """,
       nativeQuery = true)
   List<ParentTreeProj> findAllParentTreeWithVegCode(String vegCode);
