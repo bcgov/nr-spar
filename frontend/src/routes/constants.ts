@@ -13,6 +13,7 @@ const ROUTES = {
   MY_SEEDLOTS: '/seedlots/my-seedlots',
   TSC_SEEDLOTS_TABLE: '/seedlots/tsc-admin-seedlots',
   FOUR_OH_FOUR: '/404',
+  FOUR_OH_THREE: '/403',
   SERVICE_STATUS: '/service-status'
 };
 

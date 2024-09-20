@@ -147,7 +147,6 @@ jobs:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
-          oc_version: ${{ matrix.oc_version }}
           overwrite: ${{ matrix.overwrite }}
           parameters:
             -p TAG=${{ inputs.tag }}
@@ -174,7 +173,6 @@ jobs:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
-          oc_version: "4.13"
           overwrite: true
           parameters:
             -p TAG=${{ inputs.tag }}

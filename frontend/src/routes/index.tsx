@@ -14,6 +14,7 @@ import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
 import SeedlotReview from '../views/Seedlot/SeedlotReview';
 import SeedlotRegFormClassA from '../views/Seedlot/SeedlotRegFormClassA';
 import ReviewSeedlots from '../views/Seedlot/ReviewSeedlots';
+import FourOhThree from '../views/ErrorViews/FourOhThree';
 
 const BrowserRoutes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
@@ -89,6 +90,12 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.TSC_SEEDLOTS_TABLE,
     element: (
       <ReviewSeedlots />
+    )
+  },
+  {
+    path: ROUTES.FOUR_OH_THREE,
+    element: (
+      <FourOhThree />
     )
   }
 ];

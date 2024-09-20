@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import ROUTES from '../../routes/constants';
+import ROUTES from '../../../routes/constants';
 
-import mysteryImg from '../../assets/img/404-mystery.png';
+import mysteryImg from '../../../assets/img/404-mystery.png';
 
 import './styles.scss';
 
