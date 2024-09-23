@@ -931,7 +931,6 @@ public class SeedlotService {
     if (!ValueUtil.isValueEqual(seedlot.getPollenContaminantBreedingValue(), contaminantPollenBv)) {
       seedlot.setPollenContaminantBreedingValue(contaminantPollenBv);
     }
-    // review integer x bigdecimal
     seedlot.setNonOrchardPollenContaminationPercentage(
         ptCalculationResDto.orchardContaminationPct().intValue());
 

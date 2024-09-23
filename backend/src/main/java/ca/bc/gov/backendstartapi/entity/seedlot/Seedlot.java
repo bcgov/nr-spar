@@ -173,7 +173,7 @@ public class Seedlot implements Serializable {
   @Column(name = "smp_parents_outside")
   private Integer parentsOutsideTheOrchardUsedInSmp;
 
-  @Column(name = "non_orchard_pollen_contam_pct") // review to bigdecimal
+  @Column(name = "non_orchard_pollen_contam_pct")
   private Integer nonOrchardPollenContaminationPercentage;
 
   // endregion
