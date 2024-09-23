@@ -27,8 +27,7 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
     setMeanGeomInfos,
     setIsCalculatingPt,
     setGeoInfoVals,
-    setGenWorthVal,
-    seedlotData
+    setGenWorthVal
   } = useContext(ClassAContext);
 
   if (isFormSubmitted && !isReview) {
@@ -69,7 +68,6 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
         }
         disabled={disableOptions}
         onClick={() => {
-          console.log('orchardStep.breedingPercentage.value', orchardStep.breedingPercentage.value);
           setIsCalculatingPt(true);
           calculateGenWorthQuery.mutate(
             generatePtValCalcPayload(

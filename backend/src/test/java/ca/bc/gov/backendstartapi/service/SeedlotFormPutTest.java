@@ -19,6 +19,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
@@ -195,6 +196,9 @@ class SeedlotFormPutTest {
             LocalDate.now(Clock.systemUTC()),
             LocalDate.now(Clock.systemUTC()));
 
+    // Parents from outside dto
+    SeedlotFormSmpParentOutsideDto smpParentOutsideDto = new SeedlotFormSmpParentOutsideDto(0);
+
     return new SeedlotFormSubmissionDto(
         collectionDto,
         List.of(ownerDto),
@@ -202,7 +206,7 @@ class SeedlotFormPutTest {
         orchardDto,
         List.of(parentTreeDto),
         List.of(parentTreeDto),
-        0,
+        smpParentOutsideDto,
         extractionDto,
         List.of(),
         null,

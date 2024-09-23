@@ -21,6 +21,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSaveInMemoryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
@@ -633,6 +634,9 @@ public class SeedlotService {
             seedlotInfo.getTemporaryStorageStartDate(),
             seedlotInfo.getTemporaryStorageEndDate());
 
+    SeedlotFormSmpParentOutsideDto smpParentOutsideDto =
+        new SeedlotFormSmpParentOutsideDto(seedlotInfo.getParentsOutsideTheOrchardUsedInSmp());
+
     SeedlotAclassFormDto seedlotAclassFullInfo =
         new SeedlotAclassFormDto(
             new SeedlotFormSubmissionDto(
@@ -642,7 +646,7 @@ public class SeedlotService {
                 orchardStep,
                 parentTreesInfo,
                 smpMixParentTreesInfo,
-                0,
+                smpParentOutsideDto,
                 extractionStep,
                 List.of(),
                 null,
@@ -810,7 +814,7 @@ public class SeedlotService {
           seedlot,
           form.seedlotFormParentTreeDtoList(),
           form.seedlotFormParentTreeSmpDtoList(),
-          form.smpParentsOutside(),
+          form.seedlotFormSmpParentOutsideDto().smpParentsOutside(),
           form.seedlotFormOrchardDto().contaminantPollenBv());
 
       // If there is no area of use data already set:

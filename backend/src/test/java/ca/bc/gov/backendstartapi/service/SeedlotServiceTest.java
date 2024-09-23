@@ -24,6 +24,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
@@ -617,7 +618,7 @@ class SeedlotServiceTest {
                 orchardId, null, null, null, null, null, null, null, null, null),
             sptDto,
             sptSmpMixDto,
-            0,
+            new SeedlotFormSmpParentOutsideDto(null),
             new SeedlotFormExtractionDto(null, null, null, null, null, null, null, null),
             List.of(),
             null,
@@ -818,7 +819,7 @@ class SeedlotServiceTest {
             formOrchardDto, // SeedlotFormOrchardDto
             List.of(mock(SeedlotFormParentTreeSmpDto.class)), // List<SeedlotFormParentTreeSmpDto>
             List.of(mock(SeedlotFormParentTreeSmpDto.class)), // List<SeedlotFormParentTreeSmpDto>
-            0,
+            mock(SeedlotFormSmpParentOutsideDto.class),
             mock(SeedlotFormExtractionDto.class), // SeedlotFormExtractionDto
             List.of(mock(SeedlotReviewSeedPlanZoneDto.class)), // List<SeedlotReviewSeedPlanZoneDto>
             mock(SeedlotReviewElevationLatLongDto.class), // SeedlotReviewElevationLatLongDto

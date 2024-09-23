@@ -8,7 +8,11 @@ import { recordKeys } from '../../../utils/RecordUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { StringInputType } from '../../../types/FormInputType';
-import { PtValsCalcReqPayload, CalcPayloadResType, OrchardParentTreeValsType, GeospatialRequestDto } from '../../../types/PtCalcTypes';
+import {
+  PtValsCalcReqPayload,
+  CalcPayloadResType,
+  OrchardParentTreeValsType
+} from '../../../types/PtCalcTypes';
 import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
 import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
 import { GeneticWorthDto } from '../../../types/GeneticWorthType';
@@ -161,7 +165,7 @@ const isPtContributing = (pt: RowItem): boolean => (
 export const getOutsideParentTreeNum = (
   state: ParentTreeStepDataObj,
   orchardPtNums: string[]
-): number => {
+): string => {
   let sum = 0;
 
   // All parent tree numbers in SMP mix where volume is > 0
@@ -187,7 +191,7 @@ export const getOutsideParentTreeNum = (
     }
   });
 
-  return sum;
+  return sum.toString();
 };
 
 export const calcMixTabInfoItems = (
@@ -212,7 +216,7 @@ export const calcMixTabInfoItems = (
       ...prevPop,
       outsideSMPParent: {
         ...prevPop.outsideSMPParent,
-        value: numOfOutsidePt.toString()
+        value: numOfOutsidePt
       }
     }));
 
@@ -771,7 +775,7 @@ export const generatePtValCalcPayload = (
   });
 
   // SMP Parents from Outside
-  payload.smpParentsOutside = getOutsideParentTreeNum(state, orchardPts);
+  payload.smpParentsOutside = Number(getOutsideParentTreeNum(state, orchardPts));
 
   // Contaminant Pollen BV
   payload.contaminantPollenBv = 0;
