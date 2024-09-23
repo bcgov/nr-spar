@@ -938,7 +938,6 @@ public class SeedlotService {
     seedlot.setNonOrchardPollenContaminationPercentage(
         ptCalculationResDto.orchardContaminationPct().intValue());
 
-    // review integer x bigdecimal
     seedlot.setSmpSuccessPercentage(ptCalculationResDto.smpSuccessPct().intValue());
   }
 
