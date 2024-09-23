@@ -67,6 +67,8 @@ const OrchardStep = ({
   const [modalType, setModalType] = useState<keyof orchardModalOptions>('change');
   // Store the orchard selection until the user has confirmed the warning modal
   const [stagedOrchard, setStagedOrchard] = useState<OptionsInputType | null>(null);
+  const [forceUpdatePrimary, setForceUpdatePrimary] = useState<number>(0);
+  const [forceUpdateSecondary, setForceUpdateSecondary] = useState<number>(0);
 
   const gameticMethodologyQuery = useQuery({
     queryKey: ['gametic-methodologies'],
@@ -187,12 +189,23 @@ const OrchardStep = ({
         orchards
       }
     );
+
+    if (isPrimary) {
+      setForceUpdatePrimary((prev) => prev + 1);
+    } else {
+      setForceUpdateSecondary((prev) => prev + 1);
+    }
   };
 
   // Remove options that are already selected by a user
-  const filterOrchardOptions = (codeToFilter: string) => orchardQuery.data?.filter(
-    (orchards) => orchards.code !== codeToFilter
-  );
+  const filterOrchardOpts = (codeToFilter: string) => {
+    if (orchardQuery.data) {
+      return orchardQuery.data.filter(
+        (orchards) => orchards.code !== codeToFilter
+      );
+    }
+    return [];
+  };
 
   const isTableEmpty = Object.keys(tableRowData).length === 0;
 
@@ -205,6 +218,18 @@ const OrchardStep = ({
       setOrchard(
         stagedOrchard.id === state.orchards.primaryOrchard.id,
         stagedOrchard.value
+      );
+    }
+  };
+
+  const cancelEdit = () => {
+    if (modalType === 'change' && stagedOrchard) {
+      const value = stagedOrchard.id === state.orchards.primaryOrchard.id
+        ? state.orchards.primaryOrchard.value
+        : state.orchards.secondaryOrchard.value;
+      setOrchard(
+        stagedOrchard.id === state.orchards.primaryOrchard.id,
+        value
       );
     }
   };
@@ -293,13 +318,14 @@ const OrchardStep = ({
                 <>
                   <ComboBox
                     id={state.orchards.primaryOrchard.id}
+                    key={forceUpdatePrimary}
                     placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
                     items={
                       orchardQuery.status === 'success'
-                        ? filterOrchardOptions(state.orchards.secondaryOrchard.value.code)
+                        ? filterOrchardOpts(state.orchards.secondaryOrchard.value.code)
                         : []
                     }
-                    selectedItem={state.orchards.primaryOrchard.value}
+                    initialSelectedItem={state.orchards.primaryOrchard.value}
                     titleText={
                       orchardStepText.orchardSection.orchardInput.label
                     }
@@ -316,20 +342,6 @@ const OrchardStep = ({
                           });
                           setModalOpen(true);
                         } else setOrchard(true, e.selectedItem);
-                      }
-                    }
-                    // This event is necessary to track the changes when cleaning the combobox
-                    // i.e. when the user clicks on the small 'X' when there is an orchard selected
-                    onInputChange={
-                      (inputText: string) => {
-                        if (inputText === '' && !isTableEmpty) {
-                          setModalType('change');
-                          setStagedOrchard({
-                            ...state.orchards.primaryOrchard,
-                            value: EmptyMultiOptObj
-                          });
-                          setModalOpen(true);
-                        }
                       }
                     }
                     readOnly={isFormSubmitted || isReview}
@@ -362,13 +374,14 @@ const OrchardStep = ({
                   <>
                     <ComboBox
                       id={state.orchards.secondaryOrchard.id}
+                      key={forceUpdateSecondary}
                       placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
                       items={
                         orchardQuery.status === 'success'
-                          ? filterOrchardOptions(state.orchards.primaryOrchard.value.code)
+                          ? filterOrchardOpts(state.orchards.primaryOrchard.value.code)
                           : []
                       }
-                      selectedItem={state.orchards.secondaryOrchard.value}
+                      initialSelectedItem={state.orchards.secondaryOrchard.value}
                       titleText={
                         orchardStepText.orchardSection.orchardInput.secondaryLabel
                       }
@@ -385,21 +398,6 @@ const OrchardStep = ({
                             });
                             setModalOpen(true);
                           } else setOrchard(false, e.selectedItem);
-                        }
-                      }
-                      // This event is necessary to track the changes when cleaning the combobox
-                      // i.e. when the user clicks on the small 'X' when there is an
-                      // orchard selected
-                      onInputChange={
-                        (inputText: string) => {
-                          if (inputText === '' && !isTableEmpty) {
-                            setModalType('change');
-                            setStagedOrchard({
-                              ...state.orchards.primaryOrchard,
-                              value: EmptyMultiOptObj
-                            });
-                            setModalOpen(true);
-                          }
                         }
                       }
                       readOnly={isFormSubmitted || isReview}
@@ -490,6 +488,7 @@ const OrchardStep = ({
                   onChange={(e: ComboBoxEvent) => setGametic(e, true)}
                   readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.femaleGametic.value}
+                  initialSelectedItem={state.femaleGametic.value}
                 />
               )
           }
@@ -516,6 +515,7 @@ const OrchardStep = ({
                   onChange={(e: ComboBoxEvent) => setGametic(e, false)}
                   readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.maleGametic.value}
+                  initialSelectedItem={state.maleGametic.value}
                 />
               )
           }
@@ -669,6 +669,7 @@ const OrchardStep = ({
         setOpen={setModalOpen}
         modalType={modalType}
         confirmEdit={proceedEdit}
+        cancelEdit={cancelEdit}
       />
     </FlexGrid>
   );

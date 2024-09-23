@@ -9,12 +9,13 @@ interface OrchardWarnModalProps {
   open: boolean;
   setOpen: Function;
   confirmEdit: Function;
+  cancelEdit: Function;
   modalType: keyof orchardModalOptions;
 }
 
 const OrchardWarnModal = (
   {
-    open, setOpen, confirmEdit, modalType
+    open, setOpen, confirmEdit, modalType, cancelEdit
   }: OrchardWarnModalProps
 ) => (
   <Modal
@@ -25,6 +26,7 @@ const OrchardWarnModal = (
     secondaryButtonText={modalConfig[modalType].buttons.secondary}
     open={open}
     onRequestClose={() => {
+      cancelEdit();
       setOpen(false);
     }}
     onRequestSubmit={() => {
