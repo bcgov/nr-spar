@@ -70,7 +70,8 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .then($checkbox => {
         if ($checkbox.is(':checked')) {
           cy.wrap($checkbox).should("be.checked")  // passes if checked
-        } else {
+        }
+        else {
           cy.wrap($checkbox).click()
           cy.wrap($checkbox).should("be.checked")  // passes if not checked
         }
