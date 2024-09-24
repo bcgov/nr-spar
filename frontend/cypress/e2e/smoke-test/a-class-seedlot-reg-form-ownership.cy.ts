@@ -53,7 +53,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     });
   });
 
-  it.only('Page title and accordion title', () => {
+  it('Page title and accordion title', () => {
     cy.get('.seedlot-registration-title')
       .find('h1')
       .should('have.text', `Registration for seedlot ${seedlotNum}`);
