@@ -57,24 +57,22 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .eq(0)
       .should('have.text', regFormData.orchard.subtitle);
 
-    cy.get('.seedlot-orchard-title-row')
+    cy.get('.seedlot-gamete-title-row')
       .find('h2')
-      .eq(1)
       .should('have.text', regFormData.orchard.gameteTitle);
 
-    cy.get('.seedlot-orchard-title-row')
+    cy.get('.seedlot-gamete-title-row')
       .find('.subtitle-section')
-      .eq(1)
       .should('have.text', regFormData.orchard.gameteSubtitle);
 
     cy.get('.seedlot-orchard-title-row')
       .find('h2')
-      .eq(2)
+      .eq(1)
       .should('have.text', regFormData.orchard.pollenTitle);
 
     cy.get('.seedlot-orchard-title-row')
       .find('.subtitle-section')
-      .eq(2)
+      .eq(1)
       .should('have.text', regFormData.orchard.pollenSubtitle);
   });
 
