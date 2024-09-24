@@ -520,7 +520,7 @@ const SeedlotReviewContent = () => {
     if (
       !isReadMode
       && !tscSeedlotMutation.isLoading
-      && !statusOnlyMutaion.isLoading
+      && !statusOnlyMutation.isLoading
     ) {
       setIsCancelModalOpen(true); // Show modal if there are unsaved changes
       return true; // Block navigation
