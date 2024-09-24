@@ -259,6 +259,10 @@ export type ParentTreeFormSubmitType = {
   parentTreeGeneticQualities: Array<SingleParentTreeGeneticObj>
 }
 
+export type SeedlotFormSmpParentOutsideType = {
+  smpParentsOutside: number
+}
+
 export type ExtractionFormSubmitType = {
   extractoryClientNumber: string,
   extractoryLocnCode: string,
@@ -277,6 +281,7 @@ export type SeedlotAClassSubmitType = {
   seedlotFormOrchardDto: OrchardFormSubmitType,
   seedlotFormParentTreeDtoList: Array<ParentTreeFormSubmitType>,
   seedlotFormParentTreeSmpDtoList: Array<ParentTreeFormSubmitType>,
+  seedlotFormSmpParentOutsideDto: SeedlotFormSmpParentOutsideType,
   seedlotFormExtractionDto: ExtractionFormSubmitType
 }
 

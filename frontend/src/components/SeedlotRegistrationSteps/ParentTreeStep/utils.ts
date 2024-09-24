@@ -8,7 +8,11 @@ import { recordKeys } from '../../../utils/RecordUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { StringInputType } from '../../../types/FormInputType';
-import { PtValsCalcReqPayload, CalcPayloadResType, OrchardParentTreeValsType } from '../../../types/PtCalcTypes';
+import {
+  PtValsCalcReqPayload,
+  CalcPayloadResType,
+  OrchardParentTreeValsType
+} from '../../../types/PtCalcTypes';
 import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
 import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
 import { GeneticWorthDto } from '../../../types/GeneticWorthType';
@@ -728,13 +732,15 @@ const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): numbe
 export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
   seedlotSpecies: MultiOptionsObj,
-  orchardPts: string[]
+  orchardPts: string[],
+  pollenContaminantBreedingValue?: string
 ): PtValsCalcReqPayload => {
   const { tableRowData, mixTabData } = state;
   const payload: PtValsCalcReqPayload = {
     orchardPtVals: [],
     smpMixIdAndProps: [],
-    smpParentsOutside: '0'
+    smpParentsOutside: 0,
+    contaminantPollenBv: 0
   };
   const rows = Object.values(tableRowData);
   const genWorthTypes = geneticWorthDict[seedlotSpecies.code as keyof GeneticWorthDictType];
@@ -745,6 +751,7 @@ export const generatePtValCalcPayload = (
       coneCount: Number(row.coneCount.value),
       pollenCount: Number(row.pollenCount.value),
       smpSuccessPerc: Number(row.smpSuccessPerc.value),
+      nonOrchardPollenContamPct: Number(row.nonOrchardPollenContam.value),
       geneticTraits: []
     };
     // Populate geneticTraits array
@@ -768,7 +775,13 @@ export const generatePtValCalcPayload = (
   });
 
   // SMP Parents from Outside
-  payload.smpParentsOutside = getOutsideParentTreeNum(state, orchardPts);
+  payload.smpParentsOutside = Number(getOutsideParentTreeNum(state, orchardPts));
+
+  // Contaminant Pollen BV
+  payload.contaminantPollenBv = 0;
+  if (pollenContaminantBreedingValue) {
+    payload.contaminantPollenBv = Number(pollenContaminantBreedingValue);
+  }
 
   return payload;
 };
