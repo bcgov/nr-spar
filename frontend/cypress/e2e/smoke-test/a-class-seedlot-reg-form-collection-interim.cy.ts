@@ -309,6 +309,11 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
   });
 
   it('[Collection] Checkbox input', () => {
+    cy.get('#collection-step-default-checkbox')
+      .focus()
+      .check({ force: true })
+      .blur();
+
     cy.get('#cone-collection-method-checkbox-1')
       .focus()
       .check({ force: true })
@@ -318,6 +323,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .clear()
       .type('Test comment')
       .blur();
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
 
     // Press next button
     cy.get('.seedlot-registration-button-row')
