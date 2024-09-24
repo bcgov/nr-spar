@@ -19,6 +19,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
@@ -195,6 +196,9 @@ class SeedlotFormPutTest {
             LocalDate.now(Clock.systemUTC()),
             LocalDate.now(Clock.systemUTC()));
 
+    // Parents from outside dto
+    SeedlotFormSmpParentOutsideDto smpParentOutsideDto = new SeedlotFormSmpParentOutsideDto(0);
+
     return new SeedlotFormSubmissionDto(
         collectionDto,
         List.of(ownerDto),
@@ -202,6 +206,7 @@ class SeedlotFormPutTest {
         orchardDto,
         List.of(parentTreeDto),
         List.of(parentTreeDto),
+        smpParentOutsideDto,
         extractionDto,
         List.of(),
         null,
@@ -415,7 +420,12 @@ class SeedlotFormPutTest {
             120, 12, 0, 23, 4, 0, BigDecimal.valueOf(120.22), BigDecimal.valueOf(23.44), 750);
     caculatedParentTreeValsDto.setGeospatialData(geospatialRespondDto);
     PtCalculationResDto ptCalculationResDto =
-        new PtCalculationResDto(List.of(), caculatedParentTreeValsDto, geospatialRespondDto);
+        new PtCalculationResDto(
+            List.of(),
+            caculatedParentTreeValsDto,
+            geospatialRespondDto,
+            BigDecimal.ZERO,
+            BigDecimal.ZERO);
     when(parentTreeService.calculatePtVals(any())).thenReturn(ptCalculationResDto);
 
     SeedlotFormSubmissionDto mockedForm = mockSeedlotFormDto(null, null);

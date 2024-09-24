@@ -66,6 +66,7 @@ class ParentTreeServiceTest {
             new BigDecimal(12),
             new BigDecimal(33),
             23,
+            20,
             List.of(
                 new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
                 new GeneticWorthTraitsDto("gvo", new BigDecimal("18"), null, null),
@@ -78,6 +79,7 @@ class ParentTreeServiceTest {
             new BigDecimal(12),
             new BigDecimal(23),
             12,
+            10,
             List.of(
                 new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
                 new GeneticWorthTraitsDto("gvo", new BigDecimal("27"), null, null),
@@ -90,6 +92,7 @@ class ParentTreeServiceTest {
             new BigDecimal(32),
             new BigDecimal(22),
             12,
+            10,
             List.of(
                 new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
                 new GeneticWorthTraitsDto("gvo", new BigDecimal("19"), null, null),
@@ -102,6 +105,7 @@ class ParentTreeServiceTest {
             new BigDecimal(12),
             new BigDecimal(45),
             3,
+            2,
             List.of(
                 new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
                 new GeneticWorthTraitsDto("gvo", new BigDecimal("18"), null, null),
@@ -109,7 +113,8 @@ class ParentTreeServiceTest {
 
     List<OrchardParentTreeValsDto> orchardPtVals = List.of(pt4032, pt4033, pt4079, pt4080);
 
-    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0);
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO);
 
     /* ********* ORACLE GEOSPATIAL MOCK DATA ********* */
     List<GeospatialOracleResDto> oracleMockSmpGeoData =
@@ -138,13 +143,12 @@ class ParentTreeServiceTest {
     when(geneticWorthService.calculateNe(
             coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside))
         .thenReturn(mockNeValue);
-    when(geneticWorthService.calculateGeneticWorth(reqDto.orchardPtVals())).thenReturn(List.of());
 
     /* ********* SERVICE TESTS ********* */
     PtCalculationResDto resDtoToTest = parentTreeService.calculatePtVals(reqDto);
 
     List<GeneticWorthTraitsDto> traitsToTest = resDtoToTest.geneticTraits();
-    assertTrue(traitsToTest.isEmpty());
+    assertFalse(traitsToTest.isEmpty());
 
     CalculatedParentTreeValsDto ptValsToTest = resDtoToTest.calculatedPtVals();
     assertFalse(mockNeValue.equals(ptValsToTest.getNeValue()));
@@ -184,7 +188,8 @@ class ParentTreeServiceTest {
     when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(badPtId))).thenReturn(List.of());
 
     List<OrchardParentTreeValsDto> orchardPtVals = List.of();
-    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0);
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO);
 
     BigDecimal coancestry = null;
     BigDecimal varSumOrchGameteContr = null;
@@ -193,7 +198,6 @@ class ParentTreeServiceTest {
     when(geneticWorthService.calculateNe(
             coancestry, varSumOrchGameteContr, varSumNeNoSmpContrib, smpParentsOutside))
         .thenReturn(BigDecimal.ZERO);
-    when(geneticWorthService.calculateGeneticWorth(reqDto.orchardPtVals())).thenReturn(List.of());
 
     assertThrows(
         PtGeoDataNotFoundException.class,
