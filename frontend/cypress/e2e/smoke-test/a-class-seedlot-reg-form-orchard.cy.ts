@@ -554,6 +554,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-is-regional')
       .should('be.checked');
+      
+    cy.get('#orchard-breading-perc-helper-text')
+      .should('have.text', regFormData.orchard.pollenHelperText);
 
     // Check pollen breeding % error msg
     cy.get('#orchard-breading-perc')
@@ -579,9 +582,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-breading-perc-error-msg')
       .should('have.text', regFormData.orchard.pollenError);
-
-    cy.get('#orchard-breading-perc-helper-text')
-      .should('have.text', regFormData.orchard.pollenHelperText);
 
     cy.get('#orchard-breading-perc')
       .clear()
