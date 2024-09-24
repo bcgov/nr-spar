@@ -139,9 +139,15 @@ const SeedlotReviewContent = () => {
   ] = useState<SeedlotRegFormType>(InitialSeedlotRegFormData);
 
   const {
-    allStepData, genWorthVals, geoInfoVals,
-    areaOfUseData, isFetchingData, seedlotData,
-    calculatedValues, seedlotSpecies
+    allStepData,
+    genWorthVals,
+    geoInfoVals,
+    areaOfUseData,
+    isFetchingData,
+    seedlotData,
+    calculatedValues,
+    seedlotSpecies,
+    popSizeAndDiversityConfig
   } = useContext(ClassAContext);
 
   const verifyFormData = (): boolean => {
@@ -225,8 +231,13 @@ const SeedlotReviewContent = () => {
     return isValid;
   };
 
-  const generatePaylod = (): TscSeedlotEditPayloadType => {
-    const regFormPayload = getSeedlotPayload(allStepData, seedlotNumber, seedlotSpecies.code);
+  const generatePayload = (): TscSeedlotEditPayloadType => {
+    const regFormPayload = getSeedlotPayload(
+      allStepData,
+      seedlotNumber,
+      seedlotSpecies.code,
+      popSizeAndDiversityConfig
+    );
 
     const applicantAndSeedlotInfo: SeedlotPatchPayloadType = {
       applicantEmailAddress: applicantData.email.value,
@@ -334,7 +345,7 @@ const SeedlotReviewContent = () => {
     }
   });
 
-  const statusOnlyMutaion = useMutation({
+  const statusOnlyMutation = useMutation({
     mutationFn: (
       { seedlotNum, statusOnSave }: Omit<PutTscSeedlotMutationObj, 'payload'>
     ) => updateSeedlotStatus(seedlotNum, statusOnSave),
@@ -421,13 +432,13 @@ const SeedlotReviewContent = () => {
       )
     ),
     onSuccess: () => {
-      statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'PND' });
+      statusOnlyMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'PND' });
     },
     onError: (err: AxiosError) => {
       toast.error(
         <ErrorToast
-          title="Creat draft for seedlot failed"
-          subtitle={`Cannot creat draft for seedlot. Please try again later. ${err.code}: ${err.message}`}
+          title="Create draft for seedlot failed"
+          subtitle={`Cannot create draft for seedlot. Please try again later. ${err.code}: ${err.message}`}
         />,
         ErrToastOption
       );
@@ -450,7 +461,7 @@ const SeedlotReviewContent = () => {
     const isFormDataValid = verifyFormData();
 
     if (isFormDataValid) {
-      const payload = generatePaylod();
+      const payload = generatePayload();
       updateDraftMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'SUB', payload });
       setIsReadMode(!isReadMode);
     }
@@ -461,11 +472,11 @@ const SeedlotReviewContent = () => {
    */
   const handleSaveAndStatus = (statusOnSave: StatusOnSaveType) => {
     if (isReadMode) {
-      statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave });
+      statusOnlyMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave });
     } else {
       const isFormDataValid = verifyFormData();
       if (isFormDataValid) {
-        const payload = generatePaylod();
+        const payload = generatePayload();
         updateDraftMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave, payload });
       }
     }
