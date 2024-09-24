@@ -252,8 +252,8 @@ public class ParentTreeService {
 
         // Aux values
         double auxValueAa =
-            (1 - (parentTreeRow.smpSuccessPerc() / 100))
-                * (parentTreeRow.nonOrchardPollenContamPct() / 100);
+            (1 - ((double) parentTreeRow.smpSuccessPerc() / 100))
+                * ((double) parentTreeRow.nonOrchardPollenContamPct() / 100);
 
         // --col:AA
         double vmContamContrib =
@@ -319,7 +319,7 @@ public class ParentTreeService {
           parentTotalGwWveContrib = vfGwWveContrib;
           parentTotalGwWwdContrib = vfGwWwdContrib;
         } else {
-          BigDecimal two = new BigDecimal("2");
+          BigDecimal two = BigDecimal.valueOf(2);
 
           parentTotalGwAdContrib =
               vfGwAdContrib.add(maleTotalGwAdContrib).divide(two, DIVISION_SCALE, halfUp);
@@ -437,13 +437,13 @@ public class ParentTreeService {
     }
 
     // Not being displayed!? Why not?
-    BigDecimal smpSuccessPct = new BigDecimal(sumSmpSuccessWtdByfp * 100).setScale(2, halfUp);
+    BigDecimal smpSuccessPct = BigDecimal.valueOf(sumSmpSuccessWtdByfp * 100).setScale(2, halfUp);
     SparLog.debug("smpSuccessPct: {}", smpSuccessPct);
 
     // -- 7071 (7918)
     BigDecimal orchardContaminationPct = zero;
     if (totalNonOrchardPollen > 0) {
-      orchardContaminationPct = new BigDecimal(avgNonOrchardPollen).setScale(2, halfUp);
+      orchardContaminationPct = BigDecimal.valueOf(avgNonOrchardPollen).setScale(2, halfUp);
     }
 
     // Not being displayed!? Why not?
