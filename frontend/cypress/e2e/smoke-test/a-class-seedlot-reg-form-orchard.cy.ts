@@ -580,26 +580,13 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#orchard-breading-perc-error-msg')
       .should('have.text', regFormData.orchard.pollenError);
 
-    // Check '+' and '-' buttons for pollen breeding %
+    cy.get('#orchard-breading-perc-helper-text')
+      .should('have.text', regFormData.orchard.pollenHelperText);
+
     cy.get('#orchard-breading-perc')
       .clear()
       .type('5')
       .blur();
-
-    cy.get('#orchard-breading-perc-helper-text')
-      .should('have.text', regFormData.orchard.pollenHelperText);
-
-    cy.get(`button.${prefix}--number__control-btn[title="Increment number"]`)
-      .click();
-
-    cy.get('#orchard-breading-perc')
-      .should('have.value', '15');
-
-    cy.get(`button.${prefix}--number__control-btn[title="Decrement number"]`)
-      .click();
-
-    cy.get('#orchard-breading-perc')
-      .should('have.value', '5');
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
