@@ -53,7 +53,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     });
   });
 
-  it('Page title and accordion title', () => {
+  it.only('Page title and accordion title', () => {
     cy.get('.seedlot-registration-title')
       .find('h1')
       .should('have.text', `Registration for seedlot ${seedlotNum}`);
@@ -65,6 +65,16 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('.ownership-header')
       .find('p')
       .should('have.text', regFormData.ownership.subtitle);
+
+    cy.get('#default-owner-checkbox')
+      .then($checkbox => {
+        if ($checkbox.is(':checked')) {
+          cy.wrap($checkbox).should("be.checked")  // passes if checked
+        } else {
+          cy.wrap($checkbox).click()
+          cy.wrap($checkbox).should("be.checked")  // passes if not checked
+        }
+      });
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-title-section')
