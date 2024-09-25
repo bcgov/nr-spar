@@ -309,6 +309,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
   });
 
   it('[Collection] Checkbox input', () => {
+    // Change inputs
     cy.get('#collection-step-default-checkbox')
       .focus()
       .check({ force: true })
