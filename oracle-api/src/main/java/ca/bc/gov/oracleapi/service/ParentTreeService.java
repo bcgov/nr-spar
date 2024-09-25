@@ -8,12 +8,24 @@ import ca.bc.gov.oracleapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeGeoNodeDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeNodeDto;
 import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
+import ca.bc.gov.oracleapi.entity.ParentTreeGeneticQuality;
+import ca.bc.gov.oracleapi.entity.ParentTreeOrchard;
+import ca.bc.gov.oracleapi.entity.ParentTreeSpuEntity;
 import ca.bc.gov.oracleapi.entity.projection.ParentTreeProj;
+import ca.bc.gov.oracleapi.entity.projection.ParentTreePropsProj;
+import ca.bc.gov.oracleapi.repository.ParentTreeGeneticQualityRepository;
+import ca.bc.gov.oracleapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.oracleapi.repository.ParentTreeRepository;
+import ca.bc.gov.oracleapi.repository.ParentTreeSpuRepository;
+
+import java.time.Instant;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +38,12 @@ import org.springframework.stereotype.Service;
 public class ParentTreeService {
 
   private final ParentTreeRepository parentTreeRepository;
+
+  private final ParentTreeSpuRepository parentTreeSpuRepository;
+
+  private final ParentTreeOrchardRepository parentTreeOrchardRepository;
+
+  private final ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
 
   private static final Integer MAX_LEVELS = 5;
 
@@ -187,6 +205,15 @@ public class ParentTreeService {
     return list.stream().filter(tree -> tree.getElevation() == null).count() > 0;
   }
 
+  private String milliToFmt(long milli) {
+    Duration duration = Duration.ofMillis(milli);
+    long HH = duration.toHours();
+    long MM = duration.toMinutesPart();
+    long SS = duration.toSecondsPart();
+    long MS = duration.toMillisPart();
+    return String.format("%02d:%02d:%02d:%04d", HH, MM, SS, MS);
+  }
+
   /**
    * Find all parent trees under a vegCode.
    *
@@ -199,8 +226,40 @@ public class ParentTreeService {
     Map<String, ParentTreeByVegCodeDto> ptMap = new HashMap<>();
 
     // Step 1: Get all the parent trees under a species
+    /* Ric 1: Parent tree props - id, number, tested */
+    long start = Instant.now().toEpochMilli();
+    List<ParentTreePropsProj> ptProps = parentTreeRepository.findAllParentTreePropsForVegCode(vegCode);
+    List<Long> ptIdList = ptProps.stream().map(ParentTreePropsProj::getParentTreeId).toList();
+    long ending = Instant.now().toEpochMilli();
+    SparLog.info("Time elapsed for step 1: {}", milliToFmt(ending - start));
+
+    /* Ric 2: Parent Tree SPU props - spu id, parent tree id */
+    start = Instant.now().toEpochMilli();
+    List<ParentTreeSpuEntity> spuProps = parentTreeSpuRepository.findAllById_parentTreeIdIn(ptIdList);
+    spuProps.sort((o1, o2) -> o1.getId().getSpuId().compareTo(o2.getId().getSpuId()));
+    Set<Integer> spuIds = new HashSet<>(spuProps.stream().map((p) -> p.getId().getSpuId()).toList());
+    ending = Instant.now().toEpochMilli();
+    SparLog.info("Time elapsed for step 2: {}", milliToFmt(ending - start));
+
+    /* Ric 3: Orchards */
+    start = Instant.now().toEpochMilli();
+    List<ParentTreeOrchard> orchardProps = parentTreeOrchardRepository.findAllById_parentTreeIdIn(ptIdList);
+    orchardProps.sort((o1, o2) -> o1.getId().getOrchardId().compareTo(o2.getId().getOrchardId()));
+    ending = Instant.now().toEpochMilli();
+    SparLog.info("Time elapsed for step 3: {}", milliToFmt(ending - start));
+
+    /* Ric 4: Parent Tree */
+    start = Instant.now().toEpochMilli();
+    List<ParentTreeGeneticQuality> genQualityProps = parentTreeGeneticQualityRepository.findAllGenQualityProps(ptIdList, spuIds.stream().toList());
+    ending = Instant.now().toEpochMilli();
+    SparLog.info("Time elapsed for step 3: {}", milliToFmt(ending - start));
+
+    start = Instant.now().toEpochMilli();
     List<ParentTreeProj> parentTreesProjList =
         parentTreeRepository.findAllParentTreeWithVegCode(vegCode);
+
+    ending = Instant.now().toEpochMilli();
+    SparLog.info("Time elapsed for old query: {}", milliToFmt(ending - start));
 
     YesNoConverter yesNoConverter = new YesNoConverter();
 

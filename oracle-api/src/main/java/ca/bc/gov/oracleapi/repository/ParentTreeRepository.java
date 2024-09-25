@@ -2,6 +2,8 @@ package ca.bc.gov.oracleapi.repository;
 
 import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
 import ca.bc.gov.oracleapi.entity.projection.ParentTreeProj;
+import ca.bc.gov.oracleapi.entity.projection.ParentTreePropsProj;
+
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -66,4 +68,7 @@ public interface ParentTreeRepository extends JpaRepository<ParentTreeEntity, Lo
          """,
       nativeQuery = true)
   List<ParentTreeProj> findAllParentTreeWithVegCode(String vegCode);
+
+  @Query("select pt.id, pt.parentTreeNumber, pt.tested from ParentTreeEntity pt where pt.vegetationCode = ?1")
+  List<ParentTreePropsProj> findAllParentTreePropsForVegCode(String vegCode);
 }

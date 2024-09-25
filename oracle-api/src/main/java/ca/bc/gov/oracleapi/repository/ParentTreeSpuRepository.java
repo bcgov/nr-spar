@@ -10,4 +10,6 @@ public interface ParentTreeSpuRepository
     extends JpaRepository<ParentTreeSpuEntity, ParentTreeSpuId> {
 
   List<ParentTreeSpuEntity> findByIdSpuIdIn(List<Integer> spuId);
+
+  List<ParentTreeSpuEntity> findAllById_parentTreeIdIn(List<Long> parentTreeIds);
 }

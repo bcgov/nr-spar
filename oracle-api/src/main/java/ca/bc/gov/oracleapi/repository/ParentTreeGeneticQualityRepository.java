@@ -37,4 +37,7 @@ public interface ParentTreeGeneticQualityRepository
       String geneticTypeCode,
       List<Long> spuList,
       List<Long> parentTreeIdList);
+
+  @Query("from ParentTreeGeneticQuality where parentTreeId in ?1 and seedPlanningUnitId in ?2 and toBeUsedInCalculations = true")
+  List<ParentTreeGeneticQuality> findAllGenQualityProps(List<Long> parentIds, List<Integer> spuIds);
 }
