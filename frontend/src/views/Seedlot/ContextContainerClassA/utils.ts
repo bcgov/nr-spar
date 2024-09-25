@@ -1057,13 +1057,16 @@ export const getBreadcrumbs = (seedlotNumber: string) => [
 export const getSeedlotPayload = (
   allStepData: AllStepData,
   seedlotNumber: string | undefined,
-  vegCode: string
+  vegCode: string,
+  popSizeAndDiversityConfig: InfoSectionConfigType
 ): SeedlotAClassSubmitType => {
   const speciesKey = Object.keys(geneticWorthDict).includes(vegCode)
     ? vegCode.toUpperCase()
     : 'UNKNOWN';
 
   const applicableGenWorths = geneticWorthDict[speciesKey as keyof GeneticWorthDictType];
+
+  const smpParentsOutsideValue = Number(popSizeAndDiversityConfig.outsideSMPParent.value);
 
   return ({
     seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
@@ -1083,6 +1086,7 @@ export const getSeedlotPayload = (
       (seedlotNumber ?? ''),
       applicableGenWorths
     ),
+    seedlotFormSmpParentOutsideDto: { smpParentsOutside: smpParentsOutsideValue },
     seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
   });
 };

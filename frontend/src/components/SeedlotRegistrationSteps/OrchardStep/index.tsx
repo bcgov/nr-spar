@@ -67,6 +67,8 @@ const OrchardStep = ({
   const [modalType, setModalType] = useState<keyof orchardModalOptions>('change');
   // Store the orchard selection until the user has confirmed the warning modal
   const [stagedOrchard, setStagedOrchard] = useState<OptionsInputType | null>(null);
+  const [forceUpdatePrimary, setForceUpdatePrimary] = useState<number>(0);
+  const [forceUpdateSecondary, setForceUpdateSecondary] = useState<number>(0);
 
   const gameticMethodologyQuery = useQuery({
     queryKey: ['gametic-methodologies'],
@@ -187,19 +189,22 @@ const OrchardStep = ({
         orchards
       }
     );
+
+    if (isPrimary) {
+      setForceUpdatePrimary((prev) => prev + 1);
+    } else {
+      setForceUpdateSecondary((prev) => prev + 1);
+    }
   };
 
   // Remove options that are already selected by a user
-  const removeSelectedOption = (data: MultiOptionsObj[]) => {
-    const filteredOptions: MultiOptionsObj[] = structuredClone(data);
-    const orchardId = state.orchards.primaryOrchard.value.code;
-    // The index of a matching orchard in filteredOptions
-    const orchardOptIndex = filteredOptions.findIndex((option) => option.code === orchardId);
-    if (orchardOptIndex > -1) {
-      // Remove found option
-      filteredOptions.splice(orchardOptIndex, 1);
+  const filterOrchardOpts = (codeToFilter: string) => {
+    if (orchardQuery.data) {
+      return orchardQuery.data.filter(
+        (orchards) => orchards.code !== codeToFilter
+      );
     }
-    return filteredOptions;
+    return [];
   };
 
   const isTableEmpty = Object.keys(tableRowData).length === 0;
@@ -213,6 +218,18 @@ const OrchardStep = ({
       setOrchard(
         stagedOrchard.id === state.orchards.primaryOrchard.id,
         stagedOrchard.value
+      );
+    }
+  };
+
+  const cancelEdit = () => {
+    if (modalType === 'change' && stagedOrchard) {
+      const value = stagedOrchard.id === state.orchards.primaryOrchard.id
+        ? state.orchards.primaryOrchard.value
+        : state.orchards.secondaryOrchard.value;
+      setOrchard(
+        stagedOrchard.id === state.orchards.primaryOrchard.id,
+        value
       );
     }
   };
@@ -301,13 +318,14 @@ const OrchardStep = ({
                 <>
                   <ComboBox
                     id={state.orchards.primaryOrchard.id}
+                    key={forceUpdatePrimary}
                     placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
                     items={
                       orchardQuery.status === 'success'
-                        ? removeSelectedOption(orchardQuery.data)
+                        ? filterOrchardOpts(state.orchards.secondaryOrchard.value.code)
                         : []
                     }
-                    selectedItem={state.orchards.primaryOrchard.value}
+                    initialSelectedItem={state.orchards.primaryOrchard.value}
                     titleText={
                       orchardStepText.orchardSection.orchardInput.label
                     }
@@ -356,13 +374,14 @@ const OrchardStep = ({
                   <>
                     <ComboBox
                       id={state.orchards.secondaryOrchard.id}
+                      key={forceUpdateSecondary}
                       placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
                       items={
                         orchardQuery.status === 'success'
-                          ? removeSelectedOption(orchardQuery.data)
+                          ? filterOrchardOpts(state.orchards.primaryOrchard.value.code)
                           : []
                       }
-                      selectedItem={state.orchards.secondaryOrchard.value}
+                      initialSelectedItem={state.orchards.secondaryOrchard.value}
                       titleText={
                         orchardStepText.orchardSection.orchardInput.secondaryLabel
                       }
@@ -449,7 +468,7 @@ const OrchardStep = ({
         </Column>
       </Row>
       <Row className="orchard-row">
-        <Column sm={4} md={8} lg={16} xlg={12} max={10}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           {
             gameticMethodologyQuery.isFetching
               ? <DropdownSkeleton />
@@ -469,13 +488,14 @@ const OrchardStep = ({
                   onChange={(e: ComboBoxEvent) => setGametic(e, true)}
                   readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.femaleGametic.value}
+                  initialSelectedItem={state.femaleGametic.value}
                 />
               )
           }
         </Column>
       </Row>
       <Row className="orchard-row">
-        <Column sm={4} md={8} lg={16} xlg={12} max={10}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           {
             gameticMethodologyQuery.isFetching
               ? <DropdownSkeleton />
@@ -495,6 +515,7 @@ const OrchardStep = ({
                   onChange={(e: ComboBoxEvent) => setGametic(e, false)}
                   readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.maleGametic.value}
+                  initialSelectedItem={state.maleGametic.value}
                 />
               )
           }
@@ -592,13 +613,14 @@ const OrchardStep = ({
           ? (
             <>
               <Row className="pollen-contam-row">
-                <Column sm={4} md={8} lg={16} xlg={12}>
+                <Column sm={4} md={4} lg={8} xlg={6}>
                   <NumberInput
                     id={state.breedingPercentage.id}
                     name="breedingPercentage"
                     defaultValue={state.breedingPercentage.value}
                     step={10}
                     disableWheel
+                    hideSteppers
                     type="number"
                     label={orchardStepText.pollenSection.breedingPercentage.label}
                     helperText={orchardStepText.pollenSection.breedingPercentage.helper}
@@ -647,6 +669,7 @@ const OrchardStep = ({
         setOpen={setModalOpen}
         modalType={modalType}
         confirmEdit={proceedEdit}
+        cancelEdit={cancelEdit}
       />
     </FlexGrid>
   );
