@@ -362,7 +362,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .should('have.value', testPopupAcronym);
 
     cy.get('#interim-location-code')
-      .should('have.value', '03');
+      .should('have.value', '01');
 
     cy.get('#interim-use-collection-agency')
       .should('be.checked');
