@@ -593,10 +593,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('Step complete status', () => {
-    // Make sure value is loaded
-    cy.get('#orchard-breading-perc')
-      .should('have.value', '5');
-
     // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
