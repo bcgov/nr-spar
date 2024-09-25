@@ -362,6 +362,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('219 - VERNON - S - PRD')
       .click();
 
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+
     // Add additional orchard
     cy.get('.seedlot-orchard-add-orchard')
       .find('button')
