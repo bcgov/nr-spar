@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import {
@@ -338,10 +338,10 @@ const SeedlotReviewContent = () => {
     onSuccess: async (_data, variables) => {
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      setIsReadMode(true);
       if (variables.statusOnSave !== 'SUB') {
         navigate(`/seedlots/details/${seedlotNumber}/?statusOnSave=${variables.statusOnSave}`);
       }
-      setIsReadMode(true);
     }
   });
 
@@ -361,10 +361,10 @@ const SeedlotReviewContent = () => {
     onSuccess: async (_data, variables) => {
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      setIsReadMode(true);
       if (variables.statusOnSave !== 'SUB') {
         navigate(`/seedlots/details/${seedlotNumber}/?statusOnSave=${variables.statusOnSave}`);
       }
-      setIsReadMode(true);
     }
   });
 
@@ -512,6 +512,23 @@ const SeedlotReviewContent = () => {
     queryClient.refetchQueries(['seedlot-full-form', seedlotNumber]);
     closeCancelModal();
   };
+
+  /**
+   * Custom blocker function to prevent navigation with unsaved changes.
+   */
+  const blockerFunction = () => {
+    if (
+      !isReadMode
+      && !tscSeedlotMutation.isLoading
+      && !statusOnlyMutation.isLoading
+    ) {
+      setIsCancelModalOpen(true); // Show modal if there are unsaved changes
+      return true; // Block navigation
+    }
+    return false; // Allow navigation
+  };
+
+  useBlocker(blockerFunction);
 
   return (
     <FlexGrid className="seedlot-review-grid">
