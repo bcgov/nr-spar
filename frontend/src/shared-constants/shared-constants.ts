@@ -23,3 +23,7 @@ export const TSC_ADMIN_ROLE = 'SPAR_TSC_ADMIN';
 export const PLACE_HOLDER = '--';
 
 export const MINISTRY_OF_FOREST_ID = '00012797';
+
+// This is used in very specific cases related to
+// imported data created before the PROD release
+export const PROD_RELEASE_DATE = '2024/08/26';

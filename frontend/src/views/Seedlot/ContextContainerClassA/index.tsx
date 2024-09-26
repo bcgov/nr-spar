@@ -32,12 +32,14 @@ import {
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import { recordKeys } from '../../../utils/RecordUtils';
+import { utcToIsoSlashStyle } from '../../../utils/DateUtils';
 import ROUTES from '../../../routes/constants';
 import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
 import { INITIAL_GEN_WORTH_VALS, INITIAL_GEO_INFO_VALS } from '../SeedlotReview/constants';
 import { MeanGeomInfoSectionConfigType, RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { StringInputType } from '../../../types/FormInputType';
+import { PROD_RELEASE_DATE } from '../../../shared-constants/shared-constants';
 
 import ClassAContext, { ClassAContextType } from './context';
 import {
@@ -128,6 +130,16 @@ const ContextContainerClassA = ({ children }: props) => {
   });
 
   /**
+   * Determine if the form is incomplete and was registered on old SPAR,
+   * using the date release of the new SPAR this is used for very specific
+   * cases
+   */
+  const isHistoricalIncomplete = seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'INC'
+    && utcToIsoSlashStyle(
+      seedlotQuery.data?.seedlot.auditInformation.entryTimestamp
+    ) < PROD_RELEASE_DATE;
+
+  /**
    * Determine if the form is incomplete or pending,
    * if true then users can save a draft of their forms,
    * otherwise the form will be populated with data directly from the seedlot table.
@@ -150,7 +162,7 @@ const ContextContainerClassA = ({ children }: props) => {
         navigate(ROUTES.FOUR_OH_FOUR);
       }
     },
-    enabled: isFormSubmitted,
+    enabled: isFormSubmitted || isHistoricalIncomplete,
     refetchOnWindowFocus: false
   });
 
@@ -587,7 +599,10 @@ const ContextContainerClassA = ({ children }: props) => {
   const getFormDraftQuery = useQuery({
     queryKey: ['seedlots', 'a-class-form-progress', seedlotNumber ?? 'unknown'],
     queryFn: () => getAClassSeedlotDraft(seedlotNumber ?? ''),
-    enabled: seedlotNumber !== undefined && seedlotNumber.length > 0 && isFormIncomplete,
+    enabled: seedlotNumber !== undefined
+      && seedlotNumber.length > 0
+      && isFormIncomplete
+      && !isHistoricalIncomplete,
     refetchOnMount: true,
     select: (data) => data.data as SeedlotProgressPayloadType
   });
