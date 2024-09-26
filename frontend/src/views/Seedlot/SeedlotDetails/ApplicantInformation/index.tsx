@@ -128,7 +128,7 @@ const ApplicantInformation = ({
                   readOnly
                   id="seedlot-applicant-to-be-registered"
                   labelText="To be registered at the Tree Seed Centre?"
-                  value={(applicant?.willRegister ? 'Yes' : 'No') ?? ''}
+                  value={(applicant?.willRegister ? 'Yes' : 'No')}
                 />
               )
           }
@@ -144,7 +144,7 @@ const ApplicantInformation = ({
                   readOnly
                   id="seedlot-applicant-within-bc"
                   labelText="Collected from a location within B.C.?"
-                  value={(applicant?.isBcSource ? 'Yes' : 'No') ?? ''}
+                  value={(applicant?.isBcSource ? 'Yes' : 'No')}
                 />
               )
           }
