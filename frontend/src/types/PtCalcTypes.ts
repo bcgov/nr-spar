@@ -31,6 +31,7 @@ export type OrchardParentTreeValsType = {
   parentTreeId: number,
   parentTreeNumber: string,
   smpSuccessPerc: number,
+  nonOrchardPollenContamPct: number,
   coneCount: number,
   pollenCount: number,
   geneticTraits: GeneticTrait[]
@@ -44,5 +45,6 @@ export type GeospatialRequestDto = {
 export type PtValsCalcReqPayload = {
   orchardPtVals: OrchardParentTreeValsType[],
   smpMixIdAndProps: GeospatialRequestDto[],
-  smpParentsOutside: string
+  smpParentsOutside: number,
+  contaminantPollenBv: number
 }

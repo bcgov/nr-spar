@@ -31,11 +31,18 @@ public record OrchardParentTreeValsDto(
         BigDecimal pollenCount,
     @Schema(
             description =
-                "A float number representing the value for the SMP success on parent percentage",
+                "A number representing the value for the SMP success on parent percentage",
             example = "5",
             type = "number",
             format = "int")
         Integer smpSuccessPerc,
+      @Schema(
+        description =
+            "A number representing the non-orchard pollen contamination (%) of the parent tree.",
+        example = "15",
+        type = "number",
+        format = "int")
+        Integer nonOrchardPollenContamPct,
     @Schema(
             description =
                 """

@@ -76,7 +76,8 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
               getParentTreesForSelectedOrchards(
                 orchardStep,
                 state.allParentTreeData
-              )
+              ),
+              orchardStep.breedingPercentage.value
             )
           );
 

@@ -52,7 +52,8 @@ const RegPage = () => {
     isFetchingData,
     seedlotData,
     getFormDraftQuery,
-    seedlotSpecies
+    seedlotSpecies,
+    popSizeAndDiversityConfig
   } = useContext(ClassAContext);
 
   const reloadFormDraft = () => getFormDraftQuery.refetch();
@@ -245,7 +246,12 @@ const RegPage = () => {
                       }
                       submitFn={() => {
                         submitSeedlot.mutate(
-                          getSeedlotPayload(allStepData, seedlotNumber, seedlotSpecies.code)
+                          getSeedlotPayload(
+                            allStepData,
+                            seedlotNumber,
+                            seedlotSpecies.code,
+                            popSizeAndDiversityConfig
+                          )
                         );
                       }}
                       setStepFn={(e: number) => {
