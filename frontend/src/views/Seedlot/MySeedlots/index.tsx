@@ -17,6 +17,7 @@ import SeedlotTable from '../../../components/SeedlotTable';
 import ROUTES from '../../../routes/constants';
 import useWindowSize from '../../../hooks/UseWindowSize';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
+import SeedlotNavigator from '../../../components/SeedlotNavigator';
 
 import { tableText } from './constants';
 
@@ -55,6 +56,9 @@ const MySeedlots = () => {
             {tableText.buttonText}
           </Button>
         </Column>
+      </Row>
+      <Row className="my-seedlot-nav">
+        <SeedlotNavigator />
       </Row>
       <Row className="my-seedlot-data-table-row">
         <SeedlotTable

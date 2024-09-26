@@ -9,27 +9,33 @@ import ROUTES from '../../routes/constants';
 
 import { addParamToPath } from '../../utils/PathUtils';
 import focusById from '../../utils/FocusUtils';
+import { isNumeric } from '../../utils/NumberUtils';
 
 const SeedlotNavigator = () => {
   const navigate = useNavigate();
 
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
-  const [seedlotInputErr, setSeedlotInputErr] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   return (
     <>
       <Column className="no-padding-col" sm={4} md={6} lg={14} xlg={14}>
         <TextInput
           id="go-to-seedlot-input"
-          type="number"
           labelText=""
           placeholder="Enter seedlot number"
           value={seedlotNumber}
-          invalid={seedlotInputErr}
-          invalidText="Please, enter a seedlot number"
+          invalid={!!errorMessage}
+          invalidText={errorMessage}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setSeedlotInputErr(false);
+            const inputValue = e.target.value;
+            if (inputValue && !isNumeric(inputValue)) {
+              setErrorMessage('Numbers only');
+              return;
+            }
+
             setSeedlotNumber(e.target.value);
+            setErrorMessage('');
           }}
           onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
         />
@@ -43,7 +49,7 @@ const SeedlotNavigator = () => {
             if (seedlotNumber) {
               navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber));
             } else {
-              setSeedlotInputErr(true);
+              setErrorMessage('Please enter a seedlot number');
               focusById('go-to-seedlot-input');
             }
           }}
