@@ -13,7 +13,7 @@ jobs:
     name: Initialize
     outputs:
       mod-tag: ${{ steps.mod-tag.outputs.mod-tag }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Get PR Number Mod 50
         id: mod-tag
@@ -33,6 +33,6 @@ jobs:
     name: Validate Results
     if: always() && (!failure()) && (!cancelled())
     needs: [validate]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - run: echo "Success!"

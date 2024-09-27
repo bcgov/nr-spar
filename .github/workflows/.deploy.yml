@@ -36,7 +36,7 @@ jobs:
       fam-modded-zone: ${{ steps.fam-modded-zone.outputs.fam-modded-zone }}
       deploy_core: ${{ steps.triggers.outputs.core }}
       deploy_sync: ${{ steps.triggers.outputs.sync }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       # Check triggers (omitted or matched)
       - name: Check core triggers
@@ -110,7 +110,7 @@ jobs:
     environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_core == 'true'
     needs: [init]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     strategy:
       matrix:
