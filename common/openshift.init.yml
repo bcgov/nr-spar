@@ -37,41 +37,6 @@ parameters:
   - name: VITE_USER_POOLS_WEB_CLIENT_ID
     description: Cognito user pools web client ID
     required: true
-  - name: WEBHOOK_URL
-    displayName: Webhook URL
-    description: The URL of the webhook to use for notifications.  If not specified, the webhook integration feature is disabled.
-    required: false
-    value: ""
-  - name: WEBHOOK_URL_HOST
-    displayName: Webhook URL Hostname
-    description: Webhook URL Hostname.  The backup-deploy.overrides.sh will parse this from the supplied WEBHOOK_URL, and fetch it from a secret for updates.
-    required: false
-    value:
-  - name: FTP_SECRET_KEY
-    displayName: FTP Secret Key
-    description: The FTP secret key is used to wire up the credentials associated to the FTP.
-    required: false
-    value: ftp-secret
-  - name: FTP_URL
-    displayName: FTP Server URL
-    description: The URL of the backup FTP server
-    required: false
-    value: ""
-  - name: FTP_URL_HOST
-    displayName: Ftp URL Hostname
-    description: Ftp URL Hostname.  The backup-deploy.overrides.sh will parse this from the supplied FTP_URL, and fetch it from a secret for updates.
-    required: false
-    value:
-  - name: FTP_USER
-    displayName: FTP user name
-    description: FTP user name
-    required: false
-    value: ""
-  - name: FTP_PASSWORD
-    displayName: FTP password
-    description: FTP password
-    required: false
-    value: ""
 objects:
   - apiVersion: v1
     kind: Secret
@@ -123,30 +88,6 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       vite-user-pools-web-client-id: ${VITE_USER_POOLS_WEB_CLIENT_ID}
-  --
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${NAME}-${ZONE}-backup-webhook
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      webhook-url: ${WEBHOOK_URL}
-      webhook-url-host: ${WEBHOOK_URL_HOST}
-  --
-  - kind: Secret
-    apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-backup-ftp
-      labels:
-        app: ${NAME}-${ZONE}
-    type: Opaque
-    stringData:
-      ftp-url: ${FTP_URL}
-      ftp-user: ${FTP_USER}
-      ftp-password: ${FTP_PASSWORD}
-      ftp-url-host: ${FTP_URL_HOST}
-  --
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
