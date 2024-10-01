@@ -36,7 +36,7 @@ jobs:
       fam-modded-zone: ${{ steps.fam-modded-zone.outputs.fam-modded-zone }}
       deploy_core: ${{ steps.triggers.outputs.core }}
       deploy_sync: ${{ steps.triggers.outputs.sync }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       # Check triggers (omitted or matched)
       - name: Check core triggers
@@ -70,7 +70,7 @@ jobs:
 
       - name: OpenShift Init
         if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
-        uses: bcgov-nr/action-deployer-openshift@v3.0.0
+        uses: bcgov-nr/action-deployer-openshift@v3.0.1
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -92,7 +92,7 @@ jobs:
 
       - name: Database
         if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
-        uses: bcgov-nr/action-deployer-openshift@v3.0.0
+        uses: bcgov-nr/action-deployer-openshift@v3.0.1
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -110,7 +110,7 @@ jobs:
     environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_core == 'true'
     needs: [init]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     strategy:
       matrix:
@@ -140,7 +140,7 @@ jobs:
             verification_path: "actuator/health"
 
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v3.0.0
+      - uses: bcgov-nr/action-deployer-openshift@v3.0.1
         id: deploys
         with:
           file: ${{ matrix.file }}
@@ -167,7 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy (sync)
-        uses: bcgov-nr/action-deployer-openshift@v3.0.0
+        uses: bcgov-nr/action-deployer-openshift@v3.0.1
         with:
           file: sync/openshift.deploy.yml
           oc_namespace: ${{ vars.OC_NAMESPACE }}
