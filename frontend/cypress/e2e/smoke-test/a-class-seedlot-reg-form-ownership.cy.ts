@@ -75,6 +75,9 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       })
       .should("be.checked");
 
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-title-section')
       .should('have.text', initialAccordionTitle);
