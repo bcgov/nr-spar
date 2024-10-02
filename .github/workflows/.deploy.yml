@@ -156,6 +156,7 @@ jobs:
             ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=1' || '' }}
             ${{ matrix.parameters }}
+          post_rollout: ${{ matrix.post_rollout || '' }}
           verification_path: ${{ matrix.verification_path }}
           verification_retry_attempts: 5
           verification_retry_seconds: 20
