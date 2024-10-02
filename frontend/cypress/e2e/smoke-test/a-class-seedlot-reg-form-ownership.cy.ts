@@ -71,12 +71,11 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .then($checkbox => {
         if ($checkbox.is(':not(:checked)')) {
           cy.get('#default-owner-checkbox').check({ force: true });
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
         }
       })
       .should("be.checked");
-
-    // Save changes
-    cy.saveSeedlotRegFormProgress();
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-title-section')

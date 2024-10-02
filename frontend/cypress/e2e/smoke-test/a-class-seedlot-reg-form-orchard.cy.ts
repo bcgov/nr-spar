@@ -611,6 +611,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
             .find('ul li')
             .contains('219 - VERNON - S - PRD')
             .click();
+
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
         }
       });
 
@@ -629,11 +632,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
             .find('ul li')
             .contains('222 - VERNON - S - PRD')
             .click();
+
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
         }
       });
-
-    // Save changes
-    cy.saveSeedlotRegFormProgress();
   });
 
   it('Step complete status', () => {
