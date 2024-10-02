@@ -598,7 +598,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   it('Check primary and secondary orchard values', () => {
     //  Check primary orchard
     cy.get('#primary-orchard-selection')
-      .siblings(`input.${prefix}--text-input`)
       .then($input => {
         const value = $input.val();
         if (value === '') {
@@ -617,7 +616,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     //  Check secondary orchard
     cy.get('#secondary-orchard-selection')
-      .siblings(`input.${prefix}--text-input`)
       .then($input => {
         const value = $input.val();
         if (value === '') {
