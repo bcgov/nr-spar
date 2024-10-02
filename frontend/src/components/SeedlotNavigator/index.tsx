@@ -6,20 +6,25 @@ import {
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import ROUTES from '../../routes/constants';
+import useWindowSize from '../../hooks/UseWindowSize';
+import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 
 import { addParamToPath } from '../../utils/PathUtils';
 import focusById from '../../utils/FocusUtils';
 import { isNumeric } from '../../utils/NumberUtils';
 
+import './styles.scss';
+
 const SeedlotNavigator = () => {
   const navigate = useNavigate();
+  const windowSize = useWindowSize();
 
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   return (
     <>
-      <Column className="no-padding-col" sm={4} md={6} lg={14} xlg={14}>
+      <Column className="no-padding-col" sm={4} md={6} lg={12} xlg={12}>
         <TextInput
           id="go-to-seedlot-input"
           labelText=""
@@ -40,8 +45,9 @@ const SeedlotNavigator = () => {
           onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
         />
       </Column>
-      <Column sm={4} md={2} lg={2} xlg={2}>
+      <Column className="no-padding-col" sm={4} md={2} lg={4} xlg={4}>
         <Button
+          className={`seedlot-nav-btn ${windowSize.innerWidth >= MEDIUM_SCREEN_WIDTH && 'seedlot-nav-btn-float-right'}`}
           kind="primary"
           size="md"
           renderIcon={ArrowRight}

@@ -54,11 +54,11 @@ const RecentSeedlots = () => {
           </IconButton>
         ) : null}
       </Column>
-
-      <Row className="recent-seedlots-navigator">
-        <SeedlotNavigator />
-      </Row>
-
+      <Column sm={4}>
+        <Row className="recent-seedlots-navigator">
+          <SeedlotNavigator />
+        </Row>
+      </Column>
       <Column sm={4} className="recent-seedlots-table">
         <SeedlotTable userId={userId} isTscAdmin={isTscAdmin} />
       </Column>

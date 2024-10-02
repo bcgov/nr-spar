@@ -40,9 +40,7 @@
   }
 
   .recent-seedlots-navigator {
-    display: flex;
-    flex: 0 0 100%;
-    justify-content: space-between;
-    margin: 0.5rem 0 1.5rem 0;
+    justify-content: space-around;
+    margin-bottom: 1rem;
   }
 }
