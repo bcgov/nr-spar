@@ -107,6 +107,8 @@ jobs:
 
   deploy:
     name: Deploy
+    env:
+      CRONJOB: ${{ github.event.repository.name }}-${{ inputs.target }}-database-backup
     environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_core == 'true'
     needs: [init]
