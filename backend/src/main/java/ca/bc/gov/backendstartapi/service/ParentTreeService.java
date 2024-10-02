@@ -93,7 +93,7 @@ public class ParentTreeService {
         parentPropOrchPoll = zero;
       } else {
         parentPropOrchPoll =
-            parentTreeRow.coneCount().divide(totalPollenCount, DIVISION_SCALE, halfUp);
+            parentTreeRow.pollenCount().divide(totalPollenCount, DIVISION_SCALE, halfUp);
       }
 
       // --col:X
