@@ -107,8 +107,6 @@ jobs:
 
   deploy:
     name: Deploy
-    env:
-      CRONJOB: ${{ github.event.repository.name }}-${{ inputs.target }}-database-backup
     environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_core == 'true'
     needs: [init]
@@ -127,7 +125,7 @@ jobs:
             file: common/openshift.backup.yml
             parameters:
               -p ZONE=${{ env.ZONE }} -p PG_DB_IMAGE=postgis/postgis:15-master
-            post_rollout: oc create job --from=cronjob/${{ env.CRONJOB }} ${{ env.CRONJOB }}-$(date +%Y%m%d%H%M%S)
+            post_rollout: oc create job --from=cronjob/${{ github.event.repository.name }}-${{ inputs.target }}-database-backup ${{ github.event.repository.name }}-${{ inputs.target }}-database-backup-$(date +%Y%m%d%H%M%S)
           - name: frontend
             file: frontend/openshift.deploy.yml
             parameters:
