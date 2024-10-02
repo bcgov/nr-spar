@@ -105,6 +105,27 @@ jobs:
             ${{ github.event_name == 'pull_request' && '-p MEMORY_REQUEST=100Mi' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MEMORY_LIMIT=200Mi' || '' }}
 
+      - name: Deploy Database Backup
+        uses: bcgov-nr/action-deployer-openshift@v3.0.1
+        with:
+          file: common/openshift.backup.yml
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ secrets.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          oc_version: "4.13"
+          overwrite: true
+          parameters:
+            -p ZONE=${{ env.ZONE }} -p NAME=${{ github.event.repository.name }}
+            -p PG_DB_IMAGE=postgis/postgis:15-master
+
+      - name: Backup
+        if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
+        secrets: inherit
+        uses: ./.github/workflows/.deploy.yml
+        with:
+          environment: ${{ inputs.environment }}
+          target: ${{ inputs.target }}
+
   deploy:
     name: Deploy
     environment: ${{ inputs.environment }}

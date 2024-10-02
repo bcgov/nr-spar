@@ -1,0 +1,33 @@
+name: .Backup
+
+on:
+  workflow_call:
+    inputs:
+      ### Required
+      # Nothing! Only `secrets: inherit` is required
+
+      ### Typical / recommended
+      environment:
+        description: GitHub/OpenShift environment; usually PR number, test or prod
+        default: ''
+        required: false
+        type: string
+      target:
+        description: Deployment target; usually PR number, test or prod
+        default: ${{ github.event.number }}
+        required: false
+        type: string
+
+jobs:
+  backup:
+    name: Backup
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Backup database before update
+        continue-on-error: true
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ vars.OC_NAMESPACE }}
+          # Run a backup before deploying a new version
+          oc create job --from=cronjob/${{ github.event.repository.name }}-${{ inputs.target }}-database-backup ${{ github.event.repository.name }}-${{ inputs.target }}-database-backup-$(date +%Y%m%d%H%M%S)
