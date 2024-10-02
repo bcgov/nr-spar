@@ -601,7 +601,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .then($input => {
         const value = $input.val();
         if (value === '') {
-          cy.log('Input is empty');
+          cy.log('Primary input is empty');
           // Do something if the input is empty
           cy.get('#primary-orchard-selection')
             .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
@@ -619,7 +619,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .then($input => {
         const value = $input.val();
         if (value === '') {
-          cy.log('Input is empty');
+          cy.log('Secondary input is empty');
           // Do something if the input is empty
           cy.get('#secondary-orchard-selection')
             .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
@@ -631,6 +631,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
             .click();
         }
       });
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Step complete status', () => {
