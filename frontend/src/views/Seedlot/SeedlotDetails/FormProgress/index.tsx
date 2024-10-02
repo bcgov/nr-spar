@@ -8,7 +8,7 @@ import {
 } from '@carbon/react';
 import { Edit } from '@carbon/icons-react';
 
-import { getAClassSeedlotProgressStatus } from '../../../../api-service/seedlotAPI';
+import { getAClassSeedlotFullForm, getAClassSeedlotProgressStatus, getSeedlotById, putAClassSeedlotProgress } from '../../../../api-service/seedlotAPI';
 import { ProgressIndicatorConfig } from '../../ContextContainerClassA/definitions';
 import DetailSection from '../../../../components/DetailSection';
 import SeedlotRegistrationProgress from '../../../../components/SeedlotRegistrationProgress';
@@ -17,9 +17,14 @@ import { completeProgressConfig, initialProgressConfig } from '../../ContextCont
 import ROUTES from '../../../../routes/constants';
 import { addParamToPath } from '../../../../utils/PathUtils';
 import { QueryStatusType } from '../../../../types/QueryStatusType';
-import { SeedlotStatusCode } from '../../../../types/SeedlotType';
+import { SeedlotProgressPayloadType, SeedlotStatusCode } from '../../../../types/SeedlotType';
 
 import './styles.scss';
+import { resDataToState } from '../../ContextContainerClassA/utils';
+import getMethodsOfPayment from 'src/api-service/methodsOfPaymentAPI';
+import getFundingSources from 'src/api-service/fundingSourcesAPI';
+import { getOrchardByVegCode } from 'src/api-service/orchardAPI';
+import getGameticMethodology from 'src/api-service/gameticMethodologyAPI';
 
 interface FormProgressProps {
   seedlotNumber?: string;
@@ -96,6 +101,48 @@ const FormProgress = (
     );
   };
 
+  // Keep going from here
+  const createDraftPayload = async () => {
+    try {
+      if (seedlotNumber) {
+        const fullForm = await getAClassSeedlotFullForm(seedlotNumber);
+        console.log('fullForm', fullForm);
+
+        const seedlot = await getSeedlotById(seedlotNumber);
+        console.log('seedlot', seedlot);
+
+        const defaultAgencyNumber = seedlot?.seedlot.applicantClientNumber;
+
+        const methodsOfPayments = await getMethodsOfPayment();
+
+        const fundingSources = await getFundingSources();
+
+        const orchards = await getOrchardByVegCode(seedlot?.seedlot.vegetationCode);
+
+        const gameticMethodology = await getGameticMethodology();
+
+        const allStepData = resDataToState(
+          fullForm,
+          defaultAgencyNumber,
+          methodsOfPayments,
+          fundingSources,
+          orchards,
+          gameticMethodology
+        )
+
+        const payload: SeedlotProgressPayloadType = {
+          allStepData,
+          progressStatus: updatedProgressStatus,
+          revisionCount: seedlot?.seedlot.revisionCount
+        };
+        const response = await putAClassSeedlotProgress(seedlotNumber, payload);
+        
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <DetailSection title="See where you are in the registration process">
       <Row>
@@ -123,6 +170,14 @@ const FormProgress = (
                 ? 'View your seedlot'
                 : 'Edit seedlot form'
             }
+          </Button>
+          <Button
+            kind="tertiary"
+            size="md"
+            className="section-btn"
+            onClick={() => createDraftPayload()}
+          >
+            Create draft payload
           </Button>
         </Column>
       </Row>
