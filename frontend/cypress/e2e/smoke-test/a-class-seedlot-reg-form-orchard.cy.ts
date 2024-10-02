@@ -595,6 +595,46 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.saveSeedlotRegFormProgress();
   });
 
+  it('Check primary and secondary orchard values', () => {
+    //  Check primary orchard
+    cy.get('#primary-orchard-selection')
+      .siblings(`input.${prefix}--text-input`)
+      .then($input => {
+        const value = $input.val();
+        if (value === '') {
+          cy.log('Input is empty');
+          // Do something if the input is empty
+          cy.get('#primary-orchard-selection')
+            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+            .click();
+    
+          cy.get(`.${prefix}--list-box--expanded`)
+            .find('ul li')
+            .contains('219 - VERNON - S - PRD')
+            .click();
+        }
+      });
+
+    //  Check secondary orchard
+    cy.get('#secondary-orchard-selection')
+      .siblings(`input.${prefix}--text-input`)
+      .then($input => {
+        const value = $input.val();
+        if (value === '') {
+          cy.log('Input is empty');
+          // Do something if the input is empty
+          cy.get('#secondary-orchard-selection')
+            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+            .click();
+    
+          cy.get(`.${prefix}--list-box--expanded`)
+            .find('ul li')
+            .contains('222 - VERNON - S - PRD')
+            .click();
+        }
+      });
+  });
+
   it('Step complete status', () => {
     // Press next button
     cy.get('.seedlot-registration-button-row')
