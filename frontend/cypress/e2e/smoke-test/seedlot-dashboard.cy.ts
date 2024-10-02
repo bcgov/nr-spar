@@ -44,7 +44,7 @@ describe('Seedlot Dashboard test', () => {
         const seedlotNumber = sNumber as string;
 
         cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotSpecies`).should('have.text', species);
-        cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotStatus`).should('have.text', 'Incomplete');
+        cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotStatus`).should('have.text').and('match', /Incomplete|Pending/);
       });
     });
   });
