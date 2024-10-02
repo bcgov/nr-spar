@@ -48,6 +48,12 @@ parameters:
   - name: PG_DB_IMAGE
     description: PostgreSQL Image (namespace/name:tag) to be used for backup
     required: true
+  - name: TAG
+    description: Dummy param, for convenience
+  - name: MIN_REPLICAS
+    description: Dummy param, for convenience
+  - name: MAX_REPLICAS
+    description: Dummy param, for convenience
 objects: 
   - kind: PersistentVolumeClaim
     apiVersion: v1
