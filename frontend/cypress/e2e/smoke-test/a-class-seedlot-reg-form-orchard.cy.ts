@@ -1,6 +1,7 @@
 import prefix from '../../../src/styles/classPrefix';
 import { THIRTY_SECONDS } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
+import { TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
   let regFormData: {
@@ -360,7 +361,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .contains('219 - VERNON - S - PRD')
-      .click();
+      .click()
+      .blur();
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
@@ -378,7 +380,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .contains('222 - VERNON - S - PRD')
-      .click();
+      .click()
+      .blur();
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
@@ -564,7 +567,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Check pollen breeding % error msg
     cy.get('#orchard-breading-perc')
       .clear()
-      .type('-1')
+      .type('-1', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#orchard-breading-perc-error-msg')
@@ -572,7 +575,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-breading-perc')
       .clear()
-      .type('101')
+      .type('101', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#orchard-breading-perc-error-msg')
@@ -580,7 +583,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-breading-perc')
       .clear()
-      .type('21.1576')
+      .type('21.1576', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#orchard-breading-perc-error-msg')
@@ -588,7 +591,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-breading-perc')
       .clear()
-      .type('5')
+      .type('5', { delay: TYPE_DELAY })
       .blur();
 
     // Save changes
@@ -610,7 +613,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
           cy.get(`.${prefix}--list-box--expanded`)
             .find('ul li')
             .contains('219 - VERNON - S - PRD')
-            .click();
+            .click()
+            .blur();
 
           // Save changes
           cy.saveSeedlotRegFormProgress();
@@ -631,7 +635,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
           cy.get(`.${prefix}--list-box--expanded`)
             .find('ul li')
             .contains('222 - VERNON - S - PRD')
-            .click();
+            .click()
+            .blur();
 
           // Save changes
           cy.saveSeedlotRegFormProgress();
