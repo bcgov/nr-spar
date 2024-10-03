@@ -34,6 +34,67 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     });
   });
 
+  it('Check primary and secondary orchard values', () => {
+    // Press next button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Back')
+      .click();
+
+    //  Check primary orchard
+    cy.get('#primary-orchard-selection')
+      .then($input => {
+        const value = $input.val();
+        if (value === '') {
+          cy.log('Primary input is empty');
+          // Do something if the input is empty
+          cy.get('#primary-orchard-selection')
+            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+            .click();
+    
+          cy.get(`.${prefix}--list-box--expanded`)
+            .find('ul li')
+            .contains('219 - VERNON - S - PRD')
+            .click();
+
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
+        }
+      });
+
+    //  Check secondary orchard
+    cy.get('#secondary-orchard-selection')
+      .then($input => {
+        const value = $input.val();
+        if (value === '') {
+          cy.log('Secondary input is empty');
+          // Do something if the input is empty
+          cy.get('#secondary-orchard-selection')
+            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+            .click();
+    
+          cy.get(`.${prefix}--list-box--expanded`)
+            .find('ul li')
+            .contains('222 - VERNON - S - PRD')
+            .click();
+
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
+        }
+      });
+
+    // Press next button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Next')
+      .click();
+
+    cy.get('#parentTreeNumber').scrollIntoView();
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+  });
+
   it('Page title and subtitles', () => {
     cy.get('.title-row')
       .find('h2')
