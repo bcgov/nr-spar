@@ -109,14 +109,16 @@ objects:
                     --no-comments \
                     --on-conflict-do-nothing \
                     --no-sync \
-                    --exclude-table=nrfc.client_type_code \
-                    --exclude-table=nrfc.submission_status_code \
-                    --exclude-table=nrfc.submission_type_code \
-                    --exclude-table=nrfc.province_code \
-                    --exclude-table=nrfc.country_code \
-                    --exclude-table=nrfc.contact_type_code \
-                    --exclude-table=nrfc.business_type_code \
-                    --exclude-table=nrfc.district_code \
+                    --exclude-table=nr-spar.cone_collection_method_list \
+                    --exclude-table=nr-spar.gametic_methodology_list \
+                    --exclude-table=nr-spar.genetic_class_list \
+                    --exclude-table=nr-spar.genetic_worth_list \
+                    --exclude-table=nr-spar.method_of_payment_list \
+                    --exclude-table=nr-spar.seedlot_source_list \
+                    --exclude-table=nr-spar.seedlot_status_list \
+                    --exclude-table=nr-spar.etl_execution_log_hist \
+                    --exclude-table=nr-spar.etl_execution_map \
+                    --exclude-table=nr-spar.etl_execution_schedule \
                     --file=${BACKUP_DIR}/backup_$(date +%Y-%m-%d).sql \
                     &&
                     find "${BACKUP_DIR}" -type f -mtime +$NUM_BACKUPS -exec rm -f {} \; &&
