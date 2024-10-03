@@ -361,8 +361,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .contains('219 - VERNON - S - PRD')
-      .click()
-      .blur();
+      .click();
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
@@ -380,8 +379,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .contains('222 - VERNON - S - PRD')
-      .click()
-      .blur();
+      .click();
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
@@ -596,52 +594,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
-  });
-
-  it('Check primary and secondary orchard values', () => {
-    //  Check primary orchard
-    cy.get('#primary-orchard-selection')
-      .then($input => {
-        const value = $input.val();
-        if (value === '') {
-          cy.log('Primary input is empty');
-          // Do something if the input is empty
-          cy.get('#primary-orchard-selection')
-            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
-            .click();
-    
-          cy.get(`.${prefix}--list-box--expanded`)
-            .find('ul li')
-            .contains('219 - VERNON - S - PRD')
-            .click()
-            .blur();
-
-          // Save changes
-          cy.saveSeedlotRegFormProgress();
-        }
-      });
-
-    //  Check secondary orchard
-    cy.get('#secondary-orchard-selection')
-      .then($input => {
-        const value = $input.val();
-        if (value === '') {
-          cy.log('Secondary input is empty');
-          // Do something if the input is empty
-          cy.get('#secondary-orchard-selection')
-            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
-            .click();
-    
-          cy.get(`.${prefix}--list-box--expanded`)
-            .find('ul li')
-            .contains('222 - VERNON - S - PRD')
-            .click()
-            .blur();
-
-          // Save changes
-          cy.saveSeedlotRegFormProgress();
-        }
-      });
   });
 
   it('Step complete status', () => {
