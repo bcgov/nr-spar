@@ -8,6 +8,7 @@ import ROUTES from '../../../../routes/constants';
 import AuthContext from '../../../../contexts/AuthContext';
 import SeedlotTable from '../../../../components/SeedlotTable';
 import Subtitle from '../../../../components/Subtitle';
+import SeedlotNavigator from '../../../../components/SeedlotNavigator';
 
 import { getSubTitle, getTitle } from './constants';
 
@@ -23,7 +24,9 @@ const RecentSeedlots = () => {
     <Row className="recent-seedlots">
       <Column
         sm={4}
-        className={`recent-seedlots-title-section ${isTscAdmin ? 'review-seedlots-table-header' : ''}`}
+        className={`recent-seedlots-title-section ${
+          isTscAdmin ? 'review-seedlots-table-header' : ''
+        }`}
         onClick={() => {
           if (isTscAdmin) {
             navigate(ROUTES.TSC_SEEDLOTS_TABLE);
@@ -32,17 +35,29 @@ const RecentSeedlots = () => {
       >
         <div>
           <h2>{getTitle(isTscAdmin)}</h2>
-          <Subtitle text={getSubTitle(isTscAdmin)} className="recent-seedlots-subtitle" />
+          <Subtitle
+            text={getSubTitle(isTscAdmin)}
+            className="recent-seedlots-subtitle"
+          />
         </div>
-        {
-          isTscAdmin
-            ? (
-              <IconButton className="std-card-button" kind="ghost" label="Go" align="bottom" onClick={() => { navigate(ROUTES.TSC_SEEDLOTS_TABLE); }}>
-                <ArrowRight />
-              </IconButton>
-            )
-            : null
-        }
+        {isTscAdmin ? (
+          <IconButton
+            className="std-card-button"
+            kind="ghost"
+            label="Go"
+            align="bottom"
+            onClick={() => {
+              navigate(ROUTES.TSC_SEEDLOTS_TABLE);
+            }}
+          >
+            <ArrowRight />
+          </IconButton>
+        ) : null}
+      </Column>
+      <Column sm={4}>
+        <Row className="recent-seedlots-navigator">
+          <SeedlotNavigator />
+        </Row>
       </Column>
       <Column sm={4} className="recent-seedlots-table">
         <SeedlotTable userId={userId} isTscAdmin={isTscAdmin} />
