@@ -57,6 +57,21 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
             .contains('219 - VERNON - S - PRD')
             .click();
 
+          // Add additional orchard
+          cy.get('.seedlot-orchard-add-orchard')
+            .find('button')
+            .contains('Add additional orchard')
+            .click();
+
+          cy.get('#secondary-orchard-selection')
+            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+            .click();
+
+          cy.get(`.${prefix}--list-box--expanded`)
+            .find('ul li')
+            .contains('222 - VERNON - S - PRD')
+            .click();
+
           // Save changes
           cy.saveSeedlotRegFormProgress();
         }
