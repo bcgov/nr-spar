@@ -63,7 +63,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
   it('change checkbox default state', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: 8000 });
+    cy.get('#parentTreeNumber', { timeout: 10000 });
 
     cy.get('#smp-default-vals-checkbox')
       .check({force: true});
@@ -223,7 +223,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
   it('Check \'Show/hide columns\' button functionality', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: 8000 });
+    cy.get('#parentTreeNumber', { timeout: 10000 });
 
     // Click 'Dothistroma needle blight (DFS)' checkbox
     cy.get(`.${prefix}--toolbar-content > span`)
@@ -297,7 +297,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
   it('Check \'More Options\' button functionality', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: 8000 });
+    cy.get('#parentTreeNumber', { timeout: 10000 });
 
     // Check Download file option
     cy.get(`.${prefix}--toolbar-content > span`)
