@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import {
   HeaderContainer,
@@ -36,6 +36,8 @@ import './styles.scss';
 const BCHeader = () => {
   const [rightPanel, setRightPanel] = useState<RightPanelType>(defaultPanelState);
   const [overlay, setOverlay] = useState<boolean>(false);
+
+  const location = useLocation();
 
   const windowSize = useWindowSize();
 
@@ -88,11 +90,17 @@ const BCHeader = () => {
           onClick={isSideNavExpanded ? onClickSideNavExpand : null}
         >
           <SkipToContent />
-          <HeaderMenuButton
-            aria-label={componentTexts.openMenu}
-            onClick={onClickSideNavExpand}
-            isActive={isSideNavExpanded}
-          />
+          {
+            !location.pathname.endsWith('/403')
+              ? (
+                <HeaderMenuButton
+                  aria-label={componentTexts.openMenu}
+                  onClick={onClickSideNavExpand}
+                  isActive={isSideNavExpanded}
+                />
+              )
+              : null
+          }
           <Link to={HOME_LINK} className="header-link" data-testid="header-name">
             {componentTexts.headerTitle}
             <span className="header-full-name">{componentTexts.completeTitle}</span>
@@ -164,62 +172,68 @@ const BCHeader = () => {
               )
               : null
           }
-          <SideNav
-            isChildOfHeader
-            expanded={isSideNavExpanded}
-            aria-label={componentTexts.sideMenuAriaLabel}
-            inert={undefined}
-            className="spar-side-nav"
-            onClick={isSideNavExpanded ? onClickSideNavExpand : null}
-          >
-            <div className="side-nav-top">
-              {
-                navItems.map((category) => (
-                  <div key={category.name}>
-                    <SideNavLink className="side-nav-category-name">
-                      {category.name}
-                    </SideNavLink>
+          {
+            !location.pathname.endsWith('/403')
+              ? (
+                <SideNav
+                  isChildOfHeader
+                  expanded={isSideNavExpanded}
+                  aria-label={componentTexts.sideMenuAriaLabel}
+                  inert={undefined}
+                  className="spar-side-nav"
+                  onClick={isSideNavExpanded ? onClickSideNavExpand : null}
+                >
+                  <div className="side-nav-top">
                     {
-                      category.items.map((navItem) => (
-                        <SideNavLink
-                          key={navItem.name}
-                          className={navItem.disabled ? 'disabled-side-nav-option' : 'side-nav-option'}
-                          renderIcon={Icons[navItem.icon]}
-                          isActive={window.location.pathname.includes(navItem.link)}
-                          onClick={navItem.disabled ? null : () => navigate(navItem.link)}
-                        >
-                          {navItem.name}
-                        </SideNavLink>
+                      navItems.map((category) => (
+                        <div key={category.name}>
+                          <SideNavLink className="side-nav-category-name">
+                            {category.name}
+                          </SideNavLink>
+                          {
+                            category.items.map((navItem) => (
+                              <SideNavLink
+                                key={navItem.name}
+                                className={navItem.disabled ? 'disabled-side-nav-option' : 'side-nav-option'}
+                                renderIcon={Icons[navItem.icon]}
+                                isActive={window.location.pathname.includes(navItem.link)}
+                                onClick={navItem.disabled ? null : () => navigate(navItem.link)}
+                              >
+                                {navItem.name}
+                              </SideNavLink>
+                            ))
+                          }
+                        </div>
                       ))
                     }
                   </div>
-                ))
-              }
-            </div>
-            <div>
-              {/* Uncomment this section when the support pages are implemented. */}
-              {/* <SideNavLink className="side-nav-category-name">
-                {supportItems.name}
-              </SideNavLink>
-              {
-                supportItems.items.map((supportItem) => (
-                  <SideNavLink
-                    key={supportItem.name}
-                    renderIcon={Icons[supportItem.icon]}
-                    className={
-                    supportItem.disabled
-                      ? 'disabled-side-nav-option'
-                      : 'side-nav-option'
-                    }
-                    onClick={supportItem.disabled ? null : () => navigate(supportItem.link)}
-                  >
-                    {supportItem.name}
-                  </SideNavLink>
-                ))
-              } */}
-              <PanelSectionName title={VERSION} />
-            </div>
-          </SideNav>
+                  <div>
+                    {/* Uncomment this section when the support pages are implemented. */}
+                    {/* <SideNavLink className="side-nav-category-name">
+                      {supportItems.name}
+                    </SideNavLink>
+                    {
+                      supportItems.items.map((supportItem) => (
+                        <SideNavLink
+                          key={supportItem.name}
+                          renderIcon={Icons[supportItem.icon]}
+                          className={
+                          supportItem.disabled
+                            ? 'disabled-side-nav-option'
+                            : 'side-nav-option'
+                          }
+                          onClick={supportItem.disabled ? null : () => navigate(supportItem.link)}
+                        >
+                          {supportItem.name}
+                        </SideNavLink>
+                      ))
+                    } */}
+                    <PanelSectionName title={VERSION} />
+                  </div>
+                </SideNav>
+              )
+              : null
+          }
         </Header>
       )}
     />

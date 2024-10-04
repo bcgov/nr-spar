@@ -1,0 +1,46 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.four-oh-three-page {
+  // Remove the paddings from main container
+  margin-top: -5.625rem;
+  margin-left: -14rem;
+
+  h1 {
+    @include type.type-style('fluid-heading-05', true);
+    color: var(--#{vars.$bcgov-prefix}-text-primary);
+    margin-bottom: 2.5rem;
+  }
+
+  p {
+    @include type.type-style('fluid-paragraph-01', true);
+    color: var(--#{vars.$bcgov-prefix}-text-secondary);
+    margin-bottom: 0.25rem;
+  }
+
+  button {
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+    inline-size: 16rem;
+  }
+
+  .four-oh-three-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  @media only screen and (max-width: 1055px) {
+    margin-top: 0;
+    margin-left: 0;
+    img {
+      height: 50vh;
+      width: 90vw;
+    }
+  }
+
+  @media only screen and (max-width: 672px) {
+    margin-top: 0;
+  }
+}

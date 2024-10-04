@@ -71,7 +71,7 @@ const PopSize = ({ orchardPts } : PopSizeProps) => {
               getOutsideParentTreeNum(
                 allStepData.parentTreeStep,
                 orchardPts
-              ),
+              ).toString(),
               true
             )
           }

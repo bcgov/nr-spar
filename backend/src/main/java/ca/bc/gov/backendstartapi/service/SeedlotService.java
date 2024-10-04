@@ -21,6 +21,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSaveInMemoryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
@@ -633,6 +634,9 @@ public class SeedlotService {
             seedlotInfo.getTemporaryStorageStartDate(),
             seedlotInfo.getTemporaryStorageEndDate());
 
+    SeedlotFormSmpParentOutsideDto smpParentOutsideDto =
+        new SeedlotFormSmpParentOutsideDto(seedlotInfo.getParentsOutsideTheOrchardUsedInSmp());
+
     SeedlotAclassFormDto seedlotAclassFullInfo =
         new SeedlotAclassFormDto(
             new SeedlotFormSubmissionDto(
@@ -642,6 +646,7 @@ public class SeedlotService {
                 orchardStep,
                 parentTreesInfo,
                 smpMixParentTreesInfo,
+                smpParentOutsideDto,
                 extractionStep,
                 List.of(),
                 null,
@@ -806,7 +811,11 @@ public class SeedlotService {
       // Update Seedlot Ne, collection elevation, and collection lat long
       // Saves the Seedlot calculated Genetic Worth
       setParentTreeContribution(
-          seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
+          seedlot,
+          form.seedlotFormParentTreeDtoList(),
+          form.seedlotFormParentTreeSmpDtoList(),
+          form.seedlotFormSmpParentOutsideDto().smpParentsOutside(),
+          form.seedlotFormOrchardDto().contaminantPollenBv());
 
       // If there is no area of use data already set:
       // Update elevation min max, latitude min max, longitude min max, and SPZ
@@ -881,13 +890,17 @@ public class SeedlotService {
   private void setParentTreeContribution(
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> orchardPtDtoList,
-      List<SeedlotFormParentTreeSmpDto> smpPtDtoList) {
+      List<SeedlotFormParentTreeSmpDto> smpPtDtoList,
+      Integer smpParentsOutside,
+      BigDecimal contaminantPollenBv) {
 
     SparLog.info("Begin to set parent trees contribution");
     List<OrchardParentTreeValsDto> orchardPtVals = convertToPtVals(orchardPtDtoList);
     List<GeospatialRequestDto> smpMixIdAndProps = convertToGeoRes(smpPtDtoList);
 
-    PtValsCalReqDto ptValsCalReqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0);
+    PtValsCalReqDto ptValsCalReqDto =
+        new PtValsCalReqDto(
+            orchardPtVals, smpMixIdAndProps, smpParentsOutside, contaminantPollenBv);
 
     PtCalculationResDto ptCalculationResDto = parentTreeService.calculatePtVals(ptValsCalReqDto);
 
@@ -917,6 +930,15 @@ public class SeedlotService {
 
     SparLog.info("Saving Seedlot genetic worth calculated values");
     seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, ptCalculationResDto.geneticTraits());
+
+    seedlot.setParentsOutsideTheOrchardUsedInSmp(smpParentsOutside);
+    if (!ValueUtil.isValueEqual(seedlot.getPollenContaminantBreedingValue(), contaminantPollenBv)) {
+      seedlot.setPollenContaminantBreedingValue(contaminantPollenBv);
+    }
+    seedlot.setNonOrchardPollenContaminationPercentage(
+        ptCalculationResDto.orchardContaminationPct().intValue());
+
+    seedlot.setSmpSuccessPercentage(ptCalculationResDto.smpSuccessPct().intValue());
   }
 
   private List<OrchardParentTreeValsDto> convertToPtVals(
@@ -933,6 +955,7 @@ public class SeedlotService {
                       orchardPtDto.coneCount(),
                       orchardPtDto.pollenCount(),
                       orchardPtDto.smpSuccessPct(),
+                      orchardPtDto.nonOrchardPollenContamPct(),
                       getGeneticTraitList(orchardPtDto.parentTreeGeneticQualities()));
               converted.add(toAdd);
             });
@@ -991,7 +1014,7 @@ public class SeedlotService {
   }
 
   /**
-   * Reference Legacy Procedure: get_tested_area_of_use_geog from database/ddl/pkg/SPR_SEEDLOT.PKS
+   * Reference Legacy Procedure: get_tested_area_of_use_geog from database/ddl/pkg/SPR_SEEDLOT.PKS.
    *
    * @param seedlot the seedlot object to set data to
    * @param primaryOrchardId the primary orchard Id to find the spu for
