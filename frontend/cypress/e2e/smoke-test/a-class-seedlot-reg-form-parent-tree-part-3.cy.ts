@@ -452,7 +452,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check proportion value
     cy.get('#0-proportion-value')
-      .should('have.value', '1.0000');
+      .should('have.text', '1.0000');
 
     cy.get('#1-volume-value-input')
       .clear()
@@ -461,10 +461,10 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check proportion value after two Volume inputs
     cy.get('#0-proportion-value')
-      .should('have.value', '0.5');
+      .should('have.text', '0.5000');
 
     cy.get('#1-proportion-value')
-      .should('have.value', '0.5');
+      .should('have.text', '0.5000');
 
     // Enter 3rd parent tree number
     cy.get('#2-parentTreeNumber-value-input')
@@ -482,13 +482,13 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .click({force: true});
 
     cy.get('#0-proportion-value')
-      .should('have.value', '0.25');
+      .should('have.text', '0.2500');
 
     cy.get('#1-proportion-value')
-      .should('have.value', '0.25');
+      .should('have.text', '0.2500');
 
     cy.get('#2-proportion-value')
-      .should('have.value', '0.5');
+      .should('have.text', '0.5000');
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
