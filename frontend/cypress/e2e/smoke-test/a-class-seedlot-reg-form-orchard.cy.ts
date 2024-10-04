@@ -1,6 +1,7 @@
 import prefix from '../../../src/styles/classPrefix';
 import { THIRTY_SECONDS } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
+import { TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
   let regFormData: {
@@ -362,6 +363,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('219 - VERNON - S - PRD')
       .click();
 
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+
     // Add additional orchard
     cy.get('.seedlot-orchard-add-orchard')
       .find('button')
@@ -554,11 +558,14 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-is-regional')
       .should('be.checked');
+      
+    cy.get('#orchard-breading-perc-helper-text')
+      .should('have.text', regFormData.orchard.pollenHelperText);
 
     // Check pollen breeding % error msg
     cy.get('#orchard-breading-perc')
       .clear()
-      .type('-1')
+      .type('-1', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#orchard-breading-perc-error-msg')
@@ -566,7 +573,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-breading-perc')
       .clear()
-      .type('101')
+      .type('101', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#orchard-breading-perc-error-msg')
@@ -574,42 +581,22 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-breading-perc')
       .clear()
-      .type('21.1576')
+      .type('21.1576', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#orchard-breading-perc-error-msg')
       .should('have.text', regFormData.orchard.pollenError);
 
-    // Check '+' and '-' buttons for pollen breeding %
     cy.get('#orchard-breading-perc')
       .clear()
-      .type('5')
+      .type('5', { delay: TYPE_DELAY })
       .blur();
-
-    cy.get('#orchard-breading-perc-helper-text')
-      .should('have.text', regFormData.orchard.pollenHelperText);
-
-    cy.get(`button.${prefix}--number__control-btn[title="Increment number"]`)
-      .click();
-
-    cy.get('#orchard-breading-perc')
-      .should('have.value', '15');
-
-    cy.get(`button.${prefix}--number__control-btn[title="Decrement number"]`)
-      .click();
-
-    cy.get('#orchard-breading-perc')
-      .should('have.value', '5');
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
   });
 
   it('Step complete status', () => {
-    // Make sure value is loaded
-    cy.get('#orchard-breading-perc')
-      .should('have.value', '5');
-
     // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')

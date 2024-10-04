@@ -196,6 +196,9 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
 
         cy.get('#ext-location-code')
           .should('have.value', locationCode);
+
+        // Save changes
+        cy.saveSeedlotRegFormProgress();
       });
   });
 
@@ -338,6 +341,9 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
 
         cy.get('#str-location-code')
           .should('have.value', locationCode);
+
+        // Save changes
+        cy.saveSeedlotRegFormProgress();
       });
   });
 
