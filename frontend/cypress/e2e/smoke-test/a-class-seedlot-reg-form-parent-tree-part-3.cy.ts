@@ -1,4 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
+import { TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculation of SMP mix)', () => {
   let regFormData: {
@@ -34,185 +35,185 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     });
   });
 
-  // it('Page title and subtitles', () => {
-  //   cy.get(`.${prefix}--data-table-header__title`)
-  //     .should('have.text', regFormData.parentTree.calculationTitle);
+  it('Page title and subtitles', () => {
+    cy.get(`.${prefix}--data-table-header__title`)
+      .should('have.text', regFormData.parentTree.calculationTitle);
 
-  //   cy.get(`.${prefix}--data-table-header__description`)
-  //     .should('have.text', regFormData.parentTree.calculationSubtitle);
-  // });
+    cy.get(`.${prefix}--data-table-header__description`)
+      .should('have.text', regFormData.parentTree.calculationSubtitle);
+  });
 
-  // it('Check \'Add a new row\' button functionality', () => {
-  //   // Wait for the table to load
-  //   cy.get('#parentTreeNumber');
+  it('Check \'Add a new row\' button functionality', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber');
 
-  //   cy.get(`.${prefix}--pagination__items-count`)
-  //     .should('include.text', '20 items');
+    cy.get(`.${prefix}--pagination__items-count`)
+      .should('include.text', '20 items');
 
-  //   cy.get(`.${prefix}--toolbar-content > span`)
-  //     .eq(0)
-  //     .find('button')
-  //     .as('clickAddRowBtn')
-  //     .click({force: true});
+    cy.get(`.${prefix}--toolbar-content > span`)
+      .eq(0)
+      .find('button')
+      .as('clickAddRowBtn')
+      .click({force: true});
 
-  //   // Check total number of rows
-  //   cy.get(`.${prefix}--pagination__items-count`)
-  //     .should('include.text', '21 items');
+    // Check total number of rows
+    cy.get(`.${prefix}--pagination__items-count`)
+      .should('include.text', '21 items');
 
-  //   cy.get('@clickAddRowBtn')
-  //     .click({force: true});
+    cy.get('@clickAddRowBtn')
+      .click({force: true});
 
-  //   // Check total number of rows
-  //   cy.get(`.${prefix}--pagination__items-count`)
-  //     .should('include.text', '22 items');
+    // Check total number of rows
+    cy.get(`.${prefix}--pagination__items-count`)
+      .should('include.text', '22 items');
 
-  //   // Check delete button functionality
-  //   cy.get('#7-action-btn-del')
-  //     .find('button')
-  //     .click({ force: true});
+    // Check delete button functionality
+    cy.get('#7-action-btn-del')
+      .find('button')
+      .click({ force: true});
 
-  //   // Check total number of rows
-  //   cy.get(`.${prefix}--pagination__items-count`)
-  //     .should('include.text', '21 items');
-  // });
+    // Check total number of rows
+    cy.get(`.${prefix}--pagination__items-count`)
+      .should('include.text', '21 items');
+  });
 
-  // it('Check \'Show/hide columns\' button functionality', () => {
-  //   // Wait for the table to load
-  //   cy.get('#parentTreeNumber');
+  it('Check \'Show/hide columns\' button functionality', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber');
 
-  //   // Click 'Dothistroma needle blight (DFS)' checkbox
-  //   cy.get(`.${prefix}--toolbar-content > span`)
-  //     .eq(1)
-  //     .find('button')
-  //     .as('clickShowHideBtn')
-  //     .click({force: true});
+    // Click 'Dothistroma needle blight (DFS)' checkbox
+    cy.get(`.${prefix}--toolbar-content > span`)
+      .eq(1)
+      .find('button')
+      .as('clickShowHideBtn')
+      .click({force: true});
 
-  //   cy.get('ul.parent-tree-table-toggle-menu')
-  //     .find('li')
-  //     .contains('Dothistroma needle blight (DFS)')
-  //     .click();
+    cy.get('ul.parent-tree-table-toggle-menu')
+      .find('li')
+      .contains('Dothistroma needle blight (DFS)')
+      .click();
 
-  //   cy.get('.parent-tree-step-table-container')
-  //     .find('h4')
-  //     .as('closeShowHideDropdown')
-  //     .click({force: true});
+    cy.get('.parent-tree-step-table-container')
+      .find('h4')
+      .as('closeShowHideDropdown')
+      .click({force: true});
 
-  //   cy.get('thead.table-header')
-  //     .find('#dfs')
-  //     .should('exist');
+    cy.get('thead.table-header')
+      .find('#dfs')
+      .should('exist');
 
-  //   // Click 'Comandra blister rust (DSC)' checkbox
-  //   cy.get('@clickShowHideBtn')
-  //     .click({force: true});
+    // Click 'Comandra blister rust (DSC)' checkbox
+    cy.get('@clickShowHideBtn')
+      .click({force: true});
 
-  //   cy.get('ul.parent-tree-table-toggle-menu')
-  //     .find('li')
-  //     .contains('Comandra blister rust (DSC)')
-  //     .click();
+    cy.get('ul.parent-tree-table-toggle-menu')
+      .find('li')
+      .contains('Comandra blister rust (DSC)')
+      .click();
 
-  //   cy.get('@closeShowHideDropdown')
-  //     .click({force: true});
+    cy.get('@closeShowHideDropdown')
+      .click({force: true});
 
-  //   cy.get('thead.table-header')
-  //     .find('#dsc')
-  //     .should('exist');
+    cy.get('thead.table-header')
+      .find('#dsc')
+      .should('exist');
 
-  //   // Click 'Western gall rust (DSG)' checkbox
-  //   cy.get('@clickShowHideBtn')
-  //     .click({force: true});
+    // Click 'Western gall rust (DSG)' checkbox
+    cy.get('@clickShowHideBtn')
+      .click({force: true});
 
-  //   cy.get('ul.parent-tree-table-toggle-menu')
-  //     .find('li')
-  //     .contains('Western gall rust (DSG)')
-  //     .click();
+    cy.get('ul.parent-tree-table-toggle-menu')
+      .find('li')
+      .contains('Western gall rust (DSG)')
+      .click();
 
-  //   cy.get('@closeShowHideDropdown')
-  //     .click({force: true});
+    cy.get('@closeShowHideDropdown')
+      .click({force: true});
 
-  //   cy.get('thead.table-header')
-  //     .find('#dsg')
-  //     .should('exist');
+    cy.get('thead.table-header')
+      .find('#dsg')
+      .should('exist');
 
-  //   // Click 'Volume growth (GVO)' checkbox
-  //   cy.get('@clickShowHideBtn')
-  //     .click({force: true});
+    // Click 'Volume growth (GVO)' checkbox
+    cy.get('@clickShowHideBtn')
+      .click({force: true});
 
-  //   cy.get('ul.parent-tree-table-toggle-menu')
-  //     .find('li')
-  //     .contains('Volume growth (GVO)')
-  //     .click();
+    cy.get('ul.parent-tree-table-toggle-menu')
+      .find('li')
+      .contains('Volume growth (GVO)')
+      .click();
 
-  //   cy.get('@closeShowHideDropdown')
-  //     .click({force: true});
+    cy.get('@closeShowHideDropdown')
+      .click({force: true});
 
-  //   cy.get('thead.table-header')
-  //     .find('#gvo')
-  //     .should('exist');
+    cy.get('thead.table-header')
+      .find('#gvo')
+      .should('exist');
 
-  //   // Click 'Weighted DFS' checkbox
-  //   cy.get('@clickShowHideBtn')
-  //     .click({force: true});
+    // Click 'Weighted DFS' checkbox
+    cy.get('@clickShowHideBtn')
+      .click({force: true});
   
-  //   cy.get('ul.parent-tree-table-toggle-menu')
-  //     .find('li')
-  //     .contains('Weighted DFS')
-  //     .click();
+    cy.get('ul.parent-tree-table-toggle-menu')
+      .find('li')
+      .contains('Weighted DFS')
+      .click();
 
-  //   cy.get('@closeShowHideDropdown')
-  //     .click({force: true});
+    cy.get('@closeShowHideDropdown')
+      .click({force: true});
 
-  //   cy.get('thead.table-header')
-  //     .find('#w_dfs')
-  //     .should('exist');
+    cy.get('thead.table-header')
+      .find('#w_dfs')
+      .should('exist');
 
-  //   // Click 'Weighted DSC' checkbox
-  //   cy.get('@clickShowHideBtn')
-  //     .click({force: true});
+    // Click 'Weighted DSC' checkbox
+    cy.get('@clickShowHideBtn')
+      .click({force: true});
   
-  //   cy.get('ul.parent-tree-table-toggle-menu')
-  //     .find('li')
-  //     .contains('Weighted DSC')
-  //     .click();
+    cy.get('ul.parent-tree-table-toggle-menu')
+      .find('li')
+      .contains('Weighted DSC')
+      .click();
 
-  //   cy.get('@closeShowHideDropdown')
-  //     .click({force: true});
+    cy.get('@closeShowHideDropdown')
+      .click({force: true});
 
-  //   cy.get('thead.table-header')
-  //     .find('#w_dsc')
-  //     .should('exist');
+    cy.get('thead.table-header')
+      .find('#w_dsc')
+      .should('exist');
 
-  //   // Click 'Weighted DSG' checkbox
-  //   cy.get('@clickShowHideBtn')
-  //     .click({force: true});
+    // Click 'Weighted DSG' checkbox
+    cy.get('@clickShowHideBtn')
+      .click({force: true});
   
-  //   cy.get('ul.parent-tree-table-toggle-menu')
-  //     .find('li')
-  //     .contains('Weighted DSG')
-  //     .click();
+    cy.get('ul.parent-tree-table-toggle-menu')
+      .find('li')
+      .contains('Weighted DSG')
+      .click();
 
-  //   cy.get('@closeShowHideDropdown')
-  //     .click({force: true});
+    cy.get('@closeShowHideDropdown')
+      .click({force: true});
 
-  //   cy.get('thead.table-header')
-  //     .find('#w_dsg')
-  //     .should('exist');
+    cy.get('thead.table-header')
+      .find('#w_dsg')
+      .should('exist');
 
-  //   // Click 'Weighted GVO' checkbox
-  //   cy.get('@clickShowHideBtn')
-  //     .click({force: true});
+    // Click 'Weighted GVO' checkbox
+    cy.get('@clickShowHideBtn')
+      .click({force: true});
   
-  //   cy.get('ul.parent-tree-table-toggle-menu')
-  //     .find('li')
-  //     .contains('Weighted GVO')
-  //     .click();
+    cy.get('ul.parent-tree-table-toggle-menu')
+      .find('li')
+      .contains('Weighted GVO')
+      .click();
 
-  //   cy.get('@closeShowHideDropdown')
-  //     .click({force: true});
+    cy.get('@closeShowHideDropdown')
+      .click({force: true});
 
-  //   cy.get('thead.table-header')
-  //     .find('#w_gvo')
-  //     .should('exist');
-  // });
+    cy.get('thead.table-header')
+      .find('#w_gvo')
+      .should('exist');
+  });
 
   it('Check \'More Options\' button functionality', () => {
     // Wait for the table to load
@@ -356,7 +357,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check invalid parent tree number error msg
     cy.get('#0-parentTreeNumber-value-input')
-      .type('5')
+      .type('5', { delay: TYPE_DELAY })
       .blur();
 
     cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
@@ -368,7 +369,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Check invalid parent tree number error msg removal
     cy.get('#0-parentTreeNumber-value-input')
       .clear()
-      .type('212')
+      .type('212', { delay: TYPE_DELAY })
       .blur();
 
     cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
@@ -376,7 +377,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check invalid parent tree number error msg for duplicate parent tree numbers
     cy.get('#1-parentTreeNumber-value-input')
-      .type('212')
+      .type('212', { delay: TYPE_DELAY })
       .blur();
 
     cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
@@ -384,12 +385,12 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     cy.get('#1-parentTreeNumber-value-input')
       .clear()
-      .type('222')
+      .type('222', { delay: TYPE_DELAY })
       .blur();
 
     // Check Volume error msg for negative value
     cy.get('#0-volume-value-input')
-      .type('-1')
+      .type('-1', { delay: TYPE_DELAY })
       .blur();
 
     cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
@@ -401,7 +402,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Check Volume error msg for decimal value
     cy.get('#0-volume-value-input')
       .clear()
-      .type('2.8')
+      .type('2.8', { delay: TYPE_DELAY })
       .blur();
 
     cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
@@ -413,7 +414,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Check Volume error msg for value > 999999
     cy.get('#0-volume-value-input')
       .clear()
-      .type('1000000')
+      .type('1000000', { delay: TYPE_DELAY })
       .blur();
 
     cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
@@ -425,7 +426,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Check Volume error msg removal
     cy.get('#0-volume-value-input')
       .clear()
-      .type('0')
+      .type('0', { delay: TYPE_DELAY })
       .blur();
 
     cy.get(`.${prefix}--actionable-notification[role="alertdialog"]`)
@@ -441,7 +442,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     cy.get('#0-volume-value-input')
       .clear()
-      .type('1')
+      .type('1', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('.parent-tree-step-table-container')
@@ -455,7 +456,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     cy.get('#1-volume-value-input')
       .clear()
-      .type('1')
+      .type('1', { delay: TYPE_DELAY })
       .blur();
 
     // Check proportion value after two Volume inputs
@@ -468,13 +469,13 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Enter 3rd parent tree number
     cy.get('#2-parentTreeNumber-value-input')
       .clear()
-      .type('238')
+      .type('238', { delay: TYPE_DELAY })
       .blur();
 
     // Check proportion value after three unequal Volume inputs
     cy.get('#2-volume-value-input')
       .clear()
-      .type('2')
+      .type('2', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('@waitClick')
