@@ -45,7 +45,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
   it('Check \'Add a new row\' button functionality', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber');
+    cy.get('#parentTreeNumber', { timeout: 8000 });
 
     cy.get(`.${prefix}--pagination__items-count`)
       .should('include.text', '20 items');
@@ -79,7 +79,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
   it('Check \'Show/hide columns\' button functionality', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber');
+    cy.get('#parentTreeNumber', { timeout: 8000 });
 
     // Click 'Dothistroma needle blight (DFS)' checkbox
     cy.get(`.${prefix}--toolbar-content > span`)
@@ -217,7 +217,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
   it('Check \'More Options\' button functionality', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber');
+    cy.get('#parentTreeNumber', { timeout: 8000 });
 
     // Check Download file option
     cy.get(`.${prefix}--toolbar-content > span`)
@@ -337,7 +337,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
   it('Check invalid Parent tree numbers and Volume', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber');
+    cy.get('#parentTreeNumber', { timeout: 8000 });
 
     // Click 'Clean table data' option
     cy.get(`.${prefix}--toolbar-content > span`)
@@ -438,7 +438,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
   it('Check Proportion value', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber');
+    cy.get('#parentTreeNumber', { timeout: 8000 });
 
     cy.get('#0-volume-value-input')
       .clear()
@@ -496,7 +496,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
   it('Calculate Metrics button', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber');
+    cy.get('#parentTreeNumber', { timeout: 8000 });
 
     // Click 'Calculate metrics' button
     cy.get('.gen-worth-cal-row')
