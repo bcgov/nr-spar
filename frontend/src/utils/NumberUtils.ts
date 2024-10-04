@@ -7,3 +7,5 @@ export const isFloatWithinRange = (value: string, min: string, max: string): boo
   new BigNumber(value).isGreaterThanOrEqualTo(min)
   && new BigNumber(value).isLessThanOrEqualTo(max)
 );
+
+export const isNumeric = (value: string) => value.replace(/[0-9]/g, '').length === 0;

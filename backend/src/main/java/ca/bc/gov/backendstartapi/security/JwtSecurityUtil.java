@@ -43,21 +43,28 @@ public final class JwtSecurityUtil {
    */
   public static List<String> getClientIdsFromJwt(Jwt jwtPrincipal) {
     List<String> clientIds = new ArrayList<>();
-    getRolesWithClientIds(jwtPrincipal)
-        .forEach(
-            role -> {
-              if (role.length() >= 9) {
-                String clientNumber = role.substring(role.length() - 8);
-                if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
-                  clientIds.add(clientNumber);
-                }
-              }
-              // Handling concrete roles with no client id affixed
-              if (concreteRoles.contains(role)
-                  && !clientIds.contains(Constants.MINITRY_OF_FORESTS_ID)) {
-                clientIds.add(Constants.MINITRY_OF_FORESTS_ID);
-              }
-            });
+    boolean foundRole = false;
+
+    List<String> rolesAndClientIds = getRolesWithClientIds(jwtPrincipal);
+    for (String role : rolesAndClientIds) {
+      if (role.length() >= 9) {
+        String clientNumber = role.substring(role.length() - 8);
+        if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
+          clientIds.add(clientNumber);
+        }
+      }
+
+      if (concreteRoles.contains(role)) {
+        foundRole = true;
+      }
+    }
+
+    // If has role SPAR_MINISTRY_ORCHARD or SPAR_TSC_ADMIN and has no client id
+    // then add MOF client id
+    if (foundRole && !clientIds.contains(Constants.MINISTRY_OF_FORESTS_ID)) {
+      clientIds.add(Constants.MINISTRY_OF_FORESTS_ID);
+    }
+
     return clientIds;
   }
 
