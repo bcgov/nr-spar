@@ -92,9 +92,9 @@ const App: React.FC = () => {
     selectedRoutes.push(...sharedRoutes);
     // Add a wildcard route to catch undefined routes and show the 404 page
     selectedRoutes.push({
-      path: '*',  // This wildcard matches any undefined route
-      element: <FourOhFour />  // Render the 404 component
-  });
+      path: '*',
+      element: <FourOhFour />
+    });
     return createBrowserRouter(selectedRoutes);
   };
 
@@ -105,9 +105,9 @@ const App: React.FC = () => {
   };
 
   // Programmatic redirection to 404
-  const handleRedirectTo404 = () => {
-    browserRouter.navigate('/404');
-  };
+  // const handleRedirectTo404 = () => {
+  //   browserRouter.navigate('/404');
+  // };
 
   return (
     <ClassPrefix prefix={prefix}>
