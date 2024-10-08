@@ -1,26 +1,19 @@
-import React, {
-  useContext,
-  useEffect,
-  useState
-} from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
-  TextInput,
-  Button,
   Row,
   Column,
   Breadcrumb,
   BreadcrumbItem,
   FlexGrid
 } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import PageTitle from '../../../components/PageTitle';
 import AuthContext from '../../../contexts/AuthContext';
 import SeedlotTable from '../../../components/SeedlotTable';
+import SeedlotNavigator from '../../../components/SeedlotNavigator';
+
 import ROUTES from '../../../routes/constants';
-import { addParamToPath } from '../../../utils/PathUtils';
-import focusById from '../../../utils/FocusUtils';
 
 import './styles.scss';
 
@@ -28,9 +21,6 @@ const ReviewSeedlots = () => {
   const navigate = useNavigate();
   const { user, isTscAdmin } = useContext(AuthContext);
   const userId = user?.userId ?? '';
-
-  const [seedlotNumber, setSeedlotNumber] = useState<string>('');
-  const [seedlotInputErr, setSeedlotInputErr] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isTscAdmin) {
@@ -42,7 +32,9 @@ const ReviewSeedlots = () => {
     <FlexGrid fullWidth className="review-seedlots-content">
       <Row className="review-seedlots-breadcrumb">
         <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate(ROUTES.SEEDLOTS)}>Seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate(ROUTES.SEEDLOTS)}>
+            Seedlots
+          </BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Row className="review-seedlots-title">
@@ -55,39 +47,7 @@ const ReviewSeedlots = () => {
         </Column>
       </Row>
       <Row className="go-to-seedlot-section">
-        <Column className="no-padding-col" sm={4} md={6} lg={14} xlg={14}>
-          <TextInput
-            id="go-to-seedlot-input"
-            type="number"
-            labelText=""
-            placeholder="Enter seedlot number"
-            value={seedlotNumber}
-            invalid={seedlotInputErr}
-            invalidText="Please, enter a seedlot number"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setSeedlotInputErr(false);
-              setSeedlotNumber(e.target.value);
-            }}
-            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-          />
-        </Column>
-        <Column sm={4} md={2} lg={2} xlg={2}>
-          <Button
-            kind="primary"
-            size="md"
-            renderIcon={ArrowRight}
-            onClick={() => {
-              if (seedlotNumber) {
-                navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber));
-              } else {
-                setSeedlotInputErr(true);
-                focusById('go-to-seedlot-input');
-              }
-            }}
-          >
-            Go to seedlot
-          </Button>
-        </Column>
+        <SeedlotNavigator />
       </Row>
       <div className="review-seedlots-table-wrapper">
         <Row className="review-seedlots-data-table-row">

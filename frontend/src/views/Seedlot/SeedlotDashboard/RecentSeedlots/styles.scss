@@ -38,4 +38,9 @@
     background-color: var(--#{vars.$bcgov-prefix}-layer-hover-01);
     cursor: pointer;
   }
+
+  .recent-seedlots-navigator {
+    justify-content: space-around;
+    margin-bottom: 1rem;
+  }
 }

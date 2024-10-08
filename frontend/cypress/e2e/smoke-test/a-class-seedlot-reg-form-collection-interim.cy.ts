@@ -183,6 +183,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
         cy.get('#collection-location-code')
           .should('have.value', locationCode);
+
+        // Save changes
+        cy.saveSeedlotRegFormProgress();
       });
 
     // Enter location code for linkage test
@@ -306,6 +309,12 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
   });
 
   it('[Collection] Checkbox input', () => {
+    // Change inputs
+    cy.get('#collection-step-default-checkbox')
+      .focus()
+      .check({ force: true })
+      .blur();
+
     cy.get('#cone-collection-method-checkbox-1')
       .focus()
       .check({ force: true })
@@ -315,6 +324,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .clear()
       .type('Test comment')
       .blur();
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
 
     // Press next button
     cy.get('.seedlot-registration-button-row')
@@ -350,7 +362,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .should('have.value', testPopupAcronym);
 
     cy.get('#interim-location-code')
-      .should('have.value', '03');
+      .should('have.value', '01');
 
     cy.get('#interim-use-collection-agency')
       .should('be.checked');
@@ -450,6 +462,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
         cy.get('#interim-location-code')
           .should('have.value', locationCode);
+
+        // Save changes
+        cy.saveSeedlotRegFormProgress();
       });
   });
 

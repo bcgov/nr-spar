@@ -12,6 +12,7 @@ public record SeedlotFormSubmissionDto(
     SeedlotFormOrchardDto seedlotFormOrchardDto,
     List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
     List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeSmpDtoList,
+    SeedlotFormSmpParentOutsideDto seedlotFormSmpParentOutsideDto,
     SeedlotFormExtractionDto seedlotFormExtractionDto,
     List<SeedlotReviewSeedPlanZoneDto> seedlotReviewSeedPlanZones,
     SeedlotReviewElevationLatLongDto seedlotReviewElevationLatLong,
