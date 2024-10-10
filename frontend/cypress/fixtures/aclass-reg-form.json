@@ -84,6 +84,8 @@
   "submission": {
     "title": "Declaration",
     "subtitle": "Read and accept the declaration to complete the seedlot registration",
-    "checkboxText": "I hereby declare that the information provided in this application is true and correct, and that I am the owner of the seedlot or have been authorized by the owner(s) of the seedlot to submit this application."
+    "checkboxText": "I hereby declare that the information provided in this application is true and correct, and that I am the owner of the seedlot or have been authorized by the owner(s) of the seedlot to submit this application.",
+    "successTitle": "Submitted:",
+    "successSubtitle": "Your seedlot registration was submitted with success and is now under review by the TSC"
   }
 }
