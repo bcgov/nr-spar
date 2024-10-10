@@ -102,4 +102,30 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Save changes
     cy.saveSeedlotRegFormProgress();
   });
+
+  it('Check Submit process', () => {
+    const submissionUrl = `/seedlots/details/${seedlotNum}?isSubmitSuccess=true`;
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .find(`button.${prefix}--btn--primary`)
+      .contains('Submit seedlot')
+      .click();
+
+    cy.url().should('contains', submissionUrl);
+
+    cy.get('.seedlot-submitted-notification')
+      .should('be.visible');
+
+    cy.get('.seedlot-submitted-notification')
+      .find(`.${prefix}--inline-notification__title`)
+      .should('have.text', regFormData.submission.successTitle);
+
+    cy.get('.seedlot-submitted-notification')
+      .find(`.${prefix}--inline-notification__subtitle`)
+      .should('have.text', regFormData.submission.successSubtitle);
+
+    cy.contains('p.seedlot-summary-info-label', 'Status')
+      .next()
+      .children('span')
+      .should('have.text', 'Submitted');
+  });
 });
