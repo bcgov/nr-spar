@@ -29,10 +29,29 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=6`;
         cy.visit(url);
         cy.url().should('contains', url);
+
+        // Press submission button
+        cy.get('.seedlot-registration-button-row')
+          .find('button.form-action-btn')
+          .contains('Submit Registration')
+          .click();
       });
     });
   });
 
   it('Popup title and subtitles', () => {
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('be.visible');
+
+    cy.get(`h3.${prefix}--modal-header__heading`)
+      .should('have.text', regFormData.submission.title);
+
+    cy.get(`.${prefix}--modal-content`)
+      .find('p')
+      .should('have.text', regFormData.submission.subtitle);
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .find(`span.${prefix}--checkbox-label-text`)
+      .should('have.text', regFormData.submission.checkboxText);
   });
 });
