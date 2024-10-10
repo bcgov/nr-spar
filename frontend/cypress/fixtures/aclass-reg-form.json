@@ -80,5 +80,10 @@
     "parentTreeVolumeErrorMsg": "Invalid SMP success on parent (%) and non-orchard pollen contam. (%) entries",
     "calculationTitle": "Calculation of SMP mix",
     "calculationSubtitle": "Enter the estimative volume of SMP mix used for each clone"
+  },
+  "submission": {
+    "title": "Declaration",
+    "subtitle": "Read and accept the declaration to complete the seedlot registration",
+    "checkboxText": "I hereby declare that the information provided in this application is true and correct, and that I am the owner of the seedlot or have been authorized by the owner(s) of the seedlot to submit this application."
   }
 }
