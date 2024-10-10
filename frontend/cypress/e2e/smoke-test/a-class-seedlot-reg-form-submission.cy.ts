@@ -8,6 +8,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       title: string;
       subtitle: string;
       checkboxText: string;
+      successTitle: string;
+      successSubtitle: string;
     }
   };
 
@@ -53,5 +55,14 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .find(`span.${prefix}--checkbox-label-text`)
       .should('have.text', regFormData.submission.checkboxText);
+  });
+
+  it('Redirect to first step', () => {
+    const redirectUrl = `/seedlots/a-class-registration/${seedlotNum}/?step=1`;
+    cy.get(`a.${prefix}--link`)
+      .contains('Click here to go back to the first step.')
+      .click();
+
+    cy.url().should('contains', redirectUrl);
   });
 });
