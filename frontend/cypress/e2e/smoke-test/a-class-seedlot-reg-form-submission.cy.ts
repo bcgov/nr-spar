@@ -65,4 +65,41 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     cy.url().should('contains', redirectUrl);
   });
+
+  it('Check buttons', () => {
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .find(`button.${prefix}--btn--secondary`)
+      .contains('Cancel')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('not.be.visible');
+
+    // Press submission button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Submit Registration')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('be.visible');
+
+    cy.get('#declaration-modal-checkbox')
+      .should('not.be.checked');
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .find(`button.${prefix}--btn--primary`)
+      .contains('Submit seedlot')
+      .as('submitButton')
+      .should('be.disabled');
+
+    cy.get('#declaration-modal-checkbox')
+      .check({ force: true });
+
+    cy.get('@submitButton')
+      .should('not.be.disabled');
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+  });
 });
