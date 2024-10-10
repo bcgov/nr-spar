@@ -35,7 +35,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Check primary and secondary orchard values', () => {
-    // Press next button
+    // Press back button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
       .contains('Back')
