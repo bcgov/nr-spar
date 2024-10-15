@@ -26,7 +26,7 @@ import './styles.scss';
 const ClientAndCodeInput = ({
   checkboxId, clientInput, locationCodeInput, textConfig, defaultClientNumber,
   defaultLocCode, setClientAndCode, readOnly, showCheckbox, maxInputColSize,
-  checkBoxInput
+  checkBoxInput, shouldSelectDefaultValue = false
 }: ClientAndCodeInputProps) => {
   const getIsDefaultVal = () => (
     checkBoxInput === undefined
@@ -331,6 +331,11 @@ const ClientAndCodeInput = ({
     }
   };
 
+  let isChecked = checkBoxInput ? checkBoxInput.value : isDefault;
+  if (!shouldSelectDefaultValue) {
+    isChecked = false;
+  }
+
   return (
     <FlexGrid className="agency-information-section">
       {
@@ -343,7 +348,7 @@ const ClientAndCodeInput = ({
                   name={textConfig.useDefaultCheckbox.name}
                   labelText={textConfig.useDefaultCheckbox.labelText}
                   readOnly={readOnly}
-                  checked={checkBoxInput ? checkBoxInput.value : isDefault}
+                  checked={isChecked}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleDefaultCheckBox(e.target.checked);
                   }}
@@ -363,7 +368,7 @@ const ClientAndCodeInput = ({
               id={clientInput.id}
               autoCapitalize="on"
               labelText={textConfig.agencyInput.titleText}
-              defaultValue={forestClientQuery.data?.acronym}
+              defaultValue={shouldSelectDefaultValue ? forestClientQuery.data?.acronym : ''}
               helperText={
                 (readOnly || (showCheckbox && isDefault))
                   ? null
@@ -406,7 +411,7 @@ const ClientAndCodeInput = ({
               id={locationCodeInput.id}
               ref={locCodeInputRef}
               name={textConfig.locationCode.name}
-              defaultValue={locationCodeInput.value}
+              defaultValue={shouldSelectDefaultValue ? locationCodeInput.value : ''}
               type="number"
               maxCount={LOCATION_CODE_LIMIT}
               enableCounter
