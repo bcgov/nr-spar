@@ -34,7 +34,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
         // Press submission button
         cy.get('.seedlot-registration-button-row')
-          .find('button.form-action-btn')
+          .find('button.submit-modal-btn')
           .contains('Submit Registration')
           .click();
       });
@@ -70,6 +70,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .find(`button.${prefix}--btn--secondary`)
       .contains('Cancel')
+      .as('cancelButton')
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
@@ -77,7 +78,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Press submission button
     cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
+      .find('button.submit-modal-btn')
       .contains('Submit Registration')
       .click();
 
@@ -99,12 +100,19 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get('@submitButton')
       .should('not.be.disabled');
 
+    cy.get('@cancelButton')
+      .click();
+
     // Save changes
     cy.saveSeedlotRegFormProgress();
   });
 
   it('Check Submit process', () => {
     const submissionUrl = `/seedlots/details/${seedlotNum}?isSubmitSuccess=true`;
+
+    cy.get('#declaration-modal-checkbox')
+      .check({ force: true });
+
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .find(`button.${prefix}--btn--primary`)
       .contains('Submit seedlot')
