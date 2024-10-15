@@ -29,7 +29,9 @@ export default defineConfig({
       '**/a-class-seedlot-reg-form-ownership.cy.ts',
       '**/a-class-seedlot-reg-form-orchard.cy.ts',
       '**/a-class-seedlot-reg-form-extraction.cy.ts',
-      '**/a-class-seedlot-reg-form-parent-tree-part-1.cy.ts'
+      '**/a-class-seedlot-reg-form-parent-tree-part-1.cy.ts',
+      '**/a-class-seedlot-reg-form-parent-tree-part-2.cy.ts',
+      '**/a-class-seedlot-reg-form-parent-tree-part-3.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {

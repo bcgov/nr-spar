@@ -93,7 +93,7 @@ public class ParentTreeService {
         parentPropOrchPoll = zero;
       } else {
         parentPropOrchPoll =
-            parentTreeRow.coneCount().divide(totalPollenCount, DIVISION_SCALE, halfUp);
+            parentTreeRow.pollenCount().divide(totalPollenCount, DIVISION_SCALE, halfUp);
       }
 
       // --col:X
@@ -203,7 +203,12 @@ public class ParentTreeService {
     Integer totalNonOrchardPollen = 0;
     Integer numNonOrchardPollen = 0;
 
-    SparLog.debug("ptVals.contaminantPollenBv(): {}", ptVals.contaminantPollenBv());
+    double contaminantPollenBvDouble = 0;
+    if (ValueUtil.hasValue(ptVals.contaminantPollenBv())) {
+      contaminantPollenBvDouble = ptVals.contaminantPollenBv().doubleValue();
+    }
+
+    SparLog.debug("contaminantPollenBvDouble: {}", contaminantPollenBvDouble);
 
     // --Third pass to calc values that depend on totals derived above and the remainder
     for (OrchardParentTreeValsDto parentTreeRow : ptVals.orchardPtVals()) {
@@ -257,7 +262,7 @@ public class ParentTreeService {
 
         // --col:AA
         double vmContamContrib =
-            (auxValueAa * ptVals.contaminantPollenBv().doubleValue()) * femaleCropPop.doubleValue();
+            (auxValueAa * contaminantPollenBvDouble) * femaleCropPop.doubleValue();
 
         // --col:AB (depends on SUM(X)=v_sum_m_gw_contrib_orch_poll)
         double auxValueAb =

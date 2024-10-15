@@ -36,7 +36,7 @@ jobs:
       fam-modded-zone: ${{ steps.fam-modded-zone.outputs.fam-modded-zone }}
       deploy_core: ${{ steps.triggers.outputs.core }}
       deploy_sync: ${{ steps.triggers.outputs.sync }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       # Check triggers (omitted or matched)
       - name: Check core triggers
@@ -70,7 +70,7 @@ jobs:
 
       - name: OpenShift Init
         if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
-        uses: bcgov-nr/action-deployer-openshift@v3.0.0
+        uses: bcgov-nr/action-deployer-openshift@v3.0.1
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -92,7 +92,7 @@ jobs:
 
       - name: Database
         if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
-        uses: bcgov-nr/action-deployer-openshift@v3.0.0
+        uses: bcgov-nr/action-deployer-openshift@v3.0.1
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -110,28 +110,30 @@ jobs:
     environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_core == 'true'
     needs: [init]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     strategy:
       matrix:
-        name: [backend, frontend, oracle-api]
+        name: [backend, backup, frontend, oracle-api]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
-            overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             verification_path: "health"
+          - name: backup
+            file: common/openshift.backup.yml
+            parameters:
+              -p PG_DB_IMAGE=postgis/postgis:15-master
+            post_rollout: oc create job --from=cronjob/${{ github.event.repository.name }}-${{ inputs.target }}-database-backup ${{ github.event.repository.name }}-${{ inputs.target }}-database-backup-$(date +%Y%m%d%H%M%S)
           - name: frontend
             file: frontend/openshift.deploy.yml
-            overwrite: true
             parameters:
               -p FAM_MODDED_ZONE=${{ needs.init.outputs.fam-modded-zone }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
-            overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               ${{ github.event_name == 'pull_request' && '-p CPU_LIMIT=100m' || '' }}
@@ -140,20 +142,21 @@ jobs:
             verification_path: "actuator/health"
 
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v3.0.0
+      - uses: bcgov-nr/action-deployer-openshift@v3.0.1
         id: deploys
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
+          overwrite: true
           parameters:
             -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
             ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=1' || '' }}
             ${{ matrix.parameters }}
+          post_rollout: ${{ matrix.post_rollout || '' }}
           verification_path: ${{ matrix.verification_path }}
           verification_retry_attempts: 5
           verification_retry_seconds: 20
@@ -167,7 +170,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy (sync)
-        uses: bcgov-nr/action-deployer-openshift@v3.0.0
+        uses: bcgov-nr/action-deployer-openshift@v3.0.1
         with:
           file: sync/openshift.deploy.yml
           oc_namespace: ${{ vars.OC_NAMESPACE }}
