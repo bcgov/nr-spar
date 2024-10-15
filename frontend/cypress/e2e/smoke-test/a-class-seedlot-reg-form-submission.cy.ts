@@ -44,11 +44,13 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .should('be.visible');
 
-    cy.get(`h3.${prefix}--modal-header__heading`)
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .find(`h3.${prefix}--modal-header__heading`)
       .should('have.text', regFormData.submission.title);
 
-    cy.get(`.${prefix}--modal-content`)
-      .find('p')
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .find(`.${prefix}--modal-content`)
+      .children('p')
       .should('have.text', regFormData.submission.subtitle);
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
