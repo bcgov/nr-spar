@@ -1,5 +1,4 @@
 import prefix from '../../../src/styles/classPrefix';
-import { TYPE_DELAY } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculation of SMP mix)', () => {
@@ -85,6 +84,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .should('be.visible');
 
+    // Check default checkbox behaviour
     cy.get('#declaration-modal-checkbox')
       .should('not.be.checked');
 
@@ -94,6 +94,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .as('submitButton')
       .should('be.disabled');
 
+    // Check the checkbox
     cy.get('#declaration-modal-checkbox')
       .check({ force: true });
 
@@ -110,9 +111,11 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
   it('Check Submit process', () => {
     const submissionUrl = `/seedlots/details/${seedlotNum}?isSubmitSuccess=true`;
 
+    // Check the checkbox
     cy.get('#declaration-modal-checkbox')
       .check({ force: true });
 
+    // Click submit seedlot button
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .find(`button.${prefix}--btn--primary`)
       .contains('Submit seedlot')
