@@ -207,9 +207,9 @@ export type CollectionFormSubmitType = {
   collectionLocnCode: string,
   collectionStartDate: string,
   collectionEndDate: string,
-  noOfContainers: number,
-  volPerContainer: number,
-  clctnVolume: number,
+  noOfContainers: string,
+  volPerContainer: string,
+  clctnVolume: string,
   seedlotComment: string,
   coneCollectionMethodCodes: Array<number>
 }
