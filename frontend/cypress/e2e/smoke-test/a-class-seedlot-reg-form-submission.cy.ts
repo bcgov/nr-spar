@@ -15,6 +15,9 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
   let seedlotNum: string;
   const speciesKey = 'pli';
   let seedlotData: SeedlotRegFixtureType;
+  const fundingSource = 'FTM - Forests for Tomorrow MOF Admin';
+  const F2GameticValue = 'F2 - Measured Cone Volume';
+  const M3GameticValue = 'M3 - Pollen Volume Estimate by 100% Survey';
 
   beforeEach(() => {
     // Login
@@ -32,6 +35,176 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
         cy.url().should('contains', url);
       });
     });
+  });
+
+  it('Check step completion', () => {
+    // Step 1 check
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Collection')
+      .then($element => {
+        if ($element.length > 0) {
+          cy.log('Step 1 complete');
+        } else {
+          const url = `/seedlots/a-class-registration/${seedlotNum}/?step=1`;
+          cy.log('Step 1 incomplete');
+          cy.visit(url);
+
+          // Enter Collection start date
+          cy.get('#collection-start-date')
+            .clear()
+            .type('2024-05-11')
+            .blur();
+
+          // Enter Collection end date
+          cy.get('#collection-end-date')
+            .clear()
+            .type('2024-05-21')
+            .blur();
+
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
+        }
+      });
+
+    // Step 2 check
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Ownership')
+      .then($element => {
+        if ($element.length > 0) {
+          cy.log('Step 2 complete');
+        } else {
+          const url = `/seedlots/a-class-registration/${seedlotNum}/?step=2`;
+          cy.log('Step 2 incomplete');
+          cy.visit(url);
+
+          // Expand the funding source combo box
+          cy.get('#ownership-funding-source-0')
+            .should('have.value', '')
+            .click();
+
+          cy.get(`.${prefix}--list-box__menu-item__option`)
+            .contains(fundingSource)
+            .scrollIntoView()
+            .click();
+
+          cy.get('#ownership-funding-source-0')
+            .should('have.value', fundingSource);
+
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
+        }
+      });
+
+    // Step 3 check
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Interim storage')
+      .then($element => {
+        if ($element.length > 0) {
+          cy.log('Step 3 complete');
+        } else {
+          const url = `/seedlots/a-class-registration/${seedlotNum}/?step=3`;
+          cy.log('Step 3 incomplete');
+          cy.visit(url);
+
+          // Enter Interim start date
+          cy.get('#start-date-input')
+            .clear()
+            .type('2024-05-11')
+            .blur();
+
+          // Enter Interim end date
+          cy.get('#end-date-input')
+            .clear()
+            .type('2024-05-21')
+            .blur();
+
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
+        }
+      });
+
+    // Step 4 check
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Orchard')
+      .then($element => {
+        if ($element.length > 0) {
+          cy.log('Step 4 complete');
+        } else {
+          const url = `/seedlots/a-class-registration/${seedlotNum}/?step=4`;
+          cy.log('Step 4 incomplete');
+          cy.visit(url);
+
+          // Select primary orchard
+          cy.get('#primary-orchard-selection')
+            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+            .click();
+  
+          cy.get(`.${prefix}--list-box--expanded`)
+            .find('ul li')
+            .contains('219 - VERNON - S - PRD')
+            .click();
+
+          // Select female gametic contribution methodology
+          cy.get('#orchard-female-gametic')
+            .siblings()
+            .click();
+
+          cy.get(`.${prefix}--list-box--expanded`)
+            .find('ul li')
+            .contains(F2GameticValue)
+            .click();
+
+          cy.get('#orchard-female-gametic')
+            .should('have.value', F2GameticValue);
+
+          // Select male gametic contribution methodology
+          cy.get('#orchard-male-gametic')
+            .siblings()
+            .click();
+
+          cy.get(`.${prefix}--list-box--expanded`)
+            .find('ul li')
+            .contains(M3GameticValue)
+            .click();
+
+          cy.get('#orchard-male-gametic')
+            .should('have.value', M3GameticValue);
+
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
+        }
+      });
+
+      // Step 5 check
+      cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Orchard')
+      .then($element => {
+        if ($element.length > 0) {
+          cy.log('Step 5 complete');
+        } else {
+          const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
+          cy.log('Step 5 incomplete');
+          cy.visit(url);
+
+          // Wait for the table to load
+          cy.get('#parentTreeNumber', { timeout: 10000 });
+
+          // Enter cone count
+          cy.get('#223-coneCount-value-input')
+            .clear()
+            .type('1')
+            .blur();
+
+          // Enter pollen count
+          cy.get('#223-pollenCount-value-input')
+            .clear()
+            .type('1')
+            .blur();
+
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
+        }
+      });
   });
 
   it('Popup title and subtitles', () => {
