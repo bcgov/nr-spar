@@ -39,12 +39,12 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
   it('Check step completion', () => {
     // Step 1 check
-    cy.get(`.${prefix}--progress-step--complete`)
-      .contains('Collection')
+    cy.get('ul.spar-seedlot-reg-progress-bar > li')
+      .eq(0)
+      .find(`.${prefix}--assistive-text`)
       .then($element => {
-        if ($element.length > 0) {
-          cy.log('Step 1 complete');
-        } else {
+        const elementText = $element.text();
+        if (elementText === 'Incomplete') {
           const url = `/seedlots/a-class-registration/${seedlotNum}/?step=1`;
           cy.log('Step 1 incomplete');
           cy.visit(url);
@@ -63,16 +63,18 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
           // Save changes
           cy.saveSeedlotRegFormProgress();
+        } else {
+          cy.log('Step 1 complete');
         }
       });
 
     // Step 2 check
-    cy.get(`.${prefix}--progress-step--complete`)
-      .contains('Ownership')
+    cy.get('ul.spar-seedlot-reg-progress-bar > li')
+      .eq(1)
+      .find(`.${prefix}--assistive-text`)
       .then($element => {
-        if ($element.length > 0) {
-          cy.log('Step 2 complete');
-        } else {
+        const elementText = $element.text();
+        if (elementText === 'Incomplete') {
           const url = `/seedlots/a-class-registration/${seedlotNum}/?step=2`;
           cy.log('Step 2 incomplete');
           cy.visit(url);
@@ -92,16 +94,18 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
           // Save changes
           cy.saveSeedlotRegFormProgress();
+        } else {
+          cy.log('Step 2 complete');
         }
       });
 
     // Step 3 check
-    cy.get(`.${prefix}--progress-step--complete`)
-      .contains('Interim storage')
+    cy.get('ul.spar-seedlot-reg-progress-bar > li')
+      .eq(3)
+      .find(`.${prefix}--assistive-text`)
       .then($element => {
-        if ($element.length > 0) {
-          cy.log('Step 3 complete');
-        } else {
+        const elementText = $element.text();
+        if (elementText === 'Incomplete') {
           const url = `/seedlots/a-class-registration/${seedlotNum}/?step=3`;
           cy.log('Step 3 incomplete');
           cy.visit(url);
@@ -120,16 +124,18 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
           // Save changes
           cy.saveSeedlotRegFormProgress();
+        } else {
+          cy.log('Step 3 complete');
         }
       });
 
     // Step 4 check
-    cy.get(`.${prefix}--progress-step--complete`)
-      .contains('Orchard')
+    cy.get('ul.spar-seedlot-reg-progress-bar > li')
+      .eq(4)
+      .find(`.${prefix}--assistive-text`)
       .then($element => {
-        if ($element.length > 0) {
-          cy.log('Step 4 complete');
-        } else {
+        const elementText = $element.text();
+        if (elementText === 'Incomplete') {
           const url = `/seedlots/a-class-registration/${seedlotNum}/?step=4`;
           cy.log('Step 4 incomplete');
           cy.visit(url);
@@ -172,39 +178,43 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
           // Save changes
           cy.saveSeedlotRegFormProgress();
-        }
-      });
-
-      // Step 5 check
-      cy.get(`.${prefix}--progress-step--complete`)
-      .contains('Orchard')
-      .then($element => {
-        if ($element.length > 0) {
-          cy.log('Step 5 complete');
         } else {
-          const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
-          cy.log('Step 5 incomplete');
-          cy.visit(url);
-
-          // Wait for the table to load
-          cy.get('#parentTreeNumber', { timeout: 10000 });
-
-          // Enter cone count
-          cy.get('#223-coneCount-value-input')
-            .clear()
-            .type('1')
-            .blur();
-
-          // Enter pollen count
-          cy.get('#223-pollenCount-value-input')
-            .clear()
-            .type('1')
-            .blur();
-
-          // Save changes
-          cy.saveSeedlotRegFormProgress();
+          cy.log('Step 4 complete');
         }
       });
+
+    // Step 5 check
+    cy.get('ul.spar-seedlot-reg-progress-bar > li')
+      .eq(5)
+      .find(`.${prefix}--assistive-text`)
+      .then($element => {
+      const elementText = $element.text();
+      if (elementText === 'Incomplete') {
+        const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
+        cy.log('Step 5 incomplete');
+        cy.visit(url);
+
+        // Wait for the table to load
+        cy.get('#parentTreeNumber', { timeout: 10000 });
+
+        // Enter cone count
+        cy.get('#223-coneCount-value-input')
+          .clear()
+          .type('1')
+          .blur();
+
+        // Enter pollen count
+        cy.get('#223-pollenCount-value-input')
+          .clear()
+          .type('1')
+          .blur();
+
+        // Save changes
+        cy.saveSeedlotRegFormProgress();
+      } else {
+        cy.log('Step 5 complete');
+      }
+    });
   });
 
   it('Popup title and subtitles', () => {
