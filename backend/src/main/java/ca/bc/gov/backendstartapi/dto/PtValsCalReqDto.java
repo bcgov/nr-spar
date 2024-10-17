@@ -13,4 +13,4 @@ public record PtValsCalReqDto(
     @NotNull List<OrchardParentTreeValsDto> orchardPtVals,
     @NotNull List<GeospatialRequestDto> smpMixIdAndProps,
     @NotNull Integer smpParentsOutside,
-    @NotNull BigDecimal contaminantPollenBv) {}
+    BigDecimal contaminantPollenBv) {}
