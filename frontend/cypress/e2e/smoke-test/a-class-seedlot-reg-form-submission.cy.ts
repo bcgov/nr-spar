@@ -30,17 +30,17 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=6`;
         cy.visit(url);
         cy.url().should('contains', url);
-
-        // Press submission button
-        cy.get('.seedlot-registration-button-row')
-          .find('button.submit-modal-btn')
-          .contains('Submit Registration')
-          .click();
       });
     });
   });
 
   it('Popup title and subtitles', () => {
+    // Press submission button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.submit-modal-btn')
+      .contains('Submit Registration')
+      .click();
+
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .should('be.visible');
 
@@ -59,6 +59,12 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
   });
 
   it('Redirect to first step', () => {
+    // Press submission button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.submit-modal-btn')
+      .contains('Submit Registration')
+      .click();
+
     const redirectUrl = `/seedlots/a-class-registration/${seedlotNum}/?step=1`;
     cy.get(`a.${prefix}--link`)
       .contains('Click here to go back to the first step.')
@@ -68,6 +74,12 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
   });
 
   it('Check buttons', () => {
+    // Press submission button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.submit-modal-btn')
+      .contains('Submit Registration')
+      .click();
+
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .find(`button.${prefix}--btn--secondary`)
       .contains('Cancel')
@@ -112,6 +124,12 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
   it('Check Submit process', () => {
     const submissionUrl = `/seedlots/details/${seedlotNum}?isSubmitSuccess=true`;
+
+    // Press submission button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.submit-modal-btn')
+      .contains('Submit Registration')
+      .click();
 
     // Check the checkbox
     cy.get('#declaration-modal-checkbox')
