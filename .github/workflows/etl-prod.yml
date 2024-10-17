@@ -1,0 +1,22 @@
+name: ETL PROD
+
+on:
+  schedule: [cron: "30 */2 * * *"] # Every other hour on the hour
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  etl-prod:
+    environment: prod
+    name: ETL (PROD)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: "4"
+      - name: Run ./sync/oc_run.sh
+        run: ./sync/oc_run.sh prod ${{ secrets.oc_token }}
