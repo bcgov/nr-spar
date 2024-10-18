@@ -49,6 +49,17 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
           cy.log('Step 1 incomplete');
           cy.visit(url);
 
+          // Check the checkbox if unchecked
+          cy.get('#collection-step-default-checkbox')
+            .then($checkbox => {
+              if ($checkbox.is(':not(:checked)')) {
+                cy.get('#collection-step-default-checkbox').check({ force: true });
+                // Save changes
+                cy.saveSeedlotRegFormProgress();
+              }
+            })
+            .should("be.checked");
+
           // Enter Collection start date
           cy.get('#collection-start-date')
             .clear()
@@ -79,6 +90,17 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
           cy.log('Step 2 incomplete');
           cy.visit(url);
 
+          // Check the checkbox if unchecked
+          cy.get('#default-owner-checkbox')
+            .then($checkbox => {
+              if ($checkbox.is(':not(:checked)')) {
+                cy.get('#default-owner-checkbox').check({ force: true });
+                // Save changes
+                cy.saveSeedlotRegFormProgress();
+              }
+            })
+            .should("be.checked");
+
           // Expand the funding source combo box
           cy.get('#ownership-funding-source-0')
             .should('have.value', '')
@@ -101,7 +123,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Step 3 check
     cy.get('ul.spar-seedlot-reg-progress-bar > li')
-      .eq(3)
+      .eq(2)
       .find(`.${prefix}--assistive-text`)
       .then($element => {
         const elementText = $element.text();
@@ -109,6 +131,17 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
           const url = `/seedlots/a-class-registration/${seedlotNum}/?step=3`;
           cy.log('Step 3 incomplete');
           cy.visit(url);
+
+          // Check the checkbox if unchecked
+          cy.get('#interim-use-collection-agency')
+            .then($checkbox => {
+              if ($checkbox.is(':not(:checked)')) {
+                cy.get('#interim-use-collection-agency').check({ force: true });
+                // Save changes
+                cy.saveSeedlotRegFormProgress();
+              }
+            })
+            .should("be.checked");
 
           // Enter Interim start date
           cy.get('#start-date-input')
@@ -131,7 +164,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Step 4 check
     cy.get('ul.spar-seedlot-reg-progress-bar > li')
-      .eq(4)
+      .eq(3)
       .find(`.${prefix}--assistive-text`)
       .then($element => {
         const elementText = $element.text();
@@ -185,7 +218,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Step 5 check
     cy.get('ul.spar-seedlot-reg-progress-bar > li')
-      .eq(5)
+      .eq(4)
       .find(`.${prefix}--assistive-text`)
       .then($element => {
       const elementText = $element.text();
