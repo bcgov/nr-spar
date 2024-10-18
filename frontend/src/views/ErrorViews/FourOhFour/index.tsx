@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FlexGrid, Row, Column,
@@ -16,6 +16,11 @@ import './styles.scss';
 const FourOhFour = () => {
   const navigate = useNavigate();
   const windowSize = useWindowSize();
+
+  // Redirect to the /404 URL
+  useEffect(() => {
+    navigate(ROUTES.FOUR_OH_FOUR, { replace: true });
+  }, [navigate]);
 
   return (
     <FlexGrid fullWidth className="four-oh-four-page">
