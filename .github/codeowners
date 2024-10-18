@@ -1,7 +1,7 @@
 # Matched against repo root (asterisk)
-*       @RMCampos @mgaseta @Ding-x @DerekRoberts @SLDonnelly
+*       @xiaopeng0202 @mgaseta @DerekRoberts @SLDonnelly
 
 # Matched against directories
-/sync/      @ronrobb
+/sync/      @franTarkenton
 
 # See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
