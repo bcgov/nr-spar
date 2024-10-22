@@ -12,6 +12,7 @@ import { fourOhFourTexts } from './constants';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
 import './styles.scss';
+import BCHeader from '../../../components/BCHeader';
 
 const FourOhFour = () => {
   const navigate = useNavigate();
@@ -23,43 +24,46 @@ const FourOhFour = () => {
   }, [navigate]);
 
   return (
-    <FlexGrid fullWidth className="four-oh-four-page">
-      <Row className="four-oh-four-row">
-        <Column sm={4} md={8} lg={6} xlg={6} max={8}>
-          <img
-            src={Error404}
-            alt={fourOhFourTexts.altText}
-            className="four-oh-four-img"
-          />
-        </Column>
-        <Column sm={4} md={8} lg={10} xlg={10} max={8}>
-          <h1>
-            {fourOhFourTexts.title}
-          </h1>
-          {
-            windowSize.innerWidth > MEDIUM_SCREEN_WIDTH
-              ? (
-                <p>
-                  {fourOhFourTexts.supportText1}
-                </p>
-              )
-              : null
-          }
-          <p>
-            {fourOhFourTexts.supportText2}
-          </p>
-          <Button
-            renderIcon={Home}
-            size="lg"
-            onClick={
-              () => navigate(ROUTES.ROOT)
+    <>
+      <BCHeader />
+      <FlexGrid fullWidth className="four-oh-four-page">
+        <Row className="four-oh-four-row">
+          <Column sm={4} md={8} lg={6} xlg={6} max={8}>
+            <img
+              src={Error404}
+              alt={fourOhFourTexts.altText}
+              className="four-oh-four-img"
+            />
+          </Column>
+          <Column sm={4} md={8} lg={10} xlg={10} max={8}>
+            <h1>
+              {fourOhFourTexts.title}
+            </h1>
+            {
+              windowSize.innerWidth > MEDIUM_SCREEN_WIDTH
+                ? (
+                  <p>
+                    {fourOhFourTexts.supportText1}
+                  </p>
+                )
+                : null
             }
-          >
-            {fourOhFourTexts.buttonLabel}
-          </Button>
-        </Column>
-      </Row>
-    </FlexGrid>
+            <p>
+              {fourOhFourTexts.supportText2}
+            </p>
+            <Button
+              renderIcon={Home}
+              size="lg"
+              onClick={
+                () => navigate(ROUTES.ROOT)
+              }
+            >
+              {fourOhFourTexts.buttonLabel}
+            </Button>
+          </Column>
+        </Row>
+      </FlexGrid>
+    </>
   );
 };
 
