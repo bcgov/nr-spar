@@ -91,7 +91,7 @@ const BCHeader = () => {
         >
           <SkipToContent />
           {
-            !location.pathname.endsWith('/403')
+            !(location.pathname.endsWith('/403') || location.pathname.endsWith('/404'))
               ? (
                 <HeaderMenuButton
                   aria-label={componentTexts.openMenu}
@@ -173,7 +173,7 @@ const BCHeader = () => {
               : null
           }
           {
-            !location.pathname.endsWith('/403')
+            !(location.pathname.endsWith('/403') || location.pathname.endsWith('/404'))
               ? (
                 <SideNav
                   isChildOfHeader
