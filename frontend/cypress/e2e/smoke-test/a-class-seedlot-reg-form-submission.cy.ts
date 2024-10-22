@@ -54,8 +54,6 @@ describe('A Class Seedlot Registration form submission', () => {
             .then($checkbox => {
               if ($checkbox.is(':not(:checked)')) {
                 cy.get('#collection-step-default-checkbox').check({ force: true });
-                // Save changes
-                cy.saveSeedlotRegFormProgress();
               }
             })
             .should("be.checked");
@@ -95,8 +93,6 @@ describe('A Class Seedlot Registration form submission', () => {
             .then($checkbox => {
               if ($checkbox.is(':not(:checked)')) {
                 cy.get('#default-owner-checkbox').check({ force: true });
-                // Save changes
-                cy.saveSeedlotRegFormProgress();
               }
             })
             .should("be.checked");
@@ -137,8 +133,6 @@ describe('A Class Seedlot Registration form submission', () => {
             .then($checkbox => {
               if ($checkbox.is(':not(:checked)')) {
                 cy.get('#interim-use-collection-agency').check({ force: true });
-                // Save changes
-                cy.saveSeedlotRegFormProgress();
               }
             })
             .should("be.checked");
