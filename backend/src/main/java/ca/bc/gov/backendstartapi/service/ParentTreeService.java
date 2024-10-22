@@ -55,7 +55,7 @@ public class ParentTreeService {
   //CHECKSTYLE:OFF: VariableDeclarationUsageDistance
   public PtCalculationResDto calculatePtVals(PtValsCalReqDto ptVals) {
     SparLog.info(
-        "Started calculation for parent tree contribution values. Number of rchard parent received:"
+        "Started calculation for parent tree contribution values. Number of orchard parent received:"
             + " {}. Number of SMP mix parent tree received: {}.",
         ptVals.orchardPtVals().size(),
         ptVals.smpMixIdAndProps().size());
