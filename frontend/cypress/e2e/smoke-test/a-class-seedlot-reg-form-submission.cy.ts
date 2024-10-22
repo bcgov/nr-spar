@@ -242,6 +242,32 @@ describe('A Class Seedlot Registration form submission', () => {
         cy.log('Step 5 complete');
       }
     });
+
+    // Step 1 check again
+    cy.get('ul.spar-seedlot-reg-progress-bar > li')
+      .eq(0)
+      .find(`.${prefix}--assistive-text`)
+      .then($element => {
+        const elementText = $element.text();
+        if (elementText === 'Incomplete') {
+          const url = `/seedlots/a-class-registration/${seedlotNum}/?step=1`;
+          cy.log('Step 1 incomplete');
+          cy.visit(url);
+
+          // Check the checkbox if unchecked
+          cy.get('#collection-step-default-checkbox')
+            .then($checkbox => {
+              if ($checkbox.is(':not(:checked)')) {
+                cy.get('#collection-step-default-checkbox').check({ force: true });
+                // Save changes
+                cy.saveSeedlotRegFormProgress();
+              }
+            })
+            .should("be.checked");
+        } else {
+          cy.log('Step 1 complete');
+        }
+      });
   });
 
   it('Popup title and subtitles', () => {
