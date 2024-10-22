@@ -1,7 +1,7 @@
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
-describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculation of SMP mix)', () => {
+describe('A Class Seedlot Registration form submission', () => {
   let regFormData: {
     submission: {
       title: string;
