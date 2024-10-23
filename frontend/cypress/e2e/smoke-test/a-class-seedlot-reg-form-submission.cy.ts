@@ -215,33 +215,33 @@ describe('A Class Seedlot Registration form submission', () => {
       .eq(4)
       .find(`.${prefix}--assistive-text`)
       .then($element => {
-      const elementText = $element.text();
-      if (elementText === 'Incomplete') {
-        const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
-        cy.log('Step 5 incomplete');
-        cy.visit(url);
+        const elementText = $element.text();
+        if (elementText === 'Incomplete') {
+          const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
+          cy.log('Step 5 incomplete');
+          cy.visit(url);
 
-        // Wait for the table to load
-        cy.get('#parentTreeNumber', { timeout: 10000 });
+          // Wait for the table to load
+          cy.get('#parentTreeNumber', { timeout: 10000 });
 
-        // Enter cone count
-        cy.get('#223-coneCount-value-input')
-          .clear()
-          .type('1')
-          .blur();
+          // Enter cone count
+          cy.get('#223-coneCount-value-input')
+            .clear()
+            .type('1')
+            .blur();
 
-        // Enter pollen count
-        cy.get('#223-pollenCount-value-input')
-          .clear()
-          .type('1')
-          .blur();
+          // Enter pollen count
+          cy.get('#223-pollenCount-value-input')
+            .clear()
+            .type('1')
+            .blur();
 
-        // Save changes
-        cy.saveSeedlotRegFormProgress();
-      } else {
-        cy.log('Step 5 complete');
-      }
-    });
+          // Save changes
+          cy.saveSeedlotRegFormProgress();
+        } else {
+          cy.log('Step 5 complete');
+        }
+      });
 
     // Step 1 check again
     cy.get('ul.spar-seedlot-reg-progress-bar > li')
@@ -268,13 +268,15 @@ describe('A Class Seedlot Registration form submission', () => {
           cy.log('Step 1 complete');
         }
       });
-  });
 
-  it('Popup title and subtitles', () => {
+    // Title and subtitle test
     // Press submission button
+    const extractionUrl = `/seedlots/a-class-registration/${seedlotNum}/?step=6`;
+    cy.visit(extractionUrl);
     cy.get('.seedlot-registration-button-row')
       .find('button.submit-modal-btn')
       .contains('Submit Registration')
+      .as('submitRegBtn')
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
@@ -292,28 +294,19 @@ describe('A Class Seedlot Registration form submission', () => {
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .find(`span.${prefix}--checkbox-label-text`)
       .should('have.text', regFormData.submission.checkboxText);
-  });
 
-  it('Redirect to first step', () => {
-    // Press submission button
-    cy.get('.seedlot-registration-button-row')
-      .find('button.submit-modal-btn')
-      .contains('Submit Registration')
-      .click();
-
+    // Redirect test
     const redirectUrl = `/seedlots/a-class-registration/${seedlotNum}/?step=1`;
     cy.get(`a.${prefix}--link`)
       .contains('Click here to go back to the first step.')
       .click();
 
     cy.url().should('contains', redirectUrl);
-  });
 
-  it('Check buttons', () => {
+    // Check button test
+    cy.visit(extractionUrl);
     // Press submission button
-    cy.get('.seedlot-registration-button-row')
-      .find('button.submit-modal-btn')
-      .contains('Submit Registration')
+    cy.get('@submitRegBtn')
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
@@ -326,9 +319,7 @@ describe('A Class Seedlot Registration form submission', () => {
       .should('not.be.visible');
 
     // Press submission button
-    cy.get('.seedlot-registration-button-row')
-      .find('button.submit-modal-btn')
-      .contains('Submit Registration')
+    cy.get('@submitRegBtn')
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
@@ -354,17 +345,10 @@ describe('A Class Seedlot Registration form submission', () => {
     cy.get('@cancelButton')
       .click();
 
-    // Save changes
-    cy.saveSeedlotRegFormProgress();
-  });
-
-  it('Check Submit process', () => {
     const submissionUrl = `/seedlots/details/${seedlotNum}?isSubmitSuccess=true`;
 
     // Press submission button
-    cy.get('.seedlot-registration-button-row')
-      .find('button.submit-modal-btn')
-      .contains('Submit Registration')
+    cy.get('@submitRegBtn')
       .click();
 
     // Check the checkbox
@@ -372,9 +356,7 @@ describe('A Class Seedlot Registration form submission', () => {
       .check({ force: true });
 
     // Click submit seedlot button
-    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
-      .find(`button.${prefix}--btn--primary`)
-      .contains('Submit seedlot')
+    cy.get('@submitButton')
       .click();
 
     cy.url().should('contains', submissionUrl);
