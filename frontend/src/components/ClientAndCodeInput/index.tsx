@@ -341,7 +341,6 @@ const ClientAndCodeInput = ({
     }
   };
 
-
   return (
     <FlexGrid className="agency-information-section">
       {
