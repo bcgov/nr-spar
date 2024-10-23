@@ -209,3 +209,5 @@ schemaspy/output
 
 # local testing
 *.bat
+
+oracle-api/config/*

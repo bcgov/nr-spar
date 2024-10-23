@@ -38,8 +38,15 @@ const ClientAndCodeInput = ({
   const clientInputRef = useRef<HTMLInputElement>(null);
   const locCodeInputRef = useRef<HTMLInputElement>(null);
   const [isDefault, setIsDefault] = useState<boolean>(
-    () => getIsDefaultVal()
+    !shouldSelectDefaultValue ? false : () => getIsDefaultVal()
   );
+
+  const [isChecked, setIsChecked] = useState<boolean>(() => {
+    if (!shouldSelectDefaultValue) {
+      return false;
+    }
+    return checkBoxInput ? checkBoxInput.value : isDefault;
+  });
 
   const [showClientValidationStatus, setShowClientValidationStatus] = useState<boolean>(true);
 
@@ -60,7 +67,9 @@ const ClientAndCodeInput = ({
   useEffect(() => {
     const areValsDefault = getIsDefaultVal();
 
-    setIsDefault(areValsDefault);
+    if (shouldSelectDefaultValue) {
+      setIsDefault(areValsDefault);
+    }
 
     // Do not show validation status if isDefault is true
     if (areValsDefault) {
@@ -226,6 +235,7 @@ const ClientAndCodeInput = ({
 
     if (!checkBoxInput) {
       setIsDefault(checked);
+      setIsChecked(checked);
     }
   };
 
@@ -331,10 +341,6 @@ const ClientAndCodeInput = ({
     }
   };
 
-  let isChecked = checkBoxInput ? checkBoxInput.value : isDefault;
-  if (!shouldSelectDefaultValue) {
-    isChecked = false;
-  }
 
   return (
     <FlexGrid className="agency-information-section">
