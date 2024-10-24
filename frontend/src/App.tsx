@@ -58,6 +58,10 @@ const App: React.FC = () => {
       ]
     },
     {
+      path: ROUTES.FOUR_OH_FOUR,
+      element: <FourOhFour />
+    },
+    {
       path: ROUTES.ALL_ROUTES,
       element: <FourOhFour />
     }
@@ -90,6 +94,7 @@ const App: React.FC = () => {
   const getBrowserRouter = () => {
     const selectedRoutes = selectBrowserRoutes();
     selectedRoutes.push(...sharedRoutes);
+
     return createBrowserRouter(selectedRoutes);
   };
 

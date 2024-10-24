@@ -1,51 +1,69 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  FlexGrid, Row, Column,
+  Button
+} from '@carbon/react';
+import { Home } from '@carbon/icons-react';
+import Error404 from '../../../assets/img/SPAR_404_error.svg';
 import ROUTES from '../../../routes/constants';
-
-import mysteryImg from '../../../assets/img/404-mystery.png';
+import useWindowSize from '../../../hooks/UseWindowSize';
+import { fourOhFourTexts } from './constants';
+import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
 import './styles.scss';
+import BCHeader from '../../../components/BCHeader';
 
 const FourOhFour = () => {
-  type linkType = {
-    href: string,
-    text: string
-  }
+  const navigate = useNavigate();
+  const windowSize = useWindowSize();
 
-  const links: linkType[] = [
-    {
-      href: ROUTES.DASHBOARD,
-      text: 'Dashboard'
-    },
-    {
-      href: ROUTES.SEEDLOTS,
-      text: 'Seedlots'
-    }
-  ];
+  // Redirect to the /404 URL
+  useEffect(() => {
+    navigate(ROUTES.FOUR_OH_FOUR, { replace: true });
+  }, [navigate]);
+
   return (
-    <div className="fof-container">
-      <div className="fof-text">404</div>
-      <img src={mysteryImg} alt="" />
-      <div>
-        <h1>
-          Sorry, we can&apos;t find the page you are looking for.
-        </h1>
-        <h2>
-          Maybe some of these most visited links will help you?
-        </h2>
-        <div className="list">
-          {
-            links.map(({ href, text }) => (
-              <li key={text}>
-                <Link className="link" to={href}>
-                  <h3>{text}</h3>
-                </Link>
-              </li>
-            ))
-          }
-        </div>
-      </div>
-    </div>
+    <>
+      <BCHeader />
+      <FlexGrid fullWidth className="four-oh-four-page">
+        <Row className="four-oh-four-row">
+          <Column sm={4} md={8} lg={6} xlg={6} max={8}>
+            <img
+              src={Error404}
+              alt={fourOhFourTexts.altText}
+              className="four-oh-four-img"
+            />
+          </Column>
+          <Column sm={4} md={8} lg={10} xlg={10} max={8}>
+            <h1>
+              {fourOhFourTexts.title}
+            </h1>
+            {
+              windowSize.innerWidth > MEDIUM_SCREEN_WIDTH
+                ? (
+                  <p>
+                    {fourOhFourTexts.supportText1}
+                  </p>
+                )
+                : null
+            }
+            <p>
+              {fourOhFourTexts.supportText2}
+            </p>
+            <Button
+              renderIcon={Home}
+              size="lg"
+              onClick={
+                () => navigate(ROUTES.ROOT)
+              }
+            >
+              {fourOhFourTexts.buttonLabel}
+            </Button>
+          </Column>
+        </Row>
+      </FlexGrid>
+    </>
   );
 };
 
