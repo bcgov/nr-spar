@@ -114,26 +114,24 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        name: [backend, backup, frontend, oracle-api]
+        name: [backend, frontend, oracle-api]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
+            overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             verification_path: "health"
-          - name: backup
-            file: common/openshift.backup.yml
-            parameters:
-              -p PG_DB_IMAGE=postgis/postgis:15-master
-            post_rollout: oc create job --from=cronjob/${{ github.event.repository.name }}-${{ inputs.target }}-database-backup ${{ github.event.repository.name }}-${{ inputs.target }}-database-backup-$(date +%Y%m%d%H%M%S)
           - name: frontend
             file: frontend/openshift.deploy.yml
+            overwrite: true
             parameters:
               -p FAM_MODDED_ZONE=${{ needs.init.outputs.fam-modded-zone }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
+            overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               ${{ github.event_name == 'pull_request' && '-p CPU_LIMIT=100m' || '' }}
@@ -149,14 +147,13 @@ jobs:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: true
+          overwrite: ${{ matrix.overwrite }}
           parameters:
             -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
             ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=1' || '' }}
             ${{ matrix.parameters }}
-          post_rollout: ${{ matrix.post_rollout || '' }}
           verification_path: ${{ matrix.verification_path }}
           verification_retry_attempts: 5
           verification_retry_seconds: 20
