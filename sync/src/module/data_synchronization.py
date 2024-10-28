@@ -1,4 +1,4 @@
-import time
+ import time
 import logging
 import numpy as np
 import pandas as pd
@@ -310,7 +310,6 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
         logger.debug('Main driver SEEDLOT data loaded on in-memory dataframe')
         
         processes = [[{"interface_id":"SEEDLOT_EXTRACT","execution_id":"101","execution_order":"10","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_EXTRACT.sql","source_table":"spar.seedlot","source_db_type":"POSTGRES","target_table":"the.seedlot","target_primary_key":"seedlot_number","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"extraction_st_date,extraction_end_date,seed_store_client_number,seed_store_client_locn,temporary_storage_start_date,temporary_storage_end_date,seedlot_status_code"}]
-                    ,[{"interface_id":"SEEDLOT_OWNER_QUANTITY_EXTRACT","execution_id":"102","execution_order":"20","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_OWNER_QUANTITY_EXTRACT.sql","source_table":"spar.seedlot_owner_quantity","source_db_type":"POSTGRES","target_table":"the.seedlot_owner_quantity","target_primary_key":"seedlot_number,client_number,client_locn_code","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"qty_reserved,qty_rsrvd_cmtd_pln,qty_rsrvd_cmtd_apr,qty_surplus,qty_srpls_cmtd_pln,qty_srpls_cmtd_apr"}]
                     ,[{"interface_id":"SEEDLOT_SEED_PLAN_ZONE_EXTRACT","execution_id":"103","execution_order":"30","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_SEED_PLAN_ZONE_EXTRACT.sql","source_table":"spar.seedlot_seed_plan_zone","source_db_type":"POSTGRES","target_table":"the.seedlot_plan_zone","target_primary_key":"seedlot_number,seed_plan_zone_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                     ,[{"interface_id":"SEEDLOT_GENETIC_WORTH_EXTRACT","execution_id":"104","execution_order":"40","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_GENETIC_WORTH_EXTRACT.sql","source_table":"spar.seedlot_genetic_worth","source_db_type":"POSTGRES","target_table":"the.seedlot_genetic_worth","target_primary_key":"seedlot_number,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                     ,[{"interface_id":"SEEDLOT_PARENT_TREE_EXTRACT","execution_id":"105","execution_order":"50","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_EXTRACT.sql","source_table":"spar.seedlot_parent_tree","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
@@ -327,6 +326,11 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                     seedlot_metrics['step'] = "Seedlot"
                     seedlot_metrics['seedlot_number'] = seedlot.seedlot_number
 
+                    original_seed_qty_query = "SELECT ORIGINAL_SEED_QTY FROM the.seedlot WHERE seedlot_number = :seedlot_number"
+                    original_seed_qty = target_db_conn.execute(original_seed_qty_query, {"seedlot_number": seedlot.seedlot_number}).fetchone()
+
+                    if original_seed_qty and original_seed_qty[0] == 0:
+                        processes.append([{"interface_id":"SEEDLOT_OWNER_QUANTITY_EXTRACT","execution_id":"102","execution_order":"20","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_OWNER_QUANTITY_EXTRACT.sql","source_table":"spar.seedlot_owner_quantity","source_db_type":"POSTGRES","target_table":"the.seedlot_owner_quantity","target_primary_key":"seedlot_number,client_number,client_locn_code","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"qty_reserved,qty_rsrvd_cmtd_pln,qty_rsrvd_cmtd_apr,qty_surplus,qty_srpls_cmtd_pln,qty_srpls_cmtd_apr"}])
                     #delete all tables in RI order (reversing order of processes dataframe)
                     #note - special handling for seedlot_owner_quantity
                     delete_metrics = delete_seedlot_child_tables(seedlot_number=seedlot.seedlot_number,
