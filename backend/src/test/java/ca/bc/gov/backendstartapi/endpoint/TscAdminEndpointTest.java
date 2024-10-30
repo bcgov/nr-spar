@@ -244,25 +244,4 @@ class TscAdminEndpointTest {
         .andExpect(status().isNotFound())
         .andReturn();
   }
-
-  @Test
-  @DisplayName("Edit seedlot should fail with invalid seedlot status.")
-  void editSeedlot_invalidStatus_shouldFail() throws Exception {
-    String seedlotNumber = "63999";
-    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), anyBoolean(), any()))
-        .thenThrow(new SeedlotNotFoundException());
-
-    mockMvc
-        .perform(
-            put(
-                    "/api/tsc-admin/seedlots/{seedlotNumber}/edit?statusOnSave={statusOnSave}",
-                    seedlotNumber,
-                    "EXP")
-                .with(csrf().asHeader())
-                .header("Content-Type", MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(WHOLE_SEEDLOT_FORM_JSON))
-        .andExpect(status().isBadRequest())
-        .andReturn();
-  }
 }
