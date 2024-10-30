@@ -40,12 +40,12 @@ import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/
 import AuditInfo from '../../../components/SeedlotReviewSteps/AuditInfo';
 
 import {
-  PutTscSeedlotMutationObj, StatusOnSaveType, putTscSeedlotWithStatus,
+  PutTscSeedlotMutationObj, putTscSeedlotWithStatus,
   updateSeedlotStatus
 } from '../../../api-service/tscAdminAPI';
 import {
   SeedPlanZoneDto, SeedlotReviewElevationLatLongDto,
-  SeedlotReviewGeoInformationDto, TscSeedlotEditPayloadType
+  SeedlotReviewGeoInformationDto, SeedlotStatusCode, TscSeedlotEditPayloadType
 } from '../../../types/SeedlotType';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import AuthContext from '../../../contexts/AuthContext';
@@ -85,7 +85,7 @@ const SeedlotReviewContent = () => {
    */
   const [isSaveStatusModalOpen, setIsSaveStatusModalOpen] = useState(false);
 
-  const [statusToUpdateTo, setStatusToUpdateTo] = useState<StatusOnSaveType>('PND');
+  const [statusToUpdateTo, setStatusToUpdateTo] = useState<SeedlotStatusCode>('PND');
 
   const { seedlotNumber } = useParams();
 
@@ -462,7 +462,11 @@ const SeedlotReviewContent = () => {
 
     if (isFormDataValid) {
       const payload = generatePayload();
-      updateDraftMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'SUB', payload });
+      updateDraftMutation.mutate({
+        seedlotNum: seedlotNumber!,
+        statusOnSave: seedlotData?.seedlotStatus.seedlotStatusCode ?? 'SUB',
+        payload
+      });
       setIsReadMode(!isReadMode);
     }
   };
@@ -470,7 +474,7 @@ const SeedlotReviewContent = () => {
   /**
    * The handler for the send back to pending or approve buttons.
    */
-  const handleSaveAndStatus = (statusOnSave: StatusOnSaveType) => {
+  const handleSaveAndStatus = (statusOnSave: SeedlotStatusCode) => {
     if (isReadMode) {
       statusOnlyMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave });
     } else {
@@ -498,7 +502,7 @@ const SeedlotReviewContent = () => {
     setIsSaveStatusModalOpen(false);
   };
 
-  const openSaveStatusModal = (status: StatusOnSaveType) => {
+  const openSaveStatusModal = (status: SeedlotStatusCode) => {
     setStatusToUpdateTo(status);
     setIsSaveStatusModalOpen(true);
   };
