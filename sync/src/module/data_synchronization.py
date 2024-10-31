@@ -318,6 +318,8 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                     ,[{"interface_id":"SMP_MIX_EXTRACT","execution_id":"108","execution_order":"80","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_EXTRACT.sql","source_table":"spar.smp_mix","source_db_type":"POSTGRES","target_table":"the.smp_mix","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                     ,[{"interface_id":"SMP_MIX_GEN_QLTY_EXTRACT","execution_id":"109","execution_order":"90","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_GEN_QLTY_EXTRACT.sql","source_table":"spar.smp_mix_gen_qlty","source_db_type":"POSTGRES","target_table":"the.smp_mix_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                     ]
+        logger.debug(f"23333333 Seedlots to process")
+
         with db_conn.database_connection(oracle_config) as target_db_conn:
             try:
                 seedlotlst = []
