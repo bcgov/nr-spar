@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@tcp://localhost:1521/dbdock_01
+    username: THE
+    password: default
+
+    
