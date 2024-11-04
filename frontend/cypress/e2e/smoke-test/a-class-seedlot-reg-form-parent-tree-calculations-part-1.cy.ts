@@ -60,6 +60,29 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
     cy.saveSeedlotRegFormProgress();
   });
 
+  it('Upload csv file', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber', { timeout: 10000 });
+
+    // Upload csv file
+    cy.get('button.upload-button')
+      .click({force: true});
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--file`)
+      .find(`input.${prefix}--file-input`)
+      .selectFile('cypress/fixtures/Seedlot_composition_template_FDI.csv', {force: true});
+
+    cy.get('button')
+      .contains('Import file and continue')
+      .click();
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+  });
+
   it('Check Parent tree contribution summary', () => {
     // Wait for the table to load
     cy.get('#parentTreeNumber', { timeout: 10000 });
