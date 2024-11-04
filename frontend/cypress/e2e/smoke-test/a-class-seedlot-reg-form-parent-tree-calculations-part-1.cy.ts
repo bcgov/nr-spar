@@ -3,6 +3,9 @@ import prefix from '../../../src/styles/classPrefix';
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
   let seedlotNum: string;
   const speciesKey = 'fdi';
+  let totalParentTrees: Number = 0;
+  let totalConeCount: Number = 0;
+  let totalPollenCount: Number = 0;
 
   beforeEach(() => {
     // Login
@@ -58,13 +61,44 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
   });
 
   it('Check Parent tree contribution summary', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber', { timeout: 10000 });
+
+    cy.get(`table.${prefix}--data-table > tbody`)
+    .find('tr')
+    .then((row) => {
+      totalParentTrees = row.length;
+    });
+
+    cy.get(`table.${prefix}--data-table > tbody`)
+      .find('tr > td:nth-child(2)')
+      .then($cells => {
+        // Map each cell text to a number and calculate the sum using Lodash
+        const sum = Cypress._.sum(
+          $cells.toArray().map(cell => Number(cell.innerText))
+        );
+        totalConeCount = sum;
+        cy.log('Sum of row:', sum);
+      });
+
+    cy.get(`table.${prefix}--data-table > tbody`)
+      .find('tr > td:nth-child(3)')
+      .then($cells => {
+        // Map each cell text to a number and calculate the sum using Lodash
+        const sum = Cypress._.sum(
+          $cells.toArray().map(cell => Number(cell.innerText))
+        );
+        totalPollenCount = sum;
+        cy.log('Sum of row:', sum);
+      });
+
     cy.get('#totalnumber of parent trees')
-      .should('have.value', '');
+      .should('have.value', totalParentTrees);
 
     cy.get('#totalnumber of cone count')
-      .should('have.value', '');
+      .should('have.value', totalConeCount);
 
     cy.get('#totalnumber of pollen count')
-      .should('have.value', '');
+      .should('have.value', totalPollenCount);
   });
 });
