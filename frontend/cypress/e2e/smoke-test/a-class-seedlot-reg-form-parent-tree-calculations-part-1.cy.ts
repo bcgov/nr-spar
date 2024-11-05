@@ -3,9 +3,11 @@ import prefix from '../../../src/styles/classPrefix';
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
   let seedlotNum: string;
   const speciesKey = 'fdi';
-  let totalParentTrees: Number = 0;
-  let totalConeCount: Number = 0;
-  let totalPollenCount: Number = 0;
+  let totalParentTrees: number;
+  let totalConeCount: number;
+  let totalPollenCount: number;
+  let firstConeValue: number;
+  let firstPollenValue: number;
 
   beforeEach(() => {
     // Login
@@ -88,31 +90,31 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
     cy.get('#parentTreeNumber', { timeout: 10000 });
 
     cy.get(`table.${prefix}--data-table > tbody`)
-    .find('tr')
-    .then((row) => {
-      totalParentTrees = row.length;
-    });
-
-    cy.get(`table.${prefix}--data-table > tbody`)
-      .find('tr > td:nth-child(2)')
-      .then($cells => {
-        // Map each cell text to a number and calculate the sum using Lodash
-        const sum = Cypress._.sum(
-          $cells.toArray().map(cell => Number(cell.innerText))
-        );
-        totalConeCount = sum;
-        cy.log('Sum of row:', sum);
+      .find('tr')
+      .then((row) => {
+        totalParentTrees = row.length;
       });
 
-    cy.get(`table.${prefix}--data-table > tbody`)
-      .find('tr > td:nth-child(3)')
-      .then($cells => {
-        // Map each cell text to a number and calculate the sum using Lodash
+    cy.get('input[id$="-coneCount-value-input"]') // Select all inputs in coneCount column
+      .then($inputs => {
+        // Extract values, convert them to numbers, and calculate the sum using Lodash
         const sum = Cypress._.sum(
-          $cells.toArray().map(cell => Number(cell.innerText))
+          $inputs.toArray().map(input => Number(input.innerText))
         );
+    
+        totalConeCount = sum;
+        cy.log('Sum of coneCount column:', sum);
+      });
+
+    cy.get('input[id$="-pollenCount-value-input"]') // Select all inputs in pollenCount column
+      .then($inputs => {
+        // Extract values, convert them to numbers, and calculate the sum using Lodash
+        const sum = Cypress._.sum(
+          $inputs.toArray().map(input => Number(input.innerText))
+        );
+    
         totalPollenCount = sum;
-        cy.log('Sum of row:', sum);
+        cy.log('Sum of pollenCount column:', sum);
       });
 
     cy.get('#totalnumber of parent trees')
@@ -123,5 +125,45 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
     cy.get('#totalnumber of pollen count')
       .should('have.value', totalPollenCount);
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+  });
+
+  it('Remove a single Parent tree contribution', () => {
+    // Wait for the table to load
+    cy.get('#parentTreeNumber', { timeout: 10000 });
+
+    // Store first cone count to a variable
+    cy.get('#8021-coneCount-value-input')
+      .invoke('val')
+      .then(($input: any) => {
+        firstConeValue = $input;
+      });
+
+    // Store first pollen count to a variable
+    cy.get('#8021-pollenCount-value-input')
+      .invoke('val')
+      .then(($input: any) => {
+        firstPollenValue = $input;
+      });
+
+    // Remove cone count and pollen count of first row
+    cy.get('#8021-coneCount-value-input')
+      .clear()
+      .type('0');
+
+    cy.get('#8021-pollenCount-value-input')
+      .clear()
+      .type('0');
+
+    cy.get('#totalnumber of parent trees')
+      .should('have.value', (totalParentTrees - 1));
+
+    cy.get('#totalnumber of cone count')
+      .should('have.value', (totalConeCount - firstConeValue));
+
+    cy.get('#totalnumber of pollen count')
+      .should('have.value', (totalPollenCount - firstPollenValue));
   });
 });
