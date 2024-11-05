@@ -6,6 +6,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
   let totalParentTrees: number;
   let totalConeCount: number;
   let totalPollenCount: number;
+  let effectivePopulationSize: number;
   let firstConeValue: number;
   let firstPollenValue: number;
 
@@ -134,6 +135,19 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
     // Wait for the table to load
     cy.get('#parentTreeNumber', { timeout: 10000 });
 
+    // Click 'Calculate metrics' button
+    cy.get('.gen-worth-cal-row')
+      .find('button')
+      .contains('Calculate metrics')
+      .click();
+
+    // Store Ne value to a variable
+    cy.get('#effectivepopulation size (ne)')
+      .invoke('val')
+      .then(($input: any) => {
+        effectivePopulationSize = $input;
+      });
+
     // Store first cone count to a variable
     cy.get('#8021-coneCount-value-input')
       .invoke('val')
@@ -148,7 +162,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         firstPollenValue = $input;
       });
 
-    // Remove cone count and pollen count of first row
+    // Clear cone count and pollen count of first row
     cy.get('#8021-coneCount-value-input')
       .clear()
       .type('0');
@@ -165,5 +179,15 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
     cy.get('#totalnumber of pollen count')
       .should('have.value', (totalPollenCount - firstPollenValue));
+
+    // Click 'Calculate metrics' button again
+    cy.get('.gen-worth-cal-row')
+      .find('button')
+      .contains('Calculate metrics')
+      .click();
+
+    // Check Ne value after clearing first parent tree row
+    cy.get('#effectivepopulation size (ne)')
+      .should('be.lessThan', effectivePopulationSize);
   });
 });
