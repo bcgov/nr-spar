@@ -10,6 +10,9 @@ assignees: ''
 **Describe the Bug**
 A clear and concise description of what the bug is.
 
+**Impact and Priority**
+Provide a description of the impact to the business and describe the priority as either: critical, high, medium, low 
+
 **Expected Behaviour**
 A clear and concise description of what you expected to happen.
 
