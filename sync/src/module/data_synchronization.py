@@ -330,9 +330,13 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                     seedlot_metrics['seedlot_number'] = seedlot.seedlot_number
 
                     original_seed_qty_query = "SELECT ORIGINAL_SEED_QTY FROM the.seedlot WHERE seedlot_number = :seedlot_number"
-                    original_seed_qty = target_db_conn.execute(original_seed_qty_query, {"seedlot_number": seedlot.seedlot_number}).fetchone()
-                    logger.debug(f"12344321!!! Original Seed Quantity for {seedlot.seedlot_number} is {original_seed_qty}")
+                    result = target_db_conn.execute(original_seed_qty_query, {"seedlot_number": seedlot.seedlot_number})
+                    if result is None:
+                        logger.warning(f"No result returned for seedlot {seedlot.seedlot_number}. Skipping processing for this seedlot.")
+                        continue 
 
+                    original_seed_qty = result.fetchone()
+                    logger.debug(f"12344321!!! Original Seed Quantity for {seedlot.seedlot_number} is {original_seed_qty}")
                     if original_seed_qty and original_seed_qty[0] == 0:
                         processes.append([{"interface_id":"SEEDLOT_OWNER_QUANTITY_EXTRACT","execution_id":"102","execution_order":"20","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_OWNER_QUANTITY_EXTRACT.sql","source_table":"spar.seedlot_owner_quantity","source_db_type":"POSTGRES","target_table":"the.seedlot_owner_quantity","target_primary_key":"seedlot_number,client_number,client_locn_code","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"qty_reserved,qty_rsrvd_cmtd_pln,qty_rsrvd_cmtd_apr,qty_surplus,qty_srpls_cmtd_pln,qty_srpls_cmtd_apr"}])
                     #delete all tables in RI order (reversing order of processes dataframe)
