@@ -94,7 +94,6 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .find('tr')
       .then((row) => {
         totalParentTrees = row.length;
-        cy.log('Total rows:', totalParentTrees);
         cy.get('#totalnumber\\ of\\ parent\\ trees')
           .should('have.value', totalParentTrees);
 
@@ -106,10 +105,10 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
             .find('td:nth-child(2) input')
             .invoke('val')
             .then(($value: any) => {
-              cy.log("Cone count:", $value);
               totalConeCount = totalConeCount + Number($value);
 
               if (i === (totalParentTrees - 1)) {
+                // Check total cone counts
                 cy.get('#totalnumber\\ of\\ cone\\ count')
                   .should('have.value', totalConeCount);
               }
@@ -124,10 +123,10 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
             .find('td:nth-child(3) input')
             .invoke('val')
             .then(($value) => {
-              cy.log("Pollen count:", $value);
               totalPollenCount = totalPollenCount + Number($value);
 
               if (i === (totalParentTrees - 1)) {
+                // Check total pollen counts
                 cy.get('#totalnumber\\ of\\ pollen\\ count')
                   .should('have.value', totalPollenCount);
               }
@@ -148,7 +147,6 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .invoke('val')
       .then(($input: any) => {
         effectivePopulationSize = $input;
-        cy.log("effective population size:", effectivePopulationSize);
       });
 
     // Save changes
@@ -171,8 +169,6 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
           .type('0')
           .blur();
 
-        cy.log("total cone count:", totalConeCount);
-        cy.log("first cone count:", firstConeValue);
         // Check new total cone count
         cy.get('#totalnumber\\ of\\ cone\\ count')
           .should('have.value', (totalConeCount - firstConeValue));
@@ -211,8 +207,6 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
     cy.get('#effectivepopulation\\ size\\ \\(ne\\)')
       .invoke('val')
       .then($value => {
-        cy.log("Value:",$value);
-        cy.log("Effective Population Size:",effectivePopulationSize);
         expect(Number($value)).to.be.lessThan(Number(effectivePopulationSize));
       });
   });
