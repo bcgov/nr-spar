@@ -13,7 +13,7 @@ import {
 } from '@carbon/icons-react';
 import { Beforeunload } from 'react-beforeunload';
 
-import { getSeedlotById, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
+import { getSeedlotById, putAClassSeedlotProgress, getSeedlotBySeedlotNumber } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
@@ -103,6 +103,12 @@ const SeedlotReviewContent = () => {
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
     enabled: vegCodeQuery.isFetched,
     refetchOnMount: true
+  });
+
+  const getSeedlotBySeedlotNumberQuery = useQuery({
+    queryKey: ['seedlot-by-seedlotNumber', seedlotNumber],
+    queryFn: () => getSeedlotBySeedlotNumber(seedlotNumber ?? ''),
+    enabled: seedlotQuery.isFetched
   });
 
   useEffect(() => {
@@ -550,6 +556,8 @@ const SeedlotReviewContent = () => {
               className="edit-save-btn"
               renderIcon={isReadMode ? Edit : Save}
               onClick={handleEditSaveBtn}
+              disabled={getSeedlotBySeedlotNumberQuery.isSuccess
+                && getSeedlotBySeedlotNumberQuery.data.data.originalSeedQty > 0}
             >
               {isReadMode ? 'Edit seedlot' : 'Save edit'}
             </Button>

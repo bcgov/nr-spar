@@ -72,3 +72,8 @@ export const getAClassSeedlotFullForm = (seedlotNumber: string) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-full-form`;
   return api.get(url).then((res) => res.data as SeedlotAClassFullResponseType);
 };
+
+export const getSeedlotBySeedlotNumber = (seedlotNumber: string) => {
+  const url = ApiConfig.seedlotBySeedlotNumber.replace('{seedlotNumber}', seedlotNumber);
+  return api.get(url);
+};

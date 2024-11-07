@@ -19,11 +19,11 @@ public class Seedlot {
   @Id
   @Column(name = "SEEDLOT_NUMBER")
   @Schema(description = "The number of a seedlot", example = "16258")
-  private String seedlotNumber;
+  private Long seedlotNumber;
 
   @Column(name = "ORIGINAL_SEED_QTY")
   @Schema(
       description = "The original quantity of seeds in the seedlot",
       example = "1")
-  private String originalSeedQty;
+  private Long originalSeedQty;
 }
