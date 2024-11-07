@@ -14,7 +14,9 @@ import {
 
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import { SeedlotApplicantType, SeedlotDisplayType, SeedlotType } from '../../../types/SeedlotType';
+import {
+  SeedlotApplicantType, SeedlotDisplayType, SeedlotStatusCode, SeedlotType
+} from '../../../types/SeedlotType';
 
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
@@ -30,7 +32,6 @@ import { addParamToPath } from '../../../utils/PathUtils';
 import { MEDIUM_SCREEN_WIDTH, MINISTRY_OF_FOREST_ID } from '../../../shared-constants/shared-constants';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
-import { StatusOnSaveType } from '../../../api-service/tscAdminAPI';
 import AuthContext from '../../../contexts/AuthContext';
 
 import SeedlotSummary from './SeedlotSummary';
@@ -51,7 +52,7 @@ const SeedlotDetails = () => {
 
   const isSubmitSuccess = searchParams.get('isSubmitSuccess') === 'true';
 
-  const statusOnSave = searchParams.get('statusOnSave') as StatusOnSaveType | null;
+  const statusOnSave = searchParams.get('statusOnSave') as SeedlotStatusCode | null;
 
   const viewOnlySeedlot: boolean = seedlotData?.seedlotStatus === 'Submitted'
     || seedlotData?.seedlotStatus === 'Expired'
