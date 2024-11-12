@@ -1,4 +1,4 @@
- import time
+import time
 import logging
 import numpy as np
 import pandas as pd
@@ -286,8 +286,6 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
         metrics['start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
         logger.debug('Source Database connection established')
-        logger.debug('23333333 Seedlots to process')
-
 
         query_sql = """SELECT s.seedlot_number 
                          FROM spar.seedlot s
@@ -330,15 +328,13 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                     seedlot_metrics['seedlot_number'] = seedlot.seedlot_number
 
                     original_seed_qty_query = "SELECT ORIGINAL_SEED_QTY FROM the.seedlot WHERE seedlot_number = :seedlot_number"
-                    result = target_db_conn.execute(original_seed_qty_query, {"seedlot_number": seedlot.seedlot_number})
-                    if result is None:
-                        logger.warning(f"No result returned for seedlot {seedlot.seedlot_number}. Skipping processing for this seedlot.")
-                        continue 
+                    result = target_db_conn.execute(original_seed_qty_query, params={"seedlot_number": seedlot.seedlot_number})
 
-                    original_seed_qty = result.fetchone()
-                    logger.debug(f"12344321!!! Original Seed Quantity for {seedlot.seedlot_number} is {original_seed_qty}")
-                    if original_seed_qty and original_seed_qty[0] == 0:
-                        processes.append([{"interface_id":"SEEDLOT_OWNER_QUANTITY_EXTRACT","execution_id":"102","execution_order":"20","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_OWNER_QUANTITY_EXTRACT.sql","source_table":"spar.seedlot_owner_quantity","source_db_type":"POSTGRES","target_table":"the.seedlot_owner_quantity","target_primary_key":"seedlot_number,client_number,client_locn_code","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"qty_reserved,qty_rsrvd_cmtd_pln,qty_rsrvd_cmtd_apr,qty_surplus,qty_srpls_cmtd_pln,qty_srpls_cmtd_apr"}])
+                    if result is not None:
+                        original_seed_qty = result.fetchone()
+                        if original_seed_qty and original_seed_qty[0] == 0:
+                            processes.append([{"interface_id":"SEEDLOT_OWNER_QUANTITY_EXTRACT","execution_id":"102","execution_order":"20","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_OWNER_QUANTITY_EXTRACT.sql","source_table":"spar.seedlot_owner_quantity","source_db_type":"POSTGRES","target_table":"the.seedlot_owner_quantity","target_primary_key":"seedlot_number,client_number,client_locn_code","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"qty_reserved,qty_rsrvd_cmtd_pln,qty_rsrvd_cmtd_apr,qty_surplus,qty_srpls_cmtd_pln,qty_srpls_cmtd_apr"}])
+
                     #delete all tables in RI order (reversing order of processes dataframe)
                     #note - special handling for seedlot_owner_quantity
                     delete_metrics = delete_seedlot_child_tables(seedlot_number=seedlot.seedlot_number,
