@@ -25,8 +25,11 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
   });
 
   it('Orchard selection', () => {
-    const url = `/seedlots/a-class-registration/${seedlotNum}/?step=4`;
-    cy.visit(url);
+    // Press next button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Back')
+      .click();
 
     cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
