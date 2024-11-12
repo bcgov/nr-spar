@@ -751,7 +751,10 @@ export const generatePtValCalcPayload = (
       coneCount: Number(row.coneCount.value),
       pollenCount: Number(row.pollenCount.value),
       smpSuccessPerc: Number(row.smpSuccessPerc.value),
-      nonOrchardPollenContamPct: Number(row.nonOrchardPollenContam.value),
+      nonOrchardPollenContamPct:
+        row.nonOrchardPollenContam.value
+          ? Number(row.nonOrchardPollenContam.value)
+          : 0,
       geneticTraits: []
     };
     // Populate geneticTraits array
