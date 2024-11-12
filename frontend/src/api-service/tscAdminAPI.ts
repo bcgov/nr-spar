@@ -1,4 +1,4 @@
-import { SeedlotsReturnType, TscSeedlotEditPayloadType } from '../types/SeedlotType';
+import { SeedlotsReturnType, SeedlotStatusCode, TscSeedlotEditPayloadType } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
 import api from './api';
 
@@ -12,17 +12,15 @@ export const getSeedlotToReview = (pageNumber: number, pageSize: number) => {
   ));
 };
 
-export type StatusOnSaveType = 'PND' | 'SUB' | 'APP';
-
 export type PutTscSeedlotMutationObj = {
   seedlotNum: string,
-  statusOnSave: StatusOnSaveType,
+  statusOnSave: SeedlotStatusCode,
   payload: TscSeedlotEditPayloadType
 }
 
 export const putTscSeedlotWithStatus = (
   seedlotNumber: string,
-  statusOnSave: StatusOnSaveType,
+  statusOnSave: SeedlotStatusCode,
   payload: TscSeedlotEditPayloadType
 ) => {
   const url = new URL(ApiConfig.tscSeedlotEdit.replace('{seedlotNumber}', seedlotNumber));
@@ -34,7 +32,7 @@ export const putTscSeedlotWithStatus = (
 
 export const updateSeedlotStatus = (
   seedlotNumber: string,
-  statusOnSave: StatusOnSaveType
+  statusOnSave: SeedlotStatusCode
 ) => {
   const url = ApiConfig.tscSeedlotStatusUpdate.replace('{seedlotNumber}', seedlotNumber).replace('{status}', statusOnSave);
 

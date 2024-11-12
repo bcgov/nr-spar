@@ -4,7 +4,6 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.exception.InvalidSeedlotStatusException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
@@ -193,10 +192,6 @@ public class TscAdminEndpoint {
       @RequestBody SeedlotFormSubmissionDto form) {
     long started = Instant.now().toEpochMilli();
     String formattedStatus = statusOnSave.toUpperCase();
-    if (!List.of("PND", "SUB", "APP").contains(formattedStatus)) {
-      throw new InvalidSeedlotStatusException(formattedStatus);
-    }
-
     SeedlotStatusResponseDto updatedDto =
         seedlotService.updateSeedlotWithForm(seedlotNumber, form, true, false, formattedStatus);
     long finished = Instant.now().toEpochMilli();
