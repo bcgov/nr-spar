@@ -274,48 +274,35 @@ export const processParentTreeData = (
   const applicableGenWorths = geneticWorthDict[speciesKey as keyof GeneticWorthDictType];
 
   orchardParentTreeList.forEach((orchardPtNum) => {
-    if (!Object.prototype.hasOwnProperty.call(tableRowData, orchardPtNum)) {
-      const newRowData: RowItem = structuredClone(rowTemplate);
+    const newRowData: RowItem = !Object.prototype.hasOwnProperty.call(tableRowData, orchardPtNum)
+      ? structuredClone(rowTemplate)
+      : tableRowData[orchardPtNum];
 
-      const parentTree = allParentTreeData[orchardPtNum];
+    const parentTree = allParentTreeData[orchardPtNum];
 
-      newRowData.parentTreeNumber.value = orchardPtNum;
+    newRowData.parentTreeNumber.value = orchardPtNum;
 
-      const genWorthBySpu = parentTree.geneticQualitiesBySpu;
+    const genWorthBySpu = parentTree.geneticQualitiesBySpu;
 
-      const validSpuIds = Object.keys(genWorthBySpu).map((key) => parseInt(key, 10));
+    const validSpuIds = Object.keys(genWorthBySpu).map((key) => parseInt(key, 10));
 
-      // If parent tree has gen worth data under the primary orchard's SPU then use them
-      // Else use default from the gen worth list
-      if (validSpuIds.includes(primarySpu)) {
-        const parentTreeGenWorthVals = genWorthBySpu[primarySpu];
-        applicableGenWorths.forEach((gwCode) => {
-          const loweredGwCode = gwCode.toLowerCase() as keyof RowItem;
-          const matchedGwObj = parentTreeGenWorthVals
-            .find((gwObj) => gwObj.geneticWorthCode.toLowerCase() === loweredGwCode);
+    // If parent tree has gen worth data under the primary orchard's SPU then use them
+    // Else use default from the gen worth list
+    if (validSpuIds.includes(primarySpu)) {
+      const parentTreeGenWorthVals = genWorthBySpu[primarySpu];
+      applicableGenWorths.forEach((gwCode) => {
+        const loweredGwCode = gwCode.toLowerCase() as keyof RowItem;
+        const matchedGwObj = parentTreeGenWorthVals
+          .find((gwObj) => gwObj.geneticWorthCode.toLowerCase() === loweredGwCode);
 
-          if (matchedGwObj) {
-            (newRowData[loweredGwCode] as GeneticWorthInputType)
-              .value = String(matchedGwObj.geneticQualityValue);
-          } else {
-            // Assign Default GW value
-            const foundGwDto = geneticWorthList
-              .find((gwDto) => gwDto.code.toLowerCase() === loweredGwCode);
-
-            const defaultBv = foundGwDto ? foundGwDto.defaultBv.toFixed(1) : '0.0';
-            if (foundGwDto) {
-              (newRowData[loweredGwCode] as GeneticWorthInputType)
-                .value = defaultBv;
-              (newRowData[loweredGwCode] as GeneticWorthInputType)
-                .isEstimated = true;
-            }
-          }
-        });
-      } else {
-        applicableGenWorths.forEach((gwCode) => {
-          const loweredGwCode = gwCode.toLowerCase() as keyof RowItem;
+        if (matchedGwObj) {
+          (newRowData[loweredGwCode] as GeneticWorthInputType)
+            .value = String(matchedGwObj.geneticQualityValue);
+        } else {
+          // Assign Default GW value
           const foundGwDto = geneticWorthList
             .find((gwDto) => gwDto.code.toLowerCase() === loweredGwCode);
+
           const defaultBv = foundGwDto ? foundGwDto.defaultBv.toFixed(1) : '0.0';
           if (foundGwDto) {
             (newRowData[loweredGwCode] as GeneticWorthInputType)
@@ -323,13 +310,26 @@ export const processParentTreeData = (
             (newRowData[loweredGwCode] as GeneticWorthInputType)
               .isEstimated = true;
           }
-        });
-      }
-
-      tableRowData = Object.assign(tableRowData, {
-        [orchardPtNum]: populateStrInputId(orchardPtNum, newRowData)
+        }
+      });
+    } else {
+      applicableGenWorths.forEach((gwCode) => {
+        const loweredGwCode = gwCode.toLowerCase() as keyof RowItem;
+        const foundGwDto = geneticWorthList
+          .find((gwDto) => gwDto.code.toLowerCase() === loweredGwCode);
+        const defaultBv = foundGwDto ? foundGwDto.defaultBv.toFixed(1) : '0.0';
+        if (foundGwDto) {
+          (newRowData[loweredGwCode] as GeneticWorthInputType)
+            .value = defaultBv;
+          (newRowData[loweredGwCode] as GeneticWorthInputType)
+            .isEstimated = true;
+        }
       });
     }
+
+    tableRowData = Object.assign(tableRowData, {
+      [orchardPtNum]: populateStrInputId(orchardPtNum, newRowData)
+    });
   });
 
   modifiedState.tableRowData = tableRowData;
@@ -736,6 +736,9 @@ export const generatePtValCalcPayload = (
   pollenContaminantBreedingValue?: string
 ): PtValsCalcReqPayload => {
   const { tableRowData, mixTabData } = state;
+
+  // eslint-disable-next-line no-debugger
+  debugger;
   const payload: PtValsCalcReqPayload = {
     orchardPtVals: [],
     smpMixIdAndProps: [],
@@ -744,15 +747,21 @@ export const generatePtValCalcPayload = (
   };
   const rows = Object.values(tableRowData);
   const genWorthTypes = geneticWorthDict[seedlotSpecies.code as keyof GeneticWorthDictType];
+  // When recalculating the value on the review section,
+  // if the values are null on the backend, they come to the frontend as
+  // a string "null" (for some reason...)
   rows.forEach((row) => {
     const newPayloadItem: OrchardParentTreeValsType = {
       parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
       parentTreeNumber: row.parentTreeNumber.value,
       coneCount: Number(row.coneCount.value),
       pollenCount: Number(row.pollenCount.value),
-      smpSuccessPerc: Number(row.smpSuccessPerc.value),
+      smpSuccessPerc:
+        row.smpSuccessPerc.value === 'null'
+          ? Number(row.smpSuccessPerc.value)
+          : 0,
       nonOrchardPollenContamPct:
-        row.nonOrchardPollenContam.value
+        row.nonOrchardPollenContam.value === 'null'
           ? Number(row.nonOrchardPollenContam.value)
           : 0,
       geneticTraits: []
