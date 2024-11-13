@@ -332,7 +332,7 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
 
                     if result is not None:
                         original_seed_qty = result.fetchone()
-                        if original_seed_qty and original_seed_qty[0] in (0, None):
+                        if original_seed_qty and not original_seed_qty[0]:
                             processes.append([{"interface_id":"SEEDLOT_OWNER_QUANTITY_EXTRACT","execution_id":"102","execution_order":"20","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_OWNER_QUANTITY_EXTRACT.sql","source_table":"spar.seedlot_owner_quantity","source_db_type":"POSTGRES","target_table":"the.seedlot_owner_quantity","target_primary_key":"seedlot_number,client_number,client_locn_code","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"qty_reserved,qty_rsrvd_cmtd_pln,qty_rsrvd_cmtd_apr,qty_surplus,qty_srpls_cmtd_pln,qty_srpls_cmtd_apr"}])
 
                     #delete all tables in RI order (reversing order of processes dataframe)
