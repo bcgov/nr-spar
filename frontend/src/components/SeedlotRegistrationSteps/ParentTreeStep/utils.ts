@@ -545,8 +545,7 @@ export const configHeaderOpt = (
   setHeaderConfig: Function,
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: Function,
-  setApplicableGenWorths: Function,
-  isReview: boolean
+  setApplicableGenWorths: Function
 ) => {
   const speciesKey = Object.keys(geneticWorthDict).includes(seedlotSpecies.code)
     ? seedlotSpecies.code.toUpperCase()
