@@ -232,11 +232,8 @@ const ClientAndCodeInput = ({
         }
         : undefined
     );
-
-    if (!checkBoxInput) {
-      setIsDefault(checked);
-      setIsChecked(checked);
-    }
+    setIsChecked(checked);
+    setIsChecked(checked);
   };
 
   const [openAgnTooltip, setOpenAgnTooltip] = useState<boolean>(false);
