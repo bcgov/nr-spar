@@ -57,7 +57,7 @@ const ApiConfig = {
 
   parentTreeByVegCode: `${oracleServerHost}/api/parent-trees/vegetation-codes/{vegCode}`,
 
-  seedlotBySeedlotNumber: `${oracleServerHost}/api/seedlot/{seedlotNumber}`
+  seedlotFromOracleDbBySeedlotNumber: `${oracleServerHost}/api/seedlot/{seedlotNumber}`
 };
 
 export default ApiConfig;

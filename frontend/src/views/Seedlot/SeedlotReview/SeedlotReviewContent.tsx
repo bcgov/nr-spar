@@ -13,7 +13,7 @@ import {
 } from '@carbon/icons-react';
 import { Beforeunload } from 'react-beforeunload';
 
-import { getSeedlotById, putAClassSeedlotProgress, getSeedlotBySeedlotNumber } from '../../../api-service/seedlotAPI';
+import { getSeedlotById, putAClassSeedlotProgress, getSeedlotFromOracleDbBySeedlotNumber } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
@@ -107,7 +107,7 @@ const SeedlotReviewContent = () => {
 
   const getSeedlotBySeedlotNumberQuery = useQuery({
     queryKey: ['seedlot-by-seedlotNumber', seedlotNumber],
-    queryFn: () => getSeedlotBySeedlotNumber(seedlotNumber ?? ''),
+    queryFn: () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
     enabled: seedlotQuery.isFetched
   });
 

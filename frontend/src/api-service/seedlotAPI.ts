@@ -73,7 +73,7 @@ export const getAClassSeedlotFullForm = (seedlotNumber: string) => {
   return api.get(url).then((res) => res.data as SeedlotAClassFullResponseType);
 };
 
-export const getSeedlotBySeedlotNumber = (seedlotNumber: string) => {
-  const url = ApiConfig.seedlotBySeedlotNumber.replace('{seedlotNumber}', seedlotNumber);
+export const getSeedlotFromOracleDbBySeedlotNumber = (seedlotNumber: string) => {
+  const url = ApiConfig.seedlotFromOracleDbBySeedlotNumber.replace('{seedlotNumber}', seedlotNumber);
   return api.get(url);
 };

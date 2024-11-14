@@ -18,7 +18,7 @@ import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import getFundingSources from '../../../api-service/fundingSourcesAPI';
-import { getSeedlotBySeedlotNumber } from '../../../api-service/seedlotAPI';
+import { getSeedlotFromOracleDbBySeedlotNumber } from '../../../api-service/seedlotAPI';
 import TitleAccordion from '../../TitleAccordion';
 import ScrollToTop from '../../ScrollToTop';
 import SingleOwnerInfo from './SingleOwnerInfo';
@@ -111,7 +111,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
 
   const getSeedlotBySeedlotNumberQuery = useQuery(
     ['get-seedlot-by-seedlotNumber', seedlotNumber],
-    () => getSeedlotBySeedlotNumber(seedlotNumber ?? ''),
+    () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
     { enabled: !!seedlotNumber }
   );
 
