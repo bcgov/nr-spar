@@ -562,10 +562,8 @@ export const configHeaderOpt = (
     // Enable option in the column customization
     clonedHeaders[optionIndex].isAnOption = true;
 
-    // When on review mode, display all columns
-    if (isReview) {
-      clonedHeaders[optionIndex].enabled = true;
-    }
+    // Display all columns by default
+    clonedHeaders[optionIndex].enabled = true;
 
     // Enable weighted option in mix tab
     const weightedIndex = headerConfig.findIndex((header) => header.id === `w_${opt}`);
