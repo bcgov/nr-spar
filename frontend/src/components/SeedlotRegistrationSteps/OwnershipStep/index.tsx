@@ -152,7 +152,6 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
 
   const originalSeedQty = getSeedlotBySeedlotNumberQuery.data?.data?.originalSeedQty ?? 0;
-  const readOnly = originalSeedQty > 0;
 
   return (
     <div>
@@ -220,7 +219,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
-                  readOnly={isFormSubmitted || readOnly}
+                  readOnly={isFormSubmitted || originalSeedQty > 0}
                   isReview={isReview}
                 />
               </AccordionItem>
