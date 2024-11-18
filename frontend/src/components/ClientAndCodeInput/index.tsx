@@ -232,7 +232,7 @@ const ClientAndCodeInput = ({
         }
         : undefined
     );
-    setIsChecked(checked);
+    setIsDefault(checked);
     setIsChecked(checked);
   };
 
