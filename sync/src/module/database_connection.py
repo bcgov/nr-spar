@@ -35,11 +35,12 @@ class database_connection(object):
     
     def execute(self, query, params):
         """ Runs a SQL statement. """
-        self.conn.execute(text(query), params)
+        result = self.conn.execute(text(query), params or {})
+        return result
         
     def select(self, query, params=None):
         """ Runs a SQL statement. """
-        result = self.conn.execute(text(query), params)
+        result = self.conn.execute(text(query), params or {})
         return result
         
     def health_check(self) -> bool:
