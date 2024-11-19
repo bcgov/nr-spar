@@ -6,6 +6,15 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import AuthProvider from './contexts/AuthProvider';
 
+import 'antd/dist/reset.css';
+import { ConfigProvider } from 'antd';
+
+const theme = {
+  token: {
+    colorPrimary: '#1890ff'
+  }
+};
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
@@ -13,7 +22,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
+      <ConfigProvider theme={theme}>
+        <App />
+      </ConfigProvider>
     </AuthProvider>
   </React.StrictMode>
 );

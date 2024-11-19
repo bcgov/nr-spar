@@ -23,6 +23,7 @@
     "@types/validator": "^13.7.17",
     "@typescript-eslint/parser": "^7.0.0",
     "@vitejs/plugin-react": "^4.0.4",
+    "antd": "^5.22.1",
     "aws-amplify": "^5.3.11",
     "axios": "^1.6.8",
     "bignumber.js": "^9.0.0",
