@@ -42,7 +42,7 @@ services:
     environment:
       ALLOWED_ORIGINS: "http://localhost:*"
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
-      FORESTCLIENTAPI_KEY: YrmI6eO6M6Xeyw2oRYuDaueYPDOgyBuA
+      FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       POSTGRES_HOST: database
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
