@@ -734,8 +734,6 @@ export const generatePtValCalcPayload = (
 ): PtValsCalcReqPayload => {
   const { tableRowData, mixTabData } = state;
 
-  // eslint-disable-next-line no-debugger
-  debugger;
   const payload: PtValsCalcReqPayload = {
     orchardPtVals: [],
     smpMixIdAndProps: [],
@@ -754,11 +752,11 @@ export const generatePtValCalcPayload = (
       coneCount: Number(row.coneCount.value),
       pollenCount: Number(row.pollenCount.value),
       smpSuccessPerc:
-        row.smpSuccessPerc.value === 'null'
+        (row.smpSuccessPerc.value && row.smpSuccessPerc.value !== 'null')
           ? Number(row.smpSuccessPerc.value)
           : 0,
       nonOrchardPollenContamPct:
-        row.nonOrchardPollenContam.value === 'null'
+        (row.nonOrchardPollenContam.value && row.nonOrchardPollenContam.value !== 'null')
           ? Number(row.nonOrchardPollenContam.value)
           : 0,
       geneticTraits: []
