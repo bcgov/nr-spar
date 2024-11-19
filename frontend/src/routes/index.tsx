@@ -6,6 +6,7 @@ import { getStoredPath } from '../utils/PathUtils';
 
 import Dashboard from '../views/Dashboard/dashboard';
 import SeedlotDashboard from '../views/Seedlot/SeedlotDashboard';
+import TableTesting from '../views/TableTesting';
 import CreateAClass from '../views/Seedlot/CreateAClass';
 import EditAClassApplication from '../views/Seedlot/EditAClassApplication';
 import MySeedlots from '../views/Seedlot/MySeedlots';
@@ -42,6 +43,12 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.SEEDLOTS,
     element: (
       <SeedlotDashboard />
+    )
+  },
+  {
+    path: ROUTES.TABLE_TESTING,
+    element: (
+      <TableTesting />
     )
   },
   {
