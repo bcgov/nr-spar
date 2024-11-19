@@ -929,15 +929,11 @@ export const isMissingSecondaryOrchard = (orchardStepData: OrchardForm): boolean
  * Check if orchards selections are valid.
  */
 export const areOrchardsValid = (orchardStepData: OrchardForm): boolean => {
-  let isValid = true;
   const { orchards } = orchardStepData;
 
   if (!orchards.primaryOrchard.value.code) {
-    isValid = false;
-  }
-  if (isMissingSecondaryOrchard(orchardStepData)) {
-    isValid = false;
+    return false;
   }
 
-  return isValid;
+  return true;
 };

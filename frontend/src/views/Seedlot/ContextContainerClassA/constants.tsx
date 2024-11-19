@@ -120,9 +120,9 @@ export const emptyCollectionStep: CollectionFormSubmitType = {
   collectionLocnCode: '',
   collectionStartDate: '',
   collectionEndDate: '',
-  noOfContainers: 1,
-  volPerContainer: 1,
-  clctnVolume: 1,
+  noOfContainers: '',
+  volPerContainer: '',
+  clctnVolume: '',
   seedlotComment: '',
   coneCollectionMethodCodes: []
 };
