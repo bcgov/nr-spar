@@ -556,6 +556,8 @@ const SeedlotReviewContent = () => {
         className="edit-save-btn"
         renderIcon={isReadMode ? Edit : Save}
         onClick={handleEditSaveBtn}
+        disabled={getSeedlotBySeedlotNumberQuery.isSuccess
+                && getSeedlotBySeedlotNumberQuery.data.data.originalSeedQty > 0}
       >
         {isReadMode ? 'Edit seedlot' : 'Save edit'}
       </Button>
