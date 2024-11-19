@@ -219,12 +219,13 @@ export const geneticWorthDict: GeneticWorthDictType = {
   PW: ['dsb'],
   DR: ['gvo'],
   EP: ['gvo'],
-  FDI: ['gvo'],
+  FDI: ['gvo', 'wwd'],
   HW: ['gvo'],
   LW: ['gvo'],
   PY: ['gvo'],
   SS: ['gvo', 'iws'],
   SX: ['gvo', 'iws'],
+  YC: ['gvo'],
   UNKNOWN: ['gvo']
 };
 

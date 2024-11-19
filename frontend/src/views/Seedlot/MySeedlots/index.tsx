@@ -66,7 +66,7 @@ const MySeedlots = () => {
           isSortable
           showSearch
           showPagination
-          defaultPageSize={20}
+          defaultPageSize={50}
         />
       </Row>
     </FlexGrid>

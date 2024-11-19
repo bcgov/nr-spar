@@ -852,9 +852,9 @@ export const convertCollection = (collectionData: CollectionForm): CollectionFor
   // Assume the date values are present as validation has occurred before payload is generated
   collectionStartDate: localDateToUtcFormat(collectionData.startDate.value)!,
   collectionEndDate: localDateToUtcFormat(collectionData.endDate.value)!,
-  noOfContainers: +collectionData.numberOfContainers.value,
-  volPerContainer: +collectionData.volumePerContainers.value,
-  clctnVolume: +collectionData.volumeOfCones.value,
+  noOfContainers: `${+collectionData.numberOfContainers.value}`,
+  volPerContainer: `${+collectionData.volumePerContainers.value}`,
+  clctnVolume: `${+collectionData.volumeOfCones.value}`,
   seedlotComment: collectionData.comments.value,
   coneCollectionMethodCodes: collectionData
     .selectedCollectionCodes.value.map((code) => parseInt(code, 10))

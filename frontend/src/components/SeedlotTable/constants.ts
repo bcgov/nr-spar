@@ -63,7 +63,7 @@ export const TableText = {
 };
 
 export const PageSizesConfig = [
-  10, 20, 30, 40, 50
+  50, 100, 150, 200, 250
 ];
 
 export const ExclusiveAdminRows: Array<string> = [
