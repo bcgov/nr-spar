@@ -18,6 +18,7 @@ import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import getFundingSources from '../../../api-service/fundingSourcesAPI';
+import { getSeedlotFromOracleDbBySeedlotNumber } from '../../../api-service/seedlotAPI';
 import TitleAccordion from '../../TitleAccordion';
 import ScrollToTop from '../../ScrollToTop';
 import SingleOwnerInfo from './SingleOwnerInfo';
@@ -53,7 +54,8 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     setStepData,
     defaultClientNumber: defaultAgency,
     defaultCode,
-    isFormSubmitted
+    isFormSubmitted,
+    seedlotNumber
   } = useContext(ClassAContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
@@ -107,6 +109,12 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     cacheTime: THREE_HALF_HOURS
   });
 
+  const getSeedlotBySeedlotNumberQuery = useQuery(
+    ['get-seedlot-by-seedlotNumber', seedlotNumber],
+    () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
+    { enabled: !!seedlotNumber }
+  );
+
   // Set default method of payment for the first owner.
   useEffect(() => {
     if (methodsOfPaymentQuery.status === 'success') {
@@ -142,6 +150,8 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   });
 
   const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
+
+  const originalSeedQty = getSeedlotBySeedlotNumberQuery.data?.data?.originalSeedQty ?? 0;
 
   return (
     <div>
@@ -209,7 +219,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
-                  readOnly={isFormSubmitted}
+                  readOnly={isFormSubmitted || originalSeedQty > 0}
                   isReview={isReview}
                 />
               </AccordionItem>
