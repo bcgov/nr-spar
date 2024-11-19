@@ -545,8 +545,7 @@ export const configHeaderOpt = (
   setHeaderConfig: Function,
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: Function,
-  setApplicableGenWorths: Function,
-  isReview: boolean
+  setApplicableGenWorths: Function
 ) => {
   const speciesKey = Object.keys(geneticWorthDict).includes(seedlotSpecies.code)
     ? seedlotSpecies.code.toUpperCase()
@@ -562,10 +561,8 @@ export const configHeaderOpt = (
     // Enable option in the column customization
     clonedHeaders[optionIndex].isAnOption = true;
 
-    // When on review mode, display all columns
-    if (isReview) {
-      clonedHeaders[optionIndex].enabled = true;
-    }
+    // Display all columns by default
+    clonedHeaders[optionIndex].enabled = true;
 
     // Enable weighted option in mix tab
     const weightedIndex = headerConfig.findIndex((header) => header.id === `w_${opt}`);
@@ -923,15 +920,11 @@ export const isMissingSecondaryOrchard = (orchardStepData: OrchardForm): boolean
  * Check if orchards selections are valid.
  */
 export const areOrchardsValid = (orchardStepData: OrchardForm): boolean => {
-  let isValid = true;
   const { orchards } = orchardStepData;
 
   if (!orchards.primaryOrchard.value.code) {
-    isValid = false;
-  }
-  if (isMissingSecondaryOrchard(orchardStepData)) {
-    isValid = false;
+    return false;
   }
 
-  return isValid;
+  return true;
 };
