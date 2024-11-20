@@ -35,12 +35,15 @@ interface SingleOwnerInfoProps {
   setState: Function,
   readOnly?: boolean,
   isReview?: boolean
+  isOwnershipStep?: boolean
 }
 
 const SingleOwnerInfo = ({
   ownerInfo, defaultAgency, defaultCode, fundingSourcesQuery,
-  methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState, readOnly, isReview
+  methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState,
+  readOnly, isReview, isOwnershipStep
 }: SingleOwnerInfoProps) => {
+  const isReadOnly = readOnly && (isOwnershipStep || !isReview);
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>(
     inputText.portion.invalidText
   );
@@ -150,7 +153,7 @@ const SingleOwnerInfo = ({
                   locationCode: StringInputType
                 ) => setClientAndCode(client, locationCode)
               }
-              readOnly={readOnly && !isReview}
+              readOnly={isReadOnly}
             />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
@@ -168,7 +171,7 @@ const SingleOwnerInfo = ({
               }}
               invalid={ownerInfo.ownerPortion.isInvalid}
               invalidText={ownerPortionInvalidText}
-              readOnly={readOnly && !isReview}
+              readOnly={isReadOnly}
             />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
@@ -188,7 +191,7 @@ const SingleOwnerInfo = ({
                   onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                   invalid={ownerInfo.reservedPerc.isInvalid}
                   invalidText={reservedInvalidText}
-                  readOnly={readOnly && !isReview}
+                  readOnly={isReadOnly}
                 />
               </div>
               <div className="reserved-surplus-input">
@@ -206,7 +209,7 @@ const SingleOwnerInfo = ({
                   onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                   invalid={ownerInfo.surplusPerc.isInvalid}
                   invalidText={surplusInvalidText}
-                  readOnly={readOnly && !isReview}
+                  readOnly={isReadOnly}
                 />
               </div>
             </div>
@@ -233,7 +236,7 @@ const SingleOwnerInfo = ({
                     onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
                     invalid={ownerInfo.fundingSource.isInvalid}
                     invalidText={inputText.funding.invalidText}
-                    readOnly={readOnly && !isReview}
+                    readOnly={isReadOnly}
                   />
                 )
             }
@@ -258,7 +261,7 @@ const SingleOwnerInfo = ({
                     onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
                     invalid={ownerInfo.methodOfPayment.isInvalid}
                     invalidText={inputText.payment.invalidText}
-                    readOnly={readOnly && !isReview}
+                    readOnly={isReadOnly}
                   />
 
                 )
@@ -276,6 +279,7 @@ const SingleOwnerInfo = ({
                     className="owner-mod-btn"
                     renderIcon={TrashCan}
                     onClick={() => deleteAnOwner(ownerInfo.id)}
+                    disabled={isReadOnly}
                   >
                     Delete owner
                   </Button>
