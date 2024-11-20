@@ -221,6 +221,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
                   }
                   readOnly={isFormSubmitted || originalSeedQty > 0}
                   isReview={isReview}
+                  isOwnershipStep
                 />
               </AccordionItem>
             ))
@@ -235,6 +236,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
                 className="owner-add-btn"
                 renderIcon={Add}
                 onClick={addAnOwner}
+                disabled={originalSeedQty > 0}
               >
                 Add owner
               </Button>
