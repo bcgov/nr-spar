@@ -26,6 +26,12 @@ export const navItems = [
         icon: 'SoilMoistureField',
         link: ROUTES.SEEDLOTS,
         disabled: false
+      },
+      {
+        name: 'Table testing',
+        icon: 'SoilMoistureField',
+        link: ROUTES.TABLE_TESTING,
+        disabled: false
       }
       // Uncomment these as necessary :)
       // {
@@ -133,3 +139,4 @@ export const componentTexts = {
     controllerAriaLabel: 'User Settings'
   }
 };
+
