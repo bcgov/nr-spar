@@ -26,7 +26,7 @@ import './styles.scss';
 const ClientAndCodeInput = ({
   checkboxId, clientInput, locationCodeInput, textConfig, defaultClientNumber,
   defaultLocCode, setClientAndCode, readOnly, showCheckbox, maxInputColSize,
-  checkBoxInput
+  checkBoxInput, shouldSelectDefaultValue = false
 }: ClientAndCodeInputProps) => {
   const getIsDefaultVal = () => (
     checkBoxInput === undefined
@@ -38,8 +38,15 @@ const ClientAndCodeInput = ({
   const clientInputRef = useRef<HTMLInputElement>(null);
   const locCodeInputRef = useRef<HTMLInputElement>(null);
   const [isDefault, setIsDefault] = useState<boolean>(
-    () => getIsDefaultVal()
+    !shouldSelectDefaultValue ? false : () => getIsDefaultVal()
   );
+
+  const [isChecked, setIsChecked] = useState<boolean>(() => {
+    if (!shouldSelectDefaultValue) {
+      return false;
+    }
+    return checkBoxInput ? checkBoxInput.value : isDefault;
+  });
 
   const [showClientValidationStatus, setShowClientValidationStatus] = useState<boolean>(true);
 
@@ -60,7 +67,9 @@ const ClientAndCodeInput = ({
   useEffect(() => {
     const areValsDefault = getIsDefaultVal();
 
-    setIsDefault(areValsDefault);
+    if (shouldSelectDefaultValue) {
+      setIsDefault(areValsDefault);
+    }
 
     // Do not show validation status if isDefault is true
     if (areValsDefault) {
@@ -223,10 +232,8 @@ const ClientAndCodeInput = ({
         }
         : undefined
     );
-
-    if (!checkBoxInput) {
-      setIsDefault(checked);
-    }
+    setIsDefault(checked);
+    setIsChecked(checked);
   };
 
   const [openAgnTooltip, setOpenAgnTooltip] = useState<boolean>(false);
@@ -343,7 +350,7 @@ const ClientAndCodeInput = ({
                   name={textConfig.useDefaultCheckbox.name}
                   labelText={textConfig.useDefaultCheckbox.labelText}
                   readOnly={readOnly}
-                  checked={checkBoxInput ? checkBoxInput.value : isDefault}
+                  checked={isChecked}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleDefaultCheckBox(e.target.checked);
                   }}
@@ -363,7 +370,7 @@ const ClientAndCodeInput = ({
               id={clientInput.id}
               autoCapitalize="on"
               labelText={textConfig.agencyInput.titleText}
-              defaultValue={forestClientQuery.data?.acronym}
+              defaultValue={shouldSelectDefaultValue ? forestClientQuery.data?.acronym : ''}
               helperText={
                 (readOnly || (showCheckbox && isDefault))
                   ? null
@@ -406,7 +413,7 @@ const ClientAndCodeInput = ({
               id={locationCodeInput.id}
               ref={locCodeInputRef}
               name={textConfig.locationCode.name}
-              defaultValue={locationCodeInput.value}
+              defaultValue={shouldSelectDefaultValue ? locationCodeInput.value : ''}
               type="number"
               maxCount={LOCATION_CODE_LIMIT}
               enableCounter
