@@ -46,6 +46,8 @@ const Landing = () => {
             statusQueries.filter((query) => query.status === 'error').length > 0
               ? (
                 <ActionableNotification
+                  role="alert"
+                  aria-live="assertive"
                   className="dependency-notification"
                   kind="warning"
                   lowContrast
@@ -58,6 +60,7 @@ const Landing = () => {
                     SPAR&apos;s service is impacted due to server connection issue.
                     You can check the&nbsp;
                     <Link
+                      role="link"
                       target="_blank"
                       to="/service-status"
                     >
@@ -85,6 +88,8 @@ const Landing = () => {
 
           {/* Login buttons */}
           <Button
+            type="button"
+            role="button"
             onClick={() => { signIn(LoginProviders.IDIR); }}
             size="md"
             renderIcon={Login}
@@ -95,6 +100,8 @@ const Landing = () => {
           </Button>
 
           <Button
+            type="button"
+            role="button"
             kind="tertiary"
             onClick={() => { signIn(LoginProviders.BCEID_BUSINESS); }}
             size="md"
@@ -111,7 +118,7 @@ const Landing = () => {
         <Column className="seeding-img-column" sm={4} md={3} lg={6}>
           <img
             src={Seeding}
-            alt="Small green seedling on the dirt and watered"
+            alt="Pine cones on a tree"
             className="seeding-img"
           />
         </Column>
