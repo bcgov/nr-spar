@@ -82,7 +82,21 @@ export type NotifCtrlType = {
   }
 }
 
-type SpeciesWithGenWorth = 'CW'| 'PLI' |'FDC' | 'PW' | 'DR' | 'EP' | 'FDI' | 'HW' | 'LW' | 'PY' | 'SS' | 'SX' | 'UNKNOWN';
+type SpeciesWithGenWorth =
+  'CW'
+  |'PLI'
+  |'FDC'
+  |'PW'
+  |'DR'
+  |'EP'
+  |'FDI'
+  |'HW'
+  |'LW'
+  |'PY'
+  |'SS'
+  |'SX'
+  |'YC'
+  |'UNKNOWN';
 
 export type GeneticWorthDictType = {
   [key in SpeciesWithGenWorth]: string[]

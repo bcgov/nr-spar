@@ -544,22 +544,15 @@ const SeedlotReviewContent = () => {
         }
       />
 
-      {
-        // Seedlots that have 'CUS' or 'UPT' as source should not be edited.
-        seedlotData?.seedlotSource.seedlotSourceCode === 'TPT'
-          ? (
-            <Button
-              kind="secondary"
-              size="md"
-              className="edit-save-btn"
-              renderIcon={isReadMode ? Edit : Save}
-              onClick={handleEditSaveBtn}
-            >
-              {isReadMode ? 'Edit seedlot' : 'Save edit'}
-            </Button>
-          )
-          : null
-      }
+      <Button
+        kind="secondary"
+        size="md"
+        className="edit-save-btn"
+        renderIcon={isReadMode ? Edit : Save}
+        onClick={handleEditSaveBtn}
+      >
+        {isReadMode ? 'Edit seedlot' : 'Save edit'}
+      </Button>
 
       <Breadcrumbs
         crumbs={
