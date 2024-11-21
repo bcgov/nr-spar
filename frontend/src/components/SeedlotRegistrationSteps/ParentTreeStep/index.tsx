@@ -270,8 +270,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     setHeaderConfig,
     weightedGwInfoItems,
     setWeightedGwInfoItems,
-    setApplicableGenWorths,
-    isReviewDisplay ?? false
+    setApplicableGenWorths
   ), [seedlotSpecies]);
 
   const uploadCompostion = useMutation({
