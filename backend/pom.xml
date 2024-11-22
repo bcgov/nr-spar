@@ -39,7 +39,7 @@
     <sonar.organization>bcgov-sonarcloud</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <oci.revision>${project.version}</oci.revision>
-    <hibernate.version>6.6.1.Final</hibernate.version>
+    <hibernate.version>6.6.2.Final</hibernate.version>
   </properties>
 
   <profiles>
@@ -459,7 +459,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>10.20.0</version>
+            <version>10.20.1</version>
           </dependency>
         </dependencies>
         <configuration>
@@ -506,7 +506,7 @@
       <dependency>
         <groupId>com.nimbusds</groupId>
         <artifactId>nimbus-jose-jwt</artifactId>
-        <version>9.45</version>
+        <version>9.47</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
