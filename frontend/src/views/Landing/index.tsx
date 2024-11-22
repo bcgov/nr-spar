@@ -118,7 +118,7 @@ const Landing = () => {
         <Column className="seeding-img-column" sm={4} md={3} lg={6}>
           <img
             src={Seeding}
-            alt="Picture of spruce tree branches with needles and cones"
+            alt="Spruce tree branches with needles and cones"
             className="seeding-img"
           />
         </Column>
