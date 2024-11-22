@@ -18,7 +18,6 @@ type ClientAndCodeInputProps = {
   readOnly?: boolean,
   maxInputColSize?: number,
   checkBoxInput?: BooleanInputType
-  shouldSelectDefaultValue?: boolean
 }
 
 export default ClientAndCodeInputProps;
