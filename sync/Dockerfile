@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # Receive build number as argument, retain as environment variable
 ARG BUILD_NUMBER
