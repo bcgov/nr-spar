@@ -101,7 +101,6 @@ const Landing = () => {
 
           <Button
             type="button"
-            role="button"
             kind="tertiary"
             onClick={() => { signIn(LoginProviders.BCEID_BUSINESS); }}
             size="md"
