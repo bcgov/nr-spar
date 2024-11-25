@@ -5,6 +5,7 @@ import './styles.scss';
 interface SubtitleProps {
   text: string | React.ReactNode;
   className?: string;
+  role: string;
 }
 
 const Subtitle = ({ text, className }: SubtitleProps) => (
