@@ -51,7 +51,7 @@ const FavouriteActivities = () => {
       <Column sm={4} md={8} lg={16} xlg={12} className="favourite-activities-cards">
         <Row>
           {
-            favActQuery.isLoading ? <Loading withOverlay={false} /> : null
+            favActQuery.isLoading ? <Loading role="status" withOverlay={false} /> : null
           }
           {
             favActQuery.isSuccess
