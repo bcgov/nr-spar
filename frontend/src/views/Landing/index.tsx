@@ -89,7 +89,6 @@ const Landing = () => {
           {/* Login buttons */}
           <Button
             type="button"
-            role="button"
             onClick={() => { signIn(LoginProviders.IDIR); }}
             size="md"
             renderIcon={Login}
