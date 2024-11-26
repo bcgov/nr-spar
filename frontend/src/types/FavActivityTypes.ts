@@ -5,6 +5,7 @@ export type FavActivityType = {
   header: string;
   link: string;
   highlighted: boolean;
+  role?: string;
 }
 
 export type FavActivityPostType = {
