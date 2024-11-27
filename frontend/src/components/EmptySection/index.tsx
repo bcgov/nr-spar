@@ -34,10 +34,10 @@ const EmptySection = ({
   return (
     <div className="empty-section-container">
       <Img className="empty-section-icon" />
-      <p id="empty-section-heading" role="heading" className="empty-section-title">
+      <p id="empty-section-heading" role="heading" aria-level={2} className="empty-section-title">
         {title}
       </p>
-      <Subtitle className="empty-section-subtitle" text={description} aria-describedby="empty-section-heading"/>
+      <Subtitle className="empty-section-subtitle" text={description} aria-describedby="empty-section-heading" />
     </div>
   );
 };
