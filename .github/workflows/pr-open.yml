@@ -55,7 +55,7 @@ jobs:
           # View results
           echo "needs.*.result: ${{ toJson(needs.*.result) }}"
 
-      - if: contains(needs.*.result, 'canceled', 'failure')
+      - if: contains(needs.*.result, 'canceled|failure')
         run: |
           # Job failure found
           echo "At least one job has failed"
