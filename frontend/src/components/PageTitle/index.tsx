@@ -82,7 +82,7 @@ const PageTitle = ({
       </div>
       {
         subtitle
-          ? <Subtitle text={subtitle} role="heading" aria-level="2" />
+          ? <Subtitle text={subtitle} />
           : null
       }
     </Column>
