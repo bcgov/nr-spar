@@ -10,4 +10,7 @@ import jakarta.validation.constraints.NotNull;
  * @param activity The activity or page name
  */
 @Schema(description = "An object representing the request body when creating a favourite activity")
-public record FavouriteActivityCreateDto(@NotNull String activity) {}
+public record FavouriteActivityCreateDto(
+        @NotNull String activity,
+    @Schema(description = "Indicates whether this activity is a Consep", defaultValue = "false")
+        Boolean isConsep) {}

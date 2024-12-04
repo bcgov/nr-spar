@@ -5,8 +5,10 @@ export type FavActivityType = {
   header: string;
   link: string;
   highlighted: boolean;
+  isConsep?: boolean;
 }
 
 export type FavActivityPostType = {
   activity: string;
+  isConsep?: boolean;
 }

@@ -21,11 +21,17 @@ import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 const FavouriteActivities = () => {
   const windowSize = useWindowSize();
 
-  const favActQueryKey = ['favourite-activities'];
+  const favActQueryKey = (isConsep: boolean) => ['favourite-activities', isConsep];
 
   const favActQuery = useQuery({
-    queryKey: favActQueryKey,
-    queryFn: getFavAct
+    queryKey: favActQueryKey(false),
+    queryFn: ({ queryKey }) => {
+      const [, isConsep] = queryKey;
+      if (typeof isConsep === 'boolean') {
+        return getFavAct(isConsep);
+      }
+      throw new Error('Invalid isConsep value');
+    }
   });
 
   return (

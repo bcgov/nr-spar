@@ -1,11 +1,9 @@
 ---
-
 x-postgres-vars: &postgres-vars
-  POSTGRES_DB: spar
-  POSTGRES_HOST: database
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: default
-  POSTGRES_PORT: 5432
+  POSTGRES_DB: nr-spar
+  POSTGRES_HOST: localhost
+  POSTGRES_USER: nr-spar
+  POSTGRES_PASSWORD: EXd!X1gd$geIPF6^Ar%hduB2FcHlEOJt
 
 x-frontend: &frontend
   depends_on:
@@ -22,30 +20,22 @@ x-frontend: &frontend
     test: timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/3000'
 
 services:
-  database:
-    container_name: database
-    image: postgis/postgis:15-master
-    environment:
-      <<: *postgres-vars
-    volumes:
-      - "/pgdata"
-      - "./common/init_db:/init_db"
-    ports: ["5432:5432"]
-    healthcheck:
-      test: psql -q -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1'
-
   backend:
     container_name: backend
-    depends_on:
-      database:
-        condition: service_started
+    # depends_on:
+    #   database:
+    #     condition: service_started
     environment:
       ALLOWED_ORIGINS: "http://localhost:*"
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
-      FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
+      FORESTCLIENTAPI_KEY: YrmI6eO6M6Xeyw2oRYuDaueYPDOgyBuA
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-      POSTGRES_HOST: database
+      # POSTGRES_HOST: database
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
+      POSTGRES_DB: nr-spar
+      POSTGRES_HOST: host.docker.internal
+      POSTGRES_USER: nr-spar
+      POSTGRES_PASSWORD: EXd!X1gd$geIPF6^Ar%hduB2FcHlEOJt
       <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.9-eclipse-temurin-17
@@ -166,3 +156,4 @@ services:
     depends_on:
       database:
         condition: service_started
+

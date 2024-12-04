@@ -53,6 +53,12 @@ public class FavouriteActivityEntity {
   @Column(name = "update_timestamp")
   private LocalDateTime updateTimestamp;
 
+  @Column(name = "is_consep", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+  @Schema(
+      description = "Defines if the favourite activity is a CONSEP activity",
+      example = "false")
+  private Boolean isConsep = false;
+
   public FavouriteActivityEntity() {
     this.highlighted = false;
   }

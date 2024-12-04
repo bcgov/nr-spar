@@ -27,25 +27,31 @@ const PageTitle = ({
   enableFavourite,
   activity
 }: PageTitleProps) => {
-  const favActQueryKey = ['favourite-activities'];
+  const favActQueryKey = (isConsep: boolean) => ['favourite-activities', isConsep];
   const queryClient = useQueryClient();
 
   const favActQuery = useQuery({
-    queryKey: favActQueryKey,
-    queryFn: getFavAct
+    queryKey: favActQueryKey(false),
+    queryFn: ({ queryKey }) => {
+      const [, isConsep] = queryKey;
+      if (typeof isConsep === 'boolean') {
+        return getFavAct(isConsep);
+      }
+      throw new Error('Invalid isConsep value');
+    }
   });
 
   const highlightFavAct = useMutation({
     mutationFn: (actObj: FavActivityPostType) => postFavAct(actObj),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: favActQueryKey });
+      queryClient.invalidateQueries(favActQueryKey(false));
     }
   });
 
   const removeFavAct = useMutation({
     mutationFn: (id: number) => deleteFavAct(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: favActQueryKey });
+      queryClient.invalidateQueries(favActQueryKey(false));
     }
   });
 
