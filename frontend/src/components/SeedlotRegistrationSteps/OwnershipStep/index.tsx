@@ -10,8 +10,11 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
+import { env } from '../../../env';
+
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
+import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
@@ -39,7 +42,6 @@ import {
 import { MAX_OWNERS } from './constants';
 
 import './styles.scss';
-import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 
 type OwnershipStepProps = {
   isReview?: boolean
@@ -58,7 +60,9 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     seedlotNumber
   } = useContext(ClassAContext);
 
+  const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
+  const [originalSeedQty, setOriginalSeedQty] = useState<number>(0);
 
   const refControl = useRef<any>({});
 
@@ -149,9 +153,13 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     }))
   });
 
-  const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
+  useEffect(() => {
+    if (getSeedlotBySeedlotNumberQuery.status === 'success' && appVersion && appVersion !== 'dev') {
+      setOriginalSeedQty(getSeedlotBySeedlotNumberQuery.data.data.originalSeedQty);
+    }
+  }, [getSeedlotBySeedlotNumberQuery.status, getSeedlotBySeedlotNumberQuery.fetchStatus]);
 
-  const originalSeedQty = getSeedlotBySeedlotNumberQuery.data?.data?.originalSeedQty ?? 0;
+  const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
 
   return (
     <div>
