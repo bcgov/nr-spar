@@ -10,8 +10,6 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
-import { env } from '../../../env';
-
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
@@ -60,7 +58,6 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     seedlotNumber
   } = useContext(ClassAContext);
 
-  const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
   const [originalSeedQty, setOriginalSeedQty] = useState<number>(0);
 
@@ -116,7 +113,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   const getSeedlotBySeedlotNumberQuery = useQuery(
     ['get-seedlot-by-seedlotNumber', seedlotNumber],
     () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
-    { enabled: !!seedlotNumber }
+    { enabled: !!seedlotNumber && !isReview }
   );
 
   // Set default method of payment for the first owner.
@@ -154,7 +151,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   });
 
   useEffect(() => {
-    if (getSeedlotBySeedlotNumberQuery.status === 'success' && appVersion && appVersion !== 'dev') {
+    if (getSeedlotBySeedlotNumberQuery.status === 'success') {
       setOriginalSeedQty(getSeedlotBySeedlotNumberQuery.data.data.originalSeedQty);
     }
   }, [getSeedlotBySeedlotNumberQuery.status, getSeedlotBySeedlotNumberQuery.fetchStatus]);
@@ -229,7 +226,6 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
                   }
                   readOnly={isFormSubmitted || originalSeedQty > 0}
                   isReview={isReview}
-                  isOwnershipStep
                 />
               </AccordionItem>
             ))
