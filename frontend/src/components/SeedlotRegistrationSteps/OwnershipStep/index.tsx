@@ -113,7 +113,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   const getSeedlotBySeedlotNumberQuery = useQuery(
     ['get-seedlot-by-seedlotNumber', seedlotNumber],
     () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
-    { enabled: !!seedlotNumber && !isReview }
+    { enabled: !!seedlotNumber && isReview }
   );
 
   // Set default method of payment for the first owner.
