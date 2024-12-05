@@ -48,7 +48,7 @@ type OwnershipStepProps = {
 /*
   Component
 */
-const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
+const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
@@ -110,11 +110,11 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     cacheTime: THREE_HALF_HOURS
   });
 
-  const getSeedlotBySeedlotNumberQuery = useQuery(
-    ['get-seedlot-by-seedlotNumber', seedlotNumber],
-    () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
-    { enabled: !!seedlotNumber && isReview }
-  );
+  const getSeedlotBySeedlotNumberQuery = useQuery({
+    queryKey: ['get-seedlot-by-seedlotNumber', seedlotNumber],
+    queryFn: () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
+    enabled: isReview && !!seedlotNumber
+  });
 
   // Set default method of payment for the first owner.
   useEffect(() => {
