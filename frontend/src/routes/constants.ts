@@ -14,7 +14,8 @@ const ROUTES = {
   TSC_SEEDLOTS_TABLE: '/seedlots/tsc-admin-seedlots',
   FOUR_OH_FOUR: '/404',
   FOUR_OH_THREE: '/403',
-  SERVICE_STATUS: '/service-status'
+  SERVICE_STATUS: '/service-status',
+  CONSEP_FAVOURITE_ACTIVITIES: '/consep/favourite-activities'
 };
 
 export default ROUTES;

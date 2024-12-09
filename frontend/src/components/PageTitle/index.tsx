@@ -19,43 +19,41 @@ interface PageTitleProps {
   subtitle?: string | React.ReactNode;
   enableFavourite?: boolean;
   activity?: string;
+  isConsep?: boolean;
 }
 
 const PageTitle = ({
   title,
   subtitle,
   enableFavourite,
-  activity
+  activity,
+  isConsep = false
 }: PageTitleProps) => {
-  const favActQueryKey = (isConsep: boolean) => ['favourite-activities', isConsep];
+  const favActQueryKey = ['favourite-activities'];
   const queryClient = useQueryClient();
 
   const favActQuery = useQuery({
-    queryKey: favActQueryKey(false),
-    queryFn: ({ queryKey }) => {
-      const [, isConsep] = queryKey;
-      if (typeof isConsep === 'boolean') {
-        return getFavAct(isConsep);
-      }
-      throw new Error('Invalid isConsep value');
-    }
+    queryKey: favActQueryKey,
+    queryFn: getFavAct
   });
 
   const highlightFavAct = useMutation({
     mutationFn: (actObj: FavActivityPostType) => postFavAct(actObj),
     onSuccess: () => {
-      queryClient.invalidateQueries(favActQueryKey(false));
+      queryClient.invalidateQueries(favActQueryKey);
     }
   });
 
   const removeFavAct = useMutation({
     mutationFn: (id: number) => deleteFavAct(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(favActQueryKey(false));
+      queryClient.invalidateQueries(favActQueryKey);
     }
   });
 
-  const thisFavAct = favActQuery?.data?.filter((act) => act.type === activity)[0];
+  const thisFavAct = favActQuery?.data?.filter(
+    (act) => act.type === activity && act.isConsep === isConsep
+  )[0];
 
   const isFavourited = thisFavAct !== undefined;
 

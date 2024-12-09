@@ -3,14 +3,11 @@ import api from './api';
 import { FavActivityType, FavActivityPostType } from '../types/FavActivityTypes';
 import FavouriteActivityMap from '../config/FavouriteActivityMap';
 
-export const getFavAct = (isConsep: boolean) => {
+export const getFavAct = () => {
   const url = ApiConfig.favouriteActivities;
   return api.get(url)
     .then((response) => {
-      const filteredData = response.data.filter(
-        (item: FavActivityType) => item.isConsep === isConsep
-      );
-      const data = [...filteredData];
+      const data = [...response.data];
       const userList: FavActivityType[] = [];
       const activityList = Object.keys(FavouriteActivityMap);
       data.forEach((item) => {
