@@ -35,7 +35,6 @@
   align-items: flex-start;
   padding: 1.25rem 1rem;
   margin: 0.5rem;
-  width: 14.625rem;
   height: 9.875rem;
   background: var(--#{vars.$bcgov-prefix}-layer-02);
   border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-02);
@@ -48,6 +47,14 @@
 .fav-card-main:hover {
   outline: 2px solid var(--#{vars.$bcgov-prefix}-focus);
   cursor: pointer;
+}
+
+.fav-card-main-spar {
+  width: 14.625rem;
+}
+
+.fav-card-main-consep {
+  width: 18.281rem;
 }
 
 .fav-card-content {

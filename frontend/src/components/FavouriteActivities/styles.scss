@@ -3,8 +3,6 @@
 @use '@carbon/type';
 
 .favourite-activities {
-  background-color: var(--#{vars.$bcgov-prefix}-layer-01);
-
   .favourite-activities-title {
     h2 {
       @include type.type-style('heading-03');
@@ -47,4 +45,8 @@
 
 .favourite-activities-padding{
   padding: 2rem;
+}
+
+.favourite-activities-with-background {
+  background-color: var(--#{vars.$bcgov-prefix}-layer-01);
 }
