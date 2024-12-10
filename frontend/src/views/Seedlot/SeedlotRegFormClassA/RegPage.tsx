@@ -60,12 +60,6 @@ const RegPage = () => {
 
   const { isTscAdmin } = useContext(AuthContext);
 
-  const disableSubmit = !allStepCompleted
-    || saveStatus === 'conflict'
-    || !seedlotData
-    || (seedlotData.seedlotStatus.seedlotStatusCode !== 'PND'
-    && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC');
-
   return (
     <div className="seedlot-registration-page">
       <FlexGrid fullWidth>
@@ -182,21 +176,6 @@ const RegPage = () => {
           </Column>
         </Row>
         <Row className="seedlot-registration-button-row">
-          {
-            formStep === 5 && disableSubmit
-              ? (
-                <Column sm={4} md={8} lg={16} xlg={12}>
-                  <InlineNotification
-                    lowContrast
-                    kind="warning"
-                    title="Missing fields:"
-                    subtitle="Submit registration is disabled until mandatory fields are filled in
-                              correctly. You can check for blank or invalid fields on every step."
-                  />
-                </Column>
-              )
-              : null
-          }
           <Grid narrow>
             <Column sm={4} md={3} lg={3} xlg={4}>
               {
@@ -258,7 +237,13 @@ const RegPage = () => {
                     <SubmitModal
                       btnText="Submit Registration"
                       renderIconName="CheckmarkOutline"
-                      disableBtn={disableSubmit}
+                      disableBtn={
+                        !allStepCompleted
+                        || saveStatus === 'conflict'
+                        || !seedlotData
+                        || (seedlotData.seedlotStatus.seedlotStatusCode !== 'PND'
+                        && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC')
+                      }
                       submitFn={() => {
                         submitSeedlot.mutate(
                           getSeedlotPayload(

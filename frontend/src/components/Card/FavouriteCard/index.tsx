@@ -105,7 +105,7 @@ const FavouriteCard = ({
         {ActionBtn}
       </div>
       <div className="fav-card-content">
-        <p className="fav-card-title-large">{favObject.header}</p>
+        <p className="fav-card-title-large" role="heading" aria-level={2}>{favObject.header}</p>
       </div>
     </Tile>
   );
