@@ -54,7 +54,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Actual Germination Count',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   calculateCropAverage: {
     id: -1,
@@ -63,7 +64,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Calculate Crop Average',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Administrative'
   },
   cancelledRequestsReport: {
     id: -1,
@@ -72,7 +74,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Cancelled Requests Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   coneAndSeedProcessingReport: {
     id: -1,
@@ -81,7 +84,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Cone and Seed Processing Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Processing'
   },
   coneAndSeedShipmentReceipt: {
     id: -1,
@@ -90,7 +94,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Cone and Seed Shipment Receipt',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   createGerminationTray: {
     id: -1,
@@ -99,7 +104,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Create Germination Tray',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   cspRequest: {
     id: -1,
@@ -108,7 +114,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'CSP Request',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Processing'
   },
   doNotStartList: {
     id: -1,
@@ -117,7 +124,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Do Not Start List',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   familyLot: {
     id: -1,
@@ -126,7 +134,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Family Lot',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Seed and family lot'
   },
   familyLotSummaryReport: {
     id: -1,
@@ -135,7 +144,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Family Lot Summary Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Seed and family lot'
   },
   germinationSpeciesAverage: {
     id: -1,
@@ -144,7 +154,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Germination Species Average',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   germCountPredictions: {
     id: -1,
@@ -153,7 +164,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Germ Count Predictions',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   identifyAvailableLongTermLocation: {
     id: -1,
@@ -162,7 +174,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Identify Available Long-Term Location',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Seed and family lot'
   },
   inHouseInventory: {
     id: -1,
@@ -171,7 +184,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'In-House Inventory',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   inventoryLocationReport: {
     id: -1,
@@ -180,7 +194,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Inventory Location Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   kilnPrograms: {
     id: -1,
@@ -189,7 +204,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Kiln Programs',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Administrative'
   },
   maintainClientLocation: {
     id: -1,
@@ -198,7 +214,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Maintain Client Location',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Administrative'
   },
   maintainGerminationTrayScreen: {
     id: -1,
@@ -207,7 +224,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Maintain Germination Tray Screen',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   maintainLocalContacts: {
     id: -1,
@@ -216,7 +234,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Maintain Local Contacts',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Administrative'
   },
   maintainStandardActivities: {
     id: -1,
@@ -225,7 +244,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Maintain Standard Activities',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Administrative'
   },
   maintainStatHolidays: {
     id: -1,
@@ -234,7 +254,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Maintain Stat Holidays',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   maintainWorkPlans: {
     id: -1,
@@ -243,7 +264,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Maintain Work Plans',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Administrative'
   },
   manualMoistureContent: {
     id: -1,
@@ -252,7 +274,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Manual Moisture Content',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   processingActivities: {
     id: -1,
@@ -261,7 +284,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Processing Activities',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Processing'
   },
   recordStockCountResults: {
     id: -1,
@@ -270,7 +294,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Record Stock Count Results',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Seed and family lot'
   },
   requestChangesReport: {
     id: -1,
@@ -279,7 +304,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Request Changes Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   returnedSeed: {
     id: -1,
@@ -288,7 +314,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Returned Seed',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   reviewPendingRequest: {
     id: -1,
@@ -297,7 +324,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Review Pending Request',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   scheduleOrReviseRequestItemActivity: {
     id: -1,
@@ -306,7 +334,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Schedule or Revise Request Item Activity',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   seedAndFamilyLotReport: {
     id: -1,
@@ -315,7 +344,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Seed and Family Lot Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Seed and family lot'
   },
   seedSaleOrTransferActivitiesScreen: {
     id: -1,
@@ -324,7 +354,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Seed Sale or Transfer Activities Screen',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   seedlotCharacteristics: {
     id: -1,
@@ -333,7 +364,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Seedlot Characteristics',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Seed and family lot'
   },
   seedlotLocationHistoryReport: {
     id: -1,
@@ -342,7 +374,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Seedlot Location History Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   seedlotObservationHistory: {
     id: -1,
@@ -351,7 +384,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Seedlot Observation History',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Seed and family lot'
   },
   seedlotOrRequestItemInventoryLocation: {
     id: -1,
@@ -360,7 +394,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Seedlot or Request Item Inventory Location',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Seed and family lot'
   },
   seedlotOwner: {
     id: -1,
@@ -369,7 +404,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Seedlot Owner',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Seed and family lot'
   },
   seedlotTestHistoryReport: {
     id: -1,
@@ -378,7 +414,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Seedlot Test History Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   stockCountStatusReport: {
     id: -1,
@@ -387,7 +424,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Stock Count Status Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   testingActivitiesList: {
     id: -1,
@@ -396,7 +434,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Testing Activities List',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   testingActivitiesSummaryReport: {
     id: -1,
@@ -405,7 +444,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Testing Activities Summary Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   testingRequestsReport: {
     id: -1,
@@ -414,7 +454,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Testing Requests Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   waybills: {
     id: -1,
@@ -423,7 +464,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Waybills',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   withdrawalDate: {
     id: -1,
@@ -432,7 +474,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Withdrawal Date',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Testing'
   },
   withdrawalRequest: {
     id: -1,
@@ -441,7 +484,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Withdrawal Request',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   withdrawalRequestDetailsReport: {
     id: -1,
@@ -450,7 +494,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Withdrawal Request Details Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   withdrawalRequestReport: {
     id: -1,
@@ -459,7 +504,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Withdrawal Request Report',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   withdrawalResults: {
     id: -1,
@@ -468,7 +514,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Withdrawal Results',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   },
   withdrawalResultObservations: {
     id: -1,
@@ -477,7 +524,8 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     header: 'Withdrawal Result Observations',
     link: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     highlighted: false,
-    isConsep: true
+    isConsep: true,
+    department: 'Withdrawal'
   }
 };
 

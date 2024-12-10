@@ -6,6 +6,7 @@ export type FavActivityType = {
   link: string;
   highlighted: boolean;
   isConsep?: boolean;
+  department?: string;
 }
 
 export type FavActivityPostType = {
