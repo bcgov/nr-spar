@@ -1,5 +1,6 @@
 import { JWTPayload, KeyLike, SignJWT, importJWK, jwtVerify }  from 'jose';
 import express, { Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { IEnvVars, getEnvVars } from './variables';
 
 const create_jwt_claims = (subject: string, vars: IEnvVars): JWTPayload => {
@@ -61,6 +62,12 @@ const app = express();
 app.use(express.json());
 const port = 3000;
 
+// set up rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+
 app.get('/create-token', async (req: Request, res: Response) => {
   if (!process.env.COGNITO_REGION) {
     res.status(400)
@@ -92,7 +99,7 @@ app.get('/create-token', async (req: Request, res: Response) => {
   res.status(200).json(token);
 });
 
-app.post('/validate-token', async (req: Request, res: Response) => {
+app.post('/validate-token', limiter, async (req: Request, res: Response) => {
   const bodyToken = req.body.token;
   if (!bodyToken) {
     res.status(400).json("Please send the token in the request body!");
