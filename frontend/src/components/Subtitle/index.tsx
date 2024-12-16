@@ -8,7 +8,7 @@ interface SubtitleProps {
 }
 
 const Subtitle = ({ text, className }: SubtitleProps) => (
-  <div role="heading" aria-level={2} className={className ? `${className} subtitle-section` : 'subtitle-section'}>
+  <div className={className ? `${className} subtitle-section` : 'subtitle-section'}>
     {text}
   </div>
 );
