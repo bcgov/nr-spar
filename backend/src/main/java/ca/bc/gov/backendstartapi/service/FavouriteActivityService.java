@@ -60,6 +60,8 @@ public class FavouriteActivityService {
     activityEntity.setUserId(userId);
     activityEntity.setActivity(activityDto.activity());
 
+    activityEntity.setIsConsep(activityDto.isConsep() != null ? activityDto.isConsep() : false);
+
     FavouriteActivityEntity activityEntitySaved = favouriteActivityRepository.save(activityEntity);
     SparLog.info("Activity {} created for user {}", activityDto.activity(), userId);
     return activityEntitySaved;
