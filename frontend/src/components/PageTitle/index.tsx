@@ -63,6 +63,8 @@ const PageTitle = ({
               <IconButton
                 kind="ghost"
                 label={isFavourited ? 'Unfavourite' : 'Favourite'}
+                aria-label={isFavourited ? 'Unfavourite' : 'Favourite'}
+                aria-pressed={isFavourited}
                 align="right"
                 onClick={
                   isFavourited

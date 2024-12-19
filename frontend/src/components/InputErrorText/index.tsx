@@ -9,7 +9,7 @@ interface InputErrorProps {
 const InputErrorText = ({
   description
 }: InputErrorProps) => (
-  <div className="input-error-text-component">
+  <div role="alert" aria-live="polite" className="input-error-text-component">
     <ErrorOutline />
     <p>{description}</p>
   </div>

@@ -87,6 +87,12 @@
       p {
         color: var(--#{vars.$bcgov-prefix}-link-primary);
       }
+
+      p:focus {
+        outline: 0.15rem solid var(--#{vars.$bcgov-prefix}-link-primary); /* High-contrast focus indicator */
+        outline-offset: 0.15rem;
+        border-radius: 0.075rem;
+      }
     }
   }
 }

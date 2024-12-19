@@ -482,6 +482,7 @@ const ClientAndCodeInput = ({
                   <ClientSearchModal
                     linkText="open the client search"
                     modalLabel="Register A-Class Seedlot"
+                    aria-label="find the client input information"
                     applySelectedClient={(client: ForestClientSearchType) => {
                       const selectedClient: StringInputType = {
                         ...clientInput,
