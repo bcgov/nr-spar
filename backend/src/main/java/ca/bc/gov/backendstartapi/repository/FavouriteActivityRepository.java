@@ -14,6 +14,8 @@ public interface FavouriteActivityRepository extends CrudRepository<FavouriteAct
 
   Optional<FavouriteActivityEntity> findByActivity(String activity);
 
+  boolean existsByUserIdAndActivity(String userId, String activity);
+
   @Modifying
   @Query("update FavouriteActivityEntity set highlighted = false where userId = ?1")
   void removeAllHighlightedByUser(String userId);
