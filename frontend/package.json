@@ -50,7 +50,7 @@
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@types/node": "^22.0.0",
     "@types/react": "^18.2.74",
-    "@types/react-test-renderer": "^18.0.0",
+    "@types/react-test-renderer": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@vitest/coverage-v8": "^2.0.0",
     "cypress": "^13.0.0",
