@@ -82,12 +82,12 @@ const BCHeader = () => {
 
   return (
     <HeaderContainer
+      isSideNavExpanded={false}
       render={({ isSideNavExpanded, onClickSideNavExpand }: HearderContainerProps) => (
         <Header
           aria-label={componentTexts.completeTitle}
-          className="spar-header"
+          className={`spar-header ${!isSideNavExpanded ? 'spar-header-expanded' : ''}`}
           data-testid="header"
-          onClick={isSideNavExpanded ? onClickSideNavExpand : null}
         >
           <SkipToContent />
           {
@@ -95,6 +95,7 @@ const BCHeader = () => {
               ? (
                 <HeaderMenuButton
                   aria-label={componentTexts.openMenu}
+                  isCollapsible
                   onClick={onClickSideNavExpand}
                   isActive={isSideNavExpanded}
                 />
@@ -179,9 +180,8 @@ const BCHeader = () => {
                   isChildOfHeader
                   expanded={isSideNavExpanded}
                   aria-label={componentTexts.sideMenuAriaLabel}
-                  inert={undefined}
-                  className="spar-side-nav"
-                  onClick={isSideNavExpanded ? onClickSideNavExpand : null}
+                  className={`spar-side-nav ${!isSideNavExpanded ? 'spar-side-nav-expanded' : ''}`}
+                  onClick={onClickSideNavExpand}
                 >
                   <div className="side-nav-top">
                     {

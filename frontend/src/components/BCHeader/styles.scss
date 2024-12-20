@@ -52,6 +52,10 @@
     justify-content: space-between;
     overflow-y: auto;
 
+    &.spar-side-nav-expanded {
+      inline-size: 0;
+    }
+
     .side-nav-top {
       padding-top: 1rem;
     }
