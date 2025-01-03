@@ -59,7 +59,13 @@ const FavouriteActivities: React.FC<FavouriteActivitiesProps> = ({ isConsep }) =
       <Column sm={4} md={8} lg={16} xlg={isConsep ? 16 : 12} className="favourite-activities-cards">
         <Row>
           {
-            favActQuery.isLoading ? <Loading withOverlay={false} /> : null
+            favActQuery.isLoading
+              ? (
+                <Loading role="status" aria-live="polite" withOverlay={false}>
+                  <span className="visually-hidden">Loading, please wait...</span>
+                </Loading>
+              )
+              : null
           }
           {
             favActQuery.isSuccess

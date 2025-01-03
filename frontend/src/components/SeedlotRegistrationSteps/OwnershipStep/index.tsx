@@ -12,6 +12,7 @@ import { Add } from '@carbon/icons-react';
 
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
+import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
@@ -39,7 +40,6 @@ import {
 import { MAX_OWNERS } from './constants';
 
 import './styles.scss';
-import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 
 type OwnershipStepProps = {
   isReview?: boolean
@@ -48,7 +48,7 @@ type OwnershipStepProps = {
 /*
   Component
 */
-const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
+const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
@@ -59,6 +59,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   } = useContext(ClassAContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
+  const [originalSeedQty, setOriginalSeedQty] = useState<number>(0);
 
   const refControl = useRef<any>({});
 
@@ -109,11 +110,11 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     cacheTime: THREE_HALF_HOURS
   });
 
-  const getSeedlotBySeedlotNumberQuery = useQuery(
-    ['get-seedlot-by-seedlotNumber', seedlotNumber],
-    () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
-    { enabled: !!seedlotNumber }
-  );
+  const getSeedlotBySeedlotNumberQuery = useQuery({
+    queryKey: ['get-seedlot-by-seedlotNumber', seedlotNumber],
+    queryFn: () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
+    enabled: isReview && !!seedlotNumber
+  });
 
   // Set default method of payment for the first owner.
   useEffect(() => {
@@ -149,9 +150,13 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     }))
   });
 
-  const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
+  useEffect(() => {
+    if (getSeedlotBySeedlotNumberQuery.status === 'success') {
+      setOriginalSeedQty(getSeedlotBySeedlotNumberQuery.data.data.originalSeedQty);
+    }
+  }, [getSeedlotBySeedlotNumberQuery.status, getSeedlotBySeedlotNumberQuery.fetchStatus]);
 
-  const originalSeedQty = getSeedlotBySeedlotNumberQuery.data?.data?.originalSeedQty ?? 0;
+  const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
 
   return (
     <div>
@@ -221,7 +226,6 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
                   }
                   readOnly={isFormSubmitted || originalSeedQty > 0}
                   isReview={isReview}
-                  isOwnershipStep
                 />
               </AccordionItem>
             ))
