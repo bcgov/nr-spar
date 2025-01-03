@@ -90,7 +90,7 @@ const FavouriteCard = ({
 
   return (
     <Tile
-      className={favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
+      className={`${favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'} ${favObject.isConsep ? 'fav-card-main-consep' : 'fav-card-main-spar'}`}
       onClick={() => navigate(favObject.link)}
       tabIndex={0}
       aria-label={`Go to ${favObject.header}`}
