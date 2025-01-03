@@ -2,7 +2,7 @@ import React, {
   useState, useEffect, useRef, useContext
 } from 'react';
 import { AxiosError, AxiosResponse } from 'axios';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Tabs, TabList, Tab, FlexGrid, Row, Column,

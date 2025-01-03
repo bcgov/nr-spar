@@ -6,7 +6,7 @@ import {
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import AuthContext from '../../contexts/AuthContext';
 import { getForestClientByNumberOrAcronym } from '../../api-service/forestClientsAPI';

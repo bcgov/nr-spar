@@ -34,7 +34,7 @@
     "react-beforeunload": "^2.6.0",
     "react-dom": "^18.2.0",
     "react-hash-string": "^1.0.0",
-    "react-router-dom": "^7.0.0",
+    "react-router": "^7.1.1",
     "react-test-renderer": "^18.2.0",
     "react-toastify": "^11.0.0",
     "sass": "^1.77.7",
