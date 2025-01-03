@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import Landing from '../../views/Landing';
