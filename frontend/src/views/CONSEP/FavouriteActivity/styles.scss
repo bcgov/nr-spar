@@ -121,3 +121,21 @@ th > .bx--checkbox--inline > .bx--checkbox-label {
     max-width: 16rem;
   }
 }
+
+.fav-activity-search-row {
+  margin: 0 0 1.5rem 0;
+  padding: 0;
+
+  .bx--css-grid-column {
+    padding: 0;
+    margin: 0 0.1rem 0 0;
+  }
+
+  .fav-activity-search-btn {
+    width: 100%;
+    .fav-activity-search-btn-icon {
+      color: white;
+    }
+  }
+
+}

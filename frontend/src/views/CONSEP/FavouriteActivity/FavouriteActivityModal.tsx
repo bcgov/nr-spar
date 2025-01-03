@@ -3,17 +3,22 @@ import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
-  Modal, Table, TableHead, TableRow, TableHeader, Pagination,
-  TableBody, TableCell, TableContainer, DataTable, TableSelectRow, TableSelectAll
+  Modal, Table, TableHead, TableRow, TableHeader, Pagination, TableBody,
+  TableCell, TableContainer, DataTable, TableSelectRow, TableSelectAll,
+  TextInput, Dropdown, Button, Column, Grid
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
 import { getFavAct, postFavAct, deleteFavAct } from '../../../api-service/favouriteActivitiesAPI';
 import { FavActivityPostType } from '../../../types/FavActivityTypes';
 
-import { textConfig, favActHeaders } from './constants';
+import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import {
-  HeaderProps, RowProps, FavouriteActivityModalProps, FavActivityTableProps
+  textConfig, favActHeaders, searchOptions, headerIconMap
+} from './constants';
+import {
+  HeaderProps, RowProps, FavouriteActivityModalProps,
+  FavActivityTableProps, FavActivitySearchMenu
 } from './definitions';
 import './styles.scss';
 
@@ -31,23 +36,24 @@ const allRows: RowProps[] = Object.keys(FavouriteActivityMap).map((key) => {
   return null;
 }).filter((activity) => activity !== null);
 
-type Department = 'Testing' | 'Administrative' | 'Withdrawal' | 'Processing' | 'Seed and family lot';
-
-const headerIconMap: Record<Department, string> = {
-  Testing: 'Chemistry',
-  Administrative: 'Tools',
-  Withdrawal: 'StayInside',
-  Processing: 'Industry',
-  'Seed and family lot': 'SoilMoistureGlobal'
-};
-
 const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) => {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [initActs, setInitActs] = useState<string[]>([]);
+  const [searchOption, setSearchOption] = useState<FavActivitySearchMenu>(searchOptions[0]);
+  const [searchWord, setSearchWord] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const currentRows = allRows.slice(
+  let filteredRows = allRows;
+  if (searchWord) {
+    const lowerCaseKeyWord = searchWord.toLowerCase();
+    filteredRows = allRows.filter((r) => r.activityName.toLowerCase().includes(lowerCaseKeyWord));
+    if (searchOption.option !== 'All departments') {
+      filteredRows = filteredRows.filter((row) => row.department === searchOption.option);
+    }
+  }
+
+  const currentRows = filteredRows.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -122,6 +128,38 @@ const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) 
       <p className="favourite-activity-modal-description">
         {textConfig.description}
       </p>
+      <Grid fullWidth className="fav-activity-search-row">
+        <Column sm={1} md={3} lg={4} xlg={4}>
+          <Dropdown
+            id="client-search-dropdown"
+            label=""
+            aria-label="Client Search Field Select Dropdown"
+            titleText=""
+            items={searchOptions}
+            selectedItem={searchOption}
+            onChange={(e: ComboBoxEvent) => {
+              setSearchOption(e.selectedItem);
+            }}
+          />
+        </Column>
+        <Column sm={2} md={3} lg={10} xlg={10}>
+          <TextInput
+            id="client-search-input"
+            labelText=""
+            aria-label="Favourite Activity Search Input"
+            placeholder="Search for favourite activity"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setSearchWord(e.target.value);
+            }}
+          />
+        </Column>
+        <Column sm={1} md={2} lg={2} xlg={2}>
+          <Button size="md" className="fav-activity-search-btn">
+            Search
+            <Icons.Search className="fav-activity-search-btn-icon" />
+          </Button>
+        </Column>
+      </Grid>
       <DataTable
         rows={currentRows}
         headers={favActHeaders}
@@ -174,7 +212,7 @@ const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) 
       />
 
       <Pagination
-        totalItems={allRows.length}
+        totalItems={filteredRows.length}
         pageSize={itemsPerPage}
         pageSizes={[5, 10, 15, 20]}
         onChange={({ page, pageSize }: { page: number; pageSize: number }) => {
