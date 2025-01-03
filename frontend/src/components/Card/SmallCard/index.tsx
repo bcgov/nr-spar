@@ -2,7 +2,7 @@ import React from 'react';
 import * as Icons from '@carbon/icons-react';
 import * as Pictograms from '@carbon/pictograms-react';
 import { Tile } from '@carbon/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import './styles.scss';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link } from 'react-router';
 
 import { Content, ActionableNotification } from '@carbon/react';
 import { useQueries } from '@tanstack/react-query';
