@@ -58,6 +58,8 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     seedlotNumber
   } = useContext(ClassAContext);
 
+  console.log(state);
+
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
   const [originalSeedQty, setOriginalSeedQty] = useState<number>(0);
 

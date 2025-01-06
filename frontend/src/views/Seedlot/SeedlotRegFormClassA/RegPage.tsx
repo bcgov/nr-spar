@@ -53,7 +53,9 @@ const RegPage = () => {
     seedlotData,
     getFormDraftQuery,
     seedlotSpecies,
-    popSizeAndDiversityConfig
+    popSizeAndDiversityConfig,
+    isFormSubmitted,
+    seedlotDataLoaded
   } = useContext(ClassAContext);
 
   const reloadFormDraft = () => getFormDraftQuery.refetch();
@@ -65,6 +67,9 @@ const RegPage = () => {
     || !seedlotData
     || (seedlotData.seedlotStatus.seedlotStatusCode !== 'PND'
     && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC');
+
+  console.log(isFormSubmitted);
+  console.log(seedlotDataLoaded);
 
   return (
     <div className="seedlot-registration-page">
@@ -171,7 +176,8 @@ const RegPage = () => {
         <Row>
           <Column className="seedlot-registration-row">
             {
-              isFetchingData || submitSeedlot.status === 'loading'
+              (isFetchingData || submitSeedlot.status === 'loading')
+              || (isFormSubmitted && !seedlotDataLoaded)
                 ? <Loading />
                 : (
                   <RegForm
