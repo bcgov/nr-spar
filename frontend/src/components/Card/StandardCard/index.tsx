@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { Tile, IconButton } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';

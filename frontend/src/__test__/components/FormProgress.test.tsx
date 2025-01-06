@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react';
 import FormProgress from '../../components/FormProgress/index';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 
 describe('Test the Form Progress component', () => {
   it('should render correctly', () => {

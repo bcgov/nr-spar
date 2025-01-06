@@ -1,13 +1,12 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import InfoDisplayObj from '../../types/InfoDisplayObj';
 import InfoSectionRow from './InfoSectionRow';
-import JsxChildren from '../../types/JsxChildren';
 
 import './styles.scss';
 
 interface InfoSectionProps {
   infoItems: Array<InfoDisplayObj>;
-  children?: JsxChildren;
+  children?: ReactNode;
 }
 
 /**
