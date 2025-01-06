@@ -68,9 +68,6 @@ const RegPage = () => {
     || (seedlotData.seedlotStatus.seedlotStatusCode !== 'PND'
     && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC');
 
-  console.log(isFormSubmitted);
-  console.log(seedlotDataLoaded);
-
   return (
     <div className="seedlot-registration-page">
       <FlexGrid fullWidth>
