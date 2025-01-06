@@ -94,7 +94,11 @@ const BCHeader = () => {
             !(location.pathname.endsWith('/403') || location.pathname.endsWith('/404'))
               ? (
                 <HeaderMenuButton
-                  aria-label={componentTexts.openMenu}
+                  aria-label={
+                    isSideNavExpanded
+                      ? componentTexts.closeMenu
+                      : componentTexts.openMenu
+                  }
                   isCollapsible
                   onClick={onClickSideNavExpand}
                   isActive={isSideNavExpanded}
