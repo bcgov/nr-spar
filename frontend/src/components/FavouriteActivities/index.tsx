@@ -22,7 +22,7 @@ interface FavouriteActivitiesProps {
   isConsep: boolean;
 }
 
-const FavouriteActivities: React.FC<FavouriteActivitiesProps> = ({ isConsep }) => {
+const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
   const windowSize = useWindowSize();
 
   const favActQueryKey = ['favourite-activities'];
