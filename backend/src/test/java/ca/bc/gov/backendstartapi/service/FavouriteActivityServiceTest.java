@@ -49,7 +49,7 @@ class FavouriteActivityServiceTest {
     entity.setHighlighted(Boolean.FALSE);
     when(favouriteActivityRepository.save(any())).thenReturn(entity);
 
-    FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT");
+    FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT", false);
     FavouriteActivityEntity entitySaved = favouriteActivityService.createUserActivity(createDto);
 
     Assertions.assertNotNull(entitySaved);
@@ -67,7 +67,7 @@ class FavouriteActivityServiceTest {
     entity.setHighlighted(Boolean.FALSE);
     when(favouriteActivityRepository.save(any())).thenReturn(entity);
 
-    FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto(null);
+    FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto(null, false);
 
     Exception notFoundExc =
         Assertions.assertThrows(
@@ -81,7 +81,7 @@ class FavouriteActivityServiceTest {
     when(favouriteActivityRepository.findAllByUserId(any())).thenReturn(userFavList);
 
     FavouriteActivityCreateDto createAnotherDto =
-        new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT");
+        new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT", false);
 
     Exception activityExists =
         Assertions.assertThrows(
