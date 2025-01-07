@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, RouteObject } from 'react-router-dom';
+import { Navigate, RouteObject } from 'react-router';
 
 import ROUTES from './constants';
 import { getStoredPath } from '../utils/PathUtils';

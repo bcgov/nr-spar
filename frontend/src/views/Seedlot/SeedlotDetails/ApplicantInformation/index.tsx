@@ -5,7 +5,7 @@ import {
   Column, TextInput, TextInputSkeleton
 } from '@carbon/react';
 import { Edit } from '@carbon/icons-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { SeedlotApplicantType } from '../../../../types/SeedlotType';
 import { addParamToPath } from '../../../../utils/PathUtils';
