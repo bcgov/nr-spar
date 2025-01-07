@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { Tile, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
@@ -105,7 +105,7 @@ const FavouriteCard = ({
         {ActionBtn}
       </div>
       <div className="fav-card-content">
-        <p className="fav-card-title-large">{favObject.header}</p>
+        <p className="fav-card-title-large" role="heading" aria-level={2}>{favObject.header}</p>
       </div>
     </Tile>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import * as Icons from '@carbon/icons-react';
 import * as Pictograms from '@carbon/pictograms-react';
 import { Tile } from '@carbon/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import './styles.scss';
 
@@ -26,7 +26,7 @@ const SmallCard = ({
     <Tile className={favClassName ? `${favClassName} small-card` : 'small-card'} onClick={() => navigate(path)}>
       <div className="image-header">
         <Img className="image" />
-        <p className="header">{header}</p>
+        <p className="header" role="heading" aria-level={2}>{header}</p>
       </div>
       <div className="action-btn">
         {actionBtn}

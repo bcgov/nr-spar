@@ -12,7 +12,7 @@ import {
   ProgressIndicatorSkeleton
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { AxiosError } from 'axios';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { getSeedlotSubmitErrDescription } from '../ContextContainerClassA/utils';
@@ -59,6 +59,12 @@ const RegPage = () => {
   const reloadFormDraft = () => getFormDraftQuery.refetch();
 
   const { isTscAdmin } = useContext(AuthContext);
+
+  const disableSubmit = !allStepCompleted
+    || saveStatus === 'conflict'
+    || !seedlotData
+    || (seedlotData.seedlotStatus.seedlotStatusCode !== 'PND'
+    && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC');
 
   return (
     <div className="seedlot-registration-page">
@@ -176,6 +182,21 @@ const RegPage = () => {
           </Column>
         </Row>
         <Row className="seedlot-registration-button-row">
+          {
+            formStep === 5 && disableSubmit
+              ? (
+                <Column sm={4} md={8} lg={16} xlg={12}>
+                  <InlineNotification
+                    lowContrast
+                    kind="warning"
+                    title="Missing fields:"
+                    subtitle="Submit registration is disabled until mandatory fields are filled in
+                              correctly. You can check for blank or invalid fields on every step."
+                  />
+                </Column>
+              )
+              : null
+          }
           <Grid narrow>
             <Column sm={4} md={3} lg={3} xlg={4}>
               {
@@ -237,13 +258,7 @@ const RegPage = () => {
                     <SubmitModal
                       btnText="Submit Registration"
                       renderIconName="CheckmarkOutline"
-                      disableBtn={
-                        !allStepCompleted
-                        || saveStatus === 'conflict'
-                        || !seedlotData
-                        || (seedlotData.seedlotStatus.seedlotStatusCode !== 'PND'
-                        && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC')
-                      }
+                      disableBtn={disableSubmit}
                       submitFn={() => {
                         submitSeedlot.mutate(
                           getSeedlotPayload(
