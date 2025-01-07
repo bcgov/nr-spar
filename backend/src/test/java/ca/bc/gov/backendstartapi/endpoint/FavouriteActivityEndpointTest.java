@@ -60,7 +60,7 @@ class FavouriteActivityEndpointTest {
   @DisplayName("createFavoriteActivitySuccessTest")
   void createFavoriteActivitySuccessTest() throws Exception {
     FavouriteActivityEntity activityEntity = createEntity("CREATE_A_CLASS_SEEDLOT");
-    when(favouriteActivityService.createUserActivity(any())).thenReturn(activityEntity);
+    when(favouriteActivityService.createUserActivities(any())).thenReturn(List.of(activityEntity));
 
     mockMvc
         .perform(
@@ -78,7 +78,7 @@ class FavouriteActivityEndpointTest {
   @Test
   @DisplayName("createFavoriteActivityNotFoundTest")
   void createFavoriteActivityNotFoundTest() throws Exception {
-    when(favouriteActivityService.createUserActivity(any()))
+    when(favouriteActivityService.createUserActivities(any()))
         .thenThrow(new InvalidActivityException());
 
     mockMvc
@@ -97,7 +97,7 @@ class FavouriteActivityEndpointTest {
   void createFavoriteActivityDuplicatedTest() throws Exception {
     String contentString = stringifyCreate("CREATE_A_CLASS_SEEDLOT");
     FavouriteActivityEntity activityEntity = createEntity("CREATE_A_CLASS_SEEDLOT");
-    when(favouriteActivityService.createUserActivity(any())).thenReturn(activityEntity);
+    when(favouriteActivityService.createUserActivities(any())).thenReturn(List.of(activityEntity));
 
     mockMvc
         .perform(
@@ -111,7 +111,7 @@ class FavouriteActivityEndpointTest {
         .andExpect(jsonPath("$.highlighted").value("false"))
         .andReturn();
 
-    when(favouriteActivityService.createUserActivity(any()))
+    when(favouriteActivityService.createUserActivities(any()))
         .thenThrow(new FavoriteActivityExistsToUser());
 
     mockMvc
@@ -155,7 +155,7 @@ class FavouriteActivityEndpointTest {
   void updateUserFavoriteActivity() throws Exception {
     FavouriteActivityEntity activityEntity = createEntity("EXISTING_SEEDLOTS");
     activityEntity.setId(10000L);
-    when(favouriteActivityService.createUserActivity(any())).thenReturn(activityEntity);
+    when(favouriteActivityService.createUserActivities(any())).thenReturn(List.of(activityEntity));
 
     mockMvc
         .perform(
@@ -194,7 +194,7 @@ class FavouriteActivityEndpointTest {
     FavouriteActivityEntity activityEntity = createEntity("EXISTING_SEEDLOTS");
     activityEntity.setId(10000L);
 
-    when(favouriteActivityService.createUserActivity(any())).thenReturn(activityEntity);
+    when(favouriteActivityService.createUserActivities(any())).thenReturn(List.of(activityEntity));
 
     mockMvc
         .perform(

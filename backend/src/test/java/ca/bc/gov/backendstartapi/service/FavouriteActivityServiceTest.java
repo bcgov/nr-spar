@@ -51,7 +51,8 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityCreateDto createDto = 
         new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT", false);
-    FavouriteActivityEntity entitySaved = favouriteActivityService.createUserActivity(createDto);
+    List<FavouriteActivityEntity> entitiesSaved = favouriteActivityService.createUserActivities(List.of(createDto));
+    FavouriteActivityEntity entitySaved = entitiesSaved.get(0);
 
     Assertions.assertNotNull(entitySaved);
     Assertions.assertEquals("CREATE_A_CLASS_SEEDLOT", entitySaved.getActivity());
@@ -73,7 +74,7 @@ class FavouriteActivityServiceTest {
     Exception notFoundExc =
         Assertions.assertThrows(
             InvalidActivityException.class,
-            () -> favouriteActivityService.createUserActivity(createDto));
+            () -> favouriteActivityService.createUserActivities(List.of(createDto)));
 
     Assertions.assertEquals(
         "404 NOT_FOUND \"Invalid or not found activity id!\"", notFoundExc.getMessage());
@@ -87,7 +88,7 @@ class FavouriteActivityServiceTest {
     Exception activityExists =
         Assertions.assertThrows(
             FavoriteActivityExistsToUser.class,
-            () -> favouriteActivityService.createUserActivity(createAnotherDto));
+            () -> favouriteActivityService.createUserActivities(List.of(createAnotherDto)));
 
     Assertions.assertEquals(
         "400 BAD_REQUEST \"Activity already registered to this user!\"",
