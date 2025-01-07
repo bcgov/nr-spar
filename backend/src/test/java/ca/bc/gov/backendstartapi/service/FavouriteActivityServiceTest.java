@@ -49,7 +49,8 @@ class FavouriteActivityServiceTest {
     entity.setHighlighted(Boolean.FALSE);
     when(favouriteActivityRepository.save(any())).thenReturn(entity);
 
-    FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT", false);
+    FavouriteActivityCreateDto createDto = 
+        new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT", false);
     FavouriteActivityEntity entitySaved = favouriteActivityService.createUserActivity(createDto);
 
     Assertions.assertNotNull(entitySaved);
