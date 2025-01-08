@@ -65,7 +65,7 @@ public class FavouriteActivityService {
    * @return the {@link FavouriteActivityEntity} created
    */
   public List<FavouriteActivityEntity> createUserActivities(
-    List<FavouriteActivityCreateDto> activityDtos) {
+      List<FavouriteActivityCreateDto> activityDtos) {
     String userId = loggedUserService.getLoggedUserId();
     SparLog.info("Creating activities for user {}", userId);
 

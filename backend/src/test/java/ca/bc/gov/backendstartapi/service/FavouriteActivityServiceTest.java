@@ -51,7 +51,7 @@ class FavouriteActivityServiceTest {
     FavouriteActivityCreateDto createDto = 
         new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT", false);
     List<FavouriteActivityEntity> entitiesSaved = 
-      favouriteActivityService.createUserActivities(List.of(createDto));
+        favouriteActivityService.createUserActivities(List.of(createDto));
     FavouriteActivityEntity entitySaved = entitiesSaved.get(0);
 
     Assertions.assertNotNull(entitySaved);
