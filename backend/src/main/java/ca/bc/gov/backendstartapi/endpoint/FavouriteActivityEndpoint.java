@@ -44,7 +44,7 @@ public class FavouriteActivityEndpoint {
    * Creates to the logged user a {@link FavouriteActivityEntity} record based on the activity or
    * page title.
    *
-   * @param createDto a {@link FavouriteActivityCreateDto} with the activity title
+   * @param createDtos a {@link FavouriteActivityCreateDto} with the activity title
    * @return a {@link FavouriteActivityEntity} created
    */
   @PostMapping(consumes = "application/json", produces = "application/json")
@@ -52,8 +52,8 @@ public class FavouriteActivityEndpoint {
       summary = "Creates a Favourite Activities in bulk",
       description =
           """
-          Creates Favourite Activities for the logged user in bulk based on an array of activity titles 
-          or page names, with optional isConsep flags.
+          Creates Favourite Activities for the logged user in bulk based on an array
+          of activity titles or page names, with optional isConsep flags.
           """)
   @ApiResponses(
       value = {
@@ -91,7 +91,8 @@ public class FavouriteActivityEndpoint {
           @Valid
           @RequestBody
           List<FavouriteActivityCreateDto> createDtos) {
-    List<FavouriteActivityEntity> entity = favouriteActivityService.createUserActivities(createDtos);
+    List<FavouriteActivityEntity> entity = 
+        favouriteActivityService.createUserActivities(createDtos);
     return ResponseEntity.status(HttpStatus.CREATED).body(entity);
   }
 

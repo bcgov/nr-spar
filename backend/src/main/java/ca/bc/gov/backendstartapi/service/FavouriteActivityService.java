@@ -9,7 +9,6 @@ import ca.bc.gov.backendstartapi.exception.InvalidActivityException;
 import ca.bc.gov.backendstartapi.repository.FavouriteActivityRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,21 +37,20 @@ public class FavouriteActivityService {
     this.favouriteActivityRepository = favouriteActivityRepository;
   }
 
-/**
-   * Validates the activity input.
-   */
-private void validateActivityInput(FavouriteActivityCreateDto activityDto) {
-    System.out.println("22222222: " + activityDto.activity());
+  /**
+  * Validates the activity input.
+  */
+  private void validateActivityInput(FavouriteActivityCreateDto activityDto) {
     if (Objects.isNull(activityDto.activity()) || activityDto.activity().isBlank()) {
-      System.out.println("33333333: " + activityDto.activity());
-        throw new InvalidActivityException();
+      throw new InvalidActivityException();
     }
   }
 
   /**
   * Builds a FavouriteActivityEntity.
   */
-  private FavouriteActivityEntity buildFavouriteActivityEntity(String userId, FavouriteActivityCreateDto dto) {
+  private FavouriteActivityEntity buildFavouriteActivityEntity(
+      String userId, FavouriteActivityCreateDto dto) {
     FavouriteActivityEntity entity = new FavouriteActivityEntity();
     entity.setUserId(userId);
     entity.setActivity(dto.activity());
@@ -63,10 +61,11 @@ private void validateActivityInput(FavouriteActivityCreateDto activityDto) {
   /**
    * Create a user's activity in the database.
    *
-   * @param activityDto a {@link FavouriteActivityCreateDto} containing the activity title
+   * @param activityDtos a {@link FavouriteActivityCreateDto} containing the activity title
    * @return the {@link FavouriteActivityEntity} created
    */
-  public List<FavouriteActivityEntity> createUserActivities(List<FavouriteActivityCreateDto> activityDtos) {
+  public List<FavouriteActivityEntity> createUserActivities(
+    List<FavouriteActivityCreateDto> activityDtos) {
     String userId = loggedUserService.getLoggedUserId();
     SparLog.info("Creating activities for user {}", userId);
 

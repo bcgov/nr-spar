@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.backendstartapi.dto.FavouriteActivityCreateDto;
 import ca.bc.gov.backendstartapi.dto.FavouriteActivityUpdateDto;
 import ca.bc.gov.backendstartapi.entity.FavouriteActivityEntity;
-import ca.bc.gov.backendstartapi.exception.FavoriteActivityExistsToUser;
 import ca.bc.gov.backendstartapi.exception.InvalidActivityException;
 import ca.bc.gov.backendstartapi.repository.FavouriteActivityRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
@@ -51,7 +50,8 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityCreateDto createDto = 
         new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT", false);
-    List<FavouriteActivityEntity> entitiesSaved = favouriteActivityService.createUserActivities(List.of(createDto));
+    List<FavouriteActivityEntity> entitiesSaved = 
+      favouriteActivityService.createUserActivities(List.of(createDto));
     FavouriteActivityEntity entitySaved = entitiesSaved.get(0);
 
     Assertions.assertNotNull(entitySaved);
