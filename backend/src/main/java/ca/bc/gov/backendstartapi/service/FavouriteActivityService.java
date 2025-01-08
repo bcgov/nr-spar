@@ -74,7 +74,6 @@ private void validateActivityInput(FavouriteActivityCreateDto activityDto) {
 
     for (FavouriteActivityCreateDto dto : activityDtos) {
       try {
-        System.out.println("11111111: " + dto);
         validateActivityInput(dto);
         if (favouriteActivityRepository.existsByUserIdAndActivity(userId, dto.activity())) {
           continue;
