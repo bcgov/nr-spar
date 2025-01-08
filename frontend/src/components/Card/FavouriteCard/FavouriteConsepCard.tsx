@@ -51,8 +51,6 @@ const FavouriteCard = ({
       aria-label={`${favObject.header} options`}
       flipped
       iconDescription="More actions"
-      // Need to stop bubbling here so it won't trigger the
-      // the tile onKeyDown event
       onKeyDown={(e: React.KeyboardEvent<HTMLElement>) => {
         e.stopPropagation();
       }}
