@@ -41,8 +41,10 @@ public class FavouriteActivityService {
 /**
    * Validates the activity input.
    */
-  private void validateActivityInput(FavouriteActivityCreateDto activityDto) {
+private void validateActivityInput(FavouriteActivityCreateDto activityDto) {
+    System.out.println("22222222: " + activityDto.activity());
     if (Objects.isNull(activityDto.activity()) || activityDto.activity().isBlank()) {
+      System.out.println("33333333: " + activityDto.activity());
         throw new InvalidActivityException();
     }
   }
@@ -72,6 +74,7 @@ public class FavouriteActivityService {
 
     for (FavouriteActivityCreateDto dto : activityDtos) {
       try {
+        System.out.println("11111111: " + dto);
         validateActivityInput(dto);
         if (favouriteActivityRepository.existsByUserIdAndActivity(userId, dto.activity())) {
           continue;
