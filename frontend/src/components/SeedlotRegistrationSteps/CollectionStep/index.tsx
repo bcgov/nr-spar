@@ -193,6 +193,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
               helperText={isReview ? null : fieldsConfig.startDate.helperText}
               invalid={state.startDate.isInvalid}
               invalidText={fieldsConfig.startDate.invalidText}
+              aria-invalid={state.startDate.isInvalid ? 'true' : 'false'}
               size="md"
               autoComplete="off"
             />
@@ -218,6 +219,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
               helperText={isReview ? null : fieldsConfig.endDate.helperText}
               invalid={state.endDate.isInvalid}
               invalidText={fieldsConfig.endDate.invalidText}
+              aria-invalid={state.endDate.isInvalid ? 'true' : 'false'}
               size="md"
               autoComplete="off"
             />
@@ -235,6 +237,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             readOnly={isFormSubmitted && !isReview}
             invalid={state.numberOfContainers.isInvalid}
             invalidText={fieldsConfig.numberOfContainers.invalidText}
+            aria-invalid={state.numberOfContainers.isInvalid ? 'true' : 'false'}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleContainerNumAndVol(true, e.target.value);
@@ -251,6 +254,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             readOnly={isFormSubmitted && !isReview}
             invalid={state.volumePerContainers.isInvalid}
             invalidText={fieldsConfig.volumePerContainers.invalidText}
+            aria-invalid={state.volumePerContainers.isInvalid ? 'true' : 'false'}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleContainerNumAndVol(false, e.target.value);
@@ -272,6 +276,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             warn={isCalcWrong}
             readOnly={isFormSubmitted && !isReview}
             warnText={fieldsConfig.volumeOfCones.warnText}
+            aria-invalid={state.volumeOfCones.isInvalid ? 'true' : 'false'}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleVolOfCones(e.target.value);
