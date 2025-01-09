@@ -119,12 +119,13 @@ export const initOwnershipState = (
   defaultAgencyNumber: string,
   ownersStepData: Array<SingleOwnerFormSubmitType>,
   methodsOfPayment?: Array<MultiOptionsObj>,
-  fundingSource?: Array<MultiOptionsObj>
+  fundingSource?: Array<MultiOptionsObj>,
+  initLoaded?: boolean
 ): Array<SingleOwnerForm> => {
   const seedlotOwners: Array<SingleOwnerForm> = ownersStepData.map((curOwner, index) => {
     const ownerState = createOwnerTemplate(index, curOwner);
 
-    ownerState.ownerAgency.value = defaultAgencyNumber;
+    ownerState.ownerAgency.value = initLoaded ? curOwner.ownerClientNumber : defaultAgencyNumber;
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
 
     if (methodsOfPayment && methodsOfPayment.length > 0) {
@@ -1120,7 +1121,8 @@ export const resDataToState = (
     defaultAgencyNumber,
     fullFormData.seedlotFormOwnershipDtoList,
     methodsOfPaymentData,
-    fundingSourcesData
+    fundingSourcesData,
+    true
   ),
   interimStep: initInterimState(
     fullFormData.seedlotFormInterimDto.intermStrgClientNumber,
