@@ -4,7 +4,7 @@ describe('Applicant and seedlot information page', () => {
   let seedlotNumber: string;
   let fixtureData: SeedlotRegFixtureType;
 
-  before(() => {
+  beforeEach(() => {
     cy.fixture('aclass-seedlot').then((fData) => {
       fixtureData = fData;
       cy.task('getData', fData.fdi.species).then((sNumber) => {
