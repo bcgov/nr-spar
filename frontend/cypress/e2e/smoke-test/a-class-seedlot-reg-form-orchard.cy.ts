@@ -1,7 +1,6 @@
 import prefix from '../../../src/styles/classPrefix';
-import { THIRTY_SECONDS } from '../../constants';
+import { THIRTY_SECONDS, TYPE_DELAY } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
-import { TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
   let regFormData: {
@@ -558,7 +557,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-is-regional')
       .should('be.checked');
-      
+
     cy.get('#orchard-breading-perc-helper-text')
       .should('have.text', regFormData.orchard.pollenHelperText);
 

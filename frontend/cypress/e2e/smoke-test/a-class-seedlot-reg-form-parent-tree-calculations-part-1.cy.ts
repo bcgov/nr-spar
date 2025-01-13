@@ -1,3 +1,4 @@
+/* eslint-disable no-loop-func */
 import prefix from '../../../src/styles/classPrefix';
 
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
@@ -108,8 +109,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
             .find('td:nth-child(2) input')
             .invoke('val')
             .then(($value: any) => {
-              totalConeCount = totalConeCount + Number($value);
-
+              totalConeCount += Number($value);
               if (i === (totalParentTrees - 1)) {
                 // Check total cone counts
                 cy.get('#totalnumber\\ of\\ cone\\ count')
@@ -126,7 +126,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
             .find('td:nth-child(3) input')
             .invoke('val')
             .then(($value) => {
-              totalPollenCount = totalPollenCount + Number($value);
+              totalPollenCount += Number($value);
 
               if (i === (totalParentTrees - 1)) {
                 // Check total pollen counts
@@ -143,6 +143,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .contains('Calculate metrics')
       .click();
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(3000);
 
     // Store Ne value to a variable
@@ -204,12 +205,13 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .contains('Calculate metrics')
       .click();
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(3000);
 
     // Check Ne value after clearing first parent tree row
     cy.get('#effectivepopulation\\ size\\ \\(ne\\)')
       .invoke('val')
-      .then($value => {
+      .then(($value) => {
         expect(Number($value)).to.be.lessThan(Number(effectivePopulationSize));
       });
   });
