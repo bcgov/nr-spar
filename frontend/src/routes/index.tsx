@@ -15,7 +15,7 @@ import SeedlotReview from '../views/Seedlot/SeedlotReview';
 import SeedlotRegFormClassA from '../views/Seedlot/SeedlotRegFormClassA';
 import ReviewSeedlots from '../views/Seedlot/ReviewSeedlots';
 import FourOhThree from '../views/ErrorViews/FourOhThree';
-import FavouriteActivities from '../views/CONSEP/FavouriteActivity';
+import FavouriteActivities from '../views/Consep/FavouriteActivity';
 
 const BrowserRoutes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
