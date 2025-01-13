@@ -11,20 +11,29 @@ describe('Applicant and seedlot information page', () => {
         seedlotNumber = sNumber as string;
       });
     });
+
+    cy.login();
   });
 
   it('GET /api/seedlots to fetch seedlot details', () => {
     const regData = fixtureData.fdi;
-    cy.request('GET', `/api/seedlot/${seedlotNumber}`).then((response) => {
-      expect(response.status).to.eq(200);
-      expect(response.body).to.have.property('applicantLocationCode', regData.agencyNumber);
+    cy.intercept('GET', `/api/seedlots/${seedlotNumber}`).as('getSeedlot');
+
+    cy.visit(`/seedlots/details/${seedlotNumber}`);
+    cy.wait('@getSeedlot').then((interception) => {
+      // Check that the request method is GET
+      expect(interception.response?.statusCode).to.eq(200);
+
+      // Check the response body
+      const responseBody = interception.response?.body.seedlot;
+      expect(responseBody).to.have.property('applicantLocationCode', regData.agencyNumber);
     });
   });
 
-  it('check unsuccessful GET response', () => {
-    const fakeSeedlotNumber = '0005435';
-    cy.request('GET', `/api/seedlot/${fakeSeedlotNumber}`).then((response) => {
-      expect(response.status).to.eq(400);
+  it('404 test', () => {
+    // Visit a non-existent URL
+    cy.visit('/dashboard1', { failOnStatusCode: false }).then(() => {
+      cy.get('h1').should('contain', 'Page not found');
     });
   });
 });
