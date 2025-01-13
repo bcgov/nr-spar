@@ -380,6 +380,21 @@ const ContextContainerClassA = ({ children }: props) => {
     getAllSeedlotInfoQuery.fetchStatus
   ]);
 
+  const [seedlotDataLoaded, setSeedlotDataLoaded] = useState<boolean>(false);
+
+  useEffect(() => {
+    const emptySeedlotData = initEmptySteps();
+    if (
+      getAllSeedlotInfoQuery.status === 'success'
+      && allStepData !== emptySeedlotData
+    ) {
+      setSeedlotDataLoaded(true);
+    }
+  }, [
+    getAllSeedlotInfoQuery.status,
+    allStepData
+  ]);
+
   /**
    * Update the progress indicator status
    */
@@ -765,6 +780,7 @@ const ContextContainerClassA = ({ children }: props) => {
           || fundingSourcesQuery.isFetching
           || getFormDraftQuery.isFetching
         ),
+        seedlotDataLoaded,
         genWorthInfoItems,
         setGenWorthInfoItems,
         weightedGwInfoItems,
