@@ -53,7 +53,7 @@ public class FavouriteActivityEndpoint {
       description =
           """
           Creates a Favourite Activity to the logged user based on the activity
-          title or page name.
+          title or page name, with an optional isConsep flag.
           """)
   @ApiResponses(
       value = {

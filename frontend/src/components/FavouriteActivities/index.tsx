@@ -18,7 +18,11 @@ import useWindowSize from '../../hooks/UseWindowSize';
 import './styles.scss';
 import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 
-const FavouriteActivities = () => {
+interface FavouriteActivitiesProps {
+  isConsep: boolean;
+}
+
+const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
   const windowSize = useWindowSize();
 
   const favActQueryKey = ['favourite-activities'];
@@ -32,9 +36,11 @@ const FavouriteActivities = () => {
     <Row
       className={
         `favourite-activities ${windowSize.innerWidth < MEDIUM_SCREEN_WIDTH
-          ? 'favourite-activities-sm-padding' : 'favourite-activities-padding'}`
+          ? 'favourite-activities-sm-padding' : 'favourite-activities-padding'} 
+          ${!isConsep && 'favourite-activities-with-background'}`
       }
     >
+      {!isConsep && (
       <Column sm={4} md={8} lg={16} xlg={4} className="favourite-activities-title">
         <h2>My favourite activities</h2>
         <Subtitle text="Quick access to your favourite activities." className="favourite-activities-subtitle" />
@@ -48,7 +54,9 @@ const FavouriteActivities = () => {
           </button>
         </Tooltip>
       </Column>
-      <Column sm={4} md={8} lg={16} xlg={12} className="favourite-activities-cards">
+      )}
+
+      <Column sm={4} md={8} lg={16} xlg={isConsep ? 16 : 12} className="favourite-activities-cards">
         <Row>
           {
             favActQuery.isLoading
@@ -71,11 +79,14 @@ const FavouriteActivities = () => {
                     description="You can favourite your most used
                     activities by clicking on the heart icon inside each page"
                   />
-                ) : favActQuery.data.map((favObject) => (
-                  <FavouriteCard
-                    key={favObject.type}
-                    favObject={favObject}
-                  />
+                ) : favActQuery.data.filter((fav) => fav.isConsep === isConsep).map((favObject) => (
+                  <Column>
+                    <FavouriteCard
+                      key={favObject.type}
+                      favObject={favObject}
+                    />
+                  </Column>
+
                 ))
             )
           }
