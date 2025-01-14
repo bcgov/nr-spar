@@ -1,5 +1,6 @@
-@use "@bcgov-nr/nr-theme/design-tokens/variables.scss" as vars;
-@use "@carbon/type";
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
 
 .dashboard-page {
   padding: 0 0 2.5rem 0;
@@ -25,7 +26,7 @@
 }
 
 p.fav-act-page-title-large {
-  @include type.type-style("heading-06");
+  @include type.type-style('heading-06');
   white-space: nowrap;
   max-width: 12.5rem;
   margin-left: 2.5rem;
@@ -61,7 +62,7 @@ p.fav-act-page-title-large {
   }
 
   p.favourite-activity-modal-description {
-    @include type.type-style("body-short-01");
+    @include type.type-style('body-short-01');
     margin-top: -0.5rem;
     margin-bottom: 2rem;
   }
@@ -69,11 +70,9 @@ p.fav-act-page-title-large {
   .fav-act-row > svg {
     vertical-align: middle;
     margin-right: 0.4rem;
-    color: #0073e6;
+    color: colors.$blue-60;
   }
-  .fav-act-row > span {
-    vertical-align: middle;
-  }
+
   .fav-act-row {
     vertical-align: middle;
   }
@@ -107,12 +106,12 @@ th > .bx--checkbox--inline > .bx--checkbox-label {
   padding: 4rem;
 
   .consep-fav-non-content-title {
-    @include type.type-style("heading-04");
+    @include type.type-style('heading-04');
     margin-top: 2rem;
   }
 
   .consep-fav-non-content-subtitle {
-    @include type.type-style("body-compact-02");
+    @include type.type-style('body-compact-02');
     margin-top: 0.5rem;
   }
 

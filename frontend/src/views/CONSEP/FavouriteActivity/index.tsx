@@ -21,10 +21,6 @@ import './styles.scss';
 const FavouriteActivity = () => {
   const [open, setOpen] = useState(false);
 
-  const handleSetOpen = (value: boolean) => {
-    setOpen(value);
-  };
-
   const favActQueryKey = ['favourite-activities'];
 
   const favActQuery = useQuery({
@@ -54,7 +50,7 @@ const FavouriteActivity = () => {
 
                     </Column>
                     <Column lg={8} md={2} sm={0} className="consep-add-fav-action">
-                      <Button onClick={() => handleSetOpen(true)} className="consep-add-fav-btn">
+                      <Button onClick={() => setOpen(true)} className="consep-add-fav-btn">
                         Add favourite +
                       </Button>
                     </Column>
@@ -76,14 +72,14 @@ const FavouriteActivity = () => {
                 You can favorite your activities by clicking on add
                 favorite activity or by clicking on the heart icon inside each page
               </p>
-              <Button onClick={() => handleSetOpen(true)} className="consep-fav-non-content-btn">
+              <Button onClick={() => setOpen(true)} className="consep-fav-non-content-btn">
                 Add favourite activity +
               </Button>
             </Column>
           </Row>
         )}
 
-      <FavouriteActivityModal open={open} setOpen={handleSetOpen} />
+      <FavouriteActivityModal open={open} setOpen={setOpen} />
     </FlexGrid>
   );
 };

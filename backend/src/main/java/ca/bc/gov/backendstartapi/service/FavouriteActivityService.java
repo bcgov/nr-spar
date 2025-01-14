@@ -39,6 +39,8 @@ public class FavouriteActivityService {
 
   /**
   * Validates the activity input.
+  *
+  * @param activityDto a {@link FavouriteActivityCreateDto} containing the activity title
   */
   private void validateActivityInput(FavouriteActivityCreateDto activityDto) {
     if (Objects.isNull(activityDto.activity()) || activityDto.activity().isBlank()) {
@@ -48,6 +50,10 @@ public class FavouriteActivityService {
 
   /**
   * Builds a FavouriteActivityEntity.
+  *
+  * @param userId a {@link String} containing the user id
+  * @param dto a {@link FavouriteActivityCreateDto} containing the activity title
+  * @return a {@link FavouriteActivityEntity} instance
   */
   private FavouriteActivityEntity buildFavouriteActivityEntity(
       String userId, FavouriteActivityCreateDto dto) {

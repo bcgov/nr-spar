@@ -10,7 +10,7 @@ import {
 import { Information } from '@carbon/icons-react';
 
 import FavouriteCard from '../Card/FavouriteCard';
-import FavouriteConsepCard from '../Card/FavouriteCard/FavouriteConsepCard';
+import FavouriteConsepCard from '../Card/FavouriteCardConsep';
 
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
@@ -44,7 +44,6 @@ const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
         ${!isConsep && 'favourite-activities-with-background'}`
         }
       >
-        {!isConsep && (
         <Column sm={4} md={8} lg={16} xlg={4} className="favourite-activities-title">
           <h2>My favourite activities</h2>
           <Subtitle text="Quick access to your favourite activities." className="favourite-activities-subtitle" />
@@ -58,7 +57,6 @@ const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
             </button>
           </Tooltip>
         </Column>
-        )}
 
         <Column sm={4} md={8} lg={16} xlg={12} className="favourite-activities-cards">
           <Row>
