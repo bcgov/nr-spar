@@ -2,13 +2,18 @@
 
 .main-container {
   padding-top: 5.625rem;
-  padding-left: 16rem;
+  transition: padding-left 0.11s cubic-bezier(0.2, 0, 1, 0.9), transform 0.11s cubic-bezier(0.2, 0, 1, 0.9);
 
   .dependency-notification {
     max-width: none;
     width: 96%;
     margin: 2rem 2.5rem;
   }
+}
+
+header.spar-header:not(.spar-header-expanded) + div.main-container {
+  padding-left: 16rem;
+  transition: padding-left 0.11s cubic-bezier(0.2, 0, 1, 0.9), transform 0.11s cubic-bezier(0.2, 0, 1, 0.9);
 }
 
 .page-content .#{vars.$bcgov-prefix}--grid {
@@ -26,7 +31,8 @@
 }
 
 @media only screen and (max-width: 1055px) {
-  .main-container {
+  .main-container,
+  header.spar-header:not(.spar-header-expanded) + div.main-container {
     padding-top: 5rem;
     padding-left: 0;
   }
