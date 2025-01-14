@@ -92,24 +92,22 @@ const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
 
       {isConsep && (
         <Row>
-          {favActQuery.isSuccess
-              && favActQuery.data
-              && (
-                favActQuery.data.length === 0
-                  ? (
-                    <EmptySection
-                      icon="Application"
-                      title="You don't have any favourites to show yet!"
-                      description="You can favourite your most used
+          {favActQuery.isSuccess && favActQuery.data && (
+            favActQuery.data.length === 0
+              ? (
+                <EmptySection
+                  icon="Application"
+                  title="You don't have any favourites to show yet!"
+                  description="You can favourite your most used
                   activities by clicking on the heart icon inside each page"
-                    />
-                  )
-                  : favActQuery.data.filter((fav) => fav.isConsep === isConsep).map((favObject) => (
-                    <FavouriteConsepCard
-                      key={favObject.type}
-                      favObject={favObject}
-                    />
-                  )))}
+                />
+              )
+              : favActQuery.data.filter((fav) => fav.isConsep === isConsep).map((favObject) => (
+                <FavouriteConsepCard
+                  key={favObject.type}
+                  favObject={favObject}
+                />
+              )))}
         </Row>
       )}
     </>
