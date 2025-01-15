@@ -285,9 +285,10 @@ const SeedlotReviewContent = () => {
           seedlotReviewGeneticWorth.push({
             traitCode: upperCaseCode,
             calculatedValue: Number(genWorthVals[genWorthKey].value),
-            // Use the same percentage value, since users can't edit it
             testedParentTreePerc:
               genWorthInfoItems[genWorthKey]
+                // Dividing by 100 since the current value is in percentage and we need
+                // to submit the real value
                 ? Number(genWorthInfoItems[genWorthKey][1].value) / 100
                 : 0
           });
