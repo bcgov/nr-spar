@@ -145,7 +145,7 @@ const SeedlotReviewContent = () => {
     areaOfUseData,
     isFetchingData,
     seedlotData,
-    calculatedValues,
+    genWorthInfoItems,
     seedlotSpecies,
     popSizeAndDiversityConfig
   } = useContext(ClassAContext);
@@ -282,16 +282,13 @@ const SeedlotReviewContent = () => {
       .forEach((genWorthKey) => {
         if (genWorthVals[genWorthKey].value) {
           const upperCaseCode = genWorthKey.toUpperCase();
-          const traitIndex = calculatedValues.map(
-            (trait) => trait.traitCode
-          ).indexOf(upperCaseCode);
           seedlotReviewGeneticWorth.push({
             traitCode: upperCaseCode,
             calculatedValue: Number(genWorthVals[genWorthKey].value),
             // Use the same percentage value, since users can't edit it
             testedParentTreePerc:
-              calculatedValues[traitIndex]
-                ? calculatedValues[traitIndex].testedParentTreePerc
+              genWorthInfoItems[genWorthKey]
+                ? Number(genWorthInfoItems[genWorthKey][1].value) / 100
                 : 0
           });
         }
