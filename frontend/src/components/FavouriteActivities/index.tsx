@@ -36,7 +36,7 @@ const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
     <Row
       className={
         `favourite-activities ${windowSize.innerWidth < MEDIUM_SCREEN_WIDTH
-          ? 'favourite-activities-sm-padding' : 'favourite-activities-padding'} 
+          ? 'favourite-activities-sm-padding' : 'favourite-activities-padding'}
           ${!isConsep && 'favourite-activities-with-background'}`
       }
     >
@@ -80,13 +80,10 @@ const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
                     activities by clicking on the heart icon inside each page"
                   />
                 ) : favActQuery.data.filter((fav) => fav.isConsep === isConsep).map((favObject) => (
-                  <Column>
-                    <FavouriteCard
-                      key={favObject.type}
-                      favObject={favObject}
-                    />
-                  </Column>
-
+                  <FavouriteCard
+                    key={favObject.type}
+                    favObject={favObject}
+                  />
                 ))
             )
           }
