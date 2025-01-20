@@ -14,7 +14,7 @@ RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
 
 # Deploy container
 # Caddy serves static files
-FROM caddy:2.8.4-alpine
+FROM caddy:2.9.1-alpine
 RUN apk add --no-cache ca-certificates curl
 
 # Receive build number as argument, retain as environment variable
