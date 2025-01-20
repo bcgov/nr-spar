@@ -1,12 +1,11 @@
-/* eslint-disable no-loop-func */
 import prefix from '../../../src/styles/classPrefix';
 
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
   let seedlotNum: string;
   const speciesKey = 'fdi';
   let totalParentTrees: number = 0;
-  let totalConeCount: number = 0;
-  let totalPollenCount: number = 0;
+  const coneCount: number[] = [0];
+  const pollenCount: number[] = [0];
   let effectivePopulationSize: number = 0;
   let firstConeValue: number = 0;
   let firstPollenValue: number = 0;
@@ -100,38 +99,39 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         totalParentTrees = row.length;
         cy.get('#totalnumber\\ of\\ parent\\ trees')
           .should('have.value', totalParentTrees);
-
         // Get total cone counts
         for (let i = 0; i < totalParentTrees; i += 1) {
+          // Initialize total cone count
+          const localParentTreeTotal = totalParentTrees;
           cy.get('.parent-tree-step-table-container-col')
             .find('table tbody tr')
             .eq(i)
             .find('td:nth-child(2) input')
             .invoke('val')
             .then(($value: any) => {
-              totalConeCount += Number($value);
-              if (i === (totalParentTrees - 1)) {
+              coneCount[0] += Number($value);
+              if (i === (localParentTreeTotal - 1)) {
                 // Check total cone counts
                 cy.get('#totalnumber\\ of\\ cone\\ count')
-                  .should('have.value', totalConeCount);
+                  .should('have.value', coneCount[0]);
               }
             });
         }
-
         // Get total pollen counts
         for (let i = 0; i < totalParentTrees; i += 1) {
+          // Initialize total pollen count
+          const localParentTreeTotal = totalParentTrees;
           cy.get('.parent-tree-step-table-container-col')
             .find('table tbody tr')
             .eq(i)
-            .find('td:nth-child(3) input')
+            .find('td:nth-child(3) input') // Assuming pollen count is in the 3rd column
             .invoke('val')
-            .then(($value) => {
-              totalPollenCount += Number($value);
-
-              if (i === (totalParentTrees - 1)) {
+            .then(($value: any) => {
+              pollenCount[0] += Number($value);
+              if (i === (localParentTreeTotal - 1)) {
                 // Check total pollen counts
                 cy.get('#totalnumber\\ of\\ pollen\\ count')
-                  .should('have.value', totalPollenCount);
+                  .should('have.value', pollenCount[0]);
               }
             });
         }
@@ -175,7 +175,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
         // Check new total cone count
         cy.get('#totalnumber\\ of\\ cone\\ count')
-          .should('have.value', (totalConeCount - firstConeValue));
+          .should('have.value', (coneCount[0] - firstConeValue));
       });
 
     cy.get('#8021-pollenCount-value-input')
@@ -196,7 +196,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
         // Check new total pollen count
         cy.get('#totalnumber\\ of\\ pollen\\ count')
-          .should('have.value', (totalPollenCount - firstPollenValue));
+          .should('have.value', (pollenCount[0] - firstPollenValue));
       });
 
     // Click 'Calculate metrics' button again
