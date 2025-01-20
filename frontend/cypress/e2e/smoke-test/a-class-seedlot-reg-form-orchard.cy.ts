@@ -324,7 +324,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
         .eq(i)
         .find('td:nth-child(1)')
         .invoke('text')
-        // eslint-disable-next-line no-loop-func
         .then(($number) => {
           parentTreeSet.add($number);
         });
@@ -408,7 +407,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
         .eq(i)
         .find('td:nth-child(1)')
         .invoke('text')
-        // eslint-disable-next-line no-loop-func
         .then(($number) => {
           unionParentTreeArray.push($number);
           if (i === lengthOfArray - 1) {
