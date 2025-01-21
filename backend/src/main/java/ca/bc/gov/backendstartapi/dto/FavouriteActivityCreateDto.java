@@ -12,5 +12,5 @@ import jakarta.validation.constraints.NotNull;
 @Schema(description = "An object representing the request body when creating a favourite activity")
 public record FavouriteActivityCreateDto(
         @NotNull String activity,
-    @Schema(description = "Indicates whether this activity is a Consep", defaultValue = "false")
+    @Schema(description = "Indicates whether this activity is from Consep", defaultValue = "false")
         Boolean isConsep) {}

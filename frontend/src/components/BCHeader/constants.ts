@@ -121,6 +121,7 @@ export const componentTexts = {
   headerTitle: 'SPAR',
   completeTitle: ' Seed Planning and Registry System',
   openMenu: 'Open menu',
+  closeMenu: 'Close menu',
   sideMenuAriaLabel: 'Side menu',
   searchAriaLabel: 'Search',
   notifications: {

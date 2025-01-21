@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import {
   useNavigate, useParams, useSearchParams, useLocation
-} from 'react-router-dom';
+} from 'react-router';
 import {
   useMutation, useQuery
 } from '@tanstack/react-query';
@@ -378,6 +378,21 @@ const ContextContainerClassA = ({ children }: props) => {
     seedlotQuery.status,
     seedlotQuery.fetchStatus,
     getAllSeedlotInfoQuery.fetchStatus
+  ]);
+
+  const [seedlotDataLoaded, setSeedlotDataLoaded] = useState<boolean>(false);
+
+  useEffect(() => {
+    const emptySeedlotData = initEmptySteps();
+    if (
+      getAllSeedlotInfoQuery.status === 'success'
+      && allStepData !== emptySeedlotData
+    ) {
+      setSeedlotDataLoaded(true);
+    }
+  }, [
+    getAllSeedlotInfoQuery.status,
+    allStepData
   ]);
 
   /**
@@ -765,6 +780,7 @@ const ContextContainerClassA = ({ children }: props) => {
           || fundingSourcesQuery.isFetching
           || getFormDraftQuery.isFetching
         ),
+        seedlotDataLoaded,
         genWorthInfoItems,
         setGenWorthInfoItems,
         weightedGwInfoItems,

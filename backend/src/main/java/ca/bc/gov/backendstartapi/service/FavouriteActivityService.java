@@ -9,7 +9,6 @@ import ca.bc.gov.backendstartapi.exception.InvalidActivityException;
 import ca.bc.gov.backendstartapi.repository.FavouriteActivityRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -61,10 +60,11 @@ public class FavouriteActivityService {
   /**
    * Create a user's activity in the database.
    *
-   * @param activityDto a {@link FavouriteActivityCreateDto} containing the activity title
+   * @param activityDtos a {@link FavouriteActivityCreateDto} containing the activity title
    * @return the {@link FavouriteActivityEntity} created
    */
-  public List<FavouriteActivityEntity> createUserActivities(List<FavouriteActivityCreateDto> activityDtos) {
+  public List<FavouriteActivityEntity> createUserActivities(
+      List<FavouriteActivityCreateDto> activityDtos) {
     String userId = loggedUserService.getLoggedUserId();
     SparLog.info("Creating activities for user {}", userId);
 

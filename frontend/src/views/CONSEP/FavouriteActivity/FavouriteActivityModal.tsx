@@ -24,17 +24,13 @@ import './styles.scss';
 
 import FavouriteActivityMap from '../../../config/FavouriteActivityMap';
 
-const allRows: RowProps[] = Object.keys(FavouriteActivityMap).map((key) => {
-  const activity = FavouriteActivityMap[key];
-  if (activity.isConsep) {
-    return {
-      id: key,
-      activityName: activity.header,
-      department: activity.department || 'Unknown'
-    };
-  }
-  return null;
-}).filter((activity) => activity !== null);
+const allRows: RowProps[] = Object.entries(FavouriteActivityMap)
+  .filter(([, activity]) => activity.isConsep)
+  .map(([key, activity]) => ({
+    id: key,
+    activityName: activity.header,
+    department: activity.department || 'Unknown'
+  }));
 
 const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) => {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -61,7 +57,7 @@ const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) 
   const handleSelectRow = (row: RowProps) => {
     setSelectedRows((prev: string[]) => (prev.includes(row.id)
       ? prev.filter((id: string) => id !== row.id)
-      : [...prev, row.id]));
+      : prev.concat(row.id)));
   };
 
   const queryClient = useQueryClient();
@@ -101,8 +97,7 @@ const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) 
 
   useEffect(
     () => {
-      if (favActQuery.isSuccess
-            && favActQuery.data) {
+      if (favActQuery.isSuccess && favActQuery.data) {
         const consepData = favActQuery.data.filter((fav) => fav.isConsep === true)
           .map((fav) => fav.type);
         setSelectedRows(consepData);
