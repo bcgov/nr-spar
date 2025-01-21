@@ -61,7 +61,11 @@ const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
         <Column sm={4} md={8} lg={16} xlg={12} className="favourite-activities-cards">
           <Row>
             {
-              favActQuery.isLoading ? <Loading withOverlay={false} /> : null
+              favActQuery.isLoading ? (
+                <span>
+                  <Loading withOverlay={false} aria-label="Loading favourite activities" />
+                </span>
+              ) : null
             }
             {
               favActQuery.isSuccess

@@ -103,7 +103,7 @@ const FavouriteCard = ({
         }}
       >
         <div className="consep-fav-card-header">
-          <Icon className="fav-card-icon" style={{ textAlign: 'right' }} />
+          <Icon className="fav-card-icon" />
           {ActionBtn}
         </div>
         <div className="consep-fav-card-content">

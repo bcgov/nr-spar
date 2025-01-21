@@ -118,5 +118,13 @@ th > .bx--checkbox--inline > .bx--checkbox-label {
   .consep-fav-non-content-btn {
     margin-top: 2rem;
     max-width: 16rem;
+    width: fit-content;
+    white-space: nowrap;
+  }
+
+  .consep-fav-non-content-icon {
+    width: 11rem;
+    height: 11em;
+    color: colors.$blue-70;
   }
 }
