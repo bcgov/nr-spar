@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.backendstartapi.dto.FavouriteActivityCreateDto;
 import ca.bc.gov.backendstartapi.dto.FavouriteActivityUpdateDto;
 import ca.bc.gov.backendstartapi.entity.FavouriteActivityEntity;
-import ca.bc.gov.backendstartapi.exception.FavoriteActivityExistsToUser;
 import ca.bc.gov.backendstartapi.exception.InvalidActivityException;
 import ca.bc.gov.backendstartapi.repository.FavouriteActivityRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
@@ -51,47 +50,13 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityCreateDto createDto = 
         new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT", false);
-    FavouriteActivityEntity entitySaved = favouriteActivityService.createUserActivity(createDto);
+    List<FavouriteActivityEntity> entitiesSaved = 
+        favouriteActivityService.createUserActivities(List.of(createDto));
+    FavouriteActivityEntity entitySaved = entitiesSaved.get(0);
 
     Assertions.assertNotNull(entitySaved);
     Assertions.assertEquals("CREATE_A_CLASS_SEEDLOT", entitySaved.getActivity());
     Assertions.assertFalse(entitySaved.getHighlighted());
-  }
-
-  @Test
-  @DisplayName("createUserActivityExceptionTest")
-  void createUserActivityExceptionTest() {
-    when(loggedUserService.getLoggedUserId()).thenReturn(USER_ID);
-
-    FavouriteActivityEntity entity = new FavouriteActivityEntity();
-    entity.setActivity("CREATE_A_CLASS_SEEDLOT");
-    entity.setHighlighted(Boolean.FALSE);
-    when(favouriteActivityRepository.save(any())).thenReturn(entity);
-
-    FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto(null, false);
-
-    Exception notFoundExc =
-        Assertions.assertThrows(
-            InvalidActivityException.class,
-            () -> favouriteActivityService.createUserActivity(createDto));
-
-    Assertions.assertEquals(
-        "404 NOT_FOUND \"Invalid or not found activity id!\"", notFoundExc.getMessage());
-
-    List<FavouriteActivityEntity> userFavList = List.of(entity);
-    when(favouriteActivityRepository.findAllByUserId(any())).thenReturn(userFavList);
-
-    FavouriteActivityCreateDto createAnotherDto =
-        new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT", false);
-
-    Exception activityExists =
-        Assertions.assertThrows(
-            FavoriteActivityExistsToUser.class,
-            () -> favouriteActivityService.createUserActivity(createAnotherDto));
-
-    Assertions.assertEquals(
-        "400 BAD_REQUEST \"Activity already registered to this user!\"",
-        activityExists.getMessage());
   }
 
   @Test

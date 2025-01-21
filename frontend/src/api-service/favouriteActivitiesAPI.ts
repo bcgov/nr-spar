@@ -36,9 +36,9 @@ export const getFavAct = () => {
     });
 };
 
-export const postFavAct = (newAct: FavActivityPostType) => {
+export const postFavAct = (newActs: FavActivityPostType[]) => {
   const url = ApiConfig.favouriteActivities;
-  return api.post(url, newAct);
+  return api.post(url, newActs);
 };
 
 export const patchFavAct = (field: string, activity: FavActivityType) => {
