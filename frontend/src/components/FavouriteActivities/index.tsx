@@ -39,10 +39,10 @@ const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
       {!isConsep && (
       <Row
         className={
-          `favourite-activities ${windowSize.innerWidth < MEDIUM_SCREEN_WIDTH
-            ? 'favourite-activities-sm-padding' : 'favourite-activities-padding'} 
-        ${!isConsep && 'favourite-activities-with-background'}`
-        }
+        `favourite-activities ${windowSize.innerWidth < MEDIUM_SCREEN_WIDTH
+          ? 'favourite-activities-sm-padding' : 'favourite-activities-padding'}
+          ${!isConsep && 'favourite-activities-with-background'}`
+      }
       >
         <Column sm={4} md={8} lg={16} xlg={4} className="favourite-activities-title">
           <h2>My favourite activities</h2>
@@ -62,9 +62,9 @@ const FavouriteActivities = ({ isConsep }: FavouriteActivitiesProps) => {
           <Row>
             {
               favActQuery.isLoading ? (
-                <span>
-                  <Loading withOverlay={false} aria-label="Loading favourite activities" />
-                </span>
+                <Loading role="status" aria-live="polite" withOverlay={false}>
+                  <span className="visually-hidden">Loading, please wait...</span>
+                </Loading>
               ) : null
             }
             {

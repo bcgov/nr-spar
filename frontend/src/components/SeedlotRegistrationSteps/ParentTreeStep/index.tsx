@@ -369,7 +369,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
         }
         <Row className="info-section-sub-title">
           <Column>
-            Genetic worth and percent of Tested parent tree contribution
+            Genetic worth and percent of tested parent tree contribution
           </Column>
         </Row>
         {

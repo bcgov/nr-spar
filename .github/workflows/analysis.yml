@@ -18,7 +18,7 @@ jobs:
     name: Typescript lint
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov-nr/action-test-and-analyse@v1.2.1
+      - uses: bcgov/action-test-and-analyse@v1.2.1
         with:
           commands: |
             npm ci
@@ -39,7 +39,7 @@ jobs:
           - dir: oracle-api
             token: SONAR_ORACLE_API
     steps:
-      - uses: bcgov-nr/action-test-and-analyse-java@v1.0.2
+      - uses: bcgov/action-test-and-analyse-java@v1.0.2
         with:
           commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
           dir: ${{ matrix.dir }}

@@ -22,12 +22,13 @@ import validator from 'validator';
 import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
 import { filterInput, FilterObj } from '../../../utils/FilterUtils';
+import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import InputErrorText from '../../InputErrorText';
+import { OptionsInputType } from '../../../types/FormInputType';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
-import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import InputErrorText from '../../InputErrorText';
 import ScrollToTop from '../../ScrollToTop';
 import Subtitle from '../../Subtitle';
 import ReadOnlyInput from '../../ReadOnlyInput';
@@ -39,7 +40,6 @@ import OrchardWarnModal from './OrchardWarnModal';
 import orchardModalOptions from './OrchardWarnModal/definitions';
 
 import './styles.scss';
-import { OptionsInputType } from '../../../types/FormInputType';
 
 type NumStepperVal = {
   value: number,
@@ -276,9 +276,9 @@ const OrchardStep = ({
   };
 
   const renderOrchardFields = () => {
-    if (isFormSubmitted && isReview) {
+    if (isFormSubmitted || isReview) {
       return (
-        <div className="orchard-fields-review-only">
+        <div className={`${isReview && 'orchard-fields-review-only'}`}>
           <Row>
             <Column sm={4} md={4} lg={4}>
               <ReadOnlyInput
