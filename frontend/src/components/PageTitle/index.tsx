@@ -19,13 +19,15 @@ interface PageTitleProps {
   subtitle?: string | React.ReactNode;
   enableFavourite?: boolean;
   activity?: string;
+  isConsep?: boolean;
 }
 
 const PageTitle = ({
   title,
   subtitle,
   enableFavourite,
-  activity
+  activity,
+  isConsep = false
 }: PageTitleProps) => {
   const favActQueryKey = ['favourite-activities'];
   const queryClient = useQueryClient();
@@ -35,21 +37,23 @@ const PageTitle = ({
     queryFn: getFavAct
   });
 
-  const highlightFavAct = useMutation({
-    mutationFn: (actObj: FavActivityPostType) => postFavAct(actObj),
+  const addFavAct = useMutation({
+    mutationFn: (actObjs: FavActivityPostType[]) => postFavAct(actObjs),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: favActQueryKey });
+      queryClient.invalidateQueries(favActQueryKey);
     }
   });
 
   const removeFavAct = useMutation({
     mutationFn: (id: number) => deleteFavAct(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: favActQueryKey });
+      queryClient.invalidateQueries(favActQueryKey);
     }
   });
 
-  const thisFavAct = favActQuery?.data?.filter((act) => act.type === activity)[0];
+  const thisFavAct = favActQuery?.data?.filter(
+    (act) => act.type === activity && act.isConsep === isConsep
+  )[0];
 
   const isFavourited = thisFavAct !== undefined;
 
@@ -69,7 +73,7 @@ const PageTitle = ({
                 onClick={
                   isFavourited
                     ? () => removeFavAct.mutate(thisFavAct.id)
-                    : () => highlightFavAct.mutate({ activity })
+                    : () => addFavAct.mutate([{ activity }])
                 }
               >
                 {

@@ -23,7 +23,7 @@ const Dashboard = () => (
     <Row className="dashboard-row">
       <Column>
         <section title="Favourite activities">
-          <FavouriteActivities />
+          <FavouriteActivities isConsep={false} />
         </section>
       </Column>
     </Row>

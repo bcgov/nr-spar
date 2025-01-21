@@ -1,7 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router';
 
-import { Tile, OverflowMenu, OverflowMenuItem } from '@carbon/react';
+import {
+  Tile, OverflowMenu, OverflowMenuItem, Column
+} from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -49,8 +51,6 @@ const FavouriteCard = ({
       aria-label={`${favObject.header} options`}
       flipped
       iconDescription="More actions"
-      // Need to stop bubbling here so it won't trigger the
-      // the tile onKeyDown event
       onKeyDown={(e: React.KeyboardEvent<HTMLElement>) => {
         e.stopPropagation();
       }}
@@ -89,25 +89,30 @@ const FavouriteCard = ({
   }
 
   return (
-    <Tile
-      className={`${favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'} ${favObject.isConsep ? 'fav-card-main-consep' : 'fav-card-main-spar'}`}
-      onClick={() => navigate(favObject.link)}
-      tabIndex={0}
-      aria-label={`Go to ${favObject.header}`}
-      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          navigate(favObject.link);
-        }
-      }}
-    >
-      <div className="fav-card-header">
-        <Icon className="fav-card-icon" />
-        {ActionBtn}
-      </div>
-      <div className="fav-card-content">
-        <p className="fav-card-title-large" role="heading" aria-level={2}>{favObject.header}</p>
-      </div>
-    </Tile>
+    <Column key={favObject.type} lg={4} md={4} sm={2}>
+      {' '}
+      <Tile
+        className={favObject.highlighted ? 'consep-fav-card-highlighted' : 'consep-fav-card'}
+        onClick={() => navigate(favObject.link)}
+        tabIndex={0}
+        aria-label={`Go to ${favObject.header}`}
+        onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            navigate(favObject.link);
+          }
+        }}
+      >
+        <div className="consep-fav-card-header">
+          <Icon className="fav-card-icon" />
+          {ActionBtn}
+        </div>
+        <div className="consep-fav-card-content">
+          <p>{favObject.header}</p>
+        </div>
+
+      </Tile>
+    </Column>
+
   );
 };
 

@@ -44,29 +44,29 @@ public class FavouriteActivityEndpoint {
    * Creates to the logged user a {@link FavouriteActivityEntity} record based on the activity or
    * page title.
    *
-   * @param createDto a {@link FavouriteActivityCreateDto} with the activity title
+   * @param createDtos a {@link FavouriteActivityCreateDto} with the activity title
    * @return a {@link FavouriteActivityEntity} created
    */
   @PostMapping(consumes = "application/json", produces = "application/json")
   @Operation(
-      summary = "Creates a Favourite Activity",
+      summary = "Creates a Favourite Activities in bulk",
       description =
           """
-          Creates a Favourite Activity to the logged user based on the activity
-          title or page name.
+          Creates Favourite Activities for the logged user in bulk based on an array
+          of activity titles or page names, with optional isConsep flags.
           """)
   @ApiResponses(
       value = {
         @ApiResponse(
             responseCode = "201",
-            description = "The Favourite Activity entity was successfully created",
+            description = "The Favourite Activities were successfully created",
             content =
                 @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = FavouriteActivityEntity.class))),
         @ApiResponse(
             responseCode = "400",
-            description = "The activity doesn't exists or is already defined to that user",
+            description = "One or more activities failed validation or already exist",
             content =
                 @Content(
                     mediaType = "application/json",
@@ -82,7 +82,7 @@ public class FavouriteActivityEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public ResponseEntity<FavouriteActivityEntity> createUserActivity(
+  public ResponseEntity<List<FavouriteActivityEntity>> createUserActivities(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the activity name that will be created",
               required = true,
@@ -90,8 +90,9 @@ public class FavouriteActivityEndpoint {
                   @Content(schema = @Schema(implementation = FavouriteActivityCreateDto.class)))
           @Valid
           @RequestBody
-          FavouriteActivityCreateDto createDto) {
-    FavouriteActivityEntity entity = favouriteActivityService.createUserActivity(createDto);
+          List<FavouriteActivityCreateDto> createDtos) {
+    List<FavouriteActivityEntity> entity = 
+        favouriteActivityService.createUserActivities(createDtos);
     return ResponseEntity.status(HttpStatus.CREATED).body(entity);
   }
 
