@@ -43,7 +43,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     //  Check primary orchard
     cy.get('#primary-orchard-selection')
-      .then($input => {
+      .then(($input) => {
         const value = $input.val();
         if (value === '') {
           cy.log('Primary input is empty');
@@ -51,7 +51,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
           cy.get('#primary-orchard-selection')
             .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
             .click();
-    
+
           cy.get(`.${prefix}--list-box--expanded`)
             .find('ul li')
             .contains('219 - VERNON - S - PRD')
@@ -79,7 +79,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     //  Check secondary orchard
     cy.get('#secondary-orchard-selection')
-      .then($input => {
+      .then(($input) => {
         const value = $input.val();
         if (value === '') {
           cy.log('Secondary input is empty');
@@ -87,7 +87,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
           cy.get('#secondary-orchard-selection')
             .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
             .click();
-    
+
           cy.get(`.${prefix}--list-box--expanded`)
             .find('ul li')
             .contains('222 - VERNON - S - PRD')
@@ -220,7 +220,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .clear()
       .type('0.00000000001')
       .blur();
-  
+
     cy.get('@errorDialog')
       .should('have.text', regFormData.parentTree.coneErrorMsg);
 
@@ -229,7 +229,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .clear()
       .type('1')
       .blur();
-  
+
     cy.get(`.${prefix}--actionable-notification--error`)
       .should('not.exist');
 
@@ -249,16 +249,16 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .clear()
       .type('10000000001')
       .blur();
-  
+
     cy.get('@errorDialog')
       .should('have.text', regFormData.parentTree.pollenErrorMsg);
-  
+
     // Check error message for Pollen count value > 10 decimal places
     cy.get('#212-pollenCount-value-input')
       .clear()
       .type('0.00000000001')
       .blur();
-  
+
     cy.get('@errorDialog')
       .should('have.text', regFormData.parentTree.pollenErrorMsg);
 
@@ -300,7 +300,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .eq(0)
       .find('button')
       .as('clickShowHideBtn')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
@@ -318,7 +318,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Click 'Comandra blister rust (DSC)' checkbox
     cy.get('@clickShowHideBtn')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
@@ -334,7 +334,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Click 'Western gall rust (DSG)' checkbox
     cy.get('@clickShowHideBtn')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
@@ -350,7 +350,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Click 'Volume growth (GVO)' checkbox
     cy.get('@clickShowHideBtn')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
@@ -392,7 +392,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .click();
 
     cy.readFile(`${Cypress.config('downloadsFolder')}/Seedlot_composition_template.csv`);
-    
+
     // Enter values in Cone count and Pollen count columns of the table
     cy.get('#212-coneCount-value-input')
       .clear()
@@ -492,14 +492,14 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     // Check file upload functionality
     cy.get('button.upload-button')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .should('be.visible');
 
     cy.get(`.${prefix}--file`)
       .find(`input.${prefix}--file-input`)
-      .selectFile('cypress/fixtures/Seedlot_composition_template.csv', {force: true});
+      .selectFile('cypress/fixtures/Seedlot_composition_template.csv', { force: true });
 
     cy.get('button')
       .contains('Import file and continue')
@@ -552,7 +552,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.get(`table.${prefix}--data-table tbody`)
       .find('tr')
       .then(($row) => {
-        expect($row.length).equal(parseInt(dropdownNumber));
+        expect($row.length).equal(parseInt(dropdownNumber, 10));
       });
 
     // Page number dropdown
@@ -572,7 +572,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.get(`.${prefix}--pagination__control-buttons`)
       .find(`button.${prefix}--pagination__button--forward`)
       .click();
-  
+
     cy.get(`.${prefix}--pagination__right`)
       .find(`select.${prefix}--select-input`)
       .should('have.value', '2');
