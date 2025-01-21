@@ -37,19 +37,26 @@ public class FavouriteActivityService {
     this.favouriteActivityRepository = favouriteActivityRepository;
   }
 
-/**
-   * Validates the activity input.
-   */
+  /**
+  * Validates the activity input.
+  *
+  * @param activityDto a {@link FavouriteActivityCreateDto} containing the activity title
+  */
   private void validateActivityInput(FavouriteActivityCreateDto activityDto) {
     if (Objects.isNull(activityDto.activity()) || activityDto.activity().isBlank()) {
-        throw new InvalidActivityException();
+      throw new InvalidActivityException();
     }
   }
 
   /**
   * Builds a FavouriteActivityEntity.
+  *
+  * @param userId a {@link String} containing the user id
+  * @param dto a {@link FavouriteActivityCreateDto} containing the activity title
+  * @return a {@link FavouriteActivityEntity} instance
   */
-  private FavouriteActivityEntity buildFavouriteActivityEntity(String userId, FavouriteActivityCreateDto dto) {
+  private FavouriteActivityEntity buildFavouriteActivityEntity(
+      String userId, FavouriteActivityCreateDto dto) {
     FavouriteActivityEntity entity = new FavouriteActivityEntity();
     entity.setUserId(userId);
     entity.setActivity(dto.activity());

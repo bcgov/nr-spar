@@ -166,3 +166,4 @@ services:
     depends_on:
       database:
         condition: service_started
+        
