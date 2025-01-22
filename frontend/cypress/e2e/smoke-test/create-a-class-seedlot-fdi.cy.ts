@@ -1,4 +1,4 @@
-import { TYPE_DELAY } from 'cypress/constants';
+import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
@@ -15,6 +15,9 @@ describe('Create FDI Seedlot', () => {
 
   it('Register fdi seedlot', () => {
     const regData = fixtureData.fdi;
+    // Intercept the POST request
+    cy.intercept('POST', '/api/seedlots').as('postSeedlot');
+
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
@@ -62,5 +65,15 @@ describe('Create FDI Seedlot', () => {
         cy.task('setData', [regData.species, seedlotNumber]);
       });
     cy.log('A-Class seedlot created with species', regData.species);
+
+    // Wait for the intercepted request and verify its response
+    cy.wait('@postSeedlot').then((interception) => {
+      // Check that the request method is POST
+      expect(interception.response?.statusCode).to.eq(201);
+
+      // Check the request body
+      const requestBody = interception.request.body;
+      expect(requestBody).to.have.property('applicantEmailAddress', regData.email);
+    });
   });
 });
