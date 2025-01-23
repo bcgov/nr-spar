@@ -28,11 +28,6 @@ export type FavActivityTableProps = {
   getRowProps: (props: { row: RowProps }) => any;
 };
 
-export type FavActivitySearchOptions = 'All departments' | 'Testing' | 'Administrative' | 'Withdrawal' | 'Processing' | 'Seed and family lot';
-
-export type FavActivitySearchMenu = {
-  label: string;
-  option: FavActivitySearchOptions
-};
-
 export type Department = 'Testing' | 'Administrative' | 'Withdrawal' | 'Processing' | 'Seed and family lot';
+
+export type FavActivitySearchOptions = 'All departments' | Department;

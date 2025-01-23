@@ -18,7 +18,7 @@ import {
 } from './constants';
 import {
   HeaderProps, RowProps, FavouriteActivityModalProps,
-  FavActivityTableProps, FavActivitySearchMenu
+  FavActivityTableProps
 } from './definitions';
 import './styles.scss';
 
@@ -35,19 +35,11 @@ const allRows: RowProps[] = Object.entries(FavouriteActivityMap)
 const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) => {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [initActs, setInitActs] = useState<string[]>([]);
-  const [searchOption, setSearchOption] = useState<FavActivitySearchMenu>(searchOptions[0]);
+  const [searchOption, setSearchOption] = useState<string>(searchOptions[0]);
   const [searchWord, setSearchWord] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  let filteredRows = allRows;
-  if (searchWord) {
-    const lowerCaseKeyWord = searchWord.toLowerCase();
-    filteredRows = allRows.filter((r) => r.activityName.toLowerCase().includes(lowerCaseKeyWord));
-    if (searchOption.option !== 'All departments') {
-      filteredRows = filteredRows.filter((row) => row.department === searchOption.option);
-    }
-  }
+  const [filteredRows, setFilteredRows] = useState(allRows);
 
   const currentRows = filteredRows.slice(
     (currentPage - 1) * itemsPerPage,
@@ -106,6 +98,17 @@ const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) 
     },
     [favActQuery.isSuccess]
   );
+
+  useEffect(() => {
+    if (searchWord) {
+      const lowerCaseKeyWord = searchWord.toLowerCase();
+      let rows = allRows.filter((r) => r.activityName.toLowerCase().includes(lowerCaseKeyWord));
+      if (searchOption !== 'All departments') {
+        rows = rows.filter((row) => row.department === searchOption);
+      }
+      setFilteredRows(rows);
+    }
+  }, [searchWord, searchOption]);
 
   return (
     <Modal
