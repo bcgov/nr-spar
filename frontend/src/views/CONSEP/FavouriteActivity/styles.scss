@@ -125,7 +125,7 @@ th > .bx--checkbox--inline > .bx--checkbox-label {
   margin: 0 0 1.5rem 0;
   padding: 0;
 
-  .bx--css-grid-column {
+  .#{vars.$bcgov-prefix}--css-grid-column {
     padding: 0;
     margin: 0 0.1rem 0 0;
   }
@@ -133,14 +133,13 @@ th > .bx--checkbox--inline > .bx--checkbox-label {
   .fav-activity-search-btn {
     width: 100%;
     .fav-activity-search-btn-icon {
-      color: white;
+      color: colors.$white;
     }
   }
-
 }
 
 .consep-fav-non-content-icon {
   width: 11rem;
-  height: 11em;
+  height: 11rem;
   color: colors.$blue-70;
 }
