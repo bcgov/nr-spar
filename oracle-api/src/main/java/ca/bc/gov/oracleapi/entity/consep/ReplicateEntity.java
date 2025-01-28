@@ -21,34 +21,34 @@ import lombok.Setter;
 public class ReplicateEntity {
 
   @Id
-  @Column(name = "RIA_SKEY", precision = 10, scale = 10)
+  @Column(name = "RIA_SKEY", precision = 10, scale = 0)
   private BigDecimal riaKey;
 
   @Id
-  @Column(name = "TEST_REPLICATE_NO", precision = 5, scale = 5)
-  private BigDecimal replicateNumber;
+  @Column(name = "TEST_REPLICATE_NO", nullable = false)
+  private Integer replicateNumber;
 
   @Column(name = "CONTAINER_ID", length = 4)
   private String containerId;
 
-  @Column(name = "CONTAINER_WEIGHT", precision = 7, scale = 3, nullable = false)
-  private BigDecimal containerWeight;
-
-  @Column(name = "FRESH_WEIGHT", precision = 7, scale = 3, nullable = false)
+  @Column(name = "FRESH_WEIGHT", precision = 7, scale = 3)
   private BigDecimal freshSeed;
 
-  @Column(name = "CNTNR_AND_DRY_WGHT", precision = 7, scale = 3, nullable = false)
+  @Column(name = "CNTNR_AND_DRY_WGHT", precision = 7, scale = 3)
   private BigDecimal containerAndDryWeight;
 
-  @Column(name = "DRY_WEIGHT", precision = 7, scale = 3, nullable = false)
+  @Column(name = "CONTAINER_WEIGHT", precision = 7, scale = 3)
+  private BigDecimal containerWeight;
+
+  @Column(name = "DRY_WEIGHT", precision = 7, scale = 3)
   private BigDecimal dryWeight;
 
-  @Column(name = "REP_ACCEPTED_IND", precision = 5, scale = 5)
-  private BigDecimal replicateAccInd;
-
-  @Column(name = "REPLICATE_COMMENT", length = 255)
-  private String replicateComment;
+  @Column(name = "REP_ACCEPTED_IND")
+  private Integer replicateAccInd;
 
   @Column(name = "TOLRNC_OVRRDE_DESC", length = 2000)
   private String overrideReason;
+
+  @Column(name = "REPLICATE_COMMENT", length = 255)
+  private String replicateComment;
 }

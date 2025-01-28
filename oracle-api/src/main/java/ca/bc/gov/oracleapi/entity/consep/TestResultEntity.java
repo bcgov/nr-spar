@@ -22,29 +22,29 @@ import lombok.Setter;
 public class TestResultEntity {
 
   @Id
-  @Column(name = "RIA_SKEY", precision = 10, scale = 10)
+  @Column(name = "RIA_SKEY", precision = 10, scale = 0)
   private BigDecimal riaKey;
 
   @Column(name = "ACTIVITY_TYPE_CD", length = 3)
   private String activityType;
 
-  @Column(name = "STANDARD_TEST_CD", precision = 5, scale = 5)
-  private BigDecimal standardTest;
+  @Column(name = "STANDARD_TEST_CD")
+  private Integer standardTest;
 
   @Column(name = "TEST_CATEGORY_CD", length = 3)
   private String testCategory;
 
-  @Column(name = "ACCEPT_RESULT_IND", precision = 5, scale = 5)
-  private BigDecimal acceptResult;
+  @Column(name = "ACCEPT_RESULT_IND")
+  private Integer acceptResult;
 
-  @Column(name = "TEST_COMPLETE_IND", precision = 5, scale = 5)
-  private BigDecimal testCompleteInd;
+  @Column(name = "TEST_COMPLETE_IND")
+  private Integer testCompleteInd;
 
-  @Column(name = "ORIGINAL_TEST_IND", precision = 5, scale = 5)
-  private BigDecimal originalTest;
+  @Column(name = "ORIGINAL_TEST_IND")
+  private Integer originalTest;
 
-  @Column(name = "CURRENT_TEST_IND", precision = 5, scale = 5)
-  private BigDecimal currentTest;
+  @Column(name = "CURRENT_TEST_IND")
+  private Integer currentTest;
 
   @Column(name = "TEST_RANK", length = 1)
   private String testRank;
@@ -55,26 +55,26 @@ public class TestResultEntity {
   @Column(name = "MOISTURE_STATUS_CD", length = 3)
   private String moistureStatus;
 
-  @Column(name = "GERMINATION_PCT", precision = 5, scale = 5)
-  private BigDecimal germinationPct;
+  @Column(name = "GERMINATION_PCT")
+  private Integer germinationPct;
 
   @Column(name = "MOISTURE_PCT", precision = 4, scale = 1)
   private BigDecimal moisturePct;
 
-  @Column(name = "GERMINATION_VALUE", precision = 5, scale = 5)
-  private BigDecimal germinationValue;
+  @Column(name = "GERMINATION_VALUE")
+  private Integer germinationValue;
 
-  @Column(name = "PEAK_VALUE_GRM_PCT", precision = 5, scale = 5)
-  private BigDecimal peakValueGrmPct;
+  @Column(name = "PEAK_VALUE_GRM_PCT")
+  private Integer peakValueGrmPct;
 
-  @Column(name = "PEAK_VALUE_NO_DAYS", precision = 5, scale = 5)
-  private BigDecimal peakValueNoDays;
+  @Column(name = "PEAK_VALUE_NO_DAYS")
+  private Integer peakValueNoDays;
 
   @Column(name = "WEIGHT_PER_100", precision = 7, scale = 3)
   private BigDecimal weightPer100;
 
-  @Column(name = "SEEDS_PER_GRAM", precision = 5, scale = 5)
-  private BigDecimal seedsPerGram;
+  @Column(name = "SEEDS_PER_GRAM")
+  private Integer seedsPerGram;
 
   @Column(name = "PURITY_PCT", precision = 4, scale = 1)
   private BigDecimal purityPct;
@@ -109,12 +109,12 @@ public class TestResultEntity {
   @Column(name = "GERMINATOR_ID", length = 1)
   private String germinatorId;
 
-  @Column(name = "GERMINATOR_TRAY_ID", precision = 5, scale = 5)
-  private BigDecimal germinatorTrayId;
+  @Column(name = "GERMINATOR_TRAY_ID")
+  private Integer germinatorTrayId;
 
-  @Column(name = "LABEL_IND", precision = 5, scale = 5)
-  private BigDecimal labelInd;
+  @Column(name = "LABEL_IND")
+  private Integer labelInd;
 
-  @Column(name = "RE_SAMPLE_IND", precision = 5, scale = 5)
-  private BigDecimal reSampleInd;
+  @Column(name = "RE_SAMPLE_IND")
+  private Integer reSampleInd;
 }
