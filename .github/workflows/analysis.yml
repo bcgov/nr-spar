@@ -28,7 +28,7 @@ jobs:
 
   tests:
     name: Java CI
-    if: ${{ ! github.event.pull_request.draft }}
+    if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     strategy:
       matrix:
@@ -55,7 +55,7 @@ jobs:
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
     name: Security Scan
-    if: ${{ ! github.event.pull_request.draft }}
+    if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
