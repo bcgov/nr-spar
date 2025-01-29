@@ -164,7 +164,7 @@ jobs:
     environment: ${{ inputs.environment }}
     if: needs.init.outputs.deploy_sync == 'true'
     needs: [init]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Deploy (sync)
         uses: bcgov/action-deployer-openshift@v3.0.1
