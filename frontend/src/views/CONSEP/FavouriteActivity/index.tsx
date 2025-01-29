@@ -63,10 +63,10 @@ const FavouriteActivity = () => {
           <Row className="consep-fav-row">
             <Column className="consep-fav-non-content-section">
               <UserInsights className="consep-fav-non-content-icon" />
-              <p className="consep-fav-non-content-title">You don’t have any favorites to show yet!</p>
+              <p className="consep-fav-non-content-title">You don’t have any favourites to show yet!</p>
               <p className="consep-fav-non-content-subtitle">
-                You can favorite your activities by clicking on add
-                favorite activity or by clicking on the heart icon inside each page
+                You can favourite your activities by clicking on &apos;Add favourite activity&apos;
+                or by clicking on the heart icon on each page.
               </p>
               <Button onClick={() => setOpen(true)} className="consep-fav-non-content-btn" renderIcon={Add}>
                 Add favourite activity

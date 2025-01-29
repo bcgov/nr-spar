@@ -118,13 +118,28 @@ th > .bx--checkbox--inline > .bx--checkbox-label {
   .consep-fav-non-content-btn {
     margin-top: 2rem;
     max-width: 16rem;
-    width: fit-content;
-    white-space: nowrap;
+  }
+}
+
+.fav-activity-search-row {
+  margin: 0 0 1.5rem 0;
+  padding: 0;
+
+  .#{vars.$bcgov-prefix}--css-grid-column {
+    padding: 0;
+    margin: 0 0.1rem 0 0;
   }
 
-  .consep-fav-non-content-icon {
-    width: 11rem;
-    height: 11em;
-    color: colors.$blue-70;
+  .fav-activity-search-btn {
+    width: 100%;
+    .fav-activity-search-btn-icon {
+      color: colors.$white;
+    }
   }
+}
+
+.consep-fav-non-content-icon {
+  width: 11rem;
+  height: 11rem;
+  color: colors.$blue-70;
 }
