@@ -51,6 +51,7 @@ jobs:
             npm ci
             npm run cy:ci || true
           dir: frontend
+          parallel: 2
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.javascript.lcov.reportPaths=cypress-coverage/lcov.info
@@ -58,7 +59,7 @@ jobs:
             -Dsonar.sources=src/
             -Dsonar.exclusions=src/__test__/**/*
             -Dsonar.exclusions=src/mock-server/**/*
-            -Dsonar.test.inclusions=cypress/e2e/smoke-test/**/*
+            -Dsonar.test.inclusions=cypress/e2e/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
       - name: Upload videos
         uses: actions/upload-artifact@v4
