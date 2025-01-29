@@ -107,8 +107,8 @@
     "lint": "./node_modules/.bin/eslint \"src/**\"",
     "cy:open": "cypress open",
     "cy:run": "cypress run --browser chrome",
-    "cy:ci-1": "cypress run --parallel --browser chrome --spec cypress/e2e/smoke-test-01/**/*",
-    "cy:ci-2": "cypress run --parallel --browser chrome --spec cypress/e2e/smoke-test-02/**/*",
+    "cy:ci-1": "cypress run --parallel --browser chrome --spec cypress/e2e/smoke-test-01/**/* --record",
+    "cy:ci-2": "cypress run --parallel --browser chrome --spec cypress/e2e/smoke-test-02/**/* --record",
     "cy:ci": "start-server-and-test start http://localhost:3000 cy:ci-1 & start-server-and-test start http://localhost:3000 cy:ci-2"
   },
   "eslintConfig": {
