@@ -57,7 +57,7 @@ jobs:
           node_version: "18"
           commands: |
             npm ci
-            npx cypress run --browser chrome --headless --spec ${{ matrix.group.specs }} --record --key ${{ secrets.CYPRESS_RECORD_KEY }} || true
+            npm start-server-and-test start http://localhost:3000 cypress run --browser chrome --headless --spec ${{ matrix.group.specs }} --record --key ${{ secrets.CYPRESS_RECORD_KEY }} || true
           dir: frontend
           parallel: 2
           sonar_args: >
