@@ -30,6 +30,9 @@ jobs:
       VITE_ZONE: TEST
       CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        node: [14, 16]
     steps:
       # Check triggers (omitted or matched)
       - uses: bcgov/action-diff-triggers@v0.2.0
