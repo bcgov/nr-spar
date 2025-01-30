@@ -5,16 +5,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.List;
 
 /**
  * This interface enables the replicate entity from consep to be retrieved from the database.
  */
 public interface ReplicateRepository extends JpaRepository<ReplicateEntity, BigDecimal> {
 
-  @Query("SELECT r FROM ReplicateEntity r WHERE r.riaKey = :riaKey AND r.replicateNumber = :testReplicateNumber")
-    Optional<ReplicateEntity> findByRiaKeyAndReplicateNumber(
+  @Query("SELECT r FROM ReplicateEntity r WHERE r.riaKey = :riaKey AND r.replicateNumber IN :testReplicateNumbers")
+    List<ReplicateEntity> findByRiaKeyAndReplicateNumbers(
         @Param("riaKey") BigDecimal riaKey,
-        @Param("testReplicateNumber") Integer testReplicateNumber
+        @Param("testReplicateNumbers") List<Integer> testReplicateNumbers
     );
 }

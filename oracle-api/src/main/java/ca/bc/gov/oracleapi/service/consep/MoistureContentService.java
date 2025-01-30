@@ -10,9 +10,11 @@ import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +32,7 @@ public class MoistureContentService {
    * Get information for moisture cone content
    */
   public Optional<MoistureContentConesDto> getMoistureConeContentData(
-    BigDecimal riaKey,
-    List<Integer> replicateIds
+    BigDecimal riaKey
   ) {
     SparLog.info("Begin to query necessary tables for moisture cone content");
 
@@ -39,24 +40,33 @@ public class MoistureContentService {
 
     Optional<TestResultEntity> testResultData = testResultRepository.findSelectedColumnsByRiaKey(riaKey);
 
-    List<ReplicateDto> replicatesList = new ArrayList<>();
+    // The maximum number of replicates is 8 and the entries are sequencial,
+    // so we can use a fixed list to fetch the data for the replicates.
+    List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
+                                      .boxed()
+                                      .collect(Collectors.toList());
 
-    replicateIds.forEach((id) -> {
-      Optional<ReplicateEntity> curReplicate = replicateRepository.findByRiaKeyAndReplicateNumber(riaKey, id);
-      ReplicateDto replicateToAdd = new ReplicateDto(
-          riaKey,
-          id,
-          curReplicate.get().getContainerId(),
-          curReplicate.get().getContainerWeight(),
-          curReplicate.get().getFreshSeed(),
-          curReplicate.get().getContainerAndDryWeight(),
-          curReplicate.get().getDryWeight(),
-          curReplicate.get().getReplicateAccInd(),
-          curReplicate.get().getReplicateComment(),
-          curReplicate.get().getOverrideReason()
-      );
-      replicatesList.add(replicateToAdd);
-    });
+
+    List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
+      riaKey,
+      replicateIds
+    );
+
+    List<ReplicateDto> replicatesList = replicates
+      .stream()
+      .map((curReplicate) -> new ReplicateDto(
+          curReplicate.getRiaKey(),
+          curReplicate.getReplicateNumber(),
+          curReplicate.getContainerId(),
+          curReplicate.getContainerWeight(),
+          curReplicate.getFreshSeed(),
+          curReplicate.getContainerAndDryWeight(),
+          curReplicate.getDryWeight(),
+          curReplicate.getReplicateAccInd(),
+          curReplicate.getReplicateComment(),
+          curReplicate.getOverrideReason()
+      ))
+      .collect(Collectors.toList());
 
     if (
       activityData.isPresent()
