@@ -12,12 +12,12 @@ import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Collectors;
-
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/** The class for Moisture Content Cones Service. */
 @Service
 @RequiredArgsConstructor
 public class MoistureContentService {
@@ -29,16 +29,18 @@ public class MoistureContentService {
   private final ReplicateRepository replicateRepository;
 
   /**
-   * Get information for moisture cone content
+   * Get information for moisture cone content.
    */
   public Optional<MoistureContentConesDto> getMoistureConeContentData(
-    BigDecimal riaKey
+      BigDecimal riaKey
   ) {
     SparLog.info("Begin to query necessary tables for moisture cone content");
 
     Optional<ActivityEntity> activityData = activityRepository.findMccColumnsByRiaKey(riaKey);
 
-    Optional<TestResultEntity> testResultData = testResultRepository.findSelectedColumnsByRiaKey(riaKey);
+    Optional<TestResultEntity> testResultData = testResultRepository.findSelectedColumnsByRiaKey(
+        riaKey
+    );
 
     // The maximum number of replicates is 8 and the entries are sequencial,
     // so we can use a fixed list to fetch the data for the replicates.
@@ -48,30 +50,30 @@ public class MoistureContentService {
 
 
     List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
-      riaKey,
-      replicateIds
+        riaKey,
+        replicateIds
     );
 
     List<ReplicateDto> replicatesList = replicates
-      .stream()
-      .map((curReplicate) -> new ReplicateDto(
-          curReplicate.getRiaKey(),
-          curReplicate.getReplicateNumber(),
-          curReplicate.getContainerId(),
-          curReplicate.getContainerWeight(),
-          curReplicate.getFreshSeed(),
-          curReplicate.getContainerAndDryWeight(),
-          curReplicate.getDryWeight(),
-          curReplicate.getReplicateAccInd(),
-          curReplicate.getReplicateComment(),
-          curReplicate.getOverrideReason()
-      ))
-      .collect(Collectors.toList());
+        .stream()
+        .map((curReplicate) -> new ReplicateDto(
+            curReplicate.getRiaKey(),
+            curReplicate.getReplicateNumber(),
+            curReplicate.getContainerId(),
+            curReplicate.getContainerWeight(),
+            curReplicate.getFreshSeed(),
+            curReplicate.getContainerAndDryWeight(),
+            curReplicate.getDryWeight(),
+            curReplicate.getReplicateAccInd(),
+            curReplicate.getReplicateComment(),
+            curReplicate.getOverrideReason()
+        ))
+        .collect(Collectors.toList());
 
     if (
-      activityData.isPresent()
-      || testResultData.isPresent()
-      || !(replicatesList.isEmpty())
+        activityData.isPresent()
+        || testResultData.isPresent()
+        || !(replicatesList.isEmpty())
     ) {
       MoistureContentConesDto moistureContent = new MoistureContentConesDto(
           testResultData.get().getTestCompleteInd(),

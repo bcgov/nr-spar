@@ -26,7 +26,7 @@ public record ActivityDto(
     @Schema(description = "Seedlot number associated with the activity", example = "12345")
     String seedlotNumber,
 
-    @Schema(description = "Family lot number associated with the activity", example = "FMLY1234567890")
+    @Schema(description = "Family lot number associated with the activity", example = "FMLY12345")
     String familyLotNumber,
 
     @Schema(description = "State of vegetation associated with the activity", example = "ACTIVE")
@@ -65,10 +65,10 @@ public record ActivityDto(
     @Schema(description = "Revised end date for the activity", example = "2025-01-22")
     LocalDate revisedEndDate,
 
-    @Schema(description = "Actual begin date and time of the activity", example = "2025-01-05T08:00:00")
+    @Schema(description = "Actual begin date of the activity", example = "2025-01-05T08:00:00")
     LocalDateTime actualBeginDateTime,
 
-    @Schema(description = "Actual end date and time of the activity", example = "2025-01-18T16:00:00")
+    @Schema(description = "Actual end date of the activity", example = "2025-01-18T16:00:00")
     LocalDateTime actualEndDateTime,
 
     @Schema(description = "Duration of the activity in hours", example = "120")
@@ -83,7 +83,7 @@ public record ActivityDto(
     @Schema(description = "Indicator for process commit", example = "1")
     Integer processCommitIndicator,
 
-    @Schema(description = "Timestamp for the last update of the activity", example = "2025-01-20T12:00:00")
+    @Schema(description = "Timestamp for the last update", example = "2025-01-20T12:00:00")
     LocalDateTime updateTimestamp,
 
     @Schema(description = "Indicator for the process result", example = "1")

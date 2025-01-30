@@ -34,10 +34,10 @@ public record MoistureContentConesDto(
     @Schema(description = "Comments for the activity", example = "Activity completed successfully")
     String riaComment,
 
-    @Schema(description = "Actual begin date and time of the activity", example = "2025-01-05T08:00:00")
+    @Schema(description = "Actual begin date of the activity", example = "2025-01-05T08:00:00")
     LocalDateTime actualBeginDateTime,
 
-    @Schema(description = "Actual end date and time of the activity", example = "2025-01-18T16:00:00")
+    @Schema(description = "Actual end date of the activity", example = "2025-01-18T16:00:00")
     LocalDateTime actualEndDateTime,
     // End - Activity fields
 

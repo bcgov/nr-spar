@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "CNS_T_TEST_REP_MC")
-@Schema(description = "Represents a single replicate information of a testing activity for a seedlot in the database")
+@Schema(description = "Represents a single replicate data for moisture content in the database")
 public class ReplicateEntity {
 
   @Id
