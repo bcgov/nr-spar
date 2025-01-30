@@ -8,6 +8,7 @@ let CypressData: { [k: string]: any } = {};
 
 export default defineConfig({
   e2e: {
+    projectId: 'aa2v3q',
     baseUrl: 'http://localhost:3000/',
     viewportWidth: 1280,
     viewportHeight: 720,
