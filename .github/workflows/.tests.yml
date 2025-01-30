@@ -32,7 +32,11 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        node: [14, 16]
+        group:
+          - name: Group 1
+            specs: 'cypress/e2e/smoke-test/create-a-class-seedlot.cy.ts,cypress/e2e/smoke-test/seedlot-dashboard.cy.ts,cypress/e2e/smoke-test/seedlot-detail.cy.ts,cypress/e2e/smoke-test/edit-applicant-seedlot-info.cy.ts,cypress/e2e/smoke-test/my-seedlots.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-collection-interim.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-ownership.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-orchard.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-extraction.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-parent-tree-part-1.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-parent-tree-part-2.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-parent-tree-part-3.cy.ts'
+          - name: Group 2
+            specs: 'cypress/e2e/smoke-test/login-page.cy.ts,cypress/e2e/smoke-test/dashboard-page.cy.ts,cypress/e2e/smoke-test/create-a-class-seedlot-fdi.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts,cypress/e2e/smoke-test/api-tests.cy.ts'
     steps:
       # Check triggers (omitted or matched)
       - uses: bcgov/action-diff-triggers@v0.2.0
@@ -53,7 +57,7 @@ jobs:
           node_version: "18"
           commands: |
             npm ci
-            npm run cy:ci || true
+            npx cypress run --browser chrome --headless --spec ${{ matrix.group.specs }} --record --key ${{ secrets.CYPRESS_RECORD_KEY }} || true
           dir: frontend
           parallel: 2
           sonar_args: >
@@ -63,7 +67,7 @@ jobs:
             -Dsonar.sources=src/
             -Dsonar.exclusions=src/__test__/**/*
             -Dsonar.exclusions=src/mock-server/**/*
-            -Dsonar.test.inclusions=cypress/e2e/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
       - name: Upload videos
         uses: actions/upload-artifact@v4
