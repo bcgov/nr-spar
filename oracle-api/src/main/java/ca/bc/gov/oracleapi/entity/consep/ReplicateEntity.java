@@ -24,7 +24,6 @@ public class ReplicateEntity {
   @Column(name = "RIA_SKEY", precision = 10, scale = 0)
   private BigDecimal riaKey;
 
-  @Id
   @Column(name = "TEST_REPLICATE_NO", nullable = false)
   private Integer replicateNumber;
 
