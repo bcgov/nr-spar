@@ -5,14 +5,23 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 /**
  * This interface enables the test result entity from consep to be retrieved from the database.
  */
 public interface TestResultRepository extends JpaRepository<TestResultEntity, BigDecimal> {
 
-  @Query("SELECT t.testCompleteInd, t.sampleDesc, t.moistureStatus, t.moisturePct, t.acceptResult "
-          + "FROM TestResultEntity t WHERE t.riaKey = :riaKey")
-  Optional<TestResultEntity> findSelectedColumnsByRiaKey(@Param("riaKey") BigDecimal riaKey);
+  @Query(
+      value = """
+        SELECT
+          t.TEST_COMPLETE_IND AS testCompleteInd,
+          t.SAMPLE_DESC AS sampleDesc,
+          t.MOISTURE_STATUS_CD AS moistureStatus,
+          t.MOISTURE_PCT AS moisturePct,
+          t.ACCEPT_RESULT_IND AS acceptResult
+        FROM CONSEP.CNS_T_TSC_TEST_RESULT t
+        WHERE t.RIA_SKEY = ?1
+      """,
+      nativeQuery = true)
+  Optional<TestResultEntity> findSelectedColumnsByRiaKey(BigDecimal riaKey);
 }

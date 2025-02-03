@@ -5,17 +5,22 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 /**
  * This interface enables the replicate entity from consep to be retrieved from the database.
  */
 public interface ReplicateRepository extends JpaRepository<ReplicateEntity, BigDecimal> {
 
-  @Query("SELECT r FROM ReplicateEntity r WHERE r.riaKey = :riaKey "
-          + "AND r.replicateNumber IN :testReplicateNumbers")
+  @Query(
+      value = """
+        SELECT r
+        FROM CONSEP.CNS_T_TEST_REP_MC r
+        WHERE r.RIA_SKEY = ?1
+        AND r.TEST_REPLICATE_NO IN ?2
+      """,
+      nativeQuery = true)
     List<ReplicateEntity> findByRiaKeyAndReplicateNumbers(
-        @Param("riaKey") BigDecimal riaKey,
-        @Param("testReplicateNumbers") List<Integer> testReplicateNumbers
+        BigDecimal riaKey,
+        List<Integer> testReplicateNumbers
     );
 }
