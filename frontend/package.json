@@ -107,9 +107,9 @@
     "lint": "./node_modules/.bin/eslint \"src/**\"",
     "cy:open": "cypress open",
     "cy:run": "cypress run --browser chrome",
-    "cy:ci-1": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test/create-a-class-seedlot.cy.ts,cypress/e2e/smoke-test/seedlot-dashboard.cy.ts,cypress/e2e/smoke-test/seedlot-detail.cy.ts,cypress/e2e/smoke-test/edit-applicant-seedlot-info.cy.ts,cypress/e2e/smoke-test/my-seedlots.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-collection-interim.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-ownership.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-orchard.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-extraction.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-parent-tree-part-1.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-parent-tree-part-2.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-parent-tree-part-3.cy.ts --record",
-    "cy:ci-2": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test/login-page.cy.ts,cypress/e2e/smoke-test/dashboard-page.cy.ts,cypress/e2e/smoke-test/create-a-class-seedlot-fdi.cy.ts,cypress/e2e/smoke-test/a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts,cypress/e2e/smoke-test/api-tests.cy.ts --record",
-    "cy:ci": "start-server-and-test start http://localhost:3000"
+    "cy:ci-1": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-01/**/* --record",
+    "cy:ci-2": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-02/**/* --record",
+    "cy:ci": "start-server-and-test start http://localhost:3000 cy:ci-1 & start-server-and-test start http://localhost:3000 cy:ci-2"
   },
   "eslintConfig": {
     "extends": [
