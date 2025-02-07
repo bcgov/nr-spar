@@ -62,6 +62,8 @@ jobs:
             -Dsonar.exclusions=src/mock-server/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-01/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-02/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-03/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-04/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
       - name: Upload videos
         uses: actions/upload-artifact@v4
