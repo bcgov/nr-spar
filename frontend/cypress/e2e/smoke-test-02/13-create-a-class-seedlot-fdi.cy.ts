@@ -21,12 +21,14 @@ describe('Create FDI Seedlot', () => {
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
-      .type(regData.agencyNumber, { delay: TYPE_DELAY });
+      .type(regData.agencyNumber, { delay: TYPE_DELAY })
+      .blur();
 
     // Enter the applicant email address
     cy.get('#applicant-email-input')
       .clear()
-      .type(regData.email, { delay: TYPE_DELAY });
+      .type(regData.email, { delay: TYPE_DELAY })
+      .blur();
 
     // Enter the seedlot species, wait for species data to load
     cy.get('#seedlot-species-combobox')
