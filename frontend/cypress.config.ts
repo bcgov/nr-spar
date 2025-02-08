@@ -19,8 +19,6 @@ export default defineConfig({
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
-      '**/11-login-page.cy.ts',
-      '**/12-dashboard-page.cy.ts',
       '**/01-create-a-class-seedlot.cy.ts',
       '**/02-seedlot-dashboard.cy.ts',
       '**/03-seedlot-detail.cy.ts',
@@ -34,6 +32,8 @@ export default defineConfig({
       '**/33-a-class-seedlot-reg-form-parent-tree-part-1.cy.ts',
       '**/34-a-class-seedlot-reg-form-parent-tree-part-2.cy.ts',
       '**/35-a-class-seedlot-reg-form-parent-tree-part-3.cy.ts',
+      '**/11-login-page.cy.ts',
+      '**/12-dashboard-page.cy.ts',
       '**/13-create-a-class-seedlot-fdi.cy.ts',
       '**/14-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',
       '**/15-api-tests.cy.ts',
