@@ -53,6 +53,7 @@
     "@types/react-test-renderer": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@vitest/coverage-v8": "^2.0.0",
+    "concurrently": "^9.1.2",
     "cypress": "^13.0.0",
     "esbuild": "^0.24.0",
     "eslint": "^8.57.0",
@@ -111,7 +112,7 @@
     "cy:ci-2": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-02/**/* --record",
     "cy:ci-3": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-03/**/* --record",
     "cy:ci-4": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-04/**/* --record",
-    "cy:ci": "start-server-and-test start http://localhost:3000 cy:ci-1 & start-server-and-test start http://localhost:3000 cy:ci-2 & start http://localhost:3000 cy:ci-3 & start-server-and-test start http://localhost:3000 cy:ci-4"
+    "cy:ci": "concurrently -k \"npm run start\" \"npm run cy:ci-1\" \"npm run cy:ci-2\" \"npm run cy:ci-3\" \"npm run cy:ci-4\""
   },
   "eslintConfig": {
     "extends": [

@@ -52,7 +52,7 @@ jobs:
             npm ci
             npm run cy:ci || true
           dir: frontend
-          parallel: 2
+          parallel: 1
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.javascript.lcov.reportPaths=cypress-coverage/lcov.info
