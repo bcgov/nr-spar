@@ -111,7 +111,7 @@
     "cy:ci-2": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-02/**/* --record",
     "cy:ci-3": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-03/**/* --record",
     "cy:ci-4": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-04/**/* --record",
-    "cy:ci": "start-server-and-test start http://localhost:3000 cy:ci-1 & start-server-and-test start http://localhost:3001 cy:ci-2 & start http://localhost:3002 cy:ci-3 & start-server-and-test start http://localhost:3003 cy:ci-4"
+    "cy:ci": "start-server-and-test start http://localhost:3000 cy:ci-1 & start-server-and-test start http://localhost:3000 cy:ci-2 & start http://localhost:3000 cy:ci-3 & start-server-and-test start http://localhost:3000 cy:ci-4"
   },
   "eslintConfig": {
     "extends": [
