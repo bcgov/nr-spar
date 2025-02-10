@@ -135,7 +135,7 @@ const ClientSearchTable = (
           <TableRow>
             {/* Empty table header to fit the radio button
                 correctly */}
-            <TableHeader className="radiobutton-header" />
+            <TableHeader className="radiobutton-header" aria-label="placeholder for layout purposes" />
             {
               TableHeaders.map((header: HeaderObjType) => (
                 <TableHeader

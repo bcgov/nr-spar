@@ -27,3 +27,7 @@ export type FavActivityTableProps = {
   getSelectionProps: (props: { row: RowProps }) => any;
   getRowProps: (props: { row: RowProps }) => any;
 };
+
+export type Department = 'Testing' | 'Administrative' | 'Withdrawal' | 'Processing' | 'Seed and family lot';
+
+export type FavActivitySearchOptions = 'All departments' | Department;

@@ -1,4 +1,4 @@
-import { HeaderProps } from './definitions';
+import { HeaderProps, Department } from './definitions';
 
 export const textConfig = {
   title: 'Add favourite activity',
@@ -18,3 +18,15 @@ export const favActHeaders: HeaderProps[] = [
     key: 'department',
     header: 'Department'
   }];
+
+export const searchOptions: Array<string> = [
+  'All departments', 'Testing', 'Administrative', 'Withdrawal', 'Processing', 'Seed and family lot'
+];
+
+export const headerIconMap: Record<Department, string> = {
+  Testing: 'Chemistry',
+  Administrative: 'Tools',
+  Withdrawal: 'StayInside',
+  Processing: 'Industry',
+  'Seed and family lot': 'SoilMoistureGlobal'
+};
