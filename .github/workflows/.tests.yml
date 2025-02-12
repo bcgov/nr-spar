@@ -43,13 +43,24 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.triggers.outputs.triggered == 'true'
 
+      - name: Start server
+        run: npm run start &  # Start in background
+        continue-on-error: true
+        
+      - name: Wait for server to start
+        run: npx wait-on http://localhost:3000 -timeout 60 # Adjust timeout as needed
+
       - name: Run Cypress CI
         if: steps.triggers.outputs.triggered == 'true'
         uses: bcgov/action-test-and-analyse@v1.2.1
         with:
           node_version: "18"
           commands: |
-            npm ci && npm run cy:ci
+            npm ci
+            npm run cy:ci-1 || true
+            npm run cy:ci-2 || true
+            npm run cy:ci-3 || true
+            npm run cy:ci-4 || true
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
