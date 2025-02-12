@@ -6,6 +6,7 @@ import ca.bc.gov.oracleapi.dto.consep.ReplicateDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.exception.InvalidMccKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
@@ -15,6 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 /** The class for Moisture Content Cones Service. */
@@ -27,6 +30,13 @@ public class MoistureContentService {
   private final TestResultRepository testResultRepository;
 
   private final ReplicateRepository replicateRepository;
+
+  // The maximum number of replicates is 8 and the entries are sequencial,
+  // so we can use a fixed list to fetch the data for the replicates.
+  private final List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
+                                            .boxed()
+                                            .collect(Collectors.toList());
+
 
   /**
    * Get information for moisture cone content.
@@ -41,13 +51,6 @@ public class MoistureContentService {
     Optional<TestResultEntity> testResultData = testResultRepository.findSelectedColumnsByRiaKey(
         riaKey
     );
-
-    // The maximum number of replicates is 8 and the entries are sequencial,
-    // so we can use a fixed list to fetch the data for the replicates.
-    List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
-                                      .boxed()
-                                      .collect(Collectors.toList());
-
 
     List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
         riaKey,
@@ -93,5 +96,37 @@ public class MoistureContentService {
 
     SparLog.info("An error occured when fetching data from the database");
     return Optional.empty();
+  }
+
+  /**
+   * Deletes MCC data on multiple tables.
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   */
+  public void deleteUserActivity(@NonNull BigDecimal riaKey) {
+    SparLog.info("Deleting entries on Activity, Replicate and TestResult tables "
+            + "with the riaKey: {}", riaKey);
+    Optional<ActivityEntity> activityEntity = activityRepository.findById(riaKey);
+
+    Optional<TestResultEntity> testEntity = testResultRepository.findById(riaKey);
+
+    List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
+        riaKey,
+        replicateIds
+    );
+
+    if (activityEntity.isEmpty()
+        || testEntity.isEmpty()
+        || replicates.isEmpty()
+    ) {
+      throw new InvalidMccKeyException();
+    }
+
+    activityRepository.deleteById(riaKey);
+    testResultRepository.deleteById(riaKey);
+    replicateRepository.deleteById(riaKey);
+
+    SparLog.info("Activity, Replicate and TestResult with riaKey {} ", riaKey
+            + "deleted!");
   }
 }
