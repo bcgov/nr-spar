@@ -112,7 +112,7 @@
     "cy:ci-2": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-02/**/* --record --group apitest",
     "cy:ci-3": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-03/**/* --record --group seedlotreg",
     "cy:ci-4": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-04/**/* --record --group parenttree",
-    "cy:ci": "concurrently -k \"npm run start && wait-on http://localhost:3000\" \"npm run cy:ci-1\" \"npm run cy:ci-2\" \"npm run cy:ci-3\" \"npm run cy:ci-4\""
+    "cy:ci": "npm run start && wait-on http://localhost:3000 -timeout 60000"
   },
   "eslintConfig": {
     "extends": [

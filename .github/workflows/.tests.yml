@@ -44,11 +44,8 @@ jobs:
         if: steps.triggers.outputs.triggered == 'true'
 
       - name: Start server
-        run: npm run start &  # Start in background
-        continue-on-error: true
-        
-      - name: Wait for server to start
-        run: npx wait-on http://localhost:3000 -timeout 60 # Adjust timeout as needed
+        if: steps.triggers.outputs.triggered == 'true'
+        run: npm run cy:ci
 
       - name: Run Cypress CI
         if: steps.triggers.outputs.triggered == 'true'
