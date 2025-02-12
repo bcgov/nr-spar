@@ -48,7 +48,7 @@ jobs:
         continue-on-error: true
         
       - name: Wait for server to start
-        run: npx wait-on http://localhost:3000 -timeout 60000
+        run: npx wait-on http://localhost:3000
 
       - name: Run Cypress CI
         if: steps.triggers.outputs.triggered == 'true'
