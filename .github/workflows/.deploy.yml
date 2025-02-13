@@ -65,8 +65,6 @@ jobs:
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
-            -p ORACLE_SYNC_USER='${{ vars.ORACLE_SYNC_USER }}'
-            -p ORACLE_SYNC_PASSWORD='${{ secrets.ORACLE_SYNC_PASSWORD }}'
             -p ORACLE_CERT_SECRET='${{ secrets.ORACLE_CERT_SECRET }}'
             -p ORACLE_HOST='${{ vars.ORACLE_HOST }}'
             -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ secrets.VITE_USER_POOLS_WEB_CLIENT_ID }}
