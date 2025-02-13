@@ -43,13 +43,6 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.triggers.outputs.triggered == 'true'
 
-      - name: Start server
-        run: npm run start &
-        continue-on-error: true
-        
-      - name: Wait for server to start
-        run: npx wait-on http://localhost:3000
-
       - name: Run Cypress CI
         if: steps.triggers.outputs.triggered == 'true'
         uses: bcgov/action-test-and-analyse@v1.2.1
@@ -57,6 +50,7 @@ jobs:
           node_version: "18"
           commands: |
             npm ci
+            npm run cy:ci
             npm run cy:ci-1 || true
             npm run cy:ci-2 || true
             npm run cy:ci-3 || true
