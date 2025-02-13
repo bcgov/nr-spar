@@ -1,7 +1,0 @@
-#cx-Oracle==8.3.0
-oracledb
-numpy==2.2.2
-pandas==2.2.3
-psycopg2==2.9.10
-SQLAlchemy==2.0.34
-pyyaml==6.0.2
