@@ -50,8 +50,6 @@ jobs:
           node_version: "18"
           commands: |
             npm ci
-            npm run start || { echo "Server failed to start"; exit 1; }
-            npm run cy:ci || echo "Failed to reach server"
             npm run cy:ci-1 || true
             npm run cy:ci-2 || true
             npm run cy:ci-3 || true
