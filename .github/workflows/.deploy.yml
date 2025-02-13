@@ -27,7 +27,7 @@ on:
     outputs:
       triggered:
         description: Has a deployment been triggered?
-        value: ${{ jobs.trigger.outputs.triggered }}
+        value: ${{ jobs.init.outputs.triggered }}
 
 permissions: {}
 
