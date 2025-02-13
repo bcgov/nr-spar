@@ -50,10 +50,10 @@ jobs:
           node_version: "18"
           commands: |
             npm ci
-            npm run cy:test || true
-            npm run cy:ci-2 || true
-            npm run cy:ci-3 || true
-            npm run cy:ci-4 || true
+            npm run cy:run-1 || true
+            npm run cy:run-2 || true
+            npm run cy:run-3 || true
+            npm run cy:run-4 || true
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
