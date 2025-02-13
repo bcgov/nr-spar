@@ -108,11 +108,11 @@
     "lint": "./node_modules/.bin/eslint \"src/**\"",
     "cy:open": "cypress open",
     "cy:run": "cypress run --browser chrome",
-    "cy:ci-1": "start-server-and-test start http://localhost:3000 cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-01/**/* --record --group myseedlot",
+    "cy:ci-1": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-01/**/* --record --group myseedlot",
     "cy:ci-2": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-02/**/* --record --group apitest",
     "cy:ci-3": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-03/**/* --record --group seedlotreg",
     "cy:ci-4": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-04/**/* --record --group parenttree",
-    "cy:ci": "wait-on http://localhost:3000 -timeout 60000"
+    "cy:test": "start-server-and-test start http://localhost:3000 cy:ci-1"
   },
   "eslintConfig": {
     "extends": [
