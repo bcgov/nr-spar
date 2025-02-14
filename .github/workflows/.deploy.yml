@@ -88,7 +88,6 @@ jobs:
             -p ZONE=${{ inputs.target }}
             -p DB_PVC_SIZE=${{ inputs.db-pvc-size }}
             ${{ github.event_name == 'pull_request' && '-p MEMORY_REQUEST=100Mi' || '' }}
-            ${{ github.event_name == 'pull_request' && '-p MEMORY_LIMIT=200Mi' || '' }}
           triggers: ${{ inputs.triggers }}
 
   deploy:
