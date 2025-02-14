@@ -29,6 +29,10 @@ on:
         description: Database PVC size; e.g. 1Gi
         default: "1.8Gi"
         type: string
+      db-memory-request:
+        description: Database memory request; e.g. 2Gi
+        default: "2Gi"
+        type: string
 
     outputs:
       triggered:
@@ -87,7 +91,7 @@ jobs:
           parameters:
             -p ZONE=${{ inputs.target }}
             -p DB_PVC_SIZE=${{ inputs.db-pvc-size }}
-            ${{ github.event_name == 'pull_request' && '-p MEMORY_REQUEST=100Mi' || '' }}
+            -p MEMORY_REQUEST=${{ inputs.db-memory-request }}
           triggers: ${{ inputs.triggers }}
 
   deploy:
