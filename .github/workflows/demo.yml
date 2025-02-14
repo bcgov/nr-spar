@@ -26,19 +26,20 @@ jobs:
       REPO: ${{ github.event.repository.name }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: redhat-actions/openshift-tools-installer@v1
+      - uses: bcgov/action-oc-runner@X.Y.Z
         with:
-          oc: "4"
-      - name: Point DEMO URL to Existing Service
-        run: |
-          # Set Up Routing
+          oc_namespace: ${{ vars.oc_namespace }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          commands: |
+            # Set Up Routing
 
-          # Login
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }} #Safeguard!
+            # Login
+            oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+            oc project ${{ vars.oc_namespace }} #Safeguard!
 
-          # Delete and replace route
-          oc delete route/${{ env.REPO }}-${{ env.DEST }} --ignore-not-found=true
-          oc create route edge ${{ env.REPO }}-${{ env.DEST }} \
-            --hostname=${{ env.REPO }}-${{ env.DEST }}.${{ env.DOMAIN }} \
-            --service=${{ env.REPO }}-${{ github.event.number || inputs.target }}-frontend
+            # Delete and replace route
+            oc delete route/${{ env.REPO }}-${{ env.DEST }} --ignore-not-found=true
+            oc create route edge ${{ env.REPO }}-${{ env.DEST }} \
+              --hostname=${{ env.REPO }}-${{ env.DEST }}.${{ env.DOMAIN }} \
+              --service=${{ env.REPO }}-${{ github.event.number || inputs.target }}-frontend
