@@ -37,7 +37,7 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs:
       fam-modded-zone: ${{ steps.fam-modded-zone.outputs.fam-modded-zone }}
-      triggered: ${{ steps.deploy.outputs.triggered }}
+      triggered: ${{ steps.trigger.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
       - name: FAM routing
