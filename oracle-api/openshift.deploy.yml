@@ -181,13 +181,16 @@ objects:
                 httpGet:
                   path: /actuator/health
                   port: container-port
+                initialDelaySeconds: 15
               livenessProbe:
                 httpGet:
                   path: /actuator/health
                   port: container-port
+                initialDelaySeconds: 15
               startupProbe:
                 tcpSocket:
                   port: container-port
+                initialDelaySeconds: 15
                 failureThreshold: 45
   - apiVersion: v1
     kind: Service
