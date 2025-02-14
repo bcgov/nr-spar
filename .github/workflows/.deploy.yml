@@ -103,7 +103,6 @@ jobs:
             -p ZONE=${{ inputs.target }}
             ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MEMORY_REQUEST=100Mi' || '' }}
-            ${{ github.event_name == 'pull_request' && '-p MEMORY_LIMIT=200Mi' || '' }}
 
   deploy:
     name: Deploy
@@ -134,7 +133,6 @@ jobs:
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              ${{ github.event_name == 'pull_request' && '-p CPU_LIMIT=100m' || '' }}
               ${{ inputs.target == 'prod' && '-p MIN_REPLICAS=3' || '' }}
               ${{ inputs.target == 'prod' && '-p MAX_REPLICAS=5' || '' }}
             verification_path: "actuator/health"
