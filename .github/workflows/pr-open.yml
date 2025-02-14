@@ -38,6 +38,8 @@ jobs:
     with:
       db-pvc-size: 100Mi
       db-pvc-size: 192Mi
+      min-replicas: 1
+      max-replicas: 1
       triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
 
   tests:
