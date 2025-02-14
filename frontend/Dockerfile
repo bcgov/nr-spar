@@ -17,10 +17,6 @@ RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
 FROM caddy:2.9.1-alpine
 RUN apk add --no-cache ca-certificates curl
 
-# Receive build number as argument, retain as environment variable
-ARG BUILD_NUMBER
-ENV BUILD_NUMBER=${BUILD_NUMBER}
-
 # Copy files and run formatting
 COPY --from=build /app/build/ /app/dist
 COPY Caddyfile /etc/caddy/Caddyfile
