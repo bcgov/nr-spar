@@ -24,6 +24,12 @@ on:
         default: ''
         type: string
 
+      ### Optional / per-environment
+      db-pvc-size:
+        description: Database PVC size; e.g. 1Gi
+        default: "1.8Gi"
+        type: string
+
     outputs:
       triggered:
         description: Has a deployment been triggered?
@@ -80,7 +86,7 @@ jobs:
           overwrite: false
           parameters:
             -p ZONE=${{ inputs.target }}
-            ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
+            -p DB_PVC_SIZE=${{ inputs.db-pvc-size }}
             ${{ github.event_name == 'pull_request' && '-p MEMORY_REQUEST=100Mi' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MEMORY_LIMIT=200Mi' || '' }}
           triggers: ${{ inputs.triggers }}
