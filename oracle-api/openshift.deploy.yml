@@ -32,10 +32,10 @@ parameters:
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
-    value: "1"
+    value: "3"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
-    value: "2"
+    value: "5"
   - name: OPENSEARCH_ENV
     description: Oracle API environment for OpenSearch. # One of: development, test, production
     required: false

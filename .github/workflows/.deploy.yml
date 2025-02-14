@@ -33,6 +33,14 @@ on:
         description: Database memory request; e.g. 2Gi
         default: "2Gi"
         type: string
+      max-replicas:
+        description: Maximum replicas for backend, frontend and oracle-api
+        default: 5
+        type: number
+      min-replicas:
+        description: Minimum replicas for backend, frontend and oracle-api
+        default: 3
+        type: number
 
     outputs:
       triggered:
@@ -122,8 +130,6 @@ jobs:
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              ${{ inputs.target == 'prod' && '-p MIN_REPLICAS=3' || '' }}
-              ${{ inputs.target == 'prod' && '-p MAX_REPLICAS=5' || '' }}
             verification_path: "actuator/health"
     steps:
       - uses: bcgov/action-deployer-openshift@v3.2.0
@@ -137,8 +143,8 @@ jobs:
           parameters:
             -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
-            ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
-            ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=1' || '' }}
+            -p MIN_REPLICAS=${{ inputs.min-replicas }}
+            -p MAX_REPLICAS=${{ inputs.max-replicas }}
             ${{ matrix.parameters }}
           triggers: ${{ inputs.triggers }}
           verification_path: ${{ matrix.verification_path }}
