@@ -109,6 +109,6 @@ public class MoistureContentConesEndpoint {
               required = true)
           @PathVariable
           BigDecimal riaKey) {
-    moistureContentService.deleteUserActivity(riaKey);
+    moistureContentService.deleteFullMcc(riaKey);
   }
 }

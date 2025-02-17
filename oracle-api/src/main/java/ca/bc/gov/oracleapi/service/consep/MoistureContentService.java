@@ -99,11 +99,39 @@ public class MoistureContentService {
   }
 
   /**
+   * Deletes a single replicate.
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   * @param replicanteNumber the replicate number to be deleted
+   */
+  public void deleteMccReplicate(
+    @NonNull BigDecimal riaKey,
+    @NonNull Integer replicateNumber
+  ) {
+    SparLog.info("Deleting a replicate tables with the "
+        + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
+
+    Optional<ReplicateEntity> replicates = replicateRepository.findSingleReplicate(
+        riaKey,
+        replicateNumber
+    );
+
+    if (replicates.isEmpty()) {
+      throw new InvalidMccKeyException();
+    }
+
+    replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
+
+    SparLog.info("Replicate {} with riaKey {} ", replicateNumber, riaKey
+            + "deleted!");
+  }
+
+  /**
    * Deletes MCC data on multiple tables.
    *
    * @param riaKey the identifier key for all table related to MCC
    */
-  public void deleteUserActivity(@NonNull BigDecimal riaKey) {
+  public void deleteFullMcc(@NonNull BigDecimal riaKey) {
     SparLog.info("Deleting entries on Activity, Replicate and TestResult tables "
             + "with the riaKey: {}", riaKey);
     Optional<ActivityEntity> activityEntity = activityRepository.findById(riaKey);
