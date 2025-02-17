@@ -25,7 +25,7 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, BigD
         List<Integer> testReplicateNumbers
     );
 
-    @Query(
+  @Query(
       value = """
         SELECT r
         FROM CONSEP.CNS_T_TEST_REP_MC r
@@ -38,7 +38,7 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, BigD
         Integer testReplicateNumber
     );
 
-    @Query(
+  @Query(
       value = """
         DELETE FROM CONSEP.CNS_T_TEST_REP_MC
         WHERE RIA_SKEY = ?1

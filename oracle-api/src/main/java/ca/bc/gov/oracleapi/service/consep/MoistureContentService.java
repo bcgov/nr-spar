@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -102,11 +101,11 @@ public class MoistureContentService {
    * Deletes a single replicate.
    *
    * @param riaKey the identifier key for all table related to MCC
-   * @param replicanteNumber the replicate number to be deleted
+   * @param replicateNumber the replicate number to be deleted
    */
   public void deleteMccReplicate(
-    @NonNull BigDecimal riaKey,
-    @NonNull Integer replicateNumber
+      @NonNull BigDecimal riaKey,
+      @NonNull Integer replicateNumber
   ) {
     SparLog.info("Deleting a replicate tables with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);

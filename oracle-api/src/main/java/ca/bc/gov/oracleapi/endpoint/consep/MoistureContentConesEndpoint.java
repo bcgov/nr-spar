@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
 import java.util.Optional;
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -110,5 +109,49 @@ public class MoistureContentConesEndpoint {
           @PathVariable
           BigDecimal riaKey) {
     moistureContentService.deleteFullMcc(riaKey);
+  }
+
+  /**
+   * Delete a single replicate entry.
+   *
+   * @param riaKey The identifier for the MCC-related data.
+   * @param replicateNumber The replicate number to be deleted.
+   */
+  @DeleteMapping(value = "/{riaKey}/{replicateNumber}", produces = "application/json")
+  @Operation(
+      summary = "Delete a single replicate entry",
+      description =
+        "Removes a replicate entry from the database using its riaKey and replicateNumber."
+  )
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "The replicate entry was successfully deleted",
+              content = @Content(schema = @Schema(implementation = Void.class))),
+          @ApiResponse(
+              responseCode = "401",
+              description = "Access token is missing or invalid",
+              content = @Content(schema = @Schema(implementation = Void.class))),
+          @ApiResponse(
+              responseCode = "404",
+              description = "The replicate entry was not found",
+              content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public void deleteReplicate(
+      @Parameter(
+              name = "riaKey",
+              in = ParameterIn.PATH,
+              description = "Identification key for MCC data",
+              required = true)
+          @PathVariable BigDecimal riaKey,
+      @Parameter(
+              name = "replicateNumber",
+              in = ParameterIn.PATH,
+              description = "Number of the replicate to delete",
+              required = true)
+          @PathVariable Integer replicateNumber) {
+    moistureContentService.deleteMccReplicate(riaKey, replicateNumber);
   }
 }
