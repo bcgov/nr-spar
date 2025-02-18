@@ -15,7 +15,7 @@ parameters:
   - name: CPU_REQUEST
     value: 25m
   - name: MEMORY_REQUEST
-    value: 2Gi
+    value: 512Mi
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi
     value: 1.8Gi
