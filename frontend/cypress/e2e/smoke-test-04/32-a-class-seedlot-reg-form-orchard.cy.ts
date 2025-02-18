@@ -120,7 +120,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('be.visible');
 
     cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
-      .find(`h3.${prefix}--modal-header__heading`)
+      .find(`h2.${prefix}--modal-header__heading`)
       .should('have.text', regFormData.orchard.singleOrchardError);
 
     // Check 'Cancel' button of change orchard modal
