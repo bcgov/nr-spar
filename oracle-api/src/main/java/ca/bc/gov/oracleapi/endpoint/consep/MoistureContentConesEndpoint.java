@@ -13,10 +13,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,6 +75,46 @@ public class MoistureContentConesEndpoint {
     SparLog.info("Received request to fetch MCC data for key: {}", riaKey);
 
     return moistureContentService.getMoistureConeContentData(riaKey);
+  }
+
+  /**
+   * Updates a single field of a replicate entity.
+   *
+   * @param riaKey The identifier for the MCC-related data.
+   * @param replicateNumber The replicate number to be updated.
+   * @param updates A map containing the field name and its new value.
+   */
+  @PatchMapping(
+      value = "replicate/{riaKey}/{replicateNumber}",
+      consumes = "application/json")
+  @Operation(
+      summary = "Update a single field of a replicate entity",
+      description = "Updates an individual field of a replicate without affecting other fields."
+  )
+  @ApiResponses(
+      value = {
+          @ApiResponse(responseCode = "200", description = "Field successfully updated"),
+          @ApiResponse(responseCode = "400", description = "Invalid field name or value"),
+          @ApiResponse(responseCode = "404", description = "Replicate not found")
+      })
+  public void updateReplicateField(
+      @Parameter(
+          name = "riaKey",
+          in = ParameterIn.PATH,
+          description = "Identification key for MCC data",
+          required = true)
+      @PathVariable
+      BigDecimal riaKey,
+      @Parameter(
+          name = "replicateNumber",
+          in = ParameterIn.PATH,
+          description = "Number of the replicate to update",
+          required = true)
+      @PathVariable
+      Integer replicateNumber,
+      @RequestBody
+      Map<String, Object> updates) {
+        moistureContentService.updateReplicateField(riaKey, replicateNumber, updates);
   }
 
   /**

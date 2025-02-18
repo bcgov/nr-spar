@@ -12,7 +12,9 @@ import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
@@ -95,6 +97,34 @@ public class MoistureContentService {
 
     SparLog.info("An error occured when fetching data from the database");
     return Optional.empty();
+  }
+
+  private static final Set<String> ALLOWED_REPLICATE_FIELDS = Set.of(
+    "containerId", "containerWeight", "freshSeed", "containerAndDryWeight",
+    "dryWeight", "replicateAccInd", "replicateComment", "overrideReason"
+  );
+
+  public void updateReplicateField(
+    @NonNull BigDecimal riaKey,
+    @NonNull Integer replicateNumber,
+    Map<String, Object> updates
+  ) {
+    SparLog.info("Updating a replicate with the "
+        + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
+    if (updates.isEmpty()) {
+        SparLog.info("Empty object for fields to update");
+        throw new IllegalArgumentException("No fields provided for update.");
+    }
+
+    for (Map.Entry<String, Object> entry : updates.entrySet()) {
+        String field = entry.getKey();
+        Object value = entry.getValue();
+
+        if (!ALLOWED_REPLICATE_FIELDS.contains(field)) {
+            throw new IllegalArgumentException("Invalid field: " + field);
+        }
+      replicateRepository.updateField(riaKey, replicateNumber, field, value);
+    }
   }
 
   /**
