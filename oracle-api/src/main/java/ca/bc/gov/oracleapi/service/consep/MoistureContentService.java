@@ -135,6 +135,35 @@ public class MoistureContentService {
     SparLog.info("Replicate riaKey: {} and replicateNumber: {} updated", riaKey, replicateNumber);
   }
 
+  private static final Set<String> ALLOWED_ACTIVITY_FIELDS = Set.of(
+      "testCategoryCode", "riaComment", "actualBeginDateTime", "actualEndDateTime"
+  );
+
+  /**
+   * Update activity table.
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   * @param updates a map with the fields and the values to be updated
+   */
+  public void updateActivityField(BigDecimal riaKey, Map<String, Object> updates) {
+    SparLog.info("Updating a activity with the riaKey: {}", riaKey);
+    
+    if (updates.isEmpty()) {
+        throw new IllegalArgumentException("No fields provided for update.");
+    }
+
+    for (Map.Entry<String, Object> entry : updates.entrySet()) {
+        String field = entry.getKey();
+        Object value = entry.getValue();
+
+        if (!ALLOWED_ACTIVITY_FIELDS.contains(field)) {
+            throw new IllegalArgumentException("Invalid field: " + field);
+        }
+
+        activityRepository.updateField(riaKey, field, value);
+    }
+}
+
   /**
    * Deletes a single replicate.
    *
