@@ -104,6 +104,13 @@ public class MoistureContentService {
     "dryWeight", "replicateAccInd", "replicateComment", "overrideReason"
   );
 
+  /**
+   * Update a single replicate.
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   * @param replicateNumber the replicate number to be updated
+   * @param updates a map with the fields and the values to be updated
+   */
   public void updateReplicateField(
     @NonNull BigDecimal riaKey,
     @NonNull Integer replicateNumber,
