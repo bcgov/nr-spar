@@ -125,6 +125,7 @@ public class MoistureContentService {
         }
       replicateRepository.updateField(riaKey, replicateNumber, field, value);
     }
+    SparLog.info("Replicate riaKey: {} and replicateNumber: {} updated", riaKey, replicateNumber);
   }
 
   /**
