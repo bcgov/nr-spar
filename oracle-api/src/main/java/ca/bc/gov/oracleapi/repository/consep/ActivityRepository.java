@@ -28,15 +28,30 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
   Optional<ActivityEntity> findMccColumnsByRiaKey(BigDecimal riaKey);
 
   @Modifying
-  @Query(value = "UPDATE CONSEP.CNS_T_RQST_ITM_ACTVTY SET " +
-                 "   CASE " +
-                 "       WHEN :field = 'testCategoryCode' THEN TEST_CATEGORY_CD = :value " +
-                 "       WHEN :field = 'riaComment' THEN RIA_COMMENT = :value " +
-                 "       WHEN :field = 'actualBeginDateTime' THEN ACTUAL_BEGIN_DT_TM = :value " +
-                 "       WHEN :field = 'actualEndDateTime' THEN ACTUAL_END_DT_TM = :value " +
-                 "   END " +
-                 "WHERE RIA_SKEY = :riaKey",
-        nativeQuery = true)
+  @Query(
+      value =
+      """
+        UPDATE CONSEP.CNS_T_RQST_ITM_ACTVTY
+        SET
+          TEST_CATEGORY_CD = CASE
+            WHEN :field = 'testCategoryCode' THEN :value
+            ELSE TEST_CATEGORY_CD
+          END,
+          RIA_COMMENT = CASE
+            WHEN :field = 'riaComment' THEN :value
+            ELSE RIA_COMMENT
+          END,
+          ACTUAL_END_DT_TM = CASE
+            WHEN :field = 'actualEndDateTime' THEN :value
+            ELSE ACTUAL_END_DT_TM
+          END,
+          ACTUAL_BEGIN_DT_TM = CASE
+            WHEN :field = 'actualBeginDateTime' THEN :value
+            ELSE ACTUAL_BEGIN_DT_TM
+          END
+        WHERE RIA_SKEY = :riaKey
+      """,
+      nativeQuery = true)
   void updateField(
       @Param("riaKey") BigDecimal riaKey,
       @Param("field") String field,

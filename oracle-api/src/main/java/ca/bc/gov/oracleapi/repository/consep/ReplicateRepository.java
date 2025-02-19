@@ -53,19 +53,47 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, BigD
     );
 
   @Modifying
-  @Query(value = "UPDATE CONSEP.CNS_T_TEST_REP_MC SET " +
-                 "   CASE " +
-                 "       WHEN :field = 'containerId' THEN CONTAINER_ID = :value " +
-                 "       WHEN :field = 'containerWeight' THEN CONTAINER_WEIGHT = :value " +
-                 "       WHEN :field = 'freshSeed' THEN FRESH_WEIGHT = :value " +
-                 "       WHEN :field = 'containerAndDryWeight' THEN CNTNR_AND_DRY_WGHT = :value " +
-                 "       WHEN :field = 'dryWeight' THEN DRY_WEIGHT = :value " +
-                 "       WHEN :field = 'replicateAccInd' THEN REP_ACCEPTED_IND = :value " +
-                 "       WHEN :field = 'replicateComment' THEN REPLICATE_COMMENT = :value " +
-                 "       WHEN :field = 'overrideReason' THEN TOLRNC_OVRRDE_DESC = :value " +
-                 "   END " +
-                 "WHERE RIA_SKEY = :riaKey AND TEST_REPLICATE_NO = :replicateNumber",
-          nativeQuery = true)
+  @Query(
+      value =
+      """
+        UPDATE CONSEP.CNS_T_TEST_REP_MC
+        SET
+          CONTAINER_ID = CASE
+            WHEN :field = 'containerId' THEN :value
+            ELSE CONTAINER_ID
+          END,
+          CONTAINER_WEIGHT = CASE
+            WHEN :field = 'containerWeight' THEN :value
+            ELSE CONTAINER_WEIGHT
+          END,
+          FRESH_WEIGHT = CASE
+            WHEN :field = 'freshSeed' THEN :value
+            ELSE FRESH_WEIGHT
+          END,
+          CNTNR_AND_DRY_WGHT = CASE
+            WHEN :field = 'containerAndDryWeight' THEN :value
+            ELSE CNTNR_AND_DRY_WGHT
+          END,
+          DRY_WEIGHT = CASE
+            WHEN :field = 'dryWeight' THEN :value
+            ELSE DRY_WEIGHT
+          END,
+          REP_ACCEPTED_IND = CASE
+            WHEN :field = 'replicateAccInd' THEN :value
+            ELSE REP_ACCEPTED_IND
+          END,
+          REPLICATE_COMMENT = CASE
+            WHEN :field = 'replicateComment' THEN :value
+            ELSE REPLICATE_COMMENT
+          END,
+          TOLRNC_OVRRDE_DESC = CASE
+            WHEN :field = 'overrideReason' THEN :value
+            ELSE TOLRNC_OVRRDE_DESC
+          END
+        WHERE RIA_SKEY = :riaKey
+        AND TEST_REPLICATE_NO = :replicateNumber
+      """,
+      nativeQuery = true)
     void updateField(
         @Param("riaKey") BigDecimal riaKey,
         @Param("replicateNumber") Integer replicateNumber,

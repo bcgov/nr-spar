@@ -100,8 +100,8 @@ public class MoistureContentService {
   }
 
   private static final Set<String> ALLOWED_REPLICATE_FIELDS = Set.of(
-    "containerId", "containerWeight", "freshSeed", "containerAndDryWeight",
-    "dryWeight", "replicateAccInd", "replicateComment", "overrideReason"
+      "containerId", "containerWeight", "freshSeed", "containerAndDryWeight",
+      "dryWeight", "replicateAccInd", "replicateComment", "overrideReason"
   );
 
   /**
@@ -112,24 +112,24 @@ public class MoistureContentService {
    * @param updates a map with the fields and the values to be updated
    */
   public void updateReplicateField(
-    @NonNull BigDecimal riaKey,
-    @NonNull Integer replicateNumber,
-    Map<String, Object> updates
+      @NonNull BigDecimal riaKey,
+      @NonNull Integer replicateNumber,
+      Map<String, Object> updates
   ) {
     SparLog.info("Updating a replicate with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
     if (updates.isEmpty()) {
-        SparLog.info("Empty object for fields to update");
-        throw new IllegalArgumentException("No fields provided for update.");
+      SparLog.info("Empty object for fields to update");
+      throw new IllegalArgumentException("No fields provided for update.");
     }
 
     for (Map.Entry<String, Object> entry : updates.entrySet()) {
-        String field = entry.getKey();
-        Object value = entry.getValue();
+      String field = entry.getKey();
+      Object value = entry.getValue();
 
-        if (!ALLOWED_REPLICATE_FIELDS.contains(field)) {
-            throw new IllegalArgumentException("Invalid field: " + field);
-        }
+      if (!ALLOWED_REPLICATE_FIELDS.contains(field)) {
+        throw new IllegalArgumentException("Invalid field: " + field);
+      }
       replicateRepository.updateField(riaKey, replicateNumber, field, value);
     }
     SparLog.info("Replicate riaKey: {} and replicateNumber: {} updated", riaKey, replicateNumber);
@@ -146,27 +146,26 @@ public class MoistureContentService {
    * @param updates a map with the fields and the values to be updated
    */
   public void updateActivityField(
-    @NonNull BigDecimal riaKey,
-    Map<String, Object> updates
+      @NonNull BigDecimal riaKey,
+      Map<String, Object> updates
   ) {
     SparLog.info("Updating a activity with the riaKey: {}", riaKey);
 
     if (updates.isEmpty()) {
-        throw new IllegalArgumentException("No fields provided for update.");
+      throw new IllegalArgumentException("No fields provided for update.");
     }
 
     for (Map.Entry<String, Object> entry : updates.entrySet()) {
-        String field = entry.getKey();
-        Object value = entry.getValue();
+      String field = entry.getKey();
+      Object value = entry.getValue();
 
-        if (!ALLOWED_ACTIVITY_FIELDS.contains(field)) {
-            throw new IllegalArgumentException("Invalid field: " + field);
-        }
-
-        activityRepository.updateField(riaKey, field, value);
+      if (!ALLOWED_ACTIVITY_FIELDS.contains(field)) {
+        throw new IllegalArgumentException("Invalid field: " + field);
+      }
+      activityRepository.updateField(riaKey, field, value);
     }
     SparLog.info("Activity riaKey: {} updated", riaKey);
-}
+  }
 
   /**
    * Deletes a single replicate.

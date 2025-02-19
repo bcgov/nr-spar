@@ -114,7 +114,7 @@ public class MoistureContentConesEndpoint {
       Integer replicateNumber,
       @RequestBody
       Map<String, Object> updates) {
-        moistureContentService.updateReplicateField(riaKey, replicateNumber, updates);
+    moistureContentService.updateReplicateField(riaKey, replicateNumber, updates);
   }
 
   /**
@@ -126,14 +126,14 @@ public class MoistureContentConesEndpoint {
   @PatchMapping(value = "/{riaKey}", consumes = "application/json", produces = "application/json")
   @Operation(
       summary = "Update a single field of an activity record",
-      description = "Updates one or more specific fields in an activity entry without affecting other fields."
+      description = "Updates one or more specific fields in an activity entry."
   )
   @ApiResponses(
       value = {
           @ApiResponse(responseCode = "200", description = "Field successfully updated"),
           @ApiResponse(responseCode = "400", description = "Invalid field name or value"),
           @ApiResponse(responseCode = "404", description = "Activity entry not found")
-    })
+      })
   public void updateActivityField(
       @Parameter(
         name = "riaKey",
@@ -142,7 +142,7 @@ public class MoistureContentConesEndpoint {
         required = true)
       @PathVariable BigDecimal riaKey,
       @RequestBody Map<String, Object> updates) {
-      moistureContentService.updateActivityField(riaKey, updates);
+    moistureContentService.updateActivityField(riaKey, updates);
   }
 
   /**
