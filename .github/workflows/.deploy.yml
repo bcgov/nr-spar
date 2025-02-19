@@ -70,7 +70,7 @@ jobs:
 
       - name: OpenShift Init
         if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
-        uses: bcgov/action-deployer-openshift@v3.1.0
+        uses: bcgov/action-deployer-openshift@v3.2.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -92,7 +92,7 @@ jobs:
 
       - name: Database
         if: steps.triggers.outputs.core == 'true' || steps.triggers.outputs.sync == 'true'
-        uses: bcgov/action-deployer-openshift@v3.1.0
+        uses: bcgov/action-deployer-openshift@v3.2.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -138,7 +138,7 @@ jobs:
             verification_path: "actuator/health"
 
     steps:
-      - uses: bcgov/action-deployer-openshift@v3.1.0
+      - uses: bcgov/action-deployer-openshift@v3.2.0
         id: deploys
         with:
           file: ${{ matrix.file }}
@@ -165,7 +165,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Deploy (sync)
-        uses: bcgov/action-deployer-openshift@v3.1.0
+        uses: bcgov/action-deployer-openshift@v3.2.0
         with:
           file: sync/openshift.deploy.yml
           oc_namespace: ${{ vars.OC_NAMESPACE }}
