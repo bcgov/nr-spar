@@ -145,9 +145,12 @@ public class MoistureContentService {
    * @param riaKey the identifier key for all table related to MCC
    * @param updates a map with the fields and the values to be updated
    */
-  public void updateActivityField(BigDecimal riaKey, Map<String, Object> updates) {
+  public void updateActivityField(
+    @NonNull BigDecimal riaKey,
+    Map<String, Object> updates
+  ) {
     SparLog.info("Updating a activity with the riaKey: {}", riaKey);
-    
+
     if (updates.isEmpty()) {
         throw new IllegalArgumentException("No fields provided for update.");
     }
@@ -162,6 +165,7 @@ public class MoistureContentService {
 
         activityRepository.updateField(riaKey, field, value);
     }
+    SparLog.info("Activity riaKey: {} updated", riaKey);
 }
 
   /**
