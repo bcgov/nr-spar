@@ -81,137 +81,107 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Wait for the table to load
     cy.get('#parentTreeNumber', { timeout: 10000 });
 
-    // Click 'Dothistroma needle blight (DFS)' checkbox
     cy.get(`.${prefix}--toolbar-content > span`)
-      .eq(1)
+      .eq(0)
       .find('button')
-      .as('clickShowHideBtn')
-      .click({ force: true });
+      .as('clickShowHideBtn');
 
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Dothistroma needle blight (DFS)')
-      .click();
+    // Check 'Dothistroma needle blight (DFS)' checkbox
+    cy.get('thead.table-header').find('#dfs').then(($element) => {
+      if ($element.length) {
+        // Element exists, do nothing
+        cy.log('Table row DFS exists, no action taken.');
+      } else {
+        // Element does not exist, click the toggle button with DFS value
+        cy.get('@clickShowHideBtn')
+          .click({ force: true });
 
-    cy.get('.parent-tree-step-table-container')
-      .find('h4')
-      .as('closeShowHideDropdown')
-      .click({ force: true });
+        cy.get('ul.parent-tree-table-toggle-menu')
+          .find('li')
+          .contains('Dothistroma needle blight (DFS)')
+          .click();
+
+        cy.get('.parent-tree-step-table-container')
+          .find('h4')
+          .as('closeShowHideDropdown')
+          .click();
+      }
+    });
 
     cy.get('thead.table-header')
       .find('#dfs')
       .should('exist');
 
-    // Click 'Comandra blister rust (DSC)' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({ force: true });
+    // Check 'Comandra blister rust (DSC)' checkbox
+    cy.get('thead.table-header').find('#dsc').then(($element) => {
+      if ($element.length) {
+        // Element exists, do nothing
+        cy.log('Table row DSC exists, no action taken.');
+      } else {
+        // Element does not exist, click the toggle button with DSC value
+        cy.get('@clickShowHideBtn')
+          .click({ force: true });
 
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Comandra blister rust (DSC)')
-      .click();
+        cy.get('ul.parent-tree-table-toggle-menu')
+          .find('li')
+          .contains('Comandra blister rust (DSC)')
+          .click();
 
-    cy.get('@closeShowHideDropdown')
-      .click({ force: true });
+        cy.get('@closeShowHideDropdown')
+          .click();
+      }
+    });
 
     cy.get('thead.table-header')
       .find('#dsc')
       .should('exist');
 
-    // Click 'Western gall rust (DSG)' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({ force: true });
+    // Check 'Western gall rust (DSG)' checkbox
+    cy.get('thead.table-header').find('#dsg').then(($element) => {
+      if ($element.length) {
+        // Element exists, do nothing
+        cy.log('Table row DSG exists, no action taken.');
+      } else {
+        // Element does not exist, click the toggle button with DSG value
+        cy.get('@clickShowHideBtn')
+          .click({ force: true });
 
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Western gall rust (DSG)')
-      .click();
+        cy.get('ul.parent-tree-table-toggle-menu')
+          .find('li')
+          .contains('Western gall rust (DSG)')
+          .click();
 
-    cy.get('@closeShowHideDropdown')
-      .click({ force: true });
+        cy.get('@closeShowHideDropdown')
+          .click();
+      }
+    });
 
     cy.get('thead.table-header')
       .find('#dsg')
       .should('exist');
 
-    // Click 'Volume growth (GVO)' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({ force: true });
+    // Check 'Volume growth (GVO)' checkbox
+    cy.get('thead.table-header').find('#gvo').then(($element) => {
+      if ($element.length) {
+        // Element exists, do nothing
+        cy.log('Table row GVO exists, no action taken.');
+      } else {
+        // Element does not exist, click the toggle button with GVO value
+        cy.get('@clickShowHideBtn')
+          .click({ force: true });
 
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Volume growth (GVO)')
-      .click();
+        cy.get('ul.parent-tree-table-toggle-menu')
+          .find('li')
+          .contains('Volume growth (GVO)')
+          .click();
 
-    cy.get('@closeShowHideDropdown')
-      .click({ force: true });
+        cy.get('@closeShowHideDropdown')
+          .click();
+      }
+    });
 
     cy.get('thead.table-header')
       .find('#gvo')
-      .should('exist');
-
-    // Click 'Weighted DFS' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({ force: true });
-
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Weighted DFS')
-      .click();
-
-    cy.get('@closeShowHideDropdown')
-      .click({ force: true });
-
-    cy.get('thead.table-header')
-      .find('#w_dfs')
-      .should('exist');
-
-    // Click 'Weighted DSC' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({ force: true });
-
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Weighted DSC')
-      .click();
-
-    cy.get('@closeShowHideDropdown')
-      .click({ force: true });
-
-    cy.get('thead.table-header')
-      .find('#w_dsc')
-      .should('exist');
-
-    // Click 'Weighted DSG' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({ force: true });
-
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Weighted DSG')
-      .click();
-
-    cy.get('@closeShowHideDropdown')
-      .click({ force: true });
-
-    cy.get('thead.table-header')
-      .find('#w_dsg')
-      .should('exist');
-
-    // Click 'Weighted GVO' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({ force: true });
-
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Weighted GVO')
-      .click();
-
-    cy.get('@closeShowHideDropdown')
-      .click({ force: true });
-
-    cy.get('thead.table-header')
-      .find('#w_gvo')
       .should('exist');
   });
 

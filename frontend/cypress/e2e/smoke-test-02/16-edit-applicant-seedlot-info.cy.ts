@@ -11,10 +11,9 @@ describe('Applicant and seedlot information page', () => {
   before(function () {
     cy.fixture('aclass-seedlot').then((fData) => {
       fixtureData = fData;
-      // Pick a random species to test
       const speciesKeys = Object.keys(fixtureData);
       // eslint-disable-next-line prefer-destructuring
-      speciesKey = speciesKeys[0];
+      speciesKey = speciesKeys[5];
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNumber = sNumber as string;
       });

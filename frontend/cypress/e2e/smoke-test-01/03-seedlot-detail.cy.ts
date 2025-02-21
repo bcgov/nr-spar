@@ -14,7 +14,7 @@ describe('Seedlot detail page', () => {
       fixtureData = fData;
       // Pick a random species to test
       const speciesKeys = Object.keys(fixtureData);
-      speciesKey = speciesKeys[Math.floor(Math.random() * speciesKeys.length)];
+      speciesKey = speciesKeys[Math.floor(Math.random() * (speciesKeys.length - 1))];
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNumber = sNumber as string;
         cy.visit(`/seedlots/details/${seedlotNumber}`);
@@ -23,9 +23,6 @@ describe('Seedlot detail page', () => {
     });
   });
 
-  /**
-   * Seedlot Dashboard page should load correctly.
-   */
   it('should render seedlot detail correctly', () => {
     cy.get('.title-favourite')
       .should('have.text', `Seedlot ${seedlotNumber}`);

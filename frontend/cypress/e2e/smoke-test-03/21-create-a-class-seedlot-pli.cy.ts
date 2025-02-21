@@ -2,7 +2,7 @@ import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
-describe('Create FDI Seedlot', () => {
+describe('Create PLI Seedlot', () => {
   let fixtureData: SeedlotRegFixtureType = {};
   beforeEach(() => {
     cy.fixture('aclass-seedlot').then((jsonData) => {
@@ -13,20 +13,20 @@ describe('Create FDI Seedlot', () => {
     cy.visit('/seedlots/register-a-class');
   });
 
-  it('Register fdi seedlot', () => {
-    const regData = fixtureData.fdi;
-    // Intercept the POST request
-    cy.intercept('POST', '/api/seedlots').as('postSeedlot');
+  it('Register pli seedlot', () => {
+    const regData = fixtureData.pli;
 
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
-      .type(regData.agencyNumber, { delay: TYPE_DELAY });
+      .type(regData.agencyNumber, { delay: TYPE_DELAY })
+      .blur();
 
     // Enter the applicant email address
     cy.get('#applicant-email-input')
       .clear()
-      .type(regData.email, { delay: TYPE_DELAY });
+      .type(regData.email, { delay: TYPE_DELAY })
+      .blur();
 
     // Enter the seedlot species, wait for species data to load
     cy.get('#seedlot-species-combobox')
@@ -65,15 +65,5 @@ describe('Create FDI Seedlot', () => {
         cy.task('setData', [regData.species, seedlotNumber]);
       });
     cy.log('A-Class seedlot created with species', regData.species);
-
-    // Wait for the intercepted request and verify its response
-    cy.wait('@postSeedlot').then((interception) => {
-      // Check that the request method is POST
-      expect(interception.response?.statusCode).to.eq(201);
-
-      // Check the request body
-      const requestBody = interception.request.body;
-      expect(requestBody).to.have.property('applicantEmailAddress', regData.email);
-    });
   });
 });

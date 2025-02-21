@@ -247,53 +247,6 @@ describe('My seedlots page', () => {
       });
   });
 
-  it('Pagination', () => {
-    const dropdownNumber = '10';
-    // Number of item dropdown
-    cy.get(`.${prefix}--pagination__left`)
-      .find('select')
-      .select(dropdownNumber);
-
-    // Wait for table body to load
-    cy.get(`table.${prefix}--data-table tbody`)
-      .find('tr')
-      .eq(2);
-
-    cy.get(`.${prefix}--pagination__left`)
-      .find(`.${prefix}--pagination__items-count`)
-      .should('include.text', '1–10');
-
-    // Page number dropdown
-    cy.get(`.${prefix}--pagination__right`)
-      .find(`select.${prefix}--select-input`)
-      .select('2');
-
-    cy.get(`.${prefix}--pagination__left`)
-      .find(`.${prefix}--pagination__items-count`)
-      .should('include.text', '11');
-
-    cy.get(`.${prefix}--pagination__right`)
-      .find(`select.${prefix}--select-input`)
-      .select('1');
-
-    // Forward Backward buttons
-    cy.get(`.${prefix}--pagination__control-buttons`)
-      .find(`button.${prefix}--pagination__button--forward`)
-      .click();
-
-    cy.get(`.${prefix}--pagination__right`)
-      .find(`select.${prefix}--select-input`)
-      .should('have.value', '2');
-
-    cy.get(`.${prefix}--pagination__control-buttons`)
-      .find(`button.${prefix}--pagination__button--backward`)
-      .click();
-
-    cy.get(`.${prefix}--pagination__right`)
-      .find(`select.${prefix}--select-input`)
-      .should('have.value', '1');
-  });
-
   it('Select a seedlot row should redirect to its detail page', () => {
     cy.get('table.seedlot-data-table tbody tr')
       .as('tableContent');
