@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -58,8 +57,8 @@ public class MoistureContentService {
     );
 
     if (activityData.isEmpty() || testResultData.isEmpty() || replicates.isEmpty()) {
-        SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for the given RIA_SKEY.");
+      SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for given RIA_SKEY");
     }
 
     List<ReplicateDto> replicatesList = replicates
