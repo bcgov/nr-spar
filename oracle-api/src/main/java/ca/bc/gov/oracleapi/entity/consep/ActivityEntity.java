@@ -88,7 +88,7 @@ public class ActivityEntity {
   @Column(name = "ACTVTY_TM_UNIT_ST", length = 3)
   private String activityTimeUnit;
 
-  @Column(name = "SIGNIFICANT_STS_IND")
+  @Column(name = "SIGNIFICNT_STS_IND")
   private Integer significantStatusIndicator;
 
   @Column(name = "PROCESS_COMMIT_IND")

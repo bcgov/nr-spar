@@ -36,9 +36,9 @@ public class MoistureContentService {
   ) {
     SparLog.info("Begin to query necessary tables for moisture cone content");
 
-    Optional<ActivityEntity> activityData = activityRepository.findMccColumnsByRiaKey(riaKey);
+    Optional<ActivityEntity> activityData = activityRepository.findById(riaKey);
 
-    Optional<TestResultEntity> testResultData = testResultRepository.findSelectedColumnsByRiaKey(
+    Optional<TestResultEntity> testResultData = testResultRepository.findById(
         riaKey
     );
 
@@ -54,11 +54,13 @@ public class MoistureContentService {
         replicateIds
     );
 
+    replicates.forEach(replicate -> SparLog.info("ReplicateEntity: {}", replicate));
+
     List<ReplicateDto> replicatesList = replicates
         .stream()
         .map((curReplicate) -> new ReplicateDto(
-            curReplicate.getRiaKey(),
-            curReplicate.getReplicateNumber(),
+            curReplicate.getId().getRiaKey(),
+            curReplicate.getId().getReplicateNumber(),
             curReplicate.getContainerId(),
             curReplicate.getContainerWeight(),
             curReplicate.getFreshSeed(),

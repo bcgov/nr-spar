@@ -27,7 +27,7 @@ public class TestResultEntity {
   @Column(name = "ACTIVITY_TYPE_CD", length = 3)
   private String activityType;
 
-  @Column(name = "STANDARD_TEST_CD")
+  @Column(name = "STANDARD_TEST_IND")
   private Integer standardTest;
 
   @Column(name = "TEST_CATEGORY_CD", length = 3)
