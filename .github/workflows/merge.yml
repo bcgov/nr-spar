@@ -19,11 +19,11 @@ jobs:
     name: Initialize
     outputs:
       pr: ${{ steps.pr.outputs.pr }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
         # Get PR number for squash merges to main
       - id: pr
-        uses: bcgov-nr/action-get-pr@v0.0.1
+        uses: bcgov/action-get-pr@v0.0.1
 
   deploys-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
@@ -48,7 +48,7 @@ jobs:
   promote:
     name: Promote Images
     needs: [init, deploys-prod]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         package: [backend, frontend, oracle-api, sync]

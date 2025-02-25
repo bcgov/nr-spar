@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       # Check triggers (omitted or matched)
-      - uses: bcgov-nr/action-diff-triggers@v0.2.0
+      - uses: bcgov/action-diff-triggers@v0.2.0
         id: triggers
         with:
           triggers: ${{ inputs.triggers }}
@@ -44,7 +44,7 @@ jobs:
 
       - name: Run Cypress CI
         if: steps.triggers.outputs.triggered == 'true'
-        uses: bcgov-nr/action-test-and-analyse@v1.2.1
+        uses: bcgov/action-test-and-analyse@v1.2.1
         with:
           node_version: "18"
           commands: |

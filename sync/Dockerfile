@@ -1,9 +1,5 @@
 FROM python:3.13-slim
 
-# Receive build number as argument, retain as environment variable
-ARG BUILD_NUMBER
-ENV BUILD_NUMBER=${BUILD_NUMBER}
-
 # Packages and nonroot user
 RUN apt update && \
     apt install -y --no-install-recommends gcc libpq-dev python3-dev && \

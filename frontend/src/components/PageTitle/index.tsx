@@ -37,8 +37,8 @@ const PageTitle = ({
     queryFn: getFavAct
   });
 
-  const highlightFavAct = useMutation({
-    mutationFn: (actObj: FavActivityPostType) => postFavAct(actObj),
+  const addFavAct = useMutation({
+    mutationFn: (actObjs: FavActivityPostType[]) => postFavAct(actObjs),
     onSuccess: () => {
       queryClient.invalidateQueries(favActQueryKey);
     }
@@ -73,7 +73,7 @@ const PageTitle = ({
                 onClick={
                   isFavourited
                     ? () => removeFavAct.mutate(thisFavAct.id)
-                    : () => highlightFavAct.mutate({ activity })
+                    : () => addFavAct.mutate([{ activity }])
                 }
               >
                 {
