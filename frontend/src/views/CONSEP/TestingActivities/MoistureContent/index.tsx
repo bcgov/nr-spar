@@ -1,8 +1,9 @@
 import React from 'react';
-import { FlexGrid, Row } from '@carbon/react';
+import { FlexGrid, Row, Column } from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
+import ActivitySummary from '../ActivitySummary';
 
 const MoistureContent = () => {
   const createBreadcrumbItems = () => {
@@ -23,6 +24,11 @@ const MoistureContent = () => {
           title="Moisture content oven for seedlot 64132"
           enableFavourite
         />
+      </Row>
+      <Row>
+        <Column>
+          <ActivitySummary />
+        </Column>
       </Row>
     </FlexGrid>
   );
