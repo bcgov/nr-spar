@@ -1,9 +1,19 @@
 import React from 'react';
-import { FlexGrid, Row, Column } from '@carbon/react';
+import {
+  FlexGrid,
+  Row,
+  Column,
+  DatePicker,
+  DatePickerInput
+} from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../ActivitySummary';
+
+import {
+  DATE_FORMAT, fieldsConfig
+} from './constants';
 
 const MoistureContent = () => {
   const createBreadcrumbItems = () => {
@@ -16,18 +26,63 @@ const MoistureContent = () => {
 
   return (
     <FlexGrid className="consep-moisture-content">
-      <Row className="seedlot-details-breadcrumb">
+      <Row className="consep-moisture-content-breadcrumb">
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="page-title">
         <PageTitle
-          title="Moisture content oven for seedlot 64132"
+          title={fieldsConfig.titleSection.title}
           enableFavourite
         />
       </Row>
       <Row>
         <Column>
           <ActivitySummary />
+        </Column>
+      </Row>
+      <Row className="consep-moisture-content-cone-form">
+        <Column className="section-title" sm={4} md={8} lg={16} xlg={16}>
+          <h2>{fieldsConfig.MoistureContentConesTitle.title}</h2>
+        </Column>
+      </Row>
+      <Row className="consep-moisture-content-date-picker">
+        <Column sm={4} md={4} lg={8} xlg={6}>
+          <DatePicker
+            datePickerType="single"
+            dateFormat={DATE_FORMAT}
+            onChange={() => console.log('Date changed')}
+          >
+            <DatePickerInput
+              id="moisture-content-start-date-picker"
+              name={fieldsConfig.startDate.name}
+              placeholder="yyyy/mm/dd"
+              labelText={fieldsConfig.startDate.labelText}
+              invalidText={fieldsConfig.startDate.invalidText}
+              onClick={() => console.log('Input clicked')}
+              onChange={(event: { target: { value: any; }; }) => console.log('Text changed', event.target.value)}
+              size="md"
+              autoComplete="off"
+            />
+          </DatePicker>
+        </Column>
+        <Column sm={4} md={4} lg={8} xlg={6}>
+          <DatePicker
+            datePickerType="single"
+            dateFormat="Y/m/d"
+            onChange={() => console.log('Date changed')}
+          >
+            <DatePickerInput
+              id="moisture-content-end-date-picker"
+              name={fieldsConfig.endDate.name}
+              placeholder={fieldsConfig.endDate.placeholder}
+              labelText={fieldsConfig.endDate.labelText}
+              invalidText={fieldsConfig.endDate.invalidText}
+              onClick={() => console.log('Input clicked')}
+              onChange={(event: { target: { value: any; }; }) => console.log('Text changed', event.target.value)}
+              size="md"
+              autoComplete="off"
+            />
+          </DatePicker>
         </Column>
       </Row>
     </FlexGrid>
