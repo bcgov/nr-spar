@@ -8,6 +8,7 @@ import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
@@ -43,10 +44,10 @@ class MoistureContentServiceTest {
   @DisplayName("Get moiture cone content should succeed")
   void getMoistureConeContent_shouldSucceed() {
     BigDecimal riaKey = new BigDecimal(1234567890);
+    ReplicateId replicateId = new ReplicateId(riaKey, 1);
 
     ReplicateEntity replicate1 = new ReplicateEntity();
-    replicate1.setRiaKey(riaKey);
-    replicate1.setReplicateNumber(1);
+    replicate1.setId(replicateId);
     replicate1.setContainerId("A123");
     replicate1.setFreshSeed(new BigDecimal(12.345));
     replicate1.setContainerAndDryWeight(new BigDecimal(45.678));
@@ -72,7 +73,7 @@ class MoistureContentServiceTest {
     activityData.setActualEndDateTime(now.plusDays(30L));
     activityData.setActualBeginDateTime(now.minusDays(1L));
 
-    when(activityRepository.findMccColumnsByRiaKey(riaKey))
+    when(activityRepository.findById(riaKey))
         .thenReturn(Optional.of(activityData));
 
     TestResultEntity testData = new TestResultEntity();
@@ -82,7 +83,7 @@ class MoistureContentServiceTest {
     testData.setMoisturePct(new BigDecimal(12.345));
     testData.setAcceptResult(1);
 
-    when(testResultRepository.findSelectedColumnsByRiaKey(riaKey))
+    when(testResultRepository.findById(riaKey))
         .thenReturn(Optional.of(testData));
 
     Optional<MoistureContentConesDto> mccData = moistureContentService
@@ -99,8 +100,8 @@ class MoistureContentServiceTest {
     assertEquals(mccData.get().actualEndDateTime(), activityData.getActualEndDateTime());
     mccData.get().replicatesList().forEach(
         rep -> {
-          assertEquals(rep.riaKey(), replicate1.getRiaKey());
-          assertEquals(rep.replicateNumber(), replicate1.getReplicateNumber());
+          assertEquals(rep.riaKey(), replicate1.getId().getRiaKey());
+          assertEquals(rep.replicateNumber(), replicate1.getId().getReplicateNumber());
           assertEquals(rep.containerId(), replicate1.getContainerId());
           assertEquals(rep.freshSeed(), replicate1.getFreshSeed());
           assertEquals(rep.containerAndDryWeight(), replicate1.getContainerAndDryWeight());

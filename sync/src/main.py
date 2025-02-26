@@ -47,7 +47,7 @@ def generate_db_config(type_,schema_,settings):
     return dbconfig
 
 def get_build_number():
-    return os.environ.get("BUILD_NUMBER")
+    return os.environ.get("BUILDER_TAG")
 
 def required_variables_exists():
     ret = True

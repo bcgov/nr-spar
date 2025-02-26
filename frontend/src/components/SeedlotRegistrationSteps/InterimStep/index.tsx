@@ -200,6 +200,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
               placeholder={pageTexts.storageDate.placeholder}
               invalid={state.startDate.isInvalid}
               invalidText={pageTexts.storageDate.invalidText}
+              aria-invalid={state.startDate.isInvalid ? 'true' : 'false'}
               readOnly={isFormSubmitted}
               autoComplete="off"
             />
@@ -232,6 +233,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
                   ? pageTexts.storageDate.invalidText
                   : pageTexts.storageDate.invalidDateBeforeCollection
               }
+              aria-invalid={state.endDate.isInvalid ? 'true' : 'false'}
               readOnly={isFormSubmitted}
               autoComplete="off"
             />
@@ -275,6 +277,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
                   helperText={pageTexts.storageFacility.otherInput.helperText}
                   invalid={state.facilityOtherType.isInvalid}
                   invalidText={pageTexts.storageFacility.otherInput.invalidText}
+                  aria-invalid={state.facilityOtherType.isInvalid ? 'true' : 'false'}
                   onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleOtherFacilityTypeInput(e.target.value);
                   }}

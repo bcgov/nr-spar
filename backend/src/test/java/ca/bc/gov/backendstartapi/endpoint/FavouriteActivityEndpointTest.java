@@ -59,8 +59,9 @@ class FavouriteActivityEndpointTest {
   @Test
   @DisplayName("createFavoriteActivitySuccessTest")
   void createFavoriteActivitySuccessTest() throws Exception {
+    String content = "[{\"activity\":\"CREATE_A_CLASS_SEEDLOT\"}]";
     FavouriteActivityEntity activityEntity = createEntity("CREATE_A_CLASS_SEEDLOT");
-    when(favouriteActivityService.createUserActivity(any())).thenReturn(activityEntity);
+    when(favouriteActivityService.createUserActivities(any())).thenReturn(List.of(activityEntity));
 
     mockMvc
         .perform(
@@ -68,17 +69,17 @@ class FavouriteActivityEndpointTest {
                 .with(csrf().asHeader())
                 .header(CONTENT_HEADER, JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(stringifyCreate("CREATE_A_CLASS_SEEDLOT")))
+                .content(content))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.activity").value("CREATE_A_CLASS_SEEDLOT"))
-        .andExpect(jsonPath("$.highlighted").value("false"))
+        .andExpect(jsonPath("$[0].activity").value("CREATE_A_CLASS_SEEDLOT"))
+        .andExpect(jsonPath("$[0].highlighted").value("false"))
         .andReturn();
   }
 
   @Test
   @DisplayName("createFavoriteActivityNotFoundTest")
   void createFavoriteActivityNotFoundTest() throws Exception {
-    when(favouriteActivityService.createUserActivity(any()))
+    when(favouriteActivityService.createUserActivities(any()))
         .thenThrow(new InvalidActivityException());
 
     mockMvc
@@ -95,9 +96,9 @@ class FavouriteActivityEndpointTest {
   @Test
   @DisplayName("createFavoriteActivityDuplicatedTest")
   void createFavoriteActivityDuplicatedTest() throws Exception {
-    String contentString = stringifyCreate("CREATE_A_CLASS_SEEDLOT");
+    String content = "[{\"activity\":\"CREATE_A_CLASS_SEEDLOT\"}]";
     FavouriteActivityEntity activityEntity = createEntity("CREATE_A_CLASS_SEEDLOT");
-    when(favouriteActivityService.createUserActivity(any())).thenReturn(activityEntity);
+    when(favouriteActivityService.createUserActivities(any())).thenReturn(List.of(activityEntity));
 
     mockMvc
         .perform(
@@ -105,13 +106,13 @@ class FavouriteActivityEndpointTest {
                 .with(csrf().asHeader())
                 .header(CONTENT_HEADER, JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(contentString))
+                .content(content))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.activity").value("CREATE_A_CLASS_SEEDLOT"))
-        .andExpect(jsonPath("$.highlighted").value("false"))
+        .andExpect(jsonPath("$[0].activity").value("CREATE_A_CLASS_SEEDLOT"))
+        .andExpect(jsonPath("$[0].highlighted").value("false"))
         .andReturn();
 
-    when(favouriteActivityService.createUserActivity(any()))
+    when(favouriteActivityService.createUserActivities(any()))
         .thenThrow(new FavoriteActivityExistsToUser());
 
     mockMvc
@@ -120,7 +121,7 @@ class FavouriteActivityEndpointTest {
                 .with(csrf().asHeader())
                 .header(CONTENT_HEADER, JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(contentString))
+                .content(content))
         .andExpect(status().isBadRequest())
         .andReturn();
   }
@@ -153,9 +154,10 @@ class FavouriteActivityEndpointTest {
   @Test
   @DisplayName("updateUserFavoriteActivity")
   void updateUserFavoriteActivity() throws Exception {
+    String content = "[{\"activity\":\"EXISTING_SEEDLOTS\"}]";
     FavouriteActivityEntity activityEntity = createEntity("EXISTING_SEEDLOTS");
     activityEntity.setId(10000L);
-    when(favouriteActivityService.createUserActivity(any())).thenReturn(activityEntity);
+    when(favouriteActivityService.createUserActivities(any())).thenReturn(List.of(activityEntity));
 
     mockMvc
         .perform(
@@ -163,10 +165,10 @@ class FavouriteActivityEndpointTest {
                 .with(csrf().asHeader())
                 .header(CONTENT_HEADER, JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(stringifyCreate("EXISTING_SEEDLOTS")))
+                .content(content))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.activity").value("EXISTING_SEEDLOTS"))
-        .andExpect(jsonPath("$.highlighted").value("false"))
+        .andExpect(jsonPath("$[0].activity").value("EXISTING_SEEDLOTS"))
+        .andExpect(jsonPath("$[0].highlighted").value("false"))
         .andReturn();
 
     activityEntity.setHighlighted(true);
@@ -191,10 +193,11 @@ class FavouriteActivityEndpointTest {
   @Test
   @DisplayName("deleteUserFavoriteActivity")
   void deleteUserFavoriteActivity() throws Exception {
+    String content = "[{\"activity\":\"EXISTING_SEEDLOTS\"}]";
     FavouriteActivityEntity activityEntity = createEntity("EXISTING_SEEDLOTS");
     activityEntity.setId(10000L);
 
-    when(favouriteActivityService.createUserActivity(any())).thenReturn(activityEntity);
+    when(favouriteActivityService.createUserActivities(any())).thenReturn(List.of(activityEntity));
 
     mockMvc
         .perform(
@@ -202,10 +205,10 @@ class FavouriteActivityEndpointTest {
                 .with(csrf().asHeader())
                 .header(CONTENT_HEADER, JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(stringifyCreate("EXISTING_SEEDLOTS")))
+                .content(content))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.activity").value("EXISTING_SEEDLOTS"))
-        .andExpect(jsonPath("$.highlighted").value("false"))
+        .andExpect(jsonPath("$[0].activity").value("EXISTING_SEEDLOTS"))
+        .andExpect(jsonPath("$[0].highlighted").value("false"))
         .andReturn();
 
     activityEntity.setHighlighted(true);
