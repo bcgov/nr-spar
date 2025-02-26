@@ -1,6 +1,8 @@
 import React from 'react';
 import { FlexGrid, Row, Column } from '@carbon/react';
 
+import './styles.scss';
+
 const ActivitySummary = () => (
   <FlexGrid className="activity-summary-container">
     <Row className="activity-summary">
