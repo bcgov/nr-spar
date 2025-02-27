@@ -20,6 +20,13 @@ export const fieldsConfig = {
     labelText: 'End date',
     invalidText: 'Please enter a valid date'
   },
+  category: {
+    title: 'Category',
+    placeholder: 'Choose a category',
+    label: 'category',
+    invalid: 'Please select an option',
+    options: ['Quality Assurance', 'Quality Control']
+  },
   comments: {
     name: 'comments',
     labelText: 'Comments (optional)',

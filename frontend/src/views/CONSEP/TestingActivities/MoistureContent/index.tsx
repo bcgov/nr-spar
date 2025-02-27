@@ -5,7 +5,8 @@ import {
   Column,
   DatePicker,
   DatePickerInput,
-  TextArea
+  TextArea,
+  ComboBox
 } from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
@@ -84,6 +85,19 @@ const MoistureContent = () => {
               autoComplete="off"
             />
           </DatePicker>
+        </Column>
+      </Row>
+      <Row className="consep-moisture-content-category">
+        <Column sm={4} md={4} lg={8} xlg={6}>
+          <ComboBox
+            className="category-combobox"
+            id="moisture-content-category"
+            name="category"
+            items={fieldsConfig.category.options}
+            placeholder={fieldsConfig.category.placeholder}
+            titleText={fieldsConfig.category.title}
+            invalidText={fieldsConfig.category.invalid}
+          />
         </Column>
       </Row>
       <Row className="consep-moisture-content-comments">
