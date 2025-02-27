@@ -16,8 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -149,7 +149,13 @@ public class MoistureContentService {
 
     activityRepository.deleteById(riaKey);
     testResultRepository.deleteById(riaKey);
-    replicateRepository.deleteById(riaKey);
+
+    replicates.forEach(
+        rep -> replicateRepository.deleteByRiaKeyAndReplicateNumber(
+          riaKey,
+          rep.getId().getReplicateNumber()
+        )
+    );
 
     SparLog.info("Activity, Replicate and TestResult with riaKey {} ", riaKey
             + "deleted!");

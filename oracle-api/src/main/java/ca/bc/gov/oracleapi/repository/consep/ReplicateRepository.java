@@ -18,7 +18,7 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, Repl
       value = """
         SELECT *
         FROM CONSEP.CNS_T_TEST_REP_MC
-        WHERE RIA_SKEY = (:riaKey)
+        WHERE RIA_SKEY = :riaKey
         AND TEST_REPLICATE_NO IN (:testReplicateNumbers)
       """,
       nativeQuery = true)
@@ -29,26 +29,26 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, Repl
 
   @Query(
       value = """
-        SELECT r
-        FROM CONSEP.CNS_T_TEST_REP_MC r
-        WHERE r.RIA_SKEY = ?1
-        AND r.TEST_REPLICATE_NO = ?2
+        SELECT *
+        FROM CONSEP.CNS_T_TEST_REP_MC
+        WHERE RIA_SKEY = :riaKey
+        AND TEST_REPLICATE_NO = :testReplicateNumber
       """,
       nativeQuery = true)
     Optional<ReplicateEntity> findSingleReplicate(
-        BigDecimal riaKey,
-        Integer testReplicateNumber
+        @Param("riaKey") BigDecimal riaKey,
+        @Param("testReplicateNumber") Integer testReplicateNumber
     );
 
   @Query(
       value = """
         DELETE FROM CONSEP.CNS_T_TEST_REP_MC
-        WHERE RIA_SKEY = ?1
-        AND TEST_REPLICATE_NO = ?2
+        WHERE RIA_SKEY = :riaKey
+        AND TEST_REPLICATE_NO = :testReplicateNumber
       """,
       nativeQuery = true)
     void deleteByRiaKeyAndReplicateNumber(
-        BigDecimal riaKey,
-        Integer testReplicateNumber
+        @Param("riaKey") BigDecimal riaKey,
+        @Param("testReplicateNumber") Integer testReplicateNumber
     );
 }
