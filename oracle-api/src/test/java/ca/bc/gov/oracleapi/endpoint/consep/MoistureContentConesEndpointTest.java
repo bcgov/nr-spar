@@ -1,7 +1,10 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -161,6 +164,74 @@ class MoistureContentConesEndpointTest {
   void getMccDataEmptyParameter() throws Exception {
     mockMvc
         .perform(get("/api/moisture-content-cone/").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("Delete MCC data should succeed")
+  void deleteMcc_shouldSucceed() throws Exception {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+
+    // Mock the service to do nothing when delete is called
+    doNothing().when(moistureContentService).deleteFullMcc(riaKey);
+
+    mockMvc
+        .perform(delete("/api/moisture-content-cone/{riaKey}", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("Delete MCC data should return 404 when not found")
+  void deleteMcc_shouldReturnNotFound() throws Exception {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+
+    // Simulate resource not found scenario
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
+        .when(moistureContentService).deleteFullMcc(riaKey);
+
+    mockMvc
+        .perform(delete("/api/moisture-content-cone/{riaKey}", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("Delete a replicate entry should succeed")
+  void deleteReplicate_shouldSucceed() throws Exception {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    Integer replicateNumber = 1;
+
+    // Mock service behavior
+    doNothing().when(moistureContentService).deleteMccReplicate(riaKey, replicateNumber);
+
+    mockMvc
+        .perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}",
+          riaKey,
+          replicateNumber)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("Delete a replicate entry should return 404 when not found")
+  void deleteReplicate_shouldReturnNotFound() throws Exception {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    Integer replicateNumber = 1;
+
+    // Simulate resource not found scenario
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
+        .when(moistureContentService).deleteMccReplicate(riaKey, replicateNumber);
+
+    mockMvc
+        .perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}",
+          riaKey,
+          replicateNumber)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 }

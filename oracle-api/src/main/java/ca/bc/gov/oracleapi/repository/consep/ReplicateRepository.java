@@ -2,10 +2,12 @@ package ca.bc.gov.oracleapi.repository.consep;
 
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -40,6 +42,8 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, Repl
         @Param("testReplicateNumber") Integer testReplicateNumber
     );
 
+  @Modifying
+  @Transactional
   @Query(
       value = """
         DELETE FROM CONSEP.CNS_T_TEST_REP_MC
