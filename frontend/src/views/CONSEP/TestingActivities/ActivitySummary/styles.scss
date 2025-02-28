@@ -2,16 +2,25 @@
 @use '@carbon/type';
 
 .activity-summary-container {
-  padding: 0 2.5rem;
+  padding: 0rem;
 
   .activity-summary {
-    width: auto;
-    border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
-    border-radius: 0.5rem;
-    padding: 2rem 1rem;
-    margin-top: 1rem;
-    margin-bottom: 2.5rem;
-    margin-inline: 0;
+    margin: 1rem 0 2rem;
+
+    .#{vars.$bcgov-prefix}--accordion__heading {
+      background-color: #E0EFFF;
+    }
+
+    .#{vars.$bcgov-prefix}--accordion__title {
+      padding: 1rem 2rem;
+      font-weight: bold;
+    }
+
+    .#{vars.$bcgov-prefix}--accordion__content {
+      @include type.type-style('body-01');
+      color: var(--#{vars.$bcgov-prefix}-text-secondary);
+      padding-left: 2rem;
+    }
 
     .activity-summary-title {
       @include type.type-style('heading-02');
