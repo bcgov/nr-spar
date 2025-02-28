@@ -1,0 +1,36 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.title-section {
+  padding: 0rem;
+}
+
+.consep-moisture-content-activity-summary {
+  .#{vars.$bcgov-prefix}--col {
+    padding: 0rem;
+  }
+}
+
+.consep-moisture-content-cone-form {
+  .#{vars.$bcgov-prefix}--col {
+    padding: 0rem;
+  }
+}
+
+.consep-moisture-content-date-picker {
+  .#{vars.$bcgov-prefix}--col {
+    padding: 0rem;
+  }
+}
+
+.consep-moisture-content-category {
+  .#{vars.$bcgov-prefix}--col {
+    padding: 0rem;
+  }
+}
+
+.consep-moisture-content-comments {
+  .#{vars.$bcgov-prefix}--col {
+    padding: 0rem;
+  }
+}

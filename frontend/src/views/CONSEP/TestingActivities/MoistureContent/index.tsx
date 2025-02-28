@@ -17,6 +17,8 @@ import {
   DATE_FORMAT, fieldsConfig
 } from './constants';
 
+import './styles.scss';
+
 const MoistureContent = () => {
   const createBreadcrumbItems = () => {
     const crumbsList = [];
@@ -31,24 +33,24 @@ const MoistureContent = () => {
       <Row className="consep-moisture-content-breadcrumb">
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
-      <Row className="page-title">
+      <Row>
         <PageTitle
           title={fieldsConfig.titleSection.title}
           enableFavourite
         />
       </Row>
-      <Row>
+      <Row className="consep-moisture-content-activity-summary">
         <Column>
           <ActivitySummary />
         </Column>
       </Row>
       <Row className="consep-moisture-content-cone-form">
-        <Column className="section-title" sm={4} md={8} lg={16} xlg={16}>
-          <h2>{fieldsConfig.MoistureContentConesTitle.title}</h2>
+        <Column className="section-title" sm={4} md={4} lg={4} xlg={4}>
+          <h4>{fieldsConfig.MoistureContentConesTitle.title}</h4>
         </Column>
       </Row>
       <Row className="consep-moisture-content-date-picker">
-        <Column sm={4} md={4} lg={8} xlg={6}>
+        <Column sm={2} md={2} lg={4} xlg={4}>
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
@@ -67,7 +69,7 @@ const MoistureContent = () => {
             />
           </DatePicker>
         </Column>
-        <Column sm={4} md={4} lg={8} xlg={6}>
+        <Column sm={2} md={2} lg={4} xlg={4}>
           <DatePicker
             datePickerType="single"
             dateFormat="Y/m/d"
@@ -88,7 +90,7 @@ const MoistureContent = () => {
         </Column>
       </Row>
       <Row className="consep-moisture-content-category">
-        <Column sm={4} md={4} lg={8} xlg={6}>
+        <Column sm={2} md={2} lg={4} xlg={4}>
           <ComboBox
             className="category-combobox"
             id="moisture-content-category"
@@ -101,14 +103,14 @@ const MoistureContent = () => {
         </Column>
       </Row>
       <Row className="consep-moisture-content-comments">
-        <Column sm={4} md={4} lg={16} xlg={12}>
+        <Column sm={4} md={4} lg={8} xlg={8}>
           <TextArea
             id="moisture-content-comments"
             name={fieldsConfig.comments.name}
             labelText={fieldsConfig.comments.labelText}
             placeholder={fieldsConfig.comments.placeholder}
             rows={5}
-            maxCount={400}
+            maxCount={500}
             enableCounter
           />
         </Column>
