@@ -25,12 +25,8 @@ parameters:
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
     value: 25m
-  - name: CPU_LIMIT
-    value: 250m
   - name: MEMORY_REQUEST
     value: 150Mi
-  - name: MEMORY_LIMIT
-    value: 225Mi
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
@@ -123,9 +119,6 @@ objects:
                 - name: ${NAME}-${ZONE}-${COMPONENT}-certs
                   mountPath: /cert
               resources:
-                limits:
-                  cpu: ${CPU_LIMIT}
-                  memory: ${MEMORY_LIMIT}
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
@@ -180,9 +173,6 @@ objects:
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
-                limits:
-                  cpu: ${CPU_LIMIT}
-                  memory: ${MEMORY_LIMIT}
               ports:
                 - name: container-port
                   containerPort: 8090
