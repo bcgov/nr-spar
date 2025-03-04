@@ -45,7 +45,7 @@ const MoistureContent = () => {
         </Column>
       </Row>
       <Row className="consep-moisture-content-cone-form">
-        <Column className="section-title" sm={4} md={4} lg={4} xlg={4}>
+        <Column className="consep-section-title" sm={4} md={4} lg={4} xlg={4}>
           <h4>{fieldsConfig.MoistureContentConesTitle.title}</h4>
         </Column>
       </Row>
@@ -99,6 +99,7 @@ const MoistureContent = () => {
             placeholder={fieldsConfig.category.placeholder}
             titleText={fieldsConfig.category.title}
             invalidText={fieldsConfig.category.invalid}
+            onChange={(event: { target: { value: any; }; }) => console.log('Category changed', event.target.value)}
           />
         </Column>
       </Row>
