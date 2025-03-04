@@ -12,6 +12,7 @@ import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../ActivitySummary';
+import ButtonGroup from '../ButtonGroup';
 
 import {
   DATE_FORMAT, fieldsConfig
@@ -116,6 +117,7 @@ const MoistureContent = () => {
           />
         </Column>
       </Row>
+      <ButtonGroup />
     </FlexGrid>
   );
 };
