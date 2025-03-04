@@ -7,6 +7,10 @@
   .activity-summary {
     margin: 1rem 0 2rem;
 
+    .#{vars.$bcgov-prefix}--row {
+      margin-left: 1rem;
+    }
+
     .#{vars.$bcgov-prefix}--accordion__heading {
       background-color: #E0EFFF;
     }
@@ -41,7 +45,7 @@
     }
 
     .info-col {
-      margin-top: 2rem;
+      margin-top: 1rem;
     }
   }
 }
