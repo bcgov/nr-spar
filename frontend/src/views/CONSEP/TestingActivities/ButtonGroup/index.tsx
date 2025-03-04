@@ -1,53 +1,60 @@
 import React from 'react';
 import {
-  Grid,
-  Button,
-  Column
+  Row,
+  Button
 } from '@carbon/react';
 
 import './styles.scss';
-import { ArrowRight } from '@carbon/icons-react';
+import {
+  Calculator,
+  Checkmark,
+  CheckmarkOutline,
+  Time,
+  CopyFile
+} from '@carbon/icons-react';
 
 const ButtonGroup = () => (
-  <Grid narrow>
-    <Column sm={4} md={3} lg={3} xlg={4}>
-      <Button
-        kind="secondary"
-        size="lg"
-        className="form-action-btn"
-      >
-        Calculate average
-      </Button>
-      <Button
-        kind="secondary"
-        size="lg"
-        className="form-action-btn"
-      >
-        Complete test
-      </Button>
-      <Button
-        kind="secondary"
-        size="lg"
-        className="form-action-btn"
-        renderIcon={ArrowRight}
-      >
-        Accept test
-      </Button>
-      <Button
-        kind="secondary"
-        size="lg"
-        className="form-action-btn"
-      >
-        Test history
-      </Button>
-      <Button
-        kind="secondary"
-        size="lg"
-        className="form-action-btn"
-      >
-        Copy results
-      </Button>
-    </Column>
-  </Grid>
+  <Row className="consep-button-group">
+    <Button
+      kind="primary"
+      size="lg"
+      className="form-action-btn"
+      renderIcon={Calculator}
+    >
+      Calculate average
+    </Button>
+    <Button
+      kind="secondary"
+      size="lg"
+      className="form-action-btn"
+      renderIcon={Checkmark}
+    >
+      Complete test
+    </Button>
+    <Button
+      kind="secondary"
+      size="lg"
+      className="form-action-btn"
+      renderIcon={CheckmarkOutline}
+    >
+      Accept test
+    </Button>
+    <Button
+      kind="secondary"
+      size="lg"
+      className="form-action-btn"
+      renderIcon={Time}
+    >
+      Test history
+    </Button>
+    <Button
+      kind="secondary"
+      size="lg"
+      className="form-action-btn"
+      renderIcon={CopyFile}
+    >
+      Copy results
+    </Button>
+  </Row>
 );
 export default ButtonGroup;
