@@ -14,7 +14,7 @@ import {
 } from '@carbon/icons-react';
 
 const ButtonGroup = () => (
-  <Row className="consep-button-group">
+  <Row className="consep-button-row">
     <Button
       kind="primary"
       size="lg"
