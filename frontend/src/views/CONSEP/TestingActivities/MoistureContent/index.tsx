@@ -14,7 +14,7 @@ import {
 import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
-import ActivitySummary from '../ActivitySummary';
+import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
 import ButtonGroup from '../ButtonGroup';
 import StatusTag from '../../../../components/StatusTag';
 
