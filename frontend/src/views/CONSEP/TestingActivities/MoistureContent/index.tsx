@@ -39,10 +39,7 @@ const MoistureContent = () => {
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="consep-moisture-content-title">
-        <PageTitle
-          title={fieldsConfig.titleSection.title}
-          enableFavourite
-        />
+        <PageTitle title={fieldsConfig.titleSection.title} />
         <>
           <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
           <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
