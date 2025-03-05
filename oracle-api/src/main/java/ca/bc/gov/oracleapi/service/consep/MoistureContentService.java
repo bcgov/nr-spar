@@ -11,6 +11,8 @@ import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.util.List;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,20 +43,17 @@ public class MoistureContentService {
     Optional<ActivityEntity> activityData = activityRepository.findById(riaKey);
 
     Optional<TestResultEntity> testResultData = testResultRepository.findById(
-        riaKey
-    );
+        riaKey);
 
     // The maximum number of replicates is 8 and the entries are sequencial,
     // so we can use a fixed list to fetch the data for the replicates.
     List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
-                                      .boxed()
-                                      .collect(Collectors.toList());
-
+        .boxed()
+        .collect(Collectors.toList());
 
     List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
         riaKey,
-        replicateIds
-    );
+        replicateIds);
 
     if (activityData.isEmpty() || testResultData.isEmpty() || replicates.isEmpty()) {
       SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
@@ -73,8 +72,7 @@ public class MoistureContentService {
             curReplicate.getDryWeight(),
             curReplicate.getReplicateAccInd(),
             curReplicate.getReplicateComment(),
-            curReplicate.getOverrideReason()
-        ))
+            curReplicate.getOverrideReason()))
         .collect(Collectors.toList());
 
     MoistureContentConesDto moistureContent = new MoistureContentConesDto(
@@ -87,9 +85,94 @@ public class MoistureContentService {
         activityData.get().getRiaComment(),
         activityData.get().getActualBeginDateTime(),
         activityData.get().getActualEndDateTime(),
-        replicatesList
-    );
+        replicatesList);
     SparLog.info("MCC data correctly fetched");
     return Optional.of(moistureContent);
+  }
+  
+  public void validateMoistureConeContentData(List<ReplicateDto> moistureContentConesDataDtos) {
+    SparLog.info("Validating MCC data");
+    // Validate the data
+    for (ReplicateDto replicate : moistureContentConesDataDtos) {
+      if (replicate.riaKey() == null) {
+        SparLog.error("MCC data validation failed: RIA key is missing");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RIA key is missing");
+      }
+      if (replicate.replicateNumber() == null) {
+        SparLog.error("MCC data validation failed: Replicate number is missing");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Replicate number is missing");
+      }
+      if (replicate.containerId() != null && replicate.containerId().length() > 4) {
+        SparLog.error("MCC data validation failed: Container ID is too long");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Container ID is too long");
+      }
+      if (replicate.containerWeight() == null
+          || replicate.containerWeight().compareTo(BigDecimal.ZERO) < 0
+          || replicate.containerWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
+        SparLog.error("MCC data validation failed: Container weight is missing or invalid");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Container weight is missing or invalid");
+      }
+      if (replicate.freshSeed() == null
+          || replicate.freshSeed().compareTo(BigDecimal.ZERO) < 0
+          || replicate.freshSeed().compareTo(BigDecimal.valueOf(999.999)) > 0) {
+        SparLog.error("MCC data validation failed: Fresh seed weight is missing or invalid");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fresh seed weight is missing or invalid");
+      }
+      if (replicate.dryWeight() == null
+          || replicate.dryWeight().compareTo(BigDecimal.ZERO) < 0
+          || replicate.dryWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
+        SparLog.error("MCC data validation failed: Dry weight is missing or invalid");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Dry weight is missing or invalid");
+      }
+      BigDecimal containerAndDryWeight = replicate.freshSeed()
+          .subtract(replicate.freshSeed().divide(replicate.dryWeight(), 3, RoundingMode.HALF_UP));
+      if (replicate.containerAndDryWeight() == null
+          || replicate.containerAndDryWeight().compareTo(BigDecimal.ZERO) < 0
+          || replicate.containerAndDryWeight().compareTo(BigDecimal.valueOf(999.999)) > 0
+          || replicate.containerAndDryWeight() != containerAndDryWeight) {
+        SparLog.error("MCC data validation failed: Container and dry weight is missing or invalid");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Container and dry weight is missing or invalid");
+      }
+    }
+  }
+
+  public void validateMoistureContentActivityData(ActivityEntity activityData) {
+    SparLog.info("Validating MCC activity data");
+    // Validate the data
+    if (activityData.getTestCategoryCode() == null) {
+      SparLog.error("MCC activity data validation failed: Test category code is missing");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test category code is missing");
+    }
+    if (activityData.getActualBeginDateTime() == null || activityData.getActualBeginDateTime().compareTo( LocalDateTime.now()) < 0) {
+      SparLog.error("MCC activity data validation failed: Actual begin date time is missing or in the past");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Actual begin date time is missing or in the past");
+    }
+    if (activityData.getActualEndDateTime() == null || activityData.getActualEndDateTime().compareTo( LocalDateTime.now()) < 0) {
+      SparLog.error("MCC activity data validation failed: Actual end date time is missing or in the past");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Actual end date time is missing or in the past");
+    }
+  }
+  
+  public void updateTestResultStatusToCompleted(BigDecimal riaKey) {
+    SparLog.info("Updating test result status to completed for RIA_SKEY: {}", riaKey);
+    testResultRepository.updateTestResultStatusToCompleted(riaKey);
+    SparLog.info("Test result status updated to completed for RIA_SKEY: {}", riaKey);
+  }
+
+  public void acceptMoistureContentData(BigDecimal riaKey) {
+    SparLog.info("Accepting moisture content data for RIA_SKEY: {}", riaKey);
+    Optional<MoistureContentConesDto> moistureContent = getMoistureConeContentData(riaKey);
+
+    if (moistureContent.isEmpty()) {
+      SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for given RIA_KEY");
+    }
+    if (moistureContent.get().testCompleteInd() == 0) {
+      SparLog.error("Test is not completed for RIA_SKEY: {}", riaKey);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test is not completed");
+    }
+    
+    testResultRepository.updateTestResultStatusToAccepted(riaKey);
+    SparLog.info("Moisture content data accepted for RIA_SKEY: {}", riaKey);
   }
 }
