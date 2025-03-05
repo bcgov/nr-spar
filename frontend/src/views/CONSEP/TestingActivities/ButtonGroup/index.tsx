@@ -4,7 +4,6 @@ import {
   Button
 } from '@carbon/react';
 
-import './styles.scss';
 import {
   Calculator,
   Checkmark,
@@ -12,6 +11,8 @@ import {
   Time,
   CopyFile
 } from '@carbon/icons-react';
+
+import './styles.scss';
 
 const ButtonGroup = () => (
   <Row className="consep-button-row">

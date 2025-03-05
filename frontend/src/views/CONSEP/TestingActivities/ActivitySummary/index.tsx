@@ -7,8 +7,9 @@ import {
   AccordionItem
 } from '@carbon/react';
 
-import './styles.scss';
 import { Report } from '@carbon/icons-react';
+
+import './styles.scss';
 
 const ActivitySummary = () => (
   <FlexGrid className="activity-summary-container">

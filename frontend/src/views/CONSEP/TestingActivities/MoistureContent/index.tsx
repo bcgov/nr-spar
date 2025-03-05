@@ -16,13 +16,13 @@ import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../ActivitySummary';
 import ButtonGroup from '../ButtonGroup';
+import StatusTag from '../../../../components/StatusTag';
 
 import {
   DATE_FORMAT, fieldsConfig
 } from './constants';
 
 import './styles.scss';
-import StatusTag from '../../../../components/StatusTag';
 
 const MoistureContent = () => {
   const createBreadcrumbItems = () => {
