@@ -1,8 +1,20 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 @use '@carbon/type';
 
-.title-section {
-  padding: 0rem;
+
+.consep-moisture-content-title {
+  justify-content: flex-start;
+  gap: 0.5rem;
+
+  .title-section {
+    padding: 0rem;
+    max-inline-size: fit-content;
+  }
+
+  .status-tag {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+  }
 }
 
 .consep-moisture-content-activity-summary {
