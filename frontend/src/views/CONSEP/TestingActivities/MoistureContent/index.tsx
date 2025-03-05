@@ -8,6 +8,9 @@ import {
   TextArea,
   ComboBox
 } from '@carbon/react';
+import {
+  CheckmarkFilled
+} from '@carbon/icons-react';
 import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
@@ -19,6 +22,7 @@ import {
 } from './constants';
 
 import './styles.scss';
+import StatusTag from '../../../../components/StatusTag';
 
 const MoistureContent = () => {
   const createBreadcrumbItems = () => {
@@ -34,11 +38,15 @@ const MoistureContent = () => {
       <Row className="consep-moisture-content-breadcrumb">
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
-      <Row>
+      <Row className="consep-moisture-content-title">
         <PageTitle
           title={fieldsConfig.titleSection.title}
           enableFavourite
         />
+        <>
+          <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
+          <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
+        </>
       </Row>
       <Row className="consep-moisture-content-activity-summary">
         <Column>
