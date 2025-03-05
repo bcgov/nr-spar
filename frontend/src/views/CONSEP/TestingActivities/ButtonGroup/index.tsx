@@ -15,7 +15,7 @@ import {
 import './styles.scss';
 
 const ButtonGroup = () => (
-  <Row className="consep-button-row">
+  <Row className="consep-registration-button-row">
     <Button
       kind="primary"
       size="lg"
