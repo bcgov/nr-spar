@@ -25,7 +25,7 @@ const ButtonGroup = () => (
       Calculate average
     </Button>
     <Button
-      kind="secondary"
+      kind="tertiary"
       size="lg"
       className="form-action-btn"
       renderIcon={Checkmark}
@@ -33,7 +33,7 @@ const ButtonGroup = () => (
       Complete test
     </Button>
     <Button
-      kind="secondary"
+      kind="tertiary"
       size="lg"
       className="form-action-btn"
       renderIcon={CheckmarkOutline}
@@ -41,7 +41,7 @@ const ButtonGroup = () => (
       Accept test
     </Button>
     <Button
-      kind="secondary"
+      kind="tertiary"
       size="lg"
       className="form-action-btn"
       renderIcon={Time}
@@ -49,7 +49,7 @@ const ButtonGroup = () => (
       Test history
     </Button>
     <Button
-      kind="secondary"
+      kind="tertiary"
       size="lg"
       className="form-action-btn"
       renderIcon={CopyFile}
