@@ -55,7 +55,7 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-cone-form">
         <Column className="consep-section-title" sm={4} md={4} lg={4} xlg={4}>
-          <h4>{fieldsConfig.MoistureContentConesTitle.title}</h4>
+          <h4>{fieldsConfig.moistureContentConesTitle.title}</h4>
         </Column>
       </Row>
       <Row className="consep-moisture-content-date-picker">

@@ -5,7 +5,7 @@ export const fieldsConfig = {
   titleSection: {
     title: 'Moisture content oven for seedlot 64132'
   },
-  MoistureContentConesTitle: {
+  moistureContentConesTitle: {
     title: 'Moisture content cones data entry '
   },
   startDate: {
