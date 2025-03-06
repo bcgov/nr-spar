@@ -12,16 +12,16 @@
   $font-weights: types.$font-weights);
 @use '@carbon/type/scss/styles' with (
   $label-01: (
-    font-size: 1.125rem,
-    font-weight: font-family.font-weight('regular'),
-    line-height: 1.5rem,
-    letter-spacing: 0.32px,
-  ),
-  $label-02: (
     font-size: 1rem,
     font-weight: font-family.font-weight('regular'),
     line-height: 1.25rem,
-    letter-spacing: 0.32px,
+    letter-spacing: 0.32px
+  ),
+  $label-02: (
+    font-size: 1.125rem,
+    font-weight: font-family.font-weight('regular'),
+    line-height: 1.5rem,
+    letter-spacing: 0.32px
   )
 );
 
