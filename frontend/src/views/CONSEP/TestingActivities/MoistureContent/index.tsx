@@ -60,7 +60,7 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
-            onChange={() => console.log('Date changed')}
+            onChange={() => {}}
           >
             <DatePickerInput
               id="moisture-content-start-date-picker"
@@ -68,8 +68,8 @@ const MoistureContent = () => {
               placeholder="yyyy/mm/dd"
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
-              onClick={() => console.log('Input clicked')}
-              onChange={(event: { target: { value: any; }; }) => console.log('Text changed', event.target.value)}
+              onClick={() => {}}
+              onChange={() => {}}
               size="md"
               autoComplete="off"
             />
@@ -79,7 +79,7 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat="Y/m/d"
-            onChange={() => console.log('Date changed')}
+            onChange={() => {}}
           >
             <DatePickerInput
               id="moisture-content-end-date-picker"
@@ -87,8 +87,8 @@ const MoistureContent = () => {
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
-              onClick={() => console.log('Input clicked')}
-              onChange={(event: { target: { value: any; }; }) => console.log('Text changed', event.target.value)}
+              onClick={() => {}}
+              onChange={() => {}}
               size="md"
               autoComplete="off"
             />
@@ -105,7 +105,7 @@ const MoistureContent = () => {
             placeholder={fieldsConfig.category.placeholder}
             titleText={fieldsConfig.category.title}
             invalidText={fieldsConfig.category.invalid}
-            onChange={(event: { target: { value: any; }; }) => console.log('Category changed', event.target.value)}
+            onChange={() => {}}
           />
         </Column>
       </Row>
