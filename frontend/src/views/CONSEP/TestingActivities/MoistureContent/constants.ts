@@ -1,5 +1,4 @@
 export const DATE_FORMAT = 'Y/m/d';
-export const MOMENT_DATE_FORMAT = 'YYYY/MM/DD';
 
 export const fieldsConfig = {
   titleSection: {
