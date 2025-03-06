@@ -1,4 +1,5 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
 @use '@carbon/type';
 
 .activity-summary-container {
@@ -12,7 +13,7 @@
     }
 
     .#{vars.$bcgov-prefix}--accordion__heading {
-      background-color: #E0EFFF;
+      background-color: colors.$blue-10;
     }
 
     .#{vars.$bcgov-prefix}--accordion__title {
