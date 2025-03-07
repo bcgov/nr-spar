@@ -7,8 +7,6 @@ import {
   AccordionItem
 } from '@carbon/react';
 
-import { Report } from '@carbon/icons-react';
-
 import './styles.scss';
 
 const ActivitySummary = () => (
@@ -17,7 +15,6 @@ const ActivitySummary = () => (
       <AccordionItem
         open
         title="Activity summary"
-        renderIcon={() => <Report />}
       >
         <Row>
           <Column className="info-col">
