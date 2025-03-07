@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  FlexGrid,
   Row,
   Column,
   Accordion,
@@ -10,7 +9,7 @@ import {
 import './styles.scss';
 
 const ActivitySummary = () => (
-  <FlexGrid className="activity-summary-container">
+  <div className="activity-summary-container">
     <Accordion className="activity-summary">
       <AccordionItem
         open
@@ -45,7 +44,7 @@ const ActivitySummary = () => (
         </Row>
       </AccordionItem>
     </Accordion>
-  </FlexGrid>
+  </div>
 );
 
 export default ActivitySummary;

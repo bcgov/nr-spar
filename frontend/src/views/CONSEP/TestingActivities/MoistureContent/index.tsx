@@ -46,9 +46,7 @@ const MoistureContent = () => {
         </>
       </Row>
       <Row className="consep-moisture-content-activity-summary">
-        <Column>
-          <ActivitySummary />
-        </Column>
+        <ActivitySummary />
       </Row>
       <Row className="consep-moisture-content-cone-form">
         <Column className="consep-section-title">
@@ -56,7 +54,7 @@ const MoistureContent = () => {
         </Column>
       </Row>
       <Row className="consep-moisture-content-date-picker">
-        <Column sm={2} md={2} lg={4} xlg={4}>
+        <Column sm={4} md={4} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
@@ -75,7 +73,7 @@ const MoistureContent = () => {
             />
           </DatePicker>
         </Column>
-        <Column sm={2} md={2} lg={4} xlg={4}>
+        <Column sm={4} md={4} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
             dateFormat="Y/m/d"
@@ -110,7 +108,7 @@ const MoistureContent = () => {
         </Column>
       </Row>
       <Row className="consep-moisture-content-comments">
-        <Column sm={4} md={4} lg={8} xlg={8}>
+        <Column sm={4} md={4} lg={10} xlg={10}>
           <TextArea
             id="moisture-content-comments"
             name={fieldsConfig.comments.name}
