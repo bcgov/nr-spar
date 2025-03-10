@@ -59,6 +59,7 @@
     "@types/react-test-renderer": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@vitest/coverage-v8": "^3.0.0",
+    "concurrently": "^9.1.2",
     "cypress": "^14.0.0",
     "esbuild": "^0.25.0",
     "eslint": "^8.57.0",
@@ -113,7 +114,14 @@
     "lint": "./node_modules/.bin/eslint \"src/**\"",
     "cy:open": "cypress open",
     "cy:run": "cypress run --browser chrome",
-    "cy:ci": "start-server-and-test start http://localhost:3000 cy:run"
+    "cy:ci-1": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-01/**/* --record --group myseedlot",
+    "cy:ci-2": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-02/**/* --record --group apitest",
+    "cy:ci-3": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-03/**/* --record --group seedlotreg",
+    "cy:ci-4": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-04/**/* --record --group parenttree",
+    "cy:run-1": "start-server-and-test start http://localhost:3000 cy:ci-1",
+    "cy:run-2": "start-server-and-test start http://localhost:3000 cy:ci-2",
+    "cy:run-3": "start-server-and-test start http://localhost:3000 cy:ci-3",
+    "cy:run-4": "start-server-and-test start http://localhost:3000 cy:ci-4"
   },
   "eslintConfig": {
     "extends": [

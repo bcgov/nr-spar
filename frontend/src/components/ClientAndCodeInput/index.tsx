@@ -477,10 +477,10 @@ const ClientAndCodeInput = ({
             <Row className="applicant-client-search-row">
               <Column sm={4} md={4} lg={16} xlg={16}>
                 <p>
-                  If you don&apos;t remember the clientInput information you can
+                  To look up applicant agency acronyms and location codes,
                   {' '}
                   <ClientSearchModal
-                    linkText="open the client search"
+                    linkText="click here."
                     modalLabel="Register A-Class Seedlot"
                     aria-label="find the client input information"
                     applySelectedClient={(client: ForestClientSearchType) => {
