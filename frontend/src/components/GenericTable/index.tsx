@@ -16,6 +16,7 @@ type Props<T extends Record<string, any>> = {
   enableFilters?: boolean;
   enableRowSelection?: boolean;
   enableRowActions?: boolean;
+  enableEditing?: boolean;
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
   initialState?: any;
@@ -30,6 +31,7 @@ const GenericTable = <T extends Record<string, any>>({
   enableFilters = true,
   enableRowSelection = false,
   enableRowActions = false,
+  enableEditing = true,
   renderRowActions,
   onRowClick,
   initialState
@@ -70,6 +72,8 @@ const GenericTable = <T extends Record<string, any>>({
     enableColumnFilters: enableFilters,
     enableRowSelection,
     enableRowActions,
+    enableEditing,
+    editDisplayMode: 'cell',
     renderRowActions: renderRowActions
       ? ({ row, table }) => renderRowActions({ row, table })
       : undefined,
