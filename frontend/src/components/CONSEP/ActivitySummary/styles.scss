@@ -13,6 +13,15 @@
       margin-left: 1rem;
       justify-content: flex-start;
       gap: 0.5rem;
+      color: var(--bx-text-primary);
+
+      .info-col:first-child .activity-summary-info-value {
+        font-weight: bold;
+      }
+
+      .info-col:last-child .activity-summary-info-value {
+        font-weight: bold;
+      }
     }
 
     .#{vars.$bcgov-prefix}--accordion__heading {
@@ -21,12 +30,10 @@
 
     .#{vars.$bcgov-prefix}--accordion__title {
       padding: 1rem 2rem;
-      font-weight: bold;
     }
 
     .#{vars.$bcgov-prefix}--accordion__content {
       @include type.type-style('body-01');
-      color: var(--#{vars.$bcgov-prefix}-text-secondary);
       padding-left: 2rem;
     }
 
@@ -39,6 +46,10 @@
     .activity-summary-info-section>div {
       margin-right: 3.5rem;
     }
+    
+    .info-col {
+      margin-top: 1rem;
+    }
 
     .activity-summary-info-label {
       @include type.type-style('label-01');
@@ -46,10 +57,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .info-col {
-      margin-top: 1rem;
+      margin-bottom: 1rem;
     }
   }
 }
