@@ -46,7 +46,7 @@ const MoistureContent = () => {
         </>
       </Row>
       <Row className="consep-moisture-content-activity-summary">
-        <ActivitySummary />
+        <ActivitySummary seedlot={fieldsConfig.seedlot} isFetching={false} />
       </Row>
       <Row className="consep-moisture-content-cone-form">
         <Column className="consep-section-title">
