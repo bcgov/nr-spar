@@ -8,8 +8,22 @@
 
 @use '@bcgov-nr/nr-theme/style-sheets/carbon-components-overrides.scss';
 
-@use '@carbon/type/scss/_font-family.scss' with ($font-families: types.$type-family,
+@use '@carbon/type/scss/font-family.scss' with ($font-families: types.$type-family,
   $font-weights: types.$font-weights);
+@use '@carbon/type/scss/styles' with (
+  $label-01: (
+    font-size: 1rem,
+    font-weight: font-family.font-weight('regular'),
+    line-height: 1.25rem,
+    letter-spacing: 0.32px
+  ),
+  $label-02: (
+    font-size: 1.125rem,
+    font-weight: font-family.font-weight('regular'),
+    line-height: 1.5rem,
+    letter-spacing: 0.32px
+  )
+);
 
 // Set the correct light theme
 @use '@carbon/react/scss/themes';
@@ -433,4 +447,8 @@ label.#{vars.$bcgov-prefix}--label--disabled {
 
 .#{vars.$bcgov-prefix}--loading-overlay {
   z-index: 10000;
+}
+
+label.#{vars.$bcgov-prefix}--label {
+  line-height: var(--#{vars.$bcgov-prefix}-label-01-line-height, 1.5rem);
 }

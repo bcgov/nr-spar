@@ -28,6 +28,8 @@ on:
         description: Run Cypress tests if the core apps have changed (excludes sync)
         value: ${{ jobs.init.outputs.deploy_core }}
 
+permissions: {}
+
 jobs:
   init:
     name: Deploy (init)
