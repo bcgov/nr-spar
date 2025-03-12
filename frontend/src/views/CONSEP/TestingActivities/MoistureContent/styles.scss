@@ -34,7 +34,33 @@
 }
 
 .consep-moisture-content-date-picker {
+  justify-content: flex-start;
+  gap: 1rem;
   margin-bottom: 2rem;
+
+  .#{vars.$bcgov-prefix}--form-item {
+    width: inherit;
+
+    .#{vars.$bcgov-prefix}--date-picker {
+      width: inherit;
+
+      .#{vars.$bcgov-prefix}--date-picker-container {
+        width: inherit;
+
+        .#{vars.$bcgov-prefix}--date-picker-input__wrapper {
+          width: inherit;
+
+          span {
+            width: inherit;
+
+            input {
+              width: inherit;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 .consep-moisture-content-category > div {
