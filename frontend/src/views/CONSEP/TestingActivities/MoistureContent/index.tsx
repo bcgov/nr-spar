@@ -54,7 +54,7 @@ const MoistureContent = () => {
         </Column>
       </Row>
       <Row className="consep-moisture-content-date-picker">
-        <Column sm={4} md={4} lg={5} xlg={5}>
+        <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
@@ -73,7 +73,7 @@ const MoistureContent = () => {
             />
           </DatePicker>
         </Column>
-        <Column sm={4} md={4} lg={5} xlg={5}>
+        <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
             dateFormat="Y/m/d"
@@ -94,7 +94,7 @@ const MoistureContent = () => {
         </Column>
       </Row>
       <Row className="consep-moisture-content-category">
-        <Column sm={2} md={2} lg={4} xlg={4}>
+        <Column sm={2} md={2} lg={5} xlg={5}>
           <ComboBox
             className="category-combobox"
             id="moisture-content-category"
