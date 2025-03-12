@@ -3,6 +3,7 @@
 @use '@carbon/type';
 
 .activity-summary-container {
+  width: 100%;
   padding: 0rem;
 
   .activity-summary {
@@ -10,6 +11,8 @@
 
     .#{vars.$bcgov-prefix}--row {
       margin-left: 1rem;
+      justify-content: flex-start;
+      gap: 0.5rem;
     }
 
     .#{vars.$bcgov-prefix}--accordion__heading {
