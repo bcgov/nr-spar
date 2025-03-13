@@ -9,6 +9,7 @@ import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
+import ca.bc.gov.oracleapi.dto.consep.ReplicateDto;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
@@ -123,4 +124,298 @@ class MoistureContentServiceTest {
         });
   }
 
+  @Test
+  @DisplayName("validateMoistureConeContentData_shouldSucceed")
+  void validateMoistureConeContentData_shouldSucceed() {
+    ReplicateEntity replicate1 = new ReplicateEntity();
+    replicate1.setId(new ReplicateId(new BigDecimal(1234567890), 1));
+    replicate1.setContainerId("A123");
+    replicate1.setFreshSeed(new BigDecimal(12.345));
+    replicate1.setContainerAndDryWeight(new BigDecimal(45.678));
+    replicate1.setContainerWeight(new BigDecimal(58.901));
+    replicate1.setDryWeight(new BigDecimal(46.784));
+    replicate1.setReplicateAccInd(1);
+    replicate1.setOverrideReason("Replicate was re-tested due to abnormal moisture content.");
+    replicate1.setReplicateComment("Equipment calibration issue.");
+
+    List<ReplicateEntity> replicatesList = List.of(replicate1);
+
+    Assertions.assertDoesNotThrow(() -> {
+      moistureContentService.validateMoistureConeContentData(replicatesList.stream()
+          .map(rep -> new ReplicateDto(rep.getId().getRiaKey(),
+              rep.getId().getReplicateNumber(),
+              rep.getContainerId(),
+              rep.getContainerWeight(),
+              rep.getFreshSeed(),
+              rep.getContainerAndDryWeight(),
+              rep.getDryWeight(),
+              rep.getReplicateAccInd(),
+              rep.getReplicateComment(),
+              rep.getOverrideReason()))
+          .collect(Collectors.toList()));
+    });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeContentData_errorTest")
+  void validateMoistureConeContentData_errorTest() {
+    ReplicateEntity replicate1 = new ReplicateEntity();
+    replicate1.setId(new ReplicateId(new BigDecimal(1234567890), 1));
+    replicate1.setContainerId("A123");
+    replicate1.setFreshSeed(new BigDecimal(12.345));
+    replicate1.setContainerAndDryWeight(new BigDecimal(45.678));
+    replicate1.setContainerWeight(new BigDecimal(58.901));
+    replicate1.setDryWeight(new BigDecimal(46.784));
+    replicate1.setReplicateAccInd(1);
+    replicate1.setOverrideReason("Replicate was re-tested due to abnormal moisture content.");
+    replicate1.setReplicateComment("Equipment calibration issue.");
+
+    List<ReplicateEntity> replicatesList = List.of(replicate1);
+
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.validateMoistureConeContentData(replicatesList.stream()
+              .map(rep -> new ReplicateDto(rep.getId().getRiaKey(),
+                  rep.getId().getReplicateNumber(),
+                  rep.getContainerId(),
+                  rep.getContainerWeight(),
+                  rep.getFreshSeed(),
+                  rep.getContainerAndDryWeight(),
+                  rep.getDryWeight(),
+                  rep.getReplicateAccInd(),
+                  rep.getReplicateComment(),
+                  rep.getOverrideReason()))
+              .collect(Collectors.toList()));
+        });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeContentData_errorTest")
+  void validateMoistureConeContentData_errorTest2() {
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.validateMoistureConeContentData(List.of());
+        });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeContentData_errorTest")
+  void validateMoistureConeContentData_errorTest3() {
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.validateMoistureConeContentData(null);
+        });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeContentData_errorTest")
+  void validateMoistureConeContentData_errorTest4() {
+    ReplicateEntity replicate1 = new ReplicateEntity();
+    replicate1.setId(new ReplicateId(new BigDecimal(1234567890), 1));
+    replicate1.setContainerId("A123");
+    replicate1.setFreshSeed(new BigDecimal(12.345));
+    replicate1.setContainerAndDryWeight(new BigDecimal(45.678));
+    replicate1.setContainerWeight(new BigDecimal(58.901));
+    replicate1.setDryWeight(new BigDecimal(46.784));
+    replicate1.setReplicateAccInd(1);
+    replicate1.setOverrideReason("Replicate was re-tested due to abnormal moisture content.");
+    replicate1.setReplicateComment("Equipment calibration issue.");
+
+    List<ReplicateEntity> replicatesList = List.of(replicate1);
+
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.validateMoistureConeContentData(replicatesList.stream()
+              .map(rep -> new ReplicateDto(rep.getId().getRiaKey(),
+                  rep.getId().getReplicateNumber(),
+                  rep.getContainerId(),
+                  rep.getContainerWeight(),
+                  rep.getFreshSeed(),
+                  rep.getContainerAndDryWeight(),
+                  rep.getDryWeight(),
+                  rep.getReplicateAccInd(),
+                  rep.getReplicateComment(),
+                  rep.getOverrideReason()))
+              .collect(Collectors.toList()));
+        });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeActivityData_shouldSucceed")
+  void validateMoistureConeActivityData_shouldSucceed() {
+    ActivityEntity activityData = new ActivityEntity();
+    activityData.setTestCategoryCode("CNN");
+    activityData.setRiaComment("Activity finished.");
+    activityData.setActualEndDateTime(LocalDateTime.now().plusDays(30L));
+    activityData.setActualBeginDateTime(LocalDateTime.now().minusDays(1L));
+
+    Assertions.assertDoesNotThrow(() -> {
+      moistureContentService.validateMoistureContentActivityData(activityData);
+    });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeActivityData_errorTest")
+  void validateMoistureConeActivityData_errorTest() {
+    ActivityEntity activityData = new ActivityEntity();
+    activityData.setTestCategoryCode("CNN");
+    activityData.setRiaComment("Activity finished.");
+    activityData.setActualEndDateTime(LocalDateTime.now().plusDays(30L));
+
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.validateMoistureContentActivityData(activityData);
+        });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeActivityData_errorTest")
+  void validateMoistureConeActivityData_errorTest2() {
+    ActivityEntity activityData = new ActivityEntity();
+    activityData.setTestCategoryCode("CNN");
+    activityData.setRiaComment("Activity finished.");
+    activityData.setActualBeginDateTime(LocalDateTime.now().minusDays(1L));
+
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.validateMoistureContentActivityData(activityData);
+        });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeActivityData_errorTest")
+  void validateMoistureConeActivityData_errorTest3() {
+    ActivityEntity activityData = new ActivityEntity();
+    activityData.setTestCategoryCode("CNN");
+    activityData.setActualEndDateTime(LocalDateTime.now().plusDays(30L));
+    activityData.setActualBeginDateTime(LocalDateTime.now().minusDays(1L));
+
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.validateMoistureContentActivityData(activityData);
+        });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeActivityData_errorTest")
+  void validateMoistureConeActivityData_errorTest4() {
+    ActivityEntity activityData = new ActivityEntity();
+    activityData.setRiaComment("Activity finished.");
+    activityData.setActualEndDateTime(LocalDateTime.now().plusDays(30L));
+    activityData.setActualBeginDateTime(LocalDateTime.now().minusDays(1L));
+
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.validateMoistureContentActivityData(activityData);
+        });
+  }
+
+  @Test
+  @DisplayName("validateMoistureConeActivityData_errorTest")
+  void validateMoistureConeActivityData_errorTest5() {
+    ActivityEntity activityData = new ActivityEntity();
+    activityData.setTestCategoryCode("CNN");
+    activityData.setRiaComment("Activity finished.");
+    activityData.setActualEndDateTime(LocalDateTime.now().plusDays(30L));
+    activityData.setActualBeginDateTime(LocalDateTime.now().minusDays(1L));
+
+    Assertions.assertDoesNotThrow(() -> {
+      moistureContentService.validateMoistureContentActivityData(activityData);
+    });
+  }
+
+  @Test
+  @DisplayName("updateTestResultStatusToCompleted_shouldSucceed")
+  void updateTestResultStatusToCompleted_shouldSucceed() {
+    Assertions.assertDoesNotThrow(() -> {
+      moistureContentService.updateTestResultStatusToCompleted(new BigDecimal(1234567890));
+    });
+  }
+
+  @Test
+  @DisplayName("updateTestResultStatusToAccepted_shouldSucceed")
+  void updateTestResultStatusToAccepted_shouldSucceed() {
+    Assertions.assertDoesNotThrow(() -> {
+      moistureContentService.acceptMoistureContentData(new BigDecimal(1234567890));
+    });
+  }
+
+  @Test
+  @DisplayName("updateTestResultStatusToAccepted_errorTest")
+  void updateTestResultStatusToAccepted_errorTest() {
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.acceptMoistureContentData(new BigDecimal(1234567890));
+        });
+  }
+
+  @Test
+  @DisplayName("updateTestResultStatusToAccepted_errorTest")
+  void updateTestResultStatusToAccepted_errorTest2() {
+    when(testResultRepository.findById(any()))
+        .thenReturn(Optional.empty());
+
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.acceptMoistureContentData(new BigDecimal(1234567890));
+        });
+  }
+
+  @Test
+  @DisplayName("updateTestResultStatusToAccepted_errorTest")
+  void updateTestResultStatusToAccepted_errorTest3() {
+    TestResultEntity testData = new TestResultEntity();
+    testData.setTestCompleteInd(0);
+    testData.setSampleDesc("Sample description.");
+    testData.setMoistureStatus("MOI");
+    ;
+    testData.setMoisturePct(new BigDecimal(12.345));
+    testData.setAcceptResult(1);
+
+    when(testResultRepository.findById(any()))
+        .thenReturn(Optional.of(testData));
+
+    Assertions.assertThrows(ResponseStatusException.class,
+        () -> {
+          moistureContentService.acceptMoistureContentData(new BigDecimal(1234567890));
+        });
+  }
+  
+  @Test
+  @DisplayName("updateTestResultStatusToAccepted_errorTest")
+  void updateTestResultStatusToAccepted_errorTest4() {
+    TestResultEntity testData = new TestResultEntity();
+    testData.setTestCompleteInd(1);
+    testData.setSampleDesc("Sample description.");
+    testData.setMoistureStatus("MOI");
+    ;
+    testData.setMoisturePct(new BigDecimal(12.345));
+    testData.setAcceptResult(1);
+
+    when(testResultRepository.findById(any()))
+        .thenReturn(Optional.of(testData));
+
+    Assertions.assertDoesNotThrow(() -> {
+      moistureContentService.acceptMoistureContentData(new BigDecimal(1234567890));
+    });
+  }
+
+  @Test
+  @DisplayName("updateTestResultStatusToAccepted_errorTest")
+  void updateTestResultStatusToAccepted_errorTest5() {
+    TestResultEntity testData = new TestResultEntity();
+    testData.setTestCompleteInd(1);
+    testData.setSampleDesc("Sample description.");
+    testData.setMoistureStatus("MOI");
+    ;
+    testData.setMoisturePct(new BigDecimal(12.345));
+    testData.setAcceptResult(1);
+
+    when(testResultRepository.findById(any()))
+        .thenReturn(Optional.of(testData));
+
+    Assertions.assertDoesNotThrow(() -> {
+      moistureContentService.acceptMoistureContentData(new BigDecimal(1234567890));
+    });
+  }
 }

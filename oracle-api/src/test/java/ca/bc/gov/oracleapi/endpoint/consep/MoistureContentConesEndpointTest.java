@@ -159,8 +159,112 @@ class MoistureContentConesEndpointTest {
   @Test
   @DisplayName("Get a MCC should return not found for empty parameter")
   void getMccDataEmptyParameter() throws Exception {
-    mockMvc
-        .perform(get("/api/moisture-content-cone/").contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
+      mockMvc
+              .perform(get("/api/moisture-content-cone/").contentType(MediaType.APPLICATION_JSON))
+              .andExpect(status().isNotFound());
   }
+  
+    @Test
+    @DisplayName("Validate MCC data should succeed")
+    void validateMccData_shouldSucceed() throws Exception {
+        BigDecimal riaKey = new BigDecimal(1234567890);
+        mockMvc
+                .perform(
+                        get("/api/moisture-content-cone/{riaKey}/validate", riaKey)
+                                .with(csrf().asHeader())
+                                .header("Content-Type", "application/json")
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("Validate MCC data should return not found for invalid key")
+    void validateMccDataInvalidKeyShouldReturnEmpty() throws Exception {
+        BigDecimal riaKey = new BigDecimal(1234567890);
+
+        when(moistureContentService.getMoistureConeContentData(riaKey))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        mockMvc
+                .perform(
+                        get("/api/moisture-content-cone/{riaKey}/validate", riaKey)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Validate MCC data should return not found for empty parameter")
+    void validateMccDataEmptyParameter() throws Exception {
+        mockMvc
+                .perform(get("/api/moisture-content-cone//validate").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Validate MCC data should return not found for invalid key")
+    void validateMccDataInvalidKey() throws Exception {
+        BigDecimal riaKey = new BigDecimal(1234567890);
+
+        when(moistureContentService.getMoistureConeContentData(riaKey))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        mockMvc
+                .perform(
+                        get("/api/moisture-content-cone/{riaKey}/validate", riaKey)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Accept MCC data should succeed")
+    void acceptMccData_shouldSucceed() throws Exception {
+        BigDecimal riaKey = new BigDecimal(1234567890);
+        mockMvc
+                .perform(
+                        get("/api/moisture-content-cone/{riaKey}/accept", riaKey)
+                                .with(csrf().asHeader())
+                                .header("Content-Type", "application/json")
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("Accept MCC data should return not found for invalid key")
+    void acceptMccDataInvalidKeyShouldReturnEmpty() throws Exception {
+        BigDecimal riaKey = new BigDecimal(1234567890);
+
+        when(moistureContentService.getMoistureConeContentData(riaKey))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        mockMvc
+                .perform(
+                        get("/api/moisture-content-cone/{riaKey}/accept", riaKey)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Accept MCC data should return not found for empty parameter")
+    void acceptMccDataEmptyParameter() throws Exception {
+        mockMvc
+                .perform(get("/api/moisture-content-cone//accept").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Accept MCC data should return not found for invalid key")
+    void acceptMccDataInvalidKey() throws Exception {
+        BigDecimal riaKey = new BigDecimal(1234567890);
+
+        when(moistureContentService.getMoistureConeContentData(riaKey))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        mockMvc
+                .perform(
+                        get("/api/moisture-content-cone/{riaKey}/accept", riaKey)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 }

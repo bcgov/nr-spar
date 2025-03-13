@@ -86,9 +86,7 @@ public class MoistureContentConesEndpoint {
    *
    * @throws Exception if the table doesn't match the format.
    */
-    @PostMapping(
-            path = "/{riaKey}/validate"
-                    )
+    @PostMapping(path = "/{riaKey}/validate")
     @ApiResponses(
         value = {
             @ApiResponse(
@@ -133,14 +131,12 @@ public class MoistureContentConesEndpoint {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
-  
+
    /**
    * Accept moisture content cones data.
    *
    */
-    @PostMapping(
-            path = "/{riaKey}/accept"
-                    )
+    @PostMapping(path = "/{riaKey}/accept")
     @ApiResponses(
         value = {
             @ApiResponse(
@@ -168,7 +164,6 @@ public class MoistureContentConesEndpoint {
             throws Exception {
         try {
             moistureContentService.acceptMoistureContentData(riaKey);
-
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
