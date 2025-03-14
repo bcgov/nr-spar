@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
@@ -133,86 +134,87 @@ class MoistureContentServiceTest {
   @Test
   @DisplayName("Delete a single replicate should succeed")
   void deleteMccReplicate_shouldSucceed() {
-      BigDecimal riaKey = new BigDecimal(1234567890);
-      Integer replicateNumber = 1;
-      ReplicateEntity mockReplicate = new ReplicateEntity();
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    Integer replicateNumber = 1;
+    ReplicateEntity mockReplicate = new ReplicateEntity();
 
-      when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
-          .thenReturn(Optional.of(mockReplicate));
+    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
+        .thenReturn(Optional.of(mockReplicate));
 
-      doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
+    doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
 
-      // Execute delete
-      assertDoesNotThrow(() -> moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
+    // Execute delete
+    assertDoesNotThrow(() -> moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
 
-      // Verify delete was called
-      verify(replicateRepository, times(1)).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
+    // Verify delete was called
+    verify(replicateRepository, times(1)).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
   }
 
   @Test
   @DisplayName("Delete a single replicate should throw exception when not found")
   void deleteMccReplicate_shouldThrowExceptionIfNotFound() {
-      BigDecimal riaKey = new BigDecimal(1234567890);
-      Integer replicateNumber = 1;
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    Integer replicateNumber = 1;
 
-      when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
-          .thenReturn(Optional.empty());
+    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
+        .thenReturn(Optional.empty());
 
-      assertThrows(InvalidMccKeyException.class, () ->
-          moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
+    assertThrows(InvalidMccKeyException.class, () ->
+        moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
 
-      verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
   }
 
   @Test
   @DisplayName("Delete full MCC data should succeed")
   void deleteFullMcc_shouldSucceed() {
-      BigDecimal riaKey = new BigDecimal(1234567890);
-      ActivityEntity activityMock = new ActivityEntity();
-      TestResultEntity testResultMock = new TestResultEntity();
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    ActivityEntity activityMock = new ActivityEntity();
+    TestResultEntity testResultMock = new TestResultEntity();
 
-      // Generate mock replicate list
-      List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
-      List<ReplicateEntity> replicates = replicateIds.stream()
-          .map(id -> {
-              ReplicateEntity replicate = new ReplicateEntity();
-              replicate.setId(new ReplicateId(riaKey, id));
-              return replicate;
-          })
-          .collect(Collectors.toList());
+    // Generate mock replicate list
+    List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
+    List<ReplicateEntity> replicates = replicateIds.stream()
+        .map(id -> {
+          ReplicateEntity replicate = new ReplicateEntity();
+          replicate.setId(new ReplicateId(riaKey, id));
+          return replicate;
+        })
+        .collect(Collectors.toList());
 
-      when(activityRepository.findById(riaKey)).thenReturn(Optional.of(activityMock));
-      when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultMock));
-      when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
-          .thenReturn(replicates);
+    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(activityMock));
+    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultMock));
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
+        .thenReturn(replicates);
 
-      doNothing().when(activityRepository).deleteById(riaKey);
-      doNothing().when(testResultRepository).deleteById(riaKey);
-      doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(any(), any());
+    doNothing().when(activityRepository).deleteById(riaKey);
+    doNothing().when(testResultRepository).deleteById(riaKey);
+    doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(any(), any());
 
-      // Execute delete
-      assertDoesNotThrow(() -> moistureContentService.deleteFullMcc(riaKey));
+    // Execute delete
+    assertDoesNotThrow(() -> moistureContentService.deleteFullMcc(riaKey));
 
-      verify(activityRepository, times(1)).deleteById(riaKey);
-      verify(testResultRepository, times(1)).deleteById(riaKey);
-      verify(replicateRepository, times(replicates.size())).deleteByRiaKeyAndReplicateNumber(eq(riaKey), any());
+    verify(activityRepository, times(1)).deleteById(riaKey);
+    verify(testResultRepository, times(1)).deleteById(riaKey);
+    verify(replicateRepository, times(replicates.size()))
+        .deleteByRiaKeyAndReplicateNumber(eq(riaKey), any());
   }
 
   @Test
   @DisplayName("Delete full MCC data should throw exception when not found")
   void deleteFullMcc_shouldThrowExceptionIfNotFound() {
-      BigDecimal riaKey = new BigDecimal(1234567890);
-      List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
 
-      when(activityRepository.findById(riaKey)).thenReturn(Optional.empty());
-      when(testResultRepository.findById(riaKey)).thenReturn(Optional.empty());
-      when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
-          .thenReturn(List.of());
+    when(activityRepository.findById(riaKey)).thenReturn(Optional.empty());
+    when(testResultRepository.findById(riaKey)).thenReturn(Optional.empty());
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
+        .thenReturn(List.of());
 
-      assertThrows(InvalidMccKeyException.class, () -> moistureContentService.deleteFullMcc(riaKey));
+    assertThrows(InvalidMccKeyException.class, () -> moistureContentService.deleteFullMcc(riaKey));
 
-      verify(activityRepository, never()).deleteById(any());
-      verify(testResultRepository, never()).deleteById(any());
-      verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
+    verify(activityRepository, never()).deleteById(any());
+    verify(testResultRepository, never()).deleteById(any());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
   }
 }
