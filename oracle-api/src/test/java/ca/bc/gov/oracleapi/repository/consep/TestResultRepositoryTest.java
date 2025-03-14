@@ -1,48 +1,64 @@
 package ca.bc.gov.oracleapi.repository.consep;
 
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
-import java.math.BigDecimal;
-import java.util.List;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.TestPropertySource;
+
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
-public class TestResultRepositoryTest {
-    
-  @Autowired private TestResultRepository testResultRepository;
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:testdb;MODE=Oracle;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS CONSEP",
+        "spring.jpa.hibernate.ddl-auto=none",
+        "spring.sql.init.mode=always"
+})
+class TestResultRepositoryTest {
 
-  @Test
-  @DisplayName("updateTestResultStatusToCompletedTest")
-  @Sql(scripts = {"classpath:scripts/TestResultRepository.sql"})
-  void updateTestResultStatusToCompletedTest() {
-    BigDecimal riaKey = new BigDecimal(1);
-    testResultRepository.updateTestResultStatusToCompleted(riaKey);
-    List<TestResultEntity> testResultEntities = testResultRepository.findAll();
-    assertFalse(testResultEntities.isEmpty());
-    TestResultEntity testResultEntity = testResultEntities.get(0);
-    assertEquals(1, testResultEntity.getTestCompleteInd());
-  }
+    @Autowired
+    private TestResultRepository testResultRepository;
 
-  @Test
-  @DisplayName("updateTestResultStatusToAcceptedTest")
-  @Sql(scripts = {"classpath:scripts/TestResultRepository.sql"})
-  void updateTestResultStatusToAcceptedTest() {
-      BigDecimal riaKey = new BigDecimal(1);
-      testResultRepository.updateTestResultStatusToAccepted(riaKey);
-      List<TestResultEntity> testResultEntities = testResultRepository.findAll();
-      assertFalse(testResultEntities.isEmpty());
-      TestResultEntity testResultEntity = testResultEntities.get(0);
-      assertEquals(1, testResultEntity.getAcceptResult());
-  }
+    @Autowired
+    private TestEntityManager entityManager;
+
+    @Test
+    void whenUpdateTestResultStatusToCompleted_thenTestCompleteIndIsUpdated() {
+        BigDecimal riaKey = BigDecimal.valueOf(1001);
+        TestResultEntity entity = new TestResultEntity();
+        entity.setRiaKey(riaKey);
+        entity.setTestCompleteInd(0);
+        entityManager.persist(entity);
+        entityManager.flush();
+
+        testResultRepository.updateTestResultStatusToCompleted(riaKey);
+
+        entityManager.clear();
+
+        Optional<TestResultEntity> updatedEntity = testResultRepository.findById(riaKey);
+        assertThat(updatedEntity).isPresent();
+        assertThat(updatedEntity.get().getTestCompleteInd()).isEqualTo(1);
+    }
+
+    @Test
+    void whenUpdateTestResultStatusToAccepted_thenAcceptResultIndIsUpdated() {
+        BigDecimal riaKey = BigDecimal.valueOf(1002);
+        TestResultEntity entity = new TestResultEntity();
+        entity.setRiaKey(riaKey);
+        entity.setAcceptResult(0);
+        entityManager.persist(entity);
+        entityManager.flush();
+
+        testResultRepository.updateTestResultStatusToAccepted(riaKey);
+
+        entityManager.clear();
+
+        Optional<TestResultEntity> updatedEntity = testResultRepository.findById(riaKey);
+        assertThat(updatedEntity).isPresent();
+        assertThat(updatedEntity.get().getAcceptResult()).isEqualTo(1);
+    }
 }

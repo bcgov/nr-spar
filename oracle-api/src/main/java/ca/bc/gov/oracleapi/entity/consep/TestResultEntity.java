@@ -1,10 +1,7 @@
 package ca.bc.gov.oracleapi.entity.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Getter;
@@ -16,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "CNS_T_TSC_TEST_RESULT")
+@Table(name = "CNS_T_TSC_TEST_RESULT", schema = "CONSEP")
 @Schema(description = "Represents the result of a testing activity for a seedlot in the database")
 public class TestResultEntity {
 

@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 /**
  * This class represents a data object for the moisture content cone.
  */
@@ -34,9 +36,11 @@ public record MoistureContentConesDto(
     @Schema(description = "Comments for the activity", example = "Activity completed successfully")
     String riaComment,
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "Actual begin date of the activity", example = "2025-01-05T08:00:00")
     LocalDateTime actualBeginDateTime,
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "Actual end date of the activity", example = "2025-01-18T16:00:00")
     LocalDateTime actualEndDateTime,
     // End - Activity fields

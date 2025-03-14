@@ -94,6 +94,7 @@ public class MoistureContentService {
     SparLog.info("Validating MCC data");
     // Validate the data
     for (ReplicateDto replicate : moistureContentConesDataDtos) {
+
       if (replicate.riaKey() == null) {
         SparLog.error("MCC data validation failed: RIA key is missing");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RIA key is missing");
@@ -124,12 +125,9 @@ public class MoistureContentService {
         SparLog.error("MCC data validation failed: Dry weight is missing or invalid");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Dry weight is missing or invalid");
       }
-      BigDecimal containerAndDryWeight = replicate.freshSeed()
-          .subtract(replicate.freshSeed().divide(replicate.dryWeight(), 3, RoundingMode.HALF_UP));
       if (replicate.containerAndDryWeight() == null
           || replicate.containerAndDryWeight().compareTo(BigDecimal.ZERO) < 0
-          || replicate.containerAndDryWeight().compareTo(BigDecimal.valueOf(999.999)) > 0
-          || replicate.containerAndDryWeight() != containerAndDryWeight) {
+          || replicate.containerAndDryWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
         SparLog.error("MCC data validation failed: Container and dry weight is missing or invalid");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Container and dry weight is missing or invalid");
       }
