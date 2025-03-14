@@ -16,6 +16,7 @@ import SeedlotRegFormClassA from '../views/Seedlot/SeedlotRegFormClassA';
 import ReviewSeedlots from '../views/Seedlot/ReviewSeedlots';
 import FourOhThree from '../views/ErrorViews/FourOhThree';
 import FavouriteActivities from '../views/CONSEP/FavouriteActivity';
+import MoistureContent from '../views/CONSEP/TestingActivities/MoistureContent';
 
 const BrowserRoutes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
@@ -103,6 +104,12 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
     element: (
       <FavouriteActivities />
+    )
+  },
+  {
+    path: ROUTES.MANUAL_MOISTURE_CONTENT,
+    element: (
+      <MoistureContent />
     )
   }
 ];

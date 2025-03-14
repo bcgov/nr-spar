@@ -6,13 +6,14 @@ import { StatusColourMap } from './definitions';
 import './styles.scss';
 
 type StatusTagProps = {
-  type: keyof typeof StatusColourMap
+  type: keyof typeof StatusColourMap,
+  renderIcon?: Object
 }
 
-const StatusTag = ({ type }: StatusTagProps) => {
+const StatusTag = ({ type, renderIcon }: StatusTagProps) => {
   const tagType: keyof typeof StatusColourMap = Object.keys(StatusColourMap).includes(type) ? type : 'Unknown';
   return (
-    <Tag className="status-tag" type={StatusColourMap[tagType]}>
+    <Tag className="status-tag" type={StatusColourMap[tagType]} renderIcon={renderIcon}>
       {type}
     </Tag>
   );

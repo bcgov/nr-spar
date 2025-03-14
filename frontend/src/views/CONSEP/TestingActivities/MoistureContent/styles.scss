@@ -1,0 +1,77 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.consep-moisture-content-title {
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
+  .title-section {
+    padding: 0rem;
+    max-inline-size: fit-content;
+  }
+
+  .status-tag {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+  }
+}
+
+.consep-moisture-content-activity-summary {
+  .#{vars.$bcgov-prefix}--col {
+    padding: 0rem;
+  }
+}
+
+.consep-moisture-content-cone-form > div {
+  padding: 0rem;
+}
+
+.consep-moisture-content-cone-form {
+  margin-bottom: 2.5rem;
+}
+
+.consep-moisture-content-date-picker > div {
+  padding: 0rem;
+}
+
+.consep-moisture-content-date-picker {
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  .#{vars.$bcgov-prefix}--form-item {
+    width: inherit;
+
+    .#{vars.$bcgov-prefix}--date-picker {
+      width: inherit;
+
+      .#{vars.$bcgov-prefix}--date-picker-container {
+        width: inherit;
+
+        .#{vars.$bcgov-prefix}--date-picker-input__wrapper {
+          width: inherit;
+
+          span {
+            width: inherit;
+
+            input {
+              width: inherit;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.consep-moisture-content-category > div {
+  padding: 0rem;
+}
+
+.consep-moisture-content-category {
+  margin-bottom: 2rem;
+}
+
+.consep-moisture-content-comments > div {
+  padding: 0rem;
+}
