@@ -10,6 +10,8 @@ import ca.bc.gov.oracleapi.exception.InvalidMccKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
+import jakarta.transaction.Transactional;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -128,6 +130,7 @@ public class MoistureContentService {
    *
    * @param riaKey the identifier key for all table related to MCC
    */
+  @Transactional
   public void deleteFullMcc(@NonNull BigDecimal riaKey) {
     SparLog.info("Deleting entries on Activity, Replicate and TestResult tables "
             + "with the riaKey: {}", riaKey);
