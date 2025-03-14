@@ -23,7 +23,7 @@ public class ActivityEntity {
 
   @Id
   @Column(name = "RIA_SKEY", precision = 10, scale = 0)
-  private BigDecimal riaSkey;
+  private BigDecimal riaKey;
 
   @Column(name = "REQUEST_ID", length = 11)
   private String requestId;
@@ -44,7 +44,7 @@ public class ActivityEntity {
   private String vegetationState;
 
   @Column(name = "STNDRD_ACTIVITY_ID", length = 3)
-  private String atandardActivityId;
+  private String standardActivityId;
 
   @Column(name = "ACTIVITY_TYPE_CD", length = 3)
   private String activityTypeCode;
@@ -143,7 +143,7 @@ public class ActivityEntity {
   private String dewingMethod;
 
   @Column(name = "AVG_DRUM_SPEED", length = 3)
-  private String averagerumSpeed;
+  private String averageDrumSpeed;
 
   @Column(name = "WATER_TEMP_CD", length = 3)
   private String waterTemp;

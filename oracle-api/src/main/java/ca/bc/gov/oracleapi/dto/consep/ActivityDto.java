@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public record ActivityDto(
 
     @Schema(description = "Primary key of the activity entry", example = "1234567890")
-    BigDecimal riaSkey,
+    BigDecimal riaKey,
 
     @Schema(description = "Identifier of the request", example = "REQ123456")
     String requestId,
@@ -33,7 +33,7 @@ public record ActivityDto(
     String vegetationState,
 
     @Schema(description = "Standard activity identifier", example = "STD123")
-    String atandardActivityId,
+    String standardActivityId,
 
     @Schema(description = "Activity type code", example = "ATC")
     String activityTypeCode,
@@ -132,7 +132,7 @@ public record ActivityDto(
     String dewingMethod,
 
     @Schema(description = "Average drum speed", example = "120")
-    String averagerumSpeed,
+    String averageDrumSpeed,
 
     @Schema(description = "Water temperature code", example = "WT1")
     String waterTemp,
