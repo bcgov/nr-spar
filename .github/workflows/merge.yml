@@ -14,6 +14,8 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
+permissions: {}
+
 jobs:
   init:
     name: Initialize
@@ -48,6 +50,8 @@ jobs:
   promote:
     name: Promote Images
     needs: [init, deploys-prod]
+    permissions:
+      packages: write
     runs-on: ubuntu-24.04
     strategy:
       matrix:

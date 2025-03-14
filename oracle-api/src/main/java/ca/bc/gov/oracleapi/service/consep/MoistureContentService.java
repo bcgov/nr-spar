@@ -11,13 +11,17 @@ import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.util.List;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import ca.bc.gov.oracleapi.exception.InvalidMccKeyException;
+import jakarta.transaction.Transactional;
+
+
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,6 +36,13 @@ public class MoistureContentService {
 
   private final ReplicateRepository replicateRepository;
 
+  // The maximum number of replicates is 8 and the entries are sequencial,
+  // so we can use a fixed list to fetch the data for the replicates.
+  private final List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
+                                            .boxed()
+                                            .collect(Collectors.toList());
+
+
   /**
    * Get information for moisture cone content.
    */
@@ -43,17 +54,13 @@ public class MoistureContentService {
     Optional<ActivityEntity> activityData = activityRepository.findById(riaKey);
 
     Optional<TestResultEntity> testResultData = testResultRepository.findById(
-        riaKey);
-
-    // The maximum number of replicates is 8 and the entries are sequencial,
-    // so we can use a fixed list to fetch the data for the replicates.
-    List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
-        .boxed()
-        .collect(Collectors.toList());
+        riaKey
+    );
 
     List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
         riaKey,
-        replicateIds);
+        replicateIds
+    );
 
     if (activityData.isEmpty() || testResultData.isEmpty() || replicates.isEmpty()) {
       SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
@@ -72,7 +79,8 @@ public class MoistureContentService {
             curReplicate.getDryWeight(),
             curReplicate.getReplicateAccInd(),
             curReplicate.getReplicateComment(),
-            curReplicate.getOverrideReason()))
+            curReplicate.getOverrideReason()
+        ))
         .collect(Collectors.toList());
 
     MoistureContentConesDto moistureContent = new MoistureContentConesDto(
@@ -172,5 +180,72 @@ public class MoistureContentService {
     
     testResultRepository.updateTestResultStatusToAccepted(riaKey);
     SparLog.info("Moisture content data accepted for RIA_SKEY: {}", riaKey);
+  }
+
+  /**
+   * Deletes a single replicate.
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   * @param replicateNumber the replicate number to be deleted
+   */
+  public void deleteMccReplicate(
+      @NonNull BigDecimal riaKey,
+      @NonNull Integer replicateNumber
+  ) {
+    SparLog.info("Deleting a replicate tables with the "
+        + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
+
+    Optional<ReplicateEntity> replicates = replicateRepository.findSingleReplicate(
+        riaKey,
+        replicateNumber
+    );
+
+    if (replicates.isEmpty()) {
+      throw new InvalidMccKeyException();
+    }
+
+    replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
+
+    SparLog.info("Replicate {} with riaKey {} ", replicateNumber, riaKey
+            + "deleted!");
+  }
+
+  /**
+   * Deletes MCC data on multiple tables.
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   */
+  @Transactional
+  public void deleteFullMcc(@NonNull BigDecimal riaKey) {
+    SparLog.info("Deleting entries on Activity, Replicate and TestResult tables "
+            + "with the riaKey: {}", riaKey);
+    Optional<ActivityEntity> activityEntity = activityRepository.findById(riaKey);
+
+    Optional<TestResultEntity> testEntity = testResultRepository.findById(riaKey);
+
+    List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
+        riaKey,
+        replicateIds
+    );
+
+    if (activityEntity.isEmpty()
+        || testEntity.isEmpty()
+        || replicates.isEmpty()
+    ) {
+      throw new InvalidMccKeyException();
+    }
+
+    activityRepository.deleteById(riaKey);
+    testResultRepository.deleteById(riaKey);
+
+    replicates.forEach(
+        rep -> replicateRepository.deleteByRiaKeyAndReplicateNumber(
+          riaKey,
+          rep.getId().getReplicateNumber()
+        )
+    );
+
+    SparLog.info("Activity, Replicate and TestResult with riaKey {} ", riaKey
+            + "deleted!");
   }
 }
