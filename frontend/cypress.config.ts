@@ -8,6 +8,7 @@ let CypressData: { [k: string]: any } = {};
 
 export default defineConfig({
   e2e: {
+    projectId: 'aa2v3q',
     baseUrl: 'http://localhost:3000/',
     viewportWidth: 1280,
     viewportHeight: 720,
@@ -18,22 +19,25 @@ export default defineConfig({
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
-      '**/login-page.cy.ts',
-      '**/dashboard-page.cy.ts',
-      '**/create-a-class-seedlot.cy.ts',
-      '**/seedlot-dashboard.cy.ts',
-      '**/seedlot-detail.cy.ts',
-      '**/edit-applicant-seedlot-info.cy.ts',
-      '**/my-seedlots.cy.ts',
-      '**/a-class-seedlot-reg-form-collection-interim.cy.ts',
-      '**/a-class-seedlot-reg-form-ownership.cy.ts',
-      '**/a-class-seedlot-reg-form-orchard.cy.ts',
-      '**/a-class-seedlot-reg-form-extraction.cy.ts',
-      '**/a-class-seedlot-reg-form-parent-tree-part-1.cy.ts',
-      '**/a-class-seedlot-reg-form-parent-tree-part-2.cy.ts',
-      '**/a-class-seedlot-reg-form-parent-tree-part-3.cy.ts',
-      '**/create-a-class-seedlot-fdi.cy.ts',
-      '**/a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts'
+      '**/01-create-a-class-seedlot.cy.ts',
+      '**/02-seedlot-dashboard.cy.ts',
+      '**/03-seedlot-detail.cy.ts',
+      '**/04-my-seedlots.cy.ts',
+      '**/21-create-a-class-seedlot-pli.cy.ts',
+      '**/22-a-class-seedlot-reg-form-collection-interim.cy.ts',
+      '**/23-a-class-seedlot-reg-form-ownership.cy.ts',
+      '**/24-a-class-seedlot-reg-form-extraction.cy.ts',
+      '**/31-create-a-class-seedlot-pli.cy.ts',
+      '**/32-a-class-seedlot-reg-form-orchard.cy.ts',
+      '**/33-a-class-seedlot-reg-form-parent-tree-part-1.cy.ts',
+      '**/34-a-class-seedlot-reg-form-parent-tree-part-2.cy.ts',
+      '**/35-a-class-seedlot-reg-form-parent-tree-part-3.cy.ts',
+      '**/11-login-page.cy.ts',
+      '**/12-dashboard-page.cy.ts',
+      '**/13-create-a-class-seedlot-fdi.cy.ts',
+      '**/14-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',
+      '**/15-api-tests.cy.ts',
+      '**/16-edit-applicant-seedlot-info.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {

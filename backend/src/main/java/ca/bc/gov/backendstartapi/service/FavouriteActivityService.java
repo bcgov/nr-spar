@@ -9,6 +9,7 @@ import ca.bc.gov.backendstartapi.exception.InvalidActivityException;
 import ca.bc.gov.backendstartapi.repository.FavouriteActivityRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,34 +38,58 @@ public class FavouriteActivityService {
   }
 
   /**
-   * Create a user's activity in the database.
-   *
-   * @param activityDto a {@link FavouriteActivityCreateDto} containing the activity title
-   * @return the {@link FavouriteActivityEntity} created
-   */
-  public FavouriteActivityEntity createUserActivity(FavouriteActivityCreateDto activityDto) {
-    String userId = loggedUserService.getLoggedUserId();
-    SparLog.info("Creating activity {} for user {}", activityDto.activity(), userId);
-
+  * Validates the activity input.
+  *
+  * @param activityDto a {@link FavouriteActivityCreateDto} containing the activity title
+  */
+  private void validateActivityInput(FavouriteActivityCreateDto activityDto) {
     if (Objects.isNull(activityDto.activity()) || activityDto.activity().isBlank()) {
       throw new InvalidActivityException();
     }
+  }
 
-    List<FavouriteActivityEntity> userFavList = favouriteActivityRepository.findAllByUserId(userId);
-    if (userFavList.stream().anyMatch(ac -> ac.getActivity().equals(activityDto.activity()))) {
-      SparLog.info("Activity {} already exists for user {}!", activityDto.activity(), userId);
-      throw new FavoriteActivityExistsToUser();
+  /**
+  * Builds a FavouriteActivityEntity.
+  *
+  * @param userId a {@link String} containing the user id
+  * @param dto a {@link FavouriteActivityCreateDto} containing the activity title
+  * @return a {@link FavouriteActivityEntity} instance
+  */
+  private FavouriteActivityEntity buildFavouriteActivityEntity(
+      String userId, FavouriteActivityCreateDto dto) {
+    FavouriteActivityEntity entity = new FavouriteActivityEntity();
+    entity.setUserId(userId);
+    entity.setActivity(dto.activity());
+    entity.setIsConsep(Optional.ofNullable(dto.isConsep()).orElse(false));
+    return entity;
+  }
+
+  /**
+   * Create a user's activity in the database.
+   *
+   * @param activityDtos a {@link FavouriteActivityCreateDto} containing the activity title
+   * @return the {@link FavouriteActivityEntity} created
+   */
+  public List<FavouriteActivityEntity> createUserActivities(
+      List<FavouriteActivityCreateDto> activityDtos) {
+    String userId = loggedUserService.getLoggedUserId();
+    SparLog.info("Creating activities for user {}", userId);
+
+    List<FavouriteActivityEntity> createdActivities = new ArrayList<>();
+
+    for (FavouriteActivityCreateDto dto : activityDtos) {
+      try {
+        validateActivityInput(dto);
+        if (favouriteActivityRepository.existsByUserIdAndActivity(userId, dto.activity())) {
+          continue;
+        }
+        FavouriteActivityEntity entity = buildFavouriteActivityEntity(userId, dto);
+        createdActivities.add(favouriteActivityRepository.save(entity));
+      } catch (InvalidActivityException | FavoriteActivityExistsToUser e) {
+        SparLog.error("Error creating activity: {}", e.getMessage());
+      }
     }
-
-    FavouriteActivityEntity activityEntity = new FavouriteActivityEntity();
-    activityEntity.setUserId(userId);
-    activityEntity.setActivity(activityDto.activity());
-
-    activityEntity.setIsConsep(activityDto.isConsep() != null ? activityDto.isConsep() : false);
-
-    FavouriteActivityEntity activityEntitySaved = favouriteActivityRepository.save(activityEntity);
-    SparLog.info("Activity {} created for user {}", activityDto.activity(), userId);
-    return activityEntitySaved;
+    return createdActivities;
   }
 
   /**

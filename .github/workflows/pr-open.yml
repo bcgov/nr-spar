@@ -8,6 +8,8 @@ concurrency:
   group: ${{ github.event.number }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   builds:
     name: Builds
@@ -20,12 +22,9 @@ jobs:
       matrix:
         package: [backend, frontend, oracle-api, sync]
     steps:
-      - uses: bcgov-nr/action-builder-ghcr@v2.3.0
+      - uses: bcgov/action-builder-ghcr@v2.3.0
         id: build
         with:
-          build_args: |
-            BUILD_NUMBER=${{ github.event.number }}
-            BUILDKIT_INLINE_CACHE=1
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
           tag_fallback: latest

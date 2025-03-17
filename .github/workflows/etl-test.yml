@@ -8,11 +8,13 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
+permissions: {}
+
 jobs:
   etl-test:
     environment: test
     name: ETL (TEST)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:

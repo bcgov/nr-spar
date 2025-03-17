@@ -1,8 +1,8 @@
-import { TYPE_DELAY } from 'cypress/constants';
+import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
-describe('Create FDI Seedlot', () => {
+describe('Create PLI Seedlot', () => {
   let fixtureData: SeedlotRegFixtureType = {};
   beforeEach(() => {
     cy.fixture('aclass-seedlot').then((jsonData) => {
@@ -13,17 +13,20 @@ describe('Create FDI Seedlot', () => {
     cy.visit('/seedlots/register-a-class');
   });
 
-  it('Register fdi seedlot', () => {
-    const regData = fixtureData.fdi;
+  it('Register pli seedlot', () => {
+    const regData = fixtureData.pli;
+
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
-      .type(regData.agencyNumber, { delay: TYPE_DELAY });
+      .type(regData.agencyNumber, { delay: TYPE_DELAY })
+      .blur();
 
     // Enter the applicant email address
     cy.get('#applicant-email-input')
       .clear()
-      .type(regData.email, { delay: TYPE_DELAY });
+      .type(regData.email, { delay: TYPE_DELAY })
+      .blur();
 
     // Enter the seedlot species, wait for species data to load
     cy.get('#seedlot-species-combobox')

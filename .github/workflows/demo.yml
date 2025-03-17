@@ -14,15 +14,17 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   demo-routing:
     name: DEMO Routing
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.label.name == 'demo' }}
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'demo'
     env:
       DEST: demo
       DOMAIN: apps.silver.devops.gov.bc.ca
       REPO: ${{ github.event.repository.name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: redhat-actions/openshift-tools-installer@v1
         with:

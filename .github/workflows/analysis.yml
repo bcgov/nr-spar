@@ -13,12 +13,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
+
   lint:
     name: Typescript lint
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov-nr/action-test-and-analyse@v1.2.1
+      - uses: bcgov/action-test-and-analyse@v1.2.1
         with:
           commands: |
             npm ci
@@ -26,36 +29,47 @@ jobs:
           dir: frontend
           node_version: "20"
 
-  tests:
-    name: Java CI
-    if: ${{ ! github.event.pull_request.draft }}
+  tests-backend:
+    name: Backend Java CI
+    if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        dir: [backend, oracle-api]
-        include:
-          - dir: backend
-            token: SONAR_BACKEND
-          - dir: oracle-api
-            token: SONAR_ORACLE_API
     steps:
-      - uses: bcgov-nr/action-test-and-analyse-java@v1.0.2
+      - uses: bcgov/action-test-and-analyse-java@v1.0.2
         with:
           commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
-          dir: ${{ matrix.dir }}
+          dir: backend
           java-cache: maven
           java-distribution: temurin
           java-version: "17"
           sonar_args:
-            -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_${{ matrix.dir }}
+            -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_backend
             -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml
             -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/filter/**,**/interceptor/**,**/response/**,**/**Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
-          sonar_token: ${{ secrets[matrix.token] }}
+          sonar_token: ${{ secrets.SONAR_BACKEND }}
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
+  tests-oracle-api:
+    name: Oracle API Java CI
+    if: (! github.event.pull_request.draft)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: bcgov/action-test-and-analyse-java@v1.0.2
+        with:
+          commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
+          dir: oracle-api
+          java-cache: maven
+          java-distribution: temurin
+          java-version: "17"
+          sonar_args:
+            -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_oracle-api
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml
+            -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/filter/**,**/interceptor/**,**/response/**,**/**Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
+          sonar_token: ${{ secrets.SONAR_ORACLE_API }}
+
   trivy:
     name: Security Scan
-    if: ${{ ! github.event.pull_request.draft }}
+    if: (! github.event.pull_request.draft)
+    permissions:
+      security-events: write
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +91,7 @@ jobs:
   results:
     name: Analysis Results
     if: always() && (!failure()) && (!cancelled())
-    needs: [lint, tests, trivy]
+    needs: [lint, tests-backend, tests-oracle-api, trivy]
     runs-on: ubuntu-24.04
     steps:
       - run: echo "Workflow completed successfully!"

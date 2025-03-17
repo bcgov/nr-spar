@@ -8,11 +8,13 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
+permissions: {}
+
 jobs:
   etl-prod:
     environment: prod
     name: ETL (PROD)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: redhat-actions/openshift-tools-installer@v1

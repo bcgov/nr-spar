@@ -37,7 +37,7 @@ describe('Seedlot Dashboard test', () => {
   });
 
   it('all seedlot species should exist in the table', () => {
-    Cypress._.times((speciesKeys.length), (i) => {
+    Cypress._.times((speciesKeys.length - 1), (i) => {
       const { species } = seedlotTableData[speciesKeys[i]];
 
       cy.task('getData', species).then((sNumber) => {

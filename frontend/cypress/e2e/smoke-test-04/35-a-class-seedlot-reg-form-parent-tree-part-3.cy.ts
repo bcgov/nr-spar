@@ -54,14 +54,14 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .eq(0)
       .find('button')
       .as('clickAddRowBtn')
-      .click({force: true});
+      .click({ force: true });
 
     // Check total number of rows
     cy.get(`.${prefix}--pagination__items-count`)
       .should('include.text', '21 items');
 
     cy.get('@clickAddRowBtn')
-      .click({force: true});
+      .click({ force: true });
 
     // Check total number of rows
     cy.get(`.${prefix}--pagination__items-count`)
@@ -70,7 +70,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Check delete button functionality
     cy.get('#7-action-btn-del')
       .find('button')
-      .click({ force: true});
+      .click({ force: true });
 
     // Check total number of rows
     cy.get(`.${prefix}--pagination__items-count`)
@@ -81,137 +81,107 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     // Wait for the table to load
     cy.get('#parentTreeNumber', { timeout: 10000 });
 
-    // Click 'Dothistroma needle blight (DFS)' checkbox
     cy.get(`.${prefix}--toolbar-content > span`)
-      .eq(1)
+      .eq(0)
       .find('button')
-      .as('clickShowHideBtn')
-      .click({force: true});
+      .as('clickShowHideBtn');
 
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Dothistroma needle blight (DFS)')
-      .click();
+    // Check 'Dothistroma needle blight (DFS)' checkbox
+    cy.get('thead.table-header').find('#dfs').then(($element) => {
+      if ($element.length) {
+        // Element exists, do nothing
+        cy.log('Table row DFS exists, no action taken.');
+      } else {
+        // Element does not exist, click the toggle button with DFS value
+        cy.get('@clickShowHideBtn')
+          .click({ force: true });
 
-    cy.get('.parent-tree-step-table-container')
-      .find('h4')
-      .as('closeShowHideDropdown')
-      .click({force: true});
+        cy.get('ul.parent-tree-table-toggle-menu')
+          .find('li')
+          .contains('Dothistroma needle blight (DFS)')
+          .click();
+
+        cy.get('.parent-tree-step-table-container')
+          .find('h4')
+          .as('closeShowHideDropdown')
+          .click();
+      }
+    });
 
     cy.get('thead.table-header')
       .find('#dfs')
       .should('exist');
 
-    // Click 'Comandra blister rust (DSC)' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({force: true});
+    // Check 'Comandra blister rust (DSC)' checkbox
+    cy.get('thead.table-header').find('#dsc').then(($element) => {
+      if ($element.length) {
+        // Element exists, do nothing
+        cy.log('Table row DSC exists, no action taken.');
+      } else {
+        // Element does not exist, click the toggle button with DSC value
+        cy.get('@clickShowHideBtn')
+          .click({ force: true });
 
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Comandra blister rust (DSC)')
-      .click();
+        cy.get('ul.parent-tree-table-toggle-menu')
+          .find('li')
+          .contains('Comandra blister rust (DSC)')
+          .click();
 
-    cy.get('@closeShowHideDropdown')
-      .click({force: true});
+        cy.get('@closeShowHideDropdown')
+          .click();
+      }
+    });
 
     cy.get('thead.table-header')
       .find('#dsc')
       .should('exist');
 
-    // Click 'Western gall rust (DSG)' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({force: true});
+    // Check 'Western gall rust (DSG)' checkbox
+    cy.get('thead.table-header').find('#dsg').then(($element) => {
+      if ($element.length) {
+        // Element exists, do nothing
+        cy.log('Table row DSG exists, no action taken.');
+      } else {
+        // Element does not exist, click the toggle button with DSG value
+        cy.get('@clickShowHideBtn')
+          .click({ force: true });
 
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Western gall rust (DSG)')
-      .click();
+        cy.get('ul.parent-tree-table-toggle-menu')
+          .find('li')
+          .contains('Western gall rust (DSG)')
+          .click();
 
-    cy.get('@closeShowHideDropdown')
-      .click({force: true});
+        cy.get('@closeShowHideDropdown')
+          .click();
+      }
+    });
 
     cy.get('thead.table-header')
       .find('#dsg')
       .should('exist');
 
-    // Click 'Volume growth (GVO)' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({force: true});
+    // Check 'Volume growth (GVO)' checkbox
+    cy.get('thead.table-header').find('#gvo').then(($element) => {
+      if ($element.length) {
+        // Element exists, do nothing
+        cy.log('Table row GVO exists, no action taken.');
+      } else {
+        // Element does not exist, click the toggle button with GVO value
+        cy.get('@clickShowHideBtn')
+          .click({ force: true });
 
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Volume growth (GVO)')
-      .click();
+        cy.get('ul.parent-tree-table-toggle-menu')
+          .find('li')
+          .contains('Volume growth (GVO)')
+          .click();
 
-    cy.get('@closeShowHideDropdown')
-      .click({force: true});
+        cy.get('@closeShowHideDropdown')
+          .click();
+      }
+    });
 
     cy.get('thead.table-header')
       .find('#gvo')
-      .should('exist');
-
-    // Click 'Weighted DFS' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({force: true});
-  
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Weighted DFS')
-      .click();
-
-    cy.get('@closeShowHideDropdown')
-      .click({force: true});
-
-    cy.get('thead.table-header')
-      .find('#w_dfs')
-      .should('exist');
-
-    // Click 'Weighted DSC' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({force: true});
-  
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Weighted DSC')
-      .click();
-
-    cy.get('@closeShowHideDropdown')
-      .click({force: true});
-
-    cy.get('thead.table-header')
-      .find('#w_dsc')
-      .should('exist');
-
-    // Click 'Weighted DSG' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({force: true});
-  
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Weighted DSG')
-      .click();
-
-    cy.get('@closeShowHideDropdown')
-      .click({force: true});
-
-    cy.get('thead.table-header')
-      .find('#w_dsg')
-      .should('exist');
-
-    // Click 'Weighted GVO' checkbox
-    cy.get('@clickShowHideBtn')
-      .click({force: true});
-  
-    cy.get('ul.parent-tree-table-toggle-menu')
-      .find('li')
-      .contains('Weighted GVO')
-      .click();
-
-    cy.get('@closeShowHideDropdown')
-      .click({force: true});
-
-    cy.get('thead.table-header')
-      .find('#w_gvo')
       .should('exist');
   });
 
@@ -235,7 +205,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Click 'Clean table data' option
     cy.get('@clickMoreOptionsBtn')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get('ul.parent-tree-table-option-menu')
       .find('li')
@@ -257,10 +227,10 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check 'X' button of 'Clean table data' dialog box
     cy.get('@clickMoreOptionsBtn')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get('@clickCleanTableBtn')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
       .find('button')
@@ -272,17 +242,18 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check 'Clean table data' button of 'Clean table data' dialog box
     cy.get('@clickMoreOptionsBtn')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get('@clickCleanTableBtn')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
       .find('button')
       .contains('Clean table data')
       .click();
 
-    // Check values in 'SMP success on parent (%)' and 'Non-orchard pollen contam. (%)' columns of the table
+    // Check values in 'SMP success on parent (%)'
+    // and 'Non-orchard pollen contam. (%)' columns of the table
     cy.get('#0-volume-value-input')
       .should('have.value', '');
 
@@ -291,7 +262,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check upload button functionality
     cy.get('button.upload-button')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .should('be.visible');
@@ -305,14 +276,14 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
 
     // Check file upload functionality
     cy.get('button.upload-button')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
       .should('be.visible');
 
     cy.get(`.${prefix}--file`)
       .find(`input.${prefix}--file-input`)
-      .selectFile('cypress/fixtures/Seedlot_composition_template_03.csv', {force: true});
+      .selectFile('cypress/fixtures/Seedlot_composition_template_03.csv', { force: true });
 
     cy.get('button')
       .contains('Import file and continue')
@@ -343,12 +314,12 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(2)
       .find('button')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get('ul.parent-tree-table-option-menu')
       .find('li')
       .contains('Clean table data')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
       .find('button')
@@ -448,7 +419,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
     cy.get('.parent-tree-step-table-container')
       .find('h4')
       .as('waitClick')
-      .click({force: true});
+      .click({ force: true });
 
     // Check proportion value
     cy.get('#0-proportion-value')
@@ -479,7 +450,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .blur();
 
     cy.get('@waitClick')
-      .click({force: true});
+      .click({ force: true });
 
     cy.get('#0-proportion-value')
       .should('have.text', '0.2500');

@@ -16,6 +16,8 @@ on:
         required: false
         type: string
 
+permissions: {}
+
 jobs:
   cypress:
     name: Cypress
@@ -28,10 +30,11 @@ jobs:
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.VITE_USER_POOLS_WEB_CLIENT_ID }}
       VITE_ZONE: TEST
+      CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
     runs-on: ubuntu-24.04
     steps:
       # Check triggers (omitted or matched)
-      - uses: bcgov-nr/action-diff-triggers@v0.2.0
+      - uses: bcgov/action-diff-triggers@v0.2.0
         id: triggers
         with:
           triggers: ${{ inputs.triggers }}
@@ -44,12 +47,15 @@ jobs:
 
       - name: Run Cypress CI
         if: steps.triggers.outputs.triggered == 'true'
-        uses: bcgov-nr/action-test-and-analyse@v1.2.1
+        uses: bcgov/action-test-and-analyse@v1.2.1
         with:
           node_version: "18"
           commands: |
             npm ci
-            npm run cy:ci || true
+            npm run cy:run-1 || true
+            npm run cy:run-2 || true
+            npm run cy:run-3 || true
+            npm run cy:run-4 || true
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
@@ -58,7 +64,10 @@ jobs:
             -Dsonar.sources=src/
             -Dsonar.exclusions=src/__test__/**/*
             -Dsonar.exclusions=src/mock-server/**/*
-            -Dsonar.test.inclusions=cypress/e2e/smoke-test/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-01/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-02/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-03/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-04/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
       - name: Upload videos
         uses: actions/upload-artifact@v4

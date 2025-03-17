@@ -60,7 +60,9 @@ public class MoistureContentConesEndpoint {
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
-            content = @Content(schema = @Schema(implementation = Void.class)))
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public Optional<MoistureContentConesDto> getMccByRiaKey(

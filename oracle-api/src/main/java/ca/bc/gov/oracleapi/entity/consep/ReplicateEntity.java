@@ -1,9 +1,10 @@
 package ca.bc.gov.oracleapi.entity.consep;
 
+import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.Getter;
@@ -20,12 +21,8 @@ import lombok.Setter;
 @Schema(description = "Represents a single replicate data for moisture content in the database")
 public class ReplicateEntity {
 
-  @Id
-  @Column(name = "RIA_SKEY", precision = 10, scale = 0)
-  private BigDecimal riaKey;
-
-  @Column(name = "TEST_REPLICATE_NO", nullable = false)
-  private Integer replicateNumber;
+  @EmbeddedId
+  private ReplicateId id;
 
   @Column(name = "CONTAINER_ID", length = 4)
   private String containerId;
