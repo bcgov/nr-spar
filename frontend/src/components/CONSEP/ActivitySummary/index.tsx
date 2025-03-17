@@ -12,11 +12,11 @@ import { ActivitySummaryType } from '../../../types/ActivitySummaryType';
 import './styles.scss';
 
 interface ActivitySummaryProps {
-  seedlot?: ActivitySummaryType;
+  item?: ActivitySummaryType;
   isFetching: boolean;
 }
 
-const ActivitySummary = ({ seedlot, isFetching }: ActivitySummaryProps) => (
+const ActivitySummary = ({ item, isFetching }: ActivitySummaryProps) => (
   <div className="activity-summary-container">
     <Accordion className="activity-summary">
       <AccordionItem
@@ -29,7 +29,7 @@ const ActivitySummary = ({ seedlot, isFetching }: ActivitySummaryProps) => (
               Activity
             </p>
             {
-              renderFieldValue('activity', isFetching, seedlot)
+              renderFieldValue('activity', isFetching, item)
             }
           </Column>
           <Column className="info-col">
@@ -37,7 +37,7 @@ const ActivitySummary = ({ seedlot, isFetching }: ActivitySummaryProps) => (
               Seedlot number
             </p>
             {
-              renderFieldValue('seedlotNumber', isFetching, seedlot)
+              renderFieldValue('seedlotNumber', isFetching, item)
             }
           </Column>
           <Column className="info-col">
@@ -45,7 +45,7 @@ const ActivitySummary = ({ seedlot, isFetching }: ActivitySummaryProps) => (
               Request ID
             </p>
             {
-              renderFieldValue('requestId', isFetching, seedlot)
+              renderFieldValue('requestId', isFetching, item)
             }
           </Column>
           <Column className="info-col">
@@ -53,7 +53,7 @@ const ActivitySummary = ({ seedlot, isFetching }: ActivitySummaryProps) => (
               Species
             </p>
             {
-              renderFieldValue('species', isFetching, seedlot)
+              renderFieldValue('species', isFetching, item)
             }
           </Column>
           <Column className="info-col">
@@ -61,7 +61,7 @@ const ActivitySummary = ({ seedlot, isFetching }: ActivitySummaryProps) => (
               Test result
             </p>
             {
-              renderFieldValue('testResult', isFetching, seedlot)
+              renderFieldValue('testResult', isFetching, item)
             }
           </Column>
         </Row>

@@ -5,15 +5,15 @@ import { ActivitySummaryType } from '../../../types/ActivitySummaryType';
 const renderFieldValue = (
   name: keyof ActivitySummaryType,
   isFetching: boolean,
-  seedlot?: ActivitySummaryType
+  items?: ActivitySummaryType
 ) => {
   if (isFetching) {
     return <RadioButtonSkeleton />;
   }
-  if (seedlot) {
+  if (items) {
     return (
       <p className="activity-summary-info-value">
-        {seedlot[name]}
+        {items[name]}
       </p>
     );
   }
