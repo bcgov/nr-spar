@@ -7,7 +7,7 @@ export const fieldsConfig = {
   moistureContentConesTitle: {
     title: 'Moisture content cones data entry '
   },
-  seedlot: {
+  activityItem: {
     activity: 'MC',
     seedlotNumber: 64132,
     requestId: 'CSP20240013',

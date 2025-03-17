@@ -3,10 +3,10 @@ import {
   Row,
   Column,
   Accordion,
-  AccordionItem
+  AccordionItem,
+  RadioButtonSkeleton
 } from '@carbon/react';
 
-import renderFieldValue from './FieldValue';
 import { ActivitySummaryType } from '../../../types/ActivitySummaryType';
 
 import './styles.scss';
@@ -15,6 +15,24 @@ interface ActivitySummaryProps {
   item?: ActivitySummaryType;
   isFetching: boolean;
 }
+
+const renderFieldValue = (
+  name: keyof ActivitySummaryType,
+  isFetching: boolean,
+  item?: ActivitySummaryType
+) => {
+  if (isFetching) {
+    return <RadioButtonSkeleton />;
+  }
+  if (item) {
+    return (
+      <p className="activity-summary-info-value">
+        {item[name]}
+      </p>
+    );
+  }
+  return null;
+};
 
 const ActivitySummary = ({ item, isFetching }: ActivitySummaryProps) => (
   <div className="activity-summary-container">
