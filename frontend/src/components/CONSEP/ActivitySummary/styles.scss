@@ -13,7 +13,7 @@
       margin-left: 0.1rem;
       justify-content: flex-start;
       gap: 0.5rem;
-      color: var(--bx-text-primary);
+      color: var(--#{vars.$bcgov-prefix}-text-primary);
 
       .info-col:first-child .activity-summary-info-value {
         font-weight: bold;
