@@ -110,6 +110,7 @@ public class MoistureContentService {
    * @param replicateNumber the replicate number to be updated
    * @param updates a map with the fields and the values to be updated
    */
+  @Transactional
   public void updateReplicateField(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber,
@@ -144,6 +145,7 @@ public class MoistureContentService {
    * @param riaKey the identifier key for all table related to MCC
    * @param updates a map with the fields and the values to be updated
    */
+  @Transactional
   public void updateActivityField(
       @NonNull BigDecimal riaKey,
       Map<String, Object> updates
@@ -172,6 +174,7 @@ public class MoistureContentService {
    * @param riaKey the identifier key for all table related to MCC
    * @param replicateNumber the replicate number to be deleted
    */
+  @Transactional
   public void deleteMccReplicate(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber
