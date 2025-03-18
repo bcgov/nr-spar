@@ -949,8 +949,16 @@ export const convertParentTree = (
       parentTreeNumber: ptNum,
       coneCount: +parentTreeData.tableRowData[ptNum].coneCount.value,
       pollenCount: +parentTreeData.tableRowData[ptNum].pollenCount.value,
-      smpSuccessPct: +parentTreeData.tableRowData[ptNum].smpSuccessPerc.value,
-      nonOrchardPollenContamPct: +parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value,
+      smpSuccessPct:
+        (parentTreeData.tableRowData[ptNum].smpSuccessPerc.value
+          && parentTreeData.tableRowData[ptNum].smpSuccessPerc.value !== 'null')
+          ? Number(parentTreeData.tableRowData[ptNum].smpSuccessPerc.value)
+          : 0,
+      nonOrchardPollenContamPct:
+        (parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value
+          && parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value !== 'null')
+          ? Number(parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value)
+          : 0,
       amountOfMaterial: +parentTreeData.tableRowData[ptNum].volume.value,
       proportion: +parentTreeData.tableRowData[ptNum].proportion.value,
       parentTreeGeneticQualities: generateParentTreeGenQualPayload(
