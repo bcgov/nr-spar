@@ -6,5 +6,7 @@ export const StatusColourMap = {
   Incomplete: 'purple',
   Pending: 'gray',
   Submitted: 'cyan',
-  Unknown: 'outline'
+  Unknown: 'outline',
+  Accepted: 'green',
+  Completed: 'blue'
 };
