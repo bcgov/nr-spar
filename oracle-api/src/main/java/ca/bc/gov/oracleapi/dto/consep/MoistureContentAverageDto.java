@@ -15,3 +15,13 @@ public class Numbers {
         this.numbers = numbers;
     }
 }
+
+/** This class calculateas the average. */
+public class AverageService {
+  public double calculateAverage(List<Double> numbers) {
+      if (numbers.isEmpty()) {
+          throw new RuntimeException("Cannot calculate average of empty list");
+      }
+      return numbers.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+  }
+}
