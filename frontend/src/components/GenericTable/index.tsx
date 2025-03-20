@@ -7,6 +7,8 @@ import {
 } from 'material-react-table';
 import { type Theme, useTheme } from '@mui/material';
 
+import './style.scss';
+
 type Props<T extends Record<string, any>> = {
   columns: MRT_ColumnDef<T>[];
   data: T[];
@@ -14,8 +16,14 @@ type Props<T extends Record<string, any>> = {
   enablePagination?: boolean;
   enableSorting?: boolean;
   enableFilters?: boolean;
+  enableHiding?: boolean;
   enableRowSelection?: boolean;
   enableRowActions?: boolean;
+  enableColumnFilters?: boolean;
+  enableGlobalFilter?: boolean;
+  enableDensityToggle?: boolean;
+  enableFullScreenToggle?: boolean;
+  enableColumnActions?: boolean;
   enableEditing?: boolean;
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
@@ -26,11 +34,17 @@ const GenericTable = <T extends Record<string, any>>({
   columns,
   data,
   isLoading = false,
-  enablePagination = true,
-  enableSorting = true,
-  enableFilters = true,
+  enablePagination = false,
+  enableHiding = false,
+  enableSorting = false,
+  enableFilters = false,
   enableRowSelection = false,
   enableRowActions = false,
+  enableColumnFilters = false,
+  enableGlobalFilter = false,
+  enableDensityToggle = false,
+  enableFullScreenToggle = false,
+  enableColumnActions = false,
   enableEditing = true,
   renderRowActions,
   onRowClick,
@@ -60,18 +74,20 @@ const GenericTable = <T extends Record<string, any>>({
       onClick: () => onRowClick?.(row.original),
       sx: {
         cursor: onRowClick ? 'pointer' : 'default',
-        '&:hover': {
-          backgroundColor: onRowClick
-            ? theme.palette.action.hover
-            : 'inherit'
-        }
+        backgroundColor: row.index % 2 === 0 ? '#F3F3F5' : '#ffffff'
       }
     }),
     enablePagination,
     enableSorting,
-    enableColumnFilters: enableFilters,
+    enableFilters,
+    enableHiding,
+    enableColumnFilters,
     enableRowSelection,
     enableRowActions,
+    enableGlobalFilter,
+    enableDensityToggle,
+    enableFullScreenToggle,
+    enableColumnActions,
     enableEditing,
     editDisplayMode: 'cell',
     renderRowActions: renderRowActions
