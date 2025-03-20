@@ -1,7 +1,9 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
+import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,23 +81,23 @@ public class MoistureContentConesEndpoint {
   }
 
   /**
-   * Updates a single field of a replicate entity.
+   * Updates a replicate entity.
    *
    * @param riaKey The identifier for the MCC-related data.
    * @param replicateNumber The replicate number to be updated.
-   * @param updates A map containing the field name and its new value.
+   * @param replicateFormDto An object containing the new values.
    */
   @PatchMapping(
       value = "replicate/{riaKey}/{replicateNumber}",
       consumes = "application/json")
   @Operation(
-      summary = "Update a single field of a replicate entity",
-      description = "Updates an individual field of a replicate without affecting other fields."
+      summary = "Update the fields of a replicate entity",
+      description = "Updates a replicate."
   )
   @ApiResponses(
       value = {
           @ApiResponse(responseCode = "200", description = "Field successfully updated"),
-          @ApiResponse(responseCode = "400", description = "Invalid field name or value"),
+          @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Replicate not found")
       })
   public void updateReplicateField(
@@ -115,25 +116,25 @@ public class MoistureContentConesEndpoint {
       @PathVariable
       Integer replicateNumber,
       @RequestBody
-      Map<String, Object> updates) {
-    moistureContentService.updateReplicateField(riaKey, replicateNumber, updates);
+      ReplicateFormDto replicateFormDto) {
+    moistureContentService.updateReplicateField(riaKey, replicateNumber, replicateFormDto);
   }
 
   /**
-   * Updates a single field in an activity record.
+   * Updates an activity record.
    *
    * @param riaKey The identifier for the activity-related data.
-   * @param updates A map containing the field name and its new value.
+   * @param activityFormDto An object containing the new values.
    */
   @PatchMapping(value = "/{riaKey}", consumes = "application/json", produces = "application/json")
   @Operation(
-      summary = "Update a single field of an activity record",
-      description = "Updates one or more specific fields in an activity entry."
+      summary = "Update an activity record",
+      description = "Given the new values, updates an activity entry."
   )
   @ApiResponses(
       value = {
           @ApiResponse(responseCode = "200", description = "Field successfully updated"),
-          @ApiResponse(responseCode = "400", description = "Invalid field name or value"),
+          @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Activity entry not found")
       })
   public void updateActivityField(
@@ -143,8 +144,8 @@ public class MoistureContentConesEndpoint {
         description = "Identification key for activity data",
         required = true)
       @PathVariable BigDecimal riaKey,
-      @RequestBody Map<String, Object> updates) {
-    moistureContentService.updateActivityField(riaKey, updates);
+      @RequestBody ActivityFormDto activityFormDto) {
+    moistureContentService.updateActivityField(riaKey, activityFormDto);
   }
 
   /**
