@@ -106,7 +106,7 @@ public class MoistureContentService {
    * @param replicateFormDto an object with the values to be updated
    */
   @Transactional
-  public void updateReplicateField(
+  public ReplicateEntity updateReplicateField(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber,
       @NonNull ReplicateFormDto replicateFormDto
@@ -134,9 +134,11 @@ public class MoistureContentService {
     rep.setReplicateComment(replicateFormDto.replicateComment());
     rep.setOverrideReason(replicateFormDto.overrideReason());
 
-    replicateRepository.save(rep);
+    ReplicateEntity savedReplicate = replicateRepository.save(rep);
 
     SparLog.info("Replicate riaKey: {} and replicateNumber: {} updated", riaKey, replicateNumber);
+
+    return savedReplicate;
   }
 
   /**
@@ -146,7 +148,7 @@ public class MoistureContentService {
    * @param activityFormDto an object with the values to be updated
    */
   @Transactional
-  public void updateActivityField(
+  public ActivityEntity updateActivityField(
       @NonNull BigDecimal riaKey,
       @NonNull ActivityFormDto activityFormDto
   ) {
@@ -165,9 +167,11 @@ public class MoistureContentService {
     activity.setTestCategoryCode(activityFormDto.testCategoryCode());
     activity.setRiaComment(activityFormDto.riaComment());
 
-    activityRepository.save(activity);
+    ActivityEntity savedActivity = activityRepository.save(activity);
 
     SparLog.info("Activity riaKey: {} updated", riaKey);
+
+    return savedActivity;
   }
 
   /**

@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.dto.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * This record serves the purpose of mapping fields the FE should
@@ -9,8 +10,8 @@ import java.time.LocalDateTime;
  */
 @Schema(description = "JSON object with the values to be updated in the Activity table")
 public record ActivityFormDto(
-    String testCategoryCode,
-    String riaComment,
-    LocalDateTime actualBeginDateTime,
-    LocalDateTime actualEndDateTime
+    @NotNull String testCategoryCode,
+    @NotNull String riaComment,
+    @NotNull LocalDateTime actualBeginDateTime,
+    @NotNull LocalDateTime actualEndDateTime
 ) {}

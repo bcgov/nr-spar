@@ -6,12 +6,19 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateDto;
+import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +42,10 @@ class MoistureContentConesEndpointTest {
   @Autowired private MockMvc mockMvc;
 
   @MockBean private MoistureContentService moistureContentService;
+
+  private final ObjectMapper mapper = new ObjectMapper()
+        .registerModule(new JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
   @Test
   @DisplayName("Get a MCC data for a seedlot should succeed")
@@ -165,6 +176,89 @@ class MoistureContentConesEndpointTest {
     mockMvc
         .perform(get("/api/moisture-content-cone/").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("Update MCC - Activity data should succeed")
+  void updateMccActivity_shouldSucceed() throws Exception {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+
+    ActivityFormDto activityFormDto = new ActivityFormDto(
+        "STD",
+        "New comment",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-08-01T00:00:00")
+    );
+
+    ActivityEntity activityEntity = new ActivityEntity();
+
+    activityEntity.setRiaKey(riaKey);
+    activityEntity.setActualBeginDateTime(activityFormDto.actualBeginDateTime());
+    activityEntity.setActualEndDateTime(activityFormDto.actualEndDateTime());
+    activityEntity.setTestCategoryCode(activityFormDto.testCategoryCode());
+    activityEntity.setRiaComment(activityFormDto.riaComment());
+
+    when(moistureContentService.updateActivityField(riaKey, activityFormDto))
+        .thenReturn(activityEntity);
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    mockMvc
+        .perform(patch("/api/moisture-content-cone/{riaKey}", riaKey)
+            .with(csrf().asHeader())
+            .header("Content-Type", "application/json")
+            .accept(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(activityFormDto)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.actualBeginDateTime")
+            .value(activityFormDto.actualBeginDateTime().format(formatter)))
+        .andExpect(jsonPath("$.actualEndDateTime")
+            .value(activityFormDto.actualEndDateTime().format(formatter)))
+        .andExpect(jsonPath("$.testCategoryCode").value(activityFormDto.testCategoryCode()))
+        .andExpect(jsonPath("$.riaComment").value(activityFormDto.riaComment()));
+  }
+
+  @Test
+  @DisplayName("Update MCC - Activity data should return 404 when activity not found")
+  void updateActivityField_shouldReturnNotFound() throws Exception {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    ActivityFormDto activityFormDto = new ActivityFormDto(
+        "TST",
+        "Not found comment",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-08-01T00:00:00")
+    );
+
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity entry not found"))
+        .when(moistureContentService).updateActivityField(riaKey, activityFormDto);
+
+    mockMvc
+        .perform(patch("/api/moisture-content-cone/{riaKey}", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(activityFormDto)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("Update MCC - Activity data should return 400 for invalid values")
+  void updateActivityField_shouldReturnInvalid() throws Exception {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    ActivityFormDto activityFormDto = new ActivityFormDto(
+        null,
+        null,
+        null,
+        null
+    );
+
+    mockMvc
+        .perform(patch("/api/moisture-content-cone/{riaKey}", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(activityFormDto)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
