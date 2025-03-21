@@ -1,8 +1,8 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 /**
  * This record serves the purpose of mapping fields the FE should

@@ -138,13 +138,6 @@ class MoistureContentServiceTest {
   void updateActivity_shouldSucceed() {
     BigDecimal riaKey = new BigDecimal(1234567890);
 
-    ActivityFormDto activityDto = new ActivityFormDto(
-        "STD",
-        "Updated comment",
-        LocalDateTime.parse("2013-08-01T00:00:00"),
-        LocalDateTime.parse("2013-09-01T00:00:00")
-    );
-
     ActivityEntity existingEntity = new ActivityEntity();
     existingEntity.setRiaKey(riaKey);
     existingEntity.setActualBeginDateTime(LocalDateTime.parse("2013-10-01T00:00:00"));
@@ -155,6 +148,13 @@ class MoistureContentServiceTest {
     when(activityRepository.findById(riaKey)).thenReturn(Optional.of(existingEntity));
     when(activityRepository.save(any(ActivityEntity.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ActivityFormDto activityDto = new ActivityFormDto(
+        "STD",
+        "Updated comment",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-09-01T00:00:00")
+    );
 
     ActivityEntity result = moistureContentService.updateActivityField(riaKey, activityDto);
 
@@ -195,17 +195,6 @@ class MoistureContentServiceTest {
     Integer replicateNumber = 1;
     ReplicateId id = new ReplicateId(riaKey, replicateNumber);
 
-    ReplicateFormDto replicateDto = new ReplicateFormDto(
-        "1234",
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        0,
-        "New comment",
-        "Overrided"
-    );
-
     ReplicateEntity existingEntity = new ReplicateEntity();
 
     existingEntity.setId(id);
@@ -222,6 +211,17 @@ class MoistureContentServiceTest {
         .thenReturn(Optional.of(existingEntity));
     when(replicateRepository.save(any(ReplicateEntity.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ReplicateFormDto replicateDto = new ReplicateFormDto(
+        "1234",
+        new BigDecimal(5),
+        new BigDecimal(5),
+        new BigDecimal(5),
+        new BigDecimal(5),
+        0,
+        "New comment",
+        "Overrided"
+    );
 
     ReplicateEntity result = moistureContentService.updateReplicateField(
         riaKey,

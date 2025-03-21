@@ -21,7 +21,6 @@ import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -310,7 +309,8 @@ class MoistureContentConesEndpointTest {
         .andExpect(jsonPath("$.containerId").value(replicateFormDto.containerId()))
         .andExpect(jsonPath("$.containerWeight").value(replicateFormDto.containerWeight()))
         .andExpect(jsonPath("$.freshSeed").value(replicateFormDto.freshSeed()))
-        .andExpect(jsonPath("$.containerAndDryWeight").value(replicateFormDto.containerAndDryWeight()))
+        .andExpect(jsonPath("$.containerAndDryWeight")
+            .value(replicateFormDto.containerAndDryWeight()))
         .andExpect(jsonPath("$.dryWeight").value(replicateFormDto.dryWeight()))
         .andExpect(jsonPath("$.replicateAccInd").value(replicateFormDto.replicateAccInd()))
         .andExpect(jsonPath("$.replicateComment").value(replicateFormDto.replicateComment()))
