@@ -1,7 +1,11 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
+import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
+import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,11 +16,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -74,6 +81,79 @@ public class MoistureContentConesEndpoint {
     SparLog.info("Received request to fetch MCC data for key: {}", riaKey);
 
     return moistureContentService.getMoistureConeContentData(riaKey);
+  }
+
+  /**
+   * Updates a replicate entity.
+   *
+   * @param riaKey The identifier for the MCC-related data.
+   * @param replicateNumber The replicate number to be updated.
+   * @param replicateFormDto An object containing the new values.
+   * @return the {@link ReplicateEntity} updated
+   */
+  @PatchMapping(
+      value = "replicate/{riaKey}/{replicateNumber}",
+      consumes = "application/json",
+      produces = "application/json")
+  @Operation(
+      summary = "Update the fields of a replicate entity",
+      description = "Updates a replicate."
+  )
+  @ApiResponses(
+      value = {
+          @ApiResponse(responseCode = "200", description = "Field successfully updated"),
+          @ApiResponse(responseCode = "400", description = "Invalid object"),
+          @ApiResponse(responseCode = "404", description = "Replicate not found")
+      })
+  public ReplicateEntity updateReplicateField(
+      @Parameter(
+          name = "riaKey",
+          in = ParameterIn.PATH,
+          description = "Identification key for MCC data",
+          required = true)
+      @PathVariable
+      BigDecimal riaKey,
+      @Parameter(
+          name = "replicateNumber",
+          in = ParameterIn.PATH,
+          description = "Number of the replicate to update",
+          required = true)
+      @PathVariable
+      Integer replicateNumber,
+      @Valid
+      @RequestBody
+      ReplicateFormDto replicateFormDto) {
+    return moistureContentService.updateReplicateField(riaKey, replicateNumber, replicateFormDto);
+  }
+
+  /**
+   * Updates an activity record.
+   *
+   * @param riaKey The identifier for the activity-related data.
+   * @param activityFormDto An object containing the new values.
+   * @return the {@link ActivityEntity} updated
+   */
+  @PatchMapping(value = "/{riaKey}", consumes = "application/json", produces = "application/json")
+  @Operation(
+      summary = "Update an activity record",
+      description = "Given the new values, updates an activity entry."
+  )
+  @ApiResponses(
+      value = {
+          @ApiResponse(responseCode = "200", description = "Field successfully updated"),
+          @ApiResponse(responseCode = "400", description = "Invalid object"),
+          @ApiResponse(responseCode = "404", description = "Activity entry not found")
+      })
+  public ActivityEntity updateActivityField(
+      @Parameter(
+        name = "riaKey",
+        in = ParameterIn.PATH,
+        description = "Identification key for activity data",
+        required = true)
+      @PathVariable BigDecimal riaKey,
+      @Valid
+      @RequestBody ActivityFormDto activityFormDto) {
+    return moistureContentService.updateActivityField(riaKey, activityFormDto);
   }
 
   /**

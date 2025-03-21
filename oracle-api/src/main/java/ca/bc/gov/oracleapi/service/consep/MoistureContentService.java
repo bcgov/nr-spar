@@ -1,8 +1,10 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
@@ -11,7 +13,6 @@ import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -98,11 +99,88 @@ public class MoistureContentService {
   }
 
   /**
+   * Update a single replicate.
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   * @param replicateNumber the replicate number to be updated
+   * @param replicateFormDto an object with the values to be updated
+   */
+  @Transactional
+  public ReplicateEntity updateReplicateField(
+      @NonNull BigDecimal riaKey,
+      @NonNull Integer replicateNumber,
+      @NonNull ReplicateFormDto replicateFormDto
+  ) {
+    SparLog.info("Updating a replicate with the "
+        + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
+
+    Optional<ReplicateEntity> replicate = replicateRepository.findSingleReplicate(
+        riaKey,
+        replicateNumber
+    );
+
+    if (replicate.isEmpty()) {
+      throw new InvalidMccKeyException();
+    }
+
+    ReplicateEntity rep = replicate.get();
+
+    rep.setContainerId(replicateFormDto.containerId());
+    rep.setContainerWeight(replicateFormDto.containerWeight());
+    rep.setFreshSeed(replicateFormDto.freshSeed());
+    rep.setContainerAndDryWeight(replicateFormDto.containerAndDryWeight());
+    rep.setDryWeight(replicateFormDto.dryWeight());
+    rep.setReplicateAccInd(replicateFormDto.replicateAccInd());
+    rep.setReplicateComment(replicateFormDto.replicateComment());
+    rep.setOverrideReason(replicateFormDto.overrideReason());
+
+    ReplicateEntity savedReplicate = replicateRepository.save(rep);
+
+    SparLog.info("Replicate riaKey: {} and replicateNumber: {} updated", riaKey, replicateNumber);
+
+    return savedReplicate;
+  }
+
+  /**
+   * Update activity table.
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   * @param activityFormDto an object with the values to be updated
+   */
+  @Transactional
+  public ActivityEntity updateActivityField(
+      @NonNull BigDecimal riaKey,
+      @NonNull ActivityFormDto activityFormDto
+  ) {
+    SparLog.info("Updating a activity with the riaKey: {}", riaKey);
+
+    Optional<ActivityEntity> activityOpt = activityRepository.findById(riaKey);
+
+    if (activityOpt.isEmpty()) {
+      throw new InvalidMccKeyException();
+    }
+
+    ActivityEntity activity = activityOpt.get();
+
+    activity.setActualBeginDateTime(activityFormDto.actualBeginDateTime());
+    activity.setActualEndDateTime(activityFormDto.actualEndDateTime());
+    activity.setTestCategoryCode(activityFormDto.testCategoryCode());
+    activity.setRiaComment(activityFormDto.riaComment());
+
+    ActivityEntity savedActivity = activityRepository.save(activity);
+
+    SparLog.info("Activity riaKey: {} updated", riaKey);
+
+    return savedActivity;
+  }
+
+  /**
    * Deletes a single replicate.
    *
    * @param riaKey the identifier key for all table related to MCC
    * @param replicateNumber the replicate number to be deleted
    */
+  @Transactional
   public void deleteMccReplicate(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber
