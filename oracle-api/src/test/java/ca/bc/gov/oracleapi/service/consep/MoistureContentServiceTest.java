@@ -11,7 +11,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
+import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
@@ -132,6 +134,142 @@ class MoistureContentServiceTest {
   }
 
   @Test
+  @DisplayName("Update activity should succeed")
+  void updateActivity_shouldSucceed() {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+
+    ActivityFormDto activityDto = new ActivityFormDto(
+        "STD",
+        "Updated comment",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-09-01T00:00:00")
+    );
+
+    ActivityEntity existingEntity = new ActivityEntity();
+    existingEntity.setRiaKey(riaKey);
+    existingEntity.setActualBeginDateTime(LocalDateTime.parse("2013-10-01T00:00:00"));
+    existingEntity.setActualEndDateTime(LocalDateTime.parse("2013-11-01T00:00:00"));
+    existingEntity.setTestCategoryCode("OLD");
+    existingEntity.setRiaComment("Old comment");
+
+    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(existingEntity));
+    when(activityRepository.save(any(ActivityEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ActivityEntity result = moistureContentService.updateActivityField(riaKey, activityDto);
+
+    assertEquals(activityDto.actualBeginDateTime(), result.getActualBeginDateTime());
+    assertEquals(activityDto.actualEndDateTime(), result.getActualEndDateTime());
+    assertEquals(activityDto.testCategoryCode(), result.getTestCategoryCode());
+    assertEquals(activityDto.riaComment(), result.getRiaComment());
+
+    verify(activityRepository, times(1)).findById(riaKey);
+    verify(activityRepository, times(1)).save(any(ActivityEntity.class));
+  }
+
+  @Test
+  @DisplayName("Update activity should throw exception when not found")
+  void updateActivity_shouldThrowWhenNotFound() {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    ActivityFormDto activityDto = new ActivityFormDto(
+        "STD",
+        "Some comment",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-09-01T00:00:00")
+    );
+
+    when(activityRepository.findById(riaKey)).thenReturn(Optional.empty());
+
+    assertThrows(InvalidMccKeyException.class, () -> {
+      moistureContentService.updateActivityField(riaKey, activityDto);
+    });
+
+    verify(activityRepository, times(1)).findById(riaKey);
+    verify(activityRepository, never()).save(any(ActivityEntity.class));
+  }
+
+  @Test
+  @DisplayName("Update replicate should succeed")
+  void updateReplicate_shouldSucceed() {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    Integer replicateNumber = 1;
+    ReplicateId id = new ReplicateId(riaKey, replicateNumber);
+
+    ReplicateFormDto replicateDto = new ReplicateFormDto(
+        "1234",
+        new BigDecimal(5),
+        new BigDecimal(5),
+        new BigDecimal(5),
+        new BigDecimal(5),
+        0,
+        "New comment",
+        "Overrided"
+    );
+
+    ReplicateEntity existingEntity = new ReplicateEntity();
+
+    existingEntity.setId(id);
+    existingEntity.setContainerId("5678");
+    existingEntity.setContainerWeight(new BigDecimal(10));
+    existingEntity.setFreshSeed(new BigDecimal(10));
+    existingEntity.setContainerAndDryWeight(new BigDecimal(10));
+    existingEntity.setDryWeight(new BigDecimal(10));
+    existingEntity.setReplicateAccInd(1);
+    existingEntity.setReplicateComment("Old comment");
+    existingEntity.setOverrideReason("Not overrided yet");
+
+    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
+        .thenReturn(Optional.of(existingEntity));
+    when(replicateRepository.save(any(ReplicateEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ReplicateEntity result = moistureContentService.updateReplicateField(
+        riaKey,
+        replicateNumber,
+        replicateDto);
+
+    assertEquals(replicateDto.containerId(), result.getContainerId());
+    assertEquals(replicateDto.containerWeight(), result.getContainerWeight());
+    assertEquals(replicateDto.freshSeed(), result.getFreshSeed());
+    assertEquals(replicateDto.containerAndDryWeight(), result.getContainerAndDryWeight());
+    assertEquals(replicateDto.dryWeight(), result.getDryWeight());
+    assertEquals(replicateDto.replicateAccInd(), result.getReplicateAccInd());
+    assertEquals(replicateDto.replicateComment(), result.getReplicateComment());
+    assertEquals(replicateDto.overrideReason(), result.getOverrideReason());
+
+    verify(replicateRepository, times(1)).findSingleReplicate(riaKey, replicateNumber);
+    verify(replicateRepository, times(1)).save(any(ReplicateEntity.class));
+  }
+
+  @Test
+  @DisplayName("Update replicate should throw exception when not found")
+  void updateReplicate_shouldThrowWhenNotFound() {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    Integer replicateNumber = 1;
+
+    ReplicateFormDto replicateDto = new ReplicateFormDto(
+        "1234",
+        new BigDecimal(5),
+        new BigDecimal(5),
+        new BigDecimal(5),
+        new BigDecimal(5),
+        0,
+        "New comment",
+        "Overrided"
+    );
+
+    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
+        .thenReturn(Optional.empty());
+
+    assertThrows(InvalidMccKeyException.class, () -> {
+      moistureContentService.updateReplicateField(riaKey, replicateNumber, replicateDto);
+    });
+
+    verify(replicateRepository, times(1)).findSingleReplicate(riaKey, replicateNumber);
+    verify(replicateRepository, never()).save(any(ReplicateEntity.class));
+  }
+
+  @Test
   @DisplayName("Delete a single replicate should succeed")
   void deleteMccReplicate_shouldSucceed() {
     BigDecimal riaKey = new BigDecimal(1234567890);
@@ -142,11 +280,8 @@ class MoistureContentServiceTest {
         .thenReturn(Optional.of(mockReplicate));
 
     doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
-
-    // Execute delete
     assertDoesNotThrow(() -> moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
 
-    // Verify delete was called
     verify(replicateRepository, times(1)).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
   }
 
