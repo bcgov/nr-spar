@@ -8,7 +8,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import AuthProvider from './contexts/AuthProvider';
 
-const emotionCache = createCache({ key: 'mrt' });
+const emotionCache = createCache({ key: 'css', prepend: true });
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
