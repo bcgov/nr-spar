@@ -24,7 +24,11 @@ export default defineConfig(({ mode }: ConfigEnv) => {
           ]
         })
       },
-      react(),
+      react({
+        babel: {
+          plugins: ['@emotion']
+        }
+      }),
       istanbul({
         extension: ['.ts', '.tsx'],
         cypress: true
@@ -32,8 +36,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     ],
     build: {
       outDir: 'build',
-      sourcemap: true,
-      cssMinify: true
+      sourcemap: true
     },
     optimizeDeps: {
       include: ['@emotion/react', '@emotion/styled']

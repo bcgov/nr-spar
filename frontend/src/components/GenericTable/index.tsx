@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable camelcase */
 import React, { useEffect } from 'react';
@@ -107,6 +108,11 @@ const GenericTable = <T extends Record<string, any>>({
   });
 
   useForceEmotionStyles();
+
+  useEffect(() => {
+    console.log('MaterialReactTable loaded');
+  }, []);
+
   return <MaterialReactTable table={basicTable} />;
 };
 
