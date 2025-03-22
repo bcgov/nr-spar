@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
+import CssBaseline from '@mui/material/CssBaseline';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -18,6 +19,7 @@ root.render(
   <React.StrictMode>
     <CacheProvider value={emotionCache}>
       <AuthProvider>
+        <CssBaseline />
         <App />
       </AuthProvider>
     </CacheProvider>
