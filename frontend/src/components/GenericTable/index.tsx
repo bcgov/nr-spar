@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable camelcase */
-import React from 'react';
+import React, { useEffect } from 'react';
+import { css } from '@emotion/react';
 import {
   type MRT_ColumnDef,
   MaterialReactTable,
@@ -52,6 +54,12 @@ const GenericTable = <T extends Record<string, any>>({
 }: Props<T>) => {
   const theme = useTheme<Theme>();
 
+  const useForceEmotionStyles = () => {
+    useEffect(() => {
+      css``;
+    }, []);
+  };
+
   const basicTable = useMaterialReactTable({
     columns,
     data,
@@ -98,6 +106,7 @@ const GenericTable = <T extends Record<string, any>>({
     }
   });
 
+  useForceEmotionStyles();
   return <MaterialReactTable table={basicTable} />;
 };
 

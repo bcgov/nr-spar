@@ -35,6 +35,9 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       sourcemap: true,
       cssMinify: true
     },
+    optimizeDeps: {
+      include: ['@emotion/react', '@emotion/styled']
+    },
     server: {
       port: 3000,
       watch: {

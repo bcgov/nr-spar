@@ -11,6 +11,8 @@ import {
 import {
   CheckmarkFilled
 } from '@carbon/icons-react';
+import { Button } from '@mui/material';
+
 import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
@@ -44,6 +46,7 @@ const MoistureContent = () => {
         <>
           <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
           <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
+          <Button variant="contained">Test</Button>
         </>
       </Row>
       <Row className="consep-moisture-content-activity-summary">
