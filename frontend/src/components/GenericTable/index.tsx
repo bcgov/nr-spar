@@ -1,11 +1,16 @@
+/* eslint-disable no-console */
+/* eslint-disable no-unused-expressions */
 /* eslint-disable camelcase */
-import React from 'react';
+import React, { useEffect } from 'react';
+import { css } from '@emotion/react';
 import {
   type MRT_ColumnDef,
   MaterialReactTable,
   useMaterialReactTable
 } from 'material-react-table';
 import { type Theme, useTheme } from '@mui/material';
+
+import './style.scss';
 
 type Props<T extends Record<string, any>> = {
   columns: MRT_ColumnDef<T>[];
@@ -14,8 +19,14 @@ type Props<T extends Record<string, any>> = {
   enablePagination?: boolean;
   enableSorting?: boolean;
   enableFilters?: boolean;
+  enableHiding?: boolean;
   enableRowSelection?: boolean;
   enableRowActions?: boolean;
+  enableColumnFilters?: boolean;
+  enableGlobalFilter?: boolean;
+  enableDensityToggle?: boolean;
+  enableFullScreenToggle?: boolean;
+  enableColumnActions?: boolean;
   enableEditing?: boolean;
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
@@ -26,17 +37,29 @@ const GenericTable = <T extends Record<string, any>>({
   columns,
   data,
   isLoading = false,
-  enablePagination = true,
-  enableSorting = true,
-  enableFilters = true,
+  enablePagination = false,
+  enableHiding = false,
+  enableSorting = false,
+  enableFilters = false,
   enableRowSelection = false,
   enableRowActions = false,
+  enableColumnFilters = false,
+  enableGlobalFilter = false,
+  enableDensityToggle = false,
+  enableFullScreenToggle = false,
+  enableColumnActions = false,
   enableEditing = true,
   renderRowActions,
   onRowClick,
   initialState
 }: Props<T>) => {
   const theme = useTheme<Theme>();
+
+  const useForceEmotionStyles = () => {
+    useEffect(() => {
+      css``;
+    }, []);
+  };
 
   const basicTable = useMaterialReactTable({
     columns,
@@ -60,18 +83,20 @@ const GenericTable = <T extends Record<string, any>>({
       onClick: () => onRowClick?.(row.original),
       sx: {
         cursor: onRowClick ? 'pointer' : 'default',
-        '&:hover': {
-          backgroundColor: onRowClick
-            ? theme.palette.action.hover
-            : 'inherit'
-        }
+        backgroundColor: row.index % 2 === 0 ? '#F3F3F5' : '#ffffff'
       }
     }),
     enablePagination,
     enableSorting,
-    enableColumnFilters: enableFilters,
+    enableFilters,
+    enableHiding,
+    enableColumnFilters,
     enableRowSelection,
     enableRowActions,
+    enableGlobalFilter,
+    enableDensityToggle,
+    enableFullScreenToggle,
+    enableColumnActions,
     enableEditing,
     editDisplayMode: 'cell',
     renderRowActions: renderRowActions
@@ -81,6 +106,12 @@ const GenericTable = <T extends Record<string, any>>({
       noRecordsToDisplay: 'No data found'
     }
   });
+
+  useForceEmotionStyles();
+
+  useEffect(() => {
+    console.log('MaterialReactTable loaded');
+  }, []);
 
   return <MaterialReactTable table={basicTable} />;
 };

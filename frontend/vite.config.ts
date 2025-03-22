@@ -11,22 +11,24 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       {
         name: 'build-html',
         apply: 'build',
-        transformIndexHtml: (html) => {
-          return {
-            html,
-            tags: [
-              {
-                tag: 'script',
-                attrs: {
-                  src: '/env.js'
-                },
-                injectTo: 'head'
-              }
-            ]
-          }
-        }
+        transformIndexHtml: (html) => ({
+          html,
+          tags: [
+            {
+              tag: 'script',
+              attrs: {
+                src: '/env.js'
+              },
+              injectTo: 'head'
+            }
+          ]
+        })
       },
-      react(),
+      react({
+        babel: {
+          plugins: ['@emotion']
+        }
+      }),
       istanbul({
         extension: ['.ts', '.tsx'],
         cypress: true
@@ -36,6 +38,9 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       outDir: 'build',
       sourcemap: true
     },
+    optimizeDeps: {
+      include: ['@emotion/react', '@emotion/styled']
+    },
     server: {
       port: 3000,
       watch: {
@@ -43,7 +48,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       }
     },
     preview: {
-        port: 3000
+      port: 3000
     },
     resolve: {
       alias: {

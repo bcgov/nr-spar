@@ -11,12 +11,15 @@ import {
 import {
   CheckmarkFilled
 } from '@carbon/icons-react';
+import { Button } from '@mui/material';
+
 import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
 import ButtonGroup from '../ButtonGroup';
 import StatusTag from '../../../../components/StatusTag';
+import ActivityResult from '../ActivityResult';
 
 import {
   DATE_FORMAT, fieldsConfig
@@ -43,10 +46,14 @@ const MoistureContent = () => {
         <>
           <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
           <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
+          <Button variant="contained">Test</Button>
         </>
       </Row>
       <Row className="consep-moisture-content-activity-summary">
         <ActivitySummary item={fieldsConfig.activityItem} isFetching={false} />
+      </Row>
+      <Row className="consep-moisture-content-activity-result">
+        <ActivityResult />
       </Row>
       <Row className="consep-moisture-content-cone-form">
         <Column className="consep-section-title">
