@@ -1,10 +1,14 @@
 import './init';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import AuthProvider from './contexts/AuthProvider';
+
+const emotionCache = createCache({ key: 'mrt' });
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -12,9 +16,12 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <CacheProvider value={emotionCache}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </CacheProvider>
+
   </React.StrictMode>
 );
 

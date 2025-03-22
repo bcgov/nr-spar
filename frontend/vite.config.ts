@@ -11,20 +11,18 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       {
         name: 'build-html',
         apply: 'build',
-        transformIndexHtml: (html) => {
-          return {
-            html,
-            tags: [
-              {
-                tag: 'script',
-                attrs: {
-                  src: '/env.js'
-                },
-                injectTo: 'head'
-              }
-            ]
-          }
-        }
+        transformIndexHtml: (html) => ({
+          html,
+          tags: [
+            {
+              tag: 'script',
+              attrs: {
+                src: '/env.js'
+              },
+              injectTo: 'head'
+            }
+          ]
+        })
       },
       react(),
       istanbul({
@@ -34,7 +32,8 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     ],
     build: {
       outDir: 'build',
-      sourcemap: true
+      sourcemap: true,
+      cssMinify: true
     },
     server: {
       port: 3000,
@@ -43,7 +42,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       }
     },
     preview: {
-        port: 3000
+      port: 3000
     },
     resolve: {
       alias: {
