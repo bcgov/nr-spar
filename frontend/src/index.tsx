@@ -1,10 +1,13 @@
 import './init';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { StyleProvider } from '@ant-design/cssinjs';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import AuthProvider from './contexts/AuthProvider';
+
+import 'antd/dist/reset.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -12,9 +15,12 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <StyleProvider hashPriority="high">
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </StyleProvider>
+    
   </React.StrictMode>
 );
 

@@ -7,6 +7,7 @@ import istanbul from 'vite-plugin-istanbul';
 export default defineConfig(({ mode }: ConfigEnv) => {
   const config: UserConfig = {
     define: {} as any,
+    base: '/build/',
     plugins: [
       {
         name: 'build-html',
@@ -35,6 +36,13 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     build: {
       outDir: 'build',
       sourcemap: true
+    },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `@import "antd/dist/reset.css";`
+        }
+      }
     },
     server: {
       port: 3000,
