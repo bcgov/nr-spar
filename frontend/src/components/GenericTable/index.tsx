@@ -5,9 +5,6 @@ import {
   MaterialReactTable,
   useMaterialReactTable
 } from 'material-react-table';
-import { type Theme, useTheme } from '@mui/material';
-
-import './style.scss';
 
 type Props<T extends Record<string, any>> = {
   columns: MRT_ColumnDef<T>[];
@@ -30,6 +27,8 @@ type Props<T extends Record<string, any>> = {
   initialState?: any;
 };
 
+const COLOR_GREY_20 = '#DFDFE1';
+
 const GenericTable = <T extends Record<string, any>>({
   columns,
   data,
@@ -50,8 +49,6 @@ const GenericTable = <T extends Record<string, any>>({
   onRowClick,
   initialState
 }: Props<T>) => {
-  const theme = useTheme<Theme>();
-
   const basicTable = useMaterialReactTable({
     columns,
     data,
@@ -65,9 +62,13 @@ const GenericTable = <T extends Record<string, any>>({
     },
     muiTablePaperProps: {
       sx: {
-        borderRadius: '8px',
         overflow: 'hidden',
-        boxShadow: theme.shadows[3]
+        borderRadius: 0,
+        boxShadow: 'none',
+        width: '100%',
+        '& > .MuiBox-root': {
+          display: 'none',
+        },
       }
     },
     muiTableBodyRowProps: ({ row }) => ({
@@ -77,6 +78,19 @@ const GenericTable = <T extends Record<string, any>>({
         backgroundColor: row.index % 2 === 0 ? '#F3F3F5' : '#ffffff'
       }
     }),
+    muiTableBodyCellProps: {
+      sx: {
+        '&:hover': {
+          outline: 'none',
+          backgroundColor: COLOR_GREY_20,
+        },
+      },
+    },
+    muiTableHeadRowProps: {
+      sx: {
+        backgroundColor: COLOR_GREY_20,
+      },
+    },
     enablePagination,
     enableSorting,
     enableFilters,
