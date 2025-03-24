@@ -67,8 +67,8 @@ const GenericTable = <T extends Record<string, any>>({
         boxShadow: 'none',
         width: '100%',
         '& > .MuiBox-root': {
-          display: 'none',
-        },
+          display: 'none'
+        }
       }
     },
     muiTableBodyRowProps: ({ row }) => ({
@@ -82,14 +82,14 @@ const GenericTable = <T extends Record<string, any>>({
       sx: {
         '&:hover': {
           outline: 'none',
-          backgroundColor: COLOR_GREY_20,
-        },
-      },
+          backgroundColor: COLOR_GREY_20
+        }
+      }
     },
     muiTableHeadRowProps: {
       sx: {
-        backgroundColor: COLOR_GREY_20,
-      },
+        backgroundColor: COLOR_GREY_20
+      }
     },
     enablePagination,
     enableSorting,
