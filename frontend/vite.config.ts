@@ -7,7 +7,6 @@ import istanbul from 'vite-plugin-istanbul';
 export default defineConfig(({ mode }: ConfigEnv) => {
   const config: UserConfig = {
     define: {} as any,
-    base: '/build/',
     plugins: [
       {
         name: 'build-html',
