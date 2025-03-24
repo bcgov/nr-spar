@@ -26,7 +26,11 @@ export default defineConfig(({ mode }: ConfigEnv) => {
           }
         }
       },
-      react(),
+      react({
+        babel: {
+          plugins: ['@emotion']
+        }
+      }),
       istanbul({
         extension: ['.ts', '.tsx'],
         cypress: true

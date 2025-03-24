@@ -2,6 +2,8 @@ import './init';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { StyleProvider } from '@ant-design/cssinjs';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -9,18 +11,21 @@ import AuthProvider from './contexts/AuthProvider';
 
 import 'antd/dist/reset.css';
 
+const cache = createCache({ key: 'css', prepend: true });
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 root.render(
   <React.StrictMode>
-    <StyleProvider hashPriority="high">
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </StyleProvider>
-    
+    <CacheProvider value={cache}>
+      <StyleProvider hashPriority="high">
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </StyleProvider>
+    </CacheProvider>
   </React.StrictMode>
 );
 
