@@ -49,17 +49,20 @@ export const columns: MRT_ColumnDef<DataType>[] = [
     Cell: ({ row }: { row: { original: DataType } }) => <Checkbox checked={row.original.acc} />,
     size: 40,
     muiTableHeadCellProps: { align: 'center' },
-    muiTableBodyCellProps: { align: 'center' }
+    muiTableBodyCellProps: { align: 'center' },
+    enableEditing: false
   },
   {
     accessorKey: 'comments',
     header: 'Comments',
-    size: 200
+    size: 300
   },
   {
     accessorKey: 'actions',
     header: '',
     Cell: () => <Icons.TrashCan size={15} />,
+    enableEditing: false,
+    size: 40,
     ...alignRight
   }
 ];

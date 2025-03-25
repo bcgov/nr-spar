@@ -43,7 +43,7 @@ const ActivityResult = () => {
         </Column>
       </Row>
       <Row>
-        <GenericTable columns={columns} data={data} />
+        <GenericTable columns={columns} data={data} initialState={{ density: 'compact' }} />
       </Row>
     </FlexGrid>
   );

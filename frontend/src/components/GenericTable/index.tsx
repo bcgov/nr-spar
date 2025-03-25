@@ -28,6 +28,8 @@ type Props<T extends Record<string, any>> = {
 };
 
 const COLOR_GREY_20 = '#DFDFE1';
+const WHITE = '#ffffff';
+const COLOR_GREY_10 = '#F3F3F5';
 
 const GenericTable = <T extends Record<string, any>>({
   columns,
@@ -75,7 +77,7 @@ const GenericTable = <T extends Record<string, any>>({
       onClick: () => onRowClick?.(row.original),
       sx: {
         cursor: onRowClick ? 'pointer' : 'default',
-        backgroundColor: row.index % 2 === 0 ? '#F3F3F5' : '#ffffff'
+        backgroundColor: row.index % 2 === 0 ? COLOR_GREY_10 : WHITE
       }
     }),
     muiTableBodyCellProps: {
