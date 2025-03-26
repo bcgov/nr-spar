@@ -20,7 +20,7 @@
 .activity-result-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 3rem;
+  gap: 2rem;
   margin-bottom: 0.5rem;
 }
 
@@ -31,4 +31,6 @@
   align-items: center;
   gap: 0.2rem;
   cursor: pointer;
+  min-width: auto;
+  white-space: nowrap
 }

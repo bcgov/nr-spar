@@ -22,6 +22,7 @@ type Props<T extends Record<string, any>> = {
   enableFullScreenToggle?: boolean;
   enableColumnActions?: boolean;
   enableEditing?: boolean;
+  isCompacted?: boolean;
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
   initialState?: any;
@@ -47,6 +48,7 @@ const GenericTable = <T extends Record<string, any>>({
   enableFullScreenToggle = false,
   enableColumnActions = false,
   enableEditing = true,
+  isCompacted = false,
   renderRowActions,
   onRowClick,
   initialState
@@ -82,6 +84,10 @@ const GenericTable = <T extends Record<string, any>>({
     }),
     muiTableBodyCellProps: {
       sx: {
+        ...isCompacted && {
+          paddingTop: 0,
+          paddingBottom: 0
+        },
         '&:hover': {
           outline: 'none',
           backgroundColor: COLOR_GREY_20
