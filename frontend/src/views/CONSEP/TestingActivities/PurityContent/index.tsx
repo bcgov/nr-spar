@@ -119,6 +119,16 @@ const PurityContent = () => {
           </Button>
         </Column>
       </Row>
+      {impurities[replicate].length >= 10
+      // Show error message if the limit is reached
+      && (
+      <InlineNotification
+        kind="error"
+        title="Error"
+        role="alert"
+        subtitle="You can only add up to 10 impurities for each replicate."
+      />
+      )}
       {/* Render dropdowns for the specific replicate */}
       {
         impurityDropdown(replicate)
