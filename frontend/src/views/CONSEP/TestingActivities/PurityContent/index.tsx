@@ -33,17 +33,26 @@ import {
 import './styles.scss';
 
 const PurityContent = () => {
-  const [impurities, setImpurities] = useState<ImpurityType[]>([]);
+  const [impurities, setImpurities] = useState<{ [key: number]: ImpurityType[] }>({
+    1: [], // Impurities for replicate 1
+    2: [] // Impurities for replicate 2
+  });
 
-  const addImpurity = () => {
-    setImpurities((prev) => [
+  const addImpurity = (replicate: number) => {
+    setImpurities((prev) => ({
       ...prev,
-      { id: crypto.randomUUID(), value: '' } // Unique ID for each dropdown
-    ]);
+      [replicate]: [
+        ...prev[replicate],
+        { id: crypto.randomUUID(), value: '' } // Unique ID for each dropdown
+      ]
+    }));
   };
 
-  const removeImpurity = (id: string) => {
-    setImpurities((prev) => prev.filter((item) => item.id !== id));
+  const removeImpurity = (replicate: number, id: string) => {
+    setImpurities((prev) => ({
+      ...prev,
+      [replicate]: prev[replicate].filter((item) => item.id !== id)
+    }));
   };
 
   const createBreadcrumbItems = () => {
@@ -54,19 +63,17 @@ const PurityContent = () => {
     return crumbsList;
   };
 
-  // Function to create the impurity dropdowns dynamically
-  // Each impurity will have a unique ID and can be removed individually
-  const impurityDropdown = () => impurities.map((impurity) => (
+  const impurityDropdown = (replicate: number) => impurities[replicate].map((impurity) => (
     <Row key={impurity.id} className="consep-impurity-content">
       <Column sm={2} md={2} lg={5} xlg={5}>
         <ComboBox
           className="impurity-combobox"
-          id={`impurity-${impurity.id}`}
+          id={`impurity-${replicate}-${impurity.id}`}
           name={fieldsConfig.impuritySection.secondaryfieldName}
           items={fieldsConfig.impuritySection.options}
           placeholder={fieldsConfig.impuritySection.placeholder}
           titleText={fieldsConfig.impuritySection.secondaryfieldName}
-          onChange={() => { }}
+          onChange={() => {}}
         />
       </Column>
       <Column className="consep-impurity-content-remove" sm={2}>
@@ -74,7 +81,7 @@ const PurityContent = () => {
           kind="danger--tertiary"
           size="sm"
           hasIconOnly
-          onClick={() => removeImpurity(impurity.id)}
+          onClick={() => removeImpurity(replicate, impurity.id)}
           renderIcon={TrashCan}
           iconDescription="Remove impurity"
         />
@@ -84,18 +91,6 @@ const PurityContent = () => {
 
   const replicateSection = (replicate: number) => (
     <>
-      <Row className="consep-impurity-button">
-        <Column sm={4} md={4} lg={10}>
-          <Button
-            size="md"
-            kind="tertiary"
-            renderIcon={Add}
-            onClick={() => addImpurity()}
-          >
-            {fieldsConfig.impuritySection.buttonText}
-          </Button>
-        </Column>
-      </Row>
       <Row className="consep-purity-content-cone-form">
         <Column className="consep-section-title">
           <h4>
@@ -105,8 +100,21 @@ const PurityContent = () => {
           </h4>
         </Column>
       </Row>
+      <Row className="consep-impurity-button">
+        <Column sm={4} md={4} lg={10}>
+          <Button
+            size="md"
+            kind="tertiary"
+            renderIcon={Add}
+            onClick={() => addImpurity(replicate)} // Add impurity for the specific replicate
+          >
+            {fieldsConfig.impuritySection.buttonText}
+          </Button>
+        </Column>
+      </Row>
+      {/* Render dropdowns for the specific replicate */}
       {
-        impurityDropdown()
+        impurityDropdown(replicate)
       }
     </>
   );
