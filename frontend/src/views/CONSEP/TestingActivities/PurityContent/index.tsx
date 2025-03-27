@@ -7,7 +7,8 @@ import {
   DatePickerInput,
   TextArea,
   ComboBox,
-  Button
+  Button,
+  InlineNotification
 } from '@carbon/react';
 import {
   CheckmarkFilled,
@@ -98,13 +99,13 @@ const PurityContent = () => {
 
   const replicateSection = (replicate: number) => (
     <>
-      <Row className="consep-purity-content-cone-form">
+      <Row className="consep-purity-content-replicate">
         <Column className="consep-section-title">
-          <h4>
+          <h5>
             {replicate === 1
               ? fieldsConfig.impuritySection.firstSubtitle
               : fieldsConfig.impuritySection.secondSubtitle}
-          </h4>
+          </h5>
         </Column>
       </Row>
       <Row className="consep-impurity-button">
@@ -184,7 +185,7 @@ const PurityContent = () => {
       </Row>
       <Row className="consep-purity-content-cone-form">
         <Column className="consep-section-title">
-          <h3>{fieldsConfig.puritySection.title}</h3>
+          <h4>{fieldsConfig.puritySection.title}</h4>
         </Column>
       </Row>
       <Row className="consep-purity-content-date-picker">
@@ -243,7 +244,7 @@ const PurityContent = () => {
       </Row>
       <Row className="consep-impurity-content-cone-form">
         <Column className="consep-section-title">
-          <h3>{fieldsConfig.impuritySection.title}</h3>
+          <h4>{fieldsConfig.impuritySection.title}</h4>
         </Column>
       </Row>
       {
