@@ -54,6 +54,8 @@ const PurityContent = () => {
     return crumbsList;
   };
 
+  // Function to create the impurity dropdowns dynamically
+  // Each impurity will have a unique ID and can be removed individually
   const impurityDropdown = () => impurities.map((impurity) => (
     <Row key={impurity.id} className="consep-impurity-content">
       <Column sm={2} md={2} lg={5} xlg={5}>
@@ -79,6 +81,35 @@ const PurityContent = () => {
       </Column>
     </Row>
   ));
+
+  const replicateSection = (replicate: number) => (
+    <>
+      <Row className="consep-impurity-button">
+        <Column sm={4} md={4} lg={10}>
+          <Button
+            size="md"
+            kind="tertiary"
+            renderIcon={Add}
+            onClick={() => addImpurity()}
+          >
+            {fieldsConfig.impuritySection.buttonText}
+          </Button>
+        </Column>
+      </Row>
+      <Row className="consep-purity-content-cone-form">
+        <Column className="consep-section-title">
+          <h4>
+            {replicate === 1
+              ? fieldsConfig.impuritySection.firstSubtitle
+              : fieldsConfig.impuritySection.secondSubtitle}
+          </h4>
+        </Column>
+      </Row>
+      {
+        impurityDropdown()
+      }
+    </>
+  );
 
   const buttons = [
     {
@@ -128,7 +159,7 @@ const PurityContent = () => {
       </Row>
       <Row className="consep-purity-content-cone-form">
         <Column className="consep-section-title">
-          <h4>{fieldsConfig.puritySection.title}</h4>
+          <h3>{fieldsConfig.puritySection.title}</h3>
         </Column>
       </Row>
       <Row className="consep-purity-content-date-picker">
@@ -187,23 +218,14 @@ const PurityContent = () => {
       </Row>
       <Row className="consep-impurity-content-cone-form">
         <Column className="consep-section-title">
-          <h4>{fieldsConfig.impuritySection.title}</h4>
-        </Column>
-      </Row>
-      <Row className="consep-impurity-button">
-        <Column sm={4} md={4} lg={10}>
-          <Button
-            size="md"
-            kind="tertiary"
-            renderIcon={Add}
-            onClick={() => addImpurity()}
-          >
-            {fieldsConfig.impuritySection.buttonText}
-          </Button>
+          <h3>{fieldsConfig.impuritySection.title}</h3>
         </Column>
       </Row>
       {
-        impurityDropdown()
+        replicateSection(1)
+      }
+      {
+        replicateSection(2)
       }
       <Row className="consep-purity-content-comments">
         <Column sm={4} md={4} lg={10} xlg={10}>
