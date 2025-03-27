@@ -117,28 +117,28 @@ const PurityContent = () => {
       text: 'Calculate average',
       kind: 'primary',
       size: 'lg',
-      icon: { Calculator }
+      icon: Calculator
     },
     {
       id: 'complete-test',
       text: 'Complete test',
       kind: 'tertiary',
       size: 'lg',
-      icon: { Checkmark }
+      icon: Checkmark
     },
     {
       id: 'accept-test',
       text: 'Accept test',
       kind: 'tertiary',
       size: 'lg',
-      icon: { CheckmarkOutline }
+      icon: CheckmarkOutline
     },
     {
       id: 'test-history',
       text: 'Test history',
       kind: 'tertiary',
       size: 'lg',
-      icon: { Time }
+      icon: Time
     }
   ];
 
