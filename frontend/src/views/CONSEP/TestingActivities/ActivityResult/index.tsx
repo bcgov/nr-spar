@@ -26,7 +26,7 @@ const ActivityResult = () => {
   ];
 
   return (
-    <FlexGrid className="activity-result">
+    <FlexGrid className="activity-result-container">
       <Row>
         <h3 className="activity-result-title">{TITLE}</h3>
       </Row>
