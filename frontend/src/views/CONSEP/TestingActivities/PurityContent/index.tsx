@@ -39,13 +39,20 @@ const PurityContent = () => {
   });
 
   const addImpurity = (replicate: number) => {
-    setImpurities((prev) => ({
-      ...prev,
-      [replicate]: [
-        ...prev[replicate],
-        { id: crypto.randomUUID(), value: '' } // Unique ID for each dropdown
-      ]
-    }));
+    setImpurities((prev) => {
+      // Check if the replicate already has 10 dropdowns
+      if (prev[replicate].length >= 10) {
+        return prev; // Return the current state without changes
+      }
+      // Add a new impurity if the limit is not reached
+      return {
+        ...prev,
+        [replicate]: [
+          ...prev[replicate],
+          { id: crypto.randomUUID(), value: '' } // Unique ID for each dropdown
+        ]
+      };
+    });
   };
 
   const removeImpurity = (replicate: number, id: string) => {
