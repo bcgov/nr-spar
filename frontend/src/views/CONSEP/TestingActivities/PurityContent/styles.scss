@@ -22,12 +22,12 @@
   }
 }
 
-.consep-purity-content-cone-form > div {
-  padding: 0rem;
-}
-
 .consep-purity-content-cone-form {
   margin-bottom: 2.5rem;
+}
+
+.consep-section-title {
+  padding: 0rem;
 }
 
 .consep-purity-content-date-picker > div {
@@ -72,10 +72,14 @@
   margin-bottom: 2rem;
 }
 
-.consep-purity-content-comments > div {
+.consep-impurity-content-remove {
+  align-content: flex-end;
+}
+
+.consep-impurity-button > div {
   padding: 0rem;
 }
 
-.consep-impurity-content-remove {
-  align-content: flex-end;
+.consep-purity-content-comments > div {
+  padding: 0rem;
 }
