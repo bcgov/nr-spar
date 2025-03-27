@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   FlexGrid,
   Row,
@@ -6,19 +6,23 @@ import {
   DatePicker,
   DatePickerInput,
   TextArea,
-  ComboBox
+  ComboBox,
+  Button
 } from '@carbon/react';
 import {
   CheckmarkFilled,
   Calculator,
   Checkmark,
   CheckmarkOutline,
-  Time
+  Time,
+  Add,
+  TrashCan
 } from '@carbon/icons-react';
 import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
+import { ImpurityType } from './definations';
 import ButtonGroup from '../ButtonGroup';
 import StatusTag from '../../../../components/StatusTag';
 
@@ -29,6 +33,19 @@ import {
 import './styles.scss';
 
 const PurityContent = () => {
+  const [impurities, setImpurities] = useState<ImpurityType[]>([]);
+
+  const addImpurity = () => {
+    setImpurities((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), value: '' } // Unique ID for each dropdown
+    ]);
+  };
+
+  const removeImpurity = (id: string) => {
+    setImpurities((prev) => prev.filter((item) => item.id !== id));
+  };
+
   const createBreadcrumbItems = () => {
     const crumbsList = [];
     crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
@@ -36,6 +53,32 @@ const PurityContent = () => {
     crumbsList.push({ name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST });
     return crumbsList;
   };
+
+  const impurityDropdown = () => impurities.map((impurity) => (
+    <Row key={impurity.id} className="consep-impurity-content">
+      <Column sm={2} md={2} lg={5} xlg={5}>
+        <ComboBox
+          className="impurity-combobox"
+          id={`impurity-${impurity.id}`}
+          name={fieldsConfig.impuritySection.secondaryfieldName}
+          items={fieldsConfig.impuritySection.options}
+          placeholder={fieldsConfig.impuritySection.placeholder}
+          titleText={fieldsConfig.impuritySection.secondaryfieldName}
+          onChange={() => { }}
+        />
+      </Column>
+      <Column className="consep-impurity-content-remove" sm={2}>
+        <Button
+          kind="danger--tertiary"
+          size="sm"
+          hasIconOnly
+          onClick={() => removeImpurity(impurity.id)}
+          renderIcon={TrashCan}
+          iconDescription="Remove impurity"
+        />
+      </Column>
+    </Row>
+  ));
 
   const buttons = [
     {
@@ -142,6 +185,26 @@ const PurityContent = () => {
           />
         </Column>
       </Row>
+      <Row className="consep-impurity-content-cone-form">
+        <Column className="consep-section-title">
+          <h4>{fieldsConfig.impuritySection.title}</h4>
+        </Column>
+      </Row>
+      <Row className="consep-impurity-button">
+        <Column sm={4} md={4} lg={10}>
+          <Button
+            size="md"
+            kind="tertiary"
+            renderIcon={Add}
+            onClick={() => addImpurity()}
+          >
+            {fieldsConfig.impuritySection.buttonText}
+          </Button>
+        </Column>
+      </Row>
+      {
+        impurityDropdown()
+      }
       <Row className="consep-purity-content-comments">
         <Column sm={4} md={4} lg={10} xlg={10}>
           <TextArea
@@ -153,11 +216,6 @@ const PurityContent = () => {
             maxCount={500}
             enableCounter
           />
-        </Column>
-      </Row>
-      <Row className="consep-purity-content-cone-form">
-        <Column className="consep-section-title">
-          <h4>{fieldsConfig.impuritySection.title}</h4>
         </Column>
       </Row>
       <ButtonGroup buttons={buttons} />
