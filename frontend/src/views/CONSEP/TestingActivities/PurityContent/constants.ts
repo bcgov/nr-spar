@@ -9,7 +9,8 @@ export const fieldsConfig = {
   },
   impuritySection: {
     title: 'Impurities',
-    subtitle: 'Replicate 1',
+    firstSubtitle: 'Replicate 1',
+    secondSubtitle: 'Replicate 1',
     buttonText: 'Add Impurities',
     primaryfieldName: 'Rank',
     secondaryfieldName: 'Impurity type',
