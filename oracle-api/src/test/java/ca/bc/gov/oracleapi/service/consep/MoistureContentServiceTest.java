@@ -323,8 +323,8 @@ class MoistureContentServiceTest {
     Integer replicateNumber = 1;
     ReplicateEntity mockReplicate = new ReplicateEntity();
 
-    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
-        .thenReturn(Optional.of(mockReplicate));
+    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber)).thenReturn(
+        Optional.of(mockReplicate));
 
     doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
 
@@ -341,11 +341,11 @@ class MoistureContentServiceTest {
     BigDecimal riaKey = new BigDecimal(1234567890);
     Integer replicateNumber = 1;
 
-    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
-        .thenReturn(Optional.empty());
+    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber)).thenReturn(
+        Optional.empty());
 
-    assertThrows(InvalidMccKeyException.class, () ->
-        moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
+    assertThrows(InvalidMccKeyException.class,
+        () -> moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
 
     verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
   }
@@ -359,18 +359,16 @@ class MoistureContentServiceTest {
 
     // Generate mock replicate list
     List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
-    List<ReplicateEntity> replicates = replicateIds.stream()
-        .map(id -> {
-          ReplicateEntity replicate = new ReplicateEntity();
-          replicate.setId(new ReplicateId(riaKey, id));
-          return replicate;
-        })
-        .collect(Collectors.toList());
+    List<ReplicateEntity> replicates = replicateIds.stream().map(id -> {
+      ReplicateEntity replicate = new ReplicateEntity();
+      replicate.setId(new ReplicateId(riaKey, id));
+      return replicate;
+    }).collect(Collectors.toList());
 
     when(activityRepository.findById(riaKey)).thenReturn(Optional.of(activityMock));
     when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultMock));
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
-        .thenReturn(replicates);
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds)).thenReturn(
+        replicates);
 
     doNothing().when(activityRepository).deleteById(riaKey);
     doNothing().when(testResultRepository).deleteById(riaKey);
@@ -381,8 +379,8 @@ class MoistureContentServiceTest {
 
     verify(activityRepository, times(1)).deleteById(riaKey);
     verify(testResultRepository, times(1)).deleteById(riaKey);
-    verify(replicateRepository, times(replicates.size()))
-        .deleteByRiaKeyAndReplicateNumber(eq(riaKey), any());
+    verify(replicateRepository, times(replicates.size())).deleteByRiaKeyAndReplicateNumber(
+        eq(riaKey), any());
   }
 
   @Test
@@ -393,8 +391,8 @@ class MoistureContentServiceTest {
 
     when(activityRepository.findById(riaKey)).thenReturn(Optional.empty());
     when(testResultRepository.findById(riaKey)).thenReturn(Optional.empty());
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
-        .thenReturn(List.of());
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds)).thenReturn(
+        List.of());
 
     assertThrows(InvalidMccKeyException.class, () -> moistureContentService.deleteFullMcc(riaKey));
 

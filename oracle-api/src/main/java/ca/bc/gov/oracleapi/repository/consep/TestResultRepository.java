@@ -16,8 +16,9 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
   @Modifying
   @Transactional
   @Query(
-      value =
-        "UPDATE CONSEP.CNS_T_TSC_TEST_RESULT SET TEST_COMPLETE_IND = 1 WHERE RIA_SKEY = (:riaKey)",
+      value = "UPDATE CONSEP.CNS_T_TSC_TEST_RESULT "
+            + "SET TEST_COMPLETE_IND = 1 "
+            + "WHERE RIA_SKEY = (:riaKey)",
       nativeQuery = true)
   void updateTestResultStatusToCompleted(@Param("riaKey") BigDecimal riaKey);
 
@@ -25,8 +26,9 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
   @Modifying
   @Transactional
   @Query(
-      value =
-        "UPDATE CONSEP.CNS_T_TSC_TEST_RESULT SET ACCEPT_RESULT_IND = 1 WHERE RIA_SKEY = (:riaKey)",
+      value = "UPDATE CONSEP.CNS_T_TSC_TEST_RESULT "
+            + "SET ACCEPT_RESULT_IND = 1 "
+            + "WHERE RIA_SKEY = (:riaKey)",
       nativeQuery = true)
   void updateTestResultStatusToAccepted(@Param("riaKey") BigDecimal riaKey);
 }

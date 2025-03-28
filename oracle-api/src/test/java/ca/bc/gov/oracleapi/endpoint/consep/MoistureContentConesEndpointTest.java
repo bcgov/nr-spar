@@ -255,11 +255,8 @@ class MoistureContentConesEndpointTest {
     // Mock the service to do nothing when delete is called
     doNothing().when(moistureContentService).deleteFullMcc(riaKey);
 
-    mockMvc
-        .perform(delete("/api/moisture-content-cone/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}", riaKey).with(csrf().asHeader())
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
   }
 
   @Test
@@ -268,14 +265,11 @@ class MoistureContentConesEndpointTest {
     BigDecimal riaKey = new BigDecimal(1234567890);
 
     // Simulate resource not found scenario
-    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
-        .when(moistureContentService).deleteFullMcc(riaKey);
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(moistureContentService)
+        .deleteFullMcc(riaKey);
 
-    mockMvc
-        .perform(delete("/api/moisture-content-cone/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}", riaKey).with(csrf().asHeader())
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -287,12 +281,8 @@ class MoistureContentConesEndpointTest {
     // Mock service behavior
     doNothing().when(moistureContentService).deleteMccReplicate(riaKey, replicateNumber);
 
-    mockMvc
-        .perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}",
-          riaKey,
-          replicateNumber)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}", riaKey,
+            replicateNumber).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -303,15 +293,11 @@ class MoistureContentConesEndpointTest {
     Integer replicateNumber = 1;
 
     // Simulate resource not found scenario
-    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
-        .when(moistureContentService).deleteMccReplicate(riaKey, replicateNumber);
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(moistureContentService)
+        .deleteMccReplicate(riaKey, replicateNumber);
 
-    mockMvc
-        .perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}",
-          riaKey,
-          replicateNumber)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}", riaKey,
+            replicateNumber).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 }

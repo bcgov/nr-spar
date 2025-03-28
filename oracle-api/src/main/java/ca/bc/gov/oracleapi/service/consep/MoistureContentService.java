@@ -36,62 +36,43 @@ public class MoistureContentService {
 
   // The maximum number of replicates is 8 and the entries are sequencial,
   // so we can use a fixed list to fetch the data for the replicates.
-  private final List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
-                                            .boxed()
-                                            .collect(Collectors.toList());
+  private final List<Integer> replicateIds =
+      IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
 
 
   /**
    * Get information for moisture cone content.
    */
-  public Optional<MoistureContentConesDto> getMoistureConeContentData(
-      BigDecimal riaKey
-  ) {
+  public Optional<MoistureContentConesDto> getMoistureConeContentData(BigDecimal riaKey) {
     SparLog.info("Begin to query necessary tables for moisture cone content");
 
     Optional<ActivityEntity> activityData = activityRepository.findById(riaKey);
 
-    Optional<TestResultEntity> testResultData = testResultRepository.findById(
-        riaKey
-    );
+    Optional<TestResultEntity> testResultData = testResultRepository.findById(riaKey);
 
-    List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
-        riaKey,
-        replicateIds
-    );
+    List<ReplicateEntity> replicates =
+        replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
     if (activityData.isEmpty() || testResultData.isEmpty() || replicates.isEmpty()) {
       SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for given RIA_SKEY");
     }
 
-    List<ReplicateDto> replicatesList = replicates
-        .stream()
-        .map((curReplicate) -> new ReplicateDto(
-            curReplicate.getId().getRiaKey(),
-            curReplicate.getId().getReplicateNumber(),
-            curReplicate.getContainerId(),
-            curReplicate.getContainerWeight(),
-            curReplicate.getFreshSeed(),
-            curReplicate.getContainerAndDryWeight(),
-            curReplicate.getDryWeight(),
-            curReplicate.getReplicateAccInd(),
-            curReplicate.getReplicateComment(),
-            curReplicate.getOverrideReason()
-        ))
-        .collect(Collectors.toList());
+    List<ReplicateDto> replicatesList = replicates.stream().map(
+        (curReplicate) -> new ReplicateDto(curReplicate.getId().getRiaKey(),
+            curReplicate.getId().getReplicateNumber(), curReplicate.getContainerId(),
+            curReplicate.getContainerWeight(), curReplicate.getFreshSeed(),
+            curReplicate.getContainerAndDryWeight(), curReplicate.getDryWeight(),
+            curReplicate.getReplicateAccInd(), curReplicate.getReplicateComment(),
+            curReplicate.getOverrideReason())).collect(Collectors.toList());
 
-    MoistureContentConesDto moistureContent = new MoistureContentConesDto(
-        testResultData.get().getTestCompleteInd(),
-        testResultData.get().getSampleDesc(),
-        testResultData.get().getMoistureStatus(),
-        testResultData.get().getMoisturePct(),
-        testResultData.get().getAcceptResult(),
-        activityData.get().getTestCategoryCode(),
-        activityData.get().getRiaComment(),
-        activityData.get().getActualBeginDateTime(),
-        activityData.get().getActualEndDateTime(),
-        replicatesList);
+    MoistureContentConesDto moistureContent =
+        new MoistureContentConesDto(testResultData.get().getTestCompleteInd(),
+            testResultData.get().getSampleDesc(), testResultData.get().getMoistureStatus(),
+            testResultData.get().getMoisturePct(), testResultData.get().getAcceptResult(),
+            activityData.get().getTestCategoryCode(), activityData.get().getRiaComment(),
+            activityData.get().getActualBeginDateTime(), activityData.get().getActualEndDateTime(),
+            replicatesList);
     SparLog.info("MCC data correctly fetched");
     return Optional.of(moistureContent);
   }
@@ -100,7 +81,8 @@ public class MoistureContentService {
    * This function validates the data to be submitted for MCC.
    * Throws exception if validation fails
    *
-   * @param moistureContentConesDataDtos a list of objects to validate
+   * @param moistureContentConesDataDtos a list of replicates to validate
+   * @throws ResponseStatusException if any validation fails
    */
   public void validateMoistureConeContentData(List<ReplicateDto> moistureContentConesDataDtos) {
     SparLog.info("Validating MCC data");
@@ -162,10 +144,11 @@ public class MoistureContentService {
   }
 
   /**
-   * This function validates Activity parte of the data to be submitted for MCC.
+   * This function validates Activity part of the data to be submitted for MCC.
    * Throws exception if validation fails.
    *
    * @param activityData activity entity to be validated
+   * @throws ResponseStatusException if any validation fails
    */
   public void validateMoistureContentActivityData(ActivityEntity activityData) {
     SparLog.info("Validating MCC activity data");
@@ -193,7 +176,7 @@ public class MoistureContentService {
   }
 
   /**
-   * Update the test status to "complete".
+   * Update the test status to "completed".
    *
    * @param riaKey the identifier key for all table related to MCC
    */
@@ -206,7 +189,7 @@ public class MoistureContentService {
   }
 
   /**
-   * Accept the test results.
+   * Accept the test results for the given riaKey.
    *
    * @param riaKey the identifier key for all table related to MCC
    */
@@ -232,20 +215,15 @@ public class MoistureContentService {
   /**
    * Deletes a single replicate.
    *
-   * @param riaKey the identifier key for all table related to MCC
+   * @param riaKey          the identifier key for all table related to MCC
    * @param replicateNumber the replicate number to be deleted
    */
-  public void deleteMccReplicate(
-      @NonNull BigDecimal riaKey,
-      @NonNull Integer replicateNumber
-  ) {
-    SparLog.info("Deleting a replicate tables with the "
-        + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
+  public void deleteMccReplicate(@NonNull BigDecimal riaKey, @NonNull Integer replicateNumber) {
+    SparLog.info("Deleting a replicate tables with the " + "riaKey: {} and replicateNumber: {}",
+        riaKey, replicateNumber);
 
-    Optional<ReplicateEntity> replicates = replicateRepository.findSingleReplicate(
-        riaKey,
-        replicateNumber
-    );
+    Optional<ReplicateEntity> replicates =
+        replicateRepository.findSingleReplicate(riaKey, replicateNumber);
 
     if (replicates.isEmpty()) {
       throw new InvalidMccKeyException();
@@ -253,8 +231,7 @@ public class MoistureContentService {
 
     replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
 
-    SparLog.info("Replicate {} with riaKey {} ", replicateNumber, riaKey
-            + "deleted!");
+    SparLog.info("Replicate {} with riaKey {} ", replicateNumber, riaKey + "deleted!");
   }
 
   /**
@@ -264,35 +241,26 @@ public class MoistureContentService {
    */
   @Transactional
   public void deleteFullMcc(@NonNull BigDecimal riaKey) {
-    SparLog.info("Deleting entries on Activity, Replicate and TestResult tables "
-            + "with the riaKey: {}", riaKey);
+    SparLog.info(
+        "Deleting entries on Activity, Replicate and TestResult tables " + "with the riaKey: {}",
+        riaKey);
     Optional<ActivityEntity> activityEntity = activityRepository.findById(riaKey);
 
     Optional<TestResultEntity> testEntity = testResultRepository.findById(riaKey);
 
-    List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
-        riaKey,
-        replicateIds
-    );
+    List<ReplicateEntity> replicates =
+        replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
-    if (activityEntity.isEmpty()
-        || testEntity.isEmpty()
-        || replicates.isEmpty()
-    ) {
+    if (activityEntity.isEmpty() || testEntity.isEmpty() || replicates.isEmpty()) {
       throw new InvalidMccKeyException();
     }
 
     activityRepository.deleteById(riaKey);
     testResultRepository.deleteById(riaKey);
 
-    replicates.forEach(
-        rep -> replicateRepository.deleteByRiaKeyAndReplicateNumber(
-          riaKey,
-          rep.getId().getReplicateNumber()
-        )
-    );
+    replicates.forEach(rep -> replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey,
+        rep.getId().getReplicateNumber()));
 
-    SparLog.info("Activity, Replicate and TestResult with riaKey {} ", riaKey
-            + "deleted!");
+    SparLog.info("Activity, Replicate and TestResult with riaKey {} ", riaKey + "deleted!");
   }
 }
