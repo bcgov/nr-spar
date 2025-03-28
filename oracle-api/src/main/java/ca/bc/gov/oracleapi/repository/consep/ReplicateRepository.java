@@ -54,5 +54,5 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, Repl
     void deleteByRiaKeyAndReplicateNumber(
         @Param("riaKey") BigDecimal riaKey,
         @Param("testReplicateNumber") Integer testReplicateNumber
-    );
+  );
 }
