@@ -17,6 +17,7 @@ import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
 import ButtonGroup from '../ButtonGroup';
 import StatusTag from '../../../../components/StatusTag';
+import ActivityResult from '../ActivityResult';
 
 import {
   DATE_FORMAT, fieldsConfig
@@ -47,6 +48,9 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-summary">
         <ActivitySummary item={fieldsConfig.activityItem} isFetching={false} />
+      </Row>
+      <Row className="consep-moisture-content-activity-result">
+        <ActivityResult />
       </Row>
       <Row className="consep-moisture-content-cone-form">
         <Column className="consep-section-title">
