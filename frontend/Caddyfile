@@ -33,7 +33,7 @@
 			media-src 'self';
 			object-src 'none';
 			script-src 'unsafe-inline' 'report-sample' 'self' https://*.auth.ca-central-1.amazoncognito.com/ https://*.cloudfront.net;
-			style-src 'report-sample' 'self';
+			style-src 'report-sample' 'self' 'unsafe-inline';
 			worker-src 'none';
 		"
 		Referrer-Policy "same-origin"
