@@ -72,12 +72,43 @@
   margin-bottom: 2rem;
 }
 
+.consep-impurity-title {
+  margin-bottom: 2.5rem;
+}
+
+.consep-impurity-content > div {
+  padding: 0rem;
+}
+
+.consep-impurity-content {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.consep-purity-content-replicate {
+  margin-bottom: 2rem;
+}
+
 .consep-impurity-content-remove {
   align-content: flex-end;
 }
 
 .consep-impurity-button > div {
   padding: 0rem;
+}
+
+.consep-impurity-button {
+  margin-bottom: 2.5rem;
+}
+
+.consep-impurity-combobox {
+  padding-left: 0.125rem;
+  padding-right: 1rem;
+}
+
+.#{vars.$bcgov-prefix}--text-input__field-wrapper {
+  background-color: var(--#{vars.$bcgov-prefix}-field);
+  border-bottom: solid thin;
 }
 
 .consep-purity-content-comments > div {
