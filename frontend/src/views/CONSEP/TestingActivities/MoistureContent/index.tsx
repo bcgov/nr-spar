@@ -9,7 +9,12 @@ import {
   ComboBox
 } from '@carbon/react';
 import {
-  CheckmarkFilled
+  CheckmarkFilled,
+  Calculator,
+  Checkmark,
+  CheckmarkOutline,
+  Time,
+  CopyFile
 } from '@carbon/icons-react';
 import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
@@ -32,6 +37,44 @@ const MoistureContent = () => {
     crumbsList.push({ name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST });
     return crumbsList;
   };
+
+  const buttons = [
+    {
+      id: 'calculate-average',
+      text: 'Calculate average',
+      kind: 'primary',
+      size: 'lg',
+      icon: Calculator
+    },
+    {
+      id: 'complete-test',
+      text: 'Complete test',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Checkmark
+    },
+    {
+      id: 'accept-test',
+      text: 'Accept test',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: CheckmarkOutline
+    },
+    {
+      id: 'test-history',
+      text: 'Test history',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Time
+    },
+    {
+      id: 'copy-results',
+      text: 'Copy results',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: CopyFile
+    }
+  ];
 
   return (
     <FlexGrid className="consep-moisture-content">
@@ -120,7 +163,7 @@ const MoistureContent = () => {
           />
         </Column>
       </Row>
-      <ButtonGroup />
+      <ButtonGroup buttons={buttons} />
     </FlexGrid>
   );
 };

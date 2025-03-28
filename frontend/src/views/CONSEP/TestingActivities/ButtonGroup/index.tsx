@@ -4,58 +4,28 @@ import {
   Button
 } from '@carbon/react';
 
-import {
-  Calculator,
-  Checkmark,
-  CheckmarkOutline,
-  Time,
-  CopyFile
-} from '@carbon/icons-react';
-
 import './styles.scss';
+import { ButtonObjType } from './definitions';
 
-const ButtonGroup = () => (
+interface ButtonGroupProps {
+  buttons: ButtonObjType[];
+}
+
+const ButtonGroup: React.FC<ButtonGroupProps> = ({ buttons }) => (
   <Row className="consep-registration-button-row">
-    <Button
-      kind="primary"
-      size="lg"
-      className="form-action-btn"
-      renderIcon={Calculator}
-    >
-      Calculate average
-    </Button>
-    <Button
-      kind="tertiary"
-      size="lg"
-      className="form-action-btn"
-      renderIcon={Checkmark}
-    >
-      Complete test
-    </Button>
-    <Button
-      kind="tertiary"
-      size="lg"
-      className="form-action-btn"
-      renderIcon={CheckmarkOutline}
-    >
-      Accept test
-    </Button>
-    <Button
-      kind="tertiary"
-      size="lg"
-      className="form-action-btn"
-      renderIcon={Time}
-    >
-      Test history
-    </Button>
-    <Button
-      kind="tertiary"
-      size="lg"
-      className="form-action-btn"
-      renderIcon={CopyFile}
-    >
-      Copy results
-    </Button>
+    {
+      buttons.map((button: ButtonObjType) => (
+        <Button
+          key={button.id}
+          kind={button.kind}
+          size={button.size}
+          className="form-action-btn"
+          renderIcon={button.icon}
+        >
+          {button.text}
+        </Button>
+      ))
+    }
   </Row>
 );
 export default ButtonGroup;
