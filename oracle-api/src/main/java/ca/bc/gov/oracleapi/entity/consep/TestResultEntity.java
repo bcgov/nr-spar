@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "CNS_T_TSC_TEST_RESULT")
+@Table(name = "CNS_T_TSC_TEST_RESULT", schema = "CONSEP")
 @Schema(description = "Represents the result of a testing activity for a seedlot in the database")
 public class TestResultEntity {
 
