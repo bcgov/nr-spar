@@ -8,7 +8,8 @@ import {
   TextArea,
   ComboBox,
   Button,
-  InlineNotification
+  InlineNotification,
+  TextInput
 } from '@carbon/react';
 import {
   CheckmarkFilled,
@@ -84,7 +85,7 @@ const PurityContent = () => {
       </Column>
       <Column sm={2} md={2} lg={5} xlg={5}>
         <ComboBox
-          className="impurity-combobox"
+          className="consep-impurity-combobox"
           id={`impurity-${replicate}-${impurity.id}`}
           name={fieldsConfig.impuritySection.secondaryfieldName}
           items={fieldsConfig.impuritySection.options}
@@ -117,6 +118,10 @@ const PurityContent = () => {
           </h5>
         </Column>
       </Row>
+      {/* Render dropdowns for the specific replicate */}
+      {
+        impurityDropdown(replicate)
+      }
       <Row className="consep-impurity-button">
         <Column sm={4} md={4} lg={10}>
           <Button
@@ -139,10 +144,6 @@ const PurityContent = () => {
         subtitle="You can only add up to 10 impurities for each replicate."
       />
       )}
-      {/* Render dropdowns for the specific replicate */}
-      {
-        impurityDropdown(replicate)
-      }
     </>
   );
 
@@ -251,7 +252,7 @@ const PurityContent = () => {
           />
         </Column>
       </Row>
-      <Row className="consep-impurity-content-cone-form">
+      <Row className="consep-impurity-title">
         <Column className="consep-section-title">
           <h4>{fieldsConfig.impuritySection.title}</h4>
         </Column>
