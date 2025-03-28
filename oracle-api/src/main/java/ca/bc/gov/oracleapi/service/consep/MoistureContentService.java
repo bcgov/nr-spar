@@ -6,16 +6,14 @@ import ca.bc.gov.oracleapi.dto.consep.ReplicateDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.exception.InvalidMccKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
-import java.math.BigDecimal;
-import java.util.List;
-import java.time.LocalDateTime;
-import ca.bc.gov.oracleapi.exception.InvalidMccKeyException;
 import jakarta.transaction.Transactional;
-
-
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -97,7 +95,13 @@ public class MoistureContentService {
     SparLog.info("MCC data correctly fetched");
     return Optional.of(moistureContent);
   }
-  
+
+  /**
+   * This function validates the data to be submitted for MCC.
+   * Throws exception if validation fails
+   *
+   * @param moistureContentConesDataDtos a list of objects to validate
+   */
   public void validateMoistureConeContentData(List<ReplicateDto> moistureContentConesDataDtos) {
     SparLog.info("Validating MCC data");
     // Validate the data
@@ -107,77 +111,120 @@ public class MoistureContentService {
         SparLog.error("MCC data validation failed: RIA key is missing");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RIA key is missing");
       }
+
       if (replicate.replicateNumber() == null) {
         SparLog.error("MCC data validation failed: Replicate number is missing");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Replicate number is missing");
       }
+
       if (replicate.containerId() != null && replicate.containerId().length() > 4) {
         SparLog.error("MCC data validation failed: Container ID is too long");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Container ID is too long");
       }
+
       if (replicate.containerWeight() == null
           || replicate.containerWeight().compareTo(BigDecimal.ZERO) < 0
           || replicate.containerWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
         SparLog.error("MCC data validation failed: Container weight is missing or invalid");
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Container weight is missing or invalid");
+        throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "Container weight is missing or invalid");
       }
+
       if (replicate.freshSeed() == null
           || replicate.freshSeed().compareTo(BigDecimal.ZERO) < 0
           || replicate.freshSeed().compareTo(BigDecimal.valueOf(999.999)) > 0) {
         SparLog.error("MCC data validation failed: Fresh seed weight is missing or invalid");
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fresh seed weight is missing or invalid");
+        throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Fresh seed weight is missing or invalid");
       }
+
       if (replicate.dryWeight() == null
           || replicate.dryWeight().compareTo(BigDecimal.ZERO) < 0
           || replicate.dryWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
         SparLog.error("MCC data validation failed: Dry weight is missing or invalid");
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Dry weight is missing or invalid");
+        throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Dry weight is missing or invalid");
       }
+
       if (replicate.containerAndDryWeight() == null
           || replicate.containerAndDryWeight().compareTo(BigDecimal.ZERO) < 0
           || replicate.containerAndDryWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
-        SparLog.error("MCC data validation failed: Container and dry weight is missing or invalid");
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Container and dry weight is missing or invalid");
+        SparLog.error("MCC data validation failed: "
+            + "Container and dry weight is missing or invalid");
+        throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Container and dry weight is missing or invalid");
       }
     }
   }
 
+  /**
+   * This function validates Activity parte of the data to be submitted for MCC.
+   * Throws exception if validation fails.
+   *
+   * @param activityData activity entity to be validated
+   */
   public void validateMoistureContentActivityData(ActivityEntity activityData) {
     SparLog.info("Validating MCC activity data");
-    // Validate the data
+
     if (activityData.getTestCategoryCode() == null) {
       SparLog.error("MCC activity data validation failed: Test category code is missing");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test category code is missing");
     }
-    if (activityData.getActualBeginDateTime() == null || activityData.getActualBeginDateTime().compareTo( LocalDateTime.now()) < 0) {
-      SparLog.error("MCC activity data validation failed: Actual begin date time is missing or in the past");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Actual begin date time is missing or in the past");
+    if (activityData.getActualBeginDateTime() == null
+        || activityData.getActualBeginDateTime().compareTo(LocalDateTime.now()) < 0) {
+      SparLog.error("MCC activity data validation failed: "
+          + "Actual begin date time is missing or in the past");
+      throw new ResponseStatusException(
+        HttpStatus.BAD_REQUEST,
+        "Actual begin date time is missing or in the past");
     }
-    if (activityData.getActualEndDateTime() == null || activityData.getActualEndDateTime().compareTo( LocalDateTime.now()) < 0) {
-      SparLog.error("MCC activity data validation failed: Actual end date time is missing or in the past");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Actual end date time is missing or in the past");
+    if (activityData.getActualEndDateTime() == null
+        || activityData.getActualEndDateTime().compareTo(LocalDateTime.now()) < 0) {
+      SparLog.error("MCC activity data validation failed: "
+          + "Actual end date time is missing or in the past");
+      throw new ResponseStatusException(
+        HttpStatus.BAD_REQUEST,
+        "Actual end date time is missing or in the past");
     }
   }
-  
+
+  /**
+   * Update the test status to "complete".
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   */
   public void updateTestResultStatusToCompleted(BigDecimal riaKey) {
     SparLog.info("Updating test result status to completed for RIA_SKEY: {}", riaKey);
+
     testResultRepository.updateTestResultStatusToCompleted(riaKey);
+
     SparLog.info("Test result status updated to completed for RIA_SKEY: {}", riaKey);
   }
 
+  /**
+   * Accept the test results.
+   *
+   * @param riaKey the identifier key for all table related to MCC
+   */
   public void acceptMoistureContentData(BigDecimal riaKey) {
     SparLog.info("Accepting moisture content data for RIA_SKEY: {}", riaKey);
+
     Optional<MoistureContentConesDto> moistureContent = getMoistureConeContentData(riaKey);
 
     if (moistureContent.isEmpty()) {
       SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for given RIA_KEY");
     }
+
     if (moistureContent.get().testCompleteInd() == 0) {
       SparLog.error("Test is not completed for RIA_SKEY: {}", riaKey);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test is not completed");
     }
-    
+
     testResultRepository.updateTestResultStatusToAccepted(riaKey);
     SparLog.info("Moisture content data accepted for RIA_SKEY: {}", riaKey);
   }

@@ -1,11 +1,10 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * This class represents a data object for the moisture content cone.
