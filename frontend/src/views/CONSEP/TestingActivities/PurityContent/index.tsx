@@ -73,6 +73,15 @@ const PurityContent = () => {
 
   const impurityDropdown = (replicate: number) => impurities[replicate].map((impurity) => (
     <Row key={impurity.id} className="consep-impurity-content">
+      <Column>
+        <TextInput
+          labelText="Rank"
+          disabled
+          type="number"
+          value={impurities[replicate].indexOf(impurity) + 1}
+          readOnly
+        />
+      </Column>
       <Column sm={2} md={2} lg={5} xlg={5}>
         <ComboBox
           className="impurity-combobox"
