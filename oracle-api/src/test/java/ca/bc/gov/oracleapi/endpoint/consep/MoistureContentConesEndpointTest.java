@@ -63,7 +63,6 @@ class MoistureContentConesEndpointTest {
     mockMvc = MockMvcBuilders.standaloneSetup(moistureContentConesEndpoint).build();
   }
 
-
   private final ObjectMapper mapper = new ObjectMapper()
         .registerModule(new JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -399,7 +398,7 @@ class MoistureContentConesEndpointTest {
             .content(mapper.writeValueAsString(replicateFormDto)))
         .andExpect(status().isBadRequest());
   }
-  
+
   void validateMoistureContentData_Success() throws Exception {
     BigDecimal riaKey = BigDecimal.valueOf(123);
     MoistureContentConesDto dto = mock(MoistureContentConesDto.class);

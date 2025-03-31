@@ -8,6 +8,9 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -76,9 +79,11 @@ public class ActivityEntity {
   @Column(name = "REVISED_END_DT")
   private LocalDate revisedEndDate;
 
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   @Column(name = "ACTUAL_BEGIN_DT_TM")
   private LocalDateTime actualBeginDateTime;
 
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   @Column(name = "ACTUAL_END_DT_TM")
   private LocalDateTime actualEndDateTime;
 
@@ -94,6 +99,7 @@ public class ActivityEntity {
   @Column(name = "PROCESS_COMMIT_IND")
   private Integer processCommitIndicator;
 
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   @Column(name = "UPDATE_TIMESTAMP")
   private LocalDateTime updateTimestamp;
 
