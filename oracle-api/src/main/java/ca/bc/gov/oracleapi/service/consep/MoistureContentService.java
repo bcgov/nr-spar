@@ -114,7 +114,7 @@ public class MoistureContentService {
         .orElseGet(() -> {
           ReplicateEntity newRep = new ReplicateEntity();
           newRep.setId(new ReplicateId(riaKey, replicateNumber));
-          
+
           SparLog.info("Replicate number {} not found for riaKey {}."
               + "Creating new replicate.", replicateNumber, riaKey);
           return newRep;
@@ -149,13 +149,13 @@ public class MoistureContentService {
   ) {
     SparLog.info("Updating a activity with the riaKey: {}", riaKey);
 
+    ActivityEntity activity = new ActivityEntity();
+
     Optional<ActivityEntity> activityOpt = activityRepository.findById(riaKey);
 
-    if (activityOpt.isEmpty()) {
-      throw new InvalidMccKeyException();
+    if (!activityOpt.isEmpty()) {
+      activity = activityOpt.get();
     }
-
-    ActivityEntity activity = activityOpt.get();
 
     activity.setActualBeginDateTime(activityFormDto.actualBeginDateTime());
     activity.setActualEndDateTime(activityFormDto.actualEndDateTime());
