@@ -21,5 +21,5 @@ export type TestingActivityType = {
   riaComment: string;
   actualBeginDateTime: string;
   actualEndDateTime: string;
-  replicateList: ReplicateType[];
+  replicatesList: ReplicateType[];
 };

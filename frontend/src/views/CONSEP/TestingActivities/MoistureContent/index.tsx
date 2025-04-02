@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { AxiosError } from 'axios';
 import {
   FlexGrid,
   Row,
@@ -11,12 +13,19 @@ import {
 import {
   CheckmarkFilled
 } from '@carbon/icons-react';
+
+import { useQuery } from '@tanstack/react-query';
 import ROUTES from '../../../../routes/constants';
+import { getMccByID } from '../../../../api-service/moistureContentAPI';
+import { TestingActivityType } from '../../../../types/consep/TestingActivityType';
+import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
+
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
-import ButtonGroup from '../ButtonGroup';
 import StatusTag from '../../../../components/StatusTag';
+
+import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
 
 import {
@@ -26,6 +35,17 @@ import {
 import './styles.scss';
 
 const MoistureContent = () => {
+  const navigate = useNavigate();
+  const { riaKey } = useParams();
+
+  const [testActivity, setTestActivity] = useState<TestingActivityType>();
+
+  const testActivityQuery = useQuery({
+    queryKey: ['riaKey', riaKey],
+    queryFn: () => getMccByID(riaKey ?? ''),
+    refetchOnMount: true
+  });
+
   const createBreadcrumbItems = () => {
     const crumbsList = [];
     crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
@@ -33,6 +53,18 @@ const MoistureContent = () => {
     crumbsList.push({ name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST });
     return crumbsList;
   };
+
+  useEffect(() => {
+    if (
+      testActivityQuery.isFetched
+      && testActivityQuery.status === 'error'
+      && (testActivityQuery.error as AxiosError).response?.status === 404
+    ) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    } else {
+      setTestActivity(testActivityQuery.data);
+    }
+  }, [testActivityQuery.status, testActivityQuery.isFetched]);
 
   return (
     <FlexGrid className="consep-moisture-content">
@@ -47,10 +79,15 @@ const MoistureContent = () => {
         </>
       </Row>
       <Row className="consep-moisture-content-activity-summary">
-        <ActivitySummary item={fieldsConfig.activityItem} isFetching={false} />
+        <ActivitySummary
+          item={fieldsConfig.activityItem}
+          isFetching={testActivityQuery.isFetching}
+        />
       </Row>
       <Row className="consep-moisture-content-activity-result">
-        <ActivityResult />
+        <ActivityResult
+          replicatesData={testActivity?.replicatesList || []}
+        />
       </Row>
       <Row className="consep-moisture-content-cone-form">
         <Column className="consep-section-title">
@@ -70,6 +107,7 @@ const MoistureContent = () => {
               placeholder="yyyy/mm/dd"
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
+              value={utcToIsoSlashStyle(testActivity?.actualBeginDateTime)}
               onClick={() => {}}
               onChange={() => {}}
               size="md"
@@ -89,6 +127,7 @@ const MoistureContent = () => {
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
+              value={utcToIsoSlashStyle(testActivity?.actualEndDateTime)}
               onClick={() => {}}
               onChange={() => {}}
               size="md"
@@ -107,6 +146,7 @@ const MoistureContent = () => {
             placeholder={fieldsConfig.category.placeholder}
             titleText={fieldsConfig.category.title}
             invalidText={fieldsConfig.category.invalid}
+            value={testActivity?.testCategoryCode || ''}
             onChange={() => {}}
           />
         </Column>
@@ -121,6 +161,7 @@ const MoistureContent = () => {
             rows={5}
             maxCount={500}
             enableCounter
+            value={testActivity?.riaComment ?? ''}
           />
         </Column>
       </Row>

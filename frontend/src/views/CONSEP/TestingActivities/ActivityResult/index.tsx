@@ -2,12 +2,17 @@ import React from 'react';
 import { FlexGrid, Row, Column } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 import GenericTable from '../../../../components/GenericTable';
+import { ReplicateType } from '../../../../types/consep/TestingActivityType';
 
-import { columns, data } from './constants';
+import { columns } from './constants';
 
 import './styles.scss';
 
-const ActivityResult = () => {
+type ActivityResultProp = {
+  replicatesData: ReplicateType[]
+}
+
+const ActivityResult = ({ replicatesData }: ActivityResultProp) => {
   const TITLE = 'Activity results per replicate';
 
   const actions = [
@@ -43,7 +48,7 @@ const ActivityResult = () => {
         </Column>
       </Row>
       <Row>
-        <GenericTable columns={columns} data={data} isCompacted />
+        <GenericTable columns={columns} data={replicatesData} isCompacted />
       </Row>
     </FlexGrid>
   );
