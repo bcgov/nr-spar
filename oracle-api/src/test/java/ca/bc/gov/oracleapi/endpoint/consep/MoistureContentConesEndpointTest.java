@@ -90,6 +90,9 @@ class MoistureContentConesEndpointTest {
             "MOI",
             new BigDecimal(12.345),
             1,
+            "ABC123456",
+            "60000",
+            "MC",
             "TST",
             "Comment for this content",
             LocalDateTime.parse("2013-08-01T00:00:00"),
@@ -114,6 +117,9 @@ class MoistureContentConesEndpointTest {
         .andExpect(jsonPath("$.moistureStatus").value(moistureContent.get().moistureStatus()))
         .andExpect(jsonPath("$.moisturePct").value(moistureContent.get().moisturePct()))
         .andExpect(jsonPath("$.acceptResult").value(moistureContent.get().acceptResult()))
+        .andExpect(jsonPath("$.requestId").value(moistureContent.get().requestId()))
+        .andExpect(jsonPath("$.seedlotNumber").value(moistureContent.get().seedlotNumber()))
+        .andExpect(jsonPath("$.activityType").value(moistureContent.get().activityType()))
         .andExpect(jsonPath("$.testCategoryCode").value(moistureContent.get().testCategoryCode()))
         .andExpect(jsonPath("$.riaComment").value(moistureContent.get().riaComment()))
         .andExpect(jsonPath("$.actualBeginDateTime")
