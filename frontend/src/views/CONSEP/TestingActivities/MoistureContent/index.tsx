@@ -73,7 +73,7 @@ const MoistureContent = () => {
       && (testActivityQuery.error as AxiosError).response?.status === 404
     ) {
       navigate(ROUTES.FOUR_OH_FOUR);
-    } else {
+    } else if (testActivityQuery.data) {
       setTestActivity(testActivityQuery.data);
       setSeedlotNumber(testActivityQuery.data.seedlotNumber);
     }
@@ -86,18 +86,18 @@ const MoistureContent = () => {
       && (seedlotQuery.error as AxiosError).response?.status === 404
     ) {
       navigate(ROUTES.FOUR_OH_FOUR);
-    } else {
+    } else if (testActivity && seedlotQuery.data) {
       setActivitySummary(
         {
-          activity: testActivityQuery.data.activityType,
+          activity: testActivity.activityType,
           seedlotNumber,
-          requestId: testActivityQuery.data.requestId,
-          speciesAndClass: `${seedlotQuery.data?.seedlot.vegetationCode} | ${seedlotQuery.data?.seedlot.geneticClass.geneticClassCode}` || '',
-          testResult: testActivityQuery.data.moisturePct
+          requestId: testActivity.requestId,
+          speciesAndClass: `${seedlotQuery.data.seedlot.vegetationCode} | ${seedlotQuery.data.seedlot.geneticClass.geneticClassCode}` || '',
+          testResult: testActivity.moisturePct.toString()
         }
       );
     }
-  }, [seedlotQuery.status, seedlotQuery.isFetched]);
+  }, [seedlotQuery.status, seedlotQuery.isFetched, testActivity]);
 
   return (
     <FlexGrid className="consep-moisture-content">
