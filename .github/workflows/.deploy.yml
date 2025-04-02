@@ -115,7 +115,6 @@ jobs:
           - name: backend
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-            verification_path: "health"
           - name: frontend
             parameters:
               -p FAM_MODDED_ZONE=${{ needs.init.outputs.fam-modded-zone }}
@@ -124,7 +123,6 @@ jobs:
           - name: oracle-api
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-            verification_path: "actuator/health"
     steps:
       - uses: bcgov/action-deployer-openshift@v4.0.0
         id: deploys
@@ -140,6 +138,3 @@ jobs:
             -p MAX_REPLICAS=${{ inputs.max-replicas }}
             ${{ matrix.parameters }}
           triggers: ${{ inputs.triggers }}
-          verification_path: ${{ matrix.verification_path }}
-          verification_retry_attempts: 5
-          verification_retry_seconds: 20
