@@ -211,3 +211,6 @@ schemaspy/output
 *.bat
 
 oracle-api/config
+
+# Tools
+.codebuddy
