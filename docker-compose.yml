@@ -140,29 +140,3 @@ services:
     depends_on:
       database:
         condition: service_started
-
-  sync:
-    container_name: sync
-    profiles: ["sync"]
-    build: ./sync
-    develop:
-      watch:
-        - action: sync
-          path: ./sync
-          target: ./sync
-        - action: rebuild
-          path: ./sync/requirements.txt
-          target: ./sync/requirements.txt
-    environment:
-      <<: *postgres-vars
-      TEST_MODE: ${TEST_MODE:-false}
-      EXECUTION_ID: ${EXECUTION_ID:-100}
-      DATABASE_HOST: database
-      ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
-      ORACLE_PORT: ${ORACLE_PORT:-1543}
-      ORACLE_SERVICE: ${ORACLE_SERVICE:-dbq01.nrs.bcgov}
-      ORACLE_SYNC_PASSWORD: ${ORACLE_SYNC_PASSWORD}
-      ORACLE_SYNC_USER: ${ORACLE_SYNC_USER:-proxy_fsa_spar_read_only_user}
-    depends_on:
-      database:
-        condition: service_started
