@@ -8,6 +8,7 @@ import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.exception.InvalidMccKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
@@ -95,27 +96,40 @@ public class MoistureContentService {
     SparLog.info("Updating a replicate with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
 
-    Optional<ReplicateEntity> replicate = replicateRepository.findSingleReplicate(
-        riaKey,
-        replicateNumber
-    );
-
-    if (replicate.isEmpty()) {
+    if (replicateNumber < 1 || replicateNumber > 8) {
+      SparLog.info("Invalid replicate number {}, for riaKey: {}", replicateNumber, riaKey);
       throw new InvalidMccKeyException();
     }
 
-    ReplicateEntity rep = replicate.get();
+    List<ReplicateEntity> replicates =
+        replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
-    rep.setContainerId(replicateFormDto.containerId());
-    rep.setContainerWeight(replicateFormDto.containerWeight());
-    rep.setFreshSeed(replicateFormDto.freshSeed());
-    rep.setContainerAndDryWeight(replicateFormDto.containerAndDryWeight());
-    rep.setDryWeight(replicateFormDto.dryWeight());
-    rep.setReplicateAccInd(replicateFormDto.replicateAccInd());
-    rep.setReplicateComment(replicateFormDto.replicateComment());
-    rep.setOverrideReason(replicateFormDto.overrideReason());
+    if (replicates.isEmpty()) {
+      throw new InvalidMccKeyException();
+    }
 
-    ReplicateEntity savedReplicate = replicateRepository.save(rep);
+    ReplicateEntity repEntity = replicates.stream()
+        .filter(rep -> rep.getId().getReplicateNumber().equals(replicateNumber))
+        .findFirst()
+        .orElseGet(() -> {
+          ReplicateEntity newRep = new ReplicateEntity();
+          newRep.setId(new ReplicateId(riaKey, replicateNumber));
+          
+          SparLog.info("Replicate number {} not found for riaKey {}."
+              + "Creating new replicate.", replicateNumber, riaKey);
+          return newRep;
+        });
+
+    repEntity.setContainerId(replicateFormDto.containerId());
+    repEntity.setContainerWeight(replicateFormDto.containerWeight());
+    repEntity.setFreshSeed(replicateFormDto.freshSeed());
+    repEntity.setContainerAndDryWeight(replicateFormDto.containerAndDryWeight());
+    repEntity.setDryWeight(replicateFormDto.dryWeight());
+    repEntity.setReplicateAccInd(replicateFormDto.replicateAccInd());
+    repEntity.setReplicateComment(replicateFormDto.replicateComment());
+    repEntity.setOverrideReason(replicateFormDto.overrideReason());
+
+    ReplicateEntity savedReplicate = replicateRepository.save(repEntity);
 
     SparLog.info("Replicate riaKey: {} and replicateNumber: {} updated", riaKey, replicateNumber);
 
