@@ -71,7 +71,7 @@ const ActivitySummary = ({ item, isFetching }: ActivitySummaryProps) => (
               Species
             </p>
             {
-              renderFieldValue('species', isFetching, item)
+              renderFieldValue('speciesAndClass', isFetching, item)
             }
           </Column>
           <Column className="info-col">

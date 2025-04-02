@@ -17,7 +17,9 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import ROUTES from '../../../../routes/constants';
 import { getMccByID } from '../../../../api-service/moistureContentAPI';
+import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { TestingActivityType } from '../../../../types/consep/TestingActivityType';
+import { ActivitySummaryType } from '../../../../types/ActivitySummaryType';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
@@ -39,11 +41,21 @@ const MoistureContent = () => {
   const { riaKey } = useParams();
 
   const [testActivity, setTestActivity] = useState<TestingActivityType>();
+  const [seedlotNumber, setSeedlotNumber] = useState<string>('');
+  const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
     queryFn: () => getMccByID(riaKey ?? ''),
     refetchOnMount: true
+  });
+
+  const seedlotQuery = useQuery({
+    queryKey: ['seedlotNumber', seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
+    enabled: seedlotNumber !== '',
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
   });
 
   const createBreadcrumbItems = () => {
@@ -63,8 +75,29 @@ const MoistureContent = () => {
       navigate(ROUTES.FOUR_OH_FOUR);
     } else {
       setTestActivity(testActivityQuery.data);
+      setSeedlotNumber(testActivityQuery.data.seedlotNumber);
     }
   }, [testActivityQuery.status, testActivityQuery.isFetched]);
+
+  useEffect(() => {
+    if (
+      seedlotQuery.isFetched
+      && seedlotQuery.status === 'error'
+      && (seedlotQuery.error as AxiosError).response?.status === 404
+    ) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    } else {
+      setActivitySummary(
+        {
+          activity: testActivityQuery.data.activityType,
+          seedlotNumber,
+          requestId: testActivityQuery.data.requestId,
+          speciesAndClass: `${seedlotQuery.data?.seedlot.vegetationCode} | ${seedlotQuery.data?.seedlot.geneticClass.geneticClassCode}` || '',
+          testResult: testActivityQuery.data.moisturePct
+        }
+      );
+    }
+  }, [seedlotQuery.status, seedlotQuery.isFetched]);
 
   return (
     <FlexGrid className="consep-moisture-content">
@@ -74,14 +107,26 @@ const MoistureContent = () => {
       <Row className="consep-moisture-content-title">
         <PageTitle title={fieldsConfig.titleSection.title} />
         <>
-          <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
-          <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
+          {
+            testActivity?.testCompleteInd
+              ? (
+                <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
+              )
+              : null
+          }
+          {
+            testActivity?.acceptResult
+              ? (
+                <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
+              )
+              : null
+          }
         </>
       </Row>
       <Row className="consep-moisture-content-activity-summary">
         <ActivitySummary
-          item={fieldsConfig.activityItem}
-          isFetching={testActivityQuery.isFetching}
+          item={activitySummary}
+          isFetching={testActivityQuery.isFetching || seedlotQuery.isFetching}
         />
       </Row>
       <Row className="consep-moisture-content-activity-result">

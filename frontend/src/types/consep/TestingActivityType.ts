@@ -17,6 +17,9 @@ export type TestingActivityType = {
   moistureStatus: string;
   moisturePct: number;
   acceptResult: number;
+  requestId: string;
+  seedlotNumber: string;
+  activityType: string;
   testCategoryCode: string;
   riaComment: string;
   actualBeginDateTime: string;

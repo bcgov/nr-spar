@@ -59,20 +59,35 @@ public class MoistureContentService {
     }
 
     List<ReplicateDto> replicatesList = replicates.stream().map(
-        (curReplicate) -> new ReplicateDto(curReplicate.getId().getRiaKey(),
-            curReplicate.getId().getReplicateNumber(), curReplicate.getContainerId(),
-            curReplicate.getContainerWeight(), curReplicate.getFreshSeed(),
-            curReplicate.getContainerAndDryWeight(), curReplicate.getDryWeight(),
-            curReplicate.getReplicateAccInd(), curReplicate.getReplicateComment(),
-            curReplicate.getOverrideReason())).collect(Collectors.toList());
+        (curReplicate) -> new ReplicateDto(
+            curReplicate.getId().getRiaKey(),
+            curReplicate.getId().getReplicateNumber(),
+            curReplicate.getContainerId(),
+            curReplicate.getContainerWeight(),
+            curReplicate.getFreshSeed(),
+            curReplicate.getContainerAndDryWeight(),
+            curReplicate.getDryWeight(),
+            curReplicate.getReplicateAccInd(),
+            curReplicate.getReplicateComment(),
+            curReplicate.getOverrideReason()))
+        .collect(Collectors.toList());
 
     MoistureContentConesDto moistureContent =
-        new MoistureContentConesDto(testResultData.get().getTestCompleteInd(),
-            testResultData.get().getSampleDesc(), testResultData.get().getMoistureStatus(),
-            testResultData.get().getMoisturePct(), testResultData.get().getAcceptResult(),
-            activityData.get().getTestCategoryCode(), activityData.get().getRiaComment(),
-            activityData.get().getActualBeginDateTime(), activityData.get().getActualEndDateTime(),
+        new MoistureContentConesDto(
+            testResultData.get().getTestCompleteInd(),
+            testResultData.get().getSampleDesc(),
+            testResultData.get().getMoistureStatus(),
+            testResultData.get().getMoisturePct(),
+            testResultData.get().getAcceptResult(),
+            activityData.get().getRequestId(),
+            activityData.get().getSeedlotNumber(),
+            activityData.get().getActivityTypeCode(),
+            activityData.get().getTestCategoryCode(),
+            activityData.get().getRiaComment(),
+            activityData.get().getActualBeginDateTime(),
+            activityData.get().getActualEndDateTime(),
             replicatesList);
+
     SparLog.info("MCC data correctly fetched");
     return Optional.of(moistureContent);
   }

@@ -29,6 +29,15 @@ public record MoistureContentConesDto(
     // End - Result fields
 
     // Begin - Activity fields
+    @Schema(description = "The test request identifier", example = "CSP20240013")
+    String requestId,
+
+    @Schema(description = "The respective seedlot this test is related to", example = "64132")
+    String seedlotNumber,
+
+    @Schema(description = "A code that identifies the type of the activity", example = "MC")
+    String activityType,
+
     @Schema(description = "Test category code", example = "TST")
     String testCategoryCode,
 
