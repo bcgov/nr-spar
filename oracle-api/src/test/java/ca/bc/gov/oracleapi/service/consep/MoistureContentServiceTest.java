@@ -255,8 +255,12 @@ class MoistureContentServiceTest {
     existingEntity.setReplicateComment("Old comment");
     existingEntity.setOverrideReason("Not overrided yet");
 
-    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
-        .thenReturn(Optional.of(existingEntity));
+    List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
+            .boxed()
+            .collect(Collectors.toList());
+
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
+        .thenReturn(List.of(existingEntity));
     when(replicateRepository.save(any(ReplicateEntity.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -285,7 +289,7 @@ class MoistureContentServiceTest {
     assertEquals(replicateDto.replicateComment(), result.getReplicateComment());
     assertEquals(replicateDto.overrideReason(), result.getOverrideReason());
 
-    verify(replicateRepository, times(1)).findSingleReplicate(riaKey, replicateNumber);
+    verify(replicateRepository, times(1)).findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
     verify(replicateRepository, times(1)).save(any(ReplicateEntity.class));
   }
 
