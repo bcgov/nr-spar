@@ -14,7 +14,6 @@ parameters:
     required: true
   - name: ORACLE_HOST
     description: Oracle database host
-    value: nrcdb03.bcgov
     required: true
   - name: ORACLE_SERVICE
     description: Oracle service name
