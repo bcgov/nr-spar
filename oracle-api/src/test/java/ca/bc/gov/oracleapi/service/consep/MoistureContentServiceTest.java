@@ -298,6 +298,9 @@ class MoistureContentServiceTest {
   void updateReplicate_shouldThrowWhenNotFound() {
     BigDecimal riaKey = new BigDecimal(1234567890);
     Integer replicateNumber = 1;
+    List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
+            .boxed()
+            .collect(Collectors.toList());
 
     ReplicateFormDto replicateDto = new ReplicateFormDto(
         "1234",
@@ -310,14 +313,14 @@ class MoistureContentServiceTest {
         "Overrided"
     );
 
-    when(replicateRepository.findSingleReplicate(riaKey, replicateNumber))
-        .thenReturn(Optional.empty());
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
+        .thenReturn(List.of());
 
     assertThrows(InvalidMccKeyException.class, () -> {
       moistureContentService.updateReplicateField(riaKey, replicateNumber, replicateDto);
     });
 
-    verify(replicateRepository, times(1)).findSingleReplicate(riaKey, replicateNumber);
+    verify(replicateRepository, times(1)).findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
     verify(replicateRepository, never()).save(any(ReplicateEntity.class));
   }
 
