@@ -16,7 +16,7 @@ import {
 
 import { useQuery } from '@tanstack/react-query';
 import ROUTES from '../../../../routes/constants';
-import { getMccByID } from '../../../../api-service/moistureContentAPI';
+import { getMccByRiaKey } from '../../../../api-service/moistureContentAPI';
 import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { TestingActivityType } from '../../../../types/consep/TestingActivityType';
 import { ActivitySummaryType } from '../../../../types/ActivitySummaryType';
@@ -46,7 +46,7 @@ const MoistureContent = () => {
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
-    queryFn: () => getMccByID(riaKey ?? ''),
+    queryFn: () => getMccByRiaKey(riaKey ?? ''),
     refetchOnMount: true
   });
 
