@@ -31,7 +31,7 @@ on:
         type: string
       db-memory-request:
         description: Database memory request; e.g. 2Gi
-        default: "2Gi"
+        default: "512Mi"
         type: string
       max-replicas:
         description: Maximum replicas for backend, frontend and oracle-api

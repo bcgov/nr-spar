@@ -7,13 +7,6 @@ export const fieldsConfig = {
   moistureContentConesTitle: {
     title: 'Moisture content cones data entry '
   },
-  activityItem: {
-    activity: 'MC',
-    seedlotNumber: 64132,
-    requestId: 'CSP20240013',
-    species: 'PLI | A',
-    testResult: '7.80%'
-  },
   startDate: {
     name: 'startDate',
     placeholder: 'yyyy/mm/dd',

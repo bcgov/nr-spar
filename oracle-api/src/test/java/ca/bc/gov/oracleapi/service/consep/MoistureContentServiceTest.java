@@ -126,6 +126,9 @@ class MoistureContentServiceTest {
     LocalDateTime now = LocalDateTime.now();
 
     ActivityEntity activityData = new ActivityEntity();
+    activityData.setRequestId("ABC123456");
+    activityData.setSeedlotNumber("60000");
+    activityData.setActivityTypeCode("MC");
     activityData.setTestCategoryCode("CNN");
     activityData.setRiaComment("Activity finished.");
     activityData.setActualEndDateTime(now.plusDays(30L));
@@ -152,6 +155,9 @@ class MoistureContentServiceTest {
     assertEquals(mccData.get().moistureStatus(), testData.getMoistureStatus());
     assertEquals(mccData.get().moisturePct(), testData.getMoisturePct());
     assertEquals(mccData.get().acceptResult(), testData.getAcceptResult());
+    assertEquals(mccData.get().requestId(), activityData.getRequestId());
+    assertEquals(mccData.get().seedlotNumber(), activityData.getSeedlotNumber());
+    assertEquals(mccData.get().activityType(), activityData.getActivityTypeCode());
     assertEquals(mccData.get().testCategoryCode(), activityData.getTestCategoryCode());
     assertEquals(mccData.get().riaComment(), activityData.getRiaComment());
     assertEquals(mccData.get().actualBeginDateTime(), activityData.getActualBeginDateTime());
