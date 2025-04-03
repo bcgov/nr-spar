@@ -1,11 +1,14 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,8 +20,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,15 +32,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(MoistureContentConesEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class MoistureContentConesEndpointTest {
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-  @MockBean private MoistureContentService moistureContentService;
+  @MockBean
+  private MoistureContentService moistureContentService;
+
+  @InjectMocks
+  private MoistureContentConesEndpoint moistureContentConesEndpoint;
+
+  @BeforeEach
+  void setUp() {
+    MockitoAnnotations.openMocks(this);
+    mockMvc = MockMvcBuilders.standaloneSetup(moistureContentConesEndpoint).build();
+  }
+
 
   @Test
   @DisplayName("Get a MCC data for a seedlot should succeed")
@@ -65,18 +84,21 @@ class MoistureContentConesEndpointTest {
     );
     List<ReplicateDto> replicatesList = List.of(replicate1, replicate2);
     Optional<MoistureContentConesDto> moistureContent = Optional.of(
-      new MoistureContentConesDto(
-          1,
-          "Sample description",
-          "MOI",
-          new BigDecimal(12.345),
-          1,
-          "TST",
-          "Comment for this content",
-          LocalDateTime.parse("2013-08-01T00:00:00"),
-          LocalDateTime.parse("2013-08-01T00:00:00"),
-          replicatesList
-    ));
+        new MoistureContentConesDto(
+            1,
+            "Sample description",
+            "MOI",
+            new BigDecimal(12.345),
+            1,
+            "ABC123456",
+            "60000",
+            "MC",
+            "TST",
+            "Comment for this content",
+            LocalDateTime.parse("2013-08-01T00:00:00"),
+            LocalDateTime.parse("2013-08-01T00:00:00"),
+            replicatesList
+        ));
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -95,6 +117,9 @@ class MoistureContentConesEndpointTest {
         .andExpect(jsonPath("$.moistureStatus").value(moistureContent.get().moistureStatus()))
         .andExpect(jsonPath("$.moisturePct").value(moistureContent.get().moisturePct()))
         .andExpect(jsonPath("$.acceptResult").value(moistureContent.get().acceptResult()))
+        .andExpect(jsonPath("$.requestId").value(moistureContent.get().requestId()))
+        .andExpect(jsonPath("$.seedlotNumber").value(moistureContent.get().seedlotNumber()))
+        .andExpect(jsonPath("$.activityType").value(moistureContent.get().activityType()))
         .andExpect(jsonPath("$.testCategoryCode").value(moistureContent.get().testCategoryCode()))
         .andExpect(jsonPath("$.riaComment").value(moistureContent.get().riaComment()))
         .andExpect(jsonPath("$.actualBeginDateTime")
@@ -154,8 +179,8 @@ class MoistureContentConesEndpointTest {
 
     mockMvc
         .perform(
-            get("/api/moisture-content-cone/{riaKey}", riaKey)
-                .contentType(MediaType.APPLICATION_JSON))
+             get("/api/moisture-content-cone/{riaKey}", riaKey)
+                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
@@ -168,6 +193,67 @@ class MoistureContentConesEndpointTest {
   }
 
   @Test
+  void validateMoistureContentData_Success() throws Exception {
+    BigDecimal riaKey = BigDecimal.valueOf(123);
+    MoistureContentConesDto dto = mock(MoistureContentConesDto.class);
+
+    when(moistureContentService.getMoistureConeContentData(riaKey)).thenReturn(Optional.of(dto));
+    when(dto.replicatesList()).thenReturn(null);
+    when(dto.actualBeginDateTime()).thenReturn(null);
+    when(dto.actualEndDateTime()).thenReturn(null);
+    when(dto.testCategoryCode()).thenReturn(null);
+
+    doNothing().when(moistureContentService).validateMoistureConeContentData(any());
+    doNothing().when(moistureContentService).validateMoistureContentActivityData(any());
+    doNothing().when(moistureContentService).updateTestResultStatusToCompleted(riaKey);
+
+    mockMvc
+        .perform(post("/api/moisture-content-cone/{riaKey}/validate", riaKey)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+
+  @Test
+  void validateMoistureContentData_BadRequest() throws Exception {
+    BigDecimal riaKey = BigDecimal.valueOf(123);
+
+    when(moistureContentService.getMoistureConeContentData(riaKey))
+        .thenThrow(new ResponseStatusException(
+           org.springframework.http.HttpStatus.BAD_REQUEST,
+           "Invalid request"));
+
+    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/validate", riaKey)
+                .contentType(MediaType.APPLICATION_JSON))
+           .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void acceptMoistureContentData_Success() throws Exception {
+    BigDecimal riaKey = BigDecimal.valueOf(123);
+
+    doNothing().when(moistureContentService).acceptMoistureContentData(riaKey);
+
+    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/accept", riaKey)
+                .contentType(MediaType.APPLICATION_JSON))
+           .andExpect(status().isOk());
+  }
+
+  @Test
+  void acceptMoistureContentData_BadRequest() throws Exception {
+    BigDecimal riaKey = BigDecimal.valueOf(123);
+
+    doThrow(new ResponseStatusException(
+        org.springframework.http.HttpStatus.BAD_REQUEST,
+        "Invalid request"))
+      .when(moistureContentService).acceptMoistureContentData(riaKey);
+
+    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/accept", riaKey)
+                .contentType(MediaType.APPLICATION_JSON))
+           .andExpect(status().isBadRequest());
+  }
+
+  @Test
   @DisplayName("Delete MCC data should succeed")
   void deleteMcc_shouldSucceed() throws Exception {
     BigDecimal riaKey = new BigDecimal(1234567890);
@@ -175,11 +261,8 @@ class MoistureContentConesEndpointTest {
     // Mock the service to do nothing when delete is called
     doNothing().when(moistureContentService).deleteFullMcc(riaKey);
 
-    mockMvc
-        .perform(delete("/api/moisture-content-cone/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}", riaKey).with(csrf().asHeader())
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
   }
 
   @Test
@@ -188,14 +271,11 @@ class MoistureContentConesEndpointTest {
     BigDecimal riaKey = new BigDecimal(1234567890);
 
     // Simulate resource not found scenario
-    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
-        .when(moistureContentService).deleteFullMcc(riaKey);
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(moistureContentService)
+        .deleteFullMcc(riaKey);
 
-    mockMvc
-        .perform(delete("/api/moisture-content-cone/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}", riaKey).with(csrf().asHeader())
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -207,12 +287,8 @@ class MoistureContentConesEndpointTest {
     // Mock service behavior
     doNothing().when(moistureContentService).deleteMccReplicate(riaKey, replicateNumber);
 
-    mockMvc
-        .perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}",
-          riaKey,
-          replicateNumber)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}", riaKey,
+            replicateNumber).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -223,15 +299,11 @@ class MoistureContentConesEndpointTest {
     Integer replicateNumber = 1;
 
     // Simulate resource not found scenario
-    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
-        .when(moistureContentService).deleteMccReplicate(riaKey, replicateNumber);
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(moistureContentService)
+        .deleteMccReplicate(riaKey, replicateNumber);
 
-    mockMvc
-        .perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}",
-          riaKey,
-          replicateNumber)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}", riaKey,
+            replicateNumber).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 }

@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,20 +29,31 @@ public record MoistureContentConesDto(
     // End - Result fields
 
     // Begin - Activity fields
+    @Schema(description = "The test request identifier", example = "CSP20240013")
+    String requestId,
+
+    @Schema(description = "The respective seedlot this test is related to", example = "64132")
+    String seedlotNumber,
+
+    @Schema(description = "A code that identifies the type of the activity", example = "MC")
+    String activityType,
+
     @Schema(description = "Test category code", example = "TST")
     String testCategoryCode,
 
     @Schema(description = "Comments for the activity", example = "Activity completed successfully")
     String riaComment,
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "Actual begin date of the activity", example = "2025-01-05T08:00:00")
     LocalDateTime actualBeginDateTime,
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "Actual end date of the activity", example = "2025-01-18T16:00:00")
     LocalDateTime actualEndDateTime,
     // End - Activity fields
 
     // Replicates fields
     @Schema(description = "Replicates information")
-    List<ReplicateDto> replicatesList
-) {}
+    List<ReplicateDto> replicatesList) {
+}
