@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.entity.consep;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -76,9 +77,11 @@ public class ActivityEntity {
   @Column(name = "REVISED_END_DT")
   private LocalDate revisedEndDate;
 
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   @Column(name = "ACTUAL_BEGIN_DT_TM")
   private LocalDateTime actualBeginDateTime;
 
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   @Column(name = "ACTUAL_END_DT_TM")
   private LocalDateTime actualEndDateTime;
 
@@ -94,6 +97,7 @@ public class ActivityEntity {
   @Column(name = "PROCESS_COMMIT_IND")
   private Integer processCommitIndicator;
 
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   @Column(name = "UPDATE_TIMESTAMP")
   private LocalDateTime updateTimestamp;
 
