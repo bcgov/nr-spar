@@ -48,8 +48,22 @@ const MoistureContent = () => {
   const [testActivity, setTestActivity] = useState<TestingActivityType>();
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
-  
-   useEffect(() => {
+
+  const testActivityQuery = useQuery({
+    queryKey: ['riaKey', riaKey],
+    queryFn: () => getMccByRiaKey(riaKey ?? ''),
+    refetchOnMount: true
+  });
+
+  const seedlotQuery = useQuery({
+    queryKey: ['seedlotNumber', seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
+    enabled: seedlotNumber !== '',
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
+  });
+
+  useEffect(() => {
     if (
       testActivityQuery.isFetched
       && testActivityQuery.status === 'error'
@@ -81,20 +95,6 @@ const MoistureContent = () => {
       );
     }
   }, [seedlotQuery.status, seedlotQuery.isFetched, testActivity]);
-
-  const testActivityQuery = useQuery({
-    queryKey: ['riaKey', riaKey],
-    queryFn: () => getMccByRiaKey(riaKey ?? ''),
-    refetchOnMount: true
-  });
-
-  const seedlotQuery = useQuery({
-    queryKey: ['seedlotNumber', seedlotNumber],
-    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
-    enabled: seedlotNumber !== '',
-    refetchOnMount: true,
-    refetchOnWindowFocus: false
-  });
 
   const createBreadcrumbItems = () => {
     const crumbsList = [];
@@ -187,7 +187,7 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
-            onChange={() => {}}
+            onChange={() => { }}
           >
             <DatePickerInput
               id="moisture-content-start-date-picker"
@@ -196,8 +196,8 @@ const MoistureContent = () => {
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
               value={utcToIsoSlashStyle(testActivity?.actualBeginDateTime)}
-              onClick={() => {}}
-              onChange={() => {}}
+              onClick={() => { }}
+              onChange={() => { }}
               size="md"
               autoComplete="off"
             />
@@ -207,7 +207,7 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat="Y/m/d"
-            onChange={() => {}}
+            onChange={() => { }}
           >
             <DatePickerInput
               id="moisture-content-end-date-picker"
@@ -216,8 +216,8 @@ const MoistureContent = () => {
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
               value={utcToIsoSlashStyle(testActivity?.actualEndDateTime)}
-              onClick={() => {}}
-              onChange={() => {}}
+              onClick={() => { }}
+              onChange={() => { }}
               size="md"
               autoComplete="off"
             />
@@ -235,7 +235,7 @@ const MoistureContent = () => {
             titleText={fieldsConfig.category.title}
             invalidText={fieldsConfig.category.invalid}
             value={testActivity?.testCategoryCode || ''}
-            onChange={() => {}}
+            onChange={() => { }}
           />
         </Column>
       </Row>
