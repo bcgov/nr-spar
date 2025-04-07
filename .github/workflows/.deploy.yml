@@ -109,7 +109,7 @@ jobs:
     steps:
       - name: Check Triggers
         run: |
-          echo "needs.init.outputs.triggered: ${{ needs.init.outputs.triggered }}"
+          echo "Triggered?: ${{ needs.init.outputs.triggered }}"
           exit 1
 
   deploy:
