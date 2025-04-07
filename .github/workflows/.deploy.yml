@@ -102,6 +102,16 @@ jobs:
             -p MEMORY_REQUEST=${{ inputs.db-memory-request }}
           triggers: ${{ inputs.triggers }}
 
+  triggers:
+    name: Check Triggers
+    runs-on: ubuntu-24.04
+    needs: [init]
+    steps:
+      - name: Check Triggers
+        run: |
+          needs.init.outputs.triggered: ${{ needs.init.outputs.triggered }}
+          exit 1
+
   deploy:
     name: Deploy
     environment: ${{ inputs.environment }}
