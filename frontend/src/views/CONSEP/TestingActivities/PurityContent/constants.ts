@@ -20,10 +20,10 @@ export const fieldsConfig = {
 
   },
   activityItem: {
-    activity: 'MC',
-    seedlotNumber: 64132,
+    activity: 'PUR',
+    seedlotNumber: '64132',
     requestId: 'CSP20240013',
-    species: 'PLI | A',
+    speciesAndClass: 'PLI | A',
     testResult: '7.80%'
   },
   startDate: {
