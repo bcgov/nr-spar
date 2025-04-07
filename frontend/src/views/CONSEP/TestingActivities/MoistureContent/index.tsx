@@ -11,7 +11,12 @@ import {
   ComboBox
 } from '@carbon/react';
 import {
-  CheckmarkFilled
+  CheckmarkFilled,
+  Calculator,
+  Checkmark,
+  CheckmarkOutline,
+  Time,
+  CopyFile
 } from '@carbon/icons-react';
 
 import { useQuery } from '@tanstack/react-query';
@@ -58,14 +63,6 @@ const MoistureContent = () => {
     refetchOnWindowFocus: false
   });
 
-  const createBreadcrumbItems = () => {
-    const crumbsList = [];
-    crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
-    crumbsList.push({ name: 'Testing activities search', path: ROUTES.TESTING_REQUESTS_REPORT });
-    crumbsList.push({ name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST });
-    return crumbsList;
-  };
-
   useEffect(() => {
     if (
       testActivityQuery.isFetched
@@ -98,6 +95,52 @@ const MoistureContent = () => {
       );
     }
   }, [seedlotQuery.status, seedlotQuery.isFetched, testActivity]);
+
+  const createBreadcrumbItems = () => {
+    const crumbsList = [];
+    crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
+    crumbsList.push({ name: 'Testing activities search', path: ROUTES.TESTING_REQUESTS_REPORT });
+    crumbsList.push({ name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST });
+    return crumbsList;
+  };
+
+  const buttons = [
+    {
+      id: 'calculate-average',
+      text: 'Calculate average',
+      kind: 'primary',
+      size: 'lg',
+      icon: Calculator
+    },
+    {
+      id: 'complete-test',
+      text: 'Complete test',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Checkmark
+    },
+    {
+      id: 'accept-test',
+      text: 'Accept test',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: CheckmarkOutline
+    },
+    {
+      id: 'test-history',
+      text: 'Test history',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Time
+    },
+    {
+      id: 'copy-results',
+      text: 'Copy results',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: CopyFile
+    }
+  ];
 
   return (
     <FlexGrid className="consep-moisture-content">
@@ -144,7 +187,7 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
-            onChange={() => {}}
+            onChange={() => { }}
           >
             <DatePickerInput
               id="moisture-content-start-date-picker"
@@ -153,8 +196,8 @@ const MoistureContent = () => {
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
               value={utcToIsoSlashStyle(testActivity?.actualBeginDateTime)}
-              onClick={() => {}}
-              onChange={() => {}}
+              onClick={() => { }}
+              onChange={() => { }}
               size="md"
               autoComplete="off"
             />
@@ -164,7 +207,7 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat="Y/m/d"
-            onChange={() => {}}
+            onChange={() => { }}
           >
             <DatePickerInput
               id="moisture-content-end-date-picker"
@@ -173,8 +216,8 @@ const MoistureContent = () => {
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
               value={utcToIsoSlashStyle(testActivity?.actualEndDateTime)}
-              onClick={() => {}}
-              onChange={() => {}}
+              onClick={() => { }}
+              onChange={() => { }}
               size="md"
               autoComplete="off"
             />
@@ -192,7 +235,7 @@ const MoistureContent = () => {
             titleText={fieldsConfig.category.title}
             invalidText={fieldsConfig.category.invalid}
             value={testActivity?.testCategoryCode || ''}
-            onChange={() => {}}
+            onChange={() => { }}
           />
         </Column>
       </Row>
@@ -210,7 +253,7 @@ const MoistureContent = () => {
           />
         </Column>
       </Row>
-      <ButtonGroup />
+      <ButtonGroup buttons={buttons} />
     </FlexGrid>
   );
 };

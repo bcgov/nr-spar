@@ -39,6 +39,7 @@ const ROUTES = {
   MAINTAIN_STAT_HOLIDAYS: '/consep/maintain-stat-holidays',
   MAINTAIN_WORK_PLANS: '/consep/maintain-work-plans',
   MANUAL_MOISTURE_CONTENT: '/consep/manual-moisture-content/:riaKey',
+  MANUAL_PURITY_CONTENT: '/consep/manual-purity-content',
   PROCESSING_ACTIVITIES: '/consep/processing-activities',
   RECORD_STOCK_COUNT_RESULTS: '/consep/record-stock-count-results',
   REQUEST_CHANGES_REPORT: '/consep/request-changes-report',
