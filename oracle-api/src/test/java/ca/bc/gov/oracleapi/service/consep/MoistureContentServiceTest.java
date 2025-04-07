@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
@@ -11,8 +12,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
@@ -186,6 +189,89 @@ class MoistureContentServiceTest {
   }
 
   @Test
+  @DisplayName("Update activity should succeed")
+  void updateActivity_shouldSucceed() {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+
+    ActivityEntity existingEntity = new ActivityEntity();
+    existingEntity.setRiaKey(riaKey);
+    existingEntity.setActualBeginDateTime(LocalDateTime.parse("2013-10-01T00:00:00"));
+    existingEntity.setActualEndDateTime(LocalDateTime.parse("2013-11-01T00:00:00"));
+    existingEntity.setTestCategoryCode("OLD");
+    existingEntity.setRiaComment("Old comment");
+
+    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(existingEntity));
+    when(activityRepository.save(any(ActivityEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ActivityFormDto activityDto = new ActivityFormDto(
+        "STD",
+        "Updated comment",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-09-01T00:00:00")
+    );
+
+    ActivityEntity result = moistureContentService.updateActivityField(riaKey, activityDto);
+
+    assertEquals(activityDto.actualBeginDateTime(), result.getActualBeginDateTime());
+    assertEquals(activityDto.actualEndDateTime(), result.getActualEndDateTime());
+    assertEquals(activityDto.testCategoryCode(), result.getTestCategoryCode());
+    assertEquals(activityDto.riaComment(), result.getRiaComment());
+
+    verify(activityRepository, times(1)).findById(riaKey);
+    verify(activityRepository, times(1)).save(any(ActivityEntity.class));
+  }
+
+  @Test
+  @DisplayName("updateReplicateField - should return updated replicates")
+  void updateReplicateField_shouldReturnUpdatedReplicates() {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+
+    final ReplicateFormDto formDto = new ReplicateFormDto(
+        1,
+        "CID-123",
+        new BigDecimal("1.0"),
+        new BigDecimal("2.0"),
+        new BigDecimal("3.0"),
+        new BigDecimal("4.0"),
+        1,
+        "some comment",
+        "override reason"
+    );
+
+    ReplicateEntity entity = new ReplicateEntity();
+    ReplicateId replicateId = new ReplicateId(riaKey, 1);
+    entity.setId(replicateId);
+    entity.setContainerId("CID-123");
+    entity.setContainerWeight(new BigDecimal("1.0"));
+    entity.setFreshSeed(new BigDecimal("2.0"));
+    entity.setContainerAndDryWeight(new BigDecimal("3.0"));
+    entity.setDryWeight(new BigDecimal("4.0"));
+    entity.setReplicateAccInd(1);
+    entity.setReplicateComment("some comment");
+    entity.setOverrideReason("override reason");
+
+    final List<ReplicateFormDto> requestList = List.of(formDto);
+
+    List<ReplicateEntity> existingReplicates = List.of(entity);
+    List<ReplicateEntity> savedReplicates = List.of(entity);
+
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, List.of(1)))
+        .thenReturn(existingReplicates);
+    when(replicateRepository.saveAll(anyList()))
+        .thenReturn(savedReplicates);
+
+    List<ReplicateEntity> result = moistureContentService.updateReplicateField(riaKey, requestList);
+
+    assertEquals(1, result.size());
+    assertEquals("CID-123", result.get(0).getContainerId());
+    assertEquals(new BigDecimal("1.0"), result.get(0).getContainerWeight());
+
+    verify(replicateRepository).findByRiaKeyAndReplicateNumbers(riaKey, List.of(1));
+    verify(replicateRepository).saveAll(anyList());
+  }
+
+  @Test
   void validateMoistureConeContentData_validData() {
     ReplicateDto replicateDto = new ReplicateDto(
         riaKey,
@@ -333,11 +419,8 @@ class MoistureContentServiceTest {
         Optional.of(mockReplicate));
 
     doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
-
-    // Execute delete
     assertDoesNotThrow(() -> moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
 
-    // Verify delete was called
     verify(replicateRepository, times(1)).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
   }
 
