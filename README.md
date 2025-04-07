@@ -5,7 +5,6 @@
 
 #### Workflows
 [![Analysis](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml)
-[![ETL Sync](https://github.com/bcgov/nr-spar/actions/workflows/job-sync.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/job-sync.yml)
 [![Merge](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
 [![Nightly](https://github.com/bcgov/nr-spar/actions/workflows/job-nightly.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/job-nightly.yml)
 
@@ -122,12 +121,12 @@ to get a JWT token to your user.
 As mentioned, we're here to help. Feel free to start a conversation
 on Rocket chat or ask a question on Stackoverflow.
 
-# nr-spar-data-sync
+# Synchronization Engine
 
-Engine to sync data for SPAR application (from Postgres to Oracle). The application extracts, transforms, and loads data based on a few parameters/configurations.
+The engine to sync data for SPAR application (from Postgres to Oracle) has moved to its own repository. It extracts, transforms, and loads data based on a few parameters/configurations.
 
-## Running the application
-The application has a **main.py** module with a main function that triggers the data synchronization process based on parameters/configurations described on the next session.
+[https://github.com/bcgov/nr-fds-pyetl(https://github.com/bcgov/nr-fds-pyetl)]
+
 
 ## Configuring each domain (source and target tables)
 A domain folder has to be created for each domain to be synced. For example, the seedlot domain will sync a few tables that are related, such as SEEDLOT, SEEDLOT_GENETIC_WORTH, and SEEDLOT_PARENT_TREE.

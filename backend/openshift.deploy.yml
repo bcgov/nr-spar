@@ -1,11 +1,5 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-metadata:
-  name: ${NAME}
-  annotations:
-    description: "NR SPAR Backend"
-    tags: "nr-spar-backend,backend"
-    iconClass: icon-java
 labels:
   app: ${NAME}-${ZONE}
 parameters:
@@ -37,7 +31,7 @@ parameters:
   - name: CPU_REQUEST
     value: 25m
   - name: MEMORY_REQUEST
-    value: 150Mi
+    value: 100Mi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"

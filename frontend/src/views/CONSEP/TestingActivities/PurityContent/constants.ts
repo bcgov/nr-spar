@@ -2,10 +2,29 @@ export const DATE_FORMAT = 'Y/m/d';
 
 export const fieldsConfig = {
   titleSection: {
-    title: 'Moisture content oven for seedlot 64132'
+    title: 'Purity for seedlot 64132'
   },
-  moistureContentConesTitle: {
-    title: 'Moisture content cones data entry '
+  puritySection: {
+    title: 'Purity data entry'
+  },
+  impuritySection: {
+    title: 'Impurities',
+    firstSubtitle: 'Replicate 1',
+    secondSubtitle: 'Replicate 2',
+    buttonText: 'Add Impurities',
+    primaryfieldName: 'Rank',
+    secondaryfieldName: 'Impurity type',
+    placeholder: 'Select an option',
+    label: 'impurityType',
+    options: ['Impurity1', 'Impurity2', 'Impurity3']
+
+  },
+  activityItem: {
+    activity: 'PUR',
+    seedlotNumber: '64132',
+    requestId: 'CSP20240013',
+    speciesAndClass: 'PLI | A',
+    testResult: '7.80%'
   },
   startDate: {
     name: 'startDate',

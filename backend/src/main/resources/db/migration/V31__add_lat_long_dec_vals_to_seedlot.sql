@@ -10,6 +10,8 @@ comment on column spar.seedlot_audit.mean_geom is 'Referring value for spar.seed
 
 /* Update trigger */
 
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 CREATE OR REPLACE FUNCTION spar.seedlot_if_modified_func() RETURNS trigger AS $body$
 DECLARE
     v_old_data TEXT;

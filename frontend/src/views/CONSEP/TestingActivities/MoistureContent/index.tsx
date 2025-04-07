@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { AxiosError } from 'axios';
 import {
   FlexGrid,
   Row,
@@ -9,14 +11,29 @@ import {
   ComboBox
 } from '@carbon/react';
 import {
-  CheckmarkFilled
+  CheckmarkFilled,
+  Calculator,
+  Checkmark,
+  CheckmarkOutline,
+  Time,
+  CopyFile
 } from '@carbon/icons-react';
+
+import { useQuery } from '@tanstack/react-query';
 import ROUTES from '../../../../routes/constants';
+import { getMccByRiaKey } from '../../../../api-service/moistureContentAPI';
+import { getSeedlotById } from '../../../../api-service/seedlotAPI';
+import { TestingActivityType } from '../../../../types/consep/TestingActivityType';
+import { ActivitySummaryType } from '../../../../types/ActivitySummaryType';
+import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
+
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
-import ButtonGroup from '../ButtonGroup';
 import StatusTag from '../../../../components/StatusTag';
+
+import ButtonGroup from '../ButtonGroup';
+import ActivityResult from '../ActivityResult';
 
 import {
   DATE_FORMAT, fieldsConfig
@@ -25,6 +42,60 @@ import {
 import './styles.scss';
 
 const MoistureContent = () => {
+  const navigate = useNavigate();
+  const { riaKey } = useParams();
+
+  const [testActivity, setTestActivity] = useState<TestingActivityType>();
+  const [seedlotNumber, setSeedlotNumber] = useState<string>('');
+  const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
+
+  const testActivityQuery = useQuery({
+    queryKey: ['riaKey', riaKey],
+    queryFn: () => getMccByRiaKey(riaKey ?? ''),
+    refetchOnMount: true
+  });
+
+  const seedlotQuery = useQuery({
+    queryKey: ['seedlotNumber', seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
+    enabled: seedlotNumber !== '',
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
+  });
+
+  useEffect(() => {
+    if (
+      testActivityQuery.isFetched
+      && testActivityQuery.status === 'error'
+      && (testActivityQuery.error as AxiosError).response?.status === 404
+    ) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    } else if (testActivityQuery.data) {
+      setTestActivity(testActivityQuery.data);
+      setSeedlotNumber(testActivityQuery.data.seedlotNumber);
+    }
+  }, [testActivityQuery.status, testActivityQuery.isFetched]);
+
+  useEffect(() => {
+    if (
+      seedlotQuery.isFetched
+      && seedlotQuery.status === 'error'
+      && (seedlotQuery.error as AxiosError).response?.status === 404
+    ) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    } else if (testActivity && seedlotQuery.data) {
+      setActivitySummary(
+        {
+          activity: testActivity.activityType,
+          seedlotNumber,
+          requestId: testActivity.requestId,
+          speciesAndClass: `${seedlotQuery.data.seedlot.vegetationCode} | ${seedlotQuery.data.seedlot.geneticClass.geneticClassCode}` || '',
+          testResult: testActivity.moisturePct.toString()
+        }
+      );
+    }
+  }, [seedlotQuery.status, seedlotQuery.isFetched, testActivity]);
+
   const createBreadcrumbItems = () => {
     const crumbsList = [];
     crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
@@ -32,6 +103,44 @@ const MoistureContent = () => {
     crumbsList.push({ name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST });
     return crumbsList;
   };
+
+  const buttons = [
+    {
+      id: 'calculate-average',
+      text: 'Calculate average',
+      kind: 'primary',
+      size: 'lg',
+      icon: Calculator
+    },
+    {
+      id: 'complete-test',
+      text: 'Complete test',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Checkmark
+    },
+    {
+      id: 'accept-test',
+      text: 'Accept test',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: CheckmarkOutline
+    },
+    {
+      id: 'test-history',
+      text: 'Test history',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Time
+    },
+    {
+      id: 'copy-results',
+      text: 'Copy results',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: CopyFile
+    }
+  ];
 
   return (
     <FlexGrid className="consep-moisture-content">
@@ -41,12 +150,32 @@ const MoistureContent = () => {
       <Row className="consep-moisture-content-title">
         <PageTitle title={fieldsConfig.titleSection.title} />
         <>
-          <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
-          <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
+          {
+            testActivity?.testCompleteInd
+              ? (
+                <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
+              )
+              : null
+          }
+          {
+            testActivity?.acceptResult
+              ? (
+                <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
+              )
+              : null
+          }
         </>
       </Row>
       <Row className="consep-moisture-content-activity-summary">
-        <ActivitySummary item={fieldsConfig.activityItem} isFetching={false} />
+        <ActivitySummary
+          item={activitySummary}
+          isFetching={testActivityQuery.isFetching || seedlotQuery.isFetching}
+        />
+      </Row>
+      <Row className="consep-moisture-content-activity-result">
+        <ActivityResult
+          replicatesData={testActivity?.replicatesList || []}
+        />
       </Row>
       <Row className="consep-moisture-content-cone-form">
         <Column className="consep-section-title">
@@ -58,7 +187,7 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
-            onChange={() => {}}
+            onChange={() => { }}
           >
             <DatePickerInput
               id="moisture-content-start-date-picker"
@@ -66,8 +195,9 @@ const MoistureContent = () => {
               placeholder="yyyy/mm/dd"
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
-              onClick={() => {}}
-              onChange={() => {}}
+              value={utcToIsoSlashStyle(testActivity?.actualBeginDateTime)}
+              onClick={() => { }}
+              onChange={() => { }}
               size="md"
               autoComplete="off"
             />
@@ -77,7 +207,7 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat="Y/m/d"
-            onChange={() => {}}
+            onChange={() => { }}
           >
             <DatePickerInput
               id="moisture-content-end-date-picker"
@@ -85,8 +215,9 @@ const MoistureContent = () => {
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
-              onClick={() => {}}
-              onChange={() => {}}
+              value={utcToIsoSlashStyle(testActivity?.actualEndDateTime)}
+              onClick={() => { }}
+              onChange={() => { }}
               size="md"
               autoComplete="off"
             />
@@ -103,7 +234,8 @@ const MoistureContent = () => {
             placeholder={fieldsConfig.category.placeholder}
             titleText={fieldsConfig.category.title}
             invalidText={fieldsConfig.category.invalid}
-            onChange={() => {}}
+            value={testActivity?.testCategoryCode || ''}
+            onChange={() => { }}
           />
         </Column>
       </Row>
@@ -117,10 +249,11 @@ const MoistureContent = () => {
             rows={5}
             maxCount={500}
             enableCounter
+            value={testActivity?.riaComment ?? ''}
           />
         </Column>
       </Row>
-      <ButtonGroup />
+      <ButtonGroup buttons={buttons} />
     </FlexGrid>
   );
 };
