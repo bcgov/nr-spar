@@ -88,19 +88,23 @@ jobs:
             -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ secrets.VITE_USER_POOLS_WEB_CLIENT_ID }}
           triggers: ${{ inputs.triggers }}
 
-      - name: Database
-        uses: bcgov/action-deployer-openshift@v4.0.0
-        with:
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          file: common/openshift.database.yml
-          overwrite: false
-          parameters:
-            -p ZONE=${{ inputs.target }}
-            -p DB_PVC_SIZE=${{ inputs.db-pvc-size }}
-            -p MEMORY_REQUEST=${{ inputs.db-memory-request }}
-          triggers: ${{ inputs.triggers }}
+      - name: Check Triggers
+        run: |
+          echo "Triggered?: ${{ steps.trigger.outputs.triggered }}"
+
+      # - name: Database
+      #   uses: bcgov/action-deployer-openshift@v4.0.0
+      #   with:
+      #     oc_namespace: ${{ vars.OC_NAMESPACE }}
+      #     oc_server: ${{ vars.OC_SERVER }}
+      #     oc_token: ${{ secrets.OC_TOKEN }}
+      #     file: common/openshift.database.yml
+      #     overwrite: false
+      #     parameters:
+      #       -p ZONE=${{ inputs.target }}
+      #       -p DB_PVC_SIZE=${{ inputs.db-pvc-size }}
+      #       -p MEMORY_REQUEST=${{ inputs.db-memory-request }}
+      #     triggers: ${{ inputs.triggers }}
 
   triggers:
     name: Check Triggers
