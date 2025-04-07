@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -87,15 +88,14 @@ public class MoistureContentConesEndpoint {
   }
 
   /**
-   * Updates a replicate entity.
+   * Updates replicate entities.
    *
    * @param riaKey The identifier for the MCC-related data.
-   * @param replicateNumber The replicate number to be updated.
-   * @param replicateFormDto An object containing the new values.
+   * @param replicateFormDtos A list of {@link ReplicateFormDto} containing the new values.
    * @return the {@link ReplicateEntity} updated
    */
   @PatchMapping(
-      value = "replicate/{riaKey}/{replicateNumber}",
+      value = "replicate/{riaKey}",
       consumes = "application/json",
       produces = "application/json")
   @Operation(
@@ -108,7 +108,7 @@ public class MoistureContentConesEndpoint {
           @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Replicate not found")
       })
-  public ReplicateEntity updateReplicateField(
+  public List<ReplicateEntity> updateReplicateField(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
@@ -116,17 +116,10 @@ public class MoistureContentConesEndpoint {
           required = true)
       @PathVariable
       BigDecimal riaKey,
-      @Parameter(
-          name = "replicateNumber",
-          in = ParameterIn.PATH,
-          description = "Number of the replicate to update",
-          required = true)
-      @PathVariable
-      Integer replicateNumber,
       @Valid
       @RequestBody
-      ReplicateFormDto replicateFormDto) {
-    return moistureContentService.updateReplicateField(riaKey, replicateNumber, replicateFormDto);
+      List<ReplicateFormDto> replicateFormDtos) {
+    return moistureContentService.updateReplicateField(riaKey, replicateFormDtos);
   }
 
   /**

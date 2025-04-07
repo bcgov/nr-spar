@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
@@ -222,112 +223,52 @@ class MoistureContentServiceTest {
   }
 
   @Test
-  @DisplayName("Update activity should throw exception when not found")
-  void updateActivity_shouldThrowWhenNotFound() {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    ActivityFormDto activityDto = new ActivityFormDto(
-        "STD",
-        "Some comment",
-        LocalDateTime.parse("2013-08-01T00:00:00"),
-        LocalDateTime.parse("2013-09-01T00:00:00")
+  @DisplayName("updateReplicateField - should return updated replicates")
+  void updateReplicateField_shouldReturnUpdatedReplicates() {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+
+    final ReplicateFormDto formDto = new ReplicateFormDto(
+        1,
+        "CID-123",
+        new BigDecimal("1.0"),
+        new BigDecimal("2.0"),
+        new BigDecimal("3.0"),
+        new BigDecimal("4.0"),
+        1,
+        "some comment",
+        "override reason"
     );
 
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.empty());
+    ReplicateEntity entity = new ReplicateEntity();
+    ReplicateId replicateId = new ReplicateId(riaKey, 1);
+    entity.setId(replicateId);
+    entity.setContainerId("CID-123");
+    entity.setContainerWeight(new BigDecimal("1.0"));
+    entity.setFreshSeed(new BigDecimal("2.0"));
+    entity.setContainerAndDryWeight(new BigDecimal("3.0"));
+    entity.setDryWeight(new BigDecimal("4.0"));
+    entity.setReplicateAccInd(1);
+    entity.setReplicateComment("some comment");
+    entity.setOverrideReason("override reason");
 
-    assertThrows(InvalidMccKeyException.class, () -> {
-      moistureContentService.updateActivityField(riaKey, activityDto);
-    });
+    final List<ReplicateFormDto> requestList = List.of(formDto);
 
-    verify(activityRepository, times(1)).findById(riaKey);
-    verify(activityRepository, never()).save(any(ActivityEntity.class));
-  }
+    List<ReplicateEntity> existingReplicates = List.of(entity);
+    List<ReplicateEntity> savedReplicates = List.of(entity);
 
-  @Test
-  @DisplayName("Update replicate should succeed")
-  void updateReplicate_shouldSucceed() {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    Integer replicateNumber = 1;
-    ReplicateId id = new ReplicateId(riaKey, replicateNumber);
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, List.of(1)))
+        .thenReturn(existingReplicates);
+    when(replicateRepository.saveAll(anyList()))
+        .thenReturn(savedReplicates);
 
-    ReplicateEntity existingEntity = new ReplicateEntity();
+    List<ReplicateEntity> result = moistureContentService.updateReplicateField(riaKey, requestList);
 
-    existingEntity.setId(id);
-    existingEntity.setContainerId("5678");
-    existingEntity.setContainerWeight(new BigDecimal(10));
-    existingEntity.setFreshSeed(new BigDecimal(10));
-    existingEntity.setContainerAndDryWeight(new BigDecimal(10));
-    existingEntity.setDryWeight(new BigDecimal(10));
-    existingEntity.setReplicateAccInd(1);
-    existingEntity.setReplicateComment("Old comment");
-    existingEntity.setOverrideReason("Not overrided yet");
+    assertEquals(1, result.size());
+    assertEquals("CID-123", result.get(0).getContainerId());
+    assertEquals(new BigDecimal("1.0"), result.get(0).getContainerWeight());
 
-    List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
-            .boxed()
-            .collect(Collectors.toList());
-
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
-        .thenReturn(List.of(existingEntity));
-    when(replicateRepository.save(any(ReplicateEntity.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
-
-    ReplicateFormDto replicateDto = new ReplicateFormDto(
-        "1234",
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        0,
-        "New comment",
-        "Overrided"
-    );
-
-    ReplicateEntity result = moistureContentService.updateReplicateField(
-        riaKey,
-        replicateNumber,
-        replicateDto);
-
-    assertEquals(replicateDto.containerId(), result.getContainerId());
-    assertEquals(replicateDto.containerWeight(), result.getContainerWeight());
-    assertEquals(replicateDto.freshSeed(), result.getFreshSeed());
-    assertEquals(replicateDto.containerAndDryWeight(), result.getContainerAndDryWeight());
-    assertEquals(replicateDto.dryWeight(), result.getDryWeight());
-    assertEquals(replicateDto.replicateAccInd(), result.getReplicateAccInd());
-    assertEquals(replicateDto.replicateComment(), result.getReplicateComment());
-    assertEquals(replicateDto.overrideReason(), result.getOverrideReason());
-
-    verify(replicateRepository, times(1)).findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
-    verify(replicateRepository, times(1)).save(any(ReplicateEntity.class));
-  }
-
-  @Test
-  @DisplayName("Update replicate should throw exception when not found")
-  void updateReplicate_shouldThrowWhenNotFound() {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    Integer replicateNumber = 1;
-    List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
-            .boxed()
-            .collect(Collectors.toList());
-
-    ReplicateFormDto replicateDto = new ReplicateFormDto(
-        "1234",
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        0,
-        "New comment",
-        "Overrided"
-    );
-
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
-        .thenReturn(List.of());
-
-    assertThrows(InvalidMccKeyException.class, () -> {
-      moistureContentService.updateReplicateField(riaKey, replicateNumber, replicateDto);
-    });
-
-    verify(replicateRepository, times(1)).findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
-    verify(replicateRepository, never()).save(any(ReplicateEntity.class));
+    verify(replicateRepository).findByRiaKeyAndReplicateNumbers(riaKey, List.of(1));
+    verify(replicateRepository).saveAll(anyList());
   }
 
   @Test

@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -56,6 +57,9 @@ class MoistureContentConesEndpointTest {
 
   @InjectMocks
   private MoistureContentConesEndpoint moistureContentConesEndpoint;
+
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @BeforeEach
   void setUp() {
@@ -288,120 +292,93 @@ class MoistureContentConesEndpointTest {
   }
 
   @Test
-  @DisplayName("Update MCC - Replicate data should succeed")
-  void updateMccReplicate_shouldSucceed() throws Exception {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    Integer replicateNumber = 1;
-    ReplicateId id = new ReplicateId(riaKey, replicateNumber);
+  @DisplayName("PATCH /replicate/{riaKey} - should update multiple replicate entities")
+  @WithMockUser
+  void updateReplicateField_shouldReturnUpdatedReplicates() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
 
-    ReplicateFormDto replicateFormDto = new ReplicateFormDto(
-        "1234",
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        0,
-        "New comment",
-        "Overrided"
+    ReplicateFormDto form1 = new ReplicateFormDto(
+        1, "CONT-A", new BigDecimal("1.1"), new BigDecimal("2.2"),
+        new BigDecimal("3.3"), new BigDecimal("4.4"), 0,
+        "First Comment", "Override 1"
+    );
+    final ReplicateFormDto form2 = new ReplicateFormDto(
+        2, "CONT-B", new BigDecimal("5.5"), new BigDecimal("6.6"),
+        new BigDecimal("7.7"), new BigDecimal("8.8"), 1,
+        "Second Comment", "Override 2"
     );
 
-    ReplicateEntity replicateEntity = new ReplicateEntity();
+    ReplicateEntity entity1 = new ReplicateEntity();
+    entity1.setId(new ReplicateId(riaKey, 1));
+    entity1.setContainerId(form1.containerId());
+    entity1.setContainerWeight(form1.containerWeight());
+    entity1.setFreshSeed(form1.freshSeed());
+    entity1.setContainerAndDryWeight(form1.containerAndDryWeight());
+    entity1.setDryWeight(form1.dryWeight());
+    entity1.setReplicateAccInd(form1.replicateAccInd());
+    entity1.setReplicateComment(form1.replicateComment());
+    entity1.setOverrideReason(form1.overrideReason());
 
-    replicateEntity.setId(id);
-    replicateEntity.setContainerId(replicateFormDto.containerId());
-    replicateEntity.setContainerWeight(replicateFormDto.containerWeight());
-    replicateEntity.setFreshSeed(replicateFormDto.freshSeed());
-    replicateEntity.setContainerAndDryWeight(replicateFormDto.containerAndDryWeight());
-    replicateEntity.setDryWeight(replicateFormDto.dryWeight());
-    replicateEntity.setReplicateAccInd(replicateFormDto.replicateAccInd());
-    replicateEntity.setReplicateComment(replicateFormDto.replicateComment());
-    replicateEntity.setOverrideReason(replicateFormDto.overrideReason());
+    ReplicateEntity entity2 = new ReplicateEntity();
+    entity2.setId(new ReplicateId(riaKey, 2));
+    entity2.setContainerId(form2.containerId());
+    entity2.setContainerWeight(form2.containerWeight());
+    entity2.setFreshSeed(form2.freshSeed());
+    entity2.setContainerAndDryWeight(form2.containerAndDryWeight());
+    entity2.setDryWeight(form2.dryWeight());
+    entity2.setReplicateAccInd(form2.replicateAccInd());
+    entity2.setReplicateComment(form2.replicateComment());
+    entity2.setOverrideReason(form2.overrideReason());
 
-    when(moistureContentService.updateReplicateField(riaKey, replicateNumber, replicateFormDto))
-        .thenReturn(replicateEntity);
+    List<ReplicateFormDto> formList = List.of(form1, form2);
+    List<ReplicateEntity> entityList = List.of(entity1, entity2);
 
-    mockMvc
-        .perform(
-            patch("/api/moisture-content-cone/replicate/{riaKey}/{replicateNumber}",
-                riaKey,
-                replicateNumber)
+    when(moistureContentService.updateReplicateField(eq(riaKey), eq(formList)))
+        .thenReturn(entityList);
+
+    mockMvc.perform(patch("/api/moisture-content-cone/replicate/{riaKey}", riaKey)
             .with(csrf().asHeader())
-            .header("Content-Type", "application/json")
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(replicateFormDto)))
+            .content(objectMapper.writeValueAsString(formList)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.containerId").value(replicateFormDto.containerId()))
-        .andExpect(jsonPath("$.containerWeight").value(replicateFormDto.containerWeight()))
-        .andExpect(jsonPath("$.freshSeed").value(replicateFormDto.freshSeed()))
-        .andExpect(jsonPath("$.containerAndDryWeight")
-            .value(replicateFormDto.containerAndDryWeight()))
-        .andExpect(jsonPath("$.dryWeight").value(replicateFormDto.dryWeight()))
-        .andExpect(jsonPath("$.replicateAccInd").value(replicateFormDto.replicateAccInd()))
-        .andExpect(jsonPath("$.replicateComment").value(replicateFormDto.replicateComment()))
-        .andExpect(jsonPath("$.overrideReason").value(replicateFormDto.overrideReason()));
+        .andExpect(jsonPath("$[0].containerId").value(form1.containerId()))
+        .andExpect(jsonPath("$[0].containerWeight").value(form1.containerWeight()))
+        .andExpect(jsonPath("$[0].freshSeed").value(form1.freshSeed()))
+        .andExpect(jsonPath("$[0].containerAndDryWeight").value(form1.containerAndDryWeight()))
+        .andExpect(jsonPath("$[0].dryWeight").value(form1.dryWeight()))
+        .andExpect(jsonPath("$[0].replicateAccInd").value(form1.replicateAccInd()))
+        .andExpect(jsonPath("$[0].replicateComment").value(form1.replicateComment()))
+        .andExpect(jsonPath("$[0].overrideReason").value(form1.overrideReason()))
+
+        .andExpect(jsonPath("$[1].containerId").value(form2.containerId()))
+        .andExpect(jsonPath("$[1].containerWeight").value(form2.containerWeight()))
+        .andExpect(jsonPath("$[1].freshSeed").value(form2.freshSeed()))
+        .andExpect(jsonPath("$[1].containerAndDryWeight").value(form2.containerAndDryWeight()))
+        .andExpect(jsonPath("$[1].dryWeight").value(form2.dryWeight()))
+        .andExpect(jsonPath("$[1].replicateAccInd").value(form2.replicateAccInd()))
+        .andExpect(jsonPath("$[1].replicateComment").value(form2.replicateComment()))
+        .andExpect(jsonPath("$[1].overrideReason").value(form2.overrideReason()));
   }
 
   @Test
-  @DisplayName("Update MCC - Replicate data should return 404 when activity not found")
-  void updateMccReplicate_shouldReturnNotFound() throws Exception {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    Integer replicateNumber = 1;
-
-    ReplicateFormDto replicateFormDto = new ReplicateFormDto(
-        "1234",
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        new BigDecimal(5),
-        0,
-        "New comment",
-        "Overrided"
+  @DisplayName("PATCH /replicate/{riaKey} - should return 400 for invalid request body")
+  @WithMockUser
+  void updateReplicateField_shouldReturn400WhenInvalidRequest() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+  
+    // 模拟非法数据：containerId 是 null
+    ReplicateFormDto invalidForm = new ReplicateFormDto(
+        null, null, new BigDecimal("1.1"), new BigDecimal("2.2"),
+        new BigDecimal("3.3"), new BigDecimal("4.4"), 0,
+        null, null
     );
-
-    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity entry not found"))
-        .when(moistureContentService).updateReplicateField(
-            riaKey,
-            replicateNumber,
-            replicateFormDto);
-
-    mockMvc
-        .perform(
-            patch("/api/moisture-content-cone/replicate/{riaKey}/{replicateNumber}",
-                riaKey,
-                replicateNumber)
+  
+    mockMvc.perform(patch("/api/moisture-content-cone/replicate/{riaKey}", riaKey)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(replicateFormDto)))
-        .andExpect(status().isNotFound());
-  }
-
-  @Test
-  @DisplayName("Update MCC - Replicate data should return 400 for invalid values")
-  void updateMccReplicate_shouldReturnInvalid() throws Exception {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    Integer replicateNumber = 1;
-
-    ReplicateFormDto replicateFormDto = new ReplicateFormDto(
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-    );
-
-    mockMvc
-        .perform(
-            patch("/api/moisture-content-cone/replicate/{riaKey}/{replicateNumber}",
-                riaKey,
-                replicateNumber)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(replicateFormDto)))
+            .content(objectMapper.writeValueAsString(List.of(invalidForm))))
         .andExpect(status().isBadRequest());
   }
 
