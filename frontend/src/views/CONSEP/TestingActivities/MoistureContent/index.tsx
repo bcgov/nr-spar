@@ -48,6 +48,7 @@ const MoistureContent = () => {
   const [testActivity, setTestActivity] = useState<TestingActivityType>();
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
+  const [activityRiaKey, setActivityRiaKey] = useState<number>(0);
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
@@ -62,6 +63,13 @@ const MoistureContent = () => {
     refetchOnMount: true,
     refetchOnWindowFocus: false
   });
+
+  useEffect(() => {
+    if (!riaKey) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    }
+    setActivityRiaKey(Number(riaKey));
+  }, [riaKey]);
 
   useEffect(() => {
     if (
@@ -175,6 +183,7 @@ const MoistureContent = () => {
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
           replicatesData={testActivity?.replicatesList || []}
+          riaKey={activityRiaKey}
         />
       </Row>
       <Row className="consep-moisture-content-cone-form">

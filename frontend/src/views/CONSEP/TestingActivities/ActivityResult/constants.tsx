@@ -10,7 +10,9 @@ const alignRight = {
   muiTableBodyCellProps: { align: 'right' as 'right' }
 };
 
-export const columns: MRT_ColumnDef<ReplicateType>[] = [
+export const getColumns = (
+  deleteRow: (replicateNumber: number) => void
+): MRT_ColumnDef<ReplicateType>[] => [
   {
     accessorKey: 'replicateNumber',
     header: 'Replicate',
@@ -74,7 +76,13 @@ export const columns: MRT_ColumnDef<ReplicateType>[] = [
   {
     accessorKey: 'actions',
     header: '',
-    Cell: () => <Icons.TrashCan size={15} />,
+    Cell: ({ row }: { row: { original: ReplicateType } }) => (
+      <Icons.TrashCan
+        size={15}
+        style={{ cursor: 'pointer' }}
+        onClick={() => deleteRow(row.original.replicateNumber)}
+      />
+    ),
     enableEditing: false,
     size: 40,
     ...alignRight

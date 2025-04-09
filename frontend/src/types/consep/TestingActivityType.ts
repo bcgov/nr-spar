@@ -1,14 +1,14 @@
 export type ReplicateType = {
   riaKey: number;
   replicateNumber: number;
-  containerId: string;
-  containerWeight: number;
-  freshSeed: number;
-  containerAndDryWeight: number;
-  dryWeight: number;
   replicateAccInd: number;
-  replicateComment: string;
-  overrideReason: string;
+  containerId?: string;
+  containerWeight?: number;
+  freshSeed?: number;
+  containerAndDryWeight?: number;
+  dryWeight?: number;
+  replicateComment?: string;
+  overrideReason?: string;
 };
 
 export type TestingActivityType = {
