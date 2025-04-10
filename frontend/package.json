@@ -72,7 +72,7 @@
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.31.8",
     "eslint-plugin-react-hooks": "4.6.2",
-    "fork-ts-checker-webpack-plugin": "9.0.3",
+    "fork-ts-checker-webpack-plugin": "9.1.0",
     "nyc": "^17.0.0",
     "playwright-webkit": "^1.43.0",
     "source-map-support": "^0.5.21",
