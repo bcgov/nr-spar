@@ -116,10 +116,6 @@ jobs:
           overwrite: true
           parameters:
             -p ZONE=${{ inputs.target }}
-            -p S3_BUCKET=${{ vars.S3_BUCKET }}
-            -p S3_ENDPOINT=${{ vars.S3_ENDPOINT }}
-            -p S3_USER=${{ vars.S3_USER }}
-            -p S3_PASSWORD=${{ secrets.S3_PASSWORD }}
           triggers: ${{ inputs.triggers }}
 
   deploy:
