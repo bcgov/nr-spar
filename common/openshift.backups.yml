@@ -156,7 +156,7 @@ objects:
                       valueFrom:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-${COMPONENT}
-                          key: database-db
+                          key: database-name
                     - name: DATABASE_USER
                       valueFrom:
                         secretKeyRef:
