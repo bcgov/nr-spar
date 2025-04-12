@@ -1,105 +1,50 @@
 ---
-kind: "Template"
-apiVersion: "template.openshift.io/v1"
-metadata:
-  name: "{$JOB_NAME}-cronjob-template"
-  annotations:
-    description: "Scheduled Task to perform a Database Backup"
-    tags: "cronjob,backup"
+apiVersion: template.openshift.io/v1
+kind: Template
 parameters:
-  - name: "JOB_NAME"
-    displayName: "Job Name"
-    description: "Name of the Scheduled Job to Create."
-    value: "backup-postgres"
+  - name: NAME
+    description: Product name
+    value: nr-spar
+  - name: COMPONENT
+    description: Component name
+    value: db
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: "JOB_PERSISTENT_STORAGE_NAME"
-    displayName: "Backup Persistent Storage Name"
-    description: "Pre-Created PVC to use for backup target"
-    value: "bk-devex-von-tools-a9vlgd1jpsg1"
-    required: true
-  - name: "SCHEDULE"
-    displayName: "Cron Schedule"
-    description: "Cron Schedule to Execute the Job (using local cluster system TZ)"
-    # Currently targeting 1:00 AM Daily
-    value: "0 1 * * *"
-    required: true
-  - name: "SOURCE_IMAGE_NAME"
-    displayName: "Source Image Name"
-    description: "The name of the image to use for this resource."
-    required: true
-    value: "backup-container"
-  - name: "IMAGE_REGISTRY"
-    description: "The base OpenShift docker registry"
-    displayName: "Docker Image Registry"
-    required: true
-    # Set value to "docker-registry.default.svc:5000" if using OCP3
-    value: "ghcr.io"
-  - name: "IMAGE_NAMESPACE"
-    displayName: "Image Namespace"
-    description: "The namespace of the OpenShift project containing the imagestream for the application."
-    required: true
-    value: "bcgov"
-  - name: "TAG_NAME"
-    displayName: "Environment TAG name"
-    description: "The TAG name for this environment, e.g., dev, test, prod"
-    required: true
-    value: "dev"
-  - name: "DATABASE_SERVICE_NAME"
-    displayName: "Database Service Name"
-    description: "The name of the database service."
-    required: true
-    value: "postgresql"
+  - name: REGISTRY
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: ORG
+    description: Organization name
+    value: bcgov
+  - name: CRONJOB_RESTORE_TAG
+    description: Image tag for database restore cronjob; e.g. PR number, latest or prod
+    value: prod
+
+  ### Backup-Container starts here ###
+  - name: BACKUP_COMPONENT
+    description: BACKUP_COMPONENT name
+    value: database-backup
   - name: "DATABASE_DEFAULT_PORT"
-    displayName: "Database Service Port"
     description: "The configured port for the database service"
-    required: true
     value: "5432"
-  - name: "DATABASE_NAME"
-    displayName: "Database Name"
-    description: "The name of the database."
-    required: true
-    value: "MyDatabase"
-  - name: "DATABASE_DEPLOYMENT_NAME"
-    displayName: "Database Deployment Name"
-    description: "The name associated to the database deployment resources.  In particular, this is used to wire up the credentials associated to the database."
-    required: true
-    value: "postgresql"
-  - name: DATABASE_USER_KEY_NAME
-    displayName: Database User Key Name
-    description:
-      The database user key name stored in database deployment resources specified
-      by DATABASE_DEPLOYMENT_NAME.
-    required: true
-    value: database-user
-  - name: DATABASE_PASSWORD_KEY_NAME
-    displayName: Database Password Key Name
-    description:
-      The database password key name stored in database deployment resources
-      specified by DATABASE_DEPLOYMENT_NAME.
-    required: true
-    value: database-password
   - name: "BACKUP_STRATEGY"
-    displayName: "Backup Strategy"
     description: "The strategy to use for backups; for example daily, or rolling."
     required: true
     value: "rolling"
   - name: "BACKUP_DIR"
-    displayName: "The root backup directory"
     description: "The name of the root backup directory"
     required: true
     value: "/backups/"
   - name: "NUM_BACKUPS"
-    displayName: "The number of backup files to be retained"
     description: "The number of backup files to be retained.  Used for the `daily` backup strategy.  Ignored when using the `rolling` backup strategy."
     required: false
     value: "5"
   - name: "DAILY_BACKUPS"
-    displayName: "Number of Daily Backups to Retain"
     description: "The number of daily backup files to be retained.  Used for the `rolling` backup strategy."
     required: false
     value: "7"
   - name: "WEEKLY_BACKUPS"
-    displayName: "Number of Weekly Backups to Retain"
     description: "The number of weekly backup files to be retained.  Used for the `rolling` backup strategy."
     required: false
     value: "4"
@@ -109,25 +54,32 @@ parameters:
     required: false
     value: "1"
   - name: "JOB_SERVICE_ACCOUNT"
-    displayName: "Service Account Name"
     description: "Name of the Service Account To Exeucte the Job As."
     value: "default"
     required: true
   - name: "SUCCESS_JOBS_HISTORY_LIMIT"
-    displayName: "Successful Job History Limit"
     description: "The number of successful jobs that will be retained"
     value: "5"
     required: true
   - name: "FAILED_JOBS_HISTORY_LIMIT"
-    displayName: "Failed Job History Limit"
     description: "The number of failed jobs that will be retained"
     value: "2"
     required: true
   - name: "JOB_BACKOFF_LIMIT"
-    displayName: "Job Backoff Limit"
     description: "The number of attempts to try for a successful job outcome"
     value: "0"
-    required: false
+  - description: Volume space available for data, e.g. 512Mi, 2Gi.
+    displayName: Database Backup Volume Capacity
+    name: DB_BACKUP_PVC_SIZE
+    value: 1Gi
+  - name: CRON_MINUTES
+    description: Random number, 0-60, for scheduling cronjobs
+    from: "[0-5]{1}[0-9]{1}"
+    generate: expression
+  - name: RANDOM_EXPRESSION
+    description: Random expression to make sure deployments update
+    from: "[a-zA-Z0-9]{32}"
+    generate: expression
   - name: "S3_USER"
     description: "The S3 user to use for backup"
     required: true
@@ -141,133 +93,228 @@ parameters:
     description: "The S3 bucket to use for backup"
     required: true
 objects:
-- kind: ConfigMap
-  apiVersion: v1
-  metadata:
-    name: "${JOB_NAME}-config"
-    labels:
-      template: "${JOB_NAME}-config-template"
-      cronjob: "${JOB_NAME}"
-  data:
-    DATABASE_SERVICE_NAME: "${DATABASE_SERVICE_NAME}"
-    DEFAULT_PORT: "${DATABASE_DEFAULT_PORT}"
-    POSTGRESQL_DATABASE: "${DATABASE_NAME}"
-    # BACKUP_STRATEGY: "daily"
-    BACKUP_STRATEGY: "rolling"
-    RETENTION.NUM_BACKUPS: "${NUM_BACKUPS}"
-    RETENTION.DAILY_BACKUPS: "${DAILY_BACKUPS}"
-    RETENTION.WEEKLY_BACKUPS: "${WEEKLY_BACKUPS}"
-    RETENTION.MONTHLY_BACKUPS: "${MONTHLY_BACKUPS}"
+  ### Backup-Container starts here ###
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+      labels:
+        app: ${NAME}-${ZONE}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: "${DB_BACKUP_PVC_SIZE}"
+      storageClassName: netapp-file-standard
+  - kind: CronJob
+    apiVersion: "batch/v1"
+    metadata:
+      name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+      labels:
+        app: ${NAME}-${ZONE}
+        cronjob: ${NAME}-${ZONE}
+    spec:
+      schedule: "${CRON_MINUTES} 8 * * *" # Run daily at 8:xx AM UTC
+      concurrencyPolicy: "Replace"
+      successfulJobsHistoryLimit: "${{SUCCESS_JOBS_HISTORY_LIMIT}}"
+      failedJobsHistoryLimit: "${{FAILED_JOBS_HISTORY_LIMIT}}"
+      jobTemplate:
+        metadata:
+          labels:
+            app: ${NAME}-${ZONE}
+            cronjob: ${NAME}-${ZONE}
+        spec:
+          backoffLimit: ${{JOB_BACKOFF_LIMIT}}
+          template:
+            metadata:
+              labels:
+                app: ${NAME}-${ZONE}
+                cronjob: ${NAME}-${ZONE}
+            spec:
+              containers:
+                - name: ${NAME}-${ZONE}
+                  image: "bcgovimages/backup-container:latest"
+                  command:
+                    - "/bin/bash"
+                    - "-c"
+                    - "/backup.sh -1"
+                  volumeMounts:
+                    - mountPath: "${BACKUP_DIR}"
+                      name: "backup"
+                  env:
+                    - name: BACKUP_DIR
+                      value: "${BACKUP_DIR}"
+                    - name: BACKUP_STRATEGY
+                      value: "${BACKUP_STRATEGY}"
+                      optional: true
+                    - name: NUM_BACKUPS
+                      value: "${NUM_BACKUPS}"
+                      optional: true
+                    - name: DAILY_BACKUPS
+                      value: "${DAILY_BACKUPS}"
+                      optional: true
+                    - name: WEEKLY_BACKUPS
+                      value: "${WEEKLY_BACKUPS}"
+                      optional: true
+                    - name: MONTHLY_BACKUPS
+                      value: "${MONTHLY_BACKUPS}"
+                      optional: true
+                    - name: DATABASE_SERVICE_NAME
+                      value: "${NAME}-${ZONE}-${COMPONENT}"
+                    - name: DEFAULT_PORT
+                      value: ${DATABASE_DEFAULT_PORT}
+                    - name: POSTGRESQL_DATABASE
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${COMPONENT}
+                          key: database-db
+                    - name: DATABASE_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${COMPONENT}
+                          key: database-user
+                    - name: DATABASE_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${COMPONENT}
+                          key: database-password
+                    - name: S3_USER
+                      value: ${S3_USER}
+                    - name: S3_PASSWORD
+                      value: ${S3_PASSWORD}
+                    - name: S3_ENDPOINT
+                      value: ${S3_ENDPOINT}
+                    - name: S3_BUCKET
+                      value: ${S3_BUCKET}
+              volumes:
+                - name: backup
+                  persistentVolumeClaim:
+                    claimName: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+              restartPolicy: "Never"
+              terminationGracePeriodSeconds: 30
+              activeDeadlineSeconds: 1600
+              dnsPolicy: "ClusterFirst"
+              serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
+              serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+  - kind: CronJob
+    apiVersion: "batch/v1"
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}-restore
+      labels:
+        app: ${NAME}-${ZONE}
+        cronjob: ${NAME}-${ZONE}
+    spec:
+      schedule: "0 0 31 2 *" # At 00:00 on day-of-month 31 in February, so it won't run, we'll trigger it manually when need
+      concurrencyPolicy: "Replace"
+      successfulJobsHistoryLimit: ${{SUCCESS_JOBS_HISTORY_LIMIT}}
+      failedJobsHistoryLimit: ${{FAILED_JOBS_HISTORY_LIMIT}}
+      jobTemplate:
+        metadata:
+          labels:
+            app: ${NAME}-${ZONE}
+            cronjob: ${NAME}-${ZONE}
+        spec:
+          backoffLimit: 0
+          template:
+            metadata:
+              labels:
+                app: ${NAME}-${ZONE}
+                cronjob: ${NAME}-${ZONE}
+            spec:
+              containers:
+                - name: ${NAME}-${ZONE}-${COMPONENT}-restore
+                  # use the same image as our database, so we can run the psql command
+                  image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${CRONJOB_RESTORE_TAG}
+                  command: ["/bin/sh", "-c"]
+                  args:
+                  - |
+                    sql_file=$(find backups/${BACKUP_FILE_DIR} -type f -name "*.sql" -print0)
+                    if [  -z $sql_file ]; then
+                      sql_zip_file=$(find backups/${BACKUP_FILE_DIR} -type f -name "*.sql.gz" -print0)
+                      if [ -z $sql_zip_file ]; then
+                        echo "No zipped backup file found"
+                      else
+                        echo "Found zipped backup file: $sql_zip_file"
+                        gzip -dk $sql_zip_file
+                      fi
+                    fi
+                    sql_file=$(find backups/${BACKUP_FILE_DIR} -type f -name "*.sql" -print0)
+                    if [  -z $sql_file ]; then
+                      echo "Error: No backup SQL file is found"
+                      exit 1
 
-- kind: "CronJob"
-  apiVersion: "batch/v1"
-  metadata:
-    name: "${JOB_NAME}"
-    labels:
-      template: "${JOB_NAME}-cronjob"
-      cronjob: "${JOB_NAME}"
-  spec:
-    schedule: "${SCHEDULE}"
-    concurrencyPolicy: "Forbid"
-    successfulJobsHistoryLimit: "${{SUCCESS_JOBS_HISTORY_LIMIT}}"
-    failedJobsHistoryLimit: "${{FAILED_JOBS_HISTORY_LIMIT}}"
-    jobTemplate:
-      metadata:
-        labels:
-          template: "${JOB_NAME}-job"
-          cronjob: "${JOB_NAME}"
-      spec:
-        backoffLimit: ${{JOB_BACKOFF_LIMIT}}
-        template:
-          metadata:
-            labels:
-              template: "${JOB_NAME}-job"
-              cronjob: "${JOB_NAME}"
-          spec:
-            containers:
-              - name: "${JOB_NAME}-cronjob"
-                image: "${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${SOURCE_IMAGE_NAME}:${TAG_NAME}"
-                # image: backup
-                command:
-                  - "/bin/bash"
-                  - "-c"
-                  - "/backup.sh -1"
-                volumeMounts:
-                  - mountPath: "${BACKUP_DIR}"
-                    name: "backup"
-                env:
-                  - name: BACKUP_DIR
-                    value: "${BACKUP_DIR}"
-                  - name: BACKUP_STRATEGY
-                    valueFrom:
-                      configMapKeyRef:
-                        name: "${JOB_NAME}-config"
-                        key: BACKUP_STRATEGY
-                  - name: NUM_BACKUPS
-                    valueFrom:
-                      configMapKeyRef:
-                        name: "${JOB_NAME}-config"
-                        key: RETENTION.NUM_BACKUPS
-                        optional: true
-                  - name: DAILY_BACKUPS
-                    valueFrom:
-                      configMapKeyRef:
-                        name: "${JOB_NAME}-config"
-                        key: RETENTION.DAILY_BACKUPS
-                        optional: true
-                  - name: WEEKLY_BACKUPS
-                    valueFrom:
-                      configMapKeyRef:
-                        name: "${JOB_NAME}-config"
-                        key: RETENTION.WEEKLY_BACKUPS
-                        optional: true
-                  - name: MONTHLY_BACKUPS
-                    valueFrom:
-                      configMapKeyRef:
-                        name: "${JOB_NAME}-config"
-                        key: RETENTION.MONTHLY_BACKUPS
-                        optional: true
-                  - name: DATABASE_SERVICE_NAME
-                    valueFrom:
-                      configMapKeyRef:
-                        name: "${JOB_NAME}-config"
-                        key: DATABASE_SERVICE_NAME
-                  - name: DEFAULT_PORT
-                    valueFrom:
-                      configMapKeyRef:
-                        name: "${JOB_NAME}-config"
-                        key: DEFAULT_PORT
-                        optional: true
-                  - name: POSTGRESQL_DATABASE
-                    valueFrom:
-                      configMapKeyRef:
-                        name: "${JOB_NAME}-config"
-                        key: POSTGRESQL_DATABASE
-                  - name: DATABASE_USER
-                    valueFrom:
-                      secretKeyRef:
-                        name: "${DATABASE_DEPLOYMENT_NAME}"
-                        key: "${DATABASE_USER_KEY_NAME}"
-                  - name: DATABASE_PASSWORD
-                    valueFrom:
-                      secretKeyRef:
-                        name: "${DATABASE_DEPLOYMENT_NAME}"
-                        key: "${DATABASE_PASSWORD_KEY_NAME}"
-                  - name: S3_USER
-                    value: ${S3_USER}
-                  - name: S3_PASSWORD
-                    value: ${S3_PASSWORD}
-                  - name: S3_ENDPOINT
-                    value: ${S3_ENDPOINT}
-                  - name: S3_BUCKET
-                    value: ${S3_BUCKET}
-            volumes:
-              - name: backup
-                persistentVolumeClaim:
-                  claimName: "${JOB_PERSISTENT_STORAGE_NAME}"
-            restartPolicy: "Never"
-            terminationGracePeriodSeconds: 30
-            activeDeadlineSeconds: 1600
-            dnsPolicy: "ClusterFirst"
-            serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
-            serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+                    else
+                      echo "Found SQL file, rename existing database."
+                      psql -h ${NAME}-${ZONE}-${COMPONENT} -U ${POSTGRES_USER} -c "DROP DATABASE IF EXISTS ${OLD_FOM_DATABASE_NAME};" -c "ALTER DATABASE fom RENAME TO ${OLD_FOM_DATABASE_NAME};"
+                      if [ $? -ne 0 ]; then
+                        echo "Error: psql failed while trying to rename existing database."
+                        exit 1
+                      fi
+
+                      echo "Create a new empty database"
+                      psql -h ${NAME}-${ZONE}-${COMPONENT} -U ${POSTGRES_USER} -c "CREATE DATABASE fom;"
+                      db_restore_cmd_status=$?
+                      if [ $db_restore_cmd_status -eq 0 ]; then
+                        echo "Running database restore with backup SQL file: $sql_file"
+                        psql -h ${NAME}-${ZONE}-${COMPONENT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f $sql_file
+                        db_restore_cmd_status=$?
+                      fi
+
+                      if [ $db_restore_cmd_status -ne 0 ]; then
+                        echo "DB restore failed, droping newly crated empty db fom (if exists), rename old(original) db back to fom."
+                        psql -h ${NAME}-${ZONE}-${COMPONENT} -U ${POSTGRES_USER} -c "DROP DATABASE IF EXISTS fom;" -c "ALTER DATABASE ${OLD_FOM_DATABASE_NAME} RENAME TO fom;"
+                        db_revert_restore_cmd_status=$?
+                        if [ $db_revert_restore_cmd_status -eq 0 ]; then
+                          # Successfully revert previous db restore procedure's failure; exit with failed status code from previous failure.
+                          echo "psql successfully reverted current failed db restore procedure. DB fom is back to original state. However, the restore procedure failed."
+                          exit $db_restore_cmd_status
+                        else
+                          echo "Error: psql failed to attempt reverting failed db restore procedure. Please manually rename ${OLD_FOM_DATABASE_NAME} back to fom."
+                          exit $db_revert_restore_cmd_status
+                        fi
+                      else
+                        echo "Database restore successfully."
+                        exit 0
+                      fi
+                    fi
+
+                  volumeMounts:
+                    - name: ${NAME}-${ZONE}-${COMPONENT}-restore
+                      mountPath: "${BACKUP_DIR}"
+                  env:
+                    - name: BACKUP_DIR
+                      value: "${BACKUP_DIR}"
+                    - name: POSTGRES_DB
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${COMPONENT}
+                          key: database-db
+                    # this enviornment variable mmust be named PGPASSWORD, so postgres knows this is the password, and will not ask us to enter manually
+                    - name: PGPASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${COMPONENT}
+                          key: database-password
+                    - name: POSTGRES_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${COMPONENT}
+                          key: database-user
+                    # we don't need to declare the BACKUP_FILE_DIR variable if we set it manually, just put here so we won't forget
+                    # BACKUP_FILE_DIR need to be set manually, in the format for example, daily/2024-08-16, where backup container puts the backup files
+                    - name: BACKUP_FILE_DIR
+                      value: ""
+                    - name: OLD_FOM_DATABASE_NAME
+                      value: old_fom
+              volumes:
+                - name: ${NAME}-${ZONE}-${COMPONENT}-restore
+                  persistentVolumeClaim:
+                    # use the same volume as database backup, so we can get the backup files
+                    claimName: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+              restartPolicy: "Never"
+              terminationGracePeriodSeconds: 30
+              activeDeadlineSeconds: 1600
+              dnsPolicy: "ClusterFirst"
+              serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
+              serviceAccount: "${JOB_SERVICE_ACCOUNT}"

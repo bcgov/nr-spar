@@ -102,6 +102,22 @@ jobs:
             -p MEMORY_REQUEST=${{ inputs.db-memory-request }}
           triggers: ${{ inputs.triggers }}
 
+      - name: Database Backups
+        uses: bcgov/action-deployer-openshift@v4.0.0
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          file: common/openshift.backups.yml
+          overwrite: false
+          parameters:
+            -p ZONE=${{ inputs.target }}
+            -p S3_BUCKET=${{ vars.S3_BUCKET }}
+            -p S3_ENDPOINT=${{ vars.S3_ENDPOINT }}
+            -p S3_USER=${{ vars.S3_USER }}
+            -p S3_SECRET=${{ secrets.S3_SECRET }}
+          triggers: ${{ inputs.triggers }}
+
   deploy:
     name: Deploy
     environment: ${{ inputs.environment }}
