@@ -85,6 +85,10 @@ jobs:
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
             -p ORACLE_CERT_SECRET='${{ secrets.ORACLE_CERT_SECRET }}'
             -p ORACLE_HOST='${{ vars.ORACLE_HOST }}'
+            -p S3_BUCKET=${{ vars.S3_BUCKET }}
+            -p S3_ENDPOINT=${{ vars.S3_ENDPOINT }}
+            -p S3_USER=${{ vars.S3_USER }}
+            -p S3_PASSWORD=${{ secrets.S3_PASSWORD }}
             -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ secrets.VITE_USER_POOLS_WEB_CLIENT_ID }}
           triggers: ${{ inputs.triggers }}
 
@@ -109,7 +113,7 @@ jobs:
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.backups.yml
-          overwrite: false
+          overwrite: true
           parameters:
             -p ZONE=${{ inputs.target }}
             -p S3_BUCKET=${{ vars.S3_BUCKET }}

@@ -80,18 +80,6 @@ parameters:
     description: Random expression to make sure deployments update
     from: "[a-zA-Z0-9]{32}"
     generate: expression
-  - name: "S3_USER"
-    description: "The S3 user to use for backup"
-    required: true
-  - name: "S3_PASSWORD"
-    description: "The S3 password to use for backup"
-    required: true
-  - name: "S3_ENDPOINT"
-    description: "The S3 endpoint to use for backup"
-    required: true
-  - name: "S3_BUCKET"
-    description: "The S3 bucket to use for backup"
-    required: true
 objects:
   ### Backup-Container starts here ###
   - kind: PersistentVolumeClaim
@@ -179,14 +167,26 @@ objects:
                         secretKeyRef:
                           name: ${NAME}-${ZONE}-${COMPONENT}
                           key: database-password
-                    - name: S3_USER
-                      value: ${S3_USER}
-                    - name: S3_PASSWORD
-                      value: ${S3_PASSWORD}
-                    - name: S3_ENDPOINT
-                      value: ${S3_ENDPOINT}
                     - name: S3_BUCKET
-                      value: ${S3_BUCKET}
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+                          key: s3-bucket
+                    - name: S3_ENDPOINT
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+                          key: s3-endpoint
+                    - name: S3_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+                          key: s3-password
+                    - name: S3_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${NAME}-${ZONE}-${BACKUP_COMPONENT}
+                          key: s3-user
               volumes:
                 - name: backup
                   persistentVolumeClaim:
