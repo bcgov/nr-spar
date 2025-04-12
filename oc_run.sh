@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Exit on errors or unset variables
-set -eux
+set -eu
 
 # Run and verify ETL jobs in OpenShift
 #
