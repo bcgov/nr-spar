@@ -7,7 +7,7 @@ parameters:
     value: nr-spar
   - name: COMPONENT
     description: Component name
-    value: db
+    value: database
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
