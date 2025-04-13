@@ -31,5 +31,17 @@
     cursor: pointer;
     min-width: auto;
     white-space: nowrap;
-  }  
+    outline: none;
+    border: none;
+  }
+  
+  .activity-result-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
 }

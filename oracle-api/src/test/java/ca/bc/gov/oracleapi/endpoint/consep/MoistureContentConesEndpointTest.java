@@ -215,9 +215,9 @@ class MoistureContentConesEndpointTest {
 
     ActivityFormDto activityFormDto = new ActivityFormDto(
         "STD",
-        "New comment",
         LocalDateTime.parse("2013-08-01T00:00:00"),
-        LocalDateTime.parse("2013-08-01T00:00:00")
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        "New comment"
     );
 
     ActivityEntity activityEntity = new ActivityEntity();
@@ -254,9 +254,9 @@ class MoistureContentConesEndpointTest {
     BigDecimal riaKey = new BigDecimal(1234567890);
     ActivityFormDto activityFormDto = new ActivityFormDto(
         "TST",
-        "Not found comment",
         LocalDateTime.parse("2013-08-01T00:00:00"),
-        LocalDateTime.parse("2013-08-01T00:00:00")
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        "Not found comment"
     );
 
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity entry not found"))

@@ -24,7 +24,7 @@ export const fieldsConfig = {
     placeholder: 'Choose a category',
     label: 'category',
     invalid: 'Please select an option',
-    options: ['Quality Assurance', 'Quality Control']
+    options: ['QA', 'QC', 'STD']
   },
   comments: {
     name: 'comments',

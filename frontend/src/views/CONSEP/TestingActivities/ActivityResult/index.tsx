@@ -1,128 +1,198 @@
-import React, { useEffect } from 'react';
-import { FlexGrid, Row, Column } from '@carbon/react';
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  FlexGrid, Row, Column, ActionableNotification
+} from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 import { useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 import GenericTable from '../../../../components/GenericTable';
 import { ReplicateType } from '../../../../types/consep/TestingActivityType';
-
-import { updateReplicates } from '../../../../api-service/moistureContentAPI';
-
+import { updateReplicates, deleteReplicate, deleteReplicates } from '../../../../api-service/moistureContentAPI';
 import { getColumns } from './constants';
 
 import './styles.scss';
 
+const TITLE = 'Activity results per replicate';
+
 type ActivityResultProp = {
   replicatesData: ReplicateType[],
-  riaKey: number
+  riaKey: number,
+  setAlert: (isSuccess: boolean, message: string) => void
 }
 
-const ActivityResult = ({ replicatesData, riaKey }: ActivityResultProp) => {
-  const [replicatesList, setReplicatesList] = React.useState<ReplicateType[]>([]);
-  const TITLE = 'Activity results per replicate';
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: string) => void) => {
+  const [replicatesList, setReplicatesList] = useState<ReplicateType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
+  const [showDeleteNotification, setShowDeleteNotification] = useState(false);
+
+  const lastCheckedListRef = useRef<string | null>(null);
 
   const updateReplicateListMutation = useMutation({
     mutationFn: (replicates: ReplicateType[]) => updateReplicates(riaKey, replicates),
-    onSuccess: () => {
-      console.log('Replicates updated successfully');
+    onSuccess: (_, variables) => {
+      lastCheckedListRef.current = JSON.stringify(variables);
     },
     onError: (error) => {
-      console.error('Update failed:', error);
+      setAlert(false, `Failed to update replicates: ${(error as AxiosError).message}`);
     }
   });
-  useEffect(() => {
+
+  const deleteReplicateMutation = useMutation({
+    mutationFn: (replicateNumber: number) => deleteReplicate(riaKey, replicateNumber),
+    onSuccess: (data) => {
+      setAlert(true, 'Replicate deleted successfully');
+      const replicateNumber = data.data;
+      const updatedList = replicatesList.filter((item) => item.replicateNumber !== replicateNumber);
+      lastCheckedListRef.current = JSON.stringify(updatedList);
+      setReplicatesList(updatedList);
+    }
+  });
+
+  const syncWithInitialData = (data: ReplicateType[]) => {
     setIsLoading(true);
-    setReplicatesList(replicatesData);
+    const dataString = JSON.stringify(data);
+    setReplicatesList(data);
+    lastCheckedListRef.current = dataString;
     setIsLoading(false);
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const hasValidationErrors = Object.values(validationErrors).some(Boolean);
+      if (hasValidationErrors || updateReplicateListMutation.isLoading) {
+        return;
+      }
+
+      const currentListString = JSON.stringify(replicatesList);
+      if (currentListString !== lastCheckedListRef.current) {
+        updateReplicateListMutation.mutate(replicatesList);
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [replicatesList, validationErrors, updateReplicateListMutation]);
+
+  return {
+    replicatesList,
+    setReplicatesList,
+    isLoading,
+    validationErrors,
+    setValidationErrors,
+    showDeleteNotification,
+    setShowDeleteNotification,
+    deleteReplicateMutation,
+    syncWithInitialData
+  };
+};
+
+const ActivityResult = ({ replicatesData, riaKey, setAlert }: ActivityResultProp) => {
+  const {
+    replicatesList,
+    setReplicatesList,
+    isLoading,
+    validationErrors,
+    setValidationErrors,
+    showDeleteNotification,
+    setShowDeleteNotification,
+    deleteReplicateMutation,
+    syncWithInitialData
+  } = useReplicates(riaKey, setAlert);
+
+  const deleteReplicatesMutation = useMutation({
+    mutationFn: (replicateNumbers: number[]) => deleteReplicates(riaKey, replicateNumbers),
+    onSuccess: () => {
+      setAlert(true, 'Replicates deleted successfully');
+      setReplicatesList([]);
+    },
+    onError: (error) => {
+      setAlert(false, `Failed to delete replicates: ${(error as AxiosError).message}`);
+    }
+  });
+
+  useEffect(() => {
+    syncWithInitialData(replicatesData);
   }, [replicatesData]);
-  console.log(1111, replicatesList);
 
   const addRow = () => {
-    const newRow = {
-      riaKey,
-      replicateNumber: replicatesList.length + 1,
-      replicateAccInd: 1
-    };
-    const updatedReplicatesList = [...replicatesList, newRow];
-    setReplicatesList(updatedReplicatesList);
+    const newRow = { riaKey, replicateNumber: replicatesList.length + 1, replicateAccInd: 1 };
+    setReplicatesList([...replicatesList, newRow]);
+  };
+
+  const handleAllClearData = () => {
+    setShowDeleteNotification(true);
+  };
+
+  const deleteAllRows = () => {
+    setShowDeleteNotification(false);
+    deleteReplicatesMutation.mutate(replicatesList.map((item) => item.replicateNumber));
   };
 
   const deleteRow = (replicateNumber: number) => {
-    const updatedList = replicatesList.filter((item) => item.replicateNumber !== replicateNumber);
-    setReplicatesList(updatedList);
-  };
-
-  const handleEditSave = (updatedRow: ReplicateType, rowIndex: number) => {
-    const updatedList = [...replicatesList];
-    updatedList[rowIndex] = updatedRow;
-    setReplicatesList(updatedList);
-  };
-
-  const clearAll = () => {
-    setReplicatesList([]);
-  };
-
-  const acceptAll = () => {
-    const updatedList = replicatesList.map((item) => ({
-      ...item,
-      replicateAccInd: 1
-    }));
-    setReplicatesList(updatedList);
+    deleteReplicateMutation.mutate(replicateNumber);
   };
 
   const actions = [
-    {
-      label: 'Clear data',
-      icon: <Icons.TrashCan size={15} />,
-      action: clearAll
-    },
-    {
-      label: 'Accept all',
-      icon: <Icons.CheckboxChecked size={15} />,
-      action: acceptAll
-    },
-    {
-      label: 'Add row',
-      icon: <Icons.AddAlt size={15} />,
-      action: addRow
-    },
-    {
-      label: 'Save',
-      icon: <Icons.Save size={15} />,
-      action: () => {
-        setIsLoading(true);
-        updateReplicateListMutation.mutate(replicatesList);
-        setIsLoading(false);
-      }
-    }
+    { label: 'Clear data', icon: <Icons.TrashCan size={15} />, action: handleAllClearData },
+    { label: 'Accept all', icon: <Icons.CheckboxChecked size={15} />, action: () => setReplicatesList(replicatesList.map((r) => ({ ...r, replicateAccInd: 1 }))) },
+    { label: 'Add row', icon: <Icons.AddAlt size={15} />, action: addRow }
   ];
+
+  const updateRow = (row: ReplicateType) => {
+    const updatedList = replicatesList.map((item) => (item.replicateNumber === row.replicateNumber
+      ? { ...item, ...row }
+      : item));
+    const updatedListWithMCValue = updatedList.map((item) => ({
+      ...item,
+      mcValue: item.freshSeed && item.dryWeight
+        ? Math.round((item.freshSeed - item.dryWeight) / item.freshSeed)
+        : undefined
+    }));
+    setReplicatesList(updatedListWithMCValue);
+  };
 
   return (
     <FlexGrid className="activity-result-container">
+      {showDeleteNotification && (
+        <ActionableNotification
+          className="activity-result-notification"
+          actionButtonLabel="Clear"
+          aria-label="close notification"
+          closeOnEscape
+          kind="warning"
+          onActionButtonClick={deleteAllRows}
+          statusIconDescription="notification"
+          title="Are you sure?"
+          subtitle="This action will clear the data in the table."
+        />
+      )}
       <Row>
         <h3 className="activity-result-title">{TITLE}</h3>
       </Row>
       <Row className="activity-result-actions">
         <Column lg={8} />
         <Column lg={4} className="activity-result-actions">
-          {actions.map((action) => (
-            <span key={action.label} className="action-item" onClick={action.action}>
-              {action.label}
-              {action.icon}
-            </span>
+          {actions.map(({ label, icon, action }) => (
+            <button key={label} className="action-item" onClick={action} type="button" aria-label={label}>
+              {label}
+              {icon}
+            </button>
           ))}
-
         </Column>
       </Row>
       <Row>
         <GenericTable
-          columns={getColumns(deleteRow)}
+          columns={getColumns(
+            (num) => deleteRow(num),
+            updateRow,
+            validationErrors,
+            setValidationErrors
+          )}
           data={replicatesList}
           isLoading={isLoading}
           isCompacted
           enableSorting
-          onEditingRowSave={handleEditSave}
         />
       </Row>
     </FlexGrid>

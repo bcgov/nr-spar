@@ -21,6 +21,7 @@ const ButtonGroup: React.FC<ButtonGroupProps> = ({ buttons }) => (
           size={button.size}
           className="form-action-btn"
           renderIcon={button.icon}
+          disabled={button.disabled}
         >
           {button.text}
         </Button>

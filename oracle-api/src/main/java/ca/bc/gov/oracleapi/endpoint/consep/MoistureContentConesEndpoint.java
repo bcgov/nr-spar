@@ -322,7 +322,7 @@ public class MoistureContentConesEndpoint {
                   schema = @Schema(implementation = Void.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
-  public void deleteReplicate(
+  public Integer deleteReplicate(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
@@ -336,7 +336,52 @@ public class MoistureContentConesEndpoint {
           description = "Number of the replicate to delete",
           required = true)
       @PathVariable
-      Integer replicateNumber) {
+          Integer replicateNumber) {
     moistureContentService.deleteMccReplicate(riaKey, replicateNumber);
+    return replicateNumber;
+  }
+  
+  @PostMapping(value = "/{riaKey}/replicates", produces = "application/json")
+  @Operation(
+      summary = "Delete replicate entries in bulk",
+      description = "Removes multiple replicate entries from the database using their identifiers.")
+  @ApiResponses(value = {
+    @ApiResponse(
+          responseCode = "200",
+          description = "The replicate entry was successfully deleted",
+          content =
+              @Content(
+                  schema = @Schema(implementation = Void.class))),
+    @ApiResponse(
+          responseCode = "401",
+          description = "Access token is missing or invalid",
+          content =
+              @Content(
+                  schema = @Schema(implementation = Void.class))),
+    @ApiResponse(
+          responseCode = "404",
+          description = "The replicate entry was not found",
+          content =
+              @Content(
+                  schema = @Schema(implementation = Void.class)))
+  })
+  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+    public List<Integer> deleteReplicates(
+        @Parameter(
+            name = "riaKey",
+            in = ParameterIn.PATH,
+            description = "Identification key for MCC data",
+            required = true)
+        @PathVariable
+        BigDecimal riaKey,
+        @Parameter(
+            name = "replicateNumbers",
+            in = ParameterIn.QUERY,
+            description = "List of replicate numbers to delete",
+            required = true)
+        @RequestBody
+            List<Integer> replicateNumbers) {
+    moistureContentService.deleteMccReplicates(riaKey, replicateNumbers);
+    return replicateNumbers;
   }
 }

@@ -23,7 +23,6 @@ type Props<T extends Record<string, any>> = {
   enableColumnActions?: boolean;
   enableEditing?: boolean;
   isCompacted?: boolean;
-  onEditingRowSave?: (updatedRow: T, rowIndex: number) => void;
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
   initialState?: any;
@@ -50,7 +49,6 @@ const GenericTable = <T extends Record<string, any>>({
   enableColumnActions = false,
   enableEditing = true,
   isCompacted = false,
-  onEditingRowSave,
   renderRowActions,
   onRowClick,
   initialState
@@ -113,11 +111,7 @@ const GenericTable = <T extends Record<string, any>>({
     enableFullScreenToggle,
     enableColumnActions,
     enableEditing,
-    editDisplayMode: 'row',
-    onEditingRowSave: ({ row, values, table }) => {
-      onEditingRowSave?.(values as T, row.index);
-      table.setEditingRow(null);
-    },
+    editDisplayMode: 'cell',
     renderRowActions: renderRowActions
       ? ({ row, table }) => renderRowActions({ row, table })
       : undefined,

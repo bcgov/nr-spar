@@ -59,7 +59,7 @@ public class MoistureContentService {
     List<ReplicateEntity> replicates =
         replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
-    if (activityData.isEmpty() || testResultData.isEmpty() || replicates.isEmpty()) {
+    if (activityData.isEmpty() || testResultData.isEmpty()) {
       SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for given RIA_SKEY");
     }
@@ -317,6 +317,34 @@ public class MoistureContentService {
 
     testResultRepository.updateTestResultStatusToAccepted(riaKey);
     SparLog.info("Moisture content data accepted for RIA_SKEY: {}", riaKey);
+  }
+
+  /**
+   * Deletes multiple replicates.
+   *
+   * @param riaKey          the identifier key for all table related to MCC
+   * @param replicateNumbers the replicate numbers to be deleted
+   */
+  @Transactional
+  public void deleteMccReplicates(
+      @NonNull BigDecimal riaKey,
+      @NonNull List<Integer> replicateNumbers
+  ) {
+    SparLog.info("Deleting replicates with the riaKey: {} and replicateNumbers: {}",
+        riaKey, replicateNumbers);
+
+    List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
+        riaKey,
+        replicateNumbers
+    );
+
+    if (replicates.isEmpty()) {
+      throw new InvalidMccKeyException();
+    }
+
+    replicateRepository.deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
+
+    SparLog.info("Replicates with riaKey {} ", riaKey + "deleted!");
   }
 
   /**

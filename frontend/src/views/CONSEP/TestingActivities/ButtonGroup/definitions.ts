@@ -4,4 +4,5 @@ export type ButtonObjType = {
   size: string
   icon: any
   text: string
+  disabled?: boolean
 };
