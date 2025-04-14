@@ -11,7 +11,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  bd-bk-test:
+  db-bk-test:
     environment: test
     name: Database Backup (TEST)
     continue-on-error: true
@@ -24,7 +24,7 @@ jobs:
           oc_token: ${{ secrets.oc_token }}
           commands: ./common/db_bk_run.sh test
 
-  bd-bk-prod:
+  db-bk-prod:
     environment: prod
     name: Database Backup (PROD)
     continue-on-error: false
