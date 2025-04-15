@@ -206,9 +206,9 @@ class MoistureContentServiceTest {
 
     ActivityFormDto activityDto = new ActivityFormDto(
         "STD",
-        "Updated comment",
         LocalDateTime.parse("2013-08-01T00:00:00"),
-        LocalDateTime.parse("2013-09-01T00:00:00")
+        LocalDateTime.parse("2013-09-01T00:00:00"),
+        "Updated comment"
     );
 
     ActivityEntity result = moistureContentService.updateActivityField(riaKey, activityDto);

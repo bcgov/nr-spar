@@ -54,5 +54,19 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, Repl
     void deleteByRiaKeyAndReplicateNumber(
         @Param("riaKey") BigDecimal riaKey,
         @Param("testReplicateNumber") Integer testReplicateNumber
-  );
+    );
+  
+  @Modifying
+  @Transactional
+  @Query(
+      value = """
+        DELETE FROM CONSEP.CNS_T_TEST_REP_MC
+        WHERE RIA_SKEY = :riaKey
+        AND TEST_REPLICATE_NO IN (:testReplicateNumbers)
+      """,
+      nativeQuery = true)
+    void deleteByRiaKeyAndReplicateNumbers(
+        @Param("riaKey") BigDecimal riaKey,
+        @Param("testReplicateNumbers") List<Integer> testReplicateNumbers
+    );
 }

@@ -11,12 +11,12 @@ import java.math.BigDecimal;
 @Schema(description = "JSON object with the values to be updated in the Replicate table")
 public record ReplicateFormDto(
     @NotNull Integer replicateNumber,
-    @NotNull String containerId,
-    @NotNull BigDecimal containerWeight,
-    @NotNull BigDecimal freshSeed,
-    @NotNull BigDecimal containerAndDryWeight,
-    @NotNull BigDecimal dryWeight,
+    String containerId,
+    BigDecimal containerWeight,
+    BigDecimal freshSeed,
+    BigDecimal containerAndDryWeight,
+    BigDecimal dryWeight,
     @NotNull Integer replicateAccInd,
-    @NotNull String replicateComment,
-    @NotNull String overrideReason
+    String replicateComment,
+    String overrideReason
 ){}
