@@ -22,7 +22,9 @@ import {
 } from '@carbon/icons-react';
 
 import ROUTES from '../../../../routes/constants';
-import { getMccByRiaKey, updateActivityRecord } from '../../../../api-service/moistureContentAPI';
+import {
+  getMccByRiaKey, updateActivityRecord, validateResult, acceptResult
+} from '../../../../api-service/moistureContentAPI';
 import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { TestingActivityType, ActivityRecordType } from '../../../../types/consep/TestingActivityType';
 import { ActivitySummaryType } from '../../../../types/ActivitySummaryType';
@@ -37,7 +39,7 @@ import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
 
 import {
-  DATE_FORMAT, fieldsConfig
+  DATE_FORMAT, fieldsConfig, categoryMap, categoryMapReverse
 } from './constants';
 
 import './styles.scss';
@@ -151,6 +153,56 @@ const MoistureContent = () => {
     });
   };
 
+  const validateTest = useMutation({
+    mutationFn: () => validateResult(riaKey ?? ''),
+    onSuccess: () => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        testCompleteInd: 1,
+        sampleDesc: testActivity?.sampleDesc || '',
+        moistureStatus: testActivity?.moistureStatus || '',
+        moisturePct: testActivity?.moisturePct || 0,
+        acceptResult: testActivity?.acceptResult || 0,
+        requestId: testActivity?.requestId || '',
+        seedlotNumber: testActivity?.seedlotNumber || '',
+        activityType: testActivity?.activityType || '',
+        replicatesList: testActivity?.replicatesList || []
+      };
+      setTestActivity(testActivityData);
+      setAlert({ isSuccess: true, message: 'Test validated successfully' });
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    },
+    onError: (error) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to validate test: ${(error as AxiosError).message}`
+      });
+    }
+  });
+
+  const acceptTest = useMutation({
+    mutationFn: () => acceptResult(riaKey ?? ''),
+    onSuccess: () => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        acceptResult: 1
+      };
+      setTestActivity(testActivityData);
+      setAlert({ isSuccess: true, message: 'Test accepted successfully' });
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    },
+    onError: (error) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to accept test: ${(error as AxiosError).message}`
+      });
+    }
+  });
+
   const createBreadcrumbItems = () => {
     const crumbsList = [];
     crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
@@ -172,14 +224,18 @@ const MoistureContent = () => {
       text: 'Complete test',
       kind: 'tertiary',
       size: 'lg',
-      icon: Checkmark
+      icon: Checkmark,
+      disabled: !!testActivity?.testCompleteInd,
+      action: () => validateTest.mutate()
     },
     {
       id: 'accept-test',
       text: 'Accept test',
       kind: 'tertiary',
       size: 'lg',
-      icon: CheckmarkOutline
+      icon: CheckmarkOutline,
+      disabled: !testActivity?.testCompleteInd || !!testActivity?.acceptResult,
+      action: () => acceptTest.mutate()
     },
     {
       id: 'test-history',
@@ -236,6 +292,7 @@ const MoistureContent = () => {
         <ActivityResult
           replicatesData={testActivity?.replicatesList || []}
           riaKey={activityRiaKey}
+          isEditable={!testActivity?.testCompleteInd}
           setAlert={handleAlert}
         />
       </Row>
@@ -300,10 +357,17 @@ const MoistureContent = () => {
             placeholder={fieldsConfig.category.placeholder as string}
             titleText={fieldsConfig.category.title as string}
             invalidText={fieldsConfig.category.invalid as string}
-            value={activityRecord?.testCategoryCode}
+            value={
+              activityRecord?.testCategoryCode
+              && activityRecord.testCategoryCode in categoryMap
+                ? categoryMap[activityRecord.testCategoryCode as keyof typeof categoryMap]
+                : ''
+            }
             onChange={(e: { selectedItem: string }) => {
               handleUodateActivityRecord({
-                testCategoryCode: e.selectedItem
+                testCategoryCode: categoryMapReverse[
+                  e.selectedItem as keyof typeof categoryMapReverse
+                ]
               });
             }}
           />

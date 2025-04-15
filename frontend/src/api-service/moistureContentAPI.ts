@@ -26,3 +26,13 @@ export const updateActivityRecord = (riaKey: number, activityRecord: any) => {
   const url = `${ApiConfig.moistureContent}/${riaKey}`;
   return api.patch(url, activityRecord);
 };
+
+export const validateResult = (riaKey: string) => {
+  const url = `${ApiConfig.moistureContent}/validate/${riaKey}`;
+  return api.get(url);
+};
+
+export const acceptResult = (riaKey: string) => {
+  const url = `${ApiConfig.moistureContent}/accept/${riaKey}`;
+  return api.get(url);
+};

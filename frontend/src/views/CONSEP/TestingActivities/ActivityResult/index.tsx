@@ -18,6 +18,7 @@ const TITLE = 'Activity results per replicate';
 type ActivityResultProp = {
   replicatesData: ReplicateType[],
   riaKey: number,
+  isEditable: boolean,
   setAlert: (isSuccess: boolean, message: string) => void
 }
 
@@ -87,7 +88,9 @@ const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: s
   };
 };
 
-const ActivityResult = ({ replicatesData, riaKey, setAlert }: ActivityResultProp) => {
+const ActivityResult = ({
+  replicatesData, riaKey, isEditable, setAlert
+}: ActivityResultProp) => {
   const {
     replicatesList,
     setReplicatesList,
@@ -146,11 +149,22 @@ const ActivityResult = ({ replicatesData, riaKey, setAlert }: ActivityResultProp
     const updatedListWithMCValue = updatedList.map((item) => ({
       ...item,
       mcValue: item.freshSeed && item.dryWeight
-        ? Math.round((item.freshSeed - item.dryWeight) / item.freshSeed)
+        ? Math.round(
+          ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
+        ) / 100
         : undefined
     }));
     setReplicatesList(updatedListWithMCValue);
   };
+
+  const replicateListWithMCValue = replicatesList.map((item) => ({
+    ...item,
+    mcValue: item.freshSeed && item.dryWeight
+      ? Math.round(
+        ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
+      ) / 100
+      : undefined
+  }));
 
   return (
     <FlexGrid className="activity-result-container">
@@ -174,7 +188,7 @@ const ActivityResult = ({ replicatesData, riaKey, setAlert }: ActivityResultProp
         <Column lg={8} />
         <Column lg={4} className="activity-result-actions">
           {actions.map(({ label, icon, action }) => (
-            <button key={label} className="action-item" onClick={action} type="button" aria-label={label}>
+            <button key={label} className={isEditable ? 'action-item' : 'action-item-disabled'} onClick={action} type="button" aria-label={label} disabled={!isEditable}>
               {label}
               {icon}
             </button>
@@ -184,13 +198,15 @@ const ActivityResult = ({ replicatesData, riaKey, setAlert }: ActivityResultProp
       <Row>
         <GenericTable
           columns={getColumns(
+            !isEditable,
             (num) => deleteRow(num),
             updateRow,
             validationErrors,
             setValidationErrors
           )}
-          data={replicatesList}
+          data={replicateListWithMCValue}
           isLoading={isLoading}
+          enableEditing={isEditable}
           isCompacted
           enableSorting
         />

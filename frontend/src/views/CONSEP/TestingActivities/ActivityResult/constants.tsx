@@ -76,6 +76,7 @@ const createEditableTextColumn = (
 });
 
 export const getColumns = (
+  disableEditing: boolean,
   handleClearOne: (replicateNumber: number) => void,
   updateRow: (row: ReplicateType) => void,
   validationErrors: Record<string, string | undefined>,
@@ -141,6 +142,7 @@ export const getColumns = (
     Cell: ({ row }: { row: { original: ReplicateType } }) => (
       <Checkbox
         checked={!!row.original.replicateAccInd}
+        disabled={disableEditing}
         onClick={() => {
           updateRow({
             ...row.original,

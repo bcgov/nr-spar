@@ -157,7 +157,7 @@ public class MoistureContentConesEndpoint {
   *
   * @throws Exception if the table doesn't match the format.
   */
-  @PostMapping(path = "/{riaKey}/validate")
+  @GetMapping(path = "/validate/{riaKey}")
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
@@ -214,7 +214,7 @@ public class MoistureContentConesEndpoint {
   * Accept moisture content cones data.
   *
   */
-  @PostMapping(path = "/{riaKey}/accept")
+  @GetMapping(path = "/accept/{riaKey}")
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",

@@ -22,7 +22,7 @@
     margin-bottom: 0.5rem;
   }
   
-  .action-item {
+  .action-item, .action-item-disabled {
     @include type.type-style('body-short-01');
     color: colors.$blue-60;
     display: flex;
@@ -33,6 +33,11 @@
     white-space: nowrap;
     outline: none;
     border: none;
+  }
+
+  .action-item-disabled {
+    color: colors.$gray-80;
+    cursor: not-allowed;
   }
   
   .activity-result-notification {
