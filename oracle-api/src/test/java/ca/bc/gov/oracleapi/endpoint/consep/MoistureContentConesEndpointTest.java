@@ -397,7 +397,7 @@ class MoistureContentConesEndpointTest {
     doNothing().when(moistureContentService).updateTestResultStatusToCompleted(riaKey);
 
     mockMvc
-        .perform(post("/api/moisture-content-cone/{riaKey}/validate", riaKey)
+        .perform(post("/api/moisture-content-cone/validate/{riaKey}", riaKey)
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
@@ -412,7 +412,7 @@ class MoistureContentConesEndpointTest {
            org.springframework.http.HttpStatus.BAD_REQUEST,
            "Invalid request"));
 
-    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/validate", riaKey)
+    mockMvc.perform(get("/api/moisture-content-cone/validate/{riaKey}", riaKey)
                 .contentType(MediaType.APPLICATION_JSON))
            .andExpect(status().isBadRequest());
   }
@@ -423,7 +423,7 @@ class MoistureContentConesEndpointTest {
 
     doNothing().when(moistureContentService).acceptMoistureContentData(riaKey);
 
-    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/accept", riaKey)
+    mockMvc.perform(get("/api/moisture-content-cone/accept/{riaKey}", riaKey)
                 .contentType(MediaType.APPLICATION_JSON))
            .andExpect(status().isOk());
   }
@@ -437,7 +437,7 @@ class MoistureContentConesEndpointTest {
         "Invalid request"))
       .when(moistureContentService).acceptMoistureContentData(riaKey);
 
-    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/accept", riaKey)
+    mockMvc.perform(get("/api/moisture-content-cone/accept/{riaKey}", riaKey)
                 .contentType(MediaType.APPLICATION_JSON))
            .andExpect(status().isBadRequest());
   }
