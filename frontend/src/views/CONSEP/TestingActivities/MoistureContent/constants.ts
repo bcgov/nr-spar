@@ -24,11 +24,21 @@ export const fieldsConfig = {
     placeholder: 'Choose a category',
     label: 'category',
     invalid: 'Please select an option',
-    options: ['Quality Assurance', 'Quality Control']
+    options: ['Quality Assurance', 'Standard']
   },
   comments: {
     name: 'comments',
     labelText: 'Comments (optional)',
     placeholder: 'My comments about this activity'
   }
+};
+
+export const categoryMap = {
+  QA: 'Quality Assurance',
+  STD: 'Standard'
+};
+
+export const categoryMapReverse = {
+  'Quality Assurance': 'QA',
+  Standard: 'STD'
 };

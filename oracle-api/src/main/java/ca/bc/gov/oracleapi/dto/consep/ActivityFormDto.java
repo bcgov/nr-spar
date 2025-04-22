@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Schema(description = "JSON object with the values to be updated in the Activity table")
 public record ActivityFormDto(
     @NotNull String testCategoryCode,
-    @NotNull String riaComment,
     @NotNull LocalDateTime actualBeginDateTime,
-    @NotNull LocalDateTime actualEndDateTime
+    @NotNull LocalDateTime actualEndDateTime,
+    String riaComment
 ) {}

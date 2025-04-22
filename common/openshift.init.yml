@@ -27,6 +27,18 @@ parameters:
   - name: ORACLE_CERT_SECRET
     description: Oracle database keystore secret
     required: true
+  - name: "S3_BUCKET"
+    description: "The S3 bucket to use for backup"
+    required: true
+  - name: "S3_ENDPOINT"
+    description: "The S3 endpoint to use for backup"
+    required: true
+  - name: "S3_PASSWORD"
+    description: "The S3 password to use for backup"
+    required: true
+  - name: "S3_USER"
+    description: "The S3 user to use for backup"
+    required: true
   - name: VITE_USER_POOLS_WEB_CLIENT_ID
     description: Cognito user pools web client ID
     required: true
@@ -42,6 +54,17 @@ objects:
       database-password: ${DB_PASSWORD}
       database-port: "5432"
       database-user: ${NAME}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-database-backup
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      s3-bucket: ${S3_BUCKET}
+      s3-endpoint: ${S3_ENDPOINT}
+      s3-password: ${S3_PASSWORD}
+      s3-user: ${S3_USER}
   - apiVersion: v1
     kind: Secret
     metadata:

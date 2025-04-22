@@ -4,5 +4,6 @@ export type ButtonObjType = {
   size: string
   icon: any
   text: string
-  onClick?: () => void; // Optional onClick handler
+  action?: () => void
+  disabled?: boolean
 };
