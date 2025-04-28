@@ -16,10 +16,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
-import ca.bc.gov.oracleapi.dto.consep.ReplicateDto;
-import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
+import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,7 +74,7 @@ class MoistureContentConesEndpointTest {
   @Test
   @DisplayName("Get a MCC data for a seedlot should succeed")
   void getMccData_shouldSucceed() throws Exception {
-    ReplicateDto replicate1 = new ReplicateDto(
+    MccReplicateDto replicate1 = new MccReplicateDto(
         new BigDecimal(1234567890),
         1,
         "A123",
@@ -86,7 +86,7 @@ class MoistureContentConesEndpointTest {
         "Replicate was re-tested due to abnormal moisture content.",
         "Equipment calibration issue."
     );
-    ReplicateDto replicate2 = new ReplicateDto(
+    MccReplicateDto replicate2 = new MccReplicateDto(
         new BigDecimal(1234567890),
         2,
         "B456",
@@ -98,7 +98,7 @@ class MoistureContentConesEndpointTest {
         "Replicate passed all tests successfully.",
         "No issues."
     );
-    List<ReplicateDto> replicatesList = List.of(replicate1, replicate2);
+    List<MccReplicateDto> replicatesList = List.of(replicate1, replicate2);
     Optional<MoistureContentConesDto> moistureContent = Optional.of(
         new MoistureContentConesDto(
             1,
@@ -297,18 +297,18 @@ class MoistureContentConesEndpointTest {
   void updateReplicateField_shouldReturnUpdatedReplicates() throws Exception {
     BigDecimal riaKey = new BigDecimal("1234567890");
 
-    ReplicateFormDto form1 = new ReplicateFormDto(
+    MccReplicateFormDto form1 = new MccReplicateFormDto(
         1, "CONT-A", new BigDecimal("1.1"), new BigDecimal("2.2"),
         new BigDecimal("3.3"), new BigDecimal("4.4"), 0,
         "First Comment", "Override 1"
     );
-    final ReplicateFormDto form2 = new ReplicateFormDto(
+    final MccReplicateFormDto form2 = new MccReplicateFormDto(
         2, "CONT-B", new BigDecimal("5.5"), new BigDecimal("6.6"),
         new BigDecimal("7.7"), new BigDecimal("8.8"), 1,
         "Second Comment", "Override 2"
     );
 
-    ReplicateEntity entity1 = new ReplicateEntity();
+    MccReplicateEntity entity1 = new MccReplicateEntity();
     entity1.setId(new ReplicateId(riaKey, 1));
     entity1.setContainerId(form1.containerId());
     entity1.setContainerWeight(form1.containerWeight());
@@ -319,7 +319,7 @@ class MoistureContentConesEndpointTest {
     entity1.setReplicateComment(form1.replicateComment());
     entity1.setOverrideReason(form1.overrideReason());
 
-    ReplicateEntity entity2 = new ReplicateEntity();
+    MccReplicateEntity entity2 = new MccReplicateEntity();
     entity2.setId(new ReplicateId(riaKey, 2));
     entity2.setContainerId(form2.containerId());
     entity2.setContainerWeight(form2.containerWeight());
@@ -330,8 +330,8 @@ class MoistureContentConesEndpointTest {
     entity2.setReplicateComment(form2.replicateComment());
     entity2.setOverrideReason(form2.overrideReason());
 
-    List<ReplicateFormDto> formList = List.of(form1, form2);
-    List<ReplicateEntity> entityList = List.of(entity1, entity2);
+    List<MccReplicateFormDto> formList = List.of(form1, form2);
+    List<MccReplicateEntity> entityList = List.of(entity1, entity2);
 
     when(moistureContentService.updateReplicateField(eq(riaKey), eq(formList)))
         .thenReturn(entityList);
@@ -366,14 +366,14 @@ class MoistureContentConesEndpointTest {
   @WithMockUser
   void updateReplicateField_shouldReturn400WhenInvalidRequest() throws Exception {
     BigDecimal riaKey = new BigDecimal("1234567890");
-  
+
     // 模拟非法数据：containerId 是 null
-    ReplicateFormDto invalidForm = new ReplicateFormDto(
+    MccReplicateFormDto invalidForm = new MccReplicateFormDto(
         null, null, new BigDecimal("1.1"), new BigDecimal("2.2"),
         new BigDecimal("3.3"), new BigDecimal("4.4"), 0,
         null, null
     );
-  
+
     mockMvc.perform(patch("/api/moisture-content-cone/replicate/{riaKey}", riaKey)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)

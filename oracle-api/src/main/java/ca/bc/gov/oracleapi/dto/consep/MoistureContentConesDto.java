@@ -55,5 +55,5 @@ public record MoistureContentConesDto(
 
     // Replicates fields
     @Schema(description = "Replicates information")
-    List<ReplicateDto> replicatesList) {
+    List<MccReplicateDto> replicatesList) {
 }

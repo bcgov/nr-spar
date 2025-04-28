@@ -3,9 +3,9 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
-import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
+import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,8 +91,8 @@ public class MoistureContentConesEndpoint {
    * Updates replicate entities.
    *
    * @param riaKey The identifier for the MCC-related data.
-   * @param replicateFormDtos A list of {@link ReplicateFormDto} containing the new values.
-   * @return the {@link ReplicateEntity} updated
+   * @param replicateFormDtos A list of {@link MccReplicateFormDto} containing the new values.
+   * @return the {@link MccReplicateEntity} updated
    */
   @PatchMapping(
       value = "replicate/{riaKey}",
@@ -108,7 +108,7 @@ public class MoistureContentConesEndpoint {
           @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Replicate not found")
       })
-  public List<ReplicateEntity> updateReplicateField(
+  public List<MccReplicateEntity> updateReplicateField(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
@@ -118,7 +118,7 @@ public class MoistureContentConesEndpoint {
       BigDecimal riaKey,
       @Valid
       @RequestBody
-      List<ReplicateFormDto> replicateFormDtos) {
+      List<MccReplicateFormDto> replicateFormDtos) {
     return moistureContentService.updateReplicateField(riaKey, replicateFormDtos);
   }
 
@@ -151,8 +151,8 @@ public class MoistureContentConesEndpoint {
       @RequestBody ActivityFormDto activityFormDto) {
     return moistureContentService.updateActivityField(riaKey, activityFormDto);
   }
-    
-  /**  
+
+  /**
   * Validate moisture content cones data.
   *
   * @throws Exception if the table doesn't match the format.
@@ -340,7 +340,7 @@ public class MoistureContentConesEndpoint {
     moistureContentService.deleteMccReplicate(riaKey, replicateNumber);
     return replicateNumber;
   }
-  
+
   @PostMapping(value = "/{riaKey}/replicates", produces = "application/json")
   @Operation(
       summary = "Delete replicate entries in bulk",

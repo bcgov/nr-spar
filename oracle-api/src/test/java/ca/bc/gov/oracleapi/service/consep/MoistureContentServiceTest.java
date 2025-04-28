@@ -14,15 +14,15 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
-import ca.bc.gov.oracleapi.dto.consep.ReplicateDto;
-import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
+import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.exception.InvalidMccKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
-import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
+import ca.bc.gov.oracleapi.repository.consep.MccReplicatesRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -55,7 +55,7 @@ class MoistureContentServiceTest {
   private TestResultRepository testResultRepository;
 
   @Mock
-  private ReplicateRepository replicateRepository;
+  private MccReplicatesRepository replicateRepository;
 
   @Autowired
   @InjectMocks
@@ -64,7 +64,7 @@ class MoistureContentServiceTest {
   private BigDecimal riaKey;
   private ActivityEntity activityEntity;
   private TestResultEntity testResultEntity;
-  private List<ReplicateEntity> replicateEntities;
+  private List<MccReplicateEntity> replicateEntities;
 
   @BeforeEach
   void setUp() {
@@ -83,7 +83,7 @@ class MoistureContentServiceTest {
     testResultEntity.setMoisturePct(new BigDecimal("50.5"));
     testResultEntity.setAcceptResult(1);
 
-    ReplicateEntity replicate = new ReplicateEntity();
+    MccReplicateEntity replicate = new MccReplicateEntity();
     ReplicateId replicateId = new ReplicateId();
     replicateId.setRiaKey(riaKey);
     replicateId.setReplicateNumber(1);
@@ -105,7 +105,7 @@ class MoistureContentServiceTest {
     BigDecimal riaKey = new BigDecimal(1234567890);
     ReplicateId replicateId = new ReplicateId(riaKey, 1);
 
-    ReplicateEntity replicate1 = new ReplicateEntity();
+    MccReplicateEntity replicate1 = new MccReplicateEntity();
     replicate1.setId(replicateId);
     replicate1.setContainerId("A123");
     replicate1.setFreshSeed(new BigDecimal(12.345));
@@ -116,7 +116,7 @@ class MoistureContentServiceTest {
     replicate1.setOverrideReason("Replicate was re-tested due to abnormal moisture content.");
     replicate1.setReplicateComment("Equipment calibration issue.");
 
-    List<ReplicateEntity> replicatesList = List.of(replicate1);
+    List<MccReplicateEntity> replicatesList = List.of(replicate1);
     List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
             .boxed()
             .collect(Collectors.toList());
@@ -227,7 +227,7 @@ class MoistureContentServiceTest {
   void updateReplicateField_shouldReturnUpdatedReplicates() {
     BigDecimal riaKey = new BigDecimal("1234567890");
 
-    final ReplicateFormDto formDto = new ReplicateFormDto(
+    final MccReplicateFormDto formDto = new MccReplicateFormDto(
         1,
         "CID-123",
         new BigDecimal("1.0"),
@@ -239,7 +239,7 @@ class MoistureContentServiceTest {
         "override reason"
     );
 
-    ReplicateEntity entity = new ReplicateEntity();
+    MccReplicateEntity entity = new MccReplicateEntity();
     ReplicateId replicateId = new ReplicateId(riaKey, 1);
     entity.setId(replicateId);
     entity.setContainerId("CID-123");
@@ -251,17 +251,17 @@ class MoistureContentServiceTest {
     entity.setReplicateComment("some comment");
     entity.setOverrideReason("override reason");
 
-    final List<ReplicateFormDto> requestList = List.of(formDto);
+    final List<MccReplicateFormDto> requestList = List.of(formDto);
 
-    List<ReplicateEntity> existingReplicates = List.of(entity);
-    List<ReplicateEntity> savedReplicates = List.of(entity);
+    List<MccReplicateEntity> existingReplicates = List.of(entity);
+    List<MccReplicateEntity> savedReplicates = List.of(entity);
 
     when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, List.of(1)))
         .thenReturn(existingReplicates);
     when(replicateRepository.saveAll(anyList()))
         .thenReturn(savedReplicates);
 
-    List<ReplicateEntity> result = moistureContentService.updateReplicateField(riaKey, requestList);
+    List<MccReplicateEntity> result = moistureContentService.updateReplicateField(riaKey, requestList);
 
     assertEquals(1, result.size());
     assertEquals("CID-123", result.get(0).getContainerId());
@@ -273,7 +273,7 @@ class MoistureContentServiceTest {
 
   @Test
   void validateMoistureConeContentData_validData() {
-    ReplicateDto replicateDto = new ReplicateDto(
+    MccReplicateDto replicateDto = new MccReplicateDto(
         riaKey,
         1,
         "ABC",
@@ -286,14 +286,14 @@ class MoistureContentServiceTest {
         "Reason"
     );
 
-    List<ReplicateDto> replicates = List.of(replicateDto);
+    List<MccReplicateDto> replicates = List.of(replicateDto);
 
     assertDoesNotThrow(() -> moistureContentService.validateMoistureConeContentData(replicates));
   }
 
   @Test
   void validateMoistureConeContentData_missingRiaKey() {
-    ReplicateDto replicateDto = new ReplicateDto(
+    MccReplicateDto replicateDto = new MccReplicateDto(
         null,
         1,
         "ABC",
@@ -305,7 +305,7 @@ class MoistureContentServiceTest {
         "Comment",
         "Reason"
     );
-    List<ReplicateDto> replicates = List.of(replicateDto);
+    List<MccReplicateDto> replicates = List.of(replicateDto);
 
     assertThrows(ResponseStatusException.class, () ->
         moistureContentService.validateMoistureConeContentData(replicates));
@@ -313,7 +313,7 @@ class MoistureContentServiceTest {
 
   @Test
   void validateMoistureConeContentData_invalidContainerWeight() {
-    ReplicateDto replicateDto = new ReplicateDto(
+    MccReplicateDto replicateDto = new MccReplicateDto(
         riaKey,
         1,
         "ABC",
@@ -325,7 +325,7 @@ class MoistureContentServiceTest {
         "Comment",
         "Reason"
     );
-    List<ReplicateDto> replicates = List.of(replicateDto);
+    List<MccReplicateDto> replicates = List.of(replicateDto);
 
     assertThrows(ResponseStatusException.class, () ->
         moistureContentService.validateMoistureConeContentData(replicates));
@@ -362,7 +362,7 @@ class MoistureContentServiceTest {
 
   @Test
   void acceptMoistureContentData_success() {
-    ReplicateEntity replicate = new ReplicateEntity();
+    MccReplicateEntity replicate = new MccReplicateEntity();
     ReplicateId replicateId = new ReplicateId();
     replicateId.setRiaKey(riaKey);
     replicateId.setReplicateNumber(1);
@@ -413,7 +413,7 @@ class MoistureContentServiceTest {
   void deleteMccReplicate_shouldSucceed() {
     BigDecimal riaKey = new BigDecimal(1234567890);
     Integer replicateNumber = 1;
-    ReplicateEntity mockReplicate = new ReplicateEntity();
+    MccReplicateEntity mockReplicate = new MccReplicateEntity();
 
     when(replicateRepository.findSingleReplicate(riaKey, replicateNumber)).thenReturn(
         Optional.of(mockReplicate));
@@ -448,8 +448,8 @@ class MoistureContentServiceTest {
 
     // Generate mock replicate list
     List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
-    List<ReplicateEntity> replicates = replicateIds.stream().map(id -> {
-      ReplicateEntity replicate = new ReplicateEntity();
+    List<MccReplicateEntity> replicates = replicateIds.stream().map(id -> {
+      MccReplicateEntity replicate = new MccReplicateEntity();
       replicate.setId(new ReplicateId(riaKey, id));
       return replicate;
     }).collect(Collectors.toList());
