@@ -73,15 +73,7 @@ const PurityContent = () => {
     }));
   };
 
-  const handleCalculateAverage = async () => {
-    // Make the API call
-    // const response = await fetch('http://localhost:8091/calculate-average', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify({ numbers })
-    // });
+  const handleCalculateAverage = () => {
     setAverage(7.8); // Set the test average value from the API response
   };
 
