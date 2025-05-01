@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
+import ca.bc.gov.oracleapi.dto.consep.Numbers;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
@@ -20,7 +21,9 @@ import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,7 +44,9 @@ public class MoistureContentConesEndpoint {
 
   private MoistureContentService moistureContentService;
 
-  MoistureContentConesEndpoint(MoistureContentService moistureContentService) {
+  @Autowired
+  public MoistureContentConesEndpoint(
+      MoistureContentService moistureContentService) {
     this.moistureContentService = moistureContentService;
   }
 
@@ -383,5 +388,29 @@ public class MoistureContentConesEndpoint {
             List<Integer> replicateNumbers) {
     moistureContentService.deleteMccReplicates(riaKey, replicateNumbers);
     return replicateNumbers;
+  }
+
+  /**
+   * Calculate the average of a list of numbers.
+   *
+   * @param numbers A list of numbers to calculate the average.
+   * @return The calculated average.
+   */
+  @PostMapping("/calculate-average")
+  @Operation(
+      summary = "Calculate the average of a list of numbers",
+      description = "Given a list of numbers, calculates and returns the average.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully calculated the average"),
+      @ApiResponse(responseCode = "400", description = "Invalid input data"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
+  public ResponseEntity<Double> calculateAverage(@RequestBody Numbers numbers) {
+    try {
+      double average = moistureContentService.calculateAverage(numbers.getNumbers());
+      return ResponseEntity.status(HttpStatus.OK).body(average);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
   }
 }
