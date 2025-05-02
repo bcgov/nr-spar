@@ -5,58 +5,53 @@
 .activity-summary-container {
   width: 100%;
   padding: 0rem;
+  background-color: colors.$gray-10;
+  border: 1px solid colors.$gray-20;
+  border-radius: 0.2rem;
 
-  .activity-summary {
-    margin: 1rem 0 2rem;
+  .#{vars.$bcgov-prefix}--row {
+    margin: 1rem 2rem 1.2rem;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    color: var(--#{vars.$bcgov-prefix}-text-primary);
 
-    .#{vars.$bcgov-prefix}--row {
-      margin-left: 0.1rem;
-      justify-content: flex-start;
-      gap: 0.5rem;
-      color: var(--#{vars.$bcgov-prefix}-text-primary);
-
-      .info-col:first-child .activity-summary-info-value {
-        font-weight: bold;
-      }
-
-      .info-col:last-child .activity-summary-info-value {
-        font-weight: bold;
-      }
+    .info-col:first-child .activity-summary-info-value {
+      font-weight: bold;
     }
 
-    .#{vars.$bcgov-prefix}--accordion__heading {
-      background-color: colors.$blue-10;
+    .info-col:last-child .activity-summary-info-value {
+      font-weight: bold;
     }
+  }
 
-    .#{vars.$bcgov-prefix}--accordion__title {
-      padding: 1rem 2rem;
-    }
+  .#{vars.$bcgov-prefix}--accordion__heading {
+    background-color: colors.$blue-10;
+  }
 
-    .#{vars.$bcgov-prefix}--accordion__content {
-      @include type.type-style('body-01');
-      padding-left: 2rem;
-    }
+  .#{vars.$bcgov-prefix}--accordion__title {
+    padding: 1rem 2rem;
+  }
 
-    .activity-summary-title {
-      @include type.type-style('heading-02');
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
+  .#{vars.$bcgov-prefix}--accordion__content {
+    @include type.type-style('body-01');
+    padding-left: 2rem;
+  }
 
-    .activity-summary-info-section>div {
-      margin-right: 3.5rem;
-    }
-    
-    .info-col {
-      margin-top: 1rem;
-    }
+  .activity-summary-title {
+    @include type.type-style('heading-02');
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
 
-    .activity-summary-info-label {
-      @include type.type-style('label-01');
-      margin-bottom: 1rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+  .activity-summary-info-section>div {
+    margin-right: 3.5rem;
+  }
+
+  .activity-summary-info-label {
+    @include type.type-style('label-01');
+    margin-bottom: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
