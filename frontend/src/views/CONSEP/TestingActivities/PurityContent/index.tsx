@@ -232,8 +232,6 @@ const PurityContent = () => {
             />
           </DatePicker>
         </Column>
-      </Row>
-      <Row className="consep-purity-content-category">
         <Column sm={2} md={2} lg={5} xlg={5}>
           <ComboBox
             className="category-combobox"
