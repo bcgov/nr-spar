@@ -263,7 +263,7 @@ const PurityContent = () => {
             name={fieldsConfig.comments.name}
             labelText={fieldsConfig.comments.labelText}
             placeholder={fieldsConfig.comments.placeholder}
-            rows={5}
+            rows={1}
             maxCount={500}
             enableCounter
           />
