@@ -193,11 +193,6 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-summary">
         <ActivitySummary item={fieldsConfig.activityItem} isFetching={false} />
       </Row>
-      <Row className="consep-purity-content-cone-form">
-        <Column className="consep-section-title">
-          <h4>{fieldsConfig.puritySection.title}</h4>
-        </Column>
-      </Row>
       <Row className="consep-purity-content-date-picker">
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
