@@ -4,9 +4,6 @@ export const fieldsConfig = {
   titleSection: {
     title: 'Purity for seedlot 64132'
   },
-  puritySection: {
-    title: 'Purity data entry'
-  },
   impuritySection: {
     title: 'Impurities',
     firstSubtitle: 'Replicate 1',
