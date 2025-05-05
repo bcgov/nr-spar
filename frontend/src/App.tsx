@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   createBrowserRouter, RouteObject, RouterProvider
 } from 'react-router';
@@ -81,22 +81,23 @@ const App: React.FC = () => {
     }
   ];
 
-  const browserRouter = useMemo(() => {
-    const selectBrowserRoutes = () => {
-      if (!signed) {
-        return notSignedRoutes;
-      }
-      if (selectedClientRoles) {
-        return signedRoutes;
-      }
-      return roleSelectionRoutes;
-    };
+  const selectBrowserRoutes = () => {
+    if (!signed) {
+      return notSignedRoutes;
+    }
+    if (selectedClientRoles) {
+      return signedRoutes;
+    }
+    return roleSelectionRoutes;
+  };
 
+  const getBrowserRouter = () => {
     const selectedRoutes = selectBrowserRoutes();
     selectedRoutes.push(...sharedRoutes);
 
     return createBrowserRouter(selectedRoutes);
-  }, [signed, selectedClientRoles]);
+  };
+  const browserRouter = getBrowserRouter();
 
   const handleRedirectTo403 = () => {
     browserRouter.navigate('/403');
