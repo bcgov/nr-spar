@@ -84,6 +84,7 @@
 .consep-impurity-content {
   margin-top: 2rem;
   margin-bottom: 2rem;
+  justify-content: space-between;
 }
 
 .consep-purity-content-replicate {
@@ -100,11 +101,6 @@
 
 .consep-impurity-button {
   margin-bottom: 2.5rem;
-}
-
-.consep-impurity-combobox {
-  padding-left: 0.125rem;
-  padding-right: 1rem;
 }
 
 .#{vars.$bcgov-prefix}--text-input__field-wrapper {
