@@ -7,7 +7,9 @@ import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
+import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
+import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -41,8 +43,20 @@ public class MoistureContentConesEndpoint {
 
   private MoistureContentService moistureContentService;
 
+  private ActivityService activityService;
+
+  private TestResultService testResultService;
+
   MoistureContentConesEndpoint(MoistureContentService moistureContentService) {
     this.moistureContentService = moistureContentService;
+  }
+
+  MoistureContentConesEndpoint(ActivityService activityService) {
+    this.activityService = activityService;
+  }
+
+  MoistureContentConesEndpoint(TestResultService testResultService) {
+    this.testResultService = testResultService;
   }
 
   /**
@@ -149,7 +163,7 @@ public class MoistureContentConesEndpoint {
       @PathVariable BigDecimal riaKey,
       @Valid
       @RequestBody ActivityFormDto activityFormDto) {
-    return moistureContentService.updateActivityField(riaKey, activityFormDto);
+    return activityService.updateActivityField(riaKey, activityFormDto);
   }
 
   /**
@@ -202,8 +216,8 @@ public class MoistureContentConesEndpoint {
       activityData.setActualBeginDateTime(moistureContent.get().actualBeginDateTime());
       activityData.setActualEndDateTime(moistureContent.get().actualEndDateTime());
       activityData.setTestCategoryCode(moistureContent.get().testCategoryCode());
-      moistureContentService.validateMoistureContentActivityData(activityData);
-      moistureContentService.updateTestResultStatusToCompleted(riaKey);
+      activityService.validateMoistureContentActivityData(activityData);
+      testResultService.updateTestResultStatusToCompleted(riaKey);
 
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -244,7 +258,7 @@ public class MoistureContentConesEndpoint {
       BigDecimal riaKey) throws Exception {
 
     try {
-      moistureContentService.acceptMoistureContentData(riaKey);
+      testResultService.acceptTestResult(riaKey);
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
