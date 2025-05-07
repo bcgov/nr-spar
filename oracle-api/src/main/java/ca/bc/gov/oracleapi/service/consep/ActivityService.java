@@ -60,7 +60,7 @@ public class ActivityService {
    * @param activityData activity entity to be validated
    * @throws ResponseStatusException if any validation fails
    */
-  public void validateMoistureContentActivityData(ActivityEntity activityData) {
+  public void validateActivityData(ActivityEntity activityData) {
     SparLog.info("Validating activity data");
 
     if (activityData.getTestCategoryCode() == null) {

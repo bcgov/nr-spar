@@ -12,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
@@ -39,7 +38,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -64,7 +62,6 @@ class MoistureContentServiceTest {
   private BigDecimal riaKey;
   private ActivityEntity activityEntity;
   private TestResultEntity testResultEntity;
-  private List<MccReplicateEntity> replicateEntities;
 
   @BeforeEach
   void setUp() {
@@ -82,25 +79,10 @@ class MoistureContentServiceTest {
     testResultEntity.setMoistureStatus("Status");
     testResultEntity.setMoisturePct(new BigDecimal("50.5"));
     testResultEntity.setAcceptResult(1);
-
-    MccReplicateEntity replicate = new MccReplicateEntity();
-    ReplicateId replicateId = new ReplicateId();
-    replicateId.setRiaKey(riaKey);
-    replicateId.setReplicateNumber(1);
-    replicate.setId(replicateId);
-    replicate.setContainerId("ABC");
-    replicate.setContainerWeight(new BigDecimal("12.345"));
-    replicate.setFreshSeed(new BigDecimal("45.678"));
-    replicate.setContainerAndDryWeight(new BigDecimal("58.901"));
-    replicate.setDryWeight(new BigDecimal("46.789"));
-    replicate.setReplicateAccInd(1);
-    replicate.setReplicateComment("Comment");
-    replicate.setOverrideReason("Reason");
-    replicateEntities = List.of(replicate);
   }
 
   @Test
-  @DisplayName("Get moiture cone content should succeed")
+  @DisplayName("Get moisture cone content should succeed")
   void getMoistureConeContent_shouldSucceed() {
     BigDecimal riaKey = new BigDecimal(1234567890);
     ReplicateId replicateId = new ReplicateId(riaKey, 1);
@@ -186,40 +168,6 @@ class MoistureContentServiceTest {
         () -> {
             moistureContentService.getMoistureConeContentData(any());
         });
-  }
-
-  @Test
-  @DisplayName("Update activity should succeed")
-  void updateActivity_shouldSucceed() {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-
-    ActivityEntity existingEntity = new ActivityEntity();
-    existingEntity.setRiaKey(riaKey);
-    existingEntity.setActualBeginDateTime(LocalDateTime.parse("2013-10-01T00:00:00"));
-    existingEntity.setActualEndDateTime(LocalDateTime.parse("2013-11-01T00:00:00"));
-    existingEntity.setTestCategoryCode("OLD");
-    existingEntity.setRiaComment("Old comment");
-
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(existingEntity));
-    when(activityRepository.save(any(ActivityEntity.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
-
-    ActivityFormDto activityDto = new ActivityFormDto(
-        "STD",
-        LocalDateTime.parse("2013-08-01T00:00:00"),
-        LocalDateTime.parse("2013-09-01T00:00:00"),
-        "Updated comment"
-    );
-
-    ActivityEntity result = moistureContentService.updateActivityField(riaKey, activityDto);
-
-    assertEquals(activityDto.actualBeginDateTime(), result.getActualBeginDateTime());
-    assertEquals(activityDto.actualEndDateTime(), result.getActualEndDateTime());
-    assertEquals(activityDto.testCategoryCode(), result.getTestCategoryCode());
-    assertEquals(activityDto.riaComment(), result.getRiaComment());
-
-    verify(activityRepository, times(1)).findById(riaKey);
-    verify(activityRepository, times(1)).save(any(ActivityEntity.class));
   }
 
   @Test
@@ -330,83 +278,6 @@ class MoistureContentServiceTest {
     assertThrows(ResponseStatusException.class, () ->
         moistureContentService.validateMoistureConeContentData(replicates));
   }
-
-  @Test
-  void validateMoistureContentActivityData_validData() {
-    assertDoesNotThrow(() ->
-        moistureContentService.validateMoistureContentActivityData(activityEntity));
-  }
-
-  @Test
-  void validateMoistureContentActivityData_missingTestCategory() {
-    activityEntity.setTestCategoryCode(null);
-    assertThrows(ResponseStatusException.class, () ->
-        moistureContentService.validateMoistureContentActivityData(activityEntity));
-  }
-
-  @Test
-  void validateMoistureContentActivityData_pastBeginDate() {
-    activityEntity.setActualBeginDateTime(LocalDateTime.now().minusDays(1));
-    assertThrows(ResponseStatusException.class, () ->
-        moistureContentService.validateMoistureContentActivityData(activityEntity));
-  }
-
-  @Test
-  void updateTestResultStatusToCompleted_success() {
-    doNothing().when(testResultRepository).updateTestResultStatusToCompleted(riaKey);
-
-    assertDoesNotThrow(() ->
-        moistureContentService.updateTestResultStatusToCompleted(riaKey));
-    verify(testResultRepository).updateTestResultStatusToCompleted(riaKey);
-  }
-
-  @Test
-  void acceptMoistureContentData_success() {
-    MccReplicateEntity replicate = new MccReplicateEntity();
-    ReplicateId replicateId = new ReplicateId();
-    replicateId.setRiaKey(riaKey);
-    replicateId.setReplicateNumber(1);
-    replicate.setId(replicateId);
-    replicate.setContainerId("ABC");
-    replicate.setContainerWeight(new BigDecimal("12.345"));
-    replicate.setFreshSeed(new BigDecimal("45.678"));
-    replicate.setContainerAndDryWeight(new BigDecimal("58.901"));
-    replicate.setDryWeight(new BigDecimal("46.789"));
-    replicate.setReplicateAccInd(1);
-    replicate.setReplicateComment("Comment");
-    replicate.setOverrideReason("Reason");
-    replicateEntities = List.of(replicate);
-
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(activityEntity));
-    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultEntity));
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(any(), any()))
-        .thenReturn(replicateEntities);
-
-    assertDoesNotThrow(() ->
-        moistureContentService.acceptMoistureContentData(riaKey));
-    verify(testResultRepository).updateTestResultStatusToAccepted(riaKey);
-  }
-
-  @Test
-  void acceptMoistureContentData_testNotCompleted() {
-    testResultEntity.setTestCompleteInd(0);
-    testResultEntity.setSampleDesc("Sample");
-    testResultEntity.setMoistureStatus("Status");
-    testResultEntity.setMoisturePct(new BigDecimal("50.5"));
-    testResultEntity.setAcceptResult(1);
-
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(activityEntity));
-    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultEntity));
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(any(), any()))
-        .thenReturn(replicateEntities);
-
-    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
-        moistureContentService.acceptMoistureContentData(riaKey));
-
-    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-    assertEquals("Test is not completed", exception.getReason());
-  }
-
 
   @Test
   @DisplayName("Delete a single replicate should succeed")

@@ -21,7 +21,10 @@ import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
+import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
+import ca.bc.gov.oracleapi.service.consep.TestResultService;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -54,6 +57,12 @@ class MoistureContentConesEndpointTest {
 
   @MockBean
   private MoistureContentService moistureContentService;
+
+  @MockBean
+  private ActivityService activityService;
+
+  @MockBean
+  private TestResultService testResultService;
 
   @InjectMocks
   private MoistureContentConesEndpoint moistureContentConesEndpoint;
@@ -228,7 +237,7 @@ class MoistureContentConesEndpointTest {
     activityEntity.setTestCategoryCode(activityFormDto.testCategoryCode());
     activityEntity.setRiaComment(activityFormDto.riaComment());
 
-    when(moistureContentService.updateActivityField(riaKey, activityFormDto))
+    when(activityService.updateActivityField(riaKey, activityFormDto))
         .thenReturn(activityEntity);
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -260,7 +269,7 @@ class MoistureContentConesEndpointTest {
     );
 
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity entry not found"))
-        .when(moistureContentService).updateActivityField(riaKey, activityFormDto);
+        .when(activityService).updateActivityField(riaKey, activityFormDto);
 
     mockMvc
         .perform(patch("/api/moisture-content-cone/{riaKey}", riaKey)
@@ -393,8 +402,8 @@ class MoistureContentConesEndpointTest {
     when(dto.testCategoryCode()).thenReturn(null);
 
     doNothing().when(moistureContentService).validateMoistureConeContentData(any());
-    doNothing().when(moistureContentService).validateMoistureContentActivityData(any());
-    doNothing().when(moistureContentService).updateTestResultStatusToCompleted(riaKey);
+    doNothing().when(activityService).validateActivityData(any());
+    doNothing().when(testResultService).updateTestResultStatusToCompleted(riaKey);
 
     mockMvc
         .perform(post("/api/moisture-content-cone/validate/{riaKey}", riaKey)
@@ -421,7 +430,7 @@ class MoistureContentConesEndpointTest {
   void acceptMoistureContentData_Success() throws Exception {
     BigDecimal riaKey = BigDecimal.valueOf(123);
 
-    doNothing().when(moistureContentService).acceptMoistureContentData(riaKey);
+    doNothing().when(testResultService).acceptTestResult(riaKey);
 
     mockMvc.perform(get("/api/moisture-content-cone/accept/{riaKey}", riaKey)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -435,7 +444,7 @@ class MoistureContentConesEndpointTest {
     doThrow(new ResponseStatusException(
         org.springframework.http.HttpStatus.BAD_REQUEST,
         "Invalid request"))
-      .when(moistureContentService).acceptMoistureContentData(riaKey);
+      .when(testResultService).acceptTestResult(riaKey);
 
     mockMvc.perform(get("/api/moisture-content-cone/accept/{riaKey}", riaKey)
                 .contentType(MediaType.APPLICATION_JSON))
