@@ -267,7 +267,7 @@ public class PurityTestService {
    * @param riaKey the identifier key for all table related to MCC
    */
   @Transactional
-  public void deleteFullPurity(@NonNull BigDecimal riaKey) {
+  public void deleteFullPurityTest(@NonNull BigDecimal riaKey) {
     SparLog.info(
         "Deleting entries on Activity, Purity Replicate and TestResult tables "
         + "with the riaKey: {}", riaKey);
