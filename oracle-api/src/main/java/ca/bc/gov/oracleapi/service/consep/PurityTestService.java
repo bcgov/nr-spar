@@ -47,10 +47,10 @@ public class PurityTestService {
 
 
   /**
-   * Get information for moisture cone content.
+   * Get information for purity tests.
    */
-  public Optional<PurityTestDto> getMoistureConeContentData(BigDecimal riaKey) {
-    SparLog.info("Begin to query necessary tables for moisture cone content");
+  public Optional<PurityTestDto> getPurityTestsData(BigDecimal riaKey) {
+    SparLog.info("Begin to query necessary tables for purity tests");
 
     Optional<ActivityEntity> activityData = activityRepository.findById(riaKey);
 
