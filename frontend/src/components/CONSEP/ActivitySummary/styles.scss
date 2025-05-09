@@ -24,19 +24,6 @@
     }
   }
 
-  .#{vars.$bcgov-prefix}--accordion__heading {
-    background-color: colors.$blue-10;
-  }
-
-  .#{vars.$bcgov-prefix}--accordion__title {
-    padding: 1rem 2rem;
-  }
-
-  .#{vars.$bcgov-prefix}--accordion__content {
-    @include type.type-style('body-01');
-    padding-left: 2rem;
-  }
-
   .activity-summary-title {
     @include type.type-style('heading-02');
     font-weight: 700;
