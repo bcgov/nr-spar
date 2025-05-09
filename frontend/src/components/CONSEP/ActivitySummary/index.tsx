@@ -2,8 +2,6 @@ import React from 'react';
 import {
   Row,
   Column,
-  Accordion,
-  AccordionItem,
   RadioButtonSkeleton
 } from '@carbon/react';
 
@@ -36,55 +34,48 @@ const renderFieldValue = (
 
 const ActivitySummary = ({ item, isFetching }: ActivitySummaryProps) => (
   <div className="activity-summary-container">
-    <Accordion className="activity-summary">
-      <AccordionItem
-        open
-        title="Activity summary"
-      >
-        <Row>
-          <Column className="info-col">
-            <p className="activity-summary-info-label">
-              Activity
-            </p>
-            {
-              renderFieldValue('activity', isFetching, item)
-            }
-          </Column>
-          <Column className="info-col">
-            <p className="activity-summary-info-label">
-              Seedlot number
-            </p>
-            {
-              renderFieldValue('seedlotNumber', isFetching, item)
-            }
-          </Column>
-          <Column className="info-col">
-            <p className="activity-summary-info-label">
-              Request ID
-            </p>
-            {
-              renderFieldValue('requestId', isFetching, item)
-            }
-          </Column>
-          <Column className="info-col">
-            <p className="activity-summary-info-label">
-              Species
-            </p>
-            {
-              renderFieldValue('speciesAndClass', isFetching, item)
-            }
-          </Column>
-          <Column className="info-col">
-            <p className="activity-summary-info-label">
-              Test result
-            </p>
-            {
-              renderFieldValue('testResult', isFetching, item)
-            }
-          </Column>
-        </Row>
-      </AccordionItem>
-    </Accordion>
+    <Row className="activity-summary">
+      <Column className="info-col">
+        <p className="activity-summary-info-label">
+          Activity
+        </p>
+        {
+          renderFieldValue('activity', isFetching, item)
+        }
+      </Column>
+      <Column className="info-col">
+        <p className="activity-summary-info-label">
+          Seedlot number
+        </p>
+        {
+          renderFieldValue('seedlotNumber', isFetching, item)
+        }
+      </Column>
+      <Column className="info-col">
+        <p className="activity-summary-info-label">
+          Request ID
+        </p>
+        {
+          renderFieldValue('requestId', isFetching, item)
+        }
+      </Column>
+      <Column className="info-col">
+        <p className="activity-summary-info-label">
+          Species
+        </p>
+        {
+          renderFieldValue('speciesAndClass', isFetching, item)
+        }
+      </Column>
+      <Column className="info-col">
+        <p className="activity-summary-info-label">
+          Test result
+        </p>
+        {
+          renderFieldValue('testResult', isFetching, item)
+        }
+      </Column>
+    </Row>
   </div>
 );
 

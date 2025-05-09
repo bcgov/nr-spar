@@ -5,7 +5,7 @@ export const fieldsConfig = {
     title: 'Moisture content oven for seedlot 64132'
   },
   moistureContentConesTitle: {
-    title: 'Moisture content cones data entry '
+    title: 'Moisture content cones'
   },
   startDate: {
     name: 'startDate',
@@ -24,7 +24,7 @@ export const fieldsConfig = {
     placeholder: 'Choose a category',
     label: 'category',
     invalid: 'Please select an option',
-    options: ['Quality Assurance', 'Standard']
+    options: ['Quality assurance', 'Standard']
   },
   comments: {
     name: 'comments',
@@ -34,11 +34,11 @@ export const fieldsConfig = {
 };
 
 export const categoryMap = {
-  QA: 'Quality Assurance',
+  QA: 'Quality assurance',
   STD: 'Standard'
 };
 
 export const categoryMapReverse = {
-  'Quality Assurance': 'QA',
+  'Quality assurance': 'QA',
   Standard: 'STD'
 };
