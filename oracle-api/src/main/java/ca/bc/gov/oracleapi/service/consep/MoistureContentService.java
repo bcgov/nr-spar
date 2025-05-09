@@ -8,7 +8,7 @@ import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
-import ca.bc.gov.oracleapi.exception.InvalidMccKeyException;
+import ca.bc.gov.oracleapi.exception.InvalidTestActivityKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.MccReplicatesRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
@@ -235,7 +235,7 @@ public class MoistureContentService {
     );
 
     if (replicates.isEmpty()) {
-      throw new InvalidMccKeyException();
+      throw new InvalidTestActivityKeyException();
     }
 
     replicateRepository.deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
@@ -263,7 +263,7 @@ public class MoistureContentService {
     );
 
     if (replicates.isEmpty()) {
-      throw new InvalidMccKeyException();
+      throw new InvalidTestActivityKeyException();
     }
 
     replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
@@ -289,7 +289,7 @@ public class MoistureContentService {
         replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
     if (activityEntity.isEmpty() || testEntity.isEmpty() || replicates.isEmpty()) {
-      throw new InvalidMccKeyException();
+      throw new InvalidTestActivityKeyException();
     }
 
     activityRepository.deleteById(riaKey);
