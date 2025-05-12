@@ -12,9 +12,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
@@ -209,7 +209,8 @@ class MoistureContentServiceTest {
     when(replicateRepository.saveAll(anyList()))
         .thenReturn(savedReplicates);
 
-    List<MccReplicateEntity> result = moistureContentService.updateReplicateField(riaKey, requestList);
+    List<MccReplicateEntity> result = moistureContentService.updateReplicateField(
+        riaKey, requestList);
 
     assertEquals(1, result.size());
     assertEquals("CID-123", result.get(0).getContainerId());
@@ -354,7 +355,8 @@ class MoistureContentServiceTest {
     when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds)).thenReturn(
         List.of());
 
-    assertThrows(InvalidTestActivityKeyException.class, () -> moistureContentService.deleteFullMcc(riaKey));
+    assertThrows(InvalidTestActivityKeyException.class, () -> moistureContentService.deleteFullMcc(
+        riaKey));
 
     verify(activityRepository, never()).deleteById(any());
     verify(testResultRepository, never()).deleteById(any());

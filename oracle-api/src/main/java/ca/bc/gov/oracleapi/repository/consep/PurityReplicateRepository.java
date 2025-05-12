@@ -14,7 +14,8 @@ import org.springframework.data.repository.query.Param;
 /**
  * This interface enables the purity replicate entity from consep to be retrieved from the database.
  */
-public interface PurityReplicateRepository extends JpaRepository<PurityReplicateEntity, ReplicateId> {
+public interface PurityReplicateRepository extends
+    JpaRepository<PurityReplicateEntity, ReplicateId> {
 
   @Query(
       value = """

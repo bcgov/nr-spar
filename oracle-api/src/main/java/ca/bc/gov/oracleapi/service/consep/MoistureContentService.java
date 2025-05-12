@@ -1,9 +1,9 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
@@ -124,7 +124,8 @@ public class MoistureContentService {
     for (MccReplicateFormDto dto : replicateFormDtos) {
       int replicateNumber = dto.replicateNumber();
 
-      MccReplicateEntity repEntity = replicateMap.getOrDefault(replicateNumber, new MccReplicateEntity());
+      MccReplicateEntity repEntity = replicateMap.getOrDefault(
+          replicateNumber, new MccReplicateEntity());
       if (repEntity.getId() == null) {
         repEntity.setId(new ReplicateId(riaKey, replicateNumber));
         SparLog.info("Replicate number {} not found for riaKey {}. Creating new replicate.",

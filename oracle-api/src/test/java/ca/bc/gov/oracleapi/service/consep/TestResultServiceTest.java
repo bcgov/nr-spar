@@ -55,7 +55,7 @@ class TestResultServiceTest {
     doNothing().when(testResultRepository).updateTestResultStatusToCompleted(riaKey);
 
     assertDoesNotThrow(() ->
-      testResultService.updateTestResultStatusToCompleted(riaKey));
+        testResultService.updateTestResultStatusToCompleted(riaKey));
     verify(testResultRepository).updateTestResultStatusToCompleted(riaKey);
   }
 
@@ -64,7 +64,7 @@ class TestResultServiceTest {
     when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultEntity));
 
     assertDoesNotThrow(() ->
-      testResultService.acceptTestResult(riaKey));
+        testResultService.acceptTestResult(riaKey));
     verify(testResultRepository).updateTestResultStatusToAccepted(riaKey);
   }
 
@@ -79,7 +79,7 @@ class TestResultServiceTest {
     when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultEntity));
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
-      testResultService.acceptTestResult(riaKey));
+        testResultService.acceptTestResult(riaKey));
 
     assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     assertEquals("Test is not completed", exception.getReason());

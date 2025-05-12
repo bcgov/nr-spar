@@ -99,7 +99,7 @@ public class PurityTestService {
 
   /**
    * This function updates the purity replicates, either by changing the existing ones
-   * or adding new replicates requested by the user
+   * or adding new replicates requested by the user.
    *
    * @param riaKey the identifier key for all table related to test activities
    * @param replicateFormDtos an object with the values to be updated

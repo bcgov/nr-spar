@@ -24,7 +24,6 @@ import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.PurityTestService;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -292,10 +291,6 @@ class PurityTestsEndpointTest {
         1, new BigDecimal("1.1"), new BigDecimal("2.2"),
         new BigDecimal("3.3"), 0, "Override 1"
     );
-    PurityReplicateFormDto form2 = new PurityReplicateFormDto(
-        2, new BigDecimal("5.5"), new BigDecimal("6.6"),
-        new BigDecimal("7.7"), 1, "Override 2"
-    );
 
     PurityReplicateEntity entity1 = new PurityReplicateEntity();
     entity1.setId(new ReplicateId(riaKey, 1));
@@ -304,6 +299,11 @@ class PurityTestsEndpointTest {
     entity1.setContainerWeight(form1.containerWeight());
     entity1.setReplicateAccInd(form1.replicateAccInd());
     entity1.setOverrideReason(form1.overrideReason());
+
+    PurityReplicateFormDto form2 = new PurityReplicateFormDto(
+        2, new BigDecimal("5.5"), new BigDecimal("6.6"),
+        new BigDecimal("7.7"), 1, "Override 2"
+    );
 
     PurityReplicateEntity entity2 = new PurityReplicateEntity();
     entity2.setId(new ReplicateId(riaKey, 2));
