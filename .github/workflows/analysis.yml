@@ -21,7 +21,7 @@ jobs:
     name: Typescript lint
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-test-and-analyse@v1.2.1
+      - uses: bcgov/action-test-and-analyse@v1.3.0
         with:
           commands: |
             npm ci
@@ -34,7 +34,7 @@ jobs:
     if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-test-and-analyse-java@v1.0.2
+      - uses: bcgov/action-test-and-analyse-java@v1.1.0
         with:
           commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
           dir: backend
@@ -52,7 +52,7 @@ jobs:
     if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-test-and-analyse-java@v1.0.2
+      - uses: bcgov/action-test-and-analyse-java@v1.1.0
         with:
           commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
           dir: oracle-api
