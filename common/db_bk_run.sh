@@ -20,7 +20,7 @@ if [ ! -z "${2:-}" ]; then
 fi
 
 # Create job
-CRONJOB=nr-spar-${1}-sync
+CRONJOB=nr-spar-${1}-database-backup
 RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
 oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
