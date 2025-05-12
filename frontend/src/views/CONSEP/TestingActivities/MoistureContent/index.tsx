@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { AxiosError } from 'axios';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import Alert from '@mui/material/Alert';
 import {
   FlexGrid,
   Row,
@@ -19,11 +21,12 @@ import {
   CopyFile
 } from '@carbon/icons-react';
 
-import { useQuery } from '@tanstack/react-query';
 import ROUTES from '../../../../routes/constants';
-import { getMccByRiaKey } from '../../../../api-service/moistureContentAPI';
+import {
+  getMccByRiaKey, updateActivityRecord, validateResult, acceptResult
+} from '../../../../api-service/moistureContentAPI';
 import { getSeedlotById } from '../../../../api-service/seedlotAPI';
-import { TestingActivityType } from '../../../../types/consep/TestingActivityType';
+import { TestingActivityType, ActivityRecordType } from '../../../../types/consep/TestingActivityType';
 import { ActivitySummaryType } from '../../../../types/ActivitySummaryType';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 
@@ -36,7 +39,7 @@ import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
 
 import {
-  DATE_FORMAT, fieldsConfig
+  DATE_FORMAT, fieldsConfig, categoryMap, categoryMapReverse
 } from './constants';
 
 import './styles.scss';
@@ -48,11 +51,30 @@ const MoistureContent = () => {
   const [testActivity, setTestActivity] = useState<TestingActivityType>();
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
+  const [activityRiaKey, setActivityRiaKey] = useState<number>(0);
+  const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
+  const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
     queryFn: () => getMccByRiaKey(riaKey ?? ''),
     refetchOnMount: true
+  });
+
+  const updateActivityRecordMutation = useMutation({
+    mutationFn: (record?: ActivityRecordType) => updateActivityRecord(activityRiaKey, record),
+    onSuccess: () => {
+      setAlert({ isSuccess: true, message: 'Activity record updated successfully' });
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    },
+    onError: (error) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to update activity record: ${(error as AxiosError).message}`
+      });
+    }
   });
 
   const seedlotQuery = useQuery({
@@ -64,6 +86,13 @@ const MoistureContent = () => {
   });
 
   useEffect(() => {
+    if (!riaKey) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    }
+    setActivityRiaKey(Number(riaKey));
+  }, [riaKey]);
+
+  useEffect(() => {
     if (
       testActivityQuery.isFetched
       && testActivityQuery.status === 'error'
@@ -73,6 +102,13 @@ const MoistureContent = () => {
     } else if (testActivityQuery.data) {
       setTestActivity(testActivityQuery.data);
       setSeedlotNumber(testActivityQuery.data.seedlotNumber);
+      const activityRecordData = {
+        testCategoryCode: testActivityQuery.data.testCategoryCode,
+        riaComment: testActivityQuery.data.riaComment,
+        actualBeginDateTime: testActivityQuery.data.actualBeginDateTime,
+        actualEndDateTime: testActivityQuery.data.actualEndDateTime
+      };
+      setActivityRecord(activityRecordData);
     }
   }, [testActivityQuery.status, testActivityQuery.isFetched]);
 
@@ -96,6 +132,77 @@ const MoistureContent = () => {
     }
   }, [seedlotQuery.status, seedlotQuery.isFetched, testActivity]);
 
+  const handleAlert = (isSuccess: boolean, message: string) => {
+    setAlert({ isSuccess, message });
+    setTimeout(
+      () => {
+        setAlert(null);
+      },
+      3000
+    );
+  };
+
+  const handleUodateActivityRecord = (record: ActivityRecordType) => {
+    setActivityRecord({
+      ...activityRecord,
+      ...record
+    });
+    updateActivityRecordMutation.mutate({
+      ...activityRecord,
+      ...record
+    });
+  };
+
+  const validateTest = useMutation({
+    mutationFn: () => validateResult(riaKey ?? ''),
+    onSuccess: () => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        testCompleteInd: 1,
+        sampleDesc: testActivity?.sampleDesc || '',
+        moistureStatus: testActivity?.moistureStatus || '',
+        moisturePct: testActivity?.moisturePct || 0,
+        acceptResult: testActivity?.acceptResult || 0,
+        requestId: testActivity?.requestId || '',
+        seedlotNumber: testActivity?.seedlotNumber || '',
+        activityType: testActivity?.activityType || '',
+        replicatesList: testActivity?.replicatesList || []
+      };
+      setTestActivity(testActivityData);
+      setAlert({ isSuccess: true, message: 'Test validated successfully' });
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    },
+    onError: (error) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to validate test: ${(error as AxiosError).message}`
+      });
+    }
+  });
+
+  const acceptTest = useMutation({
+    mutationFn: () => acceptResult(riaKey ?? ''),
+    onSuccess: () => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        acceptResult: 1
+      };
+      setTestActivity(testActivityData);
+      setAlert({ isSuccess: true, message: 'Test accepted successfully' });
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    },
+    onError: (error) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to accept test: ${(error as AxiosError).message}`
+      });
+    }
+  });
+
   const createBreadcrumbItems = () => {
     const crumbsList = [];
     crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
@@ -117,33 +224,42 @@ const MoistureContent = () => {
       text: 'Complete test',
       kind: 'tertiary',
       size: 'lg',
-      icon: Checkmark
+      icon: Checkmark,
+      disabled: !!testActivity?.testCompleteInd,
+      action: () => validateTest.mutate()
     },
     {
       id: 'accept-test',
       text: 'Accept test',
       kind: 'tertiary',
       size: 'lg',
-      icon: CheckmarkOutline
+      icon: CheckmarkOutline,
+      disabled: !testActivity?.testCompleteInd || !!testActivity?.acceptResult,
+      action: () => acceptTest.mutate()
     },
     {
       id: 'test-history',
       text: 'Test history',
       kind: 'tertiary',
       size: 'lg',
-      icon: Time
+      icon: Time,
+      disabled: true
     },
     {
       id: 'copy-results',
       text: 'Copy results',
       kind: 'tertiary',
       size: 'lg',
-      icon: CopyFile
+      icon: CopyFile,
+      disabled: true
     }
   ];
 
   return (
     <FlexGrid className="consep-moisture-content">
+      {alert?.message
+        && (<Alert className="consep-moisture-content-alert" severity={alert?.isSuccess ? 'success' : 'error'}>{alert?.message}</Alert>)}
+
       <Row className="consep-moisture-content-breadcrumb">
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
@@ -175,6 +291,9 @@ const MoistureContent = () => {
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
           replicatesData={testActivity?.replicatesList || []}
+          riaKey={activityRiaKey}
+          isEditable={!testActivity?.testCompleteInd}
+          setAlert={handleAlert}
         />
       </Row>
       <Row className="consep-moisture-content-cone-form">
@@ -187,7 +306,11 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
-            onChange={() => { }}
+            onChange={(e: Array<Date>) => {
+              handleUodateActivityRecord({
+                actualBeginDateTime: e[0].toISOString()
+              });
+            }}
           >
             <DatePickerInput
               id="moisture-content-start-date-picker"
@@ -195,9 +318,7 @@ const MoistureContent = () => {
               placeholder="yyyy/mm/dd"
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
-              value={utcToIsoSlashStyle(testActivity?.actualBeginDateTime)}
-              onClick={() => { }}
-              onChange={() => { }}
+              value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
             />
@@ -207,7 +328,11 @@ const MoistureContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat="Y/m/d"
-            onChange={() => { }}
+            onChange={(e: Array<Date>) => {
+              handleUodateActivityRecord({
+                actualEndDateTime: e[0].toISOString()
+              });
+            }}
           >
             <DatePickerInput
               id="moisture-content-end-date-picker"
@@ -215,9 +340,7 @@ const MoistureContent = () => {
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
-              value={utcToIsoSlashStyle(testActivity?.actualEndDateTime)}
-              onClick={() => { }}
-              onChange={() => { }}
+              value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
             />
@@ -230,12 +353,23 @@ const MoistureContent = () => {
             className="category-combobox"
             id="moisture-content-category"
             name="category"
-            items={fieldsConfig.category.options}
-            placeholder={fieldsConfig.category.placeholder}
-            titleText={fieldsConfig.category.title}
-            invalidText={fieldsConfig.category.invalid}
-            value={testActivity?.testCategoryCode || ''}
-            onChange={() => { }}
+            items={fieldsConfig.category.options as Array<string>}
+            placeholder={fieldsConfig.category.placeholder as string}
+            titleText={fieldsConfig.category.title as string}
+            invalidText={fieldsConfig.category.invalid as string}
+            value={
+              activityRecord?.testCategoryCode
+              && activityRecord.testCategoryCode in categoryMap
+                ? categoryMap[activityRecord.testCategoryCode as keyof typeof categoryMap]
+                : ''
+            }
+            onChange={(e: { selectedItem: string }) => {
+              handleUodateActivityRecord({
+                testCategoryCode: categoryMapReverse[
+                  e.selectedItem as keyof typeof categoryMapReverse
+                ]
+              });
+            }}
           />
         </Column>
       </Row>
@@ -249,7 +383,12 @@ const MoistureContent = () => {
             rows={5}
             maxCount={500}
             enableCounter
-            value={testActivity?.riaComment ?? ''}
+            value={activityRecord?.riaComment}
+            onChange={(e: { target: { value: string } }) => {
+              handleUodateActivityRecord({
+                riaComment: e.target.value
+              });
+            }}
           />
         </Column>
       </Row>
