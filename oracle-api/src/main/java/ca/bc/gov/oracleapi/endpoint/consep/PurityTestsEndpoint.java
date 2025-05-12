@@ -99,7 +99,7 @@ public class PurityTestsEndpoint {
 
     SparLog.info("Received request to fetch purity test data for key: {}", riaKey);
 
-    return purityTestService.getPurityTestsData(riaKey);
+    return purityTestService.getPurityTestData(riaKey);
   }
 
   /**
@@ -205,7 +205,7 @@ public class PurityTestsEndpoint {
       BigDecimal riaKey) throws Exception {
     try {
       Optional<PurityTestDto> purityContent = purityTestService
-            .getPurityTestsData(riaKey);
+            .getPurityTestData(riaKey);
 
       if (purityContent.isEmpty()) {
         throw new ResponseStatusException(

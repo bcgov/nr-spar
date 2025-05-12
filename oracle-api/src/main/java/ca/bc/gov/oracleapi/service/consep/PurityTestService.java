@@ -49,7 +49,7 @@ public class PurityTestService {
   /**
    * Get information for purity tests.
    */
-  public Optional<PurityTestDto> getPurityTestsData(BigDecimal riaKey) {
+  public Optional<PurityTestDto> getPurityTestData(BigDecimal riaKey) {
     SparLog.info("Begin to query necessary tables for purity tests");
 
     Optional<ActivityEntity> activityData = activityRepository.findById(riaKey);
