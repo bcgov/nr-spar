@@ -30,7 +30,7 @@ public class PurityReplicateEntity {
   @Column(name = "OTHER_SEED_WEIGHT", precision = 7, scale = 3)
   private BigDecimal otherSeedWeight;
 
-  @Column(name = "INERT_MTTR_WEIGHT", precision = 7, scale = 3)
+  @Column(name = "INERT_MATTR_WEIGHT", precision = 7, scale = 3)
   private BigDecimal containerWeight;
 
   @Column(name = "REP_ACCEPTED_IND")
