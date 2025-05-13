@@ -265,20 +265,20 @@ public class MoistureContentService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test category code is missing");
     }
     if (activityData.getActualBeginDateTime() == null
-        || activityData.getActualBeginDateTime().compareTo(LocalDateTime.now()) < 0) {
+        || activityData.getActualBeginDateTime().compareTo(LocalDateTime.now()) > 0) {
       SparLog.error("MCC activity data validation failed: "
-          + "Actual begin date time is missing or in the past");
+          + "Actual begin date time is missing or in the future");
       throw new ResponseStatusException(
         HttpStatus.BAD_REQUEST,
-        "Actual begin date time is missing or in the past");
+        "Actual begin date time is missing or in the future");
     }
     if (activityData.getActualEndDateTime() == null
-        || activityData.getActualEndDateTime().compareTo(LocalDateTime.now()) < 0) {
+        || activityData.getActualEndDateTime().compareTo(LocalDateTime.now()) > 0) {
       SparLog.error("MCC activity data validation failed: "
-          + "Actual end date time is missing or in the past");
+          + "Actual end date time is missing or in the fature");
       throw new ResponseStatusException(
         HttpStatus.BAD_REQUEST,
-        "Actual end date time is missing or in the past");
+        "Actual end date time is missing or in the future");
     }
   }
 

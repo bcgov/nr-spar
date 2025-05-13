@@ -254,6 +254,17 @@ const MoistureContent = () => {
       disabled: true
     }
   ];
+  const initReplicatesList = () => {
+    const emptyRows = [];
+    for (let i = 0; i < 4; i += 1) {
+      emptyRows.push({
+        riaKey: activityRiaKey,
+        replicateNumber: i + 1,
+        replicateAccInd: 1
+      });
+    }
+    return emptyRows;
+  };
 
   return (
     <FlexGrid className="consep-moisture-content">
@@ -264,7 +275,7 @@ const MoistureContent = () => {
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="consep-moisture-content-title">
-        <PageTitle title={fieldsConfig.titleSection.title} />
+        <PageTitle title={`${fieldsConfig.titleSection.title} ${activitySummary && activitySummary.seedlotNumber}`} />
         <>
           {
             testActivity?.testCompleteInd
@@ -290,7 +301,7 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
-          replicatesData={testActivity?.replicatesList || []}
+          replicatesData={testActivity?.replicatesList || initReplicatesList()}
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
           setAlert={handleAlert}
@@ -361,7 +372,7 @@ const MoistureContent = () => {
               activityRecord?.testCategoryCode
               && activityRecord.testCategoryCode in categoryMap
                 ? categoryMap[activityRecord.testCategoryCode as keyof typeof categoryMap]
-                : ''
+                : 'Quality assurance'
             }
             onChange={(e: { selectedItem: string }) => {
               handleUodateActivityRecord({
