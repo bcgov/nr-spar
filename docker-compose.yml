@@ -24,7 +24,7 @@ x-frontend: &frontend
 services:
   database:
     container_name: database
-    image: postgis/postgis:15-master
+    image: postgis/postgis:15-master@sha256:c1288c91f8671521bb7c7d3f08a3e2b537d48cdd1725c78bdf8fa34ac81225f4
     environment:
       <<: *postgres-vars
     volumes:
@@ -48,7 +48,7 @@ services:
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
       <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
-    image: maven:3.9.9-eclipse-temurin-17
+    image: maven:3.9.9-eclipse-temurin-17@sha256:75c4d813eab02660a1dd7c5af04c2531db326b2b2998fa48082303cb28c1022c
     entrypoint: sh -c './encora-cert.sh'
     working_dir: /app
     volumes:
@@ -59,7 +59,7 @@ services:
 
   frontend:
     container_name: frontend
-    image: node:20-bullseye-slim
+    image: node:20-bullseye-slim@sha256:d22f9a922b63416d8e96f8c4b3eaa7e8451cd1eee7d5b676966cd44a43655dfa
     ports: ["3000:3000"]
     entrypoint: sh -c "npm i --no-update-notifier && npm run start"
     user: root
@@ -86,7 +86,7 @@ services:
       CYPRESS_baseUrl: http://frontend:3000
       CYPRESS_USERNAME: LOAD-3-TEST
       CYPRESS_PASSWORD: ${CYPRESS_PASSWORD}
-    image: cypress/included:12.17.4
+    image: cypress/included:12.17.4@sha256:658c7ba220b398d0dab9f474811ee8ef527424e5f841a9882d3ba6c0ad2acf9b
     profiles: ["cypress"]
     user: root
     volumes: ["./frontend:/app"]
@@ -106,7 +106,7 @@ services:
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
     profiles: ["oracle-api"]
     network_mode: host
-    image: maven:3.9.9-eclipse-temurin-17
+    image: maven:3.9.9-eclipse-temurin-17@sha256:75c4d813eab02660a1dd7c5af04c2531db326b2b2998fa48082303cb28c1022c
     entrypoint: sh -c './startup.sh && mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5006"'
     working_dir: /app
     volumes: ["./oracle-api:/app"]
@@ -116,7 +116,7 @@ services:
   schemaspy:
     container_name: schemaspy
     profiles: ["schemaspy"]
-    image: schemaspy/schemaspy:6.2.4
+    image: schemaspy/schemaspy:6.2.4@sha256:08290ff34c0fa4c1b28af555fbedf755159e42d02651a987e6077cb40a06f1ff
     user: ${UID:-""}:${GID:-""}
     volumes:
       - "./schemaspy/output:/output"
@@ -135,7 +135,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@qs.com
       PGADMIN_DEFAULT_PASSWORD: admin
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4@sha256:bd71932cb1ef94719e783f0eed42c227bc67877a7c7e076c7092738711e5f4d4
     ports: [5050:80]
     depends_on:
       database:
