@@ -1,6 +1,6 @@
 # Build static files
 # Node Bullseye has npm
-FROM node:18.20.8-bullseye-slim AS build
+FROM node:18.20.8-bullseye-slim@sha256:912df8d9d8d23d39b463a8634d51cac990d89d2f62a6504e1d35296eb4f38251 AS build
 ENV NODE_OPTIONS="--max-old-space-size=3072"
 
 # Build
@@ -14,7 +14,7 @@ RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
 
 # Deploy container
 # Caddy serves static files
-FROM caddy:2.10.0-alpine
+FROM caddy:2.10.0-alpine@sha256:e2e3a089760c453bc51c4e718342bd7032d6714f15b437db7121bfc2de2654a6
 RUN apk add --no-cache ca-certificates curl
 
 # Copy files and run formatting

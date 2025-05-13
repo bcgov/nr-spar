@@ -21,7 +21,7 @@ jobs:
     name: Typescript lint
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-test-and-analyse@v1.3.0
+      - uses: bcgov/action-test-and-analyse@e2ba34132662c1638dbde806064eb7004b3761c3 # v1.3.0
         with:
           commands: |
             npm ci
@@ -34,7 +34,7 @@ jobs:
     if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-test-and-analyse-java@v1.1.0
+      - uses: bcgov/action-test-and-analyse-java@7c7309721cae054b3e837c723afa4efb4b1a256d # v1.1.0
         with:
           commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
           dir: backend
@@ -52,7 +52,7 @@ jobs:
     if: (! github.event.pull_request.draft)
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-test-and-analyse-java@v1.1.0
+      - uses: bcgov/action-test-and-analyse-java@7c7309721cae054b3e837c723afa4efb4b1a256d # v1.1.0
         with:
           commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
           dir: oracle-api
@@ -72,9 +72,9 @@ jobs:
       security-events: write
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # 0.30.0
         with:
           format: "sarif"
           output: "trivy-results.sarif"
@@ -84,7 +84,7 @@ jobs:
           severity: "CRITICAL,HIGH"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@60168efe1c415ce0f5521ea06d5c2062adbeed1b # v3
         with:
           sarif_file: "trivy-results.sarif"
 
