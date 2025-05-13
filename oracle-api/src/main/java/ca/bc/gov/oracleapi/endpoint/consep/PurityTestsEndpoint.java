@@ -49,9 +49,9 @@ public class PurityTestsEndpoint {
   private TestResultService testResultService;
 
   PurityTestsEndpoint(
-    PurityTestService purityTestService,
-    ActivityService activityService,
-    TestResultService testResultService
+      PurityTestService purityTestService,
+      ActivityService activityService,
+      TestResultService testResultService
   ) {
     this.purityTestService = purityTestService;
     this.activityService = activityService;

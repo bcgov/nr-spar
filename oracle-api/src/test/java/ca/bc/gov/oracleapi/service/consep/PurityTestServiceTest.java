@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The test class for Moisture Content Service.
+ * The test class for purity test service.
  */
 @ExtendWith(MockitoExtension.class)
 class PurityTestServiceTest {
@@ -227,13 +227,13 @@ class PurityTestServiceTest {
   @Test
   void validatePurityData_missingRiaKey() {
     PurityReplicateDto replicateDto = new PurityReplicateDto(
-      null,
-      1,
-      new BigDecimal("12.345"),
-      new BigDecimal("45.678"),
-      new BigDecimal("58.901"),
-      1,
-      "Reason"
+        null,
+        1,
+        new BigDecimal("12.345"),
+        new BigDecimal("45.678"),
+        new BigDecimal("58.901"),
+        1,
+        "Reason"
     );
     List<PurityReplicateDto> replicates = List.of(replicateDto);
 
@@ -244,13 +244,13 @@ class PurityTestServiceTest {
   @Test
   void validatePurityData_invalidContainerWeight() {
     PurityReplicateDto replicateDto = new PurityReplicateDto(
-      null,
-      1,
-      new BigDecimal("1000"),
-      new BigDecimal("45.678"),
-      new BigDecimal("58.901"),
-      1,
-      "Reason"
+        null,
+        1,
+        new BigDecimal("1000"),
+        new BigDecimal("45.678"),
+        new BigDecimal("58.901"),
+        1,
+        "Reason"
     );
     List<PurityReplicateDto> replicates = List.of(replicateDto);
 
@@ -269,7 +269,8 @@ class PurityTestServiceTest {
         Optional.of(mockReplicate));
 
     doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
-    assertDoesNotThrow(() -> purityTestService.deleteSinglePurityReplicate(riaKey, replicateNumber));
+    assertDoesNotThrow(() -> purityTestService.deleteSinglePurityReplicate(
+        riaKey, replicateNumber));
 
     verify(replicateRepository, times(1)).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
   }
@@ -333,8 +334,8 @@ class PurityTestServiceTest {
     when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds)).thenReturn(
         List.of());
 
-    assertThrows(InvalidTestActivityKeyException.class, () -> purityTestService.deleteFullPurityTest(
-        riaKey));
+    assertThrows(InvalidTestActivityKeyException.class, () ->
+        purityTestService.deleteFullPurityTest(riaKey));
 
     verify(activityRepository, never()).deleteById(any());
     verify(testResultRepository, never()).deleteById(any());

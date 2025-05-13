@@ -48,9 +48,9 @@ public class MoistureContentConesEndpoint {
   private TestResultService testResultService;
 
   MoistureContentConesEndpoint(
-    MoistureContentService moistureContentService,
-    ActivityService activityService,
-    TestResultService testResultService
+      MoistureContentService moistureContentService,
+      ActivityService activityService,
+      TestResultService testResultService
   ) {
     this.moistureContentService = moistureContentService;
     this.activityService = activityService;
