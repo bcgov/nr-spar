@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: redhat-actions/openshift-tools-installer@v1
+      - uses: redhat-actions/openshift-tools-installer@144527c7d98999f2652264c048c7a9bd103f8a82 # v1
         with:
           oc: "4"
       - run: |
@@ -50,7 +50,7 @@ jobs:
       PREFIX: ${{ github.event.repository.name }}-test
     steps:
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.12.0
+        uses: zaproxy/action-full-scan@75ee1686750ab1511a73b26b77a2aedd295053ed # v0.12.0
         with:
           allow_issue_writing: true
           artifact_name: "zap_frontend"
