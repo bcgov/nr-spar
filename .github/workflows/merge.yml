@@ -25,7 +25,7 @@ jobs:
     steps:
         # Get PR number for squash merges to main
       - id: pr
-        uses: bcgov/action-get-pr@v0.0.1
+        uses: bcgov/action-get-pr@21f9351425cd55a98e869ee28919a512aa30647d # v0.0.1
 
   deploys-test:
     name: TEST Deploys (${{ needs.init.outputs.pr }})
@@ -57,7 +57,7 @@ jobs:
       matrix:
         package: [backend, frontend, oracle-api]
     steps:
-      - uses: shrink/actions-docker-registry-tag@v4
+      - uses: shrink/actions-docker-registry-tag@f04afd0559f66b288586792eb150f45136a927fa # v4
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}

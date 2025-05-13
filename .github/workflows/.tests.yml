@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       # Check triggers (omitted or matched)
-      - uses: bcgov/action-diff-triggers@v0.2.0
+      - uses: bcgov/action-diff-triggers@0d193029efd26c76aeacaa84aba3328de8198370 # v0.2.0
         id: triggers
         with:
           triggers: ${{ inputs.triggers }}
@@ -42,12 +42,12 @@ jobs:
       - if: steps.triggers.outputs.triggered == 'false'
         run: echo "No tests required/triggered!"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         if: steps.triggers.outputs.triggered == 'true'
 
       - name: Run Cypress CI
         if: steps.triggers.outputs.triggered == 'true'
-        uses: bcgov/action-test-and-analyse@v1.3.0
+        uses: bcgov/action-test-and-analyse@e2ba34132662c1638dbde806064eb7004b3761c3 # v1.3.0
         with:
           node_version: "18"
           commands: |
@@ -70,7 +70,7 @@ jobs:
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-04/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
       - name: Upload videos
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: cypress-videos-chrome
