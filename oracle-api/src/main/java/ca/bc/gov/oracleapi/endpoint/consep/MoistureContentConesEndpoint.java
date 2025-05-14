@@ -3,7 +3,6 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
-import ca.bc.gov.oracleapi.dto.consep.Numbers;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
@@ -396,7 +395,7 @@ public class MoistureContentConesEndpoint {
    * @param numbers A list of numbers to calculate the average.
    * @return The calculated average.
    */
-  @PostMapping("/calculate-average")
+  @PostMapping("/{riaKey}/calculate-average")
   @Operation(
       summary = "Calculate the average of a list of numbers",
       description = "Given a list of numbers, calculates and returns the average.")
@@ -405,12 +404,20 @@ public class MoistureContentConesEndpoint {
       @ApiResponse(responseCode = "400", description = "Invalid input data"),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })
-  public ResponseEntity<Double> calculateAverage(@RequestBody Numbers numbers) {
+  public ResponseEntity<Double> calculateAverage(
+        @Parameter(
+            name = "riaKey",
+            in = ParameterIn.PATH,
+            description = "Identification key for MCC data",
+            required = true)
+        @PathVariable
+        BigDecimal riaKey,
+          @RequestBody List<Double> numbers) {
     try {
-      double average = moistureContentService.calculateAverage(numbers.getNumbers());
-      return ResponseEntity.status(HttpStatus.OK).body(average);
+        double average = moistureContentService.calculateAverage(riaKey, numbers);
+        return ResponseEntity.status(HttpStatus.OK).body(average);
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
   }
 }
