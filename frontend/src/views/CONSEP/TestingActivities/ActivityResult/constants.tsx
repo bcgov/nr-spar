@@ -132,7 +132,7 @@ export const getColumns = (
   ),
   {
     accessorKey: 'mcValue',
-    header: 'MC value',
+    header: 'MC value (%)',
     size: 80,
     ...alignRight
   },
