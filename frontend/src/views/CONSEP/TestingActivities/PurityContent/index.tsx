@@ -79,7 +79,7 @@ const PurityContent = () => {
 
   const impurityDropdown = (replicate: number) => impurities[replicate].map((impurity) => (
     <Row key={impurity.id} className="consep-impurity-content">
-      <Column>
+      <Column sm={1} md={1} lg={2} xlg={2}>
         <TextInput
           labelText="Rank"
           disabled
@@ -88,7 +88,7 @@ const PurityContent = () => {
           readOnly
         />
       </Column>
-      <Column sm={2} md={2} lg={5} xlg={5}>
+      <Column sm={4} md={4} lg={10} xlg={10}>
         <ComboBox
           className="consep-impurity-combobox"
           id={`impurity-${replicate}-${impurity.id}`}
@@ -99,7 +99,7 @@ const PurityContent = () => {
           onChange={() => {}}
         />
       </Column>
-      <Column className="consep-impurity-content-remove" sm={2}>
+      <Column className="consep-impurity-content-remove" sm={1} md={1} lg={2} xlg={2}>
         <Button
           kind="danger--tertiary"
           size="sm"
@@ -113,7 +113,8 @@ const PurityContent = () => {
   ));
 
   const replicateSection = (replicate: number) => (
-    <>
+    <Column sm={4} md={4} lg={8} xlg={8}>
+      {/* Title for the replicate section */}
       <Row className="consep-purity-content-replicate">
         <Column className="consep-section-title">
           <h5>
@@ -149,7 +150,7 @@ const PurityContent = () => {
         subtitle="You can only add up to 10 impurities for each replicate."
       />
       )}
-    </>
+    </Column>
   );
 
   const buttons = [
@@ -199,11 +200,6 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-summary">
         <ActivitySummary item={fieldsConfig.activityItem} isFetching={false} />
       </Row>
-      <Row className="consep-purity-content-cone-form">
-        <Column className="consep-section-title">
-          <h4>{fieldsConfig.puritySection.title}</h4>
-        </Column>
-      </Row>
       <Row className="consep-purity-content-date-picker">
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
@@ -243,8 +239,6 @@ const PurityContent = () => {
             />
           </DatePicker>
         </Column>
-      </Row>
-      <Row className="consep-purity-content-category">
         <Column sm={2} md={2} lg={5} xlg={5}>
           <ComboBox
             className="category-combobox"
@@ -263,12 +257,14 @@ const PurityContent = () => {
           <h4>{fieldsConfig.impuritySection.title}</h4>
         </Column>
       </Row>
-      {
-        replicateSection(1)
-      }
-      {
-        replicateSection(2)
-      }
+      <Row>
+        {
+          replicateSection(1)
+        }
+        {
+          replicateSection(2)
+        }
+      </Row>
       <Row className="consep-purity-content-comments">
         <Column sm={4} md={4} lg={10} xlg={10}>
           <TextArea
@@ -276,7 +272,7 @@ const PurityContent = () => {
             name={fieldsConfig.comments.name}
             labelText={fieldsConfig.comments.labelText}
             placeholder={fieldsConfig.comments.placeholder}
-            rows={5}
+            rows={1}
             maxCount={500}
             enableCounter
           />

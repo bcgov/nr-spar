@@ -4,9 +4,6 @@ export const fieldsConfig = {
   titleSection: {
     title: 'Purity for seedlot 64132'
   },
-  puritySection: {
-    title: 'Purity data entry'
-  },
   impuritySection: {
     title: 'Impurities',
     firstSubtitle: 'Replicate 1',
@@ -43,7 +40,7 @@ export const fieldsConfig = {
     placeholder: 'Choose a category',
     label: 'category',
     invalid: 'Please select an option',
-    options: ['Quality Assurance', 'Quality Control']
+    options: ['Quality assurance', 'Quality control']
   },
   comments: {
     name: 'comments',

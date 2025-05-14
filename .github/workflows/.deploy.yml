@@ -69,7 +69,7 @@ jobs:
 
       - name: OpenShift Init
         id: trigger
-        uses: bcgov/action-deployer-openshift@v4.0.0
+        uses: bcgov/action-deployer-openshift@d972993c70aba88e4f2fe66a66c4b7149fa9fcad # v4.0.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -93,7 +93,7 @@ jobs:
           triggers: ${{ inputs.triggers }}
 
       - name: Database
-        uses: bcgov/action-deployer-openshift@v4.0.0
+        uses: bcgov/action-deployer-openshift@d972993c70aba88e4f2fe66a66c4b7149fa9fcad # v4.0.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -128,7 +128,7 @@ jobs:
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
     steps:
-      - uses: bcgov/action-deployer-openshift@v4.0.0
+      - uses: bcgov/action-deployer-openshift@d972993c70aba88e4f2fe66a66c4b7149fa9fcad # v4.0.0
         id: deploys
         with:
           file: ${{ matrix.name }}/openshift.deploy.yml

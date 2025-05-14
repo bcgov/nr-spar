@@ -74,8 +74,8 @@ class MoistureContentServiceTest {
 
     activityEntity = new ActivityEntity();
     activityEntity.setTestCategoryCode("TEST");
-    activityEntity.setActualBeginDateTime(LocalDateTime.now().plusDays(1));
-    activityEntity.setActualEndDateTime(LocalDateTime.now().plusDays(2));
+    activityEntity.setActualBeginDateTime(LocalDateTime.now().minusDays(2));
+    activityEntity.setActualEndDateTime(LocalDateTime.now().minusDays(1));
     activityEntity.setRiaComment("Test comment");
 
     testResultEntity = new TestResultEntity();
@@ -341,9 +341,9 @@ class MoistureContentServiceTest {
 
   @Test
   void validateMoistureContentActivityData_pastBeginDate() {
-    activityEntity.setActualBeginDateTime(LocalDateTime.now().minusDays(1));
-    assertThrows(ResponseStatusException.class,
-        () -> moistureContentService.validateMoistureContentActivityData(activityEntity));
+    activityEntity.setActualBeginDateTime(LocalDateTime.now().plusDays(1));
+    assertThrows(ResponseStatusException.class, () ->
+        moistureContentService.validateMoistureContentActivityData(activityEntity));
   }
 
   @Test
