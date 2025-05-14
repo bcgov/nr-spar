@@ -486,9 +486,10 @@ class MoistureContentServiceTest {
   void calculateAverage_validList_shouldReturnCorrectAverage() {
     // Arrange
     List<Double> numbers = Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0);
+    BigDecimal riaKey = new BigDecimal(1234567890);
 
     // Act
-    double result = moistureContentService.calculateAverage(numbers);
+    double result = moistureContentService.calculateAverage(riaKey, numbers);
 
     // Assert
     assertEquals(3.0, result, 0.001, "The average should be 3.0");
@@ -498,10 +499,11 @@ class MoistureContentServiceTest {
   void calculateAverage_emptyList_shouldThrowException() {
     // Arrange
     List<Double> numbers = Collections.emptyList();
+    BigDecimal riaKey = new BigDecimal(1234567890);
 
     // Act & Assert
     Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      moistureContentService.calculateAverage(numbers);
+      moistureContentService.calculateAverage(riaKey, numbers);
     });
 
     assertEquals("The list of numbers cannot be null or empty", exception.getMessage());
@@ -509,9 +511,10 @@ class MoistureContentServiceTest {
 
   @Test
   void calculateAverage_nullList_shouldThrowException() {
+    BigDecimal riaKey = new BigDecimal(1234567890);
     // Act & Assert
     Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      moistureContentService.calculateAverage(null);
+      moistureContentService.calculateAverage(riaKey, null);
     });
 
     assertEquals("The list of numbers cannot be null or empty", exception.getMessage());
