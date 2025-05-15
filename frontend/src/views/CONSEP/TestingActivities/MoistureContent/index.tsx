@@ -23,7 +23,7 @@ import {
 
 import ROUTES from '../../../../routes/constants';
 import {
-  getMccByRiaKey, updateActivityRecord, validateResult, acceptResult
+  getMccByRiaKey, updateActivityRecord, validateResult, acceptResult, calculateAverage
 } from '../../../../api-service/moistureContentAPI';
 import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { TestingActivityType, ActivityRecordType } from '../../../../types/consep/TestingActivityType';
@@ -203,6 +203,28 @@ const MoistureContent = () => {
     }
   });
 
+  const averageTest = useMutation({
+    mutationFn: (numbers: number[]) => calculateAverage(riaKey ?? '', numbers),
+    onSuccess: (data) => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        moisturePct: data.data
+      };
+      setTestActivity(testActivityData);
+      // Optionally, show an alert or update the UI
+      setAlert({ isSuccess: true, message: `Calculated average: ${data}` });
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    },
+    onError: (error: AxiosError) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to calculate average: ${error.message}`
+      });
+    }
+  });
+
   const createBreadcrumbItems = () => {
     const crumbsList = [];
     crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
@@ -217,7 +239,14 @@ const MoistureContent = () => {
       text: 'Calculate average',
       kind: 'primary',
       size: 'lg',
-      icon: Calculator
+      icon: Calculator,
+      action: () => {
+        // Extract cell values from the table
+        const cells = document.querySelectorAll('td[data-index="6"]');
+        const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+        // Call the mutate function with the extracted numbers
+        averageTest.mutate(numbers);
+      }
     },
     {
       id: 'complete-test',
