@@ -20,7 +20,9 @@ import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,7 +43,9 @@ public class MoistureContentConesEndpoint {
 
   private MoistureContentService moistureContentService;
 
-  MoistureContentConesEndpoint(MoistureContentService moistureContentService) {
+  @Autowired
+  public MoistureContentConesEndpoint(
+      MoistureContentService moistureContentService) {
     this.moistureContentService = moistureContentService;
   }
 
@@ -383,5 +387,48 @@ public class MoistureContentConesEndpoint {
             List<Integer> replicateNumbers) {
     moistureContentService.deleteMccReplicates(riaKey, replicateNumbers);
     return replicateNumbers;
+  }
+
+  /**
+   * Calculate the average of a list of numbers.
+   *
+   * @param numbers A list of numbers to calculate the average.
+   * @return The calculated average.
+   */
+  @PostMapping(value = "/{riaKey}/calculate-average", produces = "application/json")
+  @Operation(
+      summary = "Calculate the average of a list of numbers",
+      description = "Given a list of numbers, calculates and returns the average.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully calculated the average"),
+      @ApiResponse(responseCode = "400", description = "Invalid input data"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
+  public ResponseEntity<Double> calculateAverage(
+        @Parameter(
+            name = "riaKey",
+            in = ParameterIn.PATH,
+            description = "Identification key for MCC data",
+            required = true)
+        @PathVariable
+        BigDecimal riaKey,
+        @RequestBody List<Double> numbers) {
+      try {
+          // Validate input
+          if (numbers == null || numbers.isEmpty()) {
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Input list of numbers cannot be null or empty.");
+          }
+          double average = moistureContentService.calculateAverage(riaKey, numbers);
+          return ResponseEntity.status(HttpStatus.OK).body(average);
+      } catch (IllegalArgumentException e) {
+          // Handle specific exceptions (e.g., invalid arguments)
+          SparLog.error("Invalid input for calculateAverage: {}", e.getMessage(), e);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid input: " + e.getMessage(), e);
+
+      } catch (Exception e) {
+          // Handle unexpected exceptions
+          SparLog.error("Unexpected error in calculateAverage: {}", e.getMessage(), e);
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
+      }
   }
 }
