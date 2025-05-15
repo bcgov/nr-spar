@@ -1,5 +1,4 @@
 export type ReplicateType = {
-  mcValue: number;
   riaKey: number;
   replicateNumber: number;
   replicateAccInd: number;
