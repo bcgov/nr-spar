@@ -395,7 +395,7 @@ public class MoistureContentConesEndpoint {
    * @param numbers A list of numbers to calculate the average.
    * @return The calculated average.
    */
-  @PostMapping("/{riaKey}/calculate-average")
+  @PostMapping(value = "/{riaKey}/calculate-average", produces = "application/json")
   @Operation(
       summary = "Calculate the average of a list of numbers",
       description = "Given a list of numbers, calculates and returns the average.")
@@ -412,12 +412,23 @@ public class MoistureContentConesEndpoint {
             required = true)
         @PathVariable
         BigDecimal riaKey,
-          @RequestBody List<Double> numbers) {
-    try {
-        double average = moistureContentService.calculateAverage(riaKey, numbers);
-        return ResponseEntity.status(HttpStatus.OK).body(average);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
+        @RequestBody List<Double> numbers) {
+      try {
+          // Validate input
+          if (numbers == null || numbers.isEmpty()) {
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Input list of numbers cannot be null or empty.");
+          }
+          double average = moistureContentService.calculateAverage(riaKey, numbers);
+          return ResponseEntity.status(HttpStatus.OK).body(average);
+      } catch (IllegalArgumentException e) {
+          // Handle specific exceptions (e.g., invalid arguments)
+          SparLog.error("Invalid input for calculateAverage: {}", e.getMessage(), e);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid input: " + e.getMessage(), e);
+
+      } catch (Exception e) {
+          // Handle unexpected exceptions
+          SparLog.error("Unexpected error in calculateAverage: {}", e.getMessage(), e);
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
+      }
   }
 }
