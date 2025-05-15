@@ -160,9 +160,9 @@ const ActivityResult = ({
   const replicateListWithMCValue = replicatesList.map((item) => ({
     ...item,
     mcValue: item.freshSeed && item.dryWeight
-      ? Math.round(
+      ? (Math.round(
         ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
-      ) / 100
+      )).toFixed(2)
       : undefined
   }));
 
