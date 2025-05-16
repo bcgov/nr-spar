@@ -67,16 +67,18 @@ public class ActivityService {
       SparLog.error("Activity data validation failed: Test category code is missing");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test category code is missing");
     }
+
     if (activityData.getActualBeginDateTime() == null
-        || activityData.getActualBeginDateTime().compareTo(LocalDateTime.now()) < 0) {
+        || activityData.getActualBeginDateTime().compareTo(LocalDateTime.now()) > 0) {
       SparLog.error("Activity data validation failed: "
           + "Actual begin date time is missing or in the past");
       throw new ResponseStatusException(
         HttpStatus.BAD_REQUEST,
         "Actual begin date time is missing or in the past");
     }
+
     if (activityData.getActualEndDateTime() == null
-        || activityData.getActualEndDateTime().compareTo(LocalDateTime.now()) < 0) {
+        || activityData.getActualEndDateTime().compareTo(LocalDateTime.now()) > 0) {
       SparLog.error("Activity data validation failed: "
           + "Actual end date time is missing or in the past");
       throw new ResponseStatusException(

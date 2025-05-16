@@ -98,7 +98,7 @@ class ActivityServiceTest {
 
   @Test
   void validateActivityData_pastBeginDate() {
-    activityEntity.setActualBeginDateTime(LocalDateTime.now().minusDays(1));
+    activityEntity.setActualBeginDateTime(LocalDateTime.now().plusDays(1));
     assertThrows(ResponseStatusException.class, () ->
         activityService.validateActivityData(activityEntity));
   }

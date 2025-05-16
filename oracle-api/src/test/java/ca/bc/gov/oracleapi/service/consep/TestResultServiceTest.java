@@ -60,7 +60,7 @@ class TestResultServiceTest {
   }
 
   @Test
-  void acceptMoistureContentData_success() {
+  void acceptTestResult_success() {
     when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultEntity));
 
     assertDoesNotThrow(() ->
@@ -69,7 +69,7 @@ class TestResultServiceTest {
   }
 
   @Test
-  void acceptMoistureContentData_testNotCompleted() {
+  void acceptTestResult_testNotCompleted() {
     testResultEntity.setTestCompleteInd(0);
     testResultEntity.setSampleDesc("Sample");
     testResultEntity.setMoistureStatus("Status");
