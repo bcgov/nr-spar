@@ -10,7 +10,7 @@ import java.util.List;
  * This class represents a data object for the moisture content cone.
  */
 @Schema(description = "This class represents a moisture content cone object.")
-public record MoistureContentConesDto(
+public record PurityTestDto(
     // Begin - Result fields
     @Schema(description = "Indicator if the test is complete", example = "1")
     Integer testCompleteInd,
@@ -55,5 +55,7 @@ public record MoistureContentConesDto(
 
     // Replicates fields
     @Schema(description = "Replicates information")
-    List<MccReplicateDto> replicatesList) {
+    List<PurityReplicateDto> replicatesList) {
+
+    // TODO: add impurities field
 }

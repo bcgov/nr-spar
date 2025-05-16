@@ -1,16 +1,16 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
-import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
-import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
+import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.exception.InvalidTestActivityKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
-import ca.bc.gov.oracleapi.repository.consep.MccReplicatesRepository;
+import ca.bc.gov.oracleapi.repository.consep.PurityReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -27,16 +27,18 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-/** The class for Moisture Content Cones Service. */
+/** The class for Purity Tests Service. */
 @Service
 @RequiredArgsConstructor
-public class MoistureContentService {
+public class PurityTestService {
+
+  //TODO: Add everything related to impurities here (probably)
 
   private final ActivityRepository activityRepository;
 
   private final TestResultRepository testResultRepository;
 
-  private final MccReplicatesRepository replicateRepository;
+  private final PurityReplicateRepository replicateRepository;
 
   // The maximum number of replicates is 8 and the entries are sequencial,
   // so we can use a fixed list to fetch the data for the replicates.
@@ -45,16 +47,16 @@ public class MoistureContentService {
 
 
   /**
-   * Get information for moisture cone content.
+   * Get information for purity tests.
    */
-  public Optional<MoistureContentConesDto> getMoistureConeContentData(BigDecimal riaKey) {
-    SparLog.info("Begin to query necessary tables for moisture cone content");
+  public Optional<PurityTestDto> getPurityTestData(BigDecimal riaKey) {
+    SparLog.info("Begin to query necessary tables for purity tests");
 
     Optional<ActivityEntity> activityData = activityRepository.findById(riaKey);
 
     Optional<TestResultEntity> testResultData = testResultRepository.findById(riaKey);
 
-    List<MccReplicateEntity> replicates =
+    List<PurityReplicateEntity> replicates =
         replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
     if (activityData.isEmpty() || testResultData.isEmpty()) {
@@ -62,22 +64,21 @@ public class MoistureContentService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for given RIA_SKEY");
     }
 
-    List<MccReplicateDto> replicatesList = replicates.stream().map(
-        (curReplicate) -> new MccReplicateDto(
+    List<PurityReplicateDto> replicatesList = replicates.stream().map(
+        (curReplicate) -> new PurityReplicateDto(
             curReplicate.getId().getRiaKey(),
             curReplicate.getId().getReplicateNumber(),
-            curReplicate.getContainerId(),
+            curReplicate.getPureSeedWeight(),
+            curReplicate.getOtherSeedWeight(),
             curReplicate.getContainerWeight(),
-            curReplicate.getFreshSeed(),
-            curReplicate.getContainerAndDryWeight(),
-            curReplicate.getDryWeight(),
             curReplicate.getReplicateAccInd(),
-            curReplicate.getReplicateComment(),
             curReplicate.getOverrideReason()))
         .collect(Collectors.toList());
 
-    MoistureContentConesDto moistureContent =
-        new MoistureContentConesDto(
+    // TODO: add impurities data to the dto object
+
+    PurityTestDto purityContent =
+        new PurityTestDto(
             testResultData.get().getTestCompleteInd(),
             testResultData.get().getSampleDesc(),
             testResultData.get().getMoistureStatus(),
@@ -92,145 +93,132 @@ public class MoistureContentService {
             activityData.get().getActualEndDateTime(),
             replicatesList);
 
-    SparLog.info("MCC data correctly fetched");
-    return Optional.of(moistureContent);
+    SparLog.info("Purity data correctly fetched");
+    return Optional.of(purityContent);
   }
 
   /**
-   * Update replicate.
+   * This function updates the purity replicates, either by changing the existing ones
+   * or adding new replicates requested by the user.
    *
-   * @param riaKey the identifier key for all table related to MCC
+   * @param riaKey the identifier key for all table related to test activities
    * @param replicateFormDtos an object with the values to be updated
    */
   @Transactional
-  public List<MccReplicateEntity> updateReplicateField(
+  public List<PurityReplicateEntity> updateReplicateField(
       @NonNull BigDecimal riaKey,
-      @NonNull List<MccReplicateFormDto> replicateFormDtos
+      @NonNull List<PurityReplicateFormDto> replicateFormDtos
   ) {
-    SparLog.info("Updating replicates with the riaKey: {}", riaKey);
+    SparLog.info("Updating purity replicates with the riaKey: {}", riaKey);
 
     List<Integer> replicateNumbers = replicateFormDtos.stream()
-        .map(MccReplicateFormDto::replicateNumber)
+        .map(PurityReplicateFormDto::replicateNumber)
         .collect(Collectors.toList());
 
-    List<MccReplicateEntity> existingReplicates =
+    List<PurityReplicateEntity> existingReplicates =
         replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
 
-    Map<Integer, MccReplicateEntity> replicateMap = existingReplicates.stream()
+    Map<Integer, PurityReplicateEntity> replicateMap = existingReplicates.stream()
         .collect(Collectors.toMap(rep -> rep.getId().getReplicateNumber(), Function.identity()));
 
-    List<MccReplicateEntity> updatedReplicates = new ArrayList<>();
+    List<PurityReplicateEntity> updatedReplicates = new ArrayList<>();
 
-    for (MccReplicateFormDto dto : replicateFormDtos) {
+    for (PurityReplicateFormDto dto : replicateFormDtos) {
       int replicateNumber = dto.replicateNumber();
 
-      MccReplicateEntity repEntity = replicateMap.getOrDefault(
-          replicateNumber, new MccReplicateEntity());
+      PurityReplicateEntity repEntity = replicateMap.getOrDefault(
+          replicateNumber, new PurityReplicateEntity());
+
       if (repEntity.getId() == null) {
         repEntity.setId(new ReplicateId(riaKey, replicateNumber));
         SparLog.info("Replicate number {} not found for riaKey {}. Creating new replicate.",
             replicateNumber, riaKey);
       }
 
-      repEntity.setContainerId(dto.containerId());
+      repEntity.setPureSeedWeight(dto.pureSeedWeight());;
+      repEntity.setOtherSeedWeight(dto.otherSeedWeight());
       repEntity.setContainerWeight(dto.containerWeight());
-      repEntity.setFreshSeed(dto.freshSeed());
-      repEntity.setContainerAndDryWeight(dto.containerAndDryWeight());
-      repEntity.setDryWeight(dto.dryWeight());
       repEntity.setReplicateAccInd(dto.replicateAccInd());
-      repEntity.setReplicateComment(dto.replicateComment());
       repEntity.setOverrideReason(dto.overrideReason());
 
       updatedReplicates.add(repEntity);
     }
 
-    List<MccReplicateEntity> savedReplicates = replicateRepository.saveAll(updatedReplicates);
-    SparLog.info("Updated {} replicates for riaKey: {}", savedReplicates.size(), riaKey);
+    List<PurityReplicateEntity> savedReplicates = replicateRepository.saveAll(updatedReplicates);
+    SparLog.info("Updated {} purity replicates for riaKey: {}", savedReplicates.size(), riaKey);
 
     return savedReplicates;
   }
 
   /**
-   * This function validates the data to be submitted for MCC.
+   * This function validates the replicates data to be submitted for purity tests.
    * Throws exception if validation fails
    *
-   * @param moistureContentConesDataDtos a list of replicates to validate
+   * @param purityReplicates a list of replicates to validate
    * @throws ResponseStatusException if any validation fails
    */
-  public void validateMoistureConeContentData(List<MccReplicateDto> moistureContentConesDataDtos) {
-    SparLog.info("Validating MCC data");
-    // Validate the data
-    for (MccReplicateDto replicate : moistureContentConesDataDtos) {
+  public void validatePurityReplicateData(List<PurityReplicateDto> purityReplicates) {
+    SparLog.info("Validating purity replicates data");
+
+    for (PurityReplicateDto replicate : purityReplicates) {
 
       if (replicate.riaKey() == null) {
-        SparLog.error("MCC data validation failed: RIA key is missing");
+        SparLog.error("Purity test data validation failed: RIA key is missing");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RIA key is missing");
       }
 
       if (replicate.replicateNumber() == null) {
-        SparLog.error("MCC data validation failed: Replicate number is missing");
+        SparLog.error("Purity test data validation failed: Replicate number is missing");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Replicate number is missing");
       }
 
-      if (replicate.containerId() != null && replicate.containerId().length() > 4) {
-        SparLog.error("MCC data validation failed: Container ID is too long");
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Container ID is too long");
+      if (replicate.pureSeedWeight() == null
+          || replicate.pureSeedWeight().compareTo(BigDecimal.ZERO) < 0
+          || replicate.pureSeedWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
+        SparLog.error("Purity test data validation failed: "
+            + "Pure seed weight is missing or invalid");
+        throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "Pure seed weight is missing or invalid");
+      }
+
+      if (replicate.otherSeedWeight() == null
+          || replicate.otherSeedWeight().compareTo(BigDecimal.ZERO) < 0
+          || replicate.otherSeedWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
+        SparLog.error("Purity test data validation failed: "
+            + "Other seed weight is missing or invalid");
+        throw new ResponseStatusException(
+           HttpStatus.BAD_REQUEST,
+           "Other seed weight is missing or invalid");
       }
 
       if (replicate.containerWeight() == null
           || replicate.containerWeight().compareTo(BigDecimal.ZERO) < 0
           || replicate.containerWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
-        SparLog.error("MCC data validation failed: Container weight is missing or invalid");
+        SparLog.error("Purity test data validation failed: "
+            + "Container weight is missing or invalid");
         throw new ResponseStatusException(
            HttpStatus.BAD_REQUEST,
            "Container weight is missing or invalid");
-      }
-
-      if (replicate.freshSeed() == null
-          || replicate.freshSeed().compareTo(BigDecimal.ZERO) < 0
-          || replicate.freshSeed().compareTo(BigDecimal.valueOf(999.999)) > 0) {
-        SparLog.error("MCC data validation failed: Fresh seed weight is missing or invalid");
-        throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST,
-          "Fresh seed weight is missing or invalid");
-      }
-
-      if (replicate.dryWeight() == null
-          || replicate.dryWeight().compareTo(BigDecimal.ZERO) < 0
-          || replicate.dryWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
-        SparLog.error("MCC data validation failed: Dry weight is missing or invalid");
-        throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST,
-          "Dry weight is missing or invalid");
-      }
-
-      if (replicate.containerAndDryWeight() == null
-          || replicate.containerAndDryWeight().compareTo(BigDecimal.ZERO) < 0
-          || replicate.containerAndDryWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
-        SparLog.error("MCC data validation failed: "
-            + "Container and dry weight is missing or invalid");
-        throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST,
-          "Container and dry weight is missing or invalid");
       }
     }
   }
 
   /**
-   * Deletes multiple replicates.
+   * Deletes multiple purity replicates.
    *
-   * @param riaKey          the identifier key for all table related to MCC
+   * @param riaKey           the identifier key for all table related to tests activities
    * @param replicateNumbers the replicate numbers to be deleted
    */
   @Transactional
-  public void deleteMccReplicates(
+  public void deletePurityReplicates(
       @NonNull BigDecimal riaKey,
       @NonNull List<Integer> replicateNumbers
   ) {
-    SparLog.info("Deleting replicates with the riaKey: {} and replicateNumbers: {}",
+    SparLog.info("Deleting purity replicates with the riaKey: {} and replicateNumbers: {}",
         riaKey, replicateNumbers);
 
-    List<MccReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
+    List<PurityReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
         riaKey,
         replicateNumbers
     );
@@ -241,24 +229,24 @@ public class MoistureContentService {
 
     replicateRepository.deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
 
-    SparLog.info("Replicates with riaKey {} ", riaKey + "deleted!");
+    SparLog.info("Purity replicates with riaKey {} ", riaKey + "deleted!");
   }
 
   /**
-   * Deletes a single replicate.
+   * Deletes a single purity replicate.
    *
-   * @param riaKey          the identifier key for all table related to MCC
+   * @param riaKey          the identifier key for all table related to tests activities
    * @param replicateNumber the replicate number to be deleted
    */
   @Transactional
-  public void deleteMccReplicate(
+  public void deleteSinglePurityReplicate(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber
   ) {
-    SparLog.info("Deleting a replicate tables with the "
+    SparLog.info("Deleting single purity replicate with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
 
-    Optional<MccReplicateEntity> replicates = replicateRepository.findSingleReplicate(
+    Optional<PurityReplicateEntity> replicates = replicateRepository.findSingleReplicate(
         riaKey,
         replicateNumber
     );
@@ -269,24 +257,26 @@ public class MoistureContentService {
 
     replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
 
-    SparLog.info("Replicate {} with riaKey {} ", replicateNumber, riaKey + "deleted!");
+    SparLog.info("Purity replicate {} with riaKey {} ",
+        replicateNumber, riaKey + "deleted!");
   }
 
   /**
-   * Deletes MCC data on multiple tables.
+   * Deletes purity tests data on multiple tables.
    *
    * @param riaKey the identifier key for all table related to MCC
    */
   @Transactional
-  public void deleteFullMcc(@NonNull BigDecimal riaKey) {
+  public void deleteFullPurityTest(@NonNull BigDecimal riaKey) {
     SparLog.info(
-        "Deleting entries on Activity, Replicate and TestResult tables " + "with the riaKey: {}",
-        riaKey);
+        "Deleting entries on Activity, Purity Replicate and TestResult tables "
+        + "with the riaKey: {}", riaKey);
+
     Optional<ActivityEntity> activityEntity = activityRepository.findById(riaKey);
 
     Optional<TestResultEntity> testEntity = testResultRepository.findById(riaKey);
 
-    List<MccReplicateEntity> replicates =
+    List<PurityReplicateEntity> replicates =
         replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
     if (activityEntity.isEmpty() || testEntity.isEmpty() || replicates.isEmpty()) {
