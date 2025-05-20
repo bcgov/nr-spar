@@ -36,3 +36,9 @@ export const acceptResult = (riaKey: string) => {
   const url = `${ApiConfig.moistureContent}/accept/${riaKey}`;
   return api.get(url);
 };
+
+export const calculateAverage = (riaKey: string, numbers: number[]) => {
+  // change to `http://localhost:8091/api/moisture-content-cone/${riaKey}/calculate-average` to get the average on local env
+  const url = `${ApiConfig.moistureContent}/${riaKey}/calculate-average`;
+  return api.post(url, numbers);
+};

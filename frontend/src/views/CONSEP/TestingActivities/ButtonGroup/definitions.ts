@@ -2,7 +2,7 @@ export type ButtonObjType = {
   id: string
   kind: string
   size: string
-  icon: any
+  icon: JSX.Element
   text: string
   action?: () => void
   disabled?: boolean
