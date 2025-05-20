@@ -485,6 +485,7 @@ const OrchardStep = ({
                   titleText={orchardStepText.gameteSection.femaleGametic.label}
                   invalid={state.femaleGametic.isInvalid}
                   invalidText={orchardStepText.gameteSection.femaleGametic.invalid}
+                  aria-invalid={state.femaleGametic.isInvalid ? 'true' : 'false'}
                   onChange={(e: ComboBoxEvent) => setGametic(e, true)}
                   readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.femaleGametic.value}
@@ -512,6 +513,7 @@ const OrchardStep = ({
                   titleText={orchardStepText.gameteSection.maleGametic.label}
                   invalid={state.maleGametic.isInvalid}
                   invalidText={orchardStepText.gameteSection.maleGametic.invalid}
+                  aria-invalid={state.maleGametic.isInvalid ? 'true' : 'false'}
                   onChange={(e: ComboBoxEvent) => setGametic(e, false)}
                   readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.maleGametic.value}
@@ -626,6 +628,7 @@ const OrchardStep = ({
                     helperText={orchardStepText.pollenSection.breedingPercentage.helper}
                     invalid={state.breedingPercentage.isInvalid}
                     invalidText={orchardStepText.pollenSection.breedingPercentage.invalid}
+                    aria-invalid={state.breedingPercentage.isInvalid ? 'true' : 'false'}
                     onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setAndValidateBreedPerc(e.target.value, false);
                     }}
