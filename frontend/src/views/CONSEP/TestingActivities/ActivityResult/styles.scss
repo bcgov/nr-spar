@@ -10,16 +10,20 @@
   margin: 0;
   width: 100%;
 
-  .activity-result-title {
-    @include type.type-style('heading-03');
-    margin: 1rem 2rem 0rem;
-  }
-  
   .activity-result-actions {
     display: flex;
+    justify-content: space-between;
+    margin: 0.5rem 0;
+  }
+
+  .activity-result-actions-title h3 {
+    @include type.type-style('heading-03');
+  }
+
+  .activity-result-action-buttons {
+    display: flex;
     justify-content: flex-end;
-    gap: 2rem;
-    margin-bottom: 0.5rem;
+    gap: 1.5rem;
   }
   
   .action-item, .action-item-disabled {

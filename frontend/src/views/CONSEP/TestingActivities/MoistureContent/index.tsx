@@ -307,12 +307,7 @@ const MoistureContent = () => {
           setAlert={handleAlert}
         />
       </Row>
-      <Row className="consep-moisture-content-cone-form">
-        <Column className="consep-section-title">
-          <h4>{fieldsConfig.moistureContentConesTitle.title}</h4>
-        </Column>
-      </Row>
-      <Row className="consep-moisture-content-date-picker">
+      <Row className="consep-moisture-content-form">
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
@@ -357,8 +352,6 @@ const MoistureContent = () => {
             />
           </DatePicker>
         </Column>
-      </Row>
-      <Row className="consep-moisture-content-category">
         <Column sm={2} md={2} lg={5} xlg={5}>
           <ComboBox
             className="category-combobox"

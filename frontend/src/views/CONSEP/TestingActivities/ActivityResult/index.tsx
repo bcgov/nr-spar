@@ -181,12 +181,11 @@ const ActivityResult = ({
           subtitle="This action will clear the data in the table."
         />
       )}
-      <Row>
-        <h3 className="activity-result-title">{TITLE}</h3>
-      </Row>
       <Row className="activity-result-actions">
-        <Column lg={8} />
-        <Column lg={4} className="activity-result-actions">
+        <Column sm={3} md={3} lg={5} className="activity-result-actions-title">
+          <h3>{TITLE}</h3>
+        </Column>
+        <Column sm={2} md={2} lg={4} className="activity-result-action-buttons">
           {actions.map(({ label, icon, action }) => (
             <button key={label} className={isEditable ? 'action-item' : 'action-item-disabled'} onClick={action} type="button" aria-label={label} disabled={!isEditable}>
               {label}

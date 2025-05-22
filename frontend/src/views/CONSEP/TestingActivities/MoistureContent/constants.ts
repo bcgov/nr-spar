@@ -2,10 +2,7 @@ export const DATE_FORMAT = 'Y/m/d';
 
 export const fieldsConfig = {
   titleSection: {
-    title: 'Moisture content oven for seedlot'
-  },
-  moistureContentConesTitle: {
-    title: 'Moisture content cones'
+    title: 'Moisture content cones for seedlot'
   },
   startDate: {
     name: 'startDate',
