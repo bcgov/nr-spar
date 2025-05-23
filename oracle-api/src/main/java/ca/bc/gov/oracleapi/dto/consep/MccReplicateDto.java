@@ -7,7 +7,7 @@ import java.math.BigDecimal;
  * This class represents a {@link ca.bc.gov.backendstartapi.entity.consep.Replicate} object.
  */
 @Schema(description = "This class represents a Replicate object.")
-public record ReplicateDto(
+public record MccReplicateDto(
     @Schema(description = "RIA Key to identify the replicate data", example = "123")
     BigDecimal riaKey,
 

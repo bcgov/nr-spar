@@ -1,6 +1,6 @@
 package ca.bc.gov.oracleapi.repository.consep;
 
-import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
+import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -12,19 +12,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /**
- * This interface enables the replicate entity from consep to be retrieved from the database.
+ * This interface enables the purity replicate entity from consep to be retrieved from the database.
  */
-public interface ReplicateRepository extends JpaRepository<ReplicateEntity, ReplicateId> {
+public interface PurityReplicateRepository extends
+    JpaRepository<PurityReplicateEntity, ReplicateId> {
 
   @Query(
       value = """
         SELECT *
-        FROM CONSEP.CNS_T_TEST_REP_MC
+        FROM CONSEP.CNS_T_TEST_REP_PURITY
         WHERE RIA_SKEY = :riaKey
         AND TEST_REPLICATE_NO IN (:testReplicateNumbers)
       """,
       nativeQuery = true)
-    List<ReplicateEntity> findByRiaKeyAndReplicateNumbers(
+    List<PurityReplicateEntity> findByRiaKeyAndReplicateNumbers(
         @Param("riaKey") BigDecimal riaKey,
         @Param("testReplicateNumbers") List<Integer> testReplicateNumbers
     );
@@ -32,12 +33,12 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, Repl
   @Query(
       value = """
         SELECT *
-        FROM CONSEP.CNS_T_TEST_REP_MC
+        FROM CONSEP.CNS_T_TEST_REP_PURITY
         WHERE RIA_SKEY = :riaKey
         AND TEST_REPLICATE_NO = :testReplicateNumber
       """,
       nativeQuery = true)
-    Optional<ReplicateEntity> findSingleReplicate(
+    Optional<PurityReplicateEntity> findSingleReplicate(
         @Param("riaKey") BigDecimal riaKey,
         @Param("testReplicateNumber") Integer testReplicateNumber
     );
@@ -46,7 +47,7 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, Repl
   @Transactional
   @Query(
       value = """
-        DELETE FROM CONSEP.CNS_T_TEST_REP_MC
+        DELETE FROM CONSEP.CNS_T_TEST_REP_PURITY
         WHERE RIA_SKEY = :riaKey
         AND TEST_REPLICATE_NO = :testReplicateNumber
       """,
@@ -55,12 +56,12 @@ public interface ReplicateRepository extends JpaRepository<ReplicateEntity, Repl
         @Param("riaKey") BigDecimal riaKey,
         @Param("testReplicateNumber") Integer testReplicateNumber
     );
-  
+
   @Modifying
   @Transactional
   @Query(
       value = """
-        DELETE FROM CONSEP.CNS_T_TEST_REP_MC
+        DELETE FROM CONSEP.CNS_T_TEST_REP_PURITY
         WHERE RIA_SKEY = :riaKey
         AND TEST_REPLICATE_NO IN (:testReplicateNumbers)
       """,
