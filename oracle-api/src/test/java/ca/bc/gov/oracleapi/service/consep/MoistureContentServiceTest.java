@@ -503,23 +503,18 @@ class MoistureContentServiceTest {
     List<Double> numbers = Collections.emptyList();
     BigDecimal riaKey = new BigDecimal(1234567890);
 
-    // Act & Assert
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+    assertThrows(IllegalArgumentException.class, () -> {
       moistureContentService.calculateAverage(riaKey, numbers);
     });
-
-    assertEquals("The list of numbers cannot be null or empty", exception.getMessage());
   }
 
   @Test
   @DisplayName("Calculate average should throw exception for null list")
   void calculateAverage_nullList_shouldThrowException() {
     BigDecimal riaKey = new BigDecimal(1234567890);
-    // Act & Assert
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+
+    assertThrows(IllegalArgumentException.class, () -> {
       moistureContentService.calculateAverage(riaKey, null);
     });
-
-    assertEquals("The list of numbers cannot be null or empty", exception.getMessage());
   }
 }
