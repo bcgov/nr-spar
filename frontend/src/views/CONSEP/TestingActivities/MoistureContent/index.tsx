@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { AxiosError } from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -54,6 +54,8 @@ const MoistureContent = () => {
   const [activityRiaKey, setActivityRiaKey] = useState<number>(0);
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+
+  const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
@@ -211,11 +213,6 @@ const MoistureContent = () => {
         moisturePct: data.data
       };
       setTestActivity(testActivityData);
-      // Optionally, show an alert or update the UI
-      setAlert({ isSuccess: true, message: `Calculated average: ${data}` });
-      setTimeout(() => {
-        setAlert(null);
-      }, 3000);
     },
     onError: (error: AxiosError) => {
       setAlert({
@@ -241,11 +238,18 @@ const MoistureContent = () => {
       size: 'lg',
       icon: Calculator,
       action: () => {
-        // Extract cell values from the table
-        const cells = document.querySelectorAll('td[data-index="6"]');
-        const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
-        // Call the mutate function with the extracted numbers
-        averageTest.mutate(numbers);
+        if (tableBodyRef.current) {
+          // Extract cell values from the table
+          const cells = tableBodyRef.current.querySelectorAll('td[data-index="6"]');
+          const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+          // Call the mutate function with the extracted numbers
+          averageTest.mutate(numbers);
+        } else {
+          setAlert({
+            isSuccess: false,
+            message: 'Table body reference is not available'
+          });
+        }
       }
     },
     {

@@ -166,6 +166,9 @@ const ActivityResult = ({
       : undefined
   }));
 
+  // Used to reference the table body DOM
+  const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+
   return (
     <FlexGrid className="activity-result-container">
       {showDeleteNotification && (
@@ -209,6 +212,7 @@ const ActivityResult = ({
           enableEditing={isEditable}
           isCompacted
           enableSorting
+          tableBodyRef={tableBodyRef}
         />
       </Row>
     </FlexGrid>
