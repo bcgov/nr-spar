@@ -204,7 +204,7 @@ const MoistureContent = () => {
   });
 
   const averageTest = useMutation({
-    mutationFn: (numbers: number[]) => calculateAverage(riaKey ?? '', numbers),
+    mutationFn: (mcValues: number[]) => calculateAverage(riaKey ?? '', mcValues),
     onSuccess: (data) => {
       const testActivityData: TestingActivityType = {
         ...testActivity!,
