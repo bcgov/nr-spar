@@ -2,13 +2,13 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
-import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
-import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
+import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
-import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
+import ca.bc.gov.oracleapi.service.consep.PurityTestService;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,54 +23,54 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-/** This class exposes moisture content cones resources API. */
+/** This class exposes purity tests resources API. */
 @RestController
-@RequestMapping("/api/moisture-content-cone")
+@RequestMapping("/api/purity-tests")
 @Tag(
-    name = "MoistureContentCones",
-    description = "Resource to retrieve Moisture Content Cones data.")
-public class MoistureContentConesEndpoint {
+    name = "PurityTests",
+    description = "Resource to retrieve Purity Tests data.")
+public class PurityTestsEndpoint {
 
-  private MoistureContentService moistureContentService;
+  //TODO: Add everything related to impurities here (probably)
+
+  private PurityTestService purityTestService;
 
   private ActivityService activityService;
 
   private TestResultService testResultService;
 
-  MoistureContentConesEndpoint(
-      MoistureContentService moistureContentService,
+  PurityTestsEndpoint(
+      PurityTestService purityTestService,
       ActivityService activityService,
       TestResultService testResultService
   ) {
-    this.moistureContentService = moistureContentService;
+    this.purityTestService = purityTestService;
     this.activityService = activityService;
     this.testResultService = testResultService;
   }
 
   /**
-  * Retrieve a information related to the moisture content cone.
+  * Retrieve a information related to a single purity test.
   *
   * @param riaKey An id for the tables in this request.
-  * @return A {@link MoistureContentConesDto} with all the necessary information.
+  * @return A {@link PurityTestDto} with all the necessary information.
   */
   @GetMapping("/{riaKey}")
   @Operation(
-      summary = "Get a moisture content cone data given a riaKey",
-      description = "Retrieve a moisture content cone object that is under a riaKey.")
+      summary = "Get a purity test data given a riaKey",
+      description = "Retrieve a purity test object that is under a riaKey.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = """
-          Successfully returned moisture content cone data under a riaKey, an empty
+          Successfully returned purity test data under a riaKey, an empty
           object is returned if nothing is found.
       """),
       @ApiResponse(
@@ -86,7 +86,7 @@ public class MoistureContentConesEndpoint {
                 schema = @Schema(hidden = true)))
   })
   @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
-  public Optional<MoistureContentConesDto> getMccByRiaKey(
+  public Optional<PurityTestDto> getPurityTestByRiaKey(
       @PathVariable
       @Parameter(
           name = "riaKey",
@@ -95,17 +95,17 @@ public class MoistureContentConesEndpoint {
           required = true)
       BigDecimal riaKey) {
 
-    SparLog.info("Received request to fetch MCC data for key: {}", riaKey);
+    SparLog.info("Received request to fetch purity test data for key: {}", riaKey);
 
-    return moistureContentService.getMoistureConeContentData(riaKey);
+    return purityTestService.getPurityTestData(riaKey);
   }
 
   /**
-   * Updates replicate entities.
+   * Updates purity replicate entities.
    *
-   * @param riaKey The identifier for the MCC-related data.
-   * @param replicateFormDtos A list of {@link MccReplicateFormDto} containing the new values.
-   * @return the {@link MccReplicateEntity} updated
+   * @param riaKey The identifier for the test activities related data.
+   * @param replicateFormDtos A list of {@link PurityReplicateFormDto} containing the new values.
+   * @return the {@link PurityReplicateEntity} updated
    */
   @PatchMapping(
       value = "replicate/{riaKey}",
@@ -121,18 +121,19 @@ public class MoistureContentConesEndpoint {
           @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Replicate not found")
       })
-  public List<MccReplicateEntity> updateReplicateField(
+  public List<PurityReplicateEntity> updateReplicateField(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
-          description = "Identification key for MCC data",
+          description = "Identification key for test activity data",
           required = true)
       @PathVariable
       BigDecimal riaKey,
       @Valid
       @RequestBody
-      List<MccReplicateFormDto> replicateFormDtos) {
-    return moistureContentService.updateReplicateField(riaKey, replicateFormDtos);
+      List<PurityReplicateFormDto> replicateFormDtos) {
+
+    return purityTestService.updateReplicateField(riaKey, replicateFormDtos);
   }
 
   /**
@@ -159,15 +160,17 @@ public class MoistureContentConesEndpoint {
         in = ParameterIn.PATH,
         description = "Identification key for activity data",
         required = true)
-      @PathVariable BigDecimal riaKey,
+      @PathVariable
+      BigDecimal riaKey,
       @Valid
       @RequestBody ActivityFormDto activityFormDto) {
     return activityService.updateActivityField(riaKey, activityFormDto);
   }
 
   /**
-  * Validate moisture content cones data.
+  * Validate purity tests data.
   *
+  * @param riaKey The identifier for the test activities related data.
   * @throws Exception if the table doesn't match the format.
   */
   @GetMapping(path = "/validate/{riaKey}")
@@ -175,7 +178,7 @@ public class MoistureContentConesEndpoint {
       @ApiResponse(
           responseCode = "200",
           description = """
-              Successfully validated moisture content cones data.
+              Successfully validated purity tests data.
           """),
       @ApiResponse(
           responseCode = "401",
@@ -190,7 +193,7 @@ public class MoistureContentConesEndpoint {
                   schema = @Schema(hidden = true)))
   })
   @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
-  public void validateMoistureContentData(
+  public void validatePurityTestData(
       @PathVariable
       @Parameter(
           name = "riaKey",
@@ -199,22 +202,23 @@ public class MoistureContentConesEndpoint {
           required = true)
       BigDecimal riaKey) throws Exception {
     try {
-      Optional<MoistureContentConesDto> moistureContent = moistureContentService
-            .getMoistureConeContentData(riaKey);
+      Optional<PurityTestDto> purityContent = purityTestService
+            .getPurityTestData(riaKey);
 
-      if (moistureContent.isEmpty()) {
+      if (purityContent.isEmpty()) {
         throw new ResponseStatusException(
           HttpStatus.NOT_FOUND,
           "No data found for given RIA_KEY");
       }
 
-      moistureContentService.validateMoistureConeContentData(
-          moistureContent.get().replicatesList());
+      purityTestService.validatePurityReplicateData(
+          purityContent.get().replicatesList());
 
       ActivityEntity activityData = new ActivityEntity();
-      activityData.setActualBeginDateTime(moistureContent.get().actualBeginDateTime());
-      activityData.setActualEndDateTime(moistureContent.get().actualEndDateTime());
-      activityData.setTestCategoryCode(moistureContent.get().testCategoryCode());
+      activityData.setActualBeginDateTime(purityContent.get().actualBeginDateTime());
+      activityData.setActualEndDateTime(purityContent.get().actualEndDateTime());
+      activityData.setTestCategoryCode(purityContent.get().testCategoryCode());
+
       activityService.validateActivityData(activityData);
       testResultService.updateTestResultStatusToCompleted(riaKey);
 
@@ -224,15 +228,17 @@ public class MoistureContentConesEndpoint {
   }
 
   /**
-  * Accept moisture content cones data.
+  * Accept purity test data.
   *
+  * @param riaKey The identifier for the test activities related data.
+  * @throws Exception if the table doesn't match the format.
   */
   @GetMapping(path = "/accept/{riaKey}")
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
           description = """
-              Successfully accepted moisture content cones data.
+              Successfully accepted purity test data.
           """),
       @ApiResponse(
           responseCode = "401",
@@ -247,7 +253,7 @@ public class MoistureContentConesEndpoint {
                   schema = @Schema(hidden = true)))
   })
   @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
-  public void acceptMoistureContentData(
+  public void acceptPurityTestData(
       @PathVariable
       @Parameter(
           name = "riaKey",
@@ -264,19 +270,19 @@ public class MoistureContentConesEndpoint {
   }
 
   /**
-   * Delete data from a moisture content cone entry.
+   * Delete data from a purity test entry.
    *
-   * @param riaKey The id of the related tables
+   * @param riaKey The identifier for the test activities related data
    */
   @DeleteMapping(value = "/{riaKey}", produces = "application/json")
   @Operation(
-      summary = "Delete data from moisture content cone entry",
+      summary = "Delete data from purity test entry",
       description =
-          "Remove data from all tables that contains the moisture content cone information")
+          "Remove data from all tables that contains purity test information")
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
-          description = "The moisture content cone was successfully deleted",
+          description = "The purity test was successfully deleted",
           content =
               @Content(
                   schema = @Schema(implementation = Void.class))),
@@ -288,26 +294,26 @@ public class MoistureContentConesEndpoint {
                   schema = @Schema(implementation = Void.class))),
       @ApiResponse(
           responseCode = "404",
-          description = "The moisture content cone was not found",
+          description = "The purity test was not found",
           content =
               @Content(
                   schema = @Schema(implementation = Void.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
-  public void deleteMcc(
+  public void deleteFullPurityTest(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
-          description = "Identification key for MCC data",
+          description = "Identification key for testing activities data",
           required = true)
       @PathVariable BigDecimal riaKey) {
-    moistureContentService.deleteFullMcc(riaKey);
+    purityTestService.deleteFullPurityTest(riaKey);
   }
 
   /**
    * Delete a single replicate entry.
    *
-   * @param riaKey The identifier for the MCC-related data.
+   * @param riaKey The identifier for the testing activities data.
    * @param replicateNumber The replicate number to be deleted.
    */
   @DeleteMapping(value = "/{riaKey}/{replicateNumber}", produces = "application/json")
@@ -339,7 +345,7 @@ public class MoistureContentConesEndpoint {
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
-          description = "Identification key for MCC data",
+          description = "Identification key for testing activities data",
           required = true)
       @PathVariable
       BigDecimal riaKey,
@@ -350,11 +356,11 @@ public class MoistureContentConesEndpoint {
           required = true)
       @PathVariable
           Integer replicateNumber) {
-    moistureContentService.deleteMccReplicate(riaKey, replicateNumber);
+    purityTestService.deleteSinglePurityReplicate(riaKey, replicateNumber);
     return replicateNumber;
   }
 
-  @PostMapping(value = "/{riaKey}/replicates", produces = "application/json")
+  @DeleteMapping(value = "/{riaKey}/replicates", produces = "application/json")
   @Operation(
       summary = "Delete replicate entries in bulk",
       description = "Removes multiple replicate entries from the database using their identifiers.")
@@ -383,7 +389,7 @@ public class MoistureContentConesEndpoint {
         @Parameter(
             name = "riaKey",
             in = ParameterIn.PATH,
-            description = "Identification key for MCC data",
+            description = "Identification key for testing activities data",
             required = true)
         @PathVariable
         BigDecimal riaKey,
@@ -394,50 +400,7 @@ public class MoistureContentConesEndpoint {
             required = true)
         @RequestBody
             List<Integer> replicateNumbers) {
-    moistureContentService.deleteMccReplicates(riaKey, replicateNumbers);
+    purityTestService.deletePurityReplicates(riaKey, replicateNumbers);
     return replicateNumbers;
-  }
-
-  /**
-   * Calculate the average of a list of numbers.
-   *
-   * @param numbers A list of numbers to calculate the average.
-   * @return The calculated average.
-   */
-  @PostMapping(value = "/{riaKey}/calculate-average", produces = "application/json")
-  @Operation(
-      summary = "Calculate the average of a list of numbers",
-      description = "Given a list of numbers, calculates and returns the average.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Successfully calculated the average"),
-      @ApiResponse(responseCode = "400", description = "Invalid input data"),
-      @ApiResponse(responseCode = "500", description = "Internal server error")
-  })
-  public ResponseEntity<Double> calculateAverage(
-        @Parameter(
-            name = "riaKey",
-            in = ParameterIn.PATH,
-            description = "Identification key for MCC data",
-            required = true)
-        @PathVariable
-        BigDecimal riaKey,
-        @RequestBody List<Double> mcValueArray) {
-      try {
-          // Validate input
-          if (mcValueArray == null || mcValueArray.isEmpty()) {
-              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "MC Value Array cannot be null or empty.");
-          }
-          double average = moistureContentService.calculateAverage(riaKey, mcValueArray);
-          return ResponseEntity.status(HttpStatus.OK).body(average);
-      } catch (IllegalArgumentException e) {
-          // Handle specific exceptions (e.g., invalid arguments)
-          SparLog.error("Invalid input for calculateAverage: {}", e.getMessage(), e);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid input: " + e.getMessage(), e);
-
-      } catch (Exception e) {
-          // Handle unexpected exceptions
-          SparLog.error("Unexpected error in calculateAverage: {}", e.getMessage(), e);
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
-      }
   }
 }

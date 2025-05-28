@@ -7,6 +7,7 @@ export type ReplicateType = {
   freshSeed?: number;
   containerAndDryWeight?: number;
   dryWeight?: number;
+  mcValue?: number;
   replicateComment?: string;
   overrideReason?: string;
 };

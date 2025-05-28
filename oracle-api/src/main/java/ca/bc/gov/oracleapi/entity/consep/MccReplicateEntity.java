@@ -19,7 +19,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "CNS_T_TEST_REP_MC")
 @Schema(description = "Represents a single replicate data for moisture content in the database")
-public class ReplicateEntity {
+public class MccReplicateEntity {
 
   @EmbeddedId
   private ReplicateId id;

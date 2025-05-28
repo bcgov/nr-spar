@@ -21,24 +21,41 @@ const createEditableNumberColumn = (
   accessorKey,
   header,
   size: 120,
-  muiEditTextFieldProps: ({ cell, row }) => ({
-    type: 'number',
-    error: !!validationErrors[cell.id],
-    helperText: validationErrors[cell.id],
-    onChange: (event) => {
-      const value = parseFloat(event.currentTarget.value);
-      const validationError = value < 0 || value > 1000 ? validationMsg : undefined;
+  muiEditTextFieldProps: ({ cell, row }) => {
+    const value = row.original[accessorKey] ?? '';
+    return {
+      type: 'number',
+      value,
+      error: !!validationErrors[cell.id],
+      helperText: validationErrors[cell.id],
+      onChange: (event) => {
+        const newValue = parseFloat(event.currentTarget.value);
+        const validationError = newValue < 0 || newValue > 1000 ? validationMsg : undefined;
 
-      setValidationErrors({ ...validationErrors, [cell.id]: validationError });
+        setValidationErrors({ ...validationErrors, [cell.id]: validationError });
 
-      if (!validationError) {
-        updateRow({
-          ...row.original,
-          [accessorKey]: value
-        } as ReplicateType);
+        if (!validationError) {
+          updateRow({
+            ...row.original,
+            [accessorKey]: newValue
+          } as ReplicateType);
+        }
+      },
+      inputProps: {
+        inputMode: 'numeric',
+        pattern: '[0-9]*'
+      },
+      sx: {
+        '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
+          WebkitAppearance: 'none',
+          margin: 0
+        },
+        '& input[type=number]': {
+          MozAppearance: 'textfield'
+        }
       }
-    }
-  }),
+    };
+  },
   ...alignRight
 });
 
@@ -54,24 +71,28 @@ const createEditableTextColumn = (
   accessorKey,
   header,
   size: 80,
-  muiEditTextFieldProps: ({ cell, row }) => ({
-    type: 'text',
-    error: !!validationErrors[cell.id],
-    helperText: validationErrors[cell.id],
-    onChange: (event) => {
-      const { value } = event.currentTarget;
-      const validationError = value.length > maxLength ? validationMsg : undefined;
+  muiEditTextFieldProps: ({ cell, row }) => {
+    const value = row.original[accessorKey] ?? '';
+    return {
+      type: 'text',
+      value,
+      error: !!validationErrors[cell.id],
+      helperText: validationErrors[cell.id],
+      onChange: (event) => {
+        const newValue = event.currentTarget.value;
+        const validationError = newValue.length > maxLength ? validationMsg : undefined;
 
-      setValidationErrors({ ...validationErrors, [cell.id]: validationError });
+        setValidationErrors({ ...validationErrors, [cell.id]: validationError });
 
-      if (!validationError) {
-        updateRow({
-          ...row.original,
-          [accessorKey]: value
-        } as ReplicateType);
+        if (!validationError) {
+          updateRow({
+            ...row.original,
+            [accessorKey]: newValue
+          } as ReplicateType);
+        }
       }
-    }
-  }),
+    };
+  },
   ...alignRight
 });
 
@@ -87,13 +108,17 @@ export const getColumns = (
     header: 'Replicate',
     size: 40,
     enableEditing: false,
+    muiEditTextFieldProps: ({ row }) => ({
+      type: 'text',
+      value: row.original.replicateNumber ?? ''
+    }),
     ...alignRight
   },
   createEditableTextColumn(
     'containerId',
     'Container #',
     4,
-    'Container ID must be no more than 4 characters',
+    'Must be no more than 4 characters',
     updateRow,
     validationErrors,
     setValidationErrors
@@ -101,7 +126,7 @@ export const getColumns = (
   createEditableNumberColumn(
     'containerWeight',
     'Container weight',
-    'Container weight must be between 0 and 1000',
+    'Must be between 0 and 1000',
     updateRow,
     validationErrors,
     setValidationErrors
@@ -109,7 +134,7 @@ export const getColumns = (
   createEditableNumberColumn(
     'freshSeed',
     'Fresh seed',
-    'Fresh seed must be between 0 and 1000',
+    'Must be between 0 and 1000',
     updateRow,
     validationErrors,
     setValidationErrors
@@ -117,23 +142,29 @@ export const getColumns = (
   createEditableNumberColumn(
     'containerAndDryWeight',
     'Cont + Dry seed',
-    'Container + Dry weight must be between 0 and 1000',
-    updateRow,
-    validationErrors,
-    setValidationErrors
-  ),
-  createEditableNumberColumn(
-    'dryWeight',
-    'Dry weight',
-    'Dry weight must be between 0 and 1000',
+    'Must be between 0 and 1000',
     updateRow,
     validationErrors,
     setValidationErrors
   ),
   {
+    accessorKey: 'dryWeight',
+    header: 'Dry weight',
+    enableEditing: false,
+    muiEditTextFieldProps: ({ row }) => ({
+      type: 'text',
+      value: row.original.dryWeight ?? ''
+    })
+  },
+  {
     accessorKey: 'mcValue',
     header: 'MC value (%)',
     size: 80,
+    muiEditTextFieldProps: ({ row }) => ({
+      type: 'text',
+      value: row.original.mcValue ?? ''
+    }),
+    enableEditing: false,
     ...alignRight
   },
   {
@@ -151,7 +182,7 @@ export const getColumns = (
         }}
       />
     ),
-    size: 40,
+    size: 60,
     muiTableHeadCellProps: { align: 'center' },
     muiTableBodyCellProps: { align: 'center' },
     enableEditing: false
@@ -162,6 +193,7 @@ export const getColumns = (
     size: 300,
     muiEditTextFieldProps: ({ row }) => ({
       type: 'text',
+      value: row.original.replicateComment ?? '',
       onChange: (event) => {
         updateRow({
           ...row.original,
@@ -181,7 +213,7 @@ export const getColumns = (
       />
     ),
     enableEditing: false,
-    size: 40,
+    size: 60,
     ...alignRight
   }
 ];
