@@ -152,6 +152,9 @@ const ActivityResult = ({
         ? Math.round(
           ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
         ) / 100
+        : undefined,
+      dryWeight: item.containerAndDryWeight && item.containerWeight
+        ? parseFloat((item.containerAndDryWeight - item.containerWeight).toFixed(4))
         : undefined
     }));
     setReplicatesList(updatedListWithMCValue);
@@ -160,9 +163,12 @@ const ActivityResult = ({
   const replicateListWithMCValue = replicatesList.map((item) => ({
     ...item,
     mcValue: item.freshSeed && item.dryWeight
-      ? (Math.round(
+      ? Math.round(
         ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
-      )).toFixed(2)
+      ) / 100
+      : undefined,
+    dryWeight: item.containerAndDryWeight && item.containerWeight
+      ? parseFloat((item.containerAndDryWeight - item.containerWeight).toFixed(4))
       : undefined
   }));
 

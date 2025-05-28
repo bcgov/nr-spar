@@ -111,7 +111,8 @@ const GenericTable = <T extends Record<string, any>>({
     enableFullScreenToggle,
     enableColumnActions,
     enableEditing,
-    editDisplayMode: 'cell',
+    createDisplayMode: 'row',
+    editDisplayMode: 'table',
     renderRowActions: renderRowActions
       ? ({ row, table }) => renderRowActions({ row, table })
       : undefined,
