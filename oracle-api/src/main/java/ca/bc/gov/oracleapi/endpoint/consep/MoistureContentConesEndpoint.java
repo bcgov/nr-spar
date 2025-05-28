@@ -412,13 +412,13 @@ public class MoistureContentConesEndpoint {
             required = true)
         @PathVariable
         BigDecimal riaKey,
-        @RequestBody List<Double> numbers) {
+        @RequestBody List<Double> mcValueArray) {
       try {
           // Validate input
-          if (numbers == null || numbers.isEmpty()) {
-              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Input list of numbers cannot be null or empty.");
+          if (mcValueArray == null || mcValueArray.isEmpty()) {
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "MC Value Array cannot be null or empty.");
           }
-          double average = moistureContentService.calculateAverage(riaKey, numbers);
+          double average = moistureContentService.calculateAverage(riaKey, mcValueArray);
           return ResponseEntity.status(HttpStatus.OK).body(average);
       } catch (IllegalArgumentException e) {
           // Handle specific exceptions (e.g., invalid arguments)
