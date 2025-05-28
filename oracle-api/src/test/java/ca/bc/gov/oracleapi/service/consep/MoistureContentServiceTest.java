@@ -483,6 +483,7 @@ class MoistureContentServiceTest {
   }
 
   @Test
+  @DisplayName("Calculate average should return correct average value")
   void calculateAverage_validList_shouldReturnCorrectAverage() {
     // Arrange
     List<Double> numbers = Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0);
@@ -496,6 +497,7 @@ class MoistureContentServiceTest {
   }
 
   @Test
+  @DisplayName("Calculate average should throw exception for empty list")
   void calculateAverage_emptyList_shouldThrowException() {
     // Arrange
     List<Double> numbers = Collections.emptyList();
@@ -510,6 +512,7 @@ class MoistureContentServiceTest {
   }
 
   @Test
+  @DisplayName("Calculate average should throw exception for null list")
   void calculateAverage_nullList_shouldThrowException() {
     BigDecimal riaKey = new BigDecimal(1234567890);
     // Act & Assert
