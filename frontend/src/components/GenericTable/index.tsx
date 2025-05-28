@@ -5,6 +5,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable
 } from 'material-react-table';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 type Props<T extends Record<string, any>> = {
   columns: MRT_ColumnDef<T>[];
@@ -31,6 +32,21 @@ type Props<T extends Record<string, any>> = {
 const COLOR_GREY_20 = '#DFDFE1';
 const WHITE = '#ffffff';
 const COLOR_GREY_10 = '#F3F3F5';
+
+const theme = createTheme({
+  components: {
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          fontSize: '0.875rem'
+        },
+        input: {
+          padding: 0
+        }
+      }
+    }
+  }
+});
 
 const GenericTable = <T extends Record<string, any>>({
   columns,
@@ -99,6 +115,23 @@ const GenericTable = <T extends Record<string, any>>({
         backgroundColor: COLOR_GREY_20
       }
     },
+    muiTableHeadCellProps: {
+      sx: {
+        '& .Mui-TableHeadCell-Content-Labels': {
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '0.25rem',
+
+          '& .Mui-TableHeadCell-Content-Wrapper': {
+            order: 1
+          },
+          '& .MuiBadge-root': {
+            order: 2
+          }
+        }
+      }
+    },
     enablePagination,
     enableSorting,
     enableFilters,
@@ -111,7 +144,8 @@ const GenericTable = <T extends Record<string, any>>({
     enableFullScreenToggle,
     enableColumnActions,
     enableEditing,
-    editDisplayMode: 'cell',
+    createDisplayMode: 'row',
+    editDisplayMode: 'table',
     renderRowActions: renderRowActions
       ? ({ row, table }) => renderRowActions({ row, table })
       : undefined,
@@ -120,7 +154,7 @@ const GenericTable = <T extends Record<string, any>>({
     }
   });
 
-  return <MaterialReactTable table={basicTable} />;
+  return <ThemeProvider theme={theme}><MaterialReactTable table={basicTable} /></ThemeProvider>;
 };
 
 export default GenericTable;
