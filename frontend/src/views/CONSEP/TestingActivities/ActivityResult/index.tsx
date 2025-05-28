@@ -20,6 +20,7 @@ type ActivityResultProp = {
   riaKey: number,
   isEditable: boolean,
   setAlert: (isSuccess: boolean, message: string) => void
+  tableBodyRef: React.RefObject<HTMLTableSectionElement>
 }
 
 const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: string) => void) => {
@@ -89,7 +90,7 @@ const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: s
 };
 
 const ActivityResult = ({
-  replicatesData, riaKey, isEditable, setAlert
+  replicatesData, riaKey, isEditable, setAlert, tableBodyRef
 }: ActivityResultProp) => {
   const {
     replicatesList,
@@ -165,9 +166,6 @@ const ActivityResult = ({
       )).toFixed(2)
       : undefined
   }));
-
-  // Used to reference the table body DOM
-  const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
   return (
     <FlexGrid className="activity-result-container">

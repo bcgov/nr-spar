@@ -55,6 +55,7 @@ const MoistureContent = () => {
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
 
+  // Reference to the table body for extracting MC Values
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
   const testActivityQuery = useQuery({
@@ -338,6 +339,7 @@ const MoistureContent = () => {
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
           setAlert={handleAlert}
+          tableBodyRef={tableBodyRef}
         />
       </Row>
       <Row className="consep-moisture-content-cone-form">
