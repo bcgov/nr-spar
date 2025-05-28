@@ -108,13 +108,17 @@ export const getColumns = (
     header: 'Replicate',
     size: 40,
     enableEditing: false,
+    muiEditTextFieldProps: ({ row }) => ({
+      type: 'text',
+      value: row.original.replicateNumber ?? ''
+    }),
     ...alignRight
   },
   createEditableTextColumn(
     'containerId',
     'Container #',
     4,
-    'Container ID must be no more than 4 characters',
+    'Must be no more than 4 characters',
     updateRow,
     validationErrors,
     setValidationErrors
@@ -122,7 +126,7 @@ export const getColumns = (
   createEditableNumberColumn(
     'containerWeight',
     'Container weight',
-    'Container weight must be between 0 and 1000',
+    'Must be between 0 and 1000',
     updateRow,
     validationErrors,
     setValidationErrors
@@ -130,7 +134,7 @@ export const getColumns = (
   createEditableNumberColumn(
     'freshSeed',
     'Fresh seed',
-    'Fresh seed must be between 0 and 1000',
+    'Must be between 0 and 1000',
     updateRow,
     validationErrors,
     setValidationErrors
@@ -138,7 +142,7 @@ export const getColumns = (
   createEditableNumberColumn(
     'containerAndDryWeight',
     'Cont + Dry seed',
-    'Container + Dry weight must be between 0 and 1000',
+    'Must be between 0 and 1000',
     updateRow,
     validationErrors,
     setValidationErrors
@@ -178,7 +182,7 @@ export const getColumns = (
         }}
       />
     ),
-    size: 40,
+    size: 60,
     muiTableHeadCellProps: { align: 'center' },
     muiTableBodyCellProps: { align: 'center' },
     enableEditing: false
@@ -209,7 +213,7 @@ export const getColumns = (
       />
     ),
     enableEditing: false,
-    size: 40,
+    size: 60,
     ...alignRight
   }
 ];
