@@ -366,25 +366,26 @@ class MoistureContentServiceTest {
   @DisplayName("Calculate average should return correct average value")
   void calculateAverage_validList_shouldReturnCorrectAverage() {
     // Arrange
-    List<Double> numbers = Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0);
+    List<Double> mcArray = Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0);
     BigDecimal riaKey = new BigDecimal(1234567890);
 
     // Act
-    double result = moistureContentService.calculateAverage(riaKey, numbers);
+    double result = moistureContentService.calculateAverage(riaKey, mcArray);
 
     // Assert
     assertEquals(3.0, result, 0.001, "The average should be 3.0");
+    verify(testResultRepository).updateTestResultAvgValue(eq(riaKey), eq(3.0));
   }
 
   @Test
   @DisplayName("Calculate average should throw exception for empty list")
   void calculateAverage_emptyList_shouldThrowException() {
     // Arrange
-    List<Double> numbers = Collections.emptyList();
+    List<Double> mcArray = Collections.emptyList();
     BigDecimal riaKey = new BigDecimal(1234567890);
 
     assertThrows(IllegalArgumentException.class, () -> {
-      moistureContentService.calculateAverage(riaKey, numbers);
+      moistureContentService.calculateAverage(riaKey, mcArray);
     });
   }
 
