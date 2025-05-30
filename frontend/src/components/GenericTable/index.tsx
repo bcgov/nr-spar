@@ -27,6 +27,7 @@ type Props<T extends Record<string, any>> = {
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
   initialState?: any;
+  tableBodyRef?: React.RefObject<HTMLTableSectionElement>;
 };
 
 const COLOR_GREY_20 = '#DFDFE1';
@@ -67,7 +68,8 @@ const GenericTable = <T extends Record<string, any>>({
   isCompacted = false,
   renderRowActions,
   onRowClick,
-  initialState
+  initialState,
+  tableBodyRef
 }: Props<T>) => {
   const basicTable = useMaterialReactTable({
     columns,
@@ -90,6 +92,9 @@ const GenericTable = <T extends Record<string, any>>({
           display: 'none'
         }
       }
+    },
+    muiTableBodyProps: {
+      ref: tableBodyRef
     },
     muiTableBodyRowProps: ({ row }) => ({
       onClick: () => onRowClick?.(row.original),

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { AxiosError } from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -23,7 +23,7 @@ import {
 
 import ROUTES from '../../../../routes/constants';
 import {
-  getMccByRiaKey, updateActivityRecord, validateResult, acceptResult
+  getMccByRiaKey, updateActivityRecord, validateResult, acceptResult, calculateAverage
 } from '../../../../api-service/moistureContentAPI';
 import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { TestingActivityType, ActivityRecordType } from '../../../../types/consep/TestingActivityType';
@@ -54,6 +54,9 @@ const MoistureContent = () => {
   const [activityRiaKey, setActivityRiaKey] = useState<number>(0);
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+
+  // Reference to the table body for extracting MC Values
+  const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
@@ -203,6 +206,23 @@ const MoistureContent = () => {
     }
   });
 
+  const averageTest = useMutation({
+    mutationFn: (mcValues: number[]) => calculateAverage(riaKey ?? '', mcValues),
+    onSuccess: (data) => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        moisturePct: data.data
+      };
+      setTestActivity(testActivityData);
+    },
+    onError: (error: AxiosError) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to calculate average: ${error.message}`
+      });
+    }
+  });
+
   const createBreadcrumbItems = () => {
     const crumbsList = [];
     crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
@@ -217,7 +237,21 @@ const MoistureContent = () => {
       text: 'Calculate average',
       kind: 'primary',
       size: 'lg',
-      icon: Calculator
+      icon: Calculator,
+      action: () => {
+        if (tableBodyRef.current) {
+          // Extract cell values from the table
+          const cells = tableBodyRef.current.querySelectorAll('td[data-index="6"]');
+          const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+          // Call the mutate function with the extracted numbers
+          averageTest.mutate(numbers);
+        } else {
+          setAlert({
+            isSuccess: false,
+            message: 'Table body reference is not available'
+          });
+        }
+      }
     },
     {
       id: 'complete-test',
@@ -305,6 +339,7 @@ const MoistureContent = () => {
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
           setAlert={handleAlert}
+          tableBodyRef={tableBodyRef}
         />
       </Row>
       <Row className="consep-moisture-content-form">

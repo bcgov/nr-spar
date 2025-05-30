@@ -25,6 +25,8 @@ import ca.bc.gov.oracleapi.repository.consep.MccReplicatesRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,11 +102,11 @@ class MoistureContentServiceTest {
 
     List<MccReplicateEntity> replicatesList = List.of(replicate1);
     List<Integer> replicateIds = IntStream.rangeClosed(1, 8)
-            .boxed()
-            .collect(Collectors.toList());
+        .boxed()
+        .collect(Collectors.toList());
 
     when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds))
-            .thenReturn(replicatesList);
+        .thenReturn(replicatesList);
 
     LocalDateTime now = LocalDateTime.now();
 
@@ -118,7 +120,7 @@ class MoistureContentServiceTest {
     activityData.setActualBeginDateTime(now.minusDays(1L));
 
     when(activityRepository.findById(riaKey))
-            .thenReturn(Optional.of(activityData));
+        .thenReturn(Optional.of(activityData));
 
     TestResultEntity testData = new TestResultEntity();
     testData.setTestCompleteInd(1);
@@ -128,10 +130,10 @@ class MoistureContentServiceTest {
     testData.setAcceptResult(1);
 
     when(testResultRepository.findById(riaKey))
-            .thenReturn(Optional.of(testData));
+        .thenReturn(Optional.of(testData));
 
     Optional<MoistureContentConesDto> mccData = moistureContentService
-            .getMoistureConeContentData(riaKey);
+        .getMoistureConeContentData(riaKey);
 
     assertEquals(mccData.get().testCompleteInd(), testData.getTestCompleteInd());
     assertEquals(mccData.get().sampleDesc(), testData.getSampleDesc());
@@ -147,18 +149,17 @@ class MoistureContentServiceTest {
     assertEquals(mccData.get().actualEndDateTime(), activityData.getActualEndDateTime());
     mccData.get().replicatesList().forEach(
         rep -> {
-            assertEquals(rep.riaKey(), replicate1.getId().getRiaKey());
-            assertEquals(rep.replicateNumber(), replicate1.getId().getReplicateNumber());
-            assertEquals(rep.containerId(), replicate1.getContainerId());
-            assertEquals(rep.freshSeed(), replicate1.getFreshSeed());
-            assertEquals(rep.containerAndDryWeight(), replicate1.getContainerAndDryWeight());
-            assertEquals(rep.containerWeight(), replicate1.getContainerWeight());
-            assertEquals(rep.dryWeight(), replicate1.getDryWeight());
-            assertEquals(rep.replicateAccInd(), replicate1.getReplicateAccInd());
-            assertEquals(rep.overrideReason(), replicate1.getOverrideReason());
-            assertEquals(rep.replicateComment(), replicate1.getReplicateComment());
-        }
-    );
+          assertEquals(rep.riaKey(), replicate1.getId().getRiaKey());
+          assertEquals(rep.replicateNumber(), replicate1.getId().getReplicateNumber());
+          assertEquals(rep.containerId(), replicate1.getContainerId());
+          assertEquals(rep.freshSeed(), replicate1.getFreshSeed());
+          assertEquals(rep.containerAndDryWeight(), replicate1.getContainerAndDryWeight());
+          assertEquals(rep.containerWeight(), replicate1.getContainerWeight());
+          assertEquals(rep.dryWeight(), replicate1.getDryWeight());
+          assertEquals(rep.replicateAccInd(), replicate1.getReplicateAccInd());
+          assertEquals(rep.overrideReason(), replicate1.getOverrideReason());
+          assertEquals(rep.replicateComment(), replicate1.getReplicateComment());
+        });
   }
 
   @Test
@@ -166,7 +167,7 @@ class MoistureContentServiceTest {
   void getMoistureConeContent_errorTest() {
     Assertions.assertThrows(ResponseStatusException.class,
         () -> {
-            moistureContentService.getMoistureConeContentData(any());
+          moistureContentService.getMoistureConeContentData(any());
         });
   }
 
@@ -184,8 +185,7 @@ class MoistureContentServiceTest {
         new BigDecimal("4.0"),
         1,
         "some comment",
-        "override reason"
-    );
+        "override reason");
 
     MccReplicateEntity entity = new MccReplicateEntity();
     ReplicateId replicateId = new ReplicateId(riaKey, 1);
@@ -232,8 +232,7 @@ class MoistureContentServiceTest {
         new BigDecimal("46.789"),
         1,
         "Comment",
-        "Reason"
-    );
+        "Reason");
 
     List<MccReplicateDto> replicates = List.of(replicateDto);
 
@@ -256,8 +255,8 @@ class MoistureContentServiceTest {
     );
     List<MccReplicateDto> replicates = List.of(replicateDto);
 
-    assertThrows(ResponseStatusException.class, () ->
-        moistureContentService.validateMoistureConeContentData(replicates));
+    assertThrows(ResponseStatusException.class,
+        () -> moistureContentService.validateMoistureConeContentData(replicates));
   }
 
   @Test
@@ -276,8 +275,8 @@ class MoistureContentServiceTest {
     );
     List<MccReplicateDto> replicates = List.of(replicateDto);
 
-    assertThrows(ResponseStatusException.class, () ->
-        moistureContentService.validateMoistureConeContentData(replicates));
+    assertThrows(ResponseStatusException.class,
+        () -> moistureContentService.validateMoistureConeContentData(replicates));
   }
 
   @Test
@@ -361,5 +360,42 @@ class MoistureContentServiceTest {
     verify(activityRepository, never()).deleteById(any());
     verify(testResultRepository, never()).deleteById(any());
     verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
+  }
+
+  @Test
+  @DisplayName("Calculate average should return correct average value")
+  void calculateAverage_validList_shouldReturnCorrectAverage() {
+    // Arrange
+    List<Double> mcArray = Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0);
+    BigDecimal riaKey = new BigDecimal(1234567890);
+
+    // Act
+    double result = moistureContentService.calculateAverage(riaKey, mcArray);
+
+    // Assert
+    assertEquals(3.0, result, 0.001, "The average should be 3.0");
+    verify(testResultRepository).updateTestResultAvgValue(eq(riaKey), eq(3.0));
+  }
+
+  @Test
+  @DisplayName("Calculate average should throw exception for empty list")
+  void calculateAverage_emptyList_shouldThrowException() {
+    // Arrange
+    List<Double> mcArray = Collections.emptyList();
+    BigDecimal riaKey = new BigDecimal(1234567890);
+
+    assertThrows(IllegalArgumentException.class, () -> {
+      moistureContentService.calculateAverage(riaKey, mcArray);
+    });
+  }
+
+  @Test
+  @DisplayName("Calculate average should throw exception for null list")
+  void calculateAverage_nullList_shouldThrowException() {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+
+    assertThrows(IllegalArgumentException.class, () -> {
+      moistureContentService.calculateAverage(riaKey, null);
+    });
   }
 }
