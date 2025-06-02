@@ -16,7 +16,6 @@ concurrency:
 permissions: {}
 
 jobs:
-
   lint:
     name: Typescript lint
     runs-on: ubuntu-24.04
@@ -91,6 +90,7 @@ jobs:
   results:
     name: Analysis Results
     if: always()
+    needs: [lint, tests-backend, tests-oracle-api, trivy]
     runs-on: ubuntu-24.04
     steps:
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')

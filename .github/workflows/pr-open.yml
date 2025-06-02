@@ -52,6 +52,7 @@ jobs:
   results:
     name: PR Results
     if: always()
+    needs: [builds, deploys, tests]
     runs-on: ubuntu-24.04
     steps:
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
