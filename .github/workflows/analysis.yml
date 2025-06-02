@@ -90,8 +90,9 @@ jobs:
 
   results:
     name: Analysis Results
-    if: always() && (!failure()) && (!cancelled())
-    needs: [lint, tests-backend, tests-oracle-api, trivy]
+    if: always()
     runs-on: ubuntu-24.04
     steps:
-      - run: echo "Workflow completed successfully!"
+      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
+        run: echo "At least one job has failed." && exit 1
+      - run: echo "Success!"
