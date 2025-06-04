@@ -166,10 +166,6 @@ objects:
                   value: ${AWS_COGNITO_ISSUER_URI}
                 - name: RANDOM_EXPRESSION
                   value: ${RANDOM_EXPRESSION}
-                - name: SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT
-                  value: "10000"
-                - name: SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT
-                  value: "10000"
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}-certs
                   mountPath: /cert
