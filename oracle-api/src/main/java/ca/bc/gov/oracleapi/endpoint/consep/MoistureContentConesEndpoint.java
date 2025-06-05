@@ -401,7 +401,7 @@ public class MoistureContentConesEndpoint {
   /**
    * Calculate the average of a list of numbers.
    *
-   * @param numbers A list of numbers to calculate the average.
+   * @param mcValueArray A list of numbers to calculate the average.
    * @return The calculated average.
    */
   @PostMapping(value = "/{riaKey}/calculate-average", produces = "application/json")
@@ -422,22 +422,30 @@ public class MoistureContentConesEndpoint {
         @PathVariable
         BigDecimal riaKey,
         @RequestBody List<Double> mcValueArray) {
-      try {
-          // Validate input
-          if (mcValueArray == null || mcValueArray.isEmpty()) {
-              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "MC Value Array cannot be null or empty.");
-          }
-          double average = moistureContentService.calculateAverage(riaKey, mcValueArray);
-          return ResponseEntity.status(HttpStatus.OK).body(average);
-      } catch (IllegalArgumentException e) {
-          // Handle specific exceptions (e.g., invalid arguments)
-          SparLog.error("Invalid input for calculateAverage: {}", e.getMessage(), e);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid input: " + e.getMessage(), e);
-
-      } catch (Exception e) {
-          // Handle unexpected exceptions
-          SparLog.error("Unexpected error in calculateAverage: {}", e.getMessage(), e);
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + e.getMessage(), e);
+    try {
+      if (mcValueArray == null || mcValueArray.isEmpty()) {
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "MC Value Array cannot be null or empty."
+            );
       }
+      double average = moistureContentService.calculateAverage(riaKey, mcValueArray);
+      return ResponseEntity.status(HttpStatus.OK).body(average);
+    } catch (IllegalArgumentException e) {
+      SparLog.error("Invalid input for calculateAverage: {}", e.getMessage(), e);
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Invalid input: " + e.getMessage(),
+          e
+      );
+
+    } catch (Exception e) {
+      SparLog.error("Unexpected error in calculateAverage: {}", e.getMessage(), e);
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          "An unexpected error occurred: " + e.getMessage(),
+          e
+      );
+    }
   }
 }

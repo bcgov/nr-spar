@@ -269,9 +269,11 @@
 					<skip>${jacoco.skip}</skip>
 					<excludes>
 						<exclude>**/config/**</exclude>
-            <exclude>**/filter/**</exclude>
-            <exclude>**/interceptor/**</exclude>
+            			<exclude>**/filter/**</exclude>
+            			<exclude>**/interceptor/**</exclude>
 						<exclude>**/*$*Builder*</exclude>
+						<exclude>**/entity/**</exclude>
+						<exclude>**/dto/**</exclude>
 						<exclude>**/BackendStartApiApplication.*</exclude>
 					</excludes>
 				</configuration>

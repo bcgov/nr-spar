@@ -1,6 +1,9 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -21,6 +24,7 @@ import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
+import ca.bc.gov.oracleapi.exception.InvalidTestActivityKeyException;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
@@ -30,6 +34,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -502,5 +508,172 @@ class MoistureContentConesEndpointTest {
     mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}", riaKey,
             replicateNumber).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
+  }
+  
+  @Test
+  @DisplayName("POST /{riaKey}/replicates - should delete multiple replicates")
+  void deleteReplicates_shouldSucceed() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    List<Integer> replicateNumbers = Arrays.asList(1, 2, 3);
+    
+    doNothing().when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
+    
+    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(replicateNumbers)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0]").value(1))
+        .andExpect(jsonPath("$[1]").value(2))
+        .andExpect(jsonPath("$[2]").value(3));
+  }
+
+  @Test
+  @DisplayName("POST /{riaKey}/replicates - should return 404 when replicates not found")
+  void deleteReplicates_shouldReturnNotFound() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    List<Integer> replicateNumbers = Arrays.asList(1, 2, 3);
+    
+    doThrow(new InvalidTestActivityKeyException())
+        .when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
+    
+    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(replicateNumbers)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("POST /{riaKey}/calculate-average - should calculate average successfully")
+  void calculateAverage_shouldSucceed() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    List<Double> numbers = Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0);
+    double expectedAverage = 3.0;
+    
+    when(moistureContentService.calculateAverage(riaKey, numbers)).thenReturn(expectedAverage);
+    
+    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/calculate-average", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(numbers)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").value(expectedAverage));
+  }
+
+  @Test
+  @DisplayName("POST /{riaKey}/calculate-average - should return 400 for null list")
+  void calculateAverage_shouldReturnBadRequestForNullList() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    
+    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/calculate-average", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("null"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("POST /{riaKey}/calculate-average - should return 500 for service error")
+  void calculateAverage_shouldReturnInternalServerError() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    List<Double> numbers = Arrays.asList(1.0, 2.0, 3.0);
+    
+    when(moistureContentService.calculateAverage(riaKey, numbers))
+        .thenThrow(new RuntimeException("Unexpected error"));
+    
+    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/calculate-average", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(numbers)))
+        .andExpect(status().isInternalServerError());
+  }
+  
+  @Test
+  @DisplayName("GET /validate/{riaKey} - should successfully validate data")
+  void validateMoistureContentData_shouldSucceed() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    
+    // Mock data
+    MoistureContentConesDto mockDto = new MoistureContentConesDto(
+        1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
+        "REQ123", "SL123", "ACT", "TST", "Comment",
+        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+    );
+    
+    when(moistureContentService.getMoistureConeContentData(riaKey))
+        .thenReturn(Optional.of(mockDto));
+    
+    doNothing().when(moistureContentService)
+        .validateMoistureConeContentData(anyList());
+    
+    doNothing().when(activityService)
+        .validateActivityData(any(ActivityEntity.class));
+    
+    doNothing().when(testResultService)
+        .updateTestResultStatusToCompleted(riaKey);
+
+    mockMvc.perform(get("/api/moisture-content-cone/validate/{riaKey}", riaKey)
+            .with(csrf().asHeader()))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @DisplayName("GET /validate/{riaKey} - should return 400 when validation fails")
+  void validateMoistureContentData_shouldReturnBadRequest() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    
+    MoistureContentConesDto mockDto = new MoistureContentConesDto(
+        1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
+        "REQ123", "SL123", "ACT", "TST", "Comment",
+        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+    );
+    
+    when(moistureContentService.getMoistureConeContentData(riaKey))
+        .thenReturn(Optional.of(mockDto));
+    
+    doThrow(new IllegalArgumentException("Invalid moisture data"))
+        .when(moistureContentService)
+        .validateMoistureConeContentData(anyList());
+
+    mockMvc.perform(get("/api/moisture-content-cone/validate/{riaKey}", riaKey)
+            .with(csrf().asHeader()))
+        .andExpect(status().isBadRequest())
+        .andExpect(result -> assertTrue(
+            result.getResolvedException() instanceof ResponseStatusException))
+        .andExpect(result -> assertEquals(
+            "400 BAD_REQUEST \"Invalid moisture data\"",
+            result.getResolvedException().getMessage()));
+  }
+
+  @Test
+  @DisplayName("GET /validate/{riaKey} - should return 400 when activity validation fails")
+  void validateMoistureContentData_shouldReturnBadRequestForActivity() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    
+    MoistureContentConesDto mockDto = new MoistureContentConesDto(
+        1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
+        "REQ123", "SL123", "ACT", "TST", "Comment",
+        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+    );
+    
+    when(moistureContentService.getMoistureConeContentData(riaKey))
+        .thenReturn(Optional.of(mockDto));
+    
+    doNothing().when(moistureContentService)
+        .validateMoistureConeContentData(anyList());
+    
+    doThrow(new IllegalArgumentException("Invalid activity data"))
+        .when(activityService)
+        .validateActivityData(any(ActivityEntity.class));
+
+    mockMvc.perform(get("/api/moisture-content-cone/validate/{riaKey}", riaKey)
+            .with(csrf().asHeader()))
+        .andExpect(status().isBadRequest())
+        .andExpect(result -> assertTrue(
+            result.getResolvedException() instanceof ResponseStatusException))
+        .andExpect(result -> assertEquals(
+            "400 BAD_REQUEST \"Invalid activity data\"",
+            result.getResolvedException().getMessage()));
   }
 }
