@@ -137,7 +137,7 @@ objects:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
-      host: ${NAME}-${FAM_MODDED_ZONE}-${COMPONENT}.${DOMAIN}
+      host: ${NAME}-${FAM_MODDED_ZONE}.${DOMAIN}
       port:
         targetPort: 3000-tcp
       to:

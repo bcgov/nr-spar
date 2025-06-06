@@ -36,3 +36,8 @@ export const acceptResult = (riaKey: string) => {
   const url = `${ApiConfig.moistureContent}/accept/${riaKey}`;
   return api.get(url);
 };
+
+export const calculateAverage = (riaKey: string, mcValues: number[]) => {
+  const url = `${ApiConfig.moistureContent}/${riaKey}/calculate-average`;
+  return api.post(url, mcValues);
+};

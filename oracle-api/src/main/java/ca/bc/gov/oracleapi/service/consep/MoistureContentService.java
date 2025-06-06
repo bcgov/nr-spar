@@ -1,21 +1,19 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
-import ca.bc.gov.oracleapi.dto.consep.ReplicateDto;
-import ca.bc.gov.oracleapi.dto.consep.ReplicateFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.ReplicateEntity;
+import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
-import ca.bc.gov.oracleapi.exception.InvalidMccKeyException;
+import ca.bc.gov.oracleapi.exception.InvalidTestActivityKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
-import ca.bc.gov.oracleapi.repository.consep.ReplicateRepository;
+import ca.bc.gov.oracleapi.repository.consep.MccReplicatesRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,13 +36,27 @@ public class MoistureContentService {
 
   private final TestResultRepository testResultRepository;
 
-  private final ReplicateRepository replicateRepository;
+  private final MccReplicatesRepository replicateRepository;
 
   // The maximum number of replicates is 8 and the entries are sequencial,
   // so we can use a fixed list to fetch the data for the replicates.
   private final List<Integer> replicateIds =
       IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
 
+  /**
+   * Calculate the average of a list of numbers.
+   *
+   * @param numbers A list of numbers to calculate the average.
+   * @return The calculated average.
+   */
+  public double calculateAverage(BigDecimal riaKey, List<Double> numbers) {
+    if (numbers == null || numbers.isEmpty()) {
+      throw new IllegalArgumentException("The list of numbers cannot be null or empty");
+    }
+    Double average = numbers.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+    testResultRepository.updateTestResultAvgValue(riaKey, average);
+    return average;
+  }
 
   /**
    * Get information for moisture cone content.
@@ -56,7 +68,7 @@ public class MoistureContentService {
 
     Optional<TestResultEntity> testResultData = testResultRepository.findById(riaKey);
 
-    List<ReplicateEntity> replicates =
+    List<MccReplicateEntity> replicates =
         replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
     if (activityData.isEmpty() || testResultData.isEmpty()) {
@@ -64,8 +76,8 @@ public class MoistureContentService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for given RIA_SKEY");
     }
 
-    List<ReplicateDto> replicatesList = replicates.stream().map(
-        (curReplicate) -> new ReplicateDto(
+    List<MccReplicateDto> replicatesList = replicates.stream().map(
+        (curReplicate) -> new MccReplicateDto(
             curReplicate.getId().getRiaKey(),
             curReplicate.getId().getReplicateNumber(),
             curReplicate.getContainerId(),
@@ -105,34 +117,35 @@ public class MoistureContentService {
    * @param replicateFormDtos an object with the values to be updated
    */
   @Transactional
-  public List<ReplicateEntity> updateReplicateField(
+  public List<MccReplicateEntity> updateReplicateField(
       @NonNull BigDecimal riaKey,
-      @NonNull List<ReplicateFormDto> replicateFormDtos
+      @NonNull List<MccReplicateFormDto> replicateFormDtos
   ) {
     SparLog.info("Updating replicates with the riaKey: {}", riaKey);
 
     List<Integer> replicateNumbers = replicateFormDtos.stream()
-        .map(ReplicateFormDto::replicateNumber)
+        .map(MccReplicateFormDto::replicateNumber)
         .collect(Collectors.toList());
 
-    List<ReplicateEntity> existingReplicates =
+    List<MccReplicateEntity> existingReplicates =
         replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
-    
-    Map<Integer, ReplicateEntity> replicateMap = existingReplicates.stream()
+
+    Map<Integer, MccReplicateEntity> replicateMap = existingReplicates.stream()
         .collect(Collectors.toMap(rep -> rep.getId().getReplicateNumber(), Function.identity()));
 
-    List<ReplicateEntity> updatedReplicates = new ArrayList<>();
+    List<MccReplicateEntity> updatedReplicates = new ArrayList<>();
 
-    for (ReplicateFormDto dto : replicateFormDtos) {
+    for (MccReplicateFormDto dto : replicateFormDtos) {
       int replicateNumber = dto.replicateNumber();
-  
-      ReplicateEntity repEntity = replicateMap.getOrDefault(replicateNumber, new ReplicateEntity());
+
+      MccReplicateEntity repEntity = replicateMap.getOrDefault(
+          replicateNumber, new MccReplicateEntity());
       if (repEntity.getId() == null) {
         repEntity.setId(new ReplicateId(riaKey, replicateNumber));
         SparLog.info("Replicate number {} not found for riaKey {}. Creating new replicate.",
             replicateNumber, riaKey);
       }
-  
+
       repEntity.setContainerId(dto.containerId());
       repEntity.setContainerWeight(dto.containerWeight());
       repEntity.setFreshSeed(dto.freshSeed());
@@ -141,47 +154,14 @@ public class MoistureContentService {
       repEntity.setReplicateAccInd(dto.replicateAccInd());
       repEntity.setReplicateComment(dto.replicateComment());
       repEntity.setOverrideReason(dto.overrideReason());
-  
+
       updatedReplicates.add(repEntity);
     }
-        
-    List<ReplicateEntity> savedReplicates = replicateRepository.saveAll(updatedReplicates);
+
+    List<MccReplicateEntity> savedReplicates = replicateRepository.saveAll(updatedReplicates);
     SparLog.info("Updated {} replicates for riaKey: {}", savedReplicates.size(), riaKey);
 
     return savedReplicates;
-  }
-
-  /**
-   * Update activity table.
-   *
-   * @param riaKey the identifier key for all table related to MCC
-   * @param activityFormDto an object with the values to be updated
-   */
-  @Transactional
-  public ActivityEntity updateActivityField(
-      @NonNull BigDecimal riaKey,
-      @NonNull ActivityFormDto activityFormDto
-  ) {
-    SparLog.info("Updating activity with riaKey: {}", riaKey);
-
-    ActivityEntity activity = activityRepository.findById(riaKey)
-        .orElseGet(() -> {
-          SparLog.info("No existing activity found for riaKey: {}. Creating a new one.", riaKey);
-          ActivityEntity newActivity = new ActivityEntity();
-          newActivity.setRiaKey(riaKey);
-          return newActivity;
-        });
-  
-    activity.setActualBeginDateTime(activityFormDto.actualBeginDateTime());
-    activity.setActualEndDateTime(activityFormDto.actualEndDateTime());
-    activity.setTestCategoryCode(activityFormDto.testCategoryCode());
-    activity.setRiaComment(activityFormDto.riaComment());
-  
-    ActivityEntity savedActivity = activityRepository.save(activity);
-  
-    SparLog.info("Activity with riaKey: {} saved successfully.", riaKey);
-  
-    return savedActivity;
   }
 
   /**
@@ -191,10 +171,10 @@ public class MoistureContentService {
    * @param moistureContentConesDataDtos a list of replicates to validate
    * @throws ResponseStatusException if any validation fails
    */
-  public void validateMoistureConeContentData(List<ReplicateDto> moistureContentConesDataDtos) {
+  public void validateMoistureConeContentData(List<MccReplicateDto> moistureContentConesDataDtos) {
     SparLog.info("Validating MCC data");
     // Validate the data
-    for (ReplicateDto replicate : moistureContentConesDataDtos) {
+    for (MccReplicateDto replicate : moistureContentConesDataDtos) {
 
       if (replicate.riaKey() == null) {
         SparLog.error("MCC data validation failed: RIA key is missing");
@@ -251,75 +231,6 @@ public class MoistureContentService {
   }
 
   /**
-   * This function validates Activity part of the data to be submitted for MCC.
-   * Throws exception if validation fails.
-   *
-   * @param activityData activity entity to be validated
-   * @throws ResponseStatusException if any validation fails
-   */
-  public void validateMoistureContentActivityData(ActivityEntity activityData) {
-    SparLog.info("Validating MCC activity data");
-
-    if (activityData.getTestCategoryCode() == null) {
-      SparLog.error("MCC activity data validation failed: Test category code is missing");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test category code is missing");
-    }
-    if (activityData.getActualBeginDateTime() == null
-        || activityData.getActualBeginDateTime().compareTo(LocalDateTime.now()) < 0) {
-      SparLog.error("MCC activity data validation failed: "
-          + "Actual begin date time is missing or in the past");
-      throw new ResponseStatusException(
-        HttpStatus.BAD_REQUEST,
-        "Actual begin date time is missing or in the past");
-    }
-    if (activityData.getActualEndDateTime() == null
-        || activityData.getActualEndDateTime().compareTo(LocalDateTime.now()) < 0) {
-      SparLog.error("MCC activity data validation failed: "
-          + "Actual end date time is missing or in the past");
-      throw new ResponseStatusException(
-        HttpStatus.BAD_REQUEST,
-        "Actual end date time is missing or in the past");
-    }
-  }
-
-  /**
-   * Update the test status to "completed".
-   *
-   * @param riaKey the identifier key for all table related to MCC
-   */
-  public void updateTestResultStatusToCompleted(BigDecimal riaKey) {
-    SparLog.info("Updating test result status to completed for RIA_SKEY: {}", riaKey);
-
-    testResultRepository.updateTestResultStatusToCompleted(riaKey);
-
-    SparLog.info("Test result status updated to completed for RIA_SKEY: {}", riaKey);
-  }
-
-  /**
-   * Accept the test results for the given riaKey.
-   *
-   * @param riaKey the identifier key for all table related to MCC
-   */
-  public void acceptMoistureContentData(BigDecimal riaKey) {
-    SparLog.info("Accepting moisture content data for RIA_SKEY: {}", riaKey);
-
-    Optional<MoistureContentConesDto> moistureContent = getMoistureConeContentData(riaKey);
-
-    if (moistureContent.isEmpty()) {
-      SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for given RIA_KEY");
-    }
-
-    if (moistureContent.get().testCompleteInd() == 0) {
-      SparLog.error("Test is not completed for RIA_SKEY: {}", riaKey);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test is not completed");
-    }
-
-    testResultRepository.updateTestResultStatusToAccepted(riaKey);
-    SparLog.info("Moisture content data accepted for RIA_SKEY: {}", riaKey);
-  }
-
-  /**
    * Deletes multiple replicates.
    *
    * @param riaKey          the identifier key for all table related to MCC
@@ -333,13 +244,13 @@ public class MoistureContentService {
     SparLog.info("Deleting replicates with the riaKey: {} and replicateNumbers: {}",
         riaKey, replicateNumbers);
 
-    List<ReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
+    List<MccReplicateEntity> replicates = replicateRepository.findByRiaKeyAndReplicateNumbers(
         riaKey,
         replicateNumbers
     );
 
     if (replicates.isEmpty()) {
-      throw new InvalidMccKeyException();
+      throw new InvalidTestActivityKeyException();
     }
 
     replicateRepository.deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
@@ -361,13 +272,13 @@ public class MoistureContentService {
     SparLog.info("Deleting a replicate tables with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
 
-    Optional<ReplicateEntity> replicates = replicateRepository.findSingleReplicate(
+    Optional<MccReplicateEntity> replicates = replicateRepository.findSingleReplicate(
         riaKey,
         replicateNumber
     );
 
     if (replicates.isEmpty()) {
-      throw new InvalidMccKeyException();
+      throw new InvalidTestActivityKeyException();
     }
 
     replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
@@ -389,11 +300,11 @@ public class MoistureContentService {
 
     Optional<TestResultEntity> testEntity = testResultRepository.findById(riaKey);
 
-    List<ReplicateEntity> replicates =
+    List<MccReplicateEntity> replicates =
         replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
     if (activityEntity.isEmpty() || testEntity.isEmpty() || replicates.isEmpty()) {
-      throw new InvalidMccKeyException();
+      throw new InvalidTestActivityKeyException();
     }
 
     activityRepository.deleteById(riaKey);

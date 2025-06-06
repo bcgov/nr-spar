@@ -69,7 +69,7 @@ jobs:
 
       - name: OpenShift Init
         id: trigger
-        uses: bcgov/action-deployer-openshift@v4.0.0
+        uses: bcgov/action-deployer-openshift@d972993c70aba88e4f2fe66a66c4b7149fa9fcad # v4.0.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -81,10 +81,10 @@ jobs:
             -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
-            -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
+            -p ORACLE_SERVICE='${{ secrets.ORACLE_SERVICE }}'
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
             -p ORACLE_CERT_SECRET='${{ secrets.ORACLE_CERT_SECRET }}'
-            -p ORACLE_HOST='${{ vars.ORACLE_HOST }}'
+            -p ORACLE_HOST='${{ secrets.ORACLE_HOST }}'
             -p S3_BUCKET='${{ vars.S3_BUCKET }}'
             -p S3_ENDPOINT='${{ vars.S3_ENDPOINT }}'
             -p S3_USER='${{ vars.S3_USER }}'
@@ -93,7 +93,7 @@ jobs:
           triggers: ${{ inputs.triggers }}
 
       - name: Database
-        uses: bcgov/action-deployer-openshift@v4.0.0
+        uses: bcgov/action-deployer-openshift@d972993c70aba88e4f2fe66a66c4b7149fa9fcad # v4.0.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -128,7 +128,7 @@ jobs:
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
     steps:
-      - uses: bcgov/action-deployer-openshift@v4.0.0
+      - uses: bcgov/action-deployer-openshift@d972993c70aba88e4f2fe66a66c4b7149fa9fcad # v4.0.0
         id: deploys
         with:
           file: ${{ matrix.name }}/openshift.deploy.yml

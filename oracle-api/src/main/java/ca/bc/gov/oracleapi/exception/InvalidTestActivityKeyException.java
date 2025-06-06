@@ -6,9 +6,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 /** This class represents an invalid MCC. */
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-public class InvalidMccKeyException extends ResponseStatusException {
+public class InvalidTestActivityKeyException extends ResponseStatusException {
 
-  public InvalidMccKeyException() {
-    super(HttpStatus.NOT_FOUND, "Invalid or not found ria key for MCC data!");
+  public InvalidTestActivityKeyException() {
+    super(HttpStatus.NOT_FOUND, "Invalid or not found ria key for test data!");
   }
 }

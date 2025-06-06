@@ -20,6 +20,7 @@ type ActivityResultProp = {
   riaKey: number,
   isEditable: boolean,
   setAlert: (isSuccess: boolean, message: string) => void
+  tableBodyRef: React.RefObject<HTMLTableSectionElement>
 }
 
 const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: string) => void) => {
@@ -89,7 +90,7 @@ const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: s
 };
 
 const ActivityResult = ({
-  replicatesData, riaKey, isEditable, setAlert
+  replicatesData, riaKey, isEditable, setAlert, tableBodyRef
 }: ActivityResultProp) => {
   const {
     replicatesList,
@@ -152,6 +153,9 @@ const ActivityResult = ({
         ? Math.round(
           ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
         ) / 100
+        : undefined,
+      dryWeight: item.containerAndDryWeight && item.containerWeight
+        ? parseFloat((item.containerAndDryWeight - item.containerWeight).toFixed(4))
         : undefined
     }));
     setReplicatesList(updatedListWithMCValue);
@@ -163,6 +167,9 @@ const ActivityResult = ({
       ? Math.round(
         ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
       ) / 100
+      : undefined,
+    dryWeight: item.containerAndDryWeight && item.containerWeight
+      ? parseFloat((item.containerAndDryWeight - item.containerWeight).toFixed(4))
       : undefined
   }));
 
@@ -181,12 +188,11 @@ const ActivityResult = ({
           subtitle="This action will clear the data in the table."
         />
       )}
-      <Row>
-        <h3 className="activity-result-title">{TITLE}</h3>
-      </Row>
       <Row className="activity-result-actions">
-        <Column lg={8} />
-        <Column lg={4} className="activity-result-actions">
+        <Column sm={3} md={3} lg={5} className="activity-result-actions-title">
+          <h3>{TITLE}</h3>
+        </Column>
+        <Column sm={2} md={2} lg={4} className="activity-result-action-buttons">
           {actions.map(({ label, icon, action }) => (
             <button key={label} className={isEditable ? 'action-item' : 'action-item-disabled'} onClick={action} type="button" aria-label={label} disabled={!isEditable}>
               {label}
@@ -209,6 +215,7 @@ const ActivityResult = ({
           enableEditing={isEditable}
           isCompacted
           enableSorting
+          tableBodyRef={tableBodyRef}
         />
       </Row>
     </FlexGrid>

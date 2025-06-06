@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  * send to the BE, to update a Replicate entry.
  */
 @Schema(description = "JSON object with the values to be updated in the Replicate table")
-public record ReplicateFormDto(
+public record MccReplicateFormDto(
     @NotNull Integer replicateNumber,
     String containerId,
     BigDecimal containerWeight,
