@@ -26,7 +26,7 @@ jobs:
         id: build
         with:
           package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
+          tags: ${{ github.event.number }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
