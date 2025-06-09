@@ -1,0 +1,64 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  creationTimestamp: "2024-08-14T12:11:59Z"
+  labels:
+    app: nr-spar-prod
+  name: nr-spar-prod-frontend-vanity
+  namespace: b9d53b-prod
+  resourceVersion: "14682412261"
+  uid: 822bf176-ffe6-494b-b200-f3577ebfb485
+spec:
+  host: spar.nrs.gov.bc.ca
+  port:
+    targetPort: 3000-tcp
+  tls:
+    caCertificate: "-----BEGIN CERTIFICATE-----\r\nMIIFDjCCA/agAwIBAgIMDulMwwAAAABR03eFMA0GCSqGSIb3DQEBCwUAMIG+MQsw\r\nCQYDVQQGEwJVUzEWMBQGA1UEChMNRW50cnVzdCwgSW5jLjEoMCYGA1UECxMfU2Vl\r\nIHd3dy5lbnRydXN0Lm5ldC9sZWdhbC10ZXJtczE5MDcGA1UECxMwKGMpIDIwMDkg\r\nRW50cnVzdCwgSW5jLiAtIGZvciBhdXRob3JpemVkIHVzZSBvbmx5MTIwMAYDVQQD\r\nEylFbnRydXN0IFJvb3QgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkgLSBHMjAeFw0x\r\nNTEwMDUxOTEzNTZaFw0zMDEyMDUxOTQzNTZaMIG6MQswCQYDVQQGEwJVUzEWMBQG\r\nA1UEChMNRW50cnVzdCwgSW5jLjEoMCYGA1UECxMfU2VlIHd3dy5lbnRydXN0Lm5l\r\ndC9sZWdhbC10ZXJtczE5MDcGA1UECxMwKGMpIDIwMTIgRW50cnVzdCwgSW5jLiAt\r\nIGZvciBhdXRob3JpemVkIHVzZSBvbmx5MS4wLAYDVQQDEyVFbnRydXN0IENlcnRp\r\nZmljYXRpb24gQXV0aG9yaXR5IC0gTDFLMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A\r\nMIIBCgKCAQEA2j+W0E25L0Tn2zlem1DuXKVh2kFnUwmqAJqOV38pa9vH4SEkqjrQ\r\njUcj0u1yFvCRIdJdt7hLqIOPt5EyaM/OJZMssn2XyP7BtBe6CZ4DkJN7fEmDImiK\r\nm95HwzGYei59QAvS7z7Tsoyqj0ip/wDoKVgG97aTWpRzJiatWA7lQrjV6nN5ZGhT\r\nJbiEz5R6rgZFDKNrTdDGvuoYpDbwkrK6HIiPOlJ/915tgxyd8B/lw9bdpXiSPbBt\r\nLOrJz5RBGXFEaLpHPATpXbo+8DX3Fbae8i4VHj9HyMg4p3NFXU2wO7GOFyk36t0F\r\nASK7lDYqjVs1/lMZLwhGwSqzGmIdTivZGwIDAQABo4IBDDCCAQgwDgYDVR0PAQH/\r\nBAQDAgEGMBIGA1UdEwEB/wQIMAYBAf8CAQAwMwYIKwYBBQUHAQEEJzAlMCMGCCsG\r\nAQUFBzABhhdodHRwOi8vb2NzcC5lbnRydXN0Lm5ldDAwBgNVHR8EKTAnMCWgI6Ah\r\nhh9odHRwOi8vY3JsLmVudHJ1c3QubmV0L2cyY2EuY3JsMDsGA1UdIAQ0MDIwMAYE\r\nVR0gADAoMCYGCCsGAQUFBwIBFhpodHRwOi8vd3d3LmVudHJ1c3QubmV0L3JwYTAd\r\nBgNVHQ4EFgQUgqJwdN28Uz/Pe9T3zX+nYMYKTL8wHwYDVR0jBBgwFoAUanImetAe\r\n733nO2lR1GyNn5ASZqswDQYJKoZIhvcNAQELBQADggEBADnVjpiDYcgsY9NwHRkw\r\ny/YJrMxp1cncN0HyMg/vdMNY9ngnCTQIlZIv19+4o/0OgemknNM/TWgrFTEKFcxS\r\nBJPok1DD2bHi4Wi3Ogl08TRYCj93mEC45mj/XeTIRsXsgdfJghhcg85x2Ly/rJkC\r\nk9uUmITSnKa1/ly78EqvIazCP0kkZ9Yujs+szGQVGHLlbHfTUqi53Y2sAEo1GdRv\r\nc6N172tkw+CNgxKhiucOhk3YtCAbvmqljEtoZuMrx1gL+1YQ1JH7HdMxWBCMRON1\r\nexCdtTix9qrKgWRs6PLigVWXUX/hwidQosk8WwBD9lu51aX8/wdQQGcHsFXwt35u\r\nLcw=\r\n-----END
+      CERTIFICATE-----\r\n"
+    certificate: "-----BEGIN CERTIFICATE-----\r\nMIIGyTCCBbGgAwIBAgIQJA1JA/Sg9AQ57d3xl55OqjANBgkqhkiG9w0BAQsFADCB\r\nujELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUVudHJ1c3QsIEluYy4xKDAmBgNVBAsT\r\nH1NlZSB3d3cuZW50cnVzdC5uZXQvbGVnYWwtdGVybXMxOTA3BgNVBAsTMChjKSAy\r\nMDEyIEVudHJ1c3QsIEluYy4gLSBmb3IgYXV0aG9yaXplZCB1c2Ugb25seTEuMCwG\r\nA1UEAxMlRW50cnVzdCBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eSAtIEwxSzAeFw0y\r\nNDA2MTExODE2NTNaFw0yNTA2MTExODE2NTJaMIGRMQswCQYDVQQGEwJDQTEZMBcG\r\nA1UECBMQQnJpdGlzaCBDb2x1bWJpYTERMA8GA1UEBxMIVmljdG9yaWExNzA1BgNV\r\nBAoTLkdvdmVybm1lbnQgb2YgdGhlIFByb3ZpbmNlIG9mIEJyaXRpc2ggQ29sdW1i\r\naWExGzAZBgNVBAMTEnNwYXIubnJzLmdvdi5iYy5jYTCCASIwDQYJKoZIhvcNAQEB\r\nBQADggEPADCCAQoCggEBAK747Jb+kP4XKyUhW2KhqawmsVXklSEM0WyYxYwD5qVG\r\nGRvsugVF8UB3v6KKaEwg6TJSnHNhPCA1N36/kR+6Vvq5+5rqU0Kj7xgUmKtnklGS\r\n3XaMF+qgzV9LI+q5mjgR5/6kcdJccYdiL+bl1u4ogCfJ4lLtuMOgGhjsWtCvreNV\r\nxyWdWCgv93hYqyxcUd9EKbixSkbX2PdVSAQXLZKVLwnwwaJY8NEteT7AA2pBUKgx\r\nASJQwEFfG9ooAu0aMmUGkOx/h7HG2diCVbjlHvN3lmDyaaxoDSK4088GYGxek/SK\r\nNeGdZXqNR0vJyh7XiOKrv25FYqkxcqIEugu5zRb8mmECAwEAAaOCAvAwggLsMAwG\r\nA1UdEwEB/wQCMAAwHQYDVR0OBBYEFIi7Ofg/vOeSrIGjQ07htHnpCCabMB8GA1Ud\r\nIwQYMBaAFIKicHTdvFM/z3vU981/p2DGCky/MGgGCCsGAQUFBwEBBFwwWjAjBggr\r\nBgEFBQcwAYYXaHR0cDovL29jc3AuZW50cnVzdC5uZXQwMwYIKwYBBQUHMAKGJ2h0\r\ndHA6Ly9haWEuZW50cnVzdC5uZXQvbDFrLWNoYWluMjU2LmNlcjAzBgNVHR8ELDAq\r\nMCigJqAkhiJodHRwOi8vY3JsLmVudHJ1c3QubmV0L2xldmVsMWsuY3JsMDUGA1Ud\r\nEQQuMCyCEnNwYXIubnJzLmdvdi5iYy5jYYIWd3d3LnNwYXIubnJzLmdvdi5iYy5j\r\nYTAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMC\r\nMBMGA1UdIAQMMAowCAYGZ4EMAQICMIIBgAYKKwYBBAHWeQIEAgSCAXAEggFsAWoA\r\ndgCi4wrkRe+9rZt+OO1HZ3dT14JbhJTXK14bLMS5UKRH5wAAAZAIhGjSAAAEAwBH\r\nMEUCIEfwsV/hGvW009p1ez7tn71gO5NX5qfWiE15gvsnFIgZAiEAybv6yG/sleo5\r\noaIhXyi1v8YozWLaytJSeevLnmEYg3YAdwDm0jFjQHeMwRBBBtdxuc7B0kD2loSG\r\n+7qHMh39HjeOUAAAAZAIhGjpAAAEAwBIMEYCIQCAuBhhLbTFBeRpolYBaowuL8gH\r\nXpQey7p4EjIr7Q2epgIhAKftKVAYH9uesxaQnfnQQK5mSfuhV29/oJ3z04OK15y0\r\nAHcATnWjJ1yaEMM4W2zU3z9S6x3w4I4bjWnAsfpksWKaOd8AAAGQCIRo5wAABAMA\r\nSDBGAiEAi/8NJGrfOoj5drrrYrJ7801C2SYhg/jcOCA9U35bqLwCIQDRVkwUHZlM\r\ngtbe9yFDbpUGBCOr+2+yz44QqaK0B681kTANBgkqhkiG9w0BAQsFAAOCAQEAjdAS\r\nnM9AmmfJi5EroCMfw0AKMeSJmM5imyuZb4oLsSdgGmKKDfwb3iJ4dADGyywnuXpb\r\niIib84dI4PTWtxJIaqR3G5lp9ZOfw1BPwtJD15cCpp7BFHfme3T/p/L4voqwTCEz\r\nMpRlSebGMV1BnfHpxNzpClAYpRvS1UfPBmJMFceSbnpm9gxQiagHdb6uClCw2rdT\r\nTRYBUiLJ7OsZbzQqVWJYn02XWF83H8HIwibsyAjOM9m2oBs1qacJlj9i6CxHQosi\r\n75x0OUmzpNgYPaf+HQt9ll6dNcjraQQaqLSPmsYS3ts7V3EcvmrfmJfb8sI3CL0s\r\nbKmwg3kjGLySk989UQ==\r\n-----END
+      CERTIFICATE-----\r\n"
+    key: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCu+OyW/pD+Fysl
+      IVtioamsJrFV5JUhDNFsmMWMA+alRhkb7LoFRfFAd7+iimhMIOkyUpxzYTwgNTd+
+      v5Efulb6ufua6lNCo+8YFJirZ5JRkt12jBfqoM1fSyPquZo4Eef+pHHSXHGHYi/m
+      5dbuKIAnyeJS7bjDoBoY7FrQr63jVcclnVgoL/d4WKssXFHfRCm4sUpG19j3VUgE
+      Fy2SlS8J8MGiWPDRLXk+wANqQVCoMQEiUMBBXxvaKALtGjJlBpDsf4exxtnYglW4
+      5R7zd5Zg8mmsaA0iuNPPBmBsXpP0ijXhnWV6jUdLycoe14jiq79uRWKpMXKiBLoL
+      uc0W/JphAgMBAAECggEAR8mghCjowx8tV/wSGur6CsQLQRLaLqesKtKZRmN5V3jl
+      p2PeRHiYTVt0OBNyTD26f6eOQfZ0bUB4RtwBBlP1CMSSmtImG/LXj3kv1C9XxHkt
+      vMwoqd6UtFLHZzAEOpn6JatBec3s1F9wCNtm7eqW/fwiC+U1x6lh27TpY7KYdOsY
+      TG+3jtY3QZardexsiss4ZWEQgRI7DYIAoWuDtxsKxkqUQoLkOVFtGsuA+MgjTyxp
+      JpcAy2jrFAAOdwoZ/GE3l5lFe2e/ECSrcegG6PVIL08OJMc/uBK5S59a9kn1XE3o
+      ziOrfE5AkAxbWdx1DV7JeW/+anjuLc5okVcz+ETXqwKBgQDcb84o132JG/wXlWC8
+      Hp/kmNYVrCfObdf4x3jtaeUbNRAjTQocSQGJCm4V5d38k3wQXPWYiMnRJNlj5BaH
+      P3rYLNIC53mgi577oi2+uQmiOfJ94ZgO+aPlqNOvSA+HpJyO0J1r6b4xGsX49bFs
+      ledtJUY6Low6Py6sfdbIps+r+wKBgQDLM2hU6Y9yL2yV1L7KTOxjZRZOlJjMucwo
+      0jPrygs52YUrtOtK8xph918hb6QhghlDSaVnelbDm977DYWUYLraysfFhAWOatab
+      g9Mu4dAWhr0SO+pzfeJRpw0TEQ74wQX48d8z/YKo48wXvvEBHWg+FHJsTjpB5SWA
+      HZr9UlgIUwKBgBL9ltcx6WC8hnVJqzHJuaCqAheP40YHdIm8NZDOhKxZX/CKnIpf
+      R8CUo3NDgGJYGmIWgBoJ/skD0a6nYcF5GI4zHkydwH6ySJoJGMPLkSbmsxthKgZw
+      P0xzxPjezmezKMGs+0LmujnkwpV2JTjjmTJv+aLdi7sg4lZ96NkUdeOtAoGBAKwb
+      xbGuBa6sVmdtw4+rqcjiNQuntugoMrEcoZeEERAVmkMTwPtBf0Yc9PloCvfKrsUc
+      WrmTmGuj2TCBGnQ7neh1OtGj6eTfvxgHhta9srdxtjD8iK77n7aTLHLKzwiIzRs3
+      Glt5zLJqB1LRimXsV3/FZ8kuVQ+9G48xBDauCRw7AoGAV9getC9SHbc4DJCzqCbr
+      f79wJx3KX3xmbpirohjgtXTUfqG+O9gdsWRf8yqVcc/RNIqXVcjWj6j21TXX9Gxx
+      hjhFZhf4aeD83+yetaz+cV1bG+EUYWNNe/t23nH1Cwunbtc42/MKEXVCfKS+TQ+m
+      uYJjaaOe1O4EoU8Gqur0u70=
+      -----END PRIVATE KEY-----
+    termination: edge
+  to:
+    kind: Service
+    name: nr-spar-prod-frontend
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2025-06-05T23:57:56Z"
+      status: "True"
+      type: Admitted
+    host: spar.nrs.gov.bc.ca
+    routerCanonicalHostname: router-default.apps.silver.devops.gov.bc.ca
+    routerName: default
+    wildcardPolicy: None
