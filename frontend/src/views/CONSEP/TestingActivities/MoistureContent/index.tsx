@@ -336,7 +336,7 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
-          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey || '')}
+          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '')}
           replicateType="moistureTest"
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}

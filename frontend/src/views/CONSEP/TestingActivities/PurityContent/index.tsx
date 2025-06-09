@@ -131,7 +131,7 @@ const PurityContent = () => {
           activity: testActivity.activityType,
           seedlotNumber,
           requestId: testActivity.requestId,
-          speciesAndClass: `${seedlotQuery.data.seedlot.vegetationCode} | ${seedlotQuery.data.seedlot.geneticClass.geneticClassCode}` || '',
+          speciesAndClass: `${seedlotQuery.data.seedlot.vegetationCode} | ${seedlotQuery.data.seedlot.geneticClass.geneticClassCode}`,
           testResult: testActivity.moisturePct.toString()
         }
       );
@@ -326,7 +326,7 @@ const PurityContent = () => {
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="consep-purity-content-title">
-        <PageTitle title={`${fieldsConfig.titleSection.title} ${activitySummary && activitySummary.seedlotNumber}`} />
+        <PageTitle title={`${fieldsConfig.titleSection.title} ${seedlotNumber}`} />
         <>
           {
             testActivity?.testCompleteInd
@@ -353,7 +353,7 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-result">
         <ActivityResult
           replicateType="purityTest"
-          replicatesData={testActivity?.replicatesList || initReplicatesList('')}
+          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '')}
           riaKey={Number(riaKey)}
           isEditable={!testActivity?.testCompleteInd}
           setAlert={handleAlert}
