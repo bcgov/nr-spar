@@ -16,7 +16,6 @@ concurrency:
 permissions: {}
 
 jobs:
-
   lint:
     name: Typescript lint
     runs-on: ubuntu-24.04
@@ -84,14 +83,16 @@ jobs:
           severity: "CRITICAL,HIGH"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@60168efe1c415ce0f5521ea06d5c2062adbeed1b # v3
+        uses: github/codeql-action/upload-sarif@fca7ace96b7d713c7035871441bd52efbe39e27e # v3
         with:
           sarif_file: "trivy-results.sarif"
 
   results:
     name: Analysis Results
-    if: always() && (!failure()) && (!cancelled())
+    if: always()
     needs: [lint, tests-backend, tests-oracle-api, trivy]
     runs-on: ubuntu-24.04
     steps:
-      - run: echo "Workflow completed successfully!"
+      - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
+        run: echo "At least one job has failed." && exit 1
+      - run: echo "Success!"

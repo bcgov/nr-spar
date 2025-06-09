@@ -52,16 +52,9 @@ jobs:
   results:
     name: PR Results
     if: always()
-    # Include all needs that could have failures!
     needs: [builds, deploys, tests]
     runs-on: ubuntu-24.04
     steps:
-      - run: |
-          # View results
-          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
-
       - if: contains(needs.*.result, 'failure')||contains(needs.*.result, 'canceled')
-        run: |
-          # Job failure found
-          echo "At least one job has failed"
-          exit 1
+        run: echo "At least one job has failed." && exit 1
+      - run: echo "Success!"

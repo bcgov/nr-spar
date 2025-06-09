@@ -17,7 +17,7 @@ parameters:
     required: true
   - name: ORACLE_SERVICE
     description: Oracle service name
-    value: dbq01.nrs.bcgov
+    required: true
   - name: ORACLE_PASSWORD
     description: Oracle database password for API
     required: true

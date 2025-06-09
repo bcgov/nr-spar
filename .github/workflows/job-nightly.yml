@@ -56,4 +56,4 @@ jobs:
           artifact_name: "zap_frontend"
           cmd_options: "-a"
           issue_title: "ZAP: frontend"
-          target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
+          target: https://${{ env.PREFIX }}.${{ env.DOMAIN }}

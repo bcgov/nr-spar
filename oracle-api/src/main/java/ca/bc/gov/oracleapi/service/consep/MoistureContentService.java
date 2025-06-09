@@ -43,6 +43,20 @@ public class MoistureContentService {
   private final List<Integer> replicateIds =
       IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
 
+  /**
+   * Calculate the average of a list of numbers.
+   *
+   * @param numbers A list of numbers to calculate the average.
+   * @return The calculated average.
+   */
+  public double calculateAverage(BigDecimal riaKey, List<Double> numbers) {
+    if (numbers == null || numbers.isEmpty()) {
+      throw new IllegalArgumentException("The list of numbers cannot be null or empty");
+    }
+    Double average = numbers.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+    testResultRepository.updateTestResultAvgValue(riaKey, average);
+    return average;
+  }
 
   /**
    * Get information for moisture cone content.

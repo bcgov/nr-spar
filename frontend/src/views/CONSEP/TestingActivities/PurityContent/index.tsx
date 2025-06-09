@@ -39,6 +39,15 @@ const PurityContent = () => {
     1: [], // Impurities for replicate 1
     2: [] // Impurities for replicate 2
   });
+  const [average, setAverage] = useState<number | null>(null);
+
+  const createBreadcrumbItems = () => {
+    const crumbsList = [];
+    crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
+    crumbsList.push({ name: 'Testing activities search', path: ROUTES.TESTING_REQUESTS_REPORT });
+    crumbsList.push({ name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST });
+    return crumbsList;
+  };
 
   const addImpurity = (replicate: number) => {
     setImpurities((prev) => {
@@ -64,12 +73,8 @@ const PurityContent = () => {
     }));
   };
 
-  const createBreadcrumbItems = () => {
-    const crumbsList = [];
-    crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
-    crumbsList.push({ name: 'Testing activities search', path: ROUTES.TESTING_REQUESTS_REPORT });
-    crumbsList.push({ name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST });
-    return crumbsList;
+  const handleCalculateAverage = () => {
+    setAverage(7.8); // Set the test average value from the API response
   };
 
   const impurityDropdown = (replicate: number) => impurities[replicate].map((impurity) => (
@@ -154,7 +159,8 @@ const PurityContent = () => {
       text: 'Calculate average',
       kind: 'primary',
       size: 'lg',
-      icon: Calculator
+      icon: Calculator,
+      onClick: handleCalculateAverage
     },
     {
       id: 'complete-test',
@@ -272,6 +278,17 @@ const PurityContent = () => {
           />
         </Column>
       </Row>
+      {average !== null && (
+        <Row className="consep-average-result">
+          <Column>
+            <h5>
+              Calculated Average:
+              {' '}
+              {average}
+            </h5>
+          </Column>
+        </Row>
+      )}
       <ButtonGroup buttons={buttons} />
     </FlexGrid>
   );
