@@ -91,7 +91,7 @@ class PurityTestServiceTest {
     replicate1.setId(replicateId);
     replicate1.setPureSeedWeight(new BigDecimal(12.345));
     replicate1.setOtherSeedWeight(new BigDecimal(45.678));
-    replicate1.setContainerWeight(new BigDecimal(58.901));
+    replicate1.setInertMttrWeight(new BigDecimal(58.901));
     replicate1.setReplicateAccInd(1);
     replicate1.setOverrideReason("Replicate was re-tested due to abnormal moisture content.");
 
@@ -148,7 +148,7 @@ class PurityTestServiceTest {
             assertEquals(rep.replicateNumber(), replicate1.getId().getReplicateNumber());
             assertEquals(rep.pureSeedWeight(), replicate1.getPureSeedWeight());
             assertEquals(rep.otherSeedWeight(), replicate1.getOtherSeedWeight());
-            assertEquals(rep.containerWeight(), replicate1.getContainerWeight());
+            assertEquals(rep.inertMttrWeight(), replicate1.getInertMttrWeight());
             assertEquals(rep.replicateAccInd(), replicate1.getReplicateAccInd());
             assertEquals(rep.overrideReason(), replicate1.getOverrideReason());
         }
@@ -183,7 +183,7 @@ class PurityTestServiceTest {
     entity.setId(replicateId);
     entity.setPureSeedWeight(new BigDecimal("1.0"));
     entity.setOtherSeedWeight(new BigDecimal("2.0"));
-    entity.setContainerWeight(new BigDecimal("3.0"));
+    entity.setInertMttrWeight(new BigDecimal("3.0"));
     entity.setReplicateAccInd(1);
     entity.setOverrideReason("override reason");
 
@@ -201,7 +201,7 @@ class PurityTestServiceTest {
         riaKey, requestList);
 
     assertEquals(1, result.size());
-    assertEquals(new BigDecimal("3.0"), result.get(0).getContainerWeight());
+    assertEquals(new BigDecimal("3.0"), result.get(0).getInertMttrWeight());
 
     verify(replicateRepository).findByRiaKeyAndReplicateNumbers(riaKey, List.of(1));
     verify(replicateRepository).saveAll(anyList());

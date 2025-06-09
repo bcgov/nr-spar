@@ -22,13 +22,12 @@ import {
 } from '@carbon/icons-react';
 
 import ROUTES from '../../../../routes/constants';
-import {
-  getMccByRiaKey, updateActivityRecord, validateResult, acceptResult, calculateAverage
-} from '../../../../api-service/moistureContentAPI';
+import { calculateAverage } from '../../../../api-service/moistureContentAPI';
+import testingActivitiesAPI from '../../../../api-service/testingActivitiesAPI';
 import { getSeedlotById } from '../../../../api-service/seedlotAPI';
-import { TestingActivityType, ActivityRecordType } from '../../../../types/consep/TestingActivityType';
-import { ActivitySummaryType } from '../../../../types/ActivitySummaryType';
+import { TestingActivityType, ActivityRecordType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
+import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
@@ -38,8 +37,9 @@ import StatusTag from '../../../../components/StatusTag';
 import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
 
+import { categoryMap, categoryMapReverse } from '../SharedConstants';
 import {
-  DATE_FORMAT, fieldsConfig, categoryMap, categoryMapReverse
+  DATE_FORMAT, fieldsConfig
 } from './constants';
 
 import './styles.scss';
@@ -60,12 +60,16 @@ const MoistureContent = () => {
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
-    queryFn: () => getMccByRiaKey(riaKey ?? ''),
+    queryFn: () => testingActivitiesAPI('moistureTest', 'getDataByRiaKey', { riaKey }),
     refetchOnMount: true
   });
 
   const updateActivityRecordMutation = useMutation({
-    mutationFn: (record?: ActivityRecordType) => updateActivityRecord(activityRiaKey, record),
+    mutationFn: (record?: ActivityRecordType) => testingActivitiesAPI(
+      'moistureTest',
+      'updateActivityRecord',
+      { riaKey, record }
+    ),
     onSuccess: () => {
       setAlert({ isSuccess: true, message: 'Activity record updated successfully' });
       setTimeout(() => {
@@ -145,7 +149,7 @@ const MoistureContent = () => {
     );
   };
 
-  const handleUodateActivityRecord = (record: ActivityRecordType) => {
+  const handleUpdateActivityRecord = (record: ActivityRecordType) => {
     setActivityRecord({
       ...activityRecord,
       ...record
@@ -157,7 +161,11 @@ const MoistureContent = () => {
   };
 
   const validateTest = useMutation({
-    mutationFn: () => validateResult(riaKey ?? ''),
+    mutationFn: () => testingActivitiesAPI(
+      'purityTest',
+      'validateTestResult',
+      { riaKey }
+    ),
     onSuccess: () => {
       const testActivityData: TestingActivityType = {
         ...testActivity!,
@@ -186,7 +194,11 @@ const MoistureContent = () => {
   });
 
   const acceptTest = useMutation({
-    mutationFn: () => acceptResult(riaKey ?? ''),
+    mutationFn: () => testingActivitiesAPI(
+      'purityTest',
+      'acceptResult',
+      { riaKey }
+    ),
     onSuccess: () => {
       const testActivityData: TestingActivityType = {
         ...testActivity!,
@@ -288,17 +300,6 @@ const MoistureContent = () => {
       disabled: true
     }
   ];
-  const initReplicatesList = () => {
-    const emptyRows = [];
-    for (let i = 0; i < 4; i += 1) {
-      emptyRows.push({
-        riaKey: activityRiaKey,
-        replicateNumber: i + 1,
-        replicateAccInd: 1
-      });
-    }
-    return emptyRows;
-  };
 
   return (
     <FlexGrid className="consep-moisture-content">
@@ -335,7 +336,8 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
-          replicatesData={testActivity?.replicatesList || initReplicatesList()}
+          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey || '')}
+          replicateType="moistureTest"
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
           setAlert={handleAlert}
@@ -348,7 +350,7 @@ const MoistureContent = () => {
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             onChange={(e: Array<Date>) => {
-              handleUodateActivityRecord({
+              handleUpdateActivityRecord({
                 actualBeginDateTime: e[0].toISOString()
               });
             }}
@@ -370,7 +372,7 @@ const MoistureContent = () => {
             datePickerType="single"
             dateFormat="Y/m/d"
             onChange={(e: Array<Date>) => {
-              handleUodateActivityRecord({
+              handleUpdateActivityRecord({
                 actualEndDateTime: e[0].toISOString()
               });
             }}
@@ -403,7 +405,7 @@ const MoistureContent = () => {
                 : 'Quality assurance'
             }
             onChange={(e: { selectedItem: string }) => {
-              handleUodateActivityRecord({
+              handleUpdateActivityRecord({
                 testCategoryCode: categoryMapReverse[
                   e.selectedItem as keyof typeof categoryMapReverse
                 ]
@@ -424,7 +426,7 @@ const MoistureContent = () => {
             enableCounter
             value={activityRecord?.riaComment}
             onChange={(e: { target: { value: string } }) => {
-              handleUodateActivityRecord({
+              handleUpdateActivityRecord({
                 riaComment: e.target.value
               });
             }}

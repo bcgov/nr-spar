@@ -152,8 +152,8 @@ class PurityTestsEndpointTest {
             .value(purityContent.get().replicatesList().get(0).pureSeedWeight()))
         .andExpect(jsonPath("$.replicatesList[0].otherSeedWeight")
             .value(purityContent.get().replicatesList().get(0).otherSeedWeight()))
-        .andExpect(jsonPath("$.replicatesList[0].containerWeight")
-            .value(purityContent.get().replicatesList().get(0).containerWeight()))
+        .andExpect(jsonPath("$.replicatesList[0].inertMttrWeight")
+            .value(purityContent.get().replicatesList().get(0).inertMttrWeight()))
         .andExpect(jsonPath("$.replicatesList[0].replicateAccInd")
             .value(purityContent.get().replicatesList().get(0).replicateAccInd()))
         .andExpect(jsonPath("$.replicatesList[0].overrideReason")
@@ -166,8 +166,8 @@ class PurityTestsEndpointTest {
             .value(purityContent.get().replicatesList().get(1).pureSeedWeight()))
         .andExpect(jsonPath("$.replicatesList[1].otherSeedWeight")
             .value(purityContent.get().replicatesList().get(1).otherSeedWeight()))
-        .andExpect(jsonPath("$.replicatesList[1].containerWeight")
-            .value(purityContent.get().replicatesList().get(1).containerWeight()))
+        .andExpect(jsonPath("$.replicatesList[1].inertMttrWeight")
+            .value(purityContent.get().replicatesList().get(1).inertMttrWeight()))
         .andExpect(jsonPath("$.replicatesList[1].replicateAccInd")
             .value(purityContent.get().replicatesList().get(1).replicateAccInd()))
         .andExpect(jsonPath("$.replicatesList[1].overrideReason")
@@ -296,7 +296,7 @@ class PurityTestsEndpointTest {
     entity1.setId(new ReplicateId(riaKey, 1));
     entity1.setPureSeedWeight(form1.pureSeedWeight());
     entity1.setOtherSeedWeight(form1.otherSeedWeight());
-    entity1.setContainerWeight(form1.containerWeight());
+    entity1.setInertMttrWeight(form1.inertMttrWeight());
     entity1.setReplicateAccInd(form1.replicateAccInd());
     entity1.setOverrideReason(form1.overrideReason());
 
@@ -309,7 +309,7 @@ class PurityTestsEndpointTest {
     entity2.setId(new ReplicateId(riaKey, 2));
     entity2.setPureSeedWeight(form2.pureSeedWeight());
     entity2.setOtherSeedWeight(form2.otherSeedWeight());
-    entity2.setContainerWeight(form2.containerWeight());
+    entity2.setInertMttrWeight(form2.inertMttrWeight());
     entity2.setReplicateAccInd(form2.replicateAccInd());
     entity2.setOverrideReason(form2.overrideReason());
 
@@ -328,13 +328,13 @@ class PurityTestsEndpointTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].pureSeedWeight").value(form1.pureSeedWeight()))
         .andExpect(jsonPath("$[0].otherSeedWeight").value(form1.otherSeedWeight()))
-        .andExpect(jsonPath("$[0].containerWeight").value(form1.containerWeight()))
+        .andExpect(jsonPath("$[0].inertMttrWeight").value(form1.inertMttrWeight()))
         .andExpect(jsonPath("$[0].replicateAccInd").value(form1.replicateAccInd()))
         .andExpect(jsonPath("$[0].overrideReason").value(form1.overrideReason()))
 
         .andExpect(jsonPath("$[1].pureSeedWeight").value(form2.pureSeedWeight()))
         .andExpect(jsonPath("$[1].otherSeedWeight").value(form2.otherSeedWeight()))
-        .andExpect(jsonPath("$[1].containerWeight").value(form2.containerWeight()))
+        .andExpect(jsonPath("$[1].inertMttrWeight").value(form2.inertMttrWeight()))
         .andExpect(jsonPath("$[1].replicateAccInd").value(form2.replicateAccInd()))
         .andExpect(jsonPath("$[1].overrideReason").value(form2.overrideReason()));
   }

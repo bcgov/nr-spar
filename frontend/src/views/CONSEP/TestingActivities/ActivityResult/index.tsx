@@ -7,23 +7,26 @@ import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
 import GenericTable from '../../../../components/GenericTable';
-import { ReplicateType } from '../../../../types/consep/TestingActivityType';
-import { updateReplicates, deleteReplicate, deleteReplicates } from '../../../../api-service/moistureContentAPI';
-import { getColumns } from './constants';
+import { ReplicateType, TestingTypes } from '../../../../types/consep/TestingActivityType';
+import testingActivitiesAPI from '../../../../api-service/testingActivitiesAPI';
+import { getMccColumns, getPurityColumns, TABLE_TITLE } from './constants';
 
 import './styles.scss';
 
-const TITLE = 'Activity results per replicate';
-
 type ActivityResultProp = {
   replicatesData: ReplicateType[],
+  replicateType: TestingTypes,
   riaKey: number,
   isEditable: boolean,
   setAlert: (isSuccess: boolean, message: string) => void
   tableBodyRef: React.RefObject<HTMLTableSectionElement>
 }
 
-const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: string) => void) => {
+const useReplicates = (
+  riaKey: number,
+  replicateType: TestingTypes,
+  setAlert: (isSuccess: boolean, message: string) => void
+) => {
   const [replicatesList, setReplicatesList] = useState<ReplicateType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
@@ -32,7 +35,11 @@ const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: s
   const lastCheckedListRef = useRef<string | null>(null);
 
   const updateReplicateListMutation = useMutation({
-    mutationFn: (replicates: ReplicateType[]) => updateReplicates(riaKey, replicates),
+    mutationFn: (replicates: ReplicateType[]) => testingActivitiesAPI(
+      replicateType,
+      'updateMultipleReplicates',
+      { riaKey, replicates }
+    ),
     onSuccess: (_, variables) => {
       lastCheckedListRef.current = JSON.stringify(variables);
     },
@@ -42,7 +49,11 @@ const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: s
   });
 
   const deleteReplicateMutation = useMutation({
-    mutationFn: (replicateNumber: number) => deleteReplicate(riaKey, replicateNumber),
+    mutationFn: (replicateNumber: number) => testingActivitiesAPI(
+      replicateType,
+      'deleteSingleReplicate',
+      { riaKey, replicateNumber }
+    ),
     onSuccess: (data) => {
       setAlert(true, 'Replicate deleted successfully');
       const replicateNumber = data.data;
@@ -90,7 +101,8 @@ const useReplicates = (riaKey: number, setAlert: (isSuccess: boolean, message: s
 };
 
 const ActivityResult = ({
-  replicatesData, riaKey, isEditable, setAlert, tableBodyRef
+  replicatesData, replicateType, riaKey,
+  isEditable, setAlert, tableBodyRef
 }: ActivityResultProp) => {
   const {
     replicatesList,
@@ -102,10 +114,14 @@ const ActivityResult = ({
     setShowDeleteNotification,
     deleteReplicateMutation,
     syncWithInitialData
-  } = useReplicates(riaKey, setAlert);
+  } = useReplicates(riaKey, replicateType, setAlert);
 
   const deleteReplicatesMutation = useMutation({
-    mutationFn: (replicateNumbers: number[]) => deleteReplicates(riaKey, replicateNumbers),
+    mutationFn: (replicateNumbers: number[]) => testingActivitiesAPI(
+      replicateType,
+      'deleteMultipleReplicates',
+      { riaKey, replicateNumbers }
+    ),
     onSuccess: () => {
       setAlert(true, 'Replicates deleted successfully');
       setReplicatesList([]);
@@ -138,40 +154,88 @@ const ActivityResult = ({
   };
 
   const actions = [
-    { label: 'Clear data', icon: <Icons.TrashCan size={15} />, action: handleAllClearData },
-    { label: 'Accept all', icon: <Icons.CheckboxChecked size={15} />, action: () => setReplicatesList(replicatesList.map((r) => ({ ...r, replicateAccInd: 1 }))) },
-    { label: 'Add row', icon: <Icons.AddAlt size={15} />, action: addRow }
+    {
+      label: 'Clear data',
+      icon: <Icons.TrashCan size={15} />,
+      action: handleAllClearData
+    },
+    {
+      label: 'Accept all',
+      icon: <Icons.CheckboxChecked size={15} />,
+      action: () => setReplicatesList(replicatesList.map((r) => ({ ...r, replicateAccInd: 1 })))
+    },
+    {
+      label: 'Add row',
+      icon: <Icons.AddAlt size={15} />,
+      action: addRow
+    }
   ];
 
-  const updateRow = (row: ReplicateType) => {
-    const updatedList = replicatesList.map((item) => (item.replicateNumber === row.replicateNumber
-      ? { ...item, ...row }
-      : item));
-    const updatedListWithMCValue = updatedList.map((item) => ({
-      ...item,
-      mcValue: item.freshSeed && item.dryWeight
-        ? Math.round(
-          ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
-        ) / 100
-        : undefined,
-      dryWeight: item.containerAndDryWeight && item.containerWeight
-        ? parseFloat((item.containerAndDryWeight - item.containerWeight).toFixed(4))
-        : undefined
-    }));
-    setReplicatesList(updatedListWithMCValue);
+  const createReplicateList = (replicates: ReplicateType[]): ReplicateType[] => {
+    switch (replicateType) {
+      case 'moistureTest':
+        return replicates.map((item) => ({
+          ...item,
+          mcValue: ('freshSeed' in item) && item.freshSeed && item.dryWeight
+            ? (Math.round(
+              ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
+            )).toFixed(2)
+            : undefined
+        }));
+      case 'purityTest':
+        return replicates.map((item) => ({
+          ...item,
+          purityValue:
+          ('pureSeedWeight' in item) && item.pureSeedWeight && item.pureSeedWeight > 0
+          && item.otherSeedWeight && item.inertMttrWeight
+            ? (Math.round(
+              (item.pureSeedWeight
+                / (item.otherSeedWeight + item.inertMttrWeight + item.pureSeedWeight)) * 100
+            )).toFixed(2)
+            : undefined,
+          dryWeight: ('containerAndDryWeight' in item) && item.containerAndDryWeight && item.containerWeight
+            ? parseFloat((item.containerAndDryWeight - item.containerWeight).toFixed(4))
+            : undefined
+        }));
+      default:
+        break;
+    }
+    return replicatesList;
   };
 
-  const replicateListWithMCValue = replicatesList.map((item) => ({
-    ...item,
-    mcValue: item.freshSeed && item.dryWeight
-      ? Math.round(
-        ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
-      ) / 100
-      : undefined,
-    dryWeight: item.containerAndDryWeight && item.containerWeight
-      ? parseFloat((item.containerAndDryWeight - item.containerWeight).toFixed(4))
-      : undefined
-  }));
+  const updateRow = (row: ReplicateType) => {
+    const updatedList = replicatesList.map((item) => (
+      item.replicateNumber === row.replicateNumber
+        ? { ...item, ...row }
+        : item
+    ));
+
+    setReplicatesList(createReplicateList(updatedList));
+  };
+
+  const getTableColumns = () => {
+    switch (replicateType) {
+      case 'moistureTest':
+        return getMccColumns(
+          !isEditable,
+          (num) => deleteRow(num),
+          updateRow,
+          validationErrors,
+          setValidationErrors
+        );
+      case 'purityTest':
+        return getPurityColumns(
+          !isEditable,
+          (num) => deleteRow(num),
+          updateRow,
+          validationErrors,
+          setValidationErrors
+        );
+      default:
+        break;
+    }
+    return [];
+  };
 
   return (
     <FlexGrid className="activity-result-container">
@@ -190,11 +254,18 @@ const ActivityResult = ({
       )}
       <Row className="activity-result-actions">
         <Column sm={3} md={3} lg={5} className="activity-result-actions-title">
-          <h3>{TITLE}</h3>
+          <h3>{TABLE_TITLE}</h3>
         </Column>
         <Column sm={2} md={2} lg={4} className="activity-result-action-buttons">
           {actions.map(({ label, icon, action }) => (
-            <button key={label} className={isEditable ? 'action-item' : 'action-item-disabled'} onClick={action} type="button" aria-label={label} disabled={!isEditable}>
+            <button
+              key={label}
+              className={isEditable ? 'action-item' : 'action-item-disabled'}
+              onClick={action}
+              type="button"
+              aria-label={label}
+              disabled={!isEditable}
+            >
               {label}
               {icon}
             </button>
@@ -203,14 +274,8 @@ const ActivityResult = ({
       </Row>
       <Row>
         <GenericTable
-          columns={getColumns(
-            !isEditable,
-            (num) => deleteRow(num),
-            updateRow,
-            validationErrors,
-            setValidationErrors
-          )}
-          data={replicateListWithMCValue}
+          columns={getTableColumns()}
+          data={createReplicateList(replicatesList)}
           isLoading={isLoading}
           enableEditing={isEditable}
           isCompacted

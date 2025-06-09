@@ -1,10 +1,8 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
-import { ReplicateType } from '../types/consep/TestingActivityType';
+import { ReplicateType, TestingTypes } from '../types/consep/TestingActivityType';
 
 type TestingParams = Record<string, any>;
-
-type TestingTypes = 'moistureTest' | 'purityTest';
 
 type TestingActivitiesApiType =
   | 'getDataByRiaKey'
@@ -15,7 +13,7 @@ type TestingActivitiesApiType =
   | 'validateTestResult'
   | 'acceptResult';
 
-const testingActivities = async (
+const testingActivitiesAPI = async (
   testType: TestingTypes,
   fn: TestingActivitiesApiType,
   params: TestingParams
@@ -48,4 +46,4 @@ const testingActivities = async (
   return calledFn(...Object.values(params));
 };
 
-export default testingActivities;
+export default testingActivitiesAPI;

@@ -21,7 +21,7 @@ public record PurityReplicateDto(
     BigDecimal otherSeedWeight,
 
     @Schema(description = "Weight of all impurities removed from the seed", example = "5.23")
-    BigDecimal containerWeight,
+    BigDecimal inertMttrWeight,
 
     @Schema(description = "Indicator if the replicate is accepted", example = "1")
     Integer replicateAccInd,
