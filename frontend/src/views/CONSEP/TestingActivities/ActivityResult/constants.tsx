@@ -24,7 +24,7 @@ const createEditableNumberColumn = (
   header,
   size: 120,
   muiEditTextFieldProps: ({ cell, row }) => {
-    const value = row.original[accessorKey] ?? '';
+    const value = row.original[accessorKey as keyof typeof row.original] ?? '';
     return {
       type: 'number',
       value,
@@ -74,7 +74,7 @@ const createEditableTextColumn = (
   header,
   size: 80,
   muiEditTextFieldProps: ({ cell, row }) => {
-    const value = row.original[accessorKey] ?? '';
+    const value = row.original[accessorKey as keyof typeof row.original] ?? '';
     return {
       type: 'text',
       value,
@@ -155,7 +155,7 @@ export const getMccColumns = (
     enableEditing: false,
     muiEditTextFieldProps: ({ row }) => ({
       type: 'text',
-      value: row.original.dryWeight ?? ''
+      value: 'dryWeight' in row.original ? row.original.dryWeight : ''
     })
   },
   {
@@ -164,7 +164,7 @@ export const getMccColumns = (
     size: 80,
     muiEditTextFieldProps: ({ row }) => ({
       type: 'text',
-      value: row.original.mcValue ?? ''
+      value: 'mcValue' in row.original ? row.original.mcValue : ''
     }),
     enableEditing: false,
     ...alignRight
@@ -195,7 +195,7 @@ export const getMccColumns = (
     size: 300,
     muiEditTextFieldProps: ({ row }) => ({
       type: 'text',
-      value: row.original.replicateComment ?? '',
+      value: 'replicateComment' in row.original ? row.original.replicateComment : '',
       onChange: (event) => {
         updateRow({
           ...row.original,
