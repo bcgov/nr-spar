@@ -48,9 +48,6 @@ export type TestingActivityType = ActivityRecordType & {
   replicatesList: ReplicateType[];
 };
 
-/**
- * Used for Activity Summary section in CONSEP.
- */
 export type ActivitySummaryType = {
   activity: string;
   seedlotNumber: string;

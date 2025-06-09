@@ -22,7 +22,7 @@ class PurityReplicateEntityTest {
     entity.setId(id);
     entity.setPureSeedWeight(new BigDecimal("100.500"));
     entity.setOtherSeedWeight(new BigDecimal("5.250"));
-    entity.setContainerWeight(new BigDecimal("2.100"));
+    entity.setInertMttrWeight(new BigDecimal("2.100"));
     entity.setReplicateAccInd(1);
     entity.setOverrideReason("Sample override reason");
 
@@ -30,7 +30,7 @@ class PurityReplicateEntityTest {
     assertEquals(id, entity.getId());
     assertEquals(new BigDecimal("100.500"), entity.getPureSeedWeight());
     assertEquals(new BigDecimal("5.250"), entity.getOtherSeedWeight());
-    assertEquals(new BigDecimal("2.100"), entity.getContainerWeight());
+    assertEquals(new BigDecimal("2.100"), entity.getInertMttrWeight());
     assertEquals(1, entity.getReplicateAccInd());
     assertEquals("Sample override reason", entity.getOverrideReason());
   }
@@ -38,20 +38,20 @@ class PurityReplicateEntityTest {
   @Test
   void testEntityWithNullValues() {
     PurityReplicateEntity entity = new PurityReplicateEntity();
-    
+
     // Set all nullable fields to null
     entity.setId(null);
     entity.setPureSeedWeight(null);
     entity.setOtherSeedWeight(null);
-    entity.setContainerWeight(null);
+    entity.setInertMttrWeight(null);
     entity.setReplicateAccInd(null);
     entity.setOverrideReason(null);
-    
+
     // Verify null values are handled
     assertNull(entity.getId());
     assertNull(entity.getPureSeedWeight());
     assertNull(entity.getOtherSeedWeight());
-    assertNull(entity.getContainerWeight());
+    assertNull(entity.getInertMttrWeight());
     assertNull(entity.getReplicateAccInd());
     assertNull(entity.getOverrideReason());
   }
@@ -94,27 +94,27 @@ class PurityReplicateEntityTest {
 
     PurityReplicateEntity entity = new PurityReplicateEntity();
     entity.setId(id);
-    
+
     // Test maximum values based on column precision/scale
     entity.setPureSeedWeight(new BigDecimal("9999.999"));
     entity.setOtherSeedWeight(new BigDecimal("9999.999"));
-    entity.setContainerWeight(new BigDecimal("9999.999"));
+    entity.setInertMttrWeight(new BigDecimal("9999.999"));
     entity.setOverrideReason("x".repeat(2000));
 
     assertEquals(new BigDecimal("9999.999"), entity.getPureSeedWeight());
     assertEquals(new BigDecimal("9999.999"), entity.getOtherSeedWeight());
-    assertEquals(new BigDecimal("9999.999"), entity.getContainerWeight());
+    assertEquals(new BigDecimal("9999.999"), entity.getInertMttrWeight());
     assertEquals("x".repeat(2000), entity.getOverrideReason());
-    
+
     // Test minimum values
     entity.setPureSeedWeight(new BigDecimal("0.001"));
     entity.setOtherSeedWeight(new BigDecimal("0.001"));
-    entity.setContainerWeight(new BigDecimal("0.001"));
+    entity.setInertMttrWeight(new BigDecimal("0.001"));
     entity.setOverrideReason("");
 
     assertEquals(new BigDecimal("0.001"), entity.getPureSeedWeight());
     assertEquals(new BigDecimal("0.001"), entity.getOtherSeedWeight());
-    assertEquals(new BigDecimal("0.001"), entity.getContainerWeight());
+    assertEquals(new BigDecimal("0.001"), entity.getInertMttrWeight());
     assertEquals("", entity.getOverrideReason());
   }
 }
