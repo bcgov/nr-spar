@@ -1,77 +1,101 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams, useBlocker } from 'react-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams, useBlocker } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
-  Button, FlexGrid, Row,
-  Column, Loading, Modal,
-  InlineNotification
-} from '@carbon/react';
-import { toast } from 'react-toastify';
-import {
-  Edit, Save, Pending, Checkmark, Warning
-} from '@carbon/icons-react';
-import { Beforeunload } from 'react-beforeunload';
-
-import { getSeedlotById, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
-import getVegCodes from '../../../api-service/vegetationCodeAPI';
-import Breadcrumbs from '../../../components/Breadcrumbs';
-import PageTitle from '../../../components/PageTitle';
-import RowGap from '../../../components/RowGap';
-import ErrorToast from '../../../components/Toast/ErrorToast';
-import ApplicantAndSeedlotRead from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Read';
-import ApplicantAndSeedlotEdit from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Edit';
-import { SeedlotPatchPayloadType, SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
-import { InitialSeedlotRegFormData } from '../CreateAClass/constants';
-import CollectionReviewRead from '../../../components/SeedlotReviewSteps/Collection/Read';
-import CollectionReviewEdit from '../../../components/SeedlotReviewSteps/Collection/Edit';
-import OwnershipReviewRead from '../../../components/SeedlotReviewSteps/Ownership/Read';
-import OwnershipReviewEdit from '../../../components/SeedlotReviewSteps/Ownership/Edit';
-import InterimReviewRead from '../../../components/SeedlotReviewSteps/Interim/Read';
-import InterimReviewEdit from '../../../components/SeedlotReviewSteps/Interim/Edit';
-import OrchardReviewRead from '../../../components/SeedlotReviewSteps/Orchard/Read';
-import OrchardReviewEdit from '../../../components/SeedlotReviewSteps/Orchard/Edit';
-import ParentTreeReview from '../../../components/SeedlotReviewSteps/ParentTrees';
-import AreaOfUseRead from '../../../components/SeedlotReviewSteps/AreaOfUse/Read';
-import AreaOfUseEdit from '../../../components/SeedlotReviewSteps/AreaOfUse/Edit';
-import ExtractionStorageReviewRead from '../../../components/SeedlotReviewSteps/ExtractionStorage/Read';
-import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/ExtractionStorage/Edit';
-import AuditInfo from '../../../components/SeedlotReviewSteps/AuditInfo';
+  Button,
+  FlexGrid,
+  Row,
+  Column,
+  Loading,
+  Modal,
+  InlineNotification,
+} from "@carbon/react";
+import { toast } from "react-toastify";
+import { Edit, Save, Pending, Checkmark, Warning } from "@carbon/icons-react";
+import { Beforeunload } from "react-beforeunload";
 
 import {
-  PutTscSeedlotMutationObj, putTscSeedlotWithStatus,
-  updateSeedlotStatus
-} from '../../../api-service/tscAdminAPI';
+  getSeedlotById,
+  putAClassSeedlotProgress,
+} from "../../../api-service/seedlotAPI";
+import { THREE_HALF_HOURS, THREE_HOURS } from "../../../config/TimeUnits";
+import getVegCodes from "../../../api-service/vegetationCodeAPI";
+import Breadcrumbs from "../../../components/Breadcrumbs";
+import PageTitle from "../../../components/PageTitle";
+import RowGap from "../../../components/RowGap";
+import ErrorToast from "../../../components/Toast/ErrorToast";
+import ApplicantAndSeedlotRead from "../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Read";
+import ApplicantAndSeedlotEdit from "../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Edit";
 import {
-  SeedPlanZoneDto, SeedlotReviewElevationLatLongDto,
-  SeedlotReviewGeoInformationDto, SeedlotStatusCode, TscSeedlotEditPayloadType
-} from '../../../types/SeedlotType';
-import { ErrToastOption } from '../../../config/ToastifyConfig';
-import AuthContext from '../../../contexts/AuthContext';
-import { GeneticTrait } from '../../../types/PtCalcTypes';
-import { getSeedlotBreadcrumbs } from '../../../utils/BreadcrumbUtils';
+  SeedlotPatchPayloadType,
+  SeedlotRegFormType,
+} from "../../../types/SeedlotRegistrationTypes";
+import { InitialSeedlotRegFormData } from "../CreateAClass/constants";
+import CollectionReviewRead from "../../../components/SeedlotReviewSteps/Collection/Read";
+import CollectionReviewEdit from "../../../components/SeedlotReviewSteps/Collection/Edit";
+import OwnershipReviewRead from "../../../components/SeedlotReviewSteps/Ownership/Read";
+import OwnershipReviewEdit from "../../../components/SeedlotReviewSteps/Ownership/Edit";
+import InterimReviewRead from "../../../components/SeedlotReviewSteps/Interim/Read";
+import InterimReviewEdit from "../../../components/SeedlotReviewSteps/Interim/Edit";
+import OrchardReviewRead from "../../../components/SeedlotReviewSteps/Orchard/Read";
+import OrchardReviewEdit from "../../../components/SeedlotReviewSteps/Orchard/Edit";
+import ParentTreeReview from "../../../components/SeedlotReviewSteps/ParentTrees";
+import AreaOfUseRead from "../../../components/SeedlotReviewSteps/AreaOfUse/Read";
+import AreaOfUseEdit from "../../../components/SeedlotReviewSteps/AreaOfUse/Edit";
+import ExtractionStorageReviewRead from "../../../components/SeedlotReviewSteps/ExtractionStorage/Read";
+import ExtractionStorageReviewEdit from "../../../components/SeedlotReviewSteps/ExtractionStorage/Edit";
+import AuditInfo from "../../../components/SeedlotReviewSteps/AuditInfo";
 
-import ClassAContext from '../ContextContainerClassA/context';
-import { validateRegForm } from '../CreateAClass/utils';
+import {
+  PutTscSeedlotMutationObj,
+  putTscSeedlotWithStatus,
+  updateSeedlotStatus,
+} from "../../../api-service/tscAdminAPI";
+import {
+  SeedPlanZoneDto,
+  SeedlotReviewElevationLatLongDto,
+  SeedlotReviewGeoInformationDto,
+  SeedlotStatusCode,
+  TscSeedlotEditPayloadType,
+} from "../../../types/SeedlotType";
+import { ErrToastOption } from "../../../config/ToastifyConfig";
+import AuthContext from "../../../contexts/AuthContext";
+import { GeneticTrait } from "../../../types/PtCalcTypes";
+import { getSeedlotBreadcrumbs } from "../../../utils/BreadcrumbUtils";
+
+import ClassAContext from "../ContextContainerClassA/context";
+import { validateRegForm } from "../CreateAClass/utils";
 import {
   getSeedlotPayload,
   initOwnershipState,
-  validateCollectionStep, validateExtractionStep, validateInterimStep, validateOrchardStep,
-  validateOwnershipStep, validateParentStep, verifyCollectionStepCompleteness,
+  validateCollectionStep,
+  validateExtractionStep,
+  validateInterimStep,
+  validateOrchardStep,
+  validateOwnershipStep,
+  validateParentStep,
+  verifyCollectionStepCompleteness,
   verifyExtractionStepCompleteness,
-  verifyInterimStepCompleteness, verifyOrchardStepCompleteness, verifyOwnershipStepCompleteness,
-  verifyParentStepCompleteness
-} from '../ContextContainerClassA/utils';
+  verifyInterimStepCompleteness,
+  verifyOrchardStepCompleteness,
+  verifyOwnershipStepCompleteness,
+  verifyParentStepCompleteness,
+} from "../ContextContainerClassA/utils";
 
 import {
-  validateAreaOfUse, validateCollectGeoVals,
-  validateGeneticWorth
-} from './utils';
-import { GenWorthValType } from './definitions';
-import { IS_DEV_FEATURE_ENABLED, SaveStatusModalText } from './constants';
-import { completeProgressConfig, emptyOwnershipStep, initialProgressConfig } from '../ContextContainerClassA/constants';
-import { AllStepData } from '../ContextContainerClassA/definitions';
+  validateAreaOfUse,
+  validateCollectGeoVals,
+  validateGeneticWorth,
+} from "./utils";
+import { GenWorthValType } from "./definitions";
+import { IS_DEV_FEATURE_ENABLED, SaveStatusModalText } from "./constants";
+import {
+  completeProgressConfig,
+  emptyOwnershipStep,
+  initialProgressConfig,
+} from "../ContextContainerClassA/constants";
+import { AllStepData } from "../ContextContainerClassA/definitions";
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
@@ -85,35 +109,36 @@ const SeedlotReviewContent = () => {
    */
   const [isSaveStatusModalOpen, setIsSaveStatusModalOpen] = useState(false);
 
-  const [statusToUpdateTo, setStatusToUpdateTo] = useState<SeedlotStatusCode>('PND');
+  const [statusToUpdateTo, setStatusToUpdateTo] =
+    useState<SeedlotStatusCode>("PND");
 
   const { seedlotNumber } = useParams();
 
   const { isTscAdmin } = useContext(AuthContext);
 
   const vegCodeQuery = useQuery({
-    queryKey: ['vegetation-codes'],
+    queryKey: ["vegetation-codes"],
     queryFn: getVegCodes,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    cacheTime: THREE_HALF_HOURS,
   });
 
   const seedlotQuery = useQuery({
-    queryKey: ['seedlots', seedlotNumber],
-    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
+    queryKey: ["seedlots", seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber ?? ""),
     enabled: vegCodeQuery.isFetched,
-    refetchOnMount: true
+    refetchOnMount: true,
   });
 
   useEffect(() => {
     const { status } = seedlotQuery;
 
     // Handle error
-    if (status === 'error') {
+    if (status === "error") {
       const err = seedlotQuery.error as AxiosError;
       // Handle 404
       if (err.response?.status === 404) {
-        navigate('/404');
+        navigate("/404");
       }
     }
   }, [seedlotQuery.status]);
@@ -122,8 +147,9 @@ const SeedlotReviewContent = () => {
   const [isReadMode, setIsReadMode] = useState(true);
 
   useEffect(() => {
-    if (seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'INC'
-      || seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'PND'
+    if (
+      seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === "INC" ||
+      seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === "PND"
     ) {
       // Navigate back to the seedlot detail page if the seedlot is pending or incomplete
       navigate(`/seedlots/details/${seedlotNumber}`);
@@ -133,10 +159,9 @@ const SeedlotReviewContent = () => {
   /**
    * Applicant info data, form data should be accessed through context.
    */
-  const [
-    applicantData,
-    setApplicantData
-  ] = useState<SeedlotRegFormType>(InitialSeedlotRegFormData);
+  const [applicantData, setApplicantData] = useState<SeedlotRegFormType>(
+    InitialSeedlotRegFormData
+  );
 
   const {
     allStepData,
@@ -147,7 +172,7 @@ const SeedlotReviewContent = () => {
     seedlotData,
     genWorthInfoItems,
     seedlotSpecies,
-    popSizeAndDiversityConfig
+    popSizeAndDiversityConfig,
   } = useContext(ClassAContext);
 
   const verifyFormData = (): boolean => {
@@ -155,8 +180,12 @@ const SeedlotReviewContent = () => {
     const focusOnInvalid = true;
     const focusOnIncomplete = true;
     const {
-      collectionStep, ownershipStep, interimStep,
-      orchardStep, parentTreeStep, extractionStorageStep
+      collectionStep,
+      ownershipStep,
+      interimStep,
+      orchardStep,
+      parentTreeStep,
+      extractionStorageStep,
     } = allStepData;
 
     // Step 1: Applicant and Seedlot
@@ -223,7 +252,12 @@ const SeedlotReviewContent = () => {
     if (validateExtractionStep(extractionStorageStep, focusOnInvalid)) {
       return isValid;
     }
-    if (!verifyExtractionStepCompleteness(extractionStorageStep, focusOnIncomplete)) {
+    if (
+      !verifyExtractionStepCompleteness(
+        extractionStorageStep,
+        focusOnIncomplete
+      )
+    ) {
       return isValid;
     }
 
@@ -244,20 +278,24 @@ const SeedlotReviewContent = () => {
       seedlotSourceCode: applicantData.sourceCode.value,
       toBeRegistrdInd: applicantData.willBeRegistered.value,
       bcSourceInd: applicantData.isBcSource.value,
-      revisionCount: seedlotData?.revisionCount
+      revisionCount: seedlotData?.revisionCount,
     };
 
-    const seedlotReviewSeedPlanZones: SeedPlanZoneDto[] = [{
-      code: areaOfUseData.primarySpz.value.code,
-      description: areaOfUseData.primarySpz.value.description,
-      isPrimary: true
-    }];
+    const seedlotReviewSeedPlanZones: SeedPlanZoneDto[] = [
+      {
+        code: areaOfUseData.primarySpz.value.code,
+        description: areaOfUseData.primarySpz.value.description,
+        isPrimary: true,
+      },
+    ];
 
-    areaOfUseData.additionalSpzList.forEach((spz) => seedlotReviewSeedPlanZones.push({
-      code: spz.value.code,
-      description: spz.value.description,
-      isPrimary: false
-    }));
+    areaOfUseData.additionalSpzList.forEach((spz) =>
+      seedlotReviewSeedPlanZones.push({
+        code: spz.value.code,
+        description: spz.value.description,
+        isPrimary: false,
+      })
+    );
 
     const seedlotReviewElevationLatLong: SeedlotReviewElevationLatLongDto = {
       minElevation: Number(areaOfUseData.minElevation.value),
@@ -274,26 +312,26 @@ const SeedlotReviewContent = () => {
       maxLongitudeDeg: Number(areaOfUseData.maxLongDeg.value),
       maxLongitudeMin: Number(areaOfUseData.maxLongMinute.value),
       maxLongitudeSec: Number(areaOfUseData.maxLongSec.value),
-      areaOfUseComment: areaOfUseData.comment.value
+      areaOfUseComment: areaOfUseData.comment.value,
     };
 
     const seedlotReviewGeneticWorth: GeneticTrait[] = [];
-    (Object.keys(genWorthVals) as (keyof GenWorthValType)[])
-      .forEach((genWorthKey) => {
+    (Object.keys(genWorthVals) as (keyof GenWorthValType)[]).forEach(
+      (genWorthKey) => {
         if (genWorthVals[genWorthKey].value) {
           const upperCaseCode = genWorthKey.toUpperCase();
           seedlotReviewGeneticWorth.push({
             traitCode: upperCaseCode,
             calculatedValue: Number(genWorthVals[genWorthKey].value),
-            testedParentTreePerc:
-              genWorthInfoItems[genWorthKey]
-                // Dividing by 100 since the current value is in percentage and we need
+            testedParentTreePerc: genWorthInfoItems[genWorthKey]
+              ? // Dividing by 100 since the current value is in percentage and we need
                 // to submit the real value
-                ? Number(genWorthInfoItems[genWorthKey][1].value) / 100
-                : 0
+                Number(genWorthInfoItems[genWorthKey][1].value) / 100
+              : 0,
           });
         }
-      });
+      }
+    );
 
     const seedlotReviewGeoInformation: SeedlotReviewGeoInformationDto = {
       meanLatitudeDegree: Number(geoInfoVals.meanLatDeg.value),
@@ -305,7 +343,7 @@ const SeedlotReviewContent = () => {
       meanLatitude: 0,
       meanLongitude: 0,
       meanElevation: Number(geoInfoVals.meanElevation.value),
-      effectivePopulationSize: Number(geoInfoVals.effectivePopSize.value)
+      effectivePopulationSize: Number(geoInfoVals.effectivePopSize.value),
     };
 
     return {
@@ -314,16 +352,19 @@ const SeedlotReviewContent = () => {
       seedlotReviewSeedPlanZones,
       seedlotReviewElevationLatLong,
       seedlotReviewGeneticWorth,
-      seedlotReviewGeoInformation
+      seedlotReviewGeoInformation,
     };
   };
 
   const queryClient = useQueryClient();
 
   const tscSeedlotMutation = useMutation({
-    mutationFn: (
-      { seedlotNum, statusOnSave, payload }: PutTscSeedlotMutationObj
-    ) => putTscSeedlotWithStatus(seedlotNum, statusOnSave, payload),
+    mutationFn: ({
+      seedlotNum,
+      statusOnSave,
+      payload,
+    }: PutTscSeedlotMutationObj) =>
+      putTscSeedlotWithStatus(seedlotNum, statusOnSave, payload),
     onError: (err: AxiosError) => {
       toast.error(
         <ErrorToast
@@ -334,19 +375,27 @@ const SeedlotReviewContent = () => {
       );
     },
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
-      await queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      await queryClient.invalidateQueries({
+        queryKey: ["seedlots", seedlotNumber],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["seedlot-full-form", seedlotNumber],
+      });
       setIsReadMode(true);
-      if (variables.statusOnSave !== 'SUB') {
-        navigate(`/seedlots/details/${seedlotNumber}/?statusOnSave=${variables.statusOnSave}`);
+      if (variables.statusOnSave !== "SUB") {
+        navigate(
+          `/seedlots/details/${seedlotNumber}/?statusOnSave=${variables.statusOnSave}`
+        );
       }
-    }
+    },
   });
 
   const statusOnlyMutation = useMutation({
-    mutationFn: (
-      { seedlotNum, statusOnSave }: Omit<PutTscSeedlotMutationObj, 'payload'>
-    ) => updateSeedlotStatus(seedlotNum, statusOnSave),
+    mutationFn: ({
+      seedlotNum,
+      statusOnSave,
+    }: Omit<PutTscSeedlotMutationObj, "payload">) =>
+      updateSeedlotStatus(seedlotNum, statusOnSave),
     onError: (err: AxiosError) => {
       toast.error(
         <ErrorToast
@@ -357,13 +406,19 @@ const SeedlotReviewContent = () => {
       );
     },
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
-      await queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      await queryClient.invalidateQueries({
+        queryKey: ["seedlots", seedlotNumber],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["seedlot-full-form", seedlotNumber],
+      });
       setIsReadMode(true);
-      if (variables.statusOnSave !== 'SUB') {
-        navigate(`/seedlots/details/${seedlotNumber}/?statusOnSave=${variables.statusOnSave}`);
+      if (variables.statusOnSave !== "SUB") {
+        navigate(
+          `/seedlots/details/${seedlotNumber}/?statusOnSave=${variables.statusOnSave}`
+        );
       }
-    }
+    },
   });
 
   /**
@@ -372,12 +427,12 @@ const SeedlotReviewContent = () => {
    * will come in as SUB, so we need to manually send them back to PND in order to
    * generate a draft json object in the seedlot_registration_a_class_save table.
    */
-  const getAllStepDataForPayload = ():AllStepData => {
+  const getAllStepDataForPayload = (): AllStepData => {
     const allData = { ...allStepData };
     if (allData.ownershipStep.length === 0) {
-      const emptyOwner = initOwnershipState('', emptyOwnershipStep)[0];
-      emptyOwner.ownerAgency.value = seedlotData?.applicantClientNumber ?? '';
-      emptyOwner.ownerCode.value = seedlotData?.applicantLocationCode ?? '';
+      const emptyOwner = initOwnershipState("", emptyOwnershipStep)[0];
+      emptyOwner.ownerAgency.value = seedlotData?.applicantClientNumber ?? "";
+      emptyOwner.ownerCode.value = seedlotData?.applicantLocationCode ?? "";
       allData.ownershipStep = [emptyOwner];
     }
     return allData;
@@ -388,17 +443,13 @@ const SeedlotReviewContent = () => {
       // It will be used later at onSuccess
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       _variables: PutTscSeedlotMutationObj
-    ) => (
-      putAClassSeedlotProgress(
-        seedlotNumber!,
-        {
-          allStepData,
-          progressStatus: completeProgressConfig,
-          // We don't know the previous revision count
-          revisionCount: -1
-        }
-      )
-    ),
+    ) =>
+      putAClassSeedlotProgress(seedlotNumber!, {
+        allStepData,
+        progressStatus: completeProgressConfig,
+        // We don't know the previous revision count
+        revisionCount: -1,
+      }),
     onSuccess: (_data, variables) => {
       tscSeedlotMutation.mutate(variables);
     },
@@ -411,26 +462,25 @@ const SeedlotReviewContent = () => {
         ErrToastOption
       );
     },
-    retry: 0
+    retry: 0,
   });
 
   /**
    * Used for handling migrated pending seedlots from oracle.
    */
   const createDraftForPendMutation = useMutation({
-    mutationFn: () => (
-      putAClassSeedlotProgress(
-        seedlotNumber!,
-        {
-          allStepData: getAllStepDataForPayload(),
-          progressStatus: initialProgressConfig,
-          // We don't know the previous revision count
-          revisionCount: -1
-        }
-      )
-    ),
+    mutationFn: () =>
+      putAClassSeedlotProgress(seedlotNumber!, {
+        allStepData: getAllStepDataForPayload(),
+        progressStatus: initialProgressConfig,
+        // We don't know the previous revision count
+        revisionCount: -1,
+      }),
     onSuccess: () => {
-      statusOnlyMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'PND' });
+      statusOnlyMutation.mutate({
+        seedlotNum: seedlotNumber!,
+        statusOnSave: "PND",
+      });
     },
     onError: (err: AxiosError) => {
       toast.error(
@@ -441,7 +491,7 @@ const SeedlotReviewContent = () => {
         ErrToastOption
       );
     },
-    retry: 0
+    retry: 0,
   });
 
   /**
@@ -450,7 +500,10 @@ const SeedlotReviewContent = () => {
   const handleEditSaveBtn = () => {
     // If the form is in read mode, then enable edit mode only,
     // but wait for parent tree data to load first.
-    if (isReadMode && Object.keys(allStepData.parentTreeStep.allParentTreeData).length > 0) {
+    if (
+      isReadMode &&
+      Object.keys(allStepData.parentTreeStep.allParentTreeData).length > 0
+    ) {
       setIsReadMode(!isReadMode);
       return;
     }
@@ -462,8 +515,8 @@ const SeedlotReviewContent = () => {
       const payload = generatePayload();
       updateDraftMutation.mutate({
         seedlotNum: seedlotNumber!,
-        statusOnSave: seedlotData?.seedlotStatus.seedlotStatusCode ?? 'SUB',
-        payload
+        statusOnSave: seedlotData?.seedlotStatus.seedlotStatusCode ?? "SUB",
+        payload,
       });
       setIsReadMode(!isReadMode);
     }
@@ -479,7 +532,11 @@ const SeedlotReviewContent = () => {
       const isFormDataValid = verifyFormData();
       if (isFormDataValid) {
         const payload = generatePayload();
-        updateDraftMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave, payload });
+        updateDraftMutation.mutate({
+          seedlotNum: seedlotNumber!,
+          statusOnSave,
+          payload,
+        });
       }
     }
   };
@@ -510,8 +567,8 @@ const SeedlotReviewContent = () => {
    */
   const discardChanges = () => {
     setIsReadMode(true);
-    queryClient.refetchQueries(['seedlots', seedlotNumber]);
-    queryClient.refetchQueries(['seedlot-full-form', seedlotNumber]);
+    queryClient.refetchQueries(["seedlots", seedlotNumber]);
+    queryClient.refetchQueries(["seedlot-full-form", seedlotNumber]);
     closeCancelModal();
   };
 
@@ -520,9 +577,9 @@ const SeedlotReviewContent = () => {
    */
   const blockerFunction = () => {
     if (
-      !isReadMode
-      && !tscSeedlotMutation.isLoading
-      && !statusOnlyMutation.isLoading
+      !isReadMode &&
+      !tscSeedlotMutation.isLoading &&
+      !statusOnlyMutation.isLoading
     ) {
       setIsCancelModalOpen(true); // Show modal if there are unsaved changes
       return true; // Block navigation
@@ -536,9 +593,9 @@ const SeedlotReviewContent = () => {
     <FlexGrid className="seedlot-review-grid">
       <Loading
         active={
-          updateDraftMutation.isLoading
-          || tscSeedlotMutation.isLoading
-          || isFetchingData
+          updateDraftMutation.isLoading ||
+          tscSeedlotMutation.isLoading ||
+          isFetchingData
         }
       />
 
@@ -549,17 +606,15 @@ const SeedlotReviewContent = () => {
         renderIcon={isReadMode ? Edit : Save}
         onClick={handleEditSaveBtn}
       >
-        {isReadMode ? 'Edit seedlot' : 'Save edit'}
+        {isReadMode ? "Edit seedlot" : "Save edit"}
       </Button>
 
       <Breadcrumbs
-        crumbs={
-          getSeedlotBreadcrumbs(
-            seedlotNumber!,
-            seedlotData?.applicantClientNumber!,
-            isTscAdmin
-          )
-        }
+        crumbs={getSeedlotBreadcrumbs(
+          seedlotNumber!,
+          seedlotData?.applicantClientNumber!,
+          isTscAdmin
+        )}
       />
       <Row>
         <PageTitle
@@ -568,123 +623,83 @@ const SeedlotReviewContent = () => {
         />
       </Row>
 
-      {
-        seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'APP'
-          ? (
-            <Row>
-              <InlineNotification
-                className="seedlot-approved-notification"
-                lowContrast
-                hideCloseButton
-                kind="success"
-                title="Seedlot approved:"
-                subtitle="This seedlot have been reviewed and approved"
-              />
-            </Row>
-          )
-          : null
-      }
+      {seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === "APP" ? (
+        <Row>
+          <InlineNotification
+            className="seedlot-approved-notification"
+            lowContrast
+            hideCloseButton
+            kind="success"
+            title="Seedlot approved:"
+            subtitle="This seedlot have been reviewed and approved"
+          />
+        </Row>
+      ) : null}
 
       <Row className="section-title-row">
-        <Column className="section-title-col">
-          Applicant and seedlot
-        </Column>
+        <Column className="section-title-col">Applicant and seedlot</Column>
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <ApplicantAndSeedlotRead />
-              : (
-                <ApplicantAndSeedlotEdit
-                  applicantData={applicantData}
-                  setApplicantData={setApplicantData}
-                />
-              )
-          }
+          {isReadMode ? (
+            <ApplicantAndSeedlotRead />
+          ) : (
+            <ApplicantAndSeedlotEdit
+              applicantData={applicantData}
+              setApplicantData={setApplicantData}
+            />
+          )}
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column className="section-title-col">
-          Collection
-        </Column>
+        <Column className="section-title-col">Collection</Column>
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <CollectionReviewRead />
-              : (
-                <CollectionReviewEdit />
-              )
-          }
+          {isReadMode ? <CollectionReviewRead /> : <CollectionReviewEdit />}
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column className="section-title-col">
-          Ownership
-        </Column>
+        <Column className="section-title-col">Ownership</Column>
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <OwnershipReviewRead />
-              : (
-                <OwnershipReviewEdit />
-              )
-          }
+          {isReadMode ? <OwnershipReviewRead /> : <OwnershipReviewEdit />}
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column className="section-title-col">
-          Interim storage
-        </Column>
+        <Column className="section-title-col">Interim storage</Column>
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <InterimReviewRead />
-              : <InterimReviewEdit />
-          }
+          {isReadMode ? <InterimReviewRead /> : <InterimReviewEdit />}
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column className="section-title-col">
-          Orchard
-        </Column>
+        <Column className="section-title-col">Orchard</Column>
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <OrchardReviewRead />
-              : (
-                <OrchardReviewEdit />
-              )
-          }
+          {isReadMode ? <OrchardReviewRead /> : <OrchardReviewEdit />}
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column className="section-title-col">
-          Parent tree and SMP
-        </Column>
+        <Column className="section-title-col">Parent tree and SMP</Column>
       </Row>
       <Row className="section-row">
         <Column>
@@ -695,18 +710,10 @@ const SeedlotReviewContent = () => {
       <RowGap />
 
       <Row className="section-title-row">
-        <Column className="section-title-col">
-          Area of use
-        </Column>
+        <Column className="section-title-col">Area of use</Column>
       </Row>
       <Row className="section-row">
-        <Column>
-          {
-            isReadMode
-              ? <AreaOfUseRead />
-              : <AreaOfUseEdit />
-          }
-        </Column>
+        <Column>{isReadMode ? <AreaOfUseRead /> : <AreaOfUseEdit />}</Column>
       </Row>
 
       <RowGap />
@@ -718,80 +725,67 @@ const SeedlotReviewContent = () => {
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <ExtractionStorageReviewRead />
-              : (
-                <ExtractionStorageReviewEdit />
-              )
-          }
+          {isReadMode ? (
+            <ExtractionStorageReviewRead />
+          ) : (
+            <ExtractionStorageReviewEdit />
+          )}
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column className="section-title-col">
-          Audit history
-        </Column>
+        <Column className="section-title-col">Audit history</Column>
       </Row>
       <Row className="section-row">
         <Column>
           <AuditInfo />
         </Column>
       </Row>
-      {
-        seedlotData?.seedlotStatus.seedlotStatusCode === 'SUB'
-          ? (
-            <Row className="action-button-row">
-              <Column sm={4} md={4} lg={4}>
-                <Button
-                  kind="secondary"
-                  onClick={handleCancelClick}
-                >
-                  {isReadMode ? 'Back' : 'Back to review'}
-                </Button>
-              </Column>
+      {seedlotData?.seedlotStatus.seedlotStatusCode === "SUB" ? (
+        <Row className="action-button-row">
+          <Column sm={4} md={4} lg={4}>
+            <Button kind="secondary" onClick={handleCancelClick}>
+              {isReadMode ? "Back" : "Back to review"}
+            </Button>
+          </Column>
 
-              <Column className="action-button-col" sm={4} md={4} lg={4}>
-                <Button
-                  kind="secondary"
-                  renderIcon={Pending}
-                  onClick={() => openSaveStatusModal('PND')}
-                >
-                  Send back to pending
-                </Button>
-              </Column>
-              <Column className="action-button-col" sm={4} md={4} lg={4}>
-                <Button
-                  renderIcon={Checkmark}
-                  onClick={() => openSaveStatusModal('APP')}
-                >
-                  Approve seedlot
-                </Button>
-              </Column>
-            </Row>
-          )
-          : null
-      }
+          <Column className="action-button-col" sm={4} md={4} lg={4}>
+            <Button
+              kind="secondary"
+              renderIcon={Pending}
+              onClick={() => openSaveStatusModal("PND")}
+            >
+              Send back to pending
+            </Button>
+          </Column>
+          <Column className="action-button-col" sm={4} md={4} lg={4}>
+            <Button
+              renderIcon={Checkmark}
+              onClick={() => openSaveStatusModal("APP")}
+            >
+              Approve seedlot
+            </Button>
+          </Column>
+        </Row>
+      ) : null}
       {
         // this and its related code such as createDraftForPendMutation
         // needs to be deleted in the future
-        IS_DEV_FEATURE_ENABLED
-          ? (
-            <Row className="action-button-row">
-              <Column className="action-button-col" sm={4} md={4} lg={8}>
-                <Button
-                  kind="danger"
-                  renderIcon={Warning}
-                  onClick={() => createDraftForPendMutation.mutate()}
-                >
-                  Historical SUB to PND (DEV ONLY!)
-                </Button>
-              </Column>
-            </Row>
-          )
-          : null
+        IS_DEV_FEATURE_ENABLED ? (
+          <Row className="action-button-row">
+            <Column className="action-button-col" sm={4} md={4} lg={8}>
+              <Button
+                kind="danger"
+                renderIcon={Warning}
+                onClick={() => createDraftForPendMutation.mutate()}
+              >
+                Historical SUB to PND (DEV ONLY!)
+              </Button>
+            </Column>
+          </Row>
+        ) : null
       }
 
       {/* Cancel Confirm Modal */}
@@ -808,7 +802,9 @@ const SeedlotReviewContent = () => {
             Any changes you made will be discarded unless saved.
           </h5>
           <div className="modal-button-group">
-            <Button kind="secondary" onClick={discardChanges}>Discard changes</Button>
+            <Button kind="secondary" onClick={discardChanges}>
+              Discard changes
+            </Button>
             <Button
               kind="primary"
               onClick={() => {
@@ -833,57 +829,54 @@ const SeedlotReviewContent = () => {
         passiveModal
       >
         <div className="modal-content">
-          {
-              statusToUpdateTo === 'PND'
-                ? (
-                  <div className="modal-text">
-                    {SaveStatusModalText.pendingHeader}
-                    {SaveStatusModalText.pendingBody}
-                  </div>
-                )
-                : (
-                  <div className="modal-text">{SaveStatusModalText.approveHeader}</div>
-                )
-            }
+          {statusToUpdateTo === "PND" ? (
+            <div className="modal-text">
+              {SaveStatusModalText.pendingHeader}
+              {SaveStatusModalText.pendingBody}
+            </div>
+          ) : (
+            <div className="modal-text">
+              {SaveStatusModalText.approveHeader}
+            </div>
+          )}
           <div className="modal-button-group">
-            <Button kind="secondary" onClick={closeSaveStatusModal}>Cancel</Button>
-            {
-              statusToUpdateTo === 'PND'
-                ? (
-                  <Button
-                    kind="primary"
-                    onClick={() => {
-                      closeSaveStatusModal();
-                      handleSaveAndStatus('PND');
-                    }}
-                    disabled={tscSeedlotMutation.isLoading || updateDraftMutation.isLoading}
-                  >
-                    Send back to pending
-                  </Button>
-                )
-                : (
-                  <Button
-                    kind="primary"
-                    onClick={() => {
-                      closeSaveStatusModal();
-                      handleSaveAndStatus('APP');
-                    }}
-                    renderIcon={Checkmark}
-                    disabled={tscSeedlotMutation.isLoading || updateDraftMutation.isLoading}
-                  >
-                    Approve seedlot
-                  </Button>
-                )
-            }
+            <Button kind="secondary" onClick={closeSaveStatusModal}>
+              Cancel
+            </Button>
+            {statusToUpdateTo === "PND" ? (
+              <Button
+                kind="primary"
+                onClick={() => {
+                  closeSaveStatusModal();
+                  handleSaveAndStatus("PND");
+                }}
+                disabled={
+                  tscSeedlotMutation.isLoading || updateDraftMutation.isLoading
+                }
+              >
+                Send back to pending
+              </Button>
+            ) : (
+              <Button
+                kind="primary"
+                onClick={() => {
+                  closeSaveStatusModal();
+                  handleSaveAndStatus("APP");
+                }}
+                renderIcon={Checkmark}
+                disabled={
+                  tscSeedlotMutation.isLoading || updateDraftMutation.isLoading
+                }
+              >
+                Approve seedlot
+              </Button>
+            )}
           </div>
         </div>
       </Modal>
-      {
-        !isReadMode
-        && (
+      {!isReadMode && (
         <Beforeunload onBeforeunload={(event) => event.preventDefault()} />
-        )
-      }
+      )}
     </FlexGrid>
   );
 };

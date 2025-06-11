@@ -1,12 +1,12 @@
-import React, { useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import React, { useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-import ContextContainerClassA from '../ContextContainerClassA';
-import AuthContext from '../../../contexts/AuthContext';
+import ContextContainerClassA from "../ContextContainerClassA";
+import AuthContext from "../../../contexts/AuthContext";
 
-import SeedlotReviewContent from './SeedlotReviewContent';
+import SeedlotReviewContent from "./SeedlotReviewContent";
 
-import './styles.scss';
+import "./styles.scss";
 
 const SeedlotReview = () => {
   const { isTscAdmin } = useContext(AuthContext);
@@ -14,7 +14,7 @@ const SeedlotReview = () => {
 
   useEffect(() => {
     if (!isTscAdmin) {
-      navigate('/');
+      navigate("/");
     }
   }, [isTscAdmin]);
 

@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 interface ScrollToTopProps {
-  enabled?: boolean
+  enabled?: boolean;
 }
 
 const ScrollToTop = ({ enabled = true }: ScrollToTopProps) => {
@@ -13,7 +13,7 @@ const ScrollToTop = ({ enabled = true }: ScrollToTopProps) => {
       document.documentElement.scrollTo({
         top: 0,
         left: 0,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   }, [pathname]);

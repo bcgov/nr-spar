@@ -1,19 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Breadcrumb,
   BreadcrumbItem,
   OverflowMenu,
-  OverflowMenuItem
-} from '@carbon/react';
+  OverflowMenuItem,
+} from "@carbon/react";
 
-import useWindowSize from '../../hooks/UseWindowSize';
-import { MEDIUM_SCREEN_WIDTH, SMALL_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
+import useWindowSize from "../../hooks/UseWindowSize";
+import {
+  MEDIUM_SCREEN_WIDTH,
+  SMALL_SCREEN_WIDTH,
+} from "../../shared-constants/shared-constants";
 
-import { BreadcrumbsProps, CrumbType } from './definitions';
-import { DEFAULT_MAX_CRUMBS, DEFAULT_MAX_CRUMBS_MD, DEFAULT_MAX_CRUMBS_SM } from './constants';
+import { BreadcrumbsProps, CrumbType } from "./definitions";
+import {
+  DEFAULT_MAX_CRUMBS,
+  DEFAULT_MAX_CRUMBS_MD,
+  DEFAULT_MAX_CRUMBS_SM,
+} from "./constants";
 
-import './styles.scss';
+import "./styles.scss";
 
 const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
   if (!crumbs.length) {
@@ -22,7 +29,9 @@ const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
 
   const navigate = useNavigate();
   const windowSize = useWindowSize();
-  const [displayedCrumbs, setDisplayedCrumbs] = useState<CrumbType[]>(() => crumbs);
+  const [displayedCrumbs, setDisplayedCrumbs] = useState<CrumbType[]>(
+    () => crumbs
+  );
   const [overflowCrumbs, setOverflowCrumbs] = useState<CrumbType[]>([]);
 
   /**
@@ -56,16 +65,14 @@ const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
     return (
       <div className="breadcrumbs-container">
         <Breadcrumb>
-          {
-            displayedCrumbs.map((crumb) => (
-              <BreadcrumbItem
-                onClick={() => navigate(crumb.path)}
-                key={crumb.name}
-              >
-                {crumb.name}
-              </BreadcrumbItem>
-            ))
-          }
+          {displayedCrumbs.map((crumb) => (
+            <BreadcrumbItem
+              onClick={() => navigate(crumb.path)}
+              key={crumb.name}
+            >
+              {crumb.name}
+            </BreadcrumbItem>
+          ))}
         </Breadcrumb>
       </div>
     );
@@ -74,34 +81,25 @@ const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
   return (
     <div className="breadcrumbs-container">
       <Breadcrumb>
-        <BreadcrumbItem
-          onClick={() => navigate(displayedCrumbs[0].path)}
-        >
+        <BreadcrumbItem onClick={() => navigate(displayedCrumbs[0].path)}>
           {displayedCrumbs[0].name}
         </BreadcrumbItem>
         <BreadcrumbItem>
           <OverflowMenu>
-            {
-              overflowCrumbs.map((overflowCrumb) => (
-                <OverflowMenuItem
-                  key={overflowCrumb.name}
-                  itemText={overflowCrumb.name}
-                  onClick={() => navigate(overflowCrumb.path)}
-                />
-              ))
-            }
+            {overflowCrumbs.map((overflowCrumb) => (
+              <OverflowMenuItem
+                key={overflowCrumb.name}
+                itemText={overflowCrumb.name}
+                onClick={() => navigate(overflowCrumb.path)}
+              />
+            ))}
           </OverflowMenu>
         </BreadcrumbItem>
-        {
-          displayedCrumbs.slice(1).map((crumb) => (
-            <BreadcrumbItem
-              onClick={() => navigate(crumb.path)}
-              key={crumb.name}
-            >
-              {crumb.name}
-            </BreadcrumbItem>
-          ))
-        }
+        {displayedCrumbs.slice(1).map((crumb) => (
+          <BreadcrumbItem onClick={() => navigate(crumb.path)} key={crumb.name}>
+            {crumb.name}
+          </BreadcrumbItem>
+        ))}
       </Breadcrumb>
     </div>
   );

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import {
   HeaderContainer,
@@ -10,31 +10,32 @@ import {
   HeaderGlobalAction,
   HeaderPanel,
   SideNav,
-  SideNavLink
-} from '@carbon/react';
-import * as Icons from '@carbon/icons-react';
+  SideNavLink,
+} from "@carbon/react";
+import * as Icons from "@carbon/icons-react";
 
-import RightPanelTitle from '../RightPanelTitle';
-import MyProfile from '../MyProfile';
-import NotificationsCentral from '../NotificationsCentral';
-import PanelSectionName from '../PanelSectionName';
-import useWindowSize from '../../hooks/UseWindowSize';
-import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
+import RightPanelTitle from "../RightPanelTitle";
+import MyProfile from "../MyProfile";
+import NotificationsCentral from "../NotificationsCentral";
+import PanelSectionName from "../PanelSectionName";
+import useWindowSize from "../../hooks/UseWindowSize";
+import { MEDIUM_SCREEN_WIDTH } from "../../shared-constants/shared-constants";
 
 import {
   HOME_LINK,
   VERSION,
   defaultPanelState,
   componentTexts,
-  navItems
-} from './constants';
-import { RightPanelType, HearderContainerProps } from './definitions';
-import UserButton from './UserButton';
+  navItems,
+} from "./constants";
+import { RightPanelType, HearderContainerProps } from "./definitions";
+import UserButton from "./UserButton";
 
-import './styles.scss';
+import "./styles.scss";
 
 const BCHeader = () => {
-  const [rightPanel, setRightPanel] = useState<RightPanelType>(defaultPanelState);
+  const [rightPanel, setRightPanel] =
+    useState<RightPanelType>(defaultPanelState);
   const [overlay, setOverlay] = useState<boolean>(false);
 
   const location = useLocation();
@@ -53,7 +54,7 @@ const BCHeader = () => {
       setOverlay(true);
       setRightPanel({
         ...defaultPanelState,
-        [panel]: true
+        [panel]: true,
       });
     }
   };
@@ -62,18 +63,20 @@ const BCHeader = () => {
     setOverlay(false);
     setRightPanel({
       ...rightPanel,
-      [panel]: false
+      [panel]: false,
     });
   };
 
   const handleClosePanel = () => {
     if (rightPanel.notifications) {
-      closeRightPanel('notifications');
-    } else { closeRightPanel('myProfile'); }
+      closeRightPanel("notifications");
+    } else {
+      closeRightPanel("myProfile");
+    }
   };
 
   const onKeyDownFunction = (event: any) => {
-    if (event.key === 'Enter' || event.key === 'Escape') {
+    if (event.key === "Enter" || event.key === "Escape") {
       handleClosePanel();
     }
   };
@@ -83,32 +86,42 @@ const BCHeader = () => {
   return (
     <HeaderContainer
       isSideNavExpanded
-      render={({ isSideNavExpanded, onClickSideNavExpand }: HearderContainerProps) => (
+      render={({
+        isSideNavExpanded,
+        onClickSideNavExpand,
+      }: HearderContainerProps) => (
         <Header
           aria-label={componentTexts.completeTitle}
-          className={`spar-header ${!isSideNavExpanded && 'spar-header-expanded'}`}
+          className={`spar-header ${
+            !isSideNavExpanded && "spar-header-expanded"
+          }`}
           data-testid="header"
         >
           <SkipToContent />
-          {
-            !(location.pathname.endsWith('/403') || location.pathname.endsWith('/404'))
-              ? (
-                <HeaderMenuButton
-                  aria-label={
-                    isSideNavExpanded
-                      ? componentTexts.closeMenu
-                      : componentTexts.openMenu
-                  }
-                  isCollapsible
-                  onClick={onClickSideNavExpand}
-                  isActive={isSideNavExpanded}
-                />
-              )
-              : null
-          }
-          <Link to={HOME_LINK} className="header-link" data-testid="header-name">
+          {!(
+            location.pathname.endsWith("/403") ||
+            location.pathname.endsWith("/404")
+          ) ? (
+            <HeaderMenuButton
+              aria-label={
+                isSideNavExpanded
+                  ? componentTexts.closeMenu
+                  : componentTexts.openMenu
+              }
+              isCollapsible
+              onClick={onClickSideNavExpand}
+              isActive={isSideNavExpanded}
+            />
+          ) : null}
+          <Link
+            to={HOME_LINK}
+            className="header-link"
+            data-testid="header-name"
+          >
             {componentTexts.headerTitle}
-            <span className="header-full-name">{componentTexts.completeTitle}</span>
+            <span className="header-full-name">
+              {componentTexts.completeTitle}
+            </span>
           </Link>
           <HeaderGlobalBar>
             <HeaderGlobalAction
@@ -131,11 +144,9 @@ const BCHeader = () => {
               aria-label={componentTexts.profile.headerAriaLabel}
               data-testid="header-button__user"
               tooltipAlignment={
-                windowSize.innerWidth > MEDIUM_SCREEN_WIDTH
-                  ? 'center'
-                  : 'end'
+                windowSize.innerWidth > MEDIUM_SCREEN_WIDTH ? "center" : "end"
               }
-              onClick={() => handleRightPanel('myProfile')}
+              onClick={() => handleRightPanel("myProfile")}
               isActive={rightPanel.myProfile}
             >
               <UserButton />
@@ -148,7 +159,7 @@ const BCHeader = () => {
           >
             <RightPanelTitle
               title={componentTexts.notifications.title}
-              closeFn={() => closeRightPanel('notifications')}
+              closeFn={() => closeRightPanel("notifications")}
             />
             <NotificationsCentral />
           </HeaderPanel>
@@ -159,60 +170,63 @@ const BCHeader = () => {
           >
             <RightPanelTitle
               title={componentTexts.profile.title}
-              closeFn={() => closeRightPanel('myProfile')}
+              closeFn={() => closeRightPanel("myProfile")}
             />
             <MyProfile />
           </HeaderPanel>
-          {
-            overlay
-              ? (
-                <div
-                  className="overlay-element"
-                  role="button"
-                  tabIndex={0}
-                  aria-label="close right panel"
-                  onKeyDown={onKeyDownFunction}
-                  onClick={handleClosePanel}
-                />
-              )
-              : null
-          }
-          {
-            !(location.pathname.endsWith('/403') || location.pathname.endsWith('/404'))
-              ? (
-                <SideNav
-                  isChildOfHeader
-                  expanded={isSideNavExpanded}
-                  aria-label={componentTexts.sideMenuAriaLabel}
-                  className={`spar-side-nav ${!isSideNavExpanded && 'spar-side-nav-expanded'}`}
-                >
-                  <div className="side-nav-top">
-                    {
-                      navItems.map((category) => (
-                        <div key={category.name}>
-                          <SideNavLink className="side-nav-category-name">
-                            {category.name}
-                          </SideNavLink>
-                          {
-                            category.items.map((navItem) => (
-                              <SideNavLink
-                                key={navItem.name}
-                                className={navItem.disabled ? 'disabled-side-nav-option' : 'side-nav-option'}
-                                renderIcon={Icons[navItem.icon]}
-                                isActive={window.location.pathname.includes(navItem.link)}
-                                onClick={navItem.disabled ? null : () => navigate(navItem.link)}
-                              >
-                                {navItem.name}
-                              </SideNavLink>
-                            ))
-                          }
-                        </div>
-                      ))
-                    }
+          {overlay ? (
+            <div
+              className="overlay-element"
+              role="button"
+              tabIndex={0}
+              aria-label="close right panel"
+              onKeyDown={onKeyDownFunction}
+              onClick={handleClosePanel}
+            />
+          ) : null}
+          {!(
+            location.pathname.endsWith("/403") ||
+            location.pathname.endsWith("/404")
+          ) ? (
+            <SideNav
+              isChildOfHeader
+              expanded={isSideNavExpanded}
+              aria-label={componentTexts.sideMenuAriaLabel}
+              className={`spar-side-nav ${
+                !isSideNavExpanded && "spar-side-nav-expanded"
+              }`}
+            >
+              <div className="side-nav-top">
+                {navItems.map((category) => (
+                  <div key={category.name}>
+                    <SideNavLink className="side-nav-category-name">
+                      {category.name}
+                    </SideNavLink>
+                    {category.items.map((navItem) => (
+                      <SideNavLink
+                        key={navItem.name}
+                        className={
+                          navItem.disabled
+                            ? "disabled-side-nav-option"
+                            : "side-nav-option"
+                        }
+                        renderIcon={Icons[navItem.icon]}
+                        isActive={window.location.pathname.includes(
+                          navItem.link
+                        )}
+                        onClick={
+                          navItem.disabled ? null : () => navigate(navItem.link)
+                        }
+                      >
+                        {navItem.name}
+                      </SideNavLink>
+                    ))}
                   </div>
-                  <div>
-                    {/* Uncomment this section when the support pages are implemented. */}
-                    {/* <SideNavLink className="side-nav-category-name">
+                ))}
+              </div>
+              <div>
+                {/* Uncomment this section when the support pages are implemented. */}
+                {/* <SideNavLink className="side-nav-category-name">
                       {supportItems.name}
                     </SideNavLink>
                     {
@@ -231,12 +245,10 @@ const BCHeader = () => {
                         </SideNavLink>
                       ))
                     } */}
-                    <PanelSectionName title={VERSION} />
-                  </div>
-                </SideNav>
-              )
-              : null
-          }
+                <PanelSectionName title={VERSION} />
+              </div>
+            </SideNav>
+          ) : null}
         </Header>
       )}
     />

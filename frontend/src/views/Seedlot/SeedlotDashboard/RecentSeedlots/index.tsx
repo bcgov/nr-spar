@@ -1,31 +1,31 @@
-import React, { useContext } from 'react';
-import { useNavigate } from 'react-router';
+import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { Row, Column, IconButton } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
+import { Row, Column, IconButton } from "@carbon/react";
+import { ArrowRight } from "@carbon/icons-react";
 
-import ROUTES from '../../../../routes/constants';
-import AuthContext from '../../../../contexts/AuthContext';
-import SeedlotTable from '../../../../components/SeedlotTable';
-import Subtitle from '../../../../components/Subtitle';
-import SeedlotNavigator from '../../../../components/SeedlotNavigator';
+import ROUTES from "../../../../routes/constants";
+import AuthContext from "../../../../contexts/AuthContext";
+import SeedlotTable from "../../../../components/SeedlotTable";
+import Subtitle from "../../../../components/Subtitle";
+import SeedlotNavigator from "../../../../components/SeedlotNavigator";
 
-import { getSubTitle, getTitle } from './constants';
+import { getSubTitle, getTitle } from "./constants";
 
-import './styles.scss';
+import "./styles.scss";
 
 const RecentSeedlots = () => {
   const { user, isTscAdmin } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const userId = user?.userId ?? '';
+  const userId = user?.userId ?? "";
 
   return (
     <Row className="recent-seedlots">
       <Column
         sm={4}
         className={`recent-seedlots-title-section ${
-          isTscAdmin ? 'review-seedlots-table-header' : ''
+          isTscAdmin ? "review-seedlots-table-header" : ""
         }`}
         onClick={() => {
           if (isTscAdmin) {

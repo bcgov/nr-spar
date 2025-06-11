@@ -1,18 +1,18 @@
-import React from 'react';
+import React from "react";
 
-import { useNavigate } from 'react-router';
+import { useNavigate } from "react-router-dom";
 
-import { Tile, IconButton } from '@carbon/react';
-import * as Icons from '@carbon/icons-react';
-import * as Pictograms from '@carbon/pictograms-react';
+import { Tile, IconButton } from "@carbon/react";
+import * as Icons from "@carbon/icons-react";
+import * as Pictograms from "@carbon/pictograms-react";
 
-import useWindowSize from '../../../hooks/UseWindowSize';
-import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
+import useWindowSize from "../../../hooks/UseWindowSize";
+import { MEDIUM_SCREEN_WIDTH } from "../../../shared-constants/shared-constants";
 
-import EmptySection from '../../EmptySection';
-import SmallCard from '../SmallCard';
+import EmptySection from "../../EmptySection";
+import SmallCard from "../SmallCard";
 
-import './styles.scss';
+import "./styles.scss";
 
 interface StandardCardProps {
   header: string;
@@ -25,7 +25,13 @@ interface StandardCardProps {
 }
 
 const StandardCard = ({
-  header, description, url, image, isEmpty, emptyTitle, emptyDescription
+  header,
+  description,
+  url,
+  image,
+  isEmpty,
+  emptyTitle,
+  emptyDescription,
 }: StandardCardProps) => {
   const navigate = useNavigate();
   const Image = image ? Pictograms[image] : null;
@@ -33,7 +39,15 @@ const StandardCard = ({
   const windowSize = useWindowSize();
 
   const ActionBtn = (
-    <IconButton className="std-card-button" kind="ghost" label="Go" align="bottom" onClick={() => { navigate(`${url}`); }}>
+    <IconButton
+      className="std-card-button"
+      kind="ghost"
+      label="Go"
+      align="bottom"
+      onClick={() => {
+        navigate(`${url}`);
+      }}
+    >
       <Icons.ArrowRight />
     </IconButton>
   );
@@ -59,28 +73,30 @@ const StandardCard = ({
             <p>{description}</p>
           </div>
         </div>
-        {
-          isEmpty
-            ? null
-            : (
-              <IconButton
-                className="std-card-button"
-                kind="ghost"
-                label="Go"
-                align="bottom"
-                onClick={() => { navigate(`${url}`); }}
-                aria-label={`Go to ${header} page`}
-              >
-                <Icons.ArrowRight />
-              </IconButton>
-            )
-        }
+        {isEmpty ? null : (
+          <IconButton
+            className="std-card-button"
+            kind="ghost"
+            label="Go"
+            align="bottom"
+            onClick={() => {
+              navigate(`${url}`);
+            }}
+            aria-label={`Go to ${header} page`}
+          >
+            <Icons.ArrowRight />
+          </IconButton>
+        )}
       </div>
-      {
-        isEmpty
-          ? <EmptySection pictogram={image} title={emptyTitle} description={emptyDescription} />
-          : <Image className="std-card-pictogram" />
-      }
+      {isEmpty ? (
+        <EmptySection
+          pictogram={image}
+          title={emptyTitle}
+          description={emptyDescription}
+        />
+      ) : (
+        <Image className="std-card-pictogram" />
+      )}
     </Tile>
   );
 };

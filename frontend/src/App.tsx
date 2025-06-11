@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useMemo } from 'react';
 import {
-  createBrowserRouter, RouteObject, RouterProvider
-} from 'react-router';
+  createBrowserRouter,
+  RouteObject,
+  RouterProvider
+} from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { ClassPrefix } from '@carbon/react';
 import { ToastContainer } from 'react-toastify';
