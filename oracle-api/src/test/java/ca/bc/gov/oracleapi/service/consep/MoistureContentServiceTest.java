@@ -537,58 +537,6 @@ class MoistureContentServiceTest {
   }
 
   @Test
-  @DisplayName("Delete full MCC data should succeed")
-  void deleteFullMcc_shouldSucceed() {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    ActivityEntity activityMock = new ActivityEntity();
-    TestResultEntity testResultMock = new TestResultEntity();
-
-    // Generate mock replicate list
-    List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
-    List<MccReplicateEntity> replicates = replicateIds.stream().map(id -> {
-      MccReplicateEntity replicate = new MccReplicateEntity();
-      replicate.setId(new ReplicateId(riaKey, id));
-      return replicate;
-    }).collect(Collectors.toList());
-
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(activityMock));
-    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultMock));
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds)).thenReturn(
-        replicates);
-
-    doNothing().when(activityRepository).deleteById(riaKey);
-    doNothing().when(testResultRepository).deleteById(riaKey);
-    doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(any(), any());
-
-    // Execute delete
-    assertDoesNotThrow(() -> moistureContentService.deleteFullMcc(riaKey));
-
-    verify(activityRepository, times(1)).deleteById(riaKey);
-    verify(testResultRepository, times(1)).deleteById(riaKey);
-    verify(replicateRepository, times(replicates.size())).deleteByRiaKeyAndReplicateNumber(
-        eq(riaKey), any());
-  }
-
-  @Test
-  @DisplayName("Delete full MCC data should throw exception when not found")
-  void deleteFullMcc_shouldThrowExceptionIfNotFound() {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
-
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.empty());
-    when(testResultRepository.findById(riaKey)).thenReturn(Optional.empty());
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds)).thenReturn(
-        List.of());
-
-    assertThrows(InvalidTestActivityKeyException.class, () -> moistureContentService.deleteFullMcc(
-        riaKey));
-
-    verify(activityRepository, never()).deleteById(any());
-    verify(testResultRepository, never()).deleteById(any());
-    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
-  }
-
-  @Test
   @DisplayName("Calculate average should return correct average value")
   void calculateAverage_validList_shouldReturnCorrectAverage() {
     // Arrange

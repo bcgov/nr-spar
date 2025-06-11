@@ -285,34 +285,4 @@ public class MoistureContentService {
 
     SparLog.info("Replicate {} with riaKey {} ", replicateNumber, riaKey + "deleted!");
   }
-
-  /**
-   * Deletes MCC data on multiple tables.
-   *
-   * @param riaKey the identifier key for all table related to MCC
-   */
-  @Transactional
-  public void deleteFullMcc(@NonNull BigDecimal riaKey) {
-    SparLog.info(
-        "Deleting entries on Activity, Replicate and TestResult tables " + "with the riaKey: {}",
-        riaKey);
-    Optional<ActivityEntity> activityEntity = activityRepository.findById(riaKey);
-
-    Optional<TestResultEntity> testEntity = testResultRepository.findById(riaKey);
-
-    List<MccReplicateEntity> replicates =
-        replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
-
-    if (activityEntity.isEmpty() || testEntity.isEmpty() || replicates.isEmpty()) {
-      throw new InvalidTestActivityKeyException();
-    }
-
-    activityRepository.deleteById(riaKey);
-    testResultRepository.deleteById(riaKey);
-
-    replicates.forEach(rep -> replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey,
-        rep.getId().getReplicateNumber()));
-
-    SparLog.info("Activity, Replicate and TestResult with riaKey {} ", riaKey + "deleted!");
-  }
 }

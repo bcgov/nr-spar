@@ -419,31 +419,6 @@ class PurityTestsEndpointTest {
   }
 
   @Test
-  @DisplayName("Delete purity data should succeed")
-  void deletePurity_shouldSucceed() throws Exception {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-
-    // Mock the service to do nothing when delete is called
-    doNothing().when(purityTestService).deleteFullPurityTest(riaKey);
-
-    mockMvc.perform(delete("/api/purity-tests/{riaKey}", riaKey).with(csrf().asHeader())
-        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-  }
-
-  @Test
-  @DisplayName("Delete purity data should return 404 when not found")
-  void deletePurity_shouldReturnNotFound() throws Exception {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-
-    // Simulate resource not found scenario
-    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(purityTestService)
-        .deleteFullPurityTest(riaKey);
-
-    mockMvc.perform(delete("/api/purity-tests/{riaKey}", riaKey).with(csrf().asHeader())
-        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
-  }
-
-  @Test
   @DisplayName("Delete a replicate entry should succeed")
   void deleteReplicate_shouldSucceed() throws Exception {
     BigDecimal riaKey = new BigDecimal(1234567890);

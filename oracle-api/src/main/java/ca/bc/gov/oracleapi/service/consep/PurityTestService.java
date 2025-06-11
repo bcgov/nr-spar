@@ -260,35 +260,4 @@ public class PurityTestService {
     SparLog.info("Purity replicate {} with riaKey {} ",
         replicateNumber, riaKey + "deleted!");
   }
-
-  /**
-   * Deletes purity tests data on multiple tables.
-   *
-   * @param riaKey the identifier key for all table related to MCC
-   */
-  @Transactional
-  public void deleteFullPurityTest(@NonNull BigDecimal riaKey) {
-    SparLog.info(
-        "Deleting entries on Activity, Purity Replicate and TestResult tables "
-        + "with the riaKey: {}", riaKey);
-
-    Optional<ActivityEntity> activityEntity = activityRepository.findById(riaKey);
-
-    Optional<TestResultEntity> testEntity = testResultRepository.findById(riaKey);
-
-    List<PurityReplicateEntity> replicates =
-        replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
-
-    if (activityEntity.isEmpty() || testEntity.isEmpty() || replicates.isEmpty()) {
-      throw new InvalidTestActivityKeyException();
-    }
-
-    activityRepository.deleteById(riaKey);
-    testResultRepository.deleteById(riaKey);
-
-    replicates.forEach(rep -> replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey,
-        rep.getId().getReplicateNumber()));
-
-    SparLog.info("Activity, Replicate and TestResult with riaKey {} ", riaKey + "deleted!");
-  }
 }
