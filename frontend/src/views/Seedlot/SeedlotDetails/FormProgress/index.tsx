@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 import {
   Button, ProgressIndicatorSkeleton, Row, Column

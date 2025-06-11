@@ -4,7 +4,7 @@ import {
   Header, SkipToContent,
   InlineNotification, Button
 } from '@carbon/react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQueries } from '@tanstack/react-query';
 import { Home } from '@carbon/icons-react';
 
