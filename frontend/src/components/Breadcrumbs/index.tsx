@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Breadcrumb,
   BreadcrumbItem,
   OverflowMenu,
-  OverflowMenuItem,
-} from "@carbon/react";
+  OverflowMenuItem
+} from '@carbon/react';
 
-import useWindowSize from "../../hooks/UseWindowSize";
+import useWindowSize from '../../hooks/UseWindowSize';
 import {
   MEDIUM_SCREEN_WIDTH,
-  SMALL_SCREEN_WIDTH,
-} from "../../shared-constants/shared-constants";
+  SMALL_SCREEN_WIDTH
+} from '../../shared-constants/shared-constants';
 
-import { BreadcrumbsProps, CrumbType } from "./definitions";
+import { BreadcrumbsProps, CrumbType } from './definitions';
 import {
   DEFAULT_MAX_CRUMBS,
   DEFAULT_MAX_CRUMBS_MD,
-  DEFAULT_MAX_CRUMBS_SM,
-} from "./constants";
+  DEFAULT_MAX_CRUMBS_SM
+} from './constants';
 
-import "./styles.scss";
+import './styles.scss';
 
 const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
   if (!crumbs.length) {

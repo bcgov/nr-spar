@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ActionableNotification,
   Button,
@@ -7,34 +7,32 @@ import {
   Row,
   Column,
   Breadcrumb,
-  BreadcrumbItem,
-} from "@carbon/react";
-import { DocumentAdd } from "@carbon/icons-react";
-import { toast } from "react-toastify";
-import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+  BreadcrumbItem
+} from '@carbon/react';
+import { DocumentAdd } from '@carbon/icons-react';
+import { toast } from 'react-toastify';
+import { useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
-import PageTitle from "../../../components/PageTitle";
-import LotApplicantAndInfoForm from "../../../components/LotApplicantAndInfoForm";
-import {
-  SeedlotRegFormType,
-  SeedlotRegPayloadType,
-} from "../../../types/SeedlotRegistrationTypes";
-import { postSeedlot } from "../../../api-service/seedlotAPI";
-import ErrorToast from "../../../components/Toast/ErrorToast";
-import { ErrToastOption } from "../../../config/ToastifyConfig";
-import ROUTES from "../../../routes/constants";
+import PageTitle from '../../../components/PageTitle';
+import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
+import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../../types/SeedlotRegistrationTypes';
+import { postSeedlot } from '../../../api-service/seedlotAPI';
+import ErrorToast from '../../../components/Toast/ErrorToast';
+import { ErrToastOption } from '../../../config/ToastifyConfig';
+import ROUTES from '../../../routes/constants';
 
-import { InitialSeedlotRegFormData } from "./constants";
-import { convertToPayload, validateRegForm } from "./utils";
+import { InitialSeedlotRegFormData } from './constants';
+import { convertToPayload, validateRegForm } from './utils';
 
-import "./styles.scss";
+import './styles.scss';
 
 const CreateAClass = () => {
   const navigate = useNavigate();
-  const [seedlotFormData, setSeedlotFormData] = useState<SeedlotRegFormType>(
-    InitialSeedlotRegFormData
-  );
+  const [
+    seedlotFormData,
+    setSeedlotFormData
+  ] = useState<SeedlotRegFormType>(InitialSeedlotRegFormData);
 
   const seedlotMutation = useMutation({
     mutationFn: (payload: SeedlotRegPayloadType) => postSeedlot(payload),
@@ -47,11 +45,10 @@ const CreateAClass = () => {
         ErrToastOption
       );
     },
-    onSuccess: (res) =>
-      navigate({
-        pathname: ROUTES.SEEDLOT_CREATION_SUCCESS,
-        search: `?seedlotNumber=${res.data.seedlotNumber}&seedlotClass=A`,
-      }),
+    onSuccess: (res) => navigate({
+      pathname: ROUTES.SEEDLOT_CREATION_SUCCESS,
+      search: `?seedlotNumber=${res.data.seedlotNumber}&seedlotClass=A`
+    })
   });
 
   const validateAndCreateSeedlot = () => {
@@ -68,9 +65,7 @@ const CreateAClass = () => {
     <FlexGrid className="create-a-class-seedlot-page">
       <Row className="create-a-class-seedlot-breadcrumb">
         <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate(ROUTES.SEEDLOTS)}>
-            Seedlots
-          </BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate(ROUTES.SEEDLOTS)}>Seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Row className="page-title-row">
@@ -80,25 +75,30 @@ const CreateAClass = () => {
           activity="registerAClass"
         />
       </Row>
-      {seedlotMutation.isError ? (
-        <Row className="error-row">
-          <Column>
-            <ActionableNotification
-              id="create-seedlot-error-banner"
-              kind="error"
-              lowContrast
-              title="Your application could not be created"
-              inline
-              actionButtonLabel=""
-              onClose={() => false}
-            >
-              An error has occurred when trying to create your seedlot number.
-              Please try submiting it again later.{" "}
-              {`${seedlotMutation.error.code}: ${seedlotMutation.error.message}`}
-            </ActionableNotification>
-          </Column>
-        </Row>
-      ) : null}
+      {
+        seedlotMutation.isError
+          ? (
+            <Row className="error-row">
+              <Column>
+                <ActionableNotification
+                  id="create-seedlot-error-banner"
+                  kind="error"
+                  lowContrast
+                  title="Your application could not be created"
+                  inline
+                  actionButtonLabel=""
+                  onClose={() => false}
+                >
+                  An error has occurred when trying to create your seedlot number.
+                  Please try submiting it again later.
+                  {' '}
+                  {`${seedlotMutation.error.code}: ${seedlotMutation.error.message}`}
+                </ActionableNotification>
+              </Column>
+            </Row>
+          )
+          : null
+      }
       <Row>
         <Column>
           <LotApplicantAndInfoForm

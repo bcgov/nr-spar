@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import {
   HeaderContainer,
@@ -10,32 +10,31 @@ import {
   HeaderGlobalAction,
   HeaderPanel,
   SideNav,
-  SideNavLink,
-} from "@carbon/react";
-import * as Icons from "@carbon/icons-react";
+  SideNavLink
+} from '@carbon/react';
+import * as Icons from '@carbon/icons-react';
 
-import RightPanelTitle from "../RightPanelTitle";
-import MyProfile from "../MyProfile";
-import NotificationsCentral from "../NotificationsCentral";
-import PanelSectionName from "../PanelSectionName";
-import useWindowSize from "../../hooks/UseWindowSize";
-import { MEDIUM_SCREEN_WIDTH } from "../../shared-constants/shared-constants";
+import RightPanelTitle from '../RightPanelTitle';
+import MyProfile from '../MyProfile';
+import NotificationsCentral from '../NotificationsCentral';
+import PanelSectionName from '../PanelSectionName';
+import useWindowSize from '../../hooks/UseWindowSize';
+import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 
 import {
   HOME_LINK,
   VERSION,
   defaultPanelState,
   componentTexts,
-  navItems,
-} from "./constants";
-import { RightPanelType, HearderContainerProps } from "./definitions";
-import UserButton from "./UserButton";
+  navItems
+} from './constants';
+import { RightPanelType, HearderContainerProps } from './definitions';
+import UserButton from './UserButton';
 
-import "./styles.scss";
+import './styles.scss';
 
 const BCHeader = () => {
-  const [rightPanel, setRightPanel] =
-    useState<RightPanelType>(defaultPanelState);
+  const [rightPanel, setRightPanel] = useState<RightPanelType>(defaultPanelState);
   const [overlay, setOverlay] = useState<boolean>(false);
 
   const location = useLocation();
@@ -54,7 +53,7 @@ const BCHeader = () => {
       setOverlay(true);
       setRightPanel({
         ...defaultPanelState,
-        [panel]: true,
+        [panel]: true
       });
     }
   };
@@ -63,20 +62,20 @@ const BCHeader = () => {
     setOverlay(false);
     setRightPanel({
       ...rightPanel,
-      [panel]: false,
+      [panel]: false
     });
   };
 
   const handleClosePanel = () => {
     if (rightPanel.notifications) {
-      closeRightPanel("notifications");
+      closeRightPanel('notifications');
     } else {
-      closeRightPanel("myProfile");
+      closeRightPanel('myProfile');
     }
   };
 
   const onKeyDownFunction = (event: any) => {
-    if (event.key === "Enter" || event.key === "Escape") {
+    if (event.key === 'Enter' || event.key === 'Escape') {
       handleClosePanel();
     }
   };
@@ -88,19 +87,19 @@ const BCHeader = () => {
       isSideNavExpanded
       render={({
         isSideNavExpanded,
-        onClickSideNavExpand,
+        onClickSideNavExpand
       }: HearderContainerProps) => (
         <Header
           aria-label={componentTexts.completeTitle}
           className={`spar-header ${
-            !isSideNavExpanded && "spar-header-expanded"
+            !isSideNavExpanded && 'spar-header-expanded'
           }`}
           data-testid="header"
         >
           <SkipToContent />
           {!(
-            location.pathname.endsWith("/403") ||
-            location.pathname.endsWith("/404")
+            location.pathname.endsWith('/403')
+            || location.pathname.endsWith('/404')
           ) ? (
             <HeaderMenuButton
               aria-label={
@@ -112,7 +111,7 @@ const BCHeader = () => {
               onClick={onClickSideNavExpand}
               isActive={isSideNavExpanded}
             />
-          ) : null}
+            ) : null}
           <Link
             to={HOME_LINK}
             className="header-link"
@@ -144,9 +143,9 @@ const BCHeader = () => {
               aria-label={componentTexts.profile.headerAriaLabel}
               data-testid="header-button__user"
               tooltipAlignment={
-                windowSize.innerWidth > MEDIUM_SCREEN_WIDTH ? "center" : "end"
+                windowSize.innerWidth > MEDIUM_SCREEN_WIDTH ? 'center' : 'end'
               }
-              onClick={() => handleRightPanel("myProfile")}
+              onClick={() => handleRightPanel('myProfile')}
               isActive={rightPanel.myProfile}
             >
               <UserButton />
@@ -159,7 +158,7 @@ const BCHeader = () => {
           >
             <RightPanelTitle
               title={componentTexts.notifications.title}
-              closeFn={() => closeRightPanel("notifications")}
+              closeFn={() => closeRightPanel('notifications')}
             />
             <NotificationsCentral />
           </HeaderPanel>
@@ -170,7 +169,7 @@ const BCHeader = () => {
           >
             <RightPanelTitle
               title={componentTexts.profile.title}
-              closeFn={() => closeRightPanel("myProfile")}
+              closeFn={() => closeRightPanel('myProfile')}
             />
             <MyProfile />
           </HeaderPanel>
@@ -185,15 +184,15 @@ const BCHeader = () => {
             />
           ) : null}
           {!(
-            location.pathname.endsWith("/403") ||
-            location.pathname.endsWith("/404")
+            location.pathname.endsWith('/403')
+            || location.pathname.endsWith('/404')
           ) ? (
             <SideNav
               isChildOfHeader
               expanded={isSideNavExpanded}
               aria-label={componentTexts.sideMenuAriaLabel}
               className={`spar-side-nav ${
-                !isSideNavExpanded && "spar-side-nav-expanded"
+                !isSideNavExpanded && 'spar-side-nav-expanded'
               }`}
             >
               <div className="side-nav-top">
@@ -207,8 +206,8 @@ const BCHeader = () => {
                         key={navItem.name}
                         className={
                           navItem.disabled
-                            ? "disabled-side-nav-option"
-                            : "side-nav-option"
+                            ? 'disabled-side-nav-option'
+                            : 'side-nav-option'
                         }
                         renderIcon={Icons[navItem.icon]}
                         isActive={window.location.pathname.includes(
@@ -248,7 +247,7 @@ const BCHeader = () => {
                 <PanelSectionName title={VERSION} />
               </div>
             </SideNav>
-          ) : null}
+            ) : null}
         </Header>
       )}
     />

@@ -1,18 +1,18 @@
-import React from "react";
+import React from 'react';
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
-import { Tile, IconButton } from "@carbon/react";
-import * as Icons from "@carbon/icons-react";
-import * as Pictograms from "@carbon/pictograms-react";
+import { Tile, IconButton } from '@carbon/react';
+import * as Icons from '@carbon/icons-react';
+import * as Pictograms from '@carbon/pictograms-react';
 
-import useWindowSize from "../../../hooks/UseWindowSize";
-import { MEDIUM_SCREEN_WIDTH } from "../../../shared-constants/shared-constants";
+import useWindowSize from '../../../hooks/UseWindowSize';
+import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
-import EmptySection from "../../EmptySection";
-import SmallCard from "../SmallCard";
+import EmptySection from '../../EmptySection';
+import SmallCard from '../SmallCard';
 
-import "./styles.scss";
+import './styles.scss';
 
 interface StandardCardProps {
   header: string;
@@ -31,7 +31,7 @@ const StandardCard = ({
   image,
   isEmpty,
   emptyTitle,
-  emptyDescription,
+  emptyDescription
 }: StandardCardProps) => {
   const navigate = useNavigate();
   const Image = image ? Pictograms[image] : null;

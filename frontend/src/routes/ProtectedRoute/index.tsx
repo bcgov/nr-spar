@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import AuthContext from "../../contexts/AuthContext";
-import ROUTES from "../constants";
+import React, { useContext } from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import AuthContext from '../../contexts/AuthContext';
+import ROUTES from '../constants';
 
 const ProtectedRoute = (): React.JSX.Element => {
   const { signed, signOut } = useContext(AuthContext);

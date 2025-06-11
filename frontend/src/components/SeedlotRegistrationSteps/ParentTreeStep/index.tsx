@@ -1,120 +1,82 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
-import { AxiosError, AxiosResponse } from "axios";
-import { Link } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import React, {
+  useState, useEffect, useRef, useContext
+} from 'react';
+import { AxiosError, AxiosResponse } from 'axios';
+import { Link } from 'react-router-dom';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-  Tabs,
-  TabList,
-  Tab,
-  FlexGrid,
-  Row,
-  Column,
-  TableContainer,
-  TableToolbar,
-  Checkbox,
-  TableToolbarContent,
-  OverflowMenuItem,
-  OverflowMenu,
-  Button,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeader,
-  DataTableSkeleton,
-  Modal,
-  Accordion,
-  AccordionItem,
-  TextInputSkeleton,
-} from "@carbon/react";
-import { View, Settings, Upload, Add } from "@carbon/icons-react";
-import { getAllParentTrees } from "../../../api-service/parentTreeAPI";
-import { postFile } from "../../../api-service/seedlotAPI";
-import CheckboxType from "../../../types/CheckboxType";
+  Tabs, TabList, Tab, FlexGrid, Row, Column,
+  TableContainer, TableToolbar, Checkbox,
+  TableToolbarContent, OverflowMenuItem, OverflowMenu,
+  Button, Table, TableHead, TableRow, TableHeader,
+  DataTableSkeleton, Modal,
+  Accordion, AccordionItem, TextInputSkeleton
+} from '@carbon/react';
 import {
-  sortAndSliceRows,
-  sliceTableRowData,
-} from "../../../utils/PaginationUtils";
-import { recordValues } from "../../../utils/RecordUtils";
-import { THREE_HALF_HOURS, THREE_HOURS } from "../../../config/TimeUnits";
-import ClassAContext from "../../../views/Seedlot/ContextContainerClassA/context";
-import InfoSection from "../../InfoSection";
-import Subtitle from "../../Subtitle";
-import EmptySection from "../../EmptySection";
-import DetailSection from "../../DetailSection";
-import DescriptionBox from "../../DescriptionBox";
-import ScrollToTop from "../../ScrollToTop";
+  View, Settings, Upload, Add
+} from '@carbon/icons-react';
+import { getAllParentTrees } from '../../../api-service/parentTreeAPI';
+import { postFile } from '../../../api-service/seedlotAPI';
+import CheckboxType from '../../../types/CheckboxType';
+import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUtils';
+import { recordValues } from '../../../utils/RecordUtils';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import InfoSection from '../../InfoSection';
+import Subtitle from '../../Subtitle';
+import EmptySection from '../../EmptySection';
+import DetailSection from '../../DetailSection';
+import DescriptionBox from '../../DescriptionBox';
+import ScrollToTop from '../../ScrollToTop';
 
-import InputErrorNotification from "./InputErrorNotification";
-import UploadWarnNotification from "./UploadWarnNotification";
-import CalculateMetrics from "./CalculateMetrics";
-import InfoSectionDivider from "./InfoSectionDivider";
-import UnrelatedGenWorth from "./UnrelatedGenWorth";
-import PopSize from "./PopSize";
-import SpatialData from "./SpatialData";
+import InputErrorNotification from './InputErrorNotification';
+import UploadWarnNotification from './UploadWarnNotification';
+import CalculateMetrics from './CalculateMetrics';
+import InfoSectionDivider from './InfoSectionDivider';
+import UnrelatedGenWorth from './UnrelatedGenWorth';
+import PopSize from './PopSize';
+import SpatialData from './SpatialData';
 import {
-  renderColOptions,
-  renderTableBody,
-  renderNotification,
-  renderDefaultInputs,
-  renderPagination,
-} from "./TableComponents";
-import UploadFileModal from "./UploadFileModal";
-import InfoSectionRow from "../../InfoSection/InfoSectionRow";
+  renderColOptions, renderTableBody, renderNotification,
+  renderDefaultInputs, renderPagination
+} from './TableComponents';
+import UploadFileModal from './UploadFileModal';
+import InfoSectionRow from '../../InfoSection/InfoSectionRow';
 import {
-  pageText,
-  headerTemplate,
-  geneticWorthDict,
-  DEFAULT_PAGE_SIZE,
-  DEFAULT_PAGE_NUMBER,
-  DEFAULT_MIX_PAGE_SIZE,
-  getDownloadUrl,
-  fileConfigTemplate,
-  getEmptySectionDescription,
-  noParentTreeDescription,
-  dataEntryInstructions,
-  reviewDataInstructions,
-  calculateInstructions,
-} from "./constants";
+  pageText, headerTemplate, geneticWorthDict,
+  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, DEFAULT_MIX_PAGE_SIZE,
+  getDownloadUrl, fileConfigTemplate, getEmptySectionDescription,
+  noParentTreeDescription, dataEntryInstructions,
+  reviewDataInstructions, calculateInstructions
+} from './constants';
 import {
-  TabTypes,
-  HeaderObj,
-  RowItem,
-  GeneticWorthDictType,
-} from "./definitions";
+  TabTypes, HeaderObj, RowItem,
+  GeneticWorthDictType
+} from './definitions';
 import {
-  getTabString,
-  combineObjectValues,
-  calcSummaryItems,
-  processParentTreeData,
-  cleanTable,
-  fillCompostitionTables,
-  configHeaderOpt,
-  addNewMixRow,
-  calcMixTabInfoItems,
-  fillMixTable,
+  getTabString, combineObjectValues, calcSummaryItems,
+  processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
+  addNewMixRow, calcMixTabInfoItems, fillMixTable,
   getParentTreesForSelectedOrchards,
-  areOrchardsValid,
-} from "./utils";
-import EditGenWorth from "./EditGenWorth";
+  areOrchardsValid
+} from './utils';
+import EditGenWorth from './EditGenWorth';
 
-import "./styles.scss";
-import { getOrchardByVegCode } from "../../../api-service/orchardAPI";
-import getGeneticWorthList from "../../../api-service/GeneticWorthAPI";
+import './styles.scss';
+import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
+import getGeneticWorthList from '../../../api-service/GeneticWorthAPI';
 
 type ParentTreeStepProps = {
   // Determines whether this component is used on the seedlot review screen
   // True if it's used on seedlot review, false if it's used on the reg form
-  isReviewDisplay?: boolean;
+  isReviewDisplay?: boolean,
 
   // Determines whether this component is under Read mode on the seedlot review screen
   // True if the mode is read, false if the mode is edit
-  isReviewRead?: boolean;
-};
+  isReviewRead?: boolean
+}
 
-const ParentTreeStep = ({
-  isReviewDisplay,
-  isReviewRead,
-}: ParentTreeStepProps) => {
+const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) => {
   const {
     allStepData: { parentTreeStep: state },
     allStepData: { orchardStep },
@@ -132,46 +94,32 @@ const ParentTreeStep = ({
     setSummaryConfig,
     meanGeomInfos,
     isCalculatingPt,
-    isFetchingData,
+    isFetchingData
   } = useContext(ClassAContext);
 
-  const [currentTab, setCurrentTab] = useState<TabTypes>("coneTab");
+  const [currentTab, setCurrentTab] = useState<TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
     structuredClone(headerTemplate)
   );
   const [currPageSize, setCurrPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState<number>(DEFAULT_PAGE_NUMBER);
   const [slicedRows, setSlicedRows] = useState<Array<RowItem>>(
-    sortAndSliceRows(
-      Object.values(state.tableRowData),
-      currentPage,
-      currPageSize,
-      true,
-      "parentTreeNumber"
-    )
+    sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true, 'parentTreeNumber')
   );
-  const [currMixPageSize, setCurrMixPageSize] = useState<number>(
-    DEFAULT_MIX_PAGE_SIZE
-  );
-  const [currentMixPage, setCurrentMixPage] =
-    useState<number>(DEFAULT_PAGE_NUMBER);
-  const [slicedMixRows, setSlicedMixRows] = useState<Array<RowItem>>(() =>
-    sortAndSliceRows(
-      Object.values(state.mixTabData),
-      currentMixPage,
-      currMixPageSize,
-      true,
-      "parentTreeNumber"
-    )
+  const [currMixPageSize, setCurrMixPageSize] = useState<number>(DEFAULT_MIX_PAGE_SIZE);
+  const [currentMixPage, setCurrentMixPage] = useState<number>(DEFAULT_PAGE_NUMBER);
+  const [slicedMixRows, setSlicedMixRows] = useState<Array<RowItem>>(
+    () => sortAndSliceRows(Object.values(state.mixTabData), currentMixPage, currMixPageSize, true, 'parentTreeNumber')
   );
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
-  const [fileUploadConfig, setFileUploadConfig] = useState(() =>
-    structuredClone(fileConfigTemplate)
+  const [fileUploadConfig, setFileUploadConfig] = useState(
+    () => structuredClone(fileConfigTemplate)
   );
-  const resetFileUploadConfig = () =>
-    setFileUploadConfig(() => structuredClone(fileConfigTemplate));
+  const resetFileUploadConfig = () => setFileUploadConfig(
+    () => structuredClone(fileConfigTemplate)
+  );
   const [isSMPDefaultValChecked, setIsSMPDefaultValChecked] = useState(false);
   // Options are disabled if users have not typed in one or more valid orchards
   const [disableOptions, setDisableOptions] = useState(true);
@@ -179,84 +127,94 @@ const ParentTreeStep = ({
   // Array that stores invalid p.t. numbers uploaded from users from composition tabs
   const [invalidPTNumbers, setInvalidPTNumbers] = useState<string[]>([]);
   const [isOrchardEmpty, setIsOrchardEmpty] = useState<boolean>(false);
-  const [showInfoSections, setShowInfoSections] = useState<boolean>(
-    isReviewDisplay ?? false
-  );
+  const [showInfoSections, setShowInfoSections] = useState<boolean>(isReviewDisplay ?? false);
 
-  const [controlReviewData, setControlReviewData] = useState<boolean>(
-    isReviewDisplay ?? false
-  );
+  const [controlReviewData, setControlReviewData] = useState<boolean>(isReviewDisplay ?? false);
 
   const emptySectionDescription = getEmptySectionDescription(setStep);
 
   // Link reference to trigger click event
   const linkRef = useRef<HTMLAnchorElement>(null);
 
-  useEffect(() => {
-    const disabled = !areOrchardsValid(orchardStep);
-    setDisableOptions(disabled);
-  }, [orchardStep.orchards]);
+  useEffect(
+    () => {
+      const disabled = !areOrchardsValid(orchardStep);
+      setDisableOptions(disabled);
+    },
+    [orchardStep.orchards]
+  );
 
   // Effects for 'Cone and Pollen' and 'SMP Success' tabs
-  useEffect(() => {
-    const tableRows = Object.values(state.tableRowData);
-    sliceTableRowData(
-      tableRows,
-      currentPage,
-      currPageSize,
-      true,
-      "parentTreeNumber",
-      setSlicedRows
-    );
-    calcSummaryItems(setSummaryConfig, summaryConfig, tableRows);
-  }, [state.tableRowData]);
+  useEffect(
+    () => {
+      const tableRows = Object.values(state.tableRowData);
+      sliceTableRowData(
+        tableRows,
+        currentPage,
+        currPageSize,
+        true,
+        'parentTreeNumber',
+        setSlicedRows
+      );
+      calcSummaryItems(setSummaryConfig, summaryConfig, tableRows);
+    },
+    [state.tableRowData]
+  );
 
   const orchardQuery = useQuery({
-    queryKey: ["orchards", seedlotSpecies.code],
+    queryKey: ['orchards', seedlotSpecies.code],
     queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
     enabled: !isFormSubmitted,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS,
+    cacheTime: THREE_HALF_HOURS
   });
 
   // Parent trees Query
   const allParentTreeQuery = useQuery({
-    queryKey: ["parent-trees", "vegetation-codes", seedlotSpecies.code],
-    queryFn: () => getAllParentTrees(seedlotSpecies.code),
+    queryKey: ['parent-trees', 'vegetation-codes', seedlotSpecies.code],
+    queryFn: () => (
+      getAllParentTrees(seedlotSpecies.code)
+    ),
     staleTime: THREE_HOURS, // will not refetch for 3 hours
-    cacheTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
+    cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
   // Effects 'SMP mix' tab
-  useEffect(() => {
-    if (Object.keys(state.allParentTreeData).length > 0) {
-      sliceTableRowData(
-        Object.values(state.mixTabData),
-        currentMixPage,
-        currMixPageSize,
-        true,
-        "parentTreeNumber",
-        setSlicedMixRows
-      );
-      calcMixTabInfoItems(
-        disableOptions,
-        summaryConfig,
-        setSummaryConfig,
-        applicableGenWorths,
-        weightedGwInfoItems,
-        setWeightedGwInfoItems,
-        setPopSizeAndDiversityConfig,
-        state,
-        getParentTreesForSelectedOrchards(orchardStep, state.allParentTreeData)
-      );
-    }
-  }, [state.mixTabData, disableOptions, state.allParentTreeData]);
+  useEffect(
+    () => {
+      if (Object.keys(state.allParentTreeData).length > 0) {
+        sliceTableRowData(
+          Object.values(state.mixTabData),
+          currentMixPage,
+          currMixPageSize,
+          true,
+          'parentTreeNumber',
+          setSlicedMixRows
+        );
+        calcMixTabInfoItems(
+          disableOptions,
+          summaryConfig,
+          setSummaryConfig,
+          applicableGenWorths,
+          weightedGwInfoItems,
+          setWeightedGwInfoItems,
+          setPopSizeAndDiversityConfig,
+          state,
+          getParentTreesForSelectedOrchards(
+            orchardStep,
+            state.allParentTreeData
+          )
+        );
+      }
+    },
+    [state.mixTabData, disableOptions, state.allParentTreeData]
+  );
 
   const geneticWorthListQuery = useQuery({
-    queryKey: ["genetic-worth"],
+    queryKey: ['genetic-worth'],
     queryFn: getGeneticWorthList,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS,
+    cacheTime: THREE_HALF_HOURS
   });
 
   /**
@@ -265,15 +223,17 @@ const ParentTreeStep = ({
    */
   useEffect(() => {
     if (
-      !disableOptions &&
-      (Object.keys(state.tableRowData).length === 0 || controlReviewData) &&
-      allParentTreeQuery.status === "success" &&
-      orchardQuery.status === "success" &&
-      geneticWorthListQuery.status === "success"
+      !disableOptions
+      && (Object.keys(state.tableRowData).length === 0 || controlReviewData)
+      && allParentTreeQuery.status === 'success'
+      && orchardQuery.status === 'success'
+      && geneticWorthListQuery.status === 'success'
     ) {
       // List of parent tree numbers
-      const parentTreesUnderSelectedOrchards =
-        getParentTreesForSelectedOrchards(orchardStep, allParentTreeQuery.data);
+      const parentTreesUnderSelectedOrchards = getParentTreesForSelectedOrchards(
+        orchardStep,
+        allParentTreeQuery.data
+      );
 
       if (parentTreesUnderSelectedOrchards.length > 0) {
         setDisableOptions(false);
@@ -298,26 +258,20 @@ const ParentTreeStep = ({
       }
     }
   }, [
-    state.tableRowData,
-    allParentTreeQuery.status,
-    disableOptions,
-    geneticWorthListQuery.status,
+    state.tableRowData, allParentTreeQuery.status,
+    disableOptions, geneticWorthListQuery.status
   ]);
 
-  useEffect(
-    () =>
-      configHeaderOpt(
-        seedlotSpecies,
-        headerConfig,
-        genWorthInfoItems,
-        setGenWorthInfoItems,
-        setHeaderConfig,
-        weightedGwInfoItems,
-        setWeightedGwInfoItems,
-        setApplicableGenWorths
-      ),
-    [seedlotSpecies]
-  );
+  useEffect(() => configHeaderOpt(
+    seedlotSpecies,
+    headerConfig,
+    genWorthInfoItems,
+    setGenWorthInfoItems,
+    setHeaderConfig,
+    weightedGwInfoItems,
+    setWeightedGwInfoItems,
+    setApplicableGenWorths
+  ), [seedlotSpecies]);
 
   const uploadCompostion = useMutation({
     mutationFn: (coneCSV: File) => postFile(coneCSV, false),
@@ -336,12 +290,8 @@ const ParentTreeStep = ({
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
-      setFileUploadConfig({
-        ...fileUploadConfig,
-        errorSub: msg,
-        invalidFile: true,
-      });
-    },
+      setFileUploadConfig({ ...fileUploadConfig, errorSub: msg, invalidFile: true });
+    }
   });
 
   const uploadMixFile = useMutation({
@@ -361,12 +311,8 @@ const ParentTreeStep = ({
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
-      setFileUploadConfig({
-        ...fileUploadConfig,
-        errorSub: msg,
-        invalidFile: true,
-      });
-    },
+      setFileUploadConfig({ ...fileUploadConfig, errorSub: msg, invalidFile: true });
+    }
   });
 
   const renderRecalcSection = () => {
@@ -412,62 +358,85 @@ const ParentTreeStep = ({
   };
 
   const renderSubSections = () => {
-    if (currentTab === "mixTab" && !isReviewDisplay) {
+    if (currentTab === 'mixTab' && !isReviewDisplay) {
       return null;
     }
     return (
       <>
         {/* ---- Genetic worth and percent of tested parent trees ---- */}
-        {!isReviewDisplay ? <InfoSectionDivider /> : null}
+        {
+          !isReviewDisplay ? <InfoSectionDivider /> : null
+        }
         <Row className="info-section-sub-title">
           <Column>
             Genetic worth and percent of tested parent tree contribution
           </Column>
         </Row>
-        {isReviewDisplay && !isReviewRead ? (
-          <EditGenWorth genWorthValues={recordValues(genWorthInfoItems)} />
-        ) : (
-          <InfoSection infoItems={[]}>
-            {recordValues(genWorthInfoItems).map((gwTuple) => {
-              if (isCalculatingPt || isFetchingData) {
-                return <TextInputSkeleton key={gwTuple[0].name} />;
-              }
-              return <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />;
-            })}
-          </InfoSection>
-        )}
+        {
+          isReviewDisplay && !isReviewRead
+            ? (
+              <EditGenWorth genWorthValues={recordValues(genWorthInfoItems)} />
+            )
+            : (
+              <InfoSection
+                infoItems={[]}
+              >
+                {
+                  recordValues(genWorthInfoItems).map((gwTuple) => {
+                    if (isCalculatingPt || isFetchingData) {
+                      return (<TextInputSkeleton key={gwTuple[0].name} />);
+                    }
+                    return (
+                      <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
+                    );
+                  })
+                }
+              </InfoSection>
+            )
+        }
         <InfoSectionDivider />
         {/* ---- Unrelated genetic worth - REVIEW ONLY ---- */}
-        {isReviewDisplay ? (
-          <>
-            <Row className="info-section-sub-title">
-              <Column>Unrelated genetic worth</Column>
-            </Row>
-            <UnrelatedGenWorth
-              isRead={isReviewRead}
-              validGenWorth={
-                geneticWorthDict[
-                  seedlotSpecies.code as keyof GeneticWorthDictType
-                ]
-              }
-            />
-            <InfoSectionDivider />
-          </>
-        ) : null}
+        {
+          isReviewDisplay
+            ? (
+              <>
+                <Row className="info-section-sub-title">
+                  <Column>
+                    Unrelated genetic worth
+                  </Column>
+                </Row>
+                <UnrelatedGenWorth
+                  isRead={isReviewRead}
+                  validGenWorth={
+                    geneticWorthDict[seedlotSpecies.code as keyof GeneticWorthDictType]
+                  }
+                />
+                <InfoSectionDivider />
+              </>
+            )
+            : null
+        }
         {/* -------- Effective population size and diversity -------- */}
         <Row className="info-section-sub-title">
-          <Column>Effective population size and diversity</Column>
+          <Column>
+            Effective population size and diversity
+          </Column>
         </Row>
-        {isReviewDisplay && !isReviewRead ? (
-          <PopSize
-            orchardPts={getParentTreesForSelectedOrchards(
-              orchardStep,
-              state.allParentTreeData
-            )}
-          />
-        ) : (
-          <InfoSection infoItems={Object.values(popSizeAndDiversityConfig)} />
-        )}
+        {
+          isReviewDisplay && !isReviewRead
+            ? (
+              <PopSize orchardPts={getParentTreesForSelectedOrchards(
+                orchardStep,
+                state.allParentTreeData
+              )}
+              />
+            )
+            : (
+              <InfoSection
+                infoItems={Object.values(popSizeAndDiversityConfig)}
+              />
+            )
+        }
         <InfoSectionDivider />
       </>
     );
@@ -476,76 +445,122 @@ const ParentTreeStep = ({
   const renderInfoSections = () => (
     <Row className="info-sections-row">
       <Column className="info-sections-col">
-        {currentTab === "coneTab" || currentTab === "successTab" ? (
-          <>
-            {/* -------- Summary Section -------- */}
-            <DetailSection>
-              <DescriptionBox header={summaryConfig[currentTab].title} />
-              <InfoSection
-                infoItems={combineObjectValues([
-                  summaryConfig.sharedItems,
-                  summaryConfig[currentTab].infoItems,
-                ])}
-              />
-            </DetailSection>
-            {/* ------ Re-calculate Button Row - REVIEW ONLY ------ */}
-            {renderRecalcSection()}
-            {/* -------- Calculate Button Row -------- */}
-            {!(!isReviewDisplay && isFormSubmitted) ? (
-              <DetailSection>
-                {renderCalcSection(false)}
-                {showInfoSections ? (
-                  <>
-                    {renderSubSections()}
-                    {/* -------- Seedlot mean geospatial data -------- */}
-                    <Row className="info-section-sub-title">
-                      <Column>
-                        {!isReviewDisplay
-                          ? "Orchard parent tree geospatial summary"
-                          : "Collection geospatial summary"}
-                      </Column>
-                    </Row>
-                    {isReviewDisplay ? (
-                      <SpatialData isReviewRead={isReviewRead ?? false} />
-                    ) : (
-                      <InfoSection
-                        infoItems={Object.values(meanGeomInfos.seedlot)}
-                      />
-                    )}
-                  </>
-                ) : null}
-              </DetailSection>
-            ) : null}
-          </>
-        ) : (
-          <>
-            <DetailSection>
-              <DescriptionBox header="Breeding value of SMP mix used on parent" />
-              <InfoSection
-                infoItems={combineObjectValues([
-                  summaryConfig[currentTab].infoItems,
-                  weightedGwInfoItems,
-                ])}
-              />
-            </DetailSection>
-            {/* ------ Re-calculate Button Row - REVIEW ONLY ------ */}
-            {renderRecalcSection()}
-            {!(!isReviewDisplay && isFormSubmitted) ? (
-              <DetailSection>
-                {/* -------- SMP mix mean geospatial data -------- */}
-                <Row className="info-section-sub-title">
-                  <DescriptionBox header="SMP mix geospatial summary" />
-                </Row>
-                {renderCalcSection(true)}
-                {showInfoSections || isReviewDisplay ? (
-                  <InfoSection
-                    infoItems={Object.values(meanGeomInfos.smpMix)}
+        {
+          (currentTab === 'coneTab' || currentTab === 'successTab')
+            ? (
+              <>
+                {/* -------- Summary Section -------- */}
+                <DetailSection>
+                  <DescriptionBox
+                    header={summaryConfig[currentTab].title}
                   />
-                ) : null}
-              </DetailSection>
-            ) : null}
-          </>
-        )}
+                  <InfoSection
+                    infoItems={
+                      combineObjectValues([
+                        summaryConfig.sharedItems,
+                        summaryConfig[currentTab].infoItems
+                      ])
+                    }
+                  />
+                </DetailSection>
+                {/* ------ Re-calculate Button Row - REVIEW ONLY ------ */}
+                {
+                  renderRecalcSection()
+                }
+                {/* -------- Calculate Button Row -------- */}
+                {
+                  !(!isReviewDisplay && isFormSubmitted)
+                    ? (
+                      <DetailSection>
+                        {
+                          renderCalcSection(false)
+                        }
+                        {
+                          showInfoSections
+                            ? (
+                              <>
+                                {
+                                  renderSubSections()
+                                }
+                                {/* -------- Seedlot mean geospatial data -------- */}
+                                <Row className="info-section-sub-title">
+                                  <Column>
+                                    {
+                                      !isReviewDisplay
+                                        ? 'Orchard parent tree geospatial summary'
+                                        : 'Collection geospatial summary'
+                                    }
+                                  </Column>
+                                </Row>
+                                {
+                                  isReviewDisplay
+                                    ? (
+                                      <SpatialData isReviewRead={isReviewRead ?? false} />
+                                    )
+                                    : (
+                                      <InfoSection
+                                        infoItems={Object.values(meanGeomInfos.seedlot)}
+                                      />
+                                    )
+                                }
+                              </>
+                            )
+                            : null
+                        }
+                      </DetailSection>
+                    )
+                    : null
+                }
+              </>
+            )
+            : (
+              <>
+                <DetailSection>
+                  <DescriptionBox
+                    header="Breeding value of SMP mix used on parent"
+                  />
+                  <InfoSection
+                    infoItems={
+                      combineObjectValues([
+                        summaryConfig[currentTab].infoItems,
+                        weightedGwInfoItems
+                      ])
+                    }
+                  />
+                </DetailSection>
+                {/* ------ Re-calculate Button Row - REVIEW ONLY ------ */}
+                {
+                  renderRecalcSection()
+                }
+                {
+                  !(!isReviewDisplay && isFormSubmitted)
+                    ? (
+                      <DetailSection>
+                        {/* -------- SMP mix mean geospatial data -------- */}
+                        <Row className="info-section-sub-title">
+                          <DescriptionBox
+                            header="SMP mix geospatial summary"
+                          />
+                        </Row>
+                        {
+                          renderCalcSection(true)
+                        }
+                        {
+                          showInfoSections || isReviewDisplay
+                            ? (
+                              <InfoSection
+                                infoItems={Object.values(meanGeomInfos.smpMix)}
+                              />
+                            )
+                            : null
+                        }
+                      </DetailSection>
+                    )
+                    : null
+                }
+              </>
+            )
+        }
       </Column>
     </Row>
   );
@@ -553,44 +568,42 @@ const ParentTreeStep = ({
   return (
     <FlexGrid className="parent-tree-step-container">
       <ScrollToTop enabled={!isReviewDisplay} />
-      {!isReviewDisplay ? (
-        <>
-          <Row className="title-row">
-            <Column sm={4} md={8} lg={16}>
-              <h2>{pageText.stepTitle}</h2>
-              <Subtitle text={pageText.stepSubtitle} />
-            </Column>
-          </Row>
-          <Row>
-            <Column sm={4} md={8} lg={16}>
-              <Accordion className="instructions-accordion">
-                <AccordionItem open title="1. Data entry">
-                  {dataEntryInstructions}
-                </AccordionItem>
-                <AccordionItem open title="2. Review data">
-                  {reviewDataInstructions}
-                </AccordionItem>
-                <AccordionItem open title="3. Calculate seedlot metrics">
-                  {calculateInstructions}
-                </AccordionItem>
-              </Accordion>
-            </Column>
-          </Row>
-        </>
-      ) : null}
+      {
+        !isReviewDisplay
+          ? (
+            <>
+              <Row className="title-row">
+                <Column sm={4} md={8} lg={16}>
+                  <h2>{pageText.stepTitle}</h2>
+                  <Subtitle text={pageText.stepSubtitle} />
+                </Column>
+              </Row>
+              <Row>
+                <Column sm={4} md={8} lg={16}>
+                  <Accordion className="instructions-accordion">
+                    <AccordionItem open title="1. Data entry">
+                      {dataEntryInstructions}
+                    </AccordionItem>
+                    <AccordionItem open title="2. Review data">
+                      {reviewDataInstructions}
+                    </AccordionItem>
+                    <AccordionItem open title="3. Calculate seedlot metrics">
+                      {calculateInstructions}
+                    </AccordionItem>
+                  </Accordion>
+                </Column>
+              </Row>
+            </>
+          )
+          : null
+      }
       <Row>
         <Column sm={4} md={8} lg={16} xlg={16}>
-          <Tabs
-            onChange={(value: { selectedIndex: number }) =>
-              setCurrentTab(getTabString(value.selectedIndex))
-            }
+          <Tabs onChange={
+            (value: { selectedIndex: number }) => setCurrentTab(getTabString(value.selectedIndex))
+          }
           >
-            <TabList
-              className="parent-tree-step-tab-list"
-              aria-label="List of tabs"
-              id="parent-tree-step-tab-list-id"
-              tabIndex={-1}
-            >
+            <TabList className="parent-tree-step-tab-list" aria-label="List of tabs" id="parent-tree-step-tab-list-id" tabIndex={-1}>
               <Tab>
                 {pageText.coneTab.tabTitle}
                 &nbsp;(required)
@@ -599,73 +612,80 @@ const ParentTreeStep = ({
               <Tab>{pageText.mixTab.tabTitle}</Tab>
             </TabList>
             <FlexGrid className="parent-tree-tab-container">
-              {renderNotification(currentTab)}
-              <InputErrorNotification
-                state={state}
-                headerConfig={headerConfig}
-              />
+              {
+                renderNotification(currentTab)
+              }
+              <InputErrorNotification state={state} headerConfig={headerConfig} />
               <UploadWarnNotification
                 invalidPTNumbers={invalidPTNumbers}
                 setInvalidPTNumbers={setInvalidPTNumbers}
               />
-              {currentTab === "successTab" && !isReviewRead ? (
-                <>
-                  <Row className="smp-default-checkbox-row">
-                    <Column>
-                      <Checkbox
-                        id="smp-default-vals-checkbox"
-                        checked={isSMPDefaultValChecked}
-                        labelText={pageText.successTab.defaultCheckBoxDesc}
-                        onChange={(
-                          _event: React.ChangeEvent<HTMLInputElement>,
-                          { checked }: CheckboxType
-                        ) => {
-                          setIsSMPDefaultValChecked(checked);
-                        }}
-                        disabled={
-                          disableOptions ||
-                          (isFormSubmitted &&
-                            !(isReviewDisplay && !isReviewRead))
-                        }
-                      />
-                    </Column>
-                  </Row>
-                  {renderDefaultInputs(
-                    isSMPDefaultValChecked,
-                    state,
-                    setStepData,
-                    seedlotSpecies
-                  )}
-                </>
-              ) : null}
+              {
+                currentTab === 'successTab' && !isReviewRead
+                  ? (
+                    <>
+                      <Row className="smp-default-checkbox-row">
+                        <Column>
+                          <Checkbox
+                            id="smp-default-vals-checkbox"
+                            checked={isSMPDefaultValChecked}
+                            labelText={pageText.successTab.defaultCheckBoxDesc}
+                            onChange={
+                              (
+                                _event: React.ChangeEvent<HTMLInputElement>,
+                                { checked }: CheckboxType
+                              ) => {
+                                setIsSMPDefaultValChecked(checked);
+                              }
+                            }
+                            disabled={
+                              disableOptions
+                              || (isFormSubmitted
+                                && !(isReviewDisplay && !isReviewRead))
+                            }
+                          />
+                        </Column>
+                      </Row>
+                      {
+                        renderDefaultInputs(
+                          isSMPDefaultValChecked,
+                          state,
+                          setStepData,
+                          seedlotSpecies
+                        )
+                      }
+                    </>
+                  )
+                  : null
+              }
               <Row className="parent-tree-step-table-container">
                 <Column className="parent-tree-step-table-container-col">
                   <TableContainer
                     title={pageText[currentTab].tabTitle}
                     description={pageText[currentTab].tableDescription}
-                    className={
-                      !disableOptions ? "sticky-table-title" : undefined
-                    }
+                    className={(!disableOptions) ? 'sticky-table-title' : undefined}
                   >
-                    <div
-                      className={!disableOptions ? "sticky-toolbar" : undefined}
-                    >
+                    <div className={(!disableOptions) ? 'sticky-toolbar' : undefined}>
                       <TableToolbar aria-label="data table toolbar">
                         <TableToolbarContent>
-                          {currentTab === "mixTab" ? (
-                            <Button
-                              kind="ghost"
-                              hasIconOnly
-                              disabled={
-                                disableOptions ||
-                                (isFormSubmitted &&
-                                  !(isReviewDisplay && !isReviewRead))
-                              }
-                              renderIcon={Add}
-                              iconDescription="Add a new row"
-                              onClick={() => addNewMixRow(state, setStepData)}
-                            />
-                          ) : null}
+                          {
+                            currentTab === 'mixTab'
+                              ? (
+                                <Button
+                                  kind="ghost"
+                                  hasIconOnly
+                                  disabled={
+                                    disableOptions
+                                    || (isFormSubmitted
+                                      && !(isReviewDisplay && !isReviewRead))
+                                  }
+                                  renderIcon={Add}
+                                  iconDescription="Add a new row"
+                                  onClick={() => addNewMixRow(state, setStepData)}
+                                />
+                              )
+                              : null
+                          }
                           <OverflowMenu
                             menuOptionsClass="parent-tree-table-toggle-menu"
                             renderIcon={View}
@@ -673,38 +693,35 @@ const ParentTreeStep = ({
                             flipped
                             disabled={disableOptions}
                           >
-                            {renderColOptions(
-                              headerConfig,
-                              currentTab,
-                              setHeaderConfig
-                            )}
+                            {
+                              renderColOptions(headerConfig, currentTab, setHeaderConfig)
+                            }
                           </OverflowMenu>
                           <OverflowMenu
                             renderIcon={Settings}
                             iconDescription="More options"
                             menuOptionsClass="parent-tree-table-option-menu"
                             disabled={
-                              disableOptions ||
-                              isFormSubmitted ||
-                              (isReviewDisplay && !isReviewRead)
+                              disableOptions
+                              || isFormSubmitted
+                              || (isReviewDisplay && !isReviewRead)
                             }
                           >
                             <OverflowMenuItem
                               itemText={
-                                <Link
-                                  ref={linkRef}
-                                  to={getDownloadUrl(currentTab)}
-                                  target="_blank"
-                                >
-                                  Download table template
-                                </Link>
+                                (
+                                  <Link
+                                    ref={linkRef}
+                                    to={getDownloadUrl(currentTab)}
+                                    target="_blank"
+                                  >
+                                    Download table template
+                                  </Link>
+                                )
                               }
                               onClick={() => linkRef.current?.click()}
                             />
-                            <OverflowMenuItem
-                              itemText="Export table as CSV file"
-                              disabled
-                            />
+                            <OverflowMenuItem itemText="Export table as CSV file" disabled />
                             <OverflowMenuItem
                               itemText="Clean table data"
                               onClick={() => setIsCleanWarnOpen(true)}
@@ -717,10 +734,10 @@ const ParentTreeStep = ({
                             renderIcon={Upload}
                             onClick={() => setIsUploadOpen(true)}
                             disabled={
-                              disableOptions ||
-                              !allParentTreeQuery.isFetched ||
-                              isFormSubmitted ||
-                              (isReviewDisplay && !isReviewRead)
+                              disableOptions
+                              || !allParentTreeQuery.isFetched
+                              || isFormSubmitted
+                              || (isReviewDisplay && !isReviewRead)
                             }
                           >
                             Upload from file
@@ -730,77 +747,97 @@ const ParentTreeStep = ({
                     </div>
                     {
                       // Check if it's fetching parent tree and dependencies data
-                      !disableOptions &&
-                      (allParentTreeQuery.fetchStatus === "fetching" ||
-                        orchardQuery.fetchStatus === "fetching" ||
-                        geneticWorthListQuery.fetchStatus === "fetching") ? (
-                        <DataTableSkeleton
-                          showToolbar={false}
-                          showHeader={false}
-                          zebra
-                        />
-                      ) : (
-                        <Table useZebraStyles>
-                          <TableHead className="table-header">
-                            <TableRow>
-                              {headerConfig.map((header) =>
-                                header.availableInTabs.includes(currentTab) &&
-                                header.enabled ? (
-                                  <TableHeader id={header.id} key={header.id}>
-                                    {header.name}
-                                  </TableHeader>
-                                ) : null
-                              )}
-                            </TableRow>
-                          </TableHead>
-                          {disableOptions
-                            ? null
-                            : renderTableBody(
-                                currentTab,
-                                slicedRows,
-                                slicedMixRows,
-                                headerConfig,
-                                applicableGenWorths,
-                                orchardQuery.data ?? [],
-                                geneticWorthListQuery.data ?? [],
-                                isFormSubmitted,
-                                isReviewDisplay && !isReviewRead
-                              )}
-                        </Table>
+                      (!disableOptions
+                       && (allParentTreeQuery.fetchStatus === 'fetching'
+                          || orchardQuery.fetchStatus === 'fetching'
+                          || geneticWorthListQuery.fetchStatus === 'fetching'
+                       )
                       )
+                        ? (
+                          <DataTableSkeleton
+                            showToolbar={false}
+                            showHeader={false}
+                            zebra
+                          />
+                        )
+                        : (
+                          <Table useZebraStyles>
+                            <TableHead className="table-header">
+                              <TableRow>
+                                {
+                                  headerConfig.map((header) => (
+                                    (
+                                      header.availableInTabs.includes(currentTab)
+                                      && header.enabled
+                                    )
+                                      ? (
+                                        <TableHeader id={header.id} key={header.id}>
+                                          {header.name}
+                                        </TableHeader>
+                                      )
+                                      : null
+                                  ))
+                                }
+                              </TableRow>
+                            </TableHead>
+                            {
+                              disableOptions
+                                ? null
+                                : renderTableBody(
+                                  currentTab,
+                                  slicedRows,
+                                  slicedMixRows,
+                                  headerConfig,
+                                  applicableGenWorths,
+                                  orchardQuery.data ?? [],
+                                  geneticWorthListQuery.data ?? [],
+                                  isFormSubmitted,
+                                  (isReviewDisplay && !isReviewRead)
+                                )
+                            }
+                          </Table>
+                        )
                     }
-                    {disableOptions ? (
-                      <EmptySection
-                        title={
-                          isOrchardEmpty
-                            ? pageText.emptySection.emptyOrchard
-                            : pageText.emptySection.title
-                        }
-                        description={
-                          isOrchardEmpty
-                            ? noParentTreeDescription
-                            : emptySectionDescription
-                        }
-                        pictogram={isOrchardEmpty ? "Question" : "CloudyWindy"}
-                      />
-                    ) : (
-                      renderPagination(
-                        state,
-                        currentTab,
-                        currPageSize,
-                        setCurrentPage,
-                        setCurrPageSize,
-                        setSlicedRows,
-                        currMixPageSize,
-                        setCurrMixPageSize,
-                        setCurrentMixPage,
-                        setSlicedMixRows
-                      )
-                    )}
+                    {
+                      disableOptions
+                        ? (
+                          <EmptySection
+                            title={
+                              isOrchardEmpty
+                                ? pageText.emptySection.emptyOrchard
+                                : pageText.emptySection.title
+                            }
+                            description={
+                              isOrchardEmpty
+                                ? noParentTreeDescription
+                                : emptySectionDescription
+                            }
+                            pictogram={
+                              isOrchardEmpty
+                                ? 'Question'
+                                : 'CloudyWindy'
+                            }
+                          />
+                        )
+                        : renderPagination(
+                          state,
+                          currentTab,
+                          currPageSize,
+                          setCurrentPage,
+                          setCurrPageSize,
+                          setSlicedRows,
+                          currMixPageSize,
+                          setCurrMixPageSize,
+                          setCurrentMixPage,
+                          setSlicedMixRows
+                        )
+                    }
                   </TableContainer>
                 </Column>
               </Row>
-              {renderInfoSections()}
+              {
+                renderInfoSections()
+              }
             </FlexGrid>
           </Tabs>
         </Column>
@@ -808,13 +845,15 @@ const ParentTreeStep = ({
       <UploadFileModal
         open={isUploadOpen}
         setOpen={setIsUploadOpen}
-        onSubmit={(file: File) => {
-          if (currentTab === "mixTab") {
-            uploadMixFile.mutate(file);
-          } else {
-            uploadCompostion.mutate(file);
+        onSubmit={
+          (file: File) => {
+            if (currentTab === 'mixTab') {
+              uploadMixFile.mutate(file);
+            } else {
+              uploadCompostion.mutate(file);
+            }
           }
-        }}
+        }
         fileUploadConfig={fileUploadConfig}
         setFileUploadConfig={setFileUploadConfig}
         resetFileUploadConfig={resetFileUploadConfig}

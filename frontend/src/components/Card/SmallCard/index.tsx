@@ -1,10 +1,10 @@
-import React from "react";
-import * as Icons from "@carbon/icons-react";
-import * as Pictograms from "@carbon/pictograms-react";
-import { Tile } from "@carbon/react";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import * as Icons from '@carbon/icons-react';
+import * as Pictograms from '@carbon/pictograms-react';
+import { Tile } from '@carbon/react';
+import { useNavigate } from 'react-router-dom';
 
-import "./styles.scss";
+import './styles.scss';
 
 type SmallCardProps = {
   header: string;
@@ -21,7 +21,7 @@ const SmallCard = ({
   path,
   isIcon,
   image,
-  favClassName,
+  favClassName
 }: SmallCardProps) => {
   const navigate = useNavigate();
 
@@ -29,7 +29,7 @@ const SmallCard = ({
 
   return (
     <Tile
-      className={favClassName ? `${favClassName} small-card` : "small-card"}
+      className={favClassName ? `${favClassName} small-card` : 'small-card'}
       onClick={() => navigate(path)}
     >
       <div className="image-header">
