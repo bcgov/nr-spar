@@ -1,19 +1,26 @@
-import { ReportHandler } from 'web-vitals';
+type ReportHandler = (metric: {
+  name: string;
+  value: number;
+  delta: number;
+  id: string;
+  entries: PerformanceEntry[];
+  navigationType?: string;
+}) => void;
 
 const reportWebVitals = (onPerfEntry?: ReportHandler) => {
-  if (onPerfEntry && onPerfEntry instanceof Function) {
+  if (onPerfEntry && typeof onPerfEntry === 'function') {
     import('web-vitals').then(({
-      getCLS,
-      getFID,
-      getFCP,
-      getLCP,
-      getTTFB
+      onCLS,
+      onFID,
+      onFCP,
+      onLCP,
+      onTTFB
     }) => {
-      getCLS(onPerfEntry);
-      getFID(onPerfEntry);
-      getFCP(onPerfEntry);
-      getLCP(onPerfEntry);
-      getTTFB(onPerfEntry);
+      onCLS(onPerfEntry);
+      onFID(onPerfEntry);
+      onFCP(onPerfEntry);
+      onLCP(onPerfEntry);
+      onTTFB(onPerfEntry);
     });
   }
 };
