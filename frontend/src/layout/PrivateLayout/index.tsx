@@ -1,26 +1,26 @@
-import React from "react";
-import { Outlet, Link } from "react-router-dom";
+import React from 'react';
+import { Outlet, Link } from 'react-router-dom';
 
-import { Content, ActionableNotification } from "@carbon/react";
-import { useQueries } from "@tanstack/react-query";
+import { Content, ActionableNotification } from '@carbon/react';
+import { useQueries } from '@tanstack/react-query';
 
-import { SPAR_DEPENDENCIES } from "../../views/ServiceStatus/constants";
-import BCHeader from "../../components/BCHeader";
-import ScrollToTop from "../../components/ScrollToTop";
+import { SPAR_DEPENDENCIES } from '../../views/ServiceStatus/constants';
+import BCHeader from '../../components/BCHeader';
+import ScrollToTop from '../../components/ScrollToTop';
 
-import { THIRTY_SECONDS } from "../../config/TimeUnits";
+import { THIRTY_SECONDS } from '../../config/TimeUnits';
 
-import "./styles.scss";
+import './styles.scss';
 
 const Layout = () => {
   const statusQueries = useQueries({
     queries: SPAR_DEPENDENCIES.map((dependencyObj) => ({
       queryKey: [dependencyObj.queryKey],
-      queryFn: () => fetch(dependencyObj.healthCheckUrl, { mode: "no-cors" }),
+      queryFn: () => fetch(dependencyObj.healthCheckUrl, { mode: 'no-cors' }),
       refetchInterval: THIRTY_SECONDS,
       refetchIntervalInBackground: false,
-      retry: 0,
-    })),
+      retry: 0
+    }))
   });
 
   return (
@@ -28,8 +28,8 @@ const Layout = () => {
       <BCHeader />
       <ScrollToTop />
       <div className="main-container">
-        {statusQueries.filter((query) => query.status === "error").length >
-        0 ? (
+        {statusQueries.filter((query) => query.status === 'error').length
+        > 0 ? (
           <ActionableNotification
             className="dependency-notification"
             kind="warning"
@@ -50,7 +50,7 @@ const Layout = () => {
               &nbsp;for details.
             </span>
           </ActionableNotification>
-        ) : null}
+          ) : null}
         <Content className="page-content">
           <Outlet />
         </Content>
