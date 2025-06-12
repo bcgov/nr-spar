@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import {
   HeaderContainer,
@@ -69,7 +69,9 @@ const BCHeader = () => {
   const handleClosePanel = () => {
     if (rightPanel.notifications) {
       closeRightPanel('notifications');
-    } else { closeRightPanel('myProfile'); }
+    } else {
+      closeRightPanel('myProfile');
+    }
   };
 
   const onKeyDownFunction = (event: any) => {
@@ -83,32 +85,42 @@ const BCHeader = () => {
   return (
     <HeaderContainer
       isSideNavExpanded
-      render={({ isSideNavExpanded, onClickSideNavExpand }: HearderContainerProps) => (
+      render={({
+        isSideNavExpanded,
+        onClickSideNavExpand
+      }: HearderContainerProps) => (
         <Header
           aria-label={componentTexts.completeTitle}
-          className={`spar-header ${!isSideNavExpanded && 'spar-header-expanded'}`}
+          className={`spar-header ${
+            !isSideNavExpanded && 'spar-header-expanded'
+          }`}
           data-testid="header"
         >
           <SkipToContent />
-          {
-            !(location.pathname.endsWith('/403') || location.pathname.endsWith('/404'))
-              ? (
-                <HeaderMenuButton
-                  aria-label={
-                    isSideNavExpanded
-                      ? componentTexts.closeMenu
-                      : componentTexts.openMenu
-                  }
-                  isCollapsible
-                  onClick={onClickSideNavExpand}
-                  isActive={isSideNavExpanded}
-                />
-              )
-              : null
-          }
-          <Link to={HOME_LINK} className="header-link" data-testid="header-name">
+          {!(
+            location.pathname.endsWith('/403')
+            || location.pathname.endsWith('/404')
+          ) ? (
+            <HeaderMenuButton
+              aria-label={
+                isSideNavExpanded
+                  ? componentTexts.closeMenu
+                  : componentTexts.openMenu
+              }
+              isCollapsible
+              onClick={onClickSideNavExpand}
+              isActive={isSideNavExpanded}
+            />
+            ) : null}
+          <Link
+            to={HOME_LINK}
+            className="header-link"
+            data-testid="header-name"
+          >
             {componentTexts.headerTitle}
-            <span className="header-full-name">{componentTexts.completeTitle}</span>
+            <span className="header-full-name">
+              {componentTexts.completeTitle}
+            </span>
           </Link>
           <HeaderGlobalBar>
             <HeaderGlobalAction
@@ -131,9 +143,7 @@ const BCHeader = () => {
               aria-label={componentTexts.profile.headerAriaLabel}
               data-testid="header-button__user"
               tooltipAlignment={
-                windowSize.innerWidth > MEDIUM_SCREEN_WIDTH
-                  ? 'center'
-                  : 'end'
+                windowSize.innerWidth > MEDIUM_SCREEN_WIDTH ? 'center' : 'end'
               }
               onClick={() => handleRightPanel('myProfile')}
               isActive={rightPanel.myProfile}
@@ -163,56 +173,59 @@ const BCHeader = () => {
             />
             <MyProfile />
           </HeaderPanel>
-          {
-            overlay
-              ? (
-                <div
-                  className="overlay-element"
-                  role="button"
-                  tabIndex={0}
-                  aria-label="close right panel"
-                  onKeyDown={onKeyDownFunction}
-                  onClick={handleClosePanel}
-                />
-              )
-              : null
-          }
-          {
-            !(location.pathname.endsWith('/403') || location.pathname.endsWith('/404'))
-              ? (
-                <SideNav
-                  isChildOfHeader
-                  expanded={isSideNavExpanded}
-                  aria-label={componentTexts.sideMenuAriaLabel}
-                  className={`spar-side-nav ${!isSideNavExpanded && 'spar-side-nav-expanded'}`}
-                >
-                  <div className="side-nav-top">
-                    {
-                      navItems.map((category) => (
-                        <div key={category.name}>
-                          <SideNavLink className="side-nav-category-name">
-                            {category.name}
-                          </SideNavLink>
-                          {
-                            category.items.map((navItem) => (
-                              <SideNavLink
-                                key={navItem.name}
-                                className={navItem.disabled ? 'disabled-side-nav-option' : 'side-nav-option'}
-                                renderIcon={Icons[navItem.icon]}
-                                isActive={window.location.pathname.includes(navItem.link)}
-                                onClick={navItem.disabled ? null : () => navigate(navItem.link)}
-                              >
-                                {navItem.name}
-                              </SideNavLink>
-                            ))
-                          }
-                        </div>
-                      ))
-                    }
+          {overlay ? (
+            <div
+              className="overlay-element"
+              role="button"
+              tabIndex={0}
+              aria-label="close right panel"
+              onKeyDown={onKeyDownFunction}
+              onClick={handleClosePanel}
+            />
+          ) : null}
+          {!(
+            location.pathname.endsWith('/403')
+            || location.pathname.endsWith('/404')
+          ) ? (
+            <SideNav
+              isChildOfHeader
+              expanded={isSideNavExpanded}
+              aria-label={componentTexts.sideMenuAriaLabel}
+              className={`spar-side-nav ${
+                !isSideNavExpanded && 'spar-side-nav-expanded'
+              }`}
+            >
+              <div className="side-nav-top">
+                {navItems.map((category) => (
+                  <div key={category.name}>
+                    <SideNavLink className="side-nav-category-name">
+                      {category.name}
+                    </SideNavLink>
+                    {category.items.map((navItem) => (
+                      <SideNavLink
+                        key={navItem.name}
+                        className={
+                          navItem.disabled
+                            ? 'disabled-side-nav-option'
+                            : 'side-nav-option'
+                        }
+                        renderIcon={Icons[navItem.icon]}
+                        isActive={window.location.pathname.includes(
+                          navItem.link
+                        )}
+                        onClick={
+                          navItem.disabled ? null : () => navigate(navItem.link)
+                        }
+                      >
+                        {navItem.name}
+                      </SideNavLink>
+                    ))}
                   </div>
-                  <div>
-                    {/* Uncomment this section when the support pages are implemented. */}
-                    {/* <SideNavLink className="side-nav-category-name">
+                ))}
+              </div>
+              <div>
+                {/* Uncomment this section when the support pages are implemented. */}
+                {/* <SideNavLink className="side-nav-category-name">
                       {supportItems.name}
                     </SideNavLink>
                     {
@@ -231,12 +244,10 @@ const BCHeader = () => {
                         </SideNavLink>
                       ))
                     } */}
-                    <PanelSectionName title={VERSION} />
-                  </div>
-                </SideNav>
-              )
-              : null
-          }
+                <PanelSectionName title={VERSION} />
+              </div>
+            </SideNav>
+            ) : null}
         </Header>
       )}
     />

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 import { DataTableSkeleton, Pagination } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';

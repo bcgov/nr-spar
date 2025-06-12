@@ -11,7 +11,7 @@ import { Save } from '@carbon/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import AuthContext from '../../../contexts/AuthContext';
 import { getSeedlotById, patchSeedlotApplicationInfo } from '../../../api-service/seedlotAPI';

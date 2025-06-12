@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@carbon/react';
 import { SearchLocate } from '@carbon/icons-react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 import ROUTES from '../../../../routes/constants';
 import DetailSection from '../../../../components/DetailSection';

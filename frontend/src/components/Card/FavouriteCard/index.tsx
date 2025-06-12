@@ -1,12 +1,15 @@
 import React from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 import { Tile, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { FavActivityType } from '../../../types/FavActivityTypes';
-import { patchFavAct, deleteFavAct } from '../../../api-service/favouriteActivitiesAPI';
+import {
+  patchFavAct,
+  deleteFavAct
+} from '../../../api-service/favouriteActivitiesAPI';
 import useWindowSize from '../../../hooks/UseWindowSize';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
@@ -15,12 +18,10 @@ import SmallCard from '../SmallCard';
 import './styles.scss';
 
 type FavouriteCardProps = {
-  favObject: FavActivityType
-}
+  favObject: FavActivityType;
+};
 
-const FavouriteCard = ({
-  favObject
-}: FavouriteCardProps) => {
+const FavouriteCard = ({ favObject }: FavouriteCardProps) => {
   const Icon = Icons[favObject.image];
   const navigate = useNavigate();
   const favActQueryKey = ['favourite-activities'];
@@ -59,7 +60,9 @@ const FavouriteCard = ({
       }}
     >
       <OverflowMenuItem
-        itemText={favObject.highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'}
+        itemText={
+          favObject.highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'
+        }
         onClick={(e: React.MouseEvent<HTMLElement>) => {
           e.stopPropagation();
           highlightFavAct.mutate();
@@ -83,14 +86,18 @@ const FavouriteCard = ({
         path={favObject.link}
         image={favObject.image}
         isIcon
-        favClassName={favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
+        favClassName={
+          favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'
+        }
       />
     );
   }
 
   return (
     <Tile
-      className={`${favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'} ${favObject.isConsep ? 'fav-card-main-consep' : 'fav-card-main-spar'}`}
+      className={`${
+        favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'
+      } ${favObject.isConsep ? 'fav-card-main-consep' : 'fav-card-main-spar'}`}
       onClick={() => navigate(favObject.link)}
       tabIndex={0}
       aria-label={`Go to ${favObject.header}`}
@@ -105,7 +112,9 @@ const FavouriteCard = ({
         {ActionBtn}
       </div>
       <div className="fav-card-content">
-        <p className="fav-card-title-large" role="heading" aria-level={2}>{favObject.header}</p>
+        <p className="fav-card-title-large" role="heading" aria-level={2}>
+          {favObject.header}
+        </p>
       </div>
     </Tile>
   );
