@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import {
   useNavigate, useParams, useSearchParams, useLocation
-} from 'react-router';
+} from 'react-router-dom';
 import {
   useMutation, useQuery
 } from '@tanstack/react-query';

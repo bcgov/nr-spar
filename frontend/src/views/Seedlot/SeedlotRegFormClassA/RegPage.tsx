@@ -12,7 +12,7 @@ import {
   ProgressIndicatorSkeleton
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { getSeedlotSubmitErrDescription } from '../ContextContainerClassA/utils';
