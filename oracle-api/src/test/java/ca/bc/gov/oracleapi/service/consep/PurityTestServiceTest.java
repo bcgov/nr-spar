@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -25,6 +24,7 @@ import ca.bc.gov.oracleapi.repository.consep.PurityReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -91,7 +91,7 @@ class PurityTestServiceTest {
     replicate1.setId(replicateId);
     replicate1.setPureSeedWeight(new BigDecimal(12.345));
     replicate1.setOtherSeedWeight(new BigDecimal(45.678));
-    replicate1.setContainerWeight(new BigDecimal(58.901));
+    replicate1.setInertMttrWeight(new BigDecimal(58.901));
     replicate1.setReplicateAccInd(1);
     replicate1.setOverrideReason("Replicate was re-tested due to abnormal moisture content.");
 
@@ -148,7 +148,7 @@ class PurityTestServiceTest {
             assertEquals(rep.replicateNumber(), replicate1.getId().getReplicateNumber());
             assertEquals(rep.pureSeedWeight(), replicate1.getPureSeedWeight());
             assertEquals(rep.otherSeedWeight(), replicate1.getOtherSeedWeight());
-            assertEquals(rep.containerWeight(), replicate1.getContainerWeight());
+            assertEquals(rep.inertMttrWeight(), replicate1.getInertMttrWeight());
             assertEquals(rep.replicateAccInd(), replicate1.getReplicateAccInd());
             assertEquals(rep.overrideReason(), replicate1.getOverrideReason());
         }
@@ -183,7 +183,7 @@ class PurityTestServiceTest {
     entity.setId(replicateId);
     entity.setPureSeedWeight(new BigDecimal("1.0"));
     entity.setOtherSeedWeight(new BigDecimal("2.0"));
-    entity.setContainerWeight(new BigDecimal("3.0"));
+    entity.setInertMttrWeight(new BigDecimal("3.0"));
     entity.setReplicateAccInd(1);
     entity.setOverrideReason("override reason");
 
@@ -201,7 +201,7 @@ class PurityTestServiceTest {
         riaKey, requestList);
 
     assertEquals(1, result.size());
-    assertEquals(new BigDecimal("3.0"), result.get(0).getContainerWeight());
+    assertEquals(new BigDecimal("3.0"), result.get(0).getInertMttrWeight());
 
     verify(replicateRepository).findByRiaKeyAndReplicateNumbers(riaKey, List.of(1));
     verify(replicateRepository).saveAll(anyList());
@@ -242,13 +242,47 @@ class PurityTestServiceTest {
   }
 
   @Test
-  void validatePurityData_invalidContainerWeight() {
+  void validatePurityData_invalidPureSeedWeight() {
     PurityReplicateDto replicateDto = new PurityReplicateDto(
-        null,
+        riaKey,
         1,
         new BigDecimal("1000"),
         new BigDecimal("45.678"),
         new BigDecimal("58.901"),
+        1,
+        "Reason"
+    );
+    List<PurityReplicateDto> replicates = List.of(replicateDto);
+
+    assertThrows(ResponseStatusException.class, () ->
+        purityTestService.validatePurityReplicateData(replicates));
+  }
+
+  @Test
+  void validatePurityData_invalidOtherSeedWeight() {
+    PurityReplicateDto replicateDto = new PurityReplicateDto(
+        riaKey,
+        1,
+        new BigDecimal("45.678"),
+        new BigDecimal("1000"),
+        new BigDecimal("58.901"),
+        1,
+        "Reason"
+    );
+    List<PurityReplicateDto> replicates = List.of(replicateDto);
+
+    assertThrows(ResponseStatusException.class, () ->
+        purityTestService.validatePurityReplicateData(replicates));
+  }
+
+  @Test
+  void validatePurityData_invalidInertMttrWeight() {
+    PurityReplicateDto replicateDto = new PurityReplicateDto(
+        riaKey,
+        1,
+        new BigDecimal("45.678"),
+        new BigDecimal("58.901"),
+        new BigDecimal("1000"),
         1,
         "Reason"
     );
@@ -278,7 +312,6 @@ class PurityTestServiceTest {
   @Test
   @DisplayName("Delete a single replicate should throw exception when not found")
   void deletePurityReplicate_shouldThrowExceptionIfNotFound() {
-    BigDecimal riaKey = new BigDecimal(1234567890);
     Integer replicateNumber = 1;
 
     when(replicateRepository.findSingleReplicate(riaKey, replicateNumber)).thenReturn(
@@ -291,54 +324,33 @@ class PurityTestServiceTest {
   }
 
   @Test
-  @DisplayName("Delete full purity test data should succeed")
-  void deleteFullPurity_shouldSucceed() {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    ActivityEntity activityMock = new ActivityEntity();
-    TestResultEntity testResultMock = new TestResultEntity();
+  void deletePurityReplicates_shouldSucceed() {
+    List<Integer> replicateNumbers = List.of(1, 2, 3);
 
-    // Generate mock replicate list
-    List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
-    List<PurityReplicateEntity> replicates = replicateIds.stream().map(id -> {
-      PurityReplicateEntity replicate = new PurityReplicateEntity();
-      replicate.setId(new ReplicateId(riaKey, id));
-      return replicate;
-    }).collect(Collectors.toList());
+    List<PurityReplicateEntity> mockFoundReplicates = List.of(new PurityReplicateEntity());
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers))
+        .thenReturn(mockFoundReplicates);
 
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(activityMock));
-    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultMock));
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds)).thenReturn(
-        replicates);
+    doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
+    assertDoesNotThrow(() -> purityTestService.deletePurityReplicates(
+        riaKey, replicateNumbers));
 
-    doNothing().when(activityRepository).deleteById(riaKey);
-    doNothing().when(testResultRepository).deleteById(riaKey);
-    doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(any(), any());
-
-    // Execute delete
-    assertDoesNotThrow(() -> purityTestService.deleteFullPurityTest(riaKey));
-
-    verify(activityRepository, times(1)).deleteById(riaKey);
-    verify(testResultRepository, times(1)).deleteById(riaKey);
-    verify(replicateRepository, times(replicates.size())).deleteByRiaKeyAndReplicateNumber(
-        eq(riaKey), any());
+    verify(replicateRepository, times(1))
+        .deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
   }
 
   @Test
-  @DisplayName("Delete full purity test data should throw exception when not found")
-  void deleteFullPurity_shouldThrowExceptionIfNotFound() {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    List<Integer> replicateIds = IntStream.rangeClosed(1, 8).boxed().collect(Collectors.toList());
+  void deletePurityReplicates_shouldThrowExceptionIfNotFound() {
+    List<Integer> replicateNumbers = List.of(4, 5, 6);
 
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.empty());
-    when(testResultRepository.findById(riaKey)).thenReturn(Optional.empty());
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds)).thenReturn(
-        List.of());
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers))
+        .thenReturn(Collections.emptyList());
 
-    assertThrows(InvalidTestActivityKeyException.class, () ->
-        purityTestService.deleteFullPurityTest(riaKey));
+    assertThrows(InvalidTestActivityKeyException.class, () -> {
+      purityTestService.deletePurityReplicates(riaKey, replicateNumbers);
+    });
 
-    verify(activityRepository, never()).deleteById(any());
-    verify(testResultRepository, never()).deleteById(any());
-    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
+    verify(replicateRepository, never())
+        .deleteByRiaKeyAndReplicateNumbers(any(), any());
   }
 }

@@ -13,7 +13,7 @@ public record PurityReplicateFormDto(
     @NotNull Integer replicateNumber,
     BigDecimal pureSeedWeight,
     BigDecimal otherSeedWeight,
-    BigDecimal containerWeight,
+    BigDecimal inertMttrWeight,
     @NotNull Integer replicateAccInd,
     String overrideReason
 ){}

@@ -2,7 +2,7 @@ export const DATE_FORMAT = 'Y/m/d';
 
 export const fieldsConfig = {
   titleSection: {
-    title: 'Purity for seedlot 64132'
+    title: 'Purity for seedlot'
   },
   impuritySection: {
     title: 'Impurities',
@@ -15,13 +15,6 @@ export const fieldsConfig = {
     label: 'impurityType',
     options: ['Impurity1', 'Impurity2', 'Impurity3']
 
-  },
-  activityItem: {
-    activity: 'PUR',
-    seedlotNumber: '64132',
-    requestId: 'CSP20240013',
-    speciesAndClass: 'PLI | A',
-    testResult: '7.80%'
   },
   startDate: {
     name: 'startDate',

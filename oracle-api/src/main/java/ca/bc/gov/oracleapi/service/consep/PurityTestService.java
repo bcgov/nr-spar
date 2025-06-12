@@ -70,7 +70,7 @@ public class PurityTestService {
             curReplicate.getId().getReplicateNumber(),
             curReplicate.getPureSeedWeight(),
             curReplicate.getOtherSeedWeight(),
-            curReplicate.getContainerWeight(),
+            curReplicate.getInertMttrWeight(),
             curReplicate.getReplicateAccInd(),
             curReplicate.getOverrideReason()))
         .collect(Collectors.toList());
@@ -137,7 +137,7 @@ public class PurityTestService {
 
       repEntity.setPureSeedWeight(dto.pureSeedWeight());;
       repEntity.setOtherSeedWeight(dto.otherSeedWeight());
-      repEntity.setContainerWeight(dto.containerWeight());
+      repEntity.setInertMttrWeight(dto.inertMttrWeight());
       repEntity.setReplicateAccInd(dto.replicateAccInd());
       repEntity.setOverrideReason(dto.overrideReason());
 
@@ -192,9 +192,9 @@ public class PurityTestService {
            "Other seed weight is missing or invalid");
       }
 
-      if (replicate.containerWeight() == null
-          || replicate.containerWeight().compareTo(BigDecimal.ZERO) < 0
-          || replicate.containerWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
+      if (replicate.inertMttrWeight() == null
+          || replicate.inertMttrWeight().compareTo(BigDecimal.ZERO) < 0
+          || replicate.inertMttrWeight().compareTo(BigDecimal.valueOf(999.999)) > 0) {
         SparLog.error("Purity test data validation failed: "
             + "Container weight is missing or invalid");
         throw new ResponseStatusException(
@@ -259,36 +259,5 @@ public class PurityTestService {
 
     SparLog.info("Purity replicate {} with riaKey {} ",
         replicateNumber, riaKey + "deleted!");
-  }
-
-  /**
-   * Deletes purity tests data on multiple tables.
-   *
-   * @param riaKey the identifier key for all table related to MCC
-   */
-  @Transactional
-  public void deleteFullPurityTest(@NonNull BigDecimal riaKey) {
-    SparLog.info(
-        "Deleting entries on Activity, Purity Replicate and TestResult tables "
-        + "with the riaKey: {}", riaKey);
-
-    Optional<ActivityEntity> activityEntity = activityRepository.findById(riaKey);
-
-    Optional<TestResultEntity> testEntity = testResultRepository.findById(riaKey);
-
-    List<PurityReplicateEntity> replicates =
-        replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
-
-    if (activityEntity.isEmpty() || testEntity.isEmpty() || replicates.isEmpty()) {
-      throw new InvalidTestActivityKeyException();
-    }
-
-    activityRepository.deleteById(riaKey);
-    testResultRepository.deleteById(riaKey);
-
-    replicates.forEach(rep -> replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey,
-        rep.getId().getReplicateNumber()));
-
-    SparLog.info("Activity, Replicate and TestResult with riaKey {} ", riaKey + "deleted!");
   }
 }

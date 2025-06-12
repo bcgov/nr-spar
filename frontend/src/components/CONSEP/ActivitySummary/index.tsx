@@ -5,7 +5,7 @@ import {
   RadioButtonSkeleton
 } from '@carbon/react';
 
-import { ActivitySummaryType } from '../../../types/ActivitySummaryType';
+import { ActivitySummaryType } from '../../../types/consep/TestingActivityType';
 
 import './styles.scss';
 

@@ -270,47 +270,6 @@ public class PurityTestsEndpoint {
   }
 
   /**
-   * Delete data from a purity test entry.
-   *
-   * @param riaKey The identifier for the test activities related data
-   */
-  @DeleteMapping(value = "/{riaKey}", produces = "application/json")
-  @Operation(
-      summary = "Delete data from purity test entry",
-      description =
-          "Remove data from all tables that contains purity test information")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "The purity test was successfully deleted",
-          content =
-              @Content(
-                  schema = @Schema(implementation = Void.class))),
-      @ApiResponse(
-          responseCode = "401",
-          description = "Access token is missing or invalid",
-          content =
-              @Content(
-                  schema = @Schema(implementation = Void.class))),
-      @ApiResponse(
-          responseCode = "404",
-          description = "The purity test was not found",
-          content =
-              @Content(
-                  schema = @Schema(implementation = Void.class)))
-  })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
-  public void deleteFullPurityTest(
-      @Parameter(
-          name = "riaKey",
-          in = ParameterIn.PATH,
-          description = "Identification key for testing activities data",
-          required = true)
-      @PathVariable BigDecimal riaKey) {
-    purityTestService.deleteFullPurityTest(riaKey);
-  }
-
-  /**
    * Delete a single replicate entry.
    *
    * @param riaKey The identifier for the testing activities data.
@@ -360,6 +319,12 @@ public class PurityTestsEndpoint {
     return replicateNumber;
   }
 
+  /**
+   * Delete a multiple replicates entries.
+   *
+   * @param riaKey The identifier for the testing activities data.
+   * @param replicateNumbers An array of numbers with replicate numbers to be deleted.
+   */
   @DeleteMapping(value = "/{riaKey}/replicates", produces = "application/json")
   @Operation(
       summary = "Delete replicate entries in bulk",

@@ -59,7 +59,9 @@ const ApiConfig = {
 
   seedlotFromOracleDbBySeedlotNumber: `${oracleServerHost}/api/seedlot/{seedlotNumber}`,
 
-  moistureContent: `${oracleServerHost}/api/moisture-content-cone`
+  moistureContent: `${oracleServerHost}/api/moisture-content-cone`,
+
+  purityTest: `${oracleServerHost}/api/purity-tests`
 };
 
 export default ApiConfig;

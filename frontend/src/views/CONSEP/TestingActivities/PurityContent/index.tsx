@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+import Alert from '@mui/material/Alert';
 import {
   FlexGrid,
   Row,
@@ -20,21 +24,141 @@ import {
   Add,
   TrashCan
 } from '@carbon/icons-react';
-import ROUTES from '../../../../routes/constants';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
-import { ImpurityType } from './definations';
-import ButtonGroup from '../ButtonGroup';
 import StatusTag from '../../../../components/StatusTag';
 
+import { ActivityRecordType, TestingActivityType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
+import testingActivitiesAPI from '../../../../api-service/testingActivitiesAPI';
+import { getSeedlotById } from '../../../../api-service/seedlotAPI';
+import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
+import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
+import ROUTES from '../../../../routes/constants';
+
+import ActivityResult from '../ActivityResult';
+import ButtonGroup from '../ButtonGroup';
+
+import { categoryMap, categoryMapReverse } from '../SharedConstants';
+import { ImpurityType } from './definitions';
 import {
   DATE_FORMAT, fieldsConfig
 } from './constants';
-
 import './styles.scss';
 
 const PurityContent = () => {
+  const navigate = useNavigate();
+  const { riaKey } = useParams();
+
+  const [testActivity, setTestActivity] = useState<TestingActivityType>();
+  const [seedlotNumber, setSeedlotNumber] = useState<string>('');
+  const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
+  const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
+  const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+
+  const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+
+  const testActivityQuery = useQuery({
+    queryKey: ['riaKey', riaKey],
+    queryFn: () => testingActivitiesAPI('purityTest', 'getDataByRiaKey', { riaKey }),
+    refetchOnMount: true
+  });
+
+  const seedlotQuery = useQuery({
+    queryKey: ['seedlotNumber', seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
+    enabled: seedlotNumber !== '',
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
+  });
+
+  const updateActivityRecordMutation = useMutation({
+    mutationFn: (record?: ActivityRecordType) => testingActivitiesAPI(
+      'purityTest',
+      'updateActivityRecord',
+      { riaKey, record }
+    ),
+    onSuccess: () => {
+      setAlert({ isSuccess: true, message: 'Activity record updated successfully' });
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    },
+    onError: (error) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to update activity record: ${(error as AxiosError).message}`
+      });
+    }
+  });
+
+  useEffect(() => {
+    if (!riaKey) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    }
+  }, [riaKey]);
+
+  useEffect(() => {
+    if (
+      testActivityQuery.isFetched
+      && testActivityQuery.status === 'error'
+      && (testActivityQuery.error as AxiosError).response?.status === 404
+    ) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    } else if (testActivityQuery.data) {
+      setTestActivity(testActivityQuery.data);
+      setSeedlotNumber(testActivityQuery.data.seedlotNumber);
+      const activityRecordData = {
+        testCategoryCode: testActivityQuery.data.testCategoryCode,
+        riaComment: testActivityQuery.data.riaComment,
+        actualBeginDateTime: testActivityQuery.data.actualBeginDateTime,
+        actualEndDateTime: testActivityQuery.data.actualEndDateTime
+      };
+      setActivityRecord(activityRecordData);
+    }
+  }, [testActivityQuery.status, testActivityQuery.isFetched]);
+
+  useEffect(() => {
+    if (
+      seedlotQuery.isFetched
+      && seedlotQuery.status === 'error'
+      && (seedlotQuery.error as AxiosError).response?.status === 404
+    ) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    } else if (testActivity && seedlotQuery.data) {
+      setActivitySummary(
+        {
+          activity: testActivity.activityType,
+          seedlotNumber,
+          requestId: testActivity.requestId,
+          speciesAndClass: `${seedlotQuery.data.seedlot.vegetationCode} | ${seedlotQuery.data.seedlot.geneticClass.geneticClassCode}`,
+          testResult: testActivity.moisturePct.toString()
+        }
+      );
+    }
+  }, [seedlotQuery.status, seedlotQuery.isFetched, testActivity]);
+
+  const handleAlert = (isSuccess: boolean, message: string) => {
+    setAlert({ isSuccess, message });
+    setTimeout(
+      () => {
+        setAlert(null);
+      },
+      3000
+    );
+  };
+
+  const handleUpdateActivityRecord = (record: ActivityRecordType) => {
+    setActivityRecord({
+      ...activityRecord,
+      ...record
+    });
+    updateActivityRecordMutation.mutate({
+      ...activityRecord,
+      ...record
+    });
+  };
+
   const [impurities, setImpurities] = useState<{ [key: number]: ImpurityType[] }>({
     1: [], // Impurities for replicate 1
     2: [] // Impurities for replicate 2
@@ -77,7 +201,39 @@ const PurityContent = () => {
     setAverage(7.8); // Set the test average value from the API response
   };
 
-  const impurityDropdown = (replicate: number) => impurities[replicate].map((impurity) => (
+  const buttons = [
+    {
+      id: 'calculate-average',
+      text: 'Calculate average',
+      kind: 'primary',
+      size: 'lg',
+      icon: Calculator,
+      onClick: handleCalculateAverage
+    },
+    {
+      id: 'complete-test',
+      text: 'Complete test',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Checkmark
+    },
+    {
+      id: 'accept-test',
+      text: 'Accept test',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: CheckmarkOutline
+    },
+    {
+      id: 'test-history',
+      text: 'Test history',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Time
+    }
+  ];
+
+  const impurityPerReplicate = (replicate: number) => impurities[replicate].map((impurity) => (
     <Row key={impurity.id} className="consep-impurity-content">
       <Column sm={1} md={1} lg={2} xlg={2}>
         <TextInput
@@ -112,7 +268,7 @@ const PurityContent = () => {
     </Row>
   ));
 
-  const replicateSection = (replicate: number) => (
+  const impuritySection = (replicate: number) => (
     <Column sm={4} md={4} lg={8} xlg={8}>
       {/* Title for the replicate section */}
       <Row className="consep-purity-content-replicate">
@@ -126,7 +282,7 @@ const PurityContent = () => {
       </Row>
       {/* Render dropdowns for the specific replicate */}
       {
-        impurityDropdown(replicate)
+        impurityPerReplicate(replicate)
       }
       <Row className="consep-impurity-button">
         <Column sm={4} md={4} lg={10}>
@@ -153,59 +309,67 @@ const PurityContent = () => {
     </Column>
   );
 
-  const buttons = [
-    {
-      id: 'calculate-average',
-      text: 'Calculate average',
-      kind: 'primary',
-      size: 'lg',
-      icon: Calculator,
-      onClick: handleCalculateAverage
-    },
-    {
-      id: 'complete-test',
-      text: 'Complete test',
-      kind: 'tertiary',
-      size: 'lg',
-      icon: Checkmark
-    },
-    {
-      id: 'accept-test',
-      text: 'Accept test',
-      kind: 'tertiary',
-      size: 'lg',
-      icon: CheckmarkOutline
-    },
-    {
-      id: 'test-history',
-      text: 'Test history',
-      kind: 'tertiary',
-      size: 'lg',
-      icon: Time
-    }
-  ];
-
   return (
     <FlexGrid className="consep-purity-content">
+      {
+        alert?.message
+        && (
+          <Alert
+            className="consep-moisture-content-alert"
+            severity={alert?.isSuccess ? 'success' : 'error'}
+          >
+            {alert?.message}
+          </Alert>
+        )
+      }
       <Row className="consep-purity-content-breadcrumb">
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="consep-purity-content-title">
-        <PageTitle title={fieldsConfig.titleSection.title} />
+        <PageTitle title={`${fieldsConfig.titleSection.title} ${seedlotNumber}`} />
         <>
-          <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
-          <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
+          {
+            testActivity?.testCompleteInd
+              ? (
+                <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
+              )
+              : null
+          }
+          {
+            testActivity?.acceptResult
+              ? (
+                <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
+              )
+              : null
+          }
         </>
       </Row>
       <Row className="consep-purity-content-activity-summary">
-        <ActivitySummary item={fieldsConfig.activityItem} isFetching={false} />
+        <ActivitySummary
+          item={activitySummary}
+          isFetching={testActivityQuery.isFetching || seedlotQuery.isFetching}
+        />
+      </Row>
+      <Row className="consep-purity-content-activity-result">
+        <ActivityResult
+          replicateType="purityTest"
+          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '')}
+          riaKey={Number(riaKey)}
+          isEditable={!testActivity?.testCompleteInd}
+          setAlert={handleAlert}
+          tableBodyRef={tableBodyRef}
+        />
       </Row>
       <Row className="consep-purity-content-date-picker">
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
-            onChange={() => {}}
+            onChange={(e: Array<Date>) => {
+              handleUpdateActivityRecord({
+                actualBeginDateTime: e[0].toISOString()
+              });
+            }}
           >
             <DatePickerInput
               id="purity-content-start-date-picker"
@@ -213,8 +377,7 @@ const PurityContent = () => {
               placeholder="yyyy/mm/dd"
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
-              onClick={() => {}}
-              onChange={() => {}}
+              value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
             />
@@ -224,7 +387,11 @@ const PurityContent = () => {
           <DatePicker
             datePickerType="single"
             dateFormat="Y/m/d"
-            onChange={() => {}}
+            onChange={(e: Array<Date>) => {
+              handleUpdateActivityRecord({
+                actualEndDateTime: e[0].toISOString()
+              });
+            }}
           >
             <DatePickerInput
               id="purity-content-end-date-picker"
@@ -232,8 +399,7 @@ const PurityContent = () => {
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
-              onClick={() => {}}
-              onChange={() => {}}
+              value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
             />
@@ -248,7 +414,19 @@ const PurityContent = () => {
             placeholder={fieldsConfig.category.placeholder}
             titleText={fieldsConfig.category.title}
             invalidText={fieldsConfig.category.invalid}
-            onChange={() => {}}
+            value={
+              activityRecord?.testCategoryCode
+              && activityRecord.testCategoryCode in categoryMap
+                ? categoryMap[activityRecord.testCategoryCode as keyof typeof categoryMap]
+                : 'Quality assurance'
+            }
+            onChange={(e: { selectedItem: string }) => {
+              handleUpdateActivityRecord({
+                testCategoryCode: categoryMapReverse[
+                  e.selectedItem as keyof typeof categoryMapReverse
+                ]
+              });
+            }}
           />
         </Column>
       </Row>
@@ -259,10 +437,10 @@ const PurityContent = () => {
       </Row>
       <Row>
         {
-          replicateSection(1)
+          impuritySection(1)
         }
         {
-          replicateSection(2)
+          impuritySection(2)
         }
       </Row>
       <Row className="consep-purity-content-comments">
@@ -275,6 +453,12 @@ const PurityContent = () => {
             rows={1}
             maxCount={500}
             enableCounter
+            value={activityRecord?.riaComment}
+            onChange={(e: { target: { value: string } }) => {
+              handleUpdateActivityRecord({
+                riaComment: e.target.value
+              });
+            }}
           />
         </Column>
       </Row>

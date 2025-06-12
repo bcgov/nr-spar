@@ -31,7 +31,7 @@ public class PurityReplicateEntity {
   private BigDecimal otherSeedWeight;
 
   @Column(name = "INERT_MATTR_WEIGHT", precision = 7, scale = 3)
-  private BigDecimal containerWeight;
+  private BigDecimal inertMttrWeight;
 
   @Column(name = "REP_ACCEPTED_IND")
   private Integer replicateAccInd;
