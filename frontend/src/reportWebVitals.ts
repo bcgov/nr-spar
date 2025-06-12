@@ -1,5 +1,5 @@
 import {
-  onCLS, onFID, onFCP, onLCP, onTTFB
+  onCLS, onFCP, onINP, onLCP, onTTFB
 } from 'web-vitals';
 
 type ReportHandler = (metric: {
@@ -14,7 +14,7 @@ type ReportHandler = (metric: {
 const reportWebVitals = (onPerfEntry?: ReportHandler) => {
   if (onPerfEntry && typeof onPerfEntry === 'function') {
     onCLS(onPerfEntry);
-    onFID(onPerfEntry);
+    onINP(onPerfEntry);
     onFCP(onPerfEntry);
     onLCP(onPerfEntry);
     onTTFB(onPerfEntry);
