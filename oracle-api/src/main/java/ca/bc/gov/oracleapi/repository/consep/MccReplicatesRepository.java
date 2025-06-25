@@ -69,4 +69,21 @@ public interface MccReplicatesRepository extends JpaRepository<MccReplicateEntit
         @Param("riaKey") BigDecimal riaKey,
         @Param("testReplicateNumbers") List<Integer> testReplicateNumbers
     );
+
+  @Modifying
+  @Transactional
+  @Query(value = """
+      MERGE INTO CONSEP.CNS_T_TEST_REP_MC t
+      USING (
+        SELECT
+          RIA_SKEY,
+          TEST_REPLICATE_NO,
+          ROW_NUMBER() OVER (ORDER BY TEST_REPLICATE_NO) AS new_number
+        FROM CONSEP.CNS_T_TEST_REP_MC
+        WHERE RIA_SKEY = :riaKey
+      ) src
+      ON (t.RIA_SKEY = src.RIA_SKEY AND t.TEST_REPLICATE_NO = src.TEST_REPLICATE_NO)
+      WHEN MATCHED THEN UPDATE SET t.TEST_REPLICATE_NO = src.new_number
+      """, nativeQuery = true)
+  void reorderTestReplicateNumbers(@Param("riaKey") BigDecimal riaKey);
 }

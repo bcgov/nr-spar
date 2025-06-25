@@ -282,6 +282,7 @@ public class MoistureContentService {
     }
 
     replicateRepository.deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
+    replicateRepository.reorderTestReplicateNumbers(riaKey);
 
     SparLog.info("Replicate {} with riaKey {} ", replicateNumber, riaKey + "deleted!");
   }
