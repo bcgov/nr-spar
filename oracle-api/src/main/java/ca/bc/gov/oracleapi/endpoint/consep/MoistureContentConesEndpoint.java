@@ -294,7 +294,7 @@ public class MoistureContentConesEndpoint {
                   schema = @Schema(implementation = Void.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
-  public Integer deleteReplicate(
+  public Optional<MoistureContentConesDto> deleteReplicate(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
@@ -309,8 +309,7 @@ public class MoistureContentConesEndpoint {
           required = true)
       @PathVariable
           Integer replicateNumber) {
-    moistureContentService.deleteMccReplicate(riaKey, replicateNumber);
-    return replicateNumber;
+    return moistureContentService.deleteMccReplicate(riaKey, replicateNumber);
   }
 
   /**

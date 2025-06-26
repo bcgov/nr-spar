@@ -265,7 +265,7 @@ public class MoistureContentService {
    * @param replicateNumber the replicate number to be deleted
    */
   @Transactional
-  public void deleteMccReplicate(
+  public Optional<MoistureContentConesDto> deleteMccReplicate(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber
   ) {
@@ -285,5 +285,6 @@ public class MoistureContentService {
     replicateRepository.reorderTestReplicateNumbers(riaKey);
 
     SparLog.info("Replicate {} with riaKey {} ", replicateNumber, riaKey + "deleted!");
+    return getMoistureConeContentData(riaKey);
   }
 }
