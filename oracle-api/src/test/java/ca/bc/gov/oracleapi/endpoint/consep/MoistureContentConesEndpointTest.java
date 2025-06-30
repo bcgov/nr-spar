@@ -461,7 +461,7 @@ class MoistureContentConesEndpointTest {
   void deleteReplicate_shouldSucceed() throws Exception {
     BigDecimal riaKey = new BigDecimal(1234567890);
     Integer replicateNumber = 1;
-        MoistureContentConesDto mockDto = new MoistureContentConesDto(
+    MoistureContentConesDto mockDto = new MoistureContentConesDto(
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", "ACT", "TST", "Comment",
         LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
