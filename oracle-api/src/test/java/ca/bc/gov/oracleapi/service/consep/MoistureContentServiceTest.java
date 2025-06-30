@@ -516,9 +516,11 @@ class MoistureContentServiceTest {
         Optional.of(mockReplicate));
 
     doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
+    doNothing().when(replicateRepository).reorderTestReplicateNumbers(riaKey);
     assertDoesNotThrow(() -> moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
 
     verify(replicateRepository, times(1)).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
+    verify(replicateRepository, times(1)).reorderTestReplicateNumbers(riaKey);
   }
 
   @Test
