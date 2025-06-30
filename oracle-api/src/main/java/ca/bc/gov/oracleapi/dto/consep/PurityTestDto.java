@@ -55,7 +55,8 @@ public record PurityTestDto(
 
     // Replicates fields
     @Schema(description = "Replicates information")
-    List<PurityReplicateDto> replicatesList) {
+    List<PurityReplicateDto> replicatesList,
 
-    // TODO: add impurities field
-}
+    // Replicates fields
+    @Schema(description = "Replicates information")
+    List<PurityDebrisDto> debrisList) {}

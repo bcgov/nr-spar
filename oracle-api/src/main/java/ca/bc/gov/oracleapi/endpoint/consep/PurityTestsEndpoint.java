@@ -2,9 +2,11 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.PurityDebrisEntity;
 import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
@@ -367,5 +369,101 @@ public class PurityTestsEndpoint {
             List<Integer> replicateNumbers) {
     purityTestService.deletePurityReplicates(riaKey, replicateNumbers);
     return replicateNumbers;
+  }
+
+  /**
+   * Updates purity debris entities.
+   *
+   * @param riaKey The identifier for the test activities related data.
+   * @param debrisFormDtos A list of {@link PurityDebrisFormDto} containing the new values.
+   * @return the {@link PurityDebrisEntity} updated
+   */
+  @PatchMapping(
+      value = "debris/{riaKey}",
+      consumes = "application/json",
+      produces = "application/json")
+  @Operation(
+      summary = "Update the fields of a debris entity",
+      description = "Updates a debris."
+  )
+  @ApiResponses(
+      value = {
+          @ApiResponse(responseCode = "200", description = "Field successfully updated"),
+          @ApiResponse(responseCode = "400", description = "Invalid object"),
+          @ApiResponse(responseCode = "404", description = "Replicate not found")
+      })
+  public List<PurityDebrisEntity> updateDebrisField(
+      @Parameter(
+          name = "riaKey",
+          in = ParameterIn.PATH,
+          description = "Identification key for test activity data",
+          required = true)
+      @PathVariable
+      BigDecimal riaKey,
+      @Valid
+      @RequestBody
+      List<PurityDebrisFormDto> debrisFormDtos) {
+
+    return purityTestService.updateDebris(riaKey, debrisFormDtos);
+  }
+
+  /**
+   * Delete a single debris entry.
+   *
+   * @param riaKey          The identifier for the testing activities data.
+   * @param replicateNumber The replicate number of the debris to be deleted.
+   * @param debrisRank      The rank of the debris to be deleted
+   */
+  @DeleteMapping(
+      value = "/debris/{riaKey}/{replicateNumber}/{debrisRank}",
+      produces = "application/json")
+  @Operation(
+      summary = "Delete a single debris entry",
+      description = "Removes a debris entry from the database using its identifiers.")
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "The debris entry was successfully deleted",
+          content =
+              @Content(
+                   schema = @Schema(implementation = Void.class))),
+      @ApiResponse(
+          responseCode = "401",
+          description = "Access token is missing or invalid",
+          content =
+              @Content(
+                  schema = @Schema(implementation = Void.class))),
+      @ApiResponse(
+          responseCode = "404",
+          description = "The debris entry was not found",
+          content =
+              @Content(
+                  schema = @Schema(implementation = Void.class)))
+  })
+  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  public Integer deleteDebris(
+      @Parameter(
+          name = "riaKey",
+          in = ParameterIn.PATH,
+          description = "Identification key for testing activities data",
+          required = true)
+      @PathVariable
+      BigDecimal riaKey,
+      @Parameter(
+          name = "replicateNumber",
+          in = ParameterIn.PATH,
+          description = "Number of the replicate the debris is assigned to",
+          required = true)
+      @PathVariable
+          Integer replicateNumber,
+      @Parameter(
+          name = "debrisRank",
+          in = ParameterIn.PATH,
+          description = "Rank of the debris to be deleted",
+          required = true)
+      @PathVariable
+          Integer debrisRank) {
+    purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank);
+    return replicateNumber;
   }
 }

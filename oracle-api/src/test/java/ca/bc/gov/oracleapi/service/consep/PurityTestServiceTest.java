@@ -331,7 +331,8 @@ class PurityTestServiceTest {
     when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers))
         .thenReturn(mockFoundReplicates);
 
-    doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
+    doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumbers(
+        riaKey, replicateNumbers);
     assertDoesNotThrow(() -> purityTestService.deletePurityReplicates(
         riaKey, replicateNumbers));
 

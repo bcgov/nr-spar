@@ -1,15 +1,19 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.PurityDebrisEntity;
 import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.exception.InvalidTestActivityKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.PurityDebrisRepository;
 import ca.bc.gov.oracleapi.repository.consep.PurityReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
@@ -32,13 +36,13 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class PurityTestService {
 
-  //TODO: Add everything related to impurities here (probably)
-
   private final ActivityRepository activityRepository;
 
   private final TestResultRepository testResultRepository;
 
   private final PurityReplicateRepository replicateRepository;
+
+  private final PurityDebrisRepository debrisRepository;
 
   // The maximum number of replicates is 8 and the entries are sequencial,
   // so we can use a fixed list to fetch the data for the replicates.
@@ -59,6 +63,9 @@ public class PurityTestService {
     List<PurityReplicateEntity> replicates =
         replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
+    List<PurityDebrisEntity> debris =
+        debrisRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
+
     if (activityData.isEmpty() || testResultData.isEmpty()) {
       SparLog.warn("No data found for RIA_SKEY: {}", riaKey);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No data found for given RIA_SKEY");
@@ -75,7 +82,14 @@ public class PurityTestService {
             curReplicate.getOverrideReason()))
         .collect(Collectors.toList());
 
-    // TODO: add impurities data to the dto object
+    List<PurityDebrisDto> debrisList = debris.stream().map(
+        (curDebris) -> new PurityDebrisDto(
+            curDebris.getId().getRiaKey(),
+            curDebris.getId().getReplicateNumber(),
+            curDebris.getDebrisSeqNumber(),
+            curDebris.getDebrisRank(),
+            curDebris.getDebrisTypeCode()))
+        .collect(Collectors.toList());
 
     PurityTestDto purityContent =
         new PurityTestDto(
@@ -91,7 +105,8 @@ public class PurityTestService {
             activityData.get().getRiaComment(),
             activityData.get().getActualBeginDateTime(),
             activityData.get().getActualEndDateTime(),
-            replicatesList);
+            replicatesList,
+            debrisList);
 
     SparLog.info("Purity data correctly fetched");
     return Optional.of(purityContent);
@@ -148,6 +163,57 @@ public class PurityTestService {
     SparLog.info("Updated {} purity replicates for riaKey: {}", savedReplicates.size(), riaKey);
 
     return savedReplicates;
+  }
+
+  /**
+   * This function updates the purity debris, either by changing the existing ones
+   * or adding new debris requested by the user.
+   *
+   * @param riaKey the identifier key for all table related to test activities
+   * @param debrisFormDtos an object with the values to be updated
+   */
+  @Transactional
+  public List<PurityDebrisEntity> updateDebris(
+      @NonNull BigDecimal riaKey,
+      @NonNull List<PurityDebrisFormDto> debrisFormDtos
+  ) {
+    SparLog.info("Updating purity debris with the riaKey: {}", riaKey);
+
+    List<Integer> debrisNumbers = debrisFormDtos.stream()
+        .map(PurityDebrisFormDto::replicateNumber)
+        .collect(Collectors.toList());
+
+    List<PurityDebrisEntity> existingDebris =
+        debrisRepository.findByRiaKeyAndReplicateNumbers(riaKey, debrisNumbers);
+
+    Map<Integer, PurityDebrisEntity> debrisMap = existingDebris.stream()
+        .collect(Collectors.toMap(rep -> rep.getId().getReplicateNumber(), Function.identity()));
+
+    List<PurityDebrisEntity> updatedDebris = new ArrayList<>();
+
+    for (PurityDebrisFormDto dto : debrisFormDtos) {
+      int replicateNumber = dto.replicateNumber();
+
+      PurityDebrisEntity debrisEntity = debrisMap.getOrDefault(
+          replicateNumber, new PurityDebrisEntity());
+
+      if (debrisEntity.getId() == null) {
+        debrisEntity.setId(new ReplicateId(riaKey, replicateNumber));
+        SparLog.info(
+            "Debris for replicate number {} not found for riaKey {}. Creating new debris.",
+            replicateNumber, riaKey);
+      }
+
+      debrisEntity.setDebrisRank(dto.debrisRank());
+      debrisEntity.setDebrisTypeCode(dto.debrisTypeCode());
+
+      updatedDebris.add(debrisEntity);
+    }
+
+    List<PurityDebrisEntity> savedDebris = debrisRepository.saveAll(updatedDebris);
+    SparLog.info("Updated {} purity debris for riaKey: {}", savedDebris.size(), riaKey);
+
+    return savedDebris;
   }
 
   /**
@@ -259,5 +325,40 @@ public class PurityTestService {
 
     SparLog.info("Purity replicate {} with riaKey {} ",
         replicateNumber, riaKey + "deleted!");
+  }
+
+  /**
+   * Deletes a single debris entry given an id and rank.
+   *
+   * @param riaKey          the identifier key for all table related to tests activities
+   * @param replicateNumber the replicate number of the debris to be deleted
+   * @param debrisRank      the rank of the debris to be deleted
+   */
+  @Transactional
+  public void deletePurityDebris(
+      @NonNull BigDecimal riaKey,
+      @NonNull Integer replicateNumber,
+      @NonNull Integer debrisRank
+  ) {
+    SparLog.info("Deleting single debris with the "
+        + "riaKey: {}, replicateNumber: {} and rank: {}", riaKey, replicateNumber, debrisRank);
+
+    Optional<PurityDebrisEntity> debrisToDelete =
+        debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndDebrisRank(
+          riaKey,
+          replicateNumber,
+          debrisRank
+        );
+
+    if (debrisToDelete.isEmpty()) {
+      throw new InvalidTestActivityKeyException();
+    }
+
+    debrisRepository.deleteByRank(riaKey, replicateNumber, debrisRank);
+    SparLog.info("Debris {} with riaKey {} and rank {} ",
+        replicateNumber, riaKey, debrisRank + "deleted!");
+
+    debrisRepository.shiftRanksDown(riaKey, replicateNumber, debrisRank);
+    SparLog.info("Updated all debris below the removed rank {}", debrisRank);
   }
 }
