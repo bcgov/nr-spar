@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
@@ -100,6 +101,15 @@ class PurityTestsEndpointTest {
         1,
         "Divergent weights."
     );
+
+    PurityDebrisDto debris1 = new PurityDebrisDto(
+        new BigDecimal(1234567890),
+        1,
+        null,
+        1,
+        "STD"
+    );
+
     List<PurityReplicateDto> replicatesList = List.of(replicate1, replicate2);
     Optional<PurityTestDto> purityContent = Optional.of(
         new PurityTestDto(
@@ -115,7 +125,8 @@ class PurityTestsEndpointTest {
             "Comment for this test",
             LocalDateTime.parse("2013-08-01T00:00:00"),
             LocalDateTime.parse("2013-08-01T00:00:00"),
-            replicatesList
+            replicatesList,
+            List.of(debris1)
         ));
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
