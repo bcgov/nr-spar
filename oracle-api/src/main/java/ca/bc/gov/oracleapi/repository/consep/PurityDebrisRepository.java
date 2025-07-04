@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.repository.consep;
 
 import ca.bc.gov.oracleapi.entity.consep.PurityDebrisEntity;
-import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
+import ca.bc.gov.oracleapi.entity.consep.idclass.DebrisId;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,7 +15,7 @@ import org.springframework.data.repository.query.Param;
  * This interface enables the purities test's debris entity from consep to be retrieved
  * from the database.
  */
-public interface PurityDebrisRepository extends JpaRepository<PurityDebrisEntity, ReplicateId> {
+public interface PurityDebrisRepository extends JpaRepository<PurityDebrisEntity, DebrisId> {
 
   @Query(
       value = """
@@ -43,7 +43,7 @@ public interface PurityDebrisRepository extends JpaRepository<PurityDebrisEntity
         @Param("testReplicateNumber") Integer testReplicateNumber
     );
 
-  Optional<PurityDebrisEntity> findByIdRiaKeyAndIdReplicateNumberAndDebrisRank(
+  Optional<PurityDebrisEntity> findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
       BigDecimal riaKey,
       Integer replicateNumber,
       Integer debrisRank);

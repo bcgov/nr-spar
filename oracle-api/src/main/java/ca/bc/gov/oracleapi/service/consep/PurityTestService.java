@@ -10,6 +10,7 @@ import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.PurityDebrisEntity;
 import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.entity.consep.idclass.DebrisId;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.exception.InvalidTestActivityKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
@@ -87,7 +88,7 @@ public class PurityTestService {
             curDebris.getId().getRiaKey(),
             curDebris.getId().getReplicateNumber(),
             curDebris.getDebrisSeqNumber(),
-            curDebris.getDebrisRank(),
+            curDebris.getId().getDebrisRank(),
             curDebris.getDebrisTypeCode()))
         .collect(Collectors.toList());
 
@@ -179,41 +180,55 @@ public class PurityTestService {
   ) {
     SparLog.info("Updating purity debris with the riaKey: {}", riaKey);
 
-    List<Integer> debrisNumbers = debrisFormDtos.stream()
-        .map(PurityDebrisFormDto::replicateNumber)
-        .collect(Collectors.toList());
-
-    List<PurityDebrisEntity> existingDebris =
-        debrisRepository.findByRiaKeyAndReplicateNumbers(riaKey, debrisNumbers);
-
-    Map<Integer, PurityDebrisEntity> debrisMap = existingDebris.stream()
-        .collect(Collectors.toMap(rep -> rep.getId().getReplicateNumber(), Function.identity()));
-
-    List<PurityDebrisEntity> updatedDebris = new ArrayList<>();
+    List<PurityDebrisEntity> debrisToSave = new ArrayList<>();
 
     for (PurityDebrisFormDto dto : debrisFormDtos) {
-      int replicateNumber = dto.replicateNumber();
+      Integer replicateNumber = dto.replicateNumber();
+      Integer debrisRank = dto.debrisRank();
+      String newTypeCode = dto.debrisTypeCode();
 
-      PurityDebrisEntity debrisEntity = debrisMap.getOrDefault(
-          replicateNumber, new PurityDebrisEntity());
+      Optional<PurityDebrisEntity> optionalDebris =
+          debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
+              riaKey, replicateNumber, debrisRank
+          );
 
-      if (debrisEntity.getId() == null) {
-        debrisEntity.setId(new ReplicateId(riaKey, replicateNumber));
-        SparLog.info(
-            "Debris for replicate number {} not found for riaKey {}. Creating new debris.",
-            replicateNumber, riaKey);
+      if (optionalDebris.isPresent()) {
+        PurityDebrisEntity debris = optionalDebris.get();
+        SparLog.info("Updating debris for replicate {}, rank {}: setting type from {} to {}",
+            replicateNumber, debrisRank, debris.getDebrisTypeCode(), newTypeCode);
+
+        DebrisId newId = new DebrisId(
+            riaKey,
+            replicateNumber,
+            debrisRank
+        );
+
+        debris.setId(newId);
+        debris.setDebrisTypeCode(newTypeCode);
+        debrisToSave.add(debris);
+
+      } else {
+        DebrisId newId = new DebrisId(
+            riaKey,
+            replicateNumber,
+            debrisRank
+        );
+
+        PurityDebrisEntity newDebris = new PurityDebrisEntity();
+        newDebris.setId(newId);
+        newDebris.setDebrisTypeCode(newTypeCode);
+
+        SparLog.info("Creating new debris for replicate {}, rank {}, type {}",
+            replicateNumber, debrisRank, newTypeCode);
+
+        debrisToSave.add(newDebris);
       }
-
-      debrisEntity.setDebrisRank(dto.debrisRank());
-      debrisEntity.setDebrisTypeCode(dto.debrisTypeCode());
-
-      updatedDebris.add(debrisEntity);
     }
 
-    List<PurityDebrisEntity> savedDebris = debrisRepository.saveAll(updatedDebris);
-    SparLog.info("Updated {} purity debris for riaKey: {}", savedDebris.size(), riaKey);
+    List<PurityDebrisEntity> saved = debrisRepository.saveAll(debrisToSave);
 
-    return savedDebris;
+    SparLog.info("Saved {} purity debris records for riaKey: {}", saved.size(), riaKey);
+    return saved;
   }
 
   /**
@@ -344,7 +359,7 @@ public class PurityTestService {
         + "riaKey: {}, replicateNumber: {} and rank: {}", riaKey, replicateNumber, debrisRank);
 
     Optional<PurityDebrisEntity> debrisToDelete =
-        debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndDebrisRank(
+        debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
           riaKey,
           replicateNumber,
           debrisRank
@@ -355,8 +370,8 @@ public class PurityTestService {
     }
 
     debrisRepository.deleteByRank(riaKey, replicateNumber, debrisRank);
-    SparLog.info("Debris {} with riaKey {} and rank {} ",
-        replicateNumber, riaKey, debrisRank + "deleted!");
+    SparLog.info("Debris {} with riaKey {} and rank {}",
+        replicateNumber, riaKey, debrisRank + " deleted!");
 
     debrisRepository.shiftRanksDown(riaKey, replicateNumber, debrisRank);
     SparLog.info("Updated all debris below the removed rank {}", debrisRank);

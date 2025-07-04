@@ -42,8 +42,6 @@ import org.springframework.web.server.ResponseStatusException;
     description = "Resource to retrieve Purity Tests data.")
 public class PurityTestsEndpoint {
 
-  //TODO: Add everything related to impurities here (probably)
-
   private PurityTestService purityTestService;
 
   private ActivityService activityService;
