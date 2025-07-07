@@ -3,9 +3,7 @@ package ca.bc.gov.oracleapi.service.consep;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -510,33 +508,17 @@ class MoistureContentServiceTest {
   @Test
   @DisplayName("Delete a single replicate should succeed")
   void deleteMccReplicate_shouldSucceed() {
-    BigDecimal riaKey = new BigDecimal("1234567890");
+    BigDecimal riaKey = new BigDecimal(1234567890);
     Integer replicateNumber = 1;
-    MccReplicateEntity replicateEntity = new MccReplicateEntity();
-    replicateEntity.setId(new ReplicateId(riaKey, replicateNumber));
+    MccReplicateEntity mockReplicate = new MccReplicateEntity();
 
     when(replicateRepository.findSingleReplicate(riaKey, replicateNumber)).thenReturn(
-        Optional.of(replicateEntity));
+        Optional.of(mockReplicate));
 
     doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
-    doNothing().when(replicateRepository).reorderTestReplicateNumbers(riaKey);
+    assertDoesNotThrow(() -> moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
 
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(activityEntity));
-    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultEntity));
-    when(replicateRepository.findByRiaKeyAndReplicateNumbers(eq(riaKey), anyList()))
-        .thenReturn(Collections.emptyList()); // Return empty list after deletion
-
-    Optional<MoistureContentConesDto> result =
-        moistureContentService.deleteMccReplicate(riaKey, replicateNumber);
-
-    assertNotNull(result);
-    assertTrue(result.isPresent());
-    assertTrue(result.get().replicatesList().isEmpty());
-
-    verify(replicateRepository, times(1)).findSingleReplicate(riaKey, replicateNumber);
     verify(replicateRepository, times(1)).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
-    verify(replicateRepository, times(1)).reorderTestReplicateNumbers(riaKey);
-    verify(activityRepository, times(1)).findById(riaKey);
   }
 
   @Test

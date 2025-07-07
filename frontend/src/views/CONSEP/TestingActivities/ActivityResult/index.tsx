@@ -56,7 +56,8 @@ const useReplicates = (
     ),
     onSuccess: (data) => {
       setAlert(true, 'Replicate deleted successfully');
-      const updatedList = data.data.replicatesList;
+      const replicateNumber = data.data;
+      const updatedList = replicatesList.filter((item) => item.replicateNumber !== replicateNumber);
       lastCheckedListRef.current = JSON.stringify(updatedList);
       setReplicatesList(updatedList);
     }
