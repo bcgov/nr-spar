@@ -11,15 +11,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.PurityDebrisEntity;
 import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.entity.consep.idclass.DebrisId;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.exception.InvalidTestActivityKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.PurityDebrisRepository;
 import ca.bc.gov.oracleapi.repository.consep.PurityReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
@@ -55,6 +59,9 @@ class PurityTestServiceTest {
   @Mock
   private PurityReplicateRepository replicateRepository;
 
+  @Mock
+  private PurityDebrisRepository debrisRepository;
+
   @Autowired
   @InjectMocks
   private PurityTestService purityTestService;
@@ -62,6 +69,8 @@ class PurityTestServiceTest {
   private BigDecimal riaKey;
   private ActivityEntity activityEntity;
   private TestResultEntity testResultEntity;
+  private Integer replicateNumber = 1;
+  private Integer debrisRank = 2;
 
   @BeforeEach
   void setUp() {
@@ -205,6 +214,46 @@ class PurityTestServiceTest {
 
     verify(replicateRepository).findByRiaKeyAndReplicateNumbers(riaKey, List.of(1));
     verify(replicateRepository).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("Update existing debris")
+  void updateDebris_shouldUpdateExisting() {
+    DebrisId oldId = new DebrisId(riaKey, replicateNumber, debrisRank);
+    PurityDebrisEntity existing = new PurityDebrisEntity();
+    existing.setId(oldId);
+    existing.setDebrisTypeCode("OLD");
+
+    when(debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
+      riaKey, replicateNumber, debrisRank)).thenReturn(Optional.of(existing));
+    when(debrisRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    PurityDebrisFormDto formDto = new PurityDebrisFormDto(
+        replicateNumber, debrisRank, "NEW"
+    );
+
+    List<PurityDebrisEntity> result = purityTestService.updateDebris(riaKey, List.of(formDto));
+
+    assertEquals(1, result.size());
+    assertEquals("NEW", result.get(0).getDebrisTypeCode());
+  }
+
+  @Test
+  @DisplayName("Create new debris if not found")
+  void updateDebris_shouldCreateIfNotFound() {
+    PurityDebrisFormDto formDto = new PurityDebrisFormDto(
+        replicateNumber, debrisRank, "ABC"
+    );
+
+    when(debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
+        riaKey, replicateNumber, debrisRank)).thenReturn(Optional.empty());
+    when(debrisRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    List<PurityDebrisEntity> result = purityTestService.updateDebris(riaKey, List.of(formDto));
+
+    assertEquals(1, result.size());
+    assertEquals("ABC", result.get(0).getDebrisTypeCode());
+    assertEquals(riaKey, result.get(0).getId().getRiaKey());
   }
 
   @Test
@@ -353,5 +402,32 @@ class PurityTestServiceTest {
 
     verify(replicateRepository, never())
         .deleteByRiaKeyAndReplicateNumbers(any(), any());
+  }
+
+  @Test
+  @DisplayName("Delete successfully when debris exists")
+  void deletePurityDebris_shouldSucceed() {
+    DebrisId id = new DebrisId(riaKey, replicateNumber, debrisRank);
+    PurityDebrisEntity existingDebris = new PurityDebrisEntity();
+    existingDebris.setId(id);
+
+    when(debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
+        riaKey, replicateNumber, debrisRank)).thenReturn(Optional.of(existingDebris));
+
+    doNothing().when(debrisRepository).deleteByRank(riaKey, replicateNumber, debrisRank);
+    when(debrisRepository.shiftRanksDown(riaKey, replicateNumber, debrisRank)).thenReturn(1);
+
+    assertDoesNotThrow(() -> purityTestService.deletePurityDebris(
+        riaKey, replicateNumber, debrisRank));
+  }
+
+  @Test
+  @DisplayName("Delete debris should throw an exception when not found")
+  void deletePurityDebris_shouldThrowIfNotFound() {
+    when(debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
+        riaKey, replicateNumber, debrisRank)).thenReturn(Optional.empty());
+
+    assertThrows(InvalidTestActivityKeyException.class, () ->
+        purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank));
   }
 }
