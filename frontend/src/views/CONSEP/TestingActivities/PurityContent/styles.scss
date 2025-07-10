@@ -1,4 +1,6 @@
+@use '@carbon/type';
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
 
 .consep-purity-content-title {
   justify-content: flex-start;
@@ -114,4 +116,18 @@
 
 .consep-purity-content-comments > div {
   padding: 0rem;
+}
+
+.action-modal {
+  .#{vars.$bcgov-prefix}--btn {
+    height: 1rem;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-footer{
+    height: auto;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-header__label{
+    @include type.type-style('label-01');
+  }
 }
