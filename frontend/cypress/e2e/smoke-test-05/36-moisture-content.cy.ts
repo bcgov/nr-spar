@@ -1,9 +1,12 @@
+import prefix from '../../../src/styles/classPrefix';
+
 describe('Moisture Content Screen page', () => {
   beforeEach(() => {
     cy.login();
     cy.visit('/consep/manual-moisture-content/:riaKey');
     cy.url().should('contains', '/consep/manual-moisture-content/:riaKey');
   });
+
   it('should load and display manual moisture content page correctly', () => {
     // Check if the page title is displayed correctly
     cy.get('.consep-moisture-content-title')
@@ -16,9 +19,19 @@ describe('Moisture Content Screen page', () => {
       .contains('Activity results per replicate');
   });
 
-  it('Check Date inputs', () => {
+  it('Check breadcrumbs section', () => {
+    // Check if the breadcrumbs are displayed correctly
+    cy.get('.consep-moisture-content-breadcrumb')
+      .find('li')
+      .should('have.length', 3)
+      .and('contain', 'CONSEP')
+      .and('contain', 'Testing activities search')
+      .and('contain', 'Testing list');
+  });
+
+  it('should have correct Date functionality and validations', () => {
     // Check if the date input has a placeholder
-    cy.get('.bx--date-picker-container')
+    cy.get(`.${prefix}--date-picker-container`)
       .find('input')
       .should('have.attr', 'placeholder', 'yyyy/mm/dd');
 
