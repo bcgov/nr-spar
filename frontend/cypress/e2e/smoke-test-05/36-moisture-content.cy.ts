@@ -39,4 +39,17 @@ describe('Moisture Content Screen page', () => {
       .type('2025-05-27')
       .blur();
   });
+
+  it('Check Comment box', () => {
+    // Check if the comment input has a placeholder
+    cy.get('#moisture-content-comments')
+      .should('have.attr', 'placeholder', 'My comments about this activity');
+
+    // Type a comment
+    cy.get('#moisture-content-comments')
+      .clear()
+      .type('This is a test comment')
+      .blur()
+      .should('have.value', 'This is a test comment');
+  });
 });
