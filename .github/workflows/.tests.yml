@@ -21,7 +21,12 @@ permissions: {}
 jobs:
   cypress:
     name: Cypress
+    strategy:
+      matrix:
+        split_index: [0, 1, 2, 3, 4]
     env:
+      SPLIT: 5
+      SPLIT_INDEX: ${{ matrix.split_index }}
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ vars.CYPRESS_USERNAME }}
       CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
@@ -52,11 +57,7 @@ jobs:
           node_version: "18"
           commands: |
             npm ci
-            npm run cy:run-1 || true
-            npm run cy:run-2 || true
-            npm run cy:run-3 || true
-            npm run cy:run-4 || true
-            npm run cy:run-5 || true
+            npm run cy:run
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud

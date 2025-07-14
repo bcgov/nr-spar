@@ -1,5 +1,5 @@
-/* eslint-disable prefer-destructuring */
 import { defineConfig } from 'cypress';
+import cypressSplit from 'cypress-split';
 import { TEN_SECONDS } from './cypress/constants';
 
 declare const require: any;
@@ -49,6 +49,7 @@ export default defineConfig({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
       require('@cypress/code-coverage/task')(on, config);
+      cypressSplit(on, config);
       // implement node event listeners here
       on('task', {
         log(args) {
