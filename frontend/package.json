@@ -32,6 +32,7 @@
     "axios": "^1.6.8",
     "bignumber.js": "^9.0.0",
     "braces": "^3.0.3",
+    "cypress-split": "^1.24.20",
     "eslint-config-airbnb-typescript": "^18.0.0",
     "fast-xml-parser": "^4.4.1",
     "luxon": "^3.4.3",
