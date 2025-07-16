@@ -1,4 +1,4 @@
-@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use "@bcgov-nr/nr-theme/design-tokens/variables.scss" as vars;
 
 .consep-purity-content-title {
   justify-content: flex-start;
@@ -107,9 +107,11 @@
   margin-bottom: 2.5rem;
 }
 
-.#{vars.$bcgov-prefix}--text-input__field-wrapper {
+.consep-purity-content
+  .#{vars.$bcgov-prefix}--text-input__field-wrapper
+  .#{vars.$bcgov-prefix}--text-input {
   background-color: var(--#{vars.$bcgov-prefix}-field);
-  border-bottom: solid thin;
+  border-block-end-color: var(--#{vars.$bcgov-prefix}-border-strong);
 }
 
 .consep-purity-content-comments > div {
