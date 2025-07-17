@@ -55,7 +55,6 @@ export const actionModalOptions = {
     primaryButtonText: 'Yes',
     secondaryButtonText: 'Cancel'
   }
-
 };
 
 export const COMPLETE = 'complete';
