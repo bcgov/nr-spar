@@ -13,7 +13,8 @@ import {
   ComboBox,
   Button,
   InlineNotification,
-  TextInput
+  TextInput,
+  Modal
 } from '@carbon/react';
 import {
   CheckmarkFilled,
@@ -42,7 +43,7 @@ import ButtonGroup from '../ButtonGroup';
 import { categoryMap, categoryMapReverse } from '../SharedConstants';
 import { ImpurityType } from './definitions';
 import {
-  DATE_FORMAT, fieldsConfig
+  DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
 import './styles.scss';
 
@@ -55,6 +56,8 @@ const PurityContent = () => {
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'complete' | 'accept'>(COMPLETE);
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
@@ -88,6 +91,64 @@ const PurityContent = () => {
       setAlert({
         isSuccess: false,
         message: `Failed to update activity record: ${(error as AxiosError).message}`
+      });
+    }
+  });
+
+  const validateTest = useMutation({
+    mutationFn: () => testingActivitiesAPI(
+      'purityTest',
+      'validateTestResult',
+      { riaKey }
+    ),
+    onSuccess: () => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        testCompleteInd: 1,
+        sampleDesc: testActivity?.sampleDesc || '',
+        moistureStatus: testActivity?.moistureStatus || '',
+        moisturePct: testActivity?.moisturePct || 0,
+        acceptResult: testActivity?.acceptResult || 0,
+        requestId: testActivity?.requestId || '',
+        seedlotNumber: testActivity?.seedlotNumber || '',
+        activityType: testActivity?.activityType || '',
+        replicatesList: testActivity?.replicatesList || []
+      };
+      setTestActivity(testActivityData);
+      setAlert({ isSuccess: true, message: 'Test validated successfully' });
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    },
+    onError: (error) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to validate test: ${(error as AxiosError).message}`
+      });
+    }
+  });
+
+  const acceptTest = useMutation({
+    mutationFn: () => testingActivitiesAPI(
+      'purityTest',
+      'acceptResult',
+      { riaKey }
+    ),
+    onSuccess: () => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        acceptResult: 1
+      };
+      setTestActivity(testActivityData);
+      setAlert({ isSuccess: true, message: 'Test accepted successfully' });
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+    },
+    onError: (error) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to accept test: ${(error as AxiosError).message}`
       });
     }
   });
@@ -201,6 +262,16 @@ const PurityContent = () => {
     setAverage(7.8); // Set the test average value from the API response
   };
 
+  const handleCompleteTestModal = () => {
+    setModalType(COMPLETE);
+    setModalOpen(true);
+  };
+
+  const handleAcceptTestModal = () => {
+    setModalType(ACCEPT);
+    setModalOpen(true);
+  };
+
   const buttons = [
     {
       id: 'calculate-average',
@@ -208,21 +279,25 @@ const PurityContent = () => {
       kind: 'primary',
       size: 'lg',
       icon: Calculator,
-      onClick: handleCalculateAverage
+      action: handleCalculateAverage
     },
     {
       id: 'complete-test',
       text: 'Complete test',
       kind: 'tertiary',
       size: 'lg',
-      icon: Checkmark
+      icon: Checkmark,
+      disabled: testActivity?.testCompleteInd === 1,
+      action: handleCompleteTestModal
     },
     {
       id: 'accept-test',
       text: 'Accept test',
       kind: 'tertiary',
       size: 'lg',
-      icon: CheckmarkOutline
+      icon: CheckmarkOutline,
+      disabled: testActivity?.acceptResult === 1 || testActivity?.testCompleteInd !== 1,
+      action: handleAcceptTestModal
     },
     {
       id: 'test-history',
@@ -322,6 +397,27 @@ const PurityContent = () => {
           </Alert>
         )
       }
+      <Modal
+        className="action-modal"
+        modalLabel={actionModalOptions[modalType].modalLabel}
+        modalHeading={actionModalOptions[modalType].modalHeading}
+        primaryButtonText={actionModalOptions[modalType].primaryButtonText}
+        secondaryButtonText={actionModalOptions[modalType].secondaryButtonText}
+        open={isModalOpen}
+        onRequestClose={() => {
+          setModalOpen(false);
+        }}
+        onRequestSubmit={() => {
+          if (modalType === COMPLETE) {
+            validateTest.mutate();
+          } else if (modalType === ACCEPT) {
+            acceptTest.mutate();
+          }
+          setModalOpen(false);
+        }}
+        size="sm"
+        danger
+      />
       <Row className="consep-purity-content-breadcrumb">
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
@@ -329,14 +425,14 @@ const PurityContent = () => {
         <PageTitle title={`${fieldsConfig.titleSection.title} ${seedlotNumber}`} />
         <>
           {
-            testActivity?.testCompleteInd
+            testActivity?.testCompleteInd === 1
               ? (
                 <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
               )
               : null
           }
           {
-            testActivity?.acceptResult
+            testActivity?.acceptResult === 1
               ? (
                 <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
               )
