@@ -41,3 +41,21 @@ export const fieldsConfig = {
     placeholder: 'My comments about this activity'
   }
 };
+
+export const actionModalOptions = {
+  complete: {
+    modalLabel: 'Are you sure you want to complete the test?',
+    modalHeading: 'Complete purity test',
+    primaryButtonText: 'Yes',
+    secondaryButtonText: 'Cancel'
+  },
+  accept: {
+    modalLabel: 'Are you sure you want to accept the test result?',
+    modalHeading: 'Accept purity test result',
+    primaryButtonText: 'Yes',
+    secondaryButtonText: 'Cancel'
+  }
+};
+
+export const COMPLETE = 'complete';
+export const ACCEPT = 'accept';
