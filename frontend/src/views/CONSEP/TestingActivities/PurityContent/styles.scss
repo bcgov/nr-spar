@@ -109,9 +109,11 @@
   margin-bottom: 2.5rem;
 }
 
-.#{vars.$bcgov-prefix}--text-input__field-wrapper {
+.consep-purity-content
+  .#{vars.$bcgov-prefix}--text-input__field-wrapper
+  .#{vars.$bcgov-prefix}--text-input {
   background-color: var(--#{vars.$bcgov-prefix}-field);
-  border-bottom: solid thin;
+  border-block-end-color: var(--#{vars.$bcgov-prefix}-border-strong);
 }
 
 .consep-purity-content-comments > div {
