@@ -1,5 +1,5 @@
-/* eslint-disable prefer-destructuring */
 import { defineConfig } from 'cypress';
+import cypressSplit from 'cypress-split';
 import { TEN_SECONDS } from './cypress/constants';
 
 declare const require: any;
@@ -37,7 +37,8 @@ export default defineConfig({
       '**/13-create-a-class-seedlot-fdi.cy.ts',
       '**/14-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',
       '**/15-api-tests.cy.ts',
-      '**/16-edit-applicant-seedlot-info.cy.ts'
+      '**/16-edit-applicant-seedlot-info.cy.ts',
+      '**/36-moisture-content.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
@@ -48,6 +49,7 @@ export default defineConfig({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
       require('@cypress/code-coverage/task')(on, config);
+      cypressSplit(on, config);
       // implement node event listeners here
       on('task', {
         log(args) {
