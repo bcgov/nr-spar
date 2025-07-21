@@ -226,6 +226,7 @@ export const geneticWorthDict: GeneticWorthDictType = {
   SS: ['gvo', 'iws'],
   SX: ['gvo', 'iws'],
   YC: ['gvo'],
+  BL: ['gvo'],
   UNKNOWN: ['gvo']
 };
 
