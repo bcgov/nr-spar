@@ -402,7 +402,7 @@ const MoistureContent = () => {
             titleText={fieldsConfig.category.title as string}
             invalidText={fieldsConfig.category.invalid as string}
             value={
-              activityRecord?.testCategoryCode || mcVariation.defaultCategory
+              activityRecord?.testCategoryCode ?? mcVariation.defaultCategory
             }
             onChange={(e: { selectedItem: string }) => {
               handleUpdateActivityRecord({
