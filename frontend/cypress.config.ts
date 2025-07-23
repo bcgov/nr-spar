@@ -19,26 +19,11 @@ export default defineConfig({
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
-      '**/01-login-page.cy.ts',
-      '**/02-create-a-class-seedlot.cy.ts',
-      '**/03-seedlot-dashboard.cy.ts',
-      '**/04-seedlot-detail.cy.ts',
-      '**/05-my-seedlots.cy.ts',
-      '**/11-dashboard-page.cy.ts',
-      '**/12-create-a-class-seedlot-fdi.cy.ts',
-      '**/13-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',
-      '**/14-api-tests.cy.ts',
-      '**/15-edit-applicant-seedlot-info.cy.ts',
-      '**/21-create-a-class-seedlot-pli.cy.ts',
-      '**/22-a-class-seedlot-reg-form-collection-interim.cy.ts',
-      '**/23-a-class-seedlot-reg-form-ownership.cy.ts',
-      '**/24-a-class-seedlot-reg-form-extraction.cy.ts',
-      '**/31-create-a-class-seedlot-pli.cy.ts',
-      '**/32-a-class-seedlot-reg-form-orchard.cy.ts',
-      '**/33-a-class-seedlot-reg-form-parent-tree-part-1.cy.ts',
-      '**/34-a-class-seedlot-reg-form-parent-tree-part-2.cy.ts',
-      '**/35-a-class-seedlot-reg-form-parent-tree-part-3.cy.ts',
-      '**/41-moisture-content.cy.ts'
+      'cypress/e2e/smoke-test-01/**/*.cy.ts',
+      'cypress/e2e/smoke-test-02/**/*.cy.ts',
+      'cypress/e2e/smoke-test-03/**/*.cy.ts',
+      'cypress/e2e/smoke-test-04/**/*.cy.ts',
+      'cypress/e2e/smoke-test-05/**/*.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
