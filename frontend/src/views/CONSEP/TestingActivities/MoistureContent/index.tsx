@@ -37,9 +37,8 @@ import StatusTag from '../../../../components/StatusTag';
 import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
 
-import { categoryMap, categoryMapReverse } from '../SharedConstants';
 import {
-  DATE_FORMAT, fieldsConfig
+  DATE_FORMAT, fieldsConfig, mccVariations
 } from './constants';
 
 import './styles.scss';
@@ -53,6 +52,7 @@ const MoistureContent = () => {
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
   const [activityRiaKey, setActivityRiaKey] = useState<number>(0);
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
+  const [mcType, setMCType] = useState<string>('MCC');
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
 
   // Reference to the table body for extracting MC Values
@@ -109,6 +109,7 @@ const MoistureContent = () => {
     } else if (testActivityQuery.data) {
       setTestActivity(testActivityQuery.data);
       setSeedlotNumber(testActivityQuery.data.seedlotNumber);
+      setMCType(testActivityQuery.data.activityType);
       const activityRecordData = {
         testCategoryCode: testActivityQuery.data.testCategoryCode,
         riaComment: testActivityQuery.data.riaComment,
@@ -301,6 +302,8 @@ const MoistureContent = () => {
     }
   ];
 
+  const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
+
   return (
     <FlexGrid className="consep-moisture-content">
       {alert?.message
@@ -310,7 +313,7 @@ const MoistureContent = () => {
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="consep-moisture-content-title">
-        <PageTitle title={`${fieldsConfig.titleSection.title} ${activitySummary && activitySummary.seedlotNumber}`} />
+        <PageTitle title={`${mcVariation.description} for seedlot ${activitySummary && activitySummary.seedlotNumber}`} />
         <>
           {
             testActivity?.testCompleteInd
@@ -336,7 +339,7 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
-          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '')}
+          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows)}
           replicateType="moistureTest"
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
@@ -399,16 +402,11 @@ const MoistureContent = () => {
             titleText={fieldsConfig.category.title as string}
             invalidText={fieldsConfig.category.invalid as string}
             value={
-              activityRecord?.testCategoryCode
-              && activityRecord.testCategoryCode in categoryMap
-                ? categoryMap[activityRecord.testCategoryCode as keyof typeof categoryMap]
-                : 'Quality assurance'
+              activityRecord?.testCategoryCode || mcVariation.defaultCategory
             }
             onChange={(e: { selectedItem: string }) => {
               handleUpdateActivityRecord({
-                testCategoryCode: categoryMapReverse[
-                  e.selectedItem as keyof typeof categoryMapReverse
-                ]
+                testCategoryCode: e.selectedItem
               });
             }}
           />
