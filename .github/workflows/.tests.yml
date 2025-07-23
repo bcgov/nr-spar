@@ -28,6 +28,7 @@ jobs:
     env:
       SPLIT: 5
       SPLIT_INDEX: ${{ matrix.split_index }}
+      SPLIT_SPEC_PATTERN: ${{ matrix.split_index == 4 && '**/41-moisture-content.cy.ts' || '' }}
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ vars.CYPRESS_USERNAME }}
       CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
