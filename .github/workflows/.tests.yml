@@ -72,6 +72,7 @@ jobs:
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-02/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-03/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-04/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-05/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
       - name: Upload videos
         uses: actions/upload-artifact@v4
