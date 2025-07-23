@@ -19,10 +19,16 @@ export default defineConfig({
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
-      '**/01-create-a-class-seedlot.cy.ts',
-      '**/02-seedlot-dashboard.cy.ts',
-      '**/03-seedlot-detail.cy.ts',
-      '**/04-my-seedlots.cy.ts',
+      '**/01-login-page.cy.ts',
+      '**/02-create-a-class-seedlot.cy.ts',
+      '**/03-seedlot-dashboard.cy.ts',
+      '**/04-seedlot-detail.cy.ts',
+      '**/05-my-seedlots.cy.ts',
+      '**/11-dashboard-page.cy.ts',
+      '**/12-create-a-class-seedlot-fdi.cy.ts',
+      '**/13-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',
+      '**/14-api-tests.cy.ts',
+      '**/15-edit-applicant-seedlot-info.cy.ts',
       '**/21-create-a-class-seedlot-pli.cy.ts',
       '**/22-a-class-seedlot-reg-form-collection-interim.cy.ts',
       '**/23-a-class-seedlot-reg-form-ownership.cy.ts',
@@ -32,13 +38,7 @@ export default defineConfig({
       '**/33-a-class-seedlot-reg-form-parent-tree-part-1.cy.ts',
       '**/34-a-class-seedlot-reg-form-parent-tree-part-2.cy.ts',
       '**/35-a-class-seedlot-reg-form-parent-tree-part-3.cy.ts',
-      '**/11-login-page.cy.ts',
-      '**/12-dashboard-page.cy.ts',
-      '**/13-create-a-class-seedlot-fdi.cy.ts',
-      '**/14-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',
-      '**/15-api-tests.cy.ts',
-      '**/16-edit-applicant-seedlot-info.cy.ts',
-      '**/36-moisture-content.cy.ts'
+      '**/41-moisture-content.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
