@@ -26,8 +26,6 @@ jobs:
       matrix:
         split_index: [0, 1, 2, 3, 4]
     env:
-      SPLIT: 1
-      SPLIT_INDEX: ${{ matrix.split_index }}
       SPLIT_SPEC_PATTERN: ${{ matrix.split_index == 0 && 'cypress/e2e/smoke-test-01/**/*.cy.ts' || matrix.split_index == 1 && 'cypress/e2e/smoke-test-02/**/*.cy.ts' || matrix.split_index == 2 && 'cypress/e2e/smoke-test-03/**/*.cy.ts' || matrix.split_index == 3 && 'cypress/e2e/smoke-test-04/**/*.cy.ts' || matrix.split_index == 4 && 'cypress/e2e/smoke-test-05/**/*.cy.ts' }}
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ vars.CYPRESS_USERNAME }}
