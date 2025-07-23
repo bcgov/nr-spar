@@ -162,7 +162,7 @@ const MoistureContent = () => {
 
   const validateTest = useMutation({
     mutationFn: () => testingActivitiesAPI(
-      'purityTest',
+      'moistureTest',
       'validateTestResult',
       { riaKey }
     ),
@@ -195,7 +195,7 @@ const MoistureContent = () => {
 
   const acceptTest = useMutation({
     mutationFn: () => testingActivitiesAPI(
-      'purityTest',
+      'moistureTest',
       'acceptResult',
       { riaKey }
     ),
@@ -271,7 +271,7 @@ const MoistureContent = () => {
       kind: 'tertiary',
       size: 'lg',
       icon: Checkmark,
-      disabled: !!testActivity?.testCompleteInd,
+      disabled: testActivity?.testCompleteInd === 1,
       action: () => validateTest.mutate()
     },
     {
@@ -280,7 +280,7 @@ const MoistureContent = () => {
       kind: 'tertiary',
       size: 'lg',
       icon: CheckmarkOutline,
-      disabled: !testActivity?.testCompleteInd || !!testActivity?.acceptResult,
+      disabled: testActivity?.acceptResult === 1 || testActivity?.testCompleteInd !== 1,
       action: () => acceptTest.mutate()
     },
     {

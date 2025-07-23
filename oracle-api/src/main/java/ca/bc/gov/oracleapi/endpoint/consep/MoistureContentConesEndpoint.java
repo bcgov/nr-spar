@@ -215,6 +215,7 @@ public class MoistureContentConesEndpoint {
       activityData.setActualBeginDateTime(moistureContent.get().actualBeginDateTime());
       activityData.setActualEndDateTime(moistureContent.get().actualEndDateTime());
       activityData.setTestCategoryCode(moistureContent.get().testCategoryCode());
+      
       activityService.validateActivityData(activityData);
       testResultService.updateTestResultStatusToCompleted(riaKey);
 
