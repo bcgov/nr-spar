@@ -8,7 +8,7 @@ import { AxiosError } from 'axios';
 
 import GenericTable from '../../../../components/GenericTable';
 import { ReplicateType, TestingTypes } from '../../../../types/consep/TestingActivityType';
-import testingActivitiesAPI from '../../../../api-service/testingActivitiesAPI';
+import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
 import { getMccColumns, getPurityColumns, TABLE_TITLE } from './constants';
 
 import './styles.scss';

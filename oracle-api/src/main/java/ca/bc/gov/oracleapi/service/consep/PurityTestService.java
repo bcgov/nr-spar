@@ -350,7 +350,7 @@ public class PurityTestService {
    * @param debrisRank      the rank of the debris to be deleted
    */
   @Transactional
-  public void deletePurityDebris(
+  public List<PurityDebrisEntity> deletePurityDebris(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber,
       @NonNull Integer debrisRank
@@ -375,5 +375,7 @@ public class PurityTestService {
 
     debrisRepository.shiftRanksDown(riaKey, replicateNumber, debrisRank);
     SparLog.info("Updated all debris below the removed rank {}", debrisRank);
+
+    return debrisRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
   }
 }

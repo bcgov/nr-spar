@@ -439,7 +439,7 @@ public class PurityTestsEndpoint {
                   schema = @Schema(implementation = Void.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
-  public Integer deleteDebris(
+  public List<PurityDebrisEntity> deleteDebris(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
@@ -461,7 +461,6 @@ public class PurityTestsEndpoint {
           required = true)
       @PathVariable
           Integer debrisRank) {
-    purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank);
-    return replicateNumber;
+    return purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank);
   }
 }

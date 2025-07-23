@@ -551,13 +551,27 @@ class PurityTestsEndpointTest {
     int replicateNumber = 1;
     int debrisRank = 2;
 
-    doNothing().when(purityTestService).deletePurityDebris(riaKey, replicateNumber, debrisRank);
+    PurityDebrisEntity entity1 = new PurityDebrisEntity();
+    entity1.setId(new DebrisId(riaKey, replicateNumber, 1));
+    entity1.setDebrisTypeCode("ABC");
+
+    PurityDebrisEntity entity2 = new PurityDebrisEntity();
+    entity2.setId(new DebrisId(riaKey, replicateNumber, 2));
+    entity2.setDebrisTypeCode("DEF");
+
+    List<PurityDebrisEntity> deletedDebrisList = List.of(entity1);
+
+    when(purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank))
+        .thenReturn(deletedDebrisList);
 
     mockMvc.perform(delete("/api/purity-tests/debris/{riaKey}/{replicateNumber}/{debrisRank}",
             riaKey, replicateNumber, debrisRank)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].id.debrisRank").value(1))
+        .andExpect(jsonPath("$[0].debrisTypeCode").value("ABC"));
   }
 
   @Test
