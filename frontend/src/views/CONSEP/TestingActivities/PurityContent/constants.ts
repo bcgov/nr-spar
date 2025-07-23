@@ -6,12 +6,10 @@ export const fieldsConfig = {
   },
   impuritySection: {
     title: 'Impurities',
-    firstSubtitle: 'Replicate 1',
-    secondSubtitle: 'Replicate 2',
     buttonText: 'Add Impurities',
     primaryfieldName: 'Rank',
     secondaryfieldName: 'Impurity type',
-    placeholder: 'Select an option',
+    placeholder: 'Choose an option',
     label: 'impurityType',
     options: ['Impurity1', 'Impurity2', 'Impurity3']
 

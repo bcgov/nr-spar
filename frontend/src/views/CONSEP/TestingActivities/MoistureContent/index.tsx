@@ -23,7 +23,7 @@ import {
 
 import ROUTES from '../../../../routes/constants';
 import { calculateAverage } from '../../../../api-service/moistureContentAPI';
-import testingActivitiesAPI from '../../../../api-service/testingActivitiesAPI';
+import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
 import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { TestingActivityType, ActivityRecordType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';

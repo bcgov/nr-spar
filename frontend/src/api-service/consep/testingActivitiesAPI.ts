@@ -1,6 +1,6 @@
-import ApiConfig from './ApiConfig';
-import api from './api';
-import { ReplicateType, TestingTypes } from '../types/consep/TestingActivityType';
+import ApiConfig from '../ApiConfig';
+import api from '../api';
+import { ReplicateType, TestingTypes } from '../../types/consep/TestingActivityType';
 
 type TestingParams = Record<string, any>;
 
