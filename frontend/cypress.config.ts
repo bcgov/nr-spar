@@ -19,11 +19,7 @@ export default defineConfig({
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
-      'cypress/e2e/smoke-test-01/**/*.cy.ts',
-      'cypress/e2e/smoke-test-02/**/*.cy.ts',
-      'cypress/e2e/smoke-test-03/**/*.cy.ts',
-      'cypress/e2e/smoke-test-04/**/*.cy.ts',
-      'cypress/e2e/smoke-test-05/**/*.cy.ts'
+      'cypress/e2e/smoke-test-*/**/*.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
