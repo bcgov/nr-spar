@@ -66,7 +66,6 @@ const PurityContent = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'accept'>(COMPLETE);
 
-
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
   const testActivityQuery = useQuery({
