@@ -1,11 +1,12 @@
+/* eslint-disable prefer-const */
 import prefix from '../../../src/styles/classPrefix';
 
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
   let seedlotNum: string;
   const speciesKey = 'fdi';
   let totalParentTrees: number = 0;
-  const coneCount: number[] = [0];
-  const pollenCount: number[] = [0];
+  let coneCount: number[] = [0];
+  let pollenCount: number[] = [0];
   let effectivePopulationSize: number = 0;
   let firstConeValue: number = 0;
   let firstPollenValue: number = 0;
@@ -93,7 +94,8 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
     // Wait for the table to load
     cy.get('#parentTreeNumber', { timeout: 10000 });
 
-    cy.get(`table.${prefix}--data-table > tbody`)
+    cy.get(`table.${prefix}--data-table`)
+      .find('tbody')
       .find('tr')
       .then((row) => {
         totalParentTrees = row.length;
