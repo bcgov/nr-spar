@@ -120,12 +120,10 @@
     "cy:ci-2": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-02/**/* --record --group apitest",
     "cy:ci-3": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-03/**/* --record --group seedlotreg",
     "cy:ci-4": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-04/**/* --record --group parenttree",
-    "cy:ci-5": "cypress run --browser chrome --headless --spec cypress/e2e/smoke-test-05/**/* --record --group consep",
     "cy:run-1": "start-server-and-test start http://localhost:3000 cy:ci-1",
     "cy:run-2": "start-server-and-test start http://localhost:3000 cy:ci-2",
     "cy:run-3": "start-server-and-test start http://localhost:3000 cy:ci-3",
-    "cy:run-4": "start-server-and-test start http://localhost:3000 cy:ci-4",
-    "cy:run-5": "start-server-and-test start http://localhost:3000 cy:ci-5"
+    "cy:run-4": "start-server-and-test start http://localhost:3000 cy:ci-4"
   },
   "eslintConfig": {
     "extends": [
