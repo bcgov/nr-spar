@@ -96,6 +96,7 @@ type SpeciesWithGenWorth =
   |'SS'
   |'SX'
   |'YC'
+  |'BL'
   |'UNKNOWN';
 
 export type GeneticWorthDictType = {

@@ -40,7 +40,6 @@ import ROUTES from '../../../../routes/constants';
 import ActivityResult from '../ActivityResult';
 import ButtonGroup from '../ButtonGroup';
 
-import { categoryMap, categoryMapReverse } from '../SharedConstants';
 import { ImpurityType } from './definitions';
 import {
   DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
@@ -449,7 +448,7 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-result">
         <ActivityResult
           replicateType="purityTest"
-          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '')}
+          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '', 4)}
           riaKey={Number(riaKey)}
           isEditable={!testActivity?.testCompleteInd}
           setAlert={handleAlert}
@@ -511,16 +510,11 @@ const PurityContent = () => {
             titleText={fieldsConfig.category.title}
             invalidText={fieldsConfig.category.invalid}
             value={
-              activityRecord?.testCategoryCode
-              && activityRecord.testCategoryCode in categoryMap
-                ? categoryMap[activityRecord.testCategoryCode as keyof typeof categoryMap]
-                : 'Quality assurance'
+              activityRecord?.testCategoryCode ?? 'QA'
             }
             onChange={(e: { selectedItem: string }) => {
               handleUpdateActivityRecord({
-                testCategoryCode: categoryMapReverse[
-                  e.selectedItem as keyof typeof categoryMapReverse
-                ]
+                testCategoryCode: e.selectedItem
               });
             }}
           />
