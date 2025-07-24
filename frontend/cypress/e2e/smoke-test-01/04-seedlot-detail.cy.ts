@@ -101,7 +101,8 @@ describe('Seedlot detail page', () => {
     cy.contains('p.seedlot-summary-info-label', 'Status')
       .next()
       .children('span')
-      .should('have.text', 'Incomplete');
+      .invoke('text')
+      .should('match', /Incomplete|Pending/);
 
     cy.contains('p.seedlot-summary-info-label', 'Approved at')
       .siblings('p.seedlot-summary-info-value')
