@@ -5,9 +5,9 @@
  * @param {string} activityRiaKey the activity riakey to generate the list
  * @returns {any} a list of empty rows
  */
-export const initReplicatesList = (activityRiaKey: string): any => {
+export const initReplicatesList = (activityRiaKey: string, numberOfRows: number): any => {
   const emptyRows = [];
-  for (let i = 0; i < 4; i += 1) {
+  for (let i = 0; i < numberOfRows; i += 1) {
     emptyRows.push({
       riaKey: activityRiaKey,
       replicateNumber: i + 1,
