@@ -97,6 +97,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
     cy.get(`table.${prefix}--data-table`)
       .find('tbody')
       .children('tr')
+      .scrollIntoView()
       .then((row) => {
         totalParentTrees = row.length;
         cy.get('#totalnumber\\ of\\ parent\\ trees')
