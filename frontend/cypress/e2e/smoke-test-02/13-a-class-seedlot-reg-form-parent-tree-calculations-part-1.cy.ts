@@ -92,7 +92,11 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Check Parent tree contribution summary', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: 10000 });
+    cy.get('tbody > tr:first-child > td:first-child', { timeout: 10000 })
+      .should(($td) => {
+        const value = $td.text().trim();
+        expect(value, 'cell value should be a number').to.match(/^\d+$/);
+      });
 
     cy.get(`table.${prefix}--data-table`)
       .find('tbody')
@@ -162,7 +166,11 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Remove a single Parent tree contribution', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: 10000 });
+    cy.get('tbody > tr:first-child > td:first-child', { timeout: 10000 })
+      .should(($td) => {
+        const value = $td.text().trim();
+        expect(value, 'cell value should be a number').to.match(/^\d+$/);
+      });
 
     // Store initial value of total cone count
     cy.get('#totalnumber\\ of\\ cone\\ count')
