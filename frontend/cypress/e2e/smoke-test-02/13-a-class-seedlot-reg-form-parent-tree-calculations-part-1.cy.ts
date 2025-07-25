@@ -163,6 +163,13 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
     // Wait for the table to load
     cy.get('#parentTreeNumber', { timeout: 10000 });
 
+    // Store initial value of total cone count
+    cy.get('#totalnumber\\ of\\ cone\\ count')
+      .invoke('val')
+      .then(($input: any) => {
+        coneCount[0] = Number($input);
+      });
+
     cy.get('#8021-coneCount-value-input')
       .invoke('val')
       .then(($input: any) => {
@@ -178,6 +185,13 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         // Check new total cone count
         cy.get('#totalnumber\\ of\\ cone\\ count')
           .should('have.value', (coneCount[0] - firstConeValue));
+      });
+
+    // Store initial value of total pollen count
+    cy.get('#totalnumber\\ of\\ pollen\\ count')
+      .invoke('val')
+      .then(($input: any) => {
+        pollenCount[0] = Number($input);
       });
 
     cy.get('#8021-pollenCount-value-input')
