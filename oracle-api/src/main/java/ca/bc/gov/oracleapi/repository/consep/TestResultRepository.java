@@ -39,5 +39,7 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
             + "SET MOISTURE_PCT = (:average) "
             + "WHERE RIA_SKEY = (:riaKey)",
       nativeQuery = true)
-  void updateTestResultAvgValue(@Param("riaKey") BigDecimal riaKey, @Param("average") Double average);
+  void updateTestResultAvgValue(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("average") Double average);
 }
