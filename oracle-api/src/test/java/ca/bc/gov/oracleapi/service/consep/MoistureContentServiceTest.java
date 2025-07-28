@@ -67,6 +67,7 @@ class MoistureContentServiceTest {
   private BigDecimal riaKey;
   private ActivityEntity activityEntity;
   private TestResultEntity testResultEntity;
+
   @BeforeEach
   void setUp() {
     riaKey = new BigDecimal("123");
