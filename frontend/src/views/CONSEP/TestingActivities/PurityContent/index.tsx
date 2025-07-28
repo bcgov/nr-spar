@@ -41,7 +41,6 @@ import ROUTES from '../../../../routes/constants';
 
 import ActivityResult from '../ActivityResult';
 import ButtonGroup from '../ButtonGroup';
-import { categoryMap, categoryMapReverse } from '../SharedConstants';
 import {
   ImpurityDisplayType, ImpurityPayload,
   RichImpurityType, SingleImpurityType
