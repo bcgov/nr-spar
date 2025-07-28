@@ -55,6 +55,10 @@ describe('Create FDI Seedlot', () => {
     cy.get(collectedIdToClick)
       .should('be.checked');
 
+    // Click on the section title
+    cy.contains('.section-title', 'Seedlot information')
+      .click();
+
     // Click on button Create seedlot number
     cy.get('.submit-button')
       .click();
