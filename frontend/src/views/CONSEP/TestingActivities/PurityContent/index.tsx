@@ -31,7 +31,9 @@ import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
 import StatusTag from '../../../../components/StatusTag';
 
 import { ActivityRecordType, TestingActivityType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
-import testingActivitiesAPI from '../../../../api-service/testingActivitiesAPI';
+import ComboBoxEvent from '../../../../types/ComboBoxEvent';
+import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
+import { deleteImpurity, patchImpurities } from '../../../../api-service/consep/impuritiesAPI';
 import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
@@ -39,11 +41,15 @@ import ROUTES from '../../../../routes/constants';
 
 import ActivityResult from '../ActivityResult';
 import ButtonGroup from '../ButtonGroup';
-
-import { ImpurityType } from './definitions';
+import {
+  ImpurityDisplayType, ImpurityPayload,
+  RichImpurityType, SingleImpurityType
+} from './definitions';
+import { impuritiesPerReplicate } from './utils';
 import {
   DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
+
 import './styles.scss';
 
 const PurityContent = () => {
@@ -55,6 +61,7 @@ const PurityContent = () => {
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+  const [impurities, setImpurities] = useState<ImpurityDisplayType>({});
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'accept'>(COMPLETE);
 
@@ -72,6 +79,41 @@ const PurityContent = () => {
     enabled: seedlotNumber !== '',
     refetchOnMount: true,
     refetchOnWindowFocus: false
+  });
+
+  const updateImpuritiesMutation = useMutation({
+    mutationFn: (impurityPayload: ImpurityPayload[]) => patchImpurities(
+      riaKey || '',
+      impurityPayload
+    ),
+    onSuccess: (updatedImpurities) => {
+      setImpurities(impuritiesPerReplicate(updatedImpurities));
+    },
+    onError: (error: AxiosError) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to update activity record: ${error.message}`
+      });
+    }
+  });
+
+  const deleteImpuritiesMutation = useMutation({
+    mutationFn: (
+      { replicateNumber, debrisRank }: { replicateNumber: string; debrisRank: string }
+    ) => deleteImpurity(
+      riaKey || '',
+      replicateNumber,
+      debrisRank
+    ),
+    onSuccess: (updatedImpurities: RichImpurityType[]) => {
+      setImpurities(impuritiesPerReplicate(updatedImpurities));
+    },
+    onError: (error: AxiosError) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to update activity record: ${error.message}`
+      });
+    }
   });
 
   const updateActivityRecordMutation = useMutation({
@@ -175,6 +217,9 @@ const PurityContent = () => {
         actualEndDateTime: testActivityQuery.data.actualEndDateTime
       };
       setActivityRecord(activityRecordData);
+      if (testActivityQuery.data.debrisList) {
+        setImpurities(impuritiesPerReplicate(testActivityQuery.data.debrisList));
+      }
     }
   }, [testActivityQuery.status, testActivityQuery.isFetched]);
 
@@ -219,12 +264,6 @@ const PurityContent = () => {
     });
   };
 
-  const [impurities, setImpurities] = useState<{ [key: number]: ImpurityType[] }>({
-    1: [], // Impurities for replicate 1
-    2: [] // Impurities for replicate 2
-  });
-  const [average, setAverage] = useState<number | null>(null);
-
   const createBreadcrumbItems = () => {
     const crumbsList = [];
     crumbsList.push({ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES });
@@ -233,33 +272,24 @@ const PurityContent = () => {
     return crumbsList;
   };
 
-  const addImpurity = (replicate: number) => {
-    setImpurities((prev) => {
-      // Check if the replicate already has 10 dropdowns
-      if (prev[replicate].length >= 10) {
-        return prev; // Return the current state without changes
+  const addImpurity = (replicateNumber: number) => {
+    let nextRank: number = 1;
+    if (replicateNumber in impurities) {
+      const lastItem = impurities[replicateNumber].at(-1);
+      if (lastItem) {
+        nextRank = lastItem.debrisRank + 1;
       }
-      // Add a new impurity if the limit is not reached
-      return {
-        ...prev,
-        [replicate]: [
-          ...prev[replicate],
-          { id: crypto.randomUUID(), value: '' } // Unique ID for each dropdown
-        ]
-      };
-    });
+    }
+    updateImpuritiesMutation.mutate([
+      {
+        replicateNumber,
+        debrisRank: nextRank,
+        debrisTypeCode: ''
+      }
+    ]);
   };
 
-  const removeImpurity = (replicate: number, id: string) => {
-    setImpurities((prev) => ({
-      ...prev,
-      [replicate]: prev[replicate].filter((item) => item.id !== id)
-    }));
-  };
-
-  const handleCalculateAverage = () => {
-    setAverage(7.8); // Set the test average value from the API response
-  };
+  const handleCalculateAverage = () => {};
 
   const handleCompleteTestModal = () => {
     setModalType(COMPLETE);
@@ -307,80 +337,109 @@ const PurityContent = () => {
     }
   ];
 
-  const impurityPerReplicate = (replicate: number) => impurities[replicate].map((impurity) => (
-    <Row key={impurity.id} className="consep-impurity-content">
-      <Column sm={1} md={1} lg={2} xlg={2}>
+  const impurityPerReplicate = (impurity: SingleImpurityType, replicateNumber: number) => (
+    <Row key={`impurity-${replicateNumber}-${impurity.debrisRank}`} className="consep-impurity-content">
+      <Column sm={2} md={2} lg={2} xlg={2}>
         <TextInput
-          labelText="Rank"
+          id={`impurity-rank-${impurity.debrisRank}-${impurity.debrisCategory}`}
+          className="debris-rank-input"
+          labelText={impurity.debrisRank === 1 ? 'Rank' : ''}
           disabled
           type="number"
-          value={impurities[replicate].indexOf(impurity) + 1}
+          value={impurity.debrisRank}
           readOnly
         />
       </Column>
-      <Column sm={4} md={4} lg={10} xlg={10}>
+      <Column sm={4} md={4} lg={8} xlg={8} className="debris-type-column">
         <ComboBox
           className="consep-impurity-combobox"
-          id={`impurity-${replicate}-${impurity.id}`}
+          id={`impurity-${impurity.debrisRank}-${impurity.debrisCategory}`}
           name={fieldsConfig.impuritySection.secondaryfieldName}
           items={fieldsConfig.impuritySection.options}
           placeholder={fieldsConfig.impuritySection.placeholder}
-          titleText={fieldsConfig.impuritySection.secondaryfieldName}
-          onChange={() => {}}
+          titleText={
+            impurity.debrisRank === 1
+              ? fieldsConfig.impuritySection.secondaryfieldName
+              : ''
+          }
+          onChange={(e: ComboBoxEvent) => {
+            const { selectedItem } = e;
+            updateImpuritiesMutation.mutate([
+              {
+                replicateNumber,
+                debrisRank: impurity.debrisRank,
+                debrisTypeCode: selectedItem
+              }
+            ]);
+          }}
         />
       </Column>
       <Column className="consep-impurity-content-remove" sm={1} md={1} lg={2} xlg={2}>
         <Button
           kind="danger--tertiary"
-          size="sm"
           hasIconOnly
-          onClick={() => removeImpurity(replicate, impurity.id)}
+          size="md"
+          onClick={() => deleteImpuritiesMutation.mutate(
+            {
+              replicateNumber: replicateNumber.toString(),
+              debrisRank: impurity.debrisRank.toString()
+            }
+          )}
           renderIcon={TrashCan}
           iconDescription="Remove impurity"
         />
       </Column>
     </Row>
-  ));
+  );
 
-  const impuritySection = (replicate: number) => (
-    <Column sm={4} md={4} lg={8} xlg={8}>
-      {/* Title for the replicate section */}
-      <Row className="consep-purity-content-replicate">
-        <Column className="consep-section-title">
+  const impuritySection = () => (
+    testActivity?.replicatesList.map((replicate) => {
+      const { replicateNumber } = replicate;
+      return (
+        <Column
+          sm={4}
+          md={4}
+          lg={8}
+          xlg={8}
+          className="consep-section-title"
+          key={`impurities-for-rep-${replicateNumber}`}
+        >
           <h5>
-            {replicate === 1
-              ? fieldsConfig.impuritySection.firstSubtitle
-              : fieldsConfig.impuritySection.secondSubtitle}
+            {`Replicate ${replicateNumber}`}
           </h5>
+          {
+            Object.keys(impurities).length > 0
+            && impurities[replicateNumber].map(
+              (impurity) => impurityPerReplicate(impurity, replicateNumber)
+            )
+          }
+          <div className="consep-impurity-button">
+            {
+              Object.keys(impurities).length > 0
+              && impurities[replicateNumber].length >= 10
+                ? (
+                  <InlineNotification
+                    kind="error"
+                    title="Error"
+                    role="alert"
+                    subtitle="You can only add up to 10 impurities for each replicate."
+                  />
+                )
+                : (
+                  <Button
+                    size="md"
+                    kind="tertiary"
+                    renderIcon={Add}
+                    onClick={() => addImpurity(replicateNumber)}
+                  >
+                    {fieldsConfig.impuritySection.buttonText}
+                  </Button>
+                )
+            }
+          </div>
         </Column>
-      </Row>
-      {/* Render dropdowns for the specific replicate */}
-      {
-        impurityPerReplicate(replicate)
-      }
-      <Row className="consep-impurity-button">
-        <Column sm={4} md={4} lg={10}>
-          <Button
-            size="md"
-            kind="tertiary"
-            renderIcon={Add}
-            onClick={() => addImpurity(replicate)} // Add impurity for the specific replicate
-          >
-            {fieldsConfig.impuritySection.buttonText}
-          </Button>
-        </Column>
-      </Row>
-      {impurities[replicate].length >= 10
-      // Show error message if the limit is reached
-      && (
-      <InlineNotification
-        kind="error"
-        title="Error"
-        role="alert"
-        subtitle="You can only add up to 10 impurities for each replicate."
-      />
-      )}
-    </Column>
+      );
+    })
   );
 
   return (
@@ -525,12 +584,9 @@ const PurityContent = () => {
           <h4>{fieldsConfig.impuritySection.title}</h4>
         </Column>
       </Row>
-      <Row>
+      <Row className="consep-purity-content-replicate">
         {
-          impuritySection(1)
-        }
-        {
-          impuritySection(2)
+          impuritySection()
         }
       </Row>
       <Row className="consep-purity-content-comments">
@@ -543,7 +599,7 @@ const PurityContent = () => {
             rows={1}
             maxCount={500}
             enableCounter
-            value={activityRecord?.riaComment}
+            value={activityRecord?.riaComment || ''}
             onChange={(e: { target: { value: string } }) => {
               handleUpdateActivityRecord({
                 riaComment: e.target.value
@@ -552,17 +608,6 @@ const PurityContent = () => {
           />
         </Column>
       </Row>
-      {average !== null && (
-        <Row className="consep-average-result">
-          <Column>
-            <h5>
-              Calculated Average:
-              {' '}
-              {average}
-            </h5>
-          </Column>
-        </Row>
-      )}
       <ButtonGroup buttons={buttons} />
     </FlexGrid>
   );
