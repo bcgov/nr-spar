@@ -592,6 +592,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Save changes
     cy.saveSeedlotRegFormProgress();
 
+    // Check complete status of Orchard step
     cy.contains(`.${prefix}--progress-step-button`, 'Orchard')
       .find(`.${prefix}--assistive-text`)
       .should('have.text', 'Complete');
