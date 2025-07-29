@@ -592,6 +592,10 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Save changes
     cy.saveSeedlotRegFormProgress();
 
+    // Wait for 500ms to ensure the save is complete
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(500);
+
     // Check complete status of Orchard step
     cy.contains(`.${prefix}--progress-step-button`, 'Orchard')
       .find(`.${prefix}--assistive-text`)
