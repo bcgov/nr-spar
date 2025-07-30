@@ -21,7 +21,7 @@ describe('Create FDI Seedlot', () => {
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
-      .type('99', { delay: TYPE_DELAY })
+      .type(regData.agencyNumber, { delay: TYPE_DELAY })
       .blur();
 
     // Enter the applicant email address
