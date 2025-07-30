@@ -57,6 +57,16 @@ describe('Create PLI Seedlot', () => {
     cy.contains('.section-title', 'Seedlot information')
       .click();
 
+    cy.get('.loading-input-wrapper').eq(1).then(($section) => {
+      if ($section.find('#agency-number-input-error-msg').length) {
+        // Error message is present, re-enter the agency number
+        cy.get('#agency-number-input')
+          .clear()
+          .type('11', { delay: TYPE_DELAY })
+          .blur({ force: true });
+      }
+    });
+
     // Click on button Create seedlot number
     cy.get('.submit-button')
       .click();
