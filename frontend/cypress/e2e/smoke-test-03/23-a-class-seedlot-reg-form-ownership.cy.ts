@@ -458,6 +458,15 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Save changes
     cy.saveSeedlotRegFormProgress();
 
+    // Wait for 500ms to ensure the save is complete
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(500);
+
+    // Check complete status of Ownership step
+    cy.contains(`.${prefix}--progress-step-button`, 'Ownership')
+      .find(`.${prefix}--assistive-text`)
+      .should('have.text', 'Complete');
+
     // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')

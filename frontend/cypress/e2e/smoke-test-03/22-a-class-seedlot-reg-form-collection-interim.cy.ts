@@ -328,6 +328,15 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     // Save changes
     cy.saveSeedlotRegFormProgress();
 
+    // Wait for 500ms to ensure the save is complete
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(500);
+
+    // Check complete status of Collection step
+    cy.contains(`.${prefix}--progress-step-button`, 'Collection')
+      .find(`.${prefix}--assistive-text`)
+      .should('have.text', 'Complete');
+
     // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
@@ -529,6 +538,15 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
+
+    // Wait for 500ms to ensure the save is complete
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(500);
+
+    // Check complete status of Interim storage step
+    cy.contains(`.${prefix}--progress-step-button`, 'Interim storage')
+      .find(`.${prefix}--assistive-text`)
+      .should('have.text', 'Complete');
 
     // Press next button
     cy.get('.seedlot-registration-button-row')
