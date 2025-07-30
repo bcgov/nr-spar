@@ -599,7 +599,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Check complete status of Orchard step
     cy.contains(`.${prefix}--progress-step-button`, 'Orchard')
       .find(`.${prefix}--assistive-text`)
-      .should('have.text', 'Complete');
+      .should('have.text', 'Complete', { timeout: 500 });
   });
 
   it('Step complete status', () => {
