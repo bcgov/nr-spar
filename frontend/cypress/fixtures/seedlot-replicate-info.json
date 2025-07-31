@@ -1,0 +1,40 @@
+{
+  "testCompleteInd": 0,
+  "sampleDesc": null,
+  "moistureStatus": null,
+  "moisturePct": 0.5,
+  "acceptResult": 0,
+  "requestId": "SSP20000093",
+  "seedlotNumber": "60662",
+  "activityType": "MC",
+  "testCategoryCode": "STD",
+  "riaComment": null,
+  "actualBeginDateTime": "2025-06-09T07:00:00",
+  "actualEndDateTime": "2025-06-25T07:00:00",
+  "replicatesList": [
+    {
+      "riaKey": 514330,
+      "replicateNumber": 1,
+      "containerId": "33",
+      "containerWeight": null,
+      "freshSeed": null,
+      "containerAndDryWeight": null,
+      "dryWeight": null,
+      "replicateAccInd": 1,
+      "replicateComment": null,
+      "overrideReason": null
+    },
+    {
+      "riaKey": 514330,
+      "replicateNumber": 2,
+      "containerId": "444",
+      "containerWeight": null,
+      "freshSeed": null,
+      "containerAndDryWeight": null,
+      "dryWeight": null,
+      "replicateAccInd": 1,
+      "replicateComment": null,
+      "overrideReason": null
+    }
+  ]
+}
