@@ -6,6 +6,7 @@ import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -15,7 +16,10 @@ public class ActivitySearchService {
 
   private final ActivitySearchRepository activitySearchRepository;
 
-  public List<ActivitySearchResponseDto> searchActivities(ActivitySearchRequestDto activitySearchRequestDto) {
+  public List<ActivitySearchResponseDto> searchActivities(ActivitySearchRequestDto activitySearchRequestDto, Pageable pageable) {
+    int offset = (int) pageable.getOffset();
+    int size = pageable.getPageSize();
+
     List<ActivitySearchResultEntity> results = activitySearchRepository.searchActivities(
       activitySearchRequestDto.lotNumbers(),
       activitySearchRequestDto.testType(),
@@ -44,10 +48,9 @@ public class ActivitySearchService {
       activitySearchRequestDto.completeStatus(),
       activitySearchRequestDto.acceptanceStatus(),
       activitySearchRequestDto.seedlotClass(),
-      0,
-      10
+      offset,
+      size
     );
-
 
     return results.stream()
       .map(this::toDto)
