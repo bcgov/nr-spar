@@ -4,7 +4,7 @@ import { ImpurityPayload, RichImpurityType } from '../../views/CONSEP/TestingAct
 
 export const patchImpurities = (
   riaKey: string,
-  payload: ImpurityPayload
+  payload: ImpurityPayload[]
 ) => {
   const url = `${ApiConfig.purityTest}/debris/${riaKey}`;
   return api.patch(url, payload).then((res): RichImpurityType[] => res.data);
