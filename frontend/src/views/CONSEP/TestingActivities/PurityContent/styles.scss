@@ -1,135 +1,148 @@
 @use '@carbon/type';
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
+.consep-purity-content {
+  .consep-purity-content-title {
+    justify-content: flex-start;
+    gap: 0.5rem;
+    margin: 1rem -1rem;
 
-.consep-purity-content-title {
-  justify-content: flex-start;
-  gap: 0.5rem;
-  margin: 1rem -1rem;
+    .title-section {
+      padding: 0rem;
+      max-inline-size: fit-content;
+    }
 
-  .title-section {
+    .status-tag {
+      align-self: flex-start;
+      margin-top: 0.5rem;
+    }
+  }
+
+  .consep-purity-content-activity-summary {
+    .#{vars.$bcgov-prefix}--col {
+      padding: 0rem;
+    }
+  }
+
+  .consep-purity-content-cone-form {
+    margin-bottom: 2.5rem;
+  }
+
+  .consep-section-title {
     padding: 0rem;
-    max-inline-size: fit-content;
+    h5 {
+      margin-bottom: 2rem;
+    }
   }
 
-  .status-tag {
-    align-self: flex-start;
-    margin-top: 0.5rem;
-  }
-}
-
-.consep-purity-content-activity-summary {
-  .#{vars.$bcgov-prefix}--col {
+  .consep-purity-content-date-picker > div {
     padding: 0rem;
   }
-}
 
-.consep-purity-content-cone-form {
-  margin-bottom: 2.5rem;
-}
+  .consep-purity-content-date-picker {
+    justify-content: flex-start;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    margin-bottom: 2rem;
 
-.consep-section-title {
-  padding: 0rem;
-}
-
-.consep-purity-content-date-picker > div {
-  padding: 0rem;
-}
-
-.consep-purity-content-date-picker {
-  justify-content: flex-start;
-  gap: 1rem;
-  margin-top: 2.5rem;
-  margin-bottom: 2rem;
-
-  .#{vars.$bcgov-prefix}--form-item {
-    width: inherit;
-
-    .#{vars.$bcgov-prefix}--date-picker {
+    .#{vars.$bcgov-prefix}--form-item {
       width: inherit;
 
-      .#{vars.$bcgov-prefix}--date-picker-container {
+      .#{vars.$bcgov-prefix}--date-picker {
         width: inherit;
 
-        .#{vars.$bcgov-prefix}--date-picker-input__wrapper {
+        .#{vars.$bcgov-prefix}--date-picker-container {
           width: inherit;
 
-          span {
+          .#{vars.$bcgov-prefix}--date-picker-input__wrapper {
             width: inherit;
 
-            input {
+            span {
               width: inherit;
+
+              input {
+                width: inherit;
+              }
             }
           }
         }
       }
     }
   }
-}
 
-.consep-purity-content-activity-result {
-  margin-top: 2.5rem;
-}
-
-.consep-purity-content-category > div {
-  padding: 0rem;
-}
-
-.consep-purity-content-category {
-  margin-bottom: 2rem;
-}
-
-.consep-impurity-title {
-  margin-bottom: 2.5rem;
-}
-
-.consep-impurity-content > div {
-  padding: 0rem;
-}
-
-.consep-impurity-content {
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  justify-content: space-between;
-}
-
-.consep-purity-content-replicate {
-  margin-bottom: 2rem;
-}
-
-.consep-impurity-content-remove {
-  align-content: flex-end;
-}
-
-.consep-impurity-button > div {
-  padding: 0rem;
-}
-
-.consep-impurity-button {
-  margin-bottom: 2.5rem;
-}
-
-.consep-purity-content
-  .#{vars.$bcgov-prefix}--text-input__field-wrapper
-  .#{vars.$bcgov-prefix}--text-input {
-  background-color: var(--#{vars.$bcgov-prefix}-field);
-  border-block-end-color: var(--#{vars.$bcgov-prefix}-border-strong);
-}
-
-.consep-purity-content-comments > div {
-  padding: 0rem;
-}
-
-.action-modal {
-  .#{vars.$bcgov-prefix}--btn {
-    height: 1rem;
+  .consep-purity-content-activity-result {
+    margin-top: 2.5rem;
   }
 
-  .#{vars.$bcgov-prefix}--modal-footer{
-    height: auto;
+  .consep-purity-content-category > div {
+    padding: 0rem;
   }
 
-  .#{vars.$bcgov-prefix}--modal-header__label{
-    @include type.type-style('label-01');
+  .consep-purity-content-category {
+    margin-bottom: 2rem;
   }
+
+  .consep-impurity-title {
+    margin-bottom: 2.5rem;
+  }
+
+  .consep-impurity-content > div {
+    padding: 0rem;
+  }
+
+  .consep-impurity-content {
+    margin-bottom: 1.5rem;
+  }
+
+  .consep-purity-content-replicate {
+    margin-bottom: 2rem;
+  }
+
+  .consep-impurity-content-remove {
+    align-content: flex-end;
+  }
+
+  .consep-impurity-button > div {
+    padding: 0rem;
+  }
+
+  .consep-impurity-button {
+    margin-bottom: 2.5rem;
+  }
+
+  .#{vars.$bcgov-prefix}--text-input__field-wrapper {
+    background-color: var(--#{vars.$bcgov-prefix}-field);
+    border-radius: 4px 4px 0 0;
+    padding-right: 0.175rem;
+
+    .#{vars.$bcgov-prefix}--text-input {
+      border-block-end-color: var(--#{vars.$bcgov-prefix}-border-strong);
+    }
+  }
+
+  .consep-impurity-content.#{vars.$bcgov-prefix}--row {
+    margin-inline: 0;
+    .debris-type-column {
+      padding-right: 1rem;
+    }
+  }
+
+  .consep-purity-content-comments > div {
+    padding: 0rem;
+  }
+
+  .action-modal {
+    .#{vars.$bcgov-prefix}--btn {
+      height: 1rem;
+    }
+
+    .#{vars.$bcgov-prefix}--modal-footer{
+      height: auto;
+    }
+
+    .#{vars.$bcgov-prefix}--modal-header__label{
+      @include type.type-style('label-01');
+    }
+  }
+
 }
