@@ -34,6 +34,7 @@ public class ConsepOracleQueryConstants {
            , ria_skey
       FROM consep.cns17
       WHERE (:testType IS NULL OR activity_type_cd = :testType)
+        AND (:lotNumbers IS NULL OR seedlot_number IN (:lotNumbers))
         AND (:activityId IS NULL OR stndrd_activity_id = :activityId)
         AND (:germinatorTrayId IS NULL OR germinator_tray_id = :germinatorTrayId)
         AND (:withdrawalStartDate IS NULL OR seed_withdrawal_date >= :withdrawalStartDate)
@@ -44,7 +45,7 @@ public class ConsepOracleQueryConstants {
         AND (:requestId IS NULL OR LENGTH(:requestId) < 12 OR item_id = SUBSTR(:requestId, 12, 1))
         AND (:requestType IS NULL OR request_type_st = :requestType)
         AND (:requestYear IS NULL OR request_yr = :requestYear)
-        AND (:orchardId IS NULL OR vegetation_st = :orchardId)
+        AND (:orchardId IS NULL OR orchard_id = :orchardId)
         AND (:testCategory IS NULL OR test_category_cd = :testCategory)
         AND (:rank IS NULL OR test_rank = :rank)
         AND (:species IS NULL OR vegetation_st = :species)

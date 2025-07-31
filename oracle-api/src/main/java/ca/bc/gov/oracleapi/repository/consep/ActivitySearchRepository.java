@@ -6,16 +6,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
-
 import java.util.List;
 
 
 public interface ActivitySearchRepository extends JpaRepository<ActivitySearchResultEntity, Integer> {
   @Query(value = ConsepOracleQueryConstants.ACTIVITY_SEARCH, nativeQuery = true)
   List<ActivitySearchResultEntity> searchActivities(
+    @Param("lotNumbers") List<String> lotNumbers,
     @Param("testType") String testType,
     @Param("activityId") String activityId,
-    @Param("germinatorTrayId") String germinatorTrayId,
+    @Param("germinatorTrayId") Integer germinatorTrayId,
     @Param("withdrawalStartDate") LocalDate withdrawalStartDate,
     @Param("withdrawalEndDate") LocalDate withdrawalEndDate,
     @Param("includeHistoricalTests") Boolean includeHistoricalTests,
@@ -25,7 +25,7 @@ public interface ActivitySearchRepository extends JpaRepository<ActivitySearchRe
     @Param("requestYear") Integer requestYear,
     @Param("orchardId") String orchardId,
     @Param("testCategory") String testCategory,
-    @Param("rank") Integer rank,
+    @Param("rank") String rank,
     @Param("species") String species,
     @Param("actualBeginDateFrom") LocalDate actualBeginDateFrom,
     @Param("actualBeginDateTo") LocalDate actualBeginDateTo,
@@ -42,5 +42,4 @@ public interface ActivitySearchRepository extends JpaRepository<ActivitySearchRe
     @Param("offset") long offset,
     @Param("size") long size
   );
-
 }

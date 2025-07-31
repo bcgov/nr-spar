@@ -17,6 +17,7 @@ public class ActivitySearchService {
 
   public List<ActivitySearchResponseDto> searchActivities(ActivitySearchRequestDto activitySearchRequestDto) {
     List<ActivitySearchResultEntity> results = activitySearchRepository.searchActivities(
+      activitySearchRequestDto.lotNumbers(),
       activitySearchRequestDto.testType(),
       activitySearchRequestDto.activityId(),
       activitySearchRequestDto.germinatorTrayId(),
@@ -43,13 +44,16 @@ public class ActivitySearchService {
       activitySearchRequestDto.completeStatus(),
       activitySearchRequestDto.acceptanceStatus(),
       activitySearchRequestDto.seedlotClass(),
-      0, 10
+      0,
+      10
     );
+
 
     return results.stream()
       .map(this::toDto)
       .toList();
   }
+
 
   private ActivitySearchResponseDto toDto(ActivitySearchResultEntity activitySearchResultEntity) {
     return new ActivitySearchResponseDto(

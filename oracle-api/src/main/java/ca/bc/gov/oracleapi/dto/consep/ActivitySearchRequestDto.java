@@ -20,57 +20,61 @@ public record ActivitySearchRequestDto(
   @Schema(description = "Seedlot and Family Lot numbers", example = "[\"12345\", \"67890\"]")
   @Size(max = 5, message = "You can provide up to 5 lot numbers")
   List<@Size(max = 5, message = "Each lot number must be at most 5 characters") String> lotNumbers,
-  // ? ask what's the difference between Seedlot and family lot number, string and number?
 
-  @Schema(description = "Test activity type code", example = "SA")
-  String testType, // do we have enum for test type, activity, category?
+  @Schema(description = "Test activity type code, used to filter activity_type_cd")
+  @Size(max = 3)
+  String testType,
 
-  @Schema(description = "Activity ID", example = "GSA")
+  @Schema(description = "Activity ID, used to filter stndrd_activity_id")
+  @Size(max = 3)
   String activityId,
 
-  @Schema(description = "Germinator Tray ID")
-  @Size(max = 5)
-  String germinatorTrayId,
+  @Schema(description = "Germinator Tray ID, used to filter germinator_tray_id")
+  @Max(value = 99999, message = "Germinator Tray ID must be at most 5 digits")
+  @Min(value = 0)
+  Integer germinatorTrayId,
 
   @Schema(description = "Withdrawal start date", example = "2025-07-01")
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-  @Min(value = 1900, message = "Year must be no earlier than 1900")
-  @Max(value = 9999, message = "Year must be no later than 9999")
   LocalDate withdrawalStartDate,
 
   @Schema(description = "Withdrawal End date", example = "2025-07-01")
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
   LocalDate withdrawalEndDate,
 
-  @Schema(description = "Include historical tests")
+  @Schema(description = "Include historical tests, used to filter request_skey")
   Boolean includeHistoricalTests,
 
-  @Schema(description = "Germ tests only")
+  @Schema(description = "Germ tests only, used to filter germ_test_ind")
   Boolean germTestsOnly,
 
-  @Schema(description = "Request ID")
+  @Schema(description = "Request ID, used to filter req_id (first 11 char) and item_id (the 12th char)")
   @Size(max = 12)
   String requestId,
 
-  @Schema(description = "Request type")
+  @Schema(description = "Request type, used to filter request_type_st")
+  @Size(max = 3)
   String requestType,
 
-  @Schema(description = "Request year", example = "2025")
+  @Schema(description = "Request year between 1900 and 9999, used to filter request_yr")
+  @Min(value = 1900)
+  @Max(value = 9999)
   Integer requestYear,
 
-  @Schema(description = "Orchard ID")
+  @Schema(description = "Orchard ID, used to filter orchard_id")
   @Size(max = 3)
   String orchardId,
 
-  @Schema(description = "Category")
+  @Schema(description = "Category, used to filter test_category_cd")
+  @Size(max = 3)
   String testCategory,
 
-  @Schema(description = "Rank", example = "1")
-  @Min(0)
-  @Max(9)
-  Integer rank,  // ? this can only be 0-9? what's the range
+  @Schema(description = "Rank, used to filter test_rank")
+  @Size(max = 1)
+  String rank,
 
-  @Schema(description = "Species")
+  @Schema(description = "Species, used to filter vegetation_st")
+  @Size(max = 8)
   String species,
 
   @Schema(description = "Actual begin date from", example = "2025-01-01")
@@ -105,17 +109,17 @@ public record ActivitySearchRequestDto(
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
   LocalDate revisedEndDateTo,
 
-  @Schema(description = "Germ tray assignment status: -1 = Assigned, 0 = Unassigned")
+  @Schema(description = "Germ tray assignment status: -1 = Assigned, 0 = Unassigned, used to filter assigned_tray_ind")
   @Min(-1)
   @Max(0)
   Integer germTrayAssignment,
 
-  @Schema(description = "Test completion status: -1 = Complete, 0 = Incomplete")
+  @Schema(description = "Test completion status: -1 = Complete, 0 = Incomplete, used to filter test_complete_ind")
   @Min(-1)
   @Max(0)
   Integer completeStatus,
 
-  @Schema(description = "Acceptance status: -1 = Accepted, 0 = Unaccepted")
+  @Schema(description = "Acceptance status: -1 = Accepted, 0 = Unaccepted, used to filter accept_result_ind")
   @Min(-1)
   @Max(0)
   Integer acceptanceStatus,

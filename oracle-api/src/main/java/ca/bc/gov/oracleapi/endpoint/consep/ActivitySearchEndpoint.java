@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ModelAttribute;
-
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
 
 
 import java.util.List;
@@ -18,12 +19,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/search-activities")
 @RequiredArgsConstructor
+@Validated
 public class ActivitySearchEndpoint {
   private final ActivitySearchService activitySearchService;
 
   @GetMapping("/activities/search")
   public List<ActivitySearchResponseDto> searchActivities(
-    @ModelAttribute ActivitySearchRequestDto filter,
+    @Valid @ModelAttribute ActivitySearchRequestDto filter,
     @ParameterObject Pageable paginationParameters
   ) {
     return activitySearchService.searchActivities(filter);
