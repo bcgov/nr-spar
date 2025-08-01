@@ -380,7 +380,7 @@ public class PurityTestService {
     SparLog.info("Updated all debris below the removed rank {}", debrisRank);
 
     List<PurityDebrisEntity> updatedDebrisList =
-      debrisRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
+        debrisRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
 
     return updatedDebrisList.stream()
         .map(PurityDebrisMapper::convertToDto)
