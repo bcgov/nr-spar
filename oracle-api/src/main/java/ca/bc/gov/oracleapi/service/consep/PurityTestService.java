@@ -13,6 +13,7 @@ import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.DebrisId;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.exception.InvalidTestActivityKeyException;
+import ca.bc.gov.oracleapi.mapper.PurityDebrisMapper;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.PurityDebrisRepository;
 import ca.bc.gov.oracleapi.repository.consep.PurityReplicateRepository;
@@ -174,7 +175,7 @@ public class PurityTestService {
    * @param debrisFormDtos an object with the values to be updated
    */
   @Transactional
-  public List<PurityDebrisEntity> updateDebris(
+  public List<PurityDebrisDto> updateDebris(
       @NonNull BigDecimal riaKey,
       @NonNull List<PurityDebrisFormDto> debrisFormDtos
   ) {
@@ -228,7 +229,9 @@ public class PurityTestService {
     List<PurityDebrisEntity> saved = debrisRepository.saveAll(debrisToSave);
 
     SparLog.info("Saved {} purity debris records for riaKey: {}", saved.size(), riaKey);
-    return saved;
+    return saved.stream()
+        .map(PurityDebrisMapper::convertToDto)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -350,7 +353,7 @@ public class PurityTestService {
    * @param debrisRank      the rank of the debris to be deleted
    */
   @Transactional
-  public List<PurityDebrisEntity> deletePurityDebris(
+  public List<PurityDebrisDto> deletePurityDebris(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber,
       @NonNull Integer debrisRank
@@ -376,6 +379,11 @@ public class PurityTestService {
     debrisRepository.shiftRanksDown(riaKey, replicateNumber, debrisRank);
     SparLog.info("Updated all debris below the removed rank {}", debrisRank);
 
-    return debrisRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
+    List<PurityDebrisEntity> updatedDebrisList =
+        debrisRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
+
+    return updatedDebrisList.stream()
+        .map(PurityDebrisMapper::convertToDto)
+        .collect(Collectors.toList());
   }
 }

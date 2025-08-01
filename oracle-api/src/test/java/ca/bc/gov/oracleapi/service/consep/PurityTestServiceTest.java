@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
@@ -225,17 +226,22 @@ class PurityTestServiceTest {
     existing.setDebrisTypeCode("OLD");
 
     when(debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
-      riaKey, replicateNumber, debrisRank)).thenReturn(Optional.of(existing));
-    when(debrisRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+        riaKey, replicateNumber, debrisRank))
+        .thenReturn(Optional.of(existing));
+
+    when(debrisRepository.saveAll(anyList()))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     PurityDebrisFormDto formDto = new PurityDebrisFormDto(
         replicateNumber, debrisRank, "NEW"
     );
 
-    List<PurityDebrisEntity> result = purityTestService.updateDebris(riaKey, List.of(formDto));
+    List<PurityDebrisDto> result = purityTestService.updateDebris(riaKey, List.of(formDto));
 
     assertEquals(1, result.size());
-    assertEquals("NEW", result.get(0).getDebrisTypeCode());
+    assertEquals("NEW", result.get(0).debrisTypeCode());
+    assertEquals(debrisRank, result.get(0).debrisRank());
+    assertEquals(riaKey, result.get(0).riaKey());
   }
 
   @Test
@@ -244,16 +250,20 @@ class PurityTestServiceTest {
     PurityDebrisFormDto formDto = new PurityDebrisFormDto(
         replicateNumber, debrisRank, "ABC"
     );
-
+  
     when(debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
-        riaKey, replicateNumber, debrisRank)).thenReturn(Optional.empty());
-    when(debrisRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-
-    List<PurityDebrisEntity> result = purityTestService.updateDebris(riaKey, List.of(formDto));
-
+        riaKey, replicateNumber, debrisRank))
+        .thenReturn(Optional.empty());
+  
+    when(debrisRepository.saveAll(anyList()))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+  
+    List<PurityDebrisDto> result = purityTestService.updateDebris(riaKey, List.of(formDto));
+  
     assertEquals(1, result.size());
-    assertEquals("ABC", result.get(0).getDebrisTypeCode());
-    assertEquals(riaKey, result.get(0).getId().getRiaKey());
+    assertEquals("ABC", result.get(0).debrisTypeCode());
+    assertEquals(riaKey, result.get(0).riaKey());
+    assertEquals(replicateNumber, result.get(0).replicateNumber());
   }
 
   @Test

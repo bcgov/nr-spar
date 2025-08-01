@@ -273,20 +273,25 @@ const PurityContent = () => {
   };
 
   const addImpurity = (replicateNumber: number) => {
-    let nextRank: number = 1;
-    if (replicateNumber in impurities) {
-      const lastItem = impurities[replicateNumber].at(-1);
+    let nextRank = 1;
+    const replicateImpurities = impurities[replicateNumber] || [];
+
+    if (replicateImpurities.length > 0) {
+      const lastItem = replicateImpurities.at(-1);
       if (lastItem) {
         nextRank = lastItem.debrisRank + 1;
       }
     }
-    updateImpuritiesMutation.mutate([
-      {
-        replicateNumber,
-        debrisRank: nextRank,
-        debrisTypeCode: ''
-      }
-    ]);
+
+    const newImpurity = {
+      debrisRank: nextRank,
+      debrisCategory: ''
+    };
+
+    setImpurities((prev) => ({
+      ...prev,
+      [replicateNumber]: [...replicateImpurities, newImpurity]
+    }));
   };
 
   const handleCalculateAverage = () => {};
@@ -408,14 +413,16 @@ const PurityContent = () => {
             {`Replicate ${replicateNumber}`}
           </h5>
           {
-            Object.keys(impurities).length > 0
+            impurities[replicateNumber]
+            && impurities[replicateNumber].length > 0
             && impurities[replicateNumber].map(
               (impurity) => impurityPerReplicate(impurity, replicateNumber)
             )
           }
           <div className="consep-impurity-button">
             {
-              Object.keys(impurities).length > 0
+              impurities[replicateNumber]
+              && impurities[replicateNumber].length > 0
               && impurities[replicateNumber].length >= 10
                 ? (
                   <InlineNotification

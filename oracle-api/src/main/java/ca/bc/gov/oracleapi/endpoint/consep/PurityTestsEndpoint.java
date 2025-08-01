@@ -2,11 +2,11 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.PurityDebrisEntity;
 import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
@@ -374,7 +374,7 @@ public class PurityTestsEndpoint {
    *
    * @param riaKey The identifier for the test activities related data.
    * @param debrisFormDtos A list of {@link PurityDebrisFormDto} containing the new values.
-   * @return the {@link PurityDebrisEntity} updated
+   * @return the {@link PurityDebrisDto} updated
    */
   @PatchMapping(
       value = "debris/{riaKey}",
@@ -390,7 +390,7 @@ public class PurityTestsEndpoint {
           @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Replicate not found")
       })
-  public List<PurityDebrisEntity> updateDebrisField(
+  public List<PurityDebrisDto> updateDebrisField(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
@@ -439,7 +439,7 @@ public class PurityTestsEndpoint {
                   schema = @Schema(implementation = Void.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
-  public List<PurityDebrisEntity> deleteDebris(
+  public List<PurityDebrisDto> deleteDebris(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
