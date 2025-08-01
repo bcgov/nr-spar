@@ -262,6 +262,11 @@ export const getPurityColumns = (
     accessorKey: 'purityValue',
     header: 'Purity',
     size: 80,
+    muiEditTextFieldProps: ({ row }) => ({
+      type: 'text',
+      value: 'purityValue' in row.original ? row.original.purityValue : ''
+    }),
+    enableEditing: false,
     ...alignRight
   },
   {
