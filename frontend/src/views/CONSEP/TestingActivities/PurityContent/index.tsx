@@ -83,7 +83,7 @@ const PurityContent = () => {
   });
 
   const updateImpuritiesMutation = useMutation({
-    mutationFn: (impurityPayload: ImpurityPayload) => patchImpurities(
+    mutationFn: (impurityPayload: ImpurityPayload[]) => patchImpurities(
       riaKey || '',
       impurityPayload
     ),
@@ -298,13 +298,13 @@ const PurityContent = () => {
         nextRank = lastItem.debrisRank + 1;
       }
     }
-    updateImpuritiesMutation.mutate(
+    updateImpuritiesMutation.mutate([
       {
         replicateNumber,
         debrisRank: nextRank,
         debrisTypeCode: ''
       }
-    );
+    ]);
   };
 
   const handleCalculateAverage = () => {
@@ -393,13 +393,13 @@ const PurityContent = () => {
           }
           onChange={(e: ComboBoxEvent) => {
             const { selectedItem } = e;
-            updateImpuritiesMutation.mutate(
+            updateImpuritiesMutation.mutate([
               {
                 replicateNumber,
                 debrisRank: impurity.debrisRank,
                 debrisTypeCode: selectedItem
               }
-            );
+            ]);
           }}
         />
       </Column>
