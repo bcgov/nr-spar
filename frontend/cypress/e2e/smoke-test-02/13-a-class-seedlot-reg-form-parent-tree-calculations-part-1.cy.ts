@@ -93,7 +93,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Check Parent tree contribution summary', () => {
     // Wait for the table to load
-    cy.get('tbody > tr:first-child > td:first-child', { timeout: 10000 })
+    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`, { timeout: 10000 })
       .should(($td) => {
         const value = $td.text().trim();
         expect(value, 'cell value should be a number').to.match(/^\d+$/);
@@ -165,7 +165,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Remove a single Parent tree contribution', () => {
     // Wait for the table to load
-    cy.get('tbody > tr:first-child > td:first-child', { timeout: 10000 })
+    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`, { timeout: 10000 })
       .should(($td) => {
         const value = $td.text().trim();
         expect(value, 'cell value should be a number').to.match(/^\d+$/);
