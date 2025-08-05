@@ -1,4 +1,4 @@
-import { TYPE_DELAY } from '../../constants';
+import { HALF_SECOND, TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
@@ -330,7 +330,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
     // Wait for 500ms to ensure the save is complete
     // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(500);
+    cy.wait(HALF_SECOND);
 
     // Check complete status of Collection step
     cy.contains(`.${prefix}--progress-step-button`, 'Collection')
@@ -541,7 +541,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
     // Wait for 500ms to ensure the save is complete
     // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(500);
+    cy.wait(HALF_SECOND);
 
     // Check complete status of Interim storage step
     cy.contains(`.${prefix}--progress-step-button`, 'Interim storage')

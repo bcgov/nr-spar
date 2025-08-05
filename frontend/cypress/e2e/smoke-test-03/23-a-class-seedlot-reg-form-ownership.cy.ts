@@ -1,6 +1,6 @@
 import { SeedlotRegFixtureType } from '../../definitions';
 import prefix from '../../../src/styles/classPrefix';
-import { TYPE_DELAY } from '../../constants';
+import { HALF_SECOND, TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Ownership', () => {
   let regFormData: {
@@ -460,7 +460,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     // Wait for 500ms to ensure the save is complete
     // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(500);
+    cy.wait(HALF_SECOND);
 
     // Check complete status of Ownership step
     cy.contains(`.${prefix}--progress-step-button`, 'Ownership')
