@@ -21,9 +21,7 @@ import ca.bc.gov.oracleapi.dto.consep.PurityReplicateDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.PurityDebrisEntity;
 import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
-import ca.bc.gov.oracleapi.entity.consep.idclass.DebrisId;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.PurityTestService;
@@ -472,22 +470,17 @@ class PurityTestsEndpointTest {
   void updateDebrisField_shouldReturnUpdatedDebrisList() throws Exception {
     BigDecimal riaKey = new BigDecimal("1234567890");
 
-    PurityDebrisEntity entity1 = new PurityDebrisEntity();
-    entity1.setId(new DebrisId(riaKey, 1, 1));
-    entity1.setDebrisTypeCode("ABC");
-
-    PurityDebrisEntity entity2 = new PurityDebrisEntity();
-    entity2.setId(new DebrisId(riaKey, 1, 2));
-    entity2.setDebrisTypeCode("DEF");
+    PurityDebrisDto dto1 = new PurityDebrisDto(riaKey, 1, null, 1, "ABC");
+    PurityDebrisDto dto2 = new PurityDebrisDto(riaKey, 1, null, 2, "DEF");
 
     PurityDebrisFormDto debrisForm1 = new PurityDebrisFormDto(1, 1, "ABC");
     PurityDebrisFormDto debrisForm2 = new PurityDebrisFormDto(1, 2, "DEF");
 
     List<PurityDebrisFormDto> debrisFormList = List.of(debrisForm1, debrisForm2);
-    List<PurityDebrisEntity> debrisEntities = List.of(entity1, entity2);
+    List<PurityDebrisDto> debrisDtos = List.of(dto1, dto2);
 
     when(purityTestService.updateDebris(eq(riaKey), eq(debrisFormList)))
-        .thenReturn(debrisEntities);
+        .thenReturn(debrisDtos);
 
     mockMvc.perform(patch("/api/purity-tests/debris/{riaKey}", riaKey)
           .with(csrf().asHeader())
@@ -495,11 +488,11 @@ class PurityTestsEndpointTest {
           .accept(MediaType.APPLICATION_JSON)
           .content(objectMapper.writeValueAsString(debrisFormList)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].id.replicateNumber").value(1))
-        .andExpect(jsonPath("$[0].id.debrisRank").value(1))
+        .andExpect(jsonPath("$[0].replicateNumber").value(1))
+        .andExpect(jsonPath("$[0].debrisRank").value(1))
         .andExpect(jsonPath("$[0].debrisTypeCode").value("ABC"))
-        .andExpect(jsonPath("$[1].id.replicateNumber").value(1))
-        .andExpect(jsonPath("$[1].id.debrisRank").value(2))
+        .andExpect(jsonPath("$[1].replicateNumber").value(1))
+        .andExpect(jsonPath("$[1].debrisRank").value(2))
         .andExpect(jsonPath("$[1].debrisTypeCode").value("DEF"));
   }
 
@@ -510,12 +503,10 @@ class PurityTestsEndpointTest {
 
     PurityDebrisFormDto debrisForm = new PurityDebrisFormDto(1, 1, "ABC");
 
-    PurityDebrisEntity updatedEntity = new PurityDebrisEntity();
-    updatedEntity.setId(new DebrisId(riaKey, 1, 1));
-    updatedEntity.setDebrisTypeCode("ABC");
+    PurityDebrisDto updatedDto = new PurityDebrisDto(riaKey, 1, null, 1, "ABC");
 
     when(purityTestService.updateDebris(eq(riaKey), eq(List.of(debrisForm))))
-        .thenReturn(List.of(updatedEntity));
+        .thenReturn(List.of(updatedDto));
 
     mockMvc.perform(patch("/api/purity-tests/debris/{riaKey}", riaKey)
             .with(csrf().asHeader())
@@ -523,8 +514,8 @@ class PurityTestsEndpointTest {
             .accept(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(List.of(debrisForm))))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].id.replicateNumber").value(1))
-        .andExpect(jsonPath("$[0].id.debrisRank").value(1))
+        .andExpect(jsonPath("$[0].replicateNumber").value(1))
+        .andExpect(jsonPath("$[0].debrisRank").value(1))
         .andExpect(jsonPath("$[0].debrisTypeCode").value("ABC"));
   }
 
@@ -551,18 +542,14 @@ class PurityTestsEndpointTest {
     int replicateNumber = 1;
     int debrisRank = 2;
 
-    PurityDebrisEntity entity1 = new PurityDebrisEntity();
-    entity1.setId(new DebrisId(riaKey, replicateNumber, 1));
-    entity1.setDebrisTypeCode("ABC");
+    PurityDebrisDto remainingDebris = new PurityDebrisDto(
+        riaKey, replicateNumber, null, 1, "ABC"
+    );
 
-    PurityDebrisEntity entity2 = new PurityDebrisEntity();
-    entity2.setId(new DebrisId(riaKey, replicateNumber, 2));
-    entity2.setDebrisTypeCode("DEF");
-
-    List<PurityDebrisEntity> deletedDebrisList = List.of(entity1);
+    List<PurityDebrisDto> updatedList = List.of(remainingDebris);
 
     when(purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank))
-        .thenReturn(deletedDebrisList);
+        .thenReturn(updatedList);
 
     mockMvc.perform(delete("/api/purity-tests/debris/{riaKey}/{replicateNumber}/{debrisRank}",
             riaKey, replicateNumber, debrisRank)
@@ -570,7 +557,7 @@ class PurityTestsEndpointTest {
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1))
-        .andExpect(jsonPath("$[0].id.debrisRank").value(1))
+        .andExpect(jsonPath("$[0].debrisRank").value(1))
         .andExpect(jsonPath("$[0].debrisTypeCode").value("ABC"));
   }
 

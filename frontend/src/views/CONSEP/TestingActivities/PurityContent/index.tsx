@@ -291,20 +291,25 @@ const PurityContent = () => {
   };
 
   const addImpurity = (replicateNumber: number) => {
-    let nextRank: number = 1;
-    if (replicateNumber in impurities) {
-      const lastItem = impurities[replicateNumber].at(-1);
+    let nextRank = 1;
+    const replicateImpurities = impurities[replicateNumber] || [];
+
+    if (replicateImpurities.length > 0) {
+      const lastItem = replicateImpurities.at(-1);
       if (lastItem) {
         nextRank = lastItem.debrisRank + 1;
       }
     }
-    updateImpuritiesMutation.mutate([
-      {
-        replicateNumber,
-        debrisRank: nextRank,
-        debrisTypeCode: ''
-      }
-    ]);
+
+    const newImpurity = {
+      debrisRank: nextRank,
+      debrisCategory: ''
+    };
+
+    setImpurities((prev) => ({
+      ...prev,
+      [replicateNumber]: [...replicateImpurities, newImpurity]
+    }));
   };
 
   const handleCalculateAverage = () => {
