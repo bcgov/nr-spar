@@ -329,7 +329,6 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     cy.saveSeedlotRegFormProgress();
 
     // Wait for 500ms to ensure the save is complete
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(HALF_SECOND);
 
     // Check complete status of Collection step
@@ -540,7 +539,6 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     cy.saveSeedlotRegFormProgress();
 
     // Wait for 500ms to ensure the save is complete
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(HALF_SECOND);
 
     // Check complete status of Interim storage step

@@ -459,7 +459,6 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.saveSeedlotRegFormProgress();
 
     // Wait for 500ms to ensure the save is complete
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(HALF_SECOND);
 
     // Check complete status of Ownership step

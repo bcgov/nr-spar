@@ -1,3 +1,4 @@
+/* eslint-disable cypress/no-unnecessary-waiting */
 /* eslint-disable prefer-const */
 import prefix from '../../../src/styles/classPrefix';
 
@@ -149,7 +150,6 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .contains('Calculate metrics')
       .click();
 
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(3000);
 
     // Store Ne value to a variable
@@ -229,7 +229,6 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .contains('Calculate metrics')
       .click();
 
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(3000);
 
     // Check Ne value after clearing first parent tree row
