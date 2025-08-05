@@ -32,9 +32,7 @@ describe('Seedlot detail page', () => {
       .children('span')
       .invoke('text')
       .then((text) => {
-        if (text.trim() === 'Expired') {
-          // Do nothing or add an assertion for expired state if needed
-        } else {
+        if (text.trim() !== 'Expired') {
           cy.get('.combo-button-container')
             .find('.combo-button')
             .should('have.text', 'Edit seedlot form')
