@@ -62,7 +62,7 @@ public class ActivitySearchService {
     return new ActivitySearchResponseDto(
       activitySearchResultEntity.getSeedlotDisplay(),
       activitySearchResultEntity.getRequestItem(),
-      activitySearchResultEntity.getVegetationSt(),
+      activitySearchResultEntity.getSpecies(),
       activitySearchResultEntity.getActivityId(),
       activitySearchResultEntity.getTestRank(),
       activitySearchResultEntity.getCurrentTestInd(),
