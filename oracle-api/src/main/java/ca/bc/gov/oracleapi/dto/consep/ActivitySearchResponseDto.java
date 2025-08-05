@@ -1,5 +1,7 @@
 package ca.bc.gov.oracleapi.dto.consep;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -11,7 +13,7 @@ import java.time.LocalDateTime;
 public record ActivitySearchResponseDto(
   String seedlotDisplay,
   String requestItem,
-  String vegetationSt,
+  String species,
   String activityId,
   String testRank,
   Integer currentTestInd,

@@ -25,7 +25,7 @@ public class ActivitySearchResultEntity {
   private String requestItem;
 
   @Column(name = "VEGETATION_ST", length = 8)
-  private String vegetationSt;
+  private String species;
 
   @Column(name = "STNDRD_ACTIVITY_ID", length = 3)
   private String activityId;
