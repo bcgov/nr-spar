@@ -12,6 +12,7 @@ public record ActivitySearchResponseDto(
   String seedlotDisplay,
   String requestItem,
   String vegetationSt,
+  String activityId,
   String testRank,
   Integer currentTestInd,
   String testCategoryCd,

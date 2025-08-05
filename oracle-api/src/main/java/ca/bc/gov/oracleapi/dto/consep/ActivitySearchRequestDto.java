@@ -36,11 +36,11 @@ public record ActivitySearchRequestDto(
 
   @Schema(description = "Withdrawal start date", example = "2025-07-01")
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-  LocalDate withdrawalStartDate,
+  LocalDate seedWithdrawalStartDate,
 
   @Schema(description = "Withdrawal End date", example = "2025-07-01")
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-  LocalDate withdrawalEndDate,
+  LocalDate seedWithdrawalEndDate,
 
   @Schema(description = "Include historical tests, used to filter request_skey")
   Boolean includeHistoricalTests,
@@ -67,11 +67,11 @@ public record ActivitySearchRequestDto(
 
   @Schema(description = "Category, used to filter test_category_cd")
   @Size(max = 3)
-  String testCategory,
+  String testCategoryCd,
 
   @Schema(description = "Rank, used to filter test_rank")
   @Size(max = 1)
-  String rank,
+  String testRank,
 
   @Schema(description = "Species, used to filter vegetation_st")
   @Size(max = 8)

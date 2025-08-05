@@ -27,6 +27,9 @@ public class ActivitySearchResultEntity {
   @Column(name = "VEGETATION_ST", length = 8)
   private String vegetationSt;
 
+  @Column(name = "STNDRD_ACTIVITY_ID", length = 3)
+  private String activityId;
+
   @Column(name = "TEST_RANK", length = 1)
   private String testRank;
 
