@@ -228,7 +228,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
 
     signInWithRedirect({
       provider: {
-        custom: `${(appEnv).toLocaleUpperCase()}-${String(signInProvider)}`,
+        custom: `${(appEnv).toLocaleUpperCase()}-${String(signInProvider)}`
       }
     });
   };
