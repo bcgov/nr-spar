@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.hasSize;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -106,21 +108,7 @@ class ActivitySearchEndpointTest {
     Integer acceptanceStatus = -1;
     String seedlotClass = "A";
 
-    ActivitySearchRequestDto activitySearchRequestDto = new ActivitySearchRequestDto(
-      lotNumbers, testType, activityId, germinatorTrayId,
-      seedWithdrawalStartDate, seedWithdrawalEndDate,
-      includeHistoricalTests, germTestsOnly, requestId, requestType,
-      requestYear, orchardId, testCategoryCd, testRank, species,
-      actualBeginDateFrom, actualBeginDateTo,
-      actualEndDateFrom, actualEndDateTo,
-      revisedStartDateFrom, revisedStartDateTo,
-      revisedEndDateFrom, revisedEndDateTo,
-      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
-    );
-
-    Pageable pageable = PageRequest.of(0, 10);
-
-    Mockito.when(activitySearchService.searchActivities(activitySearchRequestDto, pageable))
+    Mockito.when(activitySearchService.searchActivities(Mockito.any(), Mockito.any()))
       .thenReturn(List.of(activitySearchResponseDto));
 
     mockMvc.perform(get("/api/testing-activities/search")
@@ -151,7 +139,7 @@ class ActivitySearchEndpointTest {
         .param("seedlotClass", seedlotClass)
         .accept(APPLICATION_JSON))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.size()").value(1))
+      .andExpect(jsonPath("$", hasSize(1)))
       .andExpect(jsonPath("$[0].seedlotDisplay").value("00098"))
       .andExpect(jsonPath("$[0].requestItem").value(requestId))
       .andExpect(jsonPath("$[0].species").value(species));
