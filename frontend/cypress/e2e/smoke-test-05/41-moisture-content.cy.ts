@@ -5,8 +5,8 @@ describe('Moisture Content Screen page', () => {
   beforeEach(() => {
     mockMoistureContentApi();
     cy.login();
-    cy.visit('/consep/manual-moisture-content/:riaKey');
-    cy.url().should('contains', '/consep/manual-moisture-content/:riaKey');
+    cy.visit('/consep/manual-moisture-content/514330');
+    cy.url().should('contains', '/consep/manual-moisture-content/514330');
   });
 
   it('should load and display manual moisture content page correctly', () => {
@@ -29,6 +29,33 @@ describe('Moisture Content Screen page', () => {
       .and('contain', 'CONSEP')
       .and('contain', 'Testing activities search')
       .and('contain', 'Testing list');
+  });
+
+  it('Check Activity summary section', () => {
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(0)
+      .should('have.text', 'MC');
+
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(1)
+      .should('have.text', '60662');
+
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(2)
+      .should('have.text', 'SSP20000093');
+
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(3)
+      .should('have.text', 'FDC | A');
+
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(4)
+      .should('have.text', '0.5');
   });
 
   it('should have correct Date functionality and validations', () => {
