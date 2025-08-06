@@ -28,7 +28,7 @@
     "@types/validator": "^13.7.17",
     "@typescript-eslint/parser": "^7.0.0",
     "@vitejs/plugin-react": "^4.0.4",
-    "aws-amplify": "^5.3.11",
+    "aws-amplify": "^6.15.0",
     "axios": "^1.10.0",
     "bignumber.js": "^9.0.0",
     "braces": "^3.0.3",
