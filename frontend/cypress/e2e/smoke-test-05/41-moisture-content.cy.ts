@@ -1,7 +1,9 @@
 import prefix from '../../../src/styles/classPrefix';
+import { mockMoistureContentApi } from '../../support/mockApiConsep';
 
 describe('Moisture Content Screen page', () => {
   beforeEach(() => {
+    mockMoistureContentApi();
     cy.login();
     cy.visit('/consep/manual-moisture-content/:riaKey');
     cy.url().should('contains', '/consep/manual-moisture-content/:riaKey');
