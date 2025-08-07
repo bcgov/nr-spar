@@ -92,7 +92,7 @@ const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] =>
  * you can take a look on the attribute mapping reference at:
  * https://github.com/bcgov/nr-forests-access-management/wiki/OIDC-Attribute-Mapping
  *
- * @param {CognitoUserSession} authToken CognitoUserSession to be parsed.
+ * @param {AuthSession} session CognitoUserSession to be parsed.
  * @returns {FamUser} The FamUser object
  */
 const parseToken = (session: AuthSession): FamUser => {
