@@ -73,7 +73,7 @@ const useReplicates = (
   useEffect(() => {
     const intervalId = setInterval(() => {
       const hasValidationErrors = Object.values(validationErrors).some(Boolean);
-      if (hasValidationErrors || updateReplicateListMutation.isLoading) {
+      if (hasValidationErrors || updateReplicateListMutation.isPending) {
         return;
       }
 

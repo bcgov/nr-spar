@@ -76,7 +76,7 @@ const OrchardStep = ({
     select: (data) => getMultiOptList(data, true, false, true, ['isFemaleMethodology', 'isPliSpecies']),
     enabled: !isFormSubmitted || isReview,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const filterGameticOptions = (isFemale: boolean) => {

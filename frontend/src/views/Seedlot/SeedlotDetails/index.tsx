@@ -87,7 +87,7 @@ const SeedlotDetails = () => {
     queryFn: getVegCodes,
     select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const covertToDisplayObj = (seedlot?: SeedlotType) => {
@@ -102,11 +102,6 @@ const SeedlotDetails = () => {
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
     enabled: vegCodeQuery.isFetched,
     refetchOnMount: true,
-    onError: (err: AxiosError) => {
-      if (err.response?.status === 404) {
-        navigate('/404');
-      }
-    },
     select: (data) => data.seedlot
   });
 
@@ -124,7 +119,16 @@ const SeedlotDetails = () => {
     if (seedlotQuery.isFetched || seedlotQuery.isFetchedAfterMount || seedlotQuery.status === 'success') {
       covertToDisplayObj(seedlotQuery.data);
     }
-  }, [seedlotQuery.isFetched, seedlotQuery.isFetchedAfterMount, seedlotQuery.status]);
+
+    if (seedlotQuery.error instanceof AxiosError && seedlotQuery.error.response?.status === 404) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    }
+  }, [
+    seedlotQuery.isFetched,
+    seedlotQuery.isFetchedAfterMount,
+    seedlotQuery.status,
+    seedlotQuery.error
+  ]);
 
   const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
 
@@ -133,7 +137,7 @@ const SeedlotDetails = () => {
     queryFn: () => getForestClientByNumberOrAcronym(applicantClientNumber!),
     enabled: !!applicantClientNumber,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const covertToClientObj = () => {

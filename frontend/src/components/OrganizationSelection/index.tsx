@@ -42,7 +42,7 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
       queryKey: ['role', 'forest-clients', clientRole.clientId],
       queryFn: () => getForestClientByNumberOrAcronym(clientRole.clientId),
       staleTime: THREE_HOURS,
-      cacheTime: THREE_HALF_HOURS,
+      gcTime: THREE_HALF_HOURS,
       refetchOnReconnect: false
     })) ?? []
   });
@@ -50,7 +50,7 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
   const qc = useQueryClient();
 
   const filterClientsByValue = (value: string) => {
-    const forestClientsQueriesData = qc.getQueriesData(['role', 'forest-clients']);
+    const forestClientsQueriesData = qc.getQueriesData({ queryKey: ['role', 'forest-clients'] });
 
     const forestClients = forestClientsQueriesData.map((qData) => (
       qData.at(1) as ForestClientType
@@ -104,7 +104,7 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
     const queryData: ForestClientType | undefined = qc.getQueryData(queryKey);
 
     // Render skeleton on load
-    if (queryState?.status === 'loading') {
+    if (queryState?.status === 'pending') {
       return (
         <Row className="org-item-skeleton-row" key={`${clientRole.clientId}-${clientRole.roles[0]}`}>
           <Column>

@@ -73,7 +73,7 @@ const FormProgress = (
 
   const renderProgress = () => {
     if (!seedlotStatusCode || seedlotStatusCode === 'PND' || seedlotStatusCode === 'INC') {
-      if ((getSeedlotQueryStatus === 'loading' || formProgressStatusQuery.status === 'loading')) {
+      if ((getSeedlotQueryStatus === 'pending' || formProgressStatusQuery.status === 'pending')) {
         return <ProgressIndicatorSkeleton />;
       }
 
@@ -113,7 +113,7 @@ const FormProgress = (
             className="section-btn"
             renderIcon={Edit}
             onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
-            disabled={getSeedlotQueryStatus === 'loading'}
+            disabled={getSeedlotQueryStatus === 'pending'}
           >
             {
               seedlotStatusCode === 'SUB'

@@ -83,7 +83,7 @@ const ClientSearchTable = (
     setProcessedData(sliced);
   };
 
-  if (mutationFn?.status === 'loading') {
+  if (mutationFn?.status === 'pending') {
     return (
       <DataTableSkeleton
         showToolbar={false}

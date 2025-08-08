@@ -166,7 +166,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
     enabled: !isFormSubmitted,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   // Parent trees Query
@@ -176,7 +176,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
       getAllParentTrees(seedlotSpecies.code)
     ),
     staleTime: THREE_HOURS, // will not refetch for 3 hours
-    cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
+    gcTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
   // Effects 'SMP mix' tab
@@ -214,7 +214,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     queryKey: ['genetic-worth'],
     queryFn: getGeneticWorthList,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   /**

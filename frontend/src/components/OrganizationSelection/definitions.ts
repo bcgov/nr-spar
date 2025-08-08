@@ -8,7 +8,7 @@ export type ClientTypeConfig = {
 
 export type OrganizationItemProps = {
   forestClient?: ForestClientType
-  queryState?: QueryState<unknown, undefined>
+  queryState?: QueryState<unknown, Error>
   selected?: boolean
 }
 

@@ -73,7 +73,7 @@ const ClientAndCodeInput = ({
     queryFn: () => getForestClientByNumberOrAcronym(clientInput.value),
     enabled: !!clientInput.value,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const defaultClientQuery = useQuery({
@@ -81,7 +81,7 @@ const ClientAndCodeInput = ({
     queryFn: () => getForestClientByNumberOrAcronym(defaultClientNumber!),
     enabled: !!defaultClientNumber,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const updateAfterAgencyValidation = (updatedAgency: StringInputType) => {
@@ -367,11 +367,11 @@ const ClientAndCodeInput = ({
                   ? null
                   : supportTexts.agency.helperText
               }
-              invalid={clientInput.isInvalid && !validateClientAcronymMutation.isLoading}
+              invalid={clientInput.isInvalid && !validateClientAcronymMutation.isPending}
               invalidText={invalidAcronymMessage}
               readOnly={
                 (showCheckbox && isDefault)
-                || validateClientAcronymMutation.isLoading
+                || validateClientAcronymMutation.isPending
                 || readOnly
               }
               enableCounter
@@ -386,7 +386,7 @@ const ClientAndCodeInput = ({
             />
             {
               renderLoading(
-                validateClientAcronymMutation.isLoading,
+                validateClientAcronymMutation.isPending,
                 validateClientAcronymMutation.isSuccess,
                 showClientValidationStatus,
                 clientInput.id,
@@ -415,13 +415,13 @@ const ClientAndCodeInput = ({
                   ? null
                   : supportTexts.locationCode.helperTextEnabled
               }
-              invalid={locationCodeInput.isInvalid && !validateLocationCodeMutation.isLoading}
+              invalid={locationCodeInput.isInvalid && !validateLocationCodeMutation.isPending}
               invalidText={((showCheckbox && isDefault) && locationCodeInput.value === '')
                 ? supportTexts.locationCode.invalidTextInterimSpecific
                 : invalidLocationMessage}
               readOnly={
                 (showCheckbox && isDefault)
-                || readOnly || clientInput.isInvalid || validateLocationCodeMutation.isLoading
+                || readOnly || clientInput.isInvalid || validateLocationCodeMutation.isPending
               }
               disabled={(isDefault && locationCodeInput.value === '')}
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
@@ -433,7 +433,7 @@ const ClientAndCodeInput = ({
             />
             {
               renderLoading(
-                validateLocationCodeMutation.isLoading,
+                validateLocationCodeMutation.isPending,
                 validateLocationCodeMutation.isSuccess,
                 showLocCodeValidationStatus,
                 locationCodeInput.id,

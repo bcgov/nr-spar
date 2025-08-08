@@ -59,7 +59,7 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
           () => (
             <div className="gw-calc-loading-icon">
               {
-                calculateGenWorthQuery.isLoading
+                calculateGenWorthQuery.isPending
                   ? <Loading withOverlay={false} small />
                   : <Calculator />
               }

@@ -20,7 +20,7 @@ const ApplicantAndSeedlotRead = () => {
     queryFn: () => getForestClientByNumberOrAcronym(defaultClientNumber),
     enabled: !!defaultClientNumber,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS,
+    gcTime: THREE_HALF_HOURS,
     select: (fc) => getForestClientLabel(fc)
   });
 

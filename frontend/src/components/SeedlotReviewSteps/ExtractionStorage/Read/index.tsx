@@ -19,7 +19,7 @@ const ExtractionStorageReviewRead = () => {
     queryFn: () => getForestClientByNumberOrAcronym(state.extraction.agency.value),
     enabled: !!state.extraction.agency.value,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS,
+    gcTime: THREE_HALF_HOURS,
     select: (client) => getForestClientLabel(client)
   });
 
@@ -28,7 +28,7 @@ const ExtractionStorageReviewRead = () => {
     queryFn: () => getForestClientByNumberOrAcronym(state.seedStorage.agency.value),
     enabled: !!state.seedStorage.agency.value,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS,
+    gcTime: THREE_HALF_HOURS,
     select: (client) => getForestClientLabel(client)
   });
 

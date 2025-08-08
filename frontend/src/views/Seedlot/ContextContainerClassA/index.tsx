@@ -112,17 +112,12 @@ const ContextContainerClassA = ({ children }: props) => {
     queryFn: getVegCodes,
     select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const seedlotQuery = useQuery({
     queryKey: ['seedlots', seedlotNumber],
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
-    onError: (err: AxiosError) => {
-      if (err.response?.status === 404) {
-        navigate(ROUTES.FOUR_OH_FOUR);
-      }
-    },
     enabled: vegCodeQuery.isFetched,
     refetchOnWindowFocus: false
   });
@@ -145,11 +140,6 @@ const ContextContainerClassA = ({ children }: props) => {
   const getAllSeedlotInfoQuery = useQuery({
     queryKey: ['seedlot-full-form', seedlotNumber],
     queryFn: () => getAClassSeedlotFullForm(seedlotNumber ?? ''),
-    onError: (err: AxiosError) => {
-      if (err.response?.status === 404) {
-        navigate(ROUTES.FOUR_OH_FOUR);
-      }
-    },
     enabled: isFormSubmitted,
     refetchOnWindowFocus: false
   });
@@ -270,7 +260,7 @@ const ContextContainerClassA = ({ children }: props) => {
     queryFn: getFundingSources,
     select: (data) => getMultiOptList(data),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const methodsOfPaymentQuery = useQuery({
@@ -278,7 +268,7 @@ const ContextContainerClassA = ({ children }: props) => {
     queryFn: getMethodsOfPayment,
     select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const gameticMethodologyQuery = useQuery({
@@ -286,7 +276,7 @@ const ContextContainerClassA = ({ children }: props) => {
     queryFn: getGameticMethodology,
     select: (data) => getMultiOptList(data, true, false, true, ['isFemaleMethodology', 'isPliSpecies']),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const seedlotSpecies = getSpeciesOptionByCode(
@@ -325,17 +315,28 @@ const ContextContainerClassA = ({ children }: props) => {
       // Set area of use data
       setAreaOfUseData(fillAreaOfUseData(seedlotQuery.data, areaOfUseData));
     }
-  }, [seedlotQuery.status]);
+    if (seedlotQuery.error instanceof AxiosError && seedlotQuery.error.response?.status === 404) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    }
+  }, [seedlotQuery.status, seedlotQuery.error]);
 
   /**
    * getAllSeedlotInfoQuery Effects
    */
   useEffect(() => {
     if (getAllSeedlotInfoQuery.status === 'success') {
-      // Set calculated result
       setCalculatedValues(getAllSeedlotInfoQuery.data.calculatedValues);
     }
-  }, [getAllSeedlotInfoQuery.status]);
+
+    const { error } = getAllSeedlotInfoQuery;
+
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    }
+  }, [
+    getAllSeedlotInfoQuery.status,
+    getAllSeedlotInfoQuery.error
+  ]);
 
   useEffect(() => {
     if (
@@ -559,7 +560,7 @@ const ContextContainerClassA = ({ children }: props) => {
   const handleSaveBtn = () => {
     setSaveStatus('active');
     setSaveDescription(smartSaveText.loading);
-    if (!saveProgress.isLoading) {
+    if (!saveProgress.isPending) {
       saveProgress.mutate();
     }
   };
@@ -582,13 +583,13 @@ const ContextContainerClassA = ({ children }: props) => {
    */
   useEffect(() => {
     if (numOfEdit.current >= MAX_EDIT_BEFORE_SAVE && isFormIncomplete && saveStatus !== 'conflict') {
-      if (!saveProgress.isLoading) {
+      if (!saveProgress.isPending) {
         saveProgress.mutate();
       }
     }
 
     const interval = setInterval(() => {
-      if (numOfEdit.current > 0 && !saveProgress.isLoading && isFormIncomplete && saveStatus !== 'conflict') {
+      if (numOfEdit.current > 0 && !saveProgress.isPending && isFormIncomplete && saveStatus !== 'conflict') {
         saveProgress.mutate();
       }
     }, TEN_SECONDS);

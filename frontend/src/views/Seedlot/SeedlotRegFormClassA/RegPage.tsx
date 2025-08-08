@@ -173,7 +173,7 @@ const RegPage = () => {
         <Row>
           <Column className="seedlot-registration-row">
             {
-              (isFetchingData || submitSeedlot.status === 'loading')
+              (isFetchingData || submitSeedlot.status === 'pending')
               || (isFormSubmitted && !seedlotDataLoaded)
                 ? <Loading />
                 : (
@@ -235,7 +235,7 @@ const RegPage = () => {
                       size="lg"
                       className="form-action-btn"
                       onClick={() => handleSaveBtn()}
-                      disabled={saveProgressStatus === 'loading' || saveStatus === 'conflict'}
+                      disabled={saveProgressStatus === 'pending' || saveStatus === 'conflict'}
                     >
                       <InlineLoading status={saveStatus === 'conflict' ? 'error' : saveStatus} description={saveDescription} />
                     </Button>

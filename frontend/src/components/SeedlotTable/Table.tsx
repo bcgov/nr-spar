@@ -82,13 +82,15 @@ const SeedlotDataTable = (
     });
   };
 
+  const uniqueAgencies = Array.from(new Set(seedlotData.map((seedlot) => seedlot.applicantAgency)));
+
   const clientDataQuery = useQueries({
-    queries: seedlotData.map((seedlot) => ({
-      queryKey: ['forest-clients', seedlot.applicantAgency],
-      queryFn: () => getForestClientByNumberOrAcronym(seedlot.applicantAgency),
-      enable: isTscAdmin,
+    queries: uniqueAgencies.map((applicantAgency) => ({
+      queryKey: ['forest-clients', applicantAgency],
+      queryFn: () => getForestClientByNumberOrAcronym(applicantAgency),
+      enabled: isTscAdmin,
       staleTime: THREE_HOURS,
-      cacheTime: THREE_HALF_HOURS
+      gcTime: THREE_HALF_HOURS
     }))
   });
 
