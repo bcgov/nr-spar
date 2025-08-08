@@ -36,15 +36,17 @@ const AreaOfUseEdit = () => {
     queryKey: ['area-of-use', 'spz-list', 'vegetation-code', seedlotData?.vegetationCode!],
     queryFn: () => getSpzByVegCodeList(seedlotData!.vegetationCode!),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS,
+    gcTime: THREE_HALF_HOURS,
     enabled: !!seedlotData?.vegetationCode,
     select: (data) => spzListToMultiObj(data)
   });
 
-  const [isFetching, setIsFetching] = useState<boolean>(isFetchingContextData && spzListQuery.status === 'loading');
+  const [isFetching, setIsFetching] = useState<boolean>(
+    isFetchingContextData && spzListQuery.isPending
+  );
 
   useEffect(() => {
-    if (spzListQuery.status === 'loading') {
+    if (spzListQuery.isPending) {
       setIsFetching(true);
     } else {
       setIsFetching(isFetchingContextData);

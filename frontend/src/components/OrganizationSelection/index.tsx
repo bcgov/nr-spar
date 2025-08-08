@@ -42,7 +42,7 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
       queryKey: ['role', 'forest-clients', clientRole.clientId],
       queryFn: () => getForestClientByNumberOrAcronym(clientRole.clientId),
       staleTime: THREE_HOURS,
-      cacheTime: THREE_HALF_HOURS,
+      gcTime: THREE_HALF_HOURS,
       refetchOnReconnect: false
     })) ?? []
   });

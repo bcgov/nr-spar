@@ -99,7 +99,7 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     select: (data) => getMultiOptList(data),
     enabled: !isFormSubmitted,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const methodsOfPaymentQuery = useQuery({
@@ -107,7 +107,7 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     queryFn: getMethodsOfPayment,
     select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const getSeedlotBySeedlotNumberQuery = useQuery({

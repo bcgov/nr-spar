@@ -95,7 +95,7 @@ const SeedlotReviewContent = () => {
     queryKey: ['vegetation-codes'],
     queryFn: getVegCodes,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const seedlotQuery = useQuery({
@@ -521,8 +521,8 @@ const SeedlotReviewContent = () => {
   const blockerFunction = () => {
     if (
       !isReadMode
-      && !tscSeedlotMutation.isLoading
-      && !statusOnlyMutation.isLoading
+      && !tscSeedlotMutation.isPending
+      && !statusOnlyMutation.isPending
     ) {
       setIsCancelModalOpen(true); // Show modal if there are unsaved changes
       return true; // Block navigation
@@ -536,8 +536,8 @@ const SeedlotReviewContent = () => {
     <FlexGrid className="seedlot-review-grid">
       <Loading
         active={
-          updateDraftMutation.isLoading
-          || tscSeedlotMutation.isLoading
+          updateDraftMutation.isPending
+          || tscSeedlotMutation.isPending
           || isFetchingData
         }
       />
@@ -856,7 +856,7 @@ const SeedlotReviewContent = () => {
                       closeSaveStatusModal();
                       handleSaveAndStatus('PND');
                     }}
-                    disabled={tscSeedlotMutation.isLoading || updateDraftMutation.isLoading}
+                    disabled={tscSeedlotMutation.isPending || updateDraftMutation.isPending}
                   >
                     Send back to pending
                   </Button>
@@ -869,7 +869,7 @@ const SeedlotReviewContent = () => {
                       handleSaveAndStatus('APP');
                     }}
                     renderIcon={Checkmark}
-                    disabled={tscSeedlotMutation.isLoading || updateDraftMutation.isLoading}
+                    disabled={tscSeedlotMutation.isPending || updateDraftMutation.isPending}
                   >
                     Approve seedlot
                   </Button>
