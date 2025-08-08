@@ -10,9 +10,7 @@ type FamUser = {
   clientRoles: UserClientRolesType[];
   provider: string;
   jwtToken: string;
-  refreshToken: string;
   userId: string;
-  tokenExpiration: number;
 }
 
 export default FamUser;
