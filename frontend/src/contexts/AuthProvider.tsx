@@ -3,8 +3,13 @@ import React, {
   useMemo,
   useState
 } from 'react';
-import type { CognitoUserSession } from 'amazon-cognito-identity-js';
-import { Auth } from 'aws-amplify';
+import {
+  signInWithRedirect,
+  signOut as awsSignOut,
+  fetchAuthSession,
+  decodeJWT
+} from 'aws-amplify/auth';
+import type { AuthSession } from 'aws-amplify/auth';
 import axios from 'axios';
 import { UserClientRolesType } from '../types/UserRoleType';
 import { env } from '../env';
@@ -87,13 +92,18 @@ const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] =>
  * you can take a look on the attribute mapping reference at:
  * https://github.com/bcgov/nr-forests-access-management/wiki/OIDC-Attribute-Mapping
  *
- * @param {CognitoUserSession} authToken CognitoUserSession to be parsed.
+ * @param {AuthSession} session CognitoUserSession to be parsed.
  * @returns {FamUser} The FamUser object
  */
-const parseToken = (authToken: CognitoUserSession): FamUser => {
-  const decodedIdToken = authToken.getIdToken().decodePayload();
-  const decodedAccessToken = authToken.getAccessToken().decodePayload();
+const parseToken = (session: AuthSession): FamUser => {
+  const accessToken = session.tokens?.accessToken;
+  const idToken = session.tokens?.idToken;
+  if (!accessToken || !idToken) {
+    throw new Error('The user is not authenticated');
+  }
 
+  const decodedIdToken: Record<string, any> = decodeJWT(idToken.toString()).payload;
+  const decodedAccessToken: Record<string, any> = decodeJWT(accessToken.toString()).payload;
   // Extract the first name and last name from the displayName and remove unwanted part
   const displayName = decodedIdToken['custom:idp_display_name'] as string;
   const idpProvider = (decodedIdToken['custom:idp_name'] as string).toUpperCase();
@@ -109,10 +119,8 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
     name: `${firstName} ${lastName}`,
     clientRoles: parseRole(decodedAccessToken),
     provider: decodedIdToken['custom:idp_name'].toLocaleUpperCase(),
-    jwtToken: authToken.getIdToken().getJwtToken(),
-    refreshToken: authToken.getRefreshToken().getToken(),
-    userId: `${idpProvider}@${idpUsername}`, // E.g: 'IDIR@GROOT'
-    tokenExpiration: authToken.getIdToken().getExpiration()
+    jwtToken: idToken.toString(),
+    userId: `${idpProvider}@${idpUsername}` // E.g: 'IDIR@GROOT'
   };
 
   return famUser;
@@ -143,8 +151,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
 
   const fetchFamCurrentSession = async (pathname: string): Promise<FamUser | null> => {
     try {
-      const currentSession: CognitoUserSession = await Auth.currentSession();
-      const famUser = parseToken(currentSession);
+      const session: AuthSession = await fetchAuthSession({ forceRefresh: true });
+      const famUser = parseToken(session);
       // Check if selected role still exists on user profile
       if (selectedClientRoles) {
         const foundFamClientRoles = famUser.clientRoles.find((famClientRole) => (
@@ -218,13 +226,15 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const signIn = (signInProvider: LoginProviders): void => {
     const appEnv = env.VITE_ZONE ?? 'DEV';
 
-    Auth.federatedSignIn({
-      customProvider: `${(appEnv).toLocaleUpperCase()}-${String(signInProvider)}`
+    signInWithRedirect({
+      provider: {
+        custom: `${(appEnv).toLocaleUpperCase()}-${String(signInProvider)}`
+      }
     });
   };
 
   const signOut = (): void => {
-    Auth.signOut()
+    awsSignOut()
       .then(() => {
         setSelectedClientRoles(null);
         setSigned(false);
