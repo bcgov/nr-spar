@@ -204,7 +204,7 @@ const SeedlotInformation = (
             onChange={(e: string) => handleSource(e)}
           >
             {
-              seedlotSourcesQuery.isPending
+              seedlotSourcesQuery.status === 'pending'
                 ? <RadioButtonSkeleton />
                 : renderSources()
             }

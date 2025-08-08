@@ -510,8 +510,8 @@ const SeedlotReviewContent = () => {
    */
   const discardChanges = () => {
     setIsReadMode(true);
-    queryClient.refetchQueries(['seedlots', seedlotNumber]);
-    queryClient.refetchQueries(['seedlot-full-form', seedlotNumber]);
+    queryClient.refetchQueries({ queryKey: ['seedlots', seedlotNumber] });
+    queryClient.refetchQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
     closeCancelModal();
   };
 

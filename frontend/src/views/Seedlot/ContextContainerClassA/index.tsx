@@ -118,11 +118,6 @@ const ContextContainerClassA = ({ children }: props) => {
   const seedlotQuery = useQuery({
     queryKey: ['seedlots', seedlotNumber],
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
-    onError: (err: AxiosError) => {
-      if (err.response?.status === 404) {
-        navigate(ROUTES.FOUR_OH_FOUR);
-      }
-    },
     enabled: vegCodeQuery.isFetched,
     refetchOnWindowFocus: false
   });
@@ -145,11 +140,6 @@ const ContextContainerClassA = ({ children }: props) => {
   const getAllSeedlotInfoQuery = useQuery({
     queryKey: ['seedlot-full-form', seedlotNumber],
     queryFn: () => getAClassSeedlotFullForm(seedlotNumber ?? ''),
-    onError: (err: AxiosError) => {
-      if (err.response?.status === 404) {
-        navigate(ROUTES.FOUR_OH_FOUR);
-      }
-    },
     enabled: isFormSubmitted,
     refetchOnWindowFocus: false
   });
@@ -325,7 +315,10 @@ const ContextContainerClassA = ({ children }: props) => {
       // Set area of use data
       setAreaOfUseData(fillAreaOfUseData(seedlotQuery.data, areaOfUseData));
     }
-  }, [seedlotQuery.status]);
+    if (seedlotQuery.error instanceof AxiosError && seedlotQuery.error.response?.status === 404) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    }
+  }, [seedlotQuery.status, seedlotQuery.error]);
 
   /**
    * getAllSeedlotInfoQuery Effects

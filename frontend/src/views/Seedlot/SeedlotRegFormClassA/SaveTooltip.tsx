@@ -46,7 +46,7 @@ const SaveTooltipLabel = (
 
   useEffect(() => {
     let prompt = `Saved ${lastSaveTimeDiff} min ago`;
-    if (mutationStatus === 'loading') {
+    if (mutationStatus === 'pending') {
       prompt = smartSaveText.loading;
     }
     if (saveStatus === 'error') {
@@ -99,7 +99,7 @@ const SaveTooltipLabel = (
             kind="primary"
             size="sm"
             onClick={saveStatus === 'conflict' ? reloadFormDraft : handleSaveBtn}
-            disabled={mutationStatus === 'loading'}
+            disabled={mutationStatus === 'pending'}
             renderIcon={saveStatus === 'conflict' ? Reset : Save}
           >
             <InlineLoading

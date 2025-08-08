@@ -42,11 +42,11 @@ const AreaOfUseEdit = () => {
   });
 
   const [isFetching, setIsFetching] = useState<boolean>(
-    isFetchingContextData && spzListQuery.isPending
+    isFetchingContextData && spzListQuery.status === 'pending'
   );
 
   useEffect(() => {
-    if (spzListQuery.isPending) {
+    if (spzListQuery.status === 'pending') {
       setIsFetching(true);
     } else {
       setIsFetching(isFetchingContextData);
