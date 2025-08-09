@@ -64,7 +64,7 @@ describe('Moisture Content Screen page', () => {
     cy.get('.activity-result-container')
       .find('tbody tr')
       .as('totalRows')
-      .should('have.length', 2);
+      .should('have.length', 3);
 
     // Check 'Add row' button functionality
     cy.get('.activity-result-action-buttons')
@@ -73,11 +73,11 @@ describe('Moisture Content Screen page', () => {
       .click();
 
     cy.get('@totalRows')
-      .should('have.length', 3);
+      .should('have.length', 4);
 
     // Check validation of Container input
     cy.get('@totalRows')
-      .eq(2)
+      .eq(3)
       .find('input[name="containerId"]')
       .click()
       .type('10011', { delay: TYPE_DELAY });
@@ -86,7 +86,7 @@ describe('Moisture Content Screen page', () => {
       .should('contain', 'Must be no more than 4 characters');
 
     cy.get('@totalRows')
-      .eq(2)
+      .eq(3)
       .find('input[name="containerId"]')
       .click()
       .clear()
@@ -94,16 +94,16 @@ describe('Moisture Content Screen page', () => {
 
     // Check validation of Container weight input
     cy.get('@totalRows')
-      .eq(2)
+      .eq(3)
       .find('input[name="containerWeight"]')
       .click()
       .type('10011', { delay: TYPE_DELAY });
 
     cy.get('p.Mui-error')
-      .should('contain', 'Must be no more than 4 characters');
+      .should('contain', 'Must be between 0 and 1000');
 
     cy.get('@totalRows')
-      .eq(2)
+      .eq(3)
       .find('input[name="containerWeight"]')
       .click()
       .clear()
@@ -111,16 +111,16 @@ describe('Moisture Content Screen page', () => {
 
     // Check validation of Fresh seed input
     cy.get('@totalRows')
-      .eq(2)
+      .eq(3)
       .find('input[name="freshSeed"]')
       .click()
       .type('10011', { delay: TYPE_DELAY });
 
     cy.get('p.Mui-error')
-      .should('contain', 'Must be no more than 4 characters');
+      .should('contain', 'Must be between 0 and 1000');
 
     cy.get('@totalRows')
-      .eq(2)
+      .eq(3)
       .find('input[name="freshSeed"]')
       .click()
       .clear()
@@ -128,16 +128,16 @@ describe('Moisture Content Screen page', () => {
 
     // Check validation of Cont + Dry seed input
     cy.get('@totalRows')
-      .eq(2)
+      .eq(3)
       .find('input[name="containerAndDryWeight"]')
       .click()
       .type('10011', { delay: TYPE_DELAY });
 
     cy.get('p.Mui-error')
-      .should('contain', 'Must be no more than 4 characters');
+      .should('contain', 'Must be between 0 and 1000');
 
     cy.get('@totalRows')
-      .eq(2)
+      .eq(3)
       .find('input[name="containerAndDryWeight"]')
       .click()
       .clear()
@@ -635,40 +635,40 @@ describe('Moisture Content Screen page', () => {
       .should('have.text', averageMcValues.toFixed(2));
   });
 
-  // it('should have correct Date functionality and validations', () => {
-  //   // Check if the date input has a placeholder
-  //   cy.get(`.${prefix}--date-picker-container`)
-  //     .find('input')
-  //     .should('have.attr', 'placeholder', 'yyyy/mm/dd');
+  it('should have correct Date functionality and validations', () => {
+    // Check if the date input has a placeholder
+    cy.get(`.${prefix}--date-picker-container`)
+      .find('input')
+      .should('have.attr', 'placeholder', 'yyyy/mm/dd');
 
-  //   cy.get('#moisture-content-end-date-picker')
-  //     .clear()
-  //     .type('2025-05-28', { delay: TYPE_DELAY })
-  //     .blur();
+    cy.get('#moisture-content-end-date-picker')
+      .clear()
+      .type('2025-05-28', { delay: TYPE_DELAY })
+      .blur();
 
-  //   // Invalid start date
-  //   cy.get('#moisture-content-start-date-picker')
-  //     .clear()
-  //     .type('2025-05-29', { delay: TYPE_DELAY })
-  //     .blur();
+    // Invalid start date
+    cy.get('#moisture-content-start-date-picker')
+      .clear()
+      .type('2025-05-29', { delay: TYPE_DELAY })
+      .blur();
 
-  //   // Valid start date
-  //   cy.get('#moisture-content-start-date-picker')
-  //     .clear()
-  //     .type('2025-05-27', { delay: TYPE_DELAY })
-  //     .blur();
-  // });
+    // Valid start date
+    cy.get('#moisture-content-start-date-picker')
+      .clear()
+      .type('2025-05-27', { delay: TYPE_DELAY })
+      .blur();
+  });
 
-  // it('Check Comment box', () => {
-  //   // Check if the comment input has a placeholder
-  //   cy.get('#moisture-content-comments')
-  //     .should('have.attr', 'placeholder', 'My comments about this activity');
+  it('Check Comment box', () => {
+    // Check if the comment input has a placeholder
+    cy.get('#moisture-content-comments')
+      .should('have.attr', 'placeholder', 'My comments about this activity');
 
-  //   // Type a comment
-  //   cy.get('#moisture-content-comments')
-  //     .clear()
-  //     .type('This is a test comment', { delay: TYPE_DELAY })
-  //     .blur()
-  //     .should('have.value', 'This is a test comment');
-  // });
+    // Type a comment
+    cy.get('#moisture-content-comments')
+      .clear()
+      .type('This is a test comment', { delay: TYPE_DELAY })
+      .blur()
+      .should('have.value', 'This is a test comment');
+  });
 });
