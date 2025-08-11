@@ -9,8 +9,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,7 +18,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -36,18 +36,23 @@ class ActivitySearchEndpointTest {
   @MockBean
   private ActivitySearchService activitySearchService;
 
+  @Autowired
+  private ObjectMapper objectMapper;
+
   private ActivitySearchResponseDto activitySearchResponseDto;
+
+  private String seedlotDisplay, species, requestId, testCategoryCd;
 
   @BeforeEach
   void setUp() {
     // response parameter
-    String seedlotDisplay = "00098";
-    String requestItem = "RTS19981299A";
-    String species = "PLI";
+    seedlotDisplay = "00098";
+    requestId = "RTS19981299A";
+    species = "PLI";
     String activityId = "D1";
     String testRank = "A";
     Integer currentTestInd = 0;
-    String testCategoryCd = "STD";
+    testCategoryCd = "STD";
     Integer germinationPct = 88;
     String pv = "77//9";
     Integer moisturePct = 0;
@@ -69,7 +74,7 @@ class ActivitySearchEndpointTest {
     Integer riaSkey = 448383;
 
     activitySearchResponseDto = new ActivitySearchResponseDto(
-      seedlotDisplay, requestItem, species, activityId, testRank, currentTestInd,
+      seedlotDisplay, requestId, species, activityId, testRank, currentTestInd,
       testCategoryCd, germinationPct, pv, moisturePct, purityPct, seedsPerGram,
       otherTestResult, testCompleteInd, acceptanceStatus, significntStsInd, seedWithdrawalDate,
       revisedEndDt, actualBeginDtTm, actualEndDtTm, riaComment, requestSkey,
@@ -88,13 +93,10 @@ class ActivitySearchEndpointTest {
     LocalDate seedWithdrawalEndDate = LocalDate.of(1998, 10, 31);
     Boolean includeHistoricalTests = false;
     Boolean germTestsOnly = true;
-    String requestId = "RTS19981299A";
     String requestType = "RTS";
     Integer requestYear = 1998;
     String orchardId = null;
-    String testCategoryCd = "STD";
     String testRank = "A"; // testRank
-    String species = "PLI"; // species
     LocalDate actualBeginDateFrom = LocalDate.of(1997, 10, 1);
     LocalDate actualBeginDateTo = LocalDate.of(1997, 10, 10);
     LocalDate actualEndDateFrom = LocalDate.of(1997, 11, 1);
@@ -108,40 +110,33 @@ class ActivitySearchEndpointTest {
     Integer acceptanceStatus = -1;
     String seedlotClass = "A";
 
+
+    ActivitySearchRequestDto activitySearchRequestDto = new ActivitySearchRequestDto(
+      lotNumbers, testType, activityId, germinatorTrayId,
+      seedWithdrawalStartDate, seedWithdrawalEndDate,
+      includeHistoricalTests, germTestsOnly, requestId, requestType,
+      requestYear, orchardId, testCategoryCd, testRank, species,
+      actualBeginDateFrom, actualBeginDateTo,
+      actualEndDateFrom, actualEndDateTo,
+      revisedStartDateFrom, revisedStartDateTo,
+      revisedEndDateFrom, revisedEndDateTo,
+      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
+    );
+
+
     Mockito.when(activitySearchService.searchActivities(Mockito.any(), Mockito.any()))
       .thenReturn(List.of(activitySearchResponseDto));
 
-    mockMvc.perform(get("/api/testing-activities/search")
-        .param("lotNumbers", lotNumbers.toArray(new String[0]))
-        .param("testType", testType)
-        .param("activityId", activityId)
-        .param("requestId", requestId)
-        .param("requestType", requestType)
-        .param("requestYear", requestYear.toString())
-        .param("testCategoryCd", testCategoryCd)
-        .param("testRank", testRank)
-        .param("species", species)
-        .param("seedWithdrawalStartDate", seedWithdrawalStartDate.toString())
-        .param("seedWithdrawalEndDate", seedWithdrawalEndDate.toString())
-        .param("actualBeginDateFrom", actualBeginDateFrom.toString())
-        .param("actualBeginDateTo", actualBeginDateTo.toString())
-        .param("actualEndDateFrom", actualEndDateFrom.toString())
-        .param("actualEndDateTo", actualEndDateTo.toString())
-        .param("revisedStartDateFrom", revisedStartDateFrom.toString())
-        .param("revisedStartDateTo", revisedStartDateTo.toString())
-        .param("revisedEndDateFrom", revisedEndDateFrom.toString())
-        .param("revisedEndDateTo", revisedEndDateTo.toString())
-        .param("germTestsOnly", germTestsOnly.toString())
-        .param("includeHistoricalTests", includeHistoricalTests.toString())
-        .param("germTrayAssignment", germTrayAssignment.toString())
-        .param("completeStatus", completeStatus.toString())
-        .param("acceptanceStatus", acceptanceStatus.toString())
-        .param("seedlotClass", seedlotClass)
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/testing-activities/search")
+        .contentType(APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(activitySearchRequestDto))
         .accept(APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$", hasSize(1)))
-      .andExpect(jsonPath("$[0].seedlotDisplay").value("00098"))
+      .andExpect(jsonPath("$[0].seedlotDisplay").value(seedlotDisplay))
       .andExpect(jsonPath("$[0].requestItem").value(requestId))
-      .andExpect(jsonPath("$[0].species").value(species));
+      .andExpect(jsonPath("$[0].species").value(species))
+      .andExpect(jsonPath("$[0].testCategoryCd").value(testCategoryCd));
   }
 }
