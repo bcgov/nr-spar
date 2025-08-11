@@ -5,5 +5,14 @@
     padding: 0;
     border: none;
     text-overflow: ellipsis;
+
+    &:focus,
+    &:active {
+      outline: none;
+      // Even with "outline" set to none, the rules below are necessary
+      // to overwrite the default webkit styling behavior
+      outline-color: transparent;
+      outline-width: 0;
+    }
   }
 }
