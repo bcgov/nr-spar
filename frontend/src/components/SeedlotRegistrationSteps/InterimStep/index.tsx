@@ -123,7 +123,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
     queryFn: getFacilityTypes,
     select: (data: any) => getMultiOptList(data),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const renderFacilityTypes = (facilityTypes: Array<MultiOptionsObj>) => {
