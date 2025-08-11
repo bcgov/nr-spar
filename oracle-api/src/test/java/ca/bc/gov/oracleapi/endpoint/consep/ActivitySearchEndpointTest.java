@@ -18,11 +18,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 
@@ -128,7 +129,8 @@ class ActivitySearchEndpointTest {
       .thenReturn(List.of(activitySearchResponseDto));
 
 
-    mockMvc.perform(MockMvcRequestBuilders.post("/api/testing-activities/search")
+    mockMvc.perform(post("/api/testing-activities/search")
+        .with(csrf().asHeader())
         .contentType(APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(activitySearchRequestDto))
         .accept(APPLICATION_JSON))
