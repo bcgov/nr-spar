@@ -118,4 +118,28 @@
       @include type.type-style('code-02');
     }
   }
+
+  .#{vars.$bcgov-prefix}--text-input-wrapper--readonly,
+  .#{vars.$bcgov-prefix}--combo-box--readonly {
+    border-block-end: 0;
+
+    .#{vars.$bcgov-prefix}--list-box__field{
+      button {
+        display: none;
+      }
+    }
+
+    input {
+      background: transparent;
+      border-block-end: 0;
+      &:focus,
+      &:active {
+        outline: none;
+        // Even with "outline" set to none, the rules below are necessary
+        // to overwrite the default webkit styling behavior
+        outline-color: transparent;
+        outline-width: 0;
+      }
+    }
+  }
 }
