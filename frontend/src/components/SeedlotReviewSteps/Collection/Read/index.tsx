@@ -33,7 +33,7 @@ const CollectionReviewRead = () => {
     queryKey: ['cone-collection-methods'],
     queryFn: getConeCollectionMethod,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   return (
