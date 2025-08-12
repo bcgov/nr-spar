@@ -11,7 +11,7 @@ export const fieldsConfig = {
     secondaryfieldName: 'Impurity type',
     placeholder: 'Choose an option',
     label: 'impurityType',
-    options: ['Impurity1', 'Impurity2', 'Impurity3']
+    options: ['Im1', 'Im2', 'Im3']
 
   },
   startDate: {

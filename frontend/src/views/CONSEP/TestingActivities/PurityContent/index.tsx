@@ -38,6 +38,7 @@ import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 import ROUTES from '../../../../routes/constants';
+import { calculateAverage } from '../../../../api-service/moistureContentAPI';
 
 import ActivityResult from '../ActivityResult';
 import ButtonGroup from '../ButtonGroup';
@@ -194,6 +195,23 @@ const PurityContent = () => {
     }
   });
 
+  const averageTest = useMutation({
+    mutationFn: (values: number[]) => calculateAverage(riaKey ?? '', values),
+    onSuccess: (data) => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        moisturePct: data.data
+      };
+      setTestActivity(testActivityData);
+    },
+    onError: (error: AxiosError) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to calculate average: ${error.message}`
+      });
+    }
+  });
+
   useEffect(() => {
     if (!riaKey) {
       navigate(ROUTES.FOUR_OH_FOUR);
@@ -273,23 +291,39 @@ const PurityContent = () => {
   };
 
   const addImpurity = (replicateNumber: number) => {
-    let nextRank: number = 1;
-    if (replicateNumber in impurities) {
-      const lastItem = impurities[replicateNumber].at(-1);
+    let nextRank = 1;
+    const replicateImpurities = impurities[replicateNumber] || [];
+
+    if (replicateImpurities.length > 0) {
+      const lastItem = replicateImpurities.at(-1);
       if (lastItem) {
         nextRank = lastItem.debrisRank + 1;
       }
     }
-    updateImpuritiesMutation.mutate([
-      {
-        replicateNumber,
-        debrisRank: nextRank,
-        debrisTypeCode: ''
-      }
-    ]);
+
+    const newImpurity = {
+      debrisRank: nextRank,
+      debrisCategory: ''
+    };
+
+    setImpurities((prev) => ({
+      ...prev,
+      [replicateNumber]: [...replicateImpurities, newImpurity]
+    }));
   };
 
-  const handleCalculateAverage = () => {};
+  const handleCalculateAverage = () => {
+    if (tableBodyRef.current) {
+      const cells = tableBodyRef.current.querySelectorAll('td[data-index="4"]');
+      const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+      averageTest.mutate(numbers);
+    } else {
+      setAlert({
+        isSuccess: false,
+        message: 'Table body reference is not available'
+      });
+    }
+  };
 
   const handleCompleteTestModal = () => {
     setModalType(COMPLETE);
@@ -408,14 +442,18 @@ const PurityContent = () => {
             {`Replicate ${replicateNumber}`}
           </h5>
           {
-            Object.keys(impurities).length > 0
+            Object.keys(impurities)
+            && Object.keys(impurities).length > 0
+            && impurities[replicateNumber]
             && impurities[replicateNumber].map(
               (impurity) => impurityPerReplicate(impurity, replicateNumber)
             )
           }
           <div className="consep-impurity-button">
             {
-              Object.keys(impurities).length > 0
+              Object.keys(impurities)
+              && Object.keys(impurities).length > 0
+              && impurities[replicateNumber]
               && impurities[replicateNumber].length >= 10
                 ? (
                   <InlineNotification

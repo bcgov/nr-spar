@@ -1,3 +1,3 @@
-export type QueryStatusType = 'error' | 'loading' | 'success';
+export type QueryStatusType = 'error' | 'pending' | 'success';
 
 export type MutationStatusType = QueryStatusType | 'idle';

@@ -18,19 +18,24 @@ const signOutUrl = [
   `?redirect_uri=${window.location.origin}/`
 ].join('');
 
+const verificationMethods: 'code' | 'token' = 'code';
+
 const awsconfig = {
-  aws_cognito_region: env.VITE_COGNITO_REGION || 'ca-central-1',
-  aws_user_pools_id: env.VITE_USER_POOLS_ID,
-  aws_user_pools_web_client_id: env.VITE_USER_POOLS_WEB_CLIENT_ID,
-  aws_mandatory_sign_in: 'enable',
-  oauth: {
-    domain: env.VITE_AWS_DOMAIN || 'prod-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com',
-    scope: ['openid'],
-    redirectSignIn: `${window.location.origin}/`,
-    redirectSignOut: signOutUrl,
-    responseType: 'code'
-  },
-  federationTarget: 'COGNITO_USER_POOLS'
+  Auth: {
+    Cognito: {
+      userPoolId: env.VITE_USER_POOLS_ID,
+      userPoolClientId: env.VITE_USER_POOLS_WEB_CLIENT_ID,
+      loginWith: {
+        oauth: {
+          domain: env.VITE_AWS_DOMAIN || 'prod-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com',
+          scopes: ['openid'],
+          redirectSignIn: [`${window.location.origin}/`],
+          redirectSignOut: [signOutUrl],
+          responseType: verificationMethods
+        }
+      }
+    }
+  }
 };
 
 export default awsconfig;

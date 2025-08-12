@@ -73,7 +73,7 @@ const useReplicates = (
   useEffect(() => {
     const intervalId = setInterval(() => {
       const hasValidationErrors = Object.values(validationErrors).some(Boolean);
-      if (hasValidationErrors || updateReplicateListMutation.isLoading) {
+      if (hasValidationErrors || updateReplicateListMutation.isPending) {
         return;
       }
 
@@ -175,13 +175,16 @@ const ActivityResult = ({
       case 'moistureTest':
         return replicates.map((item) => ({
           ...item,
+          dryWeight: ('containerAndDryWeight' in item) && item.containerAndDryWeight && item.containerWeight
+            ? parseFloat((item.containerAndDryWeight - item.containerWeight).toFixed(4))
+            : undefined,
           mcValue: ('freshSeed' in item) && item.freshSeed && item.dryWeight
             ? (Math.round(
               ((item.freshSeed - item.dryWeight) / item.freshSeed + Number.EPSILON) * 100
             )).toFixed(2)
             : undefined
         }));
-      case 'purityTest':
+      case 'purityTest': {
         return replicates.map((item) => ({
           ...item,
           purityValue:
@@ -191,11 +194,9 @@ const ActivityResult = ({
               (item.pureSeedWeight
                 / (item.otherSeedWeight + item.inertMttrWeight + item.pureSeedWeight)) * 100
             )).toFixed(2)
-            : undefined,
-          dryWeight: ('containerAndDryWeight' in item) && item.containerAndDryWeight && item.containerWeight
-            ? parseFloat((item.containerAndDryWeight - item.containerWeight).toFixed(4))
             : undefined
         }));
+      }
       default:
         break;
     }
