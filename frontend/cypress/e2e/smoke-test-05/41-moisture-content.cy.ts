@@ -1,9 +1,14 @@
 import { HALF_SECOND, TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { mockMoistureContentApi } from '../../support/mockApiConsep';
+import { MoistureContentType } from '../../definitions';
 
 describe('Moisture Content Screen page', () => {
+  let mcData: MoistureContentType;
   beforeEach(() => {
+    cy.fixture('moisture-content').then((jsonData) => {
+      mcData = jsonData;
+    });
     mockMoistureContentApi();
     cy.login();
     cy.visit('/consep/manual-moisture-content/514330');
@@ -14,12 +19,12 @@ describe('Moisture Content Screen page', () => {
     // Check if the page title is displayed correctly
     cy.get('.consep-moisture-content-title')
       .find('h1')
-      .contains('Moisture content cones for seedlot');
+      .contains(mcData.mc.title);
 
     // Check if the table title is displayed correctly
     cy.get('.activity-result-actions-title')
       .find('h3')
-      .contains('Activity results per replicate');
+      .contains(mcData.table.title);
   });
 
   it('Check breadcrumbs section', () => {
@@ -60,6 +65,15 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Activity results table validation', () => {
+    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
+    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+
+    // Add a new row
+    cy.get('.activity-result-action-buttons')
+      .find('button')
+      .contains('Add row')
+      .click();
+
     // Check validation of Container input
     cy.get('.activity-result-container')
       .find('tbody tr')
@@ -70,7 +84,7 @@ describe('Moisture Content Screen page', () => {
       .type('10011', { delay: TYPE_DELAY });
 
     cy.get('p.Mui-error')
-      .should('contain', 'Must be no more than 4 characters');
+      .should('contain', mcData.table.containerErrorMsg);
 
     cy.get('@totalRows')
       .eq(3)
@@ -87,7 +101,7 @@ describe('Moisture Content Screen page', () => {
       .type('10011', { delay: TYPE_DELAY });
 
     cy.get('p.Mui-error')
-      .should('contain', 'Must be between 0 and 1000');
+      .should('contain', mcData.table.containerWeightErrorMsg);
 
     cy.get('@totalRows')
       .eq(3)
@@ -104,7 +118,7 @@ describe('Moisture Content Screen page', () => {
       .type('10011', { delay: TYPE_DELAY });
 
     cy.get('p.Mui-error')
-      .should('contain', 'Must be between 0 and 1000');
+      .should('contain', mcData.table.containerWeightErrorMsg);
 
     cy.get('@totalRows')
       .eq(3)
@@ -121,7 +135,7 @@ describe('Moisture Content Screen page', () => {
       .type('10011', { delay: TYPE_DELAY });
 
     cy.get('p.Mui-error')
-      .should('contain', 'Must be between 0 and 1000');
+      .should('contain', mcData.table.containerWeightErrorMsg);
 
     cy.get('@totalRows')
       .eq(3)
@@ -131,7 +145,7 @@ describe('Moisture Content Screen page', () => {
       .type('38', { delay: TYPE_DELAY });
   });
 
-  it.only('Check Activity results table button functionality', () => {
+  it('Check Activity results table button functionality', () => {
     cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
     cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
 
@@ -175,14 +189,14 @@ describe('Moisture Content Screen page', () => {
 
     cy.get('@acceptCheckbox', { timeout: HALF_SECOND })
       .siblings('svg')
-      .should('have.attr', 'data-testid', 'CheckBoxOutlineBlankIcon');
+      .should('have.attr', 'data-testid', mcData.table.unCheckedBox);
 
     cy.get('@acceptCheckbox')
       .click();
 
     cy.get('@acceptCheckbox', { timeout: HALF_SECOND })
       .siblings('svg')
-      .should('have.attr', 'data-testid', 'CheckBoxIcon');
+      .should('have.attr', 'data-testid', mcData.table.checkedBox);
 
     // Check 'Accept all' button functionality
     cy.get('@acceptCheckbox')
@@ -195,7 +209,7 @@ describe('Moisture Content Screen page', () => {
 
     cy.get('@acceptCheckbox', { timeout: HALF_SECOND })
       .siblings('svg')
-      .should('have.attr', 'data-testid', 'CheckBoxIcon');
+      .should('have.attr', 'data-testid', mcData.table.checkedBox);
 
     // Check Comments column functionality
     cy.get('.activity-result-container')
@@ -204,11 +218,11 @@ describe('Moisture Content Screen page', () => {
       .find('td:nth-child(9) input')
       .as('commentInput')
       .click()
-      .type('test', { delay: TYPE_DELAY })
+      .type(mcData.mc.testComment, { delay: TYPE_DELAY })
       .blur();
 
     cy.get('@commentInput')
-      .should('have.value', 'test');
+      .should('have.value', mcData.mc.testComment);
 
     // Check 'Clear data' button functionality
     cy.get('.activity-result-action-buttons')
@@ -223,7 +237,7 @@ describe('Moisture Content Screen page', () => {
 
     cy.get('.activity-result-container')
       .find('tbody tr')
-      .should('contain.text', 'No data found');
+      .should('contain.text', mcData.table.emptyTableMsg);
   });
 
   it('Check sorting by Replicate number', () => {
@@ -234,7 +248,7 @@ describe('Moisture Content Screen page', () => {
       .find('thead tr')
       .find('th div')
       .as('tableHeading')
-      .contains('Replicate')
+      .contains(mcData.table.column1)
       .click();
 
     cy.get('.activity-result-container')
@@ -258,7 +272,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     cy.get('@tableHeading')
-      .contains('Replicate')
+      .contains(mcData.table.column1)
       .click();
 
     cy.get('@firstRow')
@@ -288,7 +302,7 @@ describe('Moisture Content Screen page', () => {
       .find('thead tr')
       .find('th div')
       .as('tableHeading')
-      .contains('Container #')
+      .contains(mcData.table.column2)
       .click();
 
     cy.get('.activity-result-container')
@@ -316,7 +330,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     cy.get('@tableHeading')
-      .contains('Container #')
+      .contains(mcData.table.column2)
       .click();
 
     cy.get('@firstRow')
@@ -348,7 +362,7 @@ describe('Moisture Content Screen page', () => {
       .find('thead tr')
       .find('th div')
       .as('tableHeading')
-      .contains('Container weight')
+      .contains(mcData.table.column3)
       .click();
 
     cy.get('.activity-result-container')
@@ -376,7 +390,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     cy.get('@tableHeading')
-      .contains('Container weight')
+      .contains(mcData.table.column3)
       .click();
 
     cy.get('@firstRow')
@@ -408,7 +422,7 @@ describe('Moisture Content Screen page', () => {
       .find('thead tr')
       .find('th div')
       .as('tableHeading')
-      .contains('Fresh seed')
+      .contains(mcData.table.column4)
       .click();
 
     cy.get('.activity-result-container')
@@ -436,7 +450,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     cy.get('@tableHeading')
-      .contains('Fresh seed')
+      .contains(mcData.table.column4)
       .click();
 
     cy.get('@firstRow')
@@ -468,7 +482,7 @@ describe('Moisture Content Screen page', () => {
       .find('thead tr')
       .find('th div')
       .as('tableHeading')
-      .contains('Cont + Dry seed')
+      .contains(mcData.table.column5)
       .click();
 
     cy.get('.activity-result-container')
@@ -496,7 +510,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     cy.get('@tableHeading')
-      .contains('Cont + Dry seed')
+      .contains(mcData.table.column5)
       .click();
 
     cy.get('@firstRow')
@@ -528,7 +542,7 @@ describe('Moisture Content Screen page', () => {
       .find('thead tr')
       .find('th div')
       .as('tableHeading')
-      .contains('Dry weight')
+      .contains(mcData.table.column6)
       .click();
 
     cy.get('.activity-result-container')
@@ -556,7 +570,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     cy.get('@tableHeading')
-      .contains('Dry weight')
+      .contains(mcData.table.column6)
       .click();
 
     cy.get('@firstRow')
@@ -588,7 +602,7 @@ describe('Moisture Content Screen page', () => {
       .find('thead tr')
       .find('th div')
       .as('tableHeading')
-      .contains('MC value (%)')
+      .contains(mcData.table.column7)
       .click();
 
     cy.get('.activity-result-container')
@@ -616,7 +630,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     cy.get('@tableHeading')
-      .contains('MC value (%)')
+      .contains(mcData.table.column7)
       .click();
 
     cy.get('@firstRow')
@@ -674,6 +688,7 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Calculate average button functionality', () => {
+    cy.intercept('POST', '**/api/moisture-content-cone/514330/calculate-average').as('postCalcAvg');
     cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
     cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
 
@@ -690,6 +705,7 @@ describe('Moisture Content Screen page', () => {
           const mcNum = parseFloat(mcText) || 0;
           mcValues.push(mcNum);
         });
+        cy.log('Extracted MC values:', mcValues);
       });
 
     // Calculate average
@@ -701,7 +717,6 @@ describe('Moisture Content Screen page', () => {
       .contains('Calculate average')
       .click();
 
-    cy.intercept('GET', '**/api/moisture-content-cone/514330/calculate-average').as('postCalcAvg');
     cy.wait('@postCalcAvg').its('response.statusCode').should('eq', 200);
 
     cy.get('.activity-summary')
@@ -737,13 +752,13 @@ describe('Moisture Content Screen page', () => {
   it('Check Comment box', () => {
     // Check if the comment input has a placeholder
     cy.get('#moisture-content-comments')
-      .should('have.attr', 'placeholder', 'My comments about this activity');
+      .should('have.attr', 'placeholder', mcData.mc.commentPlaceholder);
 
     // Type a comment
     cy.get('#moisture-content-comments')
       .clear()
-      .type('This is a test comment', { delay: TYPE_DELAY })
+      .type(mcData.mc.testComment, { delay: TYPE_DELAY })
       .blur()
-      .should('have.value', 'This is a test comment');
+      .should('have.value', mcData.mc.testComment);
   });
 });
