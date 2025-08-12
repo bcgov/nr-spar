@@ -606,6 +606,10 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Calculate average button functionality', () => {
+    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
+    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+
+    // Extract all MC values from the 7th column
     const mcValues: number[] = [];
     cy.get('.activity-result-container')
       .find('tbody tr')
@@ -628,6 +632,9 @@ describe('Moisture Content Screen page', () => {
       .find('button')
       .contains('Calculate average')
       .click();
+
+    cy.intercept('GET', '**/api/moisture-content-cone/514330/calculate-average').as('postCalcAvg');
+    cy.wait('@postCalcAvg').its('response.statusCode').should('eq', 200);
 
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
