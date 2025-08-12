@@ -1,4 +1,4 @@
-import { TYPE_DELAY } from '../../constants';
+import { HALF_SECOND, TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { mockMoistureContentApi } from '../../support/mockApiConsep';
 
@@ -60,23 +60,10 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Activity results table validation', () => {
-    // Check if the table has the correct number of rows
+    // Check validation of Container input
     cy.get('.activity-result-container')
       .find('tbody tr')
       .as('totalRows')
-      .should('have.length', 3);
-
-    // Check 'Add row' button functionality
-    cy.get('.activity-result-action-buttons')
-      .find('button')
-      .contains('Add row')
-      .click();
-
-    cy.get('@totalRows')
-      .should('have.length', 4);
-
-    // Check validation of Container input
-    cy.get('@totalRows')
       .eq(3)
       .find('input[name="containerId"]')
       .click()
@@ -142,6 +129,86 @@ describe('Moisture Content Screen page', () => {
       .click()
       .clear()
       .type('38', { delay: TYPE_DELAY });
+  });
+
+  it.only('Check Activity results table button functionality', () => {
+    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
+    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+
+    // Check if the table has the correct number of rows
+    cy.get('.activity-result-container')
+      .find('tbody tr')
+      .as('totalRows')
+      .should('have.length', 3);
+
+    // Check 'Add row' button functionality
+    cy.get('.activity-result-action-buttons')
+      .find('button')
+      .contains('Add row')
+      .click();
+
+    cy.get('@totalRows')
+      .should('have.length', 4);
+
+    // Check 'Delete row' button functionality
+    cy.get('@totalRows')
+      .last()
+      .find('td:nth-last-child(1) svg')
+      .click();
+
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(HALF_SECOND); // Wait for the row to be deleted
+
+    cy.get('@totalRows')
+      .should('have.length', 3);
+
+    // Check Accept checkbox functionality
+    cy.get('.activity-result-container')
+      .find('tbody tr')
+      .eq(0)
+      .find('td:nth-child(8) input')
+      .as('acceptCheckbox')
+      .should('be.checked');
+
+    cy.get('@acceptCheckbox')
+      .click();
+
+    cy.get('@acceptCheckbox', { timeout: HALF_SECOND })
+      .siblings('svg')
+      .should('have.attr', 'data-testid', 'CheckBoxOutlineBlankIcon');
+
+    cy.get('@acceptCheckbox')
+      .click();
+
+    cy.get('@acceptCheckbox', { timeout: HALF_SECOND })
+      .siblings('svg')
+      .should('have.attr', 'data-testid', 'CheckBoxIcon');
+
+    // Check 'Accept all' button functionality
+    cy.get('@acceptCheckbox')
+      .click();
+
+    cy.get('.activity-result-action-buttons')
+      .find('button')
+      .contains('Accept all')
+      .click();
+
+    cy.get('@acceptCheckbox', { timeout: HALF_SECOND })
+      .siblings('svg')
+      .should('have.attr', 'data-testid', 'CheckBoxIcon');
+
+    // Check Comments column functionality
+    cy.get('.activity-result-container')
+      .find('tbody tr')
+      .eq(0)
+      .find('td:nth-child(9) input')
+      .as('commentInput')
+      .click()
+      .type('test', { delay: TYPE_DELAY })
+      .blur();
+
+    cy.get('@commentInput')
+      .should('have.value', 'test');
 
     // Check 'Clear data' button functionality
     cy.get('.activity-result-action-buttons')
@@ -154,7 +221,8 @@ describe('Moisture Content Screen page', () => {
       .contains('Clear')
       .click();
 
-    cy.get('@totalRows')
+    cy.get('.activity-result-container')
+      .find('tbody tr')
       .should('contain.text', 'No data found');
   });
 
