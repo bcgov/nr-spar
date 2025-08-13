@@ -64,7 +64,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
     queryKey: ['cone-collection-methods'],
     queryFn: getConeCollectionMethod,
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const handleDateChange = (isStartDate: boolean, value: string) => {

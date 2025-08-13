@@ -48,7 +48,7 @@ const ClientSearchFields = ({
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
               setSearchWord(e.target.value);
             }}
-            disabled={mutationFn.isLoading}
+            disabled={mutationFn.isPending}
           />
         </Column>
         <Column sm={1} md={3} lg={3} xlg={3}>
@@ -60,7 +60,7 @@ const ClientSearchFields = ({
             items={clientSearchOptions}
             initialSelectedItem={clientSearchOptions[0]}
             selectedItem={searchOption}
-            disabled={mutationFn.isLoading}
+            disabled={mutationFn.isPending}
             onChange={(e: ComboBoxEvent) => {
               setSearchOption(e.selectedItem);
             }}
@@ -75,7 +75,7 @@ const ClientSearchFields = ({
                 : null
             }
             className="client-search-button"
-            disabled={mutationFn.isLoading}
+            disabled={mutationFn.isPending}
             onClick={
               searchWord.length
                 ? () => mutationFn.mutate()

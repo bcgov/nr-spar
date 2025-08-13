@@ -64,14 +64,14 @@ const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) 
   const addFavAct = useMutation({
     mutationFn: (actObjs: FavActivityPostType[]) => postFavAct(actObjs),
     onSuccess: () => {
-      queryClient.invalidateQueries(favActQueryKey);
+      queryClient.invalidateQueries({ queryKey: favActQueryKey });
     }
   });
 
   const removeFavAct = useMutation({
     mutationFn: (id: number) => deleteFavAct(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(favActQueryKey);
+      queryClient.invalidateQueries({ queryKey: favActQueryKey });
     }
   });
 

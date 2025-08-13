@@ -42,7 +42,7 @@ const SeedlotInformation = (
     queryFn: getVegCodes,
     enabled: !isEdit,
     staleTime: THREE_HOURS, // will not refetch for 3 hours
-    cacheTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
+    gcTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
     select: (data) => {
       let vegCodeOptions: Array<MultiOptionsObj> = [];
       if (data) {
@@ -59,7 +59,7 @@ const SeedlotInformation = (
     queryKey: ['seedlot-sources'],
     queryFn: () => getSeedlotSources(),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const setDefaultSource = (sources: SeedlotSourceType[]) => {
@@ -204,7 +204,7 @@ const SeedlotInformation = (
             onChange={(e: string) => handleSource(e)}
           >
             {
-              seedlotSourcesQuery.status === 'loading'
+              seedlotSourcesQuery.status === 'pending'
                 ? <RadioButtonSkeleton />
                 : renderSources()
             }
