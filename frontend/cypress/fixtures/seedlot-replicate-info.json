@@ -31,7 +31,7 @@
       "containerWeight": 5,
       "freshSeed": 45,
       "containerAndDryWeight": 220,
-      "dryWeight": 215,
+      "dryWeight": 10,
       "replicateAccInd": 1,
       "replicateComment": null,
       "overrideReason": null
@@ -41,9 +41,9 @@
       "replicateNumber": 3,
       "containerId": "15",
       "containerWeight": 30,
-      "freshSeed": 3,
+      "freshSeed": 30,
       "containerAndDryWeight": 419,
-      "dryWeight": 389,
+      "dryWeight": 11,
       "replicateAccInd": 1,
       "replicateComment": null,
       "overrideReason": null
