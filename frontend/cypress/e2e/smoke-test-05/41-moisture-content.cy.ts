@@ -687,6 +687,45 @@ describe('Moisture Content Screen page', () => {
       });
   });
 
+  it('Check MC value(%) value', () => {
+    let freshSeed: string;
+    let dryWt: string;
+
+    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
+    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+
+    cy.get('.activity-result-container')
+      .find('tbody tr')
+      .eq(0)
+      .as('firstRow')
+      .find('td:nth-child(4) input')
+      .invoke('val')
+      .then(($value: any) => {
+        freshSeed = $value;
+        cy.log('First row Fresh seed', freshSeed);
+      });
+
+    cy.get('@firstRow')
+      .find('td:nth-child(6)')
+      .invoke('text')
+      .then(($value: any) => {
+        dryWt = $value;
+        cy.log('First row Dry weight', dryWt);
+      });
+
+    cy.get('@firstRow')
+      .find('td:nth-child(7)')
+      .invoke('text')
+      .then(($text: any) => {
+        const mcValue = $text;
+        cy.log('First row Cont dry seed', dryWt);
+        // eslint-disable-next-line max-len
+        const expectedMcValue = ((parseInt(freshSeed, 10) - parseInt(dryWt, 10)) / parseInt(freshSeed, 10)) * 100;
+        expect(Math.round(expectedMcValue))
+          .to.be.equal(parseInt(mcValue, 10));
+      });
+  });
+
   it('Check Calculate average button functionality', () => {
     cy.intercept('POST', '**/api/moisture-content-cone/514330/calculate-average').as('postCalcAvg');
     cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
