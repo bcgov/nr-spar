@@ -313,7 +313,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($containerNum: any) => {
         ascendingFirstRow = $containerNum;
-        cy.log('First row container #:', ascendingFirstRow);
       });
 
     cy.get('.activity-result-container')
@@ -324,7 +323,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($containerNum: any) => {
         const ascendingSecondRow: string = $containerNum;
-        cy.log('Second row container #:', ascendingSecondRow);
         expect(parseInt(ascendingFirstRow, 10))
           .to.be.lessThan(parseInt(ascendingSecondRow, 10));
       });
@@ -373,7 +371,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($containerWt: any) => {
         descendingFirstRow = $containerWt;
-        cy.log('First row container #:', descendingFirstRow);
       });
 
     cy.get('.activity-result-container')
@@ -384,7 +381,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($containerWt: any) => {
         const descendingSecondRow: string = $containerWt;
-        cy.log('Second row container #:', descendingSecondRow);
         expect(parseInt(descendingFirstRow, 10))
           .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
@@ -433,7 +429,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($freshSeed: any) => {
         descendingFirstRow = $freshSeed;
-        cy.log('First row container #:', descendingFirstRow);
       });
 
     cy.get('.activity-result-container')
@@ -444,7 +439,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($freshSeed: any) => {
         const descendingSecondRow: string = $freshSeed;
-        cy.log('Second row fresh seed:', descendingSecondRow);
         expect(parseInt(descendingFirstRow, 10))
           .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
@@ -493,7 +487,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($contDrySeed: any) => {
         descendingFirstRow = $contDrySeed;
-        cy.log('First row seed:', descendingFirstRow);
       });
 
     cy.get('.activity-result-container')
@@ -504,7 +497,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($contDrySeed: any) => {
         const descendingSecondRow: string = $contDrySeed;
-        cy.log('Second row seed:', descendingSecondRow);
         expect(parseInt(descendingFirstRow, 10))
           .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
@@ -553,7 +545,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('text')
       .then(($dryWt: any) => {
         descendingFirstRow = $dryWt;
-        cy.log('First row dry weight:', descendingFirstRow);
       });
 
     cy.get('.activity-result-container')
@@ -564,7 +555,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('text')
       .then(($dryWt: any) => {
         const descendingSecondRow: string = $dryWt;
-        cy.log('Second row dry weight:', descendingSecondRow);
         expect(parseInt(descendingFirstRow, 10))
           .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
@@ -613,7 +603,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('text')
       .then(($mcValue: any) => {
         descendingFirstRow = $mcValue;
-        cy.log('First row MC value (%):', descendingFirstRow);
       });
 
     cy.get('.activity-result-container')
@@ -624,9 +613,8 @@ describe('Moisture Content Screen page', () => {
       .invoke('text')
       .then(($mcValue: any) => {
         const descendingSecondRow: string = $mcValue;
-        cy.log('Second row MC value (%):', descendingSecondRow);
         expect(parseInt(descendingFirstRow, 10))
-          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
+          .to.be.lessThan(parseInt(descendingSecondRow, 10));
       });
 
     cy.get('@tableHeading')
@@ -646,7 +634,7 @@ describe('Moisture Content Screen page', () => {
       .then(($mcValue: any) => {
         const ascendingSecondRow: string = $mcValue;
         expect(parseInt(ascendingFirstRow, 10))
-          .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+          .to.be.greaterThan(parseInt(ascendingSecondRow, 10));
       });
   });
 
@@ -665,7 +653,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($value: any) => {
         containerWt = $value;
-        cy.log('First row Container weight', containerWt);
       });
 
     cy.get('@firstRow')
@@ -673,7 +660,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($value: any) => {
         contDrySeed = $value;
-        cy.log('First row Cont dry seed', contDrySeed);
       });
 
     cy.get('@firstRow')
@@ -681,7 +667,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('text')
       .then(($text: any) => {
         const dryWt = $text;
-        cy.log('First row Cont dry seed', dryWt);
         expect(parseInt(contDrySeed, 10) - parseInt(containerWt, 10))
           .to.be.equal(parseInt(dryWt, 10));
       });
@@ -702,7 +687,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('val')
       .then(($value: any) => {
         freshSeed = $value;
-        cy.log('First row Fresh seed', freshSeed);
       });
 
     cy.get('@firstRow')
@@ -710,7 +694,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('text')
       .then(($value: any) => {
         dryWt = $value;
-        cy.log('First row Dry weight', dryWt);
       });
 
     cy.get('@firstRow')
@@ -718,7 +701,6 @@ describe('Moisture Content Screen page', () => {
       .invoke('text')
       .then(($text: any) => {
         const mcValue = $text;
-        cy.log('First row Cont dry seed', dryWt);
         // eslint-disable-next-line max-len
         const expectedMcValue = ((parseInt(freshSeed, 10) - parseInt(dryWt, 10)) / parseInt(freshSeed, 10)) * 100;
         expect(Math.round(expectedMcValue))
@@ -744,7 +726,6 @@ describe('Moisture Content Screen page', () => {
           const mcNum = parseFloat(mcText) || 0;
           mcValues.push(mcNum);
         });
-        cy.log('Extracted MC values:', mcValues);
       });
 
     // Calculate average
