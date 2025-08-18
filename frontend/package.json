@@ -79,9 +79,7 @@
     "vite-plugin-istanbul": "6.0.0",
     "vitest": "^3.0.5"
   },
-  "overrides": {
-    "braces@<3.0.3": "3.0.3"
-  },
+  "overrides": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bcgov/nr-spar.git"
