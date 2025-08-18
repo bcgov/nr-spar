@@ -1,4 +1,5 @@
 // Ignores test files when building the app
 {
-  "extends": "./tsconfig"
+  "extends": "./tsconfig",
+  "exclude": ["node_modules", "**/__test__/**", "**/*.test.ts", "**/*.test.tsx"]
 }
