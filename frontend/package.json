@@ -14,7 +14,7 @@
     "@mui/x-date-pickers": "^8.0.0",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-devtools": "^5.83.0",
-    "@tsconfig/node18": "^18.0.0",
+    "@tsconfig/node22": "^22.0.0",
     "@types/luxon": "^3.4.2",
     "@types/react-beforeunload": "^2.1.5",
     "@types/react-dom": "^18.0.11",
@@ -23,7 +23,6 @@
     "aws-amplify": "^6.15.0",
     "axios": "^1.10.0",
     "bignumber.js": "^9.0.0",
-    "braces": "^3.0.3",
     "luxon": "^3.4.3",
     "material-react-table": "^3.2.1",
     "react": "^18.2.0",
@@ -79,14 +78,7 @@
     "ts-node": "^10.9.1",
     "vitest": "^3.0.5"
   },
-  "overrides": {
-    "braces@<3.0.3": "3.0.3",
-    "ip@<1.1.9": "1.1.9",
-    "tar@<6.2.1": "6.2.1",
-    "ws@<6.2.3": "6.2.3",
-    "ws@7.5.9": "7.5.10",
-    "ws@8.16.0": "8.17.1"
-  },
+  "overrides": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bcgov/nr-spar.git"
