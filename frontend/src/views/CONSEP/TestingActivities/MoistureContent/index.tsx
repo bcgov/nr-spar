@@ -25,7 +25,9 @@ import ROUTES from '../../../../routes/constants';
 import { calculateAverage } from '../../../../api-service/moistureContentAPI';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
 import { getSeedlotById } from '../../../../api-service/seedlotAPI';
-import { TestingActivityType, ActivityRecordType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
+import {
+  TestingActivityType, ActivityRecordType, ActivitySummaryType, ReplicateType
+} from '../../../../types/consep/TestingActivityType';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 
@@ -36,6 +38,7 @@ import StatusTag from '../../../../components/StatusTag';
 
 import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
+import { mccReplicatesChecker } from './utils';
 
 import {
   DATE_FORMAT, fieldsConfig, mccVariations
@@ -54,6 +57,8 @@ const MoistureContent = () => {
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [mcType, setMCType] = useState<string>('MCC');
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+  const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Reference to the table body for extracting MC Values
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
@@ -137,6 +142,7 @@ const MoistureContent = () => {
           testResult: testActivity.moisturePct.toString()
         }
       );
+      setUpdatedReplicates(testActivityQuery.data.replicatesList);
     }
   }, [seedlotQuery.status, seedlotQuery.isFetched, testActivity]);
 
@@ -273,7 +279,14 @@ const MoistureContent = () => {
       size: 'lg',
       icon: Checkmark,
       disabled: testActivity?.testCompleteInd === 1,
-      action: () => validateTest.mutate()
+      action: () => {
+        const errors = mccReplicatesChecker(updatedReplicates);
+        if (Object.keys(errors).length > 0) {
+          setValidationErrors(errors);
+        } else {
+          validateTest.mutate();
+        }
+      }
     },
     {
       id: 'accept-test',
@@ -343,6 +356,8 @@ const MoistureContent = () => {
           replicateType="moistureTest"
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
+          initValidationErrors={validationErrors}
+          updateReplicates={setUpdatedReplicates}
           setAlert={handleAlert}
           tableBodyRef={tableBodyRef}
         />

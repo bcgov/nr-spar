@@ -25,7 +25,7 @@ const renderFieldValue = (
   if (item) {
     return (
       <p className="activity-summary-info-value">
-        {item[name]}
+        {name === 'testResult' ? Number(item[name]).toFixed(4) : null}
       </p>
     );
   }
