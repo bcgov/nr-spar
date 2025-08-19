@@ -78,7 +78,11 @@
     "ts-node": "^10.9.1",
     "vitest": "^3.0.5"
   },
-  "overrides": {},
+  "overrides": {
+    "rollup": {
+      "@rollup/rollup-linux-arm64-gnu": "4.46.2"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bcgov/nr-spar.git"
