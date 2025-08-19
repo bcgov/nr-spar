@@ -80,7 +80,8 @@
   },
   "overrides": {
     "rollup": {
-      "@rollup/rollup-linux-arm64-gnu": "4.46.2"
+      "@rollup/rollup-linux-arm64-gnu": "4.46.2",
+      "@rollup/rollup-darwin-arm64": "4.46.2"
     }
   },
   "repository": {
