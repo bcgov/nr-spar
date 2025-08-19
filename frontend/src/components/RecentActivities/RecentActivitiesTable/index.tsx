@@ -141,7 +141,7 @@ const RecentActivitiesTable = ({
                         iconDescription="Download file"
                         tooltipPosition="bottom"
                         kind="ghost"
-                        onClick={() => null}
+                        disabled
                         renderIcon={Icons.Download}
                         size="md"
                       />

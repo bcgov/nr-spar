@@ -238,7 +238,7 @@ const BCHeader = () => {
                             ? 'disabled-side-nav-option'
                             : 'side-nav-option'
                           }
-                          onClick={supportItem.disabled ? null : () => navigate(supportItem.link)}
+                          onClick={supportItem.disabled ? undefined : () => navigate(supportItem.link)}
                         >
                           {supportItem.name}
                         </SideNavLink>
