@@ -214,7 +214,9 @@ const BCHeader = () => {
                           navItem.link
                         )}
                         onClick={
-                          navItem.disabled ? undefined : () => navigate(navItem.link)
+                          navItem.disabled 
+                            ? undefined 
+                            : () => navigate(navItem.link)
                         }
                       >
                         {navItem.name}
