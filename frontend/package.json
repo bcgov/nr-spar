@@ -84,6 +84,9 @@
       "@rollup/rollup-darwin-arm64": "4.46.2"
     }
   },
+  "optionalDependencies": {
+    "@rollup/rollup-darwin-arm64": "4.46.2"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bcgov/nr-spar.git"
