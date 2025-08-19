@@ -12,8 +12,6 @@
     "@mui/icons-material": "^7.0.0",
     "@mui/material": "^7.0.0",
     "@mui/x-date-pickers": "^8.0.0",
-    "@rollup/rollup-darwin-arm64": "4.46.2",
-    "@rollup/rollup-linux-arm64-gnu": "4.46.2",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-devtools": "^5.83.0",
     "@tsconfig/node22": "^22.0.0",
@@ -79,6 +77,10 @@
     "start-server-and-test": "^2.0.1",
     "ts-node": "^10.9.1",
     "vitest": "^3.0.5"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-darwin-arm64": "4.46.2",
+    "@rollup/rollup-linux-arm64-gnu": "4.46.2"
   },
   "repository": {
     "type": "git",
