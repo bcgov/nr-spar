@@ -214,8 +214,8 @@ const BCHeader = () => {
                           navItem.link
                         )}
                         onClick={
-                          navItem.disabled 
-                            ? undefined 
+                          navItem.disabled
+                            ? undefined
                             : () => navigate(navItem.link)
                         }
                       >
@@ -240,7 +240,11 @@ const BCHeader = () => {
                             ? 'disabled-side-nav-option'
                             : 'side-nav-option'
                           }
-                          onClick={supportItem.disabled ? undefined : () => navigate(supportItem.link)}
+                          onClick={
+                            supportItem.disabled
+                              ? undefined
+                              : () => navigate(supportItem.link)
+                          }
                         >
                           {supportItem.name}
                         </SideNavLink>
