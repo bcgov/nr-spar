@@ -68,7 +68,7 @@
       "error",
       {
         "devDependencies": [
-          "**/cypress.config.{js,ts}",
+          "**/cypress.config.ts",
           "**/cypress/**/*.js",
           "**/cypress/**/*.ts",
           "**/*.test.js",
