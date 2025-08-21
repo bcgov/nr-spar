@@ -20,7 +20,7 @@ describe('Create PLI Seedlot', () => {
     cy.get('#agency-number-input')
       .clear()
       .type(regData.agencyNumber, { delay: TYPE_DELAY })
-      .blur();
+      .blur({ force: true });
 
     // Enter the applicant email address
     cy.get('#applicant-email-input')
