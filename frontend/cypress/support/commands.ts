@@ -10,6 +10,15 @@ import prefix from '../../src/styles/classPrefix';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
 
+Cypress.Commands.add('visitGovBc', (url: string) => {
+  if (url.startsWith('https://logontest7.gov.bc.ca')) {
+    cy.origin('https://logontest7.gov.bc.ca', () => {
+      cy.on('uncaught:exception', () => false);
+    });
+  }
+  cy.visit(url);
+});
+
 Cypress.Commands.add('login', () => {
   const config = {
     username: Cypress.env('USERNAME'),
@@ -29,7 +38,7 @@ Cypress.Commands.add('login', () => {
       cy.clearAllCookies();
       cy.clearAllLocalStorage();
       cy.clearAllSessionStorage();
-      cy.visit('/');
+      cy.visitGovBc('/');
       cy.getByDataTest(loginBtnId).click();
       cy.url().then((url) => {
         if (url.includes('.gov.bc.ca')) {

@@ -21,6 +21,15 @@ declare namespace Cypress {
      */
     login(): void
 
+    visitGovBc(url: string): Chainable<void>;
+    /**
+     * Custom command to visit a URL with GovBC exception handling.
+     *
+     * @param url {string} - The URL to visit
+     * @example
+     * cy.visitGovBc('https://example.gov.bc.ca')
+     */
+
     /**
      * Custom command to navigate using the app side menu.
      *
