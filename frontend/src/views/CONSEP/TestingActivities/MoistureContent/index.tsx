@@ -24,7 +24,6 @@ import {
 import ROUTES from '../../../../routes/constants';
 import { calculateAverage } from '../../../../api-service/moistureContentAPI';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
-import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { TestingActivityType, ActivityRecordType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
@@ -84,14 +83,6 @@ const MoistureContent = () => {
     }
   });
 
-  const seedlotQuery = useQuery({
-    queryKey: ['seedlotNumber', seedlotNumber],
-    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
-    enabled: seedlotNumber !== '',
-    refetchOnMount: true,
-    refetchOnWindowFocus: false
-  });
-
   useEffect(() => {
     if (!riaKey) {
       navigate(ROUTES.FOUR_OH_FOUR);
@@ -121,24 +112,18 @@ const MoistureContent = () => {
   }, [testActivityQuery.status, testActivityQuery.isFetched]);
 
   useEffect(() => {
-    if (
-      seedlotQuery.isFetched
-      && seedlotQuery.status === 'error'
-      && (seedlotQuery.error as AxiosError).response?.status === 404
-    ) {
-      navigate(ROUTES.FOUR_OH_FOUR);
-    } else if (testActivity && seedlotQuery.data) {
+    if (testActivity) {
       setActivitySummary(
         {
           activity: testActivity.activityType,
           seedlotNumber,
           requestId: testActivity.requestId,
-          speciesAndClass: `${seedlotQuery.data.seedlot.vegetationCode} | ${seedlotQuery.data.seedlot.geneticClass.geneticClassCode}` || '',
+          speciesAndClass: `${testActivity.vegetationCode} | ${testActivity.geneticClassCode}`,
           testResult: testActivity.moisturePct.toString()
         }
       );
     }
-  }, [seedlotQuery.status, seedlotQuery.isFetched, testActivity]);
+  }, [testActivity]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });
@@ -177,6 +162,9 @@ const MoistureContent = () => {
         acceptResult: testActivity?.acceptResult || 0,
         requestId: testActivity?.requestId || '',
         seedlotNumber: testActivity?.seedlotNumber || '',
+        familyLotNumber: testActivity?.familyLotNumber || '',
+        geneticClassCode: testActivity?.geneticClassCode || '',
+        vegetationCode: testActivity?.vegetationCode || '',
         activityType: testActivity?.activityType || '',
         replicatesList: testActivity?.replicatesList || []
       };
@@ -334,7 +322,7 @@ const MoistureContent = () => {
       <Row className="consep-moisture-content-activity-summary">
         <ActivitySummary
           item={activitySummary}
-          isFetching={testActivityQuery.isFetching || seedlotQuery.isFetching}
+          isFetching={testActivityQuery.isFetching}
         />
       </Row>
       <Row className="consep-moisture-content-activity-result">

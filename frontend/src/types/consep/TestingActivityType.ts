@@ -44,6 +44,9 @@ export type TestingActivityType = ActivityRecordType & {
   acceptResult: number;
   requestId: string;
   seedlotNumber: string;
+  familyLotNumber: string;
+  geneticClassCode: string;
+  vegetationCode: string;
   activityType: string;
   replicatesList: ReplicateType[];
 };
