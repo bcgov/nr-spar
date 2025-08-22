@@ -11,7 +11,13 @@ import prefix from '../../src/styles/classPrefix';
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
 
 Cypress.Commands.add('visitGovBc', (url: string) => {
-  if (url.startsWith('https://logontest7.gov.bc.ca')) {
+  let host = '';
+  try {
+    host = new URL(url).host;
+  } catch {
+    // If url is relative, host will remain ''
+  }
+  if (host === 'logontest7.gov.bc.ca') {
     cy.origin('https://logontest7.gov.bc.ca', () => {
       cy.on('uncaught:exception', () => false);
     });
