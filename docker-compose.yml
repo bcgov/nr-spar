@@ -59,7 +59,7 @@ services:
 
   frontend:
     container_name: frontend
-    image: node:20-bullseye-slim
+    image: node:22-bullseye-slim
     ports: ["3000:3000"]
     entrypoint: sh -c "npm i --no-update-notifier && npm run start"
     user: root

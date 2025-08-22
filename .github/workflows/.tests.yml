@@ -55,7 +55,7 @@ jobs:
         if: steps.triggers.outputs.triggered == 'true'
         uses: bcgov/action-test-and-analyse@e2ba34132662c1638dbde806064eb7004b3761c3 # v1.3.0
         with:
-          node_version: "18"
+          node_version: "22"
           commands: |
             npm ci
             npx start-server-and-test start http://localhost:3000 cy:run
