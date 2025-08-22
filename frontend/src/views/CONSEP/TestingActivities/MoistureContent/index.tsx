@@ -117,6 +117,7 @@ const MoistureContent = () => {
         {
           activity: testActivity.activityType,
           seedlotNumber,
+          familyLotNumber: testActivity.familyLotNumber,
           requestId: testActivity.requestId,
           speciesAndClass: `${testActivity.vegetationCode} | ${testActivity.geneticClassCode}`,
           testResult: testActivity.moisturePct.toString()
@@ -301,7 +302,14 @@ const MoistureContent = () => {
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="consep-moisture-content-title">
-        <PageTitle title={`${mcVariation.description} for seedlot ${activitySummary && activitySummary.seedlotNumber}`} />
+        <PageTitle
+          title={`${mcVariation?.description} for lot 
+          ${
+            !seedlotNumber || seedlotNumber === '00000'
+              ? testActivity?.familyLotNumber
+              : seedlotNumber
+          }`}
+        />
         <>
           {
             testActivity?.testCompleteInd
@@ -410,7 +418,7 @@ const MoistureContent = () => {
             rows={5}
             maxCount={500}
             enableCounter
-            value={activityRecord?.riaComment}
+            value={activityRecord?.riaComment || ''}
             onChange={(e: { target: { value: string } }) => {
               handleUpdateActivityRecord({
                 riaComment: e.target.value

@@ -54,6 +54,7 @@ export type TestingActivityType = ActivityRecordType & {
 export type ActivitySummaryType = {
   activity: string;
   seedlotNumber: string;
+  familyLotNumber: string;
   requestId: string;
   speciesAndClass: string;
   testResult: string;

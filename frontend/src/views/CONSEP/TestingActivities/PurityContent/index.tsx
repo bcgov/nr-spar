@@ -241,9 +241,10 @@ const PurityContent = () => {
         {
           activity: testActivity.activityType,
           seedlotNumber,
+          familyLotNumber: testActivity.familyLotNumber,
           requestId: testActivity.requestId,
           speciesAndClass: `${testActivity.vegetationCode} | ${testActivity.geneticClassCode}`,
-          testResult: testActivity.moisturePct.toString()
+          testResult: testActivity.moisturePct?.toString()
         }
       );
     }
@@ -506,7 +507,13 @@ const PurityContent = () => {
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="consep-purity-content-title">
-        <PageTitle title={`${fieldsConfig.titleSection.title} ${seedlotNumber}`} />
+        <PageTitle
+          title={`${fieldsConfig.titleSection.title} ${
+            !seedlotNumber || seedlotNumber === '00000'
+              ? testActivity?.familyLotNumber
+              : seedlotNumber
+          }`}
+        />
         <>
           {
             testActivity?.testCompleteInd === 1
