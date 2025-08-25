@@ -35,6 +35,15 @@ public record MoistureContentConesDto(
     @Schema(description = "The respective seedlot this test is related to", example = "64132")
     String seedlotNumber,
 
+    @Schema(description = "The respective familyLot this test is related to", example = "F20042140001A")
+    String familyLotNumber,
+
+    @Schema(description = "The species this test is related to, this is the item_id in the table", example = "A")
+    String geneticClassCode,
+
+    @Schema(description = "The genetic class this test is related to, this is the vegetation_st in the table", example = "PLI")
+    String vegetationCode,
+
     @Schema(description = "A code that identifies the type of the activity", example = "MC")
     String activityType,
 
