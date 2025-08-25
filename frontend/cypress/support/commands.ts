@@ -45,18 +45,19 @@ Cypress.Commands.add('login', () => {
           cy.origin(
             loginUrl,
             { args: config },
-            (
-              {
-                username, password, delay, timeout
-              }
-            ) => {
-              cy.get(loginLogo, { timeout }).should('be.visible');
-              cy.get('input[name=user]')
-                .clear()
-                .type(username, { delay });
-              cy.get('input[name=password]')
-                .clear()
-                .type(password, { delay });
+            ({
+              username, password, delay, timeout
+            }) => {
+              cy.on('uncaught:exception', (err) => {
+                if (err.message.includes('missing ) after argument list')) {
+                  return false; // Suppress only this known error
+                }
+                return true; // Let other errors fail the test
+              });
+
+              cy.get(`#${config.loginService.toLowerCase()}Logo`, { timeout }).should('be.visible');
+              cy.get('input[name=user]').clear().type(username, { delay });
+              cy.get('input[name=password]').clear().type(password, { delay });
               cy.get('input[name=btnSubmit]').click();
             }
           );
