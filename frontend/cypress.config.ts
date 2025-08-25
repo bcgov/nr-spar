@@ -37,7 +37,8 @@ export default defineConfig({
       '**/13-create-a-class-seedlot-fdi.cy.ts',
       '**/14-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',
       '**/15-api-tests.cy.ts',
-      '**/16-edit-applicant-seedlot-info.cy.ts'
+      '**/16-edit-applicant-seedlot-info.cy.ts',
+      '**/41-moisture-content.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
