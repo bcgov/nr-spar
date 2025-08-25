@@ -15,7 +15,7 @@ describe('Login page test', () => {
   });
 
   it('should load and display login page correctly', () => {
-    cy.visitGovBc('/');
+    cy.visit('/');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
     cy.getByDataTest('landing-subtitle').should('have.text', loginPageData.subtitle);
     cy.getByDataTest('landing-desc').should('have.text', loginPageData.description);
@@ -24,7 +24,7 @@ describe('Login page test', () => {
   it('should navigate to the IDIR login page', () => {
     const loginUrl = Cypress.env('LOGIN_SERVICE') === 'BCeID'
       ? Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
-    cy.visitGovBc('/');
+    cy.visit('/');
     cy.getByDataTest('landing-button__idir').click();
     cy.url().then((url) => {
       if (url.includes('.gov.bc.ca')) {
@@ -40,7 +40,7 @@ describe('Login page test', () => {
   it('should navigate to the BCeID login page', () => {
     const loginUrl = Cypress.env('LOGIN_SERVICE') === 'BCeID'
       ? Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
-    cy.visitGovBc('/');
+    cy.visit('/');
     cy.getByDataTest('landing-button__bceid').click();
     cy.url().then((url) => {
       if (url.includes('.gov.bc.ca')) {
@@ -54,14 +54,14 @@ describe('Login page test', () => {
   });
 
   it('should try to access system using a link without user connected', () => {
-    cy.visitGovBc('/dashboard');
+    cy.visit('/dashboard');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
   it('can log in with BCeID/IDIR and validate user role', () => {
     const loginService = Cypress.env('LOGIN_SERVICE') === 'BCeID' ? 'BCeID: ' : 'IDIR: ';
     cy.login();
-    cy.visitGovBc('/dashboard');
+    cy.visit('/dashboard');
     cy.url().should('contains', '/dashboard');
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
