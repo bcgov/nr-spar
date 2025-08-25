@@ -570,11 +570,15 @@ const PurityContent = () => {
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualBeginDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -586,17 +590,26 @@ const PurityContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat="Y/m/d"
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualEndDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -608,6 +621,11 @@ const PurityContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>
