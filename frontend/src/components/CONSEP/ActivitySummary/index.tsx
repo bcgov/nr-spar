@@ -45,10 +45,12 @@ const ActivitySummary = ({ item, isFetching }: ActivitySummaryProps) => (
       </Column>
       <Column className="info-col">
         <p className="activity-summary-info-label">
-          Seedlot number
+          Lot number
         </p>
         {
-          renderFieldValue('seedlotNumber', isFetching, item)
+          !item?.seedlotNumber || item.seedlotNumber === '00000'
+            ? renderFieldValue('familyLotNumber', isFetching, item)
+            : renderFieldValue('seedlotNumber', isFetching, item)
         }
       </Column>
       <Column className="info-col">
