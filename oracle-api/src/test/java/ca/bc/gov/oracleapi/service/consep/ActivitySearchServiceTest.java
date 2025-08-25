@@ -20,6 +20,8 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import java.util.ArrayList;
+
 
 @ExtendWith(SpringExtension.class)
 class ActivitySearchServiceTest {
@@ -31,12 +33,14 @@ class ActivitySearchServiceTest {
   private ActivitySearchService activitySearchService;
 
   private ActivitySearchRequestDto activitySearchRequestDto;
-  private ActivitySearchResultEntity activitySearchResultEntity;
+  private List<ActivitySearchResultEntity> activitySearchResults;
+  private ActivitySearchResultEntity activitySearchResultEntityOne;
+  private ActivitySearchResultEntity activitySearchResultEntityTwo;
 
   // Test data
   private List<String> lotNumbers;
-  private String testType, activityId, requestId, requestType, orchardId, testCategoryCd, testRank, species, seedlotClass,
-    seedlotSample, riaComment, requestItem, pv, seedlotDisplay;
+  private String lotNumbersStr, testType, activityId, requestId, requestType, orchardId, testCategoryCd, testRank, species, seedlotClass,
+    seedlotSample, riaComment, requestItem, pv, seedlotDisplaySeedlot, seedlotDisplayFamilylot;
   private Integer germinatorTrayId, requestYear, germTrayAssignment, completeStatus, acceptanceStatus, riaSkey, currentTestInd,
     germinationPct, moisturePct, purityPct, seedsPerGram, otherTestResult, significntStsInd, requestSkey;
   private LocalDate seedWithdrawalStartDate, seedWithdrawalEndDate, actualBeginDateFrom, actualBeginDateTo,
@@ -48,7 +52,10 @@ class ActivitySearchServiceTest {
   @BeforeEach
   void setUp() {
     // Search filter parameters
-    lotNumbers = List.of("00098");
+    seedlotDisplaySeedlot = "00098";
+    seedlotDisplayFamilylot = "F20082140146";
+    lotNumbers = List.of(seedlotDisplaySeedlot, seedlotDisplayFamilylot);
+    lotNumbersStr = String.join(",", seedlotDisplaySeedlot, seedlotDisplayFamilylot);
     testType = "D1";
     activityId = "D1";
     germinatorTrayId = null;
@@ -89,7 +96,6 @@ class ActivitySearchServiceTest {
     );
 
     // Search return result
-    seedlotDisplay = "00098";
     requestItem = "RTS19981299A";
     currentTestInd = 0;
     germinationPct = 88;
@@ -106,43 +112,53 @@ class ActivitySearchServiceTest {
     riaSkey = 448383;
     seedlotSample = "00098";
 
-    activitySearchResultEntity = new ActivitySearchResultEntity();
+    activitySearchResults = new ArrayList<>();
 
-    activitySearchResultEntity.setSeedlotDisplay(seedlotDisplay);
-    activitySearchResultEntity.setRequestItem(requestItem);
-    activitySearchResultEntity.setSpecies(species);
-    activitySearchResultEntity.setActivityId(activityId);
-    activitySearchResultEntity.setTestRank(testRank);
-    activitySearchResultEntity.setCurrentTestInd(currentTestInd);
-    activitySearchResultEntity.setTestCategoryCd(testCategoryCd);
-    activitySearchResultEntity.setGerminationPct(germinationPct);
-    activitySearchResultEntity.setPv(pv);
-    activitySearchResultEntity.setMoisturePct(moisturePct);
-    activitySearchResultEntity.setPurityPct(purityPct);
-    activitySearchResultEntity.setSeedsPerGram(seedsPerGram);
-    activitySearchResultEntity.setOtherTestResult(otherTestResult);
-    activitySearchResultEntity.setTestCompleteInd(completeStatus == -1);
-    activitySearchResultEntity.setAcceptResultInd(acceptanceStatus);
-    activitySearchResultEntity.setSignificntStsInd(significntStsInd);
-    activitySearchResultEntity.setSeedWithdrawalDate(seedWithdrawalStartDate);
-    activitySearchResultEntity.setRevisedEndDt(revisedEndDateTo);
-    activitySearchResultEntity.setActualBeginDtTm(actualBeginDtTm);
-    activitySearchResultEntity.setActualEndDtTm(actualEndDtTm);
-    activitySearchResultEntity.setRiaComment(riaComment);
-    activitySearchResultEntity.setRequestSkey(requestSkey);
-    activitySearchResultEntity.setReqId(requestId.substring(0, 11));
-    activitySearchResultEntity.setItemId(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
-    activitySearchResultEntity.setSeedlotSample(seedlotSample);
-    activitySearchResultEntity.setRiaSkey(riaSkey);
+    activitySearchResultEntityOne = new ActivitySearchResultEntity();
+    activitySearchResultEntityOne.setSeedlotDisplay(seedlotDisplaySeedlot);
+    populateCommonFields(activitySearchResultEntityOne);
+    activitySearchResults.add(activitySearchResultEntityOne);
+
+    activitySearchResultEntityTwo = new ActivitySearchResultEntity();
+    activitySearchResultEntityTwo.setSeedlotDisplay(seedlotDisplayFamilylot);
+    populateCommonFields(activitySearchResultEntityTwo);
+    activitySearchResults.add(activitySearchResultEntityTwo);
   }
 
+  private void populateCommonFields(ActivitySearchResultEntity entity) {
+    entity.setRequestItem(requestItem);
+    entity.setSpecies(species);
+    entity.setActivityId(activityId);
+    entity.setTestRank(testRank);
+    entity.setCurrentTestInd(currentTestInd);
+    entity.setTestCategoryCd(testCategoryCd);
+    entity.setGerminationPct(germinationPct);
+    entity.setPv(pv);
+    entity.setMoisturePct(moisturePct);
+    entity.setPurityPct(purityPct);
+    entity.setSeedsPerGram(seedsPerGram);
+    entity.setOtherTestResult(otherTestResult);
+    entity.setTestCompleteInd(completeStatus == -1);
+    entity.setAcceptResultInd(acceptanceStatus);
+    entity.setSignificntStsInd(significntStsInd);
+    entity.setSeedWithdrawalDate(seedWithdrawalStartDate);
+    entity.setRevisedEndDt(revisedEndDateTo);
+    entity.setActualBeginDtTm(actualBeginDtTm);
+    entity.setActualEndDtTm(actualEndDtTm);
+    entity.setRiaComment(riaComment);
+    entity.setRequestSkey(requestSkey);
+    entity.setReqId(requestId.substring(0, 11));
+    entity.setItemId(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
+    entity.setSeedlotSample(seedlotSample);
+    entity.setRiaSkey(riaSkey);
+  }
 
   @Test
   void shouldReturnMappedResults() {
     Pageable pageable = PageRequest.of(0, 10);
 
     when(activitySearchRepository.searchActivities(
-      lotNumbers, testType, activityId, germinatorTrayId,
+      lotNumbersStr, testType, activityId, germinatorTrayId,
       seedWithdrawalStartDate, seedWithdrawalEndDate,
       includeHistoricalTests, germTestsOnly, requestId, requestType,
       requestYear, orchardId, testCategoryCd, testRank, species,
@@ -151,13 +167,13 @@ class ActivitySearchServiceTest {
       revisedStartDateFrom, revisedStartDateTo,
       revisedEndDateFrom, revisedEndDateTo,
       germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass, 0, 10
-    )).thenReturn(List.of(activitySearchResultEntity));
+    )).thenReturn(List.of(activitySearchResultEntityOne));
 
     List<ActivitySearchResponseDto> result = activitySearchService.searchActivities(activitySearchRequestDto, pageable);
 
     assertThat(result).hasSize(1);
     ActivitySearchResponseDto activitySearchResponseDto = result.get(0);
-    assertThat(activitySearchResponseDto.seedlotDisplay()).isEqualTo(seedlotDisplay);
+    assertThat(activitySearchResponseDto.seedlotDisplay()).isEqualTo(seedlotDisplaySeedlot);
     assertThat(activitySearchResponseDto.requestItem()).isEqualTo(requestItem);
     assertThat(activitySearchResponseDto.species()).isEqualTo(species);
     assertThat(activitySearchResponseDto.activityId()).isEqualTo(activityId);
@@ -185,7 +201,7 @@ class ActivitySearchServiceTest {
     assertThat(activitySearchResponseDto.riaSkey()).isEqualTo(riaSkey);
 
     verify(activitySearchRepository, times(1)).searchActivities(
-      lotNumbers, testType, activityId, germinatorTrayId,
+      lotNumbersStr, testType, activityId, germinatorTrayId,
       seedWithdrawalStartDate, seedWithdrawalEndDate,
       includeHistoricalTests, germTestsOnly, requestId, requestType,
       requestYear, orchardId, testCategoryCd, testRank, species,
@@ -215,11 +231,17 @@ class ActivitySearchServiceTest {
       null, null, null, null, null, null,
       null, null, null, null, null, null,
       null, null, null, 0, 10
-    )).thenReturn(List.of(activitySearchResultEntity, activitySearchResultEntity));
+    )).thenReturn(activitySearchResults);
 
     List<ActivitySearchResponseDto> result = activitySearchService.searchActivities(emptyRequest, pageable);
 
     assertThat(result).hasSize(2);
+
+    ActivitySearchResponseDto firstItem = result.get(0);
+    ActivitySearchResponseDto secondItem = result.get(1);
+
+    assertThat(firstItem.seedlotDisplay()).isEqualTo(seedlotDisplaySeedlot);
+    assertThat(secondItem.seedlotDisplay()).isEqualTo(seedlotDisplayFamilylot);
   }
 
   @Test

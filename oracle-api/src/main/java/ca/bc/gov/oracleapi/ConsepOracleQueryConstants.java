@@ -34,7 +34,13 @@ public class ConsepOracleQueryConstants {
       , ria_skey
     FROM consep.cns17
     WHERE (:testType IS NULL OR activity_type_cd = :testType)
-      AND (:lotNumbers IS NULL OR seedlot_number IN (:lotNumbers))
+      AND (
+        :lotNumbersStr IS NULL OR seedlot_display IN (
+          SELECT TRIM(REGEXP_SUBSTR(:lotNumbersStr, '[^,]+', 1, LEVEL))
+          FROM dual
+          CONNECT BY REGEXP_SUBSTR(:lotNumbersStr, '[^,]+', 1, LEVEL) IS NOT NULL
+        )
+      )
       AND (:activityId IS NULL OR stndrd_activity_id = :activityId)
       AND (:germinatorTrayId IS NULL OR germinator_tray_id = :germinatorTrayId)
       AND (:seedWithdrawalStartDate IS NULL OR seed_withdrawal_date >= :seedWithdrawalStartDate)
