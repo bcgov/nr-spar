@@ -10,21 +10,6 @@ import prefix from '../../src/styles/classPrefix';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
 
-Cypress.Commands.add('visitGovBc', (url: string) => {
-  let host = '';
-  try {
-    host = new URL(url).host;
-  } catch {
-    // If url is relative, host will remain ''
-  }
-  if (host === 'logontest7.gov.bc.ca') {
-    cy.origin('https://logontest7.gov.bc.ca', () => {
-      cy.on('uncaught:exception', () => false);
-    });
-  }
-  cy.visit(url);
-});
-
 Cypress.Commands.add('login', () => {
   const config = {
     username: Cypress.env('USERNAME'),
@@ -44,7 +29,7 @@ Cypress.Commands.add('login', () => {
       cy.clearAllCookies();
       cy.clearAllLocalStorage();
       cy.clearAllSessionStorage();
-      cy.visitGovBc('/');
+      cy.visit('/');
       cy.getByDataTest(loginBtnId).click();
       cy.url().then((url) => {
         if (url.includes('.gov.bc.ca')) {
@@ -60,18 +45,19 @@ Cypress.Commands.add('login', () => {
           cy.origin(
             loginUrl,
             { args: config },
-            (
-              {
-                username, password, delay, timeout
-              }
-            ) => {
-              cy.get(loginLogo, { timeout }).should('be.visible');
-              cy.get('input[name=user]')
-                .clear()
-                .type(username, { delay });
-              cy.get('input[name=password]')
-                .clear()
-                .type(password, { delay });
+            ({
+              username, password, delay, timeout
+            }) => {
+              cy.on('uncaught:exception', (err) => {
+                if (err.message.includes('missing ) after argument list')) {
+                  return false; // Suppress only this known error
+                }
+                return true; // Let other errors fail the test
+              });
+
+              cy.get(`#${config.loginService.toLowerCase()}Logo`, { timeout }).should('be.visible');
+              cy.get('input[name=user]').clear().type(username, { delay });
+              cy.get('input[name=password]').clear().type(password, { delay });
               cy.get('input[name=btnSubmit]').click();
             }
           );
