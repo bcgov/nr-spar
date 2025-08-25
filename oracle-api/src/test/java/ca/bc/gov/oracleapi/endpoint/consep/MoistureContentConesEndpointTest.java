@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -499,10 +500,10 @@ class MoistureContentConesEndpointTest {
 
     doNothing().when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
 
-    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(replicateNumbers)))
+            .param("ids", replicateNumbers.stream().map(String::valueOf).collect(Collectors.joining(","))))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0]").value(1))
         .andExpect(jsonPath("$[1]").value(2))
@@ -518,10 +519,10 @@ class MoistureContentConesEndpointTest {
     doThrow(new InvalidTestActivityKeyException())
         .when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
 
-    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(replicateNumbers)))
+            .param("ids", replicateNumbers.stream().map(String::valueOf).collect(Collectors.joining(","))))
         .andExpect(status().isNotFound());
   }
 
