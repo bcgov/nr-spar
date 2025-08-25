@@ -18,13 +18,17 @@ type ActivityResultProp = {
   replicateType: TestingTypes,
   riaKey: number,
   isEditable: boolean,
+  initValidationErrors: Record<string, string>,
+  hideActions?: boolean,
   setAlert: (isSuccess: boolean, message: string) => void
+  updateReplicates: (replicatesList: ReplicateType[]) => void
   tableBodyRef: React.RefObject<HTMLTableSectionElement>
 }
 
 const useReplicates = (
   riaKey: number,
   replicateType: TestingTypes,
+  updateReplicates: (replicatesList: ReplicateType[]) => void,
   setAlert: (isSuccess: boolean, message: string) => void
 ) => {
   const [replicatesList, setReplicatesList] = useState<ReplicateType[]>([]);
@@ -80,6 +84,7 @@ const useReplicates = (
       const currentListString = JSON.stringify(replicatesList);
       if (currentListString !== lastCheckedListRef.current) {
         updateReplicateListMutation.mutate(replicatesList);
+        updateReplicates(replicatesList);
       }
     }, 1000);
 
@@ -100,8 +105,8 @@ const useReplicates = (
 };
 
 const ActivityResult = ({
-  replicatesData, replicateType, riaKey,
-  isEditable, setAlert, tableBodyRef
+  replicatesData, replicateType, riaKey, initValidationErrors,
+  isEditable, hideActions = false, updateReplicates, setAlert, tableBodyRef
 }: ActivityResultProp) => {
   const {
     replicatesList,
@@ -113,7 +118,7 @@ const ActivityResult = ({
     setShowDeleteNotification,
     deleteReplicateMutation,
     syncWithInitialData
-  } = useReplicates(riaKey, replicateType, setAlert);
+  } = useReplicates(riaKey, replicateType, updateReplicates, setAlert);
 
   const deleteReplicatesMutation = useMutation({
     mutationFn: (replicateNumbers: number[]) => testingActivitiesAPI(
@@ -156,6 +161,7 @@ const ActivityResult = ({
     {
       label: 'Clear data',
       icon: <Icons.TrashCan size={15} />,
+      invisible: hideActions,
       action: handleAllClearData
     },
     {
@@ -166,6 +172,7 @@ const ActivityResult = ({
     {
       label: 'Add row',
       icon: <Icons.AddAlt size={15} />,
+      invisible: hideActions,
       action: addRow
     }
   ];
@@ -220,15 +227,16 @@ const ActivityResult = ({
           !isEditable,
           (num) => deleteRow(num),
           updateRow,
-          validationErrors,
+          Object.keys(validationErrors).length > 0 ? validationErrors : initValidationErrors,
           setValidationErrors
         );
       case 'purityTest':
         return getPurityColumns(
           !isEditable,
+          hideActions,
           (num) => deleteRow(num),
           updateRow,
-          validationErrors,
+          Object.keys(validationErrors).length > 0 ? validationErrors : initValidationErrors,
           setValidationErrors
         );
       default:
@@ -257,7 +265,9 @@ const ActivityResult = ({
           <h3>{TABLE_TITLE}</h3>
         </Column>
         <Column sm={2} md={2} lg={4} className="activity-result-action-buttons">
-          {actions.map(({ label, icon, action }) => (
+          {actions.map(({
+            label, icon, invisible, action
+          }) => (
             <button
               key={label}
               className={isEditable ? 'action-item' : 'action-item-disabled'}
@@ -265,6 +275,7 @@ const ActivityResult = ({
               type="button"
               aria-label={label}
               disabled={!isEditable}
+              style={{ display: invisible ? 'none' : 'inline-flex' }}
             >
               {label}
               {icon}

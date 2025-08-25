@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -319,7 +320,7 @@ public class MoistureContentConesEndpoint {
    * @param riaKey The identifier for the testing activities data.
    * @param replicateNumbers An array of numbers with replicate numbers to be deleted.
    */
-  @PostMapping(value = "/{riaKey}/replicates", produces = "application/json")
+  @DeleteMapping(value = "/{riaKey}/replicates", produces = "application/json")
   @Operation(
       summary = "Delete replicate entries in bulk",
       description = "Removes multiple replicate entries from the database using their identifiers.")
@@ -352,13 +353,13 @@ public class MoistureContentConesEndpoint {
             required = true)
         @PathVariable
         BigDecimal riaKey,
+                
         @Parameter(
-            name = "replicateNumbers",
+            name = "ids",
             in = ParameterIn.QUERY,
             description = "List of replicate numbers to delete",
             required = true)
-        @RequestBody
-            List<Integer> replicateNumbers) {
+        @RequestParam(name = "ids") List<Integer> replicateNumbers) {
     moistureContentService.deleteMccReplicates(riaKey, replicateNumbers);
     return replicateNumbers;
   }
