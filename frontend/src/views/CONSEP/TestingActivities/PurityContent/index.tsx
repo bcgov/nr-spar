@@ -34,10 +34,10 @@ import { ActivityRecordType, TestingActivityType, ActivitySummaryType } from '..
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
 import { deleteImpurity, patchImpurities } from '../../../../api-service/consep/impuritiesAPI';
-import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 import ROUTES from '../../../../routes/constants';
+import { calculateAverage } from '../../../../api-service/moistureContentAPI';
 
 import ActivityResult from '../ActivityResult';
 import ButtonGroup from '../ButtonGroup';
@@ -71,14 +71,6 @@ const PurityContent = () => {
     queryKey: ['riaKey', riaKey],
     queryFn: () => testingActivitiesAPI('purityTest', 'getDataByRiaKey', { riaKey }),
     refetchOnMount: true
-  });
-
-  const seedlotQuery = useQuery({
-    queryKey: ['seedlotNumber', seedlotNumber],
-    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
-    enabled: seedlotNumber !== '',
-    refetchOnMount: true,
-    refetchOnWindowFocus: false
   });
 
   const updateImpuritiesMutation = useMutation({
@@ -152,6 +144,9 @@ const PurityContent = () => {
         acceptResult: testActivity?.acceptResult || 0,
         requestId: testActivity?.requestId || '',
         seedlotNumber: testActivity?.seedlotNumber || '',
+        familyLotNumber: testActivity?.familyLotNumber || '',
+        geneticClassCode: testActivity?.geneticClassCode || '',
+        vegetationCode: testActivity?.vegetationCode || '',
         activityType: testActivity?.activityType || '',
         replicatesList: testActivity?.replicatesList || []
       };
@@ -194,6 +189,23 @@ const PurityContent = () => {
     }
   });
 
+  const averageTest = useMutation({
+    mutationFn: (values: number[]) => calculateAverage(riaKey ?? '', values),
+    onSuccess: (data) => {
+      const testActivityData: TestingActivityType = {
+        ...testActivity!,
+        moisturePct: data.data
+      };
+      setTestActivity(testActivityData);
+    },
+    onError: (error: AxiosError) => {
+      setAlert({
+        isSuccess: false,
+        message: `Failed to calculate average: ${error.message}`
+      });
+    }
+  });
+
   useEffect(() => {
     if (!riaKey) {
       navigate(ROUTES.FOUR_OH_FOUR);
@@ -224,24 +236,19 @@ const PurityContent = () => {
   }, [testActivityQuery.status, testActivityQuery.isFetched]);
 
   useEffect(() => {
-    if (
-      seedlotQuery.isFetched
-      && seedlotQuery.status === 'error'
-      && (seedlotQuery.error as AxiosError).response?.status === 404
-    ) {
-      navigate(ROUTES.FOUR_OH_FOUR);
-    } else if (testActivity && seedlotQuery.data) {
+    if (testActivity) {
       setActivitySummary(
         {
           activity: testActivity.activityType,
           seedlotNumber,
+          familyLotNumber: testActivity.familyLotNumber,
           requestId: testActivity.requestId,
-          speciesAndClass: `${seedlotQuery.data.seedlot.vegetationCode} | ${seedlotQuery.data.seedlot.geneticClass.geneticClassCode}`,
-          testResult: testActivity.moisturePct.toString()
+          speciesAndClass: `${testActivity.vegetationCode} | ${testActivity.geneticClassCode}`,
+          testResult: testActivity.moisturePct?.toString()
         }
       );
     }
-  }, [seedlotQuery.status, seedlotQuery.isFetched, testActivity]);
+  }, [testActivity]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });
@@ -273,23 +280,39 @@ const PurityContent = () => {
   };
 
   const addImpurity = (replicateNumber: number) => {
-    let nextRank: number = 1;
-    if (replicateNumber in impurities) {
-      const lastItem = impurities[replicateNumber].at(-1);
+    let nextRank = 1;
+    const replicateImpurities = impurities[replicateNumber] || [];
+
+    if (replicateImpurities.length > 0) {
+      const lastItem = replicateImpurities.at(-1);
       if (lastItem) {
         nextRank = lastItem.debrisRank + 1;
       }
     }
-    updateImpuritiesMutation.mutate([
-      {
-        replicateNumber,
-        debrisRank: nextRank,
-        debrisTypeCode: ''
-      }
-    ]);
+
+    const newImpurity = {
+      debrisRank: nextRank,
+      debrisCategory: ''
+    };
+
+    setImpurities((prev) => ({
+      ...prev,
+      [replicateNumber]: [...replicateImpurities, newImpurity]
+    }));
   };
 
-  const handleCalculateAverage = () => {};
+  const handleCalculateAverage = () => {
+    if (tableBodyRef.current) {
+      const cells = tableBodyRef.current.querySelectorAll('td[data-index="4"]');
+      const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+      averageTest.mutate(numbers);
+    } else {
+      setAlert({
+        isSuccess: false,
+        message: 'Table body reference is not available'
+      });
+    }
+  };
 
   const handleCompleteTestModal = () => {
     setModalType(COMPLETE);
@@ -408,14 +431,18 @@ const PurityContent = () => {
             {`Replicate ${replicateNumber}`}
           </h5>
           {
-            Object.keys(impurities).length > 0
+            Object.keys(impurities)
+            && Object.keys(impurities).length > 0
+            && impurities[replicateNumber]
             && impurities[replicateNumber].map(
               (impurity) => impurityPerReplicate(impurity, replicateNumber)
             )
           }
           <div className="consep-impurity-button">
             {
-              Object.keys(impurities).length > 0
+              Object.keys(impurities)
+              && Object.keys(impurities).length > 0
+              && impurities[replicateNumber]
               && impurities[replicateNumber].length >= 10
                 ? (
                   <InlineNotification
@@ -480,7 +507,13 @@ const PurityContent = () => {
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
       </Row>
       <Row className="consep-purity-content-title">
-        <PageTitle title={`${fieldsConfig.titleSection.title} ${seedlotNumber}`} />
+        <PageTitle
+          title={`${fieldsConfig.titleSection.title} ${
+            !seedlotNumber || seedlotNumber === '00000'
+              ? testActivity?.familyLotNumber
+              : seedlotNumber
+          }`}
+        />
         <>
           {
             testActivity?.testCompleteInd === 1
@@ -501,7 +534,7 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-summary">
         <ActivitySummary
           item={activitySummary}
-          isFetching={testActivityQuery.isFetching || seedlotQuery.isFetching}
+          isFetching={testActivityQuery.isFetching}
         />
       </Row>
       <Row className="consep-purity-content-activity-result">

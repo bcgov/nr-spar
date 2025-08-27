@@ -62,14 +62,6 @@
     }
   }
 
-  .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
-    .#{vars.$bcgov-prefix}--text-input {
-      padding: 0;
-      border: none;
-      text-overflow: ellipsis;
-    }
-  }
-
   .#{vars.$bcgov-prefix}--text-area__wrapper--readonly {
     .#{vars.$bcgov-prefix}--text-area {
       padding: 0;

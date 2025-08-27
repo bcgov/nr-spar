@@ -45,7 +45,7 @@ const LotApplicantAndInfoForm = ({
       queryFn: () => getForestClientByNumberOrAcronym(selectedClientRoles?.clientId!),
       enabled: !isEdit && !isReview && !!selectedClientRoles?.clientId,
       staleTime: THREE_HOURS,
-      cacheTime: THREE_HALF_HOURS
+      gcTime: THREE_HALF_HOURS
     }
   );
 

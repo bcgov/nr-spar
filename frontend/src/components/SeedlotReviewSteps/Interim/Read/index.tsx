@@ -31,7 +31,7 @@ const InterimReviewRead = () => {
     queryFn: getFacilityTypes,
     select: (data: any) => getMultiOptList(data),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const getFacilityTypeLabel = (interimType: string | null) => {

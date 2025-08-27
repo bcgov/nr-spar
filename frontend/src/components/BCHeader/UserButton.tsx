@@ -21,7 +21,7 @@ const UserButton = () => {
     queryKey: ['role', 'forest-clients', selectedClientRoles!.clientId],
     queryFn: () => getForestClientByNumberOrAcronym(selectedClientRoles!.clientId),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS,
+    gcTime: THREE_HALF_HOURS,
     enabled: !selectedClientRoles?.clientName,
     refetchOnReconnect: false
   });

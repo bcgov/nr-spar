@@ -48,7 +48,7 @@ services:
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
       <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
-    image: maven:3.9.10-eclipse-temurin-17
+    image: maven:3.9.11-eclipse-temurin-17
     entrypoint: sh -c './encora-cert.sh'
     working_dir: /app
     volumes:
@@ -59,7 +59,7 @@ services:
 
   frontend:
     container_name: frontend
-    image: node:20-bullseye-slim
+    image: node:22-bullseye-slim
     ports: ["3000:3000"]
     entrypoint: sh -c "npm i --no-update-notifier && npm run start"
     user: root
@@ -106,7 +106,7 @@ services:
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
     profiles: ["oracle-api"]
     network_mode: host
-    image: maven:3.9.10-eclipse-temurin-17
+    image: maven:3.9.11-eclipse-temurin-17
     entrypoint: sh -c './startup.sh && mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5006"'
     working_dir: /app
     volumes: ["./oracle-api:/app"]

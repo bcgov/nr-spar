@@ -54,7 +54,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
     queryFn: getVegCodes,
     select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS
   });
 
   const seedlotQuery = useQuery({
