@@ -122,6 +122,9 @@ class MoistureContentConesEndpointTest {
             1,
             "ABC123456",
             "60000",
+            null,
+            "A",
+            "PLI",
             "MC",
             "TST",
             "Comment for this content",
@@ -463,7 +466,8 @@ class MoistureContentConesEndpointTest {
     Integer replicateNumber = 1;
     MoistureContentConesDto mockDto = new MoistureContentConesDto(
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
-        "REQ123", "SL123", "ACT", "TST", "Comment",
+        "REQ123", "SL123", null, "A",
+        "PLI","ACT", "TST", "Comment",
         LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
     );
 
@@ -578,7 +582,8 @@ class MoistureContentConesEndpointTest {
     // Mock data
     MoistureContentConesDto mockDto = new MoistureContentConesDto(
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
-        "REQ123", "SL123", "ACT", "TST", "Comment",
+        "REQ123", "SL123", null, "A",
+        "PLI","ACT", "TST", "Comment",
         LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
     );
 
@@ -606,7 +611,8 @@ class MoistureContentConesEndpointTest {
 
     MoistureContentConesDto mockDto = new MoistureContentConesDto(
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
-        "REQ123", "SL123", "ACT", "TST", "Comment",
+        "REQ123", "SL123", null, "A",
+        "PLI","ACT", "TST", "Comment",
         LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
     );
 
@@ -634,7 +640,8 @@ class MoistureContentConesEndpointTest {
 
     MoistureContentConesDto mockDto = new MoistureContentConesDto(
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
-        "REQ123", "SL123", "ACT", "TST", "Comment",
+        "REQ123", "SL123", null, "A",
+        "PLI", "ACT", "TST", "Comment",
         LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
     );
 
