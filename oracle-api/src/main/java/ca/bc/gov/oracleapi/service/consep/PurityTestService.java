@@ -388,8 +388,12 @@ public class PurityTestService {
         replicateNumber, riaKey, debrisRank + " deleted!");
 
     debrisRepository.shiftRanksDown(riaKey, replicateNumber, debrisRank);
-    entityManager.flush();
-    entityManager.clear();
+    
+    if (entityManager != null) {
+      entityManager.flush();
+      entityManager.clear();
+    }
+    
     SparLog.info("Updated all debris below the removed rank {}", debrisRank);
 
     List<PurityDebrisEntity> updatedDebrisList =
