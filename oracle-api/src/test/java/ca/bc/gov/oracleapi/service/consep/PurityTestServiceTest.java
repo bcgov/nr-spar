@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -232,6 +233,8 @@ class PurityTestServiceTest {
     when(debrisRepository.saveAll(anyList()))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
+    when(debrisRepository.findByRiaKeyAndReplicateNumbers(eq(riaKey), anyList()))
+        .thenReturn(List.of(existing));
     PurityDebrisFormDto formDto = new PurityDebrisFormDto(
         replicateNumber, debrisRank, "NEW"
     );
@@ -250,6 +253,12 @@ class PurityTestServiceTest {
     PurityDebrisFormDto formDto = new PurityDebrisFormDto(
         replicateNumber, debrisRank, "ABC"
     );
+
+    DebrisId id = new DebrisId(riaKey, replicateNumber, debrisRank);
+    PurityDebrisEntity entity = new PurityDebrisEntity();
+    entity.setId(id);
+    entity.setDebrisTypeCode("ABC");
+
   
     when(debrisRepository.findByIdRiaKeyAndIdReplicateNumberAndIdDebrisRank(
         riaKey, replicateNumber, debrisRank))
@@ -257,6 +266,9 @@ class PurityTestServiceTest {
   
     when(debrisRepository.saveAll(anyList()))
         .thenAnswer(invocation -> invocation.getArgument(0));
+    
+    when(debrisRepository.findByRiaKeyAndReplicateNumbers(eq(riaKey), anyList()))
+        .thenReturn(List.of(entity));
   
     List<PurityDebrisDto> result = purityTestService.updateDebris(riaKey, List.of(formDto));
   
