@@ -390,6 +390,7 @@ const PurityContent = () => {
               ? fieldsConfig.impuritySection.secondaryfieldName
               : ''
           }
+          value={impurity.debrisCategory}
           onChange={(e: ComboBoxEvent) => {
             const { selectedItem } = e;
             updateImpuritiesMutation.mutate([
@@ -439,7 +440,7 @@ const PurityContent = () => {
             Object.keys(impurities)
             && Object.keys(impurities).length > 0
             && impurities[replicateNumber]
-            && impurities[replicateNumber].map(
+            && impurities[replicateNumber].sort((a, b) => a.debrisRank - b.debrisRank).map(
               (impurity) => impurityPerReplicate(impurity, replicateNumber)
             )
           }

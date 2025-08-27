@@ -18,6 +18,8 @@ import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.PurityDebrisRepository;
 import ca.bc.gov.oracleapi.repository.consep.PurityReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -45,6 +47,9 @@ public class PurityTestService {
   private final PurityReplicateRepository replicateRepository;
 
   private final PurityDebrisRepository debrisRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   // The maximum number of replicates is 8 and the entries are sequencial,
   // so we can use a fixed list to fetch the data for the replicates.
@@ -232,7 +237,10 @@ public class PurityTestService {
     List<PurityDebrisEntity> saved = debrisRepository.saveAll(debrisToSave);
 
     SparLog.info("Saved {} purity debris records for riaKey: {}", saved.size(), riaKey);
-    return saved.stream()
+    List<PurityDebrisEntity> updatedDebrisList =
+        debrisRepository.findByRiaKeyAndReplicateNumbers(riaKey, replicateIds);
+
+    return updatedDebrisList.stream()
         .map(PurityDebrisMapper::convertToDto)
         .collect(Collectors.toList());
   }
@@ -380,6 +388,8 @@ public class PurityTestService {
         replicateNumber, riaKey, debrisRank + " deleted!");
 
     debrisRepository.shiftRanksDown(riaKey, replicateNumber, debrisRank);
+    entityManager.flush();
+    entityManager.clear();
     SparLog.info("Updated all debris below the removed rank {}", debrisRank);
 
     List<PurityDebrisEntity> updatedDebrisList =
