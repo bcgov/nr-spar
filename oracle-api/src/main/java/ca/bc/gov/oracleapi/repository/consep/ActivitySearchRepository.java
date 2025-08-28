@@ -13,7 +13,7 @@ import java.util.List;
 public interface ActivitySearchRepository extends JpaRepository<ActivitySearchResultEntity, Integer> {
   @Query(value = ConsepOracleQueryConstants.ACTIVITY_SEARCH, nativeQuery = true)
   List<ActivitySearchResultEntity> searchActivities(
-    @Param("lotNumbers") List<String> lotNumbers,
+    @Param("lotNumbersStr") String lotNumbersStr,
     @Param("testType") String testType,
     @Param("activityId") String activityId,
     @Param("germinatorTrayId") Integer germinatorTrayId,
