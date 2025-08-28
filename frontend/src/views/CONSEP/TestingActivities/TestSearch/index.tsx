@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent, useState } from 'react';
 // import { useQuery } from '@tanstack/react-query';
 // import { AxiosError } from 'axios';
 // import Alert from '@mui/material/Alert';
@@ -18,15 +18,72 @@ import {
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
+import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 
 import {
   DATE_FORMAT, testActivityCodes, testCategoryCodes,
   testSearchCrumbs
 } from './constants';
+import { ActivitySearchRequest } from './definitions';
 import './styles.scss';
 
 const TestSearch = () => {
-  console.log('test');
+  const [searchParams, setSearchParams] = useState<ActivitySearchRequest>();
+
+  const handleLotInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const lots = e.target.value
+      .split(',')
+      .map((val) => val.trim())
+      .filter((val) => val.length > 0);
+
+    setSearchParams((prev) => ({
+      ...prev,
+      lotNumbers: lots
+    }));
+  };
+
+  const handleTestTypeChange = (data: ComboBoxEvent) => {
+    setSearchParams((prev) => ({
+      ...prev,
+      testCategoryCd: data.selectedItem ?? undefined
+    }));
+  };
+
+  const handleActivityIdChange = (data: ComboBoxEvent) => {
+    setSearchParams((prev) => ({
+      ...prev,
+      activityId: data.selectedItem ?? undefined
+    }));
+  };
+
+  const handleGermTrayIdChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const parsed = value === '' ? undefined : parseInt(value, 10);
+
+    setSearchParams((prev) => ({
+      ...prev,
+      germinatorTrayId: Number.isNaN(parsed) ? undefined : parsed
+    }));
+  };
+
+  const handleWithdrawalStartDateChange = (dates: (string | Date)[]) => {
+    const raw = dates?.[0];
+    const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
+    setSearchParams((prev) => ({
+      ...prev,
+      seedWithdrawalStartDate: value ?? undefined
+    }));
+  };
+
+  const handleWithdrawalEndDateChange = (dates: (string | Date)[]) => {
+    const raw = dates?.[0];
+    const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
+    setSearchParams((prev) => ({
+      ...prev,
+      seedWithdrawalEndDate: value ?? undefined
+    }));
+  };
+
   return (
     <FlexGrid className="consep-test-search-content">
       <Row className="consep-test-search-breadcrumb">
@@ -42,7 +99,10 @@ const TestSearch = () => {
           <TextInput
             id="lot-input"
             className="lot-input"
-            labelText="Seedlot and family lot number(s)"
+            labelText="Lot #"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              handleLotInputChange(e);
+            }}
           />
         </Column>
         <Column md={1} lg={2}>
@@ -52,7 +112,9 @@ const TestSearch = () => {
             titleText="Test type"
             items={testCategoryCodes}
             placeholder="Choose test type"
-            onChange={() => {}}
+            onChange={(e: ComboBoxEvent) => {
+              handleTestTypeChange(e);
+            }}
           />
         </Column>
         <Column md={1} lg={2}>
@@ -62,7 +124,9 @@ const TestSearch = () => {
             titleText="Choose activity"
             items={testActivityCodes}
             placeholder="Choose activity"
-            onChange={() => {}}
+            onChange={(e: ComboBoxEvent) => {
+              handleActivityIdChange(e);
+            }}
           />
         </Column>
         <Column md={1} lg={2}>
@@ -72,6 +136,9 @@ const TestSearch = () => {
             placeholder="Enter germ tray ID"
             labelText="Germ tray ID"
             type="number"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              handleGermTrayIdChange(e);
+            }}
           />
         </Column>
         <Column md={1} lg={2}>
@@ -79,7 +146,9 @@ const TestSearch = () => {
             datePickerType="single"
             className="withdrawal-date-input"
             dateFormat={DATE_FORMAT}
-            onChange={() => {}}
+            onChange={(e: Array<Date>) => {
+              handleWithdrawalStartDateChange(e);
+            }}
           >
             <DatePickerInput
               id="withdrawal-start-date-input"
@@ -94,7 +163,9 @@ const TestSearch = () => {
             datePickerType="single"
             className="withdrawal-date-input"
             dateFormat={DATE_FORMAT}
-            onChange={() => {}}
+            onChange={(e: Array<Date>) => {
+              handleWithdrawalEndDateChange(e);
+            }}
           >
             <DatePickerInput
               id="withdrawal-end-date-input"
@@ -117,7 +188,9 @@ const TestSearch = () => {
             renderIcon={Search}
             iconDescription="Search activity"
             size="md"
-            onClick={() => {}}
+            onClick={() => {
+              console.log(searchParams);
+            }}
           >
             Search activity
           </Button>

@@ -9,22 +9,34 @@
     margin-top: 2rem;
 
     & > div:first-child {
-      margin-top: 0;
       padding-inline-start: 1rem;
     }
 
     & > div {
-      margin-top: 1.25rem;
       padding-inline: 0.1rem;
     }
 
-    .withdrawal-date-input input {
-      inline-size: 11.85rem;
+    .withdrawal-date-input {
+      & .#{vars.$bcgov-prefix}--date-picker.#{vars.$bcgov-prefix}--date-picker--single,
+      & .#{vars.$bcgov-prefix}--date-picker-container,
+      & input {
+        inline-size: 100%;
+      }
     }
 
     .advanced-search-input,
     .search-button {
-      margin-top: 3rem;
+      margin-top: 1.75rem;
     }
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    appearance: textfield;
   }
 }
