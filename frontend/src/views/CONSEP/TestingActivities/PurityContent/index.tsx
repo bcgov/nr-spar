@@ -540,7 +540,7 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-result">
         <ActivityResult
           replicateType="purityTest"
-          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '', 4)}
+          replicatesData={(testActivity?.replicatesList && testActivity?.replicatesList.length > 0) || initReplicatesList(riaKey ?? '', 4)}
           riaKey={Number(riaKey)}
           isEditable={!testActivity?.testCompleteInd}
           setAlert={handleAlert}
