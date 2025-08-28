@@ -1,4 +1,4 @@
-import { TYPE_DELAY } from '../../constants';
+import { HALF_SECOND, TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
@@ -328,6 +328,14 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     // Save changes
     cy.saveSeedlotRegFormProgress();
 
+    // Wait for 500ms to ensure the save is complete
+    cy.wait(HALF_SECOND);
+
+    // Check complete status of Collection step
+    cy.contains(`.${prefix}--progress-step-button`, 'Collection')
+      .find(`.${prefix}--assistive-text`)
+      .should('have.text', 'Complete');
+
     // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
@@ -529,6 +537,14 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
+
+    // Wait for 500ms to ensure the save is complete
+    cy.wait(HALF_SECOND);
+
+    // Check complete status of Interim storage step
+    cy.contains(`.${prefix}--progress-step-button`, 'Interim storage')
+      .find(`.${prefix}--assistive-text`)
+      .should('have.text', 'Complete');
 
     // Press next button
     cy.get('.seedlot-registration-button-row')

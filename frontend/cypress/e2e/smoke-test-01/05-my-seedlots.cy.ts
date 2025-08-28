@@ -185,7 +185,7 @@ describe('My seedlots page', () => {
         const descendingFirstRow: string = $createdDate.text();
         const ascendingDate = new Date(ascendingFirstRow);
         const descendingDate = new Date(descendingFirstRow);
-        expect(ascendingDate).to.be.at.most(descendingDate);
+        expect(ascendingDate).to.be.gte(descendingDate);
       });
   });
 
@@ -226,7 +226,7 @@ describe('My seedlots page', () => {
         const descendingFirstRow: string = $updatedDate.text();
         const ascendingDate = new Date(ascendingFirstRow);
         const descendingDate = new Date(descendingFirstRow);
-        expect(ascendingDate).to.be.at.most(descendingDate);
+        expect(ascendingDate).to.be.gte(descendingDate);
       });
   });
 
