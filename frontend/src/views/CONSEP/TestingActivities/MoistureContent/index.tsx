@@ -125,7 +125,7 @@ const MoistureContent = () => {
           familyLotNumber: testActivity.familyLotNumber,
           requestId: testActivity.requestId,
           speciesAndClass: `${testActivity.vegetationCode} | ${testActivity.geneticClassCode}`,
-          testResult: testActivity.moisturePct.toString()
+          testResult: testActivity.moisturePct?.toString()
         }
       );
       setUpdatedReplicates(testActivityQuery.data.replicatesList);
