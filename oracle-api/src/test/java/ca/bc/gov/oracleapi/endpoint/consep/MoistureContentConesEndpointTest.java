@@ -131,6 +131,7 @@ class MoistureContentConesEndpointTest {
             "Comment for this content",
             LocalDateTime.parse("2013-08-01T00:00:00"),
             LocalDateTime.parse("2013-08-01T00:00:00"),
+            "MCM",
             replicatesList
         ));
 
@@ -469,7 +470,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI","ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     // Mock service behavior
@@ -585,7 +586,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI","ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     when(moistureContentService.getMoistureConeContentData(riaKey))
@@ -614,7 +615,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI","ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     when(moistureContentService.getMoistureConeContentData(riaKey))
@@ -643,7 +644,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI", "ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     when(moistureContentService.getMoistureConeContentData(riaKey))

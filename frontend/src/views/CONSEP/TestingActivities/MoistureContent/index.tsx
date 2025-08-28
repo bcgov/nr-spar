@@ -105,7 +105,7 @@ const MoistureContent = () => {
     } else if (testActivityQuery.data) {
       setTestActivity(testActivityQuery.data);
       setSeedlotNumber(testActivityQuery.data.seedlotNumber);
-      setMCType(testActivityQuery.data.activityType);
+      setMCType(testActivityQuery.data.standardActivityType);
       const activityRecordData = {
         testCategoryCode: testActivityQuery.data.testCategoryCode,
         riaComment: testActivityQuery.data.riaComment,
@@ -348,7 +348,7 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
-          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows)}
+          replicatesData={(testActivity?.replicatesList && testActivity?.replicatesList.length > 0) || initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows)}
           replicateType="moistureTest"
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
