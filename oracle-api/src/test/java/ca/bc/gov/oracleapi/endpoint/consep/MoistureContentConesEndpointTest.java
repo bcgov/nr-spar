@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -122,6 +123,9 @@ class MoistureContentConesEndpointTest {
             1,
             "ABC123456",
             "60000",
+            null,
+            "A",
+            "PLI",
             "MC",
             "TST",
             "Comment for this content",
@@ -463,7 +467,8 @@ class MoistureContentConesEndpointTest {
     Integer replicateNumber = 1;
     MoistureContentConesDto mockDto = new MoistureContentConesDto(
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
-        "REQ123", "SL123", "ACT", "TST", "Comment",
+        "REQ123", "SL123", null, "A",
+        "PLI","ACT", "TST", "Comment",
         LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
     );
 
@@ -499,10 +504,10 @@ class MoistureContentConesEndpointTest {
 
     doNothing().when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
 
-    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(replicateNumbers)))
+            .param("ids", replicateNumbers.stream().map(String::valueOf).collect(Collectors.joining(","))))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0]").value(1))
         .andExpect(jsonPath("$[1]").value(2))
@@ -518,10 +523,10 @@ class MoistureContentConesEndpointTest {
     doThrow(new InvalidTestActivityKeyException())
         .when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
 
-    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(replicateNumbers)))
+            .param("ids", replicateNumbers.stream().map(String::valueOf).collect(Collectors.joining(","))))
         .andExpect(status().isNotFound());
   }
 
@@ -578,7 +583,8 @@ class MoistureContentConesEndpointTest {
     // Mock data
     MoistureContentConesDto mockDto = new MoistureContentConesDto(
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
-        "REQ123", "SL123", "ACT", "TST", "Comment",
+        "REQ123", "SL123", null, "A",
+        "PLI","ACT", "TST", "Comment",
         LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
     );
 
@@ -606,7 +612,8 @@ class MoistureContentConesEndpointTest {
 
     MoistureContentConesDto mockDto = new MoistureContentConesDto(
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
-        "REQ123", "SL123", "ACT", "TST", "Comment",
+        "REQ123", "SL123", null, "A",
+        "PLI","ACT", "TST", "Comment",
         LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
     );
 
@@ -634,7 +641,8 @@ class MoistureContentConesEndpointTest {
 
     MoistureContentConesDto mockDto = new MoistureContentConesDto(
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
-        "REQ123", "SL123", "ACT", "TST", "Comment",
+        "REQ123", "SL123", null, "A",
+        "PLI", "ACT", "TST", "Comment",
         LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
     );
 

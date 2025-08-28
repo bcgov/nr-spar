@@ -35,7 +35,7 @@ const testingActivitiesAPI = async (
     getDataByRiaKey: (riaKey: string) => api.get(`${url}/${riaKey}`).then((res) => res.data),
     updateMultipleReplicates: (riaKey: string, replicates: ReplicateType[]) => api.patch(`${url}/replicate/${riaKey}`, replicates),
     deleteSingleReplicate: (riaKey: string, replicateNumber: number) => api.delete(`${url}/${riaKey}/${replicateNumber}`),
-    deleteMultipleReplicates: (riaKey: string, replicateNumbers: number[]) => api.post(`${url}/${riaKey}/replicates`, replicateNumbers),
+    deleteMultipleReplicates: (riaKey: string, replicateNumbers: number[]) => api.delete(`${url}/${riaKey}/replicates?ids=${replicateNumbers.join(',')}`),
     updateActivityRecord: (riaKey: string, activityRecord: any) => api.patch(`${url}/${riaKey}`, activityRecord),
     validateTestResult: (riaKey: string) => api.get(`${url}/validate/${riaKey}`),
     acceptResult: (riaKey: string) => api.get(`${url}/accept/${riaKey}`)
