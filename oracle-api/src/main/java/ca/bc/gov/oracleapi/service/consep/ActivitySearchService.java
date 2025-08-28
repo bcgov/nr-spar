@@ -7,8 +7,6 @@ import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
-import java.util.stream.Collectors;
-
 
 import java.util.List;
 
