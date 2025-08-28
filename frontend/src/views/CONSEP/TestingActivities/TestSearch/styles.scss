@@ -1,0 +1,30 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.consep-test-search-content {
+  .consep-test-search-breadcrumb {
+    margin-bottom: 0.5rem;
+  }
+
+  .consep-test-search-filters {
+    margin-top: 2rem;
+
+    & > div:first-child {
+      margin-top: 0;
+      padding-inline-start: 1rem;
+    }
+
+    & > div {
+      margin-top: 1.25rem;
+      padding-inline: 0.1rem;
+    }
+
+    .withdrawal-date-input input {
+      inline-size: 11.85rem;
+    }
+
+    .advanced-search-input,
+    .search-button {
+      margin-top: 3rem;
+    }
+  }
+}
