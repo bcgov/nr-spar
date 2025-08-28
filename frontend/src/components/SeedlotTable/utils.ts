@@ -16,7 +16,8 @@ export const sortByKey = (
       const result = dateSort(a[headerId], b[headerId]);
       return direction === 'ASC' ? result : -result;
     });
-  } if (headerId && direction === 'ASC') {
+  }
+  if (headerId && direction === 'ASC') {
     return dataToSort.sort((a, b) => {
       if (a[headerId] > b[headerId]) {
         return 1;
@@ -26,7 +27,8 @@ export const sortByKey = (
       }
       return 0;
     });
-  } if (headerId && direction === 'DESC') {
+  }
+  if (headerId && direction === 'DESC') {
     return dataToSort.sort((a, b) => {
       if (a[headerId] < b[headerId]) {
         return 1;
