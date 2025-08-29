@@ -1,0 +1,28 @@
+export type TestingSearchResponseType = {
+  seedlotDisplay: string;
+  requestItem: string;
+  species: string;
+  activityId: string;
+  testRank: string;
+  currentTestInd: number;
+  testCategoryCd: string;
+  germinationPct: number;
+  pv: string;
+  moisturePct: number;
+  purityPct: number;
+  seedsPerGram: number;
+  otherTestResult: number;
+  testCompleteInd: boolean;
+  acceptResultInd: number;
+  significntStsInd: number;
+  seedWithdrawalDate: string;
+  revisedEndDt: string;
+  actualBeginDtTm: string;
+  actualEndDtTm: string;
+  riaComment: string;
+  requestSkey: number;
+  reqId: string;
+  itemId: string;
+  seedlotSample: string;
+  riaSkey: number;
+};

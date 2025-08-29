@@ -11,7 +11,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
 
-
 /**
  * This record serves the purpose of mapping fields the FE should send to the BE, to search a test activity.
  */
