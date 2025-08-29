@@ -6,15 +6,23 @@ import { useMutation } from '@tanstack/react-query';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import { PtValsCalcReqPayload } from '../../../types/PtCalcTypes';
 import postForCalculation from '../../../api-service/parentTreeAPI';
-import { fillCalculatedInfo, generatePtValCalcPayload, getParentTreesForSelectedOrchards } from './utils';
+import {
+  fillCalculatedInfo,
+  generatePtValCalcPayload,
+  getParentTreesForSelectedOrchards
+} from './utils';
 
 type props = {
-  disableOptions: boolean,
-  setShowInfoSections: React.Dispatch<React.SetStateAction<boolean>>,
-  isReview?: boolean
-}
+  disableOptions: boolean;
+  setShowInfoSections: React.Dispatch<React.SetStateAction<boolean>>;
+  isReview?: boolean;
+};
 
-const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: props) => {
+const CalculateMetrics = ({
+  disableOptions,
+  setShowInfoSections,
+  isReview
+}: props) => {
   const {
     allStepData: { parentTreeStep: state },
     allStepData: { orchardStep },
@@ -27,8 +35,22 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
     setMeanGeomInfos,
     setIsCalculatingPt,
     setGeoInfoVals,
-    setGenWorthVal
+    setGenWorthVal,
+    weightedGwInfoItems
   } = useContext(ClassAContext);
+
+  const smpBv: Record<keyof typeof weightedGwInfoItems, any> = Object.keys(
+    weightedGwInfoItems
+  ).reduce((acc, key) => {
+    acc[key as keyof typeof weightedGwInfoItems] = null;
+    return acc;
+  }, {} as Record<keyof typeof weightedGwInfoItems, any>);
+
+  Object.keys(weightedGwInfoItems).forEach((key) => {
+    const typedKey = key as keyof typeof weightedGwInfoItems;
+    const item = weightedGwInfoItems[typedKey];
+    smpBv[typedKey] = Number(item.value);
+  });
 
   if (isFormSubmitted && !isReview) {
     return null;
@@ -55,17 +77,15 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
       <Button
         size="md"
         kind="tertiary"
-        renderIcon={
-          () => (
-            <div className="gw-calc-loading-icon">
-              {
-                calculateGenWorthQuery.isPending
-                  ? <Loading withOverlay={false} small />
-                  : <Calculator />
-              }
-            </div>
-          )
-        }
+        renderIcon={() => (
+          <div className="gw-calc-loading-icon">
+            {calculateGenWorthQuery.isPending ? (
+              <Loading withOverlay={false} small />
+            ) : (
+              <Calculator />
+            )}
+          </div>
+        )}
         disabled={disableOptions}
         onClick={() => {
           setIsCalculatingPt(true);
@@ -77,6 +97,7 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
                 orchardStep,
                 state.allParentTreeData
               ),
+              smpBv,
               orchardStep.breedingPercentage.value
             )
           );
@@ -91,9 +112,7 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
           }
         }}
       >
-        {
-          `${isReview ? 'Recalculate' : 'Calculate'} metrics`
-        }
+        {`${isReview ? 'Recalculate' : 'Calculate'} metrics`}
       </Button>
     </Row>
   );
