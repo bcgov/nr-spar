@@ -295,18 +295,18 @@ public class ParentTreeService {
         double maleOrchPollContribWwd =
             auxValueAb * sumMaleGwWwdContbOrchPoll.doubleValue() * femaleCropPop.doubleValue();
 
-        double smpBVAd = ptVals.smpBV().ad() == null ? 0 : ptVals.smpBV().ad().doubleValue();
-        double smpBVDfs = ptVals.smpBV().dfs() == null ? 0 : ptVals.smpBV().dfs().doubleValue();
-        double smpBVDfu = ptVals.smpBV().dfu() == null ? 0 : ptVals.smpBV().dfu().doubleValue();
-        double smpBVDfw = ptVals.smpBV().dfw() == null ? 0 : ptVals.smpBV().dfw().doubleValue();
-        double smpBVDsb = ptVals.smpBV().dsb() == null ? 0 : ptVals.smpBV().dsb().doubleValue();
-        double smpBVDsc = ptVals.smpBV().dsc() == null ? 0 : ptVals.smpBV().dsc().doubleValue();
-        double smpBVDsg = ptVals.smpBV().dsg() == null ? 0 : ptVals.smpBV().dsg().doubleValue();
-        double smpBVGvo = ptVals.smpBV().gvo() == null ? 0 : ptVals.smpBV().gvo().doubleValue();
-        double smpBVIws = ptVals.smpBV().iws() == null ? 0 : ptVals.smpBV().iws().doubleValue();
-        double smpBVWdu = ptVals.smpBV().wdu() == null ? 0 : ptVals.smpBV().wdu().doubleValue();
-        double smpBVWve = ptVals.smpBV().wve() == null ? 0 : ptVals.smpBV().wve().doubleValue();
-        double smpBVWwd = ptVals.smpBV().wwd() == null ? 0 : ptVals.smpBV().wwd().doubleValue();
+        double smpBVAd = ptVals.smpBV().getAd() == null ? 0 : ptVals.smpBV().getAd().doubleValue();
+        double smpBVDfs = ptVals.smpBV().getDfs() == null ? 0 : ptVals.smpBV().getDfs().doubleValue();
+        double smpBVDfu = ptVals.smpBV().getDfu() == null ? 0 : ptVals.smpBV().getDfu().doubleValue();
+        double smpBVDfw = ptVals.smpBV().getDfw() == null ? 0 : ptVals.smpBV().getDfw().doubleValue();
+        double smpBVDsb = ptVals.smpBV().getDsb() == null ? 0 : ptVals.smpBV().getDsb().doubleValue();
+        double smpBVDsc = ptVals.smpBV().getDsc() == null ? 0 : ptVals.smpBV().getDsc().doubleValue();
+        double smpBVDsg = ptVals.smpBV().getDsg() == null ? 0 : ptVals.smpBV().getDsg().doubleValue();
+        double smpBVGvo = ptVals.smpBV().getGvo() == null ? 0 : ptVals.smpBV().getGvo().doubleValue();
+        double smpBVIws = ptVals.smpBV().getIws() == null ? 0 : ptVals.smpBV().getIws().doubleValue();
+        double smpBVWdu = ptVals.smpBV().getWdu() == null ? 0 : ptVals.smpBV().getWdu().doubleValue();
+        double smpBVWve = ptVals.smpBV().getWve() == null ? 0 : ptVals.smpBV().getWve().doubleValue();
+        double smpBVWwd = ptVals.smpBV().getWwd() == null ? 0 : ptVals.smpBV().getWwd().doubleValue();
 
         // SMP_Contribution = (SMP_BV * SMP_Success/100) * FEMALE_CROP_CONTRIBUTION
         double smpAdContribution = (smpBVAd * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();

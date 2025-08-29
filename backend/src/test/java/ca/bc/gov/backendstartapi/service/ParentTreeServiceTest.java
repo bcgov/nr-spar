@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
+import ca.bc.gov.backendstartapi.dto.SMPBreedingValueDto;
 import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import java.math.BigDecimal;
@@ -114,7 +115,8 @@ class ParentTreeServiceTest {
     List<OrchardParentTreeValsDto> orchardPtVals = List.of(pt4032, pt4033, pt4079, pt4080);
 
     PtValsCalReqDto reqDto =
-        new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO, null);
+            new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO,
+                    new SMPBreedingValueDto());
 
     /* ********* ORACLE GEOSPATIAL MOCK DATA ********* */
     List<GeospatialOracleResDto> oracleMockSmpGeoData =
