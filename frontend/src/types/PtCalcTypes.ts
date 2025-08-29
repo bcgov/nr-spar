@@ -46,5 +46,6 @@ export type PtValsCalcReqPayload = {
   orchardPtVals: OrchardParentTreeValsType[],
   smpMixIdAndProps: GeospatialRequestDto[],
   smpParentsOutside: number,
-  contaminantPollenBv: number
+  contaminantPollenBv: number,
+  smpBV: Record<string, number>
 }

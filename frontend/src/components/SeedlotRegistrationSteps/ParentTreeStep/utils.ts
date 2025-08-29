@@ -730,6 +730,7 @@ export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
   seedlotSpecies: MultiOptionsObj,
   orchardPts: string[],
+  smpBV: Record<keyof RowItem, number>,
   pollenContaminantBreedingValue?: string
 ): PtValsCalcReqPayload => {
   const { tableRowData, mixTabData } = state;
@@ -738,7 +739,21 @@ export const generatePtValCalcPayload = (
     orchardPtVals: [],
     smpMixIdAndProps: [],
     smpParentsOutside: 0,
-    contaminantPollenBv: 0
+    contaminantPollenBv: 0,
+    smpBV: {
+      ad: smpBV.ad ?? 0,
+      dfs: smpBV.dfs ?? 0,
+      dfu: smpBV.dfu ?? 0,
+      dfw: smpBV.dfw ?? 0,
+      dsb: smpBV.dsb ?? 0,
+      dsc: smpBV.dsc ?? 0,
+      dsg: smpBV.dsg ?? 0,
+      gvo: smpBV.gvo ?? 0,
+      iws: smpBV.iws ?? 0,
+      wdu: smpBV.wdu ?? 0,
+      wve: smpBV.wve ?? 0,
+      wwd: smpBV.wwd ?? 0
+    }
   };
   const rows = Object.values(tableRowData);
   const genWorthTypes = geneticWorthDict[seedlotSpecies.code as keyof GeneticWorthDictType];

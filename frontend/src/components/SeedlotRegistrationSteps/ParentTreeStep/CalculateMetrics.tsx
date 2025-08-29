@@ -27,8 +27,22 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
     setMeanGeomInfos,
     setIsCalculatingPt,
     setGeoInfoVals,
-    setGenWorthVal
+    setGenWorthVal,
+    weightedGwInfoItems
   } = useContext(ClassAContext);
+
+  const smpBV: Record<keyof typeof weightedGwInfoItems, any> = Object.keys(
+    weightedGwInfoItems
+  ).reduce((acc, key) => {
+    acc[key as keyof typeof weightedGwInfoItems] = null;
+    return acc;
+  }, {} as Record<keyof typeof weightedGwInfoItems, any>);
+
+  Object.keys(weightedGwInfoItems).forEach((key) => {
+    const typedKey = key as keyof typeof weightedGwInfoItems;
+    const item = weightedGwInfoItems[typedKey];
+    smpBV[typedKey] = Number(item.value);
+  });
 
   if (isFormSubmitted && !isReview) {
     return null;
@@ -77,6 +91,7 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: pro
                 orchardStep,
                 state.allParentTreeData
               ),
+              smpBV,
               orchardStep.breedingPercentage.value
             )
           );

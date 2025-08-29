@@ -900,7 +900,7 @@ public class SeedlotService {
 
     PtValsCalReqDto ptValsCalReqDto =
         new PtValsCalReqDto(
-            orchardPtVals, smpMixIdAndProps, smpParentsOutside, contaminantPollenBv);
+            orchardPtVals, smpMixIdAndProps, smpParentsOutside, contaminantPollenBv, null);
 
     PtCalculationResDto ptCalculationResDto = parentTreeService.calculatePtVals(ptValsCalReqDto);
 

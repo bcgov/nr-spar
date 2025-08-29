@@ -114,7 +114,7 @@ class ParentTreeServiceTest {
     List<OrchardParentTreeValsDto> orchardPtVals = List.of(pt4032, pt4033, pt4079, pt4080);
 
     PtValsCalReqDto reqDto =
-        new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO);
+        new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO, null);
 
     /* ********* ORACLE GEOSPATIAL MOCK DATA ********* */
     List<GeospatialOracleResDto> oracleMockSmpGeoData =
@@ -189,7 +189,7 @@ class ParentTreeServiceTest {
 
     List<OrchardParentTreeValsDto> orchardPtVals = List.of();
     PtValsCalReqDto reqDto =
-        new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO);
+        new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps, 0, BigDecimal.ZERO, null);
 
     BigDecimal coancestry = null;
     BigDecimal varSumOrchGameteContr = null;
