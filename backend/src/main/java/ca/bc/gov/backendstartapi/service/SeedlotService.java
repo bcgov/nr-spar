@@ -25,6 +25,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSaveInMemoryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
+import ca.bc.gov.backendstartapi.dto.SmpBreedingValueDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
@@ -900,7 +901,8 @@ public class SeedlotService {
 
     PtValsCalReqDto ptValsCalReqDto =
         new PtValsCalReqDto(
-            orchardPtVals, smpMixIdAndProps, smpParentsOutside, contaminantPollenBv, null);
+            orchardPtVals, smpMixIdAndProps, smpParentsOutside,
+                contaminantPollenBv, new SmpBreedingValueDto());
 
     PtCalculationResDto ptCalculationResDto = parentTreeService.calculatePtVals(ptValsCalReqDto);
 

@@ -295,7 +295,6 @@ public class ParentTreeService {
         double maleOrchPollContribWwd =
             auxValueAb * sumMaleGwWwdContbOrchPoll.doubleValue() * femaleCropPop.doubleValue();
 
-        // make two lines instead of one
         double smpBvAd = 
             ptVals.smpBv().getAd() == null ? 0 : ptVals.smpBv().getAd().doubleValue();
         double smpBvDfs = 

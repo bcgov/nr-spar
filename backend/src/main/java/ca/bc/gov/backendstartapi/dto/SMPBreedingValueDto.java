@@ -79,6 +79,3 @@ public class SmpBreedingValueDto {
         this.wwd = wwd;
     }
 }
-
-
-
