@@ -14,4 +14,4 @@ public record PtValsCalReqDto(
     @NotNull List<GeospatialRequestDto> smpMixIdAndProps,
     @NotNull Integer smpParentsOutside,
     BigDecimal contaminantPollenBv,
-    SMPBreedingValueDto smpBV) {}
+    SmpBreedingValueDto smpBv) {}

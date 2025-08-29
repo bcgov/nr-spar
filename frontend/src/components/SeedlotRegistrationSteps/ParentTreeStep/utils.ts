@@ -730,7 +730,7 @@ export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
   seedlotSpecies: MultiOptionsObj,
   orchardPts: string[],
-  smpBV: Record<keyof RowItem, number>,
+  smpBv: Record<keyof RowItem, number>,
   pollenContaminantBreedingValue?: string
 ): PtValsCalcReqPayload => {
   const { tableRowData, mixTabData } = state;
@@ -740,19 +740,19 @@ export const generatePtValCalcPayload = (
     smpMixIdAndProps: [],
     smpParentsOutside: 0,
     contaminantPollenBv: 0,
-    smpBV: {
-      ad: smpBV.ad ?? 0,
-      dfs: smpBV.dfs ?? 0,
-      dfu: smpBV.dfu ?? 0,
-      dfw: smpBV.dfw ?? 0,
-      dsb: smpBV.dsb ?? 0,
-      dsc: smpBV.dsc ?? 0,
-      dsg: smpBV.dsg ?? 0,
-      gvo: smpBV.gvo ?? 0,
-      iws: smpBV.iws ?? 0,
-      wdu: smpBV.wdu ?? 0,
-      wve: smpBV.wve ?? 0,
-      wwd: smpBV.wwd ?? 0
+    smpBv: {
+      ad: smpBv.ad ?? 0,
+      dfs: smpBv.dfs ?? 0,
+      dfu: smpBv.dfu ?? 0,
+      dfw: smpBv.dfw ?? 0,
+      dsb: smpBv.dsb ?? 0,
+      dsc: smpBv.dsc ?? 0,
+      dsg: smpBv.dsg ?? 0,
+      gvo: smpBv.gvo ?? 0,
+      iws: smpBv.iws ?? 0,
+      wdu: smpBv.wdu ?? 0,
+      wve: smpBv.wve ?? 0,
+      wwd: smpBv.wwd ?? 0
     }
   };
   const rows = Object.values(tableRowData);

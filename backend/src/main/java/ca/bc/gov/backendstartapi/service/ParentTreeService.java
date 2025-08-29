@@ -295,46 +295,83 @@ public class ParentTreeService {
         double maleOrchPollContribWwd =
             auxValueAb * sumMaleGwWwdContbOrchPoll.doubleValue() * femaleCropPop.doubleValue();
 
-        double smpBVAd = ptVals.smpBV().getAd() == null ? 0 : ptVals.smpBV().getAd().doubleValue();
-        double smpBVDfs = ptVals.smpBV().getDfs() == null ? 0 : ptVals.smpBV().getDfs().doubleValue();
-        double smpBVDfu = ptVals.smpBV().getDfu() == null ? 0 : ptVals.smpBV().getDfu().doubleValue();
-        double smpBVDfw = ptVals.smpBV().getDfw() == null ? 0 : ptVals.smpBV().getDfw().doubleValue();
-        double smpBVDsb = ptVals.smpBV().getDsb() == null ? 0 : ptVals.smpBV().getDsb().doubleValue();
-        double smpBVDsc = ptVals.smpBV().getDsc() == null ? 0 : ptVals.smpBV().getDsc().doubleValue();
-        double smpBVDsg = ptVals.smpBV().getDsg() == null ? 0 : ptVals.smpBV().getDsg().doubleValue();
-        double smpBVGvo = ptVals.smpBV().getGvo() == null ? 0 : ptVals.smpBV().getGvo().doubleValue();
-        double smpBVIws = ptVals.smpBV().getIws() == null ? 0 : ptVals.smpBV().getIws().doubleValue();
-        double smpBVWdu = ptVals.smpBV().getWdu() == null ? 0 : ptVals.smpBV().getWdu().doubleValue();
-        double smpBVWve = ptVals.smpBV().getWve() == null ? 0 : ptVals.smpBV().getWve().doubleValue();
-        double smpBVWwd = ptVals.smpBV().getWwd() == null ? 0 : ptVals.smpBV().getWwd().doubleValue();
+        // make two lines instead of one
+        double smpBvAd = 
+            ptVals.smpBv().getAd() == null ? 0 : ptVals.smpBv().getAd().doubleValue();
+        double smpBvDfs = 
+            ptVals.smpBv().getDfs() == null ? 0 : ptVals.smpBv().getDfs().doubleValue();
+        double smpBvDfu = 
+            ptVals.smpBv().getDfu() == null ? 0 : ptVals.smpBv().getDfu().doubleValue();
+        double smpBvDfw = 
+            ptVals.smpBv().getDfw() == null ? 0 : ptVals.smpBv().getDfw().doubleValue();
+        double smpBvDsb = 
+            ptVals.smpBv().getDsb() == null ? 0 : ptVals.smpBv().getDsb().doubleValue();
+        double smpBvDsc = 
+            ptVals.smpBv().getDsc() == null ? 0 : ptVals.smpBv().getDsc().doubleValue();
+        double smpBvDsg = 
+            ptVals.smpBv().getDsg() == null ? 0 : ptVals.smpBv().getDsg().doubleValue();
+        double smpBvGvo = 
+            ptVals.smpBv().getGvo() == null ? 0 : ptVals.smpBv().getGvo().doubleValue();
+        double smpBvIws = 
+            ptVals.smpBv().getIws() == null ? 0 : ptVals.smpBv().getIws().doubleValue();
+        double smpBvWdu = 
+            ptVals.smpBv().getWdu() == null ? 0 : ptVals.smpBv().getWdu().doubleValue();
+        double smpBvWve = 
+            ptVals.smpBv().getWve() == null ? 0 : ptVals.smpBv().getWve().doubleValue();
+        double smpBvWwd = 
+            ptVals.smpBv().getWwd() == null ? 0 : ptVals.smpBv().getWwd().doubleValue();
 
         // SMP_Contribution = (SMP_BV * SMP_Success/100) * FEMALE_CROP_CONTRIBUTION
-        double smpAdContribution = (smpBVAd * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpDfsContribution = (smpBVDfs * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpDfuContribution = (smpBVDfu * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpDfwContribution = (smpBVDfw * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpDsbContribution = (smpBVDsb * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpDscContribution = (smpBVDsc * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpDsgContribution = (smpBVDsg * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpGvoContribution = (smpBVGvo * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpIwsContribution = (smpBVIws * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpWduContribution = (smpBVWdu * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpWveContribution = (smpBVWve * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
-        double smpWwdContribution = (smpBVWwd * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpAdContribution = 
+            (smpBvAd * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpDfsContribution = 
+            (smpBvDfs * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpDfuContribution = 
+            (smpBvDfu * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpDfwContribution = 
+            (smpBvDfw * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpDsbContribution = 
+            (smpBvDsb * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpDscContribution = 
+            (smpBvDsc * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpDsgContribution = 
+            (smpBvDsg * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpGvoContribution = 
+            (smpBvGvo * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpIwsContribution = 
+            (smpBvIws * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpWduContribution = 
+            (smpBvWdu * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpWveContribution = 
+            (smpBvWve * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
+        double smpWwdContribution = 
+            (smpBvWwd * parentTreeRow.smpSuccessPerc() / 100) * femaleCropPop.doubleValue();
 
         // --col:AC (depends on prev value)
-        maleTotalGwAdContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribAd + smpAdContribution);
-        maleTotalGwDfsContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDfs + smpDfsContribution);
-        maleTotalGwDfuContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDfu + smpDfuContribution);
-        maleTotalGwDfwContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDfw + smpDfwContribution);
-        maleTotalGwDsbContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDsb + smpDsbContribution);
-        maleTotalGwDscContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDsc + smpDscContribution);
-        maleTotalGwDsgContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDsg + smpDsgContribution);
-        maleTotalGwGvoContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribGvo + smpGvoContribution);
-        maleTotalGwIwsContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribIws + smpIwsContribution);
-        maleTotalGwWduContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribWdu + smpWduContribution);
-        maleTotalGwWveContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribWve + smpWveContribution);
-        maleTotalGwWwdContrib = BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribWwd + smpWwdContribution);
+        maleTotalGwAdContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribAd + smpAdContribution);
+        maleTotalGwDfsContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDfs + smpDfsContribution);
+        maleTotalGwDfuContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDfu + smpDfuContribution);
+        maleTotalGwDfwContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDfw + smpDfwContribution);
+        maleTotalGwDsbContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDsb + smpDsbContribution);
+        maleTotalGwDscContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDsc + smpDscContribution);
+        maleTotalGwDsgContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribDsg + smpDsgContribution);
+        maleTotalGwGvoContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribGvo + smpGvoContribution);
+        maleTotalGwIwsContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribIws + smpIwsContribution);
+        maleTotalGwWduContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribWdu + smpWduContribution);
+        maleTotalGwWveContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribWve + smpWveContribution);
+        maleTotalGwWwdContrib = 
+            BigDecimal.valueOf(0d + vmContamContrib + maleOrchPollContribWwd + smpWwdContribution);
 
 
         // --col:AD
