@@ -121,7 +121,7 @@ const BrowserRoutes: Array<RouteObject> = [
     )
   },
   {
-    path: ROUTES.TESTING_ACTIVITY_SEARCH,
+    path: ROUTES.TESTING_ACTIVITIES_LIST,
     element: (
       <TestSearch />
     )

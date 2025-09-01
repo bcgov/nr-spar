@@ -57,7 +57,6 @@ const ROUTES = {
   STOCK_COUNT_STATUS_REPORT: '/consep/stock-count-status-report',
   TESTING_ACTIVITIES_LIST: '/consep/testing-activities-list',
   TESTING_ACTIVITIES_SUMMARY_REPORT: '/consep/testing-activities-summary-report',
-  TESTING_ACTIVITY_SEARCH: '/consep/testing-activity-search',
   TESTING_REQUESTS_REPORT: '/consep/testing-requests-report',
   WAYBILLS: '/consep/waybills',
   WITHDRAWAL_DATE: '/consep/withdrawal-date',

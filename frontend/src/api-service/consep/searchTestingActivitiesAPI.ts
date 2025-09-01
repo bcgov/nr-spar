@@ -1,8 +1,8 @@
-import ApiConfig from './ApiConfig';
-import api from './api';
+import ApiConfig from '../ApiConfig';
+import api from '../api';
 
-import { ActivitySearchRequest } from '../views/CONSEP/TestingActivities/TestSearch/definitions';
-import { TestingSearchResponseType } from '../types/consep/TestingSearchResponseType';
+import { ActivitySearchRequest } from '../../views/CONSEP/TestingActivities/TestSearch/definitions';
+import { TestingSearchResponseType } from '../../types/consep/TestingSearchResponseType';
 
 export const searchActivities = (
   filter: ActivitySearchRequest,

@@ -18,7 +18,7 @@ import {
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
-import { searchActivities } from '../../../../api-service/searchTestActivities';
+import { searchActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
 
