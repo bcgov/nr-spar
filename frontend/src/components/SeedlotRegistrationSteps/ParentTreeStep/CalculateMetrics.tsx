@@ -39,18 +39,15 @@ const CalculateMetrics = ({
     weightedGwInfoItems
   } = useContext(ClassAContext);
 
-  const smpBv: Record<keyof typeof weightedGwInfoItems, any> = Object.keys(
-    weightedGwInfoItems
-  ).reduce((acc, key) => {
-    acc[key as keyof typeof weightedGwInfoItems] = null;
-    return acc;
-  }, {} as Record<keyof typeof weightedGwInfoItems, any>);
+  type WeightedGwKey = keyof typeof weightedGwInfoItems;
 
-  Object.keys(weightedGwInfoItems).forEach((key) => {
-    const typedKey = key as keyof typeof weightedGwInfoItems;
-    const item = weightedGwInfoItems[typedKey];
-    smpBv[typedKey] = Number(item.value);
-  });
+  const smpBv: Record<WeightedGwKey, number> = Object.entries(weightedGwInfoItems).reduce(
+    (acc, [key, item]) => {
+      acc[key as WeightedGwKey] = Number(item.value);
+      return acc;
+    },
+  {} as Record<WeightedGwKey, number>
+  );
 
   if (isFormSubmitted && !isReview) {
     return null;
