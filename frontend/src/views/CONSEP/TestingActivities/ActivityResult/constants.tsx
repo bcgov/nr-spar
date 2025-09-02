@@ -31,7 +31,8 @@ const createEditableNumberColumn = (
       value,
       error: !!validationErrors[cell.id],
       helperText: validationErrors[cell.id],
-      onChange: (event) => {
+      placeholder: undefined,
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = parseFloat(event.currentTarget.value);
         const validationError = newValue < 0 || newValue > 1000 ? validationMsg : undefined;
 
@@ -81,7 +82,7 @@ const createEditableTextColumn = (
       value,
       error: !!validationErrors[cell.id],
       helperText: validationErrors[cell.id],
-      onChange: (event) => {
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = event.currentTarget.value;
         const validationError = newValue.length > maxLength ? validationMsg : undefined;
 
@@ -111,7 +112,7 @@ export const getMccColumns = (
     header: 'Replicate',
     size: 40,
     enableEditing: false,
-    muiEditTextFieldProps: ({ row }) => ({
+    muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: row.original.replicateNumber ?? ''
     }),
@@ -154,7 +155,7 @@ export const getMccColumns = (
     accessorKey: 'dryWeight',
     header: 'Dry weight',
     enableEditing: false,
-    muiEditTextFieldProps: ({ row }) => ({
+    muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'dryWeight' in row.original ? row.original.dryWeight : ''
     })
@@ -163,7 +164,7 @@ export const getMccColumns = (
     accessorKey: 'mcValue',
     header: 'MC value (%)',
     size: 80,
-    muiEditTextFieldProps: ({ row }) => ({
+    muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'mcValue' in row.original ? row.original.mcValue : ''
     }),
@@ -194,10 +195,10 @@ export const getMccColumns = (
     accessorKey: 'replicateComment',
     header: 'Comments',
     size: 300,
-    muiEditTextFieldProps: ({ row }) => ({
+    muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'replicateComment' in row.original ? row.original.replicateComment : '',
-      onChange: (event) => {
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         updateRow({
           ...row.original,
           replicateComment: event.currentTarget.value
@@ -223,6 +224,7 @@ export const getMccColumns = (
 
 export const getPurityColumns = (
   disableEditing: boolean,
+  hideActions: boolean,
   handleClearOne: (replicateNumber: number) => void,
   updateRow: (row: ReplicateType) => void,
   validationErrors: Record<string, string | undefined>,
@@ -263,7 +265,7 @@ export const getPurityColumns = (
     accessorKey: 'purityValue',
     header: 'Purity',
     size: 80,
-    muiEditTextFieldProps: ({ row }) => ({
+    muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'purityValue' in row.original ? row.original.purityValue : ''
     }),
@@ -294,9 +296,9 @@ export const getPurityColumns = (
     accessorKey: 'overrideReason',
     header: 'Comments',
     size: 300,
-    muiEditTextFieldProps: ({ row }) => ({
+    muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
-      onChange: (event) => {
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         updateRow({
           ...row.original,
           replicateComment: event.currentTarget.value
@@ -304,7 +306,9 @@ export const getPurityColumns = (
       }
     })
   },
-  {
+
+  // Conditionally add the actions column
+  !hideActions && {
     accessorKey: 'actions',
     header: '',
     Cell: ({ row }: { row: { original: ReplicateType } }) => (
@@ -318,7 +322,7 @@ export const getPurityColumns = (
     size: 40,
     ...alignRight
   }
-];
+].filter(Boolean) as MRT_ColumnDef<ReplicateType>[];
 
 const alignLeft = {
   muiTableHeadCellProps: { align: 'left' as const },

@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -130,6 +131,7 @@ class MoistureContentConesEndpointTest {
             "Comment for this content",
             LocalDateTime.parse("2013-08-01T00:00:00"),
             LocalDateTime.parse("2013-08-01T00:00:00"),
+            "MCM",
             replicatesList
         ));
 
@@ -468,7 +470,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI","ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     // Mock service behavior
@@ -503,10 +505,10 @@ class MoistureContentConesEndpointTest {
 
     doNothing().when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
 
-    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(replicateNumbers)))
+            .param("ids", replicateNumbers.stream().map(String::valueOf).collect(Collectors.joining(","))))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0]").value(1))
         .andExpect(jsonPath("$[1]").value(2))
@@ -522,10 +524,10 @@ class MoistureContentConesEndpointTest {
     doThrow(new InvalidTestActivityKeyException())
         .when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
 
-    mockMvc.perform(post("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+    mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(replicateNumbers)))
+            .param("ids", replicateNumbers.stream().map(String::valueOf).collect(Collectors.joining(","))))
         .andExpect(status().isNotFound());
   }
 
@@ -584,7 +586,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI","ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     when(moistureContentService.getMoistureConeContentData(riaKey))
@@ -613,7 +615,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI","ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     when(moistureContentService.getMoistureConeContentData(riaKey))
@@ -642,7 +644,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI", "ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     when(moistureContentService.getMoistureConeContentData(riaKey))

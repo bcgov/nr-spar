@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -358,13 +359,13 @@ public class PurityTestsEndpoint {
             required = true)
         @PathVariable
         BigDecimal riaKey,
+        
         @Parameter(
-            name = "replicateNumbers",
+            name = "ids",
             in = ParameterIn.QUERY,
             description = "List of replicate numbers to delete",
             required = true)
-        @RequestBody
-            List<Integer> replicateNumbers) {
+        @RequestParam(name = "ids") List<Integer> replicateNumbers) {
     purityTestService.deletePurityReplicates(riaKey, replicateNumbers);
     return replicateNumbers;
   }

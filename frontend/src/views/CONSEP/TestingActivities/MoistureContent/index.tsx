@@ -24,7 +24,9 @@ import {
 import ROUTES from '../../../../routes/constants';
 import { calculateAverage } from '../../../../api-service/moistureContentAPI';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
-import { TestingActivityType, ActivityRecordType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
+import {
+  TestingActivityType, ActivityRecordType, ActivitySummaryType, ReplicateType
+} from '../../../../types/consep/TestingActivityType';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 
@@ -35,6 +37,7 @@ import StatusTag from '../../../../components/StatusTag';
 
 import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
+import { mccReplicatesChecker } from './utils';
 
 import {
   DATE_FORMAT, fieldsConfig, mccVariations
@@ -53,6 +56,8 @@ const MoistureContent = () => {
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [mcType, setMCType] = useState<string>('MCC');
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+  const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Reference to the table body for extracting MC Values
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
@@ -100,7 +105,7 @@ const MoistureContent = () => {
     } else if (testActivityQuery.data) {
       setTestActivity(testActivityQuery.data);
       setSeedlotNumber(testActivityQuery.data.seedlotNumber);
-      setMCType(testActivityQuery.data.activityType);
+      setMCType(testActivityQuery.data.standardActivityType);
       const activityRecordData = {
         testCategoryCode: testActivityQuery.data.testCategoryCode,
         riaComment: testActivityQuery.data.riaComment,
@@ -120,9 +125,10 @@ const MoistureContent = () => {
           familyLotNumber: testActivity.familyLotNumber,
           requestId: testActivity.requestId,
           speciesAndClass: `${testActivity.vegetationCode} | ${testActivity.geneticClassCode}`,
-          testResult: testActivity.moisturePct.toString()
+          testResult: testActivity.moisturePct?.toString()
         }
       );
+      setUpdatedReplicates(testActivityQuery.data.replicatesList);
     }
   }, [testActivity]);
 
@@ -262,7 +268,14 @@ const MoistureContent = () => {
       size: 'lg',
       icon: Checkmark,
       disabled: testActivity?.testCompleteInd === 1,
-      action: () => validateTest.mutate()
+      action: () => {
+        const errors = mccReplicatesChecker(updatedReplicates);
+        if (Object.keys(errors).length > 0) {
+          setValidationErrors(errors);
+        } else {
+          validateTest.mutate();
+        }
+      }
     },
     {
       id: 'accept-test',
@@ -335,10 +348,12 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
-          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows)}
+          replicatesData={(testActivity?.replicatesList && testActivity?.replicatesList.length > 0) || initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows)}
           replicateType="moistureTest"
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
+          initValidationErrors={validationErrors}
+          updateReplicates={setUpdatedReplicates}
           setAlert={handleAlert}
           tableBodyRef={tableBodyRef}
         />
@@ -347,11 +362,15 @@ const MoistureContent = () => {
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualBeginDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -363,17 +382,26 @@ const MoistureContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat="Y/m/d"
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualEndDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -385,6 +413,11 @@ const MoistureContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>
