@@ -1,8 +1,8 @@
 import { SeedlotDisplayType } from '../../types/SeedlotType';
 
 const compareSeedlotDates = (
-  dateValueA: SeedlotDisplayType['createdAt'],
-  dateValueB: SeedlotDisplayType['createdAt']
+  dateValueA: string,
+  dateValueB: string
 ) => {
   const timestampA = new Date(dateValueA).getTime();
   const timestampB = new Date(dateValueB).getTime();
