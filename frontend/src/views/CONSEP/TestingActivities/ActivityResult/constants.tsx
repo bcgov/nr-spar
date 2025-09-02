@@ -3,7 +3,8 @@ import React from 'react';
 import { MRT_ColumnDef } from 'material-react-table';
 import { Checkbox } from '@mui/material';
 import * as Icons from '@carbon/icons-react';
-import { ReplicateKeys, ReplicateType } from '../../../../types/consep/TestingActivityType';
+import { Tag } from '@carbon/react';
+import { ReplicateKeys, ReplicateType, TestingActivityListType } from '../../../../types/consep/TestingActivityType';
 
 export const TABLE_TITLE = 'Activity results per replicate';
 
@@ -316,5 +317,153 @@ export const getPurityColumns = (
     enableEditing: false,
     size: 40,
     ...alignRight
+  }
+];
+
+const alignLeft = {
+  muiTableHeadCellProps: { align: 'left' as const },
+  muiTableBodyCellProps: { align: 'left' as const }
+};
+
+export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingActivityListType>[] => [
+  {
+    accessorKey: 'seedlotDisplay',
+    header: 'Lot #',
+    size: 13,
+    enableEditing: false,
+    ...alignRight
+  },
+  {
+    accessorKey: 'requestItem',
+    header: 'Request ID',
+    size: 12,
+    enableEditing: false,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'species',
+    header: 'Sp',
+    size: 8,
+    enableEditing: false,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'testRank',
+    header: 'Rank',
+    size: 1,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'testCategoryCd',
+    header: 'Category',
+    size: 3,
+    enableEditing: false,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'activityId',
+    header: 'Activity',
+    size: 3,
+    enableEditing: false,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'pv',
+    header: 'PV',
+    size: 82,
+    enableEditing: false,
+    ...alignRight
+  },
+  {
+    accessorKey: 'currentTestInd',
+    header: 'Curr',
+    size: 20,
+    enableEditing: false,
+    ...alignLeft,
+    Cell: ({ cell }) => {
+      const value = cell.getValue();
+      return value === -1 ? <Tag type="teal" size="sm">Curr</Tag> : null;
+    }
+  },
+  {
+    accessorKey: 'testCompleteInd',
+    header: 'Com',
+    size: 20,
+    enableEditing: false,
+    ...alignLeft,
+    Cell: ({ cell }) => {
+      const value = cell.getValue();
+      return value === -1 ? <Tag type="blue" size="sm">Com</Tag> : null;
+    }
+  },
+  {
+    accessorKey: 'acceptResultInd',
+    header: 'Act',
+    size: 20,
+    enableEditing: false,
+    ...alignLeft,
+    Cell: ({ cell }) => {
+      const value = cell.getValue();
+      return value === -1 ? <Tag type="green" size="sm">Acc</Tag> : null;
+    }
+  },
+  {
+    accessorKey: 'significntStsInd',
+    header: 'Sig',
+    size: 20,
+    enableEditing: false,
+    ...alignLeft,
+    Cell: ({ cell }) => {
+      const value = cell.getValue();
+      return value === -1 ? <Tag type="purple" size="sm">Sig</Tag> : null;
+    }
+  },
+  {
+    accessorKey: 'seedWithdrawalDate',
+    header: 'Wdrwl Date',
+    size: 10,
+    enableEditing: false,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'revisedEndDt',
+    header: 'Sch End Date',
+    size: 10,
+    enableEditing: false,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'actualBeginDtTm',
+    header: 'Start Date',
+    size: 10,
+    enableEditing: false,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'actualEndDtTm',
+    header: 'End Date',
+    size: 19,
+    enableEditing: false,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'riaComment',
+    header: 'Comments',
+    enableEditing: false,
+    ...alignLeft
+  },
+  {
+    accessorKey: 'actions',
+    header: '',
+    Cell: () => (
+      <Icons.TrashCan
+        size={15}
+        style={{ cursor: 'pointer' }}
+        onClick={() => {}}
+      />
+    ),
+    enableEditing: false,
+    size: 5,
+    ...alignLeft
   }
 ];
