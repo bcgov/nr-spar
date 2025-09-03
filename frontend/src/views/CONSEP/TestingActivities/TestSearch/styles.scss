@@ -1,0 +1,42 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.consep-test-search-content {
+  .consep-test-search-breadcrumb {
+    margin-bottom: 0.5rem;
+  }
+
+  .consep-test-search-filters {
+    margin-top: 2rem;
+
+    & > div:first-child {
+      padding-inline-start: 1rem;
+    }
+
+    & > div {
+      padding-inline: 0.1rem;
+    }
+
+    .withdrawal-date-input {
+      & .#{vars.$bcgov-prefix}--date-picker.#{vars.$bcgov-prefix}--date-picker--single,
+      & .#{vars.$bcgov-prefix}--date-picker-container,
+      & input {
+        inline-size: 100%;
+      }
+    }
+
+    .advanced-search-input,
+    .search-button {
+      margin-top: 1.75rem;
+    }
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    appearance: textfield;
+  }
+}

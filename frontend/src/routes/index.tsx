@@ -18,6 +18,7 @@ import FourOhThree from '../views/ErrorViews/FourOhThree';
 import FavouriteActivities from '../views/CONSEP/FavouriteActivity';
 import MoistureContent from '../views/CONSEP/TestingActivities/MoistureContent';
 import PurityContent from '../views/CONSEP/TestingActivities/PurityContent';
+import TestSearch from '../views/CONSEP/TestingActivities/TestSearch';
 
 const BrowserRoutes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
@@ -117,6 +118,12 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.MANUAL_PURITY_CONTENT,
     element: (
       <PurityContent />
+    )
+  },
+  {
+    path: ROUTES.TESTING_ACTIVITIES_LIST,
+    element: (
+      <TestSearch />
     )
   }
 ];

@@ -107,6 +107,7 @@ public class MoistureContentService {
             activityData.get().getRiaComment(),
             activityData.get().getActualBeginDateTime(),
             activityData.get().getActualEndDateTime(),
+            activityData.get().getStandardActivityId(),
             replicatesList);
 
     SparLog.info("MCC data correctly fetched");
