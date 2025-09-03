@@ -14,7 +14,9 @@ export const sortSeedlotsByKey = (
   sortKey: keyof SeedlotDisplayType | null,
   sortDirection: 'ASC' | 'DESC' | 'NONE'
 ): SeedlotDisplayType[] => {
-  if (!sortKey || sortDirection === 'NONE') return seedlotData;
+  if (!sortKey || sortDirection === 'NONE') {
+    return seedlotData;
+  }
 
   const isDateField = sortKey === 'createdAt' || sortKey === 'lastUpdatedAt';
 
@@ -26,9 +28,13 @@ export const sortSeedlotsByKey = (
         seedlotA[sortKey] as string,
         seedlotB[sortKey] as string
       );
-    } else if (seedlotA[sortKey] > seedlotB[sortKey]) comparison = 1;
-    else if (seedlotA[sortKey] < seedlotB[sortKey]) comparison = -1;
-    else comparison = 0;
+    } else if (seedlotA[sortKey] > seedlotB[sortKey]) {
+      comparison = 1;
+    } else if (seedlotA[sortKey] < seedlotB[sortKey]) {
+      comparison = -1;
+    } else {
+      comparison = 0;
+    }
 
     return sortDirection === 'ASC' ? comparison : -comparison;
   });
