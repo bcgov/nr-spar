@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @Schema(
     description = "smp breeding values")
-public class SMPBreedingValueDto {
+public class SmpBreedingValueDto {
     @Schema(description = "smp bv of ad", example = "0.3")
     private Double ad;
     @Schema(description = "smp bv of dfs", example = "0.3")
@@ -37,7 +37,7 @@ public class SMPBreedingValueDto {
     @Schema(description = "smp bv of wwd", example = "0.3")
     private Double wwd;
     // Constructor
-    public SMPBreedingValueDto() {
+    public SmpBreedingValueDto() {
         this.ad = 0.0;
         this.dfs = 0.0;
         this.dfu = 0.0;
@@ -52,7 +52,7 @@ public class SMPBreedingValueDto {
         this.wwd = 0.0;
     }
 
-    public SMPBreedingValueDto(
+    public SmpBreedingValueDto(
             Double ad,
             Double dfs,
             Double dfu,
