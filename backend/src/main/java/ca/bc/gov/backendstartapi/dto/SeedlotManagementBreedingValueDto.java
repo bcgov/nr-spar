@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
-/** This class represents a json object for smp breeding values */
+/** This class represents a JSON object for SMP breeding values. */
 @Getter
 @Setter
 @Schema(description = "smp breeding values")
@@ -45,7 +45,7 @@ public class SeedlotManagementBreedingValueDto {
   @Schema(description = "smp bv of wwd", example = "0.3")
   private Double wwd;
 
-  // Constructor
+  /** Default constructor initializing all SMP breeding value fields to 0.0. */
   public SeedlotManagementBreedingValueDto() {
     this.ad = 0.0;
     this.dfs = 0.0;
@@ -61,6 +61,22 @@ public class SeedlotManagementBreedingValueDto {
     this.wwd = 0.0;
   }
 
+  /**
+   * Constructs a new {@code SeedlotManagementBreedingValueDto} with provided SMP breeding values.
+   *
+   * @param ad SMP BV of ad
+   * @param dfs SMP BV of dfs
+   * @param dfu SMP BV of dfu
+   * @param dfw SMP BV of dfw
+   * @param dsb SMP BV of dsb
+   * @param dsc SMP BV of dsc
+   * @param dsg SMP BV of dsg
+   * @param gvo SMP BV of gvo
+   * @param iws SMP BV of iws
+   * @param wdu SMP BV of wdu
+   * @param wve SMP BV of wve
+   * @param wwd SMP BV of wwd
+   */
   public SeedlotManagementBreedingValueDto(
       Double ad,
       Double dfs,
