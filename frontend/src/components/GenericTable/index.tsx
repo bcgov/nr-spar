@@ -88,9 +88,18 @@ const GenericTable = <T extends Record<string, any>>({
         borderRadius: 0,
         boxShadow: 'none',
         width: '100%',
-        '& > .MuiBox-root': {
-          display: 'none'
-        }
+        ...(enablePagination
+          ? {
+            // only hide the top toolbar when pagination is enabled
+            '& > .MuiBox-root:first-of-type': {
+              display: 'none'
+            }
+          } : {
+            // hide both top toolbar and bottom pagination to remove extra white spaces
+            '& > .MuiBox-root': {
+              display: 'none'
+            }
+          })
       }
     },
     muiTableBodyProps: {
@@ -105,10 +114,10 @@ const GenericTable = <T extends Record<string, any>>({
     }),
     muiTableBodyCellProps: {
       sx: {
-        ...isCompacted && {
+        ...(isCompacted && {
           paddingTop: 0,
           paddingBottom: 0
-        },
+        }),
         '&:hover': {
           outline: 'none',
           backgroundColor: COLOR_GREY_20
@@ -159,7 +168,11 @@ const GenericTable = <T extends Record<string, any>>({
     }
   });
 
-  return <ThemeProvider theme={theme}><MaterialReactTable table={basicTable} /></ThemeProvider>;
+  return (
+    <ThemeProvider theme={theme}>
+      <MaterialReactTable table={basicTable} />
+    </ThemeProvider>
+  );
 };
 
 export default GenericTable;
