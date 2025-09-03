@@ -1,22 +1,23 @@
 package ca.bc.gov.oracleapi.entity.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * This class represents the data of testing activities related to requests in CONSEP.
+ */
 @Getter
 @Setter
 @Entity
 @Table(name = "CNS17", schema = "CONSEP")
-@Schema(description = "Represents the result for searching testing activities in the database CNS17 view")
+@Schema(description = "Represents the result for searching testing activities in the CNS17 view")
 public class ActivitySearchResultEntity {
   @Column(name = "SEEDLOT_DISPLAY", length = 13)
   private String seedlotDisplay;

@@ -11,15 +11,14 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
 
-
 /**
  * This record serves the purpose of mapping fields the FE should send to the BE, to search a test activity.
  */
 @Schema(description = "Search parameters for testing activity search API")
 public record ActivitySearchRequestDto(
-  @Schema(description = "Seedlot and Family Lot numbers", example = "[\"12345\", \"67890\"]")
+  @Schema(description = "Seedlot and/or Family Lot numbers", example = "[\"12345\", \"F20082140146\"]")
   @Size(max = 5, message = "You can provide up to 5 lot numbers")
-  List<@Size(max = 5, message = "Each lot number must be at most 5 characters") String> lotNumbers,
+  List<@Size(max = 13, message = "Each lot number must be at most 13 characters") String> lotNumbers,
 
   @Schema(description = "Test activity type code, used to filter activity_type_cd")
   @Size(max = 3)

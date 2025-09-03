@@ -30,7 +30,9 @@ import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
 import StatusTag from '../../../../components/StatusTag';
 
-import { ActivityRecordType, TestingActivityType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
+import {
+  ActivityRecordType, TestingActivityType, ActivitySummaryType, ReplicateType
+} from '../../../../types/consep/TestingActivityType';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
 import { deleteImpurity, patchImpurities } from '../../../../api-service/consep/impuritiesAPI';
@@ -45,7 +47,7 @@ import {
   ImpurityDisplayType, ImpurityPayload,
   RichImpurityType, SingleImpurityType
 } from './definitions';
-import { impuritiesPerReplicate } from './utils';
+import { impuritiesPerReplicate, purityReplicatesChecker } from './utils';
 import {
   DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
@@ -64,6 +66,8 @@ const PurityContent = () => {
   const [impurities, setImpurities] = useState<ImpurityDisplayType>({});
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'accept'>(COMPLETE);
+  const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
@@ -229,6 +233,7 @@ const PurityContent = () => {
         actualEndDateTime: testActivityQuery.data.actualEndDateTime
       };
       setActivityRecord(activityRecordData);
+      setUpdatedReplicates(testActivityQuery.data.replicatesList);
       if (testActivityQuery.data.debrisList) {
         setImpurities(impuritiesPerReplicate(testActivityQuery.data.debrisList));
       }
@@ -385,6 +390,7 @@ const PurityContent = () => {
               ? fieldsConfig.impuritySection.secondaryfieldName
               : ''
           }
+          value={impurity.debrisCategory}
           onChange={(e: ComboBoxEvent) => {
             const { selectedItem } = e;
             updateImpuritiesMutation.mutate([
@@ -434,7 +440,7 @@ const PurityContent = () => {
             Object.keys(impurities)
             && Object.keys(impurities).length > 0
             && impurities[replicateNumber]
-            && impurities[replicateNumber].map(
+            && impurities[replicateNumber].sort((a, b) => a.debrisRank - b.debrisRank).map(
               (impurity) => impurityPerReplicate(impurity, replicateNumber)
             )
           }
@@ -469,6 +475,11 @@ const PurityContent = () => {
     })
   );
 
+  let replicatesData = initReplicatesList(riaKey ?? '', 2);
+  if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
+    replicatesData = testActivity.replicatesList;
+  }
+
   return (
     <FlexGrid className="consep-purity-content">
       {
@@ -494,7 +505,13 @@ const PurityContent = () => {
         }}
         onRequestSubmit={() => {
           if (modalType === COMPLETE) {
-            validateTest.mutate();
+            const errors = purityReplicatesChecker(updatedReplicates);
+
+            if (Object.keys(errors).length > 0) {
+              setValidationErrors(errors);
+            } else {
+              validateTest.mutate();
+            }
           } else if (modalType === ACCEPT) {
             acceptTest.mutate();
           }
@@ -540,22 +557,29 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-result">
         <ActivityResult
           replicateType="purityTest"
-          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '', 4)}
+          replicatesData={replicatesData}
           riaKey={Number(riaKey)}
           isEditable={!testActivity?.testCompleteInd}
+          initValidationErrors={validationErrors}
+          updateReplicates={setUpdatedReplicates}
           setAlert={handleAlert}
           tableBodyRef={tableBodyRef}
+          hideActions
         />
       </Row>
       <Row className="consep-purity-content-date-picker">
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualBeginDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -567,17 +591,26 @@ const PurityContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat="Y/m/d"
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualEndDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -589,6 +622,11 @@ const PurityContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>
