@@ -475,6 +475,11 @@ const PurityContent = () => {
     })
   );
 
+  let replicatesData = initReplicatesList(riaKey ?? '', 2);
+  if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
+    replicatesData = testActivity.replicatesList;
+  }
+
   return (
     <FlexGrid className="consep-purity-content">
       {
@@ -552,7 +557,7 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-result">
         <ActivityResult
           replicateType="purityTest"
-          replicatesData={(testActivity?.replicatesList && testActivity?.replicatesList.length > 0) || initReplicatesList(riaKey ?? '', 2)}
+          replicatesData={replicatesData}
           riaKey={Number(riaKey)}
           isEditable={!testActivity?.testCompleteInd}
           initValidationErrors={validationErrors}

@@ -306,6 +306,11 @@ const MoistureContent = () => {
 
   const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
+  let replicatesData = initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows);
+  if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
+    replicatesData = testActivity.replicatesList;
+  }
+
   return (
     <FlexGrid className="consep-moisture-content">
       {alert?.message
@@ -348,7 +353,7 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
-          replicatesData={(testActivity?.replicatesList && testActivity?.replicatesList.length > 0) || initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows)}
+          replicatesData={replicatesData}
           replicateType="moistureTest"
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
