@@ -27,6 +27,7 @@ import {
   testSearchCrumbs
 } from './constants';
 import { ActivitySearchRequest } from './definitions';
+import TestListTable from './TestListTable';
 import './styles.scss';
 
 const TestSearch = () => {
@@ -102,141 +103,144 @@ const TestSearch = () => {
   };
 
   return (
-    <FlexGrid className="consep-test-search-content">
-      <Row className="consep-test-search-breadcrumb">
-        <Column>
-          <Breadcrumbs crumbs={testSearchCrumbs} />
-        </Column>
-      </Row>
-      <Row className="consep-test-search-title">
-        <PageTitle title="Testing activities" />
-      </Row>
-      <Row className="consep-test-search-filters">
-        <Column md={1} lg={2}>
-          <TextInput
-            id="lot-input"
-            className="lot-input"
-            labelText="Lot #"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              handleLotInputChange(e);
-            }}
-          />
-        </Column>
-        <Column md={1} lg={2}>
-          <ComboBox
-            id="test-type-input"
-            className="test-type-input"
-            titleText="Test type"
-            items={testCategoryCodes}
-            placeholder="Choose test type"
-            onChange={(e: ComboBoxEvent) => {
-              handleTestTypeChange(e);
-            }}
-          />
-        </Column>
-        <Column md={1} lg={2}>
-          <ComboBox
-            id="activity-type-input"
-            className="activity-type-input"
-            titleText="Choose activity"
-            items={testActivityCodes}
-            placeholder="Choose activity"
-            onChange={(e: ComboBoxEvent) => {
-              handleActivityIdChange(e);
-            }}
-          />
-        </Column>
-        <Column md={1} lg={2}>
-          <TextInput
-            id="germ-tray-input"
-            className="germ-tray-input"
-            placeholder="Enter germ tray ID"
-            labelText="Germ tray ID"
-            type="number"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              handleGermTrayIdChange(e);
-            }}
-          />
-        </Column>
-        <Column md={1} lg={2}>
-          <DatePicker
-            datePickerType="single"
-            className="withdrawal-date-input"
-            dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>) => {
-              handleWithdrawalStartDateChange(e);
-            }}
-          >
-            <DatePickerInput
-              id="withdrawal-start-date-input"
-              placeholder="Withdrawal date"
-              labelText="Withdrawal start date"
-              autoComplete="off"
+    <div>
+      <FlexGrid className="consep-test-search-content">
+        <Row className="consep-test-search-breadcrumb">
+          <Column>
+            <Breadcrumbs crumbs={testSearchCrumbs} />
+          </Column>
+        </Row>
+        <Row className="consep-test-search-title">
+          <PageTitle title="Testing activities" />
+        </Row>
+        <Row className="consep-test-search-filters">
+          <Column md={1} lg={2}>
+            <TextInput
+              id="lot-input"
+              className="lot-input"
+              labelText="Lot #"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                handleLotInputChange(e);
+              }}
             />
-          </DatePicker>
-        </Column>
-        <Column md={1} lg={2}>
-          <DatePicker
-            datePickerType="single"
-            className="withdrawal-date-input"
-            dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>) => {
-              handleWithdrawalEndDateChange(e);
-            }}
-          >
-            <DatePickerInput
-              id="withdrawal-end-date-input"
-              placeholder="Withdrawal date"
-              labelText="Withdrawal end date"
-              autoComplete="off"
+          </Column>
+          <Column md={1} lg={2}>
+            <ComboBox
+              id="test-type-input"
+              className="test-type-input"
+              titleText="Test type"
+              items={testCategoryCodes}
+              placeholder="Choose test type"
+              onChange={(e: ComboBoxEvent) => {
+                handleTestTypeChange(e);
+              }}
             />
-          </DatePicker>
-        </Column>
-        <Column className="advanced-search-input" md={1} lg={2}>
-          <ComboBox
-            id="advanced-search-input"
-            items={[]}
-            placeholder="Advanced search"
-            onChange={() => {}}
-          />
-        </Column>
-        <Column className="search-button" md={1} lg={2}>
-          <Button
-            renderIcon={Search}
-            iconDescription="Search activity"
-            size="md"
-            onClick={() => {
-              if (searchParams) {
-                searchMutation.mutate(searchParams);
-              } else {
-                setAlert({
-                  isSuccess: false,
-                  message: 'No parameters set for the search :('
-                });
-              }
-            }}
-          >
-            Search activity
-          </Button>
-        </Column>
-      </Row>
-      <Row>
-        <Column>
-          {searchMutation.isPending && <InlineLoading description="Searching..." />}
-          {
-            alert?.message
-            && (
-              <Alert
-                className="consep-moisture-content-alert"
-                severity={alert?.isSuccess ? 'success' : 'error'}
-              >
-                {alert?.message}
-              </Alert>
-            )
-          }
-        </Column>
-      </Row>
-    </FlexGrid>
+          </Column>
+          <Column md={1} lg={2}>
+            <ComboBox
+              id="activity-type-input"
+              className="activity-type-input"
+              titleText="Choose activity"
+              items={testActivityCodes}
+              placeholder="Choose activity"
+              onChange={(e: ComboBoxEvent) => {
+                handleActivityIdChange(e);
+              }}
+            />
+          </Column>
+          <Column md={1} lg={2}>
+            <TextInput
+              id="germ-tray-input"
+              className="germ-tray-input"
+              placeholder="Enter germ tray ID"
+              labelText="Germ tray ID"
+              type="number"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                handleGermTrayIdChange(e);
+              }}
+            />
+          </Column>
+          <Column md={1} lg={2}>
+            <DatePicker
+              datePickerType="single"
+              className="withdrawal-date-input"
+              dateFormat={DATE_FORMAT}
+              onChange={(e: Array<Date>) => {
+                handleWithdrawalStartDateChange(e);
+              }}
+            >
+              <DatePickerInput
+                id="withdrawal-start-date-input"
+                placeholder="Withdrawal date"
+                labelText="Withdrawal start date"
+                autoComplete="off"
+              />
+            </DatePicker>
+          </Column>
+          <Column md={1} lg={2}>
+            <DatePicker
+              datePickerType="single"
+              className="withdrawal-date-input"
+              dateFormat={DATE_FORMAT}
+              onChange={(e: Array<Date>) => {
+                handleWithdrawalEndDateChange(e);
+              }}
+            >
+              <DatePickerInput
+                id="withdrawal-end-date-input"
+                placeholder="Withdrawal date"
+                labelText="Withdrawal end date"
+                autoComplete="off"
+              />
+            </DatePicker>
+          </Column>
+          <Column className="advanced-search-input" md={1} lg={2}>
+            <ComboBox
+              id="advanced-search-input"
+              items={[]}
+              placeholder="Advanced search"
+              onChange={() => {}}
+            />
+          </Column>
+          <Column className="search-button" md={1} lg={2}>
+            <Button
+              renderIcon={Search}
+              iconDescription="Search activity"
+              size="md"
+              onClick={() => {
+                if (searchParams) {
+                  searchMutation.mutate(searchParams);
+                } else {
+                  setAlert({
+                    isSuccess: false,
+                    message: 'No parameters set for the search :('
+                  });
+                }
+              }}
+            >
+              Search activity
+            </Button>
+          </Column>
+        </Row>
+        <Row>
+          <Column>
+            {searchMutation.isPending && <InlineLoading description="Searching..." />}
+            {
+              alert?.message
+              && (
+                <Alert
+                  className="consep-moisture-content-alert"
+                  severity={alert?.isSuccess ? 'success' : 'error'}
+                >
+                  {alert?.message}
+                </Alert>
+              )
+            }
+          </Column>
+        </Row>
+      </FlexGrid>
+      <TestListTable />
+    </div>
   );
 };
 
