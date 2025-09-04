@@ -72,6 +72,9 @@ describe('Create FDI Seedlot', () => {
           // Click on the section title
           cy.contains('.section-title', 'Seedlot information')
             .click();
+
+          // Wait for the error message to disappear
+          cy.get('#agency-number-input-error-msg').should('not.exist');
         }
       });
 
