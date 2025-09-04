@@ -1,6 +1,5 @@
 import React, { ChangeEvent, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import Alert from '@mui/material/Alert';
 import {
   FlexGrid,
   Row,
@@ -10,7 +9,7 @@ import {
   ComboBox,
   Button,
   TextInput,
-  InlineLoading
+  InlineNotification
 } from '@carbon/react';
 import {
   Search
@@ -20,7 +19,7 @@ import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import { searchActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
-import { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
+import type { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
 
 import {
   DATE_FORMAT, testActivityCodes, testCategoryCodes,
@@ -31,20 +30,18 @@ import TestListTable from './TestListTable';
 import './styles.scss';
 
 const TestSearch = () => {
-  const [searchParams, setSearchParams] = useState<ActivitySearchRequest>();
-  const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+  const [searchParams, setSearchParams] = useState<ActivitySearchRequest>({});
+  const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
+  const [alert, setAlert] = useState<{ status: string; message: string } | null>(null);
 
   const searchMutation = useMutation({
     mutationFn: (params: ActivitySearchRequest) => searchActivities(params),
     onSuccess: (data: TestingSearchResponseType[]) => {
-      console.log('Search results:', data);
-      setAlert({ isSuccess: true, message: `Total results: ${data.length}, you can check the results at the console :)` });
-      setTimeout(() => {
-        setAlert(null);
-      }, 3000);
+      setSearchResults(data);
+      setAlert({ status: 'info', message: `Total results: ${data.length}, you can check the results at the console :)` });
     },
     onError: (error) => {
-      setAlert({ isSuccess: false, message: `Search failed with the error: ${error.message}` });
+      setAlert({ status: 'error', message: `Search failed with the error: ${error.message}` });
     }
   });
 
@@ -56,7 +53,7 @@ const TestSearch = () => {
 
     setSearchParams((prev) => ({
       ...prev,
-      lotNumbers: lots
+      lotNumbers: lots.length > 0 ? lots : undefined
     }));
   };
 
@@ -103,8 +100,8 @@ const TestSearch = () => {
   };
 
   return (
-    <div>
-      <FlexGrid className="consep-test-search-content">
+    <div className="consep-test-search-content">
+      <FlexGrid>
         <Row className="consep-test-search-breadcrumb">
           <Column>
             <Breadcrumbs crumbs={testSearchCrumbs} />
@@ -207,16 +204,7 @@ const TestSearch = () => {
               renderIcon={Search}
               iconDescription="Search activity"
               size="md"
-              onClick={() => {
-                if (searchParams) {
-                  searchMutation.mutate(searchParams);
-                } else {
-                  setAlert({
-                    isSuccess: false,
-                    message: 'No parameters set for the search :('
-                  });
-                }
-              }}
+              onClick={() => searchMutation.mutate(searchParams)}
             >
               Search activity
             </Button>
@@ -224,22 +212,21 @@ const TestSearch = () => {
         </Row>
         <Row>
           <Column>
-            {searchMutation.isPending && <InlineLoading description="Searching..." />}
             {
               alert?.message
               && (
-                <Alert
-                  className="consep-moisture-content-alert"
-                  severity={alert?.isSuccess ? 'success' : 'error'}
-                >
-                  {alert?.message}
-                </Alert>
+                <InlineNotification
+                  style={{ maxInlineSize: 'none' }}
+                  lowContrast
+                  kind={alert.status}
+                  subtitle={alert?.message}
+                />
               )
             }
           </Column>
         </Row>
       </FlexGrid>
-      <TestListTable />
+      <TestListTable data={searchResults} isLoading={searchMutation.isPending} />
     </div>
   );
 };

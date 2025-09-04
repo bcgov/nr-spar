@@ -118,6 +118,8 @@ const GenericTable = <T extends Record<string, any>>({
           paddingTop: 0,
           paddingBottom: 0
         }),
+        paddingTop: '0.22rem',
+        paddingBottom: '0.22rem',
         '&:hover': {
           outline: 'none',
           backgroundColor: COLOR_GREY_20

@@ -4,83 +4,87 @@ import * as Icons from '@carbon/icons-react';
 
 import GenericTable from '../../../../components/GenericTable';
 import { getTestingActivityListColumns } from './constants';
-import { data } from './data';
+import type { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
 
-const TestListTable = () => {
+type TestListTableProp = {
+  data: TestingSearchResponseType[],
+  isLoading?: boolean
+}
+
+const TestListTable = ({ data, isLoading = false }: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
-  const deleteRow = () => {};
 
   const actions = [
     {
       label: 'Results',
       type: 'tertiary',
-      action: () => {},
+      action: () => {}
     },
     {
       label: 'Observations',
       type: 'tertiary',
-      action: () => {},
+      action: () => {}
     },
     {
       label: 'Test history',
       type: 'tertiary',
-      action: () => {},
+      action: () => {}
     },
     {
       label: 'Add activity',
       type: 'tertiary',
-      action: () => {},
+      action: () => {}
     },
     {
       label: 'Create germ tray',
       type: 'tertiary',
-      action: () => {},
+      action: () => {}
     },
     {
       label: 'Edit columns',
       icon: (
         <Icons.Column
           size={16}
-          className='test-list-table-toolbar-button-icon'
+          className="concep-test-list-table-toolbar-button-icon"
         />
       ),
       type: 'primary',
-      action: () => {},
+      action: () => {}
     },
     {
       label: 'Export Data',
       icon: (
         <Icons.DocumentExport
           size={16}
-          className='test-list-table-toolbar-button-icon'
+          className="concep-test-list-table-toolbar-button-icon"
         />
       ),
       type: 'primary',
-      action: () => {},
+      action: () => {}
     },
     {
       label: 'Filters',
       icon: (
         <Icons.Filter
           size={16}
-          className='test-list-table-toolbar-button-icon'
+          className="concep-test-list-table-toolbar-button-icon"
         />
       ),
       type: 'primary',
-      action: () => {},
-    },
+      action: () => {}
+    }
   ];
 
   return (
-    <div className='test-list-table-container'>
-      <Row className='test-list-table-toolbar'>
+    <div className="concep-test-list-table-container">
+      <Row className="concep-test-list-table-toolbar">
         <Column
           sm={6}
           md={6}
           lg={6}
-          style={{ padding: '0.813rem 0.75rem 0.813rem 1.5rem' }}
+          className="concep-test-list-table-title"
         >
-          Total search result
+          {`Total search result: ${data.length}`}
         </Column>
         <Column
           sm={10}
@@ -90,17 +94,19 @@ const TestListTable = () => {
             paddingRight: '0rem',
             display: 'flex',
             justifyContent: 'flex-end',
-            flexWrap: 'wrap',
+            flexWrap: 'wrap'
           }}
         >
-          {actions.map(({ label, icon, action, type }) => (
+          {actions.map(({
+            label, icon, action, type
+          }) => (
             <Button
               key={label}
               onClick={action}
               kind={type}
               aria-label={label}
-              size='md'
-              className='test-list-table-toolbar-button'
+              size="md"
+              className="concep-test-list-table-toolbar-button"
               style={{}}
             >
               {label}
@@ -110,15 +116,13 @@ const TestListTable = () => {
         </Column>
       </Row>
 
-      <Row className='test-list-table'>
+      <Row className="concep-test-list-table">
         <GenericTable
           columns={getTestingActivityListColumns()}
           data={data}
           enablePagination
           enableRowSelection
-          // isLoading={isLoading}
-          // isCompacted
-          // enableSorting
+          isLoading={isLoading}
           tableBodyRef={tableBodyRef}
         />
       </Row>

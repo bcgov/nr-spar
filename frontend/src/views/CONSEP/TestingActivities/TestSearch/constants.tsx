@@ -1,5 +1,5 @@
 import React from 'react';
-import { MRT_ColumnDef } from 'material-react-table';
+import { MRT_ColumnDef, MRT_Cell } from 'material-react-table';
 import * as Icons from '@carbon/icons-react';
 import { Tag } from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
@@ -193,6 +193,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'testRank',
     header: 'Rank',
     size: 1,
+    enableEditing: false,
     ...alignLeft
   },
   {
@@ -222,10 +223,11 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     size: 20,
     enableEditing: false,
     ...alignLeft,
-    Cell: ({ cell }) => {
+    Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? <Tag type="teal" size="sm">Curr</Tag> : null;
     }
+
   },
   {
     accessorKey: 'testCompleteInd',
@@ -233,7 +235,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     size: 20,
     enableEditing: false,
     ...alignLeft,
-    Cell: ({ cell }) => {
+    Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? <Tag type="blue" size="sm">Com</Tag> : null;
     }
@@ -244,7 +246,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     size: 20,
     enableEditing: false,
     ...alignLeft,
-    Cell: ({ cell }) => {
+    Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? <Tag type="green" size="sm">Acc</Tag> : null;
     }
@@ -255,7 +257,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     size: 20,
     enableEditing: false,
     ...alignLeft,
-    Cell: ({ cell }) => {
+    Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? <Tag type="purple" size="sm">Sig</Tag> : null;
     }
