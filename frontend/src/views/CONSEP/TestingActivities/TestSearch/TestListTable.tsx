@@ -89,7 +89,9 @@ const TestListTable = ({
             flexWrap: 'wrap'
           }}
         >
-          {actions.map(({ label, icon, action, type }) => (
+          {actions.map(({
+            label, icon, action, type
+          }) => (
             <Button
               key={label}
               onClick={action}

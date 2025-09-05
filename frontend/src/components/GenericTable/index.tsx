@@ -2,10 +2,10 @@
 import React from 'react';
 import {
   type MRT_ColumnDef,
+  type MRT_PaginationState,
   MaterialReactTable,
   useMaterialReactTable
 } from 'material-react-table';
-import { PaginationState } from '@tanstack/react-table';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 type Props<T extends Record<string, any>> = {
@@ -94,9 +94,9 @@ const GenericTable = <T extends Record<string, any>>({
     manualPagination,
     rowCount,
     onPaginationChange: (
-      updaterOrValue: PaginationState | ((old: PaginationState) => PaginationState)
+      updaterOrValue: MRT_PaginationState | ((old: MRT_PaginationState) => MRT_PaginationState)
     ) => {
-      const newPagination: PaginationState = typeof updaterOrValue === 'function'
+      const newPagination: MRT_PaginationState = typeof updaterOrValue === 'function'
         ? updaterOrValue(basicTable.getState().pagination)
         : updaterOrValue;
       onPaginationChange?.(newPagination.pageIndex, newPagination.pageSize);
