@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.service.consep.ActivitySearchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,7 +98,7 @@ class ActivitySearchEndpointTest {
     String requestType = "RTS";
     Integer requestYear = 1998;
     String orchardId = null;
-    String testRank = "A"; // testRank
+    String testRank = "A";
     LocalDate actualBeginDateFrom = LocalDate.of(1997, 10, 1);
     LocalDate actualBeginDateTo = LocalDate.of(1997, 10, 10);
     LocalDate actualEndDateFrom = LocalDate.of(1997, 11, 1);
@@ -111,7 +112,6 @@ class ActivitySearchEndpointTest {
     Integer acceptanceStatus = -1;
     String seedlotClass = "A";
 
-
     ActivitySearchRequestDto activitySearchRequestDto = new ActivitySearchRequestDto(
       lotNumbers, testType, activityId, germinatorTrayId,
       seedWithdrawalStartDate, seedWithdrawalEndDate,
@@ -124,10 +124,17 @@ class ActivitySearchEndpointTest {
       germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
     );
 
+    // Mock paginated response
+    ActivitySearchPageResponseDto pageResponse = new ActivitySearchPageResponseDto(
+      List.of(activitySearchResponseDto), // content
+      1L,                                 // totalElements
+      1,                                  // totalPages
+      0,                                  // pageNumber
+      20                                  // pageSize
+    );
 
-    Mockito.when(activitySearchService.searchActivities(Mockito.any(), Mockito.any()))
-      .thenReturn(List.of(activitySearchResponseDto));
-
+    Mockito.when(activitySearchService.searchTestingActivities(Mockito.any(), Mockito.any()))
+      .thenReturn(pageResponse);
 
     mockMvc.perform(post("/api/testing-activities/search")
         .with(csrf().asHeader())
@@ -135,10 +142,11 @@ class ActivitySearchEndpointTest {
         .content(objectMapper.writeValueAsString(activitySearchRequestDto))
         .accept(APPLICATION_JSON))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$", hasSize(1)))
-      .andExpect(jsonPath("$[0].seedlotDisplay").value(seedlotDisplay))
-      .andExpect(jsonPath("$[0].requestItem").value(requestId))
-      .andExpect(jsonPath("$[0].species").value(species))
-      .andExpect(jsonPath("$[0].testCategoryCd").value(testCategoryCd));
+      .andExpect(jsonPath("$.content", hasSize(1)))
+      .andExpect(jsonPath("$.content[0].seedlotDisplay").value(seedlotDisplay))
+      .andExpect(jsonPath("$.content[0].requestItem").value(requestId))
+      .andExpect(jsonPath("$.content[0].species").value(species))
+      .andExpect(jsonPath("$.content[0].testCategoryCd").value(testCategoryCd))
+      .andExpect(jsonPath("$.total").value(1));
   }
 }
