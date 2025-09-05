@@ -4,14 +4,18 @@ import * as Icons from '@carbon/icons-react';
 
 import GenericTable from '../../../../components/GenericTable';
 import { getTestingActivityListColumns } from './constants';
-import type { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
+import type {
+  TestingSearchResponseType,
+  PaginationInfoType
+} from '../../../../types/consep/TestingSearchResponseType';
 
 type TestListTableProp = {
-  data: TestingSearchResponseType[],
-  isLoading?: boolean
-}
+  data: TestingSearchResponseType[];
+  paginationInfo: PaginationInfoType;
+  isLoading?: boolean;
+};
 
-const TestListTable = ({ data, isLoading = false }: TestListTableProp) => {
+const TestListTable = ({ data, isLoading = false, paginationInfo }: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
   const actions = [
@@ -42,49 +46,31 @@ const TestListTable = ({ data, isLoading = false }: TestListTableProp) => {
     },
     {
       label: 'Edit columns',
-      icon: (
-        <Icons.Column
-          size={16}
-          className="concep-test-list-table-toolbar-button-icon"
-        />
-      ),
+      icon: <Icons.Column size={16} className="concep-test-search-table-toolbar-button-icon" />,
       type: 'primary',
       action: () => {}
     },
     {
       label: 'Export Data',
       icon: (
-        <Icons.DocumentExport
-          size={16}
-          className="concep-test-list-table-toolbar-button-icon"
-        />
+        <Icons.DocumentExport size={16} className="concep-test-search-table-toolbar-button-icon" />
       ),
       type: 'primary',
       action: () => {}
     },
     {
       label: 'Filters',
-      icon: (
-        <Icons.Filter
-          size={16}
-          className="concep-test-list-table-toolbar-button-icon"
-        />
-      ),
+      icon: <Icons.Filter size={16} className="concep-test-search-table-toolbar-button-icon" />,
       type: 'primary',
       action: () => {}
     }
   ];
 
   return (
-    <div className="concep-test-list-table-container">
-      <Row className="concep-test-list-table-toolbar">
-        <Column
-          sm={6}
-          md={6}
-          lg={6}
-          className="concep-test-list-table-title"
-        >
-          {`Total search result: ${data.length}`}
+    <div className="concep-test-search-table-container">
+      <Row className="concep-test-search-table-toolbar">
+        <Column sm={6} md={6} lg={6} className="concep-test-search-table-title">
+          {`Total search result: ${paginationInfo.totalElements}`}
         </Column>
         <Column
           sm={10}
@@ -97,16 +83,14 @@ const TestListTable = ({ data, isLoading = false }: TestListTableProp) => {
             flexWrap: 'wrap'
           }}
         >
-          {actions.map(({
-            label, icon, action, type
-          }) => (
+          {actions.map(({ label, icon, action, type }) => (
             <Button
               key={label}
               onClick={action}
               kind={type}
               aria-label={label}
               size="md"
-              className="concep-test-list-table-toolbar-button"
+              className="concep-test-search-table-toolbar-button"
               style={{}}
             >
               {label}
@@ -116,7 +100,7 @@ const TestListTable = ({ data, isLoading = false }: TestListTableProp) => {
         </Column>
       </Row>
 
-      <Row className="concep-test-list-table">
+      <Row className="concep-test-search-table">
         <GenericTable
           columns={getTestingActivityListColumns()}
           data={data}

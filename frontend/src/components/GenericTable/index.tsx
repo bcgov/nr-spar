@@ -114,12 +114,13 @@ const GenericTable = <T extends Record<string, any>>({
     }),
     muiTableBodyCellProps: {
       sx: {
-        ...(isCompacted && {
+        ...(isCompacted ? {
           paddingTop: 0,
           paddingBottom: 0
+        } : {
+          paddingTop: '0.22rem',
+          paddingBottom: '0.22rem'
         }),
-        paddingTop: '0.22rem',
-        paddingBottom: '0.22rem',
         '&:hover': {
           outline: 'none',
           backgroundColor: COLOR_GREY_20

@@ -43,32 +43,33 @@
     appearance: textfield;
   }
 
-  .concep-test-list-table-container {
+  .concep-test-search-table-container {
     margin-top: 1rem;
     margin-bottom: 2rem;
     background-color: map.get(light-theme.$light-theme, layer-01);
 
-    .concep-test-list-table-title {
+    .concep-test-search-table-title {
       padding: 0.813rem 0.75rem 0.813rem 1.5rem;
       color: map.get(light-theme.$light-theme, text-secondary)
     }
 
-    .concep-test-list-table-toolbar {
+    .concep-test-search-table-toolbar {
       margin-inline: 0rem;
     }
 
-    .concep-test-list-table {
+    .concep-test-search-table {
       margin-inline: 0rem;
+      height: 100%
     }
 
-    .concep-test-list-table-toolbar-button {
+    .concep-test-search-table-toolbar-button {
       padding: 0.813rem 0.75rem;
       border-radius: 0rem;
       border: none;
       border-left: 1px solid map.get(light-theme.$light-theme, border-subtle-01);
     }
 
-    .concep-test-list-table-toolbar-button-icon {
+    .concep-test-search-table-toolbar-button-icon {
       margin-left: 0.5rem;
       margin-top: 0.15rem;
     }

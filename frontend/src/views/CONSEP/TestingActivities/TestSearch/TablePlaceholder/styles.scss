@@ -1,0 +1,31 @@
+@use '@bcgov-nr/nr-theme/design-tokens/light-theme.scss' as light-theme;
+@use 'sass:map';
+
+.concep-test-search-table-placehoder {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  background-color: map.get(light-theme.$light-theme, layer-01);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  height: calc(100vh - 20.875rem);
+
+  svg {
+    fill: map.get(light-theme.$light-theme, background-brand);
+  }
+}
+
+.concep-test-search-table-placehoder-title {
+  padding-top: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.concep-test-search-table-placehoder-text {
+  font-size: 0.875rem;
+  color: map.get(light-theme.$light-theme, text-secondary);
+  margin-bottom: 0 !important;
+}

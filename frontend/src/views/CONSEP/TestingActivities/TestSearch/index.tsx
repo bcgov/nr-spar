@@ -11,39 +11,84 @@ import {
   TextInput,
   InlineNotification
 } from '@carbon/react';
-import {
-  Search
-} from '@carbon/icons-react';
+import { Search } from '@carbon/icons-react';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
-import { searchActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
+import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
-import type { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
+import type {
+  TestingSearchResponseType,
+  TestingSearchPageResponseType,
+  PaginationInfoType
+} from '../../../../types/consep/TestingSearchResponseType';
 
-import {
-  DATE_FORMAT, testActivityCodes, testCategoryCodes,
-  testSearchCrumbs
-} from './constants';
+import { DATE_FORMAT, testActivityCodes, testCategoryCodes, testSearchCrumbs } from './constants';
 import { ActivitySearchRequest } from './definitions';
 import TestListTable from './TestListTable';
+import TablePlaceholder from './TablePlaceholder';
 import './styles.scss';
 
 const TestSearch = () => {
+  const [hasSearched, setHasSearched] = useState(false);
   const [searchParams, setSearchParams] = useState<ActivitySearchRequest>({});
   const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
-  const [alert, setAlert] = useState<{ status: string; message: string } | null>(null);
+  const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
+    totalElements: 0,
+    totalPages: 0,
+    pageNumber: 0,
+    pageSize: 20
+  });
+
+  const [alert, setAlert] = useState<{
+    status: string;
+    message: string;
+  } | null>(null);
+
+  const resetAltert = () => {
+    if (alert) {
+      setAlert(null);
+    }
+  };
 
   const searchMutation = useMutation({
-    mutationFn: (params: ActivitySearchRequest) => searchActivities(params),
-    onSuccess: (data: TestingSearchResponseType[]) => {
-      setSearchResults(data);
-      setAlert({ status: 'info', message: `Total results: ${data.length}, you can check the results at the console :)` });
+    mutationFn: (params: ActivitySearchRequest) => searchTestingActivities(params),
+    onMutate: () => {
+      resetAltert();
+      setHasSearched(true);
+    },
+    onSuccess: (data: TestingSearchPageResponseType) => {
+      setSearchResults(data.content);
+      setPaginationInfo({
+        totalElements: data.totalElements,
+        totalPages: data.totalPages,
+        pageNumber: data.pageNumber,
+        pageSize: data.pageSize
+      });
     },
     onError: (error) => {
-      setAlert({ status: 'error', message: `Search failed with the error: ${error.message}` });
+      setAlert({
+        status: 'error',
+        message: `Search failed with the error: ${error.message}`
+      });
     }
   });
+
+  const updateSearchParams = <T extends object, K extends keyof T>(
+    prev: T,
+    key: K,
+    value: T[K] | null
+  ): T => {
+    const updated = { ...prev };
+
+    if (value != null) {
+      updated[key] = value;
+    } else {
+      delete updated[key];
+    }
+
+    return updated;
+  };
 
   const handleLotInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const lots = e.target.value
@@ -51,52 +96,46 @@ const TestSearch = () => {
       .map((val) => val.trim())
       .filter((val) => val.length > 0);
 
-    setSearchParams((prev) => ({
-      ...prev,
-      lotNumbers: lots.length > 0 ? lots : undefined
-    }));
+    setSearchParams((prev) =>
+      updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null)
+    );
+    resetAltert();
   };
 
   const handleTestTypeChange = (data: ComboBoxEvent) => {
-    setSearchParams((prev) => ({
-      ...prev,
-      testCategoryCd: data.selectedItem ?? undefined
-    }));
+    setSearchParams((prev) => updateSearchParams(prev, 'testCategoryCd', data.selectedItem));
+    resetAltert();
   };
 
   const handleActivityIdChange = (data: ComboBoxEvent) => {
-    setSearchParams((prev) => ({
-      ...prev,
-      activityId: data.selectedItem ?? undefined
-    }));
+    setSearchParams((prev) => updateSearchParams(prev, 'activityId', data.selectedItem));
+    resetAltert();
   };
 
   const handleGermTrayIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     const parsed = value === '' ? undefined : parseInt(value, 10);
 
-    setSearchParams((prev) => ({
-      ...prev,
-      germinatorTrayId: Number.isNaN(parsed) ? undefined : parsed
-    }));
+    setSearchParams((prev) =>
+      updateSearchParams(prev, 'germinatorTrayId', Number.isNaN(parsed) ? undefined : parsed)
+    );
+    resetAltert();
   };
 
   const handleWithdrawalStartDateChange = (dates: (string | Date)[]) => {
     const raw = dates?.[0];
     const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
-    setSearchParams((prev) => ({
-      ...prev,
-      seedWithdrawalStartDate: value ?? undefined
-    }));
+
+    setSearchParams((prev) => updateSearchParams(prev, 'seedWithdrawalStartDate', value));
+    resetAltert();
   };
 
   const handleWithdrawalEndDateChange = (dates: (string | Date)[]) => {
     const raw = dates?.[0];
     const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
-    setSearchParams((prev) => ({
-      ...prev,
-      seedWithdrawalEndDate: value ?? undefined
-    }));
+
+    setSearchParams((prev) => updateSearchParams(prev, 'seedWithdrawalEndDate', value));
+    resetAltert();
   };
 
   return (
@@ -204,7 +243,16 @@ const TestSearch = () => {
               renderIcon={Search}
               iconDescription="Search activity"
               size="md"
-              onClick={() => searchMutation.mutate(searchParams)}
+              onClick={() => {
+                if (Object.keys(searchParams).length > 0) {
+                  searchMutation.mutate(searchParams);
+                } else {
+                  setAlert({
+                    status: 'error',
+                    message: 'At least one criteria must be entered to start the search'
+                  });
+                }
+              }}
             >
               Search activity
             </Button>
@@ -212,21 +260,26 @@ const TestSearch = () => {
         </Row>
         <Row>
           <Column>
-            {
-              alert?.message
-              && (
-                <InlineNotification
-                  style={{ maxInlineSize: 'none' }}
-                  lowContrast
-                  kind={alert.status}
-                  subtitle={alert?.message}
-                />
-              )
-            }
+            {alert?.message && (
+              <InlineNotification
+                style={{ maxInlineSize: 'none' }}
+                lowContrast
+                kind={alert.status}
+                subtitle={alert?.message}
+              />
+            )}
           </Column>
         </Row>
       </FlexGrid>
-      <TestListTable data={searchResults} isLoading={searchMutation.isPending} />
+      {hasSearched ? (
+        <TestListTable
+          data={searchResults}
+          isLoading={searchMutation.isPending}
+          paginationInfo={paginationInfo}
+        />
+      ) : (
+        <TablePlaceholder />
+      )}
     </div>
   );
 };

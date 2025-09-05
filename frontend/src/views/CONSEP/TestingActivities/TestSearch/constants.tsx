@@ -11,24 +11,15 @@ export const DATE_FORMAT = 'Y/m/d';
 export const testSearchCrumbs: CrumbType[] = [
   {
     name: 'CONSEP',
-    path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
+    path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES
   },
   {
     name: 'Testing activities search',
-    path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES,
+    path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES
   }
 ];
 
-export const testCategoryCodes: string[] = [
-  'PUR',
-  'QA',
-  'QAK',
-  'QAP',
-  'QAR',
-  'QAS',
-  'STD',
-  'TRL'
-];
+export const testCategoryCodes: string[] = ['PUR', 'QA', 'QAK', 'QAP', 'QAR', 'QAS', 'STD', 'TRL'];
 
 export const testActivityCodes: string[] = [
   'AB',
@@ -154,7 +145,7 @@ export const testActivityCodes: string[] = [
   'WDS',
   'WDU',
   'WEI',
-  'XRY',
+  'XRY'
 ];
 
 const alignRight = {
@@ -225,9 +216,12 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     ...alignLeft,
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
-      return value === -1 ? <Tag type="teal" size="sm">Curr</Tag> : null;
+      return value === -1 ? (
+        <Tag type="teal" size="sm">
+          Curr
+        </Tag>
+      ) : null;
     }
-
   },
   {
     accessorKey: 'testCompleteInd',
@@ -237,7 +231,11 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     ...alignLeft,
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
-      return value === -1 ? <Tag type="blue" size="sm">Com</Tag> : null;
+      return value === -1 ? (
+        <Tag type="blue" size="sm">
+          Com
+        </Tag>
+      ) : null;
     }
   },
   {
@@ -248,7 +246,11 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     ...alignLeft,
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
-      return value === -1 ? <Tag type="green" size="sm">Acc</Tag> : null;
+      return value === -1 ? (
+        <Tag type="green" size="sm">
+          Acc
+        </Tag>
+      ) : null;
     }
   },
   {
@@ -259,7 +261,11 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     ...alignLeft,
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
-      return value === -1 ? <Tag type="purple" size="sm">Sig</Tag> : null;
+      return value === -1 ? (
+        <Tag type="purple" size="sm">
+          Sig
+        </Tag>
+      ) : null;
     }
   },
   {
@@ -299,13 +305,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'actions',
     header: '',
-    Cell: () => (
-      <Icons.TrashCan
-        size={15}
-        style={{ cursor: 'pointer' }}
-        onClick={() => {}}
-      />
-    ),
+    Cell: () => <Icons.TrashCan size={15} style={{ cursor: 'pointer' }} onClick={() => {}} />,
     enableEditing: false,
     size: 5,
     ...alignLeft
