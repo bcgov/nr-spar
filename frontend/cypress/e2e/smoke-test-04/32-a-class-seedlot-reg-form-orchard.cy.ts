@@ -1,5 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
-import { THIRTY_SECONDS, TYPE_DELAY } from '../../constants';
+import { HALF_SECOND, THIRTY_SECONDS, TYPE_DELAY } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
@@ -591,6 +591,14 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
+
+    // Wait for 500ms to ensure the save is complete
+    cy.wait(HALF_SECOND);
+
+    // Check complete status of Orchard step
+    cy.contains(`.${prefix}--progress-step-button`, 'Orchard')
+      .find(`.${prefix}--assistive-text`)
+      .should('have.text', 'Complete', { timeout: HALF_SECOND });
   });
 
   it('Step complete status', () => {

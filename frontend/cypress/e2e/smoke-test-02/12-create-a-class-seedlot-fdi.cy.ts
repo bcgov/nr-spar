@@ -22,7 +22,7 @@ describe('Create FDI Seedlot', () => {
     cy.get('#agency-number-input')
       .clear()
       .type(regData.agencyNumber, { delay: TYPE_DELAY })
-      .blur();
+      .blur({ force: true });
 
     // Enter the applicant email address
     cy.get('#applicant-email-input')
@@ -54,6 +54,29 @@ describe('Create FDI Seedlot', () => {
       .click();
     cy.get(collectedIdToClick)
       .should('be.checked');
+
+    // Click on the section title
+    cy.contains('.section-title', 'Seedlot information')
+      .click();
+
+    cy.contains('.bx--label', 'Agency location code')
+      .closest('.loading-input-wrapper')
+      .then(($section) => {
+        if ($section.find('#agency-number-input-error-msg').length) {
+          // Error message is present, re-enter the agency number
+          cy.get('#agency-number-input')
+            .clear()
+            .type('11', { delay: TYPE_DELAY })
+            .blur({ force: true });
+
+          // Click on the section title
+          cy.contains('.section-title', 'Seedlot information')
+            .click();
+
+          // Wait for the error message to disappear
+          cy.get('#agency-number-input-error-msg').should('not.exist');
+        }
+      });
 
     // Click on button Create seedlot number
     cy.get('.submit-button')
