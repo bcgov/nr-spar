@@ -13,9 +13,15 @@ type TestListTableProp = {
   data: TestingSearchResponseType[];
   paginationInfo: PaginationInfoType;
   isLoading?: boolean;
+  onPageChange?: (pageIndex: number, pageSize: number) => void;
 };
 
-const TestListTable = ({ data, isLoading = false, paginationInfo }: TestListTableProp) => {
+const TestListTable = ({
+  data,
+  isLoading = false,
+  paginationInfo,
+  onPageChange = () => {}
+}: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
   const actions = [
@@ -105,6 +111,11 @@ const TestListTable = ({ data, isLoading = false, paginationInfo }: TestListTabl
           columns={getTestingActivityListColumns()}
           data={data}
           enablePagination
+          manualPagination
+          pageIndex={paginationInfo.pageNumber}
+          pageSize={paginationInfo.pageSize}
+          rowCount={paginationInfo.totalElements}
+          onPaginationChange={onPageChange}
           enableRowSelection
           isLoading={isLoading}
           tableBodyRef={tableBodyRef}

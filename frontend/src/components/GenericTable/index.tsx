@@ -5,6 +5,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable
 } from 'material-react-table';
+import { PaginationState } from '@tanstack/react-table';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 type Props<T extends Record<string, any>> = {
@@ -12,6 +13,11 @@ type Props<T extends Record<string, any>> = {
   data: T[];
   isLoading?: boolean;
   enablePagination?: boolean;
+  manualPagination?: boolean; // enable manual pagination
+  rowCount?: number; // total rows on server
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void;
+  pageIndex?: number;
+  pageSize?: number;
   enableSorting?: boolean;
   enableFilters?: boolean;
   enableHiding?: boolean;
@@ -54,6 +60,11 @@ const GenericTable = <T extends Record<string, any>>({
   data,
   isLoading = false,
   enablePagination = false,
+  manualPagination = false,
+  rowCount = data.length,
+  onPaginationChange,
+  pageIndex = 0,
+  pageSize = 20,
   enableHiding = false,
   enableSorting = false,
   enableFilters = false,
@@ -76,7 +87,19 @@ const GenericTable = <T extends Record<string, any>>({
     data,
     initialState,
     state: {
-      isLoading
+      isLoading,
+      pagination: { pageIndex, pageSize }
+    },
+    enablePagination,
+    manualPagination,
+    rowCount,
+    onPaginationChange: (
+      updaterOrValue: PaginationState | ((old: PaginationState) => PaginationState)
+    ) => {
+      const newPagination: PaginationState = typeof updaterOrValue === 'function'
+        ? updaterOrValue(basicTable.getState().pagination)
+        : updaterOrValue;
+      onPaginationChange?.(newPagination.pageIndex, newPagination.pageSize);
     },
     muiPaginationProps: {
       showRowsPerPage: true,
@@ -94,7 +117,8 @@ const GenericTable = <T extends Record<string, any>>({
             '& > .MuiBox-root:first-of-type': {
               display: 'none'
             }
-          } : {
+          }
+          : {
             // hide both top toolbar and bottom pagination to remove extra white spaces
             '& > .MuiBox-root': {
               display: 'none'
@@ -114,13 +138,15 @@ const GenericTable = <T extends Record<string, any>>({
     }),
     muiTableBodyCellProps: {
       sx: {
-        ...(isCompacted ? {
-          paddingTop: 0,
-          paddingBottom: 0
-        } : {
-          paddingTop: '0.22rem',
-          paddingBottom: '0.22rem'
-        }),
+        ...(isCompacted
+          ? {
+            paddingTop: 0,
+            paddingBottom: 0
+          }
+          : {
+            paddingTop: '0.22rem',
+            paddingBottom: '0.22rem'
+          }),
         '&:hover': {
           outline: 'none',
           backgroundColor: COLOR_GREY_20
@@ -149,7 +175,6 @@ const GenericTable = <T extends Record<string, any>>({
         }
       }
     },
-    enablePagination,
     enableSorting,
     enableFilters,
     enableHiding,

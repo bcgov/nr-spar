@@ -52,7 +52,15 @@ const TestSearch = () => {
   };
 
   const searchMutation = useMutation({
-    mutationFn: (params: ActivitySearchRequest) => searchTestingActivities(params),
+    mutationFn: ({
+      filter,
+      page = 0,
+      size = 20
+    }: {
+      filter: ActivitySearchRequest;
+      page?: number;
+      size?: number;
+    }) => searchTestingActivities(filter, page, size),
     onMutate: () => {
       resetAltert();
       setHasSearched(true);
@@ -73,6 +81,23 @@ const TestSearch = () => {
       });
     }
   });
+
+  const handlePageChange = (pageIndex: number, pageSize: number) => {
+    searchMutation.mutate(
+      { filter: searchParams, page: pageIndex, size: pageSize },
+      {
+        onSuccess: (data) => {
+          setSearchResults(data.content);
+          setPaginationInfo({
+            totalElements: data.totalElements,
+            totalPages: data.totalPages,
+            pageNumber: data.pageNumber,
+            pageSize: data.pageSize
+          });
+        }
+      }
+    );
+  };
 
   const updateSearchParams = <T extends object, K extends keyof T>(
     prev: T,
@@ -245,7 +270,7 @@ const TestSearch = () => {
               size="md"
               onClick={() => {
                 if (Object.keys(searchParams).length > 0) {
-                  searchMutation.mutate(searchParams);
+                  searchMutation.mutate({ filter: searchParams });
                 } else {
                   setAlert({
                     status: 'error',
@@ -276,6 +301,7 @@ const TestSearch = () => {
           data={searchResults}
           isLoading={searchMutation.isPending}
           paginationInfo={paginationInfo}
+          onPageChange={handlePageChange}
         />
       ) : (
         <TablePlaceholder />
