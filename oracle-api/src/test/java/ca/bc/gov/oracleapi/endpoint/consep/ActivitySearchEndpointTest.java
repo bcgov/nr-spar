@@ -147,6 +147,6 @@ class ActivitySearchEndpointTest {
       .andExpect(jsonPath("$.content[0].requestItem").value(requestId))
       .andExpect(jsonPath("$.content[0].species").value(species))
       .andExpect(jsonPath("$.content[0].testCategoryCd").value(testCategoryCd))
-      .andExpect(jsonPath("$.total").value(1));
+      .andExpect(jsonPath("$.totalElements").value(1));
   }
 }
