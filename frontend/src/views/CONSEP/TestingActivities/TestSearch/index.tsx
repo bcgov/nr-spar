@@ -121,9 +121,7 @@ const TestSearch = () => {
       .map((val) => val.trim())
       .filter((val) => val.length > 0);
 
-    setSearchParams((prev) =>
-      updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null)
-    );
+    setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
     resetAltert();
   };
 
@@ -141,9 +139,7 @@ const TestSearch = () => {
     const { value } = e.target;
     const parsed = value === '' ? undefined : parseInt(value, 10);
 
-    setSearchParams((prev) =>
-      updateSearchParams(prev, 'germinatorTrayId', Number.isNaN(parsed) ? undefined : parsed)
-    );
+    setSearchParams((prev) => updateSearchParams(prev, 'germinatorTrayId', Number.isNaN(parsed) ? undefined : parsed));
     resetAltert();
   };
 

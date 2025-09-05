@@ -202,6 +202,26 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     ...alignLeft
   },
   {
+    header: 'Result',
+    accessorFn: (row) => {
+      switch (row.testCategoryCd) {
+        case 'Germ':
+          return row.germinationPct;
+        case 'MC':
+          return row.moisturePct;
+        case 'SPG':
+          return row.seedsPerGram;
+        case 'PUR':
+          return row.purityPct;
+        default:
+          return null;
+      }
+    },
+    size: 13,
+    enableEditing: false,
+    ...alignRight
+  },
+  {
     accessorKey: 'pv',
     header: 'PV',
     size: 82,
