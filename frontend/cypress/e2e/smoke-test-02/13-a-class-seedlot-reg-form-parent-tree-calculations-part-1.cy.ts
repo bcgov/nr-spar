@@ -90,7 +90,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
   it('Check Parent tree contribution summary', () => {
     // Wait for the table to load
     cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`, {
-      timeout: 10000
+      timeout: TEN_SECONDS
     }).should(($td) => {
       const value = $td.text().trim();
       expect(value, 'cell value should be a number').to.match(/^\d+$/);
@@ -107,7 +107,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       coneCount[0] = 0;
       pollenCount[0] = 0;
 
-      // Calculate cone counts
+      // Calculate cone and pollen counts
       cy.get('.parent-tree-step-table-container-col table tbody tr')
         .each(($row) => {
           cy.wrap($row)
@@ -126,22 +126,24 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         })
         .then(() => {
           // Assert totals after all rows are processed
-          cy.get('#totalnumber\\ of\\ cone\\ count').should('have.value', coneCount[0]);
-          cy.get('#totalnumber\\ of\\ pollen\\ count').should('have.value', pollenCount[0]);
+          cy.get('#totalnumber\\ of\\ cone\\ count').should(($input) => {
+            expect(Number(($input as any).val())).to.eq(coneCount[0]);
+          });
+          cy.get('#totalnumber\\ of\\ pollen\\ count').should(($input) => {
+            expect(Number(($input as any).val())).to.eq(pollenCount[0]);
+          });
         });
     });
 
     // Click 'Calculate metrics' button
     cy.get('.gen-worth-cal-row').find('button').contains('Calculate metrics').click();
 
-    // Wait for calculation (adjust if needed)
-    cy.wait(3000);
-
-    // Store Ne value to a variable
-    cy.get('#effectivepopulation\\ size\\ \\(ne\\)')
+    // Store Ne value to a variable, retry until updated
+    cy.get('#effectivepopulation\\ size\\ \\(ne\\)', { timeout: TEN_SECONDS })
       .invoke('val')
-      .then(($input: any) => {
+      .should(($input: any) => {
         effectivePopulationSize = Number($input);
+        expect(effectivePopulationSize).to.be.greaterThan(0);
       });
 
     // Save changes
@@ -184,25 +186,29 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         cy.get('#8021-pollenCount-value-input').clear().type('0').blur();
       });
 
-    // After clearing, wait for recalculation (or adjust if app emits event)
-    cy.wait(500);
+    // Assert totals update automatically with retry
+    cy.get('#totalnumber\\ of\\ cone\\ count', { timeout: TEN_SECONDS }).should(($input) => {
+      const val = Number(($input as any).val());
+      expect(val).to.eq(coneCount[0] - firstConeValue);
+    });
 
-    // Assert totals updated
-    cy.get('#totalnumber\\ of\\ cone\\ count').should('have.value', coneCount[0] - firstConeValue);
-    cy.get('#totalnumber\\ of\\ pollen\\ count').should(
-      'have.value',
-      pollenCount[0] - firstPollenValue
-    );
-    cy.get('#totalnumber\\ of\\ parent\\ trees').should('have.value', totalParentTrees - 1);
+    cy.get('#totalnumber\\ of\\ pollen\\ count', { timeout: TEN_SECONDS }).should(($input) => {
+      const val = Number(($input as any).val());
+      expect(val).to.eq(pollenCount[0] - firstPollenValue);
+    });
+
+    cy.get('#totalnumber\\ of\\ parent\\ trees', { timeout: TEN_SECONDS }).should(($input) => {
+      const val = Number(($input as any).val());
+      expect(val).to.eq(totalParentTrees - 1);
+    });
 
     // Click 'Calculate metrics' button again
     cy.get('.gen-worth-cal-row').find('button').contains('Calculate metrics').click();
-    cy.wait(3000);
 
     // Check Ne value after clearing first row
-    cy.get('#effectivepopulation\\ size\\ \\(ne\\)')
+    cy.get('#effectivepopulation\\ size\\ \\(ne\\)', { timeout: TEN_SECONDS })
       .invoke('val')
-      .then(($value) => {
+      .should(($value) => {
         expect(Number($value)).to.be.lessThan(Number(effectivePopulationSize));
       });
   });

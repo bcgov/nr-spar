@@ -16,12 +16,11 @@ describe('Seedlot detail page', () => {
       fixtureData = fData;
       // Pick a random species to test
       const speciesKeys = Object.keys(fixtureData);
-      speciesKey = speciesKeys[Math.floor(Math.random() * speciesKeys.length)];
+      speciesKey = speciesKeys[Math.floor(Math.random() * speciesKeys.length - 1)];
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNumber = sNumber as string;
-
         cy.visit(`/seedlots/details/${seedlotNumber}`);
-        cy.url({ timeout: TEN_SECONDS }).should('contains', `/seedlots/details/${seedlotNumber}`);
+        cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
       });
     });
   });
@@ -48,17 +47,19 @@ describe('Seedlot detail page', () => {
           expectedButtonText = 'Edit seedlot form';
         }
 
-        // Assert button text and click it if necessary
+        // Assert button text and click it
         cy.get('.combo-button-container')
           .find('.combo-button')
-          .should('have.text', expectedButtonText)
+          .should('have.text', expectedButtonText);
+        cy.get('.combo-button-container')
+          .find('.combo-button')
           .click();
 
         // Verify URL changes for statuses that allow editing/review
         if (status === 'Submitted') {
-          cy.url().should('contains', `/seedlots/a-class/review/${seedlotNumber}`);
+          cy.url({ timeout: TEN_SECONDS }).should('contains', `/seedlots/a-class/review/${seedlotNumber}`);
         } else {
-          cy.url().should('contains', `/seedlots/a-class-registration/${seedlotNumber}`);
+          cy.url({ timeout: TEN_SECONDS }).should('contains', `/seedlots/a-class-registration/${seedlotNumber}`);
         }
       });
   });
