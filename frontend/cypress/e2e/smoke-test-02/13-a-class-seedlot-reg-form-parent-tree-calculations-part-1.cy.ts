@@ -1,6 +1,7 @@
 /* eslint-disable cypress/no-unnecessary-waiting */
 /* eslint-disable prefer-const */
 import prefix from '../../../src/styles/classPrefix';
+import { TEN_SECONDS } from '../../constants';
 
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
   let seedlotNum: string;
@@ -22,6 +23,12 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
         cy.visit(url);
         cy.url().should('contains', url);
+
+        // Wait for the page to be fully ready
+        cy.get('.seedlot-registration-row', { timeout: TEN_SECONDS }).should('be.visible');
+        cy.get('.parent-tree-step-table-container', { timeout: TEN_SECONDS }).should('be.visible');
+        cy.get('.info-sections-row', { timeout: TEN_SECONDS }).should('be.visible');
+        cy.get('.seedlot-registration-button-row', { timeout: TEN_SECONDS }).should('be.visible');
       });
     });
   });
@@ -63,7 +70,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Upload csv file', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: 15000 });
+    cy.get('#parentTreeNumber', { timeout: TEN_SECONDS });
 
     // Upload csv file
     cy.get('button.upload-button').click({ force: true });
@@ -144,7 +151,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
   it('Remove a single Parent tree contribution', () => {
     // Wait for the table to load
     cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`, {
-      timeout: 10000
+      timeout: TEN_SECONDS
     }).should(($td) => {
       const value = $td.text().trim();
       expect(value, 'cell value should be a number').to.match(/^\d+$/);
