@@ -12,20 +12,4 @@
   align-items: center;
   flex-grow: 1;
   height: calc(100vh - 20.875rem);
-
-  svg {
-    fill: map.get(light-theme.$light-theme, background-brand);
-  }
-}
-
-.concep-test-search-table-placehoder-title {
-  padding-top: 1rem;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.concep-test-search-table-placehoder-text {
-  font-size: 0.875rem;
-  color: map.get(light-theme.$light-theme, text-secondary);
-  margin-bottom: 0 !important;
 }

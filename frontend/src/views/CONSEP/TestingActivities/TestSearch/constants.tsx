@@ -9,6 +9,35 @@ import { TestingSearchResponseType } from '../../../../types/consep/TestingSearc
 
 export const DATE_FORMAT = 'Y/m/d';
 
+const formatDateCell = (value: string | null) => {
+  if (!value) return '';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const day = date.getDate().toString().padStart(2, '0');
+
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ];
+  const month = monthNames[date.getMonth()];
+
+  const year = date.getFullYear().toString().slice(-2);
+
+  return `${day} ${month} ${year}`;
+};
+
 export const testSearchCrumbs: CrumbType[] = [
   {
     name: 'CONSEP',
@@ -163,42 +192,42 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'seedlotDisplay',
     header: 'Lot #',
-    size: 13,
+    size: 50,
     enableEditing: false,
     ...alignRight
   },
   {
     accessorKey: 'requestItem',
     header: 'Request ID',
-    size: 12,
+    size: 100,
     enableEditing: false,
     ...alignLeft
   },
   {
     accessorKey: 'species',
     header: 'Sp',
-    size: 8,
+    size: 30,
     enableEditing: false,
     ...alignLeft
   },
   {
     accessorKey: 'testRank',
     header: 'Rank',
-    size: 1,
+    size: 30,
     enableEditing: false,
     ...alignLeft
   },
   {
     accessorKey: 'testCategoryCd',
     header: 'Category',
-    size: 3,
+    size: 30,
     enableEditing: false,
     ...alignLeft
   },
   {
     accessorKey: 'activityId',
     header: 'Activity',
-    size: 3,
+    size: 30,
     enableEditing: false,
     ...alignLeft
   },
@@ -218,14 +247,18 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
           return null;
       }
     },
-    size: 13,
+    size: 30,
     enableEditing: false,
-    ...alignRight
+    ...alignRight,
+    Cell: ({ cell }) => {
+      const value = cell.getValue<number | null>();
+      return value != null ? `${value}%` : '';
+    }
   },
   {
     accessorKey: 'pv',
     header: 'PV',
-    size: 82,
+    size: 50,
     enableEditing: false,
     ...alignRight
   },
@@ -292,31 +325,36 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'seedWithdrawalDate',
     header: 'Wdrwl Date',
-    size: 10,
+    size: 100,
     enableEditing: false,
-    ...alignLeft
+    ...alignLeft,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'revisedEndDt',
     header: 'Sch End Date',
-    size: 10,
+    size: 100,
     enableEditing: false,
-    ...alignLeft
+    ...alignLeft,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualBeginDtTm',
     header: 'Start Date',
-    size: 10,
+    size: 100,
     enableEditing: false,
-    ...alignLeft
+    ...alignLeft,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualEndDtTm',
     header: 'End Date',
-    size: 19,
+    size: 100,
     enableEditing: false,
-    ...alignLeft
+    ...alignLeft,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
+
   {
     accessorKey: 'riaComment',
     header: 'Comments',
@@ -328,7 +366,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     header: '',
     Cell: () => <Icons.TrashCan size={15} style={{ cursor: 'pointer' }} onClick={() => {}} />,
     enableEditing: false,
-    size: 5,
+    size: 20,
     ...alignLeft
   }
 ];
