@@ -52,7 +52,9 @@ describe('Seedlot detail page', () => {
           .click();
 
         // Verify URL changes for statuses that allow editing/review
-        if (!['Expired', 'Complete', 'Approved'].includes(status)) {
+        if (status === 'Submitted') {
+          cy.url().should('contains', `/seedlots/a-class/review/${seedlotNumber}`);
+        } else {
           cy.url().should('contains', `/seedlots/a-class-registration/${seedlotNumber}`);
         }
       });
