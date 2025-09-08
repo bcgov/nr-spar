@@ -1,6 +1,4 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
-@use '@bcgov-nr/nr-theme/design-tokens/light-theme.scss' as light-theme;
-@use "sass:map";
 
 .consep-test-search-content {
   .consep-test-search-breadcrumb {
@@ -33,24 +31,24 @@
     }
   }
 
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button {
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
 
-  input[type="number"] {
+  input[type='number'] {
     appearance: textfield;
   }
 
   .concep-test-search-table-container {
     margin-top: 1rem;
     margin-bottom: 2rem;
-    background-color: map.get(light-theme.$light-theme, layer-01);
+    background-color: var(--#{vars.$bcgov-prefix}-layer-01);
 
     .concep-test-search-table-title {
       padding: 0.813rem 0.75rem 0.813rem 1.5rem;
-      color: map.get(light-theme.$light-theme, text-secondary)
+      color: var(--#{vars.$bcgov-prefix}-text-secondary);
     }
 
     .concep-test-search-table-toolbar {
@@ -59,14 +57,14 @@
 
     .concep-test-search-table {
       margin-inline: 0rem;
-      height: 100%
+      height: 100%;
     }
 
     .concep-test-search-table-toolbar-button {
       padding: 0.813rem 0.75rem;
       border-radius: 0rem;
       border: none;
-      border-left: 1px solid map.get(light-theme.$light-theme, border-subtle-01);
+      border-left: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
     }
 
     .concep-test-search-table-toolbar-button-icon {
@@ -75,6 +73,3 @@
     }
   }
 }
-
-
-
