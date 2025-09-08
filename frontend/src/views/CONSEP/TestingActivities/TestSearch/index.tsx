@@ -23,7 +23,7 @@ import type {
   PaginationInfoType
 } from '../../../../types/consep/TestingSearchResponseType';
 import {
-  DATE_FORMAT, testActivityCodes, testCategoryCodes, testSearchCrumbs 
+  DATE_FORMAT, testActivityCodes, testCategoryCodes, testSearchCrumbs
 } from './constants';
 import { ActivitySearchRequest } from './definitions';
 import TestListTable from './TestListTable';
