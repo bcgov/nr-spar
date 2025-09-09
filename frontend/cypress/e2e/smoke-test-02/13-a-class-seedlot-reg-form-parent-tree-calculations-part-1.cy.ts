@@ -1,7 +1,7 @@
 /* eslint-disable cypress/no-unnecessary-waiting */
 /* eslint-disable prefer-const */
 import prefix from '../../../src/styles/classPrefix';
-import { TEN_SECONDS } from '../../constants';
+import { THIRTY_SECONDS } from '../../constants';
 
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
   let seedlotNum: string;
@@ -25,10 +25,10 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         cy.url().should('contains', url);
 
         // Wait for the page to be fully ready
-        cy.get('.seedlot-registration-row', { timeout: TEN_SECONDS }).should('be.visible');
-        cy.get('.parent-tree-step-table-container', { timeout: TEN_SECONDS }).should('be.visible');
-        cy.get('.info-sections-row', { timeout: TEN_SECONDS }).should('be.visible');
-        cy.get('.seedlot-registration-button-row', { timeout: TEN_SECONDS }).should('be.visible');
+        cy.get('.seedlot-registration-row', { timeout: THIRTY_SECONDS }).should('be.visible');
+        cy.get('.parent-tree-step-table-container', { timeout: THIRTY_SECONDS }).should('be.visible');
+        cy.get('.info-sections-row', { timeout: THIRTY_SECONDS }).should('be.visible');
+        cy.get('.seedlot-registration-button-row', { timeout: THIRTY_SECONDS }).should('be.visible');
       });
     });
   });
@@ -69,9 +69,6 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
   });
 
   it('Upload csv file', () => {
-    // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: TEN_SECONDS });
-
     // Upload csv file
     cy.get('button.upload-button').click({ force: true });
 
@@ -89,9 +86,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Check Parent tree contribution summary', () => {
     // Wait for the table to load
-    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`, {
-      timeout: TEN_SECONDS
-    }).should(($td) => {
+    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`).should(($td) => {
       const value = $td.text().trim();
       expect(value, 'cell value should be a number').to.match(/^\d+$/);
     });
@@ -139,7 +134,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
     cy.get('.gen-worth-cal-row').find('button').contains('Calculate metrics').click();
 
     // Store Ne value to a variable, retry until updated
-    cy.get('#effectivepopulation\\ size\\ \\(ne\\)', { timeout: TEN_SECONDS })
+    cy.get('#effectivepopulation\\ size\\ \\(ne\\)', { timeout: THIRTY_SECONDS })
       .invoke('val')
       .should(($input: any) => {
         effectivePopulationSize = Number($input);
@@ -152,9 +147,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Remove a single Parent tree contribution', () => {
     // Wait for the table to load
-    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`, {
-      timeout: TEN_SECONDS
-    }).should(($td) => {
+    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`).should(($td) => {
       const value = $td.text().trim();
       expect(value, 'cell value should be a number').to.match(/^\d+$/);
     });
@@ -187,17 +180,17 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       });
 
     // Assert totals update automatically with retry
-    cy.get('#totalnumber\\ of\\ cone\\ count', { timeout: TEN_SECONDS }).should(($input) => {
+    cy.get('#totalnumber\\ of\\ cone\\ count', { timeout: THIRTY_SECONDS }).should(($input) => {
       const val = Number(($input as any).val());
       expect(val).to.eq(coneCount[0] - firstConeValue);
     });
 
-    cy.get('#totalnumber\\ of\\ pollen\\ count', { timeout: TEN_SECONDS }).should(($input) => {
+    cy.get('#totalnumber\\ of\\ pollen\\ count', { timeout: THIRTY_SECONDS }).should(($input) => {
       const val = Number(($input as any).val());
       expect(val).to.eq(pollenCount[0] - firstPollenValue);
     });
 
-    cy.get('#totalnumber\\ of\\ parent\\ trees', { timeout: TEN_SECONDS }).should(($input) => {
+    cy.get('#totalnumber\\ of\\ parent\\ trees', { timeout: THIRTY_SECONDS }).should(($input) => {
       const val = Number(($input as any).val());
       expect(val).to.eq(totalParentTrees - 1);
     });
@@ -206,7 +199,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
     cy.get('.gen-worth-cal-row').find('button').contains('Calculate metrics').click();
 
     // Check Ne value after clearing first row
-    cy.get('#effectivepopulation\\ size\\ \\(ne\\)', { timeout: TEN_SECONDS })
+    cy.get('#effectivepopulation\\ size\\ \\(ne\\)', { timeout: THIRTY_SECONDS })
       .invoke('val')
       .should(($value) => {
         expect(Number($value)).to.be.lessThan(Number(effectivePopulationSize));

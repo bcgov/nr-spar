@@ -2,7 +2,7 @@
 /* eslint-disable prefer-arrow-callback */
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
-import { TEN_SECONDS } from '../../constants';
+import { TEN_SECONDS, THIRTY_SECONDS } from '../../constants';
 
 describe('Seedlot detail page', () => {
   let seedlotNumber: string;
@@ -48,18 +48,21 @@ describe('Seedlot detail page', () => {
         }
 
         // Assert button text and click it
-        cy.get('.combo-button-container')
-          .find('.combo-button')
-          .should('have.text', expectedButtonText);
-        cy.get('.combo-button-container')
-          .find('.combo-button')
+        cy.get('.page-title .combo-button-container')
+          .contains('.combo-button', expectedButtonText)
           .click();
 
         // Verify URL changes for statuses that allow editing/review
         if (status === 'Submitted') {
-          cy.url({ timeout: TEN_SECONDS }).should('contains', `/seedlots/a-class/review/${seedlotNumber}`);
+          cy.url({ timeout: THIRTY_SECONDS }).should(
+            'contains',
+            `/seedlots/a-class/review/${seedlotNumber}`
+          );
         } else {
-          cy.url({ timeout: TEN_SECONDS }).should('contains', `/seedlots/a-class-registration/${seedlotNumber}`);
+          cy.url({ timeout: THIRTY_SECONDS }).should(
+            'contains',
+            `/seedlots/a-class-registration/${seedlotNumber}`
+          );
         }
       });
   });

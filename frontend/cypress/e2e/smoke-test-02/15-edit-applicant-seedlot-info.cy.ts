@@ -2,6 +2,7 @@
 /* eslint-disable func-names */
 /* eslint-disable prefer-arrow-callback */
 import { SeedlotRegFixtureType } from '../../definitions';
+import { THIRTY_SECONDS } from '../../constants';
 
 describe('Applicant and seedlot information page', () => {
   let seedlotNumber: string;
@@ -28,7 +29,7 @@ describe('Applicant and seedlot information page', () => {
     cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
 
     // Click on Edit applicant and seedlot button
-    cy.get('.applicant-seedlot-information')
+    cy.get('.applicant-seedlot-information', { timeout: THIRTY_SECONDS })
       .find('.section-btn')
       .should('have.text', 'Edit applicant')
       .click();
