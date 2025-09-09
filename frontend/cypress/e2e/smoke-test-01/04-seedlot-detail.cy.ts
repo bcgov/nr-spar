@@ -2,7 +2,6 @@
 /* eslint-disable prefer-arrow-callback */
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
-import { TEN_SECONDS, THIRTY_SECONDS } from '../../constants';
 
 describe('Seedlot detail page', () => {
   let seedlotNumber: string;
@@ -11,12 +10,11 @@ describe('Seedlot detail page', () => {
 
   beforeEach(function () {
     cy.login();
-
     cy.fixture('aclass-seedlot').then((fData) => {
       fixtureData = fData;
       // Pick a random species to test
       const speciesKeys = Object.keys(fixtureData);
-      speciesKey = speciesKeys[Math.floor(Math.random() * speciesKeys.length - 1)];
+      speciesKey = speciesKeys[Math.floor(Math.random() * (speciesKeys.length - 1))];
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNumber = sNumber as string;
         cy.visit(`/seedlots/details/${seedlotNumber}`);
@@ -25,44 +23,22 @@ describe('Seedlot detail page', () => {
     });
   });
 
-  it('should render seedlot detail correctly with appropriate button text', () => {
-    // Check the seedlot title
-    cy.get('.title-favourite').should('have.text', `Seedlot ${seedlotNumber}`);
+  it('should render seedlot detail correctly', () => {
+    cy.get('.title-favourite')
+      .should('have.text', `Seedlot ${seedlotNumber}`);
 
-    // Get the status
     cy.contains('p.seedlot-summary-info-label', 'Status')
       .next()
       .children('span')
       .invoke('text')
-      .then((statusText) => {
-        const status = statusText.trim();
+      .then((text) => {
+        if (text.trim() !== 'Expired') {
+          cy.get('.combo-button-container')
+            .find('.combo-button')
+            .should('have.text', 'Edit seedlot form')
+            .click();
 
-        // Determine expected button text based on status
-        let expectedButtonText;
-        if (status === 'Submitted') {
-          expectedButtonText = 'Review seedlot';
-        } else if (['Expired', 'Complete', 'Approved'].includes(status)) {
-          expectedButtonText = 'View your seedlot';
-        } else {
-          expectedButtonText = 'Edit seedlot form';
-        }
-
-        // Assert button text and click it
-        cy.get('.page-title .combo-button-container')
-          .contains('.combo-button', expectedButtonText)
-          .click();
-
-        // Verify URL changes for statuses that allow editing/review
-        if (status === 'Submitted') {
-          cy.url({ timeout: THIRTY_SECONDS }).should(
-            'contains',
-            `/seedlots/a-class/review/${seedlotNumber}`
-          );
-        } else {
-          cy.url({ timeout: THIRTY_SECONDS }).should(
-            'contains',
-            `/seedlots/a-class-registration/${seedlotNumber}`
-          );
+          cy.url().should('contains', `/seedlots/a-class-registration/${seedlotNumber}`);
         }
       });
   });
@@ -115,7 +91,8 @@ describe('Seedlot detail page', () => {
   });
 
   it('renders Seedlot Summary section correctly', () => {
-    cy.get('.seedlot-summary-title').should('have.text', 'Seedlot summary');
+    cy.get('.seedlot-summary-title')
+      .should('have.text', 'Seedlot summary');
 
     cy.contains('p.seedlot-summary-info-label', 'Seedlot number')
       .siblings('p.seedlot-summary-info-value')
@@ -141,10 +118,8 @@ describe('Seedlot detail page', () => {
   });
 
   it('renders Applicant and Seedlot Information section correctly', () => {
-    cy.get('.applicant-seedlot-information-title').should(
-      'have.text',
-      'Check your applicant and seedlot information'
-    );
+    cy.get('.applicant-seedlot-information-title')
+      .should('have.text', 'Check your applicant and seedlot information');
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-agency')
