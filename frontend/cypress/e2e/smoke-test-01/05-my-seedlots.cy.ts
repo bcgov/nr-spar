@@ -1,6 +1,6 @@
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
-import { NUM_OF_LOOPS } from '../../constants';
+import { NUM_OF_LOOPS, TEN_SECONDS } from '../../constants';
 
 describe('My seedlots page', () => {
   let fixtureData: SeedlotRegFixtureType;
@@ -17,13 +17,9 @@ describe('My seedlots page', () => {
       fixtureData = fData;
       speciesKeys = Object.keys(fixtureData);
     });
-  });
-
-  it('Page title', () => {
-    cy.get('.my-seedlot-title')
-      .find('.title-favourite')
-      .children('h1')
-      .should('have.text', 'My Seedlots');
+    // Wait for the page title to be visible before proceeding
+    cy.get('.title-section h1')
+      .should('have.text', 'My Seedlots', { timeout: TEN_SECONDS });
   });
 
   it('Sort table by Seedlot number', () => {
