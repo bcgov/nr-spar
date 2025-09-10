@@ -12,17 +12,13 @@ import {
   getParentTreesForSelectedOrchards
 } from './utils';
 
-type props = {
-  disableOptions: boolean;
-  setShowInfoSections: React.Dispatch<React.SetStateAction<boolean>>;
-  isReview?: boolean;
-};
+import { WeightedGwKey, CalculateMetricsProps } from './definitions';
 
 const CalculateMetrics = ({
   disableOptions,
   setShowInfoSections,
   isReview
-}: props) => {
+}: CalculateMetricsProps) => {
   const {
     allStepData: { parentTreeStep: state },
     allStepData: { orchardStep },
@@ -38,8 +34,6 @@ const CalculateMetrics = ({
     setGenWorthVal,
     weightedGwInfoItems
   } = useContext(ClassAContext);
-
-  type WeightedGwKey = keyof typeof weightedGwInfoItems;
 
   const smpBv: Record<WeightedGwKey, number> = Object.entries(weightedGwInfoItems).reduce(
     (acc, [key, item]) => {
