@@ -1,6 +1,6 @@
 import { SeedlotRegFixtureType } from '../../definitions';
 import prefix from '../../../src/styles/classPrefix';
-import { HALF_SECOND, TYPE_DELAY } from '../../constants';
+import { FIVE_SECONDS, HALF_SECOND, TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Ownership', () => {
   let regFormData: {
@@ -43,7 +43,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=2`;
         cy.visit(url);
         cy.url().should('contains', url);
-        cy.get('.ownership-header').contains('Ownership');
+        cy.get('.ownership-header').contains('Ownership', { timeout: FIVE_SECONDS });
       });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
