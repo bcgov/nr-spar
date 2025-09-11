@@ -1,6 +1,6 @@
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
-import { NUM_OF_LOOPS, TEN_SECONDS } from '../../constants';
+import { FIVE_SECONDS, NUM_OF_LOOPS } from '../../constants';
 
 describe('My seedlots page', () => {
   let fixtureData: SeedlotRegFixtureType;
@@ -19,7 +19,7 @@ describe('My seedlots page', () => {
     });
     // Wait for the page title to be visible before proceeding
     cy.get('.title-section h1')
-      .should('have.text', 'My Seedlots', { timeout: TEN_SECONDS });
+      .should('have.text', 'My Seedlots', { timeout: FIVE_SECONDS });
   });
 
   it('Sort table by Seedlot number', () => {

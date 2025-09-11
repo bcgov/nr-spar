@@ -1,7 +1,8 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
 import {
-  TYPE_DELAY, INVALID_EMAIL, NUM_OF_LOOPS, TEN_SECONDS
+  TYPE_DELAY, INVALID_EMAIL, NUM_OF_LOOPS,
+  FIVE_SECONDS
 } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
@@ -19,7 +20,7 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
       cy.url().should('contains', '/seedlots');
       // Wait for the page title to be visible before proceeding
       cy.get('.title-section h1')
-        .should('have.text', NavigationLabels.Seedlots, { timeout: TEN_SECONDS });
+        .should('have.text', NavigationLabels.Seedlots, { timeout: FIVE_SECONDS });
     });
 
     it('should register an A-Class Seedlot with species pli', () => {

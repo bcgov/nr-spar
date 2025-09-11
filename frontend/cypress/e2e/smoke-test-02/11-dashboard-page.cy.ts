@@ -2,7 +2,7 @@
 /* eslint-disable prefer-arrow-callback */
 import { NavigationLabels } from '../../utils/labels';
 import prefix from '../../../src/styles/classPrefix';
-import { TEN_SECONDS } from '../../constants';
+import { FIVE_SECONDS } from '../../constants';
 
 describe('Dashboard page test', () => {
   let dashboardPageData: {
@@ -21,7 +21,7 @@ describe('Dashboard page test', () => {
     cy.url().should('contains', '/dashboard');
     // Wait for the page title to be visible before proceeding
     cy.get('.title-section h1')
-      .should('have.text', NavigationLabels.Dashboard, { timeout: TEN_SECONDS });
+      .should('have.text', NavigationLabels.Dashboard, { timeout: FIVE_SECONDS });
   });
 
   /**

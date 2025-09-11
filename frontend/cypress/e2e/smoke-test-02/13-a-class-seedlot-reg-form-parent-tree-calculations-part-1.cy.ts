@@ -1,6 +1,6 @@
 /* eslint-disable cypress/no-unnecessary-waiting */
 /* eslint-disable prefer-const */
-import { TEN_SECONDS } from '../../constants';
+import { FIVE_SECONDS, TEN_SECONDS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
@@ -25,7 +25,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
         cy.get('.title-section h1')
-          .should('have.text', `Registration for seedlot ${seedlotNum}`, { timeout: TEN_SECONDS });
+          .should('have.text', `Registration for seedlot ${seedlotNum}`, { timeout: FIVE_SECONDS });
       });
     });
   });

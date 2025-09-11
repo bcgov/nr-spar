@@ -1,4 +1,4 @@
-import { TEN_SECONDS, TYPE_DELAY } from '../../constants';
+import { FIVE_SECONDS, TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
@@ -13,7 +13,7 @@ describe('Create FDI Seedlot', () => {
     cy.visit('/seedlots/register-a-class');
     // Wait for the page title to be visible before proceeding
     cy.get('.title-section h1')
-      .should('have.text', 'Create A-class seedlot', { timeout: TEN_SECONDS });
+      .should('have.text', 'Create A-class seedlot', { timeout: FIVE_SECONDS });
   });
 
   it('Register fdi seedlot', () => {
