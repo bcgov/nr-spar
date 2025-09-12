@@ -21,7 +21,13 @@ permissions: {}
 jobs:
   cypress:
     name: Cypress
+    strategy:
+      fail-fast: false
+      matrix:
+        split_index: [0, 1, 2, 3]
     env:
+      SPLIT: 4
+      SPLIT_INDEX: ${{ matrix.split_index }}
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ vars.CYPRESS_USERNAME }}
       CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
@@ -47,15 +53,12 @@ jobs:
 
       - name: Run Cypress CI
         if: steps.triggers.outputs.triggered == 'true'
-        uses: bcgov/action-test-and-analyse@e2ba34132662c1638dbde806064eb7004b3761c3 # v1.3.0
+        uses: bcgov/action-test-and-analyse@8f4187df47aaf4d3da55da4cb66b97e1adeef731 # v1.3.1
         with:
           node_version: "22"
           commands: |
             npm ci
-            npm run cy:run-1 || true
-            npm run cy:run-2 || true
-            npm run cy:run-3 || true
-            npm run cy:run-4 || true
+            npx start-server-and-test start http://localhost:3000 cy:run
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
@@ -68,10 +71,11 @@ jobs:
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-02/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-03/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-04/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-05/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
       - name: Upload videos
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cypress-videos-chrome
+          name: cypress-videos-chrome-${{ matrix.split_index }}
           path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/

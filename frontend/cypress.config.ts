@@ -1,5 +1,5 @@
-/* eslint-disable prefer-destructuring */
 import { defineConfig } from 'cypress';
+import cypressSplit from 'cypress-split';
 import { TEN_SECONDS } from './cypress/constants';
 
 declare const require: any;
@@ -19,25 +19,25 @@ export default defineConfig({
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
-      '**/01-create-a-class-seedlot.cy.ts',
-      '**/02-seedlot-dashboard.cy.ts',
-      '**/03-seedlot-detail.cy.ts',
-      '**/04-my-seedlots.cy.ts',
-      '**/21-create-a-class-seedlot-pli.cy.ts',
-      '**/22-a-class-seedlot-reg-form-collection-interim.cy.ts',
-      '**/23-a-class-seedlot-reg-form-ownership.cy.ts',
-      '**/24-a-class-seedlot-reg-form-extraction.cy.ts',
+      '**/01-login-page.cy.ts',
+      '**/02-create-a-class-seedlot.cy.ts',
+      '**/03-seedlot-dashboard.cy.ts',
+      '**/04-seedlot-detail.cy.ts',
+      '**/05-my-seedlots.cy.ts',
+      '**/11-dashboard-page.cy.ts',
+      '**/12-create-a-class-seedlot-fdi.cy.ts',
+      '**/13-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',
+      '**/14-api-tests.cy.ts',
+      '**/15-edit-applicant-seedlot-info.cy.ts',
       '**/31-create-a-class-seedlot-pli.cy.ts',
       '**/32-a-class-seedlot-reg-form-orchard.cy.ts',
       '**/33-a-class-seedlot-reg-form-parent-tree-part-1.cy.ts',
       '**/34-a-class-seedlot-reg-form-parent-tree-part-2.cy.ts',
       '**/35-a-class-seedlot-reg-form-parent-tree-part-3.cy.ts',
-      '**/11-login-page.cy.ts',
-      '**/12-dashboard-page.cy.ts',
-      '**/13-create-a-class-seedlot-fdi.cy.ts',
-      '**/14-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',
-      '**/15-api-tests.cy.ts',
-      '**/16-edit-applicant-seedlot-info.cy.ts'
+      '**/21-create-a-class-seedlot-pli.cy.ts',
+      '**/22-a-class-seedlot-reg-form-collection-interim.cy.ts',
+      '**/23-a-class-seedlot-reg-form-ownership.cy.ts',
+      '**/24-a-class-seedlot-reg-form-extraction.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
@@ -48,6 +48,7 @@ export default defineConfig({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
       require('@cypress/code-coverage/task')(on, config);
+      cypressSplit(on, config);
       // implement node event listeners here
       on('task', {
         log(args) {

@@ -19,7 +19,7 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import { addParamToPath } from '../../utils/PathUtils';
 
 import { ExclusiveAdminRows, HeaderConfig } from './constants';
-import { sortByKey } from './utils';
+import { sortSeedlotsByKey } from './utils';
 import { HeaderObj, SeedlotDataTableProps } from './definitions';
 
 const SeedlotDataTable = (
@@ -34,7 +34,7 @@ const SeedlotDataTable = (
   }: SeedlotDataTableProps
 ) => {
   const [sortThisHeader, setSortThisHeader] = useState<keyof SeedlotDisplayType | null>(null);
-  const [sortDirection, setSortDirection] = useState('NONE');
+  const [sortDirection, setSortDirection] = useState<'NONE' | 'ASC' | 'DESC'>('NONE');
   const [processedData, setProcessedData] = useState<SeedlotDisplayType[]>(seedlotData);
 
   // Without this the table will be empty after refresh.
@@ -43,7 +43,7 @@ const SeedlotDataTable = (
   }, [seedlotData]);
 
   const handleSort = (headerId: keyof SeedlotDisplayType) => {
-    let newDirection = 'NONE';
+    let newDirection: 'NONE' | 'ASC' | 'DESC' = 'NONE';
     if (sortThisHeader !== headerId || sortDirection === 'NONE') {
       newDirection = 'ASC';
     } else if (sortDirection === 'ASC') {
@@ -53,14 +53,13 @@ const SeedlotDataTable = (
     }
 
     setSortDirection(newDirection);
-    setProcessedData((prevData) => sortByKey(prevData, headerId, newDirection));
-
+    setProcessedData(sortSeedlotsByKey(seedlotData, headerId, newDirection));
     setSortThisHeader(headerId);
   };
 
   const handleSearch = (searchValue: string) => {
     if (!searchValue) {
-      setProcessedData(sortByKey(seedlotData, sortThisHeader, sortDirection));
+      setProcessedData(sortSeedlotsByKey(seedlotData, sortThisHeader, sortDirection));
       return;
     }
     const searchString = searchValue.toLowerCase();
@@ -76,7 +75,7 @@ const SeedlotDataTable = (
         return hasMatch;
       });
       if (filtered.length > 0) {
-        return sortByKey(filtered, sortThisHeader, sortDirection);
+        return sortSeedlotsByKey(filtered, sortThisHeader, sortDirection);
       }
       return filtered;
     });
