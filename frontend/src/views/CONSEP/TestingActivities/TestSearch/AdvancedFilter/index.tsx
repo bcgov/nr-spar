@@ -1,5 +1,5 @@
 import React, {
-  ChangeEvent, useEffect, useRef, useState
+  ChangeEvent, useEffect, useRef
 } from 'react';
 import ReactDOM from 'react-dom';
 import {
@@ -32,8 +32,9 @@ type AdvancedFiltersProps = {
   setSearchParams: React.Dispatch<React.SetStateAction<ActivitySearchRequest>>;
   validateSearch: ActivitySearchValidation;
   setValidateSearch: React.Dispatch<React.SetStateAction<ActivitySearchValidation>>;
-  alignTo: DOMRect;
+  alignTo: { top: number; left: number; width: number };
   onClose: () => void;
+  anchorRef: React.RefObject<HTMLElement>;
 };
 
 const AdvancedFilters = ({
@@ -42,43 +43,35 @@ const AdvancedFilters = ({
   validateSearch,
   setValidateSearch,
   alignTo,
-  onClose
+  onClose,
+  anchorRef
 }: AdvancedFiltersProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
-
-  const [position, setPosition] = useState<{ top: number; left: number }>({
-    top: 0,
-    left: 0
-  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       if (modalRef.current?.contains(target)) return;
 
-      // This is necessary because the datepicker calendar is considered
-      // "out of the modal", so a click on it should not close the modal
-      if ((target as HTMLElement).closest('.flatpickr-calendar')) return;
+      // This is necessary because the datepicker calendar and combobox options
+      // are considered "out of the modal", because they are rendered by a react portal
+      // attached to the body element, thus being outside of the modal,
+      // but a click on them should not close the modal
+      const el = target as HTMLElement;
+      if (el.closest('.flatpickr-calendar')) return;
+      if (el.closest('.cds--list-box__menu')) return;
+
+      // Necessary to properly close the modal when the button is clicked
+      if (anchorRef.current?.contains(target)) return;
 
       onClose();
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
     };
-  }, [onClose]);
-
-  useEffect(() => {
-    const el = modalRef.current;
-    if (el) {
-      const modalWidth = el.offsetWidth;
-      setPosition({
-        top: alignTo.bottom + window.scrollY,
-        left: alignTo.right + window.scrollX - modalWidth
-      });
-    }
-  }, [alignTo]);
+  }, [onClose, anchorRef]);
 
   const handleCheckboxesChanges = (
     searchField: keyof ActivitySearchRequest,
@@ -322,8 +315,8 @@ const AdvancedFilters = ({
 
   const positionStyle: React.CSSProperties = {
     position: 'absolute',
-    top: position.top,
-    left: position.left,
+    top: alignTo.top,
+    right: window.innerWidth - alignTo.left,
     zIndex: 1000
   };
 

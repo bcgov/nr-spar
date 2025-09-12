@@ -43,7 +43,11 @@ const TestSearch = () => {
   );
   const [openAdvSearch, setOpenAdvSearch] = useState(false);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
-  const [modalAnchor, setModalAnchor] = useState<DOMRect | null>(null);
+  const [modalAnchor, setModalAnchor] = useState<{
+    top: number;
+    left: number;
+    width: number
+  } | null>(null);
 
   const advSearchRef = useRef<HTMLButtonElement>(null);
 
@@ -158,17 +162,26 @@ const TestSearch = () => {
     });
   };
 
-  const handleOpenAdvSearch = () => {
-    const rect = advSearchRef.current?.getBoundingClientRect();
-    if (rect) {
-      setModalAnchor(rect);
-      setOpenAdvSearch(!openAdvSearch);
-    }
-  };
-
   const handleCloseAdvSearch = () => {
     setOpenAdvSearch(false);
     setModalAnchor(null);
+  };
+
+  const toggleAdvSearch = () => {
+    if (openAdvSearch) {
+      setOpenAdvSearch(false);
+      setModalAnchor(null);
+    } else {
+      const rect = advSearchRef.current?.getBoundingClientRect();
+      if (rect) {
+        setModalAnchor({
+          top: rect.bottom + window.scrollY,
+          left: rect.right + window.scrollX,
+          width: rect.width
+        });
+        setOpenAdvSearch(true);
+      }
+    }
   };
 
   return (
@@ -286,7 +299,7 @@ const TestSearch = () => {
             ref={advSearchRef}
             size="md"
             kind="tertiary"
-            onClick={() => handleOpenAdvSearch()}
+            onClick={toggleAdvSearch}
           >
             Filters
           </Button>
@@ -337,6 +350,7 @@ const TestSearch = () => {
             setValidateSearch={setValidateSearch}
             alignTo={modalAnchor}
             onClose={handleCloseAdvSearch}
+            anchorRef={advSearchRef}
           />
         )
       }
