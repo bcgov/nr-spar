@@ -1,0 +1,25 @@
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.consep-test-filters-modal {
+  background: colors.$gray-10;
+  padding: 2rem 0;
+
+  .#{vars.$bcgov-prefix}--row:not(:last-child) {
+    padding-bottom: 2rem;
+  }
+
+  input,
+  .#{vars.$bcgov-prefix}--list-box input[role=combobox],
+  .#{vars.$bcgov-prefix}--list-box input[type=text] {
+    background-color: colors.$white;
+  }
+
+  .button-row{
+    padding-left: 1rem;
+
+    button {
+      margin-right: 1rem;
+    }
+  }
+}
