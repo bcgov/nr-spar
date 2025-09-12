@@ -24,9 +24,13 @@
       }
     }
 
-    .advanced-search-input,
+    .advanced-search,
     .search-button {
       margin-top: 1.75rem;
+
+      button {
+        width: 100%;
+      }
     }
   }
 

@@ -27,3 +27,16 @@ export type ActivitySearchRequest = {
   acceptanceStatus?: number;
   seedlotClass?: 'A' | 'B';
 };
+
+export type ValidationErrorType = {
+  error: boolean;
+  errorMessage: string;
+}
+
+export type ActivitySearchValidation = {
+  lotNumbers: ValidationErrorType;
+  germinatorTray: ValidationErrorType;
+  requestId: ValidationErrorType;
+  requestYear: ValidationErrorType;
+  orchardId: ValidationErrorType;
+};
