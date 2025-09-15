@@ -43,7 +43,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=2`;
         cy.visit(url);
         cy.url().should('contains', url);
-        cy.get('.ownership-header').contains('Ownership', { timeout: FIVE_SECONDS });
+        cy.get('.ownership-header').contains(regFormData.ownership.title, { timeout: FIVE_SECONDS });
       });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
