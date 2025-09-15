@@ -13,8 +13,8 @@ type Props<T extends Record<string, any>> = {
   data: T[];
   isLoading?: boolean;
   enablePagination?: boolean;
-  manualPagination?: boolean; // enable manual pagination
-  rowCount?: number; // total rows on server
+  manualPagination?: boolean;
+  rowCount?: number;
   onPaginationChange?: (pageIndex: number, pageSize: number) => void;
   pageIndex?: number;
   pageSize?: number;

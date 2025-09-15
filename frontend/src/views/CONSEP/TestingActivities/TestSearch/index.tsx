@@ -19,7 +19,7 @@ import { searchTestingActivities } from '../../../../api-service/consep/searchTe
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import type {
   TestingSearchResponseType,
-  TestingSearchPageResponseType,
+  PaginatedTestingSearchResponseType,
   PaginationInfoType
 } from '../../../../types/consep/TestingSearchResponseType';
 import {
@@ -47,7 +47,7 @@ const TestSearch = () => {
     message: string;
   } | null>(null);
 
-  const resetAltert = () => {
+  const resetAlert = () => {
     if (alert) {
       setAlert(null);
     }
@@ -64,10 +64,10 @@ const TestSearch = () => {
       size?: number;
     }) => searchTestingActivities(filter, page, size),
     onMutate: () => {
-      resetAltert();
+      resetAlert();
       setHasSearched(true);
     },
-    onSuccess: (data: TestingSearchPageResponseType) => {
+    onSuccess: (data: PaginatedTestingSearchResponseType) => {
       setSearchResults(data.content);
       setPaginationInfo({
         totalElements: data.totalElements,
@@ -124,17 +124,17 @@ const TestSearch = () => {
       .filter((val) => val.length > 0);
 
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
-    resetAltert();
+    resetAlert();
   };
 
   const handleTestTypeChange = (data: ComboBoxEvent) => {
     setSearchParams((prev) => updateSearchParams(prev, 'testCategoryCd', data.selectedItem));
-    resetAltert();
+    resetAlert();
   };
 
   const handleActivityIdChange = (data: ComboBoxEvent) => {
     setSearchParams((prev) => updateSearchParams(prev, 'activityId', data.selectedItem));
-    resetAltert();
+    resetAlert();
   };
 
   const handleGermTrayIdChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -142,7 +142,7 @@ const TestSearch = () => {
     const parsed = value === '' ? undefined : parseInt(value, 10);
 
     setSearchParams((prev) => updateSearchParams(prev, 'germinatorTrayId', Number.isNaN(parsed) ? undefined : parsed));
-    resetAltert();
+    resetAlert();
   };
 
   const handleWithdrawalStartDateChange = (dates: (string | Date)[]) => {
@@ -150,7 +150,7 @@ const TestSearch = () => {
     const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
 
     setSearchParams((prev) => updateSearchParams(prev, 'seedWithdrawalStartDate', value));
-    resetAltert();
+    resetAlert();
   };
 
   const handleWithdrawalEndDateChange = (dates: (string | Date)[]) => {
@@ -158,7 +158,7 @@ const TestSearch = () => {
     const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
 
     setSearchParams((prev) => updateSearchParams(prev, 'seedWithdrawalEndDate', value));
-    resetAltert();
+    resetAlert();
   };
 
   return (

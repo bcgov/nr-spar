@@ -35,6 +35,6 @@ export type PaginationInfoType = {
   pageSize: number;
 };
 
-export type TestingSearchPageResponseType = {
+export type PaginatedTestingSearchResponseType = {
   content: TestingSearchResponseType[];
 } & PaginationInfoType;

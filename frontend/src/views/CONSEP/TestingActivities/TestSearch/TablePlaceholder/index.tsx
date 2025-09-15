@@ -2,7 +2,7 @@ import React from 'react';
 import EmptySection from '../../../../../components/EmptySection';
 import './styles.scss';
 
-const TablePlaceholder: React.FC = () => (
+const TablePlaceholder = () => (
   <div className="concep-test-search-table-placehoder">
     <EmptySection
       pictogram="Summit"

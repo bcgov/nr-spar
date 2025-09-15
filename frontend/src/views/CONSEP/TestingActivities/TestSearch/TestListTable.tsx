@@ -99,7 +99,6 @@ const TestListTable = ({
               aria-label={label}
               size="md"
               className="concep-test-search-table-toolbar-button"
-              style={{}}
             >
               {label}
               {icon}

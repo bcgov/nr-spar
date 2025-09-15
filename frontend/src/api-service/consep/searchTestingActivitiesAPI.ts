@@ -2,7 +2,7 @@ import ApiConfig from '../ApiConfig';
 import api from '../api';
 
 import { ActivitySearchRequest } from '../../views/CONSEP/TestingActivities/TestSearch/definitions';
-import { TestingSearchPageResponseType } from '../../types/consep/TestingSearchResponseType';
+import { PaginatedTestingSearchResponseType } from '../../types/consep/TestingSearchResponseType';
 
 export const searchTestingActivities = (
   filter: ActivitySearchRequest,
@@ -10,5 +10,5 @@ export const searchTestingActivities = (
   size: number = 20
 ) => {
   const url = `${ApiConfig.searchTestActivities}/search?page=${page}&size=${size}`;
-  return api.post(url, filter).then((res): TestingSearchPageResponseType => res.data);
+  return api.post(url, filter).then((res): PaginatedTestingSearchResponseType => res.data);
 };
