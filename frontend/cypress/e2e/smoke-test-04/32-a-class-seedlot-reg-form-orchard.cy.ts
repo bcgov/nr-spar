@@ -1,5 +1,7 @@
 import prefix from '../../../src/styles/classPrefix';
-import { HALF_SECOND, THIRTY_SECONDS, TYPE_DELAY } from '../../constants';
+import {
+  FIVE_SECONDS, HALF_SECOND, THIRTY_SECONDS, TYPE_DELAY
+} from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
@@ -42,6 +44,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=4`;
         cy.visit(url);
         cy.url().should('contains', url);
+        // Wait for the page title to be visible before proceeding
+        cy.get('.seedlot-orchard-title-row').contains(regFormData.orchard.title, { timeout: FIVE_SECONDS });
       });
     });
   });
