@@ -45,7 +45,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
         seedlotNum = sNumber as string;
         cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
         // Wait for the page title to be visible before proceeding
-        cy.get('.collection-step-row h2')
+        cy.get('.section-title')
+          .eq(0)
+          .find('h2')
           .should('have.text', regFormData.collector.agencyTitle, { timeout: FIVE_SECONDS });
       });
       testAcronym = seedlotData.dr.agencyAcronym;
