@@ -10,7 +10,8 @@ import {
   ComboBox,
   Button,
   TextInput,
-  InlineLoading
+  InlineLoading,
+  InlineNotification
 } from '@carbon/react';
 import {
   Search
@@ -184,6 +185,10 @@ const TestSearch = () => {
     }
   };
 
+  const hasValidationErrors = (): boolean => Object.values(
+    validateSearch
+  ).some((field) => field.error);
+
   return (
     <FlexGrid className="consep-test-search-content">
       <Row className="consep-test-search-breadcrumb">
@@ -193,6 +198,23 @@ const TestSearch = () => {
       </Row>
       <Row className="consep-test-search-title">
         <PageTitle title="Testing activities" />
+      </Row>
+      <Row className="consep-test-search-alert">
+        {
+          hasValidationErrors()
+            ? (
+              <Column sm={4} md={8} lg={16} xlg={12}>
+                <InlineNotification
+                  lowContrast
+                  kind="error"
+                  title="Error fields:"
+                  subtitle="Search activities is disabled until all fields are filled in
+                            correctly."
+                />
+              </Column>
+            )
+            : null
+        }
       </Row>
       <Row className="consep-test-search-filters">
         <Column md={1} lg={2}>
@@ -320,6 +342,7 @@ const TestSearch = () => {
                 });
               }
             }}
+            disabled={hasValidationErrors()}
           >
             Search activity
           </Button>
