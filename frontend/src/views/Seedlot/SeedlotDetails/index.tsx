@@ -187,12 +187,13 @@ const SeedlotDetails = () => {
                   title={getActBtnLabel()}
                   items={manageOptions}
                   menuOptionsClass="edit-seedlot-form"
-                  titleBtnFunc={() => navigate(addParamToPath(
-                    isTscAdmin && seedlotData?.seedlotStatus !== 'Submitted'
-                      ? ROUTES.SEEDLOT_A_CLASS_REGISTRATION
-                      : ROUTES.SEEDLOT_A_CLASS_REVIEW,
-                    seedlotNumber ?? ''
-                  ))}
+                  titleBtnFunc={() => {
+                    let route = ROUTES.SEEDLOT_A_CLASS_REGISTRATION;
+                    if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
+                      route = ROUTES.SEEDLOT_A_CLASS_REVIEW;
+                    }
+                    navigate(addParamToPath(route, seedlotNumber ?? ''));
+                  }}
                 />
               </>
             )
