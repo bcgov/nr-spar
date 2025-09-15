@@ -2,7 +2,9 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.TestCodeDto;
 import ca.bc.gov.oracleapi.service.consep.ActivitySearchService;
+import ca.bc.gov.oracleapi.service.consep.TestCodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,6 +22,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -36,24 +39,22 @@ class ActivitySearchEndpointTest {
 
   @MockBean
   private ActivitySearchService activitySearchService;
+  private TestCodeService testCodeService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
-  private ActivitySearchResponseDto activitySearchResponseDto;
-
-  private String seedlotDisplay, species, requestId, testCategoryCd;
-
-  @BeforeEach
-  void setUp() {
+  // Test for /search
+  @Test
+  void searchTestingActivityData_shouldSucceed() throws Exception {
     // response parameter
-    seedlotDisplay = "00098";
-    requestId = "RTS19981299A";
-    species = "PLI";
+    String seedlotDisplay = "00098";
+    String requestId = "RTS19981299A";
+    String species = "PLI";
     String activityId = "D1";
     String testRank = "A";
     Integer currentTestInd = 0;
-    testCategoryCd = "STD";
+    String testCategoryCd = "STD";
     Integer germinationPct = 88;
     String pv = "77//9";
     Integer moisturePct = 0;
@@ -74,21 +75,17 @@ class ActivitySearchEndpointTest {
     String seedlotSample = "00098";
     Integer riaSkey = 448383;
 
-    activitySearchResponseDto = new ActivitySearchResponseDto(
+    ActivitySearchResponseDto activitySearchResponseDto = new ActivitySearchResponseDto(
       seedlotDisplay, requestId, species, activityId, testRank, currentTestInd,
       testCategoryCd, germinationPct, pv, moisturePct, purityPct, seedsPerGram,
       otherTestResult, testCompleteInd, acceptanceStatus, significntStsInd, seedWithdrawalDate,
       revisedEndDt, actualBeginDtTm, actualEndDtTm, riaComment, requestSkey,
       reqId, itemId, seedlotSample, riaSkey
     );
-  }
 
-  @Test
-  void searchTestingActivityData_shouldSucceed() throws Exception {
     // request parameter for filtering
     List<String> lotNumbers = List.of("00098");
     String testType = "D1";
-    String activityId = "D1";
     Integer germinatorTrayId = null;
     LocalDate seedWithdrawalStartDate = LocalDate.of(1997, 10, 1);
     LocalDate seedWithdrawalEndDate = LocalDate.of(1998, 10, 31);
@@ -97,7 +94,6 @@ class ActivitySearchEndpointTest {
     String requestType = "RTS";
     Integer requestYear = 1998;
     String orchardId = null;
-    String testRank = "A"; // testRank
     LocalDate actualBeginDateFrom = LocalDate.of(1997, 10, 1);
     LocalDate actualBeginDateTo = LocalDate.of(1997, 10, 10);
     LocalDate actualEndDateFrom = LocalDate.of(1997, 11, 1);
@@ -108,9 +104,7 @@ class ActivitySearchEndpointTest {
     LocalDate revisedEndDateTo = LocalDate.of(1997, 11, 10);
     Integer germTrayAssignment = -1;
     Integer completeStatus = -1;
-    Integer acceptanceStatus = -1;
     String seedlotClass = "A";
-
 
     ActivitySearchRequestDto activitySearchRequestDto = new ActivitySearchRequestDto(
       lotNumbers, testType, activityId, germinatorTrayId,
@@ -124,10 +118,8 @@ class ActivitySearchEndpointTest {
       germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
     );
 
-
     Mockito.when(activitySearchService.searchActivities(Mockito.any(), Mockito.any()))
       .thenReturn(List.of(activitySearchResponseDto));
-
 
     mockMvc.perform(post("/api/testing-activities/search")
         .with(csrf().asHeader())
@@ -140,5 +132,48 @@ class ActivitySearchEndpointTest {
       .andExpect(jsonPath("$[0].requestItem").value(requestId))
       .andExpect(jsonPath("$[0].species").value(species))
       .andExpect(jsonPath("$[0].testCategoryCd").value(testCategoryCd));
+  }
+
+  // Test for /type-codes
+  @Test
+  void getTestTypeCodes_shouldReturnList() throws Exception {
+    List<TestCodeDto> mockCodes = List.of(
+      new TestCodeDto("ACT1", "Activity 1"),
+      new TestCodeDto("ACT2", "Activity 2")
+    );
+
+    Mockito.when(testCodeService.getTestTypeCodes()).thenReturn(mockCodes);
+
+    mockMvc.perform(get("/api/testing-activities/type-codes")
+        .with(csrf().asHeader())
+        .accept(APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$", hasSize(2)))
+      .andExpect(jsonPath("$[0].code").value("ACT1"))
+      .andExpect(jsonPath("$[0].description").value("Activity 1"))
+      .andExpect(jsonPath("$[1].code").value("ACT2"))
+      .andExpect(jsonPath("$[1].description").value("Activity 2"));
+  }
+
+
+  // Test for /category-codes
+  @Test
+  void getTestCategoryCodes_shouldReturnList() throws Exception {
+    List<TestCodeDto> mockCodes = List.of(
+      new TestCodeDto("CAT1", "Category 1"),
+      new TestCodeDto("CAT2", "Category 2")
+    );
+
+    Mockito.when(testCodeService.getTestCategoryCodes()).thenReturn(mockCodes);
+
+    mockMvc.perform(get("/api/testing-activities/category-codes")
+        .with(csrf().asHeader())
+        .accept(APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$", hasSize(2)))
+      .andExpect(jsonPath("$[0].code").value("CAT1"))
+      .andExpect(jsonPath("$[0].description").value("Category 1"))
+      .andExpect(jsonPath("$[1].code").value("CAT2"))
+      .andExpect(jsonPath("$[1].description").value("Category 2"));
   }
 }
