@@ -1,8 +1,8 @@
 package ca.bc.gov.oracleapi.service.consep;
 
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +27,12 @@ public class ActivitySearchService {
    * The repository handles pagination via {@link Pageable}.
    *
    * @param activitySearchRequestDto The DTO containing all filter criteria for the search.
-   * @param pageable Pagination information (page number and size).
+   * @param pageable                 Pagination information (page number and size).
    * @return A paginated response containing {@link ActivitySearchResponseDto} and total count.
    */
   public ActivitySearchPageResponseDto searchTestingActivities(
-    ActivitySearchRequestDto activitySearchRequestDto,
-    Pageable pageable) {
+      ActivitySearchRequestDto activitySearchRequestDto,
+      Pageable pageable) {
 
     // Fetch paginated results from repository
     Page<ActivitySearchResultEntity> results = activitySearchRepository.searchTestingActivities(
@@ -71,11 +71,11 @@ public class ActivitySearchService {
 
     // Wrap into paginated response
     return new ActivitySearchPageResponseDto(
-      dtoPage.getContent(),
-      dtoPage.getTotalElements(),
-      dtoPage.getTotalPages(),
-      dtoPage.getNumber(),
-      dtoPage.getSize()
+        dtoPage.getContent(),
+        dtoPage.getTotalElements(),
+        dtoPage.getTotalPages(),
+        dtoPage.getNumber(),
+        dtoPage.getSize()
     );
   }
 
@@ -88,32 +88,32 @@ public class ActivitySearchService {
    */
   private ActivitySearchResponseDto toDto(ActivitySearchResultEntity activitySearchResultEntity) {
     return new ActivitySearchResponseDto(
-      activitySearchResultEntity.getSeedlotDisplay(),
-      activitySearchResultEntity.getRequestItem(),
-      activitySearchResultEntity.getSpecies(),
-      activitySearchResultEntity.getActivityId(),
-      activitySearchResultEntity.getTestRank(),
-      activitySearchResultEntity.getCurrentTestInd(),
-      activitySearchResultEntity.getTestCategoryCd(),
-      activitySearchResultEntity.getGerminationPct(),
-      activitySearchResultEntity.getPv(),
-      activitySearchResultEntity.getMoisturePct(),
-      activitySearchResultEntity.getPurityPct(),
-      activitySearchResultEntity.getSeedsPerGram(),
-      activitySearchResultEntity.getOtherTestResult(),
-      activitySearchResultEntity.getTestCompleteInd(),
-      activitySearchResultEntity.getAcceptResultInd(),
-      activitySearchResultEntity.getSignificntStsInd(),
-      activitySearchResultEntity.getSeedWithdrawalDate(),
-      activitySearchResultEntity.getRevisedEndDt(),
-      activitySearchResultEntity.getActualBeginDtTm(),
-      activitySearchResultEntity.getActualEndDtTm(),
-      activitySearchResultEntity.getRiaComment(),
-      activitySearchResultEntity.getRequestSkey(),
-      activitySearchResultEntity.getReqId(),
-      activitySearchResultEntity.getItemId(),
-      activitySearchResultEntity.getSeedlotSample(),
-      activitySearchResultEntity.getRiaSkey()
+        activitySearchResultEntity.getSeedlotDisplay(),
+        activitySearchResultEntity.getRequestItem(),
+        activitySearchResultEntity.getSpecies(),
+        activitySearchResultEntity.getActivityId(),
+        activitySearchResultEntity.getTestRank(),
+        activitySearchResultEntity.getCurrentTestInd(),
+        activitySearchResultEntity.getTestCategoryCd(),
+        activitySearchResultEntity.getGerminationPct(),
+        activitySearchResultEntity.getPv(),
+        activitySearchResultEntity.getMoisturePct(),
+        activitySearchResultEntity.getPurityPct(),
+        activitySearchResultEntity.getSeedsPerGram(),
+        activitySearchResultEntity.getOtherTestResult(),
+        activitySearchResultEntity.getTestCompleteInd(),
+        activitySearchResultEntity.getAcceptResultInd(),
+        activitySearchResultEntity.getSignificntStsInd(),
+        activitySearchResultEntity.getSeedWithdrawalDate(),
+        activitySearchResultEntity.getRevisedEndDt(),
+        activitySearchResultEntity.getActualBeginDtTm(),
+        activitySearchResultEntity.getActualEndDtTm(),
+        activitySearchResultEntity.getRiaComment(),
+        activitySearchResultEntity.getRequestSkey(),
+        activitySearchResultEntity.getReqId(),
+        activitySearchResultEntity.getItemId(),
+        activitySearchResultEntity.getSeedlotSample(),
+        activitySearchResultEntity.getRiaSkey()
     );
   }
 }

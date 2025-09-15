@@ -285,7 +285,6 @@ const TestSearch = () => {
           <Column>
             {alert?.message && (
               <InlineNotification
-                style={{ maxInlineSize: 'none' }}
                 lowContrast
                 kind={alert.status}
                 subtitle={alert?.message}

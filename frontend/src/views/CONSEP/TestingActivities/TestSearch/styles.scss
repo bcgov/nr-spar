@@ -79,4 +79,8 @@
       margin-top: 0.15rem;
     }
   }
+
+  .#{vars.$bcgov-prefix}--inline-notification {
+    max-inline-size: none;
+  }
 }

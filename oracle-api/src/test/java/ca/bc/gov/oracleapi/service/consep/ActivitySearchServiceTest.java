@@ -1,10 +1,18 @@
 package ca.bc.gov.oracleapi.service.consep;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,16 +23,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import java.util.ArrayList;
-
 
 @ExtendWith(SpringExtension.class)
 class ActivitySearchServiceTest {
@@ -42,13 +40,15 @@ class ActivitySearchServiceTest {
 
   // Test data
   private List<String> lotNumbers;
-  private String testType, activityId, requestId, requestType, orchardId, testCategoryCd, testRank, species, seedlotClass,
-    seedlotSample, riaComment, requestItem, pv, seedlotDisplaySeedlot, seedlotDisplayFamilylot;
-  private Integer germinatorTrayId, requestYear, germTrayAssignment, completeStatus, acceptanceStatus, riaSkey, currentTestInd,
-    germinationPct, moisturePct, purityPct, seedsPerGram, otherTestResult, significntStsInd, requestSkey;
-  private LocalDate seedWithdrawalStartDate, seedWithdrawalEndDate, actualBeginDateFrom, actualBeginDateTo,
-    actualEndDateFrom, actualEndDateTo, revisedStartDateFrom, revisedStartDateTo,
-    revisedEndDateFrom, revisedEndDateTo;
+  private String testType, activityId, requestId, requestType, orchardId, testCategoryCd, testRank,
+      species, seedlotClass, seedlotSample, riaComment, requestItem, pv, seedlotDisplaySeedlot,
+      seedlotDisplayFamilylot;
+  private Integer germinatorTrayId, requestYear, germTrayAssignment, completeStatus,
+      acceptanceStatus, riaSkey, currentTestInd, germinationPct, moisturePct, purityPct,
+      seedsPerGram, otherTestResult, significntStsInd, requestSkey;
+  private LocalDate seedWithdrawalStartDate, seedWithdrawalEndDate, actualBeginDateFrom,
+      actualBeginDateTo, actualEndDateFrom, actualEndDateTo, revisedStartDateFrom,
+      revisedStartDateTo, revisedEndDateFrom, revisedEndDateTo;
   private LocalDateTime actualBeginDtTm, actualEndDtTm;
   private Boolean includeHistoricalTests, germTestsOnly;
 
@@ -86,15 +86,15 @@ class ActivitySearchServiceTest {
     seedlotClass = "A";
 
     activitySearchRequestDto = new ActivitySearchRequestDto(
-      lotNumbers, testType, activityId, germinatorTrayId,
-      seedWithdrawalStartDate, seedWithdrawalEndDate,
-      includeHistoricalTests, germTestsOnly, requestId, requestType,
-      requestYear, orchardId, testCategoryCd, testRank, species,
-      actualBeginDateFrom, actualBeginDateTo,
-      actualEndDateFrom, actualEndDateTo,
-      revisedStartDateFrom, revisedStartDateTo,
-      revisedEndDateFrom, revisedEndDateTo,
-      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
+        lotNumbers, testType, activityId, germinatorTrayId,
+        seedWithdrawalStartDate, seedWithdrawalEndDate,
+        includeHistoricalTests, germTestsOnly, requestId, requestType,
+        requestYear, orchardId, testCategoryCd, testRank, species,
+        actualBeginDateFrom, actualBeginDateTo,
+        actualEndDateFrom, actualEndDateTo,
+        revisedStartDateFrom, revisedStartDateTo,
+        revisedEndDateFrom, revisedEndDateTo,
+        germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
     );
 
     // Search return result
@@ -159,24 +159,26 @@ class ActivitySearchServiceTest {
   void shouldReturnMappedResults() {
     Pageable pageable = PageRequest.of(0, 10);
     Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(
-      List.of(activitySearchResultEntityOne),
-      pageable,
-      1 // total elements
+        List.of(activitySearchResultEntityOne),
+        pageable,
+        1 // total elements
     );
 
     when(activitySearchRepository.searchTestingActivities(
-      lotNumbers, testType, activityId, germinatorTrayId,
-      seedWithdrawalStartDate, seedWithdrawalEndDate,
-      includeHistoricalTests, germTestsOnly, requestId, requestType,
-      requestYear, orchardId, testCategoryCd, testRank, species,
-      actualBeginDateFrom, actualBeginDateTo,
-      actualEndDateFrom, actualEndDateTo,
-      revisedStartDateFrom, revisedStartDateTo,
-      revisedEndDateFrom, revisedEndDateTo,
-      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass, pageable
+        lotNumbers, testType, activityId, germinatorTrayId,
+        seedWithdrawalStartDate, seedWithdrawalEndDate,
+        includeHistoricalTests, germTestsOnly, requestId, requestType,
+        requestYear, orchardId, testCategoryCd, testRank, species,
+        actualBeginDateFrom, actualBeginDateTo,
+        actualEndDateFrom, actualEndDateTo,
+        revisedStartDateFrom, revisedStartDateTo,
+        revisedEndDateFrom, revisedEndDateTo,
+        germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass, pageable
     )).thenReturn(mockPage);
 
-    ActivitySearchPageResponseDto pageResponse = activitySearchService.searchTestingActivities(activitySearchRequestDto, pageable);
+    ActivitySearchPageResponseDto pageResponse = activitySearchService.searchTestingActivities(
+        activitySearchRequestDto, pageable
+    );
 
     assertThat(pageResponse.content()).hasSize(1);
     assertThat(pageResponse.totalElements()).isEqualTo(1);
@@ -207,50 +209,53 @@ class ActivitySearchServiceTest {
     assertThat(activitySearchResponseDto.riaComment()).isEqualTo(riaComment);
     assertThat(activitySearchResponseDto.requestSkey()).isEqualTo(requestSkey);
     assertThat(activitySearchResponseDto.reqId()).isEqualTo(requestId.substring(0, 11));
-    assertThat(activitySearchResponseDto.itemId()).isEqualTo(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
+    assertThat(activitySearchResponseDto.itemId())
+        .isEqualTo(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
     assertThat(activitySearchResponseDto.seedlotSample()).isEqualTo(seedlotSample);
     assertThat(activitySearchResponseDto.riaSkey()).isEqualTo(riaSkey);
 
     verify(activitySearchRepository, times(1)).searchTestingActivities(
-      lotNumbers, testType, activityId, germinatorTrayId,
-      seedWithdrawalStartDate, seedWithdrawalEndDate,
-      includeHistoricalTests, germTestsOnly, requestId, requestType,
-      requestYear, orchardId, testCategoryCd, testRank, species,
-      actualBeginDateFrom, actualBeginDateTo,
-      actualEndDateFrom, actualEndDateTo,
-      revisedStartDateFrom, revisedStartDateTo,
-      revisedEndDateFrom, revisedEndDateTo,
-      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass, pageable
+        lotNumbers, testType, activityId, germinatorTrayId,
+        seedWithdrawalStartDate, seedWithdrawalEndDate,
+        includeHistoricalTests, germTestsOnly, requestId, requestType,
+        requestYear, orchardId, testCategoryCd, testRank, species,
+        actualBeginDateFrom, actualBeginDateTo,
+        actualEndDateFrom, actualEndDateTo,
+        revisedStartDateFrom, revisedStartDateTo,
+        revisedEndDateFrom, revisedEndDateTo,
+        germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass, pageable
     );
   }
 
   @Test
   void shouldReturnAllResultsWhenNoFiltersProvided() {
     ActivitySearchRequestDto emptyRequest = new ActivitySearchRequestDto(
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null
     );
 
     Pageable pageable = PageRequest.of(0, 10);
     Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(
-      activitySearchResults,
-      pageable,
-      activitySearchResults.size() // total elements
+        activitySearchResults,
+        pageable,
+        activitySearchResults.size() // total elements
     );
 
     // mock return 2 results
     when(activitySearchRepository.searchTestingActivities(
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, pageable
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, pageable
     )).thenReturn(mockPage);
 
-    List<ActivitySearchResponseDto> result = activitySearchService.searchTestingActivities(emptyRequest, pageable).content();
+    List<ActivitySearchResponseDto> result = activitySearchService
+        .searchTestingActivities(emptyRequest, pageable)
+        .content();
 
     assertThat(result).hasSize(2);
 
@@ -266,31 +271,32 @@ class ActivitySearchServiceTest {
   void shouldReturnEmptyListWhenNoResultsFound() {
     // filter by requestYear = 2025
     ActivitySearchRequestDto emptyRequest = new ActivitySearchRequestDto(
-      null, null, null, null, null, null,
-      null, null, null, null, 2025, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null
+        null, null, null, null, null, null,
+        null, null, null, null, 2025, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null
     );
 
     Pageable pageable = PageRequest.of(0, 10);
 
     // mock empty page
     Page<ActivitySearchResultEntity> emptyPage = new PageImpl<>(
-      Collections.emptyList(),
-      pageable,
-      0
+        Collections.emptyList(),
+        pageable,
+        0
     );
 
     when(activitySearchRepository.searchTestingActivities(
-      null, null, null, null, null, null,
-      null, null, null, null, 2025, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, pageable
+        null, null, null, null, null, null,
+        null, null, null, null, 2025, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, pageable
     )).thenReturn(emptyPage);
 
-    List<ActivitySearchResponseDto> result = activitySearchService.searchTestingActivities(emptyRequest, pageable).content();
+    List<ActivitySearchResponseDto> result = activitySearchService
+        .searchTestingActivities(emptyRequest, pageable).content();
 
     assertThat(result).isEmpty();
   }
