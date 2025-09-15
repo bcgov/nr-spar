@@ -75,19 +75,14 @@ const TestListTable = ({
   return (
     <div className="concep-test-search-table-container">
       <Row className="concep-test-search-table-toolbar">
-        <Column sm={6} md={6} lg={6} className="concep-test-search-table-title">
+        <Column sm={2} md={3} lg={6} className="concep-test-search-table-title">
           {`Total search result: ${paginationInfo.totalElements}`}
         </Column>
         <Column
-          sm={10}
-          md={10}
+          sm={2}
+          md={5}
           lg={10}
-          style={{
-            paddingRight: '0rem',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            flexWrap: 'wrap'
-          }}
+          className="concep-test-search-table-toolbar"
         >
           {actions.map(({
             label, icon, action, type

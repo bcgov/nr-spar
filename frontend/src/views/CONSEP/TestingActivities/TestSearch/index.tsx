@@ -101,11 +101,11 @@ const TestSearch = () => {
     );
   };
 
-  const updateSearchParams = <T extends object, K extends keyof T>(
-    prev: T,
+  const updateSearchParams = <K extends keyof ActivitySearchRequest>(
+    prev: ActivitySearchRequest,
     key: K,
-    value: T[K] | null
-  ): T => {
+    value: ActivitySearchRequest[K] | null
+  ) => {
     const updated = { ...prev };
 
     if (value != null) {

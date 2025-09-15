@@ -60,6 +60,13 @@
       height: 100%;
     }
 
+    .concep-test-search-table-toolbar {
+      padding-right: 0rem;
+      display: 'flex';
+      justify-content: 'flex-end';
+      flex-wrap: 'wrap';
+    }
+
     .concep-test-search-table-toolbar-button {
       padding: 0.813rem 0.75rem;
       border-radius: 0rem;
