@@ -309,7 +309,15 @@ const PurityContent = () => {
   const handleCalculateAverage = () => {
     if (tableBodyRef.current) {
       const cells = tableBodyRef.current.querySelectorAll('td[data-index="4"]');
-      const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+      const acceptCells = tableBodyRef.current.querySelectorAll('td[data-index="5"]');
+      const numbers = Array.from(cells).map((cell, index) => {
+        const checkbox = acceptCells[index].querySelector('input[type="checkbox"]');
+        if (checkbox instanceof HTMLInputElement && checkbox.checked) {
+          const value = parseFloat(cell.textContent || '');
+          return Number.isNaN(value) ? 0 : value;
+        }
+        return null;
+      }).filter((num): num is number => num !== null);
       averageTest.mutate(numbers);
     } else {
       setAlert({

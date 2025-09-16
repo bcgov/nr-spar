@@ -55,7 +55,7 @@ const MoistureContent = () => {
   const [activityRiaKey, setActivityRiaKey] = useState<number>(0);
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [mcType, setMCType] = useState<string>('MCC');
-  const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+  const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>();
   const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
@@ -250,7 +250,15 @@ const MoistureContent = () => {
         if (tableBodyRef.current) {
           // Extract cell values from the table
           const cells = tableBodyRef.current.querySelectorAll('td[data-index="6"]');
-          const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+          const acceptCells = tableBodyRef.current.querySelectorAll('td[data-index="7"]');
+          const numbers = Array.from(cells).map((cell, index) => {
+            const checkbox = acceptCells[index].querySelector('input[type="checkbox"]');
+            if (checkbox instanceof HTMLInputElement && checkbox.checked) {
+              const value = parseFloat(cell.textContent || '');
+              return Number.isNaN(value) ? 0 : value;
+            }
+            return null;
+          }).filter((num): num is number => num !== null);
           // Call the mutate function with the extracted numbers
           averageTest.mutate(numbers);
         } else {
