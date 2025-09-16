@@ -62,7 +62,7 @@ public class ActivitySearchService {
         activitySearchRequestDto.germTrayAssignment(),
         activitySearchRequestDto.completeStatus(),
         activitySearchRequestDto.acceptanceStatus(),
-        activitySearchRequestDto.seedlotClass(),
+        activitySearchRequestDto.geneticClassCode(),
         pageable
     );
 

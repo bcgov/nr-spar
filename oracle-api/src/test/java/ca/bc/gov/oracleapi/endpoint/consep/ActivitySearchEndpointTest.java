@@ -110,7 +110,7 @@ class ActivitySearchEndpointTest {
     Integer germTrayAssignment = -1;
     Integer completeStatus = -1;
     Integer acceptanceStatus = -1;
-    String seedlotClass = "A";
+    String geneticClassCode = "A";
 
     ActivitySearchRequestDto activitySearchRequestDto = new ActivitySearchRequestDto(
         lotNumbers, testType, activityId, germinatorTrayId,
@@ -121,7 +121,7 @@ class ActivitySearchEndpointTest {
         actualEndDateFrom, actualEndDateTo,
         revisedStartDateFrom, revisedStartDateTo,
         revisedEndDateFrom, revisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode
     );
 
     // Mock paginated response
