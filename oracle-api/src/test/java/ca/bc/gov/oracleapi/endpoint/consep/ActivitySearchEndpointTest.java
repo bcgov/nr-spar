@@ -1,8 +1,20 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.service.consep.ActivitySearchService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,20 +23,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.hamcrest.Matchers.hasSize;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 
 @WebMvcTest(ActivitySearchEndpoint.class)
@@ -42,7 +40,10 @@ class ActivitySearchEndpointTest {
 
   private ActivitySearchResponseDto activitySearchResponseDto;
 
-  private String seedlotDisplay, species, requestId, testCategoryCd;
+  private String seedlotDisplay;
+  private String species;
+  private String requestId;
+  private String testCategoryCd;
 
   @BeforeEach
   void setUp() {
@@ -75,11 +76,11 @@ class ActivitySearchEndpointTest {
     Integer riaSkey = 448383;
 
     activitySearchResponseDto = new ActivitySearchResponseDto(
-      seedlotDisplay, requestId, species, activityId, testRank, currentTestInd,
-      testCategoryCd, germinationPct, pv, moisturePct, purityPct, seedsPerGram,
-      otherTestResult, testCompleteInd, acceptanceStatus, significntStsInd, seedWithdrawalDate,
-      revisedEndDt, actualBeginDtTm, actualEndDtTm, riaComment, requestSkey,
-      reqId, itemId, seedlotSample, riaSkey
+        seedlotDisplay, requestId, species, activityId, testRank, currentTestInd,
+        testCategoryCd, germinationPct, pv, moisturePct, purityPct, seedsPerGram,
+        otherTestResult, testCompleteInd, acceptanceStatus, significntStsInd, seedWithdrawalDate,
+        revisedEndDt, actualBeginDtTm, actualEndDtTm, riaComment, requestSkey,
+        reqId, itemId, seedlotSample, riaSkey
     );
   }
 
@@ -97,7 +98,7 @@ class ActivitySearchEndpointTest {
     String requestType = "RTS";
     Integer requestYear = 1998;
     String orchardId = null;
-    String testRank = "A"; // testRank
+    String testRank = "A";
     LocalDate actualBeginDateFrom = LocalDate.of(1997, 10, 1);
     LocalDate actualBeginDateTo = LocalDate.of(1997, 10, 10);
     LocalDate actualEndDateFrom = LocalDate.of(1997, 11, 1);
@@ -111,34 +112,41 @@ class ActivitySearchEndpointTest {
     Integer acceptanceStatus = -1;
     String seedlotClass = "A";
 
-
     ActivitySearchRequestDto activitySearchRequestDto = new ActivitySearchRequestDto(
-      lotNumbers, testType, activityId, germinatorTrayId,
-      seedWithdrawalStartDate, seedWithdrawalEndDate,
-      includeHistoricalTests, germTestsOnly, requestId, requestType,
-      requestYear, orchardId, testCategoryCd, testRank, species,
-      actualBeginDateFrom, actualBeginDateTo,
-      actualEndDateFrom, actualEndDateTo,
-      revisedStartDateFrom, revisedStartDateTo,
-      revisedEndDateFrom, revisedEndDateTo,
-      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
+        lotNumbers, testType, activityId, germinatorTrayId,
+        seedWithdrawalStartDate, seedWithdrawalEndDate,
+        includeHistoricalTests, germTestsOnly, requestId, requestType,
+        requestYear, orchardId, testCategoryCd, testRank, species,
+        actualBeginDateFrom, actualBeginDateTo,
+        actualEndDateFrom, actualEndDateTo,
+        revisedStartDateFrom, revisedStartDateTo,
+        revisedEndDateFrom, revisedEndDateTo,
+        germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
     );
 
+    // Mock paginated response
+    ActivitySearchPageResponseDto pageResponse = new ActivitySearchPageResponseDto(
+        List.of(activitySearchResponseDto), // content
+        1L,                                 // totalElements
+        1,                                  // totalPages
+        0,                                  // pageNumber
+        20                                  // pageSize
+    );
 
-    Mockito.when(activitySearchService.searchActivities(Mockito.any(), Mockito.any()))
-      .thenReturn(List.of(activitySearchResponseDto));
-
+    Mockito.when(activitySearchService.searchTestingActivities(Mockito.any(), Mockito.any()))
+        .thenReturn(pageResponse);
 
     mockMvc.perform(post("/api/testing-activities/search")
-        .with(csrf().asHeader())
-        .contentType(APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(activitySearchRequestDto))
-        .accept(APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$", hasSize(1)))
-      .andExpect(jsonPath("$[0].seedlotDisplay").value(seedlotDisplay))
-      .andExpect(jsonPath("$[0].requestItem").value(requestId))
-      .andExpect(jsonPath("$[0].species").value(species))
-      .andExpect(jsonPath("$[0].testCategoryCd").value(testCategoryCd));
+            .with(csrf().asHeader())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(activitySearchRequestDto))
+            .accept(APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content", hasSize(1)))
+        .andExpect(jsonPath("$.content[0].seedlotDisplay").value(seedlotDisplay))
+        .andExpect(jsonPath("$.content[0].requestItem").value(requestId))
+        .andExpect(jsonPath("$.content[0].species").value(species))
+        .andExpect(jsonPath("$.content[0].testCategoryCd").value(testCategoryCd))
+        .andExpect(jsonPath("$.totalElements").value(1));
   }
 }
