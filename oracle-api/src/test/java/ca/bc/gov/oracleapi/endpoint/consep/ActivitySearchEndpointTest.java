@@ -1,11 +1,24 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.TestCodeDto;
 import ca.bc.gov.oracleapi.service.consep.ActivitySearchService;
 import ca.bc.gov.oracleapi.service.consep.TestCodeService;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,22 +26,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.hamcrest.Matchers.hasSize;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-
 
 @WebMvcTest(ActivitySearchEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
@@ -76,11 +73,11 @@ class ActivitySearchEndpointTest {
     Integer riaSkey = 448383;
 
     ActivitySearchResponseDto activitySearchResponseDto = new ActivitySearchResponseDto(
-      seedlotDisplay, requestId, species, activityId, testRank, currentTestInd,
-      testCategoryCd, germinationPct, pv, moisturePct, purityPct, seedsPerGram,
-      otherTestResult, testCompleteInd, acceptanceStatus, significntStsInd, seedWithdrawalDate,
-      revisedEndDt, actualBeginDtTm, actualEndDtTm, riaComment, requestSkey,
-      reqId, itemId, seedlotSample, riaSkey
+        seedlotDisplay, requestId, species, activityId, testRank, currentTestInd,
+        testCategoryCd, germinationPct, pv, moisturePct, purityPct, seedsPerGram,
+        otherTestResult, testCompleteInd, acceptanceStatus, significntStsInd, seedWithdrawalDate,
+        revisedEndDt, actualBeginDtTm, actualEndDtTm, riaComment, requestSkey,
+        reqId, itemId, seedlotSample, riaSkey
     );
 
     // request parameter for filtering
@@ -104,55 +101,65 @@ class ActivitySearchEndpointTest {
     LocalDate revisedEndDateTo = LocalDate.of(1997, 11, 10);
     Integer germTrayAssignment = -1;
     Integer completeStatus = -1;
-    String seedlotClass = "A";
+    String geneticClassCode = "A";
 
     ActivitySearchRequestDto activitySearchRequestDto = new ActivitySearchRequestDto(
-      lotNumbers, testType, activityId, germinatorTrayId,
-      seedWithdrawalStartDate, seedWithdrawalEndDate,
-      includeHistoricalTests, germTestsOnly, requestId, requestType,
-      requestYear, orchardId, testCategoryCd, testRank, species,
-      actualBeginDateFrom, actualBeginDateTo,
-      actualEndDateFrom, actualEndDateTo,
-      revisedStartDateFrom, revisedStartDateTo,
-      revisedEndDateFrom, revisedEndDateTo,
-      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
+        lotNumbers, testType, activityId, germinatorTrayId,
+        seedWithdrawalStartDate, seedWithdrawalEndDate,
+        includeHistoricalTests, germTestsOnly, requestId, requestType,
+        requestYear, orchardId, testCategoryCd, testRank, species,
+        actualBeginDateFrom, actualBeginDateTo,
+        actualEndDateFrom, actualEndDateTo,
+        revisedStartDateFrom, revisedStartDateTo,
+        revisedEndDateFrom, revisedEndDateTo,
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode
     );
 
-    Mockito.when(activitySearchService.searchActivities(Mockito.any(), Mockito.any()))
-      .thenReturn(List.of(activitySearchResponseDto));
+    // Mock paginated response
+    ActivitySearchPageResponseDto pageResponse = new ActivitySearchPageResponseDto(
+        List.of(activitySearchResponseDto), // content
+        1L,                                 // totalElements
+        1,                                  // totalPages
+        0,                                  // pageNumber
+        20                                  // pageSize
+    );
+
+    Mockito.when(activitySearchService.searchTestingActivities(Mockito.any(), Mockito.any()))
+        .thenReturn(pageResponse);
 
     mockMvc.perform(post("/api/testing-activities/search")
-        .with(csrf().asHeader())
-        .contentType(APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(activitySearchRequestDto))
-        .accept(APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$", hasSize(1)))
-      .andExpect(jsonPath("$[0].seedlotDisplay").value(seedlotDisplay))
-      .andExpect(jsonPath("$[0].requestItem").value(requestId))
-      .andExpect(jsonPath("$[0].species").value(species))
-      .andExpect(jsonPath("$[0].testCategoryCd").value(testCategoryCd));
+            .with(csrf().asHeader())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(activitySearchRequestDto))
+            .accept(APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content", hasSize(1)))
+        .andExpect(jsonPath("$.content[0].seedlotDisplay").value(seedlotDisplay))
+        .andExpect(jsonPath("$.content[0].requestItem").value(requestId))
+        .andExpect(jsonPath("$.content[0].species").value(species))
+        .andExpect(jsonPath("$.content[0].testCategoryCd").value(testCategoryCd))
+        .andExpect(jsonPath("$.totalElements").value(1));
   }
 
   // Test for /type-codes
   @Test
   void getTestTypeCodes_shouldReturnList() throws Exception {
     List<TestCodeDto> mockCodes = List.of(
-      new TestCodeDto("ACT1", "Activity 1"),
-      new TestCodeDto("ACT2", "Activity 2")
+        new TestCodeDto("ACT1", "Activity 1"),
+        new TestCodeDto("ACT2", "Activity 2")
     );
 
     Mockito.when(testCodeService.getTestTypeCodes()).thenReturn(mockCodes);
 
     mockMvc.perform(get("/api/testing-activities/type-codes")
-        .with(csrf().asHeader())
-        .accept(APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$", hasSize(2)))
-      .andExpect(jsonPath("$[0].code").value("ACT1"))
-      .andExpect(jsonPath("$[0].description").value("Activity 1"))
-      .andExpect(jsonPath("$[1].code").value("ACT2"))
-      .andExpect(jsonPath("$[1].description").value("Activity 2"));
+            .with(csrf().asHeader())
+            .accept(APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("$[0].code").value("ACT1"))
+        .andExpect(jsonPath("$[0].description").value("Activity 1"))
+        .andExpect(jsonPath("$[1].code").value("ACT2"))
+        .andExpect(jsonPath("$[1].description").value("Activity 2"));
   }
 
 
@@ -160,20 +167,20 @@ class ActivitySearchEndpointTest {
   @Test
   void getTestCategoryCodes_shouldReturnList() throws Exception {
     List<TestCodeDto> mockCodes = List.of(
-      new TestCodeDto("CAT1", "Category 1"),
-      new TestCodeDto("CAT2", "Category 2")
+        new TestCodeDto("CAT1", "Category 1"),
+        new TestCodeDto("CAT2", "Category 2")
     );
 
     Mockito.when(testCodeService.getTestCategoryCodes()).thenReturn(mockCodes);
 
     mockMvc.perform(get("/api/testing-activities/category-codes")
-        .with(csrf().asHeader())
-        .accept(APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$", hasSize(2)))
-      .andExpect(jsonPath("$[0].code").value("CAT1"))
-      .andExpect(jsonPath("$[0].description").value("Category 1"))
-      .andExpect(jsonPath("$[1].code").value("CAT2"))
-      .andExpect(jsonPath("$[1].description").value("Category 2"));
+            .with(csrf().asHeader())
+            .accept(APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("$[0].code").value("CAT1"))
+        .andExpect(jsonPath("$[0].description").value("Category 1"))
+        .andExpect(jsonPath("$[1].code").value("CAT2"))
+        .andExpect(jsonPath("$[1].description").value("Category 2"));
   }
 }
