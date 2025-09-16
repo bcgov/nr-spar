@@ -19,7 +19,8 @@ describe('My seedlots page', () => {
       speciesKeys = Object.keys(fixtureData);
     });
     // Wait for the page title to be visible before proceeding
-    cy.get('.title-section h1')
+    cy.get('.title-section')
+      .find('h1')
       .should('have.text', PageHeaderLabels.MySeedlots, { timeout: FIVE_SECONDS });
   });
 
