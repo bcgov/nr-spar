@@ -47,7 +47,7 @@ export const testSearchCrumbs: CrumbType[] = [
 export const advDateTypes: string[] = ['actual', 'revised'];
 
 export const emptyActivitySearchRequest: ActivitySearchRequest = {
-  lotNumbers: [],
+  lotNumbers: undefined,
   testType: undefined,
   activityId: undefined,
   germinatorTrayId: undefined,

@@ -609,7 +609,7 @@ const AdvancedFilters = ({
               />
               <Checkbox
                 id="acception-unaccepted"
-                labelText="Unassigned"
+                labelText="Unaccepted"
                 checked={searchParams.acceptanceStatus === 0}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCheckboxGroupsChange(e, 'acceptanceStatus')}
               />
