@@ -20,6 +20,7 @@ public class ConsepOracleQueryConstants {
       WHERE (:testType IS NULL OR a.activityTypeCd = :testType)
         AND (:activityId IS NULL OR a.activityId = :activityId)
         AND (:lotNumbers IS NULL OR a.seedlotDisplay IN :lotNumbers)
+        AND (:germinatorTrayId IS NULL OR a.germinatorTrayId = :germinatorTrayId)
         AND (:seedWithdrawalStartDate IS NULL OR a.seedWithdrawalDate >= :seedWithdrawalStartDate)
         AND (:seedWithdrawalEndDate IS NULL OR a.seedWithdrawalDate <= :seedWithdrawalEndDate)
         AND (:includeHistoricalTests IS NULL OR :includeHistoricalTests = true OR a.requestSkey != 0)
@@ -43,6 +44,7 @@ public class ConsepOracleQueryConstants {
         AND (:germTrayAssignment IS NULL OR a.assignedTrayId = :germTrayAssignment)
         AND (:completeStatus IS NULL OR a.testCompleteInd = :completeStatus)
         AND (:acceptanceStatus IS NULL OR a.acceptResultInd = :acceptanceStatus)
+        AND (:geneticClassCode IS NULL OR a.geneticClassCode = :geneticClassCode)
       ORDER BY a.seedlotSample, a.actualBeginDtTm
       """;
 }

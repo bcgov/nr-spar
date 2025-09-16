@@ -131,6 +131,6 @@ public record ActivitySearchRequestDto(
     @Schema(description = "Genetic class code: A = A Class, B = B Class",
         allowableValues = {"A", "B"})
     @Pattern(regexp = "[AB]", message = "geneticClassCode must be 'A' or 'B'")
-    String seedlotClass
+    String geneticClassCode
 ) {
 }
