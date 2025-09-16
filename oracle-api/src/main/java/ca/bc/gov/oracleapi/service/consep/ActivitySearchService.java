@@ -1,11 +1,12 @@
 package ca.bc.gov.oracleapi.service.consep;
 
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -23,26 +24,19 @@ public class ActivitySearchService {
 
   /**
    * Searches for testing activities based on the provided filter criteria and pagination options.
-   * The method transforms the list of lot numbers into a comma-separated string so it can be used
-   * in native SQL `IN` clauses, passes all filter fields to the repository, and converts the
-   * resulting entities into response DTOs.
+   * The repository handles pagination via {@link Pageable}.
    *
    * @param activitySearchRequestDto The DTO containing all filter criteria for the search.
    * @param pageable                 Pagination information (page number and size).
-   * @return A list of {@link ActivitySearchResponseDto} representing the test activities.
+   * @return A paginated response containing {@link ActivitySearchResponseDto} and total count.
    */
-  public List<ActivitySearchResponseDto> searchActivities(
+  public ActivitySearchPageResponseDto searchTestingActivities(
       ActivitySearchRequestDto activitySearchRequestDto,
       Pageable pageable) {
-    int offset = (int) pageable.getOffset();
-    int size = pageable.getPageSize();
 
-    String lotNumbersStr = activitySearchRequestDto.lotNumbers() != null
-        ? String.join(",", activitySearchRequestDto.lotNumbers())
-        : null;
-
-    List<ActivitySearchResultEntity> results = activitySearchRepository.searchActivities(
-        lotNumbersStr,
+    // Fetch paginated results from repository
+    Page<ActivitySearchResultEntity> results = activitySearchRepository.searchTestingActivities(
+        activitySearchRequestDto.lotNumbers(),
         activitySearchRequestDto.testType(),
         activitySearchRequestDto.activityId(),
         activitySearchRequestDto.germinatorTrayId(),
@@ -69,13 +63,20 @@ public class ActivitySearchService {
         activitySearchRequestDto.completeStatus(),
         activitySearchRequestDto.acceptanceStatus(),
         activitySearchRequestDto.seedlotClass(),
-        offset,
-        size
+        pageable
     );
 
-    return results.stream()
-        .map(this::toDto)
-        .toList();
+    // Map entities to DTOs
+    Page<ActivitySearchResponseDto> dtoPage = results.map(this::toDto);
+
+    // Wrap into paginated response
+    return new ActivitySearchPageResponseDto(
+        dtoPage.getContent(),
+        dtoPage.getTotalElements(),
+        dtoPage.getTotalPages(),
+        dtoPage.getNumber(),
+        dtoPage.getSize()
+    );
   }
 
   /**
@@ -87,32 +88,32 @@ public class ActivitySearchService {
    */
   private ActivitySearchResponseDto toDto(ActivitySearchResultEntity activitySearchResultEntity) {
     return new ActivitySearchResponseDto(
-      activitySearchResultEntity.getSeedlotDisplay(),
-      activitySearchResultEntity.getRequestItem(),
-      activitySearchResultEntity.getSpecies(),
-      activitySearchResultEntity.getActivityId(),
-      activitySearchResultEntity.getTestRank(),
-      activitySearchResultEntity.getCurrentTestInd(),
-      activitySearchResultEntity.getTestCategoryCd(),
-      activitySearchResultEntity.getGerminationPct(),
-      activitySearchResultEntity.getPv(),
-      activitySearchResultEntity.getMoisturePct(),
-      activitySearchResultEntity.getPurityPct(),
-      activitySearchResultEntity.getSeedsPerGram(),
-      activitySearchResultEntity.getOtherTestResult(),
-      activitySearchResultEntity.getTestCompleteInd(),
-      activitySearchResultEntity.getAcceptResultInd(),
-      activitySearchResultEntity.getSignificntStsInd(),
-      activitySearchResultEntity.getSeedWithdrawalDate(),
-      activitySearchResultEntity.getRevisedEndDt(),
-      activitySearchResultEntity.getActualBeginDtTm(),
-      activitySearchResultEntity.getActualEndDtTm(),
-      activitySearchResultEntity.getRiaComment(),
-      activitySearchResultEntity.getRequestSkey(),
-      activitySearchResultEntity.getReqId(),
-      activitySearchResultEntity.getItemId(),
-      activitySearchResultEntity.getSeedlotSample(),
-      activitySearchResultEntity.getRiaSkey()
+        activitySearchResultEntity.getSeedlotDisplay(),
+        activitySearchResultEntity.getRequestItem(),
+        activitySearchResultEntity.getSpecies(),
+        activitySearchResultEntity.getActivityId(),
+        activitySearchResultEntity.getTestRank(),
+        activitySearchResultEntity.getCurrentTestInd(),
+        activitySearchResultEntity.getTestCategoryCd(),
+        activitySearchResultEntity.getGerminationPct(),
+        activitySearchResultEntity.getPv(),
+        activitySearchResultEntity.getMoisturePct(),
+        activitySearchResultEntity.getPurityPct(),
+        activitySearchResultEntity.getSeedsPerGram(),
+        activitySearchResultEntity.getOtherTestResult(),
+        activitySearchResultEntity.getTestCompleteInd(),
+        activitySearchResultEntity.getAcceptResultInd(),
+        activitySearchResultEntity.getSignificntStsInd(),
+        activitySearchResultEntity.getSeedWithdrawalDate(),
+        activitySearchResultEntity.getRevisedEndDt(),
+        activitySearchResultEntity.getActualBeginDtTm(),
+        activitySearchResultEntity.getActualEndDtTm(),
+        activitySearchResultEntity.getRiaComment(),
+        activitySearchResultEntity.getRequestSkey(),
+        activitySearchResultEntity.getReqId(),
+        activitySearchResultEntity.getItemId(),
+        activitySearchResultEntity.getSeedlotSample(),
+        activitySearchResultEntity.getRiaSkey()
     );
   }
 }

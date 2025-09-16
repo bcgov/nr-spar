@@ -1,6 +1,5 @@
 import React, { ChangeEvent, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import Alert from '@mui/material/Alert';
 import {
   FlexGrid,
   Row,
@@ -10,31 +9,32 @@ import {
   ComboBox,
   Button,
   TextInput,
-  InlineLoading,
   InlineNotification
 } from '@carbon/react';
-import {
-  Search
-} from '@carbon/icons-react';
+import { Search } from '@carbon/icons-react';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
-import AdvancedFilters from './AdvancedFilter';
-import { searchActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
+import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
-import { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
-
+import type {
+  TestingSearchResponseType,
+  PaginatedTestingSearchResponseType,
+  PaginationInfoType
+} from '../../../../types/consep/TestingSearchResponseType';
+import TestListTable from './TestListTable';
+import TablePlaceholder from './TablePlaceholder';
+import AdvancedFilters from './AdvancedFilter';
 import {
   DATE_FORMAT, emptyActivitySearchRequest, activityIds,
   testSearchCrumbs, testTypesCd, iniActSearchValidation,
-  errorMessages,
-  minStartDate,
-  maxEndDate
+  errorMessages, minStartDate, maxEndDate
 } from './constants';
 import { ActivitySearchRequest, ActivitySearchValidation } from './definitions';
 import './styles.scss';
 
 const TestSearch = () => {
+  const [hasSearched, setHasSearched] = useState(false);
   const [searchParams, setSearchParams] = useState<ActivitySearchRequest>(
     emptyActivitySearchRequest
   );
@@ -43,7 +43,17 @@ const TestSearch = () => {
     iniActSearchValidation
   );
   const [openAdvSearch, setOpenAdvSearch] = useState(false);
-  const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+  const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
+  const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
+    totalElements: 0,
+    totalPages: 0,
+    pageNumber: 0,
+    pageSize: 20
+  });
+  const [alert, setAlert] = useState<{
+    status: string;
+    message: string;
+  } | null>(null);
   const [modalAnchor, setModalAnchor] = useState<{
     top: number;
     left: number;
@@ -52,19 +62,74 @@ const TestSearch = () => {
 
   const advSearchRef = useRef<HTMLButtonElement>(null);
 
+  const resetAlert = () => {
+    if (alert) {
+      setAlert(null);
+    }
+  };
   const searchMutation = useMutation({
-    mutationFn: (params: ActivitySearchRequest) => searchActivities(params),
-    onSuccess: (data: TestingSearchResponseType[]) => {
-      console.log('Search results:', data);
-      setAlert({ isSuccess: true, message: `Total results: ${data.length}, you can check the results at the console :)` });
-      setTimeout(() => {
-        setAlert(null);
-      }, 3000);
+    mutationFn: ({
+      filter,
+      page = 0,
+      size = 20
+    }: {
+      filter: ActivitySearchRequest;
+      page?: number;
+      size?: number;
+    }) => searchTestingActivities(filter, page, size),
+    onMutate: () => {
+      resetAlert();
+      setHasSearched(true);
+    },
+    onSuccess: (data: PaginatedTestingSearchResponseType) => {
+      setSearchResults(data.content);
+      setPaginationInfo({
+        totalElements: data.totalElements,
+        totalPages: data.totalPages,
+        pageNumber: data.pageNumber,
+        pageSize: data.pageSize
+      });
     },
     onError: (error) => {
-      setAlert({ isSuccess: false, message: `Search failed with the error: ${error.message}` });
+      setAlert({
+        status: 'error',
+        message: `Search failed with the error: ${error.message}`
+      });
     }
   });
+
+  const handlePageChange = (pageIndex: number, pageSize: number) => {
+    searchMutation.mutate(
+      { filter: searchParams, page: pageIndex, size: pageSize },
+      {
+        onSuccess: (data) => {
+          setSearchResults(data.content);
+          setPaginationInfo({
+            totalElements: data.totalElements,
+            totalPages: data.totalPages,
+            pageNumber: data.pageNumber,
+            pageSize: data.pageSize
+          });
+        }
+      }
+    );
+  };
+
+  const updateSearchParams = <K extends keyof ActivitySearchRequest>(
+    prev: ActivitySearchRequest,
+    key: K,
+    value: ActivitySearchRequest[K] | null
+  ) => {
+    const updated = { ...prev };
+
+    if (value != null) {
+      updated[key] = value;
+    } else {
+      delete updated[key];
+    }
+
+    return updated;
+  };
 
   const handleLotInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -86,10 +151,7 @@ const TestSearch = () => {
       errorMessage = errorMessages.lotMaxChar;
     }
 
-    setSearchParams((prev) => ({
-      ...prev,
-      lotNumbers: lots
-    }));
+    setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
     setValidateSearch((prev) => ({
       ...prev,
       lotNumbers: {
@@ -97,16 +159,15 @@ const TestSearch = () => {
         errorMessage
       }
     }));
+    resetAlert();
   };
 
   const handleComboBoxesChanges = (
     searchField: keyof ActivitySearchRequest,
     data: ComboBoxEvent
   ) => {
-    setSearchParams((prev) => ({
-      ...prev,
-      [searchField]: data.selectedItem ?? undefined
-    }));
+    setSearchParams((prev) => updateSearchParams(prev, searchField, data.selectedItem));
+    resetAlert();
   };
 
   const handleGermTrayIdChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -121,10 +182,11 @@ const TestSearch = () => {
       errorMessage = errorMessages.germTrayMax;
     }
 
-    setSearchParams((prev) => ({
-      ...prev,
-      germinatorTrayId: parsed
-    }));
+    setSearchParams((prev) => updateSearchParams(
+      prev,
+      'germinatorTrayId',
+      Number.isNaN(parsed) ? undefined : parsed
+    ));
     setValidateSearch((prev) => ({
       ...prev,
       germinatorTray: {
@@ -132,6 +194,7 @@ const TestSearch = () => {
         errorMessage
       }
     }));
+    resetAlert();
   };
 
   const handleWithdrawalDateChange = (
@@ -142,8 +205,6 @@ const TestSearch = () => {
     const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
 
     setSearchParams((prev) => {
-      // eslint-disable-next-line no-debugger
-      debugger;
       const currentStart = prev.seedWithdrawalStartDate;
       const currentEnd = prev.seedWithdrawalEndDate;
 
@@ -161,6 +222,7 @@ const TestSearch = () => {
         seedWithdrawalEndDate
       };
     });
+    resetAlert();
   };
 
   const handleCloseAdvSearch = () => {
@@ -190,194 +252,205 @@ const TestSearch = () => {
   ).some((field) => field.error);
 
   return (
-    <FlexGrid className="consep-test-search-content">
-      <Row className="consep-test-search-breadcrumb">
-        <Column>
-          <Breadcrumbs crumbs={testSearchCrumbs} />
-        </Column>
-      </Row>
-      <Row className="consep-test-search-title">
-        <PageTitle title="Testing activities" />
-      </Row>
-      <Row className="consep-test-search-alert">
-        {
-          hasValidationErrors()
-            ? (
-              <Column sm={4} md={8} lg={16} xlg={12}>
-                <InlineNotification
-                  lowContrast
-                  kind="error"
-                  title="Error fields:"
-                  subtitle="Search activities is disabled until all fields are filled in
-                            correctly."
-                />
-              </Column>
-            )
-            : null
-        }
-      </Row>
-      <Row className="consep-test-search-filters">
-        <Column md={1} lg={2}>
-          <TextInput
-            id="lot-input"
-            className="lot-input"
-            labelText="Lot #"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              handleLotInputChange(e);
-            }}
-            value={rawLotInput}
-            invalid={validateSearch.lotNumbers.error}
-            invalidText={validateSearch.lotNumbers.errorMessage}
-          />
-        </Column>
-        <Column md={1} lg={2}>
-          <ComboBox
-            id="test-type-input"
-            className="test-type-input"
-            titleText="Test type"
-            items={testTypesCd}
-            placeholder="Choose test type"
-            selectedItem={searchParams.testType}
-            onChange={(e: ComboBoxEvent) => {
-              handleComboBoxesChanges('testType', e);
-            }}
-          />
-        </Column>
-        <Column md={1} lg={2}>
-          <ComboBox
-            id="activity-type-input"
-            className="activity-type-input"
-            titleText="Choose activity"
-            items={activityIds}
-            placeholder="Choose activity"
-            selectedItem={searchParams.activityId}
-            onChange={(e: ComboBoxEvent) => {
-              handleComboBoxesChanges('activityId', e);
-            }}
-          />
-        </Column>
-        <Column md={1} lg={2}>
-          <TextInput
-            id="germ-tray-input"
-            className="germ-tray-input"
-            placeholder="Enter germ tray ID"
-            labelText="Germ tray ID"
-            type="number"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              handleGermTrayIdChange(e);
-            }}
-            value={searchParams.germinatorTrayId}
-            invalid={validateSearch.germinatorTray.error}
-            invalidText={validateSearch.germinatorTray.errorMessage}
-          />
-        </Column>
-        <Column md={1} lg={2}>
-          <DatePicker
-            datePickerType="single"
-            className="withdrawal-date-input"
-            dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>) => {
-              handleWithdrawalDateChange(e, 'start');
-            }}
-            value={
-              searchParams.seedWithdrawalStartDate !== minStartDate
-                ? searchParams.seedWithdrawalStartDate
-                : undefined
-            }
-          >
-            <DatePickerInput
-              id="withdrawal-start-date-input"
-              placeholder="Withdrawal date"
-              labelText="Withdrawal start date"
-              autoComplete="off"
-            />
-          </DatePicker>
-        </Column>
-        <Column md={1} lg={2}>
-          <DatePicker
-            datePickerType="single"
-            className="withdrawal-date-input"
-            dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>) => {
-              handleWithdrawalDateChange(e, 'end');
-            }}
-            minDate={searchParams.seedWithdrawalStartDate ?? undefined}
-            value={
-              searchParams.seedWithdrawalEndDate !== maxEndDate
-                ? searchParams.seedWithdrawalEndDate
-                : undefined
-            }
-          >
-            <DatePickerInput
-              id="withdrawal-end-date-input"
-              placeholder="Withdrawal date"
-              labelText="Withdrawal end date"
-              autoComplete="off"
-            />
-          </DatePicker>
-        </Column>
-        <Column className="advanced-search" md={1} lg={2}>
-          <Button
-            ref={advSearchRef}
-            size="md"
-            kind="tertiary"
-            onClick={toggleAdvSearch}
-          >
-            Filters
-          </Button>
-        </Column>
-        <Column className="search-button" md={1} lg={2}>
-          <Button
-            renderIcon={Search}
-            iconDescription="Search activity"
-            size="md"
-            onClick={() => {
-              console.log(searchParams);
-              if (searchParams) {
-                searchMutation.mutate(searchParams);
-              } else {
-                setAlert({
-                  isSuccess: false,
-                  message: 'No parameters set for the search :('
-                });
-              }
-            }}
-            disabled={hasValidationErrors()}
-          >
-            Search activity
-          </Button>
-        </Column>
-      </Row>
-      <Row>
-        <Column>
-          {searchMutation.isPending && <InlineLoading description="Searching..." />}
+    <div className="consep-test-search-content">
+      <FlexGrid className="consep-test-search-content">
+        <Row className="consep-test-search-breadcrumb">
+          <Column>
+            <Breadcrumbs crumbs={testSearchCrumbs} />
+          </Column>
+        </Row>
+        <Row className="consep-test-search-title">
+          <PageTitle title="Testing activities" />
+        </Row>
+        <Row className="consep-test-search-alert">
           {
-            alert?.message
-            && (
-              <Alert
-                className="consep-moisture-content-alert"
-                severity={alert?.isSuccess ? 'success' : 'error'}
-              >
-                {alert?.message}
-              </Alert>
-            )
+            hasValidationErrors()
+              ? (
+                <Column sm={4} md={8} lg={16} xlg={12}>
+                  <InlineNotification
+                    lowContrast
+                    kind="error"
+                    title="Error fields:"
+                    subtitle="Search activities is disabled until all fields are filled in
+                              correctly."
+                  />
+                </Column>
+              )
+              : null
           }
-        </Column>
-      </Row>
+        </Row>
+        <Row className="consep-test-search-filters">
+          <Column md={1} lg={2}>
+            <TextInput
+              id="lot-input"
+              className="lot-input"
+              labelText="Lot #"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                handleLotInputChange(e);
+              }}
+              value={rawLotInput}
+              invalid={validateSearch.lotNumbers.error}
+              invalidText={validateSearch.lotNumbers.errorMessage}
+            />
+          </Column>
+          <Column md={1} lg={2}>
+            <ComboBox
+              id="test-type-input"
+              className="test-type-input"
+              titleText="Test type"
+              items={testTypesCd}
+              placeholder="Choose test type"
+              selectedItem={searchParams.testType}
+              onChange={(e: ComboBoxEvent) => {
+                handleComboBoxesChanges('testType', e);
+              }}
+            />
+          </Column>
+          <Column md={1} lg={2}>
+            <ComboBox
+              id="activity-type-input"
+              className="activity-type-input"
+              titleText="Choose activity"
+              items={activityIds}
+              placeholder="Choose activity"
+              selectedItem={searchParams.activityId}
+              onChange={(e: ComboBoxEvent) => {
+                handleComboBoxesChanges('activityId', e);
+              }}
+            />
+          </Column>
+          <Column md={1} lg={2}>
+            <TextInput
+              id="germ-tray-input"
+              className="germ-tray-input"
+              placeholder="Enter germ tray ID"
+              labelText="Germ tray ID"
+              type="number"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                handleGermTrayIdChange(e);
+              }}
+              value={searchParams.germinatorTrayId}
+              invalid={validateSearch.germinatorTray.error}
+              invalidText={validateSearch.germinatorTray.errorMessage}
+            />
+          </Column>
+          <Column md={1} lg={2}>
+            <DatePicker
+              datePickerType="single"
+              className="withdrawal-date-input"
+              dateFormat={DATE_FORMAT}
+              onChange={(e: Array<Date>) => {
+                handleWithdrawalDateChange(e, 'start');
+              }}
+              value={
+                searchParams.seedWithdrawalStartDate !== minStartDate
+                  ? searchParams.seedWithdrawalStartDate
+                  : undefined
+              }
+            >
+              <DatePickerInput
+                id="withdrawal-start-date-input"
+                placeholder="Withdrawal date"
+                labelText="Withdrawal start date"
+                autoComplete="off"
+              />
+            </DatePicker>
+          </Column>
+          <Column md={1} lg={2}>
+            <DatePicker
+              datePickerType="single"
+              className="withdrawal-date-input"
+              dateFormat={DATE_FORMAT}
+              onChange={(e: Array<Date>) => {
+                handleWithdrawalDateChange(e, 'end');
+              }}
+              minDate={searchParams.seedWithdrawalStartDate ?? undefined}
+              value={
+                searchParams.seedWithdrawalEndDate !== maxEndDate
+                  ? searchParams.seedWithdrawalEndDate
+                  : undefined
+              }
+            >
+              <DatePickerInput
+                id="withdrawal-end-date-input"
+                placeholder="Withdrawal date"
+                labelText="Withdrawal end date"
+                autoComplete="off"
+              />
+            </DatePicker>
+          </Column>
+          <Column className="advanced-search" md={1} lg={2}>
+            <Button
+              ref={advSearchRef}
+              size="md"
+              kind="tertiary"
+              onClick={toggleAdvSearch}
+            >
+              Filters
+            </Button>
+          </Column>
+          <Column className="search-button" md={1} lg={2}>
+            <Button
+              renderIcon={Search}
+              iconDescription="Search activity"
+              size="md"
+              onClick={() => {
+                if (Object.keys(searchParams).length > 0) {
+                  searchMutation.mutate({ filter: searchParams });
+                } else {
+                  setAlert({
+                    status: 'error',
+                    message: 'At least one criteria must be entered to start the search'
+                  });
+                }
+              }}
+              disabled={hasValidationErrors()}
+            >
+              Search activity
+            </Button>
+          </Column>
+        </Row>
+        {
+          openAdvSearch && modalAnchor && (
+            <AdvancedFilters
+              searchParams={searchParams}
+              setSearchParams={setSearchParams}
+              validateSearch={validateSearch}
+              setValidateSearch={setValidateSearch}
+              alignTo={modalAnchor}
+              onClose={handleCloseAdvSearch}
+              anchorRef={advSearchRef}
+            />
+          )
+        }
+      </FlexGrid>
+      <FlexGrid>
+        <Row>
+          <Column>
+            {alert?.message && (
+              <InlineNotification
+                lowContrast
+                kind={alert.status}
+                subtitle={alert?.message}
+              />
+            )}
+          </Column>
+        </Row>
+      </FlexGrid>
       {
-        openAdvSearch && modalAnchor && (
-          <AdvancedFilters
-            searchParams={searchParams}
-            setSearchParams={setSearchParams}
-            validateSearch={validateSearch}
-            setValidateSearch={setValidateSearch}
-            alignTo={modalAnchor}
-            onClose={handleCloseAdvSearch}
-            anchorRef={advSearchRef}
-          />
-        )
+        hasSearched
+          ? (
+            <TestListTable
+              data={searchResults}
+              isLoading={searchMutation.isPending}
+              paginationInfo={paginationInfo}
+              onPageChange={handlePageChange}
+            />
+          ) : (
+            <TablePlaceholder />
+          )
       }
-    </FlexGrid>
+    </div>
   );
 };
 
