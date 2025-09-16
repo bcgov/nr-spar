@@ -402,7 +402,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .eq(1)
       .find('button')
       .as('clickMoreOptionsBtn')
-      .click();
+      .click({ force: true });
 
     cy.get('ul.parent-tree-table-option-menu')
       .find('li')
