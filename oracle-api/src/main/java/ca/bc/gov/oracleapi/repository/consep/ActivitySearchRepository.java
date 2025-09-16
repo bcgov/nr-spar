@@ -4,6 +4,8 @@ import ca.bc.gov.oracleapi.ConsepOracleQueryConstants;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,9 +16,9 @@ import org.springframework.data.repository.query.Param;
 public interface ActivitySearchRepository extends
     JpaRepository<ActivitySearchResultEntity, Integer> {
 
-  @Query(value = ConsepOracleQueryConstants.ACTIVITY_SEARCH, nativeQuery = true)
-  List<ActivitySearchResultEntity> searchActivities(
-      @Param("lotNumbersStr") String lotNumbersStr,
+  @Query(value = ConsepOracleQueryConstants.TESTING_ACTIVITY_SEARCH)
+  Page<ActivitySearchResultEntity> searchTestingActivities(
+      @Param("lotNumbers") List<String> lotNumbers,
       @Param("testType") String testType,
       @Param("activityId") String activityId,
       @Param("germinatorTrayId") Integer germinatorTrayId,
@@ -43,7 +45,6 @@ public interface ActivitySearchRepository extends
       @Param("completeStatus") Integer completeStatus,
       @Param("acceptanceStatus") Integer acceptanceStatus,
       @Param("seedlotClass") String seedlotClass,
-      @Param("offset") long offset,
-      @Param("size") long size
+      Pageable pageable
   );
 }
