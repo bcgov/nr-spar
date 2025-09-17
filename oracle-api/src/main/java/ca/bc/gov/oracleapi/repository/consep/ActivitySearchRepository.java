@@ -44,7 +44,7 @@ public interface ActivitySearchRepository extends
       @Param("germTrayAssignment") Integer germTrayAssignment,
       @Param("completeStatus") Integer completeStatus,
       @Param("acceptanceStatus") Integer acceptanceStatus,
-      @Param("seedlotClass") String seedlotClass,
+      @Param("geneticClassCode") String geneticClassCode,
       Pageable pageable
   );
 }

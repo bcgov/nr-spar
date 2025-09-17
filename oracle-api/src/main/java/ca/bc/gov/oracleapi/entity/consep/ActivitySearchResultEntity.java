@@ -121,4 +121,7 @@ public class ActivitySearchResultEntity {
 
   @Column(name = "ASSIGNED_TRAY_IND")
   private Integer assignedTrayId;
+
+  @Column(name = "GENETIC_CLASS_CODE", length = 8)
+  private String geneticClassCode;
 }
