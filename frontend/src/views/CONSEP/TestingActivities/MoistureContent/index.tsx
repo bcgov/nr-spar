@@ -54,10 +54,13 @@ const MoistureContent = () => {
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
   const [activityRiaKey, setActivityRiaKey] = useState<number>(0);
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
+  const [replicatesData, setReplicatesData] = useState<ReplicateType[]>([]);
   const [mcType, setMCType] = useState<string>('MCC');
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>();
   const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
   // Reference to the table body for extracting MC Values
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
@@ -131,6 +134,14 @@ const MoistureContent = () => {
       setUpdatedReplicates(testActivityQuery.data.replicatesList);
     }
   }, [testActivity]);
+
+  useEffect(() => {
+    if (testActivity?.replicatesList && testActivity.replicatesList.length > 0) {
+      setReplicatesData(testActivity.replicatesList);
+    } else {
+      setReplicatesData(initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows));
+    }
+  }, [testActivity, riaKey, mcVariation.defaultNumberOfRows]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });
@@ -311,13 +322,6 @@ const MoistureContent = () => {
       disabled: true
     }
   ];
-
-  const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
-
-  let replicatesData = initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows);
-  if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
-    replicatesData = testActivity.replicatesList;
-  }
 
   return (
     <FlexGrid className="consep-moisture-content">

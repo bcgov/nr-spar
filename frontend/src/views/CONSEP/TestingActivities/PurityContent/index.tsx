@@ -62,6 +62,7 @@ const PurityContent = () => {
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
+  const [replicatesData, setReplicatesData] = useState<ReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
   const [impurities, setImpurities] = useState<ImpurityDisplayType>({});
   const [isModalOpen, setModalOpen] = useState(false);
@@ -254,6 +255,14 @@ const PurityContent = () => {
       );
     }
   }, [testActivity]);
+
+  useEffect(() => {
+    if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
+      setReplicatesData(testActivity.replicatesList);
+    } else {
+      setReplicatesData(initReplicatesList(riaKey ?? '', 2));
+    }
+  }, [testActivity, riaKey]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });
@@ -482,11 +491,6 @@ const PurityContent = () => {
       );
     })
   );
-
-  let replicatesData = initReplicatesList(riaKey ?? '', 2);
-  if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
-    replicatesData = testActivity.replicatesList;
-  }
 
   return (
     <FlexGrid className="consep-purity-content">
