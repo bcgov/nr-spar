@@ -26,3 +26,15 @@ export type TestingSearchResponseType = {
   seedlotSample: string;
   riaSkey: number;
 };
+
+// Type for pagination details
+export type PaginationInfoType = {
+  totalElements: number;
+  totalPages: number;
+  pageNumber: number;
+  pageSize: number;
+};
+
+export type PaginatedTestingSearchResponseType = {
+  content: TestingSearchResponseType[];
+} & PaginationInfoType;
