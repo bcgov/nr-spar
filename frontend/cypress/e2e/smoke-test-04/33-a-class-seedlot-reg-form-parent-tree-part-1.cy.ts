@@ -193,7 +193,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
   it('Cone and pollen count table entries', () => {
     // Wait for the API call and check the response
-    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
+    cy.wait('@tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
 
     cy.closeMenuIfOpen();
     cy.get('#parentTreeNumber').scrollIntoView();
@@ -291,7 +291,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
   it('Check \'Show/hide columns\' button functionality', () => {
     // Wait for the API call and check the response
-    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
+    cy.wait('@tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
 
     cy.closeMenuIfOpen();
     cy.get('#parentTreeNumber').scrollIntoView();
@@ -405,7 +405,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
   it('Check \'More Options\' button functionality', () => {
     // Wait for the API call and check the response
-    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
+    cy.wait('@tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
 
     cy.closeMenuIfOpen();
     cy.get('#parentTreeNumber').scrollIntoView();
@@ -554,7 +554,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
   it('Pagination', () => {
     // Wait for the API call and check the response
-    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
+    cy.wait('@tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
     cy.get(`.${prefix}--pagination`).scrollIntoView();
 
     const dropdownNumber = '20';
@@ -610,7 +610,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
   it('Calculate Metrics button', () => {
     // Wait for the API call and check the response
-    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
+    cy.wait('@tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
     cy.get('.info-sections-row').scrollIntoView();
 
     // Check info sections not visible in DOM
