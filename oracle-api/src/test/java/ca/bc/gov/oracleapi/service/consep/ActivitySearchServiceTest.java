@@ -41,7 +41,7 @@ class ActivitySearchServiceTest {
   // Test data
   private List<String> lotNumbers;
   private String testType, activityId, requestId, requestType, orchardId, testCategoryCd, testRank,
-      species, seedlotClass, seedlotSample, riaComment, requestItem, pv, seedlotDisplaySeedlot,
+      species, geneticClassCode, seedlotSample, riaComment, requestItem, pv, seedlotDisplaySeedlot,
       seedlotDisplayFamilylot;
   private Integer germinatorTrayId, requestYear, germTrayAssignment, completeStatus,
       acceptanceStatus, riaSkey, currentTestInd, germinationPct, moisturePct, purityPct,
@@ -83,7 +83,7 @@ class ActivitySearchServiceTest {
     germTrayAssignment = -1; // assigned_tray_ind
     completeStatus = -1; // testCompleteInd
     acceptanceStatus = -1; // acceptResultInd
-    seedlotClass = "A";
+    geneticClassCode = "A";
 
     activitySearchRequestDto = new ActivitySearchRequestDto(
         lotNumbers, testType, activityId, germinatorTrayId,
@@ -94,7 +94,7 @@ class ActivitySearchServiceTest {
         actualEndDateFrom, actualEndDateTo,
         revisedStartDateFrom, revisedStartDateTo,
         revisedEndDateFrom, revisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode
     );
 
     // Search return result
@@ -173,7 +173,7 @@ class ActivitySearchServiceTest {
         actualEndDateFrom, actualEndDateTo,
         revisedStartDateFrom, revisedStartDateTo,
         revisedEndDateFrom, revisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass, pageable
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable
     )).thenReturn(mockPage);
 
     ActivitySearchPageResponseDto pageResponse = activitySearchService.searchTestingActivities(
@@ -223,7 +223,7 @@ class ActivitySearchServiceTest {
         actualEndDateFrom, actualEndDateTo,
         revisedStartDateFrom, revisedStartDateTo,
         revisedEndDateFrom, revisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass, pageable
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable
     );
   }
 
