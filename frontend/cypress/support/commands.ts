@@ -115,3 +115,14 @@ Cypress.Commands.add('saveSeedlotRegFormProgress', () => {
   cy.get(`.${prefix}--inline-loading__text`)
     .contains('Changes saved!');
 });
+
+Cypress.Commands.add('closeMenuIfOpen', () => {
+  cy.get(`button.${prefix}--header__menu-toggle`)
+    .then(($btn) => {
+      if ($btn.attr('aria-label') === 'Close menu') {
+        cy.wrap($btn).click();
+        // Optionally, verify it changed to "Open menu"
+        cy.wrap($btn).should('have.attr', 'aria-label', 'Open menu');
+      }
+    });
+});
