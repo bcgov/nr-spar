@@ -1,5 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
-import { FIVE_SECONDS, TEN_SECONDS } from '../../constants';
+import { FIVE_SECONDS } from '../../constants';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and Pollen count)', () => {
   let regFormData: {
@@ -31,6 +31,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNum = sNumber as string;
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
+        cy.intercept('GET', `**/api/seedlots/${seedlotNum}/a-class-form-progress`).as('tableStatus');
         cy.visit(url);
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
@@ -191,7 +192,11 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Cone and pollen count table entries', () => {
-    cy.get('#parentTreeNumber', { timeout: TEN_SECONDS }).scrollIntoView();
+    // Wait for the API call and check the response
+    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
+
+    cy.closeMenuIfOpen();
+    cy.get('#parentTreeNumber').scrollIntoView();
 
     // Check error message for negative Cone count
     cy.get('#212-coneCount-value-input')
@@ -285,7 +290,11 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Check \'Show/hide columns\' button functionality', () => {
-    cy.get('#parentTreeNumber', { timeout: TEN_SECONDS }).scrollIntoView();
+    // Wait for the API call and check the response
+    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
+
+    cy.closeMenuIfOpen();
+    cy.get('#parentTreeNumber').scrollIntoView();
 
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(0)
@@ -395,8 +404,11 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Check \'More Options\' button functionality', () => {
-    cy.get('#parentTreeNumber', { timeout: TEN_SECONDS }).scrollIntoView();
+    // Wait for the API call and check the response
+    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
 
+    cy.closeMenuIfOpen();
+    cy.get('#parentTreeNumber').scrollIntoView();
     // Check Download file option
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(1)
@@ -541,7 +553,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Pagination', () => {
-    cy.get('#parentTreeNumber', { timeout: TEN_SECONDS });
+    // Wait for the API call and check the response
+    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
     cy.get(`.${prefix}--pagination`).scrollIntoView();
 
     const dropdownNumber = '20';
@@ -596,8 +609,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Calculate Metrics button', () => {
-    cy.get('#parentTreeNumber', { timeout: TEN_SECONDS });
-
+    // Wait for the API call and check the response
+    cy.wait('tableStatus').its('response.body.progressStatus.orchard.isComplete').should('eq', true);
     cy.get('.info-sections-row').scrollIntoView();
 
     // Check info sections not visible in DOM
