@@ -36,6 +36,8 @@ class ActivitySearchEndpointTest {
 
   @MockBean
   private ActivitySearchService activitySearchService;
+  
+  @MockBean
   private TestCodeService testCodeService;
 
   @Autowired
