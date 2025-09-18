@@ -26,7 +26,7 @@ import TestListTable from './TestListTable';
 import TablePlaceholder from './TablePlaceholder';
 import AdvancedFilters from './AdvancedFilter';
 import {
-  DATE_FORMAT, emptyActivitySearchRequest, activityIds,
+  DATE_FORMAT, activityIds,
   testSearchCrumbs, testTypesCd, iniActSearchValidation,
   errorMessages, minStartDate, maxEndDate
 } from './constants';
@@ -36,7 +36,7 @@ import './styles.scss';
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [searchParams, setSearchParams] = useState<ActivitySearchRequest>(
-    emptyActivitySearchRequest
+    {}
   );
   const [rawLotInput, setRawLotInput] = useState('');
   const [validateSearch, setValidateSearch] = useState<ActivitySearchValidation>(

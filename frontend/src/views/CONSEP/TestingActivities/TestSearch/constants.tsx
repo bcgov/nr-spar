@@ -6,7 +6,7 @@ import { Tag } from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
 import { CrumbType } from '../../../../components/Breadcrumbs/definitions';
 import { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
-import { ActivitySearchRequest, ActivitySearchValidation, ValidationErrorType } from './definitions';
+import { ActivitySearchValidation, ValidationErrorType } from './definitions';
 
 export const DATE_FORMAT = 'Y/m/d';
 
@@ -45,36 +45,6 @@ export const testSearchCrumbs: CrumbType[] = [
 ];
 
 export const advDateTypes: string[] = ['actual', 'revised'];
-
-export const emptyActivitySearchRequest: ActivitySearchRequest = {
-  lotNumbers: undefined,
-  testType: undefined,
-  activityId: undefined,
-  germinatorTrayId: undefined,
-  seedWithdrawalStartDate: undefined,
-  seedWithdrawalEndDate: undefined,
-  includeHistoricalTests: undefined,
-  germTestsOnly: undefined,
-  requestId: undefined,
-  requestType: undefined,
-  requestYear: undefined,
-  orchardId: undefined,
-  testCategoryCd: undefined,
-  testRank: undefined,
-  species: undefined,
-  actualBeginDateFrom: undefined,
-  actualBeginDateTo: undefined,
-  actualEndDateFrom: undefined,
-  actualEndDateTo: undefined,
-  revisedStartDateFrom: undefined,
-  revisedStartDateTo: undefined,
-  revisedEndDateFrom: undefined,
-  revisedEndDateTo: undefined,
-  germTrayAssignment: undefined,
-  completeStatus: undefined,
-  acceptanceStatus: undefined,
-  seedlotClass: undefined
-};
 
 export const initialErrorValue: ValidationErrorType = {
   error: false,
