@@ -37,12 +37,10 @@ const createEditableNumberColumn = (
 
         setValidationErrors({ ...validationErrors, [cell.id]: validationError });
 
-        if (!validationError) {
-          updateRow({
-            ...row.original,
-            [accessorKey]: newValue
-          } as ReplicateType);
-        }
+        updateRow({
+          ...row.original,
+          [accessorKey]: newValue
+        } as ReplicateType);
       },
       inputProps: {
         inputMode: 'numeric',
@@ -87,12 +85,10 @@ const createEditableTextColumn = (
 
         setValidationErrors({ ...validationErrors, [cell.id]: validationError });
 
-        if (!validationError) {
-          updateRow({
-            ...row.original,
-            [accessorKey]: newValue
-          } as ReplicateType);
-        }
+        updateRow({
+          ...row.original,
+          [accessorKey]: newValue
+        } as ReplicateType);
       }
     };
   },

@@ -11,7 +11,14 @@ export const initReplicatesList = (activityRiaKey: string, numberOfRows: number)
     emptyRows.push({
       riaKey: activityRiaKey,
       replicateNumber: i + 1,
-      replicateAccInd: 1
+      replicateAccInd: 1,
+      containerId: '',
+      containerWeight: undefined,
+      freshSeed: undefined,
+      containerAndDryWeight: undefined,
+      dryWeight: undefined,
+      mcValue: undefined,
+      replicateComment: ''
     });
   }
   return emptyRows;
