@@ -16,7 +16,9 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "CNS_T_CODE_LIST_TABLE", schema = "CONSEP")
-@Schema(description = "Represents the mapping of codes with expanded results and effective/expiry dates")
+@Schema(
+    description = "Represents the mapping of codes with expanded results and effective/expiry dates"
+)
 public class TestCodeEntity {
 
   @Id

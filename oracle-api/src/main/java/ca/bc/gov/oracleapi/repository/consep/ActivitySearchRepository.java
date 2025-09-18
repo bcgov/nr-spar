@@ -11,7 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /**
- * This interface enables the activity entity from consep to be searched in the database.
+ * This interface enables the activity search result entity
+ * from consep to be searched in the database.
  */
 public interface ActivitySearchRepository extends
     JpaRepository<ActivitySearchResultEntity, Integer> {

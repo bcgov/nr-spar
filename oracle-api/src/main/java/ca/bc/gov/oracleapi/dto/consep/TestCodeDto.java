@@ -8,9 +8,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "This class represents a TestCodeEntity with code and description")
 public record TestCodeDto(
 
-  @Schema(description = "Code argument for the type or category", example = "MCK")
-  String code,
+    @Schema(description = "Code argument for the type or category", example = "MCK")
+    String code,
 
-  @Schema(description = "Expanded description of the code", example = "Moisture content unkilned seed")
-  String description
-) {}
+    @Schema(
+        description = "Expanded description of the code",
+        example = "Moisture content unkilned seed"
+    )
+    String description
+) {
+}

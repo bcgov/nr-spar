@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
@@ -36,7 +35,7 @@ class ActivitySearchEndpointTest {
 
   @MockBean
   private ActivitySearchService activitySearchService;
-  
+
   @MockBean
   private TestCodeService testCodeService;
 
