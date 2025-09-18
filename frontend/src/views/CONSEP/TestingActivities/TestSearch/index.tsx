@@ -146,6 +146,9 @@ const TestSearch = () => {
     if (lots.length > 5) {
       error = true;
       errorMessage = errorMessages.lotMax;
+    } else if (lots.some((lot) => (lot.startsWith('F') || lot.startsWith('f')) && lot.length > 13)) {
+      error = true;
+      errorMessage = errorMessages.lotMax;
     } else if (lots.some((lot) => lot.length > 5)) {
       error = true;
       errorMessage = errorMessages.lotMaxChar;
