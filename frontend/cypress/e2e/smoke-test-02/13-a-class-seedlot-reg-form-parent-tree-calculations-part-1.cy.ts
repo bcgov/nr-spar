@@ -1,6 +1,6 @@
 /* eslint-disable cypress/no-unnecessary-waiting */
 /* eslint-disable prefer-const */
-import { FIVE_SECONDS, TEN_SECONDS } from '../../constants';
+import { FIVE_SECONDS, TEN_SECONDS, THREE_SECONDS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
@@ -154,7 +154,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .contains('Calculate metrics')
       .click();
 
-    cy.wait(3000);
+    cy.wait(THREE_SECONDS);
 
     // Store Ne value to a variable
     cy.get('#effectivepopulation\\ size\\ \\(ne\\)')
@@ -233,7 +233,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .contains('Calculate metrics')
       .click();
 
-    cy.wait(3000);
+    cy.wait(THREE_SECONDS);
 
     // Check Ne value after clearing first parent tree row
     cy.get('#effectivepopulation\\ size\\ \\(ne\\)')
