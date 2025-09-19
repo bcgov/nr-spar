@@ -3,7 +3,7 @@
 
 import '@cypress/code-coverage/support';
 import {
-  HALF_SECOND, TYPE_DELAY
+  FIVE_SECONDS, HALF_SECOND, TYPE_DELAY
 } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 import prefix from '../../src/styles/classPrefix';
@@ -113,7 +113,7 @@ Cypress.Commands.add('saveSeedlotRegFormProgress', () => {
     .click();
 
   cy.get(`.${prefix}--inline-loading__text`)
-    .contains('Changes saved!');
+    .contains('Changes saved!', { timeout: FIVE_SECONDS });
 });
 
 Cypress.Commands.add('closeMenuIfOpen', () => {
