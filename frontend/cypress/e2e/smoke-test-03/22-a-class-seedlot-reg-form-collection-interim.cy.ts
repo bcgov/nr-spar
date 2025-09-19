@@ -572,7 +572,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     // Check complete status of Interim storage step
     cy.contains(`.${prefix}--progress-step-button`, 'Interim storage')
       .find(`.${prefix}--assistive-text`)
-      .should('have.text', 'Complete');
+      .should('have.text', 'Complete', { timeout: HALF_SECOND });
 
     // Press next button
     cy.get('.seedlot-registration-button-row')

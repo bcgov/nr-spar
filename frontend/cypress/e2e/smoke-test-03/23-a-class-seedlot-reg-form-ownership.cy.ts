@@ -464,7 +464,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Check complete status of Ownership step
     cy.contains(`.${prefix}--progress-step-button`, 'Ownership')
       .find(`.${prefix}--assistive-text`)
-      .should('have.text', 'Complete');
+      .should('have.text', 'Complete', { timeout: HALF_SECOND });
 
     // Press next button
     cy.get('.seedlot-registration-button-row')
