@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   FlexGrid,
@@ -22,18 +22,27 @@ import type {
   PaginatedTestingSearchResponseType,
   PaginationInfoType
 } from '../../../../types/consep/TestingSearchResponseType';
-import {
-  DATE_FORMAT, testActivityCodes, testCategoryCodes, testSearchCrumbs
-} from './constants';
-import { ActivitySearchRequest } from './definitions';
 import TestListTable from './TestListTable';
 import TablePlaceholder from './TablePlaceholder';
-
+import AdvancedFilters from './AdvancedFilter';
+import {
+  DATE_FORMAT, activityIds,
+  testSearchCrumbs, testTypesCd, iniActSearchValidation,
+  errorMessages, minStartDate, maxEndDate
+} from './constants';
+import { ActivitySearchRequest, ActivitySearchValidation } from './definitions';
 import './styles.scss';
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
-  const [searchParams, setSearchParams] = useState<ActivitySearchRequest>({});
+  const [searchParams, setSearchParams] = useState<ActivitySearchRequest>(
+    {}
+  );
+  const [rawLotInput, setRawLotInput] = useState('');
+  const [validateSearch, setValidateSearch] = useState<ActivitySearchValidation>(
+    iniActSearchValidation
+  );
+  const [openAdvSearch, setOpenAdvSearch] = useState(false);
   const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
     totalElements: 0,
@@ -41,18 +50,23 @@ const TestSearch = () => {
     pageNumber: 0,
     pageSize: 20
   });
-
   const [alert, setAlert] = useState<{
     status: string;
     message: string;
   } | null>(null);
+  const [modalAnchor, setModalAnchor] = useState<{
+    top: number;
+    left: number;
+    width: number
+  } | null>(null);
+
+  const advSearchRef = useRef<HTMLButtonElement>(null);
 
   const resetAlert = () => {
     if (alert) {
       setAlert(null);
     }
   };
-
   const searchMutation = useMutation({
     mutationFn: ({
       filter,
@@ -118,22 +132,44 @@ const TestSearch = () => {
   };
 
   const handleLotInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const lots = e.target.value
+    const { value } = e.target;
+    setRawLotInput(value);
+
+    const lots = value
       .split(',')
       .map((val) => val.trim())
       .filter((val) => val.length > 0);
 
+    let error = false;
+    let errorMessage = '';
+
+    if (lots.length > 5) {
+      error = true;
+      errorMessage = errorMessages.lotMax;
+    } else if (lots.some((lot) => (lot.startsWith('F') || lot.startsWith('f')) && lot.length > 13)) {
+      error = true;
+      errorMessage = errorMessages.lotMax;
+    } else if (lots.some((lot) => lot.length > 5)) {
+      error = true;
+      errorMessage = errorMessages.lotMaxChar;
+    }
+
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
+    setValidateSearch((prev) => ({
+      ...prev,
+      lotNumbers: {
+        error,
+        errorMessage
+      }
+    }));
     resetAlert();
   };
 
-  const handleTestTypeChange = (data: ComboBoxEvent) => {
-    setSearchParams((prev) => updateSearchParams(prev, 'testCategoryCd', data.selectedItem));
-    resetAlert();
-  };
-
-  const handleActivityIdChange = (data: ComboBoxEvent) => {
-    setSearchParams((prev) => updateSearchParams(prev, 'activityId', data.selectedItem));
+  const handleComboBoxesChanges = (
+    searchField: keyof ActivitySearchRequest,
+    data: ComboBoxEvent
+  ) => {
+    setSearchParams((prev) => updateSearchParams(prev, searchField, data.selectedItem));
     resetAlert();
   };
 
@@ -141,29 +177,86 @@ const TestSearch = () => {
     const { value } = e.target;
     const parsed = value === '' ? undefined : parseInt(value, 10);
 
-    setSearchParams((prev) => updateSearchParams(prev, 'germinatorTrayId', Number.isNaN(parsed) ? undefined : parsed));
+    let error = false;
+    let errorMessage = '';
+
+    if (parsed && parsed >= 100000) {
+      error = true;
+      errorMessage = errorMessages.germTrayMax;
+    }
+
+    setSearchParams((prev) => updateSearchParams(
+      prev,
+      'germinatorTrayId',
+      Number.isNaN(parsed) ? undefined : parsed
+    ));
+    setValidateSearch((prev) => ({
+      ...prev,
+      germinatorTray: {
+        error,
+        errorMessage
+      }
+    }));
     resetAlert();
   };
 
-  const handleWithdrawalStartDateChange = (dates: (string | Date)[]) => {
+  const handleWithdrawalDateChange = (
+    dates: (string | Date)[],
+    type: 'start' | 'end'
+  ) => {
     const raw = dates?.[0];
     const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
 
-    setSearchParams((prev) => updateSearchParams(prev, 'seedWithdrawalStartDate', value));
+    setSearchParams((prev) => {
+      const currentStart = prev.seedWithdrawalStartDate;
+      const currentEnd = prev.seedWithdrawalEndDate;
+
+      const seedWithdrawalStartDate = type === 'start'
+        ? value ?? minStartDate
+        : currentStart ?? minStartDate;
+
+      const seedWithdrawalEndDate = type === 'end'
+        ? value ?? maxEndDate
+        : currentEnd ?? maxEndDate;
+
+      return {
+        ...prev,
+        seedWithdrawalStartDate,
+        seedWithdrawalEndDate
+      };
+    });
     resetAlert();
   };
 
-  const handleWithdrawalEndDateChange = (dates: (string | Date)[]) => {
-    const raw = dates?.[0];
-    const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
-
-    setSearchParams((prev) => updateSearchParams(prev, 'seedWithdrawalEndDate', value));
-    resetAlert();
+  const handleCloseAdvSearch = () => {
+    setOpenAdvSearch(false);
+    setModalAnchor(null);
   };
+
+  const toggleAdvSearch = () => {
+    if (openAdvSearch) {
+      setOpenAdvSearch(false);
+      setModalAnchor(null);
+    } else {
+      const rect = advSearchRef.current?.getBoundingClientRect();
+      if (rect) {
+        setModalAnchor({
+          top: rect.bottom + window.scrollY,
+          left: rect.right + window.scrollX,
+          width: rect.width
+        });
+        setOpenAdvSearch(true);
+      }
+    }
+  };
+
+  const hasValidationErrors = (): boolean => Object.values(
+    validateSearch
+  ).some((field) => field.error);
 
   return (
     <div className="consep-test-search-content">
-      <FlexGrid>
+      <FlexGrid className="consep-test-search-content">
         <Row className="consep-test-search-breadcrumb">
           <Column>
             <Breadcrumbs crumbs={testSearchCrumbs} />
@@ -171,6 +264,23 @@ const TestSearch = () => {
         </Row>
         <Row className="consep-test-search-title">
           <PageTitle title="Testing activities" />
+        </Row>
+        <Row className="consep-test-search-alert">
+          {
+            hasValidationErrors()
+              ? (
+                <Column sm={4} md={8} lg={16} xlg={12}>
+                  <InlineNotification
+                    lowContrast
+                    kind="error"
+                    title="Error fields:"
+                    subtitle="Search activities is disabled until all fields are filled in
+                              correctly."
+                  />
+                </Column>
+              )
+              : null
+          }
         </Row>
         <Row className="consep-test-search-filters">
           <Column md={1} lg={2}>
@@ -181,6 +291,9 @@ const TestSearch = () => {
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 handleLotInputChange(e);
               }}
+              value={rawLotInput}
+              invalid={validateSearch.lotNumbers.error}
+              invalidText={validateSearch.lotNumbers.errorMessage}
             />
           </Column>
           <Column md={1} lg={2}>
@@ -188,10 +301,11 @@ const TestSearch = () => {
               id="test-type-input"
               className="test-type-input"
               titleText="Test type"
-              items={testCategoryCodes}
+              items={testTypesCd}
               placeholder="Choose test type"
+              selectedItem={searchParams.testType}
               onChange={(e: ComboBoxEvent) => {
-                handleTestTypeChange(e);
+                handleComboBoxesChanges('testType', e);
               }}
             />
           </Column>
@@ -200,10 +314,11 @@ const TestSearch = () => {
               id="activity-type-input"
               className="activity-type-input"
               titleText="Choose activity"
-              items={testActivityCodes}
+              items={activityIds}
               placeholder="Choose activity"
+              selectedItem={searchParams.activityId}
               onChange={(e: ComboBoxEvent) => {
-                handleActivityIdChange(e);
+                handleComboBoxesChanges('activityId', e);
               }}
             />
           </Column>
@@ -217,6 +332,9 @@ const TestSearch = () => {
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 handleGermTrayIdChange(e);
               }}
+              value={searchParams.germinatorTrayId}
+              invalid={validateSearch.germinatorTray.error}
+              invalidText={validateSearch.germinatorTray.errorMessage}
             />
           </Column>
           <Column md={1} lg={2}>
@@ -225,8 +343,13 @@ const TestSearch = () => {
               className="withdrawal-date-input"
               dateFormat={DATE_FORMAT}
               onChange={(e: Array<Date>) => {
-                handleWithdrawalStartDateChange(e);
+                handleWithdrawalDateChange(e, 'start');
               }}
+              value={
+                searchParams.seedWithdrawalStartDate !== minStartDate
+                  ? searchParams.seedWithdrawalStartDate
+                  : undefined
+              }
             >
               <DatePickerInput
                 id="withdrawal-start-date-input"
@@ -242,8 +365,14 @@ const TestSearch = () => {
               className="withdrawal-date-input"
               dateFormat={DATE_FORMAT}
               onChange={(e: Array<Date>) => {
-                handleWithdrawalEndDateChange(e);
+                handleWithdrawalDateChange(e, 'end');
               }}
+              minDate={searchParams.seedWithdrawalStartDate ?? undefined}
+              value={
+                searchParams.seedWithdrawalEndDate !== maxEndDate
+                  ? searchParams.seedWithdrawalEndDate
+                  : undefined
+              }
             >
               <DatePickerInput
                 id="withdrawal-end-date-input"
@@ -253,13 +382,15 @@ const TestSearch = () => {
               />
             </DatePicker>
           </Column>
-          <Column className="advanced-search-input" md={1} lg={2}>
-            <ComboBox
-              id="advanced-search-input"
-              items={[]}
-              placeholder="Advanced search"
-              onChange={() => {}}
-            />
+          <Column className="advanced-search" md={1} lg={2}>
+            <Button
+              ref={advSearchRef}
+              size="md"
+              kind="tertiary"
+              onClick={toggleAdvSearch}
+            >
+              Filters
+            </Button>
           </Column>
           <Column className="search-button" md={1} lg={2}>
             <Button
@@ -276,11 +407,27 @@ const TestSearch = () => {
                   });
                 }
               }}
+              disabled={hasValidationErrors()}
             >
               Search activity
             </Button>
           </Column>
         </Row>
+        {
+          openAdvSearch && modalAnchor && (
+            <AdvancedFilters
+              searchParams={searchParams}
+              setSearchParams={setSearchParams}
+              validateSearch={validateSearch}
+              setValidateSearch={setValidateSearch}
+              alignTo={modalAnchor}
+              onClose={handleCloseAdvSearch}
+              anchorRef={advSearchRef}
+            />
+          )
+        }
+      </FlexGrid>
+      <FlexGrid>
         <Row>
           <Column>
             {alert?.message && (
@@ -293,16 +440,19 @@ const TestSearch = () => {
           </Column>
         </Row>
       </FlexGrid>
-      {hasSearched ? (
-        <TestListTable
-          data={searchResults}
-          isLoading={searchMutation.isPending}
-          paginationInfo={paginationInfo}
-          onPageChange={handlePageChange}
-        />
-      ) : (
-        <TablePlaceholder />
-      )}
+      {
+        hasSearched
+          ? (
+            <TestListTable
+              data={searchResults}
+              isLoading={searchMutation.isPending}
+              paginationInfo={paginationInfo}
+              onPageChange={handlePageChange}
+            />
+          ) : (
+            <TablePlaceholder />
+          )
+      }
     </div>
   );
 };

@@ -6,6 +6,15 @@
  *                              name and acronym
  * @returns {string} the forest client number
  */
-const getForestClientNumber = (forestClient: string): string => forestClient.substring(0, forestClient.indexOf('-')).trim();
+export const getForestClientNumber = (forestClient: string): string => forestClient.substring(0, forestClient.indexOf('-')).trim();
 
-export default getForestClientNumber;
+/**
+ * Capitalizes the first letter of a given string.
+ *
+ * @param {string} word The input string to capitalize.
+ * @returns {string} A new string with the first character in uppercase and the rest unchanged.
+ */
+export const capitalizeFirstLetter = (word: string): string => {
+  if (!word) return '';
+  return word.charAt(0).toUpperCase() + word.slice(1);
+};
