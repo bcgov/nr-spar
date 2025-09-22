@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.repository.consep;
 import ca.bc.gov.oracleapi.ConsepOracleQueryConstants;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,10 +35,10 @@ public interface ActivitySearchRepository extends
       @Param("testCategoryCd") String testCategoryCd,
       @Param("testRank") String testRank,
       @Param("species") String species,
-      @Param("actualBeginDateFrom") LocalDate actualBeginDateFrom,
-      @Param("actualBeginDateTo") LocalDate actualBeginDateTo,
-      @Param("actualEndDateFrom") LocalDate actualEndDateFrom,
-      @Param("actualEndDateTo") LocalDate actualEndDateTo,
+      @Param("actualBeginDateFrom") LocalDateTime actualBeginDateFrom,
+      @Param("actualBeginDateTo") LocalDateTime actualBeginDateTo,
+      @Param("actualEndDateFrom") LocalDateTime actualEndDateFrom,
+      @Param("actualEndDateTo") LocalDateTime actualEndDateTo,
       @Param("revisedStartDateFrom") LocalDate revisedStartDateFrom,
       @Param("revisedStartDateTo") LocalDate revisedStartDateTo,
       @Param("revisedEndDateFrom") LocalDate revisedEndDateFrom,
