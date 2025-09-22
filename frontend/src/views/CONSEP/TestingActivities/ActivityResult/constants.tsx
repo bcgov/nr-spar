@@ -208,6 +208,7 @@ export const getMccColumns = (
   {
     accessorKey: 'actions',
     header: '',
+    enableSorting: false,
     Cell: ({ row }: { row: { original: ReplicateType } }) => (
       <Icons.TrashCan
         size={15}
