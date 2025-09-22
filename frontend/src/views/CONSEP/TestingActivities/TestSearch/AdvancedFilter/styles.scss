@@ -1,0 +1,36 @@
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.consep-test-filters-modal {
+  background: var(--#{vars.$bcgov-prefix}-layer-01);
+  padding: 2rem 0;
+  border-radius: 4px;
+  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
+  box-shadow: 0 2px 6px var(--#{vars.$bcgov-prefix}-shadow, rgba(0, 0, 0, 0.3));
+
+  .#{vars.$bcgov-prefix}--row:not(:last-child) {
+    padding-bottom: 2rem;
+  }
+
+  .advanced-date-input {
+    & .#{vars.$bcgov-prefix}--date-picker.#{vars.$bcgov-prefix}--date-picker--single,
+    & .#{vars.$bcgov-prefix}--date-picker-container,
+    & input.#{vars.$bcgov-prefix}--date-picker__input {
+      inline-size: 100%;
+    }
+  }
+
+  input,
+  .#{vars.$bcgov-prefix}--list-box input[role=combobox],
+  .#{vars.$bcgov-prefix}--list-box input[type=text] {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+  }
+
+  .button-row{
+    padding-left: 1rem;
+
+    button {
+      margin-right: 1rem;
+    }
+  }
+}
