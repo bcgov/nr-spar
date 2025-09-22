@@ -119,7 +119,7 @@ export const getMccColumns = (
   },
   createEditableTextColumn(
     'containerId',
-    'Container #',
+    'Cont #',
     4,
     'Must be no more than 4 characters',
     updateRow,
@@ -128,7 +128,7 @@ export const getMccColumns = (
   ),
   createEditableNumberColumn(
     'containerWeight',
-    'Container weight',
+    'Cont wt',
     'Must be between 0 and 1000',
     updateRow,
     validationErrors,
