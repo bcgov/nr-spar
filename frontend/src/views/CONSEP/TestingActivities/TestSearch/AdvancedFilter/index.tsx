@@ -203,13 +203,31 @@ const AdvancedFilters = ({
       const currentFrom = prev[fromKey];
       const currentTo = prev[toKey];
 
-      const from = range === 'From' ? value : currentFrom;
-      const to = range === 'To' ? value : currentTo;
+      let newFrom = currentFrom;
+      let newTo = currentTo;
+
+      if (range === 'From') {
+        newFrom = value || undefined;
+        newTo = (
+          newFrom && !newTo
+        )
+          ? maxEndDate
+          : undefined;
+      }
+
+      if (range === 'To') {
+        newTo = value || undefined;
+        newFrom = (
+          newTo && !newFrom
+        )
+          ? minStartDate
+          : undefined;
+      }
 
       return {
         ...prev,
-        [fromKey]: from ?? minStartDate,
-        [toKey]: to ?? maxEndDate
+        [fromKey]: newFrom,
+        [toKey]: newTo
       };
     });
   };

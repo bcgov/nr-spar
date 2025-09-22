@@ -148,7 +148,7 @@ const TestSearch = () => {
       errorMessage = errorMessages.lotMax;
     } else if (lots.some((lot) => (lot.startsWith('F') || lot.startsWith('f')) && lot.length > 13)) {
       error = true;
-      errorMessage = errorMessages.lotMax;
+      errorMessage = errorMessages.familyLotMaxChar;
     } else if (lots.some((lot) => lot.length > 5)) {
       error = true;
       errorMessage = errorMessages.lotMaxChar;
@@ -211,13 +211,26 @@ const TestSearch = () => {
       const currentStart = prev.seedWithdrawalStartDate;
       const currentEnd = prev.seedWithdrawalEndDate;
 
-      const seedWithdrawalStartDate = type === 'start'
-        ? value ?? minStartDate
-        : currentStart ?? minStartDate;
+      let seedWithdrawalStartDate = currentStart;
+      let seedWithdrawalEndDate = currentEnd;
 
-      const seedWithdrawalEndDate = type === 'end'
-        ? value ?? maxEndDate
-        : currentEnd ?? maxEndDate;
+      if (type === 'start') {
+        seedWithdrawalStartDate = value || undefined;
+        seedWithdrawalEndDate = (
+          seedWithdrawalStartDate && !seedWithdrawalEndDate
+        )
+          ? maxEndDate
+          : undefined;
+      }
+
+      if (type === 'end') {
+        seedWithdrawalEndDate = value || undefined;
+        seedWithdrawalStartDate = (
+          seedWithdrawalEndDate && !seedWithdrawalStartDate
+        )
+          ? minStartDate
+          : undefined;
+      }
 
       return {
         ...prev,
@@ -265,23 +278,6 @@ const TestSearch = () => {
         <Row className="consep-test-search-title">
           <PageTitle title="Testing activities" />
         </Row>
-        <Row className="consep-test-search-alert">
-          {
-            hasValidationErrors()
-              ? (
-                <Column sm={4} md={8} lg={16} xlg={12}>
-                  <InlineNotification
-                    lowContrast
-                    kind="error"
-                    title="Error fields:"
-                    subtitle="Search activities is disabled until all fields are filled in
-                              correctly."
-                  />
-                </Column>
-              )
-              : null
-          }
-        </Row>
         <Row className="consep-test-search-filters">
           <Column md={1} lg={2}>
             <TextInput
@@ -302,7 +298,6 @@ const TestSearch = () => {
               className="test-type-input"
               titleText="Test type"
               items={testTypesCd}
-              placeholder="Choose test type"
               selectedItem={searchParams.testType}
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('testType', e);
@@ -315,7 +310,6 @@ const TestSearch = () => {
               className="activity-type-input"
               titleText="Choose activity"
               items={activityIds}
-              placeholder="Choose activity"
               selectedItem={searchParams.activityId}
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('activityId', e);
@@ -326,7 +320,6 @@ const TestSearch = () => {
             <TextInput
               id="germ-tray-input"
               className="germ-tray-input"
-              placeholder="Enter germ tray ID"
               labelText="Germ tray ID"
               type="number"
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -353,7 +346,6 @@ const TestSearch = () => {
             >
               <DatePickerInput
                 id="withdrawal-start-date-input"
-                placeholder="Withdrawal date"
                 labelText="Withdrawal start date"
                 autoComplete="off"
               />
@@ -376,7 +368,6 @@ const TestSearch = () => {
             >
               <DatePickerInput
                 id="withdrawal-end-date-input"
-                placeholder="Withdrawal date"
                 labelText="Withdrawal end date"
                 autoComplete="off"
               />
@@ -428,6 +419,23 @@ const TestSearch = () => {
         }
       </FlexGrid>
       <FlexGrid>
+        <Row className="consep-test-search-alert">
+          {
+            hasValidationErrors()
+              ? (
+                <Column>
+                  <InlineNotification
+                    lowContrast
+                    kind="error"
+                    title="Error fields:"
+                    subtitle="Search activities is disabled until all fields are filled in
+                              correctly."
+                  />
+                </Column>
+              )
+              : null
+          }
+        </Row>
         <Row>
           <Column>
             {alert?.message && (

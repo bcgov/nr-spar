@@ -2,8 +2,11 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .consep-test-filters-modal {
-  background: colors.$gray-10;
+  background: var(--#{vars.$bcgov-prefix}-layer-01);
   padding: 2rem 0;
+  border-radius: 4px;
+  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
+  box-shadow: 0 2px 6px var(--#{vars.$bcgov-prefix}-shadow, rgba(0, 0, 0, 0.3));
 
   .#{vars.$bcgov-prefix}--row:not(:last-child) {
     padding-bottom: 2rem;
@@ -12,7 +15,7 @@
   input,
   .#{vars.$bcgov-prefix}--list-box input[role=combobox],
   .#{vars.$bcgov-prefix}--list-box input[type=text] {
-    background-color: colors.$white;
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
   }
 
   .button-row{
