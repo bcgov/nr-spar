@@ -12,6 +12,14 @@
     padding-bottom: 2rem;
   }
 
+  .advanced-date-input {
+    & .#{vars.$bcgov-prefix}--date-picker.#{vars.$bcgov-prefix}--date-picker--single,
+    & .#{vars.$bcgov-prefix}--date-picker-container,
+    & input.#{vars.$bcgov-prefix}--date-picker__input {
+      inline-size: 100%;
+    }
+  }
+
   input,
   .#{vars.$bcgov-prefix}--list-box input[role=combobox],
   .#{vars.$bcgov-prefix}--list-box input[type=text] {

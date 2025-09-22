@@ -17,10 +17,11 @@ import {
 
 import ComboBoxEvent from '../../../../../types/ComboBoxEvent';
 import { capitalizeFirstLetter } from '../../../../../utils/StringUtils';
+import useWindowSize from '../../../../../hooks/UseWindowSize';
 
 import {
   advDateTypes, DATE_FORMAT, errorMessages, initialErrorValue, maxEndDate,
-  minStartDate, requestTypeSt, species, testCategoryCd,
+  minStartDate, requestTypeSt, SAFE_MARGIN, species, testCategoryCd,
   testRanks
 } from '../constants';
 import { ActivitySearchRequest, ActivitySearchValidation } from '../definitions';
@@ -47,6 +48,7 @@ const AdvancedFilters = ({
   anchorRef
 }: AdvancedFiltersProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const windowSize = useWindowSize();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -331,12 +333,29 @@ const AdvancedFilters = ({
     }));
   };
 
-  const positionStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: alignTo.top,
-    right: window.innerWidth - alignTo.left,
-    zIndex: 1000
+  const getSidebarWidth = () => {
+    const el = document.querySelector('.spar-side-nav');
+    return el ? (el as HTMLElement).getBoundingClientRect().width : 256; // fallback razoável
   };
+
+  const positionStyle: React.CSSProperties = React.useMemo(() => {
+    const sidebarWidth = getSidebarWidth();
+    const rightOffset = Math.max(window.innerWidth - alignTo.left, 0);
+    const spaceLeftOfAnchor = alignTo.left - sidebarWidth - SAFE_MARGIN;
+    const MIN_WIDTH = 480;
+
+    const maxWidthPx = Math.max(spaceLeftOfAnchor, MIN_WIDTH);
+
+    return {
+      position: 'absolute',
+      top: alignTo.top,
+      right: rightOffset,
+      zIndex: 1000,
+      width: 'auto',
+      maxWidth: `${maxWidthPx}px`,
+      minWidth: `${MIN_WIDTH}px`
+    };
+  }, [alignTo.left, alignTo.top, windowSize.innerWidth]);
 
   const advSearchComponent = (
     <div
@@ -470,7 +489,7 @@ const AdvancedFilters = ({
               <Column md={2} lg={4}>
                 <DatePicker
                   datePickerType="single"
-                  className={`${dateType}-begin-from-input`}
+                  className="advanced-date-input"
                   dateFormat={DATE_FORMAT}
                   onChange={(e: Array<Date>) => {
                     handleAdvDateChange(e, dateType as 'actual' | 'revised', 'BeginDate', 'From');
@@ -493,7 +512,7 @@ const AdvancedFilters = ({
               <Column md={2} lg={4}>
                 <DatePicker
                   datePickerType="single"
-                  className={`${dateType}-begin-to-input`}
+                  className="advanced-date-input"
                   dateFormat={DATE_FORMAT}
                   minDate={
                     dateType === 'actual'
@@ -521,7 +540,7 @@ const AdvancedFilters = ({
               <Column md={2} lg={4}>
                 <DatePicker
                   datePickerType="single"
-                  className={`${dateType}-end-from-input`}
+                  className="advanced-date-input"
                   dateFormat={DATE_FORMAT}
                   onChange={(e: Array<Date>) => {
                     handleAdvDateChange(e, dateType as 'actual' | 'revised', 'EndDate', 'From');
@@ -544,7 +563,7 @@ const AdvancedFilters = ({
               <Column md={2} lg={4}>
                 <DatePicker
                   datePickerType="single"
-                  className={`${dateType}-end-to-input`}
+                  className="advanced-date-input"
                   dateFormat={DATE_FORMAT}
                   minDate={
                     dateType === 'actual'

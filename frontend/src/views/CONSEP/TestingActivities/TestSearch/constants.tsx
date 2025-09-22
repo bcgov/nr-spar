@@ -8,8 +8,9 @@ import { CrumbType } from '../../../../components/Breadcrumbs/definitions';
 import { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
 import { ActivitySearchValidation, ValidationErrorType } from './definitions';
 
-export const DATE_FORMAT = 'Y/m/d';
+export const SAFE_MARGIN = 16;
 
+export const DATE_FORMAT = 'Y/m/d';
 export const minStartDate = '1900-01-01';
 export const maxEndDate = '9999-12-31';
 
@@ -53,13 +54,13 @@ export const initialErrorValue: ValidationErrorType = {
 
 export const errorMessages = {
   lotMax: 'Maximum of 5 lot numbers allowed.',
-  lotMaxChar: 'Seedlot numbers must be at most 5 characters long',
-  familyLotMaxChar: 'Family lot numbers must be at most 13 characters long',
-  germTrayMax: 'IDs must be at most 5 digits long',
-  reqId: 'Request ID must be at most 5 characters long',
+  lotMaxChar: '5 character max',
+  familyLotMaxChar: '13 character max',
+  germTrayMax: '5 digits max',
+  reqId: '5 character max',
   reqYearSize: 'Year must be a 4-digit number',
   reqYearInterval: 'Year must be between 1900 and 9999',
-  orchardId: 'Orchard ID must be at most 3 characters long'
+  orchardId: '3 character max'
 };
 
 export const iniActSearchValidation: ActivitySearchValidation = {

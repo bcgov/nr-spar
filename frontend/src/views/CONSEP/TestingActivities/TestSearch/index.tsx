@@ -346,7 +346,7 @@ const TestSearch = () => {
             >
               <DatePickerInput
                 id="withdrawal-start-date-input"
-                labelText="Withdrawal start date"
+                labelText="Withdrawal start"
                 autoComplete="off"
               />
             </DatePicker>
@@ -368,7 +368,7 @@ const TestSearch = () => {
             >
               <DatePickerInput
                 id="withdrawal-end-date-input"
-                labelText="Withdrawal end date"
+                labelText="Withdrawal end"
                 autoComplete="off"
               />
             </DatePicker>
@@ -427,9 +427,7 @@ const TestSearch = () => {
                   <InlineNotification
                     lowContrast
                     kind="error"
-                    title="Error fields:"
-                    subtitle="Search activities is disabled until all fields are filled in
-                              correctly."
+                    subtitle="Errors must be fixed to search activities"
                   />
                 </Column>
               )
