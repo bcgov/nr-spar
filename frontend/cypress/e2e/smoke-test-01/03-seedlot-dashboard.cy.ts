@@ -1,5 +1,6 @@
 import { NavigationLabels } from '../../utils/labels';
 import { SeedlotRegFixtureType } from '../../definitions';
+import { FIVE_SECONDS } from '../../constants';
 
 describe('Seedlot Dashboard test', () => {
   let seedlotDashboardData: {
@@ -24,6 +25,9 @@ describe('Seedlot Dashboard test', () => {
     cy.login();
     cy.visit('/seedlots');
     cy.url().should('contains', '/seedlots');
+    // Wait for the page title to be visible before proceeding
+    cy.get('.title-section h1')
+      .should('have.text', NavigationLabels.Seedlots, { timeout: FIVE_SECONDS });
   });
 
   it('should display seedlot dashboard page title and subtitle', () => {

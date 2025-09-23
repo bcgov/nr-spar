@@ -1,8 +1,10 @@
+import { FIVE_SECONDS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP success on parent)', () => {
   let regFormData: {
     parentTree: {
+      title: string;
       smpSuccessTitle: string;
       smpSuccessSubtitle: string;
       smpSuccessErrorMsg: string;
@@ -28,6 +30,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
         cy.visit(url);
         cy.url().should('contains', url);
+        // Wait for the page title to be visible before proceeding
+        cy.get('.title-row').contains(regFormData.parentTree.title, { timeout: FIVE_SECONDS });
         cy.get('#parent-tree-step-tab-list-id')
           .find('button')
           .contains('SMP success on parent')
