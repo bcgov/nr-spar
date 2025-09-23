@@ -415,7 +415,13 @@ const TestSearch = () => {
               size="md"
               onClick={() => {
                 if (Object.keys(searchParams).length > 0) {
-                  searchMutation.mutate({ filter: searchParams });
+                  const searchParamstoSend = { ...searchParams };
+                  if (searchParamstoSend.testType === 'SA') {
+                    searchParamstoSend.testType = 'GSA';
+                  } else if (searchParamstoSend.testType === 'SE') {
+                    searchParamstoSend.testType = 'GSE';
+                  }
+                  searchMutation.mutate({ filter: searchParamstoSend });
                 } else {
                   setAlert({
                     status: 'error',
