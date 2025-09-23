@@ -10,6 +10,7 @@ import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -164,13 +165,18 @@ class ActivitySearchServiceTest {
         1 // total elements
     );
 
+    LocalDateTime expectedActualBeginFrom = actualBeginDateFrom.atStartOfDay();
+    LocalDateTime expectedActualBeginTo   = actualBeginDateTo.atTime(LocalTime.MAX);
+    LocalDateTime expectedActualEndFrom   = actualEndDateFrom.atStartOfDay();
+    LocalDateTime expectedActualEndTo     = actualEndDateTo.atTime(LocalTime.MAX);
+
     when(activitySearchRepository.searchTestingActivities(
         lotNumbers, testType, activityId, germinatorTrayId,
         seedWithdrawalStartDate, seedWithdrawalEndDate,
         includeHistoricalTests, germTestsOnly, requestId, requestType,
         requestYear, orchardId, testCategoryCd, testRank, species,
-        actualBeginDateFrom, actualBeginDateTo,
-        actualEndDateFrom, actualEndDateTo,
+        expectedActualBeginFrom, expectedActualBeginTo,
+        expectedActualEndFrom, expectedActualEndTo,
         revisedStartDateFrom, revisedStartDateTo,
         revisedEndDateFrom, revisedEndDateTo,
         germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable
@@ -219,8 +225,8 @@ class ActivitySearchServiceTest {
         seedWithdrawalStartDate, seedWithdrawalEndDate,
         includeHistoricalTests, germTestsOnly, requestId, requestType,
         requestYear, orchardId, testCategoryCd, testRank, species,
-        actualBeginDateFrom, actualBeginDateTo,
-        actualEndDateFrom, actualEndDateTo,
+        expectedActualBeginFrom, expectedActualBeginTo,
+        expectedActualEndFrom, expectedActualEndTo,
         revisedStartDateFrom, revisedStartDateTo,
         revisedEndDateFrom, revisedEndDateTo,
         germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable

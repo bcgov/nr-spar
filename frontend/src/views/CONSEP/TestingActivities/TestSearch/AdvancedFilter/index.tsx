@@ -1,6 +1,5 @@
-import React, {
-  ChangeEvent, useEffect, useRef
-} from 'react';
+import React, { ChangeEvent, useEffect, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
 import {
   FlexGrid,
@@ -12,18 +11,21 @@ import {
   DatePickerInput,
   ComboBox,
   Button,
-  TextInput
+  TextInput,
+  InlineNotification
 } from '@carbon/react';
 
 import ComboBoxEvent from '../../../../../types/ComboBoxEvent';
 import { capitalizeFirstLetter } from '../../../../../utils/StringUtils';
 import useWindowSize from '../../../../../hooks/UseWindowSize';
+import { getTestCategoryCodes } from '../../../../../api-service/consep/searchTestingActivitiesAPI';
 
+import type { TestCodeType } from '../../../../../types/consep/TestingSearchType';
 import {
   advDateTypes, DATE_FORMAT, errorMessages, initialErrorValue, maxEndDate,
-  minStartDate, requestTypeSt, SAFE_MARGIN, species, testCategoryCd,
-  testRanks
+  minStartDate, requestTypeSt, SAFE_MARGIN, species, testRanks
 } from '../constants';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from '../definitions';
 
 import './styles.scss';
@@ -49,6 +51,14 @@ const AdvancedFilters = ({
 }: AdvancedFiltersProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const windowSize = useWindowSize();
+
+  const testCategoryQuery = useQuery({
+    queryKey: ['test-category-codes'],
+    queryFn: getTestCategoryCodes,
+    staleTime: THREE_HOURS, // data is fresh for 3 hours
+    gcTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
+    select: (data: TestCodeType[]) => data?.map((testCode) => testCode.code) ?? []
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -300,30 +310,7 @@ const AdvancedFilters = ({
   const toSelectedItemString = (v?: string | null) => (v ?? null);
 
   const clearFilters = () => {
-    setSearchParams((prev) => ({
-      ...prev,
-      requestId: undefined,
-      requestType: undefined,
-      requestYear: undefined,
-      orchardId: undefined,
-      testCategoryCd: undefined,
-      testRank: undefined,
-      species: undefined,
-      actualBeginDateFrom: undefined,
-      actualBeginDateTo: undefined,
-      actualEndDateFrom: undefined,
-      actualEndDateTo: undefined,
-      revisedStartDateFrom: undefined,
-      revisedStartDateTo: undefined,
-      revisedEndDateFrom: undefined,
-      revisedEndDateTo: undefined,
-      germTrayAssignment: undefined,
-      completeStatus: undefined,
-      acceptanceStatus: undefined,
-      seedlotClass: undefined,
-      includeHistoricalTests: false,
-      germTestsOnly: false
-    }));
+    setSearchParams(() => ({}));
 
     setValidateSearch((prev) => ({
       ...prev,
@@ -364,6 +351,13 @@ const AdvancedFilters = ({
       className="consep-test-filters-modal"
     >
       <FlexGrid className="consep-test-search-content">
+        {testCategoryQuery.isError && (
+          <InlineNotification
+            lowContrast
+            kind="error"
+            subtitle={`Failed to load test categories: ${testCategoryQuery.error?.message}`}
+          />
+        )}
         <Row>
           <Column>
             <CheckboxGroup
@@ -451,7 +445,7 @@ const AdvancedFilters = ({
               id="category-input"
               className="category-input"
               titleText="Category"
-              items={testCategoryCd}
+              items={testCategoryQuery.data ?? []}
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('testCategoryCd', e);
               }}
