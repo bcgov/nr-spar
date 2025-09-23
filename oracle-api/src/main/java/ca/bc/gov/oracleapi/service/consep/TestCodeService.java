@@ -16,7 +16,7 @@ public class TestCodeService {
   private final TestCodeRepository testCodeRepository;
 
   /**
-   * Get all valid activity type codes
+   * Get all valid test type codes
    * where effective date <= today and expiry date >= today or null.
    *
    * @return list of TestCodeDto
@@ -25,8 +25,8 @@ public class TestCodeService {
     return testCodeRepository.findTestTypeCodes()
         .stream()
         .map(obj -> new TestCodeDto(
-            (String) obj[0], // codeArgument
-            (String) obj[1]  // expandedResult
+            (String) obj[0],
+            (String) obj[1]
         ))
         .toList();
   }
@@ -41,8 +41,8 @@ public class TestCodeService {
     return testCodeRepository.findTestCategoryCodes()
         .stream()
         .map(obj -> new TestCodeDto(
-            (String) obj[0], // codeArgument
-            (String) obj[1]  // expandedResult
+            (String) obj[0],
+            (String) obj[1]
         ))
         .toList();
   }

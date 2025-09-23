@@ -146,8 +146,8 @@ class ActivitySearchEndpointTest {
   @Test
   void getTestTypeCodes_shouldReturnList() throws Exception {
     List<TestCodeDto> mockCodes = List.of(
-        new TestCodeDto("ACT1", "Activity 1"),
-        new TestCodeDto("ACT2", "Activity 2")
+        new TestCodeDto("TT1", "TEST type 1"),
+        new TestCodeDto("TT2", "TEST type 2")
     );
 
     Mockito.when(testCodeService.getTestTypeCodes()).thenReturn(mockCodes);
@@ -157,10 +157,10 @@ class ActivitySearchEndpointTest {
             .accept(APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)))
-        .andExpect(jsonPath("$[0].code").value("ACT1"))
-        .andExpect(jsonPath("$[0].description").value("Activity 1"))
-        .andExpect(jsonPath("$[1].code").value("ACT2"))
-        .andExpect(jsonPath("$[1].description").value("Activity 2"));
+        .andExpect(jsonPath("$[0].code").value("TT1"))
+        .andExpect(jsonPath("$[0].description").value("TEST type 1"))
+        .andExpect(jsonPath("$[1].code").value("TT2"))
+        .andExpect(jsonPath("$[1].description").value("TEST type 2"));
   }
 
 

@@ -29,8 +29,8 @@ class TestCodeServiceTest {
   void getTestTypeCodes_shouldReturnMappedDtos() {
     // Arrange
     when(testCodeRepository.findTestTypeCodes()).thenReturn(List.of(
-      new Object[]{"ACT1", "Activity 1"},
-      new Object[]{"ACT2", "Activity 2"}
+      new Object[]{"TT1", "Test type 1"},
+      new Object[]{"TT2", "Test type 2"}
     ));
 
     // Act
@@ -38,10 +38,10 @@ class TestCodeServiceTest {
 
     // Assert
     assertThat(result).hasSize(2);
-    assertThat(result.get(0).code()).isEqualTo("ACT1");
-    assertThat(result.get(0).description()).isEqualTo("Activity 1");
-    assertThat(result.get(1).code()).isEqualTo("ACT2");
-    assertThat(result.get(1).description()).isEqualTo("Activity 2");
+    assertThat(result.get(0).code()).isEqualTo("TT1");
+    assertThat(result.get(0).description()).isEqualTo("Test type 1");
+    assertThat(result.get(1).code()).isEqualTo("TT2");
+    assertThat(result.get(1).description()).isEqualTo("Test type 2");
   }
 
   @Test
