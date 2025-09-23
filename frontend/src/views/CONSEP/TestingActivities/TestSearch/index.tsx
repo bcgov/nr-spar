@@ -1,5 +1,10 @@
-import React, { ChangeEvent, useRef, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import React, {
+  ChangeEvent,
+  useRef,
+  useState,
+  useEffect
+} from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
   Row,
@@ -15,21 +20,23 @@ import { Search } from '@carbon/icons-react';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
-import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
+import { searchTestingActivities, getTestTypeCodes } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import type {
   TestingSearchResponseType,
   PaginatedTestingSearchResponseType,
-  PaginationInfoType
-} from '../../../../types/consep/TestingSearchResponseType';
+  PaginationInfoType,
+  TestCodeType
+} from '../../../../types/consep/TestingSearchType';
 import TestListTable from './TestListTable';
 import TablePlaceholder from './TablePlaceholder';
 import AdvancedFilters from './AdvancedFilter';
 import {
   DATE_FORMAT, activityIds,
-  testSearchCrumbs, testTypesCd, iniActSearchValidation,
+  testSearchCrumbs, iniActSearchValidation,
   errorMessages, minStartDate, maxEndDate
 } from './constants';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from './definitions';
 import './styles.scss';
 
@@ -67,6 +74,7 @@ const TestSearch = () => {
       setAlert(null);
     }
   };
+
   const searchMutation = useMutation({
     mutationFn: ({
       filter,
@@ -97,6 +105,23 @@ const TestSearch = () => {
       });
     }
   });
+
+  const testTypeQuery = useQuery({
+    queryKey: ['test-type-codes'],
+    queryFn: getTestTypeCodes,
+    staleTime: THREE_HOURS, // data is fresh for 3 hours
+    gcTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
+    select: (data: TestCodeType[]) => data?.map((testCode) => testCode.code) ?? []
+  });
+
+  useEffect(() => {
+    if (testTypeQuery.error) {
+      setAlert({
+        status: 'error',
+        message: `Failed to load test types: ${testTypeQuery.error?.message}`
+      });
+    }
+  }, [testTypeQuery.error]);
 
   const handlePageChange = (pageIndex: number, pageSize: number) => {
     searchMutation.mutate(
@@ -297,7 +322,7 @@ const TestSearch = () => {
               id="test-type-input"
               className="test-type-input"
               titleText="Test type"
-              items={testTypesCd}
+              items={testTypeQuery.data ?? []}
               selectedItem={searchParams.testType}
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('testType', e);
