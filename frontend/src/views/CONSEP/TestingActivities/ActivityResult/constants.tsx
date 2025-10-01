@@ -18,11 +18,12 @@ const createEditableNumberColumn = (
   validationMsg: string,
   updateRow: (row: ReplicateType) => void,
   validationErrors: Record<string, string | undefined>,
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>
+  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>,
+  size: number = 120
 ): MRT_ColumnDef<ReplicateType> => ({
   accessorKey,
   header,
-  size: 120,
+  size,
   muiEditTextFieldProps: ({ cell, row }) => {
     const value = row.original[accessorKey as keyof typeof row.original] ?? '';
     return {
@@ -69,11 +70,12 @@ const createEditableTextColumn = (
   validationMsg: string,
   updateRow: (row: ReplicateType) => void,
   validationErrors: Record<string, string | undefined>,
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>
+  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>,
+  size: number = 80
 ): MRT_ColumnDef<ReplicateType> => ({
   accessorKey,
   header,
-  size: 80,
+  size,
   muiEditTextFieldProps: ({ cell, row }) => {
     const value = row.original[accessorKey as keyof typeof row.original] ?? '';
     return {
@@ -81,6 +83,7 @@ const createEditableTextColumn = (
       value,
       error: !!validationErrors[cell.id],
       helperText: validationErrors[cell.id],
+      placeholder: undefined,
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = event.currentTarget.value;
         const validationError = newValue.length > maxLength ? validationMsg : undefined;
@@ -132,7 +135,8 @@ export const getMccColumns = (
     'Must be between 0 and 1000',
     updateRow,
     validationErrors,
-    setValidationErrors
+    setValidationErrors,
+    80
   ),
   createEditableNumberColumn(
     'freshSeed',
@@ -153,16 +157,18 @@ export const getMccColumns = (
   {
     accessorKey: 'dryWeight',
     header: 'Dry weight',
+    size: 60,
     enableEditing: false,
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'dryWeight' in row.original ? row.original.dryWeight : ''
-    })
+    }),
+    ...alignRight
   },
   {
     accessorKey: 'mcValue',
     header: 'MC value (%)',
-    size: 80,
+    size: 40,
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'mcValue' in row.original ? row.original.mcValue : ''
