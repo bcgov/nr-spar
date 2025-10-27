@@ -824,7 +824,7 @@ public class SeedlotService {
       // Fetch data from Oracle to get the active Seed Plan Unit id
       if (!hasAreaOfUseData(seedlot)) {
         SparLog.info("Area of Use data has NOT been set previously, setting area of use data");
-        setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId(), inMemoryDto);
+        setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
       }
     } else {
       updateApplicantAndSeedlot(seedlot, form.applicantAndSeedlotInfo());
@@ -1022,17 +1022,14 @@ public class SeedlotService {
    * @param primaryOrchardId the primary orchard Id to find the spu for
    */
   private void setAreaOfUse(
-      Seedlot seedlot, String primaryOrchardId, SeedlotSaveInMemoryDto inMemoryDto) {
+      Seedlot seedlot, String primaryOrchardId) {
     SparLog.info("Begin to set Area of Use values");
 
-    Integer activeSpuId = inMemoryDto.getPrimarySpuId();
-    if (!ValueUtil.hasValue(activeSpuId)) {
-      ActiveOrchardSpuEntity activeSpuEntity =
-          orchardService
-              .findSpuIdByOrchardWithActive(primaryOrchardId, true)
-              .orElseThrow(NoSpuForOrchardException::new);
-      activeSpuId = activeSpuEntity.getSeedPlanningUnitId();
-    }
+    ActiveOrchardSpuEntity activeSpuEntity =
+        orchardService
+            .findSpuIdByOrchardWithActive(primaryOrchardId, true)
+            .orElseThrow(NoSpuForOrchardException::new);
+    Integer activeSpuId = activeSpuEntity.getSeedPlanningUnitId();
 
     AreaOfUseDto areaOfUseDto =
         oracleApiProvider
