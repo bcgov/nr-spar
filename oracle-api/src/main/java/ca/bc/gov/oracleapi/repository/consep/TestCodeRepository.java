@@ -13,7 +13,7 @@ public interface TestCodeRepository extends JpaRepository<TestCodeEntity, String
   @Query("""
         SELECT t.codeArgument AS code, t.expandedResult AS description
         FROM TestCodeEntity t
-        WHERE t.columnName = 'SEEDLOT_TEST_CODE'
+        WHERE t.columnName = 'ACTIVITY_TYPE_CD'
           AND t.effectiveDate <= CURRENT_DATE
           AND (t.expiryDate IS NULL OR t.expiryDate >= CURRENT_DATE)
         """)
