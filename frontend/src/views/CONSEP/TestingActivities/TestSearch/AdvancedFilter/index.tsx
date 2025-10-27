@@ -310,7 +310,30 @@ const AdvancedFilters = ({
   const toSelectedItemString = (v?: string | null) => (v ?? null);
 
   const clearFilters = () => {
-    setSearchParams(() => ({}));
+    setSearchParams((prev) => ({
+      ...prev,
+      requestId: undefined,
+      requestType: undefined,
+      requestYear: undefined,
+      orchardId: undefined,
+      testCategoryCd: undefined,
+      testRank: undefined,
+      species: undefined,
+      actualBeginDateFrom: undefined,
+      actualBeginDateTo: undefined,
+      actualEndDateFrom: undefined,
+      actualEndDateTo: undefined,
+      revisedStartDateFrom: undefined,
+      revisedStartDateTo: undefined,
+      revisedEndDateFrom: undefined,
+      revisedEndDateTo: undefined,
+      germTrayAssignment: undefined,
+      completeStatus: undefined,
+      acceptanceStatus: undefined,
+      seedlotClass: undefined,
+      includeHistoricalTests: false,
+      germTestsOnly: false
+    }));
 
     setValidateSearch((prev) => ({
       ...prev,
