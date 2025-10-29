@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 import { Row, Column, Button } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
-import { MRT_ShowHideColumnsButton } from 'material-react-table';
 
 import GenericTable from '../../../../components/GenericTable';
+import ShowHideColumnControl from './ToolbarControls/ShowHideColumnControl';
 import { getTestingActivityListColumns } from './constants';
 import type {
   TestingSearchResponseType,
@@ -104,9 +104,7 @@ const TestListTable = ({
                   {icon}
                 </Button>
               ))}
-
-              {/* MRT default column toggle button */}
-              <MRT_ShowHideColumnsButton table={table} className='concep-test-search-table-toolbar-edit-column'/>
+              <ShowHideColumnControl table={table} />
             </Column>
           )}
         />
