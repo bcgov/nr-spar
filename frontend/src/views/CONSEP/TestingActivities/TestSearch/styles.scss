@@ -55,32 +55,44 @@
       color: var(--#{vars.$bcgov-prefix}-text-secondary);
     }
 
-    .concep-test-search-table-toolbar {
-      margin-inline: 0rem;
-    }
-
     .concep-test-search-table {
       margin-inline: 0rem;
       height: 100%;
     }
 
-    .concep-test-search-table-toolbar {
-      padding-right: 0rem;
-      display: 'flex';
-      justify-content: 'flex-end';
-      flex-wrap: 'wrap';
-    }
+    // material react table toolbar 
+    .MuiPaper-root>.MuiBox-root:first-of-type {
+      background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+      min-height: 2.751rem;
 
-    .concep-test-search-table-toolbar-button {
-      padding: 0.813rem 0.75rem;
-      border-radius: 0rem;
-      border: none;
-      border-left: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
-    }
+      .MuiBox-root {
+        padding: 0rem;
 
-    .concep-test-search-table-toolbar-button-icon {
-      margin-left: 0.5rem;
-      margin-top: 0.15rem;
+        .bx--col {
+          padding-right: 0rem;
+        }
+      }
+
+      .concep-test-search-table-toolbar-button {
+        padding: 0.813rem 0.75rem;
+        border-radius: 0rem;
+        border: none;
+        border-left: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
+      }
+
+      .concep-test-search-table-toolbar-button.bx--btn--tertiary {
+        padding: 0.83rem 0.75rem;
+      }
+
+      .concep-test-search-table-toolbar-button-icon {
+        margin-left: 0.5rem;
+        margin-top: 0.15rem;
+      }
+
+      .concep-test-search-table-toolbar-edit-column {
+        padding: 0.64rem 0.5rem;
+        border-radius: 0rem;
+      }
     }
   }
 
