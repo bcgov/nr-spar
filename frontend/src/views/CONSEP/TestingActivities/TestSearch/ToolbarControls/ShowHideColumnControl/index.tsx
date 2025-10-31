@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import React, { useState } from 'react';
 import { Button, Checkbox } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
