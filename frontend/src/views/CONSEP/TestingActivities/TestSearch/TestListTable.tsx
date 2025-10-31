@@ -82,7 +82,6 @@ const TestListTable = ({
           enableRowSelection
           isLoading={isLoading}
           tableBodyRef={tableBodyRef}
-          enableHiding
           hideToolbar={false}
           renderTopToolbarCustomActions={() => (
             <div className="concep-test-search-table-title">{`Total search result: ${paginationInfo.totalElements}`}</div>

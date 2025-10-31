@@ -42,22 +42,25 @@ const ShowHideColumnControl = ({ table }: { table: MRT_TableInstance<any> }) => 
         onClose={handleMenuClose}
         className="table-column-menu"
       >
-        <div className="helper-text">
-          Select columns you want to see
-        </div>
+        <div className="helper-text">Select columns you want to see</div>
 
-        {table.getAllColumns().slice(1, -1).map((column: any) => (
-          <MenuItem key={column.id} onClick={() => column.toggleVisibility()}>
-            <Checkbox
-              key={column.id}
-              id={`${column.id}-checkbox`}
-              checked={column.getIsVisible()}
-              labelText={column.columnDef.header}
-              onChange={() => column.toggleVisibility()}
-              className="column-checkbox"
-            />
-          </MenuItem>
-        ))}
+        {table
+          .getAllLeafColumns()
+          .slice(1, -1)
+          .map((column: any) => (
+            <MenuItem key={column.id}>
+              <Checkbox
+                id={`${column.id}-checkbox`}
+                checked={column.getIsVisible()}
+                labelText={column.columnDef.header}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const { checked } = e.target;
+                  table.setColumnVisibility({ [column.id]: checked });
+                }}
+                className="column-checkbox"
+              />
+            </MenuItem>
+          ))}
       </Menu>
     </>
   );
