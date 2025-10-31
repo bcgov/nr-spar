@@ -1,0 +1,36 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+
+.table-column-menu {
+  min-width: 4rem;
+
+  .helper-text {
+    width: 100%;
+    @include type.type-style('label-01');
+    padding: 1rem;
+  }
+
+  .#{vars.$bcgov-prefix}--form-item.#{vars.$bcgov-prefix}--checkbox-wrapper {
+    margin-block-end: 0;
+  }
+
+  .#{vars.$bcgov-prefix}--form-item.#{vars.$bcgov-prefix}--checkbox-wrapper:hover {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-hover-02);
+  }
+
+  .column-checkbox {
+    padding: 1rem;
+  }
+
+  // remove the padding and hover effect for the material ui menu item component
+  .MuiMenuItem-root {
+    padding: 0rem;
+    &:hover {
+      background-color: transparent; // remove hover effect
+    }
+    .MuiTouchRipple-root {
+      display: none !important;
+    }
+  }
+}

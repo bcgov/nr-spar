@@ -3,6 +3,7 @@ import { Row, Column, Button } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
 import GenericTable from '../../../../components/GenericTable';
+import ShowHideColumnControl from './ToolbarControls/ShowHideColumnControl';
 import { getTestingActivityListColumns } from './constants';
 import type {
   TestingSearchResponseType,
@@ -23,6 +24,7 @@ const TestListTable = ({
   onPageChange = () => {}
 }: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+  const columnVisibilityLocalStorageKey = 'test-activity-table-columns-visibility';
 
   const actions = [
     {
@@ -51,12 +53,6 @@ const TestListTable = ({
       action: () => {}
     },
     {
-      label: 'Edit columns',
-      icon: <Icons.Column size={16} className="concep-test-search-table-toolbar-button-icon" />,
-      type: 'primary',
-      action: () => {}
-    },
-    {
       label: 'Export Data',
       icon: (
         <Icons.DocumentExport size={16} className="concep-test-search-table-toolbar-button-icon" />
@@ -74,34 +70,6 @@ const TestListTable = ({
 
   return (
     <div className="concep-test-search-table-container">
-      <Row className="concep-test-search-table-toolbar">
-        <Column sm={2} md={3} lg={6} className="concep-test-search-table-title">
-          {`Total search result: ${paginationInfo.totalElements}`}
-        </Column>
-        <Column
-          sm={2}
-          md={5}
-          lg={10}
-          className="concep-test-search-table-toolbar"
-        >
-          {actions.map(({
-            label, icon, action, type
-          }) => (
-            <Button
-              key={label}
-              onClick={action}
-              kind={type}
-              aria-label={label}
-              size="md"
-              className="concep-test-search-table-toolbar-button"
-            >
-              {label}
-              {icon}
-            </Button>
-          ))}
-        </Column>
-      </Row>
-
       <Row className="concep-test-search-table">
         <GenericTable
           columns={getTestingActivityListColumns()}
@@ -115,6 +83,38 @@ const TestListTable = ({
           enableRowSelection
           isLoading={isLoading}
           tableBodyRef={tableBodyRef}
+          hideToolbar={false}
+          initialState={{
+            columnVisibility: JSON.parse(
+              localStorage.getItem(columnVisibilityLocalStorageKey) || '{}'
+            )
+          }}
+          renderTopToolbarCustomActions={() => (
+            <div className="concep-test-search-table-title">{`Total search result: ${paginationInfo.totalElements}`}</div>
+          )}
+          renderToolbarInternalActions={({ table }) => (
+            <Column>
+              {actions.map(({
+                label, icon, action, type
+              }) => (
+                <Button
+                  key={label}
+                  onClick={action}
+                  kind={type}
+                  aria-label={label}
+                  size="md"
+                  className="concep-test-search-table-toolbar-button"
+                >
+                  {label}
+                  {icon}
+                </Button>
+              ))}
+              <ShowHideColumnControl
+                table={table}
+                columnVisibilityLocalStorageKey={columnVisibilityLocalStorageKey}
+              />
+            </Column>
+          )}
         />
       </Row>
     </div>
