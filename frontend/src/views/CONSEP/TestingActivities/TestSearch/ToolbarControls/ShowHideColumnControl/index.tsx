@@ -1,17 +1,30 @@
 /* eslint-disable camelcase */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Checkbox } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 import { type MRT_TableInstance } from 'material-react-table';
 import { Menu, MenuItem } from '@mui/material';
 import './styles.scss';
 
-const ShowHideColumnControl = ({ table }: { table: MRT_TableInstance<any> }) => {
+const ShowHideColumnControl = ({
+  table,
+  columnVisibilityLocalStorageKey = 'table-columns-visibility'
+}: {
+  table: MRT_TableInstance<any>;
+  columnVisibilityLocalStorageKey?: string;
+}) => {
   // The button element that the menu is attached to
   const [menuButtonElement, setMenuButtonElement] = useState<null | HTMLElement>(null);
 
   // Menu is open if menuButtonElement exists
   const isMenuOpen = Boolean(menuButtonElement);
+
+  useEffect(() => {
+    localStorage.setItem(
+      columnVisibilityLocalStorageKey,
+      JSON.stringify(table.getState().columnVisibility)
+    );
+  }, [table.getState().columnVisibility]);
 
   // When button is clicked, set the element to anchor the menu
   const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -55,7 +68,10 @@ const ShowHideColumnControl = ({ table }: { table: MRT_TableInstance<any> }) => 
                 labelText={column.columnDef.header}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const { checked } = e.target;
-                  table.setColumnVisibility({ [column.id]: checked });
+                  table.setColumnVisibility({
+                    ...table.getState().columnVisibility,
+                    [column.id]: checked
+                  });
                 }}
                 className="column-checkbox"
               />

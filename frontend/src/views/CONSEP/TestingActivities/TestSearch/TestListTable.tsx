@@ -24,6 +24,7 @@ const TestListTable = ({
   onPageChange = () => {}
 }: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+  const columnVisibilityLocalStorageKey = 'test-activity-table-columns-visibility';
 
   const actions = [
     {
@@ -83,6 +84,11 @@ const TestListTable = ({
           isLoading={isLoading}
           tableBodyRef={tableBodyRef}
           hideToolbar={false}
+          initialState={{
+            columnVisibility: JSON.parse(
+              localStorage.getItem(columnVisibilityLocalStorageKey) || '{}'
+            )
+          }}
           renderTopToolbarCustomActions={() => (
             <div className="concep-test-search-table-title">{`Total search result: ${paginationInfo.totalElements}`}</div>
           )}
@@ -103,7 +109,10 @@ const TestListTable = ({
                   {icon}
                 </Button>
               ))}
-              <ShowHideColumnControl table={table} />
+              <ShowHideColumnControl
+                table={table}
+                columnVisibilityLocalStorageKey={columnVisibilityLocalStorageKey}
+              />
             </Column>
           )}
         />
