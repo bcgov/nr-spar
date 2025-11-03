@@ -27,7 +27,7 @@ const awsconfig = {
       userPoolClientId: env.VITE_USER_POOLS_WEB_CLIENT_ID,
       loginWith: {
         oauth: {
-          domain: env.VITE_AWS_DOMAIN || 'prod-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com',
+          domain: env.VITE_AWS_DOMAIN || 'lza-prod-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com',
           scopes: ['openid'],
           redirectSignIn: [`${window.location.origin}/`],
           redirectSignOut: [signOutUrl],
