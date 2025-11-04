@@ -8,7 +8,7 @@ import { getTestingActivityListColumns } from './constants';
 import type {
   TestingSearchResponseType,
   PaginationInfoType
-} from '../../../../types/consep/TestingSearchResponseType';
+} from '../../../../types/consep/TestingSearchType';
 
 type TestListTableProp = {
   data: TestingSearchResponseType[];
