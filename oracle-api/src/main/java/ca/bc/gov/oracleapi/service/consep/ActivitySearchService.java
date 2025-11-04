@@ -5,6 +5,8 @@ import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,23 @@ public class ActivitySearchService {
       ActivitySearchRequestDto activitySearchRequestDto,
       Pageable pageable) {
 
+    LocalDateTime actualBeginFrom = activitySearchRequestDto.actualBeginDateFrom() != null
+        ? activitySearchRequestDto.actualBeginDateFrom().atStartOfDay()
+        : null;
+
+    LocalDateTime actualBeginTo = activitySearchRequestDto.actualBeginDateTo() != null
+        ? activitySearchRequestDto.actualBeginDateTo().atTime(LocalTime.MAX)
+        : null;
+
+    LocalDateTime actualEndFrom = activitySearchRequestDto.actualEndDateFrom() != null
+        ? activitySearchRequestDto.actualEndDateFrom().atStartOfDay()
+        : null;
+
+    LocalDateTime actualEndTo = activitySearchRequestDto.actualEndDateTo() != null
+        ? activitySearchRequestDto.actualEndDateTo().atTime(LocalTime.MAX)
+        : null;
+
+
     // Fetch paginated results from repository
     Page<ActivitySearchResultEntity> results = activitySearchRepository.searchTestingActivities(
         activitySearchRequestDto.lotNumbers(),
@@ -51,10 +70,10 @@ public class ActivitySearchService {
         activitySearchRequestDto.testCategoryCd(),
         activitySearchRequestDto.testRank(),
         activitySearchRequestDto.species(),
-        activitySearchRequestDto.actualBeginDateFrom(),
-        activitySearchRequestDto.actualBeginDateTo(),
-        activitySearchRequestDto.actualEndDateFrom(),
-        activitySearchRequestDto.actualEndDateTo(),
+        actualBeginFrom,
+        actualBeginTo,
+        actualEndFrom,
+        actualEndTo,
         activitySearchRequestDto.revisedStartDateFrom(),
         activitySearchRequestDto.revisedStartDateTo(),
         activitySearchRequestDto.revisedEndDateFrom(),
