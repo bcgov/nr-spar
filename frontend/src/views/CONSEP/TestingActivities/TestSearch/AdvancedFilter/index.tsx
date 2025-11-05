@@ -224,7 +224,7 @@ const AdvancedFilters = ({
           newFrom && !newTo
         )
           ? maxEndDate
-          : undefined;
+          : newTo;
       }
 
       if (range === 'To') {
@@ -233,7 +233,7 @@ const AdvancedFilters = ({
           newTo && !newFrom
         )
           ? minStartDate
-          : undefined;
+          : newFrom;
       }
 
       return {
