@@ -22,8 +22,7 @@ export const fieldsConfig = {
   },
   comments: {
     name: 'comments',
-    labelText: 'Comments (optional)',
-    placeholder: 'My comments about this activity'
+    labelText: 'Comments (optional)'
   }
 };
 

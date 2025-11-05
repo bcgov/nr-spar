@@ -5,7 +5,7 @@ import * as Icons from '@carbon/icons-react';
 import { Tag } from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
 import { CrumbType } from '../../../../components/Breadcrumbs/definitions';
-import { TestingSearchResponseType } from '../../../../types/consep/TestingSearchResponseType';
+import { TestingSearchResponseType } from '../../../../types/consep/TestingSearchType';
 import { ActivitySearchValidation, ValidationErrorType } from './definitions';
 
 export const SAFE_MARGIN = 16;
@@ -71,19 +71,6 @@ export const iniActSearchValidation: ActivitySearchValidation = {
   orchardId: initialErrorValue
 };
 
-export const testTypesCd: string[] = [
-  'BIO', 'CAL', 'CUT', 'D1',
-  'FUS', 'G10', 'G11', 'G12',
-  'G20', 'G30', 'G31', 'G32',
-  'G34', 'G41', 'G42', 'G44',
-  'G52', 'G54', 'G55', 'G56',
-  'G57', 'G62', 'G64', 'GH1',
-  'GPR', 'GSA', 'GSE', 'MC',
-  'NGR', 'PAT', 'PUR', 'QAM',
-  'SIR', 'SPG', 'TET', 'TUM',
-  'W1', 'XRY'
-];
-
 export const activityIds: string[] = [
   'AWT', 'BIO', 'CAL', 'CUT',
   'D1', 'FUS', 'G10', 'G11',
@@ -97,11 +84,6 @@ export const activityIds: string[] = [
   'PAT', 'PUR', 'RTE', 'SAM',
   'SIR', 'SPG', 'TZ', 'W1',
   'XRY'
-];
-
-export const testCategoryCd: string[] = [
-  'PUR', 'QA', 'QAK', 'QAP',
-  'QAR', 'QAS', 'STD', 'TRL'
 ];
 
 export const requestTypeSt: string[] = [

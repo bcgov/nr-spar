@@ -18,11 +18,12 @@ const createEditableNumberColumn = (
   validationMsg: string,
   updateRow: (row: ReplicateType) => void,
   validationErrors: Record<string, string | undefined>,
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>
+  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>,
+  size: number = 120
 ): MRT_ColumnDef<ReplicateType> => ({
   accessorKey,
   header,
-  size: 120,
+  size,
   muiEditTextFieldProps: ({ cell, row }) => {
     const value = row.original[accessorKey as keyof typeof row.original] ?? '';
     return {
@@ -67,11 +68,12 @@ const createEditableTextColumn = (
   validationMsg: string,
   updateRow: (row: ReplicateType) => void,
   validationErrors: Record<string, string | undefined>,
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>
+  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>,
+  size: number = 80
 ): MRT_ColumnDef<ReplicateType> => ({
   accessorKey,
   header,
-  size: 80,
+  size,
   muiEditTextFieldProps: ({ cell, row }) => {
     const value = row.original[accessorKey as keyof typeof row.original] ?? '';
     return {
@@ -79,6 +81,7 @@ const createEditableTextColumn = (
       value,
       error: !!validationErrors[cell.id],
       helperText: validationErrors[cell.id],
+      placeholder: undefined,
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = event.currentTarget.value;
         const validationError = newValue.length > maxLength ? validationMsg : undefined;
@@ -115,7 +118,7 @@ export const getMccColumns = (
   },
   createEditableTextColumn(
     'containerId',
-    'Container #',
+    'Cont #',
     4,
     'Must be no more than 4 characters',
     updateRow,
@@ -124,11 +127,12 @@ export const getMccColumns = (
   ),
   createEditableNumberColumn(
     'containerWeight',
-    'Container weight',
+    'Cont wt',
     'Must be between 0 and 1000',
     updateRow,
     validationErrors,
-    setValidationErrors
+    setValidationErrors,
+    80
   ),
   createEditableNumberColumn(
     'freshSeed',
@@ -149,16 +153,18 @@ export const getMccColumns = (
   {
     accessorKey: 'dryWeight',
     header: 'Dry weight',
+    size: 60,
     enableEditing: false,
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'dryWeight' in row.original ? row.original.dryWeight : ''
-    })
+    }),
+    ...alignRight
   },
   {
     accessorKey: 'mcValue',
     header: 'MC value (%)',
-    size: 80,
+    size: 40,
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'mcValue' in row.original ? row.original.mcValue : ''
@@ -204,6 +210,7 @@ export const getMccColumns = (
   {
     accessorKey: 'actions',
     header: '',
+    enableSorting: false,
     Cell: ({ row }: { row: { original: ReplicateType } }) => (
       <Icons.TrashCan
         size={15}

@@ -459,13 +459,12 @@ const MoistureContent = () => {
         </Column>
       </Row>
       <Row className="consep-moisture-content-comments">
-        <Column sm={4} md={4} lg={10} xlg={10}>
+        <Column>
           <TextArea
             id="moisture-content-comments"
             name={fieldsConfig.comments.name}
             labelText={fieldsConfig.comments.labelText}
-            placeholder={fieldsConfig.comments.placeholder}
-            rows={5}
+            rows={2}
             maxCount={500}
             enableCounter
             value={activityRecord?.riaComment || ''}
