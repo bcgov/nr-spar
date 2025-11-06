@@ -5,6 +5,7 @@ import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
@@ -36,22 +37,19 @@ public class ActivitySearchService {
       ActivitySearchRequestDto activitySearchRequestDto,
       Pageable pageable) {
 
-    LocalDateTime actualBeginFrom = activitySearchRequestDto.actualBeginDateFrom() != null
-        ? activitySearchRequestDto.actualBeginDateFrom().atStartOfDay()
-        : null;
-
-    LocalDateTime actualBeginTo = activitySearchRequestDto.actualBeginDateTo() != null
-        ? activitySearchRequestDto.actualBeginDateTo().atTime(LocalTime.MAX)
-        : null;
-
-    LocalDateTime actualEndFrom = activitySearchRequestDto.actualEndDateFrom() != null
-        ? activitySearchRequestDto.actualEndDateFrom().atStartOfDay()
-        : null;
-
-    LocalDateTime actualEndTo = activitySearchRequestDto.actualEndDateTo() != null
-        ? activitySearchRequestDto.actualEndDateTo().atTime(LocalTime.MAX)
-        : null;
-
+    LocalDateTime seedWithdrawalStartDate =
+        toStartOfDay(activitySearchRequestDto.seedWithdrawalStartDate());
+    LocalDateTime seedWithdrawalEndDate =
+        toEndOfDay(activitySearchRequestDto.seedWithdrawalEndDate());
+    LocalDateTime actualBeginFrom = toStartOfDay(activitySearchRequestDto.actualBeginDateFrom());
+    LocalDateTime actualBeginTo = toEndOfDay(activitySearchRequestDto.actualBeginDateTo());
+    LocalDateTime actualEndFrom = toStartOfDay(activitySearchRequestDto.actualEndDateFrom());
+    LocalDateTime actualEndTo = toEndOfDay(activitySearchRequestDto.actualEndDateTo());
+    LocalDateTime revisedStartDateFrom =
+        toStartOfDay(activitySearchRequestDto.revisedStartDateFrom());
+    LocalDateTime revisedStartDateTo = toEndOfDay(activitySearchRequestDto.revisedStartDateTo());
+    LocalDateTime revisedEndDateFrom = toStartOfDay(activitySearchRequestDto.revisedEndDateFrom());
+    LocalDateTime revisedEndDateTo = toEndOfDay(activitySearchRequestDto.revisedEndDateTo());
 
     // Fetch paginated results from repository
     Page<ActivitySearchResultEntity> results = activitySearchRepository.searchTestingActivities(
@@ -59,8 +57,8 @@ public class ActivitySearchService {
         activitySearchRequestDto.testType(),
         activitySearchRequestDto.activityId(),
         activitySearchRequestDto.germinatorTrayId(),
-        activitySearchRequestDto.seedWithdrawalStartDate(),
-        activitySearchRequestDto.seedWithdrawalEndDate(),
+        seedWithdrawalStartDate,
+        seedWithdrawalEndDate,
         activitySearchRequestDto.includeHistoricalTests(),
         activitySearchRequestDto.germTestsOnly(),
         activitySearchRequestDto.requestId(),
@@ -74,10 +72,10 @@ public class ActivitySearchService {
         actualBeginTo,
         actualEndFrom,
         actualEndTo,
-        activitySearchRequestDto.revisedStartDateFrom(),
-        activitySearchRequestDto.revisedStartDateTo(),
-        activitySearchRequestDto.revisedEndDateFrom(),
-        activitySearchRequestDto.revisedEndDateTo(),
+        revisedStartDateFrom,
+        revisedStartDateTo,
+        revisedEndDateFrom,
+        revisedEndDateTo,
         activitySearchRequestDto.germTrayAssignment(),
         activitySearchRequestDto.completeStatus(),
         activitySearchRequestDto.acceptanceStatus(),
@@ -134,5 +132,28 @@ public class ActivitySearchService {
         activitySearchResultEntity.getSeedlotSample(),
         activitySearchResultEntity.getRiaSkey()
     );
+  }
+
+  /**
+   * Converts a given {@link LocalDate} to the start of the day (00:00:00). May be {@code null}.
+   *
+   * @param date The {@link LocalDate} to convert
+   * @return The corresponding {@link LocalDateTime} at the start of the given day,
+   *         or {@code null} if the input date is {@code null}.
+   */
+  private LocalDateTime toStartOfDay(LocalDate date) {
+    return date != null ? date.atStartOfDay() : null;
+  }
+
+  /**
+   * Converts a given {@link LocalDate} to the end of the day (23:59:59.999999999).
+   * May be {@code null}.
+   *
+   * @param date The {@link LocalDate} to convert
+   * @return The corresponding {@link LocalDateTime} at the end of the given day,
+   *         or {@code null} if the input date is {@code null}.
+   */
+  private LocalDateTime toEndOfDay(LocalDate date) {
+    return date != null ? date.atTime(LocalTime.MAX) : null;
   }
 }

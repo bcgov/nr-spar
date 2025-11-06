@@ -1,7 +1,6 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -26,8 +25,8 @@ public record ActivitySearchResponseDto(
     Boolean testCompleteInd,
     Integer acceptResultInd,
     Integer significntStsInd,
-    LocalDate seedWithdrawalDate,
-    LocalDate revisedEndDt,
+    LocalDateTime seedWithdrawalDate,
+    LocalDateTime revisedEndDt,
     LocalDateTime actualBeginDtTm,
     LocalDateTime actualEndDtTm,
     String riaComment,
