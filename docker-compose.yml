@@ -15,8 +15,8 @@ x-frontend: &frontend
     VITE_SERVER_URL: http://localhost:8090
     VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
     LOG_LEVEL: debug
-    VITE_USER_POOLS_ID: ca-central-1_t2HSZBHur
-    VITE_USER_POOLS_WEB_CLIENT_ID: 6jmscjfesregki1pvng2oiopc3
+    VITE_USER_POOLS_ID: ca-central-1_UpeAqsYt4
+    VITE_USER_POOLS_WEB_CLIENT_ID: 3lhqndjq897v4menht7hp1u1s2
     VITE_ZONE: TEST
   healthcheck:
     test: timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/3000'
@@ -45,7 +45,7 @@ services:
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       POSTGRES_HOST: database
-      AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
+      AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_UpeAqsYt4"
       <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.11-eclipse-temurin-17
@@ -103,7 +103,7 @@ services:
       SERVER_PORT: "8091"
       ORACLEDB_KEYSTORE: /app/jssecacerts
       ORACLEDB_SECRET: changeit
-      AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
+      AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_UpeAqsYt4"
     profiles: ["oracle-api"]
     network_mode: host
     image: maven:3.9.11-eclipse-temurin-17
