@@ -38,3 +38,8 @@ export type PaginationInfoType = {
 export type PaginatedTestingSearchResponseType = {
   content: TestingSearchResponseType[];
 } & PaginationInfoType;
+
+export type TestCodeType = {
+  code: string;
+  description: string;
+};
