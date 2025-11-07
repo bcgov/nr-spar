@@ -32,15 +32,31 @@ const createEditableNumberColumn = (
       helperText: validationErrors[cell.id],
       placeholder: undefined,
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = parseFloat(event.currentTarget.value);
-        const validationError = newValue < 0 || newValue > 1000 ? validationMsg : undefined;
+        const rawValue = event.currentTarget.value;
+        const parsedValue = rawValue === '' ? NaN : parseFloat(rawValue);
 
-        setValidationErrors({ ...validationErrors, [cell.id]: validationError });
+        // count decimals (treat empty or integer as 0 decimals)
+        const decimalCount = rawValue.includes('.') ? rawValue.split('.')[1].length : 0;
 
+        // determine validation error
+        let validationError: string | undefined;
+        if (rawValue !== '' && !Number.isFinite(parsedValue)) {
+          validationError = 'Invalid number';
+        } else if (rawValue !== '' && (parsedValue < 0 || parsedValue > 1000)) {
+          validationError = validationMsg;
+        } else if (decimalCount > 3) {
+          validationError = 'Must have at most 3 decimal places';
+        } else {
+          validationError = undefined;
+        }
+
+        setValidationErrors((prev) => ({ ...prev, [cell.id]: validationError }));
+
+        // only call updateRow when there is no validation error
         if (!validationError) {
           updateRow({
             ...row.original,
-            [accessorKey]: newValue
+            [accessorKey]: rawValue === '' ? undefined : parsedValue
           } as ReplicateType);
         }
       },
