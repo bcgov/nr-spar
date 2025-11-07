@@ -45,7 +45,7 @@ const createEditableNumberColumn = (
         } else if (rawValue !== '' && (parsedValue < 0 || parsedValue > 1000)) {
           validationError = validationMsg;
         } else if (decimalCount > 3) {
-          validationError = 'Must have at most 3 decimal places';
+          validationError = 'Cannot exceed three decimal places';
         } else {
           validationError = undefined;
         }
