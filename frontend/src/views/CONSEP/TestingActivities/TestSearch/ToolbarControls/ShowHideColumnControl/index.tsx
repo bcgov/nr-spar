@@ -55,7 +55,7 @@ const ShowHideColumnControl = ({
         onClose={handleMenuClose}
         className="table-column-menu"
       >
-        <div className="helper-text">Select columns you want to see</div>
+        <div className="helper-text">Customize columns</div>
 
         {table
           .getAllLeafColumns()
