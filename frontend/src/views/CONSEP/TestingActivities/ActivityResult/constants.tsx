@@ -7,10 +7,13 @@ import { ReplicateKeys, ReplicateType } from '../../../../types/consep/TestingAc
 
 export const TABLE_TITLE = 'Activity results per replicate';
 
-const alignRight = {
-  muiTableHeadCellProps: { align: 'right' as const },
+const alignRight = (columnClassName?: string) => ({
+  muiTableHeadCellProps: {
+    align: 'right' as const,
+    ...(columnClassName ? { className: `col-${columnClassName}` } : {})
+  },
   muiTableBodyCellProps: { align: 'right' as const }
-};
+});
 
 const createEditableNumberColumn = (
   accessorKey: ReplicateKeys,
@@ -18,8 +21,7 @@ const createEditableNumberColumn = (
   validationMsg: string,
   updateRow: (row: ReplicateType) => void,
   validationErrors: Record<string, string | undefined>,
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>,
-  muiTableHeadCellProps?: Record<string, any>
+  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>
 ): MRT_ColumnDef<ReplicateType> => ({
   accessorKey,
   header,
@@ -75,11 +77,7 @@ const createEditableNumberColumn = (
       }
     };
   },
-  ...alignRight,
-  muiTableHeadCellProps: {
-    ...(alignRight.muiTableHeadCellProps || {}),
-    ...(muiTableHeadCellProps || {})
-  }
+  ...alignRight(accessorKey)
 });
 
 const createEditableTextColumn = (
@@ -89,8 +87,7 @@ const createEditableTextColumn = (
   validationMsg: string,
   updateRow: (row: ReplicateType) => void,
   validationErrors: Record<string, string | undefined>,
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>,
-  muiTableHeadCellProps?: Record<string, any>
+  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>
 ): MRT_ColumnDef<ReplicateType> => ({
   accessorKey,
   header,
@@ -117,11 +114,7 @@ const createEditableTextColumn = (
       }
     };
   },
-  ...alignRight,
-  muiTableHeadCellProps: {
-    ...(alignRight.muiTableHeadCellProps || {}),
-    ...(muiTableHeadCellProps || {})
-  }
+  ...alignRight(accessorKey)
 });
 
 export const getMccColumns = (
@@ -136,7 +129,7 @@ export const getMccColumns = (
     header: 'Replicate',
     size: 40,
     enableEditing: false,
-    muiTableHeadCellProps: { ...alignRight.muiTableHeadCellProps, className: 'col-replicateNumber' },
+    ...alignRight('replicateNumber'),
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: row.original.replicateNumber ?? ''
@@ -149,8 +142,7 @@ export const getMccColumns = (
     'Must be no more than 4 characters',
     updateRow,
     validationErrors,
-    setValidationErrors,
-    { className: 'col-containerId' }
+    setValidationErrors
   ),
   createEditableNumberColumn(
     'containerWeight',
@@ -158,8 +150,7 @@ export const getMccColumns = (
     'Must be between 0 and 1000',
     updateRow,
     validationErrors,
-    setValidationErrors,
-    { className: 'col-containerWt' }
+    setValidationErrors
   ),
   createEditableNumberColumn(
     'freshSeed',
@@ -167,8 +158,7 @@ export const getMccColumns = (
     'Must be between 0 and 1000',
     updateRow,
     validationErrors,
-    setValidationErrors,
-    { className: 'col-freshSeed' }
+    setValidationErrors
   ),
   createEditableNumberColumn(
     'containerAndDryWeight',
@@ -176,35 +166,33 @@ export const getMccColumns = (
     'Must be between 0 and 1000',
     updateRow,
     validationErrors,
-    setValidationErrors,
-    { className: 'col-contAndDryWt' }
+    setValidationErrors
   ),
   {
     accessorKey: 'dryWeight',
     header: 'Dry weight',
     size: 60,
     enableEditing: false,
-    muiTableHeadCellProps: { align: 'right', className: 'col-dryWt' },
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'dryWeight' in row.original ? row.original.dryWeight : ''
-    })
+    }),
+    ...alignRight('dryWeight')
   },
   {
     accessorKey: 'mcValue',
     header: 'MC value (%)',
     size: 40,
-    muiTableHeadCellProps: { ...alignRight.muiTableHeadCellProps, className: 'col-mcValue' },
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'mcValue' in row.original ? row.original.mcValue : ''
     }),
-    enableEditing: false
+    enableEditing: false,
+    ...alignRight('mcValue')
   },
   {
     accessorKey: 'replicateAccInd',
     header: 'Acc',
-    muiTableHeadCellProps: { ...alignRight.muiTableHeadCellProps, className: 'col-acc' },
     Cell: ({ row }: { row: { original: ReplicateType } }) => (
       <Checkbox
         checked={!!row.original.replicateAccInd}
@@ -218,14 +206,13 @@ export const getMccColumns = (
       />
     ),
     size: 60,
-    muiTableBodyCellProps: { align: 'center' },
-    enableEditing: false
+    enableEditing: false,
+    ...alignRight('replicateAccInd')
   },
   {
     accessorKey: 'replicateComment',
     header: 'Comments',
     size: 300,
-    muiTableHeadCellProps: { ...alignRight.muiTableHeadCellProps, className: 'col-comments' },
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: 'replicateComment' in row.original ? row.original.replicateComment : '',
@@ -235,7 +222,8 @@ export const getMccColumns = (
           replicateComment: event.currentTarget.value
         });
       }
-    })
+    }),
+    ...alignRight('replicateComment')
   },
   {
     accessorKey: 'actions',
