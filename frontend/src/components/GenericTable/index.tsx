@@ -3,6 +3,7 @@ import React from 'react';
 import {
   type MRT_ColumnDef,
   type MRT_PaginationState,
+  type MRT_TableInstance,
   MaterialReactTable,
   useMaterialReactTable
 } from 'material-react-table';
@@ -33,7 +34,10 @@ type Props<T extends Record<string, any>> = {
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
   initialState?: any;
-  tableBodyRef?: React.RefObject<HTMLTableSectionElement>;
+  tableBodyRef?: React.RefObject<HTMLTableSectionElement>,
+  renderToolbarInternalActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
+  renderTopToolbarCustomActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
+  hideToolbar?: boolean;
 };
 
 const COLOR_GREY_20 = '#DFDFE1';
@@ -80,7 +84,10 @@ const GenericTable = <T extends Record<string, any>>({
   renderRowActions,
   onRowClick,
   initialState,
-  tableBodyRef
+  tableBodyRef,
+  renderToolbarInternalActions,
+  renderTopToolbarCustomActions,
+  hideToolbar = true
 }: Props<T>) => {
   const basicTable = useMaterialReactTable({
     columns,
@@ -115,7 +122,7 @@ const GenericTable = <T extends Record<string, any>>({
           ? {
             // only hide the top toolbar when pagination is enabled
             '& > .MuiBox-root:first-of-type': {
-              display: 'none'
+              display: hideToolbar ? 'none' : 'flex'
             }
           }
           : {
@@ -193,7 +200,9 @@ const GenericTable = <T extends Record<string, any>>({
       : undefined,
     localization: {
       noRecordsToDisplay: 'No data found'
-    }
+    },
+    renderToolbarInternalActions,
+    renderTopToolbarCustomActions
   });
 
   return (

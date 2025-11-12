@@ -297,6 +297,6 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     Cell: () => <Icons.TrashCan size={15} style={{ cursor: 'pointer' }} onClick={() => {}} />,
     enableEditing: false,
     size: 20,
-    ...alignLeft
+    ...alignRight
   }
 ];
