@@ -38,7 +38,7 @@ parameters:
     value: "5"
   - name: VITE_AWS_DOMAIN
     description: FAM on AWS domain
-    value: https://prod-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com
+    value: https://lza-prod-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com
   - name: VITE_SPAR_BUILD_VERSION
     description: Current sample app release version
     required: true
