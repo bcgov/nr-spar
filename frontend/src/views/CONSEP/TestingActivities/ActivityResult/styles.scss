@@ -64,10 +64,10 @@
     }
 
     .col-containerId,
-    .col-containerWt,
+    .col-containerWeight,
     .col-freshSeed,
-    .col-contAndDryWt,
-    .col-dryWt,
+    .col-containerAndDryWeight,
+    .col-dryWeight,
     .col-mcValue {
       width: 6rem;
     }
@@ -88,10 +88,10 @@
       }
 
       .col-containerId,
-      .col-containerWt,
+      .col-containerWeight,
       .col-freshSeed,
-      .col-contAndDryWt,
-      .col-dryWt,
+      .col-containerAndDryWeight,
+      .col-dryWeight,
       .col-mcValue {
         width: 8.5rem;
       }
@@ -99,6 +99,10 @@
       .col-acc {
         width: 4.5rem;
       }
+
+      .col-comments {
+        min-width: 3rem;
+  }
     }
   }
 
