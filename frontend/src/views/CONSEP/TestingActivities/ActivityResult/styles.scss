@@ -55,57 +55,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
-  table {
-    table-layout: fixed;
-    width: 100%;
-
-    .col-replicateNumber {
-      width: 4rem;
-    }
-
-    .col-containerId,
-    .col-containerWeight,
-    .col-freshSeed,
-    .col-containerAndDryWeight,
-    .col-dryWeight,
-    .col-mcValue {
-      width: 6rem;
-    }
-
-    .col-acc {
-      width: 3rem;
-    }
-
-    .col-comments {
-      width: auto;
-    }
-  }
-
-  @media screen and (width>=1200px) {
-    table {
-      .col-replicateNumber {
-        width: 7rem;
-      }
-
-      .col-containerId,
-      .col-containerWeight,
-      .col-freshSeed,
-      .col-containerAndDryWeight,
-      .col-dryWeight,
-      .col-mcValue {
-        width: 8.5rem;
-      }
-
-      .col-acc {
-        width: 4.5rem;
-      }
-
-      .col-comments {
-        min-width: 3rem;
-  }
-    }
-  }
-
   th {
     padding: 0.75rem 0.25rem;
   }
