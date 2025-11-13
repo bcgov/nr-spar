@@ -202,7 +202,7 @@ const AdvancedFilters = ({
   const handleAdvDateChange = (
     dates: (string | Date)[],
     group: 'actual' | 'revised',
-    field: 'BeginDate' | 'EndDate',
+    field: 'BeginDate' | 'StartDate'| 'EndDate',
     range: 'From' | 'To'
   ) => {
     const raw = dates?.[0];
@@ -224,7 +224,7 @@ const AdvancedFilters = ({
           newFrom && !newTo
         )
           ? maxEndDate
-          : undefined;
+          : newTo;
       }
 
       if (range === 'To') {
@@ -233,7 +233,7 @@ const AdvancedFilters = ({
           newTo && !newFrom
         )
           ? minStartDate
-          : undefined;
+          : newFrom;
       }
 
       return {
@@ -509,7 +509,8 @@ const AdvancedFilters = ({
                   className="advanced-date-input"
                   dateFormat={DATE_FORMAT}
                   onChange={(e: Array<Date>) => {
-                    handleAdvDateChange(e, dateType as 'actual' | 'revised', 'BeginDate', 'From');
+                    const fromField = dateType === 'revised' ? 'StartDate' : 'BeginDate';
+                    handleAdvDateChange(e, dateType as 'actual' | 'revised', fromField, 'From');
                   }}
                   value={toDatePickerValue(
                     dateType === 'actual'
@@ -537,7 +538,8 @@ const AdvancedFilters = ({
                       : searchParams.revisedStartDateFrom ?? undefined
                   }
                   onChange={(e: Array<Date>) => {
-                    handleAdvDateChange(e, dateType as 'actual' | 'revised', 'BeginDate', 'To');
+                    const fromField = dateType === 'revised' ? 'StartDate' : 'BeginDate';
+                    handleAdvDateChange(e, dateType as 'actual' | 'revised', fromField, 'To');
                   }}
                   value={toDatePickerValue(
                     dateType === 'actual'

@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -68,13 +67,13 @@ public class ActivitySearchResultEntity {
   private Integer significntStsInd;
 
   @Column(name = "SEED_WITHDRAWAL_DATE")
-  private LocalDate seedWithdrawalDate;
+  private LocalDateTime seedWithdrawalDate;
 
   @Column(name = "REVISED_END_DT")
-  private LocalDate revisedEndDt;
+  private LocalDateTime revisedEndDt;
 
   @Column(name = "REVISED_START_DT")
-  private LocalDate revisedStartDt;
+  private LocalDateTime revisedStartDt;
 
   @Column(name = "ACTUAL_BEGIN_DT_TM")
   private LocalDateTime actualBeginDtTm;
