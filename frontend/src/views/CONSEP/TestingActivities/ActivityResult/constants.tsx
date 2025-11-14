@@ -6,11 +6,56 @@ import * as Icons from '@carbon/icons-react';
 import { ReplicateKeys, ReplicateType } from '../../../../types/consep/TestingActivityType';
 
 export const TABLE_TITLE = 'Activity results per replicate';
+const COLOR_GREY_20 = '#DFDFE1';
 
-const alignRight = {
-  muiTableHeadCellProps: { align: 'right' as const },
-  muiTableBodyCellProps: { align: 'right' as const }
-};
+const tableCellProps = (size?: number, alignment: 'left' | 'right' | 'center' = 'right') => ({
+  muiTableHeadCellProps: {
+    align: alignment,
+    ...(size
+      ? {
+        sx: {
+          width: size,
+          minWidth: size,
+          maxWidth: size,
+          // keep the header style align with the style in
+          // frontend/src/components/GenericTable/index.tsx,
+          // otherwise the header style inside GenericTable will be overrided
+          '& .Mui-TableHeadCell-Content-Labels': {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: '0.25rem',
+
+            '& .Mui-TableHeadCell-Content-Wrapper': {
+              order: 1
+            },
+            '& .MuiBadge-root': {
+              order: 2
+            }
+          }
+        }
+      }
+      : {})
+  },
+  muiTableBodyCellProps: {
+    align: alignment,
+    ...(size
+      ? {
+        sx: {
+          width: size,
+          minWidth: size,
+          maxWidth: size,
+          paddingTop: 0,
+          paddingBottom: 0,
+          '&:hover': {
+            outline: 'none',
+            backgroundColor: COLOR_GREY_20
+          }
+        }
+      }
+      : {})
+  }
+});
 
 const createEditableNumberColumn = (
   accessorKey: ReplicateKeys,
@@ -19,11 +64,10 @@ const createEditableNumberColumn = (
   updateRow: (row: ReplicateType) => void,
   validationErrors: Record<string, string | undefined>,
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>,
-  size: number = 120
+  size: number = 80
 ): MRT_ColumnDef<ReplicateType> => ({
   accessorKey,
   header,
-  size,
   muiEditTextFieldProps: ({ cell, row }) => {
     const value = row.original[accessorKey as keyof typeof row.original] ?? '';
     return {
@@ -33,21 +77,38 @@ const createEditableNumberColumn = (
       helperText: validationErrors[cell.id],
       placeholder: undefined,
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = parseFloat(event.currentTarget.value);
-        const validationError = newValue < 0 || newValue > 1000 ? validationMsg : undefined;
+        const rawValue = event.currentTarget.value;
+        const parsedValue = rawValue === '' ? NaN : parseFloat(rawValue);
 
-        setValidationErrors({ ...validationErrors, [cell.id]: validationError });
+        // count decimals (treat empty or integer as 0 decimals)
+        const decimalCount = rawValue.includes('.') ? rawValue.split('.')[1].length : 0;
 
+        // determine validation error
+        let validationError: string | undefined;
+        if (rawValue !== '' && !Number.isFinite(parsedValue)) {
+          validationError = 'Invalid number';
+        } else if (rawValue !== '' && (parsedValue < 0 || parsedValue > 1000)) {
+          validationError = validationMsg;
+        } else if (decimalCount > 3) {
+          validationError = 'Cannot exceed three decimal places';
+        } else {
+          validationError = undefined;
+        }
+
+        setValidationErrors((prev) => ({ ...prev, [cell.id]: validationError }));
+
+        // only call updateRow when there is no validation error
         if (!validationError) {
           updateRow({
             ...row.original,
-            [accessorKey]: newValue
+            [accessorKey]: rawValue === '' ? undefined : parsedValue
           } as ReplicateType);
         }
       },
       inputProps: {
         inputMode: 'numeric',
-        pattern: '[0-9]*'
+        pattern: '[0-9]*',
+        style: { textAlign: 'right' }
       },
       sx: {
         '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
@@ -60,7 +121,7 @@ const createEditableNumberColumn = (
       }
     };
   },
-  ...alignRight
+  ...tableCellProps(size)
 });
 
 const createEditableTextColumn = (
@@ -75,7 +136,6 @@ const createEditableTextColumn = (
 ): MRT_ColumnDef<ReplicateType> => ({
   accessorKey,
   header,
-  size,
   muiEditTextFieldProps: ({ cell, row }) => {
     const value = row.original[accessorKey as keyof typeof row.original] ?? '';
     return {
@@ -96,10 +156,13 @@ const createEditableTextColumn = (
             [accessorKey]: newValue
           } as ReplicateType);
         }
+      },
+      inputProps: {
+        style: { textAlign: 'right' }
       }
     };
   },
-  ...alignRight
+  ...tableCellProps(size)
 });
 
 export const getMccColumns = (
@@ -112,13 +175,12 @@ export const getMccColumns = (
   {
     accessorKey: 'replicateNumber',
     header: 'Replicate',
-    size: 40,
     enableEditing: false,
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: row.original.replicateNumber ?? ''
     }),
-    ...alignRight
+    ...tableCellProps(80)
   },
   createEditableTextColumn(
     'containerId',
@@ -135,8 +197,7 @@ export const getMccColumns = (
     'Must be between 0 and 1000',
     updateRow,
     validationErrors,
-    setValidationErrors,
-    80
+    setValidationErrors
   ),
   createEditableNumberColumn(
     'freshSeed',
@@ -156,25 +217,23 @@ export const getMccColumns = (
   ),
   {
     accessorKey: 'dryWeight',
-    header: 'Dry weight',
-    size: 60,
+    header: 'Dry wt',
     enableEditing: false,
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
-      value: 'dryWeight' in row.original ? row.original.dryWeight : ''
+      value: (row.original as any).dryWeight ?? ''
     }),
-    ...alignRight
+    ...tableCellProps(80)
   },
   {
     accessorKey: 'mcValue',
-    header: 'MC value (%)',
-    size: 40,
+    header: 'MC (%)',
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
-      value: 'mcValue' in row.original ? row.original.mcValue : ''
+      value: (row.original as any).mcValue ?? ''
     }),
     enableEditing: false,
-    ...alignRight
+    ...tableCellProps(80)
   },
   {
     accessorKey: 'replicateAccInd',
@@ -202,7 +261,7 @@ export const getMccColumns = (
     size: 300,
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
-      value: 'replicateComment' in row.original ? row.original.replicateComment : '',
+      value: (row.original as any).replicateComment ?? '',
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         updateRow({
           ...row.original,
@@ -224,7 +283,7 @@ export const getMccColumns = (
     ),
     enableEditing: false,
     size: 60,
-    ...alignRight
+    ...tableCellProps()
   }
 ];
 
@@ -239,9 +298,8 @@ export const getPurityColumns = (
   {
     accessorKey: 'replicateNumber',
     header: 'Replicate',
-    size: 40,
     enableEditing: false,
-    ...alignRight
+    ...tableCellProps(80)
   },
   createEditableNumberColumn(
     'pureSeedWeight',
@@ -270,13 +328,12 @@ export const getPurityColumns = (
   {
     accessorKey: 'purityValue',
     header: 'Purity',
-    size: 80,
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
-      value: 'purityValue' in row.original ? row.original.purityValue : ''
+      value: (row.original as any).purityValue ?? ''
     }),
     enableEditing: false,
-    ...alignRight
+    ...tableCellProps(80)
   },
   {
     accessorKey: 'replicateAccInd',
@@ -326,6 +383,6 @@ export const getPurityColumns = (
     ),
     enableEditing: false,
     size: 40,
-    ...alignRight
+    ...tableCellProps()
   }
 ].filter(Boolean) as MRT_ColumnDef<ReplicateType>[];
