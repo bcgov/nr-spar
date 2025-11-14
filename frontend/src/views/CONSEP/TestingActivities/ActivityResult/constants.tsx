@@ -156,6 +156,9 @@ const createEditableTextColumn = (
             [accessorKey]: newValue
           } as ReplicateType);
         }
+      },
+      inputProps: {
+        style: { textAlign: 'right' }
       }
     };
   },
@@ -214,7 +217,7 @@ export const getMccColumns = (
   ),
   {
     accessorKey: 'dryWeight',
-    header: 'Dry weight',
+    header: 'Dry wt',
     enableEditing: false,
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
@@ -224,7 +227,7 @@ export const getMccColumns = (
   },
   {
     accessorKey: 'mcValue',
-    header: 'MC value (%)',
+    header: 'MC (%)',
     muiEditTextFieldProps: ({ row }: { row: { original: ReplicateType } }) => ({
       type: 'text',
       value: (row.original as any).mcValue ?? ''
