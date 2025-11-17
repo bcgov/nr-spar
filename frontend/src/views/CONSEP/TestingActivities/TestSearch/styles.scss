@@ -25,13 +25,28 @@
       }
     }
 
-    .advanced-search,
-    .search-button {
-      margin-top: 1.75rem;
+    .filters-row {
+      display: flex;
+      gap: 0.5rem; // spacing between inputs/buttons
+      align-items: flex-end;
 
-      button {
-        width: 100%;
+       @media (max-width: 1200px) {
+        flex-wrap: wrap; // allow wrapping on smaller screens
       }
+    }
+
+    .lot-input {
+      width: 9rem;
+      min-width: 6rem;
+    }
+
+    .germ-tray-input {
+      width: 6rem;
+      min-width: 4rem;
+    }
+
+    #lot-input, #germ-tray-input {
+      width: 100%;
     }
   }
 

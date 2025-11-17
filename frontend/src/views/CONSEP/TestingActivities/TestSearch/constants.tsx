@@ -20,18 +20,11 @@ const formatDateCell = (value: string | null) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
 
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
 
-  const monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr',
-    'May', 'Jun', 'Jul', 'Aug',
-    'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-  const month = monthNames[date.getMonth()];
-
-  const year = date.getFullYear().toString().slice(-2);
-
-  return `${day} ${month} ${year}`;
+  return `${year}-${month}-${day}`;
 };
 
 export const testSearchCrumbs: CrumbType[] = [
