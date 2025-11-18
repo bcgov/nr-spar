@@ -50,7 +50,7 @@ class ActivitySearchServiceTest {
   private LocalDate seedWithdrawalStartDate, seedWithdrawalEndDate, actualBeginDateFrom,
       actualBeginDateTo, actualEndDateFrom, actualEndDateTo, revisedStartDateFrom,
       revisedStartDateTo, revisedEndDateFrom, revisedEndDateTo;
-  private LocalDateTime actualBeginDtTm, actualEndDtTm;
+  private LocalDateTime actualBeginDtTm, actualEndDtTm, seedWithdrawalDate, revisedEndDt;
   private Boolean includeHistoricalTests, germTestsOnly;
 
   @BeforeEach
@@ -108,8 +108,10 @@ class ActivitySearchServiceTest {
     seedsPerGram = 0;
     otherTestResult = 0;
     significntStsInd = -1;
-    actualBeginDtTm = LocalDate.of(1998, 10, 8).atTime(0, 0);
-    actualEndDtTm = LocalDate.of(1998, 11, 6).atTime(0, 0);
+    actualBeginDtTm = LocalDate.of(1998, 10, 8).atStartOfDay();
+    actualEndDtTm = LocalDate.of(1998, 11, 6).atTime(LocalTime.MAX);
+    seedWithdrawalDate = seedWithdrawalStartDate.atStartOfDay();
+    revisedEndDt = revisedEndDateFrom.atStartOfDay();
     riaComment = "Comment";
     requestSkey = 44115;
     riaSkey = 448383;
@@ -144,8 +146,8 @@ class ActivitySearchServiceTest {
     entity.setTestCompleteInd(completeStatus == -1);
     entity.setAcceptResultInd(acceptanceStatus);
     entity.setSignificntStsInd(significntStsInd);
-    entity.setSeedWithdrawalDate(seedWithdrawalStartDate);
-    entity.setRevisedEndDt(revisedEndDateTo);
+    entity.setSeedWithdrawalDate(seedWithdrawalDate);
+    entity.setRevisedEndDt(revisedEndDt);
     entity.setActualBeginDtTm(actualBeginDtTm);
     entity.setActualEndDtTm(actualEndDtTm);
     entity.setRiaComment(riaComment);
@@ -169,16 +171,22 @@ class ActivitySearchServiceTest {
     LocalDateTime expectedActualBeginTo   = actualBeginDateTo.atTime(LocalTime.MAX);
     LocalDateTime expectedActualEndFrom   = actualEndDateFrom.atStartOfDay();
     LocalDateTime expectedActualEndTo     = actualEndDateTo.atTime(LocalTime.MAX);
+    LocalDateTime expectedSeedWithdrawalStartDate = seedWithdrawalStartDate.atStartOfDay();
+    LocalDateTime expectedSeedWithdrawalEndDate   = seedWithdrawalEndDate.atTime(LocalTime.MAX);
+    LocalDateTime expectedRevisedStartDateFrom   = revisedStartDateFrom.atStartOfDay();
+    LocalDateTime expectedRevisedStartDateTo   = revisedStartDateTo.atTime(LocalTime.MAX);
+    LocalDateTime expectedRevisedEndDateFrom   = revisedEndDateFrom.atStartOfDay();
+    LocalDateTime expectedRevisedEndDateTo   = revisedEndDateTo.atTime(LocalTime.MAX);
 
     when(activitySearchRepository.searchTestingActivities(
         lotNumbers, testType, activityId, germinatorTrayId,
-        seedWithdrawalStartDate, seedWithdrawalEndDate,
+        expectedSeedWithdrawalStartDate, expectedSeedWithdrawalEndDate,
         includeHistoricalTests, germTestsOnly, requestId, requestType,
         requestYear, orchardId, testCategoryCd, testRank, species,
         expectedActualBeginFrom, expectedActualBeginTo,
         expectedActualEndFrom, expectedActualEndTo,
-        revisedStartDateFrom, revisedStartDateTo,
-        revisedEndDateFrom, revisedEndDateTo,
+        expectedRevisedStartDateFrom, expectedRevisedStartDateTo,
+        expectedRevisedEndDateFrom, expectedRevisedEndDateTo,
         germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable
     )).thenReturn(mockPage);
 
@@ -208,8 +216,8 @@ class ActivitySearchServiceTest {
     assertThat(activitySearchResponseDto.testCompleteInd()).isTrue();
     assertThat(activitySearchResponseDto.acceptResultInd()).isEqualTo(acceptanceStatus);
     assertThat(activitySearchResponseDto.significntStsInd()).isEqualTo(significntStsInd);
-    assertThat(activitySearchResponseDto.seedWithdrawalDate()).isEqualTo(seedWithdrawalStartDate);
-    assertThat(activitySearchResponseDto.revisedEndDt()).isEqualTo(revisedEndDateTo);
+    assertThat(activitySearchResponseDto.seedWithdrawalDate()).isEqualTo(seedWithdrawalDate);
+    assertThat(activitySearchResponseDto.revisedEndDt()).isEqualTo(revisedEndDt);
     assertThat(activitySearchResponseDto.actualBeginDtTm()).isEqualTo(actualBeginDtTm);
     assertThat(activitySearchResponseDto.actualEndDtTm()).isEqualTo(actualEndDtTm);
     assertThat(activitySearchResponseDto.riaComment()).isEqualTo(riaComment);
@@ -222,13 +230,13 @@ class ActivitySearchServiceTest {
 
     verify(activitySearchRepository, times(1)).searchTestingActivities(
         lotNumbers, testType, activityId, germinatorTrayId,
-        seedWithdrawalStartDate, seedWithdrawalEndDate,
+        expectedSeedWithdrawalStartDate, expectedSeedWithdrawalEndDate,
         includeHistoricalTests, germTestsOnly, requestId, requestType,
         requestYear, orchardId, testCategoryCd, testRank, species,
         expectedActualBeginFrom, expectedActualBeginTo,
         expectedActualEndFrom, expectedActualEndTo,
-        revisedStartDateFrom, revisedStartDateTo,
-        revisedEndDateFrom, revisedEndDateTo,
+        expectedRevisedStartDateFrom, expectedRevisedStartDateTo,
+        expectedRevisedEndDateFrom, expectedRevisedEndDateTo,
         germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable
     );
   }

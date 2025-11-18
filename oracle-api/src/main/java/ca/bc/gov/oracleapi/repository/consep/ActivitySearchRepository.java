@@ -2,7 +2,6 @@ package ca.bc.gov.oracleapi.repository.consep;
 
 import ca.bc.gov.oracleapi.ConsepOracleQueryConstants;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -24,8 +23,8 @@ public interface ActivitySearchRepository extends
       @Param("testType") String testType,
       @Param("activityId") String activityId,
       @Param("germinatorTrayId") Integer germinatorTrayId,
-      @Param("seedWithdrawalStartDate") LocalDate seedWithdrawalStartDate,
-      @Param("seedWithdrawalEndDate") LocalDate seedWithdrawalEndDate,
+      @Param("seedWithdrawalStartDate") LocalDateTime seedWithdrawalStartDate,
+      @Param("seedWithdrawalEndDate") LocalDateTime seedWithdrawalEndDate,
       @Param("includeHistoricalTests") Boolean includeHistoricalTests,
       @Param("germTestsOnly") Boolean germTestsOnly,
       @Param("requestId") String requestId,
@@ -39,10 +38,10 @@ public interface ActivitySearchRepository extends
       @Param("actualBeginDateTo") LocalDateTime actualBeginDateTo,
       @Param("actualEndDateFrom") LocalDateTime actualEndDateFrom,
       @Param("actualEndDateTo") LocalDateTime actualEndDateTo,
-      @Param("revisedStartDateFrom") LocalDate revisedStartDateFrom,
-      @Param("revisedStartDateTo") LocalDate revisedStartDateTo,
-      @Param("revisedEndDateFrom") LocalDate revisedEndDateFrom,
-      @Param("revisedEndDateTo") LocalDate revisedEndDateTo,
+      @Param("revisedStartDateFrom") LocalDateTime revisedStartDateFrom,
+      @Param("revisedStartDateTo") LocalDateTime revisedStartDateTo,
+      @Param("revisedEndDateFrom") LocalDateTime revisedEndDateFrom,
+      @Param("revisedEndDateTo") LocalDateTime revisedEndDateTo,
       @Param("germTrayAssignment") Integer germTrayAssignment,
       @Param("completeStatus") Integer completeStatus,
       @Param("acceptanceStatus") Integer acceptanceStatus,
