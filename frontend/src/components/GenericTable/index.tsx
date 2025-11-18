@@ -29,6 +29,7 @@ type Props<T extends Record<string, any>> = {
   enableDensityToggle?: boolean;
   enableFullScreenToggle?: boolean;
   enableColumnActions?: boolean;
+  enableColumnPinning?: boolean;
   enableEditing?: boolean;
   isCompacted?: boolean;
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
@@ -79,6 +80,7 @@ const GenericTable = <T extends Record<string, any>>({
   enableDensityToggle = false,
   enableFullScreenToggle = false,
   enableColumnActions = false,
+  enableColumnPinning = false,
   enableEditing = true,
   isCompacted = false,
   renderRowActions,
@@ -192,6 +194,7 @@ const GenericTable = <T extends Record<string, any>>({
     enableDensityToggle,
     enableFullScreenToggle,
     enableColumnActions,
+    enableColumnPinning,
     enableEditing,
     createDisplayMode: 'row',
     editDisplayMode: 'table',

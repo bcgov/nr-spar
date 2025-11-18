@@ -27,7 +27,7 @@
 
     .filters-row {
       display: flex;
-      gap: 0.5rem; // spacing between inputs/buttons
+      gap: 0.25rem; // spacing between inputs/buttons
       align-items: flex-end;
 
        @media (max-width: 1200px) {
@@ -102,6 +102,19 @@
       .concep-test-search-table-toolbar-button-icon {
         margin-left: 0.5rem;
         margin-top: 0.15rem;
+      }
+    }
+
+    .concep-test-search-table {
+      // reduce the padding for row selection column
+      th[data-index="0"],
+      td[data-index="0"] {
+        padding-left: 0.4rem;
+        padding-right: 0rem;
+
+        span {
+          padding-right: 0rem;
+        }
       }
     }
   }
