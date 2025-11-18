@@ -132,7 +132,7 @@ objects:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
             - name: ${NAME}-${ZONE}
-              image: postgis/postgis:15-master
+              image: postgis/postgis:15-3.5
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -145,7 +145,7 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - '-ce'
+                    - "-ce"
                     - exec pg_isready -U $POSTGRES_USER -d "dbname=$POSTGRES_DB" -h 127.0.0.1 -p 5432
                 periodSeconds: 30
                 timeoutSeconds: 10
@@ -154,7 +154,7 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - '-ce'
+                    - "-ce"
                     - exec pg_isready -U $POSTGRES_USER -d "dbname=$POSTGRES_DB" -h 127.0.0.1 -p 5432
                 periodSeconds: 30
                 timeoutSeconds: 10
