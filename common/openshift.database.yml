@@ -132,7 +132,7 @@ objects:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
             - name: ${NAME}-${ZONE}
-              image: postgis/postgis:15-3.5
+              image: postgis/postgis@sha256:8a0ebbe27d082814decc46f4f1e26e367cb2b369daa0c3af3f608c881c1a8e17
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
