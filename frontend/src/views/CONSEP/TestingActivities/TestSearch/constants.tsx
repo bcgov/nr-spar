@@ -12,7 +12,7 @@ export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
 export const minStartDate = '1900-01-01';
 export const maxEndDate = '9999-12-31';
-const COLOR_GREY_20 = '#DFDFE1';
+const COLOR_GREY_20 = '#DFDFE1'; // light theme token: layer-selected-01
 
 const formatDateCell = (value: string | null) => {
   if (!value) return '';
@@ -110,9 +110,9 @@ const tableCellProps = (size?: number, alignment: 'left' | 'right' | 'center' = 
           width: size,
           minWidth: size,
           maxWidth: size,
-          // keep the header style align with the style in
+          // keep the header style aligned with the style in
           // frontend/src/components/GenericTable/index.tsx,
-          // otherwise the header style inside GenericTable will be overrided
+          // otherwise the header style inside GenericTable will be overridden
           '& .Mui-TableHeadCell-Content-Labels': {
             display: 'flex',
             flexDirection: 'row',
