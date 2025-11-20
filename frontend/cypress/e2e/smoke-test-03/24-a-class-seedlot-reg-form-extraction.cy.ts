@@ -1,4 +1,4 @@
-import { FIVE_SECONDS, TYPE_DELAY } from '../../constants';
+import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
@@ -38,7 +38,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=6`;
         cy.visit(url);
         cy.url().should('contains', url);
-        cy.get('.extraction-information-title').contains(regFormData.extraction.extrationTitle, { timeout: FIVE_SECONDS });
+        cy.get('.extraction-information-title').contains(regFormData.extraction.extrationTitle);
       });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;

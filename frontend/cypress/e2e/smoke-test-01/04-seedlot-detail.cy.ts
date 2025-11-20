@@ -1,6 +1,5 @@
 /* eslint-disable func-names */
 /* eslint-disable prefer-arrow-callback */
-import { FIVE_SECONDS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
@@ -21,8 +20,7 @@ describe('Seedlot detail page', () => {
         cy.visit(`/seedlots/details/${seedlotNumber}`);
         cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
         // Wait for the page title to be visible before proceeding
-        cy.get('.title-section h1')
-          .should('have.text', `Seedlot ${seedlotNumber}`, { timeout: FIVE_SECONDS });
+        cy.get('.title-section h1').should('have.text', `Seedlot ${seedlotNumber}`);
       });
     });
   });

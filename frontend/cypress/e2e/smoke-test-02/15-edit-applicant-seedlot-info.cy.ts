@@ -1,7 +1,6 @@
 /* eslint-disable cypress/no-force */
 /* eslint-disable func-names */
 /* eslint-disable prefer-arrow-callback */
-import { FIVE_SECONDS } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('Applicant and seedlot information page', () => {
@@ -30,7 +29,7 @@ describe('Applicant and seedlot information page', () => {
 
     // Wait for the page title to be visible before proceeding
     cy.get('.title-section h1')
-      .should('have.text', `Seedlot ${seedlotNumber}`, { timeout: FIVE_SECONDS });
+      .should('have.text', `Seedlot ${seedlotNumber}`);
 
     // Click on Edit applicant and seedlot button
     cy.get('.applicant-seedlot-information')
