@@ -1,7 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
-import {
-  FIVE_SECONDS, HALF_SECOND, THIRTY_SECONDS, TYPE_DELAY
-} from '../../constants';
+import { HALF_SECOND, THIRTY_SECONDS, TYPE_DELAY } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
@@ -45,7 +43,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
         cy.visit(url);
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
-        cy.get('.seedlot-orchard-title-row').contains(regFormData.orchard.title, { timeout: FIVE_SECONDS });
+        cy.get('.seedlot-orchard-title-row').contains(regFormData.orchard.title);
       });
     });
   });
@@ -602,7 +600,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Check complete status of Orchard step
     cy.contains(`.${prefix}--progress-step-button`, 'Orchard')
       .find(`.${prefix}--assistive-text`)
-      .should('have.text', 'Complete', { timeout: HALF_SECOND });
+      .should('have.text', 'Complete');
   });
 
   it('Step complete status', () => {

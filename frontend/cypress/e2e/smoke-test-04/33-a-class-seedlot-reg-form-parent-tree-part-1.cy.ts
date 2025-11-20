@@ -1,5 +1,4 @@
 import prefix from '../../../src/styles/classPrefix';
-import { FIVE_SECONDS } from '../../constants';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and Pollen count)', () => {
   let regFormData: {
@@ -35,7 +34,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
         cy.visit(url);
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
-        cy.get('.title-row').contains(regFormData.parentTree.title, { timeout: FIVE_SECONDS });
+        cy.get('.title-row').contains(regFormData.parentTree.title);
       });
     });
   });
@@ -48,7 +47,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .click();
 
     // Wait for the page title to be visible before proceeding
-    cy.get('.seedlot-orchard-title-row').contains(regFormData.orchard.title, { timeout: FIVE_SECONDS });
+    cy.get('.seedlot-orchard-title-row').contains(regFormData.orchard.title);
 
     //  Check primary orchard
     cy.get('#primary-orchard-selection')

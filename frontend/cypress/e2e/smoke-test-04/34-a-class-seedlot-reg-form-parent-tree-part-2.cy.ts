@@ -1,4 +1,3 @@
-import { FIVE_SECONDS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP success on parent)', () => {
@@ -31,7 +30,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
         cy.visit(url);
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
-        cy.get('.title-row').contains(regFormData.parentTree.title, { timeout: FIVE_SECONDS });
+        cy.get('.title-row').contains(regFormData.parentTree.title);
         cy.get('#parent-tree-step-tab-list-id')
           .find('button')
           .contains('SMP success on parent')

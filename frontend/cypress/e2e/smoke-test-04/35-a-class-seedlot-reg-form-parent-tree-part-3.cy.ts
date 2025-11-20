@@ -1,5 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
-import { FIVE_SECONDS, TYPE_DELAY } from '../../constants';
+import { TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculation of SMP mix)', () => {
   let regFormData: {
@@ -29,7 +29,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
         cy.visit(url);
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
-        cy.get('.title-row').contains(regFormData.parentTree.title, { timeout: FIVE_SECONDS });
+        cy.get('.title-row').contains(regFormData.parentTree.title);
         cy.get('#parent-tree-step-tab-list-id')
           .find('button')
           .contains('Calculation of SMP mix')

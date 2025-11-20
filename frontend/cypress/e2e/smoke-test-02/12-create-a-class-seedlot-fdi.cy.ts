@@ -1,4 +1,4 @@
-import { FIVE_SECONDS, TYPE_DELAY } from '../../constants';
+import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
@@ -15,8 +15,7 @@ describe('Create FDI Seedlot', () => {
     cy.visit('/seedlots');
     cy.url().should('contains', '/seedlots');
     // Wait for the page title to be visible before proceeding
-    cy.get('.title-section h1')
-      .should('have.text', NavigationLabels.Seedlots, { timeout: FIVE_SECONDS });
+    cy.get('.title-section h1').should('have.text', NavigationLabels.Seedlots);
   });
 
   it('Register fdi seedlot', () => {
