@@ -113,7 +113,7 @@ Cypress.Commands.add('saveSeedlotRegFormProgress', () => {
     .click();
 
   cy.get(`.${prefix}--inline-loading__text`)
-    .contains('Changes saved!', { timeout: FIVE_SECONDS });
+    .contains('Changes saved!');
 });
 
 Cypress.Commands.add('closeMenuIfOpen', () => {
