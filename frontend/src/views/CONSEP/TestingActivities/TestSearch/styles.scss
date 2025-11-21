@@ -28,12 +28,20 @@
     .filters-row {
       display: flex;
       gap: 0.25rem; // spacing between inputs/buttons
-      align-items: flex-end;
+      align-items: flex-start;
 
-       @media (max-width: 1200px) {
+      .filters-row-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.25rem;
+        margin-top: 1.8rem; 
+      }
+
+      @media (max-width: 1200px) {
         flex-wrap: wrap; // allow wrapping on smaller screens
       }
     }
+
 
     .lot-input {
       width: 9rem;
@@ -41,8 +49,8 @@
     }
 
     .germ-tray-input {
-      width: 6rem;
-      min-width: 4rem;
+      width: 6.25rem;
+      min-width: 6.5rem;
     }
 
     #lot-input, #germ-tray-input {

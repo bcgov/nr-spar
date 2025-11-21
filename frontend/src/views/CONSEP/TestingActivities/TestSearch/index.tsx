@@ -362,7 +362,7 @@ const TestSearch = () => {
                   ? searchParams.seedWithdrawalStartDate
                   : undefined
               }
-              style={{ width: '9rem' }}
+              style={{ minWidth: '9rem' }}
             >
               <DatePickerInput
                 id="withdrawal-start-date-input"
@@ -383,7 +383,7 @@ const TestSearch = () => {
                   ? searchParams.seedWithdrawalEndDate
                   : undefined
               }
-              style={{ width: '9rem' }}
+              style={{ minWidth: '9rem' }}
             >
               <DatePickerInput
                 id="withdrawal-end-date-input"
@@ -391,38 +391,40 @@ const TestSearch = () => {
                 autoComplete="off"
               />
             </DatePicker>
-            <Button
-              ref={advSearchRef}
-              size="md"
-              kind="tertiary"
-              onClick={toggleAdvSearch}
-            >
-              Filters
-            </Button>
-            <Button
-              renderIcon={Search}
-              iconDescription="Search activity"
-              size="md"
-              onClick={() => {
-                if (Object.keys(searchParams).length > 0) {
-                  const searchParamstoSend = { ...searchParams };
-                  if (searchParamstoSend.testType === 'SA') {
-                    searchParamstoSend.testType = 'GSA';
-                  } else if (searchParamstoSend.testType === 'SE') {
-                    searchParamstoSend.testType = 'GSE';
+            <div className="filters-row-buttons">
+              <Button
+                ref={advSearchRef}
+                size="md"
+                kind="tertiary"
+                onClick={toggleAdvSearch}
+              >
+                Filters
+              </Button>
+              <Button
+                renderIcon={Search}
+                iconDescription="Search activity"
+                size="md"
+                onClick={() => {
+                  if (Object.keys(searchParams).length > 0) {
+                    const searchParamstoSend = { ...searchParams };
+                    if (searchParamstoSend.testType === 'SA') {
+                      searchParamstoSend.testType = 'GSA';
+                    } else if (searchParamstoSend.testType === 'SE') {
+                      searchParamstoSend.testType = 'GSE';
+                    }
+                    searchMutation.mutate({ filter: searchParamstoSend });
+                  } else {
+                    setAlert({
+                      status: 'error',
+                      message: 'At least one criteria must be entered to start the search'
+                    });
                   }
-                  searchMutation.mutate({ filter: searchParamstoSend });
-                } else {
-                  setAlert({
-                    status: 'error',
-                    message: 'At least one criteria must be entered to start the search'
-                  });
-                }
-              }}
-              disabled={hasValidationErrors()}
-            >
-              Search activity
-            </Button>
+                }}
+                disabled={hasValidationErrors()}
+              >
+                Search activity
+              </Button>
+            </div>
           </Column>
         </Row>
         {
