@@ -17,6 +17,7 @@ import {
   InlineNotification
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
+import { mkConfig, generateCsv, download } from 'export-to-csv';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
@@ -34,11 +35,18 @@ import AdvancedFilters from './AdvancedFilter';
 import {
   DATE_FORMAT, activityIds,
   testSearchCrumbs, iniActSearchValidation,
-  errorMessages, minStartDate, maxEndDate
+  errorMessages, minStartDate, maxEndDate,
+  formatExportData, columnVisibilityLocalStorageKey
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from './definitions';
 import './styles.scss';
+
+const csvConfig = mkConfig({
+  fieldSeparator: ',',
+  decimalSeparator: '.',
+  useKeysAsHeaders: true
+});
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
@@ -79,24 +87,29 @@ const TestSearch = () => {
     mutationFn: ({
       filter,
       page = 0,
-      size = 20
+      size = 20,
+      unpaged = false
     }: {
       filter: ActivitySearchRequest;
       page?: number;
       size?: number;
-    }) => searchTestingActivities(filter, page, size),
+      unpaged?: boolean;
+    }) => searchTestingActivities(filter, page, size, unpaged),
     onMutate: () => {
       resetAlert();
       setHasSearched(true);
     },
-    onSuccess: (data: PaginatedTestingSearchResponseType) => {
-      setSearchResults(data.content);
-      setPaginationInfo({
-        totalElements: data.totalElements,
-        totalPages: data.totalPages,
-        pageNumber: data.pageNumber,
-        pageSize: data.pageSize
-      });
+    onSuccess: (data: PaginatedTestingSearchResponseType, variables) => {
+      const { unpaged } = variables;
+      if (!unpaged) {
+        setSearchResults(data.content);
+        setPaginationInfo({
+          totalElements: data.totalElements,
+          totalPages: data.totalPages,
+          pageNumber: data.pageNumber,
+          pageSize: data.pageSize
+        });
+      }
     },
     onError: (error) => {
       setAlert({
@@ -135,6 +148,51 @@ const TestSearch = () => {
             pageNumber: data.pageNumber,
             pageSize: data.pageSize
           });
+        }
+      }
+    );
+  };
+
+  const handleExportData = () => {
+    searchMutation.mutate(
+      { filter: searchParams, unpaged: true },
+      {
+        onSuccess: (data) => {
+          const visibilityConfig = JSON.parse(
+            localStorage.getItem(columnVisibilityLocalStorageKey) || '{}'
+          );
+
+          const isVisible = (key: string) => visibilityConfig[key] !== false;
+
+          const filteredContent = data.content.map((item) => {
+            const result = {} as TestingSearchResponseType;
+
+            Object.keys(item).forEach((key) => {
+              if (isVisible(key) && Object.prototype.hasOwnProperty.call(formatExportData, key)) {
+                (result as Record<string, any>)[key] = item[key as keyof TestingSearchResponseType];
+              }
+            });
+
+            return result;
+          });
+
+          const formattedContent = filteredContent.map((item) => {
+            const result: Record<string, any> = {};
+
+            Object.entries(item).forEach(([key]) => {
+              const config = formatExportData[key as keyof typeof formatExportData];
+              if (config) {
+                (result as any)[config.header] = config.value(item);
+              }
+            });
+
+            result.Result = formatExportData.Result.value(item);
+
+            return result;
+          });
+
+          const csv = generateCsv(csvConfig)(formattedContent);
+          download(csvConfig)(csv);
         }
       }
     );
@@ -485,6 +543,7 @@ const TestSearch = () => {
               isLoading={searchMutation.isPending}
               paginationInfo={paginationInfo}
               onPageChange={handlePageChange}
+              onExportData={handleExportData}
             />
           ) : (
             <TablePlaceholder />
