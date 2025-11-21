@@ -81,13 +81,18 @@ const TestListTable = ({
           rowCount={paginationInfo.totalElements}
           onPaginationChange={onPageChange}
           enableRowSelection
+          enableColumnPinning
           isLoading={isLoading}
           tableBodyRef={tableBodyRef}
           hideToolbar={false}
           initialState={{
             columnVisibility: JSON.parse(
               localStorage.getItem(columnVisibilityLocalStorageKey) || '{}'
-            )
+            ),
+            columnPinning: {
+              left: ['mrt-row-select', 'seedlotDisplay', 'requestItem']
+            },
+            columnSizing: { 'mrt-row-select': 30 }
           }}
           renderTopToolbarCustomActions={() => (
             <div className="concep-test-search-table-title">{`Total search result: ${paginationInfo.totalElements}`}</div>
