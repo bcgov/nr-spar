@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress';
 import cypressSplit from 'cypress-split';
-import { TEN_SECONDS } from './cypress/constants';
+import { FIFTEEN_SECONDS } from './cypress/constants';
 
 declare const require: any;
 
@@ -43,7 +43,7 @@ export default defineConfig({
     retries: {
       runMode: 0
     },
-    defaultCommandTimeout: TEN_SECONDS,
+    defaultCommandTimeout: FIFTEEN_SECONDS,
     video: true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {

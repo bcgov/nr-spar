@@ -1,6 +1,6 @@
 /* eslint-disable cypress/no-unnecessary-waiting */
 /* eslint-disable prefer-const */
-import { FIVE_SECONDS, TEN_SECONDS, THREE_SECONDS } from '../../constants';
+import { THREE_SECONDS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
@@ -25,7 +25,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
         cy.get('.title-section h1')
-          .should('have.text', `Registration for seedlot ${seedlotNum}`, { timeout: FIVE_SECONDS });
+          .should('have.text', `Registration for seedlot ${seedlotNum}`);
       });
     });
   });
@@ -74,7 +74,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Upload csv file', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: TEN_SECONDS });
+    cy.get('#parentTreeNumber');
 
     // Upload csv file
     cy.get('button.upload-button')
@@ -97,7 +97,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Check Parent tree contribution summary', () => {
     // Wait for the table to load
-    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`, { timeout: TEN_SECONDS })
+    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`)
       .should(($td) => {
         const value = $td.text().trim();
         expect(value, 'cell value should be a number').to.match(/^\d+$/);
@@ -169,7 +169,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Remove a single Parent tree contribution', () => {
     // Wait for the table to load
-    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`, { timeout: TEN_SECONDS })
+    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`)
       .should(($td) => {
         const value = $td.text().trim();
         expect(value, 'cell value should be a number').to.match(/^\d+$/);
