@@ -46,7 +46,8 @@ import './styles.scss';
 const csvConfig = mkConfig({
   fieldSeparator: ',',
   decimalSeparator: '.',
-  useKeysAsHeaders: true
+  useKeysAsHeaders: true,
+  filename: `Testing_Activity_Search_${new Date().toISOString()}`
 });
 
 const TestSearch = () => {
