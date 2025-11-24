@@ -25,13 +25,36 @@
       }
     }
 
-    .advanced-search,
-    .search-button {
-      margin-top: 1.75rem;
+    .filters-row {
+      display: flex;
+      gap: 0.25rem; // spacing between inputs/buttons
+      align-items: flex-start;
 
-      button {
-        width: 100%;
+      .filters-row-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.25rem;
+        margin-top: 1.8rem; 
       }
+
+      @media (max-width: 1200px) {
+        flex-wrap: wrap; // allow wrapping on smaller screens
+      }
+    }
+
+
+    .lot-input {
+      width: 9rem;
+      min-width: 6rem;
+    }
+
+    .germ-tray-input {
+      width: 6.25rem;
+      min-width: 6.5rem;
+    }
+
+    #lot-input, #germ-tray-input {
+      width: 100%;
     }
   }
 
@@ -87,6 +110,19 @@
       .concep-test-search-table-toolbar-button-icon {
         margin-left: 0.5rem;
         margin-top: 0.15rem;
+      }
+    }
+
+    .concep-test-search-table {
+      // reduce the padding for row selection column
+      th[data-index="0"],
+      td[data-index="0"] {
+        padding-left: 0.4rem;
+        padding-right: 0;
+
+        span {
+          padding-right: 0;
+        }
       }
     }
   }
