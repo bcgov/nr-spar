@@ -61,7 +61,7 @@ services:
     container_name: frontend
     image: node:22-bullseye-slim
     ports: ["3000:3000"]
-    entrypoint: sh -c "npm i --no-update-notifier && npm run start"
+    entrypoint: sh -c "npm ci --ignore-scripts --no-update-notifier && npm run start"
     user: root
     volumes: ["./frontend:/app"]
     working_dir: /app
