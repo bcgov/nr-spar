@@ -9,10 +9,10 @@ import { TestingSearchResponseType } from '../../../../types/consep/TestingSearc
 import { ActivitySearchValidation, ValidationErrorType } from './definitions';
 
 export const SAFE_MARGIN = 16;
-
 export const DATE_FORMAT = 'Y/m/d';
 export const minStartDate = '1900-01-01';
 export const maxEndDate = '9999-12-31';
+const COLOR_GREY_20 = '#DFDFE1'; // light theme token: layer-selected-01
 
 const formatDateCell = (value: string | null) => {
   if (!value) return '';
@@ -20,18 +20,11 @@ const formatDateCell = (value: string | null) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
 
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
 
-  const monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr',
-    'May', 'Jun', 'Jul', 'Aug',
-    'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-  const month = monthNames[date.getMonth()];
-
-  const year = date.getFullYear().toString().slice(-2);
-
-  return `${day} ${month} ${year}`;
+  return `${year}-${month}-${day}`;
 };
 
 export const testSearchCrumbs: CrumbType[] = [
@@ -108,58 +101,92 @@ export const species: string[] = [
   'SS', 'SX', 'SXS', 'YC'
 ];
 
-const alignRight = {
-  muiTableHeadCellProps: { align: 'right' as const },
-  muiTableBodyCellProps: { align: 'right' as const }
-};
+const tableCellProps = (size?: number, alignment: 'left' | 'right' | 'center' = 'right') => ({
+  muiTableHeadCellProps: {
+    align: alignment,
+    ...(size
+      ? {
+        sx: {
+          width: size,
+          minWidth: size,
+          maxWidth: size,
+          // keep the header style aligned with the style in
+          // frontend/src/components/GenericTable/index.tsx,
+          // otherwise the header style inside GenericTable will be overridden
+          '& .Mui-TableHeadCell-Content-Labels': {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: '0.25rem',
 
-const alignLeft = {
-  muiTableHeadCellProps: { align: 'left' as const },
-  muiTableBodyCellProps: { align: 'left' as const }
-};
+            '& .Mui-TableHeadCell-Content-Wrapper': {
+              order: 1
+            },
+            '& .MuiBadge-root': {
+              order: 2
+            }
+          },
+          padding: '0.6rem'
+        }
+      }
+      : {})
+  },
+  muiTableBodyCellProps: {
+    align: alignment,
+    ...(size
+      ? {
+        sx: {
+          width: size,
+          minWidth: size,
+          maxWidth: size,
+          padding: '0.6rem',
+          '&:hover': {
+            outline: 'none',
+            backgroundColor: COLOR_GREY_20
+          }
+        }
+      }
+      : {})
+  }
+});
 
 export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResponseType>[] => [
   {
     accessorKey: 'seedlotDisplay',
     header: 'Lot #',
-    size: 50,
+    size: 60,
     enableEditing: false,
-    ...alignRight
+    ...tableCellProps(60)
   },
   {
     accessorKey: 'requestItem',
     header: 'Request ID',
-    size: 100,
     enableEditing: false,
-    ...alignLeft
+    ...tableCellProps(130, 'left')
   },
   {
     accessorKey: 'species',
     header: 'Sp',
-    size: 30,
     enableEditing: false,
-    ...alignLeft
+    ...tableCellProps(50, 'left')
   },
   {
     accessorKey: 'testRank',
     header: 'Rank',
-    size: 30,
     enableEditing: false,
-    ...alignLeft
+    ...tableCellProps(60, 'left')
   },
   {
     accessorKey: 'testCategoryCd',
     header: 'Category',
-    size: 30,
     enableEditing: false,
-    ...alignLeft
+    ...tableCellProps(90, 'left')
   },
   {
     accessorKey: 'activityId',
     header: 'Activity',
-    size: 30,
     enableEditing: false,
-    ...alignLeft
+    ...tableCellProps(80, 'left')
   },
   {
     header: 'Result',
@@ -177,9 +204,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
           return null;
       }
     },
-    size: 30,
     enableEditing: false,
-    ...alignRight,
+    ...tableCellProps(70),
     Cell: ({ cell }) => {
       const value = cell.getValue<number | null>();
       return value != null ? `${value}%` : '';
@@ -188,16 +214,14 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'pv',
     header: 'PV',
-    size: 50,
     enableEditing: false,
-    ...alignRight
+    ...tableCellProps(90)
   },
   {
     accessorKey: 'currentTestInd',
     header: 'Curr',
-    size: 20,
     enableEditing: false,
-    ...alignLeft,
+    ...tableCellProps(80, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -210,9 +234,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'testCompleteInd',
     header: 'Com',
-    size: 20,
     enableEditing: false,
-    ...alignLeft,
+    ...tableCellProps(80, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -225,9 +248,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'acceptResultInd',
     header: 'Act',
-    size: 20,
     enableEditing: false,
-    ...alignLeft,
+    ...tableCellProps(80, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -240,9 +262,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'significntStsInd',
     header: 'Sig',
-    size: 20,
     enableEditing: false,
-    ...alignLeft,
+    ...tableCellProps(80, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -255,33 +276,29 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'seedWithdrawalDate',
     header: 'Wdrwl Date',
-    size: 100,
     enableEditing: false,
-    ...alignLeft,
+    ...tableCellProps(120, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'revisedEndDt',
     header: 'Sch End Date',
-    size: 100,
     enableEditing: false,
-    ...alignLeft,
+    ...tableCellProps(120, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualBeginDtTm',
     header: 'Start Date',
-    size: 100,
     enableEditing: false,
-    ...alignLeft,
+    ...tableCellProps(120, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualEndDtTm',
     header: 'End Date',
-    size: 100,
     enableEditing: false,
-    ...alignLeft,
+    ...tableCellProps(120, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
 
@@ -289,7 +306,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'riaComment',
     header: 'Comments',
     enableEditing: false,
-    ...alignLeft
+    ...tableCellProps(800, 'left')
   },
   {
     accessorKey: 'actions',
@@ -297,6 +314,6 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     Cell: () => <Icons.TrashCan size={15} style={{ cursor: 'pointer' }} onClick={() => {}} />,
     enableEditing: false,
     size: 20,
-    ...alignRight
+    ...tableCellProps()
   }
 ];

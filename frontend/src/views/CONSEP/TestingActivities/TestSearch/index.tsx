@@ -55,7 +55,7 @@ const TestSearch = () => {
     totalElements: 0,
     totalPages: 0,
     pageNumber: 0,
-    pageSize: 20
+    pageSize: 100
   });
   const [alert, setAlert] = useState<{
     status: string;
@@ -79,7 +79,7 @@ const TestSearch = () => {
     mutationFn: ({
       filter,
       page = 0,
-      size = 20
+      size = 100
     }: {
       filter: ActivitySearchRequest;
       page?: number;
@@ -304,7 +304,7 @@ const TestSearch = () => {
           <PageTitle title="Testing activities" />
         </Row>
         <Row className="consep-test-search-filters">
-          <Column md={1} lg={2}>
+          <Column className="filters-row">
             <TextInput
               id="lot-input"
               className="lot-input"
@@ -316,8 +316,6 @@ const TestSearch = () => {
               invalid={validateSearch.lotNumbers.error}
               invalidText={validateSearch.lotNumbers.errorMessage}
             />
-          </Column>
-          <Column md={1} lg={2}>
             <ComboBox
               id="test-type-input"
               className="test-type-input"
@@ -327,9 +325,8 @@ const TestSearch = () => {
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('testType', e);
               }}
+              style={{ width: '8rem' }}
             />
-          </Column>
-          <Column md={1} lg={2}>
             <ComboBox
               id="activity-type-input"
               className="activity-type-input"
@@ -339,9 +336,8 @@ const TestSearch = () => {
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('activityId', e);
               }}
+              style={{ width: '8rem' }}
             />
-          </Column>
-          <Column md={1} lg={2}>
             <TextInput
               id="germ-tray-input"
               className="germ-tray-input"
@@ -354,8 +350,6 @@ const TestSearch = () => {
               invalid={validateSearch.germinatorTray.error}
               invalidText={validateSearch.germinatorTray.errorMessage}
             />
-          </Column>
-          <Column md={1} lg={2}>
             <DatePicker
               datePickerType="single"
               className="withdrawal-date-input"
@@ -368,6 +362,7 @@ const TestSearch = () => {
                   ? searchParams.seedWithdrawalStartDate
                   : undefined
               }
+              style={{ minWidth: '9rem' }}
             >
               <DatePickerInput
                 id="withdrawal-start-date-input"
@@ -375,8 +370,6 @@ const TestSearch = () => {
                 autoComplete="off"
               />
             </DatePicker>
-          </Column>
-          <Column md={1} lg={2}>
             <DatePicker
               datePickerType="single"
               className="withdrawal-date-input"
@@ -390,6 +383,7 @@ const TestSearch = () => {
                   ? searchParams.seedWithdrawalEndDate
                   : undefined
               }
+              style={{ minWidth: '9rem' }}
             >
               <DatePickerInput
                 id="withdrawal-end-date-input"
@@ -397,42 +391,40 @@ const TestSearch = () => {
                 autoComplete="off"
               />
             </DatePicker>
-          </Column>
-          <Column className="advanced-search" md={1} lg={2}>
-            <Button
-              ref={advSearchRef}
-              size="md"
-              kind="tertiary"
-              onClick={toggleAdvSearch}
-            >
-              Filters
-            </Button>
-          </Column>
-          <Column className="search-button" md={1} lg={2}>
-            <Button
-              renderIcon={Search}
-              iconDescription="Search activity"
-              size="md"
-              onClick={() => {
-                if (Object.keys(searchParams).length > 0) {
-                  const searchParamstoSend = { ...searchParams };
-                  if (searchParamstoSend.testType === 'SA') {
-                    searchParamstoSend.testType = 'GSA';
-                  } else if (searchParamstoSend.testType === 'SE') {
-                    searchParamstoSend.testType = 'GSE';
+            <div className="filters-row-buttons">
+              <Button
+                ref={advSearchRef}
+                size="md"
+                kind="tertiary"
+                onClick={toggleAdvSearch}
+              >
+                Filters
+              </Button>
+              <Button
+                renderIcon={Search}
+                iconDescription="Search activity"
+                size="md"
+                onClick={() => {
+                  if (Object.keys(searchParams).length > 0) {
+                    const searchParamstoSend = { ...searchParams };
+                    if (searchParamstoSend.testType === 'SA') {
+                      searchParamstoSend.testType = 'GSA';
+                    } else if (searchParamstoSend.testType === 'SE') {
+                      searchParamstoSend.testType = 'GSE';
+                    }
+                    searchMutation.mutate({ filter: searchParamstoSend });
+                  } else {
+                    setAlert({
+                      status: 'error',
+                      message: 'At least one criteria must be entered to start the search'
+                    });
                   }
-                  searchMutation.mutate({ filter: searchParamstoSend });
-                } else {
-                  setAlert({
-                    status: 'error',
-                    message: 'At least one criteria must be entered to start the search'
-                  });
-                }
-              }}
-              disabled={hasValidationErrors()}
-            >
-              Search activity
-            </Button>
+                }}
+                disabled={hasValidationErrors()}
+              >
+                Search activity
+              </Button>
+            </div>
           </Column>
         </Row>
         {
