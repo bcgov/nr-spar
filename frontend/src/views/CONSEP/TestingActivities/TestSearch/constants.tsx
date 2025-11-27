@@ -347,14 +347,22 @@ export const formatExportData = {
     header: 'Result',
     value: (row: TestingSearchResponseType) => {
       switch (row.testCategoryCd) {
-        case 'Germ':
-          return row.germinationPct != null ? `${row.germinationPct}%` : '';
-        case 'MC':
-          return row.moisturePct != null ? `${row.moisturePct}%` : '';
-        case 'SPG':
-          return row.seedsPerGram != null ? `${row.seedsPerGram}%` : '';
-        case 'PUR':
-          return row.purityPct != null ? `${row.purityPct}%` : '';
+        case 'Germ': {
+          const v = row.germinationPct;
+          return v == null ? '' : `${v}%`;
+        }
+        case 'MC': {
+          const v = row.moisturePct;
+          return v == null ? '' : `${v}%`;
+        }
+        case 'SPG': {
+          const v = row.seedsPerGram;
+          return v == null ? '' : `${v}%`;
+        }
+        case 'PUR': {
+          const v = row.purityPct;
+          return v == null ? '' : `${v}%`;
+        }
         default:
           return '';
       }
@@ -366,19 +374,19 @@ export const formatExportData = {
   },
   currentTestInd: {
     header: 'Curr',
-    value: (row: TestingSearchResponseType) => (row.currentTestInd !== 0 ? 'Curr' : '')
+    value: (row: TestingSearchResponseType) => (row.currentTestInd === 0 ? '' : 'Curr')
   },
   testCompleteInd: {
     header: 'Com',
-    value: (row: TestingSearchResponseType) => (row.testCompleteInd !== 0 ? 'Com' : '')
+    value: (row: TestingSearchResponseType) => (row.testCompleteInd === 0 ? '' : 'Com')
   },
   acceptResultInd: {
     header: 'Act',
-    value: (row: TestingSearchResponseType) => (row.acceptResultInd !== 0 ? 'Act' : '')
+    value: (row: TestingSearchResponseType) => (row.acceptResultInd === 0 ? '' : 'Act')
   },
   significntStsInd: {
     header: 'Sig',
-    value: (row: TestingSearchResponseType) => (row.significntStsInd !== 0 ? 'Sig' : '')
+    value: (row: TestingSearchResponseType) => (row.significntStsInd === 0 ? '' : 'Sig')
   },
   seedWithdrawalDate: {
     header: 'Wdrwl Date',

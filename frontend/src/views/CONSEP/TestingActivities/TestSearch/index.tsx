@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import React, {
   ChangeEvent,
   useRef,
@@ -18,6 +17,7 @@ import {
   InlineNotification
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
+// eslint-disable-next-line import/no-unresolved
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
@@ -47,7 +47,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ',',
   decimalSeparator: '.',
   useKeysAsHeaders: true,
-  filename: `Testing_Activity_Search_${new Date().toISOString()}`
+  filename: `Testing_Activity_Search_${new Date().toISOString().split('T')[0]}`
 });
 
 const TestSearch = () => {
@@ -166,35 +166,46 @@ const TestSearch = () => {
 
           const isVisible = (key: string) => visibilityConfig[key] !== false;
 
-          const filteredContent = data.content.map((item) => {
-            const result = {} as TestingSearchResponseType;
+          type FilteredRow = Record<
+            keyof TestingSearchResponseType,
+            TestingSearchResponseType[keyof TestingSearchResponseType] | undefined
+          >;
 
-            Object.keys(item).forEach((key) => {
-              if (isVisible(key) && Object.prototype.hasOwnProperty.call(formatExportData, key)) {
-                (result as Record<string, any>)[key] = item[key as keyof TestingSearchResponseType];
-              }
-            });
+          const filterItem = (item: TestingSearchResponseType): FilteredRow => Object
+            .keys(item).reduce((acc, key) => {
+              if (!isVisible(key)) return acc;
+              if (!Object.hasOwnProperty.call(formatExportData, key)) return acc;
 
-            return result;
-          });
+              const k = key as keyof TestingSearchResponseType;
+              acc[k] = item[k];
+              return acc;
+            }, {} as FilteredRow);
 
-          const formattedContent = filteredContent.map((item) => {
-            const result: Record<string, any> = {};
+          const formatItem = (item: FilteredRow) => Object.entries(item).reduce((acc, [key]) => {
+            const config = formatExportData[key as keyof typeof formatExportData];
 
-            Object.entries(item).forEach(([key]) => {
-              const config = formatExportData[key as keyof typeof formatExportData];
-              if (config) {
-                (result as any)[config.header] = config.value(item);
-              }
-            });
+            if (config) {
+              acc[config.header] = config.value(item as TestingSearchResponseType);
+            }
 
-            result.Result = formatExportData.Result.value(item);
+            if (key === 'Result') {
+              acc.Result = formatExportData.Result.value(item as TestingSearchResponseType);
+            }
 
-            return result;
-          });
+            return acc;
+          }, {} as Record<string, any>);
+
+          const filteredContent: FilteredRow[] = data.content.map(filterItem);
+          const formattedContent = filteredContent.map(formatItem);
 
           const csv = generateCsv(csvConfig)(formattedContent);
           download(csvConfig)(csv);
+        },
+        onError: (error) => {
+          setAlert({
+            status: 'error',
+            message: `Failed to export data: ${error?.message || 'Unknown error'}`
+          });
         }
       }
     );

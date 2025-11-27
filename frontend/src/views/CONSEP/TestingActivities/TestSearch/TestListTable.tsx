@@ -13,9 +13,9 @@ import type {
 type TestListTableProp = {
   data: TestingSearchResponseType[];
   paginationInfo: PaginationInfoType;
+  onExportData: () => void;
   isLoading?: boolean;
   onPageChange?: (pageIndex: number, pageSize: number) => void;
-  onExportData?: () => void;
 };
 
 const TestListTable = ({
@@ -59,7 +59,7 @@ const TestListTable = ({
         <Icons.DocumentExport size={16} className="concep-test-search-table-toolbar-button-icon" />
       ),
       type: 'primary',
-      action: () => onExportData && onExportData()
+      action: () => onExportData()
     },
     {
       label: 'Filters',
