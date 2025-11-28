@@ -89,29 +89,25 @@ const TestSearch = () => {
     mutationFn: ({
       filter,
       page = 0,
-      size = 100,
-      unpaged = false
+      size = 100
     }: {
       filter: ActivitySearchRequest;
       page?: number;
       size?: number;
       unpaged?: boolean;
-    }) => searchTestingActivities(filter, page, size, unpaged),
+    }) => searchTestingActivities(filter, page, size),
     onMutate: () => {
       resetAlert();
       setHasSearched(true);
     },
-    onSuccess: (data: PaginatedTestingSearchResponseType, variables) => {
-      const { unpaged } = variables;
-      if (!unpaged) {
-        setSearchResults(data.content);
-        setPaginationInfo({
-          totalElements: data.totalElements,
-          totalPages: data.totalPages,
-          pageNumber: data.pageNumber,
-          pageSize: data.pageSize
-        });
-      }
+    onSuccess: (data: PaginatedTestingSearchResponseType) => {
+      setSearchResults(data.content);
+      setPaginationInfo({
+        totalElements: data.totalElements,
+        totalPages: data.totalPages,
+        pageNumber: data.pageNumber,
+        pageSize: data.pageSize
+      });
     },
     onError: (error) => {
       setAlert({
@@ -121,50 +117,15 @@ const TestSearch = () => {
     }
   });
 
-  const testTypeQuery = useQuery({
-    queryKey: ['test-type-codes'],
-    queryFn: getTestTypeCodes,
-    staleTime: THREE_HOURS, // data is fresh for 3 hours
-    gcTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
-    select: (data: TestCodeType[]) => data?.map((testCode) => testCode.code) ?? []
-  });
+  const exportMutation = useMutation({
+    mutationFn: (filter: ActivitySearchRequest) => searchTestingActivities(filter, 0, 0, true),
 
-  useEffect(() => {
-    if (testTypeQuery.error) {
-      setAlert({
-        status: 'error',
-        message: `Failed to load test types: ${testTypeQuery.error?.message}`
-      });
-    }
-  }, [testTypeQuery.error]);
+    onSuccess: (data) => {
+      const visibilityConfig = JSON.parse(
+        localStorage.getItem(columnVisibilityLocalStorageKey) || '{}'
+      );
 
-  const handlePageChange = (pageIndex: number, pageSize: number) => {
-    searchMutation.mutate(
-      { filter: searchParams, page: pageIndex, size: pageSize },
-      {
-        onSuccess: (data) => {
-          setSearchResults(data.content);
-          setPaginationInfo({
-            totalElements: data.totalElements,
-            totalPages: data.totalPages,
-            pageNumber: data.pageNumber,
-            pageSize: data.pageSize
-          });
-        }
-      }
-    );
-  };
-
-  const handleExportData = () => {
-    searchMutation.mutate(
-      { filter: searchParams, unpaged: true },
-      {
-        onSuccess: (data) => {
-          const visibilityConfig = JSON.parse(
-            localStorage.getItem(columnVisibilityLocalStorageKey) || '{}'
-          );
-
-          const isVisible = (key: string) => visibilityConfig[key] !== false;
+      const isVisible = (key: string) => visibilityConfig[key] !== false;
 
           type FilteredRow = Record<
             keyof TestingSearchResponseType,
@@ -200,11 +161,47 @@ const TestSearch = () => {
 
           const csv = generateCsv(csvConfig)(formattedContent);
           download(csvConfig)(csv);
-        },
-        onError: (error) => {
-          setAlert({
-            status: 'error',
-            message: `Failed to export data: ${error?.message || 'Unknown error'}`
+    },
+    onError: (error) => {
+      setAlert({
+        status: 'error',
+        message: `Failed to export data: ${error?.message || 'Unknown error'}`
+      });
+    }
+  });
+
+  const handleExportData = () => {
+    exportMutation.mutate(searchParams);
+  };
+
+  const testTypeQuery = useQuery({
+    queryKey: ['test-type-codes'],
+    queryFn: getTestTypeCodes,
+    staleTime: THREE_HOURS, // data is fresh for 3 hours
+    gcTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
+    select: (data: TestCodeType[]) => data?.map((testCode) => testCode.code) ?? []
+  });
+
+  useEffect(() => {
+    if (testTypeQuery.error) {
+      setAlert({
+        status: 'error',
+        message: `Failed to load test types: ${testTypeQuery.error?.message}`
+      });
+    }
+  }, [testTypeQuery.error]);
+
+  const handlePageChange = (pageIndex: number, pageSize: number) => {
+    searchMutation.mutate(
+      { filter: searchParams, page: pageIndex, size: pageSize },
+      {
+        onSuccess: (data) => {
+          setSearchResults(data.content);
+          setPaginationInfo({
+            totalElements: data.totalElements,
+            totalPages: data.totalPages,
+            pageNumber: data.pageNumber,
+            pageSize: data.pageSize
           });
         }
       }
