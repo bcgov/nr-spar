@@ -12,7 +12,7 @@ export type TestingSearchResponseType = {
   purityPct: number | null;
   seedsPerGram: number | null;
   otherTestResult: number | null;
-  testCompleteInd: boolean;
+  testCompleteInd: number;
   acceptResultInd: number;
   significntStsInd: number;
   seedWithdrawalDate: string | null;

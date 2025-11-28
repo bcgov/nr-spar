@@ -7,9 +7,10 @@ import { PaginatedTestingSearchResponseType, TestCodeType } from '../../types/co
 export const searchTestingActivities = (
   filter: ActivitySearchRequest,
   page: number = 0,
-  size: number = 20
+  size: number = 20,
+  unpaged: boolean = false
 ) => {
-  const url = `${ApiConfig.searchTestActivities}/search?page=${page}&size=${size}`;
+  const url = `${ApiConfig.searchTestActivities}/search?page=${page}&size=${size}&unpaged=${unpaged}`;
   return api.post(url, filter).then((res): PaginatedTestingSearchResponseType => res.data);
 };
 
