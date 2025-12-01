@@ -1,16 +1,12 @@
 package ca.bc.gov.oracleapi.interceptor;
 
-import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.security.JwtSecurityUtil;
-import ca.bc.gov.oracleapi.security.RoleAccessConfig;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContext;
@@ -18,6 +14,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.security.JwtSecurityUtil;
+import ca.bc.gov.oracleapi.security.RoleAccessConfig;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /** This class represents a request interceptor resposible for ensuring RBAC. */
 @Component
@@ -32,7 +34,7 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
     String requestUri = request.getRequestURI();
 
     // Bypass other handlers - internal spring boot handlers
-    if (!handler.toString().contains("ca.bc.gov.backendstartapi")) {
+    if (!handler.toString().contains("ca.bc.gov.oracleapi")) {
       return true;
     }
 
