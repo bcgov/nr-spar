@@ -57,7 +57,7 @@ jobs:
         with:
           node_version: "22"
           commands: |
-            npm ci
+            npm ci --ignore-scripts 
             npx start-server-and-test start http://localhost:3000 cy:run
           dir: frontend
           sonar_args: >
