@@ -143,7 +143,7 @@ class ActivitySearchServiceTest {
     entity.setPurityPct(purityPct);
     entity.setSeedsPerGram(seedsPerGram);
     entity.setOtherTestResult(otherTestResult);
-    entity.setTestCompleteInd(completeStatus == -1);
+    entity.setTestCompleteInd(completeStatus);
     entity.setAcceptResultInd(acceptanceStatus);
     entity.setSignificntStsInd(significntStsInd);
     entity.setSeedWithdrawalDate(seedWithdrawalDate);
@@ -213,7 +213,7 @@ class ActivitySearchServiceTest {
     assertThat(activitySearchResponseDto.purityPct()).isEqualTo(purityPct);
     assertThat(activitySearchResponseDto.seedsPerGram()).isEqualTo(seedsPerGram);
     assertThat(activitySearchResponseDto.otherTestResult()).isEqualTo(otherTestResult);
-    assertThat(activitySearchResponseDto.testCompleteInd()).isTrue();
+    assertThat(activitySearchResponseDto.testCompleteInd()).isEqualTo(completeStatus);
     assertThat(activitySearchResponseDto.acceptResultInd()).isEqualTo(acceptanceStatus);
     assertThat(activitySearchResponseDto.significntStsInd()).isEqualTo(significntStsInd);
     assertThat(activitySearchResponseDto.seedWithdrawalDate()).isEqualTo(seedWithdrawalDate);

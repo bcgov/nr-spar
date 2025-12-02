@@ -4,7 +4,7 @@ import * as Icons from '@carbon/icons-react';
 
 import GenericTable from '../../../../components/GenericTable';
 import ShowHideColumnControl from './ToolbarControls/ShowHideColumnControl';
-import { getTestingActivityListColumns } from './constants';
+import { getTestingActivityListColumns, columnVisibilityLocalStorageKey } from './constants';
 import type {
   TestingSearchResponseType,
   PaginationInfoType
@@ -13,6 +13,7 @@ import type {
 type TestListTableProp = {
   data: TestingSearchResponseType[];
   paginationInfo: PaginationInfoType;
+  onExportData: () => void;
   isLoading?: boolean;
   onPageChange?: (pageIndex: number, pageSize: number) => void;
 };
@@ -21,10 +22,10 @@ const TestListTable = ({
   data,
   isLoading = false,
   paginationInfo,
-  onPageChange = () => {}
+  onPageChange,
+  onExportData
 }: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
-  const columnVisibilityLocalStorageKey = 'test-activity-table-columns-visibility';
 
   const actions = [
     {
@@ -58,7 +59,7 @@ const TestListTable = ({
         <Icons.DocumentExport size={16} className="concep-test-search-table-toolbar-button-icon" />
       ),
       type: 'primary',
-      action: () => {}
+      action: () => onExportData()
     },
     {
       label: 'Filters',

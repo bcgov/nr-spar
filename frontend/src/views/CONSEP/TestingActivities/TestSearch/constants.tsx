@@ -317,3 +317,97 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     ...tableCellProps()
   }
 ];
+
+export const formatExportData = {
+  seedlotDisplay: {
+    header: 'Lot #',
+    value: (row: TestingSearchResponseType) => row.seedlotDisplay
+  },
+  requestItem: {
+    header: 'Request ID',
+    value: (row: TestingSearchResponseType) => row.requestItem
+  },
+  species: {
+    header: 'Sp',
+    value: (row: TestingSearchResponseType) => row.species
+  },
+  testRank: {
+    header: 'Rank',
+    value: (row: TestingSearchResponseType) => row.testRank
+  },
+  testCategoryCd: {
+    header: 'Category',
+    value: (row: TestingSearchResponseType) => row.testCategoryCd
+  },
+  activityId: {
+    header: 'Activity',
+    value: (row: TestingSearchResponseType) => row.activityId
+  },
+  Result: {
+    header: 'Result',
+    value: (row: TestingSearchResponseType) => {
+      switch (row.testCategoryCd) {
+        case 'Germ': {
+          const v = row.germinationPct;
+          return v == null ? '' : `${v}%`;
+        }
+        case 'MC': {
+          const v = row.moisturePct;
+          return v == null ? '' : `${v}%`;
+        }
+        case 'SPG': {
+          const v = row.seedsPerGram;
+          return v == null ? '' : `${v}%`;
+        }
+        case 'PUR': {
+          const v = row.purityPct;
+          return v == null ? '' : `${v}%`;
+        }
+        default:
+          return '';
+      }
+    }
+  },
+  pv: {
+    header: 'PV',
+    value: (row: TestingSearchResponseType) => row.pv
+  },
+  currentTestInd: {
+    header: 'Curr',
+    value: (row: TestingSearchResponseType) => (row.currentTestInd === 0 ? '' : 'Curr')
+  },
+  testCompleteInd: {
+    header: 'Com',
+    value: (row: TestingSearchResponseType) => (row.testCompleteInd === 0 ? '' : 'Com')
+  },
+  acceptResultInd: {
+    header: 'Act',
+    value: (row: TestingSearchResponseType) => (row.acceptResultInd === 0 ? '' : 'Act')
+  },
+  significntStsInd: {
+    header: 'Sig',
+    value: (row: TestingSearchResponseType) => (row.significntStsInd === 0 ? '' : 'Sig')
+  },
+  seedWithdrawalDate: {
+    header: 'Wdrwl Date',
+    value: (row: TestingSearchResponseType) => formatDateCell(row.seedWithdrawalDate)
+  },
+  revisedEndDt: {
+    header: 'Sch End Date',
+    value: (row: TestingSearchResponseType) => formatDateCell(row.revisedEndDt)
+  },
+  actualBeginDtTm: {
+    header: 'Start Date',
+    value: (row: TestingSearchResponseType) => formatDateCell(row.actualBeginDtTm)
+  },
+  actualEndDtTm: {
+    header: 'End Date',
+    value: (row: TestingSearchResponseType) => formatDateCell(row.actualEndDtTm)
+  },
+  riaComment: {
+    header: 'Comments',
+    value: (row: TestingSearchResponseType) => row.riaComment || ''
+  }
+};
+
+export const columnVisibilityLocalStorageKey = 'test-activity-table-columns-visibility';
