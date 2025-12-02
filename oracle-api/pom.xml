@@ -274,7 +274,7 @@
 						<exclude>**/*$*Builder*</exclude>
 						<exclude>**/entity/**</exclude>
 						<exclude>**/dto/**</exclude>
-						<exclude>**/BackendStartApiApplication.*</exclude>
+						<exclude>**/OracleApiApplication.*</exclude>
 					</excludes>
 				</configuration>
 				<executions>

@@ -171,7 +171,7 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
       methodName = classNameWithMethod[1].substring(0, indexOfParent);
     }
 
-    if (Objects.isNull(className) || !className.startsWith("ca.bc.gov.backendstartapi")) {
+    if (Objects.isNull(className) || !className.startsWith("ca.bc.gov.oracleapi")) {
       return List.of();
     }
 

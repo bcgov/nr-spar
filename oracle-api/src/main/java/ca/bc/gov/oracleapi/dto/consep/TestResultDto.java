@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * This class represents a {@link ca.bc.gov.backendstartapi.entity.consep.TestResult} object.
+ * This class represents a {@link ca.bc.gov.oracleapi.entity.consep.TestResult} object.
  */
 @Schema(description = "This class represents a TestResultEntity")
 public record TestResultDto(
