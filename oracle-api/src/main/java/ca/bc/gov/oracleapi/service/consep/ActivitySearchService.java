@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,8 +37,19 @@ public class ActivitySearchService {
    */
   public ActivitySearchPageResponseDto searchTestingActivities(
       ActivitySearchRequestDto activitySearchRequestDto,
-      Pageable pageable) {
+      Pageable pageable,
+      String sortBy,
+      String sortDirection) {
 
+    if (sortBy != null && !sortBy.isBlank()) {
+      Sort sort = Sort.by(
+          "desc".equalsIgnoreCase(sortDirection)
+              ? Sort.Direction.DESC
+              : Sort.Direction.ASC,
+          sortBy);
+      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    }
+    
     LocalDateTime seedWithdrawalStartDate =
         toStartOfDay(activitySearchRequestDto.seedWithdrawalStartDate());
     LocalDateTime seedWithdrawalEndDate =

@@ -60,12 +60,19 @@ public class ActivitySearchEndpoint {
   public ActivitySearchPageResponseDto searchTestingActivities(
       @Valid @RequestBody ActivitySearchRequestDto filter,
       @RequestParam(defaultValue = "false") boolean unpaged,
+      @RequestParam(required = false) String sortBy,
+      @RequestParam(defaultValue = "asc") String sortDirection,
       @ParameterObject @PageableDefault(size = 20) Pageable paginationParameters
   ) {
     if (unpaged) {
       paginationParameters = Pageable.unpaged();
     }
-    return activitySearchService.searchTestingActivities(filter, paginationParameters);
+    return activitySearchService.searchTestingActivities(
+      filter, 
+      paginationParameters,
+      sortBy,
+      sortDirection
+    );
   }
 
   @GetMapping("/type-codes")

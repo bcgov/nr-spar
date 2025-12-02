@@ -191,7 +191,7 @@ class ActivitySearchServiceTest {
     )).thenReturn(mockPage);
 
     ActivitySearchPageResponseDto pageResponse = activitySearchService.searchTestingActivities(
-        activitySearchRequestDto, pageable
+        activitySearchRequestDto, pageable, null, null
     );
 
     assertThat(pageResponse.content()).hasSize(1);
@@ -268,7 +268,7 @@ class ActivitySearchServiceTest {
     )).thenReturn(mockPage);
 
     List<ActivitySearchResponseDto> result = activitySearchService
-        .searchTestingActivities(emptyRequest, pageable)
+        .searchTestingActivities(emptyRequest, pageable, null, null)
         .content();
 
     assertThat(result).hasSize(2);
@@ -310,7 +310,7 @@ class ActivitySearchServiceTest {
     )).thenReturn(emptyPage);
 
     List<ActivitySearchResponseDto> result = activitySearchService
-        .searchTestingActivities(emptyRequest, pageable).content();
+        .searchTestingActivities(emptyRequest, pageable, null, null).content();
 
     assertThat(result).isEmpty();
   }

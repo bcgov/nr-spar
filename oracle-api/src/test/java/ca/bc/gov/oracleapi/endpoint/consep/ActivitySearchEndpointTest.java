@@ -126,7 +126,7 @@ class ActivitySearchEndpointTest {
         20                                  // pageSize
     );
 
-    Mockito.when(activitySearchService.searchTestingActivities(Mockito.any(), Mockito.any()))
+    Mockito.when(activitySearchService.searchTestingActivities(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(pageResponse);
 
     mockMvc.perform(post("/api/testing-activities/search")
