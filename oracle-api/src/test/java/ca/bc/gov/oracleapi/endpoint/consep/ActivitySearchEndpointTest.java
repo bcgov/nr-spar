@@ -60,7 +60,7 @@ class ActivitySearchEndpointTest {
     Integer purityPct = 0;
     Integer seedsPerGram = 0;
     Integer otherTestResult = 0;
-    Boolean testCompleteInd = true;
+    Integer testCompleteInd = -1;
     Integer acceptanceStatus = -1;
     Integer significntStsInd = -1;
     LocalDateTime seedWithdrawalDate = LocalDate.of(1997, 10, 7).atTime(LocalTime.MAX);

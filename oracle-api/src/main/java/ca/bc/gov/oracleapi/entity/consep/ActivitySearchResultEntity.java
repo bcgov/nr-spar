@@ -58,7 +58,7 @@ public class ActivitySearchResultEntity {
   private Integer otherTestResult;
 
   @Column(name = "TEST_COMPLETE_IND")
-  private Boolean testCompleteInd;
+  private Integer testCompleteInd;
 
   @Column(name = "ACCEPT_RESULT_IND")
   private Integer acceptResultInd;

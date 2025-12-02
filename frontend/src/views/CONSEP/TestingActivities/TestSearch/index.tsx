@@ -94,7 +94,6 @@ const TestSearch = () => {
       filter: ActivitySearchRequest;
       page?: number;
       size?: number;
-      unpaged?: boolean;
     }) => searchTestingActivities(filter, page, size),
     onMutate: () => {
       resetAlert();
