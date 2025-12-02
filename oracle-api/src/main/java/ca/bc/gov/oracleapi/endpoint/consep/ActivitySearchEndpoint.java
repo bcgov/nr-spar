@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -58,8 +59,12 @@ public class ActivitySearchEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public ActivitySearchPageResponseDto searchTestingActivities(
       @Valid @RequestBody ActivitySearchRequestDto filter,
+      @RequestParam(defaultValue = "false") boolean unpaged,
       @ParameterObject @PageableDefault(size = 20) Pageable paginationParameters
   ) {
+    if (unpaged) {
+      paginationParameters = Pageable.unpaged();
+    }
     return activitySearchService.searchTestingActivities(filter, paginationParameters);
   }
 

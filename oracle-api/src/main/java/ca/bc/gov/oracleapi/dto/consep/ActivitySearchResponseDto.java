@@ -22,7 +22,7 @@ public record ActivitySearchResponseDto(
     Integer purityPct,
     Integer seedsPerGram,
     Integer otherTestResult,
-    Boolean testCompleteInd,
+    Integer testCompleteInd,
     Integer acceptResultInd,
     Integer significntStsInd,
     LocalDateTime seedWithdrawalDate,

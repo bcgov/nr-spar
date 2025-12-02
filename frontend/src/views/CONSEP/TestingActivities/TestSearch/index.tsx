@@ -17,6 +17,8 @@ import {
   InlineNotification
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
+// eslint-disable-next-line import/no-unresolved
+import { mkConfig, generateCsv, download } from 'export-to-csv';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
@@ -34,11 +36,19 @@ import AdvancedFilters from './AdvancedFilter';
 import {
   DATE_FORMAT, activityIds,
   testSearchCrumbs, iniActSearchValidation,
-  errorMessages, minStartDate, maxEndDate
+  errorMessages, minStartDate, maxEndDate,
+  formatExportData, columnVisibilityLocalStorageKey
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from './definitions';
 import './styles.scss';
+
+const csvConfig = mkConfig({
+  fieldSeparator: ',',
+  decimalSeparator: '.',
+  useKeysAsHeaders: true,
+  filename: `Testing_Activity_Search_${new Date().toISOString().split('T')[0]}`
+});
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
@@ -105,6 +115,63 @@ const TestSearch = () => {
       });
     }
   });
+
+  const exportMutation = useMutation({
+    mutationFn: (filter: ActivitySearchRequest) => searchTestingActivities(filter, 0, 0, true),
+
+    onSuccess: (data) => {
+      const visibilityConfig = JSON.parse(
+        localStorage.getItem(columnVisibilityLocalStorageKey) || '{}'
+      );
+
+      const isVisible = (key: string) => visibilityConfig[key] !== false;
+
+          type FilteredRow = Record<
+            keyof TestingSearchResponseType,
+            TestingSearchResponseType[keyof TestingSearchResponseType] | undefined
+          >;
+
+          const filterItem = (item: TestingSearchResponseType): FilteredRow => Object
+            .keys(item).reduce((acc, key) => {
+              if (!isVisible(key)) return acc;
+              if (!Object.hasOwnProperty.call(formatExportData, key)) return acc;
+
+              const k = key as keyof TestingSearchResponseType;
+              acc[k] = item[k];
+              return acc;
+            }, {} as FilteredRow);
+
+          const formatItem = (item: FilteredRow) => Object.entries(item).reduce((acc, [key]) => {
+            const config = formatExportData[key as keyof typeof formatExportData];
+
+            if (config) {
+              acc[config.header] = config.value(item as TestingSearchResponseType);
+            }
+
+            if (key === 'Result') {
+              acc.Result = formatExportData.Result.value(item as TestingSearchResponseType);
+            }
+
+            return acc;
+          }, {} as Record<string, any>);
+
+          const filteredContent: FilteredRow[] = data.content.map(filterItem);
+          const formattedContent = filteredContent.map(formatItem);
+
+          const csv = generateCsv(csvConfig)(formattedContent);
+          download(csvConfig)(csv);
+    },
+    onError: (error) => {
+      setAlert({
+        status: 'error',
+        message: `Failed to export data: ${error?.message || 'Unknown error'}`
+      });
+    }
+  });
+
+  const handleExportData = () => {
+    exportMutation.mutate(searchParams);
+  };
 
   const testTypeQuery = useQuery({
     queryKey: ['test-type-codes'],
@@ -477,6 +544,7 @@ const TestSearch = () => {
               isLoading={searchMutation.isPending}
               paginationInfo={paginationInfo}
               onPageChange={handlePageChange}
+              onExportData={handleExportData}
             />
           ) : (
             <TablePlaceholder />
