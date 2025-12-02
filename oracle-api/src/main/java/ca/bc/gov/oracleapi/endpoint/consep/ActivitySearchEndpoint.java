@@ -97,7 +97,7 @@ public class ActivitySearchEndpoint {
       content = @Content(schema = @Schema(implementation = Void.class))
     )
   })
-  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<TestCodeDto> getTestCategoryCodes() {
     return testCodeService.getTestCategoryCodes();
   }
