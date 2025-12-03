@@ -28,7 +28,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ActivitySearchEndpoint.class)
-@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
+@WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
 class ActivitySearchEndpointTest {
 
   @Autowired

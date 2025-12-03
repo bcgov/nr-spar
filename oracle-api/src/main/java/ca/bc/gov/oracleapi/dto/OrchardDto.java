@@ -3,7 +3,7 @@ package ca.bc.gov.oracleapi.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * This class represents an {@link ca.bc.gov.backendstartapi.entity.Orchard} object including a
+ * This class represents an {@link ca.bc.gov.oracleapi.entity.Orchard} object including a
  * {@link ca.bc.gov.oracleapi.entity.OrchardLotTypeCode}.
  */
 @Schema(description = "Represents an Orchard object with an Orchard Lot Type.")

@@ -86,7 +86,7 @@ public class PurityTestsEndpoint {
             @Content(
                 schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public Optional<PurityTestDto> getPurityTestByRiaKey(
       @PathVariable
       @Parameter(
@@ -193,7 +193,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void validatePurityTestData(
       @PathVariable
       @Parameter(
@@ -253,7 +253,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void acceptPurityTestData(
       @PathVariable
       @Parameter(
@@ -300,7 +300,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(implementation = Void.class)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public Integer deleteReplicate(
       @Parameter(
           name = "riaKey",
@@ -350,7 +350,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(implementation = Void.class)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
     public List<Integer> deleteReplicates(
         @Parameter(
             name = "riaKey",
@@ -439,7 +439,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(implementation = Void.class)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<PurityDebrisDto> deleteDebris(
       @Parameter(
           name = "riaKey",
