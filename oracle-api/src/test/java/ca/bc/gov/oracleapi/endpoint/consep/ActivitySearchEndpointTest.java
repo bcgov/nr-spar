@@ -73,18 +73,21 @@ class ActivitySearchEndpointTest {
     String itemId = "A";
     String seedlotSample = "00098";
     Integer riaSkey = 448383;
+    String testType = "D1";
+    String geneticClassCode = "A";
+
 
     ActivitySearchResponseDto activitySearchResponseDto = new ActivitySearchResponseDto(
         seedlotDisplay, requestId, species, activityId, testRank, currentTestInd,
         testCategoryCd, germinationPct, pv, moisturePct, purityPct, seedsPerGram,
         otherTestResult, testCompleteInd, acceptanceStatus, significntStsInd, seedWithdrawalDate,
         revisedEndDt, actualBeginDtTm, actualEndDtTm, riaComment, requestSkey,
-        reqId, itemId, seedlotSample, riaSkey
+        reqId, itemId, seedlotSample, riaSkey, testType, geneticClassCode
     );
 
     // request parameter for filtering
     List<String> lotNumbers = List.of("00098");
-    String testType = "D1";
+
     Integer germinatorTrayId = null;
     LocalDate seedWithdrawalStartDate = LocalDate.of(1997, 10, 1);
     LocalDate seedWithdrawalEndDate = LocalDate.of(1998, 10, 31);
@@ -103,7 +106,6 @@ class ActivitySearchEndpointTest {
     LocalDate revisedEndDateTo = LocalDate.of(1997, 11, 10);
     Integer germTrayAssignment = -1;
     Integer completeStatus = -1;
-    String geneticClassCode = "A";
 
     ActivitySearchRequestDto activitySearchRequestDto = new ActivitySearchRequestDto(
         lotNumbers, testType, activityId, germinatorTrayId,

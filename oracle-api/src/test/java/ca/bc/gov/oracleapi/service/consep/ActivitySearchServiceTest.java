@@ -156,6 +156,8 @@ class ActivitySearchServiceTest {
     entity.setItemId(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
     entity.setSeedlotSample(seedlotSample);
     entity.setRiaSkey(riaSkey);
+    entity.setActivityTypeCd(testType);
+    entity.setGeneticClassCode(geneticClassCode);
   }
 
   @Test
@@ -227,6 +229,8 @@ class ActivitySearchServiceTest {
         .isEqualTo(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
     assertThat(activitySearchResponseDto.seedlotSample()).isEqualTo(seedlotSample);
     assertThat(activitySearchResponseDto.riaSkey()).isEqualTo(riaSkey);
+    assertThat(activitySearchResponseDto.activityTypeCd()).isEqualTo(testType);
+    assertThat(activitySearchResponseDto.geneticClassCode()).isEqualTo(geneticClassCode);
 
     verify(activitySearchRepository, times(1)).searchTestingActivities(
         lotNumbers, testType, activityId, germinatorTrayId,
