@@ -10,7 +10,7 @@ import lombok.ToString;
 /**
  * This class holds the fields that will be returned when requesting a {@link
  * ca.bc.gov.oracleapi.entity.ParentTreeEntity} from an {@link
- * ca.bc.gov.backendstartapi.entity.Orchard}.
+ * ca.bc.gov.oracleapi.entity.Orchard}.
  */
 @Getter
 @Setter

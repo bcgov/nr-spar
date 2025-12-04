@@ -59,7 +59,7 @@ public class ActivitySearchEndpoint {
           @Content(
               schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public ActivitySearchPageResponseDto searchTestingActivities(
       @Valid @RequestBody ActivitySearchRequestDto filter,
       @RequestParam(defaultValue = "false") boolean unpaged,
@@ -98,7 +98,7 @@ public class ActivitySearchEndpoint {
       content = @Content(schema = @Schema(implementation = Void.class))
     )
   })
-  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<TestCodeDto> getTestTypeCodes() {
     return testCodeService.getTestTypeCodes();
   }
@@ -115,7 +115,7 @@ public class ActivitySearchEndpoint {
       content = @Content(schema = @Schema(implementation = Void.class))
     )
   })
-  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<TestCodeDto> getTestCategoryCodes() {
     return testCodeService.getTestCategoryCodes();
   }

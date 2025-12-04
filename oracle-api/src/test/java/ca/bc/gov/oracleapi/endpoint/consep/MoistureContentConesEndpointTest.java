@@ -55,7 +55,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(MoistureContentConesEndpoint.class)
-@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
+@WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
 class MoistureContentConesEndpointTest {
 
   @Autowired
