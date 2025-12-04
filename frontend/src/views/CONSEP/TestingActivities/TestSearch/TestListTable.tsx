@@ -1,9 +1,12 @@
-import React, { useRef } from 'react';
-import { Row, Column, Button } from '@carbon/react';
+import React, { useRef, useState } from 'react';
+import {
+  Row, Column, Button, Modal
+} from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
 import GenericTable from '../../../../components/GenericTable';
 import ShowHideColumnControl from './ToolbarControls/ShowHideColumnControl';
+import TestHistory from './ToolbarControls/TestHistory';
 import { getTestingActivityListColumns, columnVisibilityLocalStorageKey } from './constants';
 import type {
   TestingSearchResponseType,
@@ -26,6 +29,10 @@ const TestListTable = ({
   onExportData
 }: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+  const tableRef = useRef<any>(null);
+  const [showTestHistory, setShowTestHistory] = useState(false);
+  const selectedRows = tableRef.current?.getSelectedRowModel?.().rows ?? [];
+  const selectedSeedlot = selectedRows[0]?.original?.seedlotDisplay;
 
   const actions = [
     {
@@ -41,7 +48,7 @@ const TestListTable = ({
     {
       label: 'Test history',
       type: 'tertiary',
-      action: () => {}
+      action: () => setShowTestHistory(true)
     },
     {
       label: 'Add activity',
@@ -71,6 +78,30 @@ const TestListTable = ({
 
   return (
     <div className="concep-test-search-table-container">
+      <Modal
+        className="concep-test-history-modal"
+        open={showTestHistory}
+        passiveModal
+        size="lg"
+        modalHeading={
+          selectedSeedlot
+            ? `Seedlot ${selectedSeedlot}: Test history`
+            : 'Seedlot: Test history'
+        }
+        onRequestClose={() => setShowTestHistory(false)}
+        selectorsFloatingMenus={[
+          // specify selectors for floating menus
+          // that should remain accessible and on top of the modal
+          '.MuiPopover-root',
+          '.MuiPaper-root'
+        ]}
+      >
+        {showTestHistory && tableRef.current && (
+          <TestHistory
+            table={tableRef.current}
+          />
+        )}
+      </Modal>
       <Row className="concep-test-search-table">
         <GenericTable
           columns={getTestingActivityListColumns()}
@@ -98,29 +129,32 @@ const TestListTable = ({
           renderTopToolbarCustomActions={() => (
             <div className="concep-test-search-table-title">{`Total search result: ${paginationInfo.totalElements}`}</div>
           )}
-          renderToolbarInternalActions={({ table }) => (
-            <Column>
-              {actions.map(({
-                label, icon, action, type
-              }) => (
-                <Button
-                  key={label}
-                  onClick={action}
-                  kind={type}
-                  aria-label={label}
-                  size="md"
-                  className="concep-test-search-table-toolbar-button"
-                >
-                  {label}
-                  {icon}
-                </Button>
-              ))}
-              <ShowHideColumnControl
-                table={table}
-                columnVisibilityLocalStorageKey={columnVisibilityLocalStorageKey}
-              />
-            </Column>
-          )}
+          renderToolbarInternalActions={({ table }) => {
+            tableRef.current = table;
+            return (
+              <Column>
+                {actions.map(({
+                  label, icon, action, type
+                }) => (
+                  <Button
+                    key={label}
+                    onClick={action}
+                    kind={type}
+                    aria-label={label}
+                    size="md"
+                    className="concep-test-search-table-toolbar-button"
+                  >
+                    {label}
+                    {icon}
+                  </Button>
+                ))}
+                <ShowHideColumnControl
+                  table={table}
+                  columnVisibilityLocalStorageKey={columnVisibilityLocalStorageKey}
+                />
+              </Column>
+            );
+          }}
         />
       </Row>
     </div>

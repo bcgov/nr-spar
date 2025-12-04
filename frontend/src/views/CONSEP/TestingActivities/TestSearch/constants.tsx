@@ -14,7 +14,7 @@ export const minStartDate = '1900-01-01';
 export const maxEndDate = '9999-12-31';
 const COLOR_GREY_20 = '#DFDFE1'; // light theme token: layer-selected-01
 
-const formatDateCell = (value: string | null) => {
+export const formatDateCell = (value: string | null) => {
   if (!value) return '';
 
   const date = new Date(value);
@@ -247,7 +247,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   },
   {
     accessorKey: 'acceptResultInd',
-    header: 'Act',
+    header: 'Acc',
     enableEditing: false,
     ...tableCellProps(80, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {

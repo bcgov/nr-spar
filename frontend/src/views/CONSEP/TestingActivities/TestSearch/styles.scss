@@ -34,14 +34,13 @@
         display: flex;
         justify-content: flex-end;
         gap: 0.25rem;
-        margin-top: 1.8rem; 
+        margin-top: 1.8rem;
       }
 
       @media (max-width: 1200px) {
         flex-wrap: wrap; // allow wrapping on smaller screens
       }
     }
-
 
     .lot-input {
       width: 9rem;
@@ -53,7 +52,8 @@
       min-width: 6.5rem;
     }
 
-    #lot-input, #germ-tray-input {
+    #lot-input,
+    #germ-tray-input {
       width: 100%;
     }
   }
@@ -83,8 +83,8 @@
       height: 100%;
     }
 
-    // material react table toolbar 
-    .MuiPaper-root>.MuiBox-root:first-of-type {
+    // material react table toolbar
+    .MuiPaper-root > .MuiBox-root:first-of-type {
       background-color: var(--#{vars.$bcgov-prefix}-layer-01);
       min-height: 2.751rem;
 
@@ -115,8 +115,8 @@
 
     .concep-test-search-table {
       // reduce the padding for row selection column
-      th[data-index="0"],
-      td[data-index="0"] {
+      th[data-index='0'],
+      td[data-index='0'] {
         padding-left: 0.4rem;
         padding-right: 0;
 
@@ -125,9 +125,20 @@
         }
       }
     }
+
+    .#{vars.$bcgov-prefix}--modal-content {
+      padding: 0px;
+    }
   }
 
   .#{vars.$bcgov-prefix}--inline-notification {
     max-inline-size: none;
   }
+}
+
+// ensure the Material-UI table pagination menu
+// renders above the Carbon Modal by increasing its z-index
+#menu-.MuiPopover-root,
+#menu- .MuiPaper-root {
+  z-index: 9001;
 }
