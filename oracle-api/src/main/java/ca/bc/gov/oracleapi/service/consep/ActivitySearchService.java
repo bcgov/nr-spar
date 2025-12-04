@@ -49,7 +49,7 @@ public class ActivitySearchService {
           sortBy);
       pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
-    
+  
     LocalDateTime seedWithdrawalStartDate =
         toStartOfDay(activitySearchRequestDto.seedWithdrawalStartDate());
     LocalDateTime seedWithdrawalEndDate =
