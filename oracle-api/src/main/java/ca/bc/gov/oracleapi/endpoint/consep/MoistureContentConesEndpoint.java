@@ -86,7 +86,7 @@ public class MoistureContentConesEndpoint {
             @Content(
                 schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public Optional<MoistureContentConesDto> getMccByRiaKey(
       @PathVariable
       @Parameter(
@@ -190,7 +190,7 @@ public class MoistureContentConesEndpoint {
               @Content(
                   schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void validateMoistureContentData(
       @PathVariable
       @Parameter(
@@ -248,7 +248,7 @@ public class MoistureContentConesEndpoint {
               @Content(
                   schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void acceptMoistureContentData(
       @PathVariable
       @Parameter(
@@ -295,7 +295,7 @@ public class MoistureContentConesEndpoint {
               @Content(
                   schema = @Schema(implementation = Void.class)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public Optional<MoistureContentConesDto> deleteReplicate(
       @Parameter(
           name = "riaKey",
@@ -344,7 +344,7 @@ public class MoistureContentConesEndpoint {
               @Content(
                   schema = @Schema(implementation = Void.class)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
     public List<Integer> deleteReplicates(
         @Parameter(
             name = "riaKey",
