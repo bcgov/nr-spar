@@ -83,7 +83,7 @@
       height: 100%;
     }
 
-    // material react table toolbar
+    // material-ui table toolbar
     .MuiPaper-root > .MuiBox-root:first-of-type {
       background-color: var(--#{vars.$bcgov-prefix}-layer-01);
       min-height: 2.751rem;
@@ -124,10 +124,28 @@
           padding-right: 0;
         }
       }
+
+      // hardcode the position for the first two sticky columns
+      th[data-index='1'],
+      td[data-index='1'] {
+        position: sticky;
+        left: 3.034rem; // width of the selection column
+      }
+
+      th[data-index='2'],
+      td[data-index='2'] {
+        position: sticky;
+        left: 3.034rem + 7.5rem; // width of the selection column + the first lot # column
+      }
     }
 
     .#{vars.$bcgov-prefix}--modal-content {
       padding: 0px;
+    }
+
+    // hide material-ui table row selection messages
+    .MuiCollapse-root .MuiAlert-message {
+      display: none;
     }
   }
 
@@ -136,7 +154,7 @@
   }
 }
 
-// ensure the Material-UI table pagination menu
+// ensure the material-ui table pagination menu
 // renders above the Carbon Modal by increasing its z-index
 #menu-.MuiPopover-root,
 #menu- .MuiPaper-root {

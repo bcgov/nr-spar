@@ -113,6 +113,7 @@ const TestListTable = ({
           rowCount={paginationInfo.totalElements}
           onPaginationChange={onPageChange}
           enableRowSelection
+          enableMultiRowSelection={false}
           enableColumnPinning
           isLoading={isLoading}
           tableBodyRef={tableBodyRef}

@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { type MRT_TableInstance } from 'material-react-table';
 import { InlineNotification } from '@carbon/react';
@@ -25,6 +25,8 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<any> }) => {
     status: string;
     message: string;
   } | null>(null);
+  const columns = useMemo(() => getTestHistoryTableColumns(), []);
+  const historyData = useMemo(() => searchResults, [searchResults]);
 
   const searchMutation = useMutation({
     mutationFn: ({ page = 0, size = 20 }: { page?: number; size?: number }) => {
@@ -62,18 +64,7 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<any> }) => {
 
   const handlePageChange = (pageIndex: number, pageSize: number) => {
     searchMutation.mutate(
-      { page: pageIndex, size: pageSize },
-      {
-        onSuccess: (data) => {
-          setSearchResults(data.content);
-          setPaginationInfo({
-            totalElements: data.totalElements,
-            totalPages: data.totalPages,
-            pageNumber: data.pageNumber,
-            pageSize: data.pageSize
-          });
-        }
-      }
+      { page: pageIndex, size: pageSize }
     );
   };
 
@@ -87,8 +78,8 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<any> }) => {
         />
       )}
       <GenericTable
-        columns={getTestHistoryTableColumns()}
-        data={searchResults}
+        columns={columns}
+        data={historyData}
         enablePagination
         manualPagination
         pageIndex={paginationInfo.pageNumber}

@@ -154,9 +154,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'seedlotDisplay',
     header: 'Lot #',
-    size: 60,
     enableEditing: false,
-    ...tableCellProps(60)
+    ...tableCellProps(120)
   },
   {
     accessorKey: 'requestItem',
@@ -307,14 +306,6 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     header: 'Comments',
     enableEditing: false,
     ...tableCellProps(800, 'left')
-  },
-  {
-    accessorKey: 'actions',
-    header: '',
-    Cell: () => <Icons.TrashCan size={15} style={{ cursor: 'pointer' }} onClick={() => {}} />,
-    enableEditing: false,
-    size: 20,
-    ...tableCellProps()
   }
 ];
 

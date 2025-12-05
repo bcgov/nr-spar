@@ -238,12 +238,22 @@ const TestSearch = () => {
     if (lots.length > 5) {
       error = true;
       errorMessage = errorMessages.lotMax;
-    } else if (lots.some((lot) => (lot.startsWith('F') || lot.startsWith('f')) && lot.length > 13)) {
-      error = true;
-      errorMessage = errorMessages.familyLotMaxChar;
-    } else if (lots.some((lot) => lot.length > 5)) {
-      error = true;
-      errorMessage = errorMessages.lotMaxChar;
+    } else {
+      const invalidLot = lots.find((lot) => {
+        if (lot.startsWith('F') || lot.startsWith('f')) {
+          return lot.length > 13;
+        }
+        return lot.length > 5;
+      });
+
+      if (invalidLot) {
+        if (invalidLot.startsWith('F') || invalidLot.startsWith('f')) {
+          errorMessage = errorMessages.familyLotMaxChar;
+        } else {
+          errorMessage = errorMessages.lotMaxChar;
+        }
+        error = true;
+      }
     }
 
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
