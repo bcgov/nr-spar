@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, {
+  useState, useRef, useEffect, useMemo
+} from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { type MRT_TableInstance } from 'material-react-table';
 import { InlineNotification } from '@carbon/react';
@@ -63,19 +65,13 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<any> }) => {
   }, []);
 
   const handlePageChange = (pageIndex: number, pageSize: number) => {
-    searchMutation.mutate(
-      { page: pageIndex, size: pageSize }
-    );
+    searchMutation.mutate({ page: pageIndex, size: pageSize });
   };
 
   return (
     <div>
       {alert?.message && (
-        <InlineNotification
-          lowContrast
-          kind={alert.status}
-          subtitle={alert?.message}
-        />
+        <InlineNotification lowContrast kind={alert.status} subtitle={alert?.message} />
       )}
       <GenericTable
         columns={columns}
