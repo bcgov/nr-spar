@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 import React from 'react';
 import { type MRT_ColumnDef, MRT_Cell } from 'material-react-table';
-import * as Icons from '@carbon/icons-react';
 import { Tag } from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
 import { CrumbType } from '../../../../components/Breadcrumbs/definitions';
