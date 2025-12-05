@@ -54,7 +54,8 @@ public class ConsepOracleQueryConstants {
     "activityTypeCd", "activityId", "seedlotDisplay", "germinatorTrayId",
     "seedWithdrawalDate", "requestId", "testCategoryCd", "testRank", "species",
     "actualBeginDtTm", "actualEndDtTm", "revisedStartDt", "revisedEndDt",
-    "germTrayAssignment", "testCompleteInd", "acceptResultInd", "geneticClassCode"
+    "germTrayAssignment", "testCompleteInd", "acceptResultInd", "geneticClassCode",
+    "requestItem", "pv", "currentTestInd", "significntStsInd", "riaComment"
   );
 }
 

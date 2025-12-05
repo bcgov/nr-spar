@@ -6,12 +6,20 @@ import { PaginatedTestingSearchResponseType, TestCodeType } from '../../types/co
 
 export const searchTestingActivities = (
   filter: ActivitySearchRequest,
-  page: number = 0,
+  sortBy?: string,
+  sortDirection: 'asc' | 'desc' = 'asc',
+  unpaged: boolean = false,
   size: number = 20,
-  unpaged: boolean = false
+  page: number = 0
 ) => {
-  const url = `${ApiConfig.searchTestActivities}/search?page=${page}&size=${size}&unpaged=${unpaged}`;
-  return api.post(url, filter).then((res): PaginatedTestingSearchResponseType => res.data);
+  let url = `${ApiConfig.searchTestActivities}/search?page=${page}&size=${size}&unpaged=${unpaged}`;
+
+  if (sortBy) {
+    url += `&sortBy=${encodeURIComponent(sortBy)}&sortDirection=${sortDirection}`;
+  }
+
+  return api.post(url, filter)
+    .then((res): PaginatedTestingSearchResponseType => res.data);
 };
 
 export const getTestTypeCodes = () => {
