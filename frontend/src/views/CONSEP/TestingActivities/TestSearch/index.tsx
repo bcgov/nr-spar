@@ -68,7 +68,7 @@ const TestSearch = () => {
     pageSize: 100
   });
   const [alert, setAlert] = useState<{
-    status: string;
+    status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
   const [modalAnchor, setModalAnchor] = useState<{

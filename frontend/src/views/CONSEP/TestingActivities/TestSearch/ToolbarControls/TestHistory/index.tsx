@@ -1,7 +1,5 @@
 /* eslint-disable camelcase */
-import React, {
-  useState, useRef, useEffect, useMemo
-} from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { type MRT_TableInstance } from 'material-react-table';
 import { InlineNotification } from '@carbon/react';
@@ -14,7 +12,7 @@ import type {
   PaginationInfoType
 } from '../../../../../../types/consep/TestingSearchType';
 
-const TestHistory = ({ table }: { table: MRT_TableInstance<any> }) => {
+const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponseType> }) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
@@ -24,17 +22,19 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<any> }) => {
     pageSize: 10
   });
   const [alert, setAlert] = useState<{
-    status: string;
+    status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
   const columns = useMemo(() => getTestHistoryTableColumns(), []);
-  const historyData = useMemo(() => searchResults, [searchResults]);
 
   const searchMutation = useMutation({
     mutationFn: ({ page = 0, size = 20 }: { page?: number; size?: number }) => {
       const selectedRows = table.getSelectedRowModel()?.rows ?? [];
       const selectedSeedlots = selectedRows.map((row) => row.original.seedlotDisplay);
-      return searchTestingActivities({ lotNumbers: selectedSeedlots }, page, size);
+      if (selectedSeedlots.length > 0) {
+        return searchTestingActivities({ lotNumbers: selectedSeedlots }, page, size);
+      }
+      return Promise.reject(new Error('No seedlot selected'));
     },
     onMutate: () => {
       setAlert(null);
@@ -57,11 +57,7 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<any> }) => {
   });
 
   useEffect(() => {
-    const selectedRows = table?.getSelectedRowModel()?.rows ?? [];
-    const selectedSeedlots = selectedRows.map((row) => row.original.seedlotDisplay);
-    if (selectedSeedlots.length > 0) {
-      searchMutation.mutate({ page: 0, size: paginationInfo.pageSize });
-    }
+    searchMutation.mutate({ page: 0, size: paginationInfo.pageSize });
   }, []);
 
   const handlePageChange = (pageIndex: number, pageSize: number) => {
@@ -71,11 +67,16 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<any> }) => {
   return (
     <div>
       {alert?.message && (
-        <InlineNotification lowContrast kind={alert.status} subtitle={alert?.message} />
+        <InlineNotification
+          lowContrast
+          kind={alert.status}
+          subtitle={alert?.message}
+          style={{ marginBottom: '0.8rem' }}
+        />
       )}
       <GenericTable
         columns={columns}
-        data={historyData}
+        data={searchResults}
         enablePagination
         manualPagination
         pageIndex={paginationInfo.pageNumber}

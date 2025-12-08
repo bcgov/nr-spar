@@ -1,4 +1,6 @@
+/* eslint-disable camelcase */
 import React, { useRef, useState } from 'react';
+import { type MRT_TableInstance } from 'material-react-table';
 import {
   Row, Column, Button, Modal
 } from '@carbon/react';
@@ -8,6 +10,7 @@ import GenericTable from '../../../../components/GenericTable';
 import ShowHideColumnControl from './ToolbarControls/ShowHideColumnControl';
 import TestHistory from './ToolbarControls/TestHistory';
 import { getTestingActivityListColumns, columnVisibilityLocalStorageKey } from './constants';
+
 import type {
   TestingSearchResponseType,
   PaginationInfoType
@@ -29,10 +32,8 @@ const TestListTable = ({
   onExportData
 }: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
-  const tableRef = useRef<any>(null);
+  const tableRef = useRef<MRT_TableInstance<TestingSearchResponseType> | null>(null);
   const [showTestHistory, setShowTestHistory] = useState(false);
-  const selectedRows = tableRef.current?.getSelectedRowModel?.().rows ?? [];
-  const selectedSeedlot = selectedRows[0]?.original?.seedlotDisplay;
 
   const actions = [
     {
@@ -75,6 +76,10 @@ const TestListTable = ({
       action: () => {}
     }
   ];
+
+  const selectedSeedlot = (
+    tableRef.current?.getSelectedRowModel?.().rows?.[0]?.original?.seedlotDisplay
+  );
 
   return (
     <div className="concep-test-search-table-container">
@@ -131,7 +136,7 @@ const TestListTable = ({
             <div className="concep-test-search-table-title">{`Total search result: ${paginationInfo.totalElements}`}</div>
           )}
           renderToolbarInternalActions={({ table }) => {
-            tableRef.current = table;
+            tableRef.current = table as MRT_TableInstance<TestingSearchResponseType>;
             return (
               <Column>
                 {actions.map(({
@@ -150,7 +155,7 @@ const TestListTable = ({
                   </Button>
                 ))}
                 <ShowHideColumnControl
-                  table={table}
+                  table={table as MRT_TableInstance<TestingSearchResponseType>}
                   columnVisibilityLocalStorageKey={columnVisibilityLocalStorageKey}
                 />
               </Column>

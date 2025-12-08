@@ -135,7 +135,7 @@
       th[data-index='2'],
       td[data-index='2'] {
         position: sticky;
-        left: 3.034rem + 7.5rem; // width of the selection column + the first lot # column
+        left: calc(3.034rem + 7.5rem); // width of the selection column + the first lot # column
       }
     }
 

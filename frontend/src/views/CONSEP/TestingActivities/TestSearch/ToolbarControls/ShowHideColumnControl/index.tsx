@@ -4,13 +4,14 @@ import { Button, Checkbox } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 import { type MRT_TableInstance } from 'material-react-table';
 import { Menu, MenuItem } from '@mui/material';
+import type { TestingSearchResponseType } from '../../../../../../types/consep/TestingSearchType';
 import './styles.scss';
 
 const ShowHideColumnControl = ({
   table,
   columnVisibilityLocalStorageKey = 'table-columns-visibility'
 }: {
-  table: MRT_TableInstance<any>;
+  table: MRT_TableInstance<TestingSearchResponseType>;
   columnVisibilityLocalStorageKey?: string;
 }) => {
   // The button element that the menu is attached to
