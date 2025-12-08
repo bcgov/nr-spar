@@ -47,7 +47,6 @@ public class ConsepOracleQueryConstants {
         AND (:completeStatus IS NULL OR a.testCompleteInd = :completeStatus)
         AND (:acceptanceStatus IS NULL OR a.acceptResultInd = :acceptanceStatus)
         AND (:geneticClassCode IS NULL OR a.geneticClassCode = :geneticClassCode)
-      ORDER BY a.seedlotSample, a.actualBeginDtTm
       """;
 
   public static final Set<String> ALLOWED_SORT_FIELDS = Set.of(

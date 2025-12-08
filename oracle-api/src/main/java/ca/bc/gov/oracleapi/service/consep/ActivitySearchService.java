@@ -41,15 +41,17 @@ public class ActivitySearchService {
       String sortBy,
       String sortDirection) {
 
+
+    Sort sort = Sort.by("seedlotSample").ascending()
+      .and(Sort.by("actualBeginDtTm").ascending());
+
     if (sortBy != null && !sortBy.isBlank()) {
-      Sort sort = Sort.by(
-          "desc".equalsIgnoreCase(sortDirection)
-              ? Sort.Direction.DESC
-              : Sort.Direction.ASC,
-          sortBy);
-      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+      sort =
+          Sort.by("desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC,
+              sortBy);
     }
-  
+    pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
     LocalDateTime seedWithdrawalStartDate =
         toStartOfDay(activitySearchRequestDto.seedWithdrawalStartDate());
     LocalDateTime seedWithdrawalEndDate =

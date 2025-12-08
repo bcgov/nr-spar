@@ -210,8 +210,15 @@ const TestSearch = () => {
   }, [testTypeQuery.error]);
 
   const handlePageChange = (pageIndex: number, pageSize: number) => {
+    const sort = sorting[0];
     searchMutation.mutate(
-      { filter: searchParams, page: pageIndex, size: pageSize },
+      {
+        filter: searchParams,
+        page: pageIndex,
+        size: pageSize,
+        sortBy: sort?.id,
+        sortDirection: sort?.desc ? 'desc' : 'asc'
+      },
       {
         onSuccess: (data) => {
           setSearchResults(data.content);
