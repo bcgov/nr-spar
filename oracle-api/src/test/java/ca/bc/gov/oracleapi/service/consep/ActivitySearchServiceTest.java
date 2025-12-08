@@ -1,6 +1,8 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
@@ -54,6 +56,7 @@ class ActivitySearchServiceTest {
       revisedStartDateTo, revisedEndDateFrom, revisedEndDateTo;
   private LocalDateTime actualBeginDtTm, actualEndDtTm, seedWithdrawalDate, revisedEndDt;
   private Boolean includeHistoricalTests, germTestsOnly;
+  private Sort defaultSort;
 
   @BeforeEach
   void setUp() {
@@ -130,6 +133,8 @@ class ActivitySearchServiceTest {
     activitySearchResultEntityTwo.setSeedlotDisplay(seedlotDisplayFamilylot);
     populateCommonFields(activitySearchResultEntityTwo);
     activitySearchResults.add(activitySearchResultEntityTwo);
+    defaultSort = Sort.by("seedlotSample").ascending()
+      .and(Sort.by("actualBeginDtTm").ascending()); 
   }
 
   private void populateCommonFields(ActivitySearchResultEntity entity) {
@@ -162,7 +167,7 @@ class ActivitySearchServiceTest {
 
   @Test
   void shouldReturnMappedResults() {
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
     Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(
         List.of(activitySearchResultEntityOne),
         pageable,
@@ -253,7 +258,7 @@ class ActivitySearchServiceTest {
         null, null, null
     );
 
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
     Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(
         activitySearchResults,
         pageable,
@@ -294,7 +299,7 @@ class ActivitySearchServiceTest {
         null, null, null
     );
 
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
 
     // mock empty page
     Page<ActivitySearchResultEntity> emptyPage = new PageImpl<>(
@@ -369,7 +374,7 @@ class ActivitySearchServiceTest {
 
   @Test
   void shouldUseDefaultPageableWhenSortByNull() {
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
 
     Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(activitySearchResults, pageable, 2);
 
@@ -386,7 +391,7 @@ class ActivitySearchServiceTest {
 
   @Test
   void shouldUseDefaultPageableWhenSortByBlank() {
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
 
     Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(activitySearchResults, pageable, 2);
 

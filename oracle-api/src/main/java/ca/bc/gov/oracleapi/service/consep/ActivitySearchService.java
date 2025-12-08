@@ -41,7 +41,6 @@ public class ActivitySearchService {
       String sortBy,
       String sortDirection) {
 
-
     Sort sort = Sort.by("seedlotSample").ascending()
       .and(Sort.by("actualBeginDtTm").ascending());
 
