@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, {
+  useState, useRef, useEffect, useMemo
+} from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { type MRT_TableInstance } from 'material-react-table';
 import { InlineNotification } from '@carbon/react';
@@ -28,7 +30,7 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponse
   const columns = useMemo(() => getTestHistoryTableColumns(), []);
 
   const searchMutation = useMutation({
-    mutationFn: ({ page = 0, size = 20 }: { page?: number; size?: number }) => {
+    mutationFn: ({ page = 0, size = 10 }: { page?: number; size?: number }) => {
       const selectedRows = table.getSelectedRowModel()?.rows ?? [];
       const selectedSeedlots = selectedRows.map((row) => row.original.seedlotDisplay);
       if (selectedSeedlots.length > 0) {
