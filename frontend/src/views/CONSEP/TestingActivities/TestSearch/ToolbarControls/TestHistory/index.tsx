@@ -39,7 +39,7 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponse
       if (selectedSeedlots.length === 1) {
         return searchTestingActivities({ lotNumbers: selectedSeedlots }, page, size);
       }
-      return Promise.reject(new Warning('No seedlot selected'));
+      return Promise.reject(new Error('No seedlot selected'));
     },
     onMutate: () => {
       setAlert(null);
