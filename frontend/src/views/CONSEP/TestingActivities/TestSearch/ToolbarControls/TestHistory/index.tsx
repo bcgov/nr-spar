@@ -33,10 +33,13 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponse
     mutationFn: ({ page = 0, size = 10 }: { page?: number; size?: number }) => {
       const selectedRows = table.getSelectedRowModel()?.rows ?? [];
       const selectedSeedlots = selectedRows.map((row) => row.original.seedlotDisplay);
-      if (selectedSeedlots.length > 0) {
+      if (selectedSeedlots.length > 1) {
+        return Promise.reject(new Error('Please select only one seedlot to view test history.'));
+      }
+      if (selectedSeedlots.length === 1) {
         return searchTestingActivities({ lotNumbers: selectedSeedlots }, page, size);
       }
-      return Promise.reject(new Error('No seedlot selected'));
+      return Promise.reject(new Warning('No seedlot selected'));
     },
     onMutate: () => {
       setAlert(null);

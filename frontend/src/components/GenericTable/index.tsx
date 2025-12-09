@@ -23,7 +23,6 @@ type Props<T extends Record<string, any>> = {
   enableFilters?: boolean;
   enableHiding?: boolean;
   enableRowSelection?: boolean;
-  enableMultiRowSelection?: boolean;
   enableRowActions?: boolean;
   enableColumnFilters?: boolean;
   enableGlobalFilter?: boolean;
@@ -75,7 +74,6 @@ const GenericTable = <T extends Record<string, any>>({
   enableSorting = false,
   enableFilters = false,
   enableRowSelection = false,
-  enableMultiRowSelection = true,
   enableRowActions = false,
   enableColumnFilters = false,
   enableGlobalFilter = false,
@@ -191,7 +189,6 @@ const GenericTable = <T extends Record<string, any>>({
     enableHiding,
     enableColumnFilters,
     enableRowSelection,
-    enableMultiRowSelection,
     enableRowActions,
     enableGlobalFilter,
     enableDensityToggle,

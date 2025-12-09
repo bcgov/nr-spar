@@ -77,9 +77,9 @@ const TestListTable = ({
     }
   ];
 
-  const selectedSeedlot = (
-    tableRef.current?.getSelectedRowModel?.().rows?.[0]?.original?.seedlotDisplay
-  );
+  const selectedRows = tableRef.current?.getSelectedRowModel?.().rows ?? [];
+  const selectedSeedlot = selectedRows.length === 1
+    ? selectedRows[0]?.original?.seedlotDisplay : null;
 
   return (
     <div className="concep-test-search-table-container">
@@ -118,7 +118,6 @@ const TestListTable = ({
           rowCount={paginationInfo.totalElements}
           onPaginationChange={onPageChange}
           enableRowSelection
-          enableMultiRowSelection={false}
           enableColumnPinning
           isLoading={isLoading}
           tableBodyRef={tableBodyRef}
