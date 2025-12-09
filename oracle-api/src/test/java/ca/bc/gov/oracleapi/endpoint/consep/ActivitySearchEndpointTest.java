@@ -1,8 +1,8 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(ActivitySearchEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
@@ -94,14 +96,20 @@ class ActivitySearchEndpointTest {
 
   @Test
   @DisplayName("POST /search - Should throw Exception when sortBy field is not allowed")
-  void searchTestingActivityData_invalidSortField_shouldFail() {
+  void searchTestingActivityData_invalidSortField_shouldFail() throws Exception {
     ActivitySearchRequestDto requestDto = createDummyRequestDto();
 
-    assertThatThrownBy(() -> mockMvc.perform(
-        post("/api/testing-activities/search").param("sortBy", "INVALID_FIELD_SQL_INJECTION")
-            .with(csrf()).contentType(APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(requestDto)))).hasCauseInstanceOf(
-        IllegalArgumentException.class).hasMessageContaining("Invalid sort field");
+    mockMvc.perform(post("/api/testing-activities/search")
+        .param("sortBy", "INVALID_FIELD_SQL_INJECTION")
+        .with(csrf())
+        .contentType(APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(requestDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(result -> assertTrue(
+            result.getResolvedException() instanceof ResponseStatusException))
+        .andExpect(result -> assertTrue(
+            Objects.requireNonNull(result.getResolvedException())
+                .getMessage().contains("Invalid sort field")));
   }
 
   @Test

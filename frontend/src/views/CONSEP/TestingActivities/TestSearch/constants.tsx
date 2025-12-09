@@ -168,25 +168,25 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'species',
     header: 'Sp',
     enableEditing: false,
-    ...tableCellProps(50, 'left')
+    ...tableCellProps(80, 'left')
   },
   {
     accessorKey: 'testRank',
     header: 'Rank',
     enableEditing: false,
-    ...tableCellProps(60, 'left')
+    ...tableCellProps(90, 'left')
   },
   {
     accessorKey: 'testCategoryCd',
     header: 'Category',
     enableEditing: false,
-    ...tableCellProps(90, 'left')
+    ...tableCellProps(120, 'left')
   },
   {
     accessorKey: 'activityId',
     header: 'Activity',
     enableEditing: false,
-    ...tableCellProps(80, 'left')
+    ...tableCellProps(110, 'left')
   },
   {
     header: 'Result',
@@ -205,7 +205,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
       }
     },
     enableEditing: false,
-    ...tableCellProps(70),
+    ...tableCellProps(100),
     Cell: ({ cell }) => {
       const value = cell.getValue<number | null>();
       return value != null ? `${value}%` : '';
@@ -215,13 +215,13 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'pv',
     header: 'PV',
     enableEditing: false,
-    ...tableCellProps(90)
+    ...tableCellProps(120)
   },
   {
     accessorKey: 'currentTestInd',
     header: 'Curr',
     enableEditing: false,
-    ...tableCellProps(80, 'left'),
+    ...tableCellProps(110, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -235,7 +235,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'testCompleteInd',
     header: 'Com',
     enableEditing: false,
-    ...tableCellProps(80, 'left'),
+    ...tableCellProps(110, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -249,7 +249,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'acceptResultInd',
     header: 'Act',
     enableEditing: false,
-    ...tableCellProps(80, 'left'),
+    ...tableCellProps(110, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -263,7 +263,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'significntStsInd',
     header: 'Sig',
     enableEditing: false,
-    ...tableCellProps(80, 'left'),
+    ...tableCellProps(110, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -277,28 +277,28 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'seedWithdrawalDate',
     header: 'Wdrwl Date',
     enableEditing: false,
-    ...tableCellProps(120, 'left'),
+    ...tableCellProps(150, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'revisedEndDt',
     header: 'Sch End Date',
     enableEditing: false,
-    ...tableCellProps(120, 'left'),
+    ...tableCellProps(150, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualBeginDtTm',
     header: 'Start Date',
     enableEditing: false,
-    ...tableCellProps(120, 'left'),
+    ...tableCellProps(150, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualEndDtTm',
     header: 'End Date',
     enableEditing: false,
-    ...tableCellProps(120, 'left'),
+    ...tableCellProps(150, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
 

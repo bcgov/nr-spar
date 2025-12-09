@@ -134,7 +134,7 @@ class ActivitySearchServiceTest {
     populateCommonFields(activitySearchResultEntityTwo);
     activitySearchResults.add(activitySearchResultEntityTwo);
     defaultSort = Sort.by("seedlotSample").ascending()
-      .and(Sort.by("actualBeginDtTm").ascending()); 
+      .and(Sort.by("actualBeginDtTm").ascending());
   }
 
   private void populateCommonFields(ActivitySearchResultEntity entity) {
@@ -407,7 +407,7 @@ class ActivitySearchServiceTest {
   }
 
   @Test
-  void shouldIgnoreInvalidSortField() {
+  void shouldPassThroughInvalidSortField() {
     Pageable defaultPageable = PageRequest.of(0, 10);
     String sortBy = "nonExistentField";
 
@@ -433,10 +433,7 @@ class ActivitySearchServiceTest {
     assertThat(actualPageable.getSort().isUnsorted()).isFalse();
     assertThat(actualPageable.getSort().getOrderFor(sortBy)).isNotNull();
 
-
     assertThat(actualPageable.getPageNumber()).isEqualTo(0);
     assertThat(actualPageable.getPageSize()).isEqualTo(10);
   }
-
-
 }
