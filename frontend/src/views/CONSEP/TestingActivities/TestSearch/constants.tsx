@@ -154,13 +154,13 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'seedlotDisplay',
     header: 'Lot #',
     enableEditing: false,
-    ...tableCellProps(120)
+    size: 128
   },
   {
     accessorKey: 'requestItem',
     header: 'Request ID',
     enableEditing: false,
-    ...tableCellProps(130, 'left')
+    size: 130
   },
   {
     accessorKey: 'species',
@@ -189,7 +189,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     header: 'Result',
     accessorFn: (row) => {
-      switch (row.testCategoryCd) {
+      switch (row.activityId) {
         case 'Germ':
           return row.germinationPct;
         case 'MC':
