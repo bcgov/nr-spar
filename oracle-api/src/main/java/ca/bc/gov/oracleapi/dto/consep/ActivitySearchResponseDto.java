@@ -35,8 +35,7 @@ public record ActivitySearchResponseDto(
     String itemId,
     String seedlotSample,
     Integer riaSkey,
-    String activityTypeCd,
-    String geneticClassCode
+    String activityTypeCd
 ) {
 }
 

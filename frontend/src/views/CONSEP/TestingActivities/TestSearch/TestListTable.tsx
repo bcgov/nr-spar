@@ -19,9 +19,11 @@ import type {
 type TestListTableProp = {
   data: TestingSearchResponseType[];
   paginationInfo: PaginationInfoType;
+  sorting?: { id: string; desc: boolean }[];
   onExportData: () => void;
   isLoading?: boolean;
   onPageChange?: (pageIndex: number, pageSize: number) => void;
+  onSortingChange?: (sorting: { id: string; desc: boolean }[]) => void;
 };
 
 const TestListTable = ({
@@ -29,7 +31,9 @@ const TestListTable = ({
   isLoading = false,
   paginationInfo,
   onPageChange,
-  onExportData
+  onExportData,
+  onSortingChange,
+  sorting
 }: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const tableRef = useRef<MRT_TableInstance<TestingSearchResponseType> | null>(null);
@@ -113,6 +117,10 @@ const TestListTable = ({
           onPaginationChange={onPageChange}
           enableRowSelection
           enableColumnPinning
+          enableSorting
+          manualSorting
+          sorting={sorting}
+          onSortingChange={onSortingChange}
           isLoading={isLoading}
           tableBodyRef={tableBodyRef}
           hideToolbar={false}
