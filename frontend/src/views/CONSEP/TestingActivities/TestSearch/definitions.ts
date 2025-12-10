@@ -40,3 +40,8 @@ export type ActivitySearchValidation = {
   requestYear: ValidationErrorType;
   orchardId: ValidationErrorType;
 };
+
+export type Sorting = {
+  id: string;
+  desc: boolean;
+};
