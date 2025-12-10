@@ -1,7 +1,9 @@
 /* eslint-disable camelcase */
 import React, { useRef, useState } from 'react';
 import { type MRT_TableInstance } from 'material-react-table';
-import { Row, Column, Button, Modal, Tooltip } from '@carbon/react';
+import {
+  Row, Column, Button, Modal, Tooltip
+} from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
 import GenericTable from '../../../../components/GenericTable';
@@ -85,8 +87,8 @@ const TestListTable = ({
         modalHeading={
           tableRef.current?.getSelectedRowModel().rows?.length === 1
             ? `Seedlot ${
-                tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay
-              }: Test history`
+              tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay
+            }: Test history`
             : 'Seedlot: Test history'
         }
         onRequestClose={() => setShowTestHistory(false)}
@@ -130,14 +132,15 @@ const TestListTable = ({
             tableRef.current = table as MRT_TableInstance<TestingSearchResponseType>;
             const selectedRows = table.getSelectedRowModel().rows;
             const isTestHistoryEnabled = selectedRows.length === 1;
-            const testHistoryDisabledReason =
-              selectedRows.length === 0
-                ? 'Select one seedlot to view its test history.'
-                : 'You can only view test history for one seedlot at a time.';
+            const testHistoryDisabledReason = selectedRows.length === 0
+              ? 'Select one seedlot to view its test history.'
+              : 'You can only view test history for one seedlot at a time.';
 
             return (
               <Column>
-                {actions.map(({ label, icon, action, type }) => {
+                {actions.map(({
+                  label, icon, action, type
+                }) => {
                   const button = (
                     <Button
                       key={label}

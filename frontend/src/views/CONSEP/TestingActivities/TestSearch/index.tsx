@@ -227,22 +227,24 @@ const TestSearch = () => {
     if (lots.length > 5) {
       return {
         error: true,
-        errorMessage: errorMessages.lotMax
+        errorMessage: errorMessages.lotMax,
       };
     }
 
-    for (const lot of lots) {
+    const invalidLot = lots.find((lot) => {
       const isFamily = lot.toUpperCase().startsWith('F');
       const lengthLimit = isFamily ? 13 : 5;
+      return lot.length > lengthLimit;
+    });
 
-      if (lot.length > lengthLimit) {
-        return {
-          error: true,
-          errorMessage: isFamily
-            ? errorMessages.familyLotMaxChar
-            : errorMessages.lotMaxChar
-        };
-      }
+    if (invalidLot) {
+      const isFamily = invalidLot.toUpperCase().startsWith('F');
+      return {
+        error: true,
+        errorMessage: isFamily
+          ? errorMessages.familyLotMaxChar
+          : errorMessages.lotMaxChar,
+      };
     }
 
     return { error: false, errorMessage: '' };
