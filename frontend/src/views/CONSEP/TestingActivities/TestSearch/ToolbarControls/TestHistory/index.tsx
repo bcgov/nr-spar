@@ -33,7 +33,14 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponse
     mutationFn: ({ page = 0, size = 10 }: { page?: number; size?: number }) => {
       const selectedRows = table.getSelectedRowModel()?.rows ?? [];
       const selectedSeedlots = selectedRows.map((row) => row.original.seedlotDisplay);
-      return searchTestingActivities({ lotNumbers: selectedSeedlots }, page, size);
+      return searchTestingActivities(
+        { lotNumbers: selectedSeedlots },
+        undefined,
+        'asc',
+        false,
+        size,
+        page
+      );
     },
     onMutate: () => {
       setAlert(null);
