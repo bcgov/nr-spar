@@ -223,6 +223,31 @@ const TestSearch = () => {
     return updated;
   };
 
+  const validateLotNumbers = (lots: string[]) => {
+    if (lots.length > 5) {
+      return {
+        error: true,
+        errorMessage: errorMessages.lotMax
+      };
+    }
+
+    for (const lot of lots) {
+      const isFamily = lot.toUpperCase().startsWith('F');
+      const lengthLimit = isFamily ? 13 : 5;
+
+      if (lot.length > lengthLimit) {
+        return {
+          error: true,
+          errorMessage: isFamily
+            ? errorMessages.familyLotMaxChar
+            : errorMessages.lotMaxChar
+        };
+      }
+    }
+
+    return { error: false, errorMessage: '' };
+  };
+
   const handleLotInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setRawLotInput(value);
@@ -232,37 +257,10 @@ const TestSearch = () => {
       .map((val) => val.trim())
       .filter((val) => val.length > 0);
 
-    let error = false;
-    let errorMessage = '';
-
-    if (lots.length > 5) {
-      error = true;
-      errorMessage = errorMessages.lotMax;
-    } else {
-      const invalidLot = lots.find((lot) => {
-        if (lot.startsWith('F') || lot.startsWith('f')) {
-          return lot.length > 13;
-        }
-        return lot.length > 5;
-      });
-
-      if (invalidLot) {
-        if (invalidLot.startsWith('F') || invalidLot.startsWith('f')) {
-          errorMessage = errorMessages.familyLotMaxChar;
-        } else {
-          errorMessage = errorMessages.lotMaxChar;
-        }
-        error = true;
-      }
-    }
-
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
     setValidateSearch((prev) => ({
       ...prev,
-      lotNumbers: {
-        error,
-        errorMessage
-      }
+      lotNumbers: validateLotNumbers(lots)
     }));
     resetAlert();
   };
