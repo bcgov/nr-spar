@@ -227,7 +227,7 @@ const TestSearch = () => {
     if (lots.length > 5) {
       return {
         error: true,
-        errorMessage: errorMessages.lotMax,
+        errorMessage: errorMessages.lotMax
       };
     }
 
@@ -243,7 +243,7 @@ const TestSearch = () => {
         error: true,
         errorMessage: isFamily
           ? errorMessages.familyLotMaxChar
-          : errorMessages.lotMaxChar,
+          : errorMessages.lotMaxChar
       };
     }
 
