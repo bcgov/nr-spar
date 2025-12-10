@@ -45,6 +45,7 @@ public class ConsepOracleQueryConstants {
         AND (:completeStatus IS NULL OR a.testCompleteInd = :completeStatus)
         AND (:acceptanceStatus IS NULL OR a.acceptResultInd = :acceptanceStatus)
         AND (:geneticClassCode IS NULL OR a.geneticClassCode = :geneticClassCode)
+        AND (:familyLotsOnly IS NULL OR :familyLotsOnly = false OR LOWER(a.seedlotDisplay) LIKE 'f%')
       ORDER BY a.seedlotSample, a.actualBeginDtTm
       """;
 }

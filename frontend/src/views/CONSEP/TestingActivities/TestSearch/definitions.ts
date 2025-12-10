@@ -26,6 +26,7 @@ export type ActivitySearchRequest = {
   completeStatus?: number;
   acceptanceStatus?: number;
   seedlotClass?: 'A' | 'B';
+  familyLotsOnly?: boolean;
 };
 
 export type ValidationErrorType = {

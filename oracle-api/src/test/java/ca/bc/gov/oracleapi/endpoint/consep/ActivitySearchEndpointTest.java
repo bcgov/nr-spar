@@ -104,6 +104,7 @@ class ActivitySearchEndpointTest {
     Integer germTrayAssignment = -1;
     Integer completeStatus = -1;
     String geneticClassCode = "A";
+    Boolean familyLotsOnly = false;
 
     ActivitySearchRequestDto activitySearchRequestDto = new ActivitySearchRequestDto(
         lotNumbers, testType, activityId, germinatorTrayId,
@@ -114,7 +115,7 @@ class ActivitySearchEndpointTest {
         actualEndDateFrom, actualEndDateTo,
         revisedStartDateFrom, revisedStartDateTo,
         revisedEndDateFrom, revisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly
     );
 
     // Mock paginated response

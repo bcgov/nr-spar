@@ -51,7 +51,7 @@ class ActivitySearchServiceTest {
       actualBeginDateTo, actualEndDateFrom, actualEndDateTo, revisedStartDateFrom,
       revisedStartDateTo, revisedEndDateFrom, revisedEndDateTo;
   private LocalDateTime actualBeginDtTm, actualEndDtTm, seedWithdrawalDate, revisedEndDt;
-  private Boolean includeHistoricalTests, germTestsOnly;
+  private Boolean includeHistoricalTests, germTestsOnly, familyLotsOnly;
 
   @BeforeEach
   void setUp() {
@@ -85,6 +85,7 @@ class ActivitySearchServiceTest {
     completeStatus = -1; // testCompleteInd
     acceptanceStatus = -1; // acceptResultInd
     geneticClassCode = "A";
+    familyLotsOnly = false;
 
     activitySearchRequestDto = new ActivitySearchRequestDto(
         lotNumbers, testType, activityId, germinatorTrayId,
@@ -95,7 +96,7 @@ class ActivitySearchServiceTest {
         actualEndDateFrom, actualEndDateTo,
         revisedStartDateFrom, revisedStartDateTo,
         revisedEndDateFrom, revisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly
     );
 
     // Search return result
@@ -187,7 +188,8 @@ class ActivitySearchServiceTest {
         expectedActualEndFrom, expectedActualEndTo,
         expectedRevisedStartDateFrom, expectedRevisedStartDateTo,
         expectedRevisedEndDateFrom, expectedRevisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly,
+        pageable
     )).thenReturn(mockPage);
 
     ActivitySearchPageResponseDto pageResponse = activitySearchService.searchTestingActivities(
@@ -237,7 +239,8 @@ class ActivitySearchServiceTest {
         expectedActualEndFrom, expectedActualEndTo,
         expectedRevisedStartDateFrom, expectedRevisedStartDateTo,
         expectedRevisedEndDateFrom, expectedRevisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly,
+        pageable
     );
   }
 
@@ -248,7 +251,7 @@ class ActivitySearchServiceTest {
         null, null, null, null, null, null,
         null, null, null, null, null, null,
         null, null, null, null, null, null,
-        null, null, null
+        null, null, null, null
     );
 
     Pageable pageable = PageRequest.of(0, 10);
@@ -264,7 +267,7 @@ class ActivitySearchServiceTest {
         null, null, null, null, null, null,
         null, null, null, null, null, null,
         null, null, null, null, null, null,
-        null, null, null, pageable
+        null, null, null, null, pageable
     )).thenReturn(mockPage);
 
     List<ActivitySearchResponseDto> result = activitySearchService
@@ -289,7 +292,7 @@ class ActivitySearchServiceTest {
         null, null, null, null, 2025, null,
         null, null, null, null, null, null,
         null, null, null, null, null, null,
-        null, null, null
+        null, null, null, null
     );
 
     Pageable pageable = PageRequest.of(0, 10);
@@ -306,7 +309,7 @@ class ActivitySearchServiceTest {
         null, null, null, null, 2025, null,
         null, null, null, null, null, null,
         null, null, null, null, null, null,
-        null, null, null, pageable
+        null, null, null, null, pageable
     )).thenReturn(emptyPage);
 
     List<ActivitySearchResponseDto> result = activitySearchService
