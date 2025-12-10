@@ -72,12 +72,10 @@ public class ActivitySearchEndpoint {
       String sortDirection,
       @ParameterObject @PageableDefault(size = 20) Pageable paginationParameters
   ) {
-    if (sortBy != null && !sortBy.isBlank()) {
-      if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
-        throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST,
-          "Invalid sort field: " + sortBy);
-      }
+    if (sortBy != null && !sortBy.isBlank() && !ALLOWED_SORT_FIELDS.contains(sortBy)) {
+      throw new ResponseStatusException(
+        HttpStatus.BAD_REQUEST,
+        "Invalid sort field: " + sortBy);
     }
     if (unpaged) {
       paginationParameters = Pageable.unpaged();

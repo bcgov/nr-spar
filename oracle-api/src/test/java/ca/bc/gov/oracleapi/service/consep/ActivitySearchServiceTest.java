@@ -433,7 +433,7 @@ class ActivitySearchServiceTest {
     assertThat(actualPageable.getSort().isUnsorted()).isFalse();
     assertThat(actualPageable.getSort().getOrderFor(sortBy)).isNotNull();
 
-    assertThat(actualPageable.getPageNumber()).isEqualTo(0);
+    assertThat(actualPageable.getPageNumber()).isZero();
     assertThat(actualPageable.getPageSize()).isEqualTo(10);
   }
 }

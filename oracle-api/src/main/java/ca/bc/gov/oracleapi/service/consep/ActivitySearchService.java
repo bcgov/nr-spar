@@ -45,11 +45,14 @@ public class ActivitySearchService {
       .and(Sort.by("actualBeginDtTm").ascending());
 
     if (sortBy != null && !sortBy.isBlank()) {
-      sort =
-          Sort.by("desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC,
-              sortBy);
+      sort = Sort.by("desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC,
+          sortBy);
     }
-    pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    if (pageable.isPaged()) {
+      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    } else {
+      pageable = Pageable.unpaged(sort);
+    }
 
     LocalDateTime seedWithdrawalStartDate =
         toStartOfDay(activitySearchRequestDto.seedWithdrawalStartDate());
