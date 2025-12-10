@@ -16,7 +16,7 @@ export const getTestHistoryTableColumns = (): MRT_ColumnDef<TestingSearchRespons
     accessorKey: 'testCategoryCd',
     header: 'Category',
     enableEditing: false,
-    size: 50
+    size: 40
   },
   {
     accessorKey: 'actualEndDtTm',
@@ -30,12 +30,6 @@ export const getTestHistoryTableColumns = (): MRT_ColumnDef<TestingSearchRespons
     header: 'Request ID',
     enableEditing: false,
     size: 110
-  },
-  {
-    accessorKey: 'geneticClassCode',
-    header: 'Class',
-    enableEditing: false,
-    size: 50
   },
   {
     accessorKey: 'currentTestInd',
@@ -52,14 +46,14 @@ export const getTestHistoryTableColumns = (): MRT_ColumnDef<TestingSearchRespons
     size: 80
   },
   {
-    accessorKey: 'activityId',
-    header: 'Activity',
+    accessorKey: 'germinationPct',
+    header: 'Germ',
     enableEditing: false,
     size: 50
   },
   {
-    accessorKey: 'germinationPct',
-    header: 'Germ',
+    accessorKey: 'testRank',
+    header: 'Rnk',
     enableEditing: false,
     size: 50
   },
@@ -84,6 +78,12 @@ export const getTestHistoryTableColumns = (): MRT_ColumnDef<TestingSearchRespons
   {
     accessorKey: 'seedsPerGram',
     header: 'SPG',
+    enableEditing: false,
+    size: 50
+  },
+  {
+    accessorKey: 'otherTestResult',
+    header: 'Oth',
     enableEditing: false,
     size: 50
   },

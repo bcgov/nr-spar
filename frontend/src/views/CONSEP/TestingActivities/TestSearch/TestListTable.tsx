@@ -1,9 +1,7 @@
 /* eslint-disable camelcase */
 import React, { useRef, useState } from 'react';
 import { type MRT_TableInstance } from 'material-react-table';
-import {
-  Row, Column, Button, Modal
-} from '@carbon/react';
+import { Row, Column, Button, Modal, Tooltip } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
 import GenericTable from '../../../../components/GenericTable';
@@ -77,10 +75,6 @@ const TestListTable = ({
     }
   ];
 
-  const selectedRows = tableRef.current?.getSelectedRowModel?.().rows ?? [];
-  const selectedSeedlot = selectedRows.length === 1
-    ? selectedRows[0]?.original?.seedlotDisplay : null;
-
   return (
     <div className="concep-test-search-table-container">
       <Modal
@@ -89,8 +83,10 @@ const TestListTable = ({
         passiveModal
         size="lg"
         modalHeading={
-          selectedSeedlot
-            ? `Seedlot ${selectedSeedlot}: Test history`
+          tableRef.current?.getSelectedRowModel().rows?.length === 1
+            ? `Seedlot ${
+                tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay
+              }: Test history`
             : 'Seedlot: Test history'
         }
         onRequestClose={() => setShowTestHistory(false)}
@@ -101,11 +97,7 @@ const TestListTable = ({
           '.MuiPaper-root'
         ]}
       >
-        {showTestHistory && tableRef.current && (
-          <TestHistory
-            table={tableRef.current}
-          />
-        )}
+        {showTestHistory && tableRef.current && <TestHistory table={tableRef.current} />}
       </Modal>
       <Row className="concep-test-search-table">
         <GenericTable
@@ -136,23 +128,39 @@ const TestListTable = ({
           )}
           renderToolbarInternalActions={({ table }) => {
             tableRef.current = table as MRT_TableInstance<TestingSearchResponseType>;
+            const selectedRows = table.getSelectedRowModel().rows;
+            const isTestHistoryEnabled = selectedRows.length === 1;
+            const testHistoryDisabledReason =
+              selectedRows.length === 0
+                ? 'Select one seedlot to view its test history.'
+                : 'You can only view test history for one seedlot at a time.';
+
             return (
               <Column>
-                {actions.map(({
-                  label, icon, action, type
-                }) => (
-                  <Button
-                    key={label}
-                    onClick={action}
-                    kind={type}
-                    aria-label={label}
-                    size="md"
-                    className="concep-test-search-table-toolbar-button"
-                  >
-                    {label}
-                    {icon}
-                  </Button>
-                ))}
+                {actions.map(({ label, icon, action, type }) => {
+                  const button = (
+                    <Button
+                      key={label}
+                      onClick={action}
+                      kind={type}
+                      aria-label={label}
+                      size="md"
+                      className="concep-test-search-table-toolbar-button"
+                      disabled={label === 'Test history' && !isTestHistoryEnabled}
+                    >
+                      {label}
+                      {icon}
+                    </Button>
+                  );
+
+                  return label === 'Test history' && !isTestHistoryEnabled ? (
+                    <Tooltip label={testHistoryDisabledReason} align="right">
+                      <span>{button}</span>
+                    </Tooltip>
+                  ) : (
+                    button
+                  );
+                })}
                 <ShowHideColumnControl
                   table={table as MRT_TableInstance<TestingSearchResponseType>}
                   columnVisibilityLocalStorageKey={columnVisibilityLocalStorageKey}
