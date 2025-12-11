@@ -69,7 +69,7 @@ const TestSearch = () => {
     pageSize: 100
   });
   const [alert, setAlert] = useState<{
-    status: string;
+    status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
   const [modalAnchor, setModalAnchor] = useState<{
@@ -249,6 +249,33 @@ const TestSearch = () => {
     return updated;
   };
 
+  const validateLotNumbers = (lots: string[]) => {
+    if (lots.length > 5) {
+      return {
+        error: true,
+        errorMessage: errorMessages.lotMax
+      };
+    }
+
+    const invalidLot = lots.find((lot) => {
+      const isFamily = lot.toUpperCase().startsWith('F');
+      const lengthLimit = isFamily ? 13 : 5;
+      return lot.length > lengthLimit;
+    });
+
+    if (invalidLot) {
+      const isFamily = invalidLot.toUpperCase().startsWith('F');
+      return {
+        error: true,
+        errorMessage: isFamily
+          ? errorMessages.familyLotMaxChar
+          : errorMessages.lotMaxChar
+      };
+    }
+
+    return { error: false, errorMessage: '' };
+  };
+
   const handleLotInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setRawLotInput(value);
@@ -258,27 +285,10 @@ const TestSearch = () => {
       .map((val) => val.trim())
       .filter((val) => val.length > 0);
 
-    let error = false;
-    let errorMessage = '';
-
-    if (lots.length > 5) {
-      error = true;
-      errorMessage = errorMessages.lotMax;
-    } else if (lots.some((lot) => (lot.startsWith('F') || lot.startsWith('f')) && lot.length > 13)) {
-      error = true;
-      errorMessage = errorMessages.familyLotMaxChar;
-    } else if (lots.some((lot) => lot.length > 5)) {
-      error = true;
-      errorMessage = errorMessages.lotMaxChar;
-    }
-
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
     setValidateSearch((prev) => ({
       ...prev,
-      lotNumbers: {
-        error,
-        errorMessage
-      }
+      lotNumbers: validateLotNumbers(lots)
     }));
     resetAlert();
   };

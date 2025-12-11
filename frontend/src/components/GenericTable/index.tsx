@@ -76,7 +76,7 @@ const GenericTable = <T extends Record<string, any>>({
   enableHiding = false,
   enableSorting = false,
   manualSorting = false,
-  sorting,
+  sorting = [],
   onSortingChange,
   enableFilters = false,
   enableRowSelection = false,

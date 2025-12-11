@@ -147,7 +147,8 @@ public class ActivitySearchService {
         activitySearchResultEntity.getReqId(),
         activitySearchResultEntity.getItemId(),
         activitySearchResultEntity.getSeedlotSample(),
-        activitySearchResultEntity.getRiaSkey()
+        activitySearchResultEntity.getRiaSkey(),
+        activitySearchResultEntity.getActivityTypeCd()
     );
   }
 

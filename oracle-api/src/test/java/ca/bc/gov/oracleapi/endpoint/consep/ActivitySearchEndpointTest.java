@@ -144,6 +144,6 @@ class ActivitySearchEndpointTest {
         "77//9", 0, 0, 0, 0, -1, -1, -1, LocalDate.of(1997, 10, 7).atTime(LocalTime.MAX),
         LocalDate.of(1997, 10, 10).atTime(LocalTime.MAX), LocalDate.of(1998, 10, 8).atStartOfDay(),
         LocalDate.of(1998, 11, 6).atTime(LocalTime.MAX), "Comment", 44115, "RTS19981299", "A",
-        "00098", 448383);
+        "00098", 448383, "D1");
   }
 }
