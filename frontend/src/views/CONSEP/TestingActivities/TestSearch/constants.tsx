@@ -154,7 +154,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'seedlotDisplay',
     header: 'Lot #',
     enableEditing: false,
-    size: 128
+    size: 118,
+    ...tableCellProps(118, 'left')
   },
   {
     accessorKey: 'requestItem',
@@ -166,7 +167,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'species',
     header: 'Sp',
     enableEditing: false,
-    ...tableCellProps(80, 'left')
+    ...tableCellProps(70, 'left')
   },
   {
     accessorKey: 'testRank',
@@ -178,13 +179,13 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'testCategoryCd',
     header: 'Category',
     enableEditing: false,
-    ...tableCellProps(120, 'left')
+    ...tableCellProps(110, 'left')
   },
   {
     accessorKey: 'activityId',
     header: 'Activity',
     enableEditing: false,
-    ...tableCellProps(110, 'left')
+    ...tableCellProps(100, 'left')
   },
   {
     header: 'Result',
@@ -203,7 +204,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
       }
     },
     enableEditing: false,
-    ...tableCellProps(100),
+    ...tableCellProps(92),
     Cell: ({ cell }) => {
       const value = cell.getValue<number | null>();
       return value != null ? `${value}%` : '';
@@ -213,13 +214,13 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'pv',
     header: 'PV',
     enableEditing: false,
-    ...tableCellProps(120)
+    ...tableCellProps(80)
   },
   {
     accessorKey: 'currentTestInd',
     header: 'Curr',
     enableEditing: false,
-    ...tableCellProps(110, 'left'),
+    ...tableCellProps(80, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -233,7 +234,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'testCompleteInd',
     header: 'Com',
     enableEditing: false,
-    ...tableCellProps(110, 'left'),
+    ...tableCellProps(80, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -247,7 +248,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'acceptResultInd',
     header: 'Acc',
     enableEditing: false,
-    ...tableCellProps(110, 'left'),
+    ...tableCellProps(75, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -261,7 +262,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'significntStsInd',
     header: 'Sig',
     enableEditing: false,
-    ...tableCellProps(110, 'left'),
+    ...tableCellProps(70, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -275,28 +276,28 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'seedWithdrawalDate',
     header: 'Wdrwl Date',
     enableEditing: false,
-    ...tableCellProps(150, 'left'),
+    ...tableCellProps(125, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'revisedEndDt',
     header: 'Sch End Date',
     enableEditing: false,
-    ...tableCellProps(150, 'left'),
+    ...tableCellProps(140, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualBeginDtTm',
     header: 'Start Date',
     enableEditing: false,
-    ...tableCellProps(150, 'left'),
+    ...tableCellProps(115, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualEndDtTm',
     header: 'End Date',
     enableEditing: false,
-    ...tableCellProps(150, 'left'),
+    ...tableCellProps(110, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
 
