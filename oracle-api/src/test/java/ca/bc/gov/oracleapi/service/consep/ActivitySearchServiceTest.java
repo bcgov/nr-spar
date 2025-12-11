@@ -1,33 +1,36 @@
 package ca.bc.gov.oracleapi.service.consep;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
-import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
-import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
-import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
+import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
+import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
 
 @ExtendWith(SpringExtension.class)
 class ActivitySearchServiceTest {
@@ -55,12 +58,8 @@ class ActivitySearchServiceTest {
       actualBeginDateTo, actualEndDateFrom, actualEndDateTo, revisedStartDateFrom,
       revisedStartDateTo, revisedEndDateFrom, revisedEndDateTo;
   private LocalDateTime actualBeginDtTm, actualEndDtTm, seedWithdrawalDate, revisedEndDt;
-<<<<<<< HEAD
   private Boolean includeHistoricalTests, germTestsOnly, familyLotsOnly;
-=======
-  private Boolean includeHistoricalTests, germTestsOnly;
   private Sort defaultSort;
->>>>>>> d7b2e2f53d742f1b7a1fe315feada128519e39cb
 
   @BeforeEach
   void setUp() {
