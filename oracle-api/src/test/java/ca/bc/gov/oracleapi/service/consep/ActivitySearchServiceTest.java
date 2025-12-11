@@ -1,6 +1,8 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
@@ -17,12 +19,14 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
@@ -51,7 +55,12 @@ class ActivitySearchServiceTest {
       actualBeginDateTo, actualEndDateFrom, actualEndDateTo, revisedStartDateFrom,
       revisedStartDateTo, revisedEndDateFrom, revisedEndDateTo;
   private LocalDateTime actualBeginDtTm, actualEndDtTm, seedWithdrawalDate, revisedEndDt;
+<<<<<<< HEAD
   private Boolean includeHistoricalTests, germTestsOnly, familyLotsOnly;
+=======
+  private Boolean includeHistoricalTests, germTestsOnly;
+  private Sort defaultSort;
+>>>>>>> d7b2e2f53d742f1b7a1fe315feada128519e39cb
 
   @BeforeEach
   void setUp() {
@@ -129,6 +138,8 @@ class ActivitySearchServiceTest {
     activitySearchResultEntityTwo.setSeedlotDisplay(seedlotDisplayFamilylot);
     populateCommonFields(activitySearchResultEntityTwo);
     activitySearchResults.add(activitySearchResultEntityTwo);
+    defaultSort = Sort.by("seedlotSample").ascending()
+      .and(Sort.by("actualBeginDtTm").ascending());
   }
 
   private void populateCommonFields(ActivitySearchResultEntity entity) {
@@ -157,11 +168,12 @@ class ActivitySearchServiceTest {
     entity.setItemId(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
     entity.setSeedlotSample(seedlotSample);
     entity.setRiaSkey(riaSkey);
+    entity.setActivityTypeCd(testType);
   }
 
   @Test
   void shouldReturnMappedResults() {
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
     Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(
         List.of(activitySearchResultEntityOne),
         pageable,
@@ -193,7 +205,7 @@ class ActivitySearchServiceTest {
     )).thenReturn(mockPage);
 
     ActivitySearchPageResponseDto pageResponse = activitySearchService.searchTestingActivities(
-        activitySearchRequestDto, pageable
+        activitySearchRequestDto, pageable, null, null
     );
 
     assertThat(pageResponse.content()).hasSize(1);
@@ -229,6 +241,7 @@ class ActivitySearchServiceTest {
         .isEqualTo(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
     assertThat(activitySearchResponseDto.seedlotSample()).isEqualTo(seedlotSample);
     assertThat(activitySearchResponseDto.riaSkey()).isEqualTo(riaSkey);
+    assertThat(activitySearchResponseDto.activityTypeCd()).isEqualTo(testType);
 
     verify(activitySearchRepository, times(1)).searchTestingActivities(
         lotNumbers, testType, activityId, germinatorTrayId,
@@ -254,7 +267,7 @@ class ActivitySearchServiceTest {
         null, null, null, null
     );
 
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
     Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(
         activitySearchResults,
         pageable,
@@ -271,7 +284,7 @@ class ActivitySearchServiceTest {
     )).thenReturn(mockPage);
 
     List<ActivitySearchResponseDto> result = activitySearchService
-        .searchTestingActivities(emptyRequest, pageable)
+        .searchTestingActivities(emptyRequest, pageable, null, null)
         .content();
 
     assertThat(result).hasSize(2);
@@ -295,7 +308,7 @@ class ActivitySearchServiceTest {
         null, null, null, null
     );
 
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
 
     // mock empty page
     Page<ActivitySearchResultEntity> emptyPage = new PageImpl<>(
@@ -313,8 +326,123 @@ class ActivitySearchServiceTest {
     )).thenReturn(emptyPage);
 
     List<ActivitySearchResponseDto> result = activitySearchService
-        .searchTestingActivities(emptyRequest, pageable).content();
+        .searchTestingActivities(emptyRequest, pageable, null, null).content();
 
     assertThat(result).isEmpty();
+  }
+
+  @Test
+  void shouldSortByValidFieldAscending() {
+    Pageable defaultPageable = PageRequest.of(0, 10);
+    String sortBy = "seedlotDisplay";
+    String sortDirection = "asc";
+
+    Pageable sortedPageable = PageRequest.of(0, 10, Sort.by(sortBy).ascending());
+
+    Page<ActivitySearchResultEntity> mockPage =
+        new PageImpl<>(List.of(activitySearchResultEntityOne), sortedPageable, 1);
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable))).thenReturn(
+        mockPage);
+
+    ActivitySearchPageResponseDto result =
+        activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable,
+            sortBy, sortDirection);
+
+    assertThat(result.content()).hasSize(1);
+
+    verify(activitySearchRepository, times(1)).searchTestingActivities(any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable));
+  }
+
+  @Test
+  void shouldSortByValidFieldDescending() {
+    Pageable defaultPageable = PageRequest.of(0, 10);
+    String sortBy = "requestItem";
+    String sortDirection = "desc";
+
+    Pageable sortedPageable = PageRequest.of(0, 10, Sort.by(sortBy).descending());
+
+    Page<ActivitySearchResultEntity> mockPage =
+        new PageImpl<>(List.of(activitySearchResultEntityOne), sortedPageable, 1);
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable))).thenReturn(
+        mockPage);
+
+    ActivitySearchPageResponseDto result =
+        activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable,
+            sortBy, sortDirection);
+
+    assertThat(result.content()).hasSize(1);
+  }
+
+  @Test
+  void shouldUseDefaultPageableWhenSortByNull() {
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
+
+    Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(activitySearchResults, pageable, 2);
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(pageable))).thenReturn(mockPage);
+
+    List<ActivitySearchResponseDto> result =
+        activitySearchService.searchTestingActivities(activitySearchRequestDto, pageable, null,
+            null).content();
+
+    assertThat(result).hasSize(2);
+  }
+
+  @Test
+  void shouldUseDefaultPageableWhenSortByBlank() {
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
+
+    Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(activitySearchResults, pageable, 2);
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(pageable))).thenReturn(mockPage);
+
+    List<ActivitySearchResponseDto> result =
+        activitySearchService.searchTestingActivities(activitySearchRequestDto, pageable, "   ",
+            "asc").content();
+
+    assertThat(result).hasSize(2);
+  }
+
+  @Test
+  void shouldPassThroughInvalidSortField() {
+    Pageable defaultPageable = PageRequest.of(0, 10);
+    String sortBy = "nonExistentField";
+
+    Page<ActivitySearchResultEntity> mockPage =
+        new PageImpl<>(activitySearchResults, defaultPageable, activitySearchResults.size());
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(
+        mockPage);
+
+    activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable, sortBy,
+        "asc");
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+    verify(activitySearchRepository).searchTestingActivities(any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), pageableCaptor.capture());
+
+    Pageable actualPageable = pageableCaptor.getValue();
+
+    assertThat(actualPageable.getSort().isUnsorted()).isFalse();
+    assertThat(actualPageable.getSort().getOrderFor(sortBy)).isNotNull();
+
+    assertThat(actualPageable.getPageNumber()).isZero();
+    assertThat(actualPageable.getPageSize()).isEqualTo(10);
   }
 }

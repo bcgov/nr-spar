@@ -25,6 +25,7 @@ export type TestingSearchResponseType = {
   itemId: string;
   seedlotSample: string;
   riaSkey: number;
+  activityTypeCd: string;
 };
 
 // Type for pagination details

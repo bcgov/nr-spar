@@ -20,6 +20,9 @@ type Props<T extends Record<string, any>> = {
   pageIndex?: number;
   pageSize?: number;
   enableSorting?: boolean;
+  manualSorting?: boolean;
+  sorting?: { id: string; desc: boolean }[];
+  onSortingChange?: (sorting: { id: string; desc: boolean }[]) => void;
   enableFilters?: boolean;
   enableHiding?: boolean;
   enableRowSelection?: boolean;
@@ -72,6 +75,9 @@ const GenericTable = <T extends Record<string, any>>({
   pageSize = 20,
   enableHiding = false,
   enableSorting = false,
+  manualSorting = false,
+  sorting = [],
+  onSortingChange,
   enableFilters = false,
   enableRowSelection = false,
   enableRowActions = false,
@@ -97,7 +103,8 @@ const GenericTable = <T extends Record<string, any>>({
     initialState,
     state: {
       isLoading,
-      pagination: { pageIndex, pageSize }
+      pagination: { pageIndex, pageSize },
+      sorting
     },
     enablePagination,
     manualPagination,
@@ -185,6 +192,13 @@ const GenericTable = <T extends Record<string, any>>({
       }
     },
     enableSorting,
+    manualSorting,
+    onSortingChange: (updaterOrValue) => {
+      const newSorting = typeof updaterOrValue === 'function'
+        ? updaterOrValue(basicTable.getState().sorting)
+        : updaterOrValue;
+      onSortingChange?.(newSorting);
+    },
     enableFilters,
     enableHiding,
     enableColumnFilters,

@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,7 +37,22 @@ public class ActivitySearchService {
    */
   public ActivitySearchPageResponseDto searchTestingActivities(
       ActivitySearchRequestDto activitySearchRequestDto,
-      Pageable pageable) {
+      Pageable pageable,
+      String sortBy,
+      String sortDirection) {
+
+    Sort sort = Sort.by("seedlotSample").ascending()
+      .and(Sort.by("actualBeginDtTm").ascending());
+
+    if (sortBy != null && !sortBy.isBlank()) {
+      sort = Sort.by("desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC,
+          sortBy);
+    }
+    if (pageable.isPaged()) {
+      pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    } else {
+      pageable = Pageable.unpaged(sort);
+    }
 
     LocalDateTime seedWithdrawalStartDate =
         toStartOfDay(activitySearchRequestDto.seedWithdrawalStartDate());
@@ -131,7 +148,8 @@ public class ActivitySearchService {
         activitySearchResultEntity.getReqId(),
         activitySearchResultEntity.getItemId(),
         activitySearchResultEntity.getSeedlotSample(),
-        activitySearchResultEntity.getRiaSkey()
+        activitySearchResultEntity.getRiaSkey(),
+        activitySearchResultEntity.getActivityTypeCd()
     );
   }
 

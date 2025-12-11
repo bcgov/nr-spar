@@ -40,7 +40,7 @@ import {
   formatExportData, columnVisibilityLocalStorageKey
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
-import { ActivitySearchRequest, ActivitySearchValidation } from './definitions';
+import { ActivitySearchRequest, ActivitySearchValidation, Sorting } from './definitions';
 import './styles.scss';
 
 const csvConfig = mkConfig({
@@ -55,6 +55,7 @@ const TestSearch = () => {
   const [searchParams, setSearchParams] = useState<ActivitySearchRequest>(
     {}
   );
+  const [sorting, setSorting] = useState<Sorting[]>([]);
   const [rawLotInput, setRawLotInput] = useState('');
   const [validateSearch, setValidateSearch] = useState<ActivitySearchValidation>(
     iniActSearchValidation
@@ -68,7 +69,7 @@ const TestSearch = () => {
     pageSize: 100
   });
   const [alert, setAlert] = useState<{
-    status: string;
+    status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
   const [modalAnchor, setModalAnchor] = useState<{
@@ -89,12 +90,16 @@ const TestSearch = () => {
     mutationFn: ({
       filter,
       page = 0,
-      size = 100
+      size = 100,
+      sortBy,
+      sortDirection
     }: {
       filter: ActivitySearchRequest;
       page?: number;
       size?: number;
-    }) => searchTestingActivities(filter, page, size),
+      sortBy?: string;
+      sortDirection?: 'asc' | 'desc';
+    }) => searchTestingActivities(filter, sortBy, sortDirection, false, size, page),
     onMutate: () => {
       resetAlert();
       setHasSearched(true);
@@ -117,7 +122,8 @@ const TestSearch = () => {
   });
 
   const exportMutation = useMutation({
-    mutationFn: (filter: ActivitySearchRequest) => searchTestingActivities(filter, 0, 0, true),
+    mutationFn: (filter:
+      ActivitySearchRequest) => searchTestingActivities(filter, undefined, undefined, true, 0, 0),
 
     onSuccess: (data) => {
       const visibilityConfig = JSON.parse(
@@ -169,6 +175,19 @@ const TestSearch = () => {
     }
   });
 
+  const handleSortingChange = (newSorting: Sorting[]) => {
+    setSorting(newSorting);
+
+    const sort = newSorting[0];
+    searchMutation.mutate({
+      filter: searchParams,
+      page: paginationInfo.pageNumber,
+      size: paginationInfo.pageSize,
+      sortBy: sort?.id,
+      sortDirection: sort?.desc ? 'desc' : 'asc'
+    });
+  };
+
   const handleExportData = () => {
     exportMutation.mutate(searchParams);
   };
@@ -191,8 +210,15 @@ const TestSearch = () => {
   }, [testTypeQuery.error]);
 
   const handlePageChange = (pageIndex: number, pageSize: number) => {
+    const sort = sorting[0];
     searchMutation.mutate(
-      { filter: searchParams, page: pageIndex, size: pageSize },
+      {
+        filter: searchParams,
+        page: pageIndex,
+        size: pageSize,
+        sortBy: sort?.id,
+        sortDirection: sort?.desc ? 'desc' : 'asc'
+      },
       {
         onSuccess: (data) => {
           setSearchResults(data.content);
@@ -223,6 +249,33 @@ const TestSearch = () => {
     return updated;
   };
 
+  const validateLotNumbers = (lots: string[]) => {
+    if (lots.length > 5) {
+      return {
+        error: true,
+        errorMessage: errorMessages.lotMax
+      };
+    }
+
+    const invalidLot = lots.find((lot) => {
+      const isFamily = lot.toUpperCase().startsWith('F');
+      const lengthLimit = isFamily ? 13 : 5;
+      return lot.length > lengthLimit;
+    });
+
+    if (invalidLot) {
+      const isFamily = invalidLot.toUpperCase().startsWith('F');
+      return {
+        error: true,
+        errorMessage: isFamily
+          ? errorMessages.familyLotMaxChar
+          : errorMessages.lotMaxChar
+      };
+    }
+
+    return { error: false, errorMessage: '' };
+  };
+
   const handleLotInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setRawLotInput(value);
@@ -232,27 +285,10 @@ const TestSearch = () => {
       .map((val) => val.trim())
       .filter((val) => val.length > 0);
 
-    let error = false;
-    let errorMessage = '';
-
-    if (lots.length > 5) {
-      error = true;
-      errorMessage = errorMessages.lotMax;
-    } else if (lots.some((lot) => (lot.startsWith('F') || lot.startsWith('f')) && lot.length > 13)) {
-      error = true;
-      errorMessage = errorMessages.familyLotMaxChar;
-    } else if (lots.some((lot) => lot.length > 5)) {
-      error = true;
-      errorMessage = errorMessages.lotMaxChar;
-    }
-
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
     setValidateSearch((prev) => ({
       ...prev,
-      lotNumbers: {
-        error,
-        errorMessage
-      }
+      lotNumbers: validateLotNumbers(lots)
     }));
     resetAlert();
   };
@@ -543,8 +579,10 @@ const TestSearch = () => {
               data={searchResults}
               isLoading={searchMutation.isPending}
               paginationInfo={paginationInfo}
+              sorting={sorting}
               onPageChange={handlePageChange}
               onExportData={handleExportData}
+              onSortingChange={handleSortingChange}
             />
           ) : (
             <TablePlaceholder />

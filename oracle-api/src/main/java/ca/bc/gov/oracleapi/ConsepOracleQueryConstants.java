@@ -1,5 +1,7 @@
 package ca.bc.gov.oracleapi;
 
+import java.util.Set;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -46,8 +48,14 @@ public class ConsepOracleQueryConstants {
         AND (:acceptanceStatus IS NULL OR a.acceptResultInd = :acceptanceStatus)
         AND (:geneticClassCode IS NULL OR a.geneticClassCode = :geneticClassCode)
         AND (:familyLotsOnly IS NULL OR :familyLotsOnly = false OR LOWER(a.seedlotDisplay) LIKE 'f%')
-      ORDER BY a.seedlotSample, a.actualBeginDtTm
       """;
+
+  public static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+    "activityTypeCd", "activityId", "seedlotDisplay", "germinatorTrayId",
+    "seedWithdrawalDate", "requestId", "testCategoryCd", "testRank", "species",
+    "actualBeginDtTm", "actualEndDtTm", "revisedStartDt", "revisedEndDt",
+    "germTrayAssignment", "testCompleteInd", "acceptResultInd", "geneticClassCode",
+    "requestItem", "pv", "currentTestInd", "significntStsInd", "riaComment", 
+    "seedlotSample"
+  );
 }
-
-

@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 import React from 'react';
 import { type MRT_ColumnDef, MRT_Cell } from 'material-react-table';
-import * as Icons from '@carbon/icons-react';
 import { Tag } from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
 import { CrumbType } from '../../../../components/Breadcrumbs/definitions';
@@ -14,7 +13,7 @@ export const minStartDate = '1900-01-01';
 export const maxEndDate = '9999-12-31';
 const COLOR_GREY_20 = '#DFDFE1'; // light theme token: layer-selected-01
 
-const formatDateCell = (value: string | null) => {
+export const formatDateCell = (value: string | null) => {
   if (!value) return '';
 
   const date = new Date(value);
@@ -47,8 +46,8 @@ export const initialErrorValue: ValidationErrorType = {
 
 export const errorMessages = {
   lotMax: 'Maximum of 5 lot numbers allowed.',
-  lotMaxChar: '5 character max',
-  familyLotMaxChar: '13 character max',
+  lotMaxChar: '5 character max for seedlot numbers',
+  familyLotMaxChar: '13 character max for family lot numbers',
   germTrayMax: '5 digits max',
   reqId: '5 character max',
   reqYearSize: 'Year must be a 4-digit number',
@@ -154,44 +153,44 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     accessorKey: 'seedlotDisplay',
     header: 'Lot #',
-    size: 60,
     enableEditing: false,
-    ...tableCellProps(60)
+    size: 118,
+    ...tableCellProps(118, 'left')
   },
   {
     accessorKey: 'requestItem',
     header: 'Request ID',
     enableEditing: false,
-    ...tableCellProps(130, 'left')
+    size: 130
   },
   {
     accessorKey: 'species',
     header: 'Sp',
     enableEditing: false,
-    ...tableCellProps(50, 'left')
+    ...tableCellProps(70, 'left')
   },
   {
     accessorKey: 'testRank',
     header: 'Rank',
     enableEditing: false,
-    ...tableCellProps(60, 'left')
+    ...tableCellProps(90, 'left')
   },
   {
     accessorKey: 'testCategoryCd',
     header: 'Category',
     enableEditing: false,
-    ...tableCellProps(90, 'left')
+    ...tableCellProps(110, 'left')
   },
   {
     accessorKey: 'activityId',
     header: 'Activity',
     enableEditing: false,
-    ...tableCellProps(80, 'left')
+    ...tableCellProps(100, 'left')
   },
   {
     header: 'Result',
     accessorFn: (row) => {
-      switch (row.testCategoryCd) {
+      switch (row.activityId) {
         case 'Germ':
           return row.germinationPct;
         case 'MC':
@@ -205,7 +204,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
       }
     },
     enableEditing: false,
-    ...tableCellProps(70),
+    ...tableCellProps(92),
     Cell: ({ cell }) => {
       const value = cell.getValue<number | null>();
       return value != null ? `${value}%` : '';
@@ -215,7 +214,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'pv',
     header: 'PV',
     enableEditing: false,
-    ...tableCellProps(90)
+    ...tableCellProps(80)
   },
   {
     accessorKey: 'currentTestInd',
@@ -247,9 +246,9 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   },
   {
     accessorKey: 'acceptResultInd',
-    header: 'Act',
+    header: 'Acc',
     enableEditing: false,
-    ...tableCellProps(80, 'left'),
+    ...tableCellProps(75, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -263,7 +262,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'significntStsInd',
     header: 'Sig',
     enableEditing: false,
-    ...tableCellProps(80, 'left'),
+    ...tableCellProps(70, 'left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -277,28 +276,28 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'seedWithdrawalDate',
     header: 'Wdrwl Date',
     enableEditing: false,
-    ...tableCellProps(120, 'left'),
+    ...tableCellProps(125, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'revisedEndDt',
     header: 'Sch End Date',
     enableEditing: false,
-    ...tableCellProps(120, 'left'),
+    ...tableCellProps(140, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualBeginDtTm',
     header: 'Start Date',
     enableEditing: false,
-    ...tableCellProps(120, 'left'),
+    ...tableCellProps(115, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualEndDtTm',
     header: 'End Date',
     enableEditing: false,
-    ...tableCellProps(120, 'left'),
+    ...tableCellProps(110, 'left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
 
@@ -307,14 +306,6 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     header: 'Comments',
     enableEditing: false,
     ...tableCellProps(800, 'left')
-  },
-  {
-    accessorKey: 'actions',
-    header: '',
-    Cell: () => <Icons.TrashCan size={15} style={{ cursor: 'pointer' }} onClick={() => {}} />,
-    enableEditing: false,
-    size: 20,
-    ...tableCellProps()
   }
 ];
 

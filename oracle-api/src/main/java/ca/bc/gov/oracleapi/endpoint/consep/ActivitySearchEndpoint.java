@@ -17,13 +17,18 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import static ca.bc.gov.oracleapi.ConsepOracleQueryConstants.ALLOWED_SORT_FIELDS;
 
 /**
  * This class exposes testing search resources API.
@@ -60,12 +65,27 @@ public class ActivitySearchEndpoint {
   public ActivitySearchPageResponseDto searchTestingActivities(
       @Valid @RequestBody ActivitySearchRequestDto filter,
       @RequestParam(defaultValue = "false") boolean unpaged,
+      @RequestParam(required = false) String sortBy,
+      @RequestParam(defaultValue = "asc") 
+      @Pattern(regexp = "^(asc|desc)$", flags = Pattern.Flag.CASE_INSENSITIVE, 
+         message = "sortDirection must be either 'asc' or 'desc'")
+      String sortDirection,
       @ParameterObject @PageableDefault(size = 20) Pageable paginationParameters
   ) {
+    if (sortBy != null && !sortBy.isBlank() && !ALLOWED_SORT_FIELDS.contains(sortBy)) {
+      throw new ResponseStatusException(
+        HttpStatus.BAD_REQUEST,
+        "Invalid sort field: " + sortBy);
+    }
     if (unpaged) {
       paginationParameters = Pageable.unpaged();
     }
-    return activitySearchService.searchTestingActivities(filter, paginationParameters);
+    return activitySearchService.searchTestingActivities(
+      filter, 
+      paginationParameters,
+      sortBy,
+      sortDirection
+    );
   }
 
   @GetMapping("/type-codes")
