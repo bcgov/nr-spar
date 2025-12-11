@@ -165,7 +165,7 @@ const TestListTable = ({
                   );
 
                   return label === 'Test history' && !isTestHistoryEnabled ? (
-                    <Tooltip label={testHistoryDisabledReason} align="right">
+                    <Tooltip key={label} label={testHistoryDisabledReason} align="right">
                       <span>{button}</span>
                     </Tooltip>
                   ) : (
