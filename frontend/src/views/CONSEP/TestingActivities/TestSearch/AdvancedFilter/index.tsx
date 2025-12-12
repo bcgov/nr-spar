@@ -341,9 +341,9 @@ const AdvancedFilters = ({
       completeStatus: undefined,
       acceptanceStatus: undefined,
       seedlotClass: undefined,
-      includeHistoricalTests: false,
-      germTestsOnly: false,
-      familyLotsOnly: false
+      includeHistoricalTests: undefined,
+      germTestsOnly: undefined,
+      familyLotsOnly: undefined
     }));
 
     setValidateSearch((prev) => ({
