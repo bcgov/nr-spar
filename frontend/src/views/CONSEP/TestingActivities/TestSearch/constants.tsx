@@ -154,8 +154,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'seedlotDisplay',
     header: 'Lot #',
     enableEditing: false,
-    size: 118,
-    ...tableCellProps(118, 'left')
+    size: 125,
+    ...tableCellProps(125, 'left')
   },
   {
     accessorKey: 'requestItem',

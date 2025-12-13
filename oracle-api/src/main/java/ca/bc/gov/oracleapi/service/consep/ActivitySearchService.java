@@ -97,6 +97,7 @@ public class ActivitySearchService {
         activitySearchRequestDto.completeStatus(),
         activitySearchRequestDto.acceptanceStatus(),
         activitySearchRequestDto.geneticClassCode(),
+        activitySearchRequestDto.familyLotsOnly(),
         pageable
     );
 

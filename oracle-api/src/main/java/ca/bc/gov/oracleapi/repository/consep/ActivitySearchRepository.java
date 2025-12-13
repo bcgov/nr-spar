@@ -46,6 +46,7 @@ public interface ActivitySearchRepository extends
       @Param("completeStatus") Integer completeStatus,
       @Param("acceptanceStatus") Integer acceptanceStatus,
       @Param("geneticClassCode") String geneticClassCode,
+      @Param("familyLotsOnly") Boolean familyLotsOnly,
       Pageable pageable
   );
 }

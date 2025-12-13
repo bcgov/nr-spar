@@ -136,7 +136,7 @@ class ActivitySearchEndpointTest {
     return new ActivitySearchRequestDto(List.of("00098"), "D1", "D1", null,
         LocalDate.of(1997, 10, 1), LocalDate.of(1998, 10, 31), false, true, "RTS19981299A", "RTS",
         1998, null, "STD", "A", "PLI", null, null, null, null, null, null, null, null, -1, -1, -1,
-        "A");
+        "A", false);
   }
 
   private ActivitySearchResponseDto createDummyResponseDto() {
