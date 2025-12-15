@@ -21,7 +21,7 @@ public class ConsepOracleQueryConstants {
       FROM ActivitySearchResultEntity a
       WHERE (:testType IS NULL OR a.activityTypeCd = :testType)
         AND (:activityId IS NULL OR a.activityId = :activityId)
-        AND (:lotNumbers IS NULL OR a.seedlotDisplay IN :lotNumbers)
+        AND (:lotNumbers IS NULL OR UPPER(a.seedlotDisplay) IN :lotNumbers)
         AND (:germinatorTrayId IS NULL OR a.germinatorTrayId = :germinatorTrayId)
         AND (:seedWithdrawalStartDate IS NULL OR a.seedWithdrawalDate >= :seedWithdrawalStartDate)
         AND (:seedWithdrawalEndDate IS NULL OR a.seedWithdrawalDate <= :seedWithdrawalEndDate)
