@@ -121,4 +121,21 @@ public class ActivitySearchEndpoint {
   public List<TestCodeDto> getTestCategoryCodes() {
     return testCodeService.getTestCategoryCodes();
   }
+
+  @GetMapping("/request-types")
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Successfully retrieved all valid request types."
+      ),
+      @ApiResponse(
+          responseCode = "401",
+          description = "Access token is missing or invalid",
+          content = @Content(schema = @Schema(implementation = Void.class))
+      )
+  })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public List<TestCodeDto> getRequestTypes() {
+    return testCodeService.getRequestTypes();
+  }
 }

@@ -46,4 +46,19 @@ public class TestCodeService {
         ))
         .toList();
   }
+
+  /**
+   * Get all valid request types.
+   *
+   * @return list of TestCodeDto
+   */
+  public List<TestCodeDto> getRequestTypes() {
+    return testCodeRepository.findRequestTypes()
+        .stream()
+        .map(obj -> new TestCodeDto(
+            (String) obj[0], // code
+            (String) obj[1]  // description
+        ))
+        .toList();
+  }
 }

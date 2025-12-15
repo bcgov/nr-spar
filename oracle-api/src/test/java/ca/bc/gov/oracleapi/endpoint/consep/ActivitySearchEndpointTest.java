@@ -132,6 +132,16 @@ class ActivitySearchEndpointTest {
         .andExpect(jsonPath("$[0].code").value("CAT1"));
   }
 
+  @Test
+  void getRequestTypes_shouldReturnList() throws Exception {
+    List<TestCodeDto> mockCodes = List.of(new TestCodeDto("ASP", "Additional Seed Processing"));
+    when(testCodeService.getRequestTypes()).thenReturn(mockCodes);
+
+    mockMvc.perform(get("/api/testing-activities/request-types").with(csrf()))
+        .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].code").value("ASP"));
+  }
+
   private ActivitySearchRequestDto createDummyRequestDto() {
     return new ActivitySearchRequestDto(List.of("00098"), "D1", "D1", null,
         LocalDate.of(1997, 10, 1), LocalDate.of(1998, 10, 31), false, true, "RTS19981299A", "RTS",

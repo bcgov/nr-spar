@@ -50,11 +50,10 @@ public class ConsepOracleQueryConstants {
       """;
 
   public static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-    "activityTypeCd", "activityId", "seedlotDisplay", "germinatorTrayId",
-    "seedWithdrawalDate", "requestId", "testCategoryCd", "testRank", "species",
-    "actualBeginDtTm", "actualEndDtTm", "revisedStartDt", "revisedEndDt",
-    "germTrayAssignment", "testCompleteInd", "acceptResultInd", "geneticClassCode",
-    "requestItem", "pv", "currentTestInd", "significntStsInd", "riaComment", 
-    "seedlotSample"
+      "activityTypeCd", "activityId", "seedlotDisplay", "germinatorTrayId",
+      "seedWithdrawalDate", "requestId", "testCategoryCd", "testRank", "species",
+      "actualBeginDtTm", "actualEndDtTm", "revisedStartDt", "revisedEndDt",
+      "germTrayAssignment", "testCompleteInd", "acceptResultInd", "geneticClassCode",
+      "requestItem", "pv", "currentTestInd", "significntStsInd", "riaComment", "seedlotSample"
   );
 }
