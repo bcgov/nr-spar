@@ -72,7 +72,7 @@ class TestCodeServiceTest {
     ));
 
     // Act
-    List<TestCodeDto> result = testCodeService.findRequestTypes();
+    List<TestCodeDto> result = testCodeService.getRequestTypes();
 
     // Assert
     assertThat(result).hasSize(2);
