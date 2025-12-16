@@ -107,12 +107,21 @@ const AdvancedFilters = ({
     searchField: keyof ActivitySearchRequest,
     value: boolean
   ) => {
-    setSearchParams((prev) => ({
-      ...prev,
-      [searchField]: value
-    }));
-  };
+    setSearchParams((prev) => {
+      // If unchecked, remove the field by setting undefined
+      if (!value) {
+        return {
+          ...prev,
+          [searchField]: undefined
+        };
+      }
 
+      return {
+        ...prev,
+        [searchField]: true
+      };
+    });
+  };
   const handleRequestIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
 
@@ -128,6 +137,7 @@ const AdvancedFilters = ({
       ...prev,
       requestId: value
     }));
+
     setValidateSearch((prev) => ({
       ...prev,
       requestId: {
@@ -349,8 +359,9 @@ const AdvancedFilters = ({
       completeStatus: undefined,
       acceptanceStatus: undefined,
       seedlotClass: undefined,
-      includeHistoricalTests: false,
-      germTestsOnly: false
+      includeHistoricalTests: undefined,
+      germTestsOnly: undefined,
+      familyLotsOnly: undefined
     }));
 
     setValidateSearch((prev) => ({
@@ -413,7 +424,7 @@ const AdvancedFilters = ({
               <Checkbox
                 id="historical-tests"
                 labelText="Historical tests"
-                checked={searchParams.includeHistoricalTests}
+                checked={!!searchParams.includeHistoricalTests}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   handleCheckboxesChanges('includeHistoricalTests', e.target.checked);
                 }}
@@ -421,9 +432,17 @@ const AdvancedFilters = ({
               <Checkbox
                 id="germination-only"
                 labelText="Germination tests only"
-                checked={searchParams.germTestsOnly}
+                checked={!!searchParams.germTestsOnly}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   handleCheckboxesChanges('germTestsOnly', e.target.checked);
+                }}
+              />
+              <Checkbox
+                id="family-lots-only"
+                labelText="Family lot # only"
+                checked={!!searchParams.familyLotsOnly}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleCheckboxesChanges('familyLotsOnly', e.target.checked);
                 }}
               />
             </CheckboxGroup>
