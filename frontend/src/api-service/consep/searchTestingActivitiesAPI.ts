@@ -31,3 +31,8 @@ export const getTestCategoryCodes = () => {
   const url = `${ApiConfig.searchTestActivities}/category-codes`;
   return api.get(url).then((res): TestCodeType[] => res.data);
 };
+
+export const getCodesByActivity = (activity: string) => {
+  const url = `${ApiConfig.searchTestActivities}/codes-by-activity?activity=${encodeURIComponent(activity)}`;
+  return api.get(url).then((res): string[] => res.data);
+};

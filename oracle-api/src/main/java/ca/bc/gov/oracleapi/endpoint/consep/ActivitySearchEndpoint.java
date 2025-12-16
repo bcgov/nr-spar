@@ -121,4 +121,22 @@ public class ActivitySearchEndpoint {
   public List<TestCodeDto> getTestCategoryCodes() {
     return testCodeService.getTestCategoryCodes();
   }
+
+  @GetMapping("/codes-by-activity")
+  @ApiResponses(value = {
+    @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved all valid codes for the specified activity."
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Access token is missing or invalid",
+      content = @Content(schema = @Schema(implementation = Void.class))
+    )
+  })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public List<String> getCodesByActivity(
+      @RequestParam String activity) {
+    return testCodeService.getCodesByColumnActivity(activity);
+  }
 }

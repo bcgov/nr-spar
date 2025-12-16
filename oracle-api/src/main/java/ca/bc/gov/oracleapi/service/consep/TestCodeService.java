@@ -42,8 +42,21 @@ public class TestCodeService {
         .stream()
         .map(obj -> new TestCodeDto(
             (String) obj[0],
-            (String) obj[1]
-        ))
+            (String) obj[1]))
+        .toList();
+  }
+  
+  /**
+   * Get all valid codes for a given column name,
+   * where effective date <= today and expiry date >= today or null.
+   *
+   * @param activity the column name to filter codes
+   * @return list of codes as strings
+   */
+  public List<String> getCodesByColumnActivity(String activity) {
+    return testCodeRepository.findCodesByActivity(activity)
+        .stream()
+        .map(obj -> (String) obj[0])
         .toList();
   }
 }

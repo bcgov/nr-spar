@@ -35,6 +35,7 @@ import {
 } from '../../../../types/consep/TestingActivityType';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
+import { getCodesByActivity } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import { deleteImpurity, patchImpurities } from '../../../../api-service/consep/impuritiesAPI';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
@@ -76,6 +77,11 @@ const PurityContent = () => {
     queryKey: ['riaKey', riaKey],
     queryFn: () => testingActivitiesAPI('purityTest', 'getDataByRiaKey', { riaKey }),
     refetchOnMount: true
+  });
+
+  const impurityCodesQuery = useQuery({
+    queryKey: ['impurityCodes'],
+    queryFn: () => getCodesByActivity('DEBRIS_TYPE_CD')
   });
 
   const updateImpuritiesMutation = useMutation({
@@ -400,7 +406,7 @@ const PurityContent = () => {
           className="consep-impurity-combobox"
           id={`impurity-${impurity.debrisRank}-${impurity.debrisCategory}`}
           name={fieldsConfig.impuritySection.secondaryfieldName}
-          items={fieldsConfig.impuritySection.options}
+          items={impurityCodesQuery.data ?? []}
           placeholder={fieldsConfig.impuritySection.placeholder}
           titleText={
             impurity.debrisRank === 1

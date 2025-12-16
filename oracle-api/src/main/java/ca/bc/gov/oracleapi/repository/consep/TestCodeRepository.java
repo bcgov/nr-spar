@@ -27,4 +27,13 @@ public interface TestCodeRepository extends JpaRepository<TestCodeEntity, String
           AND (t.expiryDate IS NULL OR t.expiryDate >= CURRENT_DATE)
         """)
   List<Object[]> findTestCategoryCodes();
+
+  @Query("""
+        SELECT t.codeArgument AS code
+        FROM TestCodeEntity t
+        WHERE t.columnName = :activity
+          AND t.effectiveDate <= CURRENT_DATE
+          AND (t.expiryDate IS NULL OR t.expiryDate >= CURRENT_DATE)
+        """)
+  List<Object[]> findCodesByActivity(String activity);
 }
