@@ -1,9 +1,10 @@
 package ca.bc.gov.oracleapi.entity.consep;
 
+import ca.bc.gov.oracleapi.entity.consep.idclass.TestCodeId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.Getter;
@@ -21,12 +22,8 @@ import lombok.Setter;
 )
 public class TestCodeEntity {
 
-  @Id
-  @Column(name = "COLUMN_NAME", length = 18)
-  private String columnName;
-
-  @Column(name = "CODE_ARGUMENT", length = 50)
-  private String codeArgument;
+  @EmbeddedId
+  private TestCodeId id;
 
   @Column(name = "EXPANDED_RESULT", length = 120)
   private String expandedResult;

@@ -403,13 +403,13 @@ const AdvancedFilters = ({
       className="consep-test-filters-modal"
     >
       <FlexGrid className="consep-test-search-content">
-        {(requestTypeQuery.isError || testCategoryQuery.isError) && (
+        {(requestTypeQuery.isError || testCategoryQuery.isError || vegCodeQuery.isError) && (
           <InlineNotification
             lowContrast
             kind="error"
-            subtitle={`Failed to load codes: ${
+            subtitle={`Failed to load dropdown list options: ${
               (
-                (requestTypeQuery.error ?? testCategoryQuery.error) as any
+                (requestTypeQuery.error ?? testCategoryQuery.error ?? vegCodeQuery.error) as any
               )?.response?.data?.message
             }`}
           />
