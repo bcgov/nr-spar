@@ -133,7 +133,7 @@ public record ActivitySearchRequestDto(
     @Pattern(regexp = "[AB]", message = "geneticClassCode must be 'A' or 'B'")
     String geneticClassCode,
 
-    @Schema(description = "Family lot numbers only")
+    @Schema(description = "Filter for family lot numbers only (lot numbers starting with 'F')")
     Boolean familyLotsOnly
 ) {
 }

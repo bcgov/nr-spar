@@ -416,7 +416,7 @@ const AdvancedFilters = ({
                 }}
               />
               <Checkbox
-                id="familylots-only"
+                id="family-lots-only"
                 labelText="Family lot # only"
                 checked={!!searchParams.familyLotsOnly}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
