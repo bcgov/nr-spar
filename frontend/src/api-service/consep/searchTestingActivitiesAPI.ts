@@ -19,15 +19,20 @@ export const searchTestingActivities = (
   }
 
   return api.post(url, filter)
-    .then((res): PaginatedTestingSearchResponseType => res.data);
+    .then((res: { data: PaginatedTestingSearchResponseType }) => res.data);
 };
 
 export const getTestTypeCodes = () => {
   const url = `${ApiConfig.searchTestActivities}/type-codes`;
-  return api.get(url).then((res): TestCodeType[] => res.data);
+  return api.get(url).then((res: { data: TestCodeType[] }) => res.data);
 };
 
 export const getTestCategoryCodes = () => {
   const url = `${ApiConfig.searchTestActivities}/category-codes`;
-  return api.get(url).then((res): TestCodeType[] => res.data);
+  return api.get(url).then((res: { data: TestCodeType[] }) => res.data);
+};
+
+export const getRequestTypes = () => {
+  const url = `${ApiConfig.searchTestActivities}/request-types`;
+  return api.get(url).then((res: { data: TestCodeType[] }) => res.data);
 };

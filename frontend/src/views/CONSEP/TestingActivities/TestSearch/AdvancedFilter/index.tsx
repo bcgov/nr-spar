@@ -18,12 +18,14 @@ import {
 import ComboBoxEvent from '../../../../../types/ComboBoxEvent';
 import { capitalizeFirstLetter } from '../../../../../utils/StringUtils';
 import useWindowSize from '../../../../../hooks/UseWindowSize';
-import { getTestCategoryCodes } from '../../../../../api-service/consep/searchTestingActivitiesAPI';
+import { getTestCategoryCodes, getRequestTypes } from '../../../../../api-service/consep/searchTestingActivitiesAPI';
+import getVegCodes from '../../../../../api-service/vegetationCodeAPI';
+import { getMultiOptList } from '../../../../../utils/MultiOptionsUtils';
 
 import type { TestCodeType } from '../../../../../types/consep/TestingSearchType';
 import {
   advDateTypes, DATE_FORMAT, errorMessages, initialErrorValue, maxEndDate,
-  minStartDate, requestTypeSt, SAFE_MARGIN, species, testRanks
+  minStartDate, SAFE_MARGIN, species, testRanks
 } from '../constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from '../definitions';
@@ -58,6 +60,22 @@ const AdvancedFilters = ({
     staleTime: THREE_HOURS, // data is fresh for 3 hours
     gcTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
     select: (data: TestCodeType[]) => data?.map((testCode) => testCode.code) ?? []
+  });
+
+  const requestTypeQuery = useQuery({
+    queryKey: ['request-types'],
+    queryFn: getRequestTypes,
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS,
+    select: (data: TestCodeType[]) => data?.map((requestType) => requestType.code) ?? []
+  });
+
+  const vegCodeQuery = useQuery({
+    queryKey: ['vegetation-codes'],
+    queryFn: getVegCodes,
+    select: (data) => getMultiOptList(data, true, true),
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS
   });
 
   useEffect(() => {
@@ -374,11 +392,15 @@ const AdvancedFilters = ({
       className="consep-test-filters-modal"
     >
       <FlexGrid className="consep-test-search-content">
-        {testCategoryQuery.isError && (
+        {(requestTypeQuery.isError || testCategoryQuery.isError) && (
           <InlineNotification
             lowContrast
             kind="error"
-            subtitle={`Failed to load test categories: ${testCategoryQuery.error?.message}`}
+            subtitle={`Failed to load codes: ${
+              (
+                (requestTypeQuery.error ?? testCategoryQuery.error) as any
+              )?.response?.data?.message
+            }`}
           />
         )}
         <Row>
@@ -426,7 +448,7 @@ const AdvancedFilters = ({
               id="request-type-input"
               className="request-type-input"
               titleText="Request type"
-              items={requestTypeSt}
+              items={requestTypeQuery.data ?? []}
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('requestType', e);
               }}
@@ -492,7 +514,7 @@ const AdvancedFilters = ({
               id="species-input"
               className="species-input"
               titleText="Species"
-              items={species}
+              items={vegCodeQuery.data ?? []}
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('species', e);
               }}
