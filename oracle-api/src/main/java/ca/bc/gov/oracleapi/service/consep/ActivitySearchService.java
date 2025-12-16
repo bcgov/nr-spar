@@ -8,6 +8,7 @@ import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,12 +42,11 @@ public class ActivitySearchService {
       String sortBy,
       String sortDirection) {
 
-    Sort sort = Sort.by("seedlotSample").ascending()
-      .and(Sort.by("actualBeginDtTm").ascending());
+    Sort sort = Sort.by("seedlotSample").ascending().and(Sort.by("actualBeginDtTm").ascending());
 
     if (sortBy != null && !sortBy.isBlank()) {
-      sort = Sort.by("desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC,
-          sortBy);
+      sort = Sort.by("desc".equalsIgnoreCase(sortDirection)
+          ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
     }
     if (pageable.isPaged()) {
       pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -67,10 +67,18 @@ public class ActivitySearchService {
     LocalDateTime revisedStartDateTo = toEndOfDay(activitySearchRequestDto.revisedStartDateTo());
     LocalDateTime revisedEndDateFrom = toStartOfDay(activitySearchRequestDto.revisedEndDateFrom());
     LocalDateTime revisedEndDateTo = toEndOfDay(activitySearchRequestDto.revisedEndDateTo());
+    List<String> upperLotNumbers = null;
+    if (activitySearchRequestDto.lotNumbers() != null
+        && !activitySearchRequestDto.lotNumbers().isEmpty()) {
+      upperLotNumbers = activitySearchRequestDto.lotNumbers()
+          .stream()
+          .map(String::toUpperCase)
+          .toList();
+    }
 
     // Fetch paginated results from repository
     Page<ActivitySearchResultEntity> results = activitySearchRepository.searchTestingActivities(
-        activitySearchRequestDto.lotNumbers(),
+        upperLotNumbers,
         activitySearchRequestDto.testType(),
         activitySearchRequestDto.activityId(),
         activitySearchRequestDto.germinatorTrayId(),
@@ -97,6 +105,7 @@ public class ActivitySearchService {
         activitySearchRequestDto.completeStatus(),
         activitySearchRequestDto.acceptanceStatus(),
         activitySearchRequestDto.geneticClassCode(),
+        activitySearchRequestDto.familyLotsOnly(),
         pageable
     );
 

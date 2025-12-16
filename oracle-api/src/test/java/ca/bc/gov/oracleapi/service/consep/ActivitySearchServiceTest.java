@@ -3,7 +3,9 @@ package ca.bc.gov.oracleapi.service.consep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
@@ -55,7 +57,7 @@ class ActivitySearchServiceTest {
       actualBeginDateTo, actualEndDateFrom, actualEndDateTo, revisedStartDateFrom,
       revisedStartDateTo, revisedEndDateFrom, revisedEndDateTo;
   private LocalDateTime actualBeginDtTm, actualEndDtTm, seedWithdrawalDate, revisedEndDt;
-  private Boolean includeHistoricalTests, germTestsOnly;
+  private Boolean includeHistoricalTests, germTestsOnly, familyLotsOnly;
   private Sort defaultSort;
 
   @BeforeEach
@@ -90,6 +92,7 @@ class ActivitySearchServiceTest {
     completeStatus = -1; // testCompleteInd
     acceptanceStatus = -1; // acceptResultInd
     geneticClassCode = "A";
+    familyLotsOnly = false;
 
     activitySearchRequestDto = new ActivitySearchRequestDto(
         lotNumbers, testType, activityId, germinatorTrayId,
@@ -100,7 +103,7 @@ class ActivitySearchServiceTest {
         actualEndDateFrom, actualEndDateTo,
         revisedStartDateFrom, revisedStartDateTo,
         revisedEndDateFrom, revisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly
     );
 
     // Search return result
@@ -195,7 +198,8 @@ class ActivitySearchServiceTest {
         expectedActualEndFrom, expectedActualEndTo,
         expectedRevisedStartDateFrom, expectedRevisedStartDateTo,
         expectedRevisedEndDateFrom, expectedRevisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly,
+        pageable
     )).thenReturn(mockPage);
 
     ActivitySearchPageResponseDto pageResponse = activitySearchService.searchTestingActivities(
@@ -246,7 +250,8 @@ class ActivitySearchServiceTest {
         expectedActualEndFrom, expectedActualEndTo,
         expectedRevisedStartDateFrom, expectedRevisedStartDateTo,
         expectedRevisedEndDateFrom, expectedRevisedEndDateTo,
-        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, pageable
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly,
+        pageable
     );
   }
 
@@ -257,7 +262,7 @@ class ActivitySearchServiceTest {
         null, null, null, null, null, null,
         null, null, null, null, null, null,
         null, null, null, null, null, null,
-        null, null, null
+        null, null, null, null
     );
 
     Pageable pageable = PageRequest.of(0, 10, defaultSort);
@@ -273,7 +278,7 @@ class ActivitySearchServiceTest {
         null, null, null, null, null, null,
         null, null, null, null, null, null,
         null, null, null, null, null, null,
-        null, null, null, pageable
+        null, null, null, null, pageable
     )).thenReturn(mockPage);
 
     List<ActivitySearchResponseDto> result = activitySearchService
@@ -298,7 +303,7 @@ class ActivitySearchServiceTest {
         null, null, null, null, 2025, null,
         null, null, null, null, null, null,
         null, null, null, null, null, null,
-        null, null, null
+        null, null, null, null
     );
 
     Pageable pageable = PageRequest.of(0, 10, defaultSort);
@@ -315,7 +320,7 @@ class ActivitySearchServiceTest {
         null, null, null, null, 2025, null,
         null, null, null, null, null, null,
         null, null, null, null, null, null,
-        null, null, null, pageable
+        null, null, null, null, pageable
     )).thenReturn(emptyPage);
 
     List<ActivitySearchResponseDto> result = activitySearchService
@@ -337,7 +342,7 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable))).thenReturn(
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable))).thenReturn(
         mockPage);
 
     ActivitySearchPageResponseDto result =
@@ -348,7 +353,7 @@ class ActivitySearchServiceTest {
 
     verify(activitySearchRepository, times(1)).searchTestingActivities(any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable));
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable));
   }
 
   @Test
@@ -364,7 +369,7 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable))).thenReturn(
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable))).thenReturn(
         mockPage);
 
     ActivitySearchPageResponseDto result =
@@ -382,7 +387,7 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), eq(pageable))).thenReturn(mockPage);
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(pageable))).thenReturn(mockPage);
 
     List<ActivitySearchResponseDto> result =
         activitySearchService.searchTestingActivities(activitySearchRequestDto, pageable, null,
@@ -399,7 +404,7 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), eq(pageable))).thenReturn(mockPage);
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(pageable))).thenReturn(mockPage);
 
     List<ActivitySearchResponseDto> result =
         activitySearchService.searchTestingActivities(activitySearchRequestDto, pageable, "   ",
@@ -418,7 +423,7 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(
         mockPage);
 
     activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable, sortBy,
@@ -428,7 +433,7 @@ class ActivitySearchServiceTest {
 
     verify(activitySearchRepository).searchTestingActivities(any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), pageableCaptor.capture());
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), pageableCaptor.capture());
 
     Pageable actualPageable = pageableCaptor.getValue();
 
