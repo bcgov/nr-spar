@@ -25,7 +25,7 @@ import { getMultiOptList } from '../../../../../utils/MultiOptionsUtils';
 import type { TestCodeType } from '../../../../../types/consep/TestingSearchType';
 import {
   advDateTypes, DATE_FORMAT, errorMessages, initialErrorValue, maxEndDate,
-  minStartDate, SAFE_MARGIN, species, testRanks
+  minStartDate, SAFE_MARGIN, testRanks
 } from '../constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from '../definitions';
