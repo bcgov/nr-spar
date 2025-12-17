@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { type MRT_TableInstance } from 'material-react-table';
 import {
   Row, Column, Button, Modal, Tooltip
@@ -38,6 +38,11 @@ const TestListTable = ({
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const tableRef = useRef<MRT_TableInstance<TestingSearchResponseType> | null>(null);
   const [showTestHistory, setShowTestHistory] = useState(false);
+
+  useEffect(() => {
+    // Reset row selection whenever new data is set
+    tableRef.current?.resetRowSelection?.();
+  }, [data]);
 
   const actions = [
     {
