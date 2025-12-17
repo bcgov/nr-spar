@@ -63,7 +63,9 @@ const ApiConfig = {
 
   purityTest: `${oracleServerHost}/api/purity-tests`,
 
-  searchTestActivities: `${oracleServerHost}/api/testing-activities`
+  searchTestActivities: `${oracleServerHost}/api/testing-activities`,
+
+  testCodes: `${oracleServerHost}/api/test-codes`
 };
 
 export default ApiConfig;

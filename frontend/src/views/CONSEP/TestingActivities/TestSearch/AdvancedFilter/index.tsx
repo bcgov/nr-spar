@@ -18,7 +18,7 @@ import {
 import ComboBoxEvent from '../../../../../types/ComboBoxEvent';
 import { capitalizeFirstLetter } from '../../../../../utils/StringUtils';
 import useWindowSize from '../../../../../hooks/UseWindowSize';
-import { getTestCategoryCodes } from '../../../../../api-service/consep/searchTestingActivitiesAPI';
+import { getTestCategoryCodes } from '../../../../../api-service/consep/testCodesAPI';
 
 import type { TestCodeType } from '../../../../../types/consep/TestingSearchType';
 import {
