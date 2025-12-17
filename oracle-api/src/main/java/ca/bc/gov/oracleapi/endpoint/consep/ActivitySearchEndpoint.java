@@ -1,5 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static ca.bc.gov.oracleapi.ConsepOracleQueryConstants.ALLOWED_SORT_FIELDS;
+
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.TestCodeDto;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -20,15 +23,12 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-import static ca.bc.gov.oracleapi.ConsepOracleQueryConstants.ALLOWED_SORT_FIELDS;
 
 /**
  * This class exposes testing search resources API.
@@ -42,6 +42,16 @@ public class ActivitySearchEndpoint {
   private final ActivitySearchService activitySearchService;
   private final TestCodeService testCodeService;
 
+  /**
+   * Retrieve testing activities based on search criteria, pagination, and sorting options.
+   *
+   * @param filter The search criteria used to filter testing activities.
+   * @param unpaged Whether to return all results without pagination.
+   * @param sortBy The field name used to sort the results.
+   * @param sortDirection The direction of sorting, either ascending or descending.
+   * @param paginationParameters Pagination information including page number and size.
+   * @return An {@link ActivitySearchPageResponseDto} containing the matching testing activities.
+   */
   @PostMapping("/search")
   @ApiResponses(value = {
       @ApiResponse(
@@ -88,6 +98,11 @@ public class ActivitySearchEndpoint {
     );
   }
 
+  /**
+   * Retrieve all valid test activity type codes.
+   *
+   * @return A list of {@link TestCodeDto} representing test activity type codes.
+   */
   @GetMapping("/type-codes")
   @ApiResponses(value = {
     @ApiResponse(
@@ -105,6 +120,11 @@ public class ActivitySearchEndpoint {
     return testCodeService.getTestTypeCodes();
   }
 
+  /**
+   * Retrieve all valid test category codes.
+   *
+   * @return A list of {@link TestCodeDto} representing test category codes.
+   */
   @GetMapping("/category-codes")
   @ApiResponses(value = {
     @ApiResponse(
@@ -122,6 +142,11 @@ public class ActivitySearchEndpoint {
     return testCodeService.getTestCategoryCodes();
   }
 
+  /**
+   * Retrieve all valid request type codes used for testing activities.
+   *
+   * @return A list of {@link TestCodeDto} representing request type codes.
+   */
   @GetMapping("/request-types")
   @ApiResponses(value = {
       @ApiResponse(
