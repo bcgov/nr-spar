@@ -390,7 +390,7 @@ const PurityContent = () => {
 
   const {
     data: impurityCodes,
-    isLoading: isImpurityCodesLoading,
+    isPending: isImpurityCodesPending,
     isError: isImpurityCodesError
   } = impurityCodesQuery;
 
@@ -413,20 +413,18 @@ const PurityContent = () => {
           id={`impurity-${impurity.debrisRank}-${impurity.debrisCategory}`}
           name={fieldsConfig.impuritySection.secondaryfieldName}
           items={impurityCodes ?? []}
-          placeholder={
-    (() => {
-      if (isImpurityCodesLoading) return 'Loading debris types...';
-      if (isImpurityCodesError) return 'Failed to load debris types';
-      return fieldsConfig.impuritySection.placeholder;
-    })()
-  }
+          placeholder={(() => {
+            if (isImpurityCodesPending) return 'Loading debris types...';
+            if (isImpurityCodesError) return 'Failed to load debris types';
+            return fieldsConfig.impuritySection.placeholder;
+          })()}
           titleText={
-    impurity.debrisRank === 1
-      ? fieldsConfig.impuritySection.secondaryfieldName
-      : ''
-  }
+            impurity.debrisRank === 1
+              ? fieldsConfig.impuritySection.secondaryfieldName
+              : ''
+          }
           value={impurity.debrisCategory}
-          disabled={isImpurityCodesLoading || isImpurityCodesError}
+          disabled={isImpurityCodesPending || isImpurityCodesError}
           onChange={(e: ComboBoxEvent) => {
             const { selectedItem } = e;
             if (!selectedItem) {
