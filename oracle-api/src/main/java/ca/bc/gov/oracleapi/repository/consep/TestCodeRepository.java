@@ -34,6 +34,7 @@ public interface TestCodeRepository extends JpaRepository<TestCodeEntity, String
         WHERE t.columnName = :activity
           AND t.effectiveDate <= CURRENT_DATE
           AND (t.expiryDate IS NULL OR t.expiryDate >= CURRENT_DATE)
+        ORDER BY t.codeArgument
         """)
   List<Object[]> findCodesByActivity(String activity);
 }

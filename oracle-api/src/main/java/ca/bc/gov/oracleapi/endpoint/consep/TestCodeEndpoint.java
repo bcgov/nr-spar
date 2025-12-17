@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import ca.bc.gov.oracleapi.dto.consep.TestCodeDto;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.TestCodeService;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -68,14 +69,24 @@ public class TestCodeEndpoint {
       description = "Successfully retrieved all valid codes for the specified activity."
     ),
     @ApiResponse(
-      responseCode = "401",
+      responseCode = "401", 
       description = "Access token is missing or invalid",
       content = @Content(schema = @Schema(implementation = Void.class))
-    )
-  })
-  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+    )})
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public List<String> getCodesByActivity(
-      @RequestParam String activity) {
+    @Parameter(
+      description = """
+      Activity name used to filter test codes.
+      This value corresponds to the columnName field in TestCodeEntity.
+      Must be a non-blank string.
+          """, 
+      required = true, 
+      example = "SEEDLOT_TEST") 
+    @RequestParam String activity) {
+    if (activity == null || activity.trim().isEmpty()) {
+      throw new IllegalArgumentException("activity must not be blank");
+    }
     return testCodeService.getCodesByColumnActivity(activity);
   }
 }
