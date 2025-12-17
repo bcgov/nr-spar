@@ -22,7 +22,8 @@ import { mkConfig, generateCsv, download } from 'export-to-csv';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
-import { searchTestingActivities, getTestTypeCodes } from '../../../../api-service/consep/searchTestingActivitiesAPI';
+import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
+import { getTestTypeCodes } from '../../../../api-service/consep/testCodesAPI';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import type {
   TestingSearchResponseType,

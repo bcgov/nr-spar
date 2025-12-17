@@ -112,26 +112,6 @@ class ActivitySearchEndpointTest {
                 .getMessage().contains("Invalid sort field")));
   }
 
-  @Test
-  void getTestTypeCodes_shouldReturnList() throws Exception {
-    List<TestCodeDto> mockCodes = List.of(new TestCodeDto("TT1", "TEST type 1"));
-    when(testCodeService.getTestTypeCodes()).thenReturn(mockCodes);
-
-    mockMvc.perform(get("/api/testing-activities/type-codes").with(csrf()))
-        .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].code").value("TT1"));
-  }
-
-  @Test
-  void getTestCategoryCodes_shouldReturnList() throws Exception {
-    List<TestCodeDto> mockCodes = List.of(new TestCodeDto("CAT1", "Category 1"));
-    when(testCodeService.getTestCategoryCodes()).thenReturn(mockCodes);
-
-    mockMvc.perform(get("/api/testing-activities/category-codes").with(csrf()))
-        .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].code").value("CAT1"));
-  }
-
   private ActivitySearchRequestDto createDummyRequestDto() {
     return new ActivitySearchRequestDto(List.of("00098"), "D1", "D1", null,
         LocalDate.of(1997, 10, 1), LocalDate.of(1998, 10, 31), false, true, "RTS19981299A", "RTS",

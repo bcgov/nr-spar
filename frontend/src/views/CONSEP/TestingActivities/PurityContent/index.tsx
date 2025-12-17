@@ -35,7 +35,7 @@ import {
 } from '../../../../types/consep/TestingActivityType';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
-import { getCodesByActivity } from '../../../../api-service/consep/searchTestingActivitiesAPI';
+import { getCodesByActivity } from '../../../../api-service/consep/testCodesAPI';
 import { deleteImpurity, patchImpurities } from '../../../../api-service/consep/impuritiesAPI';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';

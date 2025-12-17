@@ -2,7 +2,7 @@ import ApiConfig from '../ApiConfig';
 import api from '../api';
 
 import { ActivitySearchRequest } from '../../views/CONSEP/TestingActivities/TestSearch/definitions';
-import { PaginatedTestingSearchResponseType, TestCodeType } from '../../types/consep/TestingSearchType';
+import { PaginatedTestingSearchResponseType } from '../../types/consep/TestingSearchType';
 
 export const searchTestingActivities = (
   filter: ActivitySearchRequest,
@@ -20,19 +20,4 @@ export const searchTestingActivities = (
 
   return api.post(url, filter)
     .then((res): PaginatedTestingSearchResponseType => res.data);
-};
-
-export const getTestTypeCodes = () => {
-  const url = `${ApiConfig.searchTestActivities}/type-codes`;
-  return api.get(url).then((res): TestCodeType[] => res.data);
-};
-
-export const getTestCategoryCodes = () => {
-  const url = `${ApiConfig.searchTestActivities}/category-codes`;
-  return api.get(url).then((res): TestCodeType[] => res.data);
-};
-
-export const getCodesByActivity = (activity: string) => {
-  const url = `${ApiConfig.searchTestActivities}/codes-by-activity?activity=${encodeURIComponent(activity)}`;
-  return api.get(url).then((res): string[] => res.data);
 };
