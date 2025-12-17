@@ -131,6 +131,9 @@ public record ActivitySearchRequestDto(
     @Schema(description = "Genetic class code: A = A Class, B = B Class",
         allowableValues = {"A", "B"})
     @Pattern(regexp = "[AB]", message = "geneticClassCode must be 'A' or 'B'")
-    String geneticClassCode
+    String geneticClassCode,
+
+    @Schema(description = "Filter for family lot numbers only (lot numbers starting with 'F')")
+    Boolean familyLotsOnly
 ) {
 }
