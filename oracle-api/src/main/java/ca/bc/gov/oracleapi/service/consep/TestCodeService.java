@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.TestCodeDto;
+import ca.bc.gov.oracleapi.entity.consep.TestCodeEntity;
 import ca.bc.gov.oracleapi.repository.consep.TestCodeRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +43,27 @@ public class TestCodeService {
         .stream()
         .map(obj -> new TestCodeDto(
             (String) obj[0],
-            (String) obj[1]
-        ))
+            (String) obj[1]))
+        .toList();
+  }
+  
+  /**
+   * Retrieves all valid code values for a specific test-code activity.
+   * <p>
+   * The {@code activity} parameter represents a value of the
+   * {@code columnName} field in {@link TestCodeEntity}, such as
+   * {@code "DEBRIS_TYPE_CD"}, rather than an arbitrary database column name.
+   * Only codes that are currently effective (effectiveDate <= today and
+   * expiryDate >= today or null) are returned.
+   *
+   * @param activity the test code activity identifier (e.g. "DEBRIS_TYPE_CD")
+   *                 used to filter codes by {@code TestCodeEntity.columnName}
+   * @return list of valid code values as strings, sorted for consistent display
+   */
+  public List<String> getCodesByColumnActivity(String activity) {
+    return testCodeRepository.findCodesByActivity(activity)
+        .stream()
+        .map(obj -> (String) obj[0])
         .toList();
   }
 }

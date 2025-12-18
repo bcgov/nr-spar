@@ -86,4 +86,29 @@ class TestCodeServiceTest {
     // Assert
     assertThat(result).isEmpty();
   }
+
+  @Test
+  void getCodesByColumnActivity_shouldReturnListOfCodes() {
+    // Arrange
+    String activity = "TEST_ACTIVITY";
+    when(testCodeRepository.findCodesByActivity(activity)).thenReturn(List.of(
+        new Object[] { "CODE1" },
+        new Object[] { "CODE2" }));
+    // Act
+    List<String> result = testCodeService.getCodesByColumnActivity(activity);
+    // Assert
+    assertThat(result).hasSize(2);
+    assertThat(result).containsExactly("CODE1", "CODE2");
+  }
+  
+  @Test
+  void getCodesByColumnActivity_shouldReturnEmptyListIfNoData() {
+    // Arrange
+    String activity = "TEST_ACTIVITY";
+    when(testCodeRepository.findCodesByActivity(activity)).thenReturn(List.of());
+    // Act
+    List<String> result = testCodeService.getCodesByColumnActivity(activity);
+    // Assert
+    assertThat(result).isEmpty(); 
+  }
 }

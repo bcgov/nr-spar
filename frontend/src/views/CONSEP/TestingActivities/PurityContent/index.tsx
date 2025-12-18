@@ -35,6 +35,7 @@ import {
 } from '../../../../types/consep/TestingActivityType';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
+import { getCodesByActivity } from '../../../../api-service/consep/testCodesAPI';
 import { deleteImpurity, patchImpurities } from '../../../../api-service/consep/impuritiesAPI';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
@@ -76,6 +77,11 @@ const PurityContent = () => {
     queryKey: ['riaKey', riaKey],
     queryFn: () => testingActivitiesAPI('purityTest', 'getDataByRiaKey', { riaKey }),
     refetchOnMount: true
+  });
+
+  const impurityCodesQuery = useQuery({
+    queryKey: ['impurityCodes'],
+    queryFn: () => getCodesByActivity('DEBRIS_TYPE_CD')
   });
 
   const updateImpuritiesMutation = useMutation({
@@ -382,6 +388,12 @@ const PurityContent = () => {
     }
   ];
 
+  const {
+    data: impurityCodes,
+    isPending: isImpurityCodesPending,
+    isError: isImpurityCodesError
+  } = impurityCodesQuery;
+
   const impurityPerReplicate = (impurity: SingleImpurityType, replicateNumber: number) => (
     <Row key={`impurity-${replicateNumber}-${impurity.debrisRank}`} className="consep-impurity-content">
       <Column sm={2} md={2} lg={2} xlg={2}>
@@ -400,16 +412,25 @@ const PurityContent = () => {
           className="consep-impurity-combobox"
           id={`impurity-${impurity.debrisRank}-${impurity.debrisCategory}`}
           name={fieldsConfig.impuritySection.secondaryfieldName}
-          items={fieldsConfig.impuritySection.options}
-          placeholder={fieldsConfig.impuritySection.placeholder}
+          items={impurityCodes ?? []}
+          placeholder={(() => {
+            if (isImpurityCodesPending) return 'Loading debris types...';
+            if (isImpurityCodesError) return 'Failed to load debris types';
+            return fieldsConfig.impuritySection.placeholder;
+          })()}
           titleText={
             impurity.debrisRank === 1
               ? fieldsConfig.impuritySection.secondaryfieldName
               : ''
           }
           value={impurity.debrisCategory}
+          disabled={isImpurityCodesPending || isImpurityCodesError}
           onChange={(e: ComboBoxEvent) => {
             const { selectedItem } = e;
+            if (!selectedItem) {
+              return;
+            }
+
             updateImpuritiesMutation.mutate([
               {
                 replicateNumber,
@@ -419,6 +440,7 @@ const PurityContent = () => {
             ]);
           }}
         />
+
       </Column>
       <Column className="consep-impurity-content-remove" sm={1} md={1} lg={2} xlg={2}>
         <Button
