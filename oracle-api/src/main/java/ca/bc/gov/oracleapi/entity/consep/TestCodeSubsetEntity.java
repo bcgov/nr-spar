@@ -1,6 +1,6 @@
 package ca.bc.gov.oracleapi.entity.consep;
 
-import ca.bc.gov.oracleapi.entity.consep.idclass.TestCodeId;
+import ca.bc.gov.oracleapi.entity.consep.idclass.TestCodeSubsetId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
@@ -16,21 +16,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "CNS_T_CODE_LIST_TABLE", schema = "CONSEP")
+@Table(name = "CNS_T_CODE_SUBSET_TBL", schema = "CONSEP")
 @Schema(
     description = "Represents the mapping of codes with expanded results and effective/expiry dates"
 )
-public class TestCodeEntity {
-
+public class TestCodeSubsetEntity {
   @EmbeddedId
-  private TestCodeId id;
+  private TestCodeSubsetId id;
 
-  @Column(name = "EXPANDED_RESULT", length = 120)
-  private String expandedResult;
+  @Column(name = "IN_EFFECT_DATE")
+  private LocalDate inEffectDate;
 
-  @Column(name = "EFFECTIVE_DATE")
-  private LocalDate effectiveDate;
-
-  @Column(name = "EXPIRY_DATE")
-  private LocalDate expiryDate;
+  @Column(name = "EXPIRED_DATE")
+  private LocalDate expiredDate;
 }

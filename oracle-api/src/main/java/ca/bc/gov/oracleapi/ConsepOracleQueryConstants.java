@@ -1,7 +1,6 @@
 package ca.bc.gov.oracleapi;
 
 import java.util.Set;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -25,10 +24,12 @@ public class ConsepOracleQueryConstants {
         AND (:germinatorTrayId IS NULL OR a.germinatorTrayId = :germinatorTrayId)
         AND (:seedWithdrawalStartDate IS NULL OR a.seedWithdrawalDate >= :seedWithdrawalStartDate)
         AND (:seedWithdrawalEndDate IS NULL OR a.seedWithdrawalDate <= :seedWithdrawalEndDate)
-        AND (:includeHistoricalTests IS NULL OR :includeHistoricalTests = true OR a.requestSkey != 0)
+        AND (:includeHistoricalTests IS NULL OR :includeHistoricalTests = true
+          OR a.requestSkey != 0)
         AND (:germTestsOnly IS NULL OR :germTestsOnly = false OR a.germTestInd = -1)
         AND (:requestId IS NULL OR a.reqId = SUBSTRING(:requestId, 1, 11))
-        AND (:requestId IS NULL OR LENGTH(:requestId) < 12 OR a.itemId = SUBSTRING(:requestId, 12, 1))
+        AND (:requestId IS NULL OR LENGTH(:requestId) < 12
+          OR a.itemId = SUBSTRING(:requestId, 12, 1))
         AND (:requestType IS NULL OR a.requestTypeSt = :requestType)
         AND (:requestYear IS NULL OR a.requestYr = :requestYear)
         AND (:orchardId IS NULL OR a.orchardId = :orchardId)
@@ -47,15 +48,15 @@ public class ConsepOracleQueryConstants {
         AND (:completeStatus IS NULL OR a.testCompleteInd = :completeStatus)
         AND (:acceptanceStatus IS NULL OR a.acceptResultInd = :acceptanceStatus)
         AND (:geneticClassCode IS NULL OR a.geneticClassCode = :geneticClassCode)
-        AND (:familyLotsOnly IS NULL OR :familyLotsOnly = false OR LOWER(a.seedlotDisplay) LIKE 'f%')
+        AND (:familyLotsOnly IS NULL OR :familyLotsOnly = false
+          OR LOWER(a.seedlotDisplay) LIKE 'f%')
       """;
 
   public static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-    "activityTypeCd", "activityId", "seedlotDisplay", "germinatorTrayId",
-    "seedWithdrawalDate", "requestId", "testCategoryCd", "testRank", "species",
-    "actualBeginDtTm", "actualEndDtTm", "revisedStartDt", "revisedEndDt",
-    "germTrayAssignment", "testCompleteInd", "acceptResultInd", "geneticClassCode",
-    "requestItem", "pv", "currentTestInd", "significntStsInd", "riaComment", 
-    "seedlotSample"
+      "activityTypeCd", "activityId", "seedlotDisplay", "germinatorTrayId",
+      "seedWithdrawalDate", "requestId", "testCategoryCd", "testRank", "species",
+      "actualBeginDtTm", "actualEndDtTm", "revisedStartDt", "revisedEndDt",
+      "germTrayAssignment", "testCompleteInd", "acceptResultInd", "geneticClassCode",
+      "requestItem", "pv", "currentTestInd", "significntStsInd", "riaComment", "seedlotSample"
   );
 }

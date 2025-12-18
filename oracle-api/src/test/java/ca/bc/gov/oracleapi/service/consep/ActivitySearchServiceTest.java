@@ -342,8 +342,8 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable))).thenReturn(
-        mockPage);
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(sortedPageable))).thenReturn(mockPage);
 
     ActivitySearchPageResponseDto result =
         activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable,
@@ -353,7 +353,8 @@ class ActivitySearchServiceTest {
 
     verify(activitySearchRepository, times(1)).searchTestingActivities(any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable));
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(sortedPageable));
   }
 
   @Test
@@ -369,8 +370,8 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(sortedPageable))).thenReturn(
-        mockPage);
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(sortedPageable))).thenReturn(mockPage);
 
     ActivitySearchPageResponseDto result =
         activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable,
@@ -387,7 +388,8 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(pageable))).thenReturn(mockPage);
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(pageable))).thenReturn(mockPage);
 
     List<ActivitySearchResponseDto> result =
         activitySearchService.searchTestingActivities(activitySearchRequestDto, pageable, null,
@@ -404,7 +406,8 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), eq(pageable))).thenReturn(mockPage);
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(pageable))).thenReturn(mockPage);
 
     List<ActivitySearchResponseDto> result =
         activitySearchService.searchTestingActivities(activitySearchRequestDto, pageable, "   ",
@@ -423,8 +426,8 @@ class ActivitySearchServiceTest {
 
     when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(
-        mockPage);
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(Pageable.class))).thenReturn(mockPage);
 
     activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable, sortBy,
         "asc");
@@ -433,7 +436,8 @@ class ActivitySearchServiceTest {
 
     verify(activitySearchRepository).searchTestingActivities(any(), any(), any(), any(), any(),
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), pageableCaptor.capture());
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        pageableCaptor.capture());
 
     Pageable actualPageable = pageableCaptor.getValue();
 
