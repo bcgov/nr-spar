@@ -190,11 +190,12 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     header: 'Result',
     accessorFn: (row) => {
+      if (row.activityId && row.activityId.startsWith('MC')) {
+        return row.moisturePct;
+      }
       switch (row.activityId) {
         case 'Germ':
           return row.germinationPct;
-        case 'MC':
-          return row.moisturePct;
         case 'SPG':
           return row.seedsPerGram;
         case 'PUR':
@@ -204,11 +205,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
       }
     },
     enableEditing: false,
-    ...tableCellProps(92),
-    Cell: ({ cell }) => {
-      const value = cell.getValue<number | null>();
-      return value != null ? `${value}%` : '';
-    }
+    ...tableCellProps(92)
   },
   {
     accessorKey: 'pv',
@@ -337,25 +334,18 @@ export const formatExportData = {
   Result: {
     header: 'Result',
     value: (row: TestingSearchResponseType) => {
-      switch (row.testCategoryCd) {
-        case 'Germ': {
-          const v = row.germinationPct;
-          return v == null ? '' : `${v}%`;
-        }
-        case 'MC': {
-          const v = row.moisturePct;
-          return v == null ? '' : `${v}%`;
-        }
-        case 'SPG': {
-          const v = row.seedsPerGram;
-          return v == null ? '' : `${v}%`;
-        }
-        case 'PUR': {
-          const v = row.purityPct;
-          return v == null ? '' : `${v}%`;
-        }
+      if (row.activityId && row.activityId.startsWith('MC')) {
+        return row.moisturePct;
+      }
+      switch (row.activityId) {
+        case 'Germ':
+          return row.germinationPct;
+        case 'SPG':
+          return row.seedsPerGram;
+        case 'PUR':
+          return row.purityPct;
         default:
-          return '';
+          return null;
       }
     }
   },
