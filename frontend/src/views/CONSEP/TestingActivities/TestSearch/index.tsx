@@ -429,7 +429,7 @@ const TestSearch = () => {
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('testType', e);
               }}
-              style={{ width: '8rem' }}
+              style={{ width: '9rem' }}
             />
             <ComboBox
               id="activity-type-input"
@@ -440,7 +440,7 @@ const TestSearch = () => {
               onChange={(e: ComboBoxEvent) => {
                 handleComboBoxesChanges('activityId', e);
               }}
-              style={{ width: '8rem' }}
+              style={{ width: '9rem' }}
             />
             <TextInput
               id="germ-tray-input"
