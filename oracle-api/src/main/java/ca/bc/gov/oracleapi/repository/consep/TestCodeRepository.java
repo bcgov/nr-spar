@@ -32,12 +32,12 @@ public interface TestCodeRepository extends JpaRepository<TestCodeEntity, Object
   List<Object[]> findTestCategoryCodes();
 
   @Query("""
-        SELECT t.codeArgument AS code
+        SELECT t.id.codeArgument AS code
         FROM TestCodeEntity t
-        WHERE t.columnName = :activity
+        WHERE t.id.columnName = :activity
           AND t.effectiveDate <= CURRENT_DATE
           AND (t.expiryDate IS NULL OR t.expiryDate >= CURRENT_DATE)
-        ORDER BY t.codeArgument
+        ORDER BY t.id.codeArgument
         """)
   List<Object[]> findCodesByActivity(String activity);
 

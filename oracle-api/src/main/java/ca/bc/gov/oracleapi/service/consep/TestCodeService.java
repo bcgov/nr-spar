@@ -49,7 +49,7 @@ public class TestCodeService {
   
   /**
    * Retrieves all valid code values for a specific test-code activity.
-   * <p>
+   *
    * The {@code activity} parameter represents a value of the
    * {@code columnName} field in {@link TestCodeEntity}, such as
    * {@code "DEBRIS_TYPE_CD"}, rather than an arbitrary database column name.
@@ -68,7 +68,8 @@ public class TestCodeService {
   }
 
   /**
-   * Get all valid request types.
+   * Get all valid request types,
+   * where effective date <= today and expiry date >= today or null.
    *
    * @return list of TestCodeDto
    */

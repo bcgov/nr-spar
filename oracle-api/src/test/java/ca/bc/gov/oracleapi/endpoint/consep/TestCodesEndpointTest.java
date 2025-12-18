@@ -64,7 +64,7 @@ class TestCodesEndpointTest {
     List<TestCodeDto> mockCodes = List.of(new TestCodeDto("ASP", "Additional Seed Processing"));
     when(testCodeService.getRequestTypes()).thenReturn(mockCodes);
 
-    mockMvc.perform(get("/api/testing-activities/request-types").with(csrf()))
+    mockMvc.perform(get("/api/test-codes/request-types").with(csrf()))
         .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].code").value("ASP"));
   }
