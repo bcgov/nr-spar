@@ -378,7 +378,7 @@ public class PurityTestsEndpoint {
    * @return the {@link PurityDebrisDto} updated
    */
   @PatchMapping(
-      value = "debris/{riaKey}",
+      value = "/debris/{riaKey}",
       consumes = "application/json",
       produces = "application/json")
   @Operation(
