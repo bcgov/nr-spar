@@ -18,9 +18,9 @@ import {
 import ComboBoxEvent from '../../../../../types/ComboBoxEvent';
 import { capitalizeFirstLetter } from '../../../../../utils/StringUtils';
 import useWindowSize from '../../../../../hooks/UseWindowSize';
-import { getTestCategoryCodes, getRequestTypes } from '../../../../../api-service/consep/searchTestingActivitiesAPI';
 import getVegCodes from '../../../../../api-service/vegetationCodeAPI';
 import { getMultiOptList } from '../../../../../utils/MultiOptionsUtils';
+import { getRequestTypes, getTestCategoryCodes } from '../../../../../api-service/consep/testCodesAPI';
 
 import type { TestCodeType } from '../../../../../types/consep/TestingSearchType';
 import {

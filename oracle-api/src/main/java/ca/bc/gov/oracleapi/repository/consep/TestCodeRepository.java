@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+
 /**
  * This interface enables test code entities from CONSEP to be queried in the database.
  */
@@ -29,6 +30,16 @@ public interface TestCodeRepository extends JpaRepository<TestCodeEntity, Object
           AND (t.expiryDate IS NULL OR t.expiryDate >= CURRENT_DATE)
         """)
   List<Object[]> findTestCategoryCodes();
+
+  @Query("""
+        SELECT t.codeArgument AS code
+        FROM TestCodeEntity t
+        WHERE t.columnName = :activity
+          AND t.effectiveDate <= CURRENT_DATE
+          AND (t.expiryDate IS NULL OR t.expiryDate >= CURRENT_DATE)
+        ORDER BY t.codeArgument
+        """)
+  List<Object[]> findCodesByActivity(String activity);
 
   @Query("""
         SELECT

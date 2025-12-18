@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,15 +15,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.TestCodeDto;
 import ca.bc.gov.oracleapi.service.consep.ActivitySearchService;
-import ca.bc.gov.oracleapi.service.consep.TestCodeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -45,9 +42,6 @@ class ActivitySearchEndpointTest {
 
   @MockBean
   private ActivitySearchService activitySearchService;
-
-  @MockBean
-  private TestCodeService testCodeService;
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -110,36 +104,6 @@ class ActivitySearchEndpointTest {
         .andExpect(result -> assertTrue(
             Objects.requireNonNull(result.getResolvedException())
                 .getMessage().contains("Invalid sort field")));
-  }
-
-  @Test
-  void getTestTypeCodes_shouldReturnList() throws Exception {
-    List<TestCodeDto> mockCodes = List.of(new TestCodeDto("TT1", "TEST type 1"));
-    when(testCodeService.getTestTypeCodes()).thenReturn(mockCodes);
-
-    mockMvc.perform(get("/api/testing-activities/type-codes").with(csrf()))
-        .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].code").value("TT1"));
-  }
-
-  @Test
-  void getTestCategoryCodes_shouldReturnList() throws Exception {
-    List<TestCodeDto> mockCodes = List.of(new TestCodeDto("CAT1", "Category 1"));
-    when(testCodeService.getTestCategoryCodes()).thenReturn(mockCodes);
-
-    mockMvc.perform(get("/api/testing-activities/category-codes").with(csrf()))
-        .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].code").value("CAT1"));
-  }
-
-  @Test
-  void getRequestTypes_shouldReturnList() throws Exception {
-    List<TestCodeDto> mockCodes = List.of(new TestCodeDto("ASP", "Additional Seed Processing"));
-    when(testCodeService.getRequestTypes()).thenReturn(mockCodes);
-
-    mockMvc.perform(get("/api/testing-activities/request-types").with(csrf()))
-        .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].code").value("ASP"));
   }
 
   private ActivitySearchRequestDto createDummyRequestDto() {
