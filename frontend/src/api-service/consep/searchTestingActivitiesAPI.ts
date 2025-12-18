@@ -19,5 +19,5 @@ export const searchTestingActivities = (
   }
 
   return api.post(url, filter)
-    .then((res): PaginatedTestingSearchResponseType => res.data);
+    .then((res: { data: PaginatedTestingSearchResponseType }) => res.data);
 };

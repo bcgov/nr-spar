@@ -28,6 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestCodeEndpoint {
   private final TestCodeService testCodeService;
 
+  /**
+   * Retrieve all valid test activity type codes.
+   *
+   * @return A list of {@link TestCodeDto} representing test activity type codes.
+   */
   @GetMapping("/type")
   @ApiResponses(value = {
     @ApiResponse(
@@ -45,6 +50,11 @@ public class TestCodeEndpoint {
     return testCodeService.getTestTypeCodes();
   }
 
+  /**
+   * Retrieve all valid test category codes.
+   *
+   * @return A list of {@link TestCodeDto} representing test category codes.
+   */
   @GetMapping("/category")
   @ApiResponses(value = {
     @ApiResponse(
@@ -75,18 +85,41 @@ public class TestCodeEndpoint {
     )})
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public List<String> getCodesByActivity(
-    @Parameter(
-      description = """
-      Activity name used to filter test codes.
-      This value corresponds to the columnName field in TestCodeEntity.
-      Must be a non-blank string.
-          """, 
-      required = true, 
-      example = "SEEDLOT_TEST") 
-    @RequestParam String activity) {
+      @Parameter(
+        description = """
+        Activity name used to filter test codes.
+        This value corresponds to the columnName field in TestCodeEntity.
+        Must be a non-blank string.
+        """,
+        required = true,
+        example = "SEEDLOT_TEST")
+      @RequestParam String activity
+  ) {
     if (activity == null || activity.trim().isEmpty()) {
       throw new IllegalArgumentException("activity must not be blank");
     }
     return testCodeService.getCodesByColumnActivity(activity);
+  }
+
+  /**
+   * Retrieve all valid request type codes used for testing activities.
+   *
+   * @return A list of {@link TestCodeDto} representing request type codes.
+   */
+  @GetMapping("/request-types")
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Successfully retrieved all valid request types."
+      ),
+      @ApiResponse(
+          responseCode = "401",
+          description = "Access token is missing or invalid",
+          content = @Content(schema = @Schema(implementation = Void.class))
+      )
+  })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public List<TestCodeDto> getRequestTypes() {
+    return testCodeService.getRequestTypes();
   }
 }
