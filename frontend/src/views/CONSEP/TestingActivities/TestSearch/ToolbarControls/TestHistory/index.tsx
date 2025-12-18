@@ -35,7 +35,7 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponse
       const selectedSeedlots = selectedRows.map((row) => row.original.seedlotDisplay);
       return searchTestingActivities(
         { lotNumbers: selectedSeedlots },
-        undefined,
+        'actualEndDtTm',
         'asc',
         false,
         size,
