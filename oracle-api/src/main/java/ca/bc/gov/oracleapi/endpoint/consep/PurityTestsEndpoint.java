@@ -391,6 +391,7 @@ public class PurityTestsEndpoint {
           @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Replicate not found")
       })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<PurityDebrisDto> updateDebrisField(
       @Parameter(
           name = "riaKey",
