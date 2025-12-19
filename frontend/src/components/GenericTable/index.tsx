@@ -34,6 +34,7 @@ type Props<T extends Record<string, any>> = {
   enableColumnActions?: boolean;
   enableColumnPinning?: boolean;
   enableEditing?: boolean;
+  enableStickyHeader?: boolean;
   isCompacted?: boolean;
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
@@ -88,6 +89,7 @@ const GenericTable = <T extends Record<string, any>>({
   enableColumnActions = false,
   enableColumnPinning = false,
   enableEditing = true,
+  enableStickyHeader = false,
   isCompacted = false,
   renderRowActions,
   onRowClick,
@@ -210,6 +212,7 @@ const GenericTable = <T extends Record<string, any>>({
     enableColumnActions,
     enableColumnPinning,
     enableEditing,
+    enableStickyHeader,
     createDisplayMode: 'row',
     editDisplayMode: 'table',
     renderRowActions: renderRowActions

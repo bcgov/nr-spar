@@ -124,6 +124,7 @@ const TestListTable = ({
           enableColumnPinning
           enableSorting
           manualSorting
+          enableStickyHeader
           sorting={sorting}
           onSortingChange={onSortingChange}
           isLoading={isLoading}
