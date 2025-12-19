@@ -64,26 +64,39 @@ class TestCodeServiceTest {
   }
 
   @Test
+  void getRequestTypes_shouldReturnMappedDtos() {
+    when(testCodeRepository.findRequestTypes()).thenReturn(List.of(
+        new Object[]{"ASP", "Additional Seed Processing"},
+        new Object[]{"CSP", "Cone and Seed Processing"}
+    ));
+
+    List<TestCodeDto> result = testCodeService.getRequestTypes();
+
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0).code()).isEqualTo("ASP");
+    assertThat(result.get(0).description()).isEqualTo("Additional Seed Processing");
+    assertThat(result.get(1).code()).isEqualTo("CSP");
+    assertThat(result.get(1).description()).isEqualTo("Cone and Seed Processing");
+  }
+
+  @Test
   void getTestTypeCodes_shouldReturnEmptyListIfNoData() {
-    // Arrange
     when(testCodeRepository.findTestTypeCodes()).thenReturn(List.of());
-
-    // Act
     List<TestCodeDto> result = testCodeService.getTestTypeCodes();
-
-    // Assert
     assertThat(result).isEmpty();
   }
 
   @Test
   void getTestCategoryCodes_shouldReturnEmptyListIfNoData() {
-    // Arrange
     when(testCodeRepository.findTestCategoryCodes()).thenReturn(List.of());
-
-    // Act
     List<TestCodeDto> result = testCodeService.getTestCategoryCodes();
+    assertThat(result).isEmpty();
+  }
 
-    // Assert
+  @Test
+  void getRequestTypes_shouldReturnEmptyListIfNoData() {
+    when(testCodeRepository.findRequestTypes()).thenReturn(List.of());
+    List<TestCodeDto> result = testCodeService.getRequestTypes();
     assertThat(result).isEmpty();
   }
 

@@ -78,26 +78,8 @@ export const activityIds: string[] = [
   'XRY'
 ];
 
-export const requestTypeSt: string[] = [
-  'ASP', 'CSP', 'DWD', 'DWP',
-  'RSP', 'RTS', 'SRQ', 'SSP',
-  'TST', 'USP'
-];
-
 export const testRanks: string[] = [
   'A', 'B', 'C', 'P'
-];
-
-export const species: string[] = [
-  'AC', 'ACT', 'ALNUCRI', 'ARCTUVA',
-  'AT', 'BA', 'BG', 'BL',
-  'BP', 'CW', 'DG', 'DR',
-  'EP', 'FDC', 'FDI', 'HM',
-  'HW', 'LARIDEC', 'LARIKAE', 'LD',
-  'LS', 'LT', 'LW', 'PA',
-  'PF', 'PINUSYL', 'PJ', 'PLC',
-  'PLI', 'PW', 'PY', 'SB',
-  'SS', 'SX', 'SXS', 'YC'
 ];
 
 const tableCellProps = (size?: number, alignment: 'left' | 'right' | 'center' = 'right') => ({

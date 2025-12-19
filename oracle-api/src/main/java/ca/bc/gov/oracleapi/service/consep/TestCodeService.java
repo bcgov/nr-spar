@@ -49,7 +49,7 @@ public class TestCodeService {
   
   /**
    * Retrieves all valid code values for a specific test-code activity.
-   * <p>
+   *
    * The {@code activity} parameter represents a value of the
    * {@code columnName} field in {@link TestCodeEntity}, such as
    * {@code "DEBRIS_TYPE_CD"}, rather than an arbitrary database column name.
@@ -64,6 +64,22 @@ public class TestCodeService {
     return testCodeRepository.findCodesByActivity(activity)
         .stream()
         .map(obj -> (String) obj[0])
+        .toList();
+  }
+
+  /**
+   * Get all valid request types,
+   * where effective date <= today and expiry date >= today or null.
+   *
+   * @return list of TestCodeDto
+   */
+  public List<TestCodeDto> getRequestTypes() {
+    return testCodeRepository.findRequestTypes()
+        .stream()
+        .map(obj -> new TestCodeDto(
+            (String) obj[0], // code
+            (String) obj[1]  // description
+        ))
         .toList();
   }
 }
