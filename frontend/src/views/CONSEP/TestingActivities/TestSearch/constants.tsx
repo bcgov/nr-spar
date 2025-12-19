@@ -82,6 +82,22 @@ export const testRanks: string[] = [
   'A', 'B', 'C', 'P'
 ];
 
+const getResultValue = (row: TestingSearchResponseType) => {
+  if (row.activityId && row.activityId.startsWith('M')) {
+    return row.moisturePct;
+  }
+  switch (row.activityId) {
+    case 'Germ':
+      return row.germinationPct;
+    case 'SPG':
+      return row.seedsPerGram;
+    case 'PUR':
+      return row.purityPct;
+    default:
+      return null;
+  }
+};
+
 const tableCellProps = (size?: number, alignment: 'left' | 'right' | 'center' = 'right') => ({
   muiTableHeadCellProps: {
     align: alignment,
@@ -171,21 +187,7 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   },
   {
     header: 'Result',
-    accessorFn: (row) => {
-      if (row.activityId && row.activityId.startsWith('MC')) {
-        return row.moisturePct;
-      }
-      switch (row.activityId) {
-        case 'Germ':
-          return row.germinationPct;
-        case 'SPG':
-          return row.seedsPerGram;
-        case 'PUR':
-          return row.purityPct;
-        default:
-          return null;
-      }
-    },
+    accessorFn: (row) => getResultValue(row),
     enableEditing: false,
     ...tableCellProps(92)
   },
@@ -315,21 +317,7 @@ export const formatExportData = {
   },
   Result: {
     header: 'Result',
-    value: (row: TestingSearchResponseType) => {
-      if (row.activityId && row.activityId.startsWith('MC')) {
-        return row.moisturePct;
-      }
-      switch (row.activityId) {
-        case 'Germ':
-          return row.germinationPct;
-        case 'SPG':
-          return row.seedsPerGram;
-        case 'PUR':
-          return row.purityPct;
-        default:
-          return null;
-      }
-    }
+    value: (row: TestingSearchResponseType) => getResultValue(row)
   },
   pv: {
     header: 'PV',
