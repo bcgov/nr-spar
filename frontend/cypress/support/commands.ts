@@ -2,9 +2,7 @@
 /// <reference path="../global.d.ts" />
 
 import '@cypress/code-coverage/support';
-import {
-  ONE_MINUTE, THIRTY_SECONDS, HALF_SECOND, TYPE_DELAY
-} from '../constants';
+import { HALF_SECOND, TYPE_DELAY } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 import prefix from '../../src/styles/classPrefix';
 
@@ -114,7 +112,7 @@ Cypress.Commands.add('saveSeedlotRegFormProgress', () => {
 
   cy.get('.seedlot-registration-button-row')
     .find('button.form-action-btn')
-    .contains('Changes saved!', { timeout: THIRTY_SECONDS + ONE_MINUTE });
+    .contains('Changes saved!');
 });
 
 Cypress.Commands.add('closeMenuIfOpen', () => {
