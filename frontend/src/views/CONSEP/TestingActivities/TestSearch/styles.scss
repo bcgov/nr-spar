@@ -6,7 +6,7 @@
   }
 
   .consep-test-search-filters {
-    margin-top: 2rem;
+    margin-top: 1rem;
     margin-bottom: 1rem;
 
     & > div:first-child {
@@ -43,13 +43,13 @@
     }
 
     .lot-input {
-      width: 9rem;
+      width: 25rem;
       min-width: 6rem;
     }
 
     .germ-tray-input {
-      width: 6.25rem;
-      min-width: 6.5rem;
+      width: 7.5rem;
+      min-width: 7.5rem;
     }
 
     #lot-input,
@@ -70,7 +70,6 @@
 
   .concep-test-search-table-container {
     margin-top: 1rem;
-    margin-bottom: 2rem;
     background-color: var(--#{vars.$bcgov-prefix}-layer-01);
 
     .concep-test-search-table-title {
@@ -123,6 +122,10 @@
         span {
           padding-right: 0;
         }
+      }
+
+      .MuiTableContainer-root {
+        max-height: calc(100vh - 24rem);
       }
     }
 
