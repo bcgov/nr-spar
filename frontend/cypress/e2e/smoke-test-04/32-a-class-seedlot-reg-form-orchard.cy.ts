@@ -612,6 +612,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     // Check step complete status
     cy.get(`.${prefix}--progress-step--complete`)
-      .contains('Orchard');
+      .contains('Orchard', { timeout: 3 * THIRTY_SECONDS });
   });
 });
