@@ -43,7 +43,7 @@ export default defineConfig({
     retries: {
       runMode: 0
     },
-    defaultCommandTimeout: 5 * ONE_MINUTE,
+    defaultCommandTimeout: ONE_MINUTE,
     video: true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
