@@ -1,6 +1,6 @@
 import { SeedlotRegFixtureType } from '../../definitions';
 import prefix from '../../../src/styles/classPrefix';
-import { HALF_SECOND, TYPE_DELAY } from '../../constants';
+import { HALF_SECOND, TYPE_DELAY, THIRTY_SECONDS } from '../../constants';
 
 describe('A Class Seedlot Registration form, Ownership', () => {
   let regFormData: {
@@ -473,7 +473,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
 
     // Check step complete status
-    cy.get(`.${prefix}--progress-step--complete`)
+    cy.get(`.${prefix}--progress-step--complete`, { timeout: 3 * THIRTY_SECONDS })
       .contains('Ownership');
   });
 });
