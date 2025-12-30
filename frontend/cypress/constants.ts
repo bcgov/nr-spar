@@ -5,6 +5,7 @@ export const THREE_SECONDS = 3 * ONE_SECOND;
 export const TEN_SECONDS = 10 * ONE_SECOND;
 export const FIFTEEN_SECONDS = 15 * ONE_SECOND;
 export const THIRTY_SECONDS = 3 * TEN_SECONDS;
+export const ONE_MINUTE = 6 * TEN_SECONDS;
 export const TYPE_DELAY = 50;
 
 export const INVALID_EMAIL = 'test.com.br';
