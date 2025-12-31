@@ -82,7 +82,10 @@ export const testRanks: string[] = [
   'A', 'B', 'C', 'P'
 ];
 
-const getResultValue = (row: TestingSearchResponseType, defaultValue: any = null) => {
+const getResultValue = (
+  row: TestingSearchResponseType,
+  defaultValue: string | number | null = null
+) => {
   if (row.activityId && row.activityId.startsWith('M')) {
     return row.moisturePct;
   }

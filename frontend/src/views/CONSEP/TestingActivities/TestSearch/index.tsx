@@ -120,10 +120,16 @@ const TestSearch = () => {
         pageSize: data.pageSize
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      let errorMessage = 'Search failed.';
+      if (error instanceof Error && error.message) {
+        errorMessage = `Search failed with the error: ${error.message}`;
+      } else if (typeof error === 'string') {
+        errorMessage = `Search failed with the error: ${error}`;
+      }
       setAlert({
         status: 'error',
-        message: `Search failed with the error: ${error.message}`
+        message: errorMessage
       });
     }
   });
@@ -151,8 +157,7 @@ const TestSearch = () => {
 
       const formattedContent = data.content.map(
         (row: TestingSearchResponseType) => {
-          const out: Record<string, any> = {};
-
+          const out: Record<string, string | number | null> = {};
           (
             Object.entries(formatExportData) as Array<
               [
@@ -164,7 +169,6 @@ const TestSearch = () => {
             if (!isVisible(String(key))) return;
             out[cfg.header] = cfg.value(row);
           });
-
           return out;
         }
       );
@@ -172,10 +176,13 @@ const TestSearch = () => {
       const csv = generateCsv(csvConfig)(formattedContent);
       download(csvConfig)(csv);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error && error.message
+        ? error.message
+        : 'Unknown error';
       setAlert({
         status: 'error',
-        message: `Failed to export data: ${error?.message || 'Unknown error'}`
+        message: `Failed to export data: ${message}`
       });
     }
   });
