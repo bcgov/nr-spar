@@ -101,7 +101,7 @@ const App: React.FC = () => {
   }, [signed, selectedClientRoles]);
 
   const handleRedirectTo403 = () => {
-    browserRouter.navigate('/403');
+    browserRouter.navigate(ROUTES.FOUR_OH_THREE);
   };
 
   return (
