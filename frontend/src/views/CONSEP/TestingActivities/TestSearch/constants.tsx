@@ -82,7 +82,7 @@ export const testRanks: string[] = [
   'A', 'B', 'C', 'P'
 ];
 
-const getResultValue = (row: TestingSearchResponseType) => {
+const getResultValue = (row: TestingSearchResponseType, defaultValue: any = null) => {
   if (row.activityId && row.activityId.startsWith('M')) {
     return row.moisturePct;
   }
@@ -94,7 +94,7 @@ const getResultValue = (row: TestingSearchResponseType) => {
     case 'PUR':
       return row.purityPct;
     default:
-      return null;
+      return defaultValue;
   }
 };
 
@@ -317,7 +317,7 @@ export const formatExportData = {
   },
   Result: {
     header: 'Result',
-    value: (row: TestingSearchResponseType) => getResultValue(row)
+    value: (row: TestingSearchResponseType) => getResultValue(row, '')
   },
   pv: {
     header: 'PV',

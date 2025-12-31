@@ -41,7 +41,13 @@ import {
   formatExportData, columnVisibilityLocalStorageKey
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
-import { ActivitySearchRequest, ActivitySearchValidation, Sorting } from './definitions';
+import {
+  ActivitySearchRequest,
+  ActivitySearchValidation,
+  Sorting,
+  ExportMutationVariables,
+  VisibilityConfig
+} from './definitions';
 import './styles.scss';
 
 const csvConfig = mkConfig({
@@ -114,7 +120,7 @@ const TestSearch = () => {
         pageSize: data.pageSize
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       setAlert({
         status: 'error',
         message: `Search failed with the error: ${error.message}`
@@ -123,52 +129,50 @@ const TestSearch = () => {
   });
 
   const exportMutation = useMutation({
-    mutationFn: (filter:
-      ActivitySearchRequest) => searchTestingActivities(filter, undefined, undefined, true, 0, 0),
+    mutationFn: ({
+      filter,
+      sortBy,
+      sortDirection
+    }: ExportMutationVariables) => searchTestingActivities(
+      filter,
+      sortBy,
+      sortDirection,
+      true,
+      0,
+      0
+    ),
 
-    onSuccess: (data) => {
-      const visibilityConfig = JSON.parse(
+    onSuccess: (data: PaginatedTestingSearchResponseType) => {
+      const visibilityConfig: VisibilityConfig = JSON.parse(
         localStorage.getItem(columnVisibilityLocalStorageKey) || '{}'
       );
 
       const isVisible = (key: string) => visibilityConfig[key] !== false;
 
-          type FilteredRow = Record<
-            keyof TestingSearchResponseType,
-            TestingSearchResponseType[keyof TestingSearchResponseType] | undefined
-          >;
+      const formattedContent = data.content.map(
+        (row: TestingSearchResponseType) => {
+          const out: Record<string, any> = {};
 
-          const filterItem = (item: TestingSearchResponseType): FilteredRow => Object
-            .keys(item).reduce((acc, key) => {
-              if (!isVisible(key)) return acc;
-              if (!Object.hasOwnProperty.call(formatExportData, key)) return acc;
+          (
+            Object.entries(formatExportData) as Array<
+              [
+                keyof typeof formatExportData,
+                (typeof formatExportData)[keyof typeof formatExportData]
+              ]
+            >
+          ).forEach(([key, cfg]) => {
+            if (!isVisible(String(key))) return;
+            out[cfg.header] = cfg.value(row);
+          });
 
-              const k = key as keyof TestingSearchResponseType;
-              acc[k] = item[k];
-              return acc;
-            }, {} as FilteredRow);
+          return out;
+        }
+      );
 
-          const formatItem = (item: FilteredRow) => Object.entries(item).reduce((acc, [key]) => {
-            const config = formatExportData[key as keyof typeof formatExportData];
-
-            if (config) {
-              acc[config.header] = config.value(item as TestingSearchResponseType);
-            }
-
-            if (key === 'Result') {
-              acc.Result = formatExportData.Result.value(item as TestingSearchResponseType);
-            }
-
-            return acc;
-          }, {} as Record<string, any>);
-
-          const filteredContent: FilteredRow[] = data.content.map(filterItem);
-          const formattedContent = filteredContent.map(formatItem);
-
-          const csv = generateCsv(csvConfig)(formattedContent);
-          download(csvConfig)(csv);
+      const csv = generateCsv(csvConfig)(formattedContent);
+      download(csvConfig)(csv);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       setAlert({
         status: 'error',
         message: `Failed to export data: ${error?.message || 'Unknown error'}`
@@ -190,7 +194,12 @@ const TestSearch = () => {
   };
 
   const handleExportData = () => {
-    exportMutation.mutate(searchParams);
+    const sort = sorting[0];
+    exportMutation.mutate({
+      filter: searchParams,
+      sortBy: sort?.id,
+      sortDirection: sort?.desc ? 'desc' : 'asc'
+    });
   };
 
   const testTypeQuery = useQuery({
@@ -221,7 +230,7 @@ const TestSearch = () => {
         sortDirection: sort?.desc ? 'desc' : 'asc'
       },
       {
-        onSuccess: (data) => {
+        onSuccess: (data: PaginatedTestingSearchResponseType) => {
           setSearchResults(data.content);
           setPaginationInfo({
             totalElements: data.totalElements,

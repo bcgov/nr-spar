@@ -46,3 +46,13 @@ export type Sorting = {
   id: string;
   desc: boolean;
 };
+
+export interface ExportMutationVariables {
+  filter: ActivitySearchRequest;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+}
+
+export interface VisibilityConfig {
+  [key: string]: boolean;
+}
