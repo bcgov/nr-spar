@@ -47,7 +47,7 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
 
     boolean allowed = matchUserRoleWithResourceRoles(rolesRequired, userRoles);
     if (!allowed) {
-      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+      response.setStatus(HttpStatus.FORBIDDEN.value());
     }
 
     return allowed;
