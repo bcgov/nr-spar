@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.7</version>
+		<version>3.5.9</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ca.bc.gov</groupId>
@@ -40,7 +40,7 @@
 		<sonar.organization>bcgov-sonarcloud</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <oci.revision>${project.version}</oci.revision>
-    <hibernate.version>6.6.2.Final</hibernate.version>
+    <hibernate.version>6.6.40.Final</hibernate.version>
 	</properties>
 
 	<profiles>
@@ -264,7 +264,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.13</version>
+				<version>0.8.14</version>
 				<configuration>
 					<skip>${jacoco.skip}</skip>
 					<excludes>
@@ -374,7 +374,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.11.3</version>
+				<version>3.12.0</version>
 				<configuration>
 					<source>17</source>
 					<doctitle>Javadoc Documentation for ${project.name} ${project.version}</doctitle>
@@ -385,7 +385,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.6.1</version>
+				<version>3.6.2</version>
 				<executions>
 					<execution>
 						<id>default-cli</id>
@@ -430,7 +430,7 @@
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>11.0.1</version>
+						<version>11.1.0</version>
 					</dependency>
 				</dependencies>
 				<configuration>
@@ -477,7 +477,7 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>10.5</version>
+				<version>10.6</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
