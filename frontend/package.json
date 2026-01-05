@@ -14,7 +14,7 @@
     "@mui/x-date-pickers": "^8.0.0",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-devtools": "^5.83.0",
-    "@tsconfig/node22": "^22.0.0",
+    "@tsconfig/node24": "^24.0.0",
     "@types/luxon": "^3.4.2",
     "@types/react-beforeunload": "^2.1.5",
     "@types/react-dom": "^18.0.11",
