@@ -117,6 +117,14 @@ const TestSearch = () => {
         pageNumber: data.pageNumber,
         pageSize: data.pageSize
       });
+      if (data.missingLotNumbers && data.missingLotNumbers.length > 0) {
+        setAlert({
+          status: 'warning',
+          message: `The following lot numbers were not found: ${data.missingLotNumbers.join(
+            ', '
+          )}. Please check the lot numbers and try again.`
+        });
+      }
     },
     onError: (error: unknown) => {
       let errorMessage = 'Search failed.';

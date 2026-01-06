@@ -23,6 +23,9 @@ public record ActivitySearchPageResponseDto(
     int pageNumber,
 
     @Schema(description = "Size of the page")
-    int pageSize
+    int pageSize,
+
+    @Schema(description = "Lot numbers that were requested but not found")
+    List<String> missingLotNumbers
 ) {
 }

@@ -211,6 +211,7 @@ class ActivitySearchServiceTest {
     assertThat(pageResponse.totalPages()).isEqualTo(1);
     assertThat(pageResponse.pageNumber()).isEqualTo(0);
     assertThat(pageResponse.pageSize()).isEqualTo(10);
+    assertThat(pageResponse.missingLotNumbers()).containsExactly(seedlotDisplayFamilylot);
     ActivitySearchResponseDto activitySearchResponseDto = pageResponse.content().get(0);
     assertThat(activitySearchResponseDto.seedlotDisplay()).isEqualTo(seedlotDisplaySeedlot);
     assertThat(activitySearchResponseDto.requestItem()).isEqualTo(requestItem);
@@ -281,14 +282,14 @@ class ActivitySearchServiceTest {
         null, null, null, null, pageable
     )).thenReturn(mockPage);
 
-    List<ActivitySearchResponseDto> result = activitySearchService
-        .searchTestingActivities(emptyRequest, pageable, null, null)
-        .content();
+    ActivitySearchPageResponseDto pageResponse = activitySearchService
+        .searchTestingActivities(emptyRequest, pageable, null, null);
 
-    assertThat(result).hasSize(2);
+    assertThat(pageResponse.content()).hasSize(2);
+    assertThat(pageResponse.missingLotNumbers()).isEmpty();
 
-    ActivitySearchResponseDto firstItem = result.get(0);
-    ActivitySearchResponseDto secondItem = result.get(1);
+    ActivitySearchResponseDto firstItem = pageResponse.content().get(0);
+    ActivitySearchResponseDto secondItem = pageResponse.content().get(1);
 
     assertThat(firstItem.seedlotDisplay()).isEqualTo(seedlotDisplaySeedlot);
     assertThat(secondItem.seedlotDisplay()).isEqualTo(seedlotDisplayFamilylot);
@@ -323,10 +324,11 @@ class ActivitySearchServiceTest {
         null, null, null, null, pageable
     )).thenReturn(emptyPage);
 
-    List<ActivitySearchResponseDto> result = activitySearchService
-        .searchTestingActivities(emptyRequest, pageable, null, null).content();
+    ActivitySearchPageResponseDto pageResponse = activitySearchService
+        .searchTestingActivities(emptyRequest, pageable, null, null);
 
-    assertThat(result).isEmpty();
+    assertThat(pageResponse.content()).isEmpty();
+    assertThat(pageResponse.missingLotNumbers()).isEmpty();
   }
 
   @Test
