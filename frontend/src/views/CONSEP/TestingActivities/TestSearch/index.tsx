@@ -1,4 +1,6 @@
-import React, { ChangeEvent, useRef, useState, useEffect } from 'react';
+import React, {
+  ChangeEvent, useRef, useState, useEffect
+} from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
@@ -63,8 +65,9 @@ const TestSearch = () => {
   const [searchParams, setSearchParams] = useState<ActivitySearchRequest>({});
   const [sorting, setSorting] = useState<Sorting[]>([]);
   const [rawLotInput, setRawLotInput] = useState<string[]>(['', '', '', '', '']);
-  const [validateSearch, setValidateSearch] =
-    useState<ActivitySearchValidation>(iniActSearchValidation);
+  const [
+    validateSearch, setValidateSearch
+  ] = useState<ActivitySearchValidation>(iniActSearchValidation);
   const [openAdvSearch, setOpenAdvSearch] = useState(false);
   const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
@@ -141,8 +144,9 @@ const TestSearch = () => {
   });
 
   const exportMutation = useMutation({
-    mutationFn: ({ filter, sortBy, sortDirection }: ExportMutationVariables) =>
-      searchTestingActivities(filter, sortBy, sortDirection, true, 0, 0),
+    mutationFn: (
+      { filter, sortBy, sortDirection }: ExportMutationVariables
+    ) => searchTestingActivities(filter, sortBy, sortDirection, true, 0, 0),
 
     onSuccess: (data: PaginatedTestingSearchResponseType) => {
       const visibilityConfig: VisibilityConfig = JSON.parse(
@@ -258,23 +262,21 @@ const TestSearch = () => {
     return updated;
   };
 
-  const validateLotNumbers = (lots: string[]) => {
-    return lots.map((lot) => {
-      if (!lot.trim()) {
-        return { error: false, errorMessage: '' };
+  const validateLotNumbers = (lots: string[]) => lots.map((lot) => {
+    if (!lot.trim()) {
+      return { error: false, errorMessage: '' };
+    }
+
+    const isFamily = lot.toUpperCase().startsWith('F');
+    const limit = isFamily ? 13 : 5;
+
+    return lot.length > limit
+      ? {
+        error: true,
+        errorMessage: isFamily ? errorMessages.familyLotMaxChar : errorMessages.lotMaxChar
       }
-
-      const isFamily = lot.toUpperCase().startsWith('F');
-      const limit = isFamily ? 13 : 5;
-
-      return lot.length > limit
-        ? {
-            error: true,
-            errorMessage: isFamily ? errorMessages.familyLotMaxChar : errorMessages.lotMaxChar
-          }
-        : { error: false, errorMessage: '' };
-    });
-  };
+      : { error: false, errorMessage: '' };
+  });
 
   const padSeedlotNumber = (value: string): string => {
     const trimmed = value.trim();
@@ -299,9 +301,7 @@ const TestSearch = () => {
 
     const lots = updatedInputs.map((val) => val.trim()).filter((val) => val.length > 0);
 
-    setSearchParams((prev) =>
-      updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null)
-    );
+    setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
     setValidateSearch((prev) => ({
       ...prev,
       lotNumbers: validateLotNumbers(updatedInputs)
@@ -329,9 +329,7 @@ const TestSearch = () => {
       errorMessage = errorMessages.germTrayMax;
     }
 
-    setSearchParams((prev) =>
-      updateSearchParams(prev, 'germinatorTrayId', Number.isNaN(parsed) ? undefined : parsed)
-    );
+    setSearchParams((prev) => updateSearchParams(prev, 'germinatorTrayId', Number.isNaN(parsed) ? undefined : parsed));
     setValidateSearch((prev) => ({
       ...prev,
       germinatorTray: {
@@ -355,14 +353,14 @@ const TestSearch = () => {
 
       if (type === 'start') {
         seedWithdrawalStartDate = value || undefined;
-        seedWithdrawalEndDate =
-          seedWithdrawalStartDate && !seedWithdrawalEndDate ? maxEndDate : undefined;
+        seedWithdrawalEndDate = seedWithdrawalStartDate
+          && !seedWithdrawalEndDate ? maxEndDate : undefined;
       }
 
       if (type === 'end') {
         seedWithdrawalEndDate = value || undefined;
-        seedWithdrawalStartDate =
-          seedWithdrawalEndDate && !seedWithdrawalStartDate ? minStartDate : undefined;
+        seedWithdrawalStartDate = seedWithdrawalEndDate
+          && !seedWithdrawalStartDate ? minStartDate : undefined;
       }
 
       return {
@@ -396,10 +394,9 @@ const TestSearch = () => {
     }
   };
 
-  const hasValidationErrors = (): boolean =>
-    Object.values(validateSearch).some((field) =>
-      Array.isArray(field) ? field.some((f) => f.error) : field.error
-    );
+  const hasValidationErrors = (): boolean => Object.values(validateSearch).some(
+    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
+  );
 
   return (
     <div className="consep-test-search-content">
@@ -417,7 +414,6 @@ const TestSearch = () => {
           <div className="lot-inputs">
             {rawLotInput.map((value, index) => (
               <TextInput
-                key={`lot-input-${index}`}
                 id={`lot-input-${index}`}
                 value={value}
                 labelText=""
@@ -521,9 +517,7 @@ const TestSearch = () => {
                       .map((val) => val.trim())
                       .filter((val) => val.length > 0)
                       .map(padSeedlotNumber);
-                    setRawLotInput((prev) =>
-                      prev.map((val) => (val.trim() ? padSeedlotNumber(val) : ''))
-                    );
+                    setRawLotInput((prev) => prev.map((val) => (val.trim() ? padSeedlotNumber(val) : '')));
                     const searchParamstoSend = {
                       ...searchParams,
                       lotNumbers: paddedLots.length > 0 ? paddedLots : undefined
