@@ -35,7 +35,7 @@ export type ValidationErrorType = {
 }
 
 export type ActivitySearchValidation = {
-  lotNumbers: ValidationErrorType;
+  lotNumbers: ValidationErrorType[];
   germinatorTray: ValidationErrorType;
   requestId: ValidationErrorType;
   requestYear: ValidationErrorType;

@@ -14,7 +14,8 @@ import {
   ComboBox,
   Button,
   TextInput,
-  InlineNotification
+  InlineNotification,
+  FormLabel
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
 // eslint-disable-next-line import/no-unresolved
@@ -63,7 +64,7 @@ const TestSearch = () => {
     {}
   );
   const [sorting, setSorting] = useState<Sorting[]>([]);
-  const [rawLotInput, setRawLotInput] = useState('');
+  const [rawLotInput, setRawLotInput] = useState<string[]>(['', '', '', '', '']);
   const [validateSearch, setValidateSearch] = useState<ActivitySearchValidation>(
     iniActSearchValidation
   );
@@ -267,45 +268,38 @@ const TestSearch = () => {
   };
 
   const validateLotNumbers = (lots: string[]) => {
-    if (lots.length > 5) {
-      return {
-        error: true,
-        errorMessage: errorMessages.lotMax
-      };
+  return lots.map((lot) => {
+    if (!lot.trim()) {
+      return { error: false, errorMessage: '' };
     }
 
-    const invalidLot = lots.find((lot) => {
-      const isFamily = lot.toUpperCase().startsWith('F');
-      const lengthLimit = isFamily ? 13 : 5;
-      return lot.length > lengthLimit;
-    });
+    const isFamily = lot.toUpperCase().startsWith('F');
+    const limit = isFamily ? 13 : 5;
 
-    if (invalidLot) {
-      const isFamily = invalidLot.toUpperCase().startsWith('F');
-      return {
-        error: true,
-        errorMessage: isFamily
-          ? errorMessages.familyLotMaxChar
-          : errorMessages.lotMaxChar
-      };
-    }
+    return lot.length > limit
+      ? {
+          error: true,
+          errorMessage: isFamily
+            ? errorMessages.familyLotMaxChar
+            : errorMessages.lotMaxChar
+        }
+      : { error: false, errorMessage: '' };
+  });
+};
 
-    return { error: false, errorMessage: '' };
-  };
+  const handleLotInputChange = (index: number, value: string) => {
+    const updatedInputs = [...rawLotInput];
+    updatedInputs[index] = value;
+    setRawLotInput(updatedInputs);
 
-  const handleLotInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setRawLotInput(value);
-
-    const lots = value
-      .split(',')
+    const lots = updatedInputs
       .map((val) => val.trim())
       .filter((val) => val.length > 0);
 
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
     setValidateSearch((prev) => ({
       ...prev,
-      lotNumbers: validateLotNumbers(lots)
+      lotNumbers: validateLotNumbers(updatedInputs)
     }));
     resetAlert();
   };
@@ -408,9 +402,13 @@ const TestSearch = () => {
     }
   };
 
-  const hasValidationErrors = (): boolean => Object.values(
-    validateSearch
-  ).some((field) => field.error);
+  const hasValidationErrors = (): boolean =>
+  Object.values(validateSearch).some((field) =>
+    Array.isArray(field)
+      ? field.some((f) => f.error)
+      : field.error
+  );
+
 
   return (
     <div className="consep-test-search-content">
@@ -423,19 +421,26 @@ const TestSearch = () => {
         <Row className="consep-test-search-title">
           <PageTitle title="Testing activities" />
         </Row>
+        <Row className="consep-test-search-lot-numbers-filter">
+          <FormLabel className="lot-inputs-label">Lot #</FormLabel>
+          <div className="lot-inputs">
+            {rawLotInput.map((value, index) => (
+            <TextInput
+              key={`lot-input-${index}`}
+              id={`lot-input-${index}`}
+              value={value}
+              labelText=""
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                handleLotInputChange(index, e.target.value);
+              }}
+              invalid={validateSearch.lotNumbers[index]?.error}
+              invalidText={validateSearch.lotNumbers[index]?.errorMessage}
+            />
+          ))}
+          </div>
+        </Row>
         <Row className="consep-test-search-filters">
           <Column className="filters-row">
-            <TextInput
-              id="lot-input"
-              className="lot-input"
-              labelText="Lot #"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                handleLotInputChange(e);
-              }}
-              value={rawLotInput}
-              invalid={validateSearch.lotNumbers.error}
-              invalidText={validateSearch.lotNumbers.errorMessage}
-            />
             <ComboBox
               id="test-type-input"
               className="test-type-input"
