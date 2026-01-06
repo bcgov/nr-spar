@@ -1,9 +1,4 @@
-import React, {
-  ChangeEvent,
-  useRef,
-  useState,
-  useEffect
-} from 'react';
+import React, { ChangeEvent, useRef, useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
@@ -36,10 +31,15 @@ import TestListTable from './TestListTable';
 import TablePlaceholder from './TablePlaceholder';
 import AdvancedFilters from './AdvancedFilter';
 import {
-  DATE_FORMAT, activityIds,
-  testSearchCrumbs, iniActSearchValidation,
-  errorMessages, minStartDate, maxEndDate,
-  formatExportData, columnVisibilityLocalStorageKey
+  DATE_FORMAT,
+  activityIds,
+  testSearchCrumbs,
+  iniActSearchValidation,
+  errorMessages,
+  minStartDate,
+  maxEndDate,
+  formatExportData,
+  columnVisibilityLocalStorageKey
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import {
@@ -60,14 +60,11 @@ const csvConfig = mkConfig({
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
-  const [searchParams, setSearchParams] = useState<ActivitySearchRequest>(
-    {}
-  );
+  const [searchParams, setSearchParams] = useState<ActivitySearchRequest>({});
   const [sorting, setSorting] = useState<Sorting[]>([]);
   const [rawLotInput, setRawLotInput] = useState<string[]>(['', '', '', '', '']);
-  const [validateSearch, setValidateSearch] = useState<ActivitySearchValidation>(
-    iniActSearchValidation
-  );
+  const [validateSearch, setValidateSearch] =
+    useState<ActivitySearchValidation>(iniActSearchValidation);
   const [openAdvSearch, setOpenAdvSearch] = useState(false);
   const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
@@ -83,7 +80,7 @@ const TestSearch = () => {
   const [modalAnchor, setModalAnchor] = useState<{
     top: number;
     left: number;
-    width: number
+    width: number;
   } | null>(null);
 
   const advSearchRef = useRef<HTMLButtonElement>(null);
@@ -136,18 +133,8 @@ const TestSearch = () => {
   });
 
   const exportMutation = useMutation({
-    mutationFn: ({
-      filter,
-      sortBy,
-      sortDirection
-    }: ExportMutationVariables) => searchTestingActivities(
-      filter,
-      sortBy,
-      sortDirection,
-      true,
-      0,
-      0
-    ),
+    mutationFn: ({ filter, sortBy, sortDirection }: ExportMutationVariables) =>
+      searchTestingActivities(filter, sortBy, sortDirection, true, 0, 0),
 
     onSuccess: (data: PaginatedTestingSearchResponseType) => {
       const visibilityConfig: VisibilityConfig = JSON.parse(
@@ -156,31 +143,27 @@ const TestSearch = () => {
 
       const isVisible = (key: string) => visibilityConfig[key] !== false;
 
-      const formattedContent = data.content.map(
-        (row: TestingSearchResponseType) => {
-          const out: Record<string, string | number | null> = {};
-          (
-            Object.entries(formatExportData) as Array<
-              [
-                keyof typeof formatExportData,
-                (typeof formatExportData)[keyof typeof formatExportData]
-              ]
-            >
-          ).forEach(([key, cfg]) => {
-            if (!isVisible(String(key))) return;
-            out[cfg.header] = cfg.value(row);
-          });
-          return out;
-        }
-      );
+      const formattedContent = data.content.map((row: TestingSearchResponseType) => {
+        const out: Record<string, string | number | null> = {};
+        (
+          Object.entries(formatExportData) as Array<
+            [
+              keyof typeof formatExportData,
+              (typeof formatExportData)[keyof typeof formatExportData]
+            ]
+          >
+        ).forEach(([key, cfg]) => {
+          if (!isVisible(String(key))) return;
+          out[cfg.header] = cfg.value(row);
+        });
+        return out;
+      });
 
       const csv = generateCsv(csvConfig)(formattedContent);
       download(csvConfig)(csv);
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error && error.message
-        ? error.message
-        : 'Unknown error';
+      const message = error instanceof Error && error.message ? error.message : 'Unknown error';
       setAlert({
         status: 'error',
         message: `Failed to export data: ${message}`
@@ -268,35 +251,49 @@ const TestSearch = () => {
   };
 
   const validateLotNumbers = (lots: string[]) => {
-  return lots.map((lot) => {
-    if (!lot.trim()) {
-      return { error: false, errorMessage: '' };
+    return lots.map((lot) => {
+      if (!lot.trim()) {
+        return { error: false, errorMessage: '' };
+      }
+
+      const isFamily = lot.toUpperCase().startsWith('F');
+      const limit = isFamily ? 13 : 5;
+
+      return lot.length > limit
+        ? {
+            error: true,
+            errorMessage: isFamily ? errorMessages.familyLotMaxChar : errorMessages.lotMaxChar
+          }
+        : { error: false, errorMessage: '' };
+    });
+  };
+
+  const padSeedlotNumber = (value: string): string => {
+    const trimmed = value.trim();
+
+    // Family lot → do NOT pad
+    if (/^f/i.test(trimmed)) {
+      return trimmed;
     }
 
-    const isFamily = lot.toUpperCase().startsWith('F');
-    const limit = isFamily ? 13 : 5;
+    // Seedlot must be numeric
+    if (!/^\d+$/.test(trimmed)) {
+      return trimmed;
+    }
 
-    return lot.length > limit
-      ? {
-          error: true,
-          errorMessage: isFamily
-            ? errorMessages.familyLotMaxChar
-            : errorMessages.lotMaxChar
-        }
-      : { error: false, errorMessage: '' };
-  });
-};
+    return trimmed.padStart(5, '0');
+  };
 
   const handleLotInputChange = (index: number, value: string) => {
     const updatedInputs = [...rawLotInput];
     updatedInputs[index] = value;
     setRawLotInput(updatedInputs);
 
-    const lots = updatedInputs
-      .map((val) => val.trim())
-      .filter((val) => val.length > 0);
+    const lots = updatedInputs.map((val) => val.trim()).filter((val) => val.length > 0);
 
-    setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
+    setSearchParams((prev) =>
+      updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null)
+    );
     setValidateSearch((prev) => ({
       ...prev,
       lotNumbers: validateLotNumbers(updatedInputs)
@@ -324,11 +321,9 @@ const TestSearch = () => {
       errorMessage = errorMessages.germTrayMax;
     }
 
-    setSearchParams((prev) => updateSearchParams(
-      prev,
-      'germinatorTrayId',
-      Number.isNaN(parsed) ? undefined : parsed
-    ));
+    setSearchParams((prev) =>
+      updateSearchParams(prev, 'germinatorTrayId', Number.isNaN(parsed) ? undefined : parsed)
+    );
     setValidateSearch((prev) => ({
       ...prev,
       germinatorTray: {
@@ -339,10 +334,7 @@ const TestSearch = () => {
     resetAlert();
   };
 
-  const handleWithdrawalDateChange = (
-    dates: (string | Date)[],
-    type: 'start' | 'end'
-  ) => {
+  const handleWithdrawalDateChange = (dates: (string | Date)[], type: 'start' | 'end') => {
     const raw = dates?.[0];
     const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
 
@@ -355,20 +347,14 @@ const TestSearch = () => {
 
       if (type === 'start') {
         seedWithdrawalStartDate = value || undefined;
-        seedWithdrawalEndDate = (
-          seedWithdrawalStartDate && !seedWithdrawalEndDate
-        )
-          ? maxEndDate
-          : undefined;
+        seedWithdrawalEndDate =
+          seedWithdrawalStartDate && !seedWithdrawalEndDate ? maxEndDate : undefined;
       }
 
       if (type === 'end') {
         seedWithdrawalEndDate = value || undefined;
-        seedWithdrawalStartDate = (
-          seedWithdrawalEndDate && !seedWithdrawalStartDate
-        )
-          ? minStartDate
-          : undefined;
+        seedWithdrawalStartDate =
+          seedWithdrawalEndDate && !seedWithdrawalStartDate ? minStartDate : undefined;
       }
 
       return {
@@ -403,12 +389,9 @@ const TestSearch = () => {
   };
 
   const hasValidationErrors = (): boolean =>
-  Object.values(validateSearch).some((field) =>
-    Array.isArray(field)
-      ? field.some((f) => f.error)
-      : field.error
-  );
-
+    Object.values(validateSearch).some((field) =>
+      Array.isArray(field) ? field.some((f) => f.error) : field.error
+    );
 
   return (
     <div className="consep-test-search-content">
@@ -425,18 +408,18 @@ const TestSearch = () => {
           <FormLabel className="lot-inputs-label">Lot #</FormLabel>
           <div className="lot-inputs">
             {rawLotInput.map((value, index) => (
-            <TextInput
-              key={`lot-input-${index}`}
-              id={`lot-input-${index}`}
-              value={value}
-              labelText=""
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                handleLotInputChange(index, e.target.value);
-              }}
-              invalid={validateSearch.lotNumbers[index]?.error}
-              invalidText={validateSearch.lotNumbers[index]?.errorMessage}
-            />
-          ))}
+              <TextInput
+                key={`lot-input-${index}`}
+                id={`lot-input-${index}`}
+                value={value}
+                labelText=""
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  handleLotInputChange(index, e.target.value);
+                }}
+                invalid={validateSearch.lotNumbers[index]?.error}
+                invalidText={validateSearch.lotNumbers[index]?.errorMessage}
+              />
+            ))}
           </div>
         </Row>
         <Row className="consep-test-search-filters">
@@ -517,12 +500,7 @@ const TestSearch = () => {
               />
             </DatePicker>
             <div className="filters-row-buttons">
-              <Button
-                ref={advSearchRef}
-                size="md"
-                kind="tertiary"
-                onClick={toggleAdvSearch}
-              >
+              <Button ref={advSearchRef} size="md" kind="tertiary" onClick={toggleAdvSearch}>
                 Filters
               </Button>
               <Button
@@ -531,7 +509,17 @@ const TestSearch = () => {
                 size="md"
                 onClick={() => {
                   if (Object.keys(searchParams).length > 0) {
-                    const searchParamstoSend = { ...searchParams };
+                    const paddedLots = rawLotInput
+                      .map((val) => val.trim())
+                      .filter((val) => val.length > 0)
+                      .map(padSeedlotNumber);
+                    setRawLotInput((prev) =>
+                      prev.map((val) => (val.trim() ? padSeedlotNumber(val) : ''))
+                    );
+                    const searchParamstoSend = {
+                      ...searchParams,
+                      lotNumbers: paddedLots.length > 0 ? paddedLots : undefined
+                    };
                     if (searchParamstoSend.testType === 'SA') {
                       searchParamstoSend.testType = 'GSA';
                     } else if (searchParamstoSend.testType === 'SE') {
@@ -552,64 +540,51 @@ const TestSearch = () => {
             </div>
           </Column>
         </Row>
-        {
-          openAdvSearch && modalAnchor && (
-            <AdvancedFilters
-              searchParams={searchParams}
-              setSearchParams={setSearchParams}
-              validateSearch={validateSearch}
-              setValidateSearch={setValidateSearch}
-              alignTo={modalAnchor}
-              onClose={handleCloseAdvSearch}
-              anchorRef={advSearchRef}
-            />
-          )
-        }
+        {openAdvSearch && modalAnchor && (
+          <AdvancedFilters
+            searchParams={searchParams}
+            setSearchParams={setSearchParams}
+            validateSearch={validateSearch}
+            setValidateSearch={setValidateSearch}
+            alignTo={modalAnchor}
+            onClose={handleCloseAdvSearch}
+            anchorRef={advSearchRef}
+          />
+        )}
       </FlexGrid>
       <FlexGrid>
         <Row className="consep-test-search-alert">
-          {
-            hasValidationErrors()
-              ? (
-                <Column>
-                  <InlineNotification
-                    lowContrast
-                    kind="error"
-                    subtitle="Errors must be fixed to search activities"
-                  />
-                </Column>
-              )
-              : null
-          }
+          {hasValidationErrors() ? (
+            <Column>
+              <InlineNotification
+                lowContrast
+                kind="error"
+                subtitle="Errors must be fixed to search activities"
+              />
+            </Column>
+          ) : null}
         </Row>
         <Row>
           <Column>
             {alert?.message && (
-              <InlineNotification
-                lowContrast
-                kind={alert.status}
-                subtitle={alert?.message}
-              />
+              <InlineNotification lowContrast kind={alert.status} subtitle={alert?.message} />
             )}
           </Column>
         </Row>
       </FlexGrid>
-      {
-        hasSearched
-          ? (
-            <TestListTable
-              data={searchResults}
-              isLoading={searchMutation.isPending}
-              paginationInfo={paginationInfo}
-              sorting={sorting}
-              onPageChange={handlePageChange}
-              onExportData={handleExportData}
-              onSortingChange={handleSortingChange}
-            />
-          ) : (
-            <TablePlaceholder />
-          )
-      }
+      {hasSearched ? (
+        <TestListTable
+          data={searchResults}
+          isLoading={searchMutation.isPending}
+          paginationInfo={paginationInfo}
+          sorting={sorting}
+          onPageChange={handlePageChange}
+          onExportData={handleExportData}
+          onSortingChange={handleSortingChange}
+        />
+      ) : (
+        <TablePlaceholder />
+      )}
     </div>
   );
 };
