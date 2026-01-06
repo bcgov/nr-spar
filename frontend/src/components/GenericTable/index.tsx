@@ -33,6 +33,7 @@ type Props<T extends Record<string, any>> = {
   enableFullScreenToggle?: boolean;
   enableColumnActions?: boolean;
   enableColumnPinning?: boolean;
+  enableColumnResizing?: boolean;
   enableEditing?: boolean;
   enableStickyHeader?: boolean;
   isCompacted?: boolean;
@@ -88,6 +89,7 @@ const GenericTable = <T extends Record<string, any>>({
   enableFullScreenToggle = false,
   enableColumnActions = false,
   enableColumnPinning = false,
+  enableColumnResizing = false,
   enableEditing = true,
   enableStickyHeader = false,
   isCompacted = false,
@@ -211,6 +213,7 @@ const GenericTable = <T extends Record<string, any>>({
     enableFullScreenToggle,
     enableColumnActions,
     enableColumnPinning,
+    enableColumnResizing,
     enableEditing,
     enableStickyHeader,
     createDisplayMode: 'row',

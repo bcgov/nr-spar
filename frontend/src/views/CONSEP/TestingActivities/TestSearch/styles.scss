@@ -137,6 +137,16 @@
 
       .MuiTableContainer-root {
         max-height: calc(100vh - 28.2rem);
+
+        // style for table header resize handle
+        .Mui-TableHeadCell-ResizeHandle-Wrapper {
+          margin-right: -4px;
+        }
+
+        // adjust padding for table header and cells
+        .MuiTableCell-root {
+          padding: 0.6rem 0.4rem;
+        }
       }
     }
 

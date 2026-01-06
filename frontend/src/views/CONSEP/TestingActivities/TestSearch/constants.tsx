@@ -11,7 +11,6 @@ export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
 export const minStartDate = '1900-01-01';
 export const maxEndDate = '9999-12-31';
-const COLOR_GREY_20 = '#DFDFE1'; // light theme token: layer-selected-01
 
 export const formatDateCell = (value: string | null) => {
   if (!value) return '';
@@ -101,52 +100,12 @@ const getResultValue = (
   }
 };
 
-const tableCellProps = (size?: number, alignment: 'left' | 'right' | 'center' = 'right') => ({
+const tableCellProps = (alignment: 'left' | 'right' | 'center' = 'right') => ({
   muiTableHeadCellProps: {
-    align: alignment,
-    ...(size
-      ? {
-        sx: {
-          width: size,
-          minWidth: size,
-          maxWidth: size,
-          // keep the header style aligned with the style in
-          // frontend/src/components/GenericTable/index.tsx,
-          // otherwise the header style inside GenericTable will be overridden
-          '& .Mui-TableHeadCell-Content-Labels': {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: '0.25rem',
-
-            '& .Mui-TableHeadCell-Content-Wrapper': {
-              order: 1
-            },
-            '& .MuiBadge-root': {
-              order: 2
-            }
-          },
-          padding: '0.6rem 0.2rem'
-        }
-      }
-      : {})
+    align: alignment
   },
   muiTableBodyCellProps: {
-    align: alignment,
-    ...(size
-      ? {
-        sx: {
-          width: size,
-          minWidth: size,
-          maxWidth: size,
-          padding: '0.6rem 0.2rem',
-          '&:hover': {
-            outline: 'none',
-            backgroundColor: COLOR_GREY_20
-          }
-        }
-      }
-      : {})
+    align: alignment
   }
 });
 
@@ -155,57 +114,64 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'seedlotDisplay',
     header: 'Lot #',
     enableEditing: false,
-    size: 115,
-    ...tableCellProps(115, 'left')
+    size: 80,
+    ...tableCellProps('left')
   },
   {
     accessorKey: 'requestItem',
     header: 'Request ID',
     enableEditing: false,
     size: 120,
-    ...tableCellProps(120, 'left')
+    ...tableCellProps('left')
   },
   {
     accessorKey: 'species',
     header: 'Sp',
     enableEditing: false,
-    ...tableCellProps(100, 'left')
+    size: 90,
+    ...tableCellProps('left')
   },
   {
     accessorKey: 'testRank',
     header: 'Rnk',
     enableEditing: false,
-    ...tableCellProps(65, 'left')
+    size: 70,
+    ...tableCellProps('left')
   },
   {
     accessorKey: 'testCategoryCd',
     header: 'Cat',
     enableEditing: false,
-    ...tableCellProps(65, 'left')
+    size: 70,
+    ...tableCellProps('left')
   },
   {
     accessorKey: 'activityId',
     header: 'Act',
     enableEditing: false,
-    ...tableCellProps(65, 'left')
+    size: 70,
+    ...tableCellProps('left')
   },
   {
     header: 'Result',
     accessorFn: (row) => getResultValue(row),
     enableEditing: false,
-    ...tableCellProps(78)
+    size: 90,
+    ...tableCellProps()
   },
   {
     accessorKey: 'pv',
     header: 'PV',
     enableEditing: false,
-    ...tableCellProps(75)
+    size: 70,
+    ...tableCellProps()
   },
   {
     accessorKey: 'currentTestInd',
     header: 'Curr',
     enableEditing: false,
-    ...tableCellProps(70, 'left'),
+    size: 70,
+    ...tableCellProps('left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -219,7 +185,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'testCompleteInd',
     header: 'Com',
     enableEditing: false,
-    ...tableCellProps(70, 'left'),
+    size: 75,
+    ...tableCellProps('left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -233,7 +200,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'acceptResultInd',
     header: 'Acc',
     enableEditing: false,
-    ...tableCellProps(70, 'left'),
+    size: 70,
+    ...tableCellProps('left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -247,7 +215,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'significntStsInd',
     header: 'Sig',
     enableEditing: false,
-    ...tableCellProps(70, 'left'),
+    size: 70,
+    ...tableCellProps('left'),
     Cell: ({ cell }: { cell: MRT_Cell<TestingSearchResponseType> }) => {
       const value = cell.getValue();
       return value === -1 ? (
@@ -261,28 +230,32 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'seedWithdrawalDate',
     header: 'Wdrwl Date',
     enableEditing: false,
-    ...tableCellProps(120, 'left'),
+    size: 120,
+    ...tableCellProps('left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'revisedEndDt',
     header: 'Sch End Date',
     enableEditing: false,
-    ...tableCellProps(130, 'left'),
+    size: 135,
+    ...tableCellProps('left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualBeginDtTm',
     header: 'Start Date',
     enableEditing: false,
-    ...tableCellProps(105, 'left'),
+    size: 110,
+    ...tableCellProps('left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actualEndDtTm',
     header: 'End Date',
     enableEditing: false,
-    ...tableCellProps(100, 'left'),
+    size: 105,
+    ...tableCellProps('left'),
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
 
@@ -290,7 +263,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
     accessorKey: 'riaComment',
     header: 'Comments',
     enableEditing: false,
-    ...tableCellProps(1200, 'left')
+    size: 1200,
+    ...tableCellProps('left')
   }
 ];
 
