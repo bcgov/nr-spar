@@ -21,8 +21,8 @@ public interface ActivitySearchRepository extends
   @Query(value = ConsepOracleQueryConstants.TESTING_ACTIVITY_SEARCH)
   Page<ActivitySearchResultEntity> searchTestingActivities(
       @Param("lotNumbers") List<String> lotNumbers,
-      @Param("testType") String testType,
-      @Param("activityId") String activityId,
+      @Param("testTypes") List<String> testTypes,
+      @Param("activityIds") List<String> activityIds,
       @Param("germinatorTrayId") Integer germinatorTrayId,
       @Param("seedWithdrawalStartDate") LocalDateTime seedWithdrawalStartDate,
       @Param("seedWithdrawalEndDate") LocalDateTime seedWithdrawalEndDate,
