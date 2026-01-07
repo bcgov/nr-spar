@@ -447,9 +447,9 @@ const TestSearch = () => {
                   }))
                   : []
               }
-              itemToString={(item) => (item ? item.text : '')}
-              onChange={(event) => {
-                handleMultiSelectChanges('testTypes', event.selectedItems.map((it) => it.id));
+              itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+              onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
               }}
               selectionFeedback="top-after-reopen"
             />
@@ -458,9 +458,9 @@ const TestSearch = () => {
               className="activity-type-input"
               titleText="Choose activity"
               items={activityIds.map((type) => ({ id: type, text: type }))}
-              itemToString={(item) => (item ? item.text : '')}
-              onChange={(event) => {
-                handleMultiSelectChanges('activityIds', event.selectedItems.map((it) => it.id));
+              itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+              onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
               }}
               selectionFeedback="top-after-reopen"
             />
