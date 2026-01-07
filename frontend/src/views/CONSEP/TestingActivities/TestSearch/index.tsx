@@ -314,7 +314,9 @@ const TestSearch = () => {
     searchField: keyof ActivitySearchRequest,
     data: string[] | null
   ) => {
-    setSearchParams((prev) => updateSearchParams(prev, searchField, data));
+    setSearchParams(
+      (prev) => updateSearchParams(prev, searchField, data && data.length > 0 ? data : null)
+    );
     resetAlert();
   };
 
