@@ -116,7 +116,8 @@ public class ActivitySearchService {
     Page<ActivitySearchResponseDto> dtoPage = results.map(this::toDto);
 
     List<String> missingLotNumbers = List.of();
-    if (requestedLotSet != null && !requestedLotSet.isEmpty()) {
+    if (requestedLotSet != null && !requestedLotSet.isEmpty() && pageable.isPaged()) {
+      // no need to check missing lot numbers when unpaged, because that's for exporting data
       Set<String> foundLotNumbers =
           activitySearchRepository.findExistingLotNumbers(requestedLotSet);
       missingLotNumbers = requestedLotSet.stream()
