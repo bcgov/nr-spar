@@ -107,7 +107,7 @@ class ActivitySearchEndpointTest {
   }
 
   private ActivitySearchRequestDto createDummyRequestDto() {
-    return new ActivitySearchRequestDto(List.of("00098"), "D1", "D1", null,
+    return new ActivitySearchRequestDto(List.of("00098"), List.of("D1"), List.of("D1"), null,
         LocalDate.of(1997, 10, 1), LocalDate.of(1998, 10, 31), false, true, "RTS19981299A", "RTS",
         1998, null, "STD", "A", "PLI", null, null, null, null, null, null, null, null, -1, -1, -1,
         "A", false);

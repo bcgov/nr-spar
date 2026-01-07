@@ -11,10 +11,10 @@ import {
   Column,
   DatePicker,
   DatePickerInput,
-  ComboBox,
   Button,
   TextInput,
-  InlineNotification
+  InlineNotification,
+  FilterableMultiSelect
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
 // eslint-disable-next-line import/no-unresolved
@@ -24,7 +24,6 @@ import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import { getTestTypeCodes } from '../../../../api-service/consep/testCodesAPI';
-import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import type {
   TestingSearchResponseType,
   PaginatedTestingSearchResponseType,
@@ -310,11 +309,11 @@ const TestSearch = () => {
     resetAlert();
   };
 
-  const handleComboBoxesChanges = (
+  const handleMultiSelectChanges = (
     searchField: keyof ActivitySearchRequest,
-    data: ComboBoxEvent
+    data: string[] | null
   ) => {
-    setSearchParams((prev) => updateSearchParams(prev, searchField, data.selectedItem));
+    setSearchParams((prev) => updateSearchParams(prev, searchField, data));
     resetAlert();
   };
 
@@ -436,27 +435,34 @@ const TestSearch = () => {
               invalid={validateSearch.lotNumbers.error}
               invalidText={validateSearch.lotNumbers.errorMessage}
             />
-            <ComboBox
+            <FilterableMultiSelect
               id="test-type-input"
               className="test-type-input"
               titleText="Test type"
-              items={testTypeQuery.data ?? []}
-              selectedItem={searchParams.testType}
-              onChange={(e: ComboBoxEvent) => {
-                handleComboBoxesChanges('testType', e);
+              items={
+                testTypeQuery.data
+                  ? testTypeQuery.data.map((type: string) => ({
+                    id: type,
+                    text: type
+                  }))
+                  : []
+              }
+              itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+              onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
               }}
-              style={{ width: '9rem' }}
+              selectionFeedback="top-after-reopen"
             />
-            <ComboBox
+            <FilterableMultiSelect
               id="activity-type-input"
               className="activity-type-input"
               titleText="Choose activity"
-              items={activityIds}
-              selectedItem={searchParams.activityId}
-              onChange={(e: ComboBoxEvent) => {
-                handleComboBoxesChanges('activityId', e);
+              items={activityIds.map((type) => ({ id: type, text: type }))}
+              itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+              onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
               }}
-              style={{ width: '9rem' }}
+              selectionFeedback="top-after-reopen"
             />
             <TextInput
               id="germ-tray-input"
@@ -527,11 +533,15 @@ const TestSearch = () => {
                 onClick={() => {
                   if (Object.keys(searchParams).length > 0) {
                     const searchParamstoSend = { ...searchParams };
-                    if (searchParamstoSend.testType === 'SA') {
-                      searchParamstoSend.testType = 'GSA';
-                    } else if (searchParamstoSend.testType === 'SE') {
-                      searchParamstoSend.testType = 'GSE';
-                    }
+                    searchParamstoSend.testTypes = (
+                      searchParamstoSend.testTypes ?? []
+                    ).map((t: string) => {
+                      const v = (t ?? '').toLowerCase();
+                      if (v === 'SA') return 'GSA';
+                      if (v === 'SE') return 'GSE';
+                      return t;
+                    });
+
                     searchMutation.mutate({ filter: searchParamstoSend });
                   } else {
                     setAlert({
