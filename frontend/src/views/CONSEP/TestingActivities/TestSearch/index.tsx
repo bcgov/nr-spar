@@ -1,5 +1,8 @@
 import React, {
-  ChangeEvent, useRef, useState, useEffect
+  ChangeEvent,
+  useRef,
+  useState,
+  useEffect
 } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
@@ -66,9 +69,9 @@ const TestSearch = () => {
   const [searchParams, setSearchParams] = useState<ActivitySearchRequest>({});
   const [sorting, setSorting] = useState<Sorting[]>([]);
   const [rawLotInput, setRawLotInput] = useState<string[]>(['', '', '', '', '']);
-  const [
-    validateSearch, setValidateSearch
-  ] = useState<ActivitySearchValidation>(iniActSearchValidation);
+  const [validateSearch, setValidateSearch] = useState<ActivitySearchValidation>(
+    iniActSearchValidation
+  );
   const [openAdvSearch, setOpenAdvSearch] = useState(false);
   const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
