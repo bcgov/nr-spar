@@ -310,7 +310,7 @@ const TestSearch = () => {
     resetAlert();
   };
 
-  const handleComboBoxesChanges = (
+  const handleMultiSelectChanges = (
     searchField: keyof ActivitySearchRequest,
     data: string[] | null
   ) => {
@@ -450,7 +450,7 @@ const TestSearch = () => {
               }
               itemToString={(item) => (item ? item.text : '')}
               onChange={(event) => {
-                handleComboBoxesChanges('testTypes', event.selectedItems.map((it) => it.id));
+                handleMultiSelectChanges('testTypes', event.selectedItems.map((it) => it.id));
               }}
               selectionFeedback="top-after-reopen"
             />
@@ -461,7 +461,7 @@ const TestSearch = () => {
               items={activityIds.map((type) => ({ id: type, text: type }))}
               itemToString={(item) => (item ? item.text : '')}
               onChange={(event) => {
-                handleComboBoxesChanges('activityIds', event.selectedItems.map((it) => it.id));
+                handleMultiSelectChanges('activityIds', event.selectedItems.map((it) => it.id));
               }}
               selectionFeedback="top-after-reopen"
             />
