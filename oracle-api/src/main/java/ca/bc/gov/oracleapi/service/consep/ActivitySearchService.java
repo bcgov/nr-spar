@@ -76,11 +76,32 @@ public class ActivitySearchService {
           .toList();
     }
 
+    List<String> testTypes = null;
+    if (activitySearchRequestDto.testTypes() != null
+        && !activitySearchRequestDto.testTypes().isEmpty()) {
+      testTypes = activitySearchRequestDto.testTypes().stream()
+        .filter(s -> s != null && !s.isBlank())
+        .map(String::trim)
+        .map(String::toUpperCase)
+        .toList();
+      if (testTypes.isEmpty()) testTypes = null;
+    }
+
+    List<String> activityIds = null;
+    if (activitySearchRequestDto.activityIds() != null
+        && !activitySearchRequestDto.activityIds().isEmpty()) {
+      activityIds = activitySearchRequestDto.activityIds().stream()
+        .filter(s -> s != null && !s.isBlank())
+        .map(String::trim)
+        .toList();
+      if (activityIds.isEmpty()) activityIds = null;
+    }
+
     // Fetch paginated results from repository
     Page<ActivitySearchResultEntity> results = activitySearchRepository.searchTestingActivities(
         upperLotNumbers,
-        activitySearchRequestDto.testType(),
-        activitySearchRequestDto.activityId(),
+        testTypes,
+        activityIds,
         activitySearchRequestDto.germinatorTrayId(),
         seedWithdrawalStartDate,
         seedWithdrawalEndDate,

@@ -1,7 +1,7 @@
 export type ActivitySearchRequest = {
   lotNumbers?: string[];
-  testType?: string;
-  activityId?: string;
+  testTypes?: string[];
+  activityIds?: string[];
   germinatorTrayId?: number;
   seedWithdrawalStartDate?: string;
   seedWithdrawalEndDate?: string;

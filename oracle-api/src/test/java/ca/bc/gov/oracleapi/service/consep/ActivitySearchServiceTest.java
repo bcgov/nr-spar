@@ -46,8 +46,8 @@ class ActivitySearchServiceTest {
   private ActivitySearchResultEntity activitySearchResultEntityTwo;
 
   // Test data
-  private List<String> lotNumbers;
-  private String testType, activityId, requestId, requestType, orchardId, testCategoryCd, testRank,
+  private List<String> lotNumbers, testTypes, activityIds;
+  private String requestId, requestType, orchardId, testCategoryCd, testRank,
       species, geneticClassCode, seedlotSample, riaComment, requestItem, pv, seedlotDisplaySeedlot,
       seedlotDisplayFamilylot;
   private Integer germinatorTrayId, requestYear, germTrayAssignment, completeStatus,
@@ -66,8 +66,8 @@ class ActivitySearchServiceTest {
     seedlotDisplaySeedlot = "00098";
     seedlotDisplayFamilylot = "F20082140146";
     lotNumbers = List.of(seedlotDisplaySeedlot, seedlotDisplayFamilylot);
-    testType = "D1";
-    activityId = "D1";
+    testTypes = List.of("D1");
+    activityIds = List.of("D1");
     germinatorTrayId = null;
     seedWithdrawalStartDate = LocalDate.of(1997, 10, 1); // seedWithdrawalDate
     seedWithdrawalEndDate = LocalDate.of(1998, 10, 31); // seedWithdrawalDate
@@ -95,7 +95,7 @@ class ActivitySearchServiceTest {
     familyLotsOnly = false;
 
     activitySearchRequestDto = new ActivitySearchRequestDto(
-        lotNumbers, testType, activityId, germinatorTrayId,
+        lotNumbers, testTypes, activityIds, germinatorTrayId,
         seedWithdrawalStartDate, seedWithdrawalEndDate,
         includeHistoricalTests, germTestsOnly, requestId, requestType,
         requestYear, orchardId, testCategoryCd, testRank, species,
@@ -143,7 +143,7 @@ class ActivitySearchServiceTest {
   private void populateCommonFields(ActivitySearchResultEntity entity) {
     entity.setRequestItem(requestItem);
     entity.setSpecies(species);
-    entity.setActivityId(activityId);
+    entity.setActivityId(activityIds.get(0));
     entity.setTestRank(testRank);
     entity.setCurrentTestInd(currentTestInd);
     entity.setTestCategoryCd(testCategoryCd);
@@ -166,7 +166,7 @@ class ActivitySearchServiceTest {
     entity.setItemId(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
     entity.setSeedlotSample(seedlotSample);
     entity.setRiaSkey(riaSkey);
-    entity.setActivityTypeCd(testType);
+    entity.setActivityTypeCd(testTypes.get(0));
   }
 
   @Test
@@ -190,7 +190,7 @@ class ActivitySearchServiceTest {
     LocalDateTime expectedRevisedEndDateTo   = revisedEndDateTo.atTime(LocalTime.MAX);
 
     when(activitySearchRepository.searchTestingActivities(
-        lotNumbers, testType, activityId, germinatorTrayId,
+        lotNumbers, testTypes, activityIds, germinatorTrayId,
         expectedSeedWithdrawalStartDate, expectedSeedWithdrawalEndDate,
         includeHistoricalTests, germTestsOnly, requestId, requestType,
         requestYear, orchardId, testCategoryCd, testRank, species,
@@ -215,7 +215,7 @@ class ActivitySearchServiceTest {
     assertThat(activitySearchResponseDto.seedlotDisplay()).isEqualTo(seedlotDisplaySeedlot);
     assertThat(activitySearchResponseDto.requestItem()).isEqualTo(requestItem);
     assertThat(activitySearchResponseDto.species()).isEqualTo(species);
-    assertThat(activitySearchResponseDto.activityId()).isEqualTo(activityId);
+    assertThat(activitySearchResponseDto.activityId()).isEqualTo(activityIds.get(0));
     assertThat(activitySearchResponseDto.testRank()).isEqualTo(testRank);
     assertThat(activitySearchResponseDto.currentTestInd()).isEqualTo(currentTestInd);
     assertThat(activitySearchResponseDto.testCategoryCd()).isEqualTo(testCategoryCd);
@@ -239,10 +239,10 @@ class ActivitySearchServiceTest {
         .isEqualTo(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
     assertThat(activitySearchResponseDto.seedlotSample()).isEqualTo(seedlotSample);
     assertThat(activitySearchResponseDto.riaSkey()).isEqualTo(riaSkey);
-    assertThat(activitySearchResponseDto.activityTypeCd()).isEqualTo(testType);
+    assertThat(activitySearchResponseDto.activityTypeCd()).isEqualTo(testTypes.get(0));
 
     verify(activitySearchRepository, times(1)).searchTestingActivities(
-        lotNumbers, testType, activityId, germinatorTrayId,
+        lotNumbers, testTypes, activityIds, germinatorTrayId,
         expectedSeedWithdrawalStartDate, expectedSeedWithdrawalEndDate,
         includeHistoricalTests, germTestsOnly, requestId, requestType,
         requestYear, orchardId, testCategoryCd, testRank, species,

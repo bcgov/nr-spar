@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -20,14 +21,13 @@ public record ActivitySearchRequestDto(
     @Size(max = 5, message = "You can provide up to 5 lot numbers")
     List<@Size(max = 13, message = "Each lot number must be at most 13 characters") String>
     lotNumbers,
+    @Schema(description = "Test activity type codes, used to filter activity_type_cd",
+        maxLength = 3)
+    List<@Size(max = 3) String> testTypes,
 
-    @Schema(description = "Test activity type code, used to filter activity_type_cd")
-    @Size(max = 3)
-    String testType,
-
-    @Schema(description = "Activity ID, used to filter stndrd_activity_id")
-    @Size(max = 3)
-    String activityId,
+    @Schema(description = "Activity IDs, used to filter stndrd_activity_id",
+        maxLength = 3)
+    List<@Size(max = 3) String> activityIds,
 
     @Schema(description = "Germinator Tray ID, used to filter germinator_tray_id")
     @Max(value = 99999, message = "Germinator Tray ID must be at most 5 digits")
