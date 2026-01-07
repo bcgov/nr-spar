@@ -116,7 +116,7 @@ public class ActivitySearchService {
     Page<ActivitySearchResponseDto> dtoPage = results.map(this::toDto);
 
     List<String> missingLotNumbers = List.of();
-    if (requestedLotSet != null) {
+    if (requestedLotSet != null && !requestedLotSet.isEmpty()) {
       Set<String> foundLotNumbers =
           activitySearchRepository.findExistingLotNumbers(requestedLotSet);
       missingLotNumbers = requestedLotSet.stream()

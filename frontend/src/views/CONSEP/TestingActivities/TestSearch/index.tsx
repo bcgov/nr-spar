@@ -419,7 +419,8 @@ const TestSearch = () => {
                 key={`${LOT_INPUT_KEYS[index]}`}
                 id={`lot-input-${index}`}
                 value={value}
-                labelText=""
+                labelText={`Lot # ${index + 1}`}
+                hideLabel
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   handleLotInputChange(index, e.target.value);
                 }}
