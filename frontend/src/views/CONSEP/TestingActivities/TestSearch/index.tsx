@@ -24,7 +24,6 @@ import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import { getTestTypeCodes } from '../../../../api-service/consep/testCodesAPI';
-import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import type {
   TestingSearchResponseType,
   PaginatedTestingSearchResponseType,
@@ -532,7 +531,6 @@ const TestSearch = () => {
                 iconDescription="Search activity"
                 size="md"
                 onClick={() => {
-                  console.log(11111, searchParams);
                   if (Object.keys(searchParams).length > 0) {
                     const searchParamstoSend = { ...searchParams };
                     searchParamstoSend.testTypes = (
