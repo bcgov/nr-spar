@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.ConsepOracleQueryConstants;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -48,5 +49,14 @@ public interface ActivitySearchRepository extends
       @Param("geneticClassCode") String geneticClassCode,
       @Param("familyLotsOnly") Boolean familyLotsOnly,
       Pageable pageable
+  );
+
+  @Query("""
+      select distinct upper(a.seedlotDisplay)
+      from ActivitySearchResultEntity a
+      where upper(a.seedlotDisplay) in :lotNumbers
+      """)
+  Set<String> findExistingLotNumbers(
+      @Param("lotNumbers") Set<String> lotNumbers
   );
 }

@@ -60,6 +60,8 @@ const csvConfig = mkConfig({
   filename: `Testing_Activity_Search_${new Date().toISOString().split('T')[0]}`
 });
 
+const LOT_INPUT_KEYS = ['lot-input-1', 'lot-input-2', 'lot-input-3', 'lot-input-4', 'lot-input-5'] as const;
+
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [searchParams, setSearchParams] = useState<ActivitySearchRequest>({});
@@ -414,6 +416,7 @@ const TestSearch = () => {
           <div className="lot-inputs">
             {rawLotInput.map((value, index) => (
               <TextInput
+                key={`${LOT_INPUT_KEYS[index]}`}
                 id={`lot-input-${index}`}
                 value={value}
                 labelText=""

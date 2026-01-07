@@ -118,17 +118,11 @@ public class ActivitySearchService {
     List<String> missingLotNumbers = List.of();
     if (requestedLotSet != null) {
       Set<String> foundLotNumbers =
-          results.getContent().stream()
-              .map(ActivitySearchResultEntity::getSeedlotDisplay)
-              .filter(s -> s != null && !((String) s).trim().isEmpty())
-              .map(s -> ((String) s).toUpperCase())
-              .collect(java.util.stream.Collectors.toSet());
-
+          activitySearchRepository.findExistingLotNumbers(requestedLotSet);
       missingLotNumbers = requestedLotSet.stream()
           .filter(lot -> !foundLotNumbers.contains(lot))
           .toList();
     }
-
 
     // Wrap into paginated response
     return new ActivitySearchPageResponseDto(

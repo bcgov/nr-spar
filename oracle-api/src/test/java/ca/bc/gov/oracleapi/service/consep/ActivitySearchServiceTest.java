@@ -18,6 +18,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -188,6 +189,10 @@ class ActivitySearchServiceTest {
     LocalDateTime expectedRevisedStartDateTo   = revisedStartDateTo.atTime(LocalTime.MAX);
     LocalDateTime expectedRevisedEndDateFrom   = revisedEndDateFrom.atStartOfDay();
     LocalDateTime expectedRevisedEndDateTo   = revisedEndDateTo.atTime(LocalTime.MAX);
+
+    when(activitySearchRepository.findExistingLotNumbers(
+        eq(Set.of(seedlotDisplaySeedlot, seedlotDisplayFamilylot))
+    )).thenReturn(Set.of(seedlotDisplaySeedlot));
 
     when(activitySearchRepository.searchTestingActivities(
         lotNumbers, testType, activityId, germinatorTrayId,
