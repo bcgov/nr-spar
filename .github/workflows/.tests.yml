@@ -53,7 +53,7 @@ jobs:
 
       - name: Run Cypress CI
         if: steps.triggers.outputs.triggered == 'true'
-        uses: bcgov/action-test-and-analyse@51b50be3bb2522e480ed8eab72735612deff7f15 # v1.4.0
+        uses: bcgov/action-test-and-analyse@87f88c90526b8b05cea760492ff33db4ba6e271b # v1.6.0
         with:
           node_version: "22"
           commands: |
