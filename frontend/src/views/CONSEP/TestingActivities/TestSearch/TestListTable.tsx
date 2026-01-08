@@ -122,6 +122,7 @@ const TestListTable = ({
           onPaginationChange={onPageChange}
           enableRowSelection
           enableColumnPinning
+          enableColumnResizing
           enableSorting
           manualSorting
           enableStickyHeader

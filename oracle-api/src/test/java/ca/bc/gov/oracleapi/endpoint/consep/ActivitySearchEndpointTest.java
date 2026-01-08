@@ -53,7 +53,7 @@ class ActivitySearchEndpointTest {
     ActivitySearchRequestDto requestDto = createDummyRequestDto();
     ActivitySearchResponseDto responseItem = createDummyResponseDto();
     ActivitySearchPageResponseDto pageResponse =
-        new ActivitySearchPageResponseDto(List.of(responseItem), 1L, 1, 0, 20);
+        new ActivitySearchPageResponseDto(List.of(responseItem), 1L, 1, 0, 20, List.of());
 
     when(activitySearchService.searchTestingActivities(any(), any(), any(), any())).thenReturn(
         pageResponse);
@@ -64,7 +64,8 @@ class ActivitySearchEndpointTest {
         .andExpect(jsonPath("$.content", hasSize(1)))
         .andExpect(jsonPath("$.content[0].seedlotDisplay").value("00098"))
         .andExpect(jsonPath("$.content[0].requestItem").value("RTS19981299A"))
-        .andExpect(jsonPath("$.totalElements").value(1));
+        .andExpect(jsonPath("$.totalElements").value(1))
+        .andExpect(jsonPath("$.missingLotNumbers", hasSize(0)));
   }
 
   @Test
@@ -73,7 +74,7 @@ class ActivitySearchEndpointTest {
     ActivitySearchRequestDto requestDto = createDummyRequestDto();
 
     when(activitySearchService.searchTestingActivities(any(), any(), any(), any())).thenReturn(
-        new ActivitySearchPageResponseDto(Collections.emptyList(), 0L, 0, 0, 0));
+        new ActivitySearchPageResponseDto(Collections.emptyList(), 0L, 0, 0, 0, List.of()));
 
     mockMvc.perform(post("/api/testing-activities/search").param("unpaged", "true").with(csrf())
             .contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(requestDto)))

@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -68,12 +69,14 @@ public class ActivitySearchService {
     LocalDateTime revisedEndDateFrom = toStartOfDay(activitySearchRequestDto.revisedEndDateFrom());
     LocalDateTime revisedEndDateTo = toEndOfDay(activitySearchRequestDto.revisedEndDateTo());
     List<String> upperLotNumbers = null;
+    Set<String> requestedLotSet = null;
     if (activitySearchRequestDto.lotNumbers() != null
         && !activitySearchRequestDto.lotNumbers().isEmpty()) {
       upperLotNumbers = activitySearchRequestDto.lotNumbers()
           .stream()
           .map(String::toUpperCase)
           .toList();
+      requestedLotSet = Set.copyOf(upperLotNumbers);
     }
 
     List<String> testTypes = null;
@@ -133,13 +136,24 @@ public class ActivitySearchService {
     // Map entities to DTOs
     Page<ActivitySearchResponseDto> dtoPage = results.map(this::toDto);
 
+    List<String> missingLotNumbers = List.of();
+    if (requestedLotSet != null && !requestedLotSet.isEmpty() && pageable.isPaged()) {
+      // no need to check missing lot numbers when unpaged, because that's for exporting data
+      Set<String> foundLotNumbers =
+          activitySearchRepository.findExistingLotNumbers(requestedLotSet);
+      missingLotNumbers = requestedLotSet.stream()
+          .filter(lot -> !foundLotNumbers.contains(lot))
+          .toList();
+    }
+
     // Wrap into paginated response
     return new ActivitySearchPageResponseDto(
         dtoPage.getContent(),
         dtoPage.getTotalElements(),
         dtoPage.getTotalPages(),
         dtoPage.getNumber(),
-        dtoPage.getSize()
+        dtoPage.getSize(),
+        missingLotNumbers
     );
   }
 

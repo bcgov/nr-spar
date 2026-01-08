@@ -38,6 +38,7 @@ export type PaginationInfoType = {
 
 export type PaginatedTestingSearchResponseType = {
   content: TestingSearchResponseType[];
+  missingLotNumbers?: string[];
 } & PaginationInfoType;
 
 export type TestCodeType = {

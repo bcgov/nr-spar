@@ -5,9 +5,26 @@
     margin-bottom: 0.5rem;
   }
 
+  .consep-test-search-lot-numbers-filter {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    display: block;
+    padding-left: 1rem;
+
+    .lot-inputs-label {
+      margin-block-end: 0.5rem;
+    }
+
+    .lot-inputs {
+      display: flex;
+      gap: 0.25rem;
+      align-items: flex-start;
+    }
+  }
+
   .consep-test-search-filters {
     margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 
     & > div:first-child {
       padding-inline-start: 1rem;
@@ -42,9 +59,10 @@
       }
     }
 
-    .lot-input {
-      width: 25rem;
-      min-width: 6rem;
+    .test-type-input,
+    .activity-type-input {
+      width: 14.5rem;
+      min-width: 7.5rem;
     }
 
     .germ-tray-input {
@@ -52,7 +70,6 @@
       min-width: 7.5rem;
     }
 
-    #lot-input,
     #germ-tray-input {
       width: 100%;
     }
@@ -125,7 +142,17 @@
       }
 
       .MuiTableContainer-root {
-        max-height: calc(100vh - 24rem);
+        max-height: calc(100vh - 28.2rem);
+
+        // style for table header resize handle
+        .Mui-TableHeadCell-ResizeHandle-Wrapper {
+          margin-right: -4px;
+        }
+
+        // adjust padding for table header and cells
+        .MuiTableCell-root {
+          padding: 0.6rem 0.4rem;
+        }
       }
     }
 
