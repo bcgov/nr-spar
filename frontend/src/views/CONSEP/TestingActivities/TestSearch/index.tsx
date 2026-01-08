@@ -283,19 +283,16 @@ const TestSearch = () => {
   });
 
   const padSeedlotNumber = (value: string): string => {
-    const trimmed = value.trim();
-
-    // Family lot → do NOT pad
-    if (/^f/i.test(trimmed)) {
-      return trimmed;
+    if (/^f/i.test(value)) {
+      return value;
     }
 
     // Seedlot must be numeric
-    if (!/^\d+$/.test(trimmed)) {
-      return trimmed;
+    if (!/^\d+$/.test(value)) {
+      return value;
     }
 
-    return trimmed.padStart(5, '0');
+    return value.padStart(5, '0');
   };
 
   const handleLotInputChange = (index: number, value: string) => {
