@@ -404,6 +404,48 @@ const TestSearch = () => {
     (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
   );
 
+  const handleSearchClick = () => {
+    if (Object.keys(searchParams).length === 0) {
+      setAlert({
+        status: 'error',
+        message: 'At least one criteria must be entered to start the search'
+      });
+      return;
+    }
+
+    const paddedLotNumbers = rawLotInput.reduce<string[]>(
+      (result, inputValue) => {
+        const trimmedValue = inputValue.trim();
+        if (trimmedValue) {
+          result.push(padSeedlotNumber(trimmedValue));
+        }
+        return result;
+      },
+      []
+    );
+
+    if (paddedLotNumbers.length > 0) {
+      setRawLotInput((prev) => prev.map((val) => (val.trim() ? padSeedlotNumber(val) : '')));
+      setSearchParams((prev) => ({
+        ...prev,
+        lotNumbers: paddedLotNumbers.length > 0 ? paddedLotNumbers : undefined
+      }));
+    }
+
+    const searchParamstoSend = {
+      ...searchParams,
+      lotNumbers: paddedLotNumbers.length > 0 ? paddedLotNumbers : undefined,
+      testTypes: (searchParams.testTypes ?? []).map((t: string) => {
+        const v = (t ?? '').toLowerCase();
+        if (v === 'sa') return 'GSA';
+        if (v === 'se') return 'GSE';
+        return t;
+      })
+    };
+
+    searchMutation.mutate({ filter: searchParamstoSend });
+  };
+
   return (
     <div className="consep-test-search-content">
       <FlexGrid className="consep-test-search-content">
@@ -526,34 +568,7 @@ const TestSearch = () => {
                 renderIcon={Search}
                 iconDescription="Search activity"
                 size="md"
-                onClick={() => {
-                  if (Object.keys(searchParams).length > 0) {
-                    const paddedLots = rawLotInput
-                      .map((val) => val.trim())
-                      .filter((val) => val.length > 0)
-                      .map(padSeedlotNumber);
-                    setRawLotInput((prev) => prev.map((val) => (val.trim() ? padSeedlotNumber(val) : '')));
-                    const searchParamstoSend = {
-                      ...searchParams,
-                      lotNumbers: paddedLots.length > 0 ? paddedLots : undefined
-                    };
-                    searchParamstoSend.testTypes = (
-                      searchParamstoSend.testTypes ?? []
-                    ).map((t: string) => {
-                      const v = (t ?? '').toLowerCase();
-                      if (v === 'SA') return 'GSA';
-                      if (v === 'SE') return 'GSE';
-                      return t;
-                    });
-
-                    searchMutation.mutate({ filter: searchParamstoSend });
-                  } else {
-                    setAlert({
-                      status: 'error',
-                      message: 'At least one criteria must be entered to start the search'
-                    });
-                  }
-                }}
+                onClick={handleSearchClick}
                 disabled={hasValidationErrors()}
               >
                 Search activity
