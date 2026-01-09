@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
@@ -85,5 +86,71 @@ public class ActivityService {
         HttpStatus.BAD_REQUEST,
         "Actual end date time is missing or in the future");
     }
+  }
+
+  /**
+   * Creates a new ActivityEntity from ActivityCreateDto and saves it to the database.
+   *
+   * @param activityCreateDto The DTO containing activity data to be created.
+   * @return The saved ActivityEntity.
+   */
+  @Transactional
+  public ActivityEntity createActivity(ActivityCreateDto activityCreateDto) {
+    if (!activityCreateDto.plannedStartDate().isBefore(activityCreateDto.plannedEndDate())) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Planned start date must be before planned end date."
+      );
+    }
+
+    boolean hasSeedlot = activityCreateDto.seedlotNumber() != null
+        && !activityCreateDto.seedlotNumber().isBlank();
+    boolean hasFamilyLot = activityCreateDto.familyLotNumber() != null
+        && !activityCreateDto.familyLotNumber().isBlank();
+    if (!(hasSeedlot || hasFamilyLot)) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Either seedlotNumber or familyLotNumber must be provided."
+      );
+    }
+
+    ActivityEntity newActivityEntity = new ActivityEntity();
+
+    // Map fields from dto to entity
+    newActivityEntity.setRiaKey(activityCreateDto.riaKey());
+    newActivityEntity.setStandardActivityId(activityCreateDto.standardActivityId());
+    newActivityEntity.setActivityTypeCode(activityCreateDto.activityTypeCd());
+    newActivityEntity.setTestCategoryCode(activityCreateDto.testCategoryCd());
+    newActivityEntity.setAssociatedRiaKey(activityCreateDto.associatedRiaKey());
+    newActivityEntity.setPlannedStartDate(activityCreateDto.plannedStartDate());
+    newActivityEntity.setPlannedEndDate(activityCreateDto.plannedEndDate());
+    newActivityEntity.setRevisedStartDate(activityCreateDto.revisedStartDate());
+    newActivityEntity.setRevisedEndDate(activityCreateDto.revisedEndDate());
+    newActivityEntity.setActivityDuration(activityCreateDto.activityDuration());
+    newActivityEntity.setActivityTimeUnit(activityCreateDto.activityTimeUnit());
+    newActivityEntity.setSignificantStatusIndicator(activityCreateDto.significantStatusIndicator());
+    newActivityEntity.setProcessCommitIndicator(activityCreateDto.processCommitIndicator());
+    newActivityEntity.setProcessResultIndicator(activityCreateDto.processResultIndicator());
+    newActivityEntity.setTestResultIndicator(activityCreateDto.testResultIndicator());
+    newActivityEntity.setRequestSkey(activityCreateDto.requestSkey());
+    newActivityEntity.setRequestId(activityCreateDto.requestId());
+    newActivityEntity.setItemId(activityCreateDto.itemId());
+    newActivityEntity.setVegetationState(activityCreateDto.vegetationState());
+    newActivityEntity.setSeedlotNumber(activityCreateDto.seedlotNumber());
+    newActivityEntity.setFamilyLotNumber(activityCreateDto.familyLotNumber());
+    newActivityEntity.setUpdateTimestamp(LocalDateTime.now());
+
+    ActivityEntity savedActivityEntity = activityRepository.save(newActivityEntity);
+
+    // If processCommitIndicator == -1, clear that flag for others in the same request/item
+    if (activityCreateDto.processCommitIndicator() != null
+        && activityCreateDto.processCommitIndicator() == -1
+    ) {
+      activityRepository.clearExistingProcessCommitment(
+          savedActivityEntity.getRequestSkey(),
+          savedActivityEntity.getItemId(),
+          savedActivityEntity.getRiaKey()
+      );
+    }
+
+    return savedActivityEntity;
   }
 }
