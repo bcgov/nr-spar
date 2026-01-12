@@ -8,10 +8,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+
+import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -39,6 +43,7 @@ class ActivityServiceTest {
 
   private BigDecimal riaKey;
   private ActivityEntity activityEntity;
+  private ActivityCreateDto validActivityCreateDto;
 
   @BeforeEach
   void setUp() {
@@ -49,6 +54,30 @@ class ActivityServiceTest {
     activityEntity.setActualBeginDateTime(LocalDateTime.now().minusDays(1));
     activityEntity.setActualEndDateTime(LocalDateTime.now().minusDays(2));
     activityEntity.setRiaComment("Test comment");
+
+    validActivityCreateDto = new ActivityCreateDto(
+        new BigDecimal("408623"),
+        "ST1",
+        "AC1",
+        "TC1",
+        new BigDecimal("33874"),
+        LocalDate.of(2024, 1, 1),
+        LocalDate.of(2024, 1, 2),
+        null,
+        null,
+        1,
+        "HR",
+        1,
+        null,
+        1,
+        1,
+        new BigDecimal("33874"),
+        "CSP19970005",
+        "A",
+        "PLI",
+        "00098",
+        ""
+    );
   }
 
   @Test
@@ -103,4 +132,81 @@ class ActivityServiceTest {
         activityService.validateActivityData(activityEntity));
   }
 
+  @Test
+  void createActivity_shouldSucceed_whenValidData() {
+    when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+    ActivityEntity createdActivityEntity = activityService.createActivity(validActivityCreateDto);
+
+    assertEquals(validActivityCreateDto.riaKey(), createdActivityEntity.getRiaKey());
+    assertEquals(validActivityCreateDto.seedlotNumber(), createdActivityEntity.getSeedlotNumber());
+    assertEquals(validActivityCreateDto.requestSkey(), createdActivityEntity.getRequestSkey());
+    assertEquals(validActivityCreateDto.itemId(), createdActivityEntity.getItemId());
+    verify(activityRepository, times(1)).save(any(ActivityEntity.class));
+  }
+
+  @Test
+  void createActivity_shouldFail_whenStartDateNotBeforeEndDate() {
+    ActivityCreateDto invalidDto = new ActivityCreateDto(
+        new BigDecimal("408623"),
+        "ST1",
+        "AC1",
+        "TC1",
+        new BigDecimal("33874"),
+        LocalDate.of(2024, 1, 10),
+        LocalDate.of(2024, 1, 2),
+        null,
+        null,
+        1,
+        "HR",
+        1,
+        null,
+        1,
+        1,
+        new BigDecimal("33874"),
+        "CSP19970005",
+        "A",
+        "PLI",
+        "00098",
+        "");
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("Planned start date must be before planned end date.", ex.getReason());
+  }
+
+  @Test
+  void createActivity_shouldFail_whenNoSeedlotOrFamilyLot() {
+    ActivityCreateDto invalidDto = new ActivityCreateDto(
+        new BigDecimal("408623"),
+        "ST1",
+        "AC1",
+        "TC1",
+        new BigDecimal("33874"),
+        LocalDate.of(2024, 1, 1),
+        LocalDate.of(2024, 1, 2),
+        null,
+        null,
+        1,
+        "HR",
+        1,
+        null,
+        1,
+        1,
+        new BigDecimal("33874"),
+        "CSP19970005",
+        "A",
+        "PLI",
+        "",
+        ""
+    );
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("Either seedlotNumber or familyLotNumber must be provided.", ex.getReason());
+  }
 }
