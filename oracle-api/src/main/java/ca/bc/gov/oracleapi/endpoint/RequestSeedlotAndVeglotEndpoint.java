@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/request-seedlot-and-veglot")
-@Tag(name = "commitmentIndicator", description = "Resource to retrieve commitment indicator by request skey and item id")
+@Tag(name = "CommitmentIndicator", description = "Resource to retrieve commitment indicator by request skey and item id")
 public class RequestSeedlotAndVeglotEndpoint {
 
   private RequestLotService requestSeedlotAndVeglotService;
