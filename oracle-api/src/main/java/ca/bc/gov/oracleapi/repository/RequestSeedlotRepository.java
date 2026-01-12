@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-/** This interface enables the funding source entity to be retrieved from the database. */
+/** This interface enables the RequestSeedlot entity to be retrieved from the database. */
 public interface RequestSeedlotRepository extends JpaRepository<RequestSeedlot, Long> {
   @Query("""
       SELECT rs.commitmentInd

@@ -7,7 +7,7 @@ import ca.bc.gov.oracleapi.repository.RequestVeglotRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/** The class for BEC Zone Code Service. */
+/** The class for Request Lot Service. */
 @Service
 @RequiredArgsConstructor
 public class RequestLotService {
@@ -17,9 +17,9 @@ public class RequestLotService {
   private final RequestVeglotRepository requestVeglotRepository;
 
   /**
-   * Get the description of a Seed Plan Unit by an ID.
+   * Check if the commitment indicator is checked for the given requestSkey and itemId.
    *
-   * @return a {@link SpuDto} if found
+   * @return true if the commitment indicator is "Y", false otherwise
    */
   public boolean isCommitmentChecked(Long requestSkey, String itemId) {
     SparLog.info("Finding commitment indicator for requestSkey {} and itemId {}", requestSkey, itemId);

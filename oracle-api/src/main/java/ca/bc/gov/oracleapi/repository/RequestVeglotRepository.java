@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-/** This interface enables the funding source entity to be retrieved from the database. */
+/** This interface enables the RequestVeglot entity to be retrieved from the database. */
 public interface RequestVeglotRepository extends JpaRepository<RequestVeglot, Long> {
   @Query("""
       SELECT rs.commitmentInd

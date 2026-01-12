@@ -65,9 +65,9 @@ class RequestSeedlotAndVeglotEndpointTest {
   }
 
   @Test
-  @DisplayName("isCommitmentCheckedNoAuthorizedTest")
+  @DisplayName("isCommitmentCheckedUnauthorizedTest")
   @WithAnonymousUser
-  void isCommitmentCheckedNoAuthorizedTest() throws Exception {
+  void isCommitmentCheckedUnauthorizedTest() throws Exception {
     mockMvc
         .perform(
             get("/api/request-seedlot-and-veglot/commitment/{requestSkey}/{itemId}", 123L, "1")
