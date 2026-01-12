@@ -96,6 +96,8 @@ public class ActivityService {
    */
   @Transactional
   public ActivityEntity createActivity(ActivityCreateDto activityCreateDto) {
+    SparLog.info("Create a new activity");
+
     if (!activityCreateDto.plannedStartDate().isBefore(activityCreateDto.plannedEndDate())) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Planned start date must be before planned end date."
@@ -139,6 +141,7 @@ public class ActivityService {
     newActivityEntity.setUpdateTimestamp(LocalDateTime.now());
 
     ActivityEntity savedActivityEntity = activityRepository.save(newActivityEntity);
+    SparLog.info("Activity with riaKey: {} saved successfully.", savedActivityEntity.getRiaKey());
 
     // If processCommitIndicator == -1, clear that flag for others in the same request/item
     if (activityCreateDto.processCommitIndicator() != null
@@ -149,6 +152,8 @@ public class ActivityService {
           savedActivityEntity.getItemId(),
           savedActivityEntity.getRiaKey()
       );
+      SparLog.info("Process commitment of activity with riaKey: {} were updated successfully.",
+          savedActivityEntity.getRiaKey());
     }
 
     return savedActivityEntity;

@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
@@ -67,10 +68,10 @@ class ActivityServiceTest {
         null,
         1,
         "HR",
-        1,
-        null,
-        1,
-        1,
+        0,
+        -1,
+        0,
+        0,
         new BigDecimal("33874"),
         "CSP19970005",
         "A",
@@ -143,32 +144,71 @@ class ActivityServiceTest {
     assertEquals(validActivityCreateDto.requestSkey(), createdActivityEntity.getRequestSkey());
     assertEquals(validActivityCreateDto.itemId(), createdActivityEntity.getItemId());
     verify(activityRepository, times(1)).save(any(ActivityEntity.class));
+    verify(activityRepository, times(1)).clearExistingProcessCommitment(
+        eq(validActivityCreateDto.requestSkey()),
+        eq(validActivityCreateDto.itemId()),
+        eq(validActivityCreateDto.riaKey())
+    );
+  }
+
+  @Test
+  void createActivity_shouldNotCallClearExistingProcessCommitment_whenProcessCommitUnchecked() {
+    ActivityCreateDto dto = new ActivityCreateDto(
+        validActivityCreateDto.riaKey(),
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        validActivityCreateDto.testCategoryCd(),
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        0,
+        validActivityCreateDto.processResultIndicator(),
+        validActivityCreateDto.testResultIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        validActivityCreateDto.seedlotNumber(),
+        validActivityCreateDto.familyLotNumber()
+    );
+
+    when(activityRepository.save(any(ActivityEntity.class))).thenReturn(new ActivityEntity());
+
+    activityService.createActivity(dto);
+
+    verify(activityRepository, never()).clearExistingProcessCommitment(any(), any(), any());
   }
 
   @Test
   void createActivity_shouldFail_whenStartDateNotBeforeEndDate() {
     ActivityCreateDto invalidDto = new ActivityCreateDto(
-        new BigDecimal("408623"),
-        "ST1",
-        "AC1",
-        "TC1",
-        new BigDecimal("33874"),
+        validActivityCreateDto.riaKey(),
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        validActivityCreateDto.testCategoryCd(),
+        validActivityCreateDto.associatedRiaKey(),
         LocalDate.of(2024, 1, 10),
         LocalDate.of(2024, 1, 2),
-        null,
-        null,
-        1,
-        "HR",
-        1,
-        null,
-        1,
-        1,
-        new BigDecimal("33874"),
-        "CSP19970005",
-        "A",
-        "PLI",
-        "00098",
-        "");
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.processResultIndicator(),
+        validActivityCreateDto.testResultIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        validActivityCreateDto.seedlotNumber(),
+        validActivityCreateDto.familyLotNumber()
+    );
 
     ResponseStatusException ex = assertThrows(
         ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
@@ -180,25 +220,25 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldFail_whenNoSeedlotOrFamilyLot() {
     ActivityCreateDto invalidDto = new ActivityCreateDto(
-        new BigDecimal("408623"),
-        "ST1",
-        "AC1",
-        "TC1",
-        new BigDecimal("33874"),
-        LocalDate.of(2024, 1, 1),
-        LocalDate.of(2024, 1, 2),
-        null,
-        null,
-        1,
-        "HR",
-        1,
-        null,
-        1,
-        1,
-        new BigDecimal("33874"),
-        "CSP19970005",
-        "A",
-        "PLI",
+        validActivityCreateDto.riaKey(),
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        validActivityCreateDto.testCategoryCd(),
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.processResultIndicator(),
+        validActivityCreateDto.testResultIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
         "",
         ""
     );

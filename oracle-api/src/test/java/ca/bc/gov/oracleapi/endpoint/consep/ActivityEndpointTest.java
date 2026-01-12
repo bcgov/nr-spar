@@ -51,10 +51,10 @@ class ActivityEndpointTest {
         null,
         1,
         "HR",
-        1,
+        0,
         null,
-        1,
-        1,
+        0,
+        0,
         new BigDecimal("33874"),
         "CSP19970005",
         "A",
@@ -89,5 +89,61 @@ class ActivityEndpointTest {
         .andExpect(jsonPath("$.itemId").value(validActivityCreateDto.itemId()));
 
     verify(activityService, times(1)).createActivity(validActivityCreateDto);
+  }
+
+  @Test
+  void createTestingActivity_shouldReturnBadRequest_whenInvalidDto() throws Exception {
+    var invalidDto = new ActivityCreateDto(
+        null, // <-- riaKey is required
+        "", // standardActivityId cannot be empty
+        validActivityCreateDto.activityTypeCd(),
+        "TEST", // testCategoryCd can have max 3 chars
+        validActivityCreateDto.associatedRiaKey(),
+        null, // plannedStartDate cannot be null
+        null, // plannedEndDate cannot be null
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        null, // activityDuration cannot be null
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        1, // indicators can only be 0 or -1
+        validActivityCreateDto.processResultIndicator(),
+        validActivityCreateDto.testResultIndicator(),
+        null, // requestSkey cannot be null
+        null, // requestId cannot be null
+        null, // itemId cannot be null
+        null, // vegetationState cannot be null
+        validActivityCreateDto.seedlotNumber(),
+        validActivityCreateDto.familyLotNumber()
+    );
+
+    mockMvc.perform(post("/api/activities")
+            .with(csrf())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(invalidDto)))
+        .andExpect(status().isBadRequest())
+        .andDo(result -> System.out.println(result.getResponse().getContentAsString()))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='riaKey')].fieldMessage")
+            .value("must not be null"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='standardActivityId')].fieldMessage")
+            .value("must not be blank"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='requestId')].fieldMessage")
+            .value("must not be null"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='plannedStartDate')].fieldMessage")
+            .value("must not be null"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='plannedEndDate')].fieldMessage")
+            .value("must not be null"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='activityDuration')].fieldMessage")
+            .value("must not be null"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='itemId')].fieldMessage")
+            .value("must not be null"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='vegetationState')].fieldMessage")
+            .value("must not be null"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='requestSkey')].fieldMessage")
+            .value("must not be null"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='testCategoryCd')].fieldMessage")
+            .value("size must be between 0 and 3"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='processCommitIndicator')].fieldMessage")
+            .value("must be less than or equal to 0"));
   }
 }

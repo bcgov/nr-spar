@@ -41,7 +41,7 @@ public class ActivityEndpoint {
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "201",
-          description = "Successfully created the testing activity.",
+          description = "Successfully created the activity.",
           content = @Content(schema = @Schema(implementation = ActivityEntity.class))),
       @ApiResponse(
           responseCode = "400",

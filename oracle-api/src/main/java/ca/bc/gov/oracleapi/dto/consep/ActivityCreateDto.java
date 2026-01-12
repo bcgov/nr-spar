@@ -56,7 +56,7 @@ public record ActivityCreateDto(
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate revisedEndDate,
 
-    @Schema(description = "Duration of the activity in hours")
+    @Schema(description = "Duration of the activity")
     @Max(value = 999)
     @Min(value = 0)
     @NotNull
@@ -68,23 +68,23 @@ public record ActivityCreateDto(
     String activityTimeUnit,
 
     @Schema(description = "Indicator for significant status")
-    @Max(value = 99999)
-    @Min(value = 0)
+    @Min(-1)
+    @Max(0)
     Integer significantStatusIndicator,
 
     @Schema(description = "Indicator for process commit")
-    @Max(value = 99999)
-    @Min(value = 0)
+    @Min(-1)
+    @Max(0)
     Integer processCommitIndicator,
 
     @Schema(description = "Indicator for the process result")
-    @Max(value = 99999)
-    @Min(value = 0)
+    @Min(-1)
+    @Max(0)
     Integer processResultIndicator,
 
     @Schema(description = "Indicator for the test result")
-    @Max(value = 99999)
-    @Min(value = 0)
+    @Min(-1)
+    @Max(0)
     Integer testResultIndicator,
 
     @Schema(description = "Foreign key for the request")
