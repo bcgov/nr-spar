@@ -9,10 +9,10 @@ import org.springframework.data.repository.query.Param;
 /** This interface enables the RequestVeglot entity to be retrieved from the database. */
 public interface RequestVeglotRepository extends JpaRepository<RequestVeglot, Long> {
   @Query("""
-      SELECT rs.commitmentInd
-      FROM RequestVeglot rs
-      WHERE rs.requestSkey = :requestSkey
-      AND rs.itemId = :itemId
+      SELECT rv.commitmentInd
+      FROM RequestVeglot rv
+      WHERE rv.requestSkey = :requestSkey
+      AND rv.itemId = :itemId
       """)
   String getCommitment(@Param("requestSkey") Long requestSkey, @Param("itemId") String itemId);
 }
