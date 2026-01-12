@@ -98,7 +98,7 @@ public class ActivityService {
   public ActivityEntity createActivity(ActivityCreateDto activityCreateDto) {
     SparLog.info("Create a new activity");
 
-    if (!activityCreateDto.plannedStartDate().isBefore(activityCreateDto.plannedEndDate())) {
+    if (activityCreateDto.plannedStartDate().isAfter(activityCreateDto.plannedEndDate())) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Planned start date must be before planned end date."
       );
@@ -112,6 +112,21 @@ public class ActivityService {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Either seedlotNumber or familyLotNumber must be provided."
       );
+    }
+
+    String requestId = activityCreateDto.requestId();
+    String testCategoryCd = activityCreateDto.testCategoryCd();
+
+    if (requestId != null && requestId.length() >= 4) {
+      String first4 = requestId.substring(0, 4);
+      if (first4.chars().allMatch(Character::isDigit)) { // Seedling request
+        if (!"STD".equals(testCategoryCd)) {
+          throw new ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "TEST_CATEGORY_CD must be 'STD' because Request ID is a Seedling Request"
+          );
+        }
+      }
     }
 
     ActivityEntity newActivityEntity = new ActivityEntity();
@@ -138,7 +153,6 @@ public class ActivityService {
     newActivityEntity.setVegetationState(activityCreateDto.vegetationState());
     newActivityEntity.setSeedlotNumber(activityCreateDto.seedlotNumber());
     newActivityEntity.setFamilyLotNumber(activityCreateDto.familyLotNumber());
-    newActivityEntity.setUpdateTimestamp(LocalDateTime.now());
 
     ActivityEntity savedActivityEntity = activityRepository.save(newActivityEntity);
     SparLog.info("Activity with riaKey: {} saved successfully.", savedActivityEntity.getRiaKey());

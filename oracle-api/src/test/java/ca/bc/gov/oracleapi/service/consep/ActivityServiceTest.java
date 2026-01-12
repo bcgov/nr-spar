@@ -249,4 +249,38 @@ class ActivityServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals("Either seedlotNumber or familyLotNumber must be provided.", ex.getReason());
   }
+
+  @Test
+  void createActivity_shouldFail_whenSeedlingRequestIdAndTestCategoryCdNotStd() {
+    ActivityCreateDto invalidDto = new ActivityCreateDto(
+        validActivityCreateDto.riaKey(),
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        "NON", // <-- Not STD
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.processResultIndicator(),
+        validActivityCreateDto.testResultIndicator(),
+        validActivityCreateDto.requestSkey(),
+        "1234ABC", // <-- First 4 chars numeric ("1234"), which is a seedling request id
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        validActivityCreateDto.seedlotNumber(),
+        validActivityCreateDto.familyLotNumber()
+    );
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("TEST_CATEGORY_CD must be 'STD' if Request ID is a Seedling Request (first 4 chars numeric)",
+        ex.getReason());
+  }
 }

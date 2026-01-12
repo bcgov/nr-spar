@@ -64,7 +64,7 @@ public record ActivityCreateDto(
 
     @Schema(description = "Time unit for the activity duration")
     @Size(max = 3)
-    @NotNull
+    @NotBlank
     String activityTimeUnit,
 
     @Schema(description = "Indicator for significant status")
@@ -94,17 +94,17 @@ public record ActivityCreateDto(
 
     @Schema(description = "Identifier of the request")
     @Size(max = 11)
-    @NotNull
+    @NotBlank
     String requestId,
 
     @Schema(description = "Identifier for the item")
     @Size(max = 1)
-    @NotNull
+    @NotBlank
     String itemId,
 
     @Schema(description = "State of vegetation associated with the activity")
     @Size(max = 8)
-    @NotNull
+    @NotBlank
     String vegetationState,
 
     @Schema(description = "Seedlot number associated with the activity")

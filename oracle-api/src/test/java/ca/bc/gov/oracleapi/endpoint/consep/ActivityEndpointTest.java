@@ -52,7 +52,7 @@ class ActivityEndpointTest {
         1,
         "HR",
         0,
-        null,
+        -1,
         0,
         0,
         new BigDecimal("33874"),
@@ -104,7 +104,7 @@ class ActivityEndpointTest {
         validActivityCreateDto.revisedStartDate(),
         validActivityCreateDto.revisedEndDate(),
         null, // activityDuration cannot be null
-        validActivityCreateDto.activityTimeUnit(),
+        "", // activityTimeUnit cannot be empty
         validActivityCreateDto.significantStatusIndicator(),
         1, // indicators can only be 0 or -1
         validActivityCreateDto.processResultIndicator(),
@@ -122,10 +122,11 @@ class ActivityEndpointTest {
             .contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(invalidDto)))
         .andExpect(status().isBadRequest())
-        .andDo(result -> System.out.println(result.getResponse().getContentAsString()))
         .andExpect(jsonPath("$.fields[?(@.fieldName=='riaKey')].fieldMessage")
             .value("must not be null"))
         .andExpect(jsonPath("$.fields[?(@.fieldName=='standardActivityId')].fieldMessage")
+            .value("must not be blank"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='activityTimeUnit')].fieldMessage")
             .value("must not be blank"))
         .andExpect(jsonPath("$.fields[?(@.fieldName=='requestId')].fieldMessage")
             .value("must not be null"))
