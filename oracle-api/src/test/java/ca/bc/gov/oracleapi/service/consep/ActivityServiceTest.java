@@ -280,7 +280,7 @@ class ActivityServiceTest {
         ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
     );
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-    assertEquals("TEST_CATEGORY_CD must be 'STD' if Request ID is a Seedling Request (first 4 chars numeric)",
+    assertEquals("TEST_CATEGORY_CD must be 'STD' because Request ID is a Seedling Request",
         ex.getReason());
   }
 }
