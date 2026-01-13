@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -82,7 +83,7 @@ public class TestResultEntity {
   private BigDecimal otherTestResult;
 
   @Column(name = "UPDATE_TIMESTAMP")
-  private LocalDate updateTimestamp;
+  private LocalDateTime updateTimestamp;
 
   @Column(name = "STRAT_START_DT")
   private LocalDate stratStartDate;

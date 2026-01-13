@@ -42,4 +42,17 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
   void updateTestResultAvgValue(
       @Param("riaKey") BigDecimal riaKey,
       @Param("average") Double average);
+
+  @Modifying
+  @Query(
+      value = """
+        INSERT INTO CNS_T_TSC_TEST_RESULT
+          (RIA_SKEY, ACTIVITY_TYPE_CD, TEST_CATEGORY_CD, UPDATE_TIMESTAMP)
+        VALUES
+          (:riaKey, :activityTypeCd, :testCategoryCd, SYSDATE)
+        """,
+      nativeQuery = true)
+  void insertTestResult(@Param("riaKey") BigDecimal riaKey,
+                        @Param("activityTypeCd") String activityTypeCd,
+                        @Param("testCategoryCd") String testCategoryCd);
 }
