@@ -39,7 +39,7 @@ class ActivityServiceTest {
 
   @Mock
   private ActivityRepository activityRepository;
-  
+
   @Mock
   private TestResultRepository testResultRepository;
 
@@ -141,7 +141,7 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldSucceed_whenValidData() {
     when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
-    when(testResultRepository.save(any(TestResultEntity.class))).thenAnswer(i -> i.getArgument(0)); // option: stub if you need to
+    when(testResultRepository.save(any(TestResultEntity.class))).thenAnswer(i -> i.getArgument(0));
 
     ActivityEntity createdActivityEntity = activityService.createActivity(validActivityCreateDto);
 
