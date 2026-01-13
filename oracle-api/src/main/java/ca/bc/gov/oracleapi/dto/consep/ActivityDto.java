@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * This class represents a {@link ca.bc.gov.oracleapi.entity.consep.Activity} object.
+ * This class represents an {@link ca.bc.gov.oracleapi.entity.consep.ActivityEntity} object.
  */
 @Schema(description = "This class represents an activity object.")
 public record ActivityDto(
