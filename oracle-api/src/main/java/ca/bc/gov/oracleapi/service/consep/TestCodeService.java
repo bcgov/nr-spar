@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.TestCodeDto;
 import ca.bc.gov.oracleapi.entity.consep.TestCodeEntity;
+import ca.bc.gov.oracleapi.repository.consep.CodeSubsetRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestCodeRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class TestCodeService {
 
   private final TestCodeRepository testCodeRepository;
+  private final CodeSubsetRepository codeSubsetRepository;
 
   /**
    * Get all valid test type codes
@@ -81,5 +83,15 @@ public class TestCodeService {
             (String) obj[1]  // description
         ))
         .toList();
+  }
+
+  /**
+   * Get all valid activity duration time unit codes,
+   * where in-effect date <= today and expiry date >= today or null.
+   *
+   * @return list of code values as strings (e.g. "HR", "DY")
+   */
+  public List<String> getActivityDurationTimeUnits() {
+    return codeSubsetRepository.findActivityDurationTimeUnit();
   }
 }

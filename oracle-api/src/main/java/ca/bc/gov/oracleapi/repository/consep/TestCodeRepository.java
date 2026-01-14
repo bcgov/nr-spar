@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.repository.consep;
 
 import ca.bc.gov.oracleapi.entity.consep.TestCodeEntity;
 import java.util.List;
+import ca.bc.gov.oracleapi.entity.consep.idclass.TestCodeId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -9,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 /**
  * This interface enables test code entities from CONSEP to be queried in the database.
  */
-public interface TestCodeRepository extends JpaRepository<TestCodeEntity, Object> {
+public interface TestCodeRepository extends JpaRepository<TestCodeEntity, TestCodeId> {
 
   @Query("""
         SELECT t.id.codeArgument AS code,
