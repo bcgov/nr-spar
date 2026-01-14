@@ -13,7 +13,9 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,6 +39,9 @@ class ActivityServiceTest {
 
   @Mock
   private ActivityRepository activityRepository;
+
+  @Mock
+  private TestResultRepository testResultRepository;
 
   @Autowired
   @InjectMocks
@@ -136,6 +141,7 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldSucceed_whenValidData() {
     when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
+    when(testResultRepository.save(any(TestResultEntity.class))).thenAnswer(i -> i.getArgument(0));
 
     ActivityEntity createdActivityEntity = activityService.createActivity(validActivityCreateDto);
 
@@ -149,6 +155,7 @@ class ActivityServiceTest {
         eq(validActivityCreateDto.itemId()),
         eq(validActivityCreateDto.riaKey())
     );
+    verify(testResultRepository, times(1)).save(any(TestResultEntity.class));
   }
 
   @Test
@@ -157,7 +164,7 @@ class ActivityServiceTest {
         validActivityCreateDto.riaKey(),
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
-        validActivityCreateDto.testCategoryCd(),
+        null,
         validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
@@ -182,6 +189,7 @@ class ActivityServiceTest {
     activityService.createActivity(dto);
 
     verify(activityRepository, never()).clearExistingProcessCommitment(any(), any(), any());
+    verify(testResultRepository, never()).save(any(TestResultEntity.class));
   }
 
   @Test
