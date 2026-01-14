@@ -170,8 +170,8 @@ const TestListTable = ({
             const selectedRows = table.getSelectedRowModel().rows;
             const isActionButtonsEnabled = selectedRows.length === 1;
             const disabledReason = selectedRows.length === 0
-              ? 'Select one seedlot to enable the action.'
-              : 'You can only perform the action for one seedlot at a time.';
+              ? 'Select one seedlot to view its test history or add activity.'
+              : 'You can only view test history or add activity for one seedlot at a time.';
 
             return (
               <Column>
