@@ -4,7 +4,9 @@ import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ActivityService {
 
   private final ActivityRepository activityRepository;
+  private final TestResultRepository testResultRepository;
 
   /**
    * Update activity table.
@@ -168,6 +171,16 @@ public class ActivityService {
       );
       SparLog.info("Process commitment of activity with riaKey: {} were updated successfully.",
           savedActivityEntity.getRiaKey());
+    }
+
+    // If adding a test type activity
+    if (activityCreateDto.testCategoryCd() != null) {
+      TestResultEntity testResult = new TestResultEntity();
+      testResult.setRiaKey(savedActivityEntity.getRiaKey());
+      testResult.setActivityType(savedActivityEntity.getActivityTypeCode());
+      testResult.setTestCategory(savedActivityEntity.getTestCategoryCode());
+      testResult.setUpdateTimestamp(LocalDateTime.now());
+      testResultRepository.save(testResult);
     }
 
     return savedActivityEntity;

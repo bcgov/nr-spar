@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 
 class TestResultEntityTest {
@@ -13,6 +14,7 @@ class TestResultEntityTest {
   @Test
   void testEntityGettersAndSetters() {
     LocalDate now = LocalDate.now();
+    LocalDateTime nowTime = LocalDateTime.now();
     LocalDate tomorrow = now.plusDays(1);
     
     // Create entity and set all values
@@ -37,7 +39,7 @@ class TestResultEntityTest {
     entity.setSeedsPerGram(1000);
     entity.setPurityPct(new BigDecimal("99.9"));
     entity.setOtherTestResult(new BigDecimal("123.456"));
-    entity.setUpdateTimestamp(now);
+    entity.setUpdateTimestamp(nowTime);
     entity.setStratStartDate(now);
     entity.setGermStartDate(now);
     entity.setGermNextStageDate(tomorrow);
@@ -71,7 +73,7 @@ class TestResultEntityTest {
     assertEquals(1000, entity.getSeedsPerGram());
     assertEquals(new BigDecimal("99.9"), entity.getPurityPct());
     assertEquals(new BigDecimal("123.456"), entity.getOtherTestResult());
-    assertEquals(now, entity.getUpdateTimestamp());
+    assertEquals(nowTime, entity.getUpdateTimestamp());
     assertEquals(now, entity.getStratStartDate());
     assertEquals(now, entity.getGermStartDate());
     assertEquals(tomorrow, entity.getGermNextStageDate());
