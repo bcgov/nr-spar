@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.TestCodeDto;
+import ca.bc.gov.oracleapi.repository.consep.CodeSubsetRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestCodeRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,9 @@ class TestCodeServiceTest {
 
   @Mock
   private TestCodeRepository testCodeRepository;
+
+  @Mock
+  private CodeSubsetRepository codeSubsetRepository;
 
   @InjectMocks
   private TestCodeService testCodeService;
@@ -123,5 +127,21 @@ class TestCodeServiceTest {
     List<String> result = testCodeService.getCodesByColumnActivity(activity);
     // Assert
     assertThat(result).isEmpty(); 
+  }
+
+  @Test
+  void getActivityDurationTimeUnits_shouldReturnListOfUnits() {
+    List<String> mockUnits = List.of("HR", "DY", "WK");
+    when(codeSubsetRepository.findActivityDurationTimeUnit()).thenReturn(mockUnits);
+    List<String> result = testCodeService.getActivityDurationTimeUnits();
+    assertThat(result).hasSize(3);
+    assertThat(result).containsExactly("HR", "DY", "WK");
+  }
+
+  @Test
+  void getActivityDurationTimeUnits_shouldReturnEmptyListIfNoData() {
+    when(codeSubsetRepository.findActivityDurationTimeUnit()).thenReturn(List.of());
+    List<String> result = testCodeService.getActivityDurationTimeUnits();
+    assertThat(result).isEmpty();
   }
 }

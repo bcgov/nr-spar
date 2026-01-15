@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
@@ -19,6 +20,7 @@ import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -290,5 +292,36 @@ class ActivityServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals("TEST_CATEGORY_CD must be 'STD' because Request ID is a Seedling Request",
         ex.getReason());
+  }
+
+  @Test
+  void getActivityByRequestSkeyAndItemId_shouldReturnExpectedDtos() {
+    BigDecimal requestSkey = new BigDecimal("422679");
+    String itemId = "A";
+    List<Object[]> repoResult = List.of(
+        new Object[] { new BigDecimal("809210"), "G11 germination test" },
+        new Object[] { new BigDecimal("805643"), "Extend strat 35 days" }
+    );
+    when(activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId))
+        .thenReturn(repoResult);
+    List<ActivityRequestItemDto> activityResult =
+        activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
+
+    assertEquals(2, activityResult.size());
+    assertEquals(new BigDecimal("809210"), activityResult.get(0).riaSkey());
+    assertEquals("G11 germination test", activityResult.get(0).activityDesc());
+    assertEquals(new BigDecimal("805643"), activityResult.get(1).riaSkey());
+    assertEquals("Extend strat 35 days", activityResult.get(1).activityDesc());
+  }
+
+  @Test
+  void getActivityByRequestSkeyAndItemId_shouldReturnEmptyList_whenNoData() {
+    BigDecimal requestSkey = new BigDecimal("422679");
+    String itemId = "A";
+    when(activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId))
+        .thenReturn(List.of());
+    List<ActivityRequestItemDto> activityResult =
+        activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
+    assertEquals(0, activityResult.size());
   }
 }

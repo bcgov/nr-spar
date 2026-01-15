@@ -68,4 +68,17 @@ class TestCodesEndpointTest {
         .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].code").value("ASP"));
   }
+
+  @Test
+  void getActivityDurationTimeUnits_shouldReturnList() throws Exception {
+    List<String> mockUnits = List.of("HR", "DY", "WK");
+    when(testCodeService.getActivityDurationTimeUnits()).thenReturn(mockUnits);
+
+    mockMvc.perform(get("/api/test-codes/activity-duration-units").with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(3)))
+        .andExpect(jsonPath("$[0]").value("HR"))
+        .andExpect(jsonPath("$[1]").value("DY"))
+        .andExpect(jsonPath("$[2]").value("WK"));
+  }
 }

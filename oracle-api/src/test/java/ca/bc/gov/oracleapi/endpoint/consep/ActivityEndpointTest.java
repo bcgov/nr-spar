@@ -1,17 +1,26 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,5 +155,28 @@ class ActivityEndpointTest {
             .value("size must be between 0 and 3"))
         .andExpect(jsonPath("$.fields[?(@.fieldName=='processCommitIndicator')].fieldMessage")
             .value("must be less than or equal to 0"));
+  }
+
+  @Test
+  void getActivityByRequestSkeyAndItemId_shouldReturnDtoList() throws Exception {
+    BigDecimal requestSkey = new BigDecimal("422679");
+    String itemId = "A";
+    var activities = List.of(
+        new ActivityRequestItemDto(new BigDecimal("809210"), "G11 germination test"),
+        new ActivityRequestItemDto(new BigDecimal("805643"), "Extend strat 35 days")
+    );
+    when(activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId)).thenReturn(activities);
+
+    mockMvc.perform(
+        get("/api/activities/request/{requestSkey}/item/{itemId}", requestSkey, itemId)
+            .with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("$[0].riaSkey").value("809210"))
+        .andExpect(jsonPath("$[0].activityDesc").value("G11 germination test"))
+        .andExpect(jsonPath("$[1].riaSkey").value("805643"))
+        .andExpect(jsonPath("$[1].activityDesc").value("Extend strat 35 days"));
+
+    verify(activityService, times(1)).getActivityByRequestSkeyAndItemId(requestSkey, itemId);
   }
 }
