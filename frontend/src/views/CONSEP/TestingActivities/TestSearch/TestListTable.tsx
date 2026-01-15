@@ -9,6 +9,7 @@ import * as Icons from '@carbon/icons-react';
 import GenericTable from '../../../../components/GenericTable';
 import ShowHideColumnControl from './ToolbarControls/ShowHideColumnControl';
 import TestHistory from './ToolbarControls/TestHistory';
+import AddActivity from './ToolbarControls/AddActivity';
 import { getTestingActivityListColumns, columnVisibilityLocalStorageKey } from './constants';
 
 import type {
@@ -38,6 +39,7 @@ const TestListTable = ({
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const tableRef = useRef<MRT_TableInstance<TestingSearchResponseType> | null>(null);
   const [showTestHistory, setShowTestHistory] = useState(false);
+  const [showAddActivity, setShowAddActivity] = useState(false);
 
   useEffect(() => {
     // Reset row selection whenever new data is set
@@ -63,7 +65,7 @@ const TestListTable = ({
     {
       label: 'Add activity',
       type: 'tertiary',
-      action: () => {}
+      action: () => setShowAddActivity(true)
     },
     {
       label: 'Create germ tray',
@@ -110,6 +112,26 @@ const TestListTable = ({
       >
         {showTestHistory && tableRef.current && <TestHistory table={tableRef.current} />}
       </Modal>
+      <Modal
+        className="concep-add-activity-modal"
+        open={showAddActivity}
+        passiveModal
+        size="lg"
+        modalHeading={
+          tableRef.current?.getSelectedRowModel().rows?.length === 1
+            ? `Seedlot ${
+              tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay
+            }: Add activity`
+            : 'Seedlot: Add activity'
+        }
+        onRequestClose={() => setShowAddActivity(false)}
+        selectorsFloatingMenus={[
+          '.MuiPopover-root',
+          '.MuiPaper-root'
+        ]}
+      >
+        {showAddActivity && tableRef.current && <AddActivity table={tableRef.current} />}
+      </Modal>
       <Row className="concep-test-search-table">
         <GenericTable
           columns={getTestingActivityListColumns()}
@@ -146,10 +168,10 @@ const TestListTable = ({
           renderToolbarInternalActions={({ table }) => {
             tableRef.current = table as MRT_TableInstance<TestingSearchResponseType>;
             const selectedRows = table.getSelectedRowModel().rows;
-            const isTestHistoryEnabled = selectedRows.length === 1;
-            const testHistoryDisabledReason = selectedRows.length === 0
-              ? 'Select one seedlot to view its test history.'
-              : 'You can only view test history for one seedlot at a time.';
+            const isActionButtonsEnabled = selectedRows.length === 1;
+            const disabledReason = selectedRows.length === 0
+              ? 'Select one seedlot to view its test history or add activity.'
+              : 'You can only view test history or add activity for one seedlot at a time.';
 
             return (
               <Column>
@@ -164,15 +186,15 @@ const TestListTable = ({
                       aria-label={label}
                       size="md"
                       className="concep-test-search-table-toolbar-button"
-                      disabled={label === 'Test history' && !isTestHistoryEnabled}
+                      disabled={(label === 'Test history' || label === 'Add activity') && !isActionButtonsEnabled}
                     >
                       {label}
                       {icon}
                     </Button>
                   );
 
-                  return label === 'Test history' && !isTestHistoryEnabled ? (
-                    <Tooltip key={label} label={testHistoryDisabledReason} align="right">
+                  return (label === 'Test history' || label === 'Add activity') && !isActionButtonsEnabled ? (
+                    <Tooltip key={label} label={disabledReason} align="right">
                       <span>{button}</span>
                     </Tooltip>
                   ) : (
