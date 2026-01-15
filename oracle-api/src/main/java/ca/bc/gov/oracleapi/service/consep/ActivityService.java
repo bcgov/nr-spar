@@ -190,11 +190,11 @@ public class ActivityService {
 
   /**
    * Retrieves all activities for the given request skey and item id,
-   * mapping the result to PartActivityDto records.
+   * mapping the result to ActivityRequestItemDto records.
    *
    * @param requestSkey the request skey to filter activities
    * @param itemId the item id to filter activities
-   * @return a list of PartActivityDto containing the activity key and description
+   * @return a list of ActivityRequestItemDto containing the activity key and description
    */
   public List<ActivityRequestItemDto> getActivityByRequestSkeyAndItemId(BigDecimal requestSkey, String itemId) {
     return activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId)
