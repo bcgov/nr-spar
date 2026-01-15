@@ -168,7 +168,7 @@ class ActivityEndpointTest {
     when(activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId)).thenReturn(activities);
 
     mockMvc.perform(
-        get("/api/activities/request/{requestSkey}/item/{itemId}/activities", requestSkey, itemId)
+        get("/api/activities/request/{requestSkey}/item/{itemId}", requestSkey, itemId)
             .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)))
