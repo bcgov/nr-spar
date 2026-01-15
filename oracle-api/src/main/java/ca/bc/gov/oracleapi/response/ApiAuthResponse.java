@@ -24,6 +24,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @ApiResponses(value = {
     @ApiResponse(
+        responseCode = "400",
+        description = "Validation error or request data is invalid.",
+        content = @Content(schema = @Schema(hidden = true))
+    ),
+    @ApiResponse(
         responseCode = "401",
         description = "Access token is missing or invalid",
         content = @Content(schema = @Schema(implementation = Void.class))
