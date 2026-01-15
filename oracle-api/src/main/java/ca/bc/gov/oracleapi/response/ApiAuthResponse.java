@@ -14,6 +14,7 @@ import java.lang.annotation.Target;
  *
  * <p>Includes:
  * <ul>
+ *   <li>400 - Validation error or request data is invalid</li>
  *   <li>401 - Access token is missing or invalid</li>
  *   <li>403 - User does not have required role</li>
  * </ul>

@@ -63,7 +63,7 @@ public class ActivityEndpoint {
    * @param itemId the item id to filter activities
    * @return a list of ActivityRequestItemDto containing the activity key and description
    */
-  @GetMapping("/request/{requestSkey}/item/{itemId}/activities")
+  @GetMapping("/request/{requestSkey}/item/{itemId}")
   @ApiResponse(
       responseCode = "200",
       description = "Successfully retrieved the activities by requestSkey and itemId."
