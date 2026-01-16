@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
@@ -75,5 +76,22 @@ public class ActivityEndpoint {
       @PathVariable String itemId
   ) {
     return activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
+  }
+
+  /**
+   * Retrieves standard activity IDs and descriptions for seedlot and/or family lot numbers.
+   *
+   * @return a list of StandardActivityDto containing the activity id and description
+   */
+  @GetMapping("/standard-activity-ids")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved the standard activity IDs and descriptions.",
+      content = @Content(schema = @Schema(implementation = StandardActivityDto.class))
+  )
+  @ApiAuthResponse
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public List<StandardActivityDto> getStandardActivityIds() {
+    return activityService.getStandardActivityIds();
   }
 }
