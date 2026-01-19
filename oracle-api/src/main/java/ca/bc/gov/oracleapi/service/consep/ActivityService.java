@@ -229,7 +229,7 @@ public class ActivityService {
         activityMap.put(a.getStandardActivityId(), a)
     );
     familyLotActivities.forEach(a ->
-        activityMap.put(a.getStandardActivityId(), a)
+        activityMap.putIfAbsent(a.getStandardActivityId(), a)
     );
 
     return activityMap.values().stream()
