@@ -16,7 +16,6 @@ public interface StandardActivityRepository extends JpaRepository<StandardActivi
       JOIN TestCodeEntity c
       ON sa.standardActivityId = c.id.codeArgument
       WHERE c.id.columnName = 'FAMILYLOT_TEST_CD'
-      ORDER BY sa.activityDesc ASC
       """)
   List<StandardActivityEntity> findAllFamilyLotActivities();
 }

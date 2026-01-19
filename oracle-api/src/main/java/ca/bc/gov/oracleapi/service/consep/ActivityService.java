@@ -214,7 +214,7 @@ public class ActivityService {
    * Retrieves all unique standard activity IDs and descriptions
    * used for seedlot and/or family lot contexts.
    *
-   * @return list of StandardActivityDto containing standardActivityId and activityDesc
+   * @return list of StandardActivityDto containing standardActivityId and activityDescription
    */
   public List<StandardActivityDto> getStandardActivityIds() {
     List<StandardActivityEntity> allActivities =
