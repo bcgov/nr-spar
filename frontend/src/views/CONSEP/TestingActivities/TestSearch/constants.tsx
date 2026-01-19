@@ -62,21 +62,6 @@ export const iniActSearchValidation: ActivitySearchValidation = {
   orchardId: initialErrorValue
 };
 
-export const activityIds: string[] = [
-  'AWT', 'BIO', 'CAL', 'CUT',
-  'D1', 'FUS', 'G10', 'G11',
-  'G12', 'G20', 'G30', 'G31',
-  'G32', 'G34', 'G41', 'G42',
-  'G44', 'G52', 'G54', 'G55',
-  'G56', 'G57', 'G62', 'G64',
-  'GH1', 'GSA', 'GSE', 'MC',
-  'MCC', 'MCK', 'MCM', 'MCQ',
-  'MCR', 'MCW', 'MMC', 'NGR',
-  'PAT', 'PUR', 'RTE', 'SAM',
-  'SIR', 'SPG', 'TZ', 'W1',
-  'XRY'
-];
-
 export const testRanks: string[] = [
   'A', 'B', 'C', 'P'
 ];

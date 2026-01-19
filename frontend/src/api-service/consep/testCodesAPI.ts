@@ -1,7 +1,7 @@
 import ApiConfig from '../ApiConfig';
 import api from '../api';
 
-import { TestCodeType } from '../../types/consep/TestingSearchType';
+import { TestCodeType, ActivityIdType } from '../../types/consep/TestingSearchType';
 
 export const getTestTypeCodes = () => {
   const url = `${ApiConfig.testCodes}/type`;
@@ -21,4 +21,9 @@ export const getCodesByActivity = (activity: string) => {
 export const getRequestTypes = () => {
   const url = `${ApiConfig.testCodes}/request-types`;
   return api.get(url).then((res: { data: TestCodeType[] }) => res.data);
+};
+
+export const getActivityIds = () => {
+  const url = `${ApiConfig.activities}/ids`;
+  return api.get(url).then((res: { data: ActivityIdType[] }) => res.data);
 };

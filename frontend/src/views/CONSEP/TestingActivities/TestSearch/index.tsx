@@ -24,19 +24,19 @@ import { mkConfig, generateCsv, download } from 'export-to-csv';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
-import { getTestTypeCodes } from '../../../../api-service/consep/testCodesAPI';
+import { getTestTypeCodes, getActivityIds } from '../../../../api-service/consep/testCodesAPI';
 import type {
   TestingSearchResponseType,
   PaginatedTestingSearchResponseType,
   PaginationInfoType,
-  TestCodeType
+  TestCodeType,
+  ActivityIdType
 } from '../../../../types/consep/TestingSearchType';
 import TestListTable from './TestListTable';
 import TablePlaceholder from './TablePlaceholder';
 import AdvancedFilters from './AdvancedFilter';
 import {
   DATE_FORMAT,
-  activityIds,
   testSearchCrumbs,
   iniActSearchValidation,
   errorMessages,
@@ -217,6 +217,14 @@ const TestSearch = () => {
     select: (data: TestCodeType[]) => data?.map((testCode) => testCode.code) ?? []
   });
 
+  const activityIdQuery = useQuery({
+    queryKey: ['activity-ids'],
+    queryFn: getActivityIds,
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS,
+    select: (data: ActivityIdType[]) => data?.map((activity) => activity.standardActivityId) ?? []
+  });
+
   useEffect(() => {
     if (testTypeQuery.error) {
       setAlert({
@@ -224,7 +232,13 @@ const TestSearch = () => {
         message: `Failed to load test types: ${testTypeQuery.error?.message}`
       });
     }
-  }, [testTypeQuery.error]);
+    if (activityIdQuery.error) {
+      setAlert({
+        status: 'error',
+        message: `Failed to load activity IDs: ${activityIdQuery.error?.message}`
+      });
+    }
+  }, [testTypeQuery.error, activityIdQuery.error]);
 
   const handlePageChange = (pageIndex: number, pageSize: number) => {
     const sort = sorting[0];
@@ -432,12 +446,16 @@ const TestSearch = () => {
     const searchParamstoSend = {
       ...searchParams,
       lotNumbers: paddedLotNumbers.length > 0 ? paddedLotNumbers : undefined,
-      testTypes: (searchParams.testTypes ?? []).map((t: string) => {
-        const v = (t ?? '').toLowerCase();
-        if (v === 'sa') return 'GSA';
-        if (v === 'se') return 'GSE';
-        return t;
-      })
+      ...(searchParams.testTypes?.length
+        ? {
+          testTypes: searchParams.testTypes.map((t: string) => {
+            const v = (t ?? '').toLowerCase();
+            if (v === 'sa') return 'GSA';
+            if (v === 'se') return 'GSE';
+            return t;
+          })
+        }
+        : {})
     };
 
     searchMutation.mutate({ filter: searchParamstoSend });
@@ -497,7 +515,11 @@ const TestSearch = () => {
               id="activity-type-input"
               className="activity-type-input"
               titleText="Choose activity"
-              items={activityIds.map((type) => ({ id: type, text: type }))}
+              items={
+                activityIdQuery.data
+                  ? activityIdQuery.data.map((id) => ({ id, text: id }))
+                  : []
+              }
               itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
               onChange={(event: { selectedItems: Array<{ id: string }> }) => {
                 handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
