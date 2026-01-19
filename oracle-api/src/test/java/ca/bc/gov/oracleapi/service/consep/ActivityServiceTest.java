@@ -317,9 +317,9 @@ class ActivityServiceTest {
 
     assertEquals(2, activityResult.size());
     assertEquals(new BigDecimal("809210"), activityResult.get(0).riaSkey());
-    assertEquals("G11 germination test", activityResult.get(0).activityDesc());
+    assertEquals("G11 germination test", activityResult.get(0).activityDescription());
     assertEquals(new BigDecimal("805643"), activityResult.get(1).riaSkey());
-    assertEquals("Extend strat 35 days", activityResult.get(1).activityDesc());
+    assertEquals("Extend strat 35 days", activityResult.get(1).activityDescription());
   }
 
   @Test
@@ -365,7 +365,7 @@ class ActivityServiceTest {
         );
 
     assertThat(result)
-        .extracting(StandardActivityDto::activityDesc)
+        .extracting(StandardActivityDto::activityDescription)
         .containsExactly(
             activity1.getActivityDesc(),
             activity2.getActivityDesc(),

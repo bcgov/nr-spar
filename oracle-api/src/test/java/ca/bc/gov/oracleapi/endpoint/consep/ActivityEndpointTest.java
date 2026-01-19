@@ -174,9 +174,9 @@ class ActivityEndpointTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].riaSkey").value("809210"))
-        .andExpect(jsonPath("$[0].activityDesc").value("G11 germination test"))
+        .andExpect(jsonPath("$[0].activityDescription").value("G11 germination test"))
         .andExpect(jsonPath("$[1].riaSkey").value("805643"))
-        .andExpect(jsonPath("$[1].activityDesc").value("Extend strat 35 days"));
+        .andExpect(jsonPath("$[1].activityDescription").value("Extend strat 35 days"));
 
     verify(activityService, times(1)).getActivityByRequestSkeyAndItemId(requestSkey, itemId);
   }
@@ -190,17 +190,17 @@ class ActivityEndpointTest {
     when(activityService.getStandardActivityIds())
         .thenReturn(List.of(dto1, dto2, dto3));
 
-    mockMvc.perform(get("/api/activities/standard-activity-ids")
+    mockMvc.perform(get("/api/activities/ids")
             .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(3)))
         .andExpect(jsonPath("$[0].standardActivityId").value("AEX"))
-        .andExpect(jsonPath("$[0].activityDesc").value("Abies extraction"))
+        .andExpect(jsonPath("$[0].activityDescription").value("Abies extraction"))
         .andExpect(jsonPath("$[1].standardActivityId").value("SSP"))
-        .andExpect(jsonPath("$[1].activityDesc").value("Seed separation"))
+        .andExpect(jsonPath("$[1].activityDescription").value("Seed separation"))
         .andExpect(jsonPath("$[2].standardActivityId").value("TQA"))
-        .andExpect(jsonPath("$[2].activityDesc").value("Tumbling qa"));
+        .andExpect(jsonPath("$[2].activityDescription").value("Tumbling qa"));
 
     verify(activityService, times(1)).getStandardActivityIds();
   }

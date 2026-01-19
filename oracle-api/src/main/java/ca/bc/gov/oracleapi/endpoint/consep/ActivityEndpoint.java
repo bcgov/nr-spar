@@ -83,7 +83,7 @@ public class ActivityEndpoint {
    *
    * @return a list of StandardActivityDto containing the activity id and description
    */
-  @GetMapping("/standard-activity-ids")
+  @GetMapping("/ids")
   @ApiResponse(
       responseCode = "200",
       description = "Successfully retrieved the standard activity IDs and descriptions.",
