@@ -15,6 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
  * A DTO containing only the fields needed for
  * creating a new {@link ca.bc.gov.oracleapi.entity.consep.ActivityEntity} instance.
  */
+@Schema(description = "This class represents an object needed to create an activity entity.")
 public record ActivityCreateDto(
     @Schema(description = "A surrogate key to uniquely identify each Spar Request")
     @Digits(integer = 10, fraction = 0)
