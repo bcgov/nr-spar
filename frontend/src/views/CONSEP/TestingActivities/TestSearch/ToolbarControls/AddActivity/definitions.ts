@@ -1,0 +1,22 @@
+export type AddActivityRequest = {
+  riaKey: string;
+  standardActivityId: string;
+  activityTypeCd?: string;
+  testCategoryCd?: string;
+  associatedRiaKey?: string;
+  plannedStartDate: string;
+  plannedEndDate: string;
+  revisedStartDate?: string;
+  revisedEndDate?: string;
+  activityDuration: number;
+  activityTimeUnit: string;
+  significantStatusIndicator?: boolean;
+  processResultIndicator?: boolean;
+  testResultIndicator?: boolean;
+  requestSkey: number;
+  requestId: string;
+  itemId: string;
+  vegetationState: string;
+  seedlotNumber?: string;
+  familyLotNumber?: string;
+};

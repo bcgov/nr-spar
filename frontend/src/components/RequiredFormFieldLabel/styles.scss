@@ -1,0 +1,6 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.required-asterisk {
+  color: var(--#{vars.$bcgov-prefix}-support-error);
+  margin-right: 0.25rem;
+}
