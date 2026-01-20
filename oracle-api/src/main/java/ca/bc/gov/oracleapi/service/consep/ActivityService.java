@@ -4,14 +4,20 @@ import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
@@ -25,6 +31,7 @@ public class ActivityService {
 
   private final ActivityRepository activityRepository;
   private final TestResultRepository testResultRepository;
+  private final StandardActivityRepository standardActivityRepository;
 
   /**
    * Update activity table.
@@ -200,6 +207,37 @@ public class ActivityService {
     return activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId)
         .stream()
         .map(arr -> new ActivityRequestItemDto((BigDecimal) arr[0], (String) arr[1]))
+        .toList();
+  }
+
+  /**
+   * Retrieves all unique standard activity IDs and descriptions
+   * used for seedlot and/or family lot contexts.
+   *
+   * @return list of StandardActivityDto containing standardActivityId and activityDescription
+   */
+  public List<StandardActivityDto> getStandardActivityIds() {
+    List<StandardActivityEntity> allActivities =
+        standardActivityRepository.findAll();
+
+    List<StandardActivityEntity> familyLotActivities =
+        standardActivityRepository.findAllFamilyLotActivities();
+
+    Map<String, StandardActivityEntity> activityMap = new HashMap<>();
+
+    allActivities.forEach(a ->
+        activityMap.put(a.getStandardActivityId(), a)
+    );
+    familyLotActivities.forEach(a ->
+        activityMap.putIfAbsent(a.getStandardActivityId(), a)
+    );
+
+    return activityMap.values().stream()
+        .sorted(Comparator.comparing(StandardActivityEntity::getStandardActivityId))
+        .map(a -> new StandardActivityDto(
+            a.getStandardActivityId(),
+            a.getActivityDesc()
+        ))
         .toList();
   }
 }

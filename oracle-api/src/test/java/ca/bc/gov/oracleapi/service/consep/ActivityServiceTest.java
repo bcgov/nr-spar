@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.service.consep;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,9 +14,12 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+
 /**
  * The test class for Moisture Content Service.
  */
@@ -44,6 +49,9 @@ class ActivityServiceTest {
 
   @Mock
   private TestResultRepository testResultRepository;
+
+  @Mock
+  private StandardActivityRepository standardActivityRepository;
 
   @Autowired
   @InjectMocks
@@ -309,9 +317,9 @@ class ActivityServiceTest {
 
     assertEquals(2, activityResult.size());
     assertEquals(new BigDecimal("809210"), activityResult.get(0).riaSkey());
-    assertEquals("G11 germination test", activityResult.get(0).activityDesc());
+    assertEquals("G11 germination test", activityResult.get(0).activityDescription());
     assertEquals(new BigDecimal("805643"), activityResult.get(1).riaSkey());
-    assertEquals("Extend strat 35 days", activityResult.get(1).activityDesc());
+    assertEquals("Extend strat 35 days", activityResult.get(1).activityDescription());
   }
 
   @Test
@@ -323,5 +331,45 @@ class ActivityServiceTest {
     List<ActivityRequestItemDto> activityResult =
         activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
     assertEquals(0, activityResult.size());
+  }
+
+  @Test
+  void getStandardActivityIds_shouldReturnExpectedDtos() {
+    StandardActivityEntity activity1 = new StandardActivityEntity();
+    activity1.setStandardActivityId("AEX");
+    activity1.setActivityDesc("Abies extraction");
+
+    StandardActivityEntity activity2 = new StandardActivityEntity();
+    activity2.setStandardActivityId("SSP");
+    activity2.setActivityDesc("Seed separation");
+
+    StandardActivityEntity activity3 = new StandardActivityEntity();
+    activity3.setStandardActivityId("TQA");
+    activity3.setActivityDesc("Tumbling qa");
+
+    when(standardActivityRepository.findAll())
+        .thenReturn(List.of(activity2, activity1));
+
+    when(standardActivityRepository.findAllFamilyLotActivities())
+        .thenReturn(List.of(activity2, activity3));
+
+    List<StandardActivityDto> result = activityService.getStandardActivityIds();
+
+    assertThat(result)
+        .hasSize(3)
+        .extracting(StandardActivityDto::standardActivityId)
+        .containsExactly(
+            activity1.getStandardActivityId(),
+            activity2.getStandardActivityId(),
+            activity3.getStandardActivityId()
+        );
+
+    assertThat(result)
+        .extracting(StandardActivityDto::activityDescription)
+        .containsExactly(
+            activity1.getActivityDesc(),
+            activity2.getActivityDesc(),
+            activity3.getActivityDesc()
+        );
   }
 }
