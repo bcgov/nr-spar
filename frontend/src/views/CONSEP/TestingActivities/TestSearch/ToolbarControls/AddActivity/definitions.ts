@@ -1,9 +1,9 @@
 export type AddActivityRequest = {
-  riaKey: string;
+  riaKey: number;
   standardActivityId: string;
   activityTypeCd?: string;
   testCategoryCd?: string;
-  associatedRiaKey?: string;
+  associatedRiaKey?: number;
   plannedStartDate: string;
   plannedEndDate: string;
   revisedStartDate?: string;

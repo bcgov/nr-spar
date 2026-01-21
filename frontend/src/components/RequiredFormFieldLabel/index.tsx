@@ -3,7 +3,7 @@ import './styles.scss';
 
 const RequiredFormFieldLabel = ({ text }: { text: string }) => (
   <>
-    <span className="required-asterisk">*</span>
+    <b className="required-asterisk">*</b>
     {text}
   </>
 );

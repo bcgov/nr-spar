@@ -2,6 +2,7 @@
 
 .add-activity-form {
   padding: 1rem;
+  max-width: 44rem;
 
   .add-activity-select {
     margin-bottom: 1rem;
@@ -30,5 +31,20 @@
     align-items: flex-end;
     gap: 0.5rem;
     margin-bottom: 1rem;
+
+    #add-activity-duration-unit-select {
+      max-width: 13rem;
+    }
+  }
+}
+
+.add-activity-footer {
+  display: flex;
+  gap: 0.3rem;
+  margin: 0rem 1rem 1rem;
+
+  button {
+    flex: 1; // each button takes equal width
+    max-width: none; 
   }
 }

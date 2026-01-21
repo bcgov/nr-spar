@@ -115,6 +115,7 @@ const TestListTable = ({
       <Modal
         className="concep-add-activity-modal"
         open={showAddActivity}
+        passiveModal
         primaryButtonText="Add activity"
         secondaryButtonText="Cancel"
         size="lg"
@@ -131,7 +132,9 @@ const TestListTable = ({
           '.MuiPaper-root'
         ]}
       >
-        {showAddActivity && tableRef.current && <AddActivity table={tableRef.current} />}
+        {showAddActivity
+        && tableRef.current
+        && <AddActivity table={tableRef.current} closeModal={() => setShowAddActivity(false)} />}
       </Modal>
       <Row className="concep-test-search-table">
         <GenericTable
