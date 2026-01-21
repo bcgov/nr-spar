@@ -22,7 +22,11 @@ public class RequestLotService {
    * @return true if the commitment indicator is "Y", false otherwise
    */
   public boolean isCommitmentChecked(Long requestSkey, String itemId) {
-    SparLog.info("Finding commitment indicator for requestSkey {} and itemId {}", requestSkey, itemId);
+    SparLog.info(
+        "Finding commitment indicator for requestSkey {} and itemId {}",
+        requestSkey,
+        itemId
+    );
 
     String commitmentInd = requestSeedlotRepository.getCommitment(requestSkey, itemId);
     if (commitmentInd == null) {

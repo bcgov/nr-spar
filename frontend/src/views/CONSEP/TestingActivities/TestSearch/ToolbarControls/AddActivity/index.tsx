@@ -25,6 +25,7 @@ import {
   getTestCategoryCodes,
   getActivityDurationUnits
 } from '../../../../../../api-service/consep/testCodesAPI';
+import isCommitmentChecked from '../../../../../../api-service/requestSeedLotAndVegLotAPI';
 import {
   DATE_FORMAT,
   maxEndDate,
@@ -91,6 +92,14 @@ const AddActivity = (
     (field) => addActivityData[field] !== undefined && addActivityData[field] !== null && addActivityData[field] !== ''
   );
 
+  const isCommitmentCheckedQuery = useQuery({
+    queryKey: ['request-is-commitment', requestSkey, itemId],
+    queryFn: () => isCommitmentChecked(requestSkey, itemId),
+    enabled: Boolean(requestSkey && itemId),
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS
+  });
+
   const activityIdQuery = useQuery({
     queryKey: ['activity-ids'],
     queryFn: getActivityIds,
@@ -139,6 +148,9 @@ const AddActivity = (
     if (activityDurationUnitQuery.isError && activityDurationUnitQuery.error instanceof Error) {
       failedMessages.push(`Activity Duration Units: ${activityDurationUnitQuery.error.message}`);
     }
+    if (isCommitmentCheckedQuery.isError && isCommitmentCheckedQuery.error instanceof Error) {
+      failedMessages.push(`Process Commitment Indicator: ${isCommitmentCheckedQuery.error.message}`);
+    }
     if (failedMessages.length > 0) {
       setAlert({
         status: 'error',
@@ -156,7 +168,7 @@ const AddActivity = (
 
   const updateField = <K extends keyof AddActivityRequest>(
     field: K,
-    value: AddActivityRequest[K]
+    value: AddActivityRequest[K] | undefined
   ) => {
     console.log('selectedRows', selectedRows[0]);
     setAddActivityData((prev) => {
@@ -241,6 +253,7 @@ const AddActivity = (
           className="add-activity-select"
           titleText={isTestActivity ? <RequiredFormFieldLabel text="Test category" /> : 'Test category'}
           items={testCategoryQuery.data ?? []}
+          disabled={!isTestActivity}
           selectedItem={toSelectedItemString(addActivityData.testCategoryCd)}
           onChange={(e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem)}
         />
@@ -289,9 +302,18 @@ const AddActivity = (
             id="add-activity-duration-input"
             labelText={<RequiredFormFieldLabel text="Activity duration" />}
             type="number"
+            min={0}
+            max={999}
+            invalid={
+              !!addActivityData.activityDuration
+              && (addActivityData.activityDuration < 0
+                || addActivityData.activityDuration > 999)
+              }
+            invalidText="Activity duration must be between 0 and 999"
             value={addActivityData.activityDuration ?? ''}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              updateField('activityDuration', Number(e.target.value));
+              const { value } = e.target;
+              updateField('activityDuration', value === '' ? undefined : Number(value));
             }}
           />
           <ComboBox
@@ -312,6 +334,7 @@ const AddActivity = (
         <Checkbox
           labelText="Process commitment"
           id="add-activity-process-commitment-checkbox"
+          disabled={isCommitmentCheckedQuery.data === false}
           checked={addActivityData.processResultIndicator ?? false}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             updateField('processResultIndicator', e.target.checked);

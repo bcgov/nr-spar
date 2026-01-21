@@ -12,7 +12,7 @@
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
-
+    
     .#{vars.$bcgov-prefix}--date-picker--single {
       width: 100%;
 
@@ -28,12 +28,17 @@
 
   .add-activity-duration {
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     gap: 0.5rem;
     margin-bottom: 1rem;
 
-    #add-activity-duration-unit-select {
+    .#{vars.$bcgov-prefix}--text-input-wrapper {
+      min-width: 10rem;
+    }
+
+    .#{vars.$bcgov-prefix}--list-box__wrapper {
       max-width: 13rem;
+      margin-top: 1.72rem;
     }
   }
 }
