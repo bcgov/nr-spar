@@ -1,5 +1,3 @@
-import { FIVE_SECONDS } from '../../constants';
-
 describe('Login page test', () => {
   let loginPageData: {
     title: string,
@@ -28,10 +26,10 @@ describe('Login page test', () => {
     cy.getByDataTest('landing-button__idir').click();
     cy.url().then((url) => {
       if (url.includes('.gov.bc.ca')) {
-        cy.get('#idirLogo', { timeout: 5000 }).should('be.visible');
+        cy.get('#idirLogo').should('be.visible');
       } else {
-        cy.origin(loginUrl, { args: { timeout: FIVE_SECONDS } }, ({ timeout }) => {
-          cy.get('#idirLogo', { timeout }).should('be.visible');
+        cy.origin(loginUrl, () => {
+          cy.get('#idirLogo').should('be.visible');
         });
       }
     });
@@ -44,10 +42,10 @@ describe('Login page test', () => {
     cy.getByDataTest('landing-button__bceid').click();
     cy.url().then((url) => {
       if (url.includes('.gov.bc.ca')) {
-        cy.get('#bceidLogo', { timeout: 5000 }).should('be.visible');
+        cy.get('#bceidLogo').should('be.visible');
       } else {
-        cy.origin(loginUrl, { args: { timeout: FIVE_SECONDS } }, ({ timeout }) => {
-          cy.get('#bceidLogo', { timeout }).should('be.visible');
+        cy.origin(loginUrl, () => {
+          cy.get('#bceidLogo').should('be.visible');
         });
       }
     });

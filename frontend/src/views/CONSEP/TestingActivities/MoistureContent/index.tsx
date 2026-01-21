@@ -24,7 +24,9 @@ import {
 import ROUTES from '../../../../routes/constants';
 import { calculateAverage } from '../../../../api-service/moistureContentAPI';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
-import { TestingActivityType, ActivityRecordType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
+import {
+  TestingActivityType, ActivityRecordType, ActivitySummaryType, ReplicateType
+} from '../../../../types/consep/TestingActivityType';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 
@@ -35,6 +37,7 @@ import StatusTag from '../../../../components/StatusTag';
 
 import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
+import { mccReplicatesChecker } from './utils';
 
 import {
   DATE_FORMAT, fieldsConfig, mccVariations
@@ -51,8 +54,13 @@ const MoistureContent = () => {
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
   const [activityRiaKey, setActivityRiaKey] = useState<number>(0);
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
+  const [replicatesData, setReplicatesData] = useState<ReplicateType[]>([]);
   const [mcType, setMCType] = useState<string>('MCC');
-  const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
+  const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>();
+  const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
   // Reference to the table body for extracting MC Values
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
@@ -100,7 +108,7 @@ const MoistureContent = () => {
     } else if (testActivityQuery.data) {
       setTestActivity(testActivityQuery.data);
       setSeedlotNumber(testActivityQuery.data.seedlotNumber);
-      setMCType(testActivityQuery.data.activityType);
+      setMCType(testActivityQuery.data.standardActivityType);
       const activityRecordData = {
         testCategoryCode: testActivityQuery.data.testCategoryCode,
         riaComment: testActivityQuery.data.riaComment,
@@ -120,11 +128,20 @@ const MoistureContent = () => {
           familyLotNumber: testActivity.familyLotNumber,
           requestId: testActivity.requestId,
           speciesAndClass: `${testActivity.vegetationCode} | ${testActivity.geneticClassCode}`,
-          testResult: testActivity.moisturePct.toString()
+          testResult: testActivity.moisturePct?.toString()
         }
       );
+      setUpdatedReplicates(testActivityQuery.data.replicatesList);
     }
   }, [testActivity]);
+
+  useEffect(() => {
+    if (testActivity?.replicatesList && testActivity.replicatesList.length > 0) {
+      setReplicatesData(testActivity.replicatesList);
+    } else {
+      setReplicatesData(initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows));
+    }
+  }, [testActivity, riaKey, mcVariation.defaultNumberOfRows]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });
@@ -244,7 +261,15 @@ const MoistureContent = () => {
         if (tableBodyRef.current) {
           // Extract cell values from the table
           const cells = tableBodyRef.current.querySelectorAll('td[data-index="6"]');
-          const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+          const acceptCells = tableBodyRef.current.querySelectorAll('td[data-index="7"]');
+          const numbers = Array.from(cells).map((cell, index) => {
+            const checkbox = acceptCells[index].querySelector('input[type="checkbox"]');
+            if (checkbox instanceof HTMLInputElement && checkbox.checked) {
+              const value = parseFloat(cell.textContent || '');
+              return Number.isNaN(value) ? 0 : value;
+            }
+            return null;
+          }).filter((num): num is number => num !== null);
           // Call the mutate function with the extracted numbers
           averageTest.mutate(numbers);
         } else {
@@ -262,7 +287,14 @@ const MoistureContent = () => {
       size: 'lg',
       icon: Checkmark,
       disabled: testActivity?.testCompleteInd === 1,
-      action: () => validateTest.mutate()
+      action: () => {
+        const errors = mccReplicatesChecker(updatedReplicates);
+        if (Object.keys(errors).length > 0) {
+          setValidationErrors(errors);
+        } else {
+          validateTest.mutate();
+        }
+      }
     },
     {
       id: 'accept-test',
@@ -290,8 +322,6 @@ const MoistureContent = () => {
       disabled: true
     }
   ];
-
-  const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
   return (
     <FlexGrid className="consep-moisture-content">
@@ -335,10 +365,12 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
-          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows)}
+          replicatesData={replicatesData}
           replicateType="moistureTest"
           riaKey={activityRiaKey}
           isEditable={!testActivity?.testCompleteInd}
+          initValidationErrors={validationErrors}
+          updateReplicates={setUpdatedReplicates}
           setAlert={handleAlert}
           tableBodyRef={tableBodyRef}
         />
@@ -347,11 +379,15 @@ const MoistureContent = () => {
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualBeginDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -363,17 +399,26 @@ const MoistureContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat="Y/m/d"
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualEndDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -385,6 +430,11 @@ const MoistureContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>
@@ -409,13 +459,12 @@ const MoistureContent = () => {
         </Column>
       </Row>
       <Row className="consep-moisture-content-comments">
-        <Column sm={4} md={4} lg={10} xlg={10}>
+        <Column>
           <TextArea
             id="moisture-content-comments"
             name={fieldsConfig.comments.name}
             labelText={fieldsConfig.comments.labelText}
-            placeholder={fieldsConfig.comments.placeholder}
-            rows={5}
+            rows={2}
             maxCount={500}
             enableCounter
             value={activityRecord?.riaComment || ''}

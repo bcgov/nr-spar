@@ -60,10 +60,18 @@
   }
 }
 
+.consep-moisture-content-comments {
+  width: 100%;
+}
+
 .consep-moisture-content-comments > div {
   padding: 0rem;
 }
 
 .consep-moisture-content-alert {
   margin-bottom: 2rem;
+  position: fixed;
+  top: 3rem;
+  width: 80%;
+  z-index: 1000;
 }

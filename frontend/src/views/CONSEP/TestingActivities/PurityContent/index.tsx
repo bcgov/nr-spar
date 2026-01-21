@@ -30,9 +30,12 @@ import PageTitle from '../../../../components/PageTitle';
 import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
 import StatusTag from '../../../../components/StatusTag';
 
-import { ActivityRecordType, TestingActivityType, ActivitySummaryType } from '../../../../types/consep/TestingActivityType';
+import {
+  ActivityRecordType, TestingActivityType, ActivitySummaryType, ReplicateType
+} from '../../../../types/consep/TestingActivityType';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
+import { getCodesByActivity } from '../../../../api-service/consep/testCodesAPI';
 import { deleteImpurity, patchImpurities } from '../../../../api-service/consep/impuritiesAPI';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
@@ -45,7 +48,7 @@ import {
   ImpurityDisplayType, ImpurityPayload,
   RichImpurityType, SingleImpurityType
 } from './definitions';
-import { impuritiesPerReplicate } from './utils';
+import { impuritiesPerReplicate, purityReplicatesChecker } from './utils';
 import {
   DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
@@ -60,10 +63,13 @@ const PurityContent = () => {
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
+  const [replicatesData, setReplicatesData] = useState<ReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
   const [impurities, setImpurities] = useState<ImpurityDisplayType>({});
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'accept'>(COMPLETE);
+  const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
@@ -71,6 +77,11 @@ const PurityContent = () => {
     queryKey: ['riaKey', riaKey],
     queryFn: () => testingActivitiesAPI('purityTest', 'getDataByRiaKey', { riaKey }),
     refetchOnMount: true
+  });
+
+  const impurityCodesQuery = useQuery({
+    queryKey: ['impurityCodes'],
+    queryFn: () => getCodesByActivity('DEBRIS_TYPE_CD')
   });
 
   const updateImpuritiesMutation = useMutation({
@@ -229,6 +240,7 @@ const PurityContent = () => {
         actualEndDateTime: testActivityQuery.data.actualEndDateTime
       };
       setActivityRecord(activityRecordData);
+      setUpdatedReplicates(testActivityQuery.data.replicatesList);
       if (testActivityQuery.data.debrisList) {
         setImpurities(impuritiesPerReplicate(testActivityQuery.data.debrisList));
       }
@@ -249,6 +261,14 @@ const PurityContent = () => {
       );
     }
   }, [testActivity]);
+
+  useEffect(() => {
+    if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
+      setReplicatesData(testActivity.replicatesList);
+    } else {
+      setReplicatesData(initReplicatesList(riaKey ?? '', 2));
+    }
+  }, [testActivity, riaKey]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });
@@ -304,7 +324,15 @@ const PurityContent = () => {
   const handleCalculateAverage = () => {
     if (tableBodyRef.current) {
       const cells = tableBodyRef.current.querySelectorAll('td[data-index="4"]');
-      const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+      const acceptCells = tableBodyRef.current.querySelectorAll('td[data-index="5"]');
+      const numbers = Array.from(cells).map((cell, index) => {
+        const checkbox = acceptCells[index].querySelector('input[type="checkbox"]');
+        if (checkbox instanceof HTMLInputElement && checkbox.checked) {
+          const value = parseFloat(cell.textContent || '');
+          return Number.isNaN(value) ? 0 : value;
+        }
+        return null;
+      }).filter((num): num is number => num !== null);
       averageTest.mutate(numbers);
     } else {
       setAlert({
@@ -360,6 +388,12 @@ const PurityContent = () => {
     }
   ];
 
+  const {
+    data: impurityCodes,
+    isPending: isImpurityCodesPending,
+    isError: isImpurityCodesError
+  } = impurityCodesQuery;
+
   const impurityPerReplicate = (impurity: SingleImpurityType, replicateNumber: number) => (
     <Row key={`impurity-${replicateNumber}-${impurity.debrisRank}`} className="consep-impurity-content">
       <Column sm={2} md={2} lg={2} xlg={2}>
@@ -378,15 +412,25 @@ const PurityContent = () => {
           className="consep-impurity-combobox"
           id={`impurity-${impurity.debrisRank}-${impurity.debrisCategory}`}
           name={fieldsConfig.impuritySection.secondaryfieldName}
-          items={fieldsConfig.impuritySection.options}
-          placeholder={fieldsConfig.impuritySection.placeholder}
+          items={impurityCodes ?? []}
+          placeholder={(() => {
+            if (isImpurityCodesPending) return 'Loading debris types...';
+            if (isImpurityCodesError) return 'Failed to load debris types';
+            return fieldsConfig.impuritySection.placeholder;
+          })()}
           titleText={
             impurity.debrisRank === 1
               ? fieldsConfig.impuritySection.secondaryfieldName
               : ''
           }
+          value={impurity.debrisCategory}
+          disabled={isImpurityCodesPending || isImpurityCodesError}
           onChange={(e: ComboBoxEvent) => {
             const { selectedItem } = e;
+            if (!selectedItem) {
+              return;
+            }
+
             updateImpuritiesMutation.mutate([
               {
                 replicateNumber,
@@ -396,6 +440,7 @@ const PurityContent = () => {
             ]);
           }}
         />
+
       </Column>
       <Column className="consep-impurity-content-remove" sm={1} md={1} lg={2} xlg={2}>
         <Button
@@ -434,7 +479,7 @@ const PurityContent = () => {
             Object.keys(impurities)
             && Object.keys(impurities).length > 0
             && impurities[replicateNumber]
-            && impurities[replicateNumber].map(
+            && impurities[replicateNumber].sort((a, b) => a.debrisRank - b.debrisRank).map(
               (impurity) => impurityPerReplicate(impurity, replicateNumber)
             )
           }
@@ -494,7 +539,13 @@ const PurityContent = () => {
         }}
         onRequestSubmit={() => {
           if (modalType === COMPLETE) {
-            validateTest.mutate();
+            const errors = purityReplicatesChecker(updatedReplicates);
+
+            if (Object.keys(errors).length > 0) {
+              setValidationErrors(errors);
+            } else {
+              validateTest.mutate();
+            }
           } else if (modalType === ACCEPT) {
             acceptTest.mutate();
           }
@@ -540,22 +591,29 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-result">
         <ActivityResult
           replicateType="purityTest"
-          replicatesData={testActivity?.replicatesList || initReplicatesList(riaKey ?? '', 4)}
+          replicatesData={replicatesData}
           riaKey={Number(riaKey)}
           isEditable={!testActivity?.testCompleteInd}
+          initValidationErrors={validationErrors}
+          updateReplicates={setUpdatedReplicates}
           setAlert={handleAlert}
           tableBodyRef={tableBodyRef}
+          hideActions
         />
       </Row>
       <Row className="consep-purity-content-date-picker">
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualBeginDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -567,17 +625,26 @@ const PurityContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualBeginDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
           <DatePicker
             datePickerType="single"
+            allowInput
             dateFormat="Y/m/d"
-            onChange={(e: Array<Date>) => {
-              handleUpdateActivityRecord({
-                actualEndDateTime: e[0].toISOString()
-              });
+            onChange={(e: Array<Date>, strDates: string[]) => {
+              const date = e[0] || new Date(strDates[0]);
+              if (date) {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: date.toISOString()
+                });
+              }
             }}
           >
             <DatePickerInput
@@ -589,6 +656,11 @@ const PurityContent = () => {
               value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                handleUpdateActivityRecord({
+                  actualEndDateTime: new Date(e.target.value).toISOString()
+                });
+              }}
             />
           </DatePicker>
         </Column>

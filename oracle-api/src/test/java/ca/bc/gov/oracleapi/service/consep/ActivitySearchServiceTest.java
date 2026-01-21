@@ -1,25 +1,36 @@
 package ca.bc.gov.oracleapi.service.consep;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivitySearchResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivitySearchRepository;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class ActivitySearchServiceTest {
@@ -31,26 +42,33 @@ class ActivitySearchServiceTest {
   private ActivitySearchService activitySearchService;
 
   private ActivitySearchRequestDto activitySearchRequestDto;
-  private ActivitySearchResultEntity activitySearchResultEntity;
+  private List<ActivitySearchResultEntity> activitySearchResults;
+  private ActivitySearchResultEntity activitySearchResultEntityOne;
+  private ActivitySearchResultEntity activitySearchResultEntityTwo;
 
   // Test data
-  private List<String> lotNumbers;
-  private String testType, activityId, requestId, requestType, orchardId, testCategoryCd, testRank, species, seedlotClass,
-    seedlotSample, riaComment, requestItem, pv, seedlotDisplay;
-  private Integer germinatorTrayId, requestYear, germTrayAssignment, completeStatus, acceptanceStatus, riaSkey, currentTestInd,
-    germinationPct, moisturePct, purityPct, seedsPerGram, otherTestResult, significntStsInd, requestSkey;
-  private LocalDate seedWithdrawalStartDate, seedWithdrawalEndDate, actualBeginDateFrom, actualBeginDateTo,
-    actualEndDateFrom, actualEndDateTo, revisedStartDateFrom, revisedStartDateTo,
-    revisedEndDateFrom, revisedEndDateTo;
-  private LocalDateTime actualBeginDtTm, actualEndDtTm;
-  private Boolean includeHistoricalTests, germTestsOnly;
+  private List<String> lotNumbers, testTypes, activityIds;
+  private String requestId, requestType, orchardId, testCategoryCd, testRank,
+      species, geneticClassCode, seedlotSample, riaComment, requestItem, pv, seedlotDisplaySeedlot,
+      seedlotDisplayFamilylot;
+  private Integer germinatorTrayId, requestYear, germTrayAssignment, completeStatus,
+      acceptanceStatus, riaSkey, currentTestInd, germinationPct, moisturePct, purityPct,
+      seedsPerGram, otherTestResult, significntStsInd, requestSkey;
+  private LocalDate seedWithdrawalStartDate, seedWithdrawalEndDate, actualBeginDateFrom,
+      actualBeginDateTo, actualEndDateFrom, actualEndDateTo, revisedStartDateFrom,
+      revisedStartDateTo, revisedEndDateFrom, revisedEndDateTo;
+  private LocalDateTime actualBeginDtTm, actualEndDtTm, seedWithdrawalDate, revisedEndDt;
+  private Boolean includeHistoricalTests, germTestsOnly, familyLotsOnly;
+  private Sort defaultSort;
 
   @BeforeEach
   void setUp() {
     // Search filter parameters
-    lotNumbers = List.of("00098");
-    testType = "D1";
-    activityId = "D1";
+    seedlotDisplaySeedlot = "00098";
+    seedlotDisplayFamilylot = "F20082140146";
+    lotNumbers = List.of(seedlotDisplaySeedlot, seedlotDisplayFamilylot);
+    testTypes = List.of("D1");
+    activityIds = List.of("D1");
     germinatorTrayId = null;
     seedWithdrawalStartDate = LocalDate.of(1997, 10, 1); // seedWithdrawalDate
     seedWithdrawalEndDate = LocalDate.of(1998, 10, 31); // seedWithdrawalDate
@@ -74,22 +92,22 @@ class ActivitySearchServiceTest {
     germTrayAssignment = -1; // assigned_tray_ind
     completeStatus = -1; // testCompleteInd
     acceptanceStatus = -1; // acceptResultInd
-    seedlotClass = "A";
+    geneticClassCode = "A";
+    familyLotsOnly = false;
 
     activitySearchRequestDto = new ActivitySearchRequestDto(
-      lotNumbers, testType, activityId, germinatorTrayId,
-      seedWithdrawalStartDate, seedWithdrawalEndDate,
-      includeHistoricalTests, germTestsOnly, requestId, requestType,
-      requestYear, orchardId, testCategoryCd, testRank, species,
-      actualBeginDateFrom, actualBeginDateTo,
-      actualEndDateFrom, actualEndDateTo,
-      revisedStartDateFrom, revisedStartDateTo,
-      revisedEndDateFrom, revisedEndDateTo,
-      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass
+        lotNumbers, testTypes, activityIds, germinatorTrayId,
+        seedWithdrawalStartDate, seedWithdrawalEndDate,
+        includeHistoricalTests, germTestsOnly, requestId, requestType,
+        requestYear, orchardId, testCategoryCd, testRank, species,
+        actualBeginDateFrom, actualBeginDateTo,
+        actualEndDateFrom, actualEndDateTo,
+        revisedStartDateFrom, revisedStartDateTo,
+        revisedEndDateFrom, revisedEndDateTo,
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly
     );
 
     // Search return result
-    seedlotDisplay = "00098";
     requestItem = "RTS19981299A";
     currentTestInd = 0;
     germinationPct = 88;
@@ -99,68 +117,111 @@ class ActivitySearchServiceTest {
     seedsPerGram = 0;
     otherTestResult = 0;
     significntStsInd = -1;
-    actualBeginDtTm = LocalDate.of(1998, 10, 8).atTime(0, 0);
-    actualEndDtTm = LocalDate.of(1998, 11, 6).atTime(0, 0);
+    actualBeginDtTm = LocalDate.of(1998, 10, 8).atStartOfDay();
+    actualEndDtTm = LocalDate.of(1998, 11, 6).atTime(LocalTime.MAX);
+    seedWithdrawalDate = seedWithdrawalStartDate.atStartOfDay();
+    revisedEndDt = revisedEndDateFrom.atStartOfDay();
     riaComment = "Comment";
     requestSkey = 44115;
     riaSkey = 448383;
     seedlotSample = "00098";
 
-    activitySearchResultEntity = new ActivitySearchResultEntity();
+    activitySearchResults = new ArrayList<>();
 
-    activitySearchResultEntity.setSeedlotDisplay(seedlotDisplay);
-    activitySearchResultEntity.setRequestItem(requestItem);
-    activitySearchResultEntity.setSpecies(species);
-    activitySearchResultEntity.setActivityId(activityId);
-    activitySearchResultEntity.setTestRank(testRank);
-    activitySearchResultEntity.setCurrentTestInd(currentTestInd);
-    activitySearchResultEntity.setTestCategoryCd(testCategoryCd);
-    activitySearchResultEntity.setGerminationPct(germinationPct);
-    activitySearchResultEntity.setPv(pv);
-    activitySearchResultEntity.setMoisturePct(moisturePct);
-    activitySearchResultEntity.setPurityPct(purityPct);
-    activitySearchResultEntity.setSeedsPerGram(seedsPerGram);
-    activitySearchResultEntity.setOtherTestResult(otherTestResult);
-    activitySearchResultEntity.setTestCompleteInd(completeStatus == -1);
-    activitySearchResultEntity.setAcceptResultInd(acceptanceStatus);
-    activitySearchResultEntity.setSignificntStsInd(significntStsInd);
-    activitySearchResultEntity.setSeedWithdrawalDate(seedWithdrawalStartDate);
-    activitySearchResultEntity.setRevisedEndDt(revisedEndDateTo);
-    activitySearchResultEntity.setActualBeginDtTm(actualBeginDtTm);
-    activitySearchResultEntity.setActualEndDtTm(actualEndDtTm);
-    activitySearchResultEntity.setRiaComment(riaComment);
-    activitySearchResultEntity.setRequestSkey(requestSkey);
-    activitySearchResultEntity.setReqId(requestId.substring(0, 11));
-    activitySearchResultEntity.setItemId(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
-    activitySearchResultEntity.setSeedlotSample(seedlotSample);
-    activitySearchResultEntity.setRiaSkey(riaSkey);
+    activitySearchResultEntityOne = new ActivitySearchResultEntity();
+    activitySearchResultEntityOne.setSeedlotDisplay(seedlotDisplaySeedlot);
+    populateCommonFields(activitySearchResultEntityOne);
+    activitySearchResults.add(activitySearchResultEntityOne);
+
+    activitySearchResultEntityTwo = new ActivitySearchResultEntity();
+    activitySearchResultEntityTwo.setSeedlotDisplay(seedlotDisplayFamilylot);
+    populateCommonFields(activitySearchResultEntityTwo);
+    activitySearchResults.add(activitySearchResultEntityTwo);
+    defaultSort = Sort.by("seedlotSample").ascending()
+      .and(Sort.by("actualBeginDtTm").ascending());
   }
 
+  private void populateCommonFields(ActivitySearchResultEntity entity) {
+    entity.setRequestItem(requestItem);
+    entity.setSpecies(species);
+    entity.setActivityId(activityIds.get(0));
+    entity.setTestRank(testRank);
+    entity.setCurrentTestInd(currentTestInd);
+    entity.setTestCategoryCd(testCategoryCd);
+    entity.setGerminationPct(germinationPct);
+    entity.setPv(pv);
+    entity.setMoisturePct(moisturePct);
+    entity.setPurityPct(purityPct);
+    entity.setSeedsPerGram(seedsPerGram);
+    entity.setOtherTestResult(otherTestResult);
+    entity.setTestCompleteInd(completeStatus);
+    entity.setAcceptResultInd(acceptanceStatus);
+    entity.setSignificntStsInd(significntStsInd);
+    entity.setSeedWithdrawalDate(seedWithdrawalDate);
+    entity.setRevisedEndDt(revisedEndDt);
+    entity.setActualBeginDtTm(actualBeginDtTm);
+    entity.setActualEndDtTm(actualEndDtTm);
+    entity.setRiaComment(riaComment);
+    entity.setRequestSkey(requestSkey);
+    entity.setReqId(requestId.substring(0, 11));
+    entity.setItemId(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
+    entity.setSeedlotSample(seedlotSample);
+    entity.setRiaSkey(riaSkey);
+    entity.setActivityTypeCd(testTypes.get(0));
+  }
 
   @Test
   void shouldReturnMappedResults() {
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
+    Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(
+        List.of(activitySearchResultEntityOne),
+        pageable,
+        1 // total elements
+    );
 
-    when(activitySearchRepository.searchActivities(
-      lotNumbers, testType, activityId, germinatorTrayId,
-      seedWithdrawalStartDate, seedWithdrawalEndDate,
-      includeHistoricalTests, germTestsOnly, requestId, requestType,
-      requestYear, orchardId, testCategoryCd, testRank, species,
-      actualBeginDateFrom, actualBeginDateTo,
-      actualEndDateFrom, actualEndDateTo,
-      revisedStartDateFrom, revisedStartDateTo,
-      revisedEndDateFrom, revisedEndDateTo,
-      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass, 0, 10
-    )).thenReturn(List.of(activitySearchResultEntity));
+    LocalDateTime expectedActualBeginFrom = actualBeginDateFrom.atStartOfDay();
+    LocalDateTime expectedActualBeginTo   = actualBeginDateTo.atTime(LocalTime.MAX);
+    LocalDateTime expectedActualEndFrom   = actualEndDateFrom.atStartOfDay();
+    LocalDateTime expectedActualEndTo     = actualEndDateTo.atTime(LocalTime.MAX);
+    LocalDateTime expectedSeedWithdrawalStartDate = seedWithdrawalStartDate.atStartOfDay();
+    LocalDateTime expectedSeedWithdrawalEndDate   = seedWithdrawalEndDate.atTime(LocalTime.MAX);
+    LocalDateTime expectedRevisedStartDateFrom   = revisedStartDateFrom.atStartOfDay();
+    LocalDateTime expectedRevisedStartDateTo   = revisedStartDateTo.atTime(LocalTime.MAX);
+    LocalDateTime expectedRevisedEndDateFrom   = revisedEndDateFrom.atStartOfDay();
+    LocalDateTime expectedRevisedEndDateTo   = revisedEndDateTo.atTime(LocalTime.MAX);
 
-    List<ActivitySearchResponseDto> result = activitySearchService.searchActivities(activitySearchRequestDto, pageable);
+    when(activitySearchRepository.findExistingLotNumbers(
+        eq(Set.of(seedlotDisplaySeedlot, seedlotDisplayFamilylot))
+    )).thenReturn(Set.of(seedlotDisplaySeedlot));
 
-    assertThat(result).hasSize(1);
-    ActivitySearchResponseDto activitySearchResponseDto = result.get(0);
-    assertThat(activitySearchResponseDto.seedlotDisplay()).isEqualTo(seedlotDisplay);
+    when(activitySearchRepository.searchTestingActivities(
+        lotNumbers, testTypes, activityIds, germinatorTrayId,
+        expectedSeedWithdrawalStartDate, expectedSeedWithdrawalEndDate,
+        includeHistoricalTests, germTestsOnly, requestId, requestType,
+        requestYear, orchardId, testCategoryCd, testRank, species,
+        expectedActualBeginFrom, expectedActualBeginTo,
+        expectedActualEndFrom, expectedActualEndTo,
+        expectedRevisedStartDateFrom, expectedRevisedStartDateTo,
+        expectedRevisedEndDateFrom, expectedRevisedEndDateTo,
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly,
+        pageable
+    )).thenReturn(mockPage);
+
+    ActivitySearchPageResponseDto pageResponse = activitySearchService.searchTestingActivities(
+        activitySearchRequestDto, pageable, null, null
+    );
+
+    assertThat(pageResponse.content()).hasSize(1);
+    assertThat(pageResponse.totalElements()).isEqualTo(1);
+    assertThat(pageResponse.totalPages()).isEqualTo(1);
+    assertThat(pageResponse.pageNumber()).isEqualTo(0);
+    assertThat(pageResponse.pageSize()).isEqualTo(10);
+    assertThat(pageResponse.missingLotNumbers()).containsExactly(seedlotDisplayFamilylot);
+    ActivitySearchResponseDto activitySearchResponseDto = pageResponse.content().get(0);
+    assertThat(activitySearchResponseDto.seedlotDisplay()).isEqualTo(seedlotDisplaySeedlot);
     assertThat(activitySearchResponseDto.requestItem()).isEqualTo(requestItem);
     assertThat(activitySearchResponseDto.species()).isEqualTo(species);
-    assertThat(activitySearchResponseDto.activityId()).isEqualTo(activityId);
+    assertThat(activitySearchResponseDto.activityId()).isEqualTo(activityIds.get(0));
     assertThat(activitySearchResponseDto.testRank()).isEqualTo(testRank);
     assertThat(activitySearchResponseDto.currentTestInd()).isEqualTo(currentTestInd);
     assertThat(activitySearchResponseDto.testCategoryCd()).isEqualTo(testCategoryCd);
@@ -170,82 +231,227 @@ class ActivitySearchServiceTest {
     assertThat(activitySearchResponseDto.purityPct()).isEqualTo(purityPct);
     assertThat(activitySearchResponseDto.seedsPerGram()).isEqualTo(seedsPerGram);
     assertThat(activitySearchResponseDto.otherTestResult()).isEqualTo(otherTestResult);
-    assertThat(activitySearchResponseDto.testCompleteInd()).isTrue();
+    assertThat(activitySearchResponseDto.testCompleteInd()).isEqualTo(completeStatus);
     assertThat(activitySearchResponseDto.acceptResultInd()).isEqualTo(acceptanceStatus);
     assertThat(activitySearchResponseDto.significntStsInd()).isEqualTo(significntStsInd);
-    assertThat(activitySearchResponseDto.seedWithdrawalDate()).isEqualTo(seedWithdrawalStartDate);
-    assertThat(activitySearchResponseDto.revisedEndDt()).isEqualTo(revisedEndDateTo);
+    assertThat(activitySearchResponseDto.seedWithdrawalDate()).isEqualTo(seedWithdrawalDate);
+    assertThat(activitySearchResponseDto.revisedEndDt()).isEqualTo(revisedEndDt);
     assertThat(activitySearchResponseDto.actualBeginDtTm()).isEqualTo(actualBeginDtTm);
     assertThat(activitySearchResponseDto.actualEndDtTm()).isEqualTo(actualEndDtTm);
     assertThat(activitySearchResponseDto.riaComment()).isEqualTo(riaComment);
     assertThat(activitySearchResponseDto.requestSkey()).isEqualTo(requestSkey);
     assertThat(activitySearchResponseDto.reqId()).isEqualTo(requestId.substring(0, 11));
-    assertThat(activitySearchResponseDto.itemId()).isEqualTo(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
+    assertThat(activitySearchResponseDto.itemId())
+        .isEqualTo(requestId.length() >= 12 ? requestId.substring(11, 12) : "");
     assertThat(activitySearchResponseDto.seedlotSample()).isEqualTo(seedlotSample);
     assertThat(activitySearchResponseDto.riaSkey()).isEqualTo(riaSkey);
+    assertThat(activitySearchResponseDto.activityTypeCd()).isEqualTo(testTypes.get(0));
 
-    verify(activitySearchRepository, times(1)).searchActivities(
-      lotNumbers, testType, activityId, germinatorTrayId,
-      seedWithdrawalStartDate, seedWithdrawalEndDate,
-      includeHistoricalTests, germTestsOnly, requestId, requestType,
-      requestYear, orchardId, testCategoryCd, testRank, species,
-      actualBeginDateFrom, actualBeginDateTo,
-      actualEndDateFrom, actualEndDateTo,
-      revisedStartDateFrom, revisedStartDateTo,
-      revisedEndDateFrom, revisedEndDateTo,
-      germTrayAssignment, completeStatus, acceptanceStatus, seedlotClass, 0, 10
+    verify(activitySearchRepository, times(1)).searchTestingActivities(
+        lotNumbers, testTypes, activityIds, germinatorTrayId,
+        expectedSeedWithdrawalStartDate, expectedSeedWithdrawalEndDate,
+        includeHistoricalTests, germTestsOnly, requestId, requestType,
+        requestYear, orchardId, testCategoryCd, testRank, species,
+        expectedActualBeginFrom, expectedActualBeginTo,
+        expectedActualEndFrom, expectedActualEndTo,
+        expectedRevisedStartDateFrom, expectedRevisedStartDateTo,
+        expectedRevisedEndDateFrom, expectedRevisedEndDateTo,
+        germTrayAssignment, completeStatus, acceptanceStatus, geneticClassCode, familyLotsOnly,
+        pageable
     );
   }
 
   @Test
   void shouldReturnAllResultsWhenNoFiltersProvided() {
     ActivitySearchRequestDto emptyRequest = new ActivitySearchRequestDto(
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null
     );
-    Pageable pageable = PageRequest.of(0, 10);
+
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
+    Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(
+        activitySearchResults,
+        pageable,
+        activitySearchResults.size() // total elements
+    );
 
     // mock return 2 results
-    when(activitySearchRepository.searchActivities(
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, 0, 10
-    )).thenReturn(List.of(activitySearchResultEntity, activitySearchResultEntity));
+    when(activitySearchRepository.searchTestingActivities(
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, pageable
+    )).thenReturn(mockPage);
 
-    List<ActivitySearchResponseDto> result = activitySearchService.searchActivities(emptyRequest, pageable);
+    ActivitySearchPageResponseDto pageResponse = activitySearchService
+        .searchTestingActivities(emptyRequest, pageable, null, null);
 
-    assertThat(result).hasSize(2);
+    assertThat(pageResponse.content()).hasSize(2);
+    assertThat(pageResponse.missingLotNumbers()).isEmpty();
+
+    ActivitySearchResponseDto firstItem = pageResponse.content().get(0);
+    ActivitySearchResponseDto secondItem = pageResponse.content().get(1);
+
+    assertThat(firstItem.seedlotDisplay()).isEqualTo(seedlotDisplaySeedlot);
+    assertThat(secondItem.seedlotDisplay()).isEqualTo(seedlotDisplayFamilylot);
   }
+
 
   @Test
   void shouldReturnEmptyListWhenNoResultsFound() {
     // filter by requestYear = 2025
     ActivitySearchRequestDto emptyRequest = new ActivitySearchRequestDto(
-      null, null, null, null, null, null,
-      null, null, null, null, 2025, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null
+        null, null, null, null, null, null,
+        null, null, null, null, 2025, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null
     );
 
-    Pageable pageable = PageRequest.of(0, 10);
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
 
-    when(activitySearchRepository.searchActivities(
-      null, null, null, null, null, null,
-      null, null, null, null, 2025, null,
-      null, null, null, null, null, null,
-      null, null, null, null, null, null,
-      null, null, null, 0, 10
-    )).thenReturn(Collections.emptyList());
+    // mock empty page
+    Page<ActivitySearchResultEntity> emptyPage = new PageImpl<>(
+        Collections.emptyList(),
+        pageable,
+        0
+    );
 
-    List<ActivitySearchResponseDto> result = activitySearchService.searchActivities(emptyRequest, pageable);
+    when(activitySearchRepository.searchTestingActivities(
+        null, null, null, null, null, null,
+        null, null, null, null, 2025, null,
+        null, null, null, null, null, null,
+        null, null, null, null, null, null,
+        null, null, null, null, pageable
+    )).thenReturn(emptyPage);
 
-    assertThat(result).isEmpty();
+    ActivitySearchPageResponseDto pageResponse = activitySearchService
+        .searchTestingActivities(emptyRequest, pageable, null, null);
+
+    assertThat(pageResponse.content()).isEmpty();
+    assertThat(pageResponse.missingLotNumbers()).isEmpty();
   }
 
+  @Test
+  void shouldSortByValidFieldAscending() {
+    Pageable defaultPageable = PageRequest.of(0, 10);
+    String sortBy = "seedlotDisplay";
+    String sortDirection = "asc";
+
+    Pageable sortedPageable = PageRequest.of(0, 10, Sort.by(sortBy).ascending());
+
+    Page<ActivitySearchResultEntity> mockPage =
+        new PageImpl<>(List.of(activitySearchResultEntityOne), sortedPageable, 1);
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(sortedPageable))).thenReturn(mockPage);
+
+    ActivitySearchPageResponseDto result =
+        activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable,
+            sortBy, sortDirection);
+
+    assertThat(result.content()).hasSize(1);
+
+    verify(activitySearchRepository, times(1)).searchTestingActivities(any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(sortedPageable));
+  }
+
+  @Test
+  void shouldSortByValidFieldDescending() {
+    Pageable defaultPageable = PageRequest.of(0, 10);
+    String sortBy = "requestItem";
+    String sortDirection = "desc";
+
+    Pageable sortedPageable = PageRequest.of(0, 10, Sort.by(sortBy).descending());
+
+    Page<ActivitySearchResultEntity> mockPage =
+        new PageImpl<>(List.of(activitySearchResultEntityOne), sortedPageable, 1);
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(sortedPageable))).thenReturn(mockPage);
+
+    ActivitySearchPageResponseDto result =
+        activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable,
+            sortBy, sortDirection);
+
+    assertThat(result.content()).hasSize(1);
+  }
+
+  @Test
+  void shouldUseDefaultPageableWhenSortByNull() {
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
+
+    Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(activitySearchResults, pageable, 2);
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(pageable))).thenReturn(mockPage);
+
+    List<ActivitySearchResponseDto> result =
+        activitySearchService.searchTestingActivities(activitySearchRequestDto, pageable, null,
+            null).content();
+
+    assertThat(result).hasSize(2);
+  }
+
+  @Test
+  void shouldUseDefaultPageableWhenSortByBlank() {
+    Pageable pageable = PageRequest.of(0, 10, defaultSort);
+
+    Page<ActivitySearchResultEntity> mockPage = new PageImpl<>(activitySearchResults, pageable, 2);
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        eq(pageable))).thenReturn(mockPage);
+
+    List<ActivitySearchResponseDto> result =
+        activitySearchService.searchTestingActivities(activitySearchRequestDto, pageable, "   ",
+            "asc").content();
+
+    assertThat(result).hasSize(2);
+  }
+
+  @Test
+  void shouldPassThroughInvalidSortField() {
+    Pageable defaultPageable = PageRequest.of(0, 10);
+    String sortBy = "nonExistentField";
+
+    Page<ActivitySearchResultEntity> mockPage =
+        new PageImpl<>(activitySearchResults, defaultPageable, activitySearchResults.size());
+
+    when(activitySearchRepository.searchTestingActivities(any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(Pageable.class))).thenReturn(mockPage);
+
+    activitySearchService.searchTestingActivities(activitySearchRequestDto, defaultPageable, sortBy,
+        "asc");
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+    verify(activitySearchRepository).searchTestingActivities(any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+        pageableCaptor.capture());
+
+    Pageable actualPageable = pageableCaptor.getValue();
+
+    assertThat(actualPageable.getSort().isUnsorted()).isFalse();
+    assertThat(actualPageable.getSort().getOrderFor(sortBy)).isNotNull();
+
+    assertThat(actualPageable.getPageNumber()).isZero();
+    assertThat(actualPageable.getPageSize()).isEqualTo(10);
+  }
 }

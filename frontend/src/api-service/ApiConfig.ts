@@ -61,7 +61,13 @@ const ApiConfig = {
 
   moistureContent: `${oracleServerHost}/api/moisture-content-cone`,
 
-  purityTest: `${oracleServerHost}/api/purity-tests`
+  purityTest: `${oracleServerHost}/api/purity-tests`,
+
+  searchTestActivities: `${oracleServerHost}/api/testing-activities`,
+
+  testCodes: `${oracleServerHost}/api/test-codes`,
+
+  activities: `${oracleServerHost}/api/activities`
 };
 
 export default ApiConfig;

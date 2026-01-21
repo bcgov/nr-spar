@@ -2,16 +2,6 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "Presets from https://github.com/bcgov/renovate-config",
   "extends": [
-    "github>bcgov/renovate-config"
-  ],
-  "packageRules": [
-    {
-      "description": "Ignore vite-plugin-istanbul 6.0.0",
-      "matchCurrentVersion": "6.0.0",
-      "matchPackageNames": [
-        "vite-plugin-istanbul"
-      ],
-      "enabled": false
-    }
+    "github>bcgov/renovate-config#2025.10.1"
   ]
 }

@@ -1,11 +1,14 @@
+/* eslint-disable cypress/no-unnecessary-waiting */
+/* eslint-disable prefer-const */
+import { THREE_SECONDS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 
 describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', () => {
   let seedlotNum: string;
   const speciesKey = 'fdi';
   let totalParentTrees: number = 0;
-  const coneCount: number[] = [0];
-  const pollenCount: number[] = [0];
+  let coneCount: number[] = [0];
+  let pollenCount: number[] = [0];
   let effectivePopulationSize: number = 0;
   let firstConeValue: number = 0;
   let firstPollenValue: number = 0;
@@ -20,6 +23,9 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
         cy.visit(url);
         cy.url().should('contains', url);
+        // Wait for the page title to be visible before proceeding
+        cy.get('.title-section h1')
+          .should('have.text', `Registration for seedlot ${seedlotNum}`);
       });
     });
   });
@@ -68,7 +74,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Upload csv file', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: 10000 });
+    cy.get('#parentTreeNumber');
 
     // Upload csv file
     cy.get('button.upload-button')
@@ -91,10 +97,15 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Check Parent tree contribution summary', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: 10000 });
+    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`)
+      .should(($td) => {
+        const value = $td.text().trim();
+        expect(value, 'cell value should be a number').to.match(/^\d+$/);
+      });
 
-    cy.get(`table.${prefix}--data-table > tbody`)
-      .find('tr')
+    cy.get(`table.${prefix}--data-table`)
+      .find('tbody')
+      .children('tr')
       .then((row) => {
         totalParentTrees = row.length;
         cy.get('#totalnumber\\ of\\ parent\\ trees')
@@ -143,8 +154,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .contains('Calculate metrics')
       .click();
 
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(3000);
+    cy.wait(THREE_SECONDS);
 
     // Store Ne value to a variable
     cy.get('#effectivepopulation\\ size\\ \\(ne\\)')
@@ -159,7 +169,18 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
 
   it('Remove a single Parent tree contribution', () => {
     // Wait for the table to load
-    cy.get('#parentTreeNumber', { timeout: 10000 });
+    cy.get(`.${prefix}--data-table > tbody > tr:first-child > td:first-child`)
+      .should(($td) => {
+        const value = $td.text().trim();
+        expect(value, 'cell value should be a number').to.match(/^\d+$/);
+      });
+
+    // Store initial value of total cone count
+    cy.get('#totalnumber\\ of\\ cone\\ count')
+      .invoke('val')
+      .then(($input: any) => {
+        coneCount[0] = Number($input);
+      });
 
     cy.get('#8021-coneCount-value-input')
       .invoke('val')
@@ -176,6 +197,13 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
         // Check new total cone count
         cy.get('#totalnumber\\ of\\ cone\\ count')
           .should('have.value', (coneCount[0] - firstConeValue));
+      });
+
+    // Store initial value of total pollen count
+    cy.get('#totalnumber\\ of\\ pollen\\ count')
+      .invoke('val')
+      .then(($input: any) => {
+        pollenCount[0] = Number($input);
       });
 
     cy.get('#8021-pollenCount-value-input')
@@ -205,8 +233,7 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .contains('Calculate metrics')
       .click();
 
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(3000);
+    cy.wait(THREE_SECONDS);
 
     // Check Ne value after clearing first parent tree row
     cy.get('#effectivepopulation\\ size\\ \\(ne\\)')

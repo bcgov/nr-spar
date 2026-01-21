@@ -2,6 +2,8 @@
 import React from 'react';
 import {
   type MRT_ColumnDef,
+  type MRT_PaginationState,
+  type MRT_TableInstance,
   MaterialReactTable,
   useMaterialReactTable
 } from 'material-react-table';
@@ -12,7 +14,15 @@ type Props<T extends Record<string, any>> = {
   data: T[];
   isLoading?: boolean;
   enablePagination?: boolean;
+  manualPagination?: boolean;
+  rowCount?: number;
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void;
+  pageIndex?: number;
+  pageSize?: number;
   enableSorting?: boolean;
+  manualSorting?: boolean;
+  sorting?: { id: string; desc: boolean }[];
+  onSortingChange?: (sorting: { id: string; desc: boolean }[]) => void;
   enableFilters?: boolean;
   enableHiding?: boolean;
   enableRowSelection?: boolean;
@@ -22,12 +32,18 @@ type Props<T extends Record<string, any>> = {
   enableDensityToggle?: boolean;
   enableFullScreenToggle?: boolean;
   enableColumnActions?: boolean;
+  enableColumnPinning?: boolean;
+  enableColumnResizing?: boolean;
   enableEditing?: boolean;
+  enableStickyHeader?: boolean;
   isCompacted?: boolean;
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
   initialState?: any;
-  tableBodyRef?: React.RefObject<HTMLTableSectionElement>;
+  tableBodyRef?: React.RefObject<HTMLTableSectionElement>,
+  renderToolbarInternalActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
+  renderTopToolbarCustomActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
+  hideToolbar?: boolean;
 };
 
 const COLOR_GREY_20 = '#DFDFE1';
@@ -54,8 +70,16 @@ const GenericTable = <T extends Record<string, any>>({
   data,
   isLoading = false,
   enablePagination = false,
+  manualPagination = false,
+  rowCount = data.length,
+  onPaginationChange,
+  pageIndex = 0,
+  pageSize = 20,
   enableHiding = false,
   enableSorting = false,
+  manualSorting = false,
+  sorting = [],
+  onSortingChange,
   enableFilters = false,
   enableRowSelection = false,
   enableRowActions = false,
@@ -64,19 +88,38 @@ const GenericTable = <T extends Record<string, any>>({
   enableDensityToggle = false,
   enableFullScreenToggle = false,
   enableColumnActions = false,
+  enableColumnPinning = false,
+  enableColumnResizing = false,
   enableEditing = true,
+  enableStickyHeader = false,
   isCompacted = false,
   renderRowActions,
   onRowClick,
   initialState,
-  tableBodyRef
+  tableBodyRef,
+  renderToolbarInternalActions,
+  renderTopToolbarCustomActions,
+  hideToolbar = true
 }: Props<T>) => {
   const basicTable = useMaterialReactTable({
     columns,
     data,
     initialState,
     state: {
-      isLoading
+      isLoading,
+      pagination: { pageIndex, pageSize },
+      sorting
+    },
+    enablePagination,
+    manualPagination,
+    rowCount,
+    onPaginationChange: (
+      updaterOrValue: MRT_PaginationState | ((old: MRT_PaginationState) => MRT_PaginationState)
+    ) => {
+      const newPagination: MRT_PaginationState = typeof updaterOrValue === 'function'
+        ? updaterOrValue(basicTable.getState().pagination)
+        : updaterOrValue;
+      onPaginationChange?.(newPagination.pageIndex, newPagination.pageSize);
     },
     muiPaginationProps: {
       showRowsPerPage: true,
@@ -88,9 +131,19 @@ const GenericTable = <T extends Record<string, any>>({
         borderRadius: 0,
         boxShadow: 'none',
         width: '100%',
-        '& > .MuiBox-root': {
-          display: 'none'
-        }
+        ...(enablePagination
+          ? {
+            // only hide the top toolbar when pagination is enabled
+            '& > .MuiBox-root:first-of-type': {
+              display: hideToolbar ? 'none' : 'flex'
+            }
+          }
+          : {
+            // hide both top toolbar and bottom pagination to remove extra white spaces
+            '& > .MuiBox-root': {
+              display: 'none'
+            }
+          })
       }
     },
     muiTableBodyProps: {
@@ -105,10 +158,15 @@ const GenericTable = <T extends Record<string, any>>({
     }),
     muiTableBodyCellProps: {
       sx: {
-        ...isCompacted && {
-          paddingTop: 0,
-          paddingBottom: 0
-        },
+        ...(isCompacted
+          ? {
+            paddingTop: 0,
+            paddingBottom: 0
+          }
+          : {
+            paddingTop: '0.6rem',
+            paddingBottom: '0.6rem'
+          }),
         '&:hover': {
           outline: 'none',
           backgroundColor: COLOR_GREY_20
@@ -137,8 +195,14 @@ const GenericTable = <T extends Record<string, any>>({
         }
       }
     },
-    enablePagination,
     enableSorting,
+    manualSorting,
+    onSortingChange: (updaterOrValue) => {
+      const newSorting = typeof updaterOrValue === 'function'
+        ? updaterOrValue(basicTable.getState().sorting)
+        : updaterOrValue;
+      onSortingChange?.(newSorting);
+    },
     enableFilters,
     enableHiding,
     enableColumnFilters,
@@ -148,7 +212,10 @@ const GenericTable = <T extends Record<string, any>>({
     enableDensityToggle,
     enableFullScreenToggle,
     enableColumnActions,
+    enableColumnPinning,
+    enableColumnResizing,
     enableEditing,
+    enableStickyHeader,
     createDisplayMode: 'row',
     editDisplayMode: 'table',
     renderRowActions: renderRowActions
@@ -156,10 +223,16 @@ const GenericTable = <T extends Record<string, any>>({
       : undefined,
     localization: {
       noRecordsToDisplay: 'No data found'
-    }
+    },
+    renderToolbarInternalActions,
+    renderTopToolbarCustomActions
   });
 
-  return <ThemeProvider theme={theme}><MaterialReactTable table={basicTable} /></ThemeProvider>;
+  return (
+    <ThemeProvider theme={theme}>
+      <MaterialReactTable table={basicTable} />
+    </ThemeProvider>
+  );
 };
 
 export default GenericTable;

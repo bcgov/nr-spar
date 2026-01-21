@@ -1,6 +1,7 @@
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 import { NUM_OF_LOOPS } from '../../constants';
+import { PageHeaderLabels } from '../../utils/labels';
 
 describe('My seedlots page', () => {
   let fixtureData: SeedlotRegFixtureType;
@@ -17,13 +18,10 @@ describe('My seedlots page', () => {
       fixtureData = fData;
       speciesKeys = Object.keys(fixtureData);
     });
-  });
-
-  it('Page title', () => {
-    cy.get('.my-seedlot-title')
-      .find('.title-favourite')
-      .children('h1')
-      .should('have.text', 'My Seedlots');
+    // Wait for the page title to be visible before proceeding
+    cy.get('.title-section')
+      .find('h1')
+      .should('have.text', PageHeaderLabels.MySeedlots);
   });
 
   it('Sort table by Seedlot number', () => {
@@ -185,7 +183,7 @@ describe('My seedlots page', () => {
         const descendingFirstRow: string = $createdDate.text();
         const ascendingDate = new Date(ascendingFirstRow);
         const descendingDate = new Date(descendingFirstRow);
-        expect(ascendingDate).to.be.at.most(descendingDate);
+        expect(ascendingDate).to.be.lte(descendingDate);
       });
   });
 
@@ -226,7 +224,7 @@ describe('My seedlots page', () => {
         const descendingFirstRow: string = $updatedDate.text();
         const ascendingDate = new Date(ascendingFirstRow);
         const descendingDate = new Date(descendingFirstRow);
-        expect(ascendingDate).to.be.at.most(descendingDate);
+        expect(ascendingDate).to.be.lte(descendingDate);
       });
   });
 

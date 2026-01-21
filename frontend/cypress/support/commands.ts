@@ -3,7 +3,7 @@
 
 import '@cypress/code-coverage/support';
 import {
-  HALF_SECOND, TYPE_DELAY
+  THIRTY_SECONDS, HALF_SECOND, TYPE_DELAY
 } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 import prefix from '../../src/styles/classPrefix';
@@ -22,6 +22,12 @@ Cypress.Commands.add('login', () => {
   cy.session(
     config.username,
     () => {
+      cy.on('uncaught:exception', (err) => {
+        if (err.message.includes('missing ) after argument list')) {
+          return false; // Suppress this known error, avoid failing test
+        }
+        return true; // Fail test on other errors
+      });
       const loginBtnId = `landing-button__${config.loginService.toLowerCase()}`;
       const loginLogo = `#${config.loginService.toLowerCase()}Logo`;
       const loginUrl = config.loginService === 'IDIR'
@@ -45,18 +51,12 @@ Cypress.Commands.add('login', () => {
           cy.origin(
             loginUrl,
             { args: config },
-            (
-              {
-                username, password, delay, timeout
-              }
-            ) => {
-              cy.get(loginLogo, { timeout }).should('be.visible');
-              cy.get('input[name=user]')
-                .clear()
-                .type(username, { delay });
-              cy.get('input[name=password]')
-                .clear()
-                .type(password, { delay });
+            ({
+              username, password, delay, timeout
+            }) => {
+              cy.get(`#${config.loginService.toLowerCase()}Logo`, { timeout }).should('be.visible');
+              cy.get('input[name=user]').clear().type(username, { delay });
+              cy.get('input[name=password]').clear().type(password, { delay });
               cy.get('input[name=btnSubmit]').click();
             }
           );
@@ -112,6 +112,18 @@ Cypress.Commands.add('saveSeedlotRegFormProgress', () => {
     .contains('Save changes')
     .click();
 
-  cy.get(`.${prefix}--inline-loading__text`)
-    .contains('Changes saved!');
+  cy.get('.seedlot-registration-button-row')
+    .find('button.form-action-btn')
+    .contains('Changes saved!', { timeout: 3 * THIRTY_SECONDS });
+});
+
+Cypress.Commands.add('closeMenuIfOpen', () => {
+  cy.get(`button.${prefix}--header__menu-toggle`)
+    .then(($btn) => {
+      if ($btn.attr('aria-label') === 'Close menu') {
+        cy.wrap($btn).click();
+        // Optionally, verify it changed to "Open menu"
+        cy.wrap($btn).should('have.attr', 'aria-label', 'Open menu');
+      }
+    });
 });

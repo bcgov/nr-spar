@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "CNS_T_RQST_ITM_ACTVTY")
+@Table(name = "CNS_T_RQST_ITM_ACTVTY", schema = "CONSEP")
 @Schema(description = "Represents the data of activities related to requests in CONSEP")
 public class ActivityEntity {
 

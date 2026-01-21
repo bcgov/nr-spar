@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -85,7 +86,7 @@ public class PurityTestsEndpoint {
             @Content(
                 schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public Optional<PurityTestDto> getPurityTestByRiaKey(
       @PathVariable
       @Parameter(
@@ -192,7 +193,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void validatePurityTestData(
       @PathVariable
       @Parameter(
@@ -252,7 +253,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(hidden = true)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void acceptPurityTestData(
       @PathVariable
       @Parameter(
@@ -299,7 +300,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(implementation = Void.class)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public Integer deleteReplicate(
       @Parameter(
           name = "riaKey",
@@ -349,7 +350,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(implementation = Void.class)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
     public List<Integer> deleteReplicates(
         @Parameter(
             name = "riaKey",
@@ -358,13 +359,13 @@ public class PurityTestsEndpoint {
             required = true)
         @PathVariable
         BigDecimal riaKey,
+        
         @Parameter(
-            name = "replicateNumbers",
+            name = "ids",
             in = ParameterIn.QUERY,
             description = "List of replicate numbers to delete",
             required = true)
-        @RequestBody
-            List<Integer> replicateNumbers) {
+        @RequestParam(name = "ids") List<Integer> replicateNumbers) {
     purityTestService.deletePurityReplicates(riaKey, replicateNumbers);
     return replicateNumbers;
   }
@@ -377,7 +378,7 @@ public class PurityTestsEndpoint {
    * @return the {@link PurityDebrisDto} updated
    */
   @PatchMapping(
-      value = "debris/{riaKey}",
+      value = "/debris/{riaKey}",
       consumes = "application/json",
       produces = "application/json")
   @Operation(
@@ -390,6 +391,7 @@ public class PurityTestsEndpoint {
           @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Replicate not found")
       })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<PurityDebrisDto> updateDebrisField(
       @Parameter(
           name = "riaKey",
@@ -438,7 +440,7 @@ public class PurityTestsEndpoint {
               @Content(
                   schema = @Schema(implementation = Void.class)))
   })
-  @RoleAccessConfig({ "SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD" })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<PurityDebrisDto> deleteDebris(
       @Parameter(
           name = "riaKey",

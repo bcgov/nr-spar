@@ -22,7 +22,7 @@ export const SPAR_DEPENDENCIES: DependencyDefinition[] = [
   {
     name: 'Forest Access Management API',
     queryKey: 'fam-healthcheck',
-    healthCheckUrl: 'https://6mud7781pe.execute-api.ca-central-1.amazonaws.com/v1/smoke_test',
+    healthCheckUrl: 'https://qdghpzq5dh.execute-api.ca-central-1.amazonaws.com/v1/smoke_test',
     icon: 'HardwareSecurityModule'
   },
   {

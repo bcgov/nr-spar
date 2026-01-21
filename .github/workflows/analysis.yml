@@ -20,10 +20,10 @@ jobs:
     name: Typescript lint
     runs-on: ubuntu-24.04
     steps:
-      - uses: bcgov/action-test-and-analyse@e2ba34132662c1638dbde806064eb7004b3761c3 # v1.3.0
+      - uses: bcgov/action-test-and-analyse@87f88c90526b8b05cea760492ff33db4ba6e271b # v1.6.0
         with:
           commands: |
-            npm ci
+            npm ci --ignore-scripts 
             npm run lint
           dir: frontend
           node_version: "22"
@@ -73,7 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # 0.32.0
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           format: "sarif"
           output: "trivy-results.sarif"

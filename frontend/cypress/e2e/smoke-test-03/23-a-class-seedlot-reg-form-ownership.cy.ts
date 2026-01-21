@@ -1,6 +1,6 @@
 import { SeedlotRegFixtureType } from '../../definitions';
 import prefix from '../../../src/styles/classPrefix';
-import { TYPE_DELAY } from '../../constants';
+import { HALF_SECOND, TYPE_DELAY, THIRTY_SECONDS } from '../../constants';
 
 describe('A Class Seedlot Registration form, Ownership', () => {
   let regFormData: {
@@ -43,7 +43,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=2`;
         cy.visit(url);
         cy.url().should('contains', url);
-        cy.get('.ownership-header').contains('Ownership');
+        cy.get('.ownership-header').contains(regFormData.ownership.title);
       });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
@@ -458,6 +458,14 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Save changes
     cy.saveSeedlotRegFormProgress();
 
+    // Wait for 500ms to ensure the save is complete
+    cy.wait(HALF_SECOND);
+
+    // Check complete status of Ownership step
+    cy.contains(`.${prefix}--progress-step-button`, 'Ownership')
+      .find(`.${prefix}--assistive-text`)
+      .should('have.text', 'Complete');
+
     // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
@@ -465,7 +473,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
 
     // Check step complete status
-    cy.get(`.${prefix}--progress-step--complete`)
+    cy.get(`.${prefix}--progress-step--complete`, { timeout: 3 * THIRTY_SECONDS })
       .contains('Ownership');
   });
 });

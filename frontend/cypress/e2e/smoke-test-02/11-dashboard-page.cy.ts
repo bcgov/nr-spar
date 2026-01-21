@@ -18,6 +18,9 @@ describe('Dashboard page test', () => {
     cy.login();
     cy.visit('/');
     cy.url().should('contains', '/dashboard');
+    // Wait for the page title to be visible before proceeding
+    cy.get('.title-section h1')
+      .should('have.text', NavigationLabels.Dashboard);
   });
 
   /**

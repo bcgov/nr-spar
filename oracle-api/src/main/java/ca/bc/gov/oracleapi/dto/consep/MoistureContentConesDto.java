@@ -60,6 +60,9 @@ public record MoistureContentConesDto(
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "Actual end date of the activity", example = "2025-01-18T16:00:00")
     LocalDateTime actualEndDateTime,
+            
+    @Schema(description = "standard activity type", example = "MCM")
+    String standardActivityType,
     // End - Activity fields
 
     // Replicates fields
