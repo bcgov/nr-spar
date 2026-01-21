@@ -1,6 +1,8 @@
 import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
+import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
+import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 
 describe('Create FDI Seedlot', () => {
   let fixtureData: SeedlotRegFixtureType = {};
@@ -10,7 +12,10 @@ describe('Create FDI Seedlot', () => {
     });
 
     cy.login();
-    cy.visit('/seedlots/register-a-class');
+    cy.visit('/seedlots');
+    cy.url().should('contains', '/seedlots');
+    // Wait for the page title to be visible before proceeding
+    cy.get('.title-section h1').should('have.text', NavigationLabels.Seedlots);
   });
 
   it('Register fdi seedlot', () => {
@@ -18,17 +23,28 @@ describe('Create FDI Seedlot', () => {
     // Intercept the POST request
     cy.intercept('POST', '/api/seedlots').as('postSeedlot');
 
+    cy.isPageTitle(NavigationLabels.Seedlots);
+    // Select the “Seedlots” section from the left-hand panel
+    // Click on the register seedlot an A-class seedlot card
+    cy.get(SeedlotRegistrationSelectors.SeedlotActivitiesCardTitle)
+      .contains(SeedlotActivities.RegisterAClass)
+      .click();
+    cy.url().should('contains', '/register-a-class');
+    // Check the applicant agency name
+    cy.get('#applicant-info-input').should(
+      'have.value',
+      regData.agencyAcronym
+    );
+
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
-      .type(regData.agencyNumber, { delay: TYPE_DELAY })
-      .blur({ force: true });
+      .type(regData.agencyNumber, { delay: TYPE_DELAY });
 
     // Enter the applicant email address
     cy.get('#applicant-email-input')
       .clear()
-      .type(regData.email, { delay: TYPE_DELAY })
-      .blur();
+      .type(regData.email, { delay: TYPE_DELAY });
 
     // Enter the seedlot species, wait for species data to load
     cy.get('#seedlot-species-combobox')

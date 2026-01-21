@@ -24,6 +24,8 @@ describe('Seedlot Dashboard test', () => {
     cy.login();
     cy.visit('/seedlots');
     cy.url().should('contains', '/seedlots');
+    // Wait for the page title to be visible before proceeding
+    cy.get('.title-section h1').should('have.text', NavigationLabels.Seedlots);
   });
 
   it('should display seedlot dashboard page title and subtitle', () => {

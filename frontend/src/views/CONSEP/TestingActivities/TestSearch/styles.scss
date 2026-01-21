@@ -5,8 +5,26 @@
     margin-bottom: 0.5rem;
   }
 
+  .consep-test-search-lot-numbers-filter {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    display: block;
+    padding-left: 1rem;
+
+    .lot-inputs-label {
+      margin-block-end: 0.5rem;
+    }
+
+    .lot-inputs {
+      display: flex;
+      gap: 0.25rem;
+      align-items: flex-start;
+    }
+  }
+
   .consep-test-search-filters {
-    margin-top: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
 
     & > div:first-child {
       padding-inline-start: 1rem;
@@ -24,19 +42,136 @@
       }
     }
 
-    .advanced-search-input,
-    .search-button {
-      margin-top: 1.75rem;
+    .filters-row {
+      display: flex;
+      gap: 0.25rem; // spacing between inputs/buttons
+      align-items: flex-start;
+
+      .filters-row-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.25rem;
+        margin-top: 1.8rem;
+      }
+
+      @media (max-width: 1200px) {
+        flex-wrap: wrap; // allow wrapping on smaller screens
+      }
+    }
+
+    .test-type-input,
+    .activity-type-input {
+      width: 14.5rem;
+      min-width: 7.5rem;
+    }
+
+    .germ-tray-input {
+      width: 7.5rem;
+      min-width: 7.5rem;
+    }
+
+    #germ-tray-input {
+      width: 100%;
     }
   }
 
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button {
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
 
-  input[type="number"] {
+  input[type='number'] {
     appearance: textfield;
   }
+
+  .concep-test-search-table-container {
+    margin-top: 1rem;
+    background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+
+    .concep-test-search-table-title {
+      padding: 0.813rem 0.75rem 0.813rem 1.5rem;
+      color: var(--#{vars.$bcgov-prefix}-text-secondary);
+    }
+
+    .concep-test-search-table {
+      margin-inline: 0rem;
+      height: 100%;
+    }
+
+    // material-ui table toolbar
+    .MuiPaper-root > .MuiBox-root:first-of-type {
+      background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+      min-height: 2.751rem;
+
+      .MuiBox-root {
+        padding: 0rem;
+
+        .bx--col {
+          padding-right: 0rem;
+        }
+      }
+
+      .concep-test-search-table-toolbar-button {
+        padding: 0.813rem 0.75rem;
+        border-radius: 0rem;
+        border: none;
+        border-left: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
+      }
+
+      .concep-test-search-table-toolbar-button.bx--btn--tertiary {
+        padding: 0.83rem 0.75rem;
+      }
+
+      .concep-test-search-table-toolbar-button-icon {
+        margin-left: 0.5rem;
+        margin-top: 0.15rem;
+      }
+    }
+
+    .concep-test-search-table {
+      // reduce the padding for row selection column
+      th[data-index='0'],
+      td[data-index='0'] {
+        padding-left: 0.4rem;
+        padding-right: 0;
+
+        span {
+          padding-right: 0;
+        }
+      }
+
+      .MuiTableContainer-root {
+        max-height: calc(100vh - 28.2rem);
+
+        // style for table header resize handle
+        .Mui-TableHeadCell-ResizeHandle-Wrapper {
+          margin-right: -4px;
+        }
+
+        // adjust padding for table header and cells
+        .MuiTableCell-root {
+          padding: 0.6rem 0.4rem;
+        }
+      }
+    }
+
+    .#{vars.$bcgov-prefix}--modal-content {
+      padding: 0rem;
+      .MuiPaper-root {
+        border-radius: 0rem 0rem 0.5rem 0.5rem;
+      }
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--inline-notification {
+    max-inline-size: none;
+  }
+}
+
+// ensure the material-ui table pagination menu
+// renders above the Carbon Modal by increasing its z-index
+#menu-.MuiPopover-root,
+#menu- .MuiPaper-root {
+  z-index: 9001;
 }

@@ -1,18 +1,30 @@
 package ca.bc.gov.oracleapi.service.consep;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +34,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
 
 /**
  * The test class for Moisture Content Service.
@@ -33,12 +47,19 @@ class ActivityServiceTest {
   @Mock
   private ActivityRepository activityRepository;
 
+  @Mock
+  private TestResultRepository testResultRepository;
+
+  @Mock
+  private StandardActivityRepository standardActivityRepository;
+
   @Autowired
   @InjectMocks
   private ActivityService activityService;
 
   private BigDecimal riaKey;
   private ActivityEntity activityEntity;
+  private ActivityCreateDto validActivityCreateDto;
 
   @BeforeEach
   void setUp() {
@@ -49,6 +70,30 @@ class ActivityServiceTest {
     activityEntity.setActualBeginDateTime(LocalDateTime.now().minusDays(1));
     activityEntity.setActualEndDateTime(LocalDateTime.now().minusDays(2));
     activityEntity.setRiaComment("Test comment");
+
+    validActivityCreateDto = new ActivityCreateDto(
+        new BigDecimal("408623"),
+        "ST1",
+        "AC1",
+        "TC1",
+        new BigDecimal("33874"),
+        LocalDate.of(2024, 1, 1),
+        LocalDate.of(2024, 1, 2),
+        null,
+        null,
+        1,
+        "HR",
+        0,
+        -1,
+        0,
+        0,
+        new BigDecimal("33874"),
+        "CSP19970005",
+        "A",
+        "PLI",
+        "00098",
+        ""
+    );
   }
 
   @Test
@@ -103,4 +148,228 @@ class ActivityServiceTest {
         activityService.validateActivityData(activityEntity));
   }
 
+  @Test
+  void createActivity_shouldSucceed_whenValidData() {
+    when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
+    when(testResultRepository.save(any(TestResultEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+    ActivityEntity createdActivityEntity = activityService.createActivity(validActivityCreateDto);
+
+    assertEquals(validActivityCreateDto.riaKey(), createdActivityEntity.getRiaKey());
+    assertEquals(validActivityCreateDto.seedlotNumber(), createdActivityEntity.getSeedlotNumber());
+    assertEquals(validActivityCreateDto.requestSkey(), createdActivityEntity.getRequestSkey());
+    assertEquals(validActivityCreateDto.itemId(), createdActivityEntity.getItemId());
+    verify(activityRepository, times(1)).save(any(ActivityEntity.class));
+    verify(activityRepository, times(1)).clearExistingProcessCommitment(
+        eq(validActivityCreateDto.requestSkey()),
+        eq(validActivityCreateDto.itemId()),
+        eq(validActivityCreateDto.riaKey())
+    );
+    verify(testResultRepository, times(1)).save(any(TestResultEntity.class));
+  }
+
+  @Test
+  void createActivity_shouldNotCallClearExistingProcessCommitment_whenProcessCommitUnchecked() {
+    ActivityCreateDto dto = new ActivityCreateDto(
+        validActivityCreateDto.riaKey(),
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        null,
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        0,
+        validActivityCreateDto.processResultIndicator(),
+        validActivityCreateDto.testResultIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        validActivityCreateDto.seedlotNumber(),
+        validActivityCreateDto.familyLotNumber()
+    );
+
+    when(activityRepository.save(any(ActivityEntity.class))).thenReturn(new ActivityEntity());
+
+    activityService.createActivity(dto);
+
+    verify(activityRepository, never()).clearExistingProcessCommitment(any(), any(), any());
+    verify(testResultRepository, never()).save(any(TestResultEntity.class));
+  }
+
+  @Test
+  void createActivity_shouldFail_whenStartDateNotBeforeEndDate() {
+    ActivityCreateDto invalidDto = new ActivityCreateDto(
+        validActivityCreateDto.riaKey(),
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        validActivityCreateDto.testCategoryCd(),
+        validActivityCreateDto.associatedRiaKey(),
+        LocalDate.of(2024, 1, 10),
+        LocalDate.of(2024, 1, 2),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.processResultIndicator(),
+        validActivityCreateDto.testResultIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        validActivityCreateDto.seedlotNumber(),
+        validActivityCreateDto.familyLotNumber()
+    );
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("Planned start date must be before planned end date.", ex.getReason());
+  }
+
+  @Test
+  void createActivity_shouldFail_whenNoSeedlotOrFamilyLot() {
+    ActivityCreateDto invalidDto = new ActivityCreateDto(
+        validActivityCreateDto.riaKey(),
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        validActivityCreateDto.testCategoryCd(),
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.processResultIndicator(),
+        validActivityCreateDto.testResultIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        "",
+        ""
+    );
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("Either seedlotNumber or familyLotNumber must be provided.", ex.getReason());
+  }
+
+  @Test
+  void createActivity_shouldFail_whenSeedlingRequestIdAndTestCategoryCdNotStd() {
+    ActivityCreateDto invalidDto = new ActivityCreateDto(
+        validActivityCreateDto.riaKey(),
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        "NON", // <-- Not STD
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.processResultIndicator(),
+        validActivityCreateDto.testResultIndicator(),
+        validActivityCreateDto.requestSkey(),
+        "1234ABC", // <-- First 4 chars numeric ("1234"), which is a seedling request id
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        validActivityCreateDto.seedlotNumber(),
+        validActivityCreateDto.familyLotNumber()
+    );
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("TEST_CATEGORY_CD must be 'STD' because Request ID is a Seedling Request",
+        ex.getReason());
+  }
+
+  @Test
+  void getActivityByRequestSkeyAndItemId_shouldReturnExpectedDtos() {
+    BigDecimal requestSkey = new BigDecimal("422679");
+    String itemId = "A";
+    List<Object[]> repoResult = List.of(
+        new Object[] { new BigDecimal("809210"), "G11 germination test" },
+        new Object[] { new BigDecimal("805643"), "Extend strat 35 days" }
+    );
+    when(activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId))
+        .thenReturn(repoResult);
+    List<ActivityRequestItemDto> activityResult =
+        activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
+
+    assertEquals(2, activityResult.size());
+    assertEquals(new BigDecimal("809210"), activityResult.get(0).riaSkey());
+    assertEquals("G11 germination test", activityResult.get(0).activityDescription());
+    assertEquals(new BigDecimal("805643"), activityResult.get(1).riaSkey());
+    assertEquals("Extend strat 35 days", activityResult.get(1).activityDescription());
+  }
+
+  @Test
+  void getActivityByRequestSkeyAndItemId_shouldReturnEmptyList_whenNoData() {
+    BigDecimal requestSkey = new BigDecimal("422679");
+    String itemId = "A";
+    when(activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId))
+        .thenReturn(List.of());
+    List<ActivityRequestItemDto> activityResult =
+        activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
+    assertEquals(0, activityResult.size());
+  }
+
+  @Test
+  void getStandardActivityIds_shouldReturnExpectedDtos() {
+    StandardActivityEntity activity1 = new StandardActivityEntity();
+    activity1.setStandardActivityId("AEX");
+    activity1.setActivityDesc("Abies extraction");
+
+    StandardActivityEntity activity2 = new StandardActivityEntity();
+    activity2.setStandardActivityId("SSP");
+    activity2.setActivityDesc("Seed separation");
+
+    StandardActivityEntity activity3 = new StandardActivityEntity();
+    activity3.setStandardActivityId("TQA");
+    activity3.setActivityDesc("Tumbling qa");
+
+    when(standardActivityRepository.findAll())
+        .thenReturn(List.of(activity2, activity1));
+
+    when(standardActivityRepository.findAllFamilyLotActivities())
+        .thenReturn(List.of(activity2, activity3));
+
+    List<StandardActivityDto> result = activityService.getStandardActivityIds();
+
+    assertThat(result)
+        .hasSize(3)
+        .extracting(StandardActivityDto::standardActivityId)
+        .containsExactly(
+            activity1.getStandardActivityId(),
+            activity2.getStandardActivityId(),
+            activity3.getStandardActivityId()
+        );
+
+    assertThat(result)
+        .extracting(StandardActivityDto::activityDescription)
+        .containsExactly(
+            activity1.getActivityDesc(),
+            activity2.getActivityDesc(),
+            activity3.getActivityDesc()
+        );
+  }
 }

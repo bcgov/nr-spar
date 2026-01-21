@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -59,7 +58,7 @@ public class ActivitySearchResultEntity {
   private Integer otherTestResult;
 
   @Column(name = "TEST_COMPLETE_IND")
-  private Boolean testCompleteInd;
+  private Integer testCompleteInd;
 
   @Column(name = "ACCEPT_RESULT_IND")
   private Integer acceptResultInd;
@@ -68,10 +67,13 @@ public class ActivitySearchResultEntity {
   private Integer significntStsInd;
 
   @Column(name = "SEED_WITHDRAWAL_DATE")
-  private LocalDate seedWithdrawalDate;
+  private LocalDateTime seedWithdrawalDate;
 
   @Column(name = "REVISED_END_DT")
-  private LocalDate revisedEndDt;
+  private LocalDateTime revisedEndDt;
+
+  @Column(name = "REVISED_START_DT")
+  private LocalDateTime revisedStartDt;
 
   @Column(name = "ACTUAL_BEGIN_DT_TM")
   private LocalDateTime actualBeginDtTm;
@@ -97,4 +99,28 @@ public class ActivitySearchResultEntity {
   @Id
   @Column(name = "RIA_SKEY", precision = 10, scale = 0)
   private Integer riaSkey;
+
+  @Column(name = "ACTIVITY_TYPE_CD", length = 3)
+  private String activityTypeCd;
+
+  @Column(name = "GERMINATOR_TRAY_ID")
+  private Integer germinatorTrayId;
+
+  @Column(name = "GERM_TEST_IND")
+  private Integer germTestInd;
+
+  @Column(name = "REQUEST_TYPE_ST", length = 3)
+  private String requestTypeSt;
+
+  @Column(name = "REQUEST_YR")
+  private Integer requestYr;
+
+  @Column(name = "ORCHARD_ID", length = 3)
+  private String orchardId;
+
+  @Column(name = "ASSIGNED_TRAY_IND")
+  private Integer assignedTrayId;
+
+  @Column(name = "GENETIC_CLASS_CODE", length = 8)
+  private String geneticClassCode;
 }

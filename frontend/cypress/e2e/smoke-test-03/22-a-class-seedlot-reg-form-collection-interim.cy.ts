@@ -44,6 +44,11 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNum = sNumber as string;
         cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
+        // Wait for the page title to be visible before proceeding
+        cy.get('.section-title')
+          .eq(0)
+          .find('h2')
+          .should('have.text', regFormData.collector.agencyTitle);
       });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
@@ -353,8 +358,8 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
 
-    cy.get('.interim-agency-storage-form')
-      .find('h2')
+    // Wait for the page title to be visible before proceeding
+    cy.get('.interim-title-row h2')
       .should('have.text', fixtureData.title);
 
     cy.get('.interim-agency-storage-form')
@@ -363,8 +368,13 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
   });
 
   it('Step 1 and Step 3 linkage', () => {
+    const fixtureData = regFormData.interimStorage;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
+
+    // Wait for the page title to be visible before proceeding
+    cy.get('.interim-title-row h2')
+      .should('have.text', fixtureData.title);
 
     cy.get('#interim-agency')
       .should('have.value', testPopupAcronym);
@@ -380,6 +390,10 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     const fixtureData = regFormData.interimStorage;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
+
+    // Wait for the page title to be visible before proceeding
+    cy.get('.interim-title-row h2')
+      .should('have.text', fixtureData.title);
 
     cy.get('#interim-use-collection-agency')
       .uncheck({ force: true });
@@ -423,8 +437,13 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
   });
 
   it('[Interim storage] Client search modal', () => {
+    const fixtureData = regFormData.interimStorage;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
+
+    // Wait for the page title to be visible before proceeding
+    cy.get('.interim-title-row h2')
+      .should('have.text', fixtureData.title);
 
     cy.get('.agency-information-section')
       .find('button.client-search-toggle-btn')
@@ -481,6 +500,10 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
 
+    // Wait for the page title to be visible before proceeding
+    cy.get('.interim-title-row h2')
+      .should('have.text', fixtureData.title);
+
     // Check invalid date error msg
     cy.get('#end-date-input')
       .clear()
@@ -516,8 +539,13 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
   });
 
   it('[Interim storage] Radio button', () => {
+    const fixtureData = regFormData.interimStorage;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
+
+    // Wait for the page title to be visible before proceeding
+    cy.get('.interim-title-row h2')
+      .should('have.text', fixtureData.title);
 
     // Radio button test
     cy.get('#facility-type-radio-btn-ocv')

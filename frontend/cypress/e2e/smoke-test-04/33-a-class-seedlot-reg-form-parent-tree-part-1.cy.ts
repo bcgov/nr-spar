@@ -1,5 +1,4 @@
 import prefix from '../../../src/styles/classPrefix';
-import { THIRTY_SECONDS } from '../../constants';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and Pollen count)', () => {
   let regFormData: {
@@ -11,6 +10,9 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       coneErrorMsg: string;
       pollenErrorMsg: string;
       conePollenErrorMsg: string;
+    },
+    orchard: {
+      title: string;
     }
   };
 
@@ -28,8 +30,11 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNum = sNumber as string;
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
+        cy.intercept('GET', '**/api/parent-trees/vegetation-codes/*').as('tableStatus');
         cy.visit(url);
         cy.url().should('contains', url);
+        // Wait for the page title to be visible before proceeding
+        cy.get('.title-row').contains(regFormData.parentTree.title);
       });
     });
   });
@@ -40,6 +45,9 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .find('button.form-action-btn')
       .contains('Back')
       .click();
+
+    // Wait for the page title to be visible before proceeding
+    cy.get('.seedlot-orchard-title-row').contains(regFormData.orchard.title);
 
     //  Check primary orchard
     cy.get('#primary-orchard-selection')
@@ -183,14 +191,10 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Cone and pollen count table entries', () => {
-    // Intercept the call
-    cy.intercept({
-      method: 'GET',
-      url: '**/api/parent-trees/vegetation-codes/*'
-    }).as('parentTreesUnderVegCode');
+    // Wait for the API call and check the response
+    cy.wait('@tableStatus').its('response.statusCode').should('eq', 200);
 
-    // Wait for the table to load
-    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.closeMenuIfOpen();
     cy.get('#parentTreeNumber').scrollIntoView();
 
     // Check error message for negative Cone count
@@ -285,14 +289,10 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Check \'Show/hide columns\' button functionality', () => {
-    // Intercept the call
-    cy.intercept({
-      method: 'GET',
-      url: '**/api/parent-trees/vegetation-codes/*'
-    }).as('parentTreesUnderVegCode');
+    // Wait for the API call and check the response
+    cy.wait('@tableStatus').its('response.statusCode').should('eq', 200);
 
-    // Wait for the table to load
-    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.closeMenuIfOpen();
     cy.get('#parentTreeNumber').scrollIntoView();
 
     cy.get(`.${prefix}--toolbar-content > span`)
@@ -403,22 +403,17 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Check \'More Options\' button functionality', () => {
-    // Intercept the call
-    cy.intercept({
-      method: 'GET',
-      url: '**/api/parent-trees/vegetation-codes/*'
-    }).as('parentTreesUnderVegCode');
+    // Wait for the API call and check the response
+    cy.wait('@tableStatus').its('response.statusCode').should('eq', 200);
 
-    // Wait for the table to load
-    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
+    cy.closeMenuIfOpen();
     cy.get('#parentTreeNumber').scrollIntoView();
-
     // Check Download file option
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(1)
       .find('button')
       .as('clickMoreOptionsBtn')
-      .click();
+      .click({ force: true });
 
     cy.get('ul.parent-tree-table-option-menu')
       .find('li')
@@ -557,16 +552,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Pagination', () => {
-    // Intercept the call
-    cy.intercept({
-      method: 'GET',
-      url: '**/api/parent-trees/vegetation-codes/*'
-    }).as('parentTreesUnderVegCode');
-
-    // Wait for the table to load
-    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
-    cy.get('#parentTreeNumber');
-
+    // Wait for the API call and check the response
+    cy.wait('@tableStatus').its('response.statusCode').should('eq', 200);
     cy.get(`.${prefix}--pagination`).scrollIntoView();
 
     const dropdownNumber = '20';
@@ -621,16 +608,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   });
 
   it('Calculate Metrics button', () => {
-    // Intercept the call
-    cy.intercept({
-      method: 'GET',
-      url: '**/api/parent-trees/vegetation-codes/*'
-    }).as('parentTreesUnderVegCode');
-
-    // Wait for the table to load
-    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS }).its('response.statusCode').should('equal', 200);
-    cy.get('#parentTreeNumber');
-
+    // Wait for the API call and check the response
+    cy.wait('@tableStatus').its('response.statusCode').should('eq', 200);
     cy.get('.info-sections-row').scrollIntoView();
 
     // Check info sections not visible in DOM

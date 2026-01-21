@@ -52,5 +52,12 @@ declare namespace Cypress {
      * cy.saveButton()
      */
     saveSeedlotRegFormProgress(): void
+    /**
+     * Custom command to close the side menu if it's open (for smaller screen sizes).
+     *
+     * @example
+     * cy.closeMenuIfOpen()
+     */
+    closeMenuIfOpen(): void
   }
 }

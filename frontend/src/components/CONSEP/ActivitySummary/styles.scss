@@ -22,6 +22,13 @@
     .info-col:last-child .activity-summary-info-value {
       font-weight: bold;
     }
+
+    .info-col {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 0.5rem;
+    }
   }
 
   .activity-summary-title {
@@ -35,10 +42,14 @@
   }
 
   .activity-summary-info-label {
+    align-self: center;
     @include type.type-style('label-01');
-    margin-bottom: 1rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .activity-summary-info-value {
+    align-self: center;;
   }
 }

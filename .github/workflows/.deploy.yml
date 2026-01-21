@@ -9,7 +9,7 @@ on:
       ### Typical / recommended
       environment:
         description: GitHub/OpenShift environment; usually PR number, test or prod
-        default: ''
+        default: ""
         type: string
       tag:
         description: Container tag; usually PR number
@@ -21,7 +21,7 @@ on:
         type: string
       triggers:
         description: List of directories to trigger the deployment
-        default: ''
+        default: ""
         type: string
 
       ### Optional / per-environment
@@ -69,15 +69,14 @@ jobs:
 
       - name: OpenShift Init
         id: trigger
-        uses: bcgov/action-deployer-openshift@d972993c70aba88e4f2fe66a66c4b7149fa9fcad # v4.0.0
+        uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 # v4.0.1
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
           overwrite: true
-          parameters:
-            -p ZONE=${{ inputs.target }}
+          parameters: -p ZONE=${{ inputs.target }}
             -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
@@ -93,15 +92,14 @@ jobs:
           triggers: ${{ inputs.triggers }}
 
       - name: Database
-        uses: bcgov/action-deployer-openshift@d972993c70aba88e4f2fe66a66c4b7149fa9fcad # v4.0.0
+        uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 # v4.0.1
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.database.yml
-          overwrite: false
-          parameters:
-            -p ZONE=${{ inputs.target }}
+          overwrite: ${{ inputs.target != 'prod' && 'true' || 'false' }}
+          parameters: -p ZONE=${{ inputs.target }}
             -p DB_PVC_SIZE=${{ inputs.db-pvc-size }}
             -p MEMORY_REQUEST=${{ inputs.db-memory-request }}
           triggers: ${{ inputs.triggers }}
@@ -117,26 +115,23 @@ jobs:
         name: [backend, frontend, oracle-api]
         include:
           - name: backend
-            parameters:
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+            parameters: -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
           - name: frontend
             parameters:
               -p FAM_MODDED_ZONE=${{ needs.init.outputs.fam-modded-zone }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
           - name: oracle-api
-            parameters:
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+            parameters: -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
     steps:
-      - uses: bcgov/action-deployer-openshift@d972993c70aba88e4f2fe66a66c4b7149fa9fcad # v4.0.0
+      - uses: bcgov/action-deployer-openshift@565e315dfddb8aee08fcfd885a27407dde9a2775 # v4.0.1
         id: deploys
         with:
           file: ${{ matrix.name }}/openshift.deploy.yml
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
-          parameters:
-            -p TAG=${{ inputs.tag }}
+          parameters: -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
             -p MIN_REPLICAS=${{ inputs.min-replicas }}
             -p MAX_REPLICAS=${{ inputs.max-replicas }}

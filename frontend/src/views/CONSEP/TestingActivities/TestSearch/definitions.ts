@@ -1,7 +1,7 @@
 export type ActivitySearchRequest = {
   lotNumbers?: string[];
-  testType?: string;
-  activityId?: string;
+  testTypes?: string[];
+  activityIds?: string[];
   germinatorTrayId?: number;
   seedWithdrawalStartDate?: string;
   seedWithdrawalEndDate?: string;
@@ -26,4 +26,33 @@ export type ActivitySearchRequest = {
   completeStatus?: number;
   acceptanceStatus?: number;
   seedlotClass?: 'A' | 'B';
+  familyLotsOnly?: boolean;
 };
+
+export type ValidationErrorType = {
+  error: boolean;
+  errorMessage: string;
+}
+
+export type ActivitySearchValidation = {
+  lotNumbers: ValidationErrorType[];
+  germinatorTray: ValidationErrorType;
+  requestId: ValidationErrorType;
+  requestYear: ValidationErrorType;
+  orchardId: ValidationErrorType;
+};
+
+export type Sorting = {
+  id: string;
+  desc: boolean;
+};
+
+export interface ExportMutationVariables {
+  filter: ActivitySearchRequest;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+}
+
+export interface VisibilityConfig {
+  [key: string]: boolean;
+}

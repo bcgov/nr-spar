@@ -15,6 +15,8 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
       cy.login();
       cy.visit('/seedlots');
       cy.url().should('contains', '/seedlots');
+      // Wait for the page title to be visible before proceeding
+      cy.get('.title-section h1').should('have.text', NavigationLabels.Seedlots);
     });
 
     it('should register an A-Class Seedlot with species pli', () => {

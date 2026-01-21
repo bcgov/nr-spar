@@ -42,6 +42,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=4`;
         cy.visit(url);
         cy.url().should('contains', url);
+        // Wait for the page title to be visible before proceeding
+        cy.get('.seedlot-orchard-title-row').contains(regFormData.orchard.title);
       });
     });
   });
@@ -598,7 +600,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Check complete status of Orchard step
     cy.contains(`.${prefix}--progress-step-button`, 'Orchard')
       .find(`.${prefix}--assistive-text`)
-      .should('have.text', 'Complete', { timeout: HALF_SECOND });
+      .should('have.text', 'Complete');
   });
 
   it('Step complete status', () => {

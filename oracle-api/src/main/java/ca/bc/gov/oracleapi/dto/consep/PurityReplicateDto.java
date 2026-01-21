@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 
 /**
- * This class represents a {@link ca.bc.gov.backendstartapi.entity.consep.PurityReplicate} object.
+ * This class represents a {@link ca.bc.gov.oracleapi.entity.consep.PurityReplicate} object.
  */
 @Schema(description = "This class represents a purity replicate object.")
 public record PurityReplicateDto(

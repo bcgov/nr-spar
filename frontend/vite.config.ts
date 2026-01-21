@@ -1,30 +1,28 @@
 import { fileURLToPath, URL } from 'node:url';
 import { ConfigEnv, defineConfig, UserConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import istanbul from 'vite-plugin-istanbul';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }: ConfigEnv) => {
+export default defineConfig(async ({ mode }: ConfigEnv) => {
+  const { default: istanbul } = await import('vite-plugin-istanbul');
   const config: UserConfig = {
     define: {} as any,
     plugins: [
       {
         name: 'build-html',
         apply: 'build',
-        transformIndexHtml: (html) => {
-          return {
-            html,
-            tags: [
-              {
-                tag: 'script',
-                attrs: {
-                  src: '/env.js'
-                },
-                injectTo: 'head'
-              }
-            ]
-          }
-        }
+        transformIndexHtml: (html) => ({
+          html,
+          tags: [
+            {
+              tag: 'script',
+              attrs: {
+                src: '/env.js'
+              },
+              injectTo: 'head'
+            }
+          ]
+        })
       },
       react(),
       istanbul({
@@ -43,7 +41,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       }
     },
     preview: {
-        port: 3000
+      port: 3000
     },
     resolve: {
       alias: {

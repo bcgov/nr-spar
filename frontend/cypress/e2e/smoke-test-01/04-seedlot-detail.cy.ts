@@ -19,6 +19,8 @@ describe('Seedlot detail page', () => {
         seedlotNumber = sNumber as string;
         cy.visit(`/seedlots/details/${seedlotNumber}`);
         cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
+        // Wait for the page title to be visible before proceeding
+        cy.get('.title-section h1').should('have.text', `Seedlot ${seedlotNumber}`);
       });
     });
   });

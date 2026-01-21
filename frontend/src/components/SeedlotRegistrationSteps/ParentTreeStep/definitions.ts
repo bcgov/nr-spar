@@ -160,3 +160,11 @@ export type MeanGeomInfoSectionConfigType = {
     meanElevation: InfoDisplayObj
   }
 }
+
+export type WeightedGwKey = string | number | symbol;
+
+export type CalculateMetricsProps = {
+  disableOptions: boolean;
+  setShowInfoSections: React.Dispatch<React.SetStateAction<boolean>>;
+  isReview?: boolean;
+};

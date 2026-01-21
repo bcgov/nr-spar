@@ -35,6 +35,7 @@ import {
 } from '../../../../types/consep/TestingActivityType';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
+import { getCodesByActivity } from '../../../../api-service/consep/testCodesAPI';
 import { deleteImpurity, patchImpurities } from '../../../../api-service/consep/impuritiesAPI';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
@@ -62,6 +63,7 @@ const PurityContent = () => {
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
+  const [replicatesData, setReplicatesData] = useState<ReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
   const [impurities, setImpurities] = useState<ImpurityDisplayType>({});
   const [isModalOpen, setModalOpen] = useState(false);
@@ -75,6 +77,11 @@ const PurityContent = () => {
     queryKey: ['riaKey', riaKey],
     queryFn: () => testingActivitiesAPI('purityTest', 'getDataByRiaKey', { riaKey }),
     refetchOnMount: true
+  });
+
+  const impurityCodesQuery = useQuery({
+    queryKey: ['impurityCodes'],
+    queryFn: () => getCodesByActivity('DEBRIS_TYPE_CD')
   });
 
   const updateImpuritiesMutation = useMutation({
@@ -255,6 +262,14 @@ const PurityContent = () => {
     }
   }, [testActivity]);
 
+  useEffect(() => {
+    if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
+      setReplicatesData(testActivity.replicatesList);
+    } else {
+      setReplicatesData(initReplicatesList(riaKey ?? '', 2));
+    }
+  }, [testActivity, riaKey]);
+
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });
     setTimeout(
@@ -309,7 +324,15 @@ const PurityContent = () => {
   const handleCalculateAverage = () => {
     if (tableBodyRef.current) {
       const cells = tableBodyRef.current.querySelectorAll('td[data-index="4"]');
-      const numbers = Array.from(cells).map((cell) => parseFloat(cell.textContent?.trim() || '0'));
+      const acceptCells = tableBodyRef.current.querySelectorAll('td[data-index="5"]');
+      const numbers = Array.from(cells).map((cell, index) => {
+        const checkbox = acceptCells[index].querySelector('input[type="checkbox"]');
+        if (checkbox instanceof HTMLInputElement && checkbox.checked) {
+          const value = parseFloat(cell.textContent || '');
+          return Number.isNaN(value) ? 0 : value;
+        }
+        return null;
+      }).filter((num): num is number => num !== null);
       averageTest.mutate(numbers);
     } else {
       setAlert({
@@ -365,6 +388,12 @@ const PurityContent = () => {
     }
   ];
 
+  const {
+    data: impurityCodes,
+    isPending: isImpurityCodesPending,
+    isError: isImpurityCodesError
+  } = impurityCodesQuery;
+
   const impurityPerReplicate = (impurity: SingleImpurityType, replicateNumber: number) => (
     <Row key={`impurity-${replicateNumber}-${impurity.debrisRank}`} className="consep-impurity-content">
       <Column sm={2} md={2} lg={2} xlg={2}>
@@ -383,16 +412,25 @@ const PurityContent = () => {
           className="consep-impurity-combobox"
           id={`impurity-${impurity.debrisRank}-${impurity.debrisCategory}`}
           name={fieldsConfig.impuritySection.secondaryfieldName}
-          items={fieldsConfig.impuritySection.options}
-          placeholder={fieldsConfig.impuritySection.placeholder}
+          items={impurityCodes ?? []}
+          placeholder={(() => {
+            if (isImpurityCodesPending) return 'Loading debris types...';
+            if (isImpurityCodesError) return 'Failed to load debris types';
+            return fieldsConfig.impuritySection.placeholder;
+          })()}
           titleText={
             impurity.debrisRank === 1
               ? fieldsConfig.impuritySection.secondaryfieldName
               : ''
           }
           value={impurity.debrisCategory}
+          disabled={isImpurityCodesPending || isImpurityCodesError}
           onChange={(e: ComboBoxEvent) => {
             const { selectedItem } = e;
+            if (!selectedItem) {
+              return;
+            }
+
             updateImpuritiesMutation.mutate([
               {
                 replicateNumber,
@@ -402,6 +440,7 @@ const PurityContent = () => {
             ]);
           }}
         />
+
       </Column>
       <Column className="consep-impurity-content-remove" sm={1} md={1} lg={2} xlg={2}>
         <Button
@@ -474,11 +513,6 @@ const PurityContent = () => {
       );
     })
   );
-
-  let replicatesData = initReplicatesList(riaKey ?? '', 2);
-  if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
-    replicatesData = testActivity.replicatesList;
-  }
 
   return (
     <FlexGrid className="consep-purity-content">

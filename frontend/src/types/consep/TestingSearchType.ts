@@ -12,7 +12,7 @@ export type TestingSearchResponseType = {
   purityPct: number | null;
   seedsPerGram: number | null;
   otherTestResult: number | null;
-  testCompleteInd: boolean;
+  testCompleteInd: number;
   acceptResultInd: number;
   significntStsInd: number;
   seedWithdrawalDate: string | null;
@@ -25,4 +25,28 @@ export type TestingSearchResponseType = {
   itemId: string;
   seedlotSample: string;
   riaSkey: number;
+  activityTypeCd: string;
+};
+
+// Type for pagination details
+export type PaginationInfoType = {
+  totalElements: number;
+  totalPages: number;
+  pageNumber: number;
+  pageSize: number;
+};
+
+export type PaginatedTestingSearchResponseType = {
+  content: TestingSearchResponseType[];
+  missingLotNumbers?: string[];
+} & PaginationInfoType;
+
+export type TestCodeType = {
+  code: string;
+  description: string;
+};
+
+export type ActivityIdType = {
+  standardActivityId: string;
+  activityDescription: string;
 };

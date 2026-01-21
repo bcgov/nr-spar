@@ -1,0 +1,14 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.concep-test-search-table-placehoder {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  height: calc(100vh - 25.5rem);
+}

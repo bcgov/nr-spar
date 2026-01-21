@@ -22,7 +22,7 @@ jobs:
       matrix:
         package: [backend, frontend, oracle-api]
     steps:
-      - uses: bcgov/action-builder-ghcr@1a3767a04ade69edf7e4857c44269d1100282581 # v4.1.0
+      - uses: bcgov/action-builder-ghcr@2b24ac7f95e6a019064151498660437cca3202c5 # v4.2.1
         id: build
         with:
           package: ${{ matrix.package }}
