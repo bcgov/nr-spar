@@ -144,7 +144,6 @@ public class ActivityService {
     ActivityEntity newActivityEntity = new ActivityEntity();
 
     // Map fields from dto to entity
-    newActivityEntity.setRiaKey(activityCreateDto.riaKey());
     newActivityEntity.setStandardActivityId(activityCreateDto.standardActivityId());
     newActivityEntity.setActivityTypeCode(activityCreateDto.activityTypeCd());
     newActivityEntity.setTestCategoryCode(activityCreateDto.testCategoryCd());
@@ -165,6 +164,7 @@ public class ActivityService {
     newActivityEntity.setVegetationState(activityCreateDto.vegetationState());
     newActivityEntity.setSeedlotNumber(activityCreateDto.seedlotNumber());
     newActivityEntity.setFamilyLotNumber(activityCreateDto.familyLotNumber());
+    newActivityEntity.setUpdateTimestamp(LocalDateTime.now());
 
     ActivityEntity savedActivityEntity = activityRepository.save(newActivityEntity);
     SparLog.info("Activity with riaKey: {} saved successfully.", savedActivityEntity.getRiaKey());

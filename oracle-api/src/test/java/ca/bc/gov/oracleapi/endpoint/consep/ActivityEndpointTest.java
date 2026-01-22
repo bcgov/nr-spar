@@ -50,7 +50,6 @@ class ActivityEndpointTest {
   @BeforeEach
   void setUp() {
     validActivityCreateDto = new ActivityCreateDto(
-        new BigDecimal("408623"),
         "ST1",
         "AC1",
         "TC1",
@@ -74,7 +73,6 @@ class ActivityEndpointTest {
     );
 
     createdActivityEntity = new ActivityEntity();
-    createdActivityEntity.setRiaKey(validActivityCreateDto.riaKey());
     createdActivityEntity.setRequestId(validActivityCreateDto.requestId());
     createdActivityEntity.setSeedlotNumber(validActivityCreateDto.seedlotNumber());
     createdActivityEntity.setRequestSkey(validActivityCreateDto.requestSkey());
@@ -92,7 +90,6 @@ class ActivityEndpointTest {
             .content(objectMapper.writeValueAsString(validActivityCreateDto)))
         .andExpect(status().isCreated())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.riaKey").value(validActivityCreateDto.riaKey().toString()))
         .andExpect(jsonPath("$.requestId").value(validActivityCreateDto.requestId()))
         .andExpect(jsonPath("$.seedlotNumber").value(validActivityCreateDto.seedlotNumber()))
         .andExpect(jsonPath("$.requestSkey").value(validActivityCreateDto.requestSkey().toString()))
@@ -104,7 +101,6 @@ class ActivityEndpointTest {
   @Test
   void createTestingActivity_shouldReturnBadRequest_whenInvalidDto() throws Exception {
     var invalidDto = new ActivityCreateDto(
-        null, // <-- riaKey is required
         "", // standardActivityId cannot be empty
         validActivityCreateDto.activityTypeCd(),
         "TEST", // testCategoryCd can have max 3 chars
@@ -132,8 +128,6 @@ class ActivityEndpointTest {
             .contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(invalidDto)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.fields[?(@.fieldName=='riaKey')].fieldMessage")
-            .value("must not be null"))
         .andExpect(jsonPath("$.fields[?(@.fieldName=='standardActivityId')].fieldMessage")
             .value("must not be blank"))
         .andExpect(jsonPath("$.fields[?(@.fieldName=='activityTimeUnit')].fieldMessage")

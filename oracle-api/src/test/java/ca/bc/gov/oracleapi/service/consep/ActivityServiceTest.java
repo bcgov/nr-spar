@@ -72,7 +72,6 @@ class ActivityServiceTest {
     activityEntity.setRiaComment("Test comment");
 
     validActivityCreateDto = new ActivityCreateDto(
-        new BigDecimal("408623"),
         "ST1",
         "AC1",
         "TC1",
@@ -155,7 +154,6 @@ class ActivityServiceTest {
 
     ActivityEntity createdActivityEntity = activityService.createActivity(validActivityCreateDto);
 
-    assertEquals(validActivityCreateDto.riaKey(), createdActivityEntity.getRiaKey());
     assertEquals(validActivityCreateDto.seedlotNumber(), createdActivityEntity.getSeedlotNumber());
     assertEquals(validActivityCreateDto.requestSkey(), createdActivityEntity.getRequestSkey());
     assertEquals(validActivityCreateDto.itemId(), createdActivityEntity.getItemId());
@@ -163,7 +161,7 @@ class ActivityServiceTest {
     verify(activityRepository, times(1)).clearExistingProcessCommitment(
         eq(validActivityCreateDto.requestSkey()),
         eq(validActivityCreateDto.itemId()),
-        eq(validActivityCreateDto.riaKey())
+        eq(createdActivityEntity.getRiaKey())
     );
     verify(testResultRepository, times(1)).save(any(TestResultEntity.class));
   }
@@ -171,7 +169,6 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldNotCallClearExistingProcessCommitment_whenProcessCommitUnchecked() {
     ActivityCreateDto dto = new ActivityCreateDto(
-        validActivityCreateDto.riaKey(),
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         null,
@@ -205,7 +202,6 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldFail_whenStartDateNotBeforeEndDate() {
     ActivityCreateDto invalidDto = new ActivityCreateDto(
-        validActivityCreateDto.riaKey(),
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
@@ -238,7 +234,6 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldFail_whenNoSeedlotOrFamilyLot() {
     ActivityCreateDto invalidDto = new ActivityCreateDto(
-        validActivityCreateDto.riaKey(),
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
@@ -271,7 +266,6 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldFail_whenSeedlingRequestIdAndTestCategoryCdNotStd() {
     ActivityCreateDto invalidDto = new ActivityCreateDto(
-        validActivityCreateDto.riaKey(),
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         "NON", // <-- Not STD
