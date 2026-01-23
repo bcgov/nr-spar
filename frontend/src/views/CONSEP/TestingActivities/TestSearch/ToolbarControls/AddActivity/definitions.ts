@@ -1,5 +1,4 @@
 export type AddActivityRequest = {
-  riaKey: number;
   standardActivityId: string;
   activityTypeCd?: string;
   testCategoryCd?: string;
@@ -10,9 +9,8 @@ export type AddActivityRequest = {
   revisedEndDate?: string;
   activityDuration: number;
   activityTimeUnit: string;
-  significantStatusIndicator?: boolean;
-  processResultIndicator?: boolean;
-  testResultIndicator?: boolean;
+  significantStatusIndicator?: 0 | -1;
+  processCommitIndicator?: 0 | -1;
   requestSkey: number;
   requestId: string;
   itemId: string;

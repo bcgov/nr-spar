@@ -57,7 +57,6 @@ const AddActivity = (
   const todayString = new Date().toISOString().split('T')[0];
   const REQUIRED_FIELDS = useMemo<(keyof AddActivityRequest)[]>(() => {
     const baseFields: (keyof AddActivityRequest)[] = [
-      'riaKey',
       'standardActivityId',
       'plannedStartDate',
       'plannedEndDate',
@@ -77,12 +76,11 @@ const AddActivity = (
   }, [isTestActivity]);
 
   const [addActivityData, setAddActivityData] = useState<Partial<AddActivityRequest>>({
-    riaKey: selectedRows[0].riaSkey,
     plannedStartDate: todayString,
-    requestSkey: selectedRows[0].requestSkey,
-    requestId: selectedRows[0].reqId,
-    itemId: selectedRows[0].itemId,
-    vegetationState: selectedRows[0].species
+    requestSkey: selectedRows[0]?.requestSkey,
+    requestId: selectedRows[0]?.reqId,
+    itemId: selectedRows[0]?.itemId,
+    vegetationState: selectedRows[0]?.species
   });
   const [alert, setAlert] = useState<{
     status: 'error' | 'info' | 'success' | 'warning';
@@ -169,7 +167,8 @@ const AddActivity = (
     activityIdQuery.error,
     activityRiaSkeyQuery.error,
     testCategoryQuery.error,
-    activityDurationUnitQuery.error
+    activityDurationUnitQuery.error,
+    isCommitmentIndicatorYesQuery.error
   ]);
 
   const updateField = <K extends keyof AddActivityRequest>(
@@ -239,11 +238,11 @@ const AddActivity = (
           className="add-activity-select"
           titleText={<RequiredFormFieldLabel text="Activity" />}
           items={activityIdQuery.data ?? []}
-          itemToString={(item: { id: number; text: string } | null) => item?.text ?? ''}
+          itemToString={(item: { id: string; text: string } | null) => item?.text ?? ''}
           selectedItem={activityIdQuery.data?.find(
             (o) => o.id === addActivityData.standardActivityId
           )}
-          onChange={(e: ComboBoxEvent) => updateField('standardActivityId', e.selectedItem)}
+          onChange={(e: ComboBoxEvent) => updateField('standardActivityId', e.selectedItem.id)}
         />
         <ComboBox
           id="add-activity-part-of-activity-select"
@@ -261,12 +260,12 @@ const AddActivity = (
           className="add-activity-select"
           titleText={isTestActivity ? <RequiredFormFieldLabel text="Test category" /> : 'Test category'}
           items={testCategoryQuery.data ?? []}
-          itemToString={(item: { id: number; text: string } | null) => item?.text ?? ''}
+          itemToString={(item: { id: string; text: string } | null) => item?.text ?? ''}
           disabled={!isTestActivity}
           selectedItem={testCategoryQuery.data?.find(
             (o) => o.id === addActivityData.testCategoryCd
           )}
-          onChange={(e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem)}
+          onChange={(e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem.id)}
         />
         <div className="add-activity-date-picker">
           <DatePicker
@@ -293,7 +292,7 @@ const AddActivity = (
             minDate={addActivityData.plannedStartDate ?? minStartDate}
             maxDate={maxEndDate}
             dateFormat={DATE_FORMAT}
-            value={[addActivityData.plannedEndDate]}
+            value={addActivityData.plannedEndDate ? [addActivityData.plannedEndDate] : []}
             onChange={(dates: Date[]) => {
               if (dates[0]) {
                 updateField('plannedEndDate', dates[0].toISOString().split('T')[0]);
@@ -329,26 +328,28 @@ const AddActivity = (
           />
           <ComboBox
             id="add-activity-duration-unit-select"
+            aria-label="Time unit"
             items={activityDurationUnitQuery.data ?? []}
             selectedItem={toSelectedItemString(addActivityData.activityTimeUnit)}
+            itemToString={(item: string | null) => item ?? ''}
             onChange={(e: ComboBoxEvent) => updateField('activityTimeUnit', e.selectedItem)}
           />
         </div>
         <Checkbox
           labelText="Significant"
           id="add-activity-significant-checkbox"
-          checked={addActivityData.significantStatusIndicator ?? false}
+          checked={(addActivityData.significantStatusIndicator ?? 0) === -1}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            updateField('significantStatusIndicator', e.target.checked);
+            updateField('significantStatusIndicator', e.target.checked ? -1 : 0);
           }}
         />
         <Checkbox
           labelText="Process commitment"
           id="add-activity-process-commitment-checkbox"
           disabled={isCommitmentIndicatorYesQuery.data === false}
-          checked={addActivityData.processResultIndicator ?? false}
+          checked={(addActivityData.processCommitIndicator ?? 0) === -1}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            updateField('processResultIndicator', e.target.checked);
+            updateField('processCommitIndicator', e.target.checked ? -1 : 0);
           }}
         />
       </div>

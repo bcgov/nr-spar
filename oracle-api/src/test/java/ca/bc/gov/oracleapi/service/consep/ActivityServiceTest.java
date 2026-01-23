@@ -84,8 +84,6 @@ class ActivityServiceTest {
         "HR",
         0,
         -1,
-        0,
-        0,
         new BigDecimal("33874"),
         "CSP19970005",
         "A",
@@ -157,6 +155,16 @@ class ActivityServiceTest {
     assertEquals(validActivityCreateDto.seedlotNumber(), createdActivityEntity.getSeedlotNumber());
     assertEquals(validActivityCreateDto.requestSkey(), createdActivityEntity.getRequestSkey());
     assertEquals(validActivityCreateDto.itemId(), createdActivityEntity.getItemId());
+    assertEquals(
+        0,
+        createdActivityEntity.getProcessResultIndicator(),
+        "processResultIndicator should be 0 when testCategoryCd is not null"
+    );
+    assertEquals(
+        -1,
+        createdActivityEntity.getTestResultIndicator(),
+        "testResultIndicator should be -1 when testCategoryCd is not null"
+    );
     verify(activityRepository, times(1)).save(any(ActivityEntity.class));
     verify(activityRepository, times(1)).clearExistingProcessCommitment(
         eq(validActivityCreateDto.requestSkey()),
@@ -181,8 +189,6 @@ class ActivityServiceTest {
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
         0,
-        validActivityCreateDto.processResultIndicator(),
-        validActivityCreateDto.testResultIndicator(),
         validActivityCreateDto.requestSkey(),
         validActivityCreateDto.requestId(),
         validActivityCreateDto.itemId(),
@@ -191,9 +197,20 @@ class ActivityServiceTest {
         validActivityCreateDto.familyLotNumber()
     );
 
-    when(activityRepository.save(any(ActivityEntity.class))).thenReturn(new ActivityEntity());
+    when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
 
-    activityService.createActivity(dto);
+    ActivityEntity createdActivityEntity = activityService.createActivity(dto);
+
+    assertEquals(
+        -1,
+        createdActivityEntity.getProcessResultIndicator(),
+        "processResultIndicator should be -1 when testCategoryCd is null"
+    );
+    assertEquals(
+        0,
+        createdActivityEntity.getTestResultIndicator(),
+        "testResultIndicator should be 0 when testCategoryCd is null"
+    );
 
     verify(activityRepository, never()).clearExistingProcessCommitment(any(), any(), any());
     verify(testResultRepository, never()).save(any(TestResultEntity.class));
@@ -214,8 +231,6 @@ class ActivityServiceTest {
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
         validActivityCreateDto.processCommitIndicator(),
-        validActivityCreateDto.processResultIndicator(),
-        validActivityCreateDto.testResultIndicator(),
         validActivityCreateDto.requestSkey(),
         validActivityCreateDto.requestId(),
         validActivityCreateDto.itemId(),
@@ -246,8 +261,6 @@ class ActivityServiceTest {
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
         validActivityCreateDto.processCommitIndicator(),
-        validActivityCreateDto.processResultIndicator(),
-        validActivityCreateDto.testResultIndicator(),
         validActivityCreateDto.requestSkey(),
         validActivityCreateDto.requestId(),
         validActivityCreateDto.itemId(),
@@ -278,8 +291,6 @@ class ActivityServiceTest {
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
         validActivityCreateDto.processCommitIndicator(),
-        validActivityCreateDto.processResultIndicator(),
-        validActivityCreateDto.testResultIndicator(),
         validActivityCreateDto.requestSkey(),
         "1234ABC", // <-- First 4 chars numeric ("1234"), which is a seedling request id
         validActivityCreateDto.itemId(),

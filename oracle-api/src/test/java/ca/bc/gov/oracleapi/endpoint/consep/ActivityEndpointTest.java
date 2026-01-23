@@ -62,8 +62,6 @@ class ActivityEndpointTest {
         "HR",
         0,
         -1,
-        0,
-        0,
         new BigDecimal("33874"),
         "CSP19970005",
         "A",
@@ -113,8 +111,6 @@ class ActivityEndpointTest {
         "", // activityTimeUnit cannot be empty
         validActivityCreateDto.significantStatusIndicator(),
         1, // indicators can only be 0 or -1
-        validActivityCreateDto.processResultIndicator(),
-        validActivityCreateDto.testResultIndicator(),
         null, // requestSkey cannot be null
         null, // requestId cannot be null
         null, // itemId cannot be null

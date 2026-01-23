@@ -141,6 +141,16 @@ public class ActivityService {
       }
     }
 
+    Integer processResultIndicator;
+    Integer testResultIndicator;
+    if (testCategoryCd == null) {
+      processResultIndicator = -1;
+      testResultIndicator = 0;
+    } else {
+      processResultIndicator = 0;
+      testResultIndicator = -1;
+    }
+
     ActivityEntity newActivityEntity = new ActivityEntity();
 
     // Map fields from dto to entity
@@ -156,8 +166,8 @@ public class ActivityService {
     newActivityEntity.setActivityTimeUnit(activityCreateDto.activityTimeUnit());
     newActivityEntity.setSignificantStatusIndicator(activityCreateDto.significantStatusIndicator());
     newActivityEntity.setProcessCommitIndicator(activityCreateDto.processCommitIndicator());
-    newActivityEntity.setProcessResultIndicator(activityCreateDto.processResultIndicator());
-    newActivityEntity.setTestResultIndicator(activityCreateDto.testResultIndicator());
+    newActivityEntity.setProcessResultIndicator(processResultIndicator);
+    newActivityEntity.setTestResultIndicator(testResultIndicator);
     newActivityEntity.setRequestSkey(activityCreateDto.requestSkey());
     newActivityEntity.setRequestId(activityCreateDto.requestId());
     newActivityEntity.setItemId(activityCreateDto.itemId());

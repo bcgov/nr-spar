@@ -35,5 +35,5 @@ export const getActivityRiaSkeys = (requestSkey: number, itemId: string) => {
 
 export const getActivityDurationUnits = () => {
   const url = `${ApiConfig.testCodes}/activity-duration-units`;
-  return api.get(url).then((res: { data: String[] }) => res.data);
+  return api.get(url).then((res: { data: string[] }) => res.data);
 };
