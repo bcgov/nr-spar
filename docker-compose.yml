@@ -86,7 +86,7 @@ services:
       CYPRESS_baseUrl: http://frontend:3000
       CYPRESS_USERNAME: LOAD-3-TEST
       CYPRESS_PASSWORD: ${CYPRESS_PASSWORD}
-    image: cypress/included:12.17.4
+    image: cypress/included:15.9.0
     profiles: ["cypress"]
     user: root
     volumes: ["./frontend:/app"]
