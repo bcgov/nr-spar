@@ -116,8 +116,6 @@ const TestListTable = ({
         className="concep-add-activity-modal"
         open={showAddActivity}
         passiveModal
-        primaryButtonText="Add activity"
-        secondaryButtonText="Cancel"
         size="lg"
         modalHeading={
           tableRef.current?.getSelectedRowModel().rows?.length === 1

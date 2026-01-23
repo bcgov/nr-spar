@@ -25,7 +25,7 @@ import {
   getTestCategoryCodes,
   getActivityDurationUnits
 } from '../../../../../../api-service/consep/testCodesAPI';
-import isCommitmentChecked from '../../../../../../api-service/requestSeedlotAndVeglotAPI';
+import isCommitmentIndicatorYes from '../../../../../../api-service/requestSeedlotAndVeglotAPI';
 import {
   DATE_FORMAT,
   maxEndDate,
@@ -92,9 +92,9 @@ const AddActivity = (
     (field) => addActivityData[field] !== undefined && addActivityData[field] !== null && addActivityData[field] !== ''
   );
 
-  const isCommitmentCheckedQuery = useQuery({
+  const isCommitmentIndicatorYesQuery = useQuery({
     queryKey: ['request-is-commitment', requestSkey, itemId],
-    queryFn: () => isCommitmentChecked(requestSkey, itemId),
+    queryFn: () => isCommitmentIndicatorYes(requestSkey, itemId),
     enabled: Boolean(requestSkey && itemId),
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS
@@ -154,8 +154,8 @@ const AddActivity = (
     if (activityDurationUnitQuery.isError && activityDurationUnitQuery.error instanceof Error) {
       failedMessages.push(`Activity Duration Units: ${activityDurationUnitQuery.error.message}`);
     }
-    if (isCommitmentCheckedQuery.isError && isCommitmentCheckedQuery.error instanceof Error) {
-      failedMessages.push(`Process Commitment Indicator: ${isCommitmentCheckedQuery.error.message}`);
+    if (isCommitmentIndicatorYesQuery.isError && isCommitmentIndicatorYesQuery.error instanceof Error) {
+      failedMessages.push(`Process Commitment Indicator: ${isCommitmentIndicatorYesQuery.error.message}`);
     }
     if (failedMessages.length > 0) {
       setAlert({
@@ -345,7 +345,7 @@ const AddActivity = (
         <Checkbox
           labelText="Process commitment"
           id="add-activity-process-commitment-checkbox"
-          disabled={isCommitmentCheckedQuery.data === false}
+          disabled={isCommitmentIndicatorYesQuery.data === false}
           checked={addActivityData.processResultIndicator ?? false}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             updateField('processResultIndicator', e.target.checked);
