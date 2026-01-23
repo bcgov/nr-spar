@@ -1,5 +1,12 @@
 package ca.bc.gov.oracleapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import ca.bc.gov.oracleapi.repository.RequestSeedlotRepository;
 import ca.bc.gov.oracleapi.repository.RequestVeglotRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,9 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RequestSeedlotAndVeglotServiceTest {
@@ -26,81 +30,53 @@ class RequestSeedlotAndVeglotServiceTest {
   }
 
   @Test
-  @DisplayName("isCommitmentChecked_shouldReturnTrue_whenSeedlotCommitmentIsY")
-  void isCommitmentChecked_shouldReturnTrue_whenSeedlotCommitmentIsY() {
+  @DisplayName("isCommitmentIndicatorYes_shouldReturnTrue_whenSeedlotCommitmentIsYes")
+  void isCommitmentIndicatorYes_shouldReturnTrue_whenSeedlotCommitmentIsYes() {
     Long requestSkey = 123L;
     String itemId = "1";
 
-    when(requestSeedlotRepository.getCommitment(requestSkey, itemId)).thenReturn("Y");
+    when(requestSeedlotRepository.existsCommitmentYes(requestSkey, itemId)).thenReturn(true);
 
-    boolean result = service.isCommitmentChecked(requestSkey, itemId);
+    boolean result = service.isCommitmentIndicatorYes(requestSkey, itemId);
 
     assertTrue(result);
-    verify(requestSeedlotRepository).getCommitment(requestSkey, itemId);
+    verify(requestSeedlotRepository).existsCommitmentYes(requestSkey, itemId);
     verifyNoInteractions(requestVeglotRepository);
   }
 
-  @Test
-  @DisplayName("isCommitmentChecked_shouldReturnTrue_whenSeedlotCommitmentIsLowercaseY")
-  void isCommitmentChecked_shouldReturnTrue_whenSeedlotCommitmentIsLowercaseY() {
-    Long requestSkey = 123L;
-    String itemId = "1";
-
-    when(requestSeedlotRepository.getCommitment(requestSkey, itemId)).thenReturn("y");
-
-    boolean result = service.isCommitmentChecked(requestSkey, itemId);
-
-    assertTrue(result);
-    verify(requestSeedlotRepository).getCommitment(requestSkey, itemId);
-    verifyNoInteractions(requestVeglotRepository);
-  }
 
   @Test
-  @DisplayName("isCommitmentChecked_shouldReturnFalse_whenSeedlotCommitmentIsN")
-  void isCommitmentChecked_shouldReturnFalse_whenSeedlotCommitmentIsN() {
-    Long requestSkey = 123L;
-    String itemId = "1";
-
-    when(requestSeedlotRepository.getCommitment(requestSkey, itemId)).thenReturn("N");
-
-    boolean result = service.isCommitmentChecked(requestSkey, itemId);
-
-    assertFalse(result);
-    verify(requestSeedlotRepository).getCommitment(requestSkey, itemId);
-    verifyNoInteractions(requestVeglotRepository);
-  }
-
-  @Test
-  @DisplayName("isCommitmentChecked_shouldFallbackToVeglot_whenSeedlotCommitmentIsNull_andReturnTrueIfVeglotIsY")
-  void isCommitmentChecked_shouldFallbackToVeglot_whenSeedlotCommitmentIsNull_andReturnTrueIfVeglotIsY() {
+  @DisplayName("isCommitmentIndicatorYes_shouldReturnTrueIfVeglotCommitmentIsY"
+      + "_whenSeedlotCommitmentIsFalse")
+  void isCommitmentIndicatorYes_shouldReturnTrueIfVeglotIsYes_whenSeedlotCommitmentIsFalse() {
     Long requestSkey = 456L;
     String itemId = "88";
 
-    when(requestSeedlotRepository.getCommitment(requestSkey, itemId)).thenReturn(null);
-    when(requestVeglotRepository.getCommitment(requestSkey, itemId)).thenReturn("Y");
+    when(requestSeedlotRepository.existsCommitmentYes(requestSkey, itemId)).thenReturn(false);
+    when(requestVeglotRepository.existsCommitmentYes(requestSkey, itemId)).thenReturn(true);
 
-    boolean result = service.isCommitmentChecked(requestSkey, itemId);
+    boolean result = service.isCommitmentIndicatorYes(requestSkey, itemId);
 
     assertTrue(result);
-    verify(requestSeedlotRepository).getCommitment(requestSkey, itemId);
-    verify(requestVeglotRepository).getCommitment(requestSkey, itemId);
+    verify(requestSeedlotRepository).existsCommitmentYes(requestSkey, itemId);
+    verify(requestVeglotRepository).existsCommitmentYes(requestSkey, itemId);
     verifyNoMoreInteractions(requestSeedlotRepository, requestVeglotRepository);
   }
 
   @Test
-  @DisplayName("isCommitmentChecked_shouldReturnFalse_whenBothSeedlotAndVeglotAreNull")
-  void isCommitmentChecked_shouldReturnFalse_whenBothSeedlotAndVeglotAreNull() {
+  @DisplayName("isCommitmentIndicatorYes_shouldReturnFalse_whenBothSeedlotAndVeglotAreFalse")
+  void isCommitmentIndicatorYes_shouldReturnFalse_whenBothSeedlotAndVeglotAreFalse() {
     Long requestSkey = 789L;
     String itemId = "99";
 
-    when(requestSeedlotRepository.getCommitment(requestSkey, itemId)).thenReturn(null);
-    when(requestVeglotRepository.getCommitment(requestSkey, itemId)).thenReturn(null);
+    when(requestSeedlotRepository.existsCommitmentYes(requestSkey, itemId)).thenReturn(false);
+    when(requestVeglotRepository.existsCommitmentYes(requestSkey, itemId)).thenReturn(false);
 
-    boolean result = service.isCommitmentChecked(requestSkey, itemId);
+    boolean result = service.isCommitmentIndicatorYes(requestSkey, itemId);
 
     assertFalse(result);
-    verify(requestSeedlotRepository).getCommitment(requestSkey, itemId);
-    verify(requestVeglotRepository).getCommitment(requestSkey, itemId);
+    verify(requestSeedlotRepository).existsCommitmentYes(requestSkey, itemId);
+    verify(requestVeglotRepository).existsCommitmentYes(requestSkey, itemId);
     verifyNoMoreInteractions(requestSeedlotRepository, requestVeglotRepository);
   }
 }
