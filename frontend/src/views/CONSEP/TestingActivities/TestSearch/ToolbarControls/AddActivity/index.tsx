@@ -25,7 +25,7 @@ import {
   getTestCategoryCodes,
   getActivityDurationUnits
 } from '../../../../../../api-service/consep/testCodesAPI';
-import isCommitmentChecked from '../../../../../../api-service/requestSeedLotAndVegLotAPI';
+import isCommitmentChecked from '../../../../../../api-service/requestSeedlotAndVeglotAPI';
 import {
   DATE_FORMAT,
   maxEndDate,
@@ -105,7 +105,10 @@ const AddActivity = (
     queryFn: getActivityIds,
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
-    select: (data: ActivityIdType[]) => data?.map((activity) => activity.standardActivityId) ?? []
+    select: (data: ActivityIdType[]) => data.map((activity) => ({
+      id: activity.standardActivityId,
+      text: activity.activityDescription
+    }))
   });
 
   const activityRiaSkeyQuery = useQuery({
@@ -115,7 +118,7 @@ const AddActivity = (
     gcTime: THREE_HALF_HOURS,
     select: (data: ActivityRiaSkeyType[]) => data.map((activity) => ({
       id: activity.riaSkey,
-      text: String(activity.riaSkey)
+      text: activity.activityDescription
     }))
   });
 
@@ -124,7 +127,10 @@ const AddActivity = (
     queryFn: getTestCategoryCodes,
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
-    select: (data: TestCodeType[]) => data?.map((testCode) => testCode.code) ?? []
+    select: (data: TestCodeType[]) => data?.map((testCode) => ({
+      id: testCode.code,
+      text: testCode.description
+    }))
   });
 
   const activityDurationUnitQuery = useQuery({
@@ -216,7 +222,6 @@ const AddActivity = (
         }
       }
 
-      console.log('newData', newData);
       return newData;
     });
   };
@@ -234,7 +239,10 @@ const AddActivity = (
           className="add-activity-select"
           titleText={<RequiredFormFieldLabel text="Activity" />}
           items={activityIdQuery.data ?? []}
-          selectedItem={toSelectedItemString(addActivityData.standardActivityId)}
+          itemToString={(item: { id: number; text: string } | null) => item?.text ?? ''}
+          selectedItem={activityIdQuery.data?.find(
+            (o) => o.id === addActivityData.standardActivityId
+          )}
           onChange={(e: ComboBoxEvent) => updateField('standardActivityId', e.selectedItem)}
         />
         <ComboBox
@@ -253,8 +261,11 @@ const AddActivity = (
           className="add-activity-select"
           titleText={isTestActivity ? <RequiredFormFieldLabel text="Test category" /> : 'Test category'}
           items={testCategoryQuery.data ?? []}
+          itemToString={(item: { id: number; text: string } | null) => item?.text ?? ''}
           disabled={!isTestActivity}
-          selectedItem={toSelectedItemString(addActivityData.testCategoryCd)}
+          selectedItem={testCategoryQuery.data?.find(
+            (o) => o.id === addActivityData.testCategoryCd
+          )}
           onChange={(e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem)}
         />
         <div className="add-activity-date-picker">
@@ -353,7 +364,6 @@ const AddActivity = (
           disabled={!isAddActivityValid}
           onClick={() => {
             console.log('Submitting Add Activity:', addActivityData);
-            // Call API here if needed
           }}
         >
           Add Activity
