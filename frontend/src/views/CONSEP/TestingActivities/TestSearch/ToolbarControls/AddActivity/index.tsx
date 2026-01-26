@@ -65,7 +65,9 @@ const AddActivity = (
       'requestSkey',
       'requestId',
       'itemId',
-      'vegetationState'
+      'vegetationState',
+      'significantStatusIndicator',
+      'processCommitIndicator'
     ];
 
     if (isTestActivity) {
@@ -80,7 +82,9 @@ const AddActivity = (
     requestSkey: selectedRows[0]?.requestSkey,
     requestId: selectedRows[0]?.reqId,
     itemId: selectedRows[0]?.itemId,
-    vegetationState: selectedRows[0]?.species
+    vegetationState: selectedRows[0]?.species,
+    significantStatusIndicator: 0,
+    processCommitIndicator: 0
   });
   const [alert, setAlert] = useState<{
     status: 'error' | 'info' | 'success' | 'warning';
@@ -364,7 +368,18 @@ const AddActivity = (
           kind="primary"
           disabled={!isAddActivityValid}
           onClick={() => {
-            console.log('Submitting Add Activity:', addActivityData);
+            const lot = selectedRows[0]?.seedlotDisplay ?? '';
+            const isFamilyLot = lot.toUpperCase().startsWith('F');
+
+            // Prepare request object
+            const requestPayload: AddActivityRequest = {
+              ...addActivityData,
+              revisedEndDate: addActivityData.plannedEndDate,
+              revisedStartDate: addActivityData.plannedStartDate,
+              ...(isFamilyLot ? { familyLotNumber: lot } : { seedlotNumber: lot })
+            };
+
+            console.log('Submitting Add Activity:', requestPayload);
           }}
         >
           Add Activity

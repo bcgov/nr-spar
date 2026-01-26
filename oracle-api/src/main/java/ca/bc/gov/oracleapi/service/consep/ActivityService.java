@@ -120,9 +120,10 @@ public class ActivityService {
         && !activityCreateDto.seedlotNumber().isBlank();
     boolean hasFamilyLot = activityCreateDto.familyLotNumber() != null
         && !activityCreateDto.familyLotNumber().isBlank();
-    if (!(hasSeedlot || hasFamilyLot)) {
+    if (hasSeedlot == hasFamilyLot) {
       throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Either seedlotNumber or familyLotNumber must be provided."
+          HttpStatus.BAD_REQUEST,
+          "Either seedlotNumber or familyLotNumber must be provided, but not both."
       );
     }
 

@@ -9,8 +9,8 @@ export type AddActivityRequest = {
   revisedEndDate?: string;
   activityDuration: number;
   activityTimeUnit: string;
-  significantStatusIndicator?: 0 | -1;
-  processCommitIndicator?: 0 | -1;
+  significantStatusIndicator: 0 | -1;
+  processCommitIndicator: 0 | -1;
   requestSkey: number;
   requestId: string;
   itemId: string;

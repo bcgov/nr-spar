@@ -273,7 +273,43 @@ class ActivityServiceTest {
         ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
     );
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-    assertEquals("Either seedlotNumber or familyLotNumber must be provided.", ex.getReason());
+    assertEquals(
+        "Either seedlotNumber or familyLotNumber must be provided, but not both.",
+        ex.getReason()
+    );
+  }
+
+  @Test
+  void createActivity_shouldFail_whenHaveBothSeedlotAndFamilyLot() {
+    ActivityCreateDto invalidDto = new ActivityCreateDto(
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        validActivityCreateDto.testCategoryCd(),
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        "00098",
+        "F20082140146"
+    );
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(
+        "Either seedlotNumber or familyLotNumber must be provided, but not both.",
+        ex.getReason()
+    );
   }
 
   @Test
