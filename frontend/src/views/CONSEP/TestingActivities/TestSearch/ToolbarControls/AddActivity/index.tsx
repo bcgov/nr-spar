@@ -221,8 +221,8 @@ const AddActivity = (
               start.setHours(start.getHours() + duration);
 
               const dayDiff = start.toDateString() !== endDate.toDateString()
-                  ? Math.floor((start.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24))
-                  : 0;
+                ? Math.floor((start.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24))
+                : 0;
 
               endDate.setDate(endDate.getDate() + dayDiff);
               break;
