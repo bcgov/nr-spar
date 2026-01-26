@@ -92,13 +92,23 @@ const AddActivity = (
     status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
-  const isAddActivityValid = REQUIRED_FIELDS.every(
-    (field) => addActivityData[field] !== undefined && addActivityData[field] !== null && addActivityData[field] !== ''
-  );
+
+  const isAddActivityValid = REQUIRED_FIELDS.every((field) => {
+    const value = addActivityData[field];
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    return value !== undefined && value !== null;
+  });
 
   const isCommitmentIndicatorYesQuery = useQuery({
-    queryKey: ['request-is-commitment', requestSkey, itemId],
-    queryFn: () => isCommitmentIndicatorYes(requestSkey, itemId),
+    queryKey: ['request-commitment-indicator', requestSkey, itemId],
+    queryFn: () => {
+      if (!requestSkey || !itemId) {
+        throw new Error('requestSkey or itemId is missing');
+      }
+      return isCommitmentIndicatorYes(requestSkey, itemId);
+    },
     enabled: Boolean(requestSkey && itemId),
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS
@@ -207,8 +217,15 @@ const AddActivity = (
 
           switch (newData.activityTimeUnit) {
             case 'HR': {
-              const daysToAdd = Math.ceil(duration / 24);
-              endDate.setDate(endDate.getDate() + daysToAdd);
+              const start = new Date(startDate);
+              start.setHours(start.getHours() + duration);
+
+              const dayDiff =
+                start.toDateString() !== endDate.toDateString()
+                  ? Math.floor((start.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24))
+                  : 0;
+
+              endDate.setDate(endDate.getDate() + dayDiff);
               break;
             }
             case 'DY':
@@ -287,6 +304,8 @@ const AddActivity = (
             onChange={(dates: Date[]) => {
               if (dates[0]) {
                 updateField('plannedStartDate', toLocalDateString(dates[0]));
+              } else {
+                updateField('plannedStartDate', undefined);
               }
             }}
           >
@@ -306,6 +325,8 @@ const AddActivity = (
             onChange={(dates: Date[]) => {
               if (dates[0]) {
                 updateField('plannedEndDate', toLocalDateString(dates[0]));
+              } else {
+                updateField('plannedEndDate', undefined);
               }
             }}
           >

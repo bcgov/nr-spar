@@ -123,7 +123,8 @@ public class ActivityService {
     if (hasSeedlot == hasFamilyLot) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Either seedlotNumber or familyLotNumber must be provided, but not both."
+          "Exactly one of seedlotNumber or familyLotNumber must be provided"
+          + "(provide one, but not both or neither)."
       );
     }
 

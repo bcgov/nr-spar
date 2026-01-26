@@ -274,7 +274,7 @@ class ActivityServiceTest {
     );
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(
-        "Either seedlotNumber or familyLotNumber must be provided, but not both.",
+        "Exactly one of seedlotNumber or familyLotNumber must be provided (provide one, but not both or neither).",
         ex.getReason()
     );
   }
@@ -307,7 +307,7 @@ class ActivityServiceTest {
     );
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(
-        "Either seedlotNumber or familyLotNumber must be provided, but not both.",
+        "Exactly one of seedlotNumber or familyLotNumber must be provided (provide one, but not both or neither).",
         ex.getReason()
     );
   }

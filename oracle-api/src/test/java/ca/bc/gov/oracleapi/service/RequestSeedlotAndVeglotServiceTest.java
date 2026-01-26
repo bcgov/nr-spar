@@ -46,7 +46,7 @@ class RequestSeedlotAndVeglotServiceTest {
 
 
   @Test
-  @DisplayName("isCommitmentIndicatorYes_shouldReturnTrueIfVeglotCommitmentIsY"
+  @DisplayName("isCommitmentIndicatorYes_shouldReturnTrueIfVeglotCommitmentIsYes"
       + "_whenSeedlotCommitmentIsFalse")
   void isCommitmentIndicatorYes_shouldReturnTrueIfVeglotIsYes_whenSeedlotCommitmentIsFalse() {
     Long requestSkey = 456L;
