@@ -179,7 +179,6 @@ const AddActivity = (
     field: K,
     value: AddActivityRequest[K] | undefined
   ) => {
-    console.log('selectedRows', selectedRows[0]);
     setAddActivityData((prev) => {
       const newData = { ...prev, [field]: value };
 
@@ -371,15 +370,23 @@ const AddActivity = (
             const lot = selectedRows[0]?.seedlotDisplay ?? '';
             const isFamilyLot = lot.toUpperCase().startsWith('F');
 
-            // Prepare request object
             const requestPayload: AddActivityRequest = {
               ...addActivityData,
+              standardActivityId: addActivityData.standardActivityId!,
+              plannedStartDate: addActivityData.plannedStartDate!,
+              plannedEndDate: addActivityData.plannedEndDate!,
               revisedEndDate: addActivityData.plannedEndDate,
               revisedStartDate: addActivityData.plannedStartDate,
+              activityDuration: addActivityData.activityDuration!, 
+              activityTimeUnit: addActivityData.activityTimeUnit!,
+              significantStatusIndicator: addActivityData.significantStatusIndicator!,
+              processCommitIndicator: addActivityData.processCommitIndicator!,
+              requestSkey: addActivityData.requestSkey!,
+              requestId: addActivityData.requestId!,
+              itemId: addActivityData.itemId!,
+              vegetationState: addActivityData.vegetationState!,
               ...(isFamilyLot ? { familyLotNumber: lot } : { seedlotNumber: lot })
             };
-
-            console.log('Submitting Add Activity:', requestPayload);
           }}
         >
           Add Activity
