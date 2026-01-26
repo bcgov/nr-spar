@@ -44,6 +44,8 @@ import type {
 import type { AddActivityRequest } from './definitions';
 import './styles.scss';
 
+const toLocalDateString = (date: Date) => date.toLocaleDateString('en-CA'); 
+
 const AddActivity = (
   { table, closeModal }:
   { table: MRT_TableInstance<TestingSearchResponseType>; closeModal: () => void }
@@ -54,7 +56,7 @@ const AddActivity = (
   const requestSkey = selectedRows[0]?.requestSkey;
   const itemId = selectedRows[0]?.itemId;
   const isTestActivity = Boolean(selectedRows[0]?.testCategoryCd);
-  const todayString = new Date().toISOString().split('T')[0];
+  const todayString = toLocalDateString(new Date());
   const REQUIRED_FIELDS = useMemo<(keyof AddActivityRequest)[]>(() => {
     const baseFields: (keyof AddActivityRequest)[] = [
       'standardActivityId',
@@ -115,7 +117,12 @@ const AddActivity = (
 
   const activityRiaSkeyQuery = useQuery({
     queryKey: ['activity-riaSkeys', requestSkey, itemId],
-    queryFn: () => getActivityRiaSkeys(requestSkey, itemId),
+    queryFn: () => {
+      if (!requestSkey || !itemId) {
+        throw new Error('requestSkey or itemId is missing');
+      }
+      return getActivityRiaSkeys(requestSkey, itemId)
+    },
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
     select: (data: ActivityRiaSkeyType[]) => data.map((activity) => ({
@@ -156,23 +163,23 @@ const AddActivity = (
     if (activityDurationUnitQuery.isError && activityDurationUnitQuery.error instanceof Error) {
       failedMessages.push(`Activity Duration Units: ${activityDurationUnitQuery.error.message}`);
     }
-    if (isCommitmentIndicatorYesQuery.isError && isCommitmentIndicatorYesQuery.error instanceof Error) {
+    if (
+      isCommitmentIndicatorYesQuery.isError 
+      && isCommitmentIndicatorYesQuery.error instanceof Error
+    ) {
       failedMessages.push(`Process Commitment Indicator: ${isCommitmentIndicatorYesQuery.error.message}`);
     }
-    if (failedMessages.length > 0) {
-      setAlert({
-        status: 'error',
-        message: `Failed to load: ${failedMessages.join('; ')}.`
-      });
-    } else {
-      setAlert(null);
-    }
+
+    setAlert(failedMessages.length > 0
+      ? { status: 'error', message: `Failed to load: ${failedMessages.join('; ')}.` }
+      : null
+    );
   }, [
-    activityIdQuery.error,
-    activityRiaSkeyQuery.error,
-    testCategoryQuery.error,
-    activityDurationUnitQuery.error,
-    isCommitmentIndicatorYesQuery.error
+    activityIdQuery.isError, activityIdQuery.error,
+    activityRiaSkeyQuery.isError, activityRiaSkeyQuery.error,
+    testCategoryQuery.isError, testCategoryQuery.error,
+    activityDurationUnitQuery.isError, activityDurationUnitQuery.error,
+    isCommitmentIndicatorYesQuery.isError, isCommitmentIndicatorYesQuery.error
   ]);
 
   const updateField = <K extends keyof AddActivityRequest>(
@@ -201,7 +208,8 @@ const AddActivity = (
 
           switch (newData.activityTimeUnit) {
             case 'HR':
-              endDate.setHours(endDate.getHours() + duration);
+              const daysToAdd = Math.ceil(duration / 24);
+              endDate.setDate(endDate.getDate() + daysToAdd);
               break;
             case 'DY':
               endDate.setDate(endDate.getDate() + duration);
@@ -219,8 +227,7 @@ const AddActivity = (
               endDate.setDate(endDate.getDate() + duration);
           }
 
-          const [dateString] = endDate.toISOString().split('T');
-          newData.plannedEndDate = dateString;
+          newData.plannedEndDate = toLocalDateString(endDate);
         }
       }
 
@@ -245,7 +252,7 @@ const AddActivity = (
           selectedItem={activityIdQuery.data?.find(
             (o) => o.id === addActivityData.standardActivityId
           )}
-          onChange={(e: ComboBoxEvent) => updateField('standardActivityId', e.selectedItem.id)}
+          onChange={(e: ComboBoxEvent) => updateField('standardActivityId', e.selectedItem ? e.selectedItem.id : undefined)}
         />
         <ComboBox
           id="add-activity-part-of-activity-select"
@@ -256,7 +263,7 @@ const AddActivity = (
           selectedItem={activityRiaSkeyQuery.data?.find(
             (o) => o.id === addActivityData.associatedRiaKey
           )}
-          onChange={(e: ComboBoxEvent) => updateField('associatedRiaKey', e.selectedItem.id)}
+          onChange={(e: ComboBoxEvent) => updateField('associatedRiaKey', e.selectedItem ? e.selectedItem.id : undefined)}
         />
         <ComboBox
           id="add-activity-test-category-select"
@@ -268,7 +275,7 @@ const AddActivity = (
           selectedItem={testCategoryQuery.data?.find(
             (o) => o.id === addActivityData.testCategoryCd
           )}
-          onChange={(e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem.id)}
+          onChange={(e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem ? e.selectedItem.id : undefined)}
         />
         <div className="add-activity-date-picker">
           <DatePicker
@@ -279,7 +286,7 @@ const AddActivity = (
             value={[addActivityData.plannedStartDate ?? todayString]}
             onChange={(dates: Date[]) => {
               if (dates[0]) {
-                updateField('plannedStartDate', dates[0].toISOString().split('T')[0]);
+                updateField('plannedStartDate', toLocalDateString(dates[0]));
               }
             }}
           >
@@ -298,7 +305,7 @@ const AddActivity = (
             value={addActivityData.plannedEndDate ? [addActivityData.plannedEndDate] : []}
             onChange={(dates: Date[]) => {
               if (dates[0]) {
-                updateField('plannedEndDate', dates[0].toISOString().split('T')[0]);
+                updateField('plannedEndDate', toLocalDateString(dates[0]));
               }
             }}
           >
@@ -335,7 +342,7 @@ const AddActivity = (
             items={activityDurationUnitQuery.data ?? []}
             selectedItem={toSelectedItemString(addActivityData.activityTimeUnit)}
             itemToString={(item: string | null) => item ?? ''}
-            onChange={(e: ComboBoxEvent) => updateField('activityTimeUnit', e.selectedItem)}
+            onChange={(e: ComboBoxEvent) => updateField('activityTimeUnit', e.e.selectedItem ? e.selectedItem.id : undefined)}
           />
         </div>
         <Checkbox
@@ -367,26 +374,29 @@ const AddActivity = (
           kind="primary"
           disabled={!isAddActivityValid}
           onClick={() => {
-            const lot = selectedRows[0]?.seedlotDisplay ?? '';
-            const isFamilyLot = lot.toUpperCase().startsWith('F');
+            // TODO: Implement the API call to add activity
+            // const lot = selectedRows[0]?.seedlotDisplay ?? '';
+            // const isFamilyLot = lot.toUpperCase().startsWith('F');
 
-            const requestPayload: AddActivityRequest = {
-              ...addActivityData,
-              standardActivityId: addActivityData.standardActivityId!,
-              plannedStartDate: addActivityData.plannedStartDate!,
-              plannedEndDate: addActivityData.plannedEndDate!,
-              revisedEndDate: addActivityData.plannedEndDate,
-              revisedStartDate: addActivityData.plannedStartDate,
-              activityDuration: addActivityData.activityDuration!, 
-              activityTimeUnit: addActivityData.activityTimeUnit!,
-              significantStatusIndicator: addActivityData.significantStatusIndicator!,
-              processCommitIndicator: addActivityData.processCommitIndicator!,
-              requestSkey: addActivityData.requestSkey!,
-              requestId: addActivityData.requestId!,
-              itemId: addActivityData.itemId!,
-              vegetationState: addActivityData.vegetationState!,
-              ...(isFamilyLot ? { familyLotNumber: lot } : { seedlotNumber: lot })
-            };
+            // const requestPayload: AddActivityRequest = {
+            //   ...addActivityData,
+            //   standardActivityId: addActivityData.standardActivityId!,
+            //   plannedStartDate: addActivityData.plannedStartDate!,
+            //   plannedEndDate: addActivityData.plannedEndDate!,
+            //   revisedEndDate: addActivityData.plannedEndDate,
+            //   revisedStartDate: addActivityData.plannedStartDate,
+            //   activityDuration: addActivityData.activityDuration!,
+            //   activityTimeUnit: addActivityData.activityTimeUnit!,
+            //   significantStatusIndicator: addActivityData.significantStatusIndicator!,
+            //   processCommitIndicator: addActivityData.processCommitIndicator!,
+            //   requestSkey: addActivityData.requestSkey!,
+            //   requestId: addActivityData.requestId!,
+            //   itemId: addActivityData.itemId!,
+            //   vegetationState: addActivityData.vegetationState!,
+            //   ...(isFamilyLot ? { familyLotNumber: lot } : { seedlotNumber: lot })
+            // };
+
+            // console.log('requestPayload', requestPayload);
           }}
         >
           Add Activity
