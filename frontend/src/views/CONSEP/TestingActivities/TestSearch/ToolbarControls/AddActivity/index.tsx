@@ -44,7 +44,7 @@ import type {
 import type { AddActivityRequest } from './definitions';
 import './styles.scss';
 
-const toLocalDateString = (date: Date) => date.toLocaleDateString('en-CA'); 
+const toLocalDateString = (date: Date) => date.toLocaleDateString('en-CA');
 
 const AddActivity = (
   { table, closeModal }:
@@ -121,7 +121,7 @@ const AddActivity = (
       if (!requestSkey || !itemId) {
         throw new Error('requestSkey or itemId is missing');
       }
-      return getActivityRiaSkeys(requestSkey, itemId)
+      return getActivityRiaSkeys(requestSkey, itemId);
     },
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
@@ -164,7 +164,7 @@ const AddActivity = (
       failedMessages.push(`Activity Duration Units: ${activityDurationUnitQuery.error.message}`);
     }
     if (
-      isCommitmentIndicatorYesQuery.isError 
+      isCommitmentIndicatorYesQuery.isError
       && isCommitmentIndicatorYesQuery.error instanceof Error
     ) {
       failedMessages.push(`Process Commitment Indicator: ${isCommitmentIndicatorYesQuery.error.message}`);
@@ -172,8 +172,7 @@ const AddActivity = (
 
     setAlert(failedMessages.length > 0
       ? { status: 'error', message: `Failed to load: ${failedMessages.join('; ')}.` }
-      : null
-    );
+      : null);
   }, [
     activityIdQuery.isError, activityIdQuery.error,
     activityRiaSkeyQuery.isError, activityRiaSkeyQuery.error,
@@ -207,10 +206,11 @@ const AddActivity = (
           const endDate = new Date(startDate);
 
           switch (newData.activityTimeUnit) {
-            case 'HR':
+            case 'HR': {
               const daysToAdd = Math.ceil(duration / 24);
               endDate.setDate(endDate.getDate() + daysToAdd);
               break;
+            }
             case 'DY':
               endDate.setDate(endDate.getDate() + duration);
               break;
@@ -342,7 +342,7 @@ const AddActivity = (
             items={activityDurationUnitQuery.data ?? []}
             selectedItem={toSelectedItemString(addActivityData.activityTimeUnit)}
             itemToString={(item: string | null) => item ?? ''}
-            onChange={(e: ComboBoxEvent) => updateField('activityTimeUnit', e.e.selectedItem ? e.selectedItem.id : undefined)}
+            onChange={(e: ComboBoxEvent) => updateField('activityTimeUnit', e.selectedItem ? e.selectedItem.id : undefined)}
           />
         </div>
         <Checkbox
