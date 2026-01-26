@@ -342,7 +342,7 @@ const AddActivity = (
             items={activityDurationUnitQuery.data ?? []}
             selectedItem={toSelectedItemString(addActivityData.activityTimeUnit)}
             itemToString={(item: string | null) => item ?? ''}
-            onChange={(e: ComboBoxEvent) => updateField('activityTimeUnit', e.selectedItem ? e.selectedItem.id : undefined)}
+            onChange={(e: ComboBoxEvent) => updateField('activityTimeUnit', e.selectedItem)}
           />
         </div>
         <Checkbox
