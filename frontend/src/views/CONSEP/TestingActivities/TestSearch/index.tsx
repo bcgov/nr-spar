@@ -62,7 +62,7 @@ const csvConfig = mkConfig({
   filename: `Testing_Activity_Search_${new Date().toISOString().split('T')[0]}`
 });
 const LOT_INPUT_KEYS = ['lot-input-1', 'lot-input-2', 'lot-input-3', 'lot-input-4', 'lot-input-5'] as const;
-const toDate = (value?: string) => value ? new Date(`${value}T00:00:00`) : undefined;
+const toDate = (value?: string) => (value ? new Date(`${value}T00:00:00`) : undefined);
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
@@ -357,7 +357,7 @@ const TestSearch = () => {
     resetAlert();
   };
 
-  const handleWithdrawalDateChange = (dates: (string | Date)[], type: 'start' | 'end') => {
+  const handleWithdrawalDateChange = (dates:  Date[], type: 'start' | 'end') => {
     const raw = dates?.[0];
     const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : undefined;
 
@@ -478,8 +478,8 @@ const TestSearch = () => {
             e.preventDefault();
             if (!hasValidationErrors()) {
               handleSearchClick();
-            } 
-        }}>
+            }
+          }}>
           <Row className="consep-test-search-lot-numbers-filter">
             <FormLabel className="lot-inputs-label">Lot #</FormLabel>
             <div className="lot-inputs">
@@ -555,7 +555,7 @@ const TestSearch = () => {
                 }}
                 value={
                   searchParams.seedWithdrawalStartDate !== minStartDate
-                    ? toDate(searchParams.seedWithdrawalStartDate) 
+                    ? toDate(searchParams.seedWithdrawalStartDate)
                     : undefined
                 }
                 style={{ minWidth: '9rem' }}
@@ -576,7 +576,7 @@ const TestSearch = () => {
                 minDate={searchParams.seedWithdrawalStartDate || undefined}
                 value={
                   searchParams.seedWithdrawalEndDate !== maxEndDate
-                    ? toDate(searchParams.seedWithdrawalEndDate) 
+                    ? toDate(searchParams.seedWithdrawalEndDate)
                     : undefined
                 }
                 style={{ minWidth: '9rem' }}
