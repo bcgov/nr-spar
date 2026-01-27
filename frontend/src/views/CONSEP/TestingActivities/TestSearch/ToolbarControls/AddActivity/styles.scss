@@ -1,0 +1,55 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.add-activity-form {
+  padding: 1rem;
+  max-width: 44rem;
+
+  .add-activity-select {
+    margin-bottom: 1rem;
+  }
+
+  .add-activity-date-picker {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    
+    .#{vars.$bcgov-prefix}--date-picker--single {
+      width: 100%;
+
+      .#{vars.$bcgov-prefix}--date-picker-container {
+        width: 100%;
+
+        .#{vars.$bcgov-prefix}--date-picker__input {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .add-activity-duration {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    .#{vars.$bcgov-prefix}--text-input-wrapper {
+      min-width: 10rem;
+    }
+
+    .#{vars.$bcgov-prefix}--list-box__wrapper {
+      max-width: 13rem;
+      margin-top: 1.72rem;
+    }
+  }
+}
+
+.add-activity-footer {
+  display: flex;
+  gap: 0.3rem;
+  margin: 0rem 1rem 1rem;
+
+  button {
+    flex: 1; // each button takes equal width
+    max-width: none; 
+  }
+}

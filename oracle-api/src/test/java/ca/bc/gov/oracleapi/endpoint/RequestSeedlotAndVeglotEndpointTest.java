@@ -26,12 +26,12 @@ class RequestSeedlotAndVeglotEndpointTest {
   @MockBean private RequestLotService requestSeedlotAndVeglotService;
 
   @Test
-  @DisplayName("isCommitmentCheckedSuccessTrueTest")
-  void isCommitmentCheckedSuccessTrueTest() throws Exception {
+  @DisplayName("isCommitmentIndicatorYesSuccessTrueTest")
+  void isCommitmentIndicatorYesSuccessTrueTest() throws Exception {
     Long requestSkey = 123L;
     String itemId = "1";
 
-    when(requestSeedlotAndVeglotService.isCommitmentChecked(requestSkey, itemId)).thenReturn(true);
+    when(requestSeedlotAndVeglotService.isCommitmentIndicatorYes(requestSkey, itemId)).thenReturn(true);
 
     mockMvc
         .perform(
@@ -46,12 +46,12 @@ class RequestSeedlotAndVeglotEndpointTest {
   }
 
   @Test
-  @DisplayName("isCommitmentCheckedSuccessFalseTest")
-  void isCommitmentCheckedSuccessFalseTest() throws Exception {
+  @DisplayName("isCommitmentIndicatorYesSuccessFalseTest")
+  void isCommitmentIndicatorYesSuccessFalseTest() throws Exception {
     Long requestSkey = 999L;
     String itemId = "88";
 
-    when(requestSeedlotAndVeglotService.isCommitmentChecked(requestSkey, itemId)).thenReturn(false);
+    when(requestSeedlotAndVeglotService.isCommitmentIndicatorYes(requestSkey, itemId)).thenReturn(false);
 
     mockMvc
         .perform(
@@ -65,9 +65,9 @@ class RequestSeedlotAndVeglotEndpointTest {
   }
 
   @Test
-  @DisplayName("isCommitmentCheckedUnauthorizedTest")
+  @DisplayName("isCommitmentIndicatorYesUnauthorizedTest")
   @WithAnonymousUser
-  void isCommitmentCheckedUnauthorizedTest() throws Exception {
+  void isCommitmentIndicatorYesUnauthorizedTest() throws Exception {
     mockMvc
         .perform(
             get("/api/request-seedlot-and-veglot/commitment/{requestSkey}/{itemId}", 123L, "1")

@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,6 +26,12 @@ import lombok.Setter;
 public class ActivityEntity {
 
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ria_seq")
+  @SequenceGenerator(
+      name = "ria_seq",
+      sequenceName = "CNS_RIA_COUNTER",
+      allocationSize = 1
+  )
   @Column(name = "RIA_SKEY", precision = 10, scale = 0)
   private BigDecimal riaKey;
 

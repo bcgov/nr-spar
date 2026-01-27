@@ -130,7 +130,9 @@ const TestListTable = ({
           '.MuiPaper-root'
         ]}
       >
-        {showAddActivity && tableRef.current && <AddActivity table={tableRef.current} />}
+        {showAddActivity
+        && tableRef.current
+        && <AddActivity table={tableRef.current} closeModal={() => setShowAddActivity(false)} />}
       </Modal>
       <Row className="concep-test-search-table">
         <GenericTable

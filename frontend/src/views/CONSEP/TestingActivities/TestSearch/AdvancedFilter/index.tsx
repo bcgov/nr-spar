@@ -25,7 +25,7 @@ import { getRequestTypes, getTestCategoryCodes } from '../../../../../api-servic
 import type { TestCodeType } from '../../../../../types/consep/TestingSearchType';
 import {
   advDateTypes, DATE_FORMAT, errorMessages, initialErrorValue, maxEndDate,
-  minStartDate, SAFE_MARGIN, testRanks
+  minStartDate, SAFE_MARGIN, testRanks, toSelectedItemString
 } from '../constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from '../definitions';
@@ -334,8 +334,6 @@ const AdvancedFilters = ({
   const toInputValue = (
     v: string | number | undefined | null
   ) => (v === undefined || v === null ? '' : String(v));
-
-  const toSelectedItemString = (v?: string | null) => (v ?? null);
 
   const clearFilters = () => {
     setSearchParams((prev) => ({

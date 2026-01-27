@@ -1,7 +1,6 @@
 package ca.bc.gov.oracleapi.service;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.SpuDto;
 import ca.bc.gov.oracleapi.repository.RequestSeedlotRepository;
 import ca.bc.gov.oracleapi.repository.RequestVeglotRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,24 +16,33 @@ public class RequestLotService {
   private final RequestVeglotRepository requestVeglotRepository;
 
   /**
-   * Check if the commitment indicator is checked for the given requestSkey and itemId.
+   * Check if the commitment indicator is Y for the given requestSkey and itemId.
    *
    * @return true if the commitment indicator is "Y", false otherwise
    */
-  public boolean isCommitmentChecked(Long requestSkey, String itemId) {
-    SparLog.info("Finding commitment indicator for requestSkey {} and itemId {}", requestSkey, itemId);
+  public boolean isCommitmentIndicatorYes(Long requestSkey, String itemId) {
+    SparLog.info(
+        "Finding commitment indicator for requestSkey {} and itemId {}",
+        requestSkey,
+        itemId
+    );
 
-    String commitmentInd = requestSeedlotRepository.getCommitment(requestSkey, itemId);
-    if (commitmentInd == null) {
-      commitmentInd = requestVeglotRepository.getCommitment(requestSkey, itemId);
+    boolean seedlotCommitted =
+        requestSeedlotRepository.existsCommitmentYes(requestSkey, itemId);
+
+    if (seedlotCommitted) {
+      SparLog.info("Commitment found in RequestSeedlot");
+      return true;
     }
 
-    SparLog.info(
-        "Commitment indicator found for requestSkey {} and itemId {}: {}",
-        requestSkey,
-        itemId,
-        commitmentInd);
+    boolean veglotCommitted =
+        requestVeglotRepository.existsCommitmentYes(requestSkey, itemId);
 
-    return commitmentInd != null && commitmentInd.equalsIgnoreCase("Y");
+    SparLog.info(
+        "Commitment found in RequestVeglot: {}",
+        veglotCommitted
+    );
+
+    return veglotCommitted;
   }
 }

@@ -162,6 +162,12 @@
         border-radius: 0rem 0rem 0.5rem 0.5rem;
       }
     }
+
+    .#{vars.$bcgov-prefix}--modal-footer .#{vars.$bcgov-prefix}--btn {
+      max-width: none;
+      height: 3rem;
+      padding-bottom: 1rem;
+    }
   }
 
   .#{vars.$bcgov-prefix}--inline-notification {
