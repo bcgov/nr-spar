@@ -25,6 +25,8 @@ export const formatDateCell = (value: string | null) => {
   return `${year}-${month}-${day}`;
 };
 
+export const toSelectedItemString = (v?: string | null) => (v ?? null);
+
 export const testSearchCrumbs: CrumbType[] = [
   {
     name: 'CONSEP',

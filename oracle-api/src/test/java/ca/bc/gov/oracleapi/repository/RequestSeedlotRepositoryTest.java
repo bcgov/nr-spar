@@ -1,15 +1,16 @@
 package ca.bc.gov.oracleapi.repository;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.bc.gov.oracleapi.entity.RequestSeedlot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -19,58 +20,50 @@ class RequestSeedlotRepositoryTest {
   @Autowired private RequestSeedlotRepository requestSeedlotRepository;
 
   @Test
-  @DisplayName("getCommitment_shouldReturnCommitmentInd_whenMatchingRowExists")
-  void getCommitment_shouldReturnCommitmentInd_whenMatchingRowExists() {
-    Long requestSkey = 100L;
-    String itemId = "1";
-
+  @DisplayName("existsCommitmentYes_shouldReturnTrue_whenMatchingRowWithYesExists")
+  void existsCommitmentYes_shouldReturnTrue_whenMatchingRowWithYesExists() {
     RequestSeedlot rs = new RequestSeedlot();
-
-    rs.setRequestSkey(requestSkey);
-    rs.setItemId(itemId);
+    rs.setRequestSkey(100L);
+    rs.setItemId("1");
     rs.setCommitmentInd("Y");
 
     entityManager.persistAndFlush(rs);
 
-    String result = requestSeedlotRepository.getCommitment(requestSkey, itemId);
+    boolean result =
+        requestSeedlotRepository.existsCommitmentYes(100L, "1");
 
-    assertEquals("Y", result);
+    assertTrue(result);
   }
 
   @Test
-  @DisplayName("getCommitment_shouldReturnNull_whenNoMatchingRow")
-  void getCommitment_shouldReturnNull_whenNoMatchingRow() {
+  @DisplayName("existsCommitmentYes_shouldReturnFalse_whenNoMatchingRow")
+  void existsCommitmentYes_shouldReturnFalse_whenNoMatchingRow() {
     RequestSeedlot rs = new RequestSeedlot();
-
     rs.setRequestSkey(200L);
     rs.setItemId("999");
     rs.setCommitmentInd("Y");
+
     entityManager.persistAndFlush(rs);
 
-    String result = requestSeedlotRepository.getCommitment(200L, "1"); // itemId 不匹配
+    boolean result =
+        requestSeedlotRepository.existsCommitmentYes(200L, "1");
 
-    assertNull(result);
+    assertFalse(result);
   }
 
   @Test
-  @DisplayName("getCommitment_shouldReturnCorrectRow_whenMultipleRowsExist")
-  void getCommitment_shouldReturnCorrectRow_whenMultipleRowsExist() {
-    RequestSeedlot rsA = new RequestSeedlot();
+  @DisplayName("existsCommitmentYes_shouldIgnoreNonYesValues")
+  void existsCommitmentYes_shouldIgnoreNonYesValues() {
+    RequestSeedlot rs = new RequestSeedlot();
+    rs.setRequestSkey(300L);
+    rs.setItemId("1");
+    rs.setCommitmentInd("N");
 
-    rsA.setRequestSkey(300L);
-    rsA.setItemId("1");
-    rsA.setCommitmentInd("N");
-    entityManager.persist(rsA);
+    entityManager.persistAndFlush(rs);
 
-    RequestSeedlot rsB = new RequestSeedlot();
+    boolean result =
+        requestSeedlotRepository.existsCommitmentYes(300L, "1");
 
-    rsB.setRequestSkey(300L);
-    rsB.setItemId("2");
-    rsB.setCommitmentInd("Y");
-    entityManager.persistAndFlush(rsB);
-
-    String result = requestSeedlotRepository.getCommitment(300L, "2");
-
-    assertEquals("Y", result);
+    assertFalse(result);
   }
 }

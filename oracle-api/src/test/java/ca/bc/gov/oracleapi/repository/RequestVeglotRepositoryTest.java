@@ -1,15 +1,17 @@
 package ca.bc.gov.oracleapi.repository;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.bc.gov.oracleapi.entity.RequestVeglot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -19,58 +21,76 @@ class RequestVeglotRepositoryTest {
   @Autowired private RequestVeglotRepository requestVeglotRepository;
 
   @Test
-  @DisplayName("getCommitment_shouldReturnCommitmentInd_whenMatchingRowExists")
-  void getCommitment_shouldReturnCommitmentInd_whenMatchingRowExists() {
-    Long requestSkey = 100L;
-    String itemId = "1";
+  @DisplayName("existsCommitmentYes_shouldReturnTrue_whenMatchingRowWithYesExists")
+  void existsCommitmentYes_shouldReturnTrue_whenMatchingRowWithYesExists() {
+    RequestVeglot rv = new RequestVeglot();
+    rv.setRequestSkey(100L);
+    rv.setItemId("1");
+    rv.setCommitmentInd("Y");
 
-    RequestVeglot rs = new RequestVeglot();
+    entityManager.persistAndFlush(rv);
 
-    rs.setRequestSkey(requestSkey);
-    rs.setItemId(itemId);
-    rs.setCommitmentInd("Y");
+    boolean result =
+        requestVeglotRepository.existsCommitmentYes(100L, "1");
 
-    entityManager.persistAndFlush(rs);
-
-    String result = requestVeglotRepository.getCommitment(requestSkey, itemId);
-
-    assertEquals("Y", result);
+    assertTrue(result);
   }
 
   @Test
-  @DisplayName("getCommitment_shouldReturnNull_whenNoMatchingRow")
-  void getCommitment_shouldReturnNull_whenNoMatchingRow() {
-    RequestVeglot rs = new RequestVeglot();
+  @DisplayName("existsCommitmentYes_shouldReturnFalse_whenNoMatchingRow")
+  void existsCommitmentYes_shouldReturnFalse_whenNoMatchingRow() {
+    RequestVeglot rv = new RequestVeglot();
+    rv.setRequestSkey(200L);
+    rv.setItemId("999");
+    rv.setCommitmentInd("Y");
 
-    rs.setRequestSkey(200L);
-    rs.setItemId("999");
-    rs.setCommitmentInd("Y");
-    entityManager.persistAndFlush(rs);
+    entityManager.persistAndFlush(rv);
 
-    String result = requestVeglotRepository.getCommitment(200L, "1"); // itemId 不匹配
+    boolean result =
+        requestVeglotRepository.existsCommitmentYes(200L, "1");
 
-    assertNull(result);
+    assertFalse(result);
   }
 
   @Test
-  @DisplayName("getCommitment_shouldReturnCorrectRow_whenMultipleRowsExist")
-  void getCommitment_shouldReturnCorrectRow_whenMultipleRowsExist() {
-    RequestVeglot rsA = new RequestVeglot();
+  @DisplayName("existsCommitmentYes_shouldIgnoreNonYesValues")
+  void existsCommitmentYes_shouldIgnoreNonYesValues() {
+    RequestVeglot rv1 = new RequestVeglot();
+    rv1.setRequestSkey(300L);
+    rv1.setItemId("1");
+    rv1.setCommitmentInd("N");
+    entityManager.persist(rv1);
 
-    rsA.setRequestSkey(300L);
-    rsA.setItemId("1");
-    rsA.setCommitmentInd("N");
-    entityManager.persist(rsA);
+    RequestVeglot rv2 = new RequestVeglot();
+    rv2.setRequestSkey(300L);
+    rv2.setItemId("2");
+    rv2.setCommitmentInd("n"); // lowercase to verify UPPER()
+    entityManager.persistAndFlush(rv2);
 
-    RequestVeglot rsB = new RequestVeglot();
+    boolean result =
+        requestVeglotRepository.existsCommitmentYes(300L, "1");
 
-    rsB.setRequestSkey(300L);
-    rsB.setItemId("2");
-    rsB.setCommitmentInd("Y");
-    entityManager.persistAndFlush(rsB);
+    assertFalse(result);
+  }
 
-    String result = requestVeglotRepository.getCommitment(300L, "2");
+  @Test
+  @DisplayName("existsCommitmentYes_shouldReturnTrue_whenAnyMatchingRowHasYes")
+  void existsCommitmentYes_shouldReturnTrue_whenAnyMatchingRowHasYes() {
+    Long requestSkey = 400L;
 
-    assertEquals("Y", result);
+    RequestVeglot rv1 = new RequestVeglot();
+    rv1.setRequestSkey(requestSkey);
+    rv1.setItemId("A");
+    rv1.setCommitmentInd("N");
+    entityManager.persist(rv1);
+
+    RequestVeglot rv2 = new RequestVeglot();
+    rv2.setRequestSkey(requestSkey);
+    rv2.setItemId("B");
+    rv2.setCommitmentInd("Y");
+    entityManager.persistAndFlush(rv2);
+
+    assertTrue(requestVeglotRepository.existsCommitmentYes(requestSkey, "B"));
+    assertFalse(requestVeglotRepository.existsCommitmentYes(requestSkey, "A"));
   }
 }
