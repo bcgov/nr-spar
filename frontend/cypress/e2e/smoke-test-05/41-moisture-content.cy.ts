@@ -61,12 +61,12 @@ describe('Moisture Content Screen page', () => {
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(4)
-      .should('have.text', '0.5');
+      .should('have.text', '86.5');
   });
 
   it('Check Activity results table validation', () => {
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     // Add a new row
     cy.get('.activity-result-action-buttons')
@@ -146,8 +146,8 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Activity results table button functionality', () => {
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     // Check if the table has the correct number of rows
     cy.get('.activity-result-container')
@@ -294,8 +294,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     // Check ascending sorting functionality of 'Container' column
     cy.get('.activity-result-container')
@@ -352,8 +352,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     // Check ascending sorting functionality of 'Container weight' column
     cy.get('.activity-result-container')
@@ -410,8 +410,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     // Check ascending sorting functionality of 'Fresh seed' column
     cy.get('.activity-result-container')
@@ -468,8 +468,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     // Check ascending sorting functionality of 'Cont + Dry seed' column
     cy.get('.activity-result-container')
@@ -526,8 +526,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     // Check ascending sorting functionality of 'Dry weight' column
     cy.get('.activity-result-container')
@@ -584,8 +584,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     // Check ascending sorting functionality of 'MC value (%)' column
     cy.get('.activity-result-container')
@@ -642,8 +642,8 @@ describe('Moisture Content Screen page', () => {
     let containerWt: string;
     let contDrySeed: string;
 
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     cy.get('.activity-result-container')
       .find('tbody tr')
@@ -676,8 +676,8 @@ describe('Moisture Content Screen page', () => {
     let freshSeed: string;
     let dryWt: string;
 
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     cy.get('.activity-result-container')
       .find('tbody tr')
@@ -710,8 +710,8 @@ describe('Moisture Content Screen page', () => {
 
   it('Check Calculate average button functionality', () => {
     cy.intercept('POST', '**/api/moisture-content-cone/514330/calculate-average').as('postCalcAvg');
-    cy.intercept('GET', '**/api/seedlots/60662').as('getSeedlotDetail');
-    cy.wait('@getSeedlotDetail').its('response.statusCode').should('eq', 200);
+    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
+    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     // Extract all MC values from the 7th column
     const mcValues: number[] = [];
