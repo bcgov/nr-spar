@@ -195,60 +195,10 @@ const AddActivity = (
     field: K,
     value: AddActivityRequest[K] | undefined
   ) => {
-    setAddActivityData((prev) => {
-      const newData = { ...prev, [field]: value };
-
-      // Auto calculate plannedEndDate when is not set
-      if (
-        field === 'activityDuration'
-        || field === 'activityTimeUnit'
-        || field === 'plannedStartDate'
-      ) {
-        if (
-          !newData.plannedEndDate
-          && newData.plannedStartDate
-          && newData.activityDuration
-          && newData.activityTimeUnit
-        ) {
-          const startDate = new Date(newData.plannedStartDate);
-          const duration = Number(newData.activityDuration);
-
-          const endDate = new Date(startDate);
-
-          switch (newData.activityTimeUnit) {
-            case 'HR': {
-              const start = new Date(startDate);
-              start.setHours(start.getHours() + duration);
-
-              const dayDiff = start.toDateString() !== endDate.toDateString()
-                ? Math.floor((start.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24))
-                : 0;
-
-              endDate.setDate(endDate.getDate() + dayDiff);
-              break;
-            }
-            case 'DY':
-              endDate.setDate(endDate.getDate() + duration);
-              break;
-            case 'WK':
-              endDate.setDate(endDate.getDate() + duration * 7);
-              break;
-            case 'MO':
-              endDate.setMonth(endDate.getMonth() + duration);
-              break;
-            case 'YR':
-              endDate.setFullYear(endDate.getFullYear() + duration);
-              break;
-            default:
-              endDate.setDate(endDate.getDate() + duration);
-          }
-
-          newData.plannedEndDate = toLocalDateString(endDate);
-        }
-      }
-
-      return newData;
-    });
+    setAddActivityData((prev) => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
