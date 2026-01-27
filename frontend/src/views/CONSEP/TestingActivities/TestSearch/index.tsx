@@ -357,7 +357,7 @@ const TestSearch = () => {
     resetAlert();
   };
 
-  const handleWithdrawalDateChange = (dates:  Date[], type: 'start' | 'end') => {
+  const handleWithdrawalDateChange = (dates: Date[], type: 'start' | 'end') => {
     const raw = dates?.[0];
     const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : undefined;
 
@@ -479,7 +479,8 @@ const TestSearch = () => {
             if (!hasValidationErrors()) {
               handleSearchClick();
             }
-          }}>
+          }}
+        >
           <Row className="consep-test-search-lot-numbers-filter">
             <FormLabel className="lot-inputs-label">Lot #</FormLabel>
             <div className="lot-inputs">
