@@ -2,8 +2,6 @@ name: Release
 
 on:
   workflow_dispatch:
-    branches:
-      - main
     inputs:
       release:
         description: "Release version (e.g., v1.2.3). Leave empty to calculate from semantic commits."
@@ -61,15 +59,15 @@ jobs:
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@84dadaf2c367cb52af02737cd9c7e888807219e7 # v6
         id: changelog
-        if: ${{ inputs.release == '' }}
         continue-on-error: true
         with:
           github-token: ${{ github.token }}
           output-file: "CHANGELOG.md"
           skip-version-file: "true"
           skip-commit: "true"
+          skip-tag: ${{ inputs.release != '' }}
           skip-on-empty: "false"
-          git-push: "true"
+          git-push: ${{ inputs.release == '' }}
 
       - name: Set Final Version
         id: set-version
@@ -82,73 +80,8 @@ jobs:
             echo "version=${{ steps.changelog.outputs.version }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Get Previous Tag
-        id: previous-tag
-        run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git tag --sort=-creatordate | head -2 | tail -1 || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            PREV_TAG=$(git rev-list --max-parents=0 HEAD | head -1)
-          fi
-          echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
-
-      - name: Generate Categorized Changelog
-        id: changelog-body
-        run: |
-          PREV_TAG="${{ steps.previous-tag.outputs.tag }}"
-          CURRENT_TAG="${{ steps.set-version.outputs.tag }}"
-          
-          # Generate categorized changelog from commits
-          # Handles: feat:, feat!:, feat(scope):, feat(scope)!:, fix:, fix!:, fix(scope):, fix(scope)!:
-          CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"%s" --no-merges | \
-            awk '
-            BEGIN {
-              breaking = ""
-              features = ""
-              fixes = ""
-              other = ""
-            }
-            # Match breaking changes: feat!: or feat(scope)!: or fix!: or fix(scope)!:
-            /^feat\([^)]+\)!:/ || /^feat!:/ || /^fix\([^)]+\)!:/ || /^fix!:/ {
-              # Remove type prefix (feat/fix, optional scope, !, and colon)
-              gsub(/^(feat|fix)(\([^)]+\))?!: /, "", $0)
-              breaking = breaking "- " $0 "\n"
-              next
-            }
-            # Match regular features: feat: or feat(scope):
-            /^feat\([^)]+\):/ || /^feat:/ {
-              # Remove type prefix (feat, optional scope, and colon)
-              gsub(/^feat(\([^)]+\))?: /, "", $0)
-              features = features "- " $0 "\n"
-              next
-            }
-            # Match regular fixes: fix: or fix(scope):
-            /^fix\([^)]+\):/ || /^fix:/ {
-              # Remove type prefix (fix, optional scope, and colon)
-              gsub(/^fix(\([^)]+\))?: /, "", $0)
-              fixes = fixes "- " $0 "\n"
-              next
-            }
-            {
-              other = other "- " $0 "\n"
-            }
-            END {
-              result = ""
-              if (breaking != "") result = result "## 💥 Breaking Changes\n\n" breaking "\n"
-              if (features != "") result = result "## 🚀 Features\n\n" features "\n"
-              if (fixes != "") result = result "## 🐛 Bug Fixes\n\n" fixes "\n"
-              if (other != "") result = result "## 📝 Other Changes\n\n" other "\n"
-              print result
-            }')
-          
-          # Escape for GitHub output
-          {
-            echo 'changelog<<EOF'
-            echo "$CHANGELOG"
-            echo EOF
-          } >> $GITHUB_OUTPUT
-
       - name: Create Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         if: steps.set-version.outputs.tag != ''
         continue-on-error: true
         env:
@@ -157,7 +90,7 @@ jobs:
           token: ${{ github.token }}
           tag_name: ${{ steps.set-version.outputs.tag }}
           name: ${{ steps.set-version.outputs.tag }}
-          body: ${{ steps.changelog-body.outputs.changelog }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
           generate_release_notes: false
 
   deploys-test:
