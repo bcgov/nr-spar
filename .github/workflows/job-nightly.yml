@@ -45,6 +45,8 @@ jobs:
     name: Penetration Tests
     # Run after other tests to avoid rate limiting
     needs: [tests]
+    permissions:
+      issues: write
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-test
