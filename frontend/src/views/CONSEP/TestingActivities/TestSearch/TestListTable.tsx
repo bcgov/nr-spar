@@ -48,6 +48,10 @@ const TestListTable = ({
     tableRef.current?.resetRowSelection?.();
   }, [data]);
 
+  // const handleCreateGermTray = (options: GermTrayOptions) => {
+  //   // Handle create germ tray logic here
+  // };
+
   const actions = [
     {
       label: 'Results',
