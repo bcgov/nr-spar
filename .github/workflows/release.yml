@@ -95,7 +95,7 @@ jobs:
         uses: requarks/changelog-action@v1
         with:
           token: ${{ github.token }}
-          fromTag: HEAD
+          fromTag: ${{ steps.set-version.outputs.tag }}
           toTag: ${{ steps.previous-tag.outputs.tag }}
           writeToFile: false
           useGitmojis: false
@@ -112,7 +112,7 @@ jobs:
           token: ${{ github.token }}
           tag_name: ${{ steps.set-version.outputs.tag }}
           name: ${{ steps.set-version.outputs.tag }}
-          body: ${{ steps.changelog-body.outputs.changes != '' && steps.changelog-body.outputs.changes || 'No changes detected.' }}
+          body: ${{ steps.changelog-body.outputs.changes }}
           generate_release_notes: false
 
   deploys-test:
