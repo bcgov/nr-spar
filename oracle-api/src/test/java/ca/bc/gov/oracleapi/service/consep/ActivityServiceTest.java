@@ -3,7 +3,10 @@ package ca.bc.gov.oracleapi.service.consep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -14,12 +17,14 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -52,6 +57,9 @@ class ActivityServiceTest {
 
   @Mock
   private StandardActivityRepository standardActivityRepository;
+
+  @Mock
+  private TestRegimeRepository testRegimeRepository;
 
   @Autowired
   @InjectMocks
@@ -145,6 +153,8 @@ class ActivityServiceTest {
         activityService.validateActivityData(activityEntity));
   }
 
+
+  /* ------------------------ Create Activity -----------------------------------------------*/
   @Test
   void createActivity_shouldSucceed_whenValidData() {
     when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
@@ -274,7 +284,8 @@ class ActivityServiceTest {
     );
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(
-        "Exactly one of seedlotNumber or familyLotNumber must be provided (provide one, but not both or neither).",
+        "Exactly one of seedlotNumber or familyLotNumber "
+        + "must be provided (provide one, but not both or neither).",
         ex.getReason()
     );
   }
@@ -307,7 +318,8 @@ class ActivityServiceTest {
     );
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(
-        "Exactly one of seedlotNumber or familyLotNumber must be provided (provide one, but not both or neither).",
+        "Exactly one of seedlotNumber or familyLotNumber "
+        + "must be provided (provide one, but not both or neither).",
         ex.getReason()
     );
   }
@@ -343,6 +355,7 @@ class ActivityServiceTest {
         ex.getReason());
   }
 
+  /* ----------------------- Get Activity By RequestSkey And ItemId ---------------------------*/
   @Test
   void getActivityByRequestSkeyAndItemId_shouldReturnExpectedDtos() {
     BigDecimal requestSkey = new BigDecimal("422679");
@@ -374,6 +387,7 @@ class ActivityServiceTest {
     assertEquals(0, activityResult.size());
   }
 
+  /* ------------------------ Get Activity Ids -----------------------------------------------*/
   @Test
   void getStandardActivityIds_shouldReturnExpectedDtos() {
     StandardActivityEntity activity1 = new StandardActivityEntity();
@@ -423,5 +437,102 @@ class ActivityServiceTest {
             activity2.getActivityDesc(),
             activity3.getActivityDesc()
         );
+  }
+
+
+  /* ------------------------ Validate Add Germ Test ----------------------------------------*/
+  @Test
+  @DisplayName("validateAddGermTest should throw BAD_REQUEST when"
+      + "both seedlotNumber and familyLotNumber are missing")
+  void validateAddGermTest_shouldThrowBadRequestWhenNoSeedlotOrFamilyLot() {
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class,
+        () -> activityService.validateAddGermTest("G11", null, null)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(
+        "Exactly one of seedlotNumber or familyLotNumber must be provided",
+        ex.getReason()
+    );
+  }
+
+  @Test
+  @DisplayName("validateAddGermTest should return false germTest when"
+      + "activity type is not a germ test")
+  void validateAddGermTest_shouldReturnFalseWhenNotGermTest() {
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G01", "G02"));
+
+    AddGermTestValidationResponseDto result =
+        activityService.validateAddGermTest("X99", "00098", null);
+
+    assertFalse(result.germTest());
+    assertTrue(result.matchesCurrentTypeCode());
+    assertNull(result.currentTypeCode());
+  }
+
+  @Test
+  @DisplayName("validateAddGermTest should return true and"
+      + "matchesCurrentTypeCode true when no current A-rank exists")
+  void validateAddGermTest_shouldReturnTrueWhenNoCurrentRankA() {
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G11", "G12"));
+    when(activityRepository.findTypeCodeForAcceptedGermTestRankA("00098", null)).thenReturn(List.of());
+
+    AddGermTestValidationResponseDto result =
+        activityService.validateAddGermTest("G11", "00098", null);
+
+    assertTrue(result.germTest());
+    assertTrue(result.matchesCurrentTypeCode());
+    assertNull(result.currentTypeCode());
+  }
+
+  @Test
+  @DisplayName("validateAddGermTest should return false matchesCurrentTypeCode"
+      + "when current A-rank does not match")
+  void validateAddGermTest_shouldReturnFalseWhenDoesNotMatchCurrentRankA() {
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G11", "G12"));
+    when(activityRepository.findTypeCodeForAcceptedGermTestRankA("00098", null))
+        .thenReturn(List.of("G12"));
+
+    AddGermTestValidationResponseDto result =
+        activityService.validateAddGermTest("G11", "00098", null);
+
+    assertTrue(result.germTest());
+    assertFalse(result.matchesCurrentTypeCode());
+    assertEquals("G12", result.currentTypeCode());
+  }
+
+  @Test
+  @DisplayName("validateAddGermTest should return true matchesCurrentTypeCode"
+      + "when current A-rank matches")
+  void validateAddGermTest_shouldReturnTrueWhenMatchesCurrentRankA() {
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G11", "G12"));
+    when(activityRepository.findTypeCodeForAcceptedGermTestRankA("00098", null))
+        .thenReturn(List.of("G11"));
+
+    AddGermTestValidationResponseDto result =
+        activityService.validateAddGermTest("G11", "00098", null);
+
+    assertTrue(result.germTest());
+    assertTrue(result.matchesCurrentTypeCode());
+    assertEquals("G11", result.currentTypeCode());
+  }
+
+  @Test
+  @DisplayName("validateAddGermTest should throw CONFLICT when multiple current A-rank codes exist")
+  void validateAddGermTest_shouldThrowConflictWhenMultipleCurrentRankA() {
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G11", "G12"));
+    when(activityRepository.findTypeCodeForAcceptedGermTestRankA("00098", null))
+        .thenReturn(List.of("G11", "G12"));
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class,
+        () -> activityService.validateAddGermTest("G11", "00098", null)
+    );
+
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    assertEquals(
+        "Multiple accepted A-rank germ tests exist for this seedlot/family lot",
+        ex.getReason()
+    );
   }
 }

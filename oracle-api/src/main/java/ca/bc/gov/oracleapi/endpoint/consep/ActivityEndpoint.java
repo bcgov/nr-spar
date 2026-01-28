@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
@@ -22,8 +23,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 
 /**
  * This class exposes activities resources API.
@@ -93,5 +96,32 @@ public class ActivityEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<StandardActivityDto> getStandardActivityIds() {
     return activityService.getStandardActivityIds();
+  }
+
+  /**
+   * Validates the given activity type code against the current accepted A-rank germ test
+   * for the specified seedlot or family lot.
+   *
+   * @param activityTypeCode the activity type code to validate
+   * @param seedlotNumber the seedlot number to check against (optional if familyLotNumber provided)
+   * @param familyLotNumber the family lot number to check against
+   *                        (optional if seedlotNumber provided)
+   * @return an AddGermTestValidationResponseDto indicating whether the activity type
+   *         is a germ test and whether it matches the current A-rank germ test activity type code
+   */
+  @GetMapping("/validate-add-germ-test")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully validated the germ test activity type.",
+      content = @Content(schema = @Schema(implementation = AddGermTestValidationResponseDto.class))
+  )
+  @ApiAuthResponse
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public AddGermTestValidationResponseDto validateAddGermTest(
+      @RequestParam String activityTypeCode,
+      @RequestParam(required = false) String seedlotNumber,
+      @RequestParam(required = false) String familyLotNumber
+  ) {
+    return activityService.validateAddGermTest(activityTypeCode, seedlotNumber, familyLotNumber);
   }
 }

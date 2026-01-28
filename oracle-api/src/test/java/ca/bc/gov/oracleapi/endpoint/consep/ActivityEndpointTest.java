@@ -9,12 +9,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
@@ -27,9 +28,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(ActivityEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
@@ -100,7 +103,7 @@ class ActivityEndpointTest {
   void createTestingActivity_shouldReturnBadRequest_whenInvalidDto() throws Exception {
     var invalidDto = new ActivityCreateDto(
         "", // standardActivityId cannot be empty
-        validActivityCreateDto.activityTypeCd(),
+        "", // activityTypeCd cannot be empty
         "TEST", // testCategoryCd can have max 3 chars
         validActivityCreateDto.associatedRiaKey(),
         null, // plannedStartDate cannot be null
@@ -199,4 +202,70 @@ class ActivityEndpointTest {
 
     verify(activityService, times(1)).getStandardActivityIds();
   }
+
+  @Test
+  void validateAddGermTest_shouldPass_whenGermTestAndNoCurrentRankA() throws Exception {
+    String activityTypeCode = "G11";
+    String seedlotNumber = "00098";
+
+    AddGermTestValidationResponseDto serviceResponse =
+        new AddGermTestValidationResponseDto(true, true, null);
+
+    when(activityService.validateAddGermTest(activityTypeCode, seedlotNumber, null))
+        .thenReturn(serviceResponse);
+
+    mockMvc.perform(get("/api/activities/validate-add-germ-test")
+            .param("activityTypeCode", activityTypeCode)
+            .param("seedlotNumber", seedlotNumber)
+            .with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.germTest").value(true))
+        .andExpect(jsonPath("$.matchesCurrentTypeCode").value(true))
+        .andExpect(jsonPath("$.currentTypeCode").isEmpty());
+
+    verify(activityService, times(1))
+        .validateAddGermTest(activityTypeCode, seedlotNumber, null);
+  }
+
+  @Test
+  void validateAddGermTest_shouldPass_whenNotGermTest() throws Exception {
+    String activityTypeCode = "X99";
+    String seedlotNumber = "00098";
+
+    AddGermTestValidationResponseDto serviceResponse =
+        new AddGermTestValidationResponseDto(false, true, null);
+
+    when(activityService.validateAddGermTest(activityTypeCode, seedlotNumber, null))
+        .thenReturn(serviceResponse);
+
+    mockMvc.perform(get("/api/activities/validate-add-germ-test")
+            .param("activityTypeCode", activityTypeCode)
+            .param("seedlotNumber", seedlotNumber)
+            .with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.germTest").value(false))
+        .andExpect(jsonPath("$.matchesCurrentTypeCode").value(true))
+        .andExpect(jsonPath("$.currentTypeCode").isEmpty());
+
+    verify(activityService, times(1))
+        .validateAddGermTest(activityTypeCode, seedlotNumber, null);
+  }
+
+  @Test
+  void validateAddGermTest_shouldReturnBadRequest_whenNeitherSeedlotNorFamilyLotProvided() throws Exception {
+    String activityTypeCode = "G11";
+
+    when(activityService.validateAddGermTest(activityTypeCode, null, null))
+        .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Exactly one of seedlotNumber or familyLotNumber must be provided"));
+
+    mockMvc.perform(get("/api/activities/validate-add-germ-test")
+            .param("activityTypeCode", activityTypeCode)
+            .with(csrf()))
+        .andExpect(status().isBadRequest());
+
+    verify(activityService, times(1))
+        .validateAddGermTest(activityTypeCode, null, null);
+  }
+
 }

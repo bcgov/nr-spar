@@ -4,12 +4,14 @@ import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -32,6 +34,7 @@ public class ActivityService {
   private final ActivityRepository activityRepository;
   private final TestResultRepository testResultRepository;
   private final StandardActivityRepository standardActivityRepository;
+  private final TestRegimeRepository testRegimeRepository;
 
   /**
    * Update activity table.
@@ -252,5 +255,71 @@ public class ActivityService {
             a.getActivityDesc()
         ))
         .toList();
+  }
+
+  /**
+   * Validates whether the given activity type code represents a germ test
+   * and whether it matches the current accepted A-rank germ test for the specified seedlot or family lot.
+   *
+   * @param activityTypeCode the activity type code to validate
+   * @param seedlotNumber the seedlot number to check against
+   * @param familyLotNumber the family lot number to check against
+   * @return an AddGermTestValidationResponseDto containing:
+   *         - {@code germTest}: whether the activity type is a germ test
+   *         - {@code matchesCurrentTypeCode}: whether it matches the current A-rank germ test
+   *         - {@code currentTypeCode}: the current accepted A-rank type code if it does not match, {@code null} otherwise
+   * @throws ResponseStatusException with {@code HttpStatus.CONFLICT} if multiple accepted A-rank germ tests exist
+   */
+  public AddGermTestValidationResponseDto validateAddGermTest(
+      String activityTypeCode,
+      String seedlotNumber,
+      String familyLotNumber
+  ) {
+    boolean hasSeedlot = seedlotNumber != null && !seedlotNumber.isBlank();
+    boolean hasFamilyLot = familyLotNumber != null && !familyLotNumber.isBlank();
+    if (hasSeedlot == hasFamilyLot) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Exactly one of seedlotNumber or familyLotNumber must be provided"
+      );
+    }
+
+    List<String> germTestCodes =
+        testRegimeRepository.findAllGermTestActivityTypeCodes();
+    boolean isGermTest = germTestCodes.contains(activityTypeCode);
+    if (!isGermTest) {
+      return new AddGermTestValidationResponseDto(
+          false,
+          true,
+          null
+      );
+    }
+
+    // Find current accepted A-rank germ test for the seedlot/family lot
+    List<String> currentAcceptedCodes =
+        activityRepository.findTypeCodeForAcceptedGermTestRankA(
+            seedlotNumber,
+            familyLotNumber
+        );
+    if (currentAcceptedCodes.size() > 1) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Multiple accepted A-rank germ tests exist for this seedlot/family lot"
+      );
+    }
+    if (currentAcceptedCodes.isEmpty()) {
+      return new AddGermTestValidationResponseDto(
+          true,
+          true,
+          null
+      );
+    }
+    String currentTypeCode = currentAcceptedCodes.get(0);
+    boolean matches = activityTypeCode.equals(currentTypeCode);
+    return new AddGermTestValidationResponseDto(
+        true,
+        matches,
+        currentTypeCode
+    );
   }
 }
