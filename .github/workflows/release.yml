@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release version (e.g., v1.2.3). Leave empty to calculate from semantic commits.'
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  vars:
+    name: Set Variables
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      # Get PR number for the last merged PR
+      - name: PR Number
+        id: pr
+        uses: bcgov/action-get-pr@35514fa1d4765547da319e967b509363598e8b46 # v0.1.0
+
+  semantic-release:
+    runs-on: ubuntu-24.04
+    needs: [vars]
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.set-version.outputs.tag }}
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set Version from Input
+        id: version-input
+        if: ${{ inputs.release != '' }}
+        run: |
+          VERSION="${{ inputs.release }}"
+          # Validate semantic version format: vMAJOR.MINOR.PATCH
+          # Example: v1.2.3
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Release names must use semantic versioning (e.g., v1.2.3). Got: $VERSION"
+            exit 1
+          fi
+          # Version without 'v' prefix for outputs
+          VERSION_NUM="${VERSION#v}"
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION_NUM" >> $GITHUB_OUTPUT
+
+      - name: Conventional Changelog Update
+        uses: TriPSs/conventional-changelog-action@67139193614f5b9e8db87da1bd4240922b34d765 # v6
+        id: changelog
+        if: ${{ inputs.release == '' }}
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          output-file: 'CHANGELOG.md'
+          skip-version-file: 'true'
+          skip-commit: 'true'
+          skip-on-empty: 'false'
+          git-push: 'true'
+
+      - name: Set Final Version
+        id: set-version
+        run: |
+          if [ "${{ inputs.release }}" != "" ]; then
+            echo "tag=${{ steps.version-input.outputs.tag }}" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.version-input.outputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ steps.changelog.outputs.tag }}" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.changelog.outputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2
+        if: steps.set-version.outputs.tag != ''
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          token: ${{ github.token }}
+          tag_name: ${{ steps.set-version.outputs.tag }}
+          name: ${{ steps.set-version.outputs.tag }}
+          generate_release_notes: true
+
+  deploys-test:
+    name: TEST Deploys (${{ needs.vars.outputs.pr }})
+    needs: [vars, semantic-release]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: test
+      tag: ${{ needs.vars.outputs.pr }}
+      target: test
