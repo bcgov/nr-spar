@@ -45,9 +45,10 @@ jobs:
         if: ${{ inputs.release != '' }}
         run: |
           VERSION="${{ inputs.release }}"
-          # Ensure 'v' prefix is present
+          # Validate version format - must start with 'v'
           if [[ ! "$VERSION" =~ ^v ]]; then
-            VERSION="v$VERSION"
+            echo "Error: Release names must use semantic versioning (e.g., v1.2.3). Got: $VERSION"
+            exit 1
           fi
           # Version without 'v' prefix for outputs
           VERSION_NUM="${VERSION#v}"
