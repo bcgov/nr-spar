@@ -71,7 +71,7 @@ const TestListTable = ({
     {
       label: 'Create germ tray',
       type: 'tertiary',
-      action: () => {}
+      action: () => setShowCreateGermTray(true)
     },
     {
       label: 'Export Data',
