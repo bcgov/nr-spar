@@ -95,8 +95,12 @@ jobs:
         uses: requarks/changelog-action@v1
         with:
           token: ${{ github.token }}
-          fromTag: ${{ steps.set-version.outputs.tag }}
-          toTag: ${{ steps.previous-tag.outputs.tag }}
+          # Note: Action's parameter names are confusing:
+          # fromTag = newer tag (latest/release tag)
+          # toTag = older tag (previous tag)
+          # Action compares: toTag...fromTag (commits between old and new)
+          fromTag: ${{ steps.set-version.outputs.tag }} # New release tag (e.g., v0.2.0)
+          toTag: ${{ steps.previous-tag.outputs.tag }} # Previous tag (e.g., v0.1.0)
           writeToFile: false
           useGitmojis: false
           excludeTypes: "build,docs,other,style"
