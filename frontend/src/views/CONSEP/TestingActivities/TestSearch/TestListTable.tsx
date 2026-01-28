@@ -10,6 +10,7 @@ import GenericTable from '../../../../components/GenericTable';
 import ShowHideColumnControl from './ToolbarControls/ShowHideColumnControl';
 import TestHistory from './ToolbarControls/TestHistory';
 import AddActivity from './ToolbarControls/AddActivity';
+import CreateGermTray from './ToolbarControls/CreateGermTray';
 import { getTestingActivityListColumns, columnVisibilityLocalStorageKey } from './constants';
 
 import type {
