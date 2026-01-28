@@ -1,23 +1,14 @@
 changelog:
-  exclude:
-    labels:
-      - ignore-for-release
   categories:
     - title: "🚀 Features"
-      labels:
-        - "feature"
-        - "enhancement"
-      # Also match PR titles starting with "feat:"
+      # Match PR titles starting with "feat:"
       any:
         - "title:/^feat:/i"
     - title: "🐛 Bug Fixes"
-      labels:
-        - "bug"
-        - "fix"
-      # Also match PR titles starting with "fix:"
+      # Match PR titles starting with "fix:"
       any:
         - "title:/^fix:/i"
     - title: "📝 Other Changes"
-      labels:
-        - "*"
       # Catch-all for everything else (docs, chore, refactor, etc.)
+      any:
+        - "*"
