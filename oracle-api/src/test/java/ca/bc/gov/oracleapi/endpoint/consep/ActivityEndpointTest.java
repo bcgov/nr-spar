@@ -126,6 +126,8 @@ class ActivityEndpointTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fields[?(@.fieldName=='standardActivityId')].fieldMessage")
             .value("must not be blank"))
+        .andExpect(jsonPath("$.fields[?(@.fieldName=='activityTypeCd')].fieldMessage")
+            .value("must not be blank"))
         .andExpect(jsonPath("$.fields[?(@.fieldName=='activityTimeUnit')].fieldMessage")
             .value("must not be blank"))
         .andExpect(jsonPath("$.fields[?(@.fieldName=='requestId')].fieldMessage")
@@ -173,9 +175,9 @@ class ActivityEndpointTest {
 
   @Test
   void getStandardActivityIds_shouldReturnActivityDtoList() throws Exception {
-    var dto1 = new StandardActivityDto("AEX", "Abies extraction");
-    var dto2 = new StandardActivityDto("SSP", "Seed separation");
-    var dto3 = new StandardActivityDto("TQA", "Tumbling qa");
+    var dto1 = new StandardActivityDto("AB", "MCR", "Abies extraction");
+    var dto2 = new StandardActivityDto("SSP", "SEP", "Seed separation");
+    var dto3 = new StandardActivityDto("TUM", "TUM",  "Cone tumbling/seed extraction");
 
     when(activityService.getStandardActivityIds())
         .thenReturn(List.of(dto1, dto2, dto3));
@@ -185,12 +187,15 @@ class ActivityEndpointTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(3)))
-        .andExpect(jsonPath("$[0].standardActivityId").value("AEX"))
-        .andExpect(jsonPath("$[0].activityDescription").value("Abies extraction"))
-        .andExpect(jsonPath("$[1].standardActivityId").value("SSP"))
-        .andExpect(jsonPath("$[1].activityDescription").value("Seed separation"))
-        .andExpect(jsonPath("$[2].standardActivityId").value("TQA"))
-        .andExpect(jsonPath("$[2].activityDescription").value("Tumbling qa"));
+        .andExpect(jsonPath("$[0].standardActivityId").value(dto1.standardActivityId()))
+        .andExpect(jsonPath("$[0].activityTypeCd").value(dto1.activityTypeCd()))
+        .andExpect(jsonPath("$[0].activityDescription").value(dto1.activityDescription()))
+        .andExpect(jsonPath("$[1].standardActivityId").value(dto2.standardActivityId()))
+        .andExpect(jsonPath("$[1].activityTypeCd").value(dto2.activityTypeCd()))
+        .andExpect(jsonPath("$[1].activityDescription").value(dto2.activityDescription()))
+        .andExpect(jsonPath("$[2].standardActivityId").value(dto3.standardActivityId()))
+        .andExpect(jsonPath("$[2].activityTypeCd").value(dto3.activityTypeCd()))
+        .andExpect(jsonPath("$[2].activityDescription").value(dto3.activityDescription()));
 
     verify(activityService, times(1)).getStandardActivityIds();
   }

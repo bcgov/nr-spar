@@ -8,5 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "This class represents a StandardActivityEntity with code and description")
 public record StandardActivityDto(
     String standardActivityId,
+    String activityTypeCd,
     String activityDescription
 ) {}

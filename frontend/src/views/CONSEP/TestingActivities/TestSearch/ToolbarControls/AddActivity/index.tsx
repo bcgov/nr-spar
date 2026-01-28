@@ -121,7 +121,8 @@ const AddActivity = (
     gcTime: THREE_HALF_HOURS,
     select: (data: ActivityIdType[]) => data.map((activity) => ({
       id: activity.standardActivityId,
-      text: activity.activityDescription
+      text: activity.activityDescription,
+      activityTypeCd: activity.activityTypeCd
     }))
   });
 
@@ -218,7 +219,15 @@ const AddActivity = (
           selectedItem={activityIdQuery.data?.find(
             (o) => o.id === addActivityData.standardActivityId
           )}
-          onChange={(e: ComboBoxEvent) => updateField('standardActivityId', e.selectedItem ? e.selectedItem.id : undefined)}
+          onChange={(e: ComboBoxEvent) => {
+            if (e.selectedItem) {
+              updateField('standardActivityId', e.selectedItem.id);
+              updateField('activityTypeCd', e.selectedItem.activityTypeCd);
+            } else {
+              updateField('standardActivityId', undefined);
+              updateField('activityTypeCd', undefined);
+            }
+          }}
         />
         <ComboBox
           id="add-activity-part-of-activity-select"
@@ -345,28 +354,29 @@ const AddActivity = (
           disabled={!isAddActivityValid}
           onClick={() => {
             // TODO: Implement the API call to add activity
-            // const lot = selectedRows[0]?.seedlotDisplay ?? '';
-            // const isFamilyLot = lot.toUpperCase().startsWith('F');
+            const lot = selectedRows[0]?.seedlotDisplay ?? '';
+            const isFamilyLot = lot.toUpperCase().startsWith('F');
 
-            // const requestPayload: AddActivityRequest = {
-            //   ...addActivityData,
-            //   standardActivityId: addActivityData.standardActivityId!,
-            //   plannedStartDate: addActivityData.plannedStartDate!,
-            //   plannedEndDate: addActivityData.plannedEndDate!,
-            //   revisedEndDate: addActivityData.plannedEndDate,
-            //   revisedStartDate: addActivityData.plannedStartDate,
-            //   activityDuration: addActivityData.activityDuration!,
-            //   activityTimeUnit: addActivityData.activityTimeUnit!,
-            //   significantStatusIndicator: addActivityData.significantStatusIndicator!,
-            //   processCommitIndicator: addActivityData.processCommitIndicator!,
-            //   requestSkey: addActivityData.requestSkey!,
-            //   requestId: addActivityData.requestId!,
-            //   itemId: addActivityData.itemId!,
-            //   vegetationState: addActivityData.vegetationState!,
-            //   ...(isFamilyLot ? { familyLotNumber: lot } : { seedlotNumber: lot })
-            // };
+            const requestPayload: AddActivityRequest = {
+              ...addActivityData,
+              standardActivityId: addActivityData.standardActivityId!,
+              activityTypeCd: addActivityData.activityTypeCd!,
+              plannedStartDate: addActivityData.plannedStartDate!,
+              plannedEndDate: addActivityData.plannedEndDate!,
+              revisedEndDate: addActivityData.plannedEndDate,
+              revisedStartDate: addActivityData.plannedStartDate,
+              activityDuration: addActivityData.activityDuration!,
+              activityTimeUnit: addActivityData.activityTimeUnit!,
+              significantStatusIndicator: addActivityData.significantStatusIndicator!,
+              processCommitIndicator: addActivityData.processCommitIndicator!,
+              requestSkey: addActivityData.requestSkey!,
+              requestId: addActivityData.requestId!,
+              itemId: addActivityData.itemId!,
+              vegetationState: addActivityData.vegetationState!,
+              ...(isFamilyLot ? { familyLotNumber: lot } : { seedlotNumber: lot })
+            };
 
-            // console.log('requestPayload', requestPayload);
+            console.log('requestPayload', requestPayload);
           }}
         >
           Add Activity

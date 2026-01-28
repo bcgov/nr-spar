@@ -248,6 +248,7 @@ public class ActivityService {
         .sorted(Comparator.comparing(StandardActivityEntity::getStandardActivityId))
         .map(a -> new StandardActivityDto(
             a.getStandardActivityId(),
+            a.getActivityTypeCode(),
             a.getActivityDesc()
         ))
         .toList();

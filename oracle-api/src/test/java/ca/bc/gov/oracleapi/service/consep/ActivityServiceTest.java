@@ -378,14 +378,17 @@ class ActivityServiceTest {
   void getStandardActivityIds_shouldReturnExpectedDtos() {
     StandardActivityEntity activity1 = new StandardActivityEntity();
     activity1.setStandardActivityId("AEX");
+    activity1.setActivityTypeCode("SCR");
     activity1.setActivityDesc("Abies extraction");
 
     StandardActivityEntity activity2 = new StandardActivityEntity();
     activity2.setStandardActivityId("SSP");
+    activity2.setActivityTypeCode("SEP");
     activity2.setActivityDesc("Seed separation");
 
     StandardActivityEntity activity3 = new StandardActivityEntity();
     activity3.setStandardActivityId("TQA");
+    activity3.setActivityTypeCode("QAM");
     activity3.setActivityDesc("Tumbling qa");
 
     when(standardActivityRepository.findAll())
@@ -403,6 +406,14 @@ class ActivityServiceTest {
             activity1.getStandardActivityId(),
             activity2.getStandardActivityId(),
             activity3.getStandardActivityId()
+        );
+
+    assertThat(result)
+        .extracting(StandardActivityDto::activityTypeCd)
+        .containsExactly(
+            activity1.getActivityTypeCode(),
+            activity2.getActivityTypeCode(),
+            activity3.getActivityTypeCode()
         );
 
     assertThat(result)
