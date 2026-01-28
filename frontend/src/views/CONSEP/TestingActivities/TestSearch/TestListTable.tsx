@@ -132,6 +132,22 @@ const TestListTable = ({
       >
         {showAddActivity && tableRef.current && <AddActivity table={tableRef.current} />}
       </Modal>
+      <Modal
+        className="concep-create-germ-tray-modal"
+        open={showCreateGermTray}
+        passiveModal
+        size="sm"
+        modalHeading="Create germination tray"
+        onRequestClose={() => setShowCreateGermTray(false)}
+      >
+        {showCreateGermTray && (
+          <CreateGermTray
+            onClose={() => setShowCreateGermTray(false)}
+            onSubmit={() => {}}
+            isLoading={false}
+          />
+        )}
+      </Modal>
       <Row className="concep-test-search-table">
         <GenericTable
           columns={getTestingActivityListColumns()}
