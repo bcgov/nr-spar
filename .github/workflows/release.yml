@@ -91,64 +91,14 @@ jobs:
 
       - name: Generate Categorized Changelog
         id: changelog-body
-        run: |
-          PREV_TAG="${{ steps.previous-tag.outputs.tag }}"
-
-          # Generate categorized changelog from commits
-          # Breaking changes included in their respective categories with marker
-          # Handles: feat:, feat!:, feat(scope):, feat(scope)!:, fix:, fix!:, fix(scope):, fix(scope)!:
-          CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"%s" --no-merges | \
-            awk '
-            BEGIN {
-              features = ""
-              fixes = ""
-              other = ""
-            }
-            # Match breaking features: feat!: or feat(scope)!:
-            /^feat\([^)]+\)!:/ || /^feat!:/ {
-              # Remove type prefix (feat, optional scope, !, and colon)
-              gsub(/^feat(\([^)]+\))?!: /, "", $0)
-              features = features "- ⚠️ **BREAKING:** " $0 "\n"
-              next
-            }
-            # Match regular features: feat: or feat(scope):
-            /^feat\([^)]+\):/ || /^feat:/ {
-              # Remove type prefix (feat, optional scope, and colon)
-              gsub(/^feat(\([^)]+\))?: /, "", $0)
-              features = features "- " $0 "\n"
-              next
-            }
-            # Match breaking fixes: fix!: or fix(scope)!:
-            /^fix\([^)]+\)!:/ || /^fix!:/ {
-              # Remove type prefix (fix, optional scope, !, and colon)
-              gsub(/^fix(\([^)]+\))?!: /, "", $0)
-              fixes = fixes "- ⚠️ **BREAKING:** " $0 "\n"
-              next
-            }
-            # Match regular fixes: fix: or fix(scope):
-            /^fix\([^)]+\):/ || /^fix:/ {
-              # Remove type prefix (fix, optional scope, and colon)
-              gsub(/^fix(\([^)]+\))?: /, "", $0)
-              fixes = fixes "- " $0 "\n"
-              next
-            }
-            {
-              other = other "- " $0 "\n"
-            }
-            END {
-              result = ""
-              if (features != "") result = result "## 🚀 Features\n\n" features "\n"
-              if (fixes != "") result = result "## 🐛 Bug Fixes\n\n" fixes "\n"
-              if (other != "") result = result "## 📝 Other Changes\n\n" other "\n"
-              print result
-            }')
-
-          # Escape for GitHub output
-          {
-            echo 'changelog<<EOF'
-            echo "$CHANGELOG"
-            echo EOF
-          } >> $GITHUB_OUTPUT
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          fromTag: ${{ steps.set-version.outputs.tag }}
+          toTag: ${{ steps.previous-tag.outputs.tag }}
+          writeToFile: false
+          useGitmojis: false
+          excludeTypes: "build,docs,other,style"
 
       - name: Create Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
@@ -160,7 +110,7 @@ jobs:
           token: ${{ github.token }}
           tag_name: ${{ steps.set-version.outputs.tag }}
           name: ${{ steps.set-version.outputs.tag }}
-          body: ${{ steps.changelog-body.outputs.changelog }}
+          body: ${{ steps.changelog-body.outputs.changes }}
           generate_release_notes: false
 
   deploys-test:
