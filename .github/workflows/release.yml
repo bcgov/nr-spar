@@ -80,6 +80,57 @@ jobs:
             echo "version=${{ steps.changelog.outputs.version }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Get Previous Tag
+        id: previous-tag
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git tag --sort=-creatordate | head -2 | tail -1 || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD | head -1)
+          fi
+          echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate Categorized Changelog
+        id: changelog-body
+        run: |
+          PREV_TAG="${{ steps.previous-tag.outputs.tag }}"
+          CURRENT_TAG="${{ steps.set-version.outputs.tag }}"
+          
+          # Generate categorized changelog from commits
+          CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"%s" --no-merges | \
+            awk '
+            BEGIN {
+              features = ""
+              fixes = ""
+              other = ""
+            }
+            /^feat:/ {
+              gsub(/^feat: /, "", $0)
+              features = features "- " $0 "\n"
+              next
+            }
+            /^fix:/ {
+              gsub(/^fix: /, "", $0)
+              fixes = fixes "- " $0 "\n"
+              next
+            }
+            {
+              other = other "- " $0 "\n"
+            }
+            END {
+              result = ""
+              if (features != "") result = result "## 🚀 Features\n\n" features "\n"
+              if (fixes != "") result = result "## 🐛 Bug Fixes\n\n" fixes "\n"
+              if (other != "") result = result "## 📝 Other Changes\n\n" other "\n"
+              print result
+            }')
+          
+          # Escape for GitHub output
+          {
+            echo 'changelog<<EOF'
+            echo "$CHANGELOG"
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
       - name: Create Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         if: steps.set-version.outputs.tag != ''
@@ -90,7 +141,8 @@ jobs:
           token: ${{ github.token }}
           tag_name: ${{ steps.set-version.outputs.tag }}
           name: ${{ steps.set-version.outputs.tag }}
-          generate_release_notes: true
+          body: ${{ steps.changelog-body.outputs.changelog }}
+          generate_release_notes: false
 
   deploys-test:
     name: TEST Deploys (${{ needs.vars.outputs.pr }})
