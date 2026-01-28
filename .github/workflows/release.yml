@@ -6,7 +6,7 @@ on:
       - main
     inputs:
       release:
-        description: 'Release version (e.g., v1.2.3). Leave empty to calculate from semantic commits.'
+        description: "Release version (e.g., v1.2.3). Leave empty to calculate from semantic commits."
         required: false
         type: string
 
@@ -65,11 +65,11 @@ jobs:
         continue-on-error: true
         with:
           github-token: ${{ github.token }}
-          output-file: 'CHANGELOG.md'
-          skip-version-file: 'true'
-          skip-commit: 'true'
-          skip-on-empty: 'false'
-          git-push: 'true'
+          output-file: "CHANGELOG.md"
+          skip-version-file: "true"
+          skip-commit: "true"
+          skip-on-empty: "false"
+          git-push: "true"
 
       - name: Set Final Version
         id: set-version
@@ -98,20 +98,33 @@ jobs:
           CURRENT_TAG="${{ steps.set-version.outputs.tag }}"
           
           # Generate categorized changelog from commits
+          # Handles: feat:, feat!:, feat(scope):, feat(scope)!:, fix:, fix!:, fix(scope):, fix(scope)!:
           CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"%s" --no-merges | \
             awk '
             BEGIN {
+              breaking = ""
               features = ""
               fixes = ""
               other = ""
             }
-            /^feat:/ {
-              gsub(/^feat: /, "", $0)
+            # Match breaking changes: feat!: or feat(scope)!: or fix!: or fix(scope)!:
+            /^feat\([^)]+\)!:/ || /^feat!:/ || /^fix\([^)]+\)!:/ || /^fix!:/ {
+              # Remove type prefix (feat/fix, optional scope, !, and colon)
+              gsub(/^(feat|fix)(\([^)]+\))?!: /, "", $0)
+              breaking = breaking "- " $0 "\n"
+              next
+            }
+            # Match regular features: feat: or feat(scope):
+            /^feat\([^)]+\):/ || /^feat:/ {
+              # Remove type prefix (feat, optional scope, and colon)
+              gsub(/^feat(\([^)]+\))?: /, "", $0)
               features = features "- " $0 "\n"
               next
             }
-            /^fix:/ {
-              gsub(/^fix: /, "", $0)
+            # Match regular fixes: fix: or fix(scope):
+            /^fix\([^)]+\):/ || /^fix:/ {
+              # Remove type prefix (fix, optional scope, and colon)
+              gsub(/^fix(\([^)]+\))?: /, "", $0)
               fixes = fixes "- " $0 "\n"
               next
             }
@@ -120,6 +133,7 @@ jobs:
             }
             END {
               result = ""
+              if (breaking != "") result = result "## 💥 Breaking Changes\n\n" breaking "\n"
               if (features != "") result = result "## 🚀 Features\n\n" features "\n"
               if (fixes != "") result = result "## 🐛 Bug Fixes\n\n" fixes "\n"
               if (other != "") result = result "## 📝 Other Changes\n\n" other "\n"
