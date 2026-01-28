@@ -40,6 +40,7 @@ const TestListTable = ({
   const tableRef = useRef<MRT_TableInstance<TestingSearchResponseType> | null>(null);
   const [showTestHistory, setShowTestHistory] = useState(false);
   const [showAddActivity, setShowAddActivity] = useState(false);
+  const [showCreateGermTray, setShowCreateGermTray] = useState(false);
 
   useEffect(() => {
     // Reset row selection whenever new data is set
