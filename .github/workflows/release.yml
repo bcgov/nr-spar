@@ -91,14 +91,16 @@ jobs:
 
       - name: Generate Categorized Changelog
         id: changelog-body
+        continue-on-error: true
         uses: requarks/changelog-action@v1
         with:
           token: ${{ github.token }}
-          fromTag: ${{ steps.set-version.outputs.tag }}
+          fromTag: HEAD
           toTag: ${{ steps.previous-tag.outputs.tag }}
           writeToFile: false
           useGitmojis: false
           excludeTypes: "build,docs,other,style"
+          includeInvalidCommits: false
 
       - name: Create Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
@@ -110,7 +112,7 @@ jobs:
           token: ${{ github.token }}
           tag_name: ${{ steps.set-version.outputs.tag }}
           name: ${{ steps.set-version.outputs.tag }}
-          body: ${{ steps.changelog-body.outputs.changes }}
+          body: ${{ steps.changelog-body.outputs.changes != '' && steps.changelog-body.outputs.changes || 'No changes detected.' }}
           generate_release_notes: false
 
   deploys-test:
