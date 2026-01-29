@@ -120,9 +120,11 @@ public class ActivityService {
         && !activityCreateDto.seedlotNumber().isBlank();
     boolean hasFamilyLot = activityCreateDto.familyLotNumber() != null
         && !activityCreateDto.familyLotNumber().isBlank();
-    if (!(hasSeedlot || hasFamilyLot)) {
+    if (hasSeedlot == hasFamilyLot) {
       throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Either seedlotNumber or familyLotNumber must be provided."
+          HttpStatus.BAD_REQUEST,
+          "Exactly one of seedlotNumber or familyLotNumber must be provided"
+          + " (provide one, but not both or neither)."
       );
     }
 
@@ -141,10 +143,19 @@ public class ActivityService {
       }
     }
 
+    Integer processResultIndicator;
+    Integer testResultIndicator;
+    if (testCategoryCd == null) {
+      processResultIndicator = -1;
+      testResultIndicator = 0;
+    } else {
+      processResultIndicator = 0;
+      testResultIndicator = -1;
+    }
+
     ActivityEntity newActivityEntity = new ActivityEntity();
 
     // Map fields from dto to entity
-    newActivityEntity.setRiaKey(activityCreateDto.riaKey());
     newActivityEntity.setStandardActivityId(activityCreateDto.standardActivityId());
     newActivityEntity.setActivityTypeCode(activityCreateDto.activityTypeCd());
     newActivityEntity.setTestCategoryCode(activityCreateDto.testCategoryCd());
@@ -157,14 +168,15 @@ public class ActivityService {
     newActivityEntity.setActivityTimeUnit(activityCreateDto.activityTimeUnit());
     newActivityEntity.setSignificantStatusIndicator(activityCreateDto.significantStatusIndicator());
     newActivityEntity.setProcessCommitIndicator(activityCreateDto.processCommitIndicator());
-    newActivityEntity.setProcessResultIndicator(activityCreateDto.processResultIndicator());
-    newActivityEntity.setTestResultIndicator(activityCreateDto.testResultIndicator());
+    newActivityEntity.setProcessResultIndicator(processResultIndicator);
+    newActivityEntity.setTestResultIndicator(testResultIndicator);
     newActivityEntity.setRequestSkey(activityCreateDto.requestSkey());
     newActivityEntity.setRequestId(activityCreateDto.requestId());
     newActivityEntity.setItemId(activityCreateDto.itemId());
     newActivityEntity.setVegetationState(activityCreateDto.vegetationState());
     newActivityEntity.setSeedlotNumber(activityCreateDto.seedlotNumber());
     newActivityEntity.setFamilyLotNumber(activityCreateDto.familyLotNumber());
+    newActivityEntity.setUpdateTimestamp(LocalDateTime.now());
 
     ActivityEntity savedActivityEntity = activityRepository.save(newActivityEntity);
     SparLog.info("Activity with riaKey: {} saved successfully.", savedActivityEntity.getRiaKey());

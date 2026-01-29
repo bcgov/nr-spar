@@ -72,7 +72,6 @@ class ActivityServiceTest {
     activityEntity.setRiaComment("Test comment");
 
     validActivityCreateDto = new ActivityCreateDto(
-        new BigDecimal("408623"),
         "ST1",
         "AC1",
         "TC1",
@@ -85,8 +84,6 @@ class ActivityServiceTest {
         "HR",
         0,
         -1,
-        0,
-        0,
         new BigDecimal("33874"),
         "CSP19970005",
         "A",
@@ -155,15 +152,24 @@ class ActivityServiceTest {
 
     ActivityEntity createdActivityEntity = activityService.createActivity(validActivityCreateDto);
 
-    assertEquals(validActivityCreateDto.riaKey(), createdActivityEntity.getRiaKey());
     assertEquals(validActivityCreateDto.seedlotNumber(), createdActivityEntity.getSeedlotNumber());
     assertEquals(validActivityCreateDto.requestSkey(), createdActivityEntity.getRequestSkey());
     assertEquals(validActivityCreateDto.itemId(), createdActivityEntity.getItemId());
+    assertEquals(
+        0,
+        createdActivityEntity.getProcessResultIndicator(),
+        "processResultIndicator should be 0 when testCategoryCd is not null"
+    );
+    assertEquals(
+        -1,
+        createdActivityEntity.getTestResultIndicator(),
+        "testResultIndicator should be -1 when testCategoryCd is not null"
+    );
     verify(activityRepository, times(1)).save(any(ActivityEntity.class));
     verify(activityRepository, times(1)).clearExistingProcessCommitment(
         eq(validActivityCreateDto.requestSkey()),
         eq(validActivityCreateDto.itemId()),
-        eq(validActivityCreateDto.riaKey())
+        eq(createdActivityEntity.getRiaKey())
     );
     verify(testResultRepository, times(1)).save(any(TestResultEntity.class));
   }
@@ -171,7 +177,6 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldNotCallClearExistingProcessCommitment_whenProcessCommitUnchecked() {
     ActivityCreateDto dto = new ActivityCreateDto(
-        validActivityCreateDto.riaKey(),
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         null,
@@ -184,8 +189,6 @@ class ActivityServiceTest {
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
         0,
-        validActivityCreateDto.processResultIndicator(),
-        validActivityCreateDto.testResultIndicator(),
         validActivityCreateDto.requestSkey(),
         validActivityCreateDto.requestId(),
         validActivityCreateDto.itemId(),
@@ -194,9 +197,20 @@ class ActivityServiceTest {
         validActivityCreateDto.familyLotNumber()
     );
 
-    when(activityRepository.save(any(ActivityEntity.class))).thenReturn(new ActivityEntity());
+    when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
 
-    activityService.createActivity(dto);
+    ActivityEntity createdActivityEntity = activityService.createActivity(dto);
+
+    assertEquals(
+        -1,
+        createdActivityEntity.getProcessResultIndicator(),
+        "processResultIndicator should be -1 when testCategoryCd is null"
+    );
+    assertEquals(
+        0,
+        createdActivityEntity.getTestResultIndicator(),
+        "testResultIndicator should be 0 when testCategoryCd is null"
+    );
 
     verify(activityRepository, never()).clearExistingProcessCommitment(any(), any(), any());
     verify(testResultRepository, never()).save(any(TestResultEntity.class));
@@ -205,7 +219,6 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldFail_whenStartDateNotBeforeEndDate() {
     ActivityCreateDto invalidDto = new ActivityCreateDto(
-        validActivityCreateDto.riaKey(),
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
@@ -218,8 +231,6 @@ class ActivityServiceTest {
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
         validActivityCreateDto.processCommitIndicator(),
-        validActivityCreateDto.processResultIndicator(),
-        validActivityCreateDto.testResultIndicator(),
         validActivityCreateDto.requestSkey(),
         validActivityCreateDto.requestId(),
         validActivityCreateDto.itemId(),
@@ -238,7 +249,6 @@ class ActivityServiceTest {
   @Test
   void createActivity_shouldFail_whenNoSeedlotOrFamilyLot() {
     ActivityCreateDto invalidDto = new ActivityCreateDto(
-        validActivityCreateDto.riaKey(),
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
@@ -251,8 +261,6 @@ class ActivityServiceTest {
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
         validActivityCreateDto.processCommitIndicator(),
-        validActivityCreateDto.processResultIndicator(),
-        validActivityCreateDto.testResultIndicator(),
         validActivityCreateDto.requestSkey(),
         validActivityCreateDto.requestId(),
         validActivityCreateDto.itemId(),
@@ -265,13 +273,48 @@ class ActivityServiceTest {
         ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
     );
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-    assertEquals("Either seedlotNumber or familyLotNumber must be provided.", ex.getReason());
+    assertEquals(
+        "Exactly one of seedlotNumber or familyLotNumber must be provided (provide one, but not both or neither).",
+        ex.getReason()
+    );
+  }
+
+  @Test
+  void createActivity_shouldFail_whenHaveBothSeedlotAndFamilyLot() {
+    ActivityCreateDto invalidDto = new ActivityCreateDto(
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        validActivityCreateDto.testCategoryCd(),
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        "00098",
+        "F20082140146"
+    );
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(
+        "Exactly one of seedlotNumber or familyLotNumber must be provided (provide one, but not both or neither).",
+        ex.getReason()
+    );
   }
 
   @Test
   void createActivity_shouldFail_whenSeedlingRequestIdAndTestCategoryCdNotStd() {
     ActivityCreateDto invalidDto = new ActivityCreateDto(
-        validActivityCreateDto.riaKey(),
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         "NON", // <-- Not STD
@@ -284,8 +327,6 @@ class ActivityServiceTest {
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
         validActivityCreateDto.processCommitIndicator(),
-        validActivityCreateDto.processResultIndicator(),
-        validActivityCreateDto.testResultIndicator(),
         validActivityCreateDto.requestSkey(),
         "1234ABC", // <-- First 4 chars numeric ("1234"), which is a seedling request id
         validActivityCreateDto.itemId(),

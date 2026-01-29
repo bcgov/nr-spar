@@ -1,0 +1,8 @@
+# Note: GitHub's release.yml only supports label-based categorization, not commit message patterns.
+# We generate categorized changelog from commit messages in the release workflow instead.
+# This file is kept for potential future label-based categorization.
+changelog:
+  categories:
+    - title: "🚀 Features"
+      labels:
+        - "*"

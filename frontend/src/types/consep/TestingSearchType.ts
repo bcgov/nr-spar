@@ -50,3 +50,8 @@ export type ActivityIdType = {
   standardActivityId: string;
   activityDescription: string;
 };
+
+export type ActivityRiaSkeyType = {
+  riaSkey: number;
+  activityDescription: string;
+};
