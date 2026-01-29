@@ -31,7 +31,7 @@ export type MoistureContentType = {
     containerErrorMsg: string,
     containerWeightErrorMsg: string,
     checkedBox: string,
-    unCheckedBox: string
-    emptyTableMsg: string,
+    unCheckedBox: string,
+    emptyTableMsg: string
   }
 }
