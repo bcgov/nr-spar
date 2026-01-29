@@ -211,7 +211,7 @@ class ActivityServiceTest {
         validActivityCreateDto.activityDuration(),
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
-        0, // processCommitIndicator not -1
+        0,
         validActivityCreateDto.requestSkey(),
         validActivityCreateDto.requestId(),
         validActivityCreateDto.itemId(),
