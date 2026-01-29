@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Checkbox, Button } from '@carbon/react';
 import { GermTrayOptions, CreateGermTrayProps } from './definitions';
+import './styles.scss';
 
 const CreateGermTray: React.FC<CreateGermTrayProps> = ({
   onClose,
