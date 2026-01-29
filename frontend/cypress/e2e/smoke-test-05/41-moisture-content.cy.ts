@@ -1,12 +1,16 @@
 import { TYPE_DELAY } from '../../constants';
 import { mockMoistureContentApi } from '../../support/mockApiConsep';
-import { MoistureContentType } from '../../definitions';
+import { MoistureContentType, SeedlotReplicateInfoType } from '../../definitions';
 
 describe('Moisture Content Screen page', () => {
   let mcData: MoistureContentType;
+  let seedlotData: SeedlotReplicateInfoType;
   beforeEach(() => {
     cy.fixture('moisture-content').then((jsonData) => {
       mcData = jsonData;
+    });
+    cy.fixture('seedlot-replicate-info').then((jsonData) => {
+      seedlotData = jsonData;
     });
     mockMoistureContentApi();
     cy.login();
@@ -39,27 +43,27 @@ describe('Moisture Content Screen page', () => {
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(0)
-      .should('have.text', 'MC');
+      .should('have.text', seedlotData.replicatesList[0].riaKey);
 
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(1)
-      .should('have.text', '60662');
+      .should('have.text', seedlotData.seedlotNumber);
 
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(2)
-      .should('have.text', 'SSP20000093');
+      .should('have.text', seedlotData.requestId);
 
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(3)
-      .should('have.text', 'FDC | A');
+      .should('have.text', `${seedlotData.vegetationCode} | ${seedlotData.geneticClassCode}`);
 
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(4)
-      .should('have.text', '86.5');
+      .should('have.text', seedlotData.moisturePct);
   });
 
   it('Check Comment box', () => {
