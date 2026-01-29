@@ -61,8 +61,8 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true,
   filename: `Testing_Activity_Search_${new Date().toISOString().split('T')[0]}`
 });
-
 const LOT_INPUT_KEYS = ['lot-input-1', 'lot-input-2', 'lot-input-3', 'lot-input-4', 'lot-input-5'] as const;
+const toDate = (value?: string) => (value ? new Date(`${value}T00:00:00`) : undefined);
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
@@ -357,9 +357,9 @@ const TestSearch = () => {
     resetAlert();
   };
 
-  const handleWithdrawalDateChange = (dates: (string | Date)[], type: 'start' | 'end') => {
+  const handleWithdrawalDateChange = (dates: Date[], type: 'start' | 'end') => {
     const raw = dates?.[0];
-    const value = typeof raw === 'string' ? raw : raw?.toISOString().slice(0, 10);
+    const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : undefined;
 
     setSearchParams((prev) => {
       const currentStart = prev.seedWithdrawalStartDate;
@@ -472,140 +472,150 @@ const TestSearch = () => {
         <Row className="consep-test-search-title">
           <PageTitle title="Testing activities" />
         </Row>
-        <Row className="consep-test-search-lot-numbers-filter">
-          <FormLabel className="lot-inputs-label">Lot #</FormLabel>
-          <div className="lot-inputs">
-            {rawLotInput.map((value, index) => (
-              <TextInput
-                key={`${LOT_INPUT_KEYS[index]}`}
-                id={`lot-input-${index}`}
-                value={value}
-                labelText={`Lot # ${index + 1}`}
-                hideLabel
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  handleLotInputChange(index, e.target.value);
-                }}
-                invalid={validateSearch.lotNumbers[index]?.error}
-                invalidText={validateSearch.lotNumbers[index]?.errorMessage}
-              />
-            ))}
-          </div>
-        </Row>
-        <Row className="consep-test-search-filters">
-          <Column className="filters-row">
-            <FilterableMultiSelect
-              id="test-type-input"
-              className="test-type-input"
-              titleText="Test type"
-              items={
-                testTypeQuery.data
-                  ? testTypeQuery.data.map((type: string) => ({
-                    id: type,
-                    text: type
-                  }))
-                  : []
-              }
-              itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
-              onChange={(event: { selectedItems: Array<{ id: string }> }) => {
-                handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
-              }}
-              selectionFeedback="top-after-reopen"
-            />
-            <FilterableMultiSelect
-              id="activity-type-input"
-              className="activity-type-input"
-              titleText="Choose activity"
-              items={
-                activityIdQuery.data
-                  ? activityIdQuery.data.map((id) => ({ id, text: id }))
-                  : []
-              }
-              itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
-              onChange={(event: { selectedItems: Array<{ id: string }> }) => {
-                handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
-              }}
-              selectionFeedback="top-after-reopen"
-            />
-            <TextInput
-              id="germ-tray-input"
-              className="germ-tray-input"
-              labelText="Germ tray ID"
-              type="number"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                handleGermTrayIdChange(e);
-              }}
-              value={searchParams.germinatorTrayId}
-              invalid={validateSearch.germinatorTray.error}
-              invalidText={validateSearch.germinatorTray.errorMessage}
-            />
-            <DatePicker
-              datePickerType="single"
-              className="withdrawal-date-input"
-              dateFormat={DATE_FORMAT}
-              onChange={(e: Array<Date>) => {
-                handleWithdrawalDateChange(e, 'start');
-              }}
-              value={
-                searchParams.seedWithdrawalStartDate !== minStartDate
-                  ? searchParams.seedWithdrawalStartDate
-                  : undefined
-              }
-              style={{ minWidth: '9rem' }}
-            >
-              <DatePickerInput
-                id="withdrawal-start-date-input"
-                labelText="Withdrawal start"
-                autoComplete="off"
-              />
-            </DatePicker>
-            <DatePicker
-              datePickerType="single"
-              className="withdrawal-date-input"
-              dateFormat={DATE_FORMAT}
-              onChange={(e: Array<Date>) => {
-                handleWithdrawalDateChange(e, 'end');
-              }}
-              minDate={searchParams.seedWithdrawalStartDate ?? undefined}
-              value={
-                searchParams.seedWithdrawalEndDate !== maxEndDate
-                  ? searchParams.seedWithdrawalEndDate
-                  : undefined
-              }
-              style={{ minWidth: '9rem' }}
-            >
-              <DatePickerInput
-                id="withdrawal-end-date-input"
-                labelText="Withdrawal end"
-                autoComplete="off"
-              />
-            </DatePicker>
-            <div className="filters-row-buttons">
-              <Button ref={advSearchRef} size="md" kind="tertiary" onClick={toggleAdvSearch}>
-                Filters
-              </Button>
-              <Button
-                renderIcon={Search}
-                iconDescription="Search activity"
-                size="md"
-                onClick={handleSearchClick}
-                disabled={hasValidationErrors()}
-              >
-                Search activity
-              </Button>
+        <form
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!hasValidationErrors()) {
+              handleSearchClick();
+            }
+          }}
+        >
+          <Row className="consep-test-search-lot-numbers-filter">
+            <FormLabel className="lot-inputs-label">Lot #</FormLabel>
+            <div className="lot-inputs">
+              {rawLotInput.map((value, index) => (
+                <TextInput
+                  key={`${LOT_INPUT_KEYS[index]}`}
+                  id={`lot-input-${index}`}
+                  value={value}
+                  labelText={`Lot # ${index + 1}`}
+                  hideLabel
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleLotInputChange(index, e.target.value);
+                  }}
+                  invalid={validateSearch.lotNumbers[index]?.error}
+                  invalidText={validateSearch.lotNumbers[index]?.errorMessage}
+                />
+              ))}
             </div>
-          </Column>
-        </Row>
-        {openAdvSearch && modalAnchor && (
-          <AdvancedFilters
-            searchParams={searchParams}
-            setSearchParams={setSearchParams}
-            validateSearch={validateSearch}
-            setValidateSearch={setValidateSearch}
-            alignTo={modalAnchor}
-            onClose={handleCloseAdvSearch}
-            anchorRef={advSearchRef}
-          />
-        )}
+          </Row>
+          <Row className="consep-test-search-filters">
+            <Column className="filters-row">
+              <FilterableMultiSelect
+                id="test-type-input"
+                className="test-type-input"
+                titleText="Test type"
+                items={
+                  testTypeQuery.data
+                    ? testTypeQuery.data.map((type: string) => ({
+                      id: type,
+                      text: type
+                    }))
+                    : []
+                }
+                itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+                onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                  handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
+                }}
+                selectionFeedback="top-after-reopen"
+              />
+              <FilterableMultiSelect
+                id="activity-type-input"
+                className="activity-type-input"
+                titleText="Choose activity"
+                items={
+                  activityIdQuery.data
+                    ? activityIdQuery.data.map((id) => ({ id, text: id }))
+                    : []
+                }
+                itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+                onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                  handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
+                }}
+                selectionFeedback="top-after-reopen"
+              />
+              <TextInput
+                id="germ-tray-input"
+                className="germ-tray-input"
+                labelText="Germ tray ID"
+                type="number"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  handleGermTrayIdChange(e);
+                }}
+                value={searchParams.germinatorTrayId}
+                invalid={validateSearch.germinatorTray.error}
+                invalidText={validateSearch.germinatorTray.errorMessage}
+              />
+              <DatePicker
+                datePickerType="single"
+                className="withdrawal-date-input"
+                dateFormat={DATE_FORMAT}
+                onChange={(dates: Date[]) => {
+                  handleWithdrawalDateChange(dates, 'start');
+                }}
+                value={
+                  searchParams.seedWithdrawalStartDate !== minStartDate
+                    ? toDate(searchParams.seedWithdrawalStartDate)
+                    : undefined
+                }
+                style={{ minWidth: '9rem' }}
+              >
+                <DatePickerInput
+                  id="withdrawal-start-date-input"
+                  labelText="Withdrawal start"
+                  autoComplete="off"
+                />
+              </DatePicker>
+              <DatePicker
+                datePickerType="single"
+                className="withdrawal-date-input"
+                dateFormat={DATE_FORMAT}
+                onChange={(dates: Date[]) => {
+                  handleWithdrawalDateChange(dates, 'end');
+                }}
+                minDate={searchParams.seedWithdrawalStartDate || undefined}
+                value={
+                  searchParams.seedWithdrawalEndDate !== maxEndDate
+                    ? toDate(searchParams.seedWithdrawalEndDate)
+                    : undefined
+                }
+                style={{ minWidth: '9rem' }}
+              >
+                <DatePickerInput
+                  id="withdrawal-end-date-input"
+                  labelText="Withdrawal end"
+                  autoComplete="off"
+                />
+              </DatePicker>
+              <div className="filters-row-buttons">
+                <Button ref={advSearchRef} size="md" kind="tertiary" onClick={toggleAdvSearch}>
+                  Filters
+                </Button>
+                <Button
+                  type="submit"
+                  renderIcon={Search}
+                  iconDescription="Search activity"
+                  size="md"
+                  disabled={hasValidationErrors()}
+                >
+                  Search activity
+                </Button>
+              </div>
+            </Column>
+          </Row>
+          {openAdvSearch && modalAnchor && (
+            <AdvancedFilters
+              searchParams={searchParams}
+              setSearchParams={setSearchParams}
+              validateSearch={validateSearch}
+              setValidateSearch={setValidateSearch}
+              alignTo={modalAnchor}
+              onClose={handleCloseAdvSearch}
+              anchorRef={advSearchRef}
+            />
+          )}
+        </form>
       </FlexGrid>
       <FlexGrid>
         <Row className="consep-test-search-alert">
