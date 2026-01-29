@@ -66,7 +66,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check Comment box', () => {
     // Check if the comment input exists
-    cy.get('#moisture-content-comments');
+    cy.get('#moisture-content-comments').should('be.visible');
 
     // Type a comment
     cy.get('#moisture-content-comments')
