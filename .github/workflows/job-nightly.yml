@@ -1,7 +1,7 @@
 name: Nightly
 
 on:
-  schedule: [cron: "0 11 * * *"] # 2 AM PST = 11 PM UDT
+  schedule: [cron: "0 11 * * *"] # 3 AM PST / 2 AM PDT = 11:00 UTC, daily
   workflow_dispatch:
 
 concurrency:
