@@ -34,4 +34,4 @@ export type MoistureContentType = {
     unCheckedBox: string,
     emptyTableMsg: string
   }
-}
+};
