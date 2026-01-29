@@ -59,31 +59,9 @@ const AddActivity = (
   const selectedRows = table.getSelectedRowModel()?.rows.map((row) => row.original) ?? [];
   const requestSkey = selectedRows[0]?.requestSkey;
   const itemId = selectedRows[0]?.itemId;
-  const isTestActivity = Boolean(selectedRows[0]?.testCategoryCd);
   const lot = selectedRows[0]?.seedlotDisplay ?? '';
   const isFamilyLotNumber = isFamilyLot(lot);
   const todayString = toLocalDateString(new Date());
-  const REQUIRED_FIELDS = useMemo<(keyof AddActivityRequest)[]>(() => {
-    const baseFields: (keyof AddActivityRequest)[] = [
-      'standardActivityId',
-      'plannedStartDate',
-      'plannedEndDate',
-      'activityDuration',
-      'activityTimeUnit',
-      'requestSkey',
-      'requestId',
-      'itemId',
-      'vegetationState',
-      'significantStatusIndicator',
-      'processCommitIndicator'
-    ];
-
-    if (isTestActivity) {
-      baseFields.push('testCategoryCd');
-    }
-
-    return baseFields;
-  }, [isTestActivity]);
 
   const [addActivityData, setAddActivityData] = useState<Partial<AddActivityRequest>>({
     plannedStartDate: todayString,
@@ -99,14 +77,6 @@ const AddActivity = (
     message: string;
   } | null>(null);
   const [showGermTestWarning, setShowGermTestWarning] = useState(false);
-
-  const isAddActivityValid = REQUIRED_FIELDS.every((field) => {
-    const value = addActivityData[field];
-    if (typeof value === 'string') {
-      return value.trim().length > 0;
-    }
-    return value !== undefined && value !== null;
-  });
 
   const isCommitmentIndicatorYesQuery = useQuery({
     queryKey: ['request-commitment-indicator', requestSkey, itemId],
@@ -132,7 +102,8 @@ const AddActivity = (
     select: (data: ActivityIdType[]) => data.map((activity) => ({
       id: activity.standardActivityId,
       text: activity.activityDescription,
-      activityTypeCd: activity.activityTypeCd
+      activityTypeCd: activity.activityTypeCd,
+      testCategoryCd: activity.testCategoryCd
     }))
   });
 
@@ -240,6 +211,42 @@ const AddActivity = (
     isCommitmentIndicatorYesQuery.isError, isCommitmentIndicatorYesQuery.error
   ]);
 
+  const selectedActivity = useMemo(() => {
+    return activityIdQuery.data?.find(
+      (a) => a.id === addActivityData.standardActivityId
+    );
+  }, [activityIdQuery.data, addActivityData.standardActivityId]);
+  const isTestActivity = Boolean(selectedActivity?.testCategoryCd);
+  const REQUIRED_FIELDS = useMemo<(keyof AddActivityRequest)[]>(() => {
+    const baseFields: (keyof AddActivityRequest)[] = [
+      'standardActivityId',
+      'plannedStartDate',
+      'plannedEndDate',
+      'activityDuration',
+      'activityTimeUnit',
+      'requestSkey',
+      'requestId',
+      'itemId',
+      'vegetationState',
+      'significantStatusIndicator',
+      'processCommitIndicator'
+    ];
+
+    if (isTestActivity) {
+      baseFields.push('testCategoryCd');
+    }
+
+    return baseFields;
+  }, [isTestActivity]);
+
+  const isAddActivityValid = REQUIRED_FIELDS.every((field) => {
+    const value = addActivityData[field];
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    return value !== undefined && value !== null;
+  });
+
   const updateField = <K extends keyof AddActivityRequest>(
     field: K,
     value: AddActivityRequest[K] | undefined
@@ -329,18 +336,17 @@ const AddActivity = (
           )}
           onChange={(e: ComboBoxEvent) => updateField('associatedRiaKey', e.selectedItem ? e.selectedItem.id : undefined)}
         />
-        <ComboBox
+        {isTestActivity && <ComboBox
           id="add-activity-test-category-select"
           className="add-activity-select"
-          titleText={isTestActivity ? <RequiredFormFieldLabel text="Test category" /> : 'Test category'}
+          titleText={<RequiredFormFieldLabel text="Test category" />}
           items={testCategoryQuery.data ?? []}
           itemToString={(item: { id: string; text: string } | null) => item?.text ?? ''}
-          disabled={!isTestActivity}
           selectedItem={testCategoryQuery.data?.find(
             (o) => o.id === addActivityData.testCategoryCd
           )}
           onChange={(e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem ? e.selectedItem.id : undefined)}
-        />
+        />}
         <div className="add-activity-date-picker">
           <DatePicker
             datePickerType="single"

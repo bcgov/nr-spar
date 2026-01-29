@@ -255,7 +255,8 @@ public class ActivityService {
         )
         .map(a -> new StandardActivityDto(
             a.getStandardActivityId(),
-            a.getActivityTypeCode(),
+            a.getActivityTypeCd(),
+            a.getTestCategoryCd(),
             a.getActivityDesc()
         ))
         .toList();

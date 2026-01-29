@@ -392,12 +392,14 @@ class ActivityServiceTest {
   void getStandardActivityIds_shouldReturnExpectedDtos_forSeedlot() {
     StandardActivityEntity activity1 = new StandardActivityEntity();
     activity1.setStandardActivityId("AEX");
-    activity1.setActivityTypeCode("SCR");
+    activity1.setActivityTypeCd("SCR");
+    activity1.setTestCategoryCd("T1");
     activity1.setActivityDesc("Abies extraction");
 
     StandardActivityEntity activity2 = new StandardActivityEntity();
     activity2.setStandardActivityId("SSP");
-    activity2.setActivityTypeCode("SEP");
+    activity2.setActivityTypeCd("SEP");
+    activity2.setTestCategoryCd("T2");
     activity2.setActivityDesc("Seed separation");
 
     // Unordered input, expect sorting by description
@@ -407,13 +409,16 @@ class ActivityServiceTest {
 
     assertThat(result)
         .hasSize(2)
-        // Sorted by "Abies extraction", "Seed separation"
         .extracting(StandardActivityDto::standardActivityId)
         .containsExactly(activity1.getStandardActivityId(), activity2.getStandardActivityId());
 
     assertThat(result)
         .extracting(StandardActivityDto::activityTypeCd)
-        .containsExactly(activity1.getActivityTypeCode(), activity2.getActivityTypeCode());
+        .containsExactly(activity1.getActivityTypeCd(), activity2.getActivityTypeCd());
+
+    assertThat(result)
+        .extracting(StandardActivityDto::testCategoryCd)
+        .containsExactly(activity1.getTestCategoryCd(), activity2.getTestCategoryCd());
 
     assertThat(result)
         .extracting(StandardActivityDto::activityDescription)
@@ -427,12 +432,14 @@ class ActivityServiceTest {
   void getStandardActivityIds_shouldReturnExpectedDtos_forFamilyLot() {
     StandardActivityEntity activity1 = new StandardActivityEntity();
     activity1.setStandardActivityId("FA1");
-    activity1.setActivityTypeCode("FAM");
+    activity1.setActivityTypeCd("FAM");
+    activity1.setTestCategoryCd("T3");
     activity1.setActivityDesc("Beta Family");
 
     StandardActivityEntity activity2 = new StandardActivityEntity();
     activity2.setStandardActivityId("FA2");
-    activity2.setActivityTypeCode("FAM");
+    activity2.setActivityTypeCd("FAM");
+    activity2.setTestCategoryCd("T4");
     activity2.setActivityDesc("Alpha Family");
 
     // Unordered input, expect sorting by description
@@ -442,13 +449,16 @@ class ActivityServiceTest {
 
     assertThat(result)
         .hasSize(2)
-        // Sorted by "Alpha Family", "Beta Family"
         .extracting(StandardActivityDto::standardActivityId)
         .containsExactly(activity2.getStandardActivityId(), activity1.getStandardActivityId());
 
     assertThat(result)
         .extracting(StandardActivityDto::activityTypeCd)
-        .containsExactly(activity2.getActivityTypeCode(), activity1.getActivityTypeCode());
+        .containsExactly(activity2.getActivityTypeCd(), activity1.getActivityTypeCd());
+
+    assertThat(result)
+        .extracting(StandardActivityDto::testCategoryCd)
+        .containsExactly(activity2.getTestCategoryCd(), activity1.getTestCategoryCd());
 
     assertThat(result)
         .extracting(StandardActivityDto::activityDescription)
@@ -462,22 +472,26 @@ class ActivityServiceTest {
   void getStandardActivityIds_shouldReturnExpectedDtos_forAll() {
     StandardActivityEntity activity1 = new StandardActivityEntity();
     activity1.setStandardActivityId("AEX");
-    activity1.setActivityTypeCode("SCR");
+    activity1.setActivityTypeCd("SCR");
+    activity1.setTestCategoryCd("T1");
     activity1.setActivityDesc("Abies extraction");
 
     StandardActivityEntity activity2 = new StandardActivityEntity();
     activity2.setStandardActivityId("SSP");
-    activity2.setActivityTypeCode("SEP");
+    activity2.setActivityTypeCd("SEP");
+    activity2.setTestCategoryCd("T2");
     activity2.setActivityDesc("Seed separation");
 
     StandardActivityEntity activity3 = new StandardActivityEntity();
     activity3.setStandardActivityId("FA1");
-    activity3.setActivityTypeCode("FAM");
+    activity3.setActivityTypeCd("FAM");
+    activity3.setTestCategoryCd("T3");
     activity3.setActivityDesc("Beta Family");
 
     StandardActivityEntity activity4 = new StandardActivityEntity();
     activity4.setStandardActivityId("TUM");
-    activity4.setActivityTypeCode("TUM");
+    activity4.setActivityTypeCd("TUM");
+    activity4.setTestCategoryCd("T4");
     activity4.setActivityDesc("Cone tumbling/seed extraction");
 
     when(standardActivityRepository.findAll()).thenReturn(List.of(activity2, activity1, activity4));
@@ -487,13 +501,21 @@ class ActivityServiceTest {
 
     assertThat(result)
         .hasSize(4)
-        // Alphabetical by description
         .extracting(StandardActivityDto::standardActivityId)
         .containsExactly(
             activity1.getStandardActivityId(), // Abies extraction
             activity3.getStandardActivityId(), // Beta Family
             activity4.getStandardActivityId(), // Cone tumbling/seed extraction
             activity2.getStandardActivityId()  // Seed separation
+        );
+
+    assertThat(result)
+        .extracting(StandardActivityDto::testCategoryCd)
+        .containsExactly(
+            activity1.getTestCategoryCd(),
+            activity3.getTestCategoryCd(),
+            activity4.getTestCategoryCd(),
+            activity2.getTestCategoryCd()
         );
 
     assertThat(result)

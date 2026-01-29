@@ -21,10 +21,10 @@ public class StandardActivityEntity {
   private String standardActivityId;
 
   @Column(name = "ACTIVITY_TYPE_CD", length = 3)
-  private String activityTypeCode;
+  private String activityTypeCd;
 
   @Column(name = "TEST_CATEGORY_CD", length = 3)
-  private String testCategoryCode;
+  private String testCategoryCd;
 
   @Column(name = "SIGNIFICNT_STS_IND", precision = 5)
   private Integer significantStatusIndicator;

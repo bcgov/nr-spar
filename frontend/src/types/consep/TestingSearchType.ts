@@ -49,6 +49,7 @@ export type TestCodeType = {
 export type ActivityIdType = {
   standardActivityId: string;
   activityTypeCd: string;
+  testCategoryCd: string;
   activityDescription: string;
 };
 

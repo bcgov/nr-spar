@@ -9,5 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record StandardActivityDto(
     String standardActivityId,
     String activityTypeCd,
+    String testCategoryCd,
     String activityDescription
 ) {}
