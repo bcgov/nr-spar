@@ -128,8 +128,32 @@ public class ActivityService {
       );
     }
 
-    String requestId = activityCreateDto.requestId();
+    String standardActivityId = activityCreateDto.standardActivityId();
     String testCategoryCd = activityCreateDto.testCategoryCd();
+    StandardActivityEntity standardActivity = standardActivityRepository
+        .findById(standardActivityId)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "StandardActivityId '" + standardActivityId + "' does not exist."
+        ));
+    boolean isTestActivity = standardActivity.getTestCategoryCd() != null;
+    if (isTestActivity) {
+      if (testCategoryCd == null || testCategoryCd.isBlank()) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Test category code is required for the selected test activity."
+        );
+      }
+    } else {
+      if (testCategoryCd != null && !testCategoryCd.isBlank()) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "The selected activity is not a test activity; test category code should be null."
+        );
+      }
+    }
+
+    String requestId = activityCreateDto.requestId();
 
     if (requestId != null && requestId.length() >= 4) {
       String first4 = requestId.substring(0, 4);
@@ -195,7 +219,7 @@ public class ActivityService {
     }
 
     // If adding a test type activity
-    if (activityCreateDto.testCategoryCd() != null) {
+    if (isTestActivity) {
       TestResultEntity testResult = new TestResultEntity();
       testResult.setRiaKey(savedActivityEntity.getRiaKey());
       testResult.setActivityType(savedActivityEntity.getActivityTypeCode());
