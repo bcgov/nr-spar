@@ -18,6 +18,7 @@ import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -80,8 +81,9 @@ class ActivityEndpointTest {
     createdActivityEntity.setItemId(validActivityCreateDto.itemId());
   }
 
+  /* --------------------- Create Activity ---------------------------------*/
   @Test
-  void createTestingActivity_shouldReturnCreated_andCallService() throws Exception {
+  void createActivity_shouldReturnCreated_andCallService() throws Exception {
     when(activityService.createActivity(any(ActivityCreateDto.class)))
         .thenReturn(createdActivityEntity);
 
@@ -100,7 +102,7 @@ class ActivityEndpointTest {
   }
 
   @Test
-  void createTestingActivity_shouldReturnBadRequest_whenInvalidDto() throws Exception {
+  void createActivity_shouldReturnBadRequest_whenInvalidDto() throws Exception {
     var invalidDto = new ActivityCreateDto(
         "", // standardActivityId cannot be empty
         "", // activityTypeCd cannot be empty
@@ -153,6 +155,7 @@ class ActivityEndpointTest {
             .value("must be less than or equal to 0"));
   }
 
+  /* --------------------- Get Activity RiaSkey ---------------------------------*/
   @Test
   void getActivityByRequestSkeyAndItemId_shouldReturnDtoList() throws Exception {
     BigDecimal requestSkey = new BigDecimal("422679");
@@ -176,6 +179,7 @@ class ActivityEndpointTest {
     verify(activityService, times(1)).getActivityByRequestSkeyAndItemId(requestSkey, itemId);
   }
 
+  /* --------------------- Get Standard Activity Ids------------------------------*/
   @Test
   void getStandardActivityIds_shouldReturnSeedlotOnly() throws Exception {
     var dto1 = new StandardActivityDto("AB", "MCR", "TC1", "Abies extraction");
@@ -272,6 +276,7 @@ class ActivityEndpointTest {
     verify(activityService, times(1)).getStandardActivityIds(true, true);
   }
 
+  /* ----------------------- Validate Adding Germ Test ----------------------------*/
   @Test
   void validateAddGermTest_shouldPass_whenGermTestAndNoCurrentRankA() throws Exception {
     String activityTypeCd = "G11";

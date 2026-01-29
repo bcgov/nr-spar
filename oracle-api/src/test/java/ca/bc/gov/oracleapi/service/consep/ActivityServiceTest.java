@@ -68,6 +68,7 @@ class ActivityServiceTest {
   private BigDecimal riaKey;
   private ActivityEntity activityEntity;
   private ActivityCreateDto validActivityCreateDto;
+  private StandardActivityEntity standardActivity;
 
   @BeforeEach
   void setUp() {
@@ -99,6 +100,11 @@ class ActivityServiceTest {
         "00098",
         ""
     );
+
+    standardActivity = new StandardActivityEntity();
+    standardActivity.setStandardActivityId(validActivityCreateDto.standardActivityId());
+    standardActivity.setActivityTypeCd(validActivityCreateDto.activityTypeCd());
+    standardActivity.setTestCategoryCd(validActivityCreateDto.testCategoryCd());
   }
 
   @Test
@@ -159,6 +165,8 @@ class ActivityServiceTest {
   void createActivity_shouldSucceed_whenValidData() {
     when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
     when(testResultRepository.save(any(TestResultEntity.class))).thenAnswer(i -> i.getArgument(0));
+    when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
+        .thenReturn(Optional.of(standardActivity));
 
     ActivityEntity createdActivityEntity = activityService.createActivity(validActivityCreateDto);
 
@@ -186,10 +194,15 @@ class ActivityServiceTest {
 
   @Test
   void createActivity_shouldNotCallClearExistingProcessCommitment_whenProcessCommitUnchecked() {
+    StandardActivityEntity nonTestActivity = new StandardActivityEntity();
+    nonTestActivity.setStandardActivityId(validActivityCreateDto.standardActivityId()); // match DTO
+    nonTestActivity.setActivityTypeCd(validActivityCreateDto.activityTypeCd());
+    nonTestActivity.setTestCategoryCd(null); // Not a test activity
+
     ActivityCreateDto dto = new ActivityCreateDto(
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
-        null,
+        null, // Not a test activity
         validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
@@ -198,7 +211,7 @@ class ActivityServiceTest {
         validActivityCreateDto.activityDuration(),
         validActivityCreateDto.activityTimeUnit(),
         validActivityCreateDto.significantStatusIndicator(),
-        0,
+        0, // processCommitIndicator not -1
         validActivityCreateDto.requestSkey(),
         validActivityCreateDto.requestId(),
         validActivityCreateDto.itemId(),
@@ -208,9 +221,10 @@ class ActivityServiceTest {
     );
 
     when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
+    when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
+        .thenReturn(Optional.of(nonTestActivity));
 
     ActivityEntity createdActivityEntity = activityService.createActivity(dto);
-
     assertEquals(
         -1,
         createdActivityEntity.getProcessResultIndicator(),
@@ -347,12 +361,94 @@ class ActivityServiceTest {
         validActivityCreateDto.familyLotNumber()
     );
 
+    when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
+        .thenReturn(Optional.of(standardActivity));
+
     ResponseStatusException ex = assertThrows(
         ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
     );
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals("TEST_CATEGORY_CD must be 'STD' because Request ID is a Seedling Request",
         ex.getReason());
+  }
+
+  @Test
+  void createActivity_shouldFail_whenTestActivityWithoutTestCategoryCd() {
+    when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
+        .thenReturn(Optional.of(standardActivity));
+
+    ActivityCreateDto dto = new ActivityCreateDto(
+        validActivityCreateDto.standardActivityId(),
+        validActivityCreateDto.activityTypeCd(),
+        null, // missing testCategoryCd
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        validActivityCreateDto.seedlotNumber(),
+        validActivityCreateDto.familyLotNumber()
+    );
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class,
+        () -> activityService.createActivity(dto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(
+        "Test category code is required for the selected test activity.",
+        ex.getReason()
+    );
+  }
+
+  @Test
+  void createActivity_shouldFail_whenNonTestActivityWithTestCategoryCd() {
+    StandardActivityEntity nonTestActivity = new StandardActivityEntity();
+    nonTestActivity.setStandardActivityId("ST2");
+    nonTestActivity.setActivityTypeCd("AC2");
+    nonTestActivity.setTestCategoryCd(null); // Not a test activity
+
+    when(standardActivityRepository.findById("ST2"))
+        .thenReturn(Optional.of(nonTestActivity));
+
+    ActivityCreateDto dto = new ActivityCreateDto(
+        "ST2",
+        "AC2",
+        "TC1", // invalid testCategoryCd for non-test activity
+        validActivityCreateDto.associatedRiaKey(),
+        validActivityCreateDto.plannedStartDate(),
+        validActivityCreateDto.plannedEndDate(),
+        validActivityCreateDto.revisedStartDate(),
+        validActivityCreateDto.revisedEndDate(),
+        validActivityCreateDto.activityDuration(),
+        validActivityCreateDto.activityTimeUnit(),
+        validActivityCreateDto.significantStatusIndicator(),
+        validActivityCreateDto.processCommitIndicator(),
+        validActivityCreateDto.requestSkey(),
+        validActivityCreateDto.requestId(),
+        validActivityCreateDto.itemId(),
+        validActivityCreateDto.vegetationState(),
+        validActivityCreateDto.seedlotNumber(),
+        validActivityCreateDto.familyLotNumber()
+    );
+
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class,
+        () -> activityService.createActivity(dto)
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(
+        "The selected activity is not a test activity; test category code should be null.",
+        ex.getReason()
+    );
   }
 
   /* ----------------------- Get Activity By RequestSkey And ItemId ---------------------------*/

@@ -154,7 +154,6 @@ public class ActivityService {
     }
 
     String requestId = activityCreateDto.requestId();
-
     if (requestId != null && requestId.length() >= 4) {
       String first4 = requestId.substring(0, 4);
       if (first4.chars().allMatch(Character::isDigit)) { // Seedling request
