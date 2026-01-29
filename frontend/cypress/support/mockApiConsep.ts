@@ -1,5 +1,6 @@
 /**
- *
+ * Sets up Cypress intercepts for moisture content cone and forest client APIs
+ * with predefined fixture responses for testing purposes.
  */
 export function mockMoistureContentApi() {
   cy.intercept(
