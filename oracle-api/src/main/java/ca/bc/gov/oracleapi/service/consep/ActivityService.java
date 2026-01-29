@@ -16,10 +16,7 @@ import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
@@ -229,26 +226,33 @@ public class ActivityService {
    * Retrieves all unique standard activity IDs and descriptions
    * used for seedlot and/or family lot contexts.
    *
+   * @param isFamilyLot true for familylot
+   * @param isSeedlot true for seedlot
    * @return list of StandardActivityDto containing standardActivityId and activityDescription
    */
-  public List<StandardActivityDto> getStandardActivityIds() {
-    List<StandardActivityEntity> allActivities =
-        standardActivityRepository.findAll();
+  public List<StandardActivityDto> getStandardActivityIds(boolean isFamilyLot, boolean isSeedlot) {
+    List<StandardActivityEntity> activities = new ArrayList<>();
+    if (isFamilyLot) {
+      activities.addAll(standardActivityRepository.findAllFamilyLotActivities());
+    }
+    if (isSeedlot) {
+      activities.addAll(standardActivityRepository.findAll());
+    }
+    // If neither, return empty
+    if (!isFamilyLot && !isSeedlot) {
+      return List.of();
+    }
 
-    List<StandardActivityEntity> familyLotActivities =
-        standardActivityRepository.findAllFamilyLotActivities();
-
-    Map<String, StandardActivityEntity> activityMap = new HashMap<>();
-
-    allActivities.forEach(a ->
-        activityMap.put(a.getStandardActivityId(), a)
-    );
-    familyLotActivities.forEach(a ->
-        activityMap.putIfAbsent(a.getStandardActivityId(), a)
-    );
-
-    return activityMap.values().stream()
-        .sorted(Comparator.comparing(StandardActivityEntity::getStandardActivityId))
+    // Remove duplicates by id
+    Map<String, StandardActivityEntity> map = new HashMap<>();
+    for (StandardActivityEntity a : activities) {
+      map.putIfAbsent(a.getStandardActivityId(), a);
+    }
+    return map.values().stream()
+        .sorted(
+            Comparator.comparing(StandardActivityEntity::getActivityDesc,
+                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+        )
         .map(a -> new StandardActivityDto(
             a.getStandardActivityId(),
             a.getActivityTypeCode(),

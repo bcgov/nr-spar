@@ -60,6 +60,8 @@ const AddActivity = (
   const requestSkey = selectedRows[0]?.requestSkey;
   const itemId = selectedRows[0]?.itemId;
   const isTestActivity = Boolean(selectedRows[0]?.testCategoryCd);
+  const lot = selectedRows[0]?.seedlotDisplay ?? '';
+  const isFamilyLotNumber = isFamilyLot(lot);
   const todayString = toLocalDateString(new Date());
   const REQUIRED_FIELDS = useMemo<(keyof AddActivityRequest)[]>(() => {
     const baseFields: (keyof AddActivityRequest)[] = [
@@ -120,8 +122,11 @@ const AddActivity = (
   });
 
   const activityIdQuery = useQuery({
-    queryKey: ['activity-ids'],
-    queryFn: getActivityIds,
+    queryKey: ['activity-ids-by-type', isFamilyLotNumber],
+    queryFn: () => getActivityIds({
+      isFamilyLot: isFamilyLotNumber,
+      isSeedlot: !isFamilyLotNumber,
+    }),
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
     select: (data: ActivityIdType[]) => data.map((activity) => ({
@@ -246,9 +251,6 @@ const AddActivity = (
   };
 
   const handleAddActivity = () => {
-    const lot = selectedRows[0]?.seedlotDisplay ?? '';
-    const isFamilyLotNumber = isFamilyLot(lot);
-
     const requestPayload: AddActivityRequest = {
       ...addActivityData,
       standardActivityId: addActivityData.standardActivityId!,
@@ -440,9 +442,6 @@ const AddActivity = (
           kind="primary"
           disabled={!isAddActivityValid}
           onClick={() => {
-            const lot = selectedRows[0]?.seedlotDisplay ?? '';
-            const isFamilyLot = lot.toUpperCase().startsWith('F');
-
             if (!addActivityData.activityTypeCd) {
               setAlert({
                 status: 'error',
@@ -453,8 +452,8 @@ const AddActivity = (
 
             validateAddGermTestMutation.mutate({
               activityTypeCd: addActivityData.activityTypeCd,
-              seedlotNumber: isFamilyLot ? undefined : lot,
-              familyLotNumber: isFamilyLot ? lot : undefined
+              seedlotNumber: isFamilyLotNumber ? undefined : lot,
+              familyLotNumber: isFamilyLotNumber ? lot : undefined
             });
           }}
         >

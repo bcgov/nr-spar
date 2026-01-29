@@ -219,7 +219,7 @@ const TestSearch = () => {
 
   const activityIdQuery = useQuery({
     queryKey: ['activity-ids'],
-    queryFn: getActivityIds,
+    queryFn: () => getActivityIds(),
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
     select: (data: ActivityIdType[]) => data?.map((activity) => activity.standardActivityId) ?? []

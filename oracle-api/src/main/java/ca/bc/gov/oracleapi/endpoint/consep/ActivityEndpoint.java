@@ -84,6 +84,8 @@ public class ActivityEndpoint {
   /**
    * Retrieves standard activity IDs and descriptions for seedlot and/or family lot numbers.
    *
+   * @param isFamilyLot a boolean indicating if the request is for getting familylot activities
+   * @param isSeedlot a boolean indicating if the request is for getting seedlot activities
    * @return a list of StandardActivityDto containing the activity id and description
    */
   @GetMapping("/ids")
@@ -94,15 +96,18 @@ public class ActivityEndpoint {
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public List<StandardActivityDto> getStandardActivityIds() {
-    return activityService.getStandardActivityIds();
+  public List<StandardActivityDto> getStandardActivityIds(
+      @RequestParam(name = "isFamilyLot", defaultValue = "true") boolean isFamilyLot,
+      @RequestParam(name = "isSeedlot", defaultValue = "true") boolean isSeedlot
+  ) {
+    return activityService.getStandardActivityIds(isFamilyLot, isSeedlot);
   }
 
   /**
    * Validates the given activity type code against the current accepted A-rank germ test
    * for the specified seedlot or family lot.
    *
-   * @param activityTypeCode the activity type code to validate
+   * @param activityTypeCd the activity type code to validate
    * @param seedlotNumber the seedlot number to check against (optional if familyLotNumber provided)
    * @param familyLotNumber the family lot number to check against
    *                        (optional if seedlotNumber provided)

@@ -177,30 +177,77 @@ class ActivityEndpointTest {
   }
 
   @Test
-  void getStandardActivityIds_shouldReturnActivityDtoList() throws Exception {
+  void getStandardActivityIds_shouldReturnSeedlotOnly() throws Exception {
     var dto1 = new StandardActivityDto("AB", "MCR", "Abies extraction");
     var dto2 = new StandardActivityDto("SSP", "SEP", "Seed separation");
-    var dto3 = new StandardActivityDto("TUM", "TUM",  "Cone tumbling/seed extraction");
+    var dto3 = new StandardActivityDto("TUM", "TUM", "Cone tumbling/seed extraction");
 
-    when(activityService.getStandardActivityIds())
-        .thenReturn(List.of(dto1, dto2, dto3));
+    when(activityService.getStandardActivityIds(false, true))
+        .thenReturn(List.of(dto1, dto3, dto2)); // Assume sorted by description
 
     mockMvc.perform(get("/api/activities/ids")
-            .with(csrf()))
+            .with(csrf())
+            .param("isFamilyLot", "false")
+            .param("isSeedlot", "true"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(3)))
         .andExpect(jsonPath("$[0].standardActivityId").value(dto1.standardActivityId()))
-        .andExpect(jsonPath("$[0].activityTypeCd").value(dto1.activityTypeCd()))
+        .andExpect(jsonPath("$[0].activityDescription").value(dto1.activityDescription()))
+        .andExpect(jsonPath("$[1].standardActivityId").value(dto3.standardActivityId()))
+        .andExpect(jsonPath("$[1].activityDescription").value(dto3.activityDescription()))
+        .andExpect(jsonPath("$[2].standardActivityId").value(dto2.standardActivityId()))
+        .andExpect(jsonPath("$[2].activityDescription").value(dto2.activityDescription()));
+
+    verify(activityService, times(1)).getStandardActivityIds(false, true);
+  }
+
+  @Test
+  void getStandardActivityIds_shouldReturnFamilyLotOnly() throws Exception {
+    var dto1 = new StandardActivityDto("FA2", "FAM", "Alpha Family");
+    var dto2 = new StandardActivityDto("FA1", "FAM", "Beta Family");
+
+    when(activityService.getStandardActivityIds(true, false))
+        .thenReturn(List.of(dto1, dto2)); // Assume sorted by description
+
+    mockMvc.perform(get("/api/activities/ids")
+            .with(csrf())
+            .param("isFamilyLot", "true")
+            .param("isSeedlot", "false"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("$[0].standardActivityId").value(dto1.standardActivityId()))
         .andExpect(jsonPath("$[0].activityDescription").value(dto1.activityDescription()))
         .andExpect(jsonPath("$[1].standardActivityId").value(dto2.standardActivityId()))
-        .andExpect(jsonPath("$[1].activityTypeCd").value(dto2.activityTypeCd()))
-        .andExpect(jsonPath("$[1].activityDescription").value(dto2.activityDescription()))
-        .andExpect(jsonPath("$[2].standardActivityId").value(dto3.standardActivityId()))
-        .andExpect(jsonPath("$[2].activityTypeCd").value(dto3.activityTypeCd()))
-        .andExpect(jsonPath("$[2].activityDescription").value(dto3.activityDescription()));
+        .andExpect(jsonPath("$[1].activityDescription").value(dto2.activityDescription()));
 
-    verify(activityService, times(1)).getStandardActivityIds();
+    verify(activityService, times(1)).getStandardActivityIds(true, false);
+  }
+
+  @Test
+  void getStandardActivityIds_shouldReturnAll_whenBothTrue() throws Exception {
+    var dto1 = new StandardActivityDto("AB", "MCR", "Abies extraction");
+    var dto2 = new StandardActivityDto("FA1", "FAM", "Beta Family");
+    var dto3 = new StandardActivityDto("TUM", "TUM", "Cone tumbling/seed extraction");
+    var dto4 = new StandardActivityDto("SSP", "SEP", "Seed separation");
+
+    when(activityService.getStandardActivityIds(true, true))
+        .thenReturn(List.of(dto1, dto2, dto3, dto4)); // Assume sorted by description
+
+    mockMvc.perform(get("/api/activities/ids")
+            .with(csrf())
+            .param("isFamilyLot", "true")
+            .param("isSeedlot", "true"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(4)))
+        .andExpect(jsonPath("$[0].standardActivityId").value(dto1.standardActivityId()))
+        .andExpect(jsonPath("$[1].standardActivityId").value(dto2.standardActivityId()))
+        .andExpect(jsonPath("$[2].standardActivityId").value(dto3.standardActivityId()))
+        .andExpect(jsonPath("$[3].standardActivityId").value(dto4.standardActivityId()));
+
+    verify(activityService, times(1)).getStandardActivityIds(true, true);
   }
 
   @Test

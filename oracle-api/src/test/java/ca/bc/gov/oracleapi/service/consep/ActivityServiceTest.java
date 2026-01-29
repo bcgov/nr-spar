@@ -389,7 +389,77 @@ class ActivityServiceTest {
 
   /* ------------------------ Get Activity Ids -----------------------------------------------*/
   @Test
-  void getStandardActivityIds_shouldReturnExpectedDtos() {
+  void getStandardActivityIds_shouldReturnExpectedDtos_forSeedlot() {
+    StandardActivityEntity activity1 = new StandardActivityEntity();
+    activity1.setStandardActivityId("AEX");
+    activity1.setActivityTypeCode("SCR");
+    activity1.setActivityDesc("Abies extraction");
+
+    StandardActivityEntity activity2 = new StandardActivityEntity();
+    activity2.setStandardActivityId("SSP");
+    activity2.setActivityTypeCode("SEP");
+    activity2.setActivityDesc("Seed separation");
+
+    // Unordered input, expect sorting by description
+    when(standardActivityRepository.findAll()).thenReturn(List.of(activity2, activity1));
+
+    List<StandardActivityDto> result = activityService.getStandardActivityIds(false, true);
+
+    assertThat(result)
+        .hasSize(2)
+        // Sorted by "Abies extraction", "Seed separation"
+        .extracting(StandardActivityDto::standardActivityId)
+        .containsExactly(activity1.getStandardActivityId(), activity2.getStandardActivityId());
+
+    assertThat(result)
+        .extracting(StandardActivityDto::activityTypeCd)
+        .containsExactly(activity1.getActivityTypeCode(), activity2.getActivityTypeCode());
+
+    assertThat(result)
+        .extracting(StandardActivityDto::activityDescription)
+        .containsExactly(activity1.getActivityDesc(), activity2.getActivityDesc());
+
+    verify(standardActivityRepository, times(1)).findAll();
+    verify(standardActivityRepository, never()).findAllFamilyLotActivities();
+  }
+
+  @Test
+  void getStandardActivityIds_shouldReturnExpectedDtos_forFamilyLot() {
+    StandardActivityEntity activity1 = new StandardActivityEntity();
+    activity1.setStandardActivityId("FA1");
+    activity1.setActivityTypeCode("FAM");
+    activity1.setActivityDesc("Beta Family");
+
+    StandardActivityEntity activity2 = new StandardActivityEntity();
+    activity2.setStandardActivityId("FA2");
+    activity2.setActivityTypeCode("FAM");
+    activity2.setActivityDesc("Alpha Family");
+
+    // Unordered input, expect sorting by description
+    when(standardActivityRepository.findAllFamilyLotActivities()).thenReturn(List.of(activity1, activity2));
+
+    List<StandardActivityDto> result = activityService.getStandardActivityIds(true, false);
+
+    assertThat(result)
+        .hasSize(2)
+        // Sorted by "Alpha Family", "Beta Family"
+        .extracting(StandardActivityDto::standardActivityId)
+        .containsExactly(activity2.getStandardActivityId(), activity1.getStandardActivityId());
+
+    assertThat(result)
+        .extracting(StandardActivityDto::activityTypeCd)
+        .containsExactly(activity2.getActivityTypeCode(), activity1.getActivityTypeCode());
+
+    assertThat(result)
+        .extracting(StandardActivityDto::activityDescription)
+        .containsExactly(activity2.getActivityDesc(), activity1.getActivityDesc());
+
+    verify(standardActivityRepository, times(1)).findAllFamilyLotActivities();
+    verify(standardActivityRepository, never()).findAll();
+  }
+
+  @Test
+  void getStandardActivityIds_shouldReturnExpectedDtos_forAll() {
     StandardActivityEntity activity1 = new StandardActivityEntity();
     activity1.setStandardActivityId("AEX");
     activity1.setActivityTypeCode("SCR");
@@ -401,44 +471,51 @@ class ActivityServiceTest {
     activity2.setActivityDesc("Seed separation");
 
     StandardActivityEntity activity3 = new StandardActivityEntity();
-    activity3.setStandardActivityId("TQA");
-    activity3.setActivityTypeCode("QAM");
-    activity3.setActivityDesc("Tumbling qa");
+    activity3.setStandardActivityId("FA1");
+    activity3.setActivityTypeCode("FAM");
+    activity3.setActivityDesc("Beta Family");
 
-    when(standardActivityRepository.findAll())
-        .thenReturn(List.of(activity2, activity1));
+    StandardActivityEntity activity4 = new StandardActivityEntity();
+    activity4.setStandardActivityId("TUM");
+    activity4.setActivityTypeCode("TUM");
+    activity4.setActivityDesc("Cone tumbling/seed extraction");
 
-    when(standardActivityRepository.findAllFamilyLotActivities())
-        .thenReturn(List.of(activity2, activity3));
+    when(standardActivityRepository.findAll()).thenReturn(List.of(activity2, activity1, activity4));
+    when(standardActivityRepository.findAllFamilyLotActivities()).thenReturn(List.of(activity3));
 
-    List<StandardActivityDto> result = activityService.getStandardActivityIds();
+    List<StandardActivityDto> result = activityService.getStandardActivityIds(true, true);
 
     assertThat(result)
-        .hasSize(3)
+        .hasSize(4)
+        // Alphabetical by description
         .extracting(StandardActivityDto::standardActivityId)
         .containsExactly(
-            activity1.getStandardActivityId(),
-            activity2.getStandardActivityId(),
-            activity3.getStandardActivityId()
-        );
-
-    assertThat(result)
-        .extracting(StandardActivityDto::activityTypeCd)
-        .containsExactly(
-            activity1.getActivityTypeCode(),
-            activity2.getActivityTypeCode(),
-            activity3.getActivityTypeCode()
+            activity1.getStandardActivityId(), // Abies extraction
+            activity3.getStandardActivityId(), // Beta Family
+            activity4.getStandardActivityId(), // Cone tumbling/seed extraction
+            activity2.getStandardActivityId()  // Seed separation
         );
 
     assertThat(result)
         .extracting(StandardActivityDto::activityDescription)
         .containsExactly(
             activity1.getActivityDesc(),
-            activity2.getActivityDesc(),
-            activity3.getActivityDesc()
+            activity3.getActivityDesc(),
+            activity4.getActivityDesc(),
+            activity2.getActivityDesc()
         );
+
+    verify(standardActivityRepository, times(1)).findAllFamilyLotActivities();
+    verify(standardActivityRepository, times(1)).findAll();
   }
 
+  @Test
+  void getStandardActivityIds_shouldReturnEmpty_whenBothFalse() {
+    List<StandardActivityDto> result = activityService.getStandardActivityIds(false, false);
+    assertThat(result).isEmpty();
+    verify(standardActivityRepository, never()).findAll();
+    verify(standardActivityRepository, never()).findAllFamilyLotActivities();
+  }
 
   /* ------------------------ Validate Add Germ Test ----------------------------------------*/
   @Test
