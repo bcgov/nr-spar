@@ -14,9 +14,10 @@ import {
   DatePicker,
   DatePickerInput,
   TextInput,
-  InlineNotification
+  InlineNotification,
+  Modal
 } from '@carbon/react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import GenericTable from '../../../../../../components/GenericTable';
 import RequiredFormFieldLabel from '../../../../../../components/RequiredFormFieldLabel';
 import {
@@ -25,12 +26,14 @@ import {
   getTestCategoryCodes,
   getActivityDurationUnits
 } from '../../../../../../api-service/consep/testCodesAPI';
+import { addActivities, validateAddGermTest } from '../../../../../../api-service/consep/activitiesAPI';
 import isCommitmentIndicatorYes from '../../../../../../api-service/requestSeedlotAndVeglotAPI';
 import {
   DATE_FORMAT,
   maxEndDate,
   minStartDate,
-  toSelectedItemString
+  toSelectedItemString,
+  isFamilyLot
 } from '../../constants';
 import { getAddActivityTableColumns } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../../config/TimeUnits';
@@ -39,7 +42,8 @@ import type {
   TestingSearchResponseType,
   ActivityIdType,
   ActivityRiaSkeyType,
-  TestCodeType
+  TestCodeType,
+  AddGermTestValidationResponseType
 } from '../../../../../../types/consep/TestingSearchType';
 import type { AddActivityRequest } from './definitions';
 import './styles.scss';
@@ -92,6 +96,7 @@ const AddActivity = (
     status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
+  const [showGermTestWarning, setShowGermTestWarning] = useState(false);
 
   const isAddActivityValid = REQUIRED_FIELDS.every((field) => {
     const value = addActivityData[field];
@@ -160,6 +165,44 @@ const AddActivity = (
     gcTime: THREE_HALF_HOURS
   });
 
+  const addActivityMutation = useMutation({
+    mutationFn: (payload: AddActivityRequest) => addActivities(payload),
+    onSuccess: () => {
+      closeModal();
+    },
+    onError: (error: unknown) => {
+      setAlert({
+        status: 'error',
+        message: `Failed to add activity: ${error}`
+      });
+    }
+  });
+
+  const validateAddGermTestMutation = useMutation({
+    mutationFn: ({
+      activityTypeCd,
+      seedlotNumber,
+      familyLotNumber
+    }: {
+      activityTypeCd: string;
+      seedlotNumber?: string;
+      familyLotNumber?: string;
+    }) => validateAddGermTest(activityTypeCd, seedlotNumber, familyLotNumber),
+    onSuccess: (data: AddGermTestValidationResponseType) => {
+      if (data.germTest && !data.matchesCurrentTypeCode) {
+        setShowGermTestWarning(true);
+      } else {
+        handleAddActivity();
+      }
+    },
+    onError: (error: unknown) => {
+      setAlert({
+        status: 'error',
+        message: `Failed to validate the new activity: ${error}`
+      });
+    }
+  });
+
   useEffect(() => {
     const failedMessages: string[] = [];
     if (activityIdQuery.isError && activityIdQuery.error instanceof Error) {
@@ -202,8 +245,52 @@ const AddActivity = (
     }));
   };
 
+  const handleAddActivity = () => {
+    const lot = selectedRows[0]?.seedlotDisplay ?? '';
+    const isFamilyLotNumber = isFamilyLot(lot);
+
+    const requestPayload: AddActivityRequest = {
+      ...addActivityData,
+      standardActivityId: addActivityData.standardActivityId!,
+      activityTypeCd: addActivityData.activityTypeCd!,
+      plannedStartDate: addActivityData.plannedStartDate!,
+      plannedEndDate: addActivityData.plannedEndDate!,
+      revisedEndDate: addActivityData.plannedEndDate,
+      revisedStartDate: addActivityData.plannedStartDate,
+      activityDuration: addActivityData.activityDuration!,
+      activityTimeUnit: addActivityData.activityTimeUnit!,
+      significantStatusIndicator: addActivityData.significantStatusIndicator!,
+      processCommitIndicator: addActivityData.processCommitIndicator!,
+      requestSkey: addActivityData.requestSkey!,
+      requestId: addActivityData.requestId!,
+      itemId: addActivityData.itemId!,
+      vegetationState: addActivityData.vegetationState!,
+      ...(isFamilyLotNumber ? { familyLotNumber: lot } : { seedlotNumber: lot })
+    };
+
+    addActivityMutation.mutate(requestPayload);
+  };
+
   return (
     <div>
+      {showGermTestWarning && (
+        <Modal
+          className="add-activity-germ-test-warning-modal"
+          open={showGermTestWarning}
+          modalHeading="Add activity validation warning: test type mismatch"
+          primaryButtonText="Okay"
+          secondaryButtonText="Cancel"
+          onRequestClose={() => {
+            setShowGermTestWarning(false);
+          }}
+          onRequestSubmit={() => {
+            handleAddActivity();
+            setShowGermTestWarning(false);
+          }}
+        >
+          <p style={{ margin: '1rem' }}>Test Type does not match current A-Rank for Seedlot.</p>
+        </Modal>
+      )}
       <GenericTable columns={columns} data={selectedRows} tableBodyRef={tableBodyRef} />
       {alert?.message && (
         <InlineNotification lowContrast kind={alert.status} subtitle={alert?.message} />
@@ -353,30 +440,22 @@ const AddActivity = (
           kind="primary"
           disabled={!isAddActivityValid}
           onClick={() => {
-            // TODO: Implement the API call to add activity
             const lot = selectedRows[0]?.seedlotDisplay ?? '';
             const isFamilyLot = lot.toUpperCase().startsWith('F');
 
-            const requestPayload: AddActivityRequest = {
-              ...addActivityData,
-              standardActivityId: addActivityData.standardActivityId!,
-              activityTypeCd: addActivityData.activityTypeCd!,
-              plannedStartDate: addActivityData.plannedStartDate!,
-              plannedEndDate: addActivityData.plannedEndDate!,
-              revisedEndDate: addActivityData.plannedEndDate,
-              revisedStartDate: addActivityData.plannedStartDate,
-              activityDuration: addActivityData.activityDuration!,
-              activityTimeUnit: addActivityData.activityTimeUnit!,
-              significantStatusIndicator: addActivityData.significantStatusIndicator!,
-              processCommitIndicator: addActivityData.processCommitIndicator!,
-              requestSkey: addActivityData.requestSkey!,
-              requestId: addActivityData.requestId!,
-              itemId: addActivityData.itemId!,
-              vegetationState: addActivityData.vegetationState!,
-              ...(isFamilyLot ? { familyLotNumber: lot } : { seedlotNumber: lot })
-            };
+            if (!addActivityData.activityTypeCd) {
+              setAlert({
+                status: 'error',
+                message: 'Activity Type Code is missing.'
+              });
+              return;
+            }
 
-            console.log('requestPayload', requestPayload);
+            validateAddGermTestMutation.mutate({
+              activityTypeCd: addActivityData.activityTypeCd,
+              seedlotNumber: isFamilyLot ? undefined : lot,
+              familyLotNumber: isFamilyLot ? lot : undefined
+            });
           }}
         >
           Add Activity

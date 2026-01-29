@@ -118,10 +118,10 @@ public class ActivityEndpoint {
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public AddGermTestValidationResponseDto validateAddGermTest(
-      @RequestParam String activityTypeCode,
+      @RequestParam String activityTypeCd,
       @RequestParam(required = false) String seedlotNumber,
       @RequestParam(required = false) String familyLotNumber
   ) {
-    return activityService.validateAddGermTest(activityTypeCode, seedlotNumber, familyLotNumber);
+    return activityService.validateAddGermTest(activityTypeCd, seedlotNumber, familyLotNumber);
   }
 }

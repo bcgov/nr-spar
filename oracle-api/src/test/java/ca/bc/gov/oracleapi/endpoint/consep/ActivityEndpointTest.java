@@ -205,17 +205,17 @@ class ActivityEndpointTest {
 
   @Test
   void validateAddGermTest_shouldPass_whenGermTestAndNoCurrentRankA() throws Exception {
-    String activityTypeCode = "G11";
+    String activityTypeCd = "G11";
     String seedlotNumber = "00098";
 
     AddGermTestValidationResponseDto serviceResponse =
         new AddGermTestValidationResponseDto(true, true, null);
 
-    when(activityService.validateAddGermTest(activityTypeCode, seedlotNumber, null))
+    when(activityService.validateAddGermTest(activityTypeCd, seedlotNumber, null))
         .thenReturn(serviceResponse);
 
     mockMvc.perform(get("/api/activities/validate-add-germ-test")
-            .param("activityTypeCode", activityTypeCode)
+            .param("activityTypeCd", activityTypeCd)
             .param("seedlotNumber", seedlotNumber)
             .with(csrf()))
         .andExpect(status().isOk())
@@ -224,22 +224,22 @@ class ActivityEndpointTest {
         .andExpect(jsonPath("$.currentTypeCode").isEmpty());
 
     verify(activityService, times(1))
-        .validateAddGermTest(activityTypeCode, seedlotNumber, null);
+        .validateAddGermTest(activityTypeCd, seedlotNumber, null);
   }
 
   @Test
   void validateAddGermTest_shouldPass_whenNotGermTest() throws Exception {
-    String activityTypeCode = "X99";
+    String activityTypeCd = "X99";
     String seedlotNumber = "00098";
 
     AddGermTestValidationResponseDto serviceResponse =
         new AddGermTestValidationResponseDto(false, true, null);
 
-    when(activityService.validateAddGermTest(activityTypeCode, seedlotNumber, null))
+    when(activityService.validateAddGermTest(activityTypeCd, seedlotNumber, null))
         .thenReturn(serviceResponse);
 
     mockMvc.perform(get("/api/activities/validate-add-germ-test")
-            .param("activityTypeCode", activityTypeCode)
+            .param("activityTypeCd", activityTypeCd)
             .param("seedlotNumber", seedlotNumber)
             .with(csrf()))
         .andExpect(status().isOk())
@@ -248,24 +248,24 @@ class ActivityEndpointTest {
         .andExpect(jsonPath("$.currentTypeCode").isEmpty());
 
     verify(activityService, times(1))
-        .validateAddGermTest(activityTypeCode, seedlotNumber, null);
+        .validateAddGermTest(activityTypeCd, seedlotNumber, null);
   }
 
   @Test
   void validateAddGermTest_shouldReturnBadRequest_whenNeitherSeedlotNorFamilyLotProvided() throws Exception {
-    String activityTypeCode = "G11";
+    String activityTypeCd = "G11";
 
-    when(activityService.validateAddGermTest(activityTypeCode, null, null))
+    when(activityService.validateAddGermTest(activityTypeCd, null, null))
         .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST,
             "Exactly one of seedlotNumber or familyLotNumber must be provided"));
 
     mockMvc.perform(get("/api/activities/validate-add-germ-test")
-            .param("activityTypeCode", activityTypeCode)
+            .param("activityTypeCd", activityTypeCd)
             .with(csrf()))
         .andExpect(status().isBadRequest());
 
     verify(activityService, times(1))
-        .validateAddGermTest(activityTypeCode, null, null);
+        .validateAddGermTest(activityTypeCd, null, null);
   }
 
 }
