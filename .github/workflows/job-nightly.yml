@@ -61,18 +61,19 @@ jobs:
 
   tests:
     name: Tests
+    needs: [db-bk-test]
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
     with:
       target: test
 
   zap_scan:
-    runs-on: ubuntu-24.04
     name: Penetration Tests
     # Run after other tests to avoid rate limiting
     needs: [tests]
     permissions:
       issues: write
+    runs-on: ubuntu-24.04
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-test
