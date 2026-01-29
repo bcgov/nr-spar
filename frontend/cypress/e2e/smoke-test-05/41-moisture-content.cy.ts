@@ -26,8 +26,7 @@ describe('Moisture Content Screen page', () => {
       .contains(mcData.table.title);
   });
 
-  it('Check breadcrumbs section', () => {
-    // Check if the breadcrumbs are displayed correctly
+  it('should display breadcrumbs correctly', () => {
     cy.get('.consep-moisture-content-breadcrumb')
       .find('li')
       .should('have.length', 3)
@@ -36,7 +35,7 @@ describe('Moisture Content Screen page', () => {
       .and('contain', 'Testing list');
   });
 
-  it('Check Activity summary section', () => {
+  it('should display Activity summary section correctly', () => {
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(0)
