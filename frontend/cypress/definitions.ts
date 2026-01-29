@@ -35,3 +35,36 @@ export type MoistureContentType = {
     emptyTableMsg: string
   }
 };
+
+export type ReplicateType = {
+  riaKey: number;
+  replicateNumber: number;
+  containerId?: string;
+  containerWeight?: number;
+  freshSeed?: number;
+  containerAndDryWeight?: number;
+  dryWeight?: number;
+  replicateAccInd?: number;
+  replicateComment?: string;
+  overrideReason?: string;
+};
+
+export type SeedlotReplicateInfoType = {
+  testCompleteInd: number,
+  sampleDesc: string,
+  moistureStatus: string,
+  moisturePct: number,
+  acceptResult: number,
+  requestId: string,
+  seedlotNumber: string,
+  familyLotNumber: string,
+  geneticClassCode: string,
+  vegetationCode: string,
+  activityType: string,
+  testCategoryCode: string,
+  riaComment: string,
+  actualBeginDateTime: string,
+  actualEndDateTime: string,
+  standardActivityType: string,
+  replicatesList: ReplicateType[]
+};
