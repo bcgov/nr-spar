@@ -43,7 +43,7 @@ describe('Moisture Content Screen page', () => {
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(0)
-      .should('have.text', seedlotData.replicatesList[0].riaKey);
+      .should('have.text', seedlotData.activityType);
 
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
