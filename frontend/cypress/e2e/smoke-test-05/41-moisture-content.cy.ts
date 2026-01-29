@@ -1,5 +1,4 @@
-import { HALF_SECOND, TYPE_DELAY } from '../../constants';
-import prefix from '../../../src/styles/classPrefix';
+import { TYPE_DELAY } from '../../constants';
 import { mockMoistureContentApi } from '../../support/mockApiConsep';
 import { MoistureContentType } from '../../definitions';
 
