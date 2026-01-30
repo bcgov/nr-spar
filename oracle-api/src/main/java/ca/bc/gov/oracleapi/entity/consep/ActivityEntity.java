@@ -26,12 +26,7 @@ import lombok.Setter;
 public class ActivityEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ria_seq")
-  @SequenceGenerator(
-      name = "ria_seq",
-      sequenceName = "CNS_RIA_COUNTER",
-      allocationSize = 1
-  )
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "RIA_SKEY", precision = 10, scale = 0)
   private BigDecimal riaKey;
 

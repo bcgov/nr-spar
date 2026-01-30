@@ -36,4 +36,23 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("requestSkey") BigDecimal requestSkey,
       @Param("itemId") String itemId
   );
+
+  @Query("""
+        SELECT a.activityTypeCode
+        FROM ActivityEntity a
+        JOIN TestResultEntity t
+          ON t.riaKey = a.riaKey
+        WHERE t.currentTest = -1
+          AND t.testRank = 'A'
+          AND t.standardTest = -1
+          AND t.acceptResult = -1
+          AND (
+            (:seedlotNumber IS NOT NULL AND a.seedlotNumber = :seedlotNumber)
+            OR (:familyLotNumber IS NOT NULL AND a.familyLotNumber = :familyLotNumber)
+          )
+      """)
+  List<String> findTypeCodeForAcceptedGermTestRankA(
+      @Param("seedlotNumber") String seedlotNumber,
+      @Param("familyLotNumber") String familyLotNumber
+  );
 }
