@@ -629,7 +629,7 @@ class ActivityServiceTest {
   /* ------------------------ Validate Add Germ Test ----------------------------------------*/
   @Test
   @DisplayName("validateAddGermTest should throw BAD_REQUEST when"
-      + "both seedlotNumber and familyLotNumber are missing")
+      + " both seedlotNumber and familyLotNumber are missing")
   void validateAddGermTest_shouldThrowBadRequestWhenNoSeedlotOrFamilyLot() {
     ResponseStatusException ex = assertThrows(
         ResponseStatusException.class,
@@ -644,7 +644,7 @@ class ActivityServiceTest {
 
   @Test
   @DisplayName("validateAddGermTest should return false germTest when"
-      + "activity type is not a germ test")
+      + " activity type is not a germ test")
   void validateAddGermTest_shouldReturnFalseWhenNotGermTest() {
     when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G01", "G02"));
 
@@ -658,7 +658,7 @@ class ActivityServiceTest {
 
   @Test
   @DisplayName("validateAddGermTest should return true and"
-      + "matchesCurrentTypeCode true when no current A-rank exists")
+      + " matchesCurrentTypeCode true when no current A-rank exists")
   void validateAddGermTest_shouldReturnTrueWhenNoCurrentRankA() {
     when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G11", "G12"));
     when(activityRepository.findTypeCodeForAcceptedGermTestRankA("00098", null)).thenReturn(List.of());
@@ -673,7 +673,7 @@ class ActivityServiceTest {
 
   @Test
   @DisplayName("validateAddGermTest should return false matchesCurrentTypeCode"
-      + "when current A-rank does not match")
+      + " when current A-rank does not match")
   void validateAddGermTest_shouldReturnFalseWhenDoesNotMatchCurrentRankA() {
     when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G11", "G12"));
     when(activityRepository.findTypeCodeForAcceptedGermTestRankA("00098", null))
@@ -689,7 +689,7 @@ class ActivityServiceTest {
 
   @Test
   @DisplayName("validateAddGermTest should return true matchesCurrentTypeCode"
-      + "when current A-rank matches")
+      + " when current A-rank matches")
   void validateAddGermTest_shouldReturnTrueWhenMatchesCurrentRankA() {
     when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G11", "G12"));
     when(activityRepository.findTypeCodeForAcceptedGermTestRankA("00098", null))

@@ -58,8 +58,7 @@ const AddActivity = ({
   table: MRT_TableInstance<TestingSearchResponseType>;
   closeModal: () => void;
   onAddActivitySuccess?: (newActivity: TestingSearchResponseType) => void;
-}
-) => {
+}) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const columns = useMemo(() => getAddActivityTableColumns(), []);
   const selectedRows = table.getSelectedRowModel()?.rows.map((row) => row.original) ?? [];
@@ -101,7 +100,7 @@ const AddActivity = ({
     queryKey: ['activity-ids-by-type', isFamilyLotNumber],
     queryFn: () => getActivityIds({
       isFamilyLot: isFamilyLotNumber,
-      isSeedlot: !isFamilyLotNumber,
+      isSeedlot: !isFamilyLotNumber
     }),
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
@@ -161,6 +160,29 @@ const AddActivity = ({
     }
   });
 
+  const handleAddActivity = () => {
+    const requestPayload: AddActivityRequest = {
+      ...addActivityData,
+      standardActivityId: addActivityData.standardActivityId!,
+      activityTypeCd: addActivityData.activityTypeCd!,
+      plannedStartDate: addActivityData.plannedStartDate!,
+      plannedEndDate: addActivityData.plannedEndDate!,
+      revisedEndDate: addActivityData.plannedEndDate,
+      revisedStartDate: addActivityData.plannedStartDate,
+      activityDuration: addActivityData.activityDuration!,
+      activityTimeUnit: addActivityData.activityTimeUnit!,
+      significantStatusIndicator: addActivityData.significantStatusIndicator!,
+      processCommitIndicator: addActivityData.processCommitIndicator!,
+      requestSkey: addActivityData.requestSkey!,
+      requestId: addActivityData.requestId!,
+      itemId: addActivityData.itemId!,
+      vegetationState: addActivityData.vegetationState!,
+      ...(isFamilyLotNumber ? { familyLotNumber: lot } : { seedlotNumber: lot })
+    };
+
+    addActivityMutation.mutate(requestPayload);
+  };
+
   const validateAddGermTestMutation = useMutation({
     mutationFn: ({
       activityTypeCd,
@@ -218,11 +240,10 @@ const AddActivity = ({
     isCommitmentIndicatorYesQuery.isError, isCommitmentIndicatorYesQuery.error
   ]);
 
-  const selectedActivity = useMemo(() => {
-    return activityIdQuery.data?.find(
-      (a) => a.id === addActivityData.standardActivityId
-    );
-  }, [activityIdQuery.data, addActivityData.standardActivityId]);
+  const selectedActivity = useMemo(
+    () => activityIdQuery.data?.find(a => a.id === addActivityData.standardActivityId),
+    [activityIdQuery.data, addActivityData.standardActivityId]
+  );
   const isTestActivity = Boolean(selectedActivity?.testCategoryCd);
   const REQUIRED_FIELDS = useMemo<(keyof AddActivityRequest)[]>(() => {
     const baseFields: (keyof AddActivityRequest)[] = [
@@ -262,29 +283,6 @@ const AddActivity = ({
       ...prev,
       [field]: value
     }));
-  };
-
-  const handleAddActivity = () => {
-    const requestPayload: AddActivityRequest = {
-      ...addActivityData,
-      standardActivityId: addActivityData.standardActivityId!,
-      activityTypeCd: addActivityData.activityTypeCd!,
-      plannedStartDate: addActivityData.plannedStartDate!,
-      plannedEndDate: addActivityData.plannedEndDate!,
-      revisedEndDate: addActivityData.plannedEndDate,
-      revisedStartDate: addActivityData.plannedStartDate,
-      activityDuration: addActivityData.activityDuration!,
-      activityTimeUnit: addActivityData.activityTimeUnit!,
-      significantStatusIndicator: addActivityData.significantStatusIndicator!,
-      processCommitIndicator: addActivityData.processCommitIndicator!,
-      requestSkey: addActivityData.requestSkey!,
-      requestId: addActivityData.requestId!,
-      itemId: addActivityData.itemId!,
-      vegetationState: addActivityData.vegetationState!,
-      ...(isFamilyLotNumber ? { familyLotNumber: lot } : { seedlotNumber: lot })
-    };
-
-    addActivityMutation.mutate(requestPayload);
   };
 
   return (
@@ -343,17 +341,21 @@ const AddActivity = ({
           )}
           onChange={(e: ComboBoxEvent) => updateField('associatedRiaKey', e.selectedItem ? e.selectedItem.id : undefined)}
         />
-        {isTestActivity && <ComboBox
-          id="add-activity-test-category-select"
-          className="add-activity-select"
-          titleText={<RequiredFormFieldLabel text="Test category" />}
-          items={testCategoryQuery.data ?? []}
-          itemToString={(item: { id: string; text: string } | null) => item?.text ?? ''}
-          selectedItem={testCategoryQuery.data?.find(
-            (o) => o.id === addActivityData.testCategoryCd
-          )}
-          onChange={(e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem ? e.selectedItem.id : undefined)}
-        />}
+        {isTestActivity && (
+          <ComboBox
+            id="add-activity-test-category-select"
+            className="add-activity-select"
+            titleText={<RequiredFormFieldLabel text="Test category" />}
+            items={testCategoryQuery.data ?? []}
+            itemToString={(item: { id: string; text: string } | null) => item?.text ?? ''}
+            selectedItem={testCategoryQuery.data?.find(
+              (o) => o.id === addActivityData.testCategoryCd
+            )}
+            onChange={(e: ComboBoxEvent) =>
+              updateField('testCategoryCd', e.selectedItem ? e.selectedItem.id : undefined)
+            }
+          />
+        )}
         <div className="add-activity-date-picker">
           <DatePicker
             datePickerType="single"

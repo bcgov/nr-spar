@@ -17,7 +17,11 @@ import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
@@ -361,7 +365,7 @@ public class ActivityService {
    */
   public static ActivitySearchResponseDto mapActivityEntityToSearchResponseDto(ActivityEntity e) {
     return new ActivitySearchResponseDto(
-        e.getSeedlotNumber(),
+        e.getSeedlotNumber() != null ? e.getSeedlotNumber() : e.getFamilyLotNumber(),
         e.getRequestId() + "-" + e.getItemId(),
         e.getVegetationState(),
         e.getStandardActivityId(),
@@ -379,13 +383,13 @@ public class ActivityService {
         e.getSignificantStatusIndicator(),
         null,
         e.getRevisedEndDate() != null ? e.getRevisedEndDate().atStartOfDay() : null,
-        e.getActualBeginDateTime(),
-        e.getActualEndDateTime(),
-        e.getRiaComment(),
+        null,
+        null,
+        null,
         e.getRequestSkey() != null ? e.getRequestSkey().intValue() : null,
         e.getRequestId(),
         e.getItemId(),
-        e.getSeedlotNumber() != null ? e.getSeedlotNumber() : e.getFamilyLotNumber(),
+        null,
         e.getRiaKey().intValue(),
         e.getActivityTypeCode()
     );
