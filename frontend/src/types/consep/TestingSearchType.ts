@@ -61,5 +61,5 @@ export type ActivityRiaSkeyType = {
 export type AddGermTestValidationResponseType = {
   germTest: boolean;
   matchesCurrentTypeCode: boolean;
-  currentTypeCode: string;
+  currentTypeCode: string | null;
 };

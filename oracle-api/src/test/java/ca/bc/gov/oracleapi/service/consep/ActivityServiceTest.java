@@ -721,4 +721,20 @@ class ActivityServiceTest {
         ex.getReason()
     );
   }
+
+  @Test
+  @DisplayName("validateAddGermTest should throw BAD_REQUEST"
+      + " when both seedlotNumber and familyLotNumber are provided")
+  void validateAddGermTest_shouldThrowBadRequestWhenBothSeedlotAndFamilyLot() {
+    ResponseStatusException ex = assertThrows(
+        ResponseStatusException.class,
+        () -> activityService.validateAddGermTest("G11", "00098", "F20082140146")
+    );
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(
+        "Exactly one of seedlotNumber or familyLotNumber must be provided",
+        ex.getReason()
+    );
+  }
+
 }

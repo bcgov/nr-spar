@@ -201,10 +201,11 @@ const AddActivity = ({
         handleAddActivity();
       }
     },
-    onError: (error: unknown) => {
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || error;
       setAlert({
         status: 'error',
-        message: `Failed to validate the new activity: ${error}`
+        message: `Failed to validate if the new activity pass the germ test check: ${message}`
       });
     }
   });
