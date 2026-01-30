@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: 'Release version (e.g., v1.2.3). Leave empty to calculate from semantic commits.'
+        description: "Release version (e.g., v1.2.3). Leave empty to calculate from semantic commits."
         required: false
         type: string
 
 concurrency:
   group: ${{ github.workflow }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions: {}
 
@@ -59,15 +59,15 @@ jobs:
       - name: Conventional Changelog Update
         uses: TriPSs/conventional-changelog-action@84dadaf2c367cb52af02737cd9c7e888807219e7 # v6
         id: changelog
-        if: ${{ inputs.release == '' }}
         continue-on-error: true
         with:
           github-token: ${{ github.token }}
-          output-file: 'CHANGELOG.md'
-          skip-version-file: 'true'
-          skip-commit: 'true'
-          skip-on-empty: 'false'
-          git-push: 'true'
+          output-file: "CHANGELOG.md"
+          skip-version-file: "true"
+          skip-commit: "true"
+          skip-tag: ${{ inputs.release != '' }}
+          skip-on-empty: "false"
+          git-push: ${{ inputs.release == '' }}
 
       - name: Set Final Version
         id: set-version
@@ -80,8 +80,35 @@ jobs:
             echo "version=${{ steps.changelog.outputs.version }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Get Previous Tag
+        id: previous-tag
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git tag --sort=-creatordate | head -2 | tail -1 || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD | head -1)
+          fi
+          echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate Categorized Changelog
+        id: changelog-body
+        continue-on-error: true
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          # Note: Action's parameter names are confusing:
+          # fromTag = newer tag (latest/release tag)
+          # toTag = older tag (previous tag)
+          # Action compares: toTag...fromTag (commits between old and new)
+          fromTag: ${{ steps.set-version.outputs.tag }} # New release tag (e.g., v0.2.0)
+          toTag: ${{ steps.previous-tag.outputs.tag }} # Previous tag (e.g., v0.1.0)
+          writeToFile: false
+          useGitmojis: false
+          excludeTypes: "build,docs,other,style"
+          includeInvalidCommits: false
+          includeRefIssues: false
+
       - name: Create Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         if: steps.set-version.outputs.tag != ''
         continue-on-error: true
         env:
@@ -90,7 +117,8 @@ jobs:
           token: ${{ github.token }}
           tag_name: ${{ steps.set-version.outputs.tag }}
           name: ${{ steps.set-version.outputs.tag }}
-          generate_release_notes: true
+          body: ${{ steps.changelog-body.outputs.changes }}
+          generate_release_notes: false
 
   deploys-test:
     name: TEST Deploys (${{ needs.vars.outputs.pr }})
@@ -101,3 +129,30 @@ jobs:
       environment: test
       tag: ${{ needs.vars.outputs.pr }}
       target: test
+
+  deploys-prod:
+    name: PROD Deploys (${{ needs.vars.outputs.pr }})
+    needs: [vars, deploys-test]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: prod
+      tag: ${{ needs.vars.outputs.pr }}
+      target: prod
+
+  promote:
+    name: Promote Images
+    needs: [vars, deploys-prod]
+    permissions:
+      packages: write
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        package: [backend, frontend, oracle-api]
+    steps:
+      - uses: shrink/actions-docker-registry-tag@f04afd0559f66b288586792eb150f45136a927fa # v4
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ needs.vars.outputs.pr }}
+          tags: prod
