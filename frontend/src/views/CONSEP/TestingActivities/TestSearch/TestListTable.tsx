@@ -19,6 +19,7 @@ import type {
 
 type TestListTableProp = {
   data: TestingSearchResponseType[];
+  onAddActivitySuccess?: ((newActivity: TestingSearchResponseType) => void);
   paginationInfo: PaginationInfoType;
   sorting?: { id: string; desc: boolean }[];
   onExportData: () => void;
@@ -29,6 +30,7 @@ type TestListTableProp = {
 
 const TestListTable = ({
   data,
+  onAddActivitySuccess = () => {},
   isLoading = false,
   paginationInfo,
   onPageChange,
@@ -138,9 +140,13 @@ const TestListTable = ({
           '.MuiPaper-root'
         ]}
       >
-        {showAddActivity
-        && tableRef.current
-        && <AddActivity table={tableRef.current} closeModal={() => setShowAddActivity(false)} />}
+        {showAddActivity && tableRef.current && (
+          <AddActivity
+            table={tableRef.current}
+            closeModal={() => setShowAddActivity(false)}
+            onAddActivitySuccess={onAddActivitySuccess}
+          />
+        )}
       </Modal>
       <Row className="concep-test-search-table">
         <GenericTable

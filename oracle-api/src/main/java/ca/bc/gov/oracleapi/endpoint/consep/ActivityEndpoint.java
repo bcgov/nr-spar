@@ -1,9 +1,6 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
-import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
-import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
+import ca.bc.gov.oracleapi.dto.consep.*;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
@@ -54,7 +51,7 @@ public class ActivityEndpoint {
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public ActivityEntity createActivity(
+  public ActivitySearchResponseDto createActivity(
       @Valid @RequestBody ActivityCreateDto activityCreateDto
   ) {
     return activityService.createActivity(activityCreateDto);

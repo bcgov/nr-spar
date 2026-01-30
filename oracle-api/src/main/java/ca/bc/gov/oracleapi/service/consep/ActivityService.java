@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
@@ -107,7 +108,7 @@ public class ActivityService {
    * @return The saved ActivityEntity.
    */
   @Transactional
-  public ActivityEntity createActivity(ActivityCreateDto activityCreateDto) {
+  public ActivitySearchResponseDto createActivity(ActivityCreateDto activityCreateDto) {
     SparLog.info("Create a new activity");
 
     if (activityCreateDto.plannedStartDate().isAfter(activityCreateDto.plannedEndDate())) {
@@ -154,7 +155,7 @@ public class ActivityService {
     }
 
     String requestId = activityCreateDto.requestId();
-    if (requestId != null && requestId.length() >= 4) {
+    if (isTestActivity && requestId != null && requestId.length() >= 4) {
       String first4 = requestId.substring(0, 4);
       if (first4.chars().allMatch(Character::isDigit)) { // Seedling request
         if (!"STD".equals(testCategoryCd)) {
@@ -227,7 +228,7 @@ public class ActivityService {
       testResultRepository.save(testResult);
     }
 
-    return savedActivityEntity;
+    return mapActivityEntityToSearchResponseDto(savedActivityEntity);
   }
 
   /**
@@ -348,6 +349,45 @@ public class ActivityService {
         true,
         matches,
         currentTypeCode
+    );
+  }
+
+  /**
+   * Maps an {@link ActivityEntity} to an {@link ActivitySearchResponseDto} for use
+   * in activity search results and table displays.
+   *
+   * @param e the persisted {@link ActivityEntity} to map
+   * @return a populated {@link ActivitySearchResponseDto} suitable for search result displays
+   */
+  public static ActivitySearchResponseDto mapActivityEntityToSearchResponseDto(ActivityEntity e) {
+    return new ActivitySearchResponseDto(
+        e.getSeedlotNumber(),
+        e.getRequestId() + "-" + e.getItemId(),
+        e.getVegetationState(),
+        e.getStandardActivityId(),
+        null,
+        null,
+        e.getTestCategoryCode(),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        e.getSignificantStatusIndicator(),
+        null,
+        e.getRevisedEndDate() != null ? e.getRevisedEndDate().atStartOfDay() : null,
+        e.getActualBeginDateTime(),
+        e.getActualEndDateTime(),
+        e.getRiaComment(),
+        e.getRequestSkey() != null ? e.getRequestSkey().intValue() : null,
+        e.getRequestId(),
+        e.getItemId(),
+        e.getSeedlotNumber() != null ? e.getSeedlotNumber() : e.getFamilyLotNumber(),
+        e.getRiaKey().intValue(),
+        e.getActivityTypeCode()
     );
   }
 }

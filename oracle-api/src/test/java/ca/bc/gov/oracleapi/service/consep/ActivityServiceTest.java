@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
@@ -163,31 +164,27 @@ class ActivityServiceTest {
   /* ------------------------ Create Activity -----------------------------------------------*/
   @Test
   void createActivity_shouldSucceed_whenValidData() {
-    when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
+    when(activityRepository.save(any(ActivityEntity.class)))
+        .thenAnswer(invocation -> {
+          ActivityEntity e = invocation.getArgument(0);
+          e.setRiaKey(new BigDecimal("999999")); // simulate DB-generated PK
+          return e;
+        });
     when(testResultRepository.save(any(TestResultEntity.class))).thenAnswer(i -> i.getArgument(0));
     when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
         .thenReturn(Optional.of(standardActivity));
 
-    ActivityEntity createdActivityEntity = activityService.createActivity(validActivityCreateDto);
+    ActivitySearchResponseDto createdActivity =
+        activityService.createActivity(validActivityCreateDto);
 
-    assertEquals(validActivityCreateDto.seedlotNumber(), createdActivityEntity.getSeedlotNumber());
-    assertEquals(validActivityCreateDto.requestSkey(), createdActivityEntity.getRequestSkey());
-    assertEquals(validActivityCreateDto.itemId(), createdActivityEntity.getItemId());
-    assertEquals(
-        0,
-        createdActivityEntity.getProcessResultIndicator(),
-        "processResultIndicator should be 0 when testCategoryCd is not null"
-    );
-    assertEquals(
-        -1,
-        createdActivityEntity.getTestResultIndicator(),
-        "testResultIndicator should be -1 when testCategoryCd is not null"
-    );
+    assertEquals(validActivityCreateDto.seedlotNumber(), createdActivity.seedlotDisplay());
+    assertEquals(validActivityCreateDto.requestSkey().intValue(), createdActivity.requestSkey());
+    assertEquals(validActivityCreateDto.itemId(), createdActivity.itemId());
     verify(activityRepository, times(1)).save(any(ActivityEntity.class));
     verify(activityRepository, times(1)).clearExistingProcessCommitment(
         eq(validActivityCreateDto.requestSkey()),
         eq(validActivityCreateDto.itemId()),
-        eq(createdActivityEntity.getRiaKey())
+        eq(BigDecimal.valueOf(createdActivity.riaSkey()))
     );
     verify(testResultRepository, times(1)).save(any(TestResultEntity.class));
   }
@@ -220,22 +217,16 @@ class ActivityServiceTest {
         validActivityCreateDto.familyLotNumber()
     );
 
-    when(activityRepository.save(any(ActivityEntity.class))).thenAnswer(i -> i.getArgument(0));
+    when(activityRepository.save(any(ActivityEntity.class)))
+        .thenAnswer(invocation -> {
+          ActivityEntity e = invocation.getArgument(0);
+          e.setRiaKey(new BigDecimal("999999")); // simulate DB-generated PK
+          return e;
+        });
     when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
         .thenReturn(Optional.of(nonTestActivity));
 
-    ActivityEntity createdActivityEntity = activityService.createActivity(dto);
-    assertEquals(
-        -1,
-        createdActivityEntity.getProcessResultIndicator(),
-        "processResultIndicator should be -1 when testCategoryCd is null"
-    );
-    assertEquals(
-        0,
-        createdActivityEntity.getTestResultIndicator(),
-        "testResultIndicator should be 0 when testCategoryCd is null"
-    );
-
+    activityService.createActivity(dto);
     verify(activityRepository, never()).clearExistingProcessCommitment(any(), any(), any());
     verify(testResultRepository, never()).save(any(TestResultEntity.class));
   }

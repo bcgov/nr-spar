@@ -630,6 +630,9 @@ const TestSearch = () => {
       {hasSearched ? (
         <TestListTable
           data={searchResults}
+          onAddActivitySuccess={(newActivity) => {
+            setSearchResults(prev => [newActivity, ...prev]);
+          }}
           isLoading={searchMutation.isPending}
           paginationInfo={paginationInfo}
           sorting={sorting}

@@ -50,9 +50,15 @@ import './styles.scss';
 
 const toLocalDateString = (date: Date) => date.toLocaleDateString('en-CA');
 
-const AddActivity = (
-  { table, closeModal }:
-  { table: MRT_TableInstance<TestingSearchResponseType>; closeModal: () => void }
+const AddActivity = ({
+  table,
+  closeModal,
+  onAddActivitySuccess = () => {}
+}: {
+  table: MRT_TableInstance<TestingSearchResponseType>;
+  closeModal: () => void;
+  onAddActivitySuccess?: (newActivity: TestingSearchResponseType) => void;
+}
 ) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const columns = useMemo(() => getAddActivityTableColumns(), []);
@@ -143,7 +149,8 @@ const AddActivity = (
 
   const addActivityMutation = useMutation({
     mutationFn: (payload: AddActivityRequest) => addActivities(payload),
-    onSuccess: () => {
+    onSuccess: (data: TestingSearchResponseType) => {
+      onAddActivitySuccess(data);
       closeModal();
     },
     onError: (error: unknown) => {

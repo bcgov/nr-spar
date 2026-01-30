@@ -15,10 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
-import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -49,7 +48,7 @@ class ActivityEndpointTest {
   private ObjectMapper objectMapper;
 
   private ActivityCreateDto validActivityCreateDto;
-  private ActivityEntity createdActivityEntity;
+  private ActivitySearchResponseDto createdActivityDto;
 
   @BeforeEach
   void setUp() {
@@ -74,18 +73,37 @@ class ActivityEndpointTest {
         ""
     );
 
-    createdActivityEntity = new ActivityEntity();
-    createdActivityEntity.setRequestId(validActivityCreateDto.requestId());
-    createdActivityEntity.setSeedlotNumber(validActivityCreateDto.seedlotNumber());
-    createdActivityEntity.setRequestSkey(validActivityCreateDto.requestSkey());
-    createdActivityEntity.setItemId(validActivityCreateDto.itemId());
+    createdActivityDto = new ActivitySearchResponseDto(
+        validActivityCreateDto.seedlotNumber(),           // seedlotDisplay
+        validActivityCreateDto.requestId() + "-" + validActivityCreateDto.itemId(), // requestItem
+        validActivityCreateDto.vegetationState(),          // species / vegetation
+        validActivityCreateDto.standardActivityId(),       // activityId
+        null,                                              // testRank
+        null,                                              // currentTestInd
+        validActivityCreateDto.testCategoryCd(),           // testCategoryCd
+        // test-related fields
+        null, null, null, null, null, null, null, null,
+        validActivityCreateDto.significantStatusIndicator(),
+        null,                                              // seedWithdrawalDate
+        null,                                              // revisedEndDt
+        null,                                              // actualBeginDtTm
+        null,                                              // actualEndDtTm
+        null,                                              // riaComment
+        validActivityCreateDto.requestSkey().intValue(),   // requestSkey
+        validActivityCreateDto.requestId(),                // reqId
+        validActivityCreateDto.itemId(),                   // itemId
+        validActivityCreateDto.seedlotNumber(),            // seedlotSample
+        12345,                                             // riaSkey (mock value)
+        validActivityCreateDto.activityTypeCd()            // activityTypeCd
+    );
+
   }
 
   /* --------------------- Create Activity ---------------------------------*/
   @Test
   void createActivity_shouldReturnCreated_andCallService() throws Exception {
     when(activityService.createActivity(any(ActivityCreateDto.class)))
-        .thenReturn(createdActivityEntity);
+        .thenReturn(createdActivityDto);
 
     mockMvc.perform(post("/api/activities")
             .with(csrf())
@@ -93,9 +111,10 @@ class ActivityEndpointTest {
             .content(objectMapper.writeValueAsString(validActivityCreateDto)))
         .andExpect(status().isCreated())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.requestId").value(validActivityCreateDto.requestId()))
-        .andExpect(jsonPath("$.seedlotNumber").value(validActivityCreateDto.seedlotNumber()))
-        .andExpect(jsonPath("$.requestSkey").value(validActivityCreateDto.requestSkey().toString()))
+        .andExpect(jsonPath("$.reqId").value(validActivityCreateDto.requestId()))
+        .andExpect(jsonPath("$.seedlotSample").value(validActivityCreateDto.seedlotNumber()))
+        .andExpect(jsonPath("$.requestSkey")
+            .value(validActivityCreateDto.requestSkey().intValue()))
         .andExpect(jsonPath("$.itemId").value(validActivityCreateDto.itemId()));
 
     verify(activityService, times(1)).createActivity(validActivityCreateDto);
