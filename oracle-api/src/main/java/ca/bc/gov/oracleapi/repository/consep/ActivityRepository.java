@@ -47,8 +47,8 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
           AND t.standardTest = -1
           AND t.acceptResult = -1
           AND (
-            a.seedlotNumber = :seedlotNumber
-            OR a.familyLotNumber = :familyLotNumber
+            (:seedlotNumber IS NOT NULL AND a.seedlotNumber = :seedlotNumber)
+            OR (:familyLotNumber IS NOT NULL AND a.familyLotNumber = :familyLotNumber)
           )
       """)
   List<String> findTypeCodeForAcceptedGermTestRankA(

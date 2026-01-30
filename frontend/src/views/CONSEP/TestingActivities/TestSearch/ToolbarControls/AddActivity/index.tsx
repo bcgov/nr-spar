@@ -152,10 +152,11 @@ const AddActivity = ({
       onAddActivitySuccess(data);
       closeModal();
     },
-    onError: (error: unknown) => {
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || error;
       setAlert({
         status: 'error',
-        message: `Failed to add activity: ${error}`
+        message: `Failed to add activity: ${message}`
       });
     }
   });
@@ -248,6 +249,7 @@ const AddActivity = ({
   const REQUIRED_FIELDS = useMemo<(keyof AddActivityRequest)[]>(() => {
     const baseFields: (keyof AddActivityRequest)[] = [
       'standardActivityId',
+      'activityTypeCd',
       'plannedStartDate',
       'plannedEndDate',
       'activityDuration',
@@ -324,9 +326,13 @@ const AddActivity = ({
             if (e.selectedItem) {
               updateField('standardActivityId', e.selectedItem.id);
               updateField('activityTypeCd', e.selectedItem.activityTypeCd);
+              if (!e.selectedItem.testCategoryCd) {
+                updateField('testCategoryCd', undefined);
+              }
             } else {
               updateField('standardActivityId', undefined);
               updateField('activityTypeCd', undefined);
+              updateField('testCategoryCd', undefined);
             }
           }}
         />
