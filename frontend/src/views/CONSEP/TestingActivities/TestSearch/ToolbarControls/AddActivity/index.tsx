@@ -241,7 +241,7 @@ const AddActivity = ({
   ]);
 
   const selectedActivity = useMemo(
-    () => activityIdQuery.data?.find(a => a.id === addActivityData.standardActivityId),
+    () => activityIdQuery.data?.find((a) => a.id === addActivityData.standardActivityId),
     [activityIdQuery.data, addActivityData.standardActivityId]
   );
   const isTestActivity = Boolean(selectedActivity?.testCategoryCd);
@@ -351,8 +351,8 @@ const AddActivity = ({
             selectedItem={testCategoryQuery.data?.find(
               (o) => o.id === addActivityData.testCategoryCd
             )}
-            onChange={(e: ComboBoxEvent) =>
-              updateField('testCategoryCd', e.selectedItem ? e.selectedItem.id : undefined)
+            onChange={
+              (e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem ? e.selectedItem.id : undefined)
             }
           />
         )}

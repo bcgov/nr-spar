@@ -641,7 +641,7 @@ const TestSearch = () => {
         <TestListTable
           data={searchResults}
           onAddActivitySuccess={(newActivity) => {
-            setSearchResults(prev => [newActivity, ...prev]);
+            setSearchResults((prev) => [newActivity, ...prev]);
           }}
           isLoading={searchMutation.isPending}
           paginationInfo={paginationInfo}
