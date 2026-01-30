@@ -1,0 +1,131 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Release version (e.g., v1.2.3). Leave empty to calculate from semantic commits."
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  vars:
+    name: Set Variables
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      # Get PR number for the last merged PR
+      - name: PR Number
+        id: pr
+        uses: bcgov/action-get-pr@35514fa1d4765547da319e967b509363598e8b46 # v0.1.0
+
+  semantic-release:
+    runs-on: ubuntu-24.04
+    needs: [vars]
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.set-version.outputs.tag }}
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set Version from Input
+        id: version-input
+        if: ${{ inputs.release != '' }}
+        run: |
+          VERSION="${{ inputs.release }}"
+          # Validate semantic version format: vMAJOR.MINOR.PATCH
+          # Example: v1.2.3
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Release names must use semantic versioning (e.g., v1.2.3). Got: $VERSION"
+            exit 1
+          fi
+          # Version without 'v' prefix for outputs
+          VERSION_NUM="${VERSION#v}"
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION_NUM" >> $GITHUB_OUTPUT
+
+      - name: Conventional Changelog Update
+        uses: TriPSs/conventional-changelog-action@84dadaf2c367cb52af02737cd9c7e888807219e7 # v6
+        id: changelog
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          output-file: "CHANGELOG.md"
+          skip-version-file: "true"
+          skip-commit: "true"
+          skip-tag: ${{ inputs.release != '' }}
+          skip-on-empty: "false"
+          git-push: ${{ inputs.release == '' }}
+
+      - name: Set Final Version
+        id: set-version
+        run: |
+          if [ "${{ inputs.release }}" != "" ]; then
+            echo "tag=${{ steps.version-input.outputs.tag }}" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.version-input.outputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ steps.changelog.outputs.tag }}" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.changelog.outputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get Previous Tag
+        id: previous-tag
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git tag --sort=-creatordate | head -2 | tail -1 || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD | head -1)
+          fi
+          echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate Categorized Changelog
+        id: changelog-body
+        continue-on-error: true
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          # Note: Action's parameter names are confusing:
+          # fromTag = newer tag (latest/release tag)
+          # toTag = older tag (previous tag)
+          # Action compares: toTag...fromTag (commits between old and new)
+          fromTag: ${{ steps.set-version.outputs.tag }} # New release tag (e.g., v0.2.0)
+          toTag: ${{ steps.previous-tag.outputs.tag }} # Previous tag (e.g., v0.1.0)
+          writeToFile: false
+          useGitmojis: false
+          excludeTypes: "build,docs,other,style"
+          includeInvalidCommits: false
+          includeRefIssues: false
+
+      - name: Create Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        if: steps.set-version.outputs.tag != ''
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          token: ${{ github.token }}
+          tag_name: ${{ steps.set-version.outputs.tag }}
+          name: ${{ steps.set-version.outputs.tag }}
+          body: ${{ steps.changelog-body.outputs.changes }}
+          generate_release_notes: false
+
+  deploys-test:
+    name: TEST Deploys (${{ needs.vars.outputs.pr }})
+    needs: [vars, semantic-release]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: test
+      tag: ${{ needs.vars.outputs.pr }}
+      target: test

@@ -136,7 +136,9 @@ const TestListTable = ({
           '.MuiPaper-root'
         ]}
       >
-        {showAddActivity && tableRef.current && <AddActivity table={tableRef.current} />}
+        {showAddActivity
+        && tableRef.current
+        && <AddActivity table={tableRef.current} closeModal={() => setShowAddActivity(false)} />}
       </Modal>
       <Modal
         className="concep-create-germ-tray-modal"

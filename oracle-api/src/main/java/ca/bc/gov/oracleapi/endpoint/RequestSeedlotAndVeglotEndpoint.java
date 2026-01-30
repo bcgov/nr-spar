@@ -51,10 +51,10 @@ public class RequestSeedlotAndVeglotEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public boolean isCommitmentChecked(@PathVariable Long requestSkey, @PathVariable String itemId) {
+  public boolean isCommitmentIndicatorYes(@PathVariable Long requestSkey, @PathVariable String itemId) {
     SparLog.info("Fetching commitment indicator for requestSkey {} and itemId {}", requestSkey, itemId);
 
-    boolean commitmentChecked = requestSeedlotAndVeglotService.isCommitmentChecked(requestSkey, itemId);
+    boolean commitmentChecked = requestSeedlotAndVeglotService.isCommitmentIndicatorYes(requestSkey, itemId);
     SparLog.info("Commitment indicator for requestSkey {} and itemId {}: {}", requestSkey, itemId, commitmentChecked);
     return commitmentChecked;
   }

@@ -67,7 +67,9 @@ const ApiConfig = {
 
   testCodes: `${oracleServerHost}/api/test-codes`,
 
-  activities: `${oracleServerHost}/api/activities`
+  activities: `${oracleServerHost}/api/activities`,
+
+  requestSeedLotAndVegLot: `${oracleServerHost}/api/request-seedlot-and-veglot`
 };
 
 export default ApiConfig;

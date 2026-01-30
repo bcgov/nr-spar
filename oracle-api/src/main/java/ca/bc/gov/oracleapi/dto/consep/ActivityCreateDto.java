@@ -17,11 +17,6 @@ import org.springframework.format.annotation.DateTimeFormat;
  */
 @Schema(description = "This class represents an object needed to create an activity entity.")
 public record ActivityCreateDto(
-    @Schema(description = "A surrogate key to uniquely identify each Spar Request")
-    @Digits(integer = 10, fraction = 0)
-    @NotNull
-    BigDecimal riaKey,
-
     @Schema(description = "Standard activity identifier")
     @Size(max = 3)
     @NotBlank
@@ -77,16 +72,6 @@ public record ActivityCreateDto(
     @Min(-1)
     @Max(0)
     Integer processCommitIndicator,
-
-    @Schema(description = "Indicator for the process result")
-    @Min(-1)
-    @Max(0)
-    Integer processResultIndicator,
-
-    @Schema(description = "Indicator for the test result")
-    @Min(-1)
-    @Max(0)
-    Integer testResultIndicator,
 
     @Schema(description = "Foreign key for the request")
     @Digits(integer = 10, fraction = 0)

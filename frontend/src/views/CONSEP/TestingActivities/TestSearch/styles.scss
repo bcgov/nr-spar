@@ -142,7 +142,7 @@
       }
 
       .MuiTableContainer-root {
-        max-height: calc(100vh - 28.2rem);
+        max-height: calc(100vh - 10rem);
 
         // style for table header resize handle
         .Mui-TableHeadCell-ResizeHandle-Wrapper {
@@ -161,6 +161,12 @@
       .MuiPaper-root {
         border-radius: 0rem 0rem 0.5rem 0.5rem;
       }
+    }
+
+    .#{vars.$bcgov-prefix}--modal-footer .#{vars.$bcgov-prefix}--btn {
+      max-width: none;
+      height: 3rem;
+      padding-bottom: 1rem;
     }
   }
 
