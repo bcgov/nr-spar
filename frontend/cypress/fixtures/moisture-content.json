@@ -1,0 +1,22 @@
+{
+  "mc": {
+    "title": "Moisture content oven for lot",
+    "commentPlaceholder": "",
+    "testComment": "This is a test comment"
+  },
+  "table": {
+    "title": "Activity results per replicate",
+    "column1": "Replicate",
+    "column2": "Container #",
+    "column3": "Container weight",
+    "column4": "Fresh seed",
+    "column5": "Cont + Dry seed",
+    "column6": "Dry weight",
+    "column7": "MC value (%)",
+    "containerErrorMsg": "Must be no more than 4 characters",
+    "containerWeightErrorMsg": "Must be between 0 and 1000",
+    "checkedBox": "CheckBoxIcon",
+    "unCheckedBox": "CheckBoxOutlineBlankIcon",
+    "emptyTableMsg": "No data found"
+  }
+}
