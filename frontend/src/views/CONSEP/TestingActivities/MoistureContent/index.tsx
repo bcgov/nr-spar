@@ -141,7 +141,7 @@ const MoistureContent = () => {
     } else if (mcVariation) {
       setReplicatesData(initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows));
     }
-  }, [testActivity, riaKey, mcVariation]);
+  }, [testActivity, riaKey, mcType]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });
