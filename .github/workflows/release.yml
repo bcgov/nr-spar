@@ -10,7 +10,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions: {}
 
@@ -129,3 +129,30 @@ jobs:
       environment: test
       tag: ${{ needs.vars.outputs.pr }}
       target: test
+
+  deploys-prod:
+    name: PROD Deploys (${{ needs.vars.outputs.pr }})
+    needs: [vars, deploys-test]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: prod
+      tag: ${{ needs.vars.outputs.pr }}
+      target: prod
+
+  promote:
+    name: Promote Images
+    needs: [vars, deploys-prod]
+    permissions:
+      packages: write
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        package: [backend, frontend, oracle-api]
+    steps:
+      - uses: shrink/actions-docker-registry-tag@f04afd0559f66b288586792eb150f45136a927fa # v4
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ needs.vars.outputs.pr }}
+          tags: prod
