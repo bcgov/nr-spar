@@ -1,12 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 16",
+  "display": "Node 24",
   "compilerOptions": {
-    "target": "es2021",
+    "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
-      "es2021"
+      "ES2022"
     ],
     "allowJs": true,
     "baseUrl": "./",

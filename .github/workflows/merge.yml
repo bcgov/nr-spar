@@ -4,10 +4,10 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '*.md'
-      - '.github/**'
-      - '.github/graphics/**'
-      - '!.github/workflows/**'
+      - "*.md"
+      - ".github/**"
+      - ".github/graphics/**"
+      - "!.github/workflows/**"
 
 concurrency:
   # Do not interrupt previous workflows
@@ -23,7 +23,7 @@ jobs:
       pr: ${{ steps.pr.outputs.pr }}
     runs-on: ubuntu-24.04
     steps:
-        # Get PR number for squash merges to main
+      # Get PR number for squash merges to main
       - id: pr
         uses: bcgov/action-get-pr@35514fa1d4765547da319e967b509363598e8b46 # v0.1.0
 
@@ -36,30 +36,3 @@ jobs:
       environment: test
       tag: ${{ needs.init.outputs.pr }}
       target: test
-
-  deploys-prod:
-    name: PROD Deploys (${{ needs.init.outputs.pr }})
-    needs: [init, deploys-test]
-    secrets: inherit
-    uses: ./.github/workflows/.deploy.yml
-    with:
-      environment: prod
-      tag: ${{ needs.init.outputs.pr }}
-      target: prod
-
-  promote:
-    name: Promote Images
-    needs: [init, deploys-prod]
-    permissions:
-      packages: write
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        package: [backend, frontend, oracle-api]
-    steps:
-      - uses: shrink/actions-docker-registry-tag@f04afd0559f66b288586792eb150f45136a927fa # v4
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ needs.init.outputs.pr }}
-          tags: prod
