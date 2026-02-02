@@ -26,6 +26,8 @@ const CreateGermTray: React.FC<CreateGermTrayProps> = ({
     onSubmit(options);
   };
 
+  const isAnyCheckboxSelected = Object.values(options).some((value) => value);
+
   return (
     <div className="create-germ-tray-content">
       <div className="germ-tray-options">
@@ -58,7 +60,7 @@ const CreateGermTray: React.FC<CreateGermTrayProps> = ({
         <Button kind="secondary" onClick={onClose}>
           Cancel
         </Button>
-        <Button kind="primary" onClick={handleSubmit} disabled={isLoading}>
+        <Button kind="primary" onClick={handleSubmit} disabled={isLoading || !isAnyCheckboxSelected}>
           Create germination tray
         </Button>
       </div>
