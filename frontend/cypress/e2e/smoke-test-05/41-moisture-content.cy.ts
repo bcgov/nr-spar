@@ -66,7 +66,7 @@ describe('Moisture Content Screen page', () => {
       .should('have.text', seedlotData.moisturePct);
   });
 
-  it('Check Comment box', () => {
+  it('should check comment box', () => {
     // Check if the comment input exists
     cy.get('#moisture-content-comments').should('be.visible');
 
