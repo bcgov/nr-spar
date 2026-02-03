@@ -5,6 +5,7 @@
 
 #### Workflows
 [![Analysis](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml)
+[![CodeQL](https://github.com/bcgov/nr-spar/actions/workflows/codeql.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/codeql.yml)
 [![Merge](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
 [![Nightly](https://github.com/bcgov/nr-spar/actions/workflows/job-nightly.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/job-nightly.yml)
 
