@@ -122,6 +122,7 @@ public class MoistureContentConesEndpoint {
           @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Replicate not found")
       })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<MccReplicateEntity> updateReplicateField(
       @Parameter(
           name = "riaKey",
@@ -154,6 +155,7 @@ public class MoistureContentConesEndpoint {
           @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Activity entry not found")
       })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public ActivityEntity updateActivityField(
       @Parameter(
         name = "riaKey",
