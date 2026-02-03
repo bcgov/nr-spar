@@ -3,11 +3,13 @@ import { Checkbox, Button } from '@carbon/react';
 import { GermTrayOptions, CreateGermTrayProps } from './definitions';
 import './styles.scss';
 
-const CreateGermTray: React.FC<CreateGermTrayProps> = ({
-  onClose,
-  onSubmit,
-  isLoading = false
-}) => {
+const CreateGermTray = (
+  {
+    onClose,
+    onSubmit,
+    isLoading = false
+  }: CreateGermTrayProps
+) => {
   const [options, setOptions] = useState<GermTrayOptions>({
     printDishLabels: false,
     printGerminationTrayLabels: false,
