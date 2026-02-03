@@ -215,17 +215,42 @@ the namespace **b9d53b**.
 
 These are the existing workflows:
 
-CI - Runs for every commit sent -
-[Link here](https://github.com/bcgov/nr-spar/actions/workflows/ci.yml)
+**Analysis** - Runs linting, tests, and security scanning on PRs and main -
+[Link here](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml)
 
-PR - Runs for every open pull request -
+**CodeQL** - Automated code security scanning for vulnerabilities -
+[Link here](https://github.com/bcgov/nr-spar/actions/workflows/codeql.yml)
+
+**PR** - Runs for every open pull request -
 [Link here](https://github.com/bcgov/nr-spar/actions/workflows/pr-open.yml)
 
-PR Close - Runs for all closed PRs - 
+**PR Close** - Runs for all closed PRs - 
 [Link here](https://github.com/bcgov/nr-spar/actions/workflows/pr-close.yml)
 
-Merge to Main - Runs for all merges to main - 
-[Link here](https://github.com/bcgov/nr-spar/actions/workflows/merge-main.yml)
+**Merge** - Runs for all merges to main and deploys to TEST - 
+[Link here](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
+
+**Release** - Deploys to PROD environment -
+[Link here](https://github.com/bcgov/nr-spar/actions/workflows/release.yml)
+
+**Nightly** - Scheduled nightly maintenance tasks -
+[Link here](https://github.com/bcgov/nr-spar/actions/workflows/job-nightly.yml)
+
+## CodeQL Security Scanning
+
+CodeQL automatically scans the codebase for security vulnerabilities:
+- Runs on all pull requests (opened, reopened, new commits, ready for review)
+- Runs on pushes to main branch
+- Scheduled to run weekly on Mondays at 2 AM UTC
+- Can be manually triggered from the Actions tab
+
+To manually trigger CodeQL:
+1. Go to the [Actions tab](https://github.com/bcgov/nr-spar/actions)
+2. Select "CodeQL" workflow
+3. Click "Run workflow" button
+4. Select the branch and click "Run workflow"
+
+Results are visible in the Security tab under "Code scanning alerts".
 
 # General code practices
 
