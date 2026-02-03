@@ -28,8 +28,6 @@ const CreateGermTray = (
     onSubmit(options);
   };
 
-  const isAnyCheckboxSelected = Object.values(options).some((value) => value);
-
   return (
     <div className="create-germ-tray-content">
       <div className="germ-tray-options">
@@ -62,7 +60,7 @@ const CreateGermTray = (
         <Button kind="secondary" onClick={onClose}>
           Cancel
         </Button>
-        <Button kind="primary" onClick={handleSubmit} disabled={isLoading || !isAnyCheckboxSelected}>
+        <Button kind="primary" onClick={handleSubmit} disabled={isLoading}>
           Create germination tray
         </Button>
       </div>
