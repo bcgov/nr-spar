@@ -12,12 +12,11 @@
 
   .germ-tray-actions {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    gap: 0.3rem;
 
     button {
-      width: 100%;
-      max-width: 48%;
+      flex: 1;
+      max-width: none;
     }
   }
 }
