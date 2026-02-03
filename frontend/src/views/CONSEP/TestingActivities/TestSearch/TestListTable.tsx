@@ -152,7 +152,6 @@ const TestListTable = ({
           <CreateGermTray
             onClose={() => setShowCreateGermTray(false)}
             onSubmit={() => {}}
-            isLoading={false}
           />
         )}
       </Modal>
