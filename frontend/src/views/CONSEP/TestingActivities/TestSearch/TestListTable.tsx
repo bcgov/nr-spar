@@ -10,6 +10,7 @@ import GenericTable from '../../../../components/GenericTable';
 import ShowHideColumnControl from './ToolbarControls/ShowHideColumnControl';
 import TestHistory from './ToolbarControls/TestHistory';
 import AddActivity from './ToolbarControls/AddActivity';
+import CreateGermTray from './ToolbarControls/CreateGermTray';
 import { getTestingActivityListColumns, columnVisibilityLocalStorageKey } from './constants';
 
 import type {
@@ -40,6 +41,7 @@ const TestListTable = ({
   const tableRef = useRef<MRT_TableInstance<TestingSearchResponseType> | null>(null);
   const [showTestHistory, setShowTestHistory] = useState(false);
   const [showAddActivity, setShowAddActivity] = useState(false);
+  const [showCreateGermTray, setShowCreateGermTray] = useState(false);
 
   useEffect(() => {
     // Reset row selection whenever new data is set
@@ -70,7 +72,7 @@ const TestListTable = ({
     {
       label: 'Create germ tray',
       type: 'tertiary',
-      action: () => {}
+      action: () => setShowCreateGermTray(true)
     },
     {
       label: 'Export Data',
@@ -133,6 +135,21 @@ const TestListTable = ({
         {showAddActivity
         && tableRef.current
         && <AddActivity table={tableRef.current} closeModal={() => setShowAddActivity(false)} />}
+      </Modal>
+      <Modal
+        className="concep-create-germ-tray-modal"
+        open={showCreateGermTray}
+        passiveModal
+        size="sm"
+        modalHeading="Create germination tray"
+        onRequestClose={() => setShowCreateGermTray(false)}
+      >
+        {showCreateGermTray && (
+          <CreateGermTray
+            onClose={() => setShowCreateGermTray(false)}
+            onSubmit={() => {}}
+          />
+        )}
       </Modal>
       <Row className="concep-test-search-table">
         <GenericTable
