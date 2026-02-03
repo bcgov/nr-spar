@@ -31,10 +31,8 @@ jobs:
         include:
           - language: java-kotlin
             build-mode: none
-            directory: backend
           - language: javascript-typescript
             build-mode: none
-            directory: frontend
 
     steps:
       - name: Checkout repository
