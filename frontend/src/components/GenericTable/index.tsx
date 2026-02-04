@@ -40,7 +40,7 @@ type Props<T extends Record<string, any>> = {
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
   initialState?: any;
-  tableBodyRef?: React.RefObject<HTMLTableSectionElement>,
+  tableBodyRef?: React.RefObject<HTMLTableSectionElement>;
   renderToolbarInternalActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   renderTopToolbarCustomActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   hideToolbar?: boolean;
@@ -108,7 +108,7 @@ const GenericTable = <T extends Record<string, any>>({
     state: {
       isLoading,
       pagination: { pageIndex, pageSize },
-      sorting
+      ...(manualSorting && sorting ? { sorting } : {})
     },
     enablePagination,
     manualPagination,
@@ -197,12 +197,14 @@ const GenericTable = <T extends Record<string, any>>({
     },
     enableSorting,
     manualSorting,
-    onSortingChange: (updaterOrValue) => {
-      const newSorting = typeof updaterOrValue === 'function'
-        ? updaterOrValue(basicTable.getState().sorting)
-        : updaterOrValue;
-      onSortingChange?.(newSorting);
-    },
+    ...(manualSorting && onSortingChange ? {
+      onSortingChange: (updaterOrValue) => {
+        const newSorting = typeof updaterOrValue === 'function'
+          ? updaterOrValue(basicTable.getState().sorting)
+          : updaterOrValue;
+        onSortingChange?.(newSorting);
+      }
+    } : {}),
     enableFilters,
     enableHiding,
     enableColumnFilters,
