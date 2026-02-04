@@ -37,7 +37,8 @@ export default defineConfig({
       '**/21-create-a-class-seedlot-pli.cy.ts',
       '**/22-a-class-seedlot-reg-form-collection-interim.cy.ts',
       '**/23-a-class-seedlot-reg-form-ownership.cy.ts',
-      '**/24-a-class-seedlot-reg-form-extraction.cy.ts'
+      '**/24-a-class-seedlot-reg-form-extraction.cy.ts',
+      '**/41-moisture-content.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
