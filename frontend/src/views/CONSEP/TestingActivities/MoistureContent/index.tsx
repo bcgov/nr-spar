@@ -138,10 +138,10 @@ const MoistureContent = () => {
   useEffect(() => {
     if (testActivity?.replicatesList && testActivity.replicatesList.length > 0) {
       setReplicatesData(testActivity.replicatesList);
-    } else {
+    } else if (mcVariation) {
       setReplicatesData(initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows));
     }
-  }, [testActivity, riaKey, mcVariation.defaultNumberOfRows]);
+  }, [testActivity, riaKey, mcType]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });
