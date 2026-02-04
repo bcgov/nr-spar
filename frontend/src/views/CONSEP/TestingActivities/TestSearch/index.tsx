@@ -219,7 +219,7 @@ const TestSearch = () => {
 
   const activityIdQuery = useQuery({
     queryKey: ['activity-ids'],
-    queryFn: getActivityIds,
+    queryFn: () => getActivityIds(),
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
     select: (data: ActivityIdType[]) => data?.map((activity) => activity.standardActivityId) ?? []
@@ -640,6 +640,9 @@ const TestSearch = () => {
       {hasSearched ? (
         <TestListTable
           data={searchResults}
+          onAddActivitySuccess={(newActivity) => {
+            setSearchResults((prev) => [newActivity, ...prev]);
+          }}
           isLoading={searchMutation.isPending}
           paginationInfo={paginationInfo}
           sorting={sorting}

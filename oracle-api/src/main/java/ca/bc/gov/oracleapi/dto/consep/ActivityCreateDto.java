@@ -24,6 +24,7 @@ public record ActivityCreateDto(
 
     @Schema(description = "Activity type code")
     @Size(max = 3)
+    @NotBlank
     String activityTypeCd,
 
     @Schema(description = "Test category code")

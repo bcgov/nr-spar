@@ -4,16 +4,20 @@ import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +36,7 @@ public class ActivityService {
   private final ActivityRepository activityRepository;
   private final TestResultRepository testResultRepository;
   private final StandardActivityRepository standardActivityRepository;
+  private final TestRegimeRepository testRegimeRepository;
 
   /**
    * Update activity table.
@@ -107,7 +112,7 @@ public class ActivityService {
    * @return The saved ActivityEntity.
    */
   @Transactional
-  public ActivityEntity createActivity(ActivityCreateDto activityCreateDto) {
+  public ActivitySearchResponseDto createActivity(ActivityCreateDto activityCreateDto) {
     SparLog.info("Create a new activity");
 
     if (activityCreateDto.plannedStartDate().isAfter(activityCreateDto.plannedEndDate())) {
@@ -128,10 +133,33 @@ public class ActivityService {
       );
     }
 
-    String requestId = activityCreateDto.requestId();
+    String standardActivityId = activityCreateDto.standardActivityId();
     String testCategoryCd = activityCreateDto.testCategoryCd();
+    StandardActivityEntity standardActivity = standardActivityRepository
+        .findById(standardActivityId)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "StandardActivityId '" + standardActivityId + "' does not exist."
+        ));
+    boolean isTestActivity = standardActivity.getTestCategoryCd() != null;
+    if (isTestActivity) {
+      if (testCategoryCd == null || testCategoryCd.isBlank()) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Test category code is required for the selected test activity."
+        );
+      }
+    } else {
+      if (testCategoryCd != null && !testCategoryCd.isBlank()) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "The selected activity is not a test activity; test category code should be null."
+        );
+      }
+    }
 
-    if (requestId != null && requestId.length() >= 4) {
+    String requestId = activityCreateDto.requestId();
+    if (isTestActivity && requestId != null && requestId.length() >= 4) {
       String first4 = requestId.substring(0, 4);
       if (first4.chars().allMatch(Character::isDigit)) { // Seedling request
         if (!"STD".equals(testCategoryCd)) {
@@ -195,7 +223,7 @@ public class ActivityService {
     }
 
     // If adding a test type activity
-    if (activityCreateDto.testCategoryCd() != null) {
+    if (isTestActivity) {
       TestResultEntity testResult = new TestResultEntity();
       testResult.setRiaKey(savedActivityEntity.getRiaKey());
       testResult.setActivityType(savedActivityEntity.getActivityTypeCode());
@@ -204,7 +232,7 @@ public class ActivityService {
       testResultRepository.save(testResult);
     }
 
-    return savedActivityEntity;
+    return mapActivityEntityToSearchResponseDto(savedActivityEntity);
   }
 
   /**
@@ -226,30 +254,144 @@ public class ActivityService {
    * Retrieves all unique standard activity IDs and descriptions
    * used for seedlot and/or family lot contexts.
    *
+   * @param isFamilyLot true for familylot
+   * @param isSeedlot true for seedlot
    * @return list of StandardActivityDto containing standardActivityId and activityDescription
    */
-  public List<StandardActivityDto> getStandardActivityIds() {
-    List<StandardActivityEntity> allActivities =
-        standardActivityRepository.findAll();
+  public List<StandardActivityDto> getStandardActivityIds(boolean isFamilyLot, boolean isSeedlot) {
+    List<StandardActivityEntity> activities = new ArrayList<>();
+    if (isFamilyLot) {
+      activities.addAll(standardActivityRepository.findAllFamilyLotActivities());
+    }
+    if (isSeedlot) {
+      activities.addAll(standardActivityRepository.findAll());
+    }
+    // If neither, return empty
+    if (!isFamilyLot && !isSeedlot) {
+      return List.of();
+    }
 
-    List<StandardActivityEntity> familyLotActivities =
-        standardActivityRepository.findAllFamilyLotActivities();
-
-    Map<String, StandardActivityEntity> activityMap = new HashMap<>();
-
-    allActivities.forEach(a ->
-        activityMap.put(a.getStandardActivityId(), a)
-    );
-    familyLotActivities.forEach(a ->
-        activityMap.putIfAbsent(a.getStandardActivityId(), a)
-    );
-
-    return activityMap.values().stream()
-        .sorted(Comparator.comparing(StandardActivityEntity::getStandardActivityId))
+    // Remove duplicates by id
+    Map<String, StandardActivityEntity> map = new HashMap<>();
+    for (StandardActivityEntity a : activities) {
+      map.putIfAbsent(a.getStandardActivityId(), a);
+    }
+    return map.values().stream()
+        .sorted(
+            Comparator.comparing(StandardActivityEntity::getActivityDesc,
+                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+        )
         .map(a -> new StandardActivityDto(
             a.getStandardActivityId(),
+            a.getActivityTypeCd(),
+            a.getTestCategoryCd(),
             a.getActivityDesc()
         ))
         .toList();
+  }
+
+  /**
+   * Validates whether the given activity type code represents a germ test
+   * and whether it matches the current accepted A-rank germ test for the specified seedlot or family lot.
+   *
+   * @param activityTypeCode the activity type code to validate
+   * @param seedlotNumber the seedlot number to check against
+   * @param familyLotNumber the family lot number to check against
+   * @return an AddGermTestValidationResponseDto containing:
+   *         - {@code germTest}: whether the activity type is a germ test
+   *         - {@code matchesCurrentTypeCode}: whether it matches the current A-rank germ test
+   *         - {@code currentTypeCode}: the current accepted A-rank type code if it does not match, {@code null} otherwise
+   * @throws ResponseStatusException with {@code HttpStatus.CONFLICT} if multiple accepted A-rank germ tests exist
+   */
+  public AddGermTestValidationResponseDto validateAddGermTest(
+      String activityTypeCode,
+      String seedlotNumber,
+      String familyLotNumber
+  ) {
+    boolean hasSeedlot = seedlotNumber != null && !seedlotNumber.isBlank();
+    boolean hasFamilyLot = familyLotNumber != null && !familyLotNumber.isBlank();
+    if (hasSeedlot == hasFamilyLot) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Exactly one of seedlotNumber or familyLotNumber must be provided"
+      );
+    }
+
+    List<String> germTestCodes =
+        testRegimeRepository.findAllGermTestActivityTypeCodes();
+    boolean isGermTest = germTestCodes.contains(activityTypeCode);
+    if (!isGermTest) {
+      return new AddGermTestValidationResponseDto(
+          false,
+          true,
+          null
+      );
+    }
+
+    // Find current accepted A-rank germ test for the seedlot/family lot
+    List<String> currentAcceptedCodes =
+        activityRepository.findTypeCodeForAcceptedGermTestRankA(
+            seedlotNumber,
+            familyLotNumber
+        );
+    if (currentAcceptedCodes.size() > 1) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Multiple accepted A-rank germ tests exist for this seedlot/family lot"
+      );
+    }
+    if (currentAcceptedCodes.isEmpty()) {
+      return new AddGermTestValidationResponseDto(
+          true,
+          true,
+          null
+      );
+    }
+    String currentTypeCode = currentAcceptedCodes.get(0);
+    boolean matches = activityTypeCode.equals(currentTypeCode);
+    return new AddGermTestValidationResponseDto(
+        true,
+        matches,
+        currentTypeCode
+    );
+  }
+
+  /**
+   * Maps an {@link ActivityEntity} to an {@link ActivitySearchResponseDto} for use
+   * in activity search results and table displays.
+   *
+   * @param e the persisted {@link ActivityEntity} to map
+   * @return a populated {@link ActivitySearchResponseDto} suitable for search result displays
+   */
+  public static ActivitySearchResponseDto mapActivityEntityToSearchResponseDto(ActivityEntity e) {
+    return new ActivitySearchResponseDto(
+        e.getSeedlotNumber() != null ? e.getSeedlotNumber() : e.getFamilyLotNumber(),
+        e.getRequestId() + "-" + e.getItemId(),
+        e.getVegetationState(),
+        e.getStandardActivityId(),
+        null,
+        null,
+        e.getTestCategoryCode(),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        e.getSignificantStatusIndicator(),
+        null,
+        e.getRevisedEndDate() != null ? e.getRevisedEndDate().atStartOfDay() : null,
+        null,
+        null,
+        null,
+        e.getRequestSkey() != null ? e.getRequestSkey().intValue() : null,
+        e.getRequestId(),
+        e.getItemId(),
+        null,
+        e.getRiaKey().intValue(),
+        e.getActivityTypeCode()
+    );
   }
 }

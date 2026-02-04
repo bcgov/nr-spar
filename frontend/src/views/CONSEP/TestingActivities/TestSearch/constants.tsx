@@ -26,6 +26,7 @@ export const formatDateCell = (value: string | null) => {
 };
 
 export const toSelectedItemString = (v?: string | null) => (v ?? null);
+export const isFamilyLot = (lot: string) => lot.toUpperCase().startsWith('F');
 
 export const testSearchCrumbs: CrumbType[] = [
   {

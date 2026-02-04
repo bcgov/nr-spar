@@ -1,6 +1,6 @@
 export type AddActivityRequest = {
   standardActivityId: string;
-  activityTypeCd?: string;
+  activityTypeCd: string;
   testCategoryCd?: string;
   associatedRiaKey?: number;
   plannedStartDate: string;
