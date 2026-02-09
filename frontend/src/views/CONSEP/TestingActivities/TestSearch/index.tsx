@@ -240,6 +240,23 @@ const TestSearch = () => {
     }
   }, [testTypeQuery.error, activityIdQuery.error]);
 
+  const testTypeItems = React.useMemo(
+    () => (
+      testTypeQuery.data
+        ? testTypeQuery.data.map((type: string) => ({
+          id: type,
+          text: type
+        }))
+        : []
+    ),
+    [testTypeQuery.data]
+  );
+
+  const activityIdItems = React.useMemo(
+    () => (activityIdQuery.data ? activityIdQuery.data.map((id) => ({ id, text: id })) : []),
+    [activityIdQuery.data]
+  );
+
   const handlePageChange = (pageIndex: number, pageSize: number) => {
     const sort = sorting[0];
     searchMutation.mutate(
@@ -506,14 +523,7 @@ const TestSearch = () => {
                 id="test-type-input"
                 className="test-type-input"
                 titleText="Test type"
-                items={
-                  testTypeQuery.data
-                    ? testTypeQuery.data.map((type: string) => ({
-                      id: type,
-                      text: type
-                    }))
-                    : []
-                }
+                items={testTypeItems}
                 itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
                 onChange={(event: { selectedItems: Array<{ id: string }> }) => {
                   handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
@@ -524,11 +534,7 @@ const TestSearch = () => {
                 id="activity-type-input"
                 className="activity-type-input"
                 titleText="Choose activity"
-                items={
-                  activityIdQuery.data
-                    ? activityIdQuery.data.map((id) => ({ id, text: id }))
-                    : []
-                }
+                items={activityIdItems}
                 itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
                 onChange={(event: { selectedItems: Array<{ id: string }> }) => {
                   handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
