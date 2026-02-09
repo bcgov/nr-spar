@@ -23,9 +23,9 @@ export const getRequestTypes = () => {
   return api.get(url).then((res: { data: TestCodeType[] }) => res.data);
 };
 
-export const getActivityIds = () => {
+export const getActivityIds = (params?: { isFamilyLot?: boolean; isSeedlot?: boolean }) => {
   const url = `${ApiConfig.activities}/ids`;
-  return api.get(url).then((res: { data: ActivityIdType[] }) => res.data);
+  return api.get(url, { params }).then((res: { data: ActivityIdType[] }) => res.data);
 };
 
 export const getActivityRiaSkeys = (requestSkey: number, itemId: string) => {

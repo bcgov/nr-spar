@@ -48,10 +48,18 @@ export type TestCodeType = {
 
 export type ActivityIdType = {
   standardActivityId: string;
+  activityTypeCd: string;
+  testCategoryCd: string;
   activityDescription: string;
 };
 
 export type ActivityRiaSkeyType = {
   riaSkey: number;
   activityDescription: string;
+};
+
+export type AddGermTestValidationResponseType = {
+  germTest: boolean;
+  matchesCurrentTypeCode: boolean;
+  currentTypeCode: string | null;
 };
