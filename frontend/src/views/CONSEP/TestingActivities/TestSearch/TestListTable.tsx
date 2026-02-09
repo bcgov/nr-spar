@@ -11,7 +11,7 @@ import ShowHideColumnControl from './ToolbarControls/ShowHideColumnControl';
 import TestHistory from './ToolbarControls/TestHistory';
 import AddActivity from './ToolbarControls/AddActivity';
 import CreateGermTray from './ToolbarControls/CreateGermTray';
-import { getTestingActivityListColumns, columnVisibilityLocalStorageKey } from './constants';
+import { getTestingActivityListColumns, columnVisibilityLocalStorageKey, isFamilyLot } from './constants';
 
 import type {
   TestingSearchResponseType,
@@ -20,6 +20,7 @@ import type {
 
 type TestListTableProp = {
   data: TestingSearchResponseType[];
+  onAddActivitySuccess?: ((newActivity: TestingSearchResponseType) => void);
   paginationInfo: PaginationInfoType;
   sorting?: { id: string; desc: boolean }[];
   onExportData: () => void;
@@ -30,6 +31,7 @@ type TestListTableProp = {
 
 const TestListTable = ({
   data,
+  onAddActivitySuccess = () => {},
   isLoading = false,
   paginationInfo,
   onPageChange,
@@ -99,9 +101,13 @@ const TestListTable = ({
         size="lg"
         modalHeading={
           tableRef.current?.getSelectedRowModel().rows?.length === 1
-            ? `Seedlot ${
-              tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay
-            }: Test history`
+            ? (() => {
+              const lot = tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay;
+              if (isFamilyLot(lot)) {
+                return `Familylot ${lot}: Test history`;
+              }
+              return `Seedlot ${lot}: Test history`;
+            })()
             : 'Seedlot: Test history'
         }
         onRequestClose={() => setShowTestHistory(false)}
@@ -121,9 +127,13 @@ const TestListTable = ({
         size="lg"
         modalHeading={
           tableRef.current?.getSelectedRowModel().rows?.length === 1
-            ? `Seedlot ${
-              tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay
-            }: Add activity`
+            ? (() => {
+              const lot = tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay;
+              if (isFamilyLot(lot)) {
+                return `Familylot ${lot}: Add activity`;
+              }
+              return `Seedlot ${lot}: Add activity`;
+            })()
             : 'Seedlot: Add activity'
         }
         onRequestClose={() => setShowAddActivity(false)}
@@ -132,9 +142,13 @@ const TestListTable = ({
           '.MuiPaper-root'
         ]}
       >
-        {showAddActivity
-        && tableRef.current
-        && <AddActivity table={tableRef.current} closeModal={() => setShowAddActivity(false)} />}
+        {showAddActivity && tableRef.current && (
+          <AddActivity
+            table={tableRef.current}
+            closeModal={() => setShowAddActivity(false)}
+            onAddActivitySuccess={onAddActivitySuccess}
+          />
+        )}
       </Modal>
       <Modal
         className="concep-create-germ-tray-modal"
