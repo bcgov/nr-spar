@@ -14,9 +14,10 @@ import {
   DatePicker,
   DatePickerInput,
   TextInput,
-  InlineNotification
+  InlineNotification,
+  Modal
 } from '@carbon/react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import GenericTable from '../../../../../../components/GenericTable';
 import RequiredFormFieldLabel from '../../../../../../components/RequiredFormFieldLabel';
 import {
@@ -25,12 +26,14 @@ import {
   getTestCategoryCodes,
   getActivityDurationUnits
 } from '../../../../../../api-service/consep/testCodesAPI';
+import { addActivities, validateAddGermTest } from '../../../../../../api-service/consep/activitiesAPI';
 import isCommitmentIndicatorYes from '../../../../../../api-service/requestSeedlotAndVeglotAPI';
 import {
   DATE_FORMAT,
   maxEndDate,
   minStartDate,
-  toSelectedItemString
+  toSelectedItemString,
+  isFamilyLot
 } from '../../constants';
 import { getAddActivityTableColumns } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../../config/TimeUnits';
@@ -39,45 +42,31 @@ import type {
   TestingSearchResponseType,
   ActivityIdType,
   ActivityRiaSkeyType,
-  TestCodeType
+  TestCodeType,
+  AddGermTestValidationResponseType
 } from '../../../../../../types/consep/TestingSearchType';
 import type { AddActivityRequest } from './definitions';
 import './styles.scss';
 
 const toLocalDateString = (date: Date) => date.toLocaleDateString('en-CA');
 
-const AddActivity = (
-  { table, closeModal }:
-  { table: MRT_TableInstance<TestingSearchResponseType>; closeModal: () => void }
-) => {
+const AddActivity = ({
+  table,
+  closeModal,
+  onAddActivitySuccess = () => {}
+}: {
+  table: MRT_TableInstance<TestingSearchResponseType>;
+  closeModal: () => void;
+  onAddActivitySuccess?: (newActivity: TestingSearchResponseType) => void;
+}) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const columns = useMemo(() => getAddActivityTableColumns(), []);
   const selectedRows = table.getSelectedRowModel()?.rows.map((row) => row.original) ?? [];
   const requestSkey = selectedRows[0]?.requestSkey;
   const itemId = selectedRows[0]?.itemId;
-  const isTestActivity = Boolean(selectedRows[0]?.testCategoryCd);
+  const lot = selectedRows[0]?.seedlotDisplay ?? '';
+  const isFamilyLotNumber = isFamilyLot(lot);
   const todayString = toLocalDateString(new Date());
-  const REQUIRED_FIELDS = useMemo<(keyof AddActivityRequest)[]>(() => {
-    const baseFields: (keyof AddActivityRequest)[] = [
-      'standardActivityId',
-      'plannedStartDate',
-      'plannedEndDate',
-      'activityDuration',
-      'activityTimeUnit',
-      'requestSkey',
-      'requestId',
-      'itemId',
-      'vegetationState',
-      'significantStatusIndicator',
-      'processCommitIndicator'
-    ];
-
-    if (isTestActivity) {
-      baseFields.push('testCategoryCd');
-    }
-
-    return baseFields;
-  }, [isTestActivity]);
 
   const [addActivityData, setAddActivityData] = useState<Partial<AddActivityRequest>>({
     plannedStartDate: todayString,
@@ -92,14 +81,7 @@ const AddActivity = (
     status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
-
-  const isAddActivityValid = REQUIRED_FIELDS.every((field) => {
-    const value = addActivityData[field];
-    if (typeof value === 'string') {
-      return value.trim().length > 0;
-    }
-    return value !== undefined && value !== null;
-  });
+  const [showGermTestWarning, setShowGermTestWarning] = useState(false);
 
   const isCommitmentIndicatorYesQuery = useQuery({
     queryKey: ['request-commitment-indicator', requestSkey, itemId],
@@ -115,13 +97,18 @@ const AddActivity = (
   });
 
   const activityIdQuery = useQuery({
-    queryKey: ['activity-ids'],
-    queryFn: getActivityIds,
+    queryKey: ['activity-ids-by-type', isFamilyLotNumber],
+    queryFn: () => getActivityIds({
+      isFamilyLot: isFamilyLotNumber,
+      isSeedlot: !isFamilyLotNumber
+    }),
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
     select: (data: ActivityIdType[]) => data.map((activity) => ({
       id: activity.standardActivityId,
-      text: activity.activityDescription
+      text: activity.activityDescription,
+      activityTypeCd: activity.activityTypeCd,
+      testCategoryCd: activity.testCategoryCd
     }))
   });
 
@@ -159,6 +146,70 @@ const AddActivity = (
     gcTime: THREE_HALF_HOURS
   });
 
+  const addActivityMutation = useMutation({
+    mutationFn: (payload: AddActivityRequest) => addActivities(payload),
+    onSuccess: (data: TestingSearchResponseType) => {
+      onAddActivitySuccess(data);
+      closeModal();
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || 'api request failed';
+      setAlert({
+        status: 'error',
+        message: `Failed to add activity: ${message}`
+      });
+    }
+  });
+
+  const handleAddActivity = () => {
+    const requestPayload: AddActivityRequest = {
+      ...addActivityData,
+      standardActivityId: addActivityData.standardActivityId!,
+      activityTypeCd: addActivityData.activityTypeCd!,
+      plannedStartDate: addActivityData.plannedStartDate!,
+      plannedEndDate: addActivityData.plannedEndDate!,
+      revisedEndDate: addActivityData.plannedEndDate,
+      revisedStartDate: addActivityData.plannedStartDate,
+      activityDuration: addActivityData.activityDuration!,
+      activityTimeUnit: addActivityData.activityTimeUnit!,
+      significantStatusIndicator: addActivityData.significantStatusIndicator!,
+      processCommitIndicator: addActivityData.processCommitIndicator!,
+      requestSkey: addActivityData.requestSkey!,
+      requestId: addActivityData.requestId!,
+      itemId: addActivityData.itemId!,
+      vegetationState: addActivityData.vegetationState!,
+      ...(isFamilyLotNumber ? { familyLotNumber: lot } : { seedlotNumber: lot })
+    };
+
+    addActivityMutation.mutate(requestPayload);
+  };
+
+  const validateAddGermTestMutation = useMutation({
+    mutationFn: ({
+      activityTypeCd,
+      seedlotNumber,
+      familyLotNumber
+    }: {
+      activityTypeCd: string;
+      seedlotNumber?: string;
+      familyLotNumber?: string;
+    }) => validateAddGermTest(activityTypeCd, seedlotNumber, familyLotNumber),
+    onSuccess: (data: AddGermTestValidationResponseType) => {
+      if (data.germTest && !data.matchesCurrentTypeCode) {
+        setShowGermTestWarning(true);
+      } else {
+        handleAddActivity();
+      }
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || 'api request failed';
+      setAlert({
+        status: 'error',
+        message: `Failed to validate if the new activity pass the germ test check: ${message}`
+      });
+    }
+  });
+
   useEffect(() => {
     const failedMessages: string[] = [];
     if (activityIdQuery.isError && activityIdQuery.error instanceof Error) {
@@ -191,6 +242,42 @@ const AddActivity = (
     isCommitmentIndicatorYesQuery.isError, isCommitmentIndicatorYesQuery.error
   ]);
 
+  const selectedActivity = useMemo(
+    () => activityIdQuery.data?.find((a) => a.id === addActivityData.standardActivityId),
+    [activityIdQuery.data, addActivityData.standardActivityId]
+  );
+  const isTestActivity = Boolean(selectedActivity?.testCategoryCd);
+  const REQUIRED_FIELDS = useMemo<(keyof AddActivityRequest)[]>(() => {
+    const baseFields: (keyof AddActivityRequest)[] = [
+      'standardActivityId',
+      'activityTypeCd',
+      'plannedStartDate',
+      'plannedEndDate',
+      'activityDuration',
+      'activityTimeUnit',
+      'requestSkey',
+      'requestId',
+      'itemId',
+      'vegetationState',
+      'significantStatusIndicator',
+      'processCommitIndicator'
+    ];
+
+    if (isTestActivity) {
+      baseFields.push('testCategoryCd');
+    }
+
+    return baseFields;
+  }, [isTestActivity]);
+
+  const isAddActivityValid = REQUIRED_FIELDS.every((field) => {
+    const value = addActivityData[field];
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    return value !== undefined && value !== null;
+  });
+
   const updateField = <K extends keyof AddActivityRequest>(
     field: K,
     value: AddActivityRequest[K] | undefined
@@ -203,6 +290,24 @@ const AddActivity = (
 
   return (
     <div>
+      {showGermTestWarning && (
+        <Modal
+          className="add-activity-germ-test-warning-modal"
+          open={showGermTestWarning}
+          modalHeading="Add activity validation warning: test type mismatch"
+          primaryButtonText="Okay"
+          secondaryButtonText="Cancel"
+          onRequestClose={() => {
+            setShowGermTestWarning(false);
+          }}
+          onRequestSubmit={() => {
+            handleAddActivity();
+            setShowGermTestWarning(false);
+          }}
+        >
+          <p style={{ margin: '1rem' }}>Test Type does not match current A-Rank for Seedlot.</p>
+        </Modal>
+      )}
       <GenericTable columns={columns} data={selectedRows} tableBodyRef={tableBodyRef} />
       {alert?.message && (
         <InlineNotification lowContrast kind={alert.status} subtitle={alert?.message} />
@@ -218,7 +323,19 @@ const AddActivity = (
           selectedItem={activityIdQuery.data?.find(
             (o) => o.id === addActivityData.standardActivityId
           )}
-          onChange={(e: ComboBoxEvent) => updateField('standardActivityId', e.selectedItem ? e.selectedItem.id : undefined)}
+          onChange={(e: ComboBoxEvent) => {
+            if (e.selectedItem) {
+              updateField('standardActivityId', e.selectedItem.id);
+              updateField('activityTypeCd', e.selectedItem.activityTypeCd);
+              if (!e.selectedItem.testCategoryCd) {
+                updateField('testCategoryCd', undefined);
+              }
+            } else {
+              updateField('standardActivityId', undefined);
+              updateField('activityTypeCd', undefined);
+              updateField('testCategoryCd', undefined);
+            }
+          }}
         />
         <ComboBox
           id="add-activity-part-of-activity-select"
@@ -231,18 +348,21 @@ const AddActivity = (
           )}
           onChange={(e: ComboBoxEvent) => updateField('associatedRiaKey', e.selectedItem ? e.selectedItem.id : undefined)}
         />
-        <ComboBox
-          id="add-activity-test-category-select"
-          className="add-activity-select"
-          titleText={isTestActivity ? <RequiredFormFieldLabel text="Test category" /> : 'Test category'}
-          items={testCategoryQuery.data ?? []}
-          itemToString={(item: { id: string; text: string } | null) => item?.text ?? ''}
-          disabled={!isTestActivity}
-          selectedItem={testCategoryQuery.data?.find(
-            (o) => o.id === addActivityData.testCategoryCd
-          )}
-          onChange={(e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem ? e.selectedItem.id : undefined)}
-        />
+        {isTestActivity && (
+          <ComboBox
+            id="add-activity-test-category-select"
+            className="add-activity-select"
+            titleText={<RequiredFormFieldLabel text="Test category" />}
+            items={testCategoryQuery.data ?? []}
+            itemToString={(item: { id: string; text: string } | null) => item?.text ?? ''}
+            selectedItem={testCategoryQuery.data?.find(
+              (o) => o.id === addActivityData.testCategoryCd
+            )}
+            onChange={
+              (e: ComboBoxEvent) => updateField('testCategoryCd', e.selectedItem ? e.selectedItem.id : undefined)
+            }
+          />
+        )}
         <div className="add-activity-date-picker">
           <DatePicker
             datePickerType="single"
@@ -344,29 +464,19 @@ const AddActivity = (
           kind="primary"
           disabled={!isAddActivityValid}
           onClick={() => {
-            // TODO: Implement the API call to add activity
-            // const lot = selectedRows[0]?.seedlotDisplay ?? '';
-            // const isFamilyLot = lot.toUpperCase().startsWith('F');
+            if (!addActivityData.activityTypeCd) {
+              setAlert({
+                status: 'error',
+                message: 'Activity Type Code is missing.'
+              });
+              return;
+            }
 
-            // const requestPayload: AddActivityRequest = {
-            //   ...addActivityData,
-            //   standardActivityId: addActivityData.standardActivityId!,
-            //   plannedStartDate: addActivityData.plannedStartDate!,
-            //   plannedEndDate: addActivityData.plannedEndDate!,
-            //   revisedEndDate: addActivityData.plannedEndDate,
-            //   revisedStartDate: addActivityData.plannedStartDate,
-            //   activityDuration: addActivityData.activityDuration!,
-            //   activityTimeUnit: addActivityData.activityTimeUnit!,
-            //   significantStatusIndicator: addActivityData.significantStatusIndicator!,
-            //   processCommitIndicator: addActivityData.processCommitIndicator!,
-            //   requestSkey: addActivityData.requestSkey!,
-            //   requestId: addActivityData.requestId!,
-            //   itemId: addActivityData.itemId!,
-            //   vegetationState: addActivityData.vegetationState!,
-            //   ...(isFamilyLot ? { familyLotNumber: lot } : { seedlotNumber: lot })
-            // };
-
-            // console.log('requestPayload', requestPayload);
+            validateAddGermTestMutation.mutate({
+              activityTypeCd: addActivityData.activityTypeCd,
+              seedlotNumber: isFamilyLotNumber ? undefined : lot,
+              familyLotNumber: isFamilyLotNumber ? lot : undefined
+            });
           }}
         >
           Add Activity
