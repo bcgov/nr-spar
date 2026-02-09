@@ -642,6 +642,10 @@ const TestSearch = () => {
           data={searchResults}
           onAddActivitySuccess={(newActivity) => {
             setSearchResults((prev) => [newActivity, ...prev]);
+            setPaginationInfo((prev) => ({
+              ...prev,
+              totalElements: prev.totalElements + 1
+            }));
           }}
           isLoading={searchMutation.isPending}
           paginationInfo={paginationInfo}

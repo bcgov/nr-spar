@@ -153,7 +153,7 @@ const AddActivity = ({
       closeModal();
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || error.message || error;
+      const message = error.response?.data?.message || error.message || 'api request failed';
       setAlert({
         status: 'error',
         message: `Failed to add activity: ${message}`
@@ -202,7 +202,7 @@ const AddActivity = ({
       }
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || error.message || error;
+      const message = error.response?.data?.message || error.message || 'api request failed';
       setAlert({
         status: 'error',
         message: `Failed to validate if the new activity pass the germ test check: ${message}`
