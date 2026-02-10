@@ -283,9 +283,12 @@ public class ActivityService {
         )
         .map(a -> new StandardActivityDto(
             a.getStandardActivityId(),
+            a.getActivityDesc(),
             a.getActivityTypeCd(),
             a.getTestCategoryCd(),
-            a.getActivityDesc()
+            a.getSignificantStatusIndicator(),
+            a.getActivityDuration(),
+            a.getActivityTimeUnit()
         ))
         .toList();
   }

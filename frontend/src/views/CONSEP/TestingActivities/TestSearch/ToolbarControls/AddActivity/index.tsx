@@ -103,13 +103,7 @@ const AddActivity = ({
       isSeedlot: !isFamilyLotNumber
     }),
     staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS,
-    select: (data: ActivityIdType[]) => data.map((activity) => ({
-      id: activity.standardActivityId,
-      text: activity.activityDescription,
-      activityTypeCd: activity.activityTypeCd,
-      testCategoryCd: activity.testCategoryCd
-    }))
+    gcTime: THREE_HALF_HOURS
   });
 
   const activityRiaSkeyQuery = useQuery({
@@ -243,7 +237,9 @@ const AddActivity = ({
   ]);
 
   const selectedActivity = useMemo(
-    () => activityIdQuery.data?.find((a) => a.id === addActivityData.standardActivityId),
+    () => activityIdQuery.data?.find(
+      (a) => a.standardActivityId === addActivityData.standardActivityId
+    ),
     [activityIdQuery.data, addActivityData.standardActivityId]
   );
   const isTestActivity = Boolean(selectedActivity?.testCategoryCd);
@@ -288,6 +284,55 @@ const AddActivity = ({
     }));
   };
 
+  const setSelectedActivity = (activity: ActivityIdType) => {
+    if (!activity) return;
+
+    setAddActivityData((prev) => {
+      const updatesFields: Partial<AddActivityRequest> = {};
+      updatesFields.standardActivityId = activity.standardActivityId;
+      updatesFields.activityTypeCd = activity.activityTypeCd;
+      updatesFields.significantStatusIndicator = activity.significantStatusIndicator;
+
+      if (activity.testCategoryCd) updatesFields.testCategoryCd = activity.testCategoryCd;
+      if (activity.activityDuration) updatesFields.activityDuration = activity.activityDuration;
+      if (activity.activityTimeUnit) updatesFields.activityTimeUnit = activity.activityTimeUnit;
+
+      if (
+        prev.plannedStartDate
+        && updatesFields.activityDuration
+        && updatesFields.activityTimeUnit
+      ) {
+        const startDate = new Date(prev.plannedStartDate);
+        const duration = updatesFields.activityDuration;
+        const tempEndDate = new Date(startDate);
+
+        switch (updatesFields.activityTimeUnit) {
+          case 'HR':
+            tempEndDate.setHours(tempEndDate.getHours() + duration);
+            break;
+          case 'DY':
+            tempEndDate.setDate(tempEndDate.getDate() + duration);
+            break;
+          case 'WK':
+            tempEndDate.setDate(tempEndDate.getDate() + duration * 7);
+            break;
+          case 'MO':
+            tempEndDate.setMonth(tempEndDate.getMonth() + duration);
+            break;
+          case 'YR':
+            tempEndDate.setFullYear(tempEndDate.getFullYear() + duration);
+            break;
+          default:
+            tempEndDate.setDate(tempEndDate.getDate() + duration);
+        }
+
+        updatesFields.plannedEndDate = toLocalDateString(tempEndDate);
+      }
+
+      return { ...prev, ...updatesFields };
+    });
+  };
+
   return (
     <div>
       {showGermTestWarning && (
@@ -319,22 +364,13 @@ const AddActivity = ({
           className="add-activity-select"
           titleText={<RequiredFormFieldLabel text="Activity" />}
           items={activityIdQuery.data ?? []}
-          itemToString={(item: { id: string; text: string } | null) => item?.text ?? ''}
+          itemToString={(item: ActivityIdType) => item?.activityDescription ?? ''}
           selectedItem={activityIdQuery.data?.find(
-            (o) => o.id === addActivityData.standardActivityId
+            (o) => o.standardActivityId === addActivityData.standardActivityId
           )}
           onChange={(e: ComboBoxEvent) => {
-            if (e.selectedItem) {
-              updateField('standardActivityId', e.selectedItem.id);
-              updateField('activityTypeCd', e.selectedItem.activityTypeCd);
-              if (!e.selectedItem.testCategoryCd) {
-                updateField('testCategoryCd', undefined);
-              }
-            } else {
-              updateField('standardActivityId', undefined);
-              updateField('activityTypeCd', undefined);
-              updateField('testCategoryCd', undefined);
-            }
+            const activity = e.selectedItem as ActivityIdType;
+            setSelectedActivity(activity);
           }}
         />
         <ComboBox

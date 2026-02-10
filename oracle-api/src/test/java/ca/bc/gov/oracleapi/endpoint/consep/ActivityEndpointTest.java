@@ -201,9 +201,35 @@ class ActivityEndpointTest {
   /* --------------------- Get Standard Activity Ids------------------------------*/
   @Test
   void getStandardActivityIds_shouldReturnSeedlotOnly() throws Exception {
-    var dto1 = new StandardActivityDto("AB", "MCR", "TC1", "Abies extraction");
-    var dto3 = new StandardActivityDto("TUM", "TUM", "TC2", "Cone tumbling/seed extraction");
-    var dto2 = new StandardActivityDto("SSP", "SEP", "TC3", "Seed separation");
+    var dto1 = new StandardActivityDto(
+        "TUM",
+        "Cone tumbling/seed extraction",
+        "TUM",
+        null,
+        -1,
+        1,
+        "DY"
+    );
+
+    var dto2 = new StandardActivityDto(
+        "SSP",
+        "Seed separation",
+        "SEP",
+        null,
+        0,
+        1,
+        "DY"
+    );
+
+    var dto3 = new StandardActivityDto(
+        "MCM",
+        "Moisture content meter",
+        "MC",
+        "QA",
+        0,
+        1,
+        "HR"
+    );
 
     when(activityService.getStandardActivityIds(false, true))
         .thenReturn(List.of(dto1, dto3, dto2)); // Assume sorted by description
@@ -233,16 +259,63 @@ class ActivityEndpointTest {
 
   @Test
   void getStandardActivityIds_shouldReturnFamilyLotOnly() throws Exception {
-    var dto1 = new StandardActivityDto("FA2", "FAM", "FTC1", "Alpha Family");
-    var dto2 = new StandardActivityDto("FA1", "FAM", "FTC2", "Beta Family");
+    var dto1 = new StandardActivityDto(
+        "KLN",
+        "Cone kilning",
+        "KLN",
+        null,
+        0,
+        1,
+        "DY"
+    );
 
     when(activityService.getStandardActivityIds(true, false))
-        .thenReturn(List.of(dto1, dto2)); // Assume sorted by description
+        .thenReturn(List.of(dto1)); // Assume sorted by description
 
     mockMvc.perform(get("/api/activities/ids")
             .with(csrf())
             .param("isFamilyLot", "true")
             .param("isSeedlot", "false"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].standardActivityId").value(dto1.standardActivityId()))
+        .andExpect(jsonPath("$[0].activityTypeCd").value(dto1.activityTypeCd()))
+        .andExpect(jsonPath("$[0].testCategoryCd").value(dto1.testCategoryCd()))
+        .andExpect(jsonPath("$[0].activityDescription").value(dto1.activityDescription()));
+
+    verify(activityService, times(1)).getStandardActivityIds(true, false);
+  }
+
+  @Test
+  void getStandardActivityIds_shouldReturnAll_whenBothTrue() throws Exception {
+    var dto1 = new StandardActivityDto(
+        "TUM",
+        "Cone tumbling/seed extraction",
+        "TUM",
+        null,
+        -1,
+        1,
+        "DY"
+    );
+
+    var dto2 = new StandardActivityDto(
+        "KLN",
+        "Cone kilning",
+        "KLN",
+        null,
+        0,
+        1,
+        "DY"
+    );
+
+    when(activityService.getStandardActivityIds(true, true))
+        .thenReturn(List.of(dto1, dto2)); // sorted by description
+
+    mockMvc.perform(get("/api/activities/ids")
+            .with(csrf())
+            .param("isFamilyLot", "true")
+            .param("isSeedlot", "true"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(2)))
@@ -254,43 +327,6 @@ class ActivityEndpointTest {
         .andExpect(jsonPath("$[1].activityTypeCd").value(dto2.activityTypeCd()))
         .andExpect(jsonPath("$[1].testCategoryCd").value(dto2.testCategoryCd()))
         .andExpect(jsonPath("$[1].activityDescription").value(dto2.activityDescription()));
-
-    verify(activityService, times(1)).getStandardActivityIds(true, false);
-  }
-
-  @Test
-  void getStandardActivityIds_shouldReturnAll_whenBothTrue() throws Exception {
-    var dto1 = new StandardActivityDto("AB", "MCR", "TC1", "Abies extraction");
-    var dto2 = new StandardActivityDto("FA1", "FAM", "FTC2", "Beta Family");
-    var dto3 = new StandardActivityDto("TUM", "TUM", "TC2", "Cone tumbling/seed extraction");
-    var dto4 = new StandardActivityDto("SSP", "SEP", "TC3", "Seed separation");
-
-    when(activityService.getStandardActivityIds(true, true))
-        .thenReturn(List.of(dto1, dto2, dto3, dto4)); // sorted by description
-
-    mockMvc.perform(get("/api/activities/ids")
-            .with(csrf())
-            .param("isFamilyLot", "true")
-            .param("isSeedlot", "true"))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(4)))
-        .andExpect(jsonPath("$[0].standardActivityId").value(dto1.standardActivityId()))
-        .andExpect(jsonPath("$[0].activityTypeCd").value(dto1.activityTypeCd()))
-        .andExpect(jsonPath("$[0].testCategoryCd").value(dto1.testCategoryCd()))
-        .andExpect(jsonPath("$[0].activityDescription").value(dto1.activityDescription()))
-        .andExpect(jsonPath("$[1].standardActivityId").value(dto2.standardActivityId()))
-        .andExpect(jsonPath("$[1].activityTypeCd").value(dto2.activityTypeCd()))
-        .andExpect(jsonPath("$[1].testCategoryCd").value(dto2.testCategoryCd()))
-        .andExpect(jsonPath("$[1].activityDescription").value(dto2.activityDescription()))
-        .andExpect(jsonPath("$[2].standardActivityId").value(dto3.standardActivityId()))
-        .andExpect(jsonPath("$[2].activityTypeCd").value(dto3.activityTypeCd()))
-        .andExpect(jsonPath("$[2].testCategoryCd").value(dto3.testCategoryCd()))
-        .andExpect(jsonPath("$[2].activityDescription").value(dto3.activityDescription()))
-        .andExpect(jsonPath("$[3].standardActivityId").value(dto4.standardActivityId()))
-        .andExpect(jsonPath("$[3].activityTypeCd").value(dto4.activityTypeCd()))
-        .andExpect(jsonPath("$[3].testCategoryCd").value(dto4.testCategoryCd()))
-        .andExpect(jsonPath("$[3].activityDescription").value(dto4.activityDescription()));
 
     verify(activityService, times(1)).getStandardActivityIds(true, true);
   }
