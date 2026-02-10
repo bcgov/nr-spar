@@ -56,11 +56,6 @@ export type ActivityIdType = {
   activityTimeUnit: string | null;
 };
 
-export type ActivityRiaSkeyType = {
-  riaSkey: number;
-  activityDescription: string;
-};
-
 export type AddGermTestValidationResponseType = {
   germTest: boolean;
   matchesCurrentTypeCode: boolean;

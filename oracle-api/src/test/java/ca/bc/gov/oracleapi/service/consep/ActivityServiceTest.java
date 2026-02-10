@@ -85,7 +85,6 @@ class ActivityServiceTest {
         "ST1",
         "AC1",
         "TC1",
-        new BigDecimal("33874"),
         LocalDate.of(2024, 1, 1),
         LocalDate.of(2024, 1, 2),
         null,
@@ -200,7 +199,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         null, // Not a test activity
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -237,7 +235,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
-        validActivityCreateDto.associatedRiaKey(),
         LocalDate.of(2024, 1, 10),
         LocalDate.of(2024, 1, 2),
         validActivityCreateDto.revisedStartDate(),
@@ -267,7 +264,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -301,7 +297,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -335,7 +330,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         "NON", // <-- Not STD
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -372,7 +366,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         null, // missing testCategoryCd
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -414,7 +407,6 @@ class ActivityServiceTest {
         "ST2",
         "AC2",
         "TC1", // invalid testCategoryCd for non-test activity
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),

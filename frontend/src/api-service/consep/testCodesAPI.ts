@@ -28,11 +28,6 @@ export const getActivityIds = (params?: { isFamilyLot?: boolean; isSeedlot?: boo
   return api.get(url, { params }).then((res: { data: ActivityIdType[] }) => res.data);
 };
 
-export const getActivityRiaSkeys = (requestSkey: number, itemId: string) => {
-  const url = `${ApiConfig.activities}/request/${requestSkey}/item/${itemId}`;
-  return api.get(url).then((res: { data: ActivityRiaSkeyType[] }) => res.data);
-};
-
 export const getActivityDurationUnits = () => {
   const url = `${ApiConfig.testCodes}/activity-duration-units`;
   return api.get(url).then((res: { data: string[] }) => res.data);

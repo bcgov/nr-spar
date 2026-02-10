@@ -187,7 +187,6 @@ public class ActivityService {
     newActivityEntity.setStandardActivityId(activityCreateDto.standardActivityId());
     newActivityEntity.setActivityTypeCode(activityCreateDto.activityTypeCd());
     newActivityEntity.setTestCategoryCode(activityCreateDto.testCategoryCd());
-    newActivityEntity.setAssociatedRiaKey(activityCreateDto.associatedRiaKey());
     newActivityEntity.setPlannedStartDate(activityCreateDto.plannedStartDate());
     newActivityEntity.setPlannedEndDate(activityCreateDto.plannedEndDate());
     newActivityEntity.setRevisedStartDate(activityCreateDto.revisedStartDate());

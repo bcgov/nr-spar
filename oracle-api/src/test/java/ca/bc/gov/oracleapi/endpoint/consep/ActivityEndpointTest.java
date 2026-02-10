@@ -56,7 +56,6 @@ class ActivityEndpointTest {
         "ST1",
         "AC1",
         "TC1",
-        new BigDecimal("33874"),
         LocalDate.of(2024, 1, 1),
         LocalDate.of(2024, 1, 2),
         null,
@@ -126,7 +125,6 @@ class ActivityEndpointTest {
         "", // standardActivityId cannot be empty
         "", // activityTypeCd cannot be empty
         "TEST", // testCategoryCd can have max 3 chars
-        validActivityCreateDto.associatedRiaKey(),
         null, // plannedStartDate cannot be null
         null, // plannedEndDate cannot be null
         validActivityCreateDto.revisedStartDate(),
