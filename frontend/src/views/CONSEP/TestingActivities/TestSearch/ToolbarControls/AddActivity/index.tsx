@@ -288,7 +288,8 @@ const AddActivity = ({
 
       if (
         prev.plannedStartDate
-        && updatesFields.activityDuration
+        && updatesFields.activityDuration !== null
+        && updatesFields.activityDuration !== undefined
         && updatesFields.activityTimeUnit
       ) {
         const [yearStr, monthStr, dayStr] = prev.plannedStartDate.split('-');
