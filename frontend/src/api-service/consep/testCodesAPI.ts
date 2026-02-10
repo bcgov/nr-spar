@@ -1,7 +1,7 @@
 import ApiConfig from '../ApiConfig';
 import api from '../api';
 
-import { TestCodeType, ActivityIdType, ActivityRiaSkeyType } from '../../types/consep/TestingSearchType';
+import { TestCodeType, ActivityIdType } from '../../types/consep/TestingSearchType';
 
 export const getTestTypeCodes = () => {
   const url = `${ApiConfig.testCodes}/type`;
