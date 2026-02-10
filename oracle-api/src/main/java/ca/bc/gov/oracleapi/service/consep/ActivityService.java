@@ -3,7 +3,6 @@ package ca.bc.gov.oracleapi.service.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
@@ -232,21 +231,6 @@ public class ActivityService {
     }
 
     return mapActivityEntityToSearchResponseDto(savedActivityEntity);
-  }
-
-  /**
-   * Retrieves all activities for the given request skey and item id,
-   * mapping the result to ActivityRequestItemDto records.
-   *
-   * @param requestSkey the request skey to filter activities
-   * @param itemId the item id to filter activities
-   * @return a list of ActivityRequestItemDto containing the activity key and description
-   */
-  public List<ActivityRequestItemDto> getActivityByRequestSkeyAndItemId(BigDecimal requestSkey, String itemId) {
-    return activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId)
-        .stream()
-        .map(arr -> new ActivityRequestItemDto((BigDecimal) arr[0], (String) arr[1]))
-        .toList();
   }
 
   /**

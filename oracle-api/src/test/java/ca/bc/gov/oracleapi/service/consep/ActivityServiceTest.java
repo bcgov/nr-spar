@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
@@ -432,38 +431,6 @@ class ActivityServiceTest {
         "The selected activity is not a test activity; test category code should be null.",
         ex.getReason()
     );
-  }
-
-  /* ----------------------- Get Activity By RequestSkey And ItemId ---------------------------*/
-  @Test
-  void getActivityByRequestSkeyAndItemId_shouldReturnExpectedDtos() {
-    BigDecimal requestSkey = new BigDecimal("422679");
-    String itemId = "A";
-    List<Object[]> repoResult = List.of(
-        new Object[] { new BigDecimal("809210"), "G11 germination test" },
-        new Object[] { new BigDecimal("805643"), "Extend strat 35 days" }
-    );
-    when(activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId))
-        .thenReturn(repoResult);
-    List<ActivityRequestItemDto> activityResult =
-        activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
-
-    assertEquals(2, activityResult.size());
-    assertEquals(new BigDecimal("809210"), activityResult.get(0).riaSkey());
-    assertEquals("G11 germination test", activityResult.get(0).activityDescription());
-    assertEquals(new BigDecimal("805643"), activityResult.get(1).riaSkey());
-    assertEquals("Extend strat 35 days", activityResult.get(1).activityDescription());
-  }
-
-  @Test
-  void getActivityByRequestSkeyAndItemId_shouldReturnEmptyList_whenNoData() {
-    BigDecimal requestSkey = new BigDecimal("422679");
-    String itemId = "A";
-    when(activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId))
-        .thenReturn(List.of());
-    List<ActivityRequestItemDto> activityResult =
-        activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
-    assertEquals(0, activityResult.size());
   }
 
   /* ------------------------ Get Activity Ids -----------------------------------------------*/
