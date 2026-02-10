@@ -263,26 +263,42 @@ const AddActivity = ({
   };
 
   const setSelectedActivity = (activity: ActivityIdType) => {
-    if (!activity) return;
-
     setAddActivityData((prev) => {
+      if (!activity) {
+        return {
+          ...prev,
+          standardActivityId: undefined,
+          activityTypeCd: undefined,
+          significantStatusIndicator: 0,
+          testCategoryCd: undefined,
+          activityDuration: undefined,
+          activityTimeUnit: undefined,
+          plannedEndDate: undefined
+        };
+      }
+
       const updatesFields: Partial<AddActivityRequest> = {};
       updatesFields.standardActivityId = activity.standardActivityId;
       updatesFields.activityTypeCd = activity.activityTypeCd;
       updatesFields.significantStatusIndicator = activity.significantStatusIndicator;
-
-      if (activity.testCategoryCd) updatesFields.testCategoryCd = activity.testCategoryCd;
-      if (activity.activityDuration) updatesFields.activityDuration = activity.activityDuration;
-      if (activity.activityTimeUnit) updatesFields.activityTimeUnit = activity.activityTimeUnit;
+      updatesFields.testCategoryCd = activity.testCategoryCd ?? undefined;
+      updatesFields.activityDuration = activity.activityDuration !== null
+        && activity.activityDuration !== undefined ? activity.activityDuration : undefined;
+      updatesFields.activityTimeUnit = activity.activityTimeUnit ?? undefined;
 
       if (
         prev.plannedStartDate
         && updatesFields.activityDuration
         && updatesFields.activityTimeUnit
       ) {
-        const startDate = new Date(prev.plannedStartDate);
+        const [yearStr, monthStr, dayStr] = prev.plannedStartDate.split('-');
+        const startDate = new Date(
+          Number(yearStr),
+          Number(monthStr) - 1,
+          Number(dayStr)
+        );
         const duration = updatesFields.activityDuration;
-        const tempEndDate = new Date(startDate);
+        const tempEndDate = new Date(startDate.getTime());
 
         switch (updatesFields.activityTimeUnit) {
           case 'HR':
@@ -342,7 +358,7 @@ const AddActivity = ({
           className="add-activity-select"
           titleText={<RequiredFormFieldLabel text="Activity" />}
           items={activityIdQuery.data ?? []}
-          itemToString={(item: ActivityIdType) => item?.activityDescription ?? ''}
+          itemToString={(item: ActivityIdType | null) => item?.activityDescription ?? ''}
           selectedItem={activityIdQuery.data?.find(
             (o) => o.standardActivityId === addActivityData.standardActivityId
           )}

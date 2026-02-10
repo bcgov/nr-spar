@@ -239,7 +239,7 @@ public class ActivityService {
    *
    * @param isFamilyLot true for familylot
    * @param isSeedlot true for seedlot
-   * @return list of StandardActivityDto containing standardActivityId and activityDescription
+   * @return list of StandardActivityDto
    */
   public List<StandardActivityDto> getStandardActivityIds(boolean isFamilyLot, boolean isSeedlot) {
     List<StandardActivityEntity> activities = new ArrayList<>();

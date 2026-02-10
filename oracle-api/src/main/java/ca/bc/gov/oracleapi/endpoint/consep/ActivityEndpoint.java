@@ -63,7 +63,7 @@ public class ActivityEndpoint {
    *
    * @param isFamilyLot a boolean indicating if the request is for getting familylot activities
    * @param isSeedlot a boolean indicating if the request is for getting seedlot activities
-   * @return a list of StandardActivityDto containing the activity id and description
+   * @return a list of StandardActivityDto
    */
   @GetMapping("/ids")
   @ApiResponse(
