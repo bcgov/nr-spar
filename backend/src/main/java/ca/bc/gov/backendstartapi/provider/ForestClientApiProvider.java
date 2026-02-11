@@ -287,7 +287,7 @@ public class ForestClientApiProvider implements Provider {
                     "size",
                     String.valueOf(size),
                     "clientName",
-                    clientName));
+                    clientName.toLowerCase()));
 
         SparLog.info(
             "Finished {} request for function {}, Page {} - 200 OK!",
