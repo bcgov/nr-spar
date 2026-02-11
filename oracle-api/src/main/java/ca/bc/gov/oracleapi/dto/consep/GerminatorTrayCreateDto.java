@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.dto.consep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * A DTO containing only the fields needed for
@@ -14,6 +15,9 @@ public record GerminatorTrayCreateDto(
     String testCategoryCd,
 
     @Schema(description = "Primary key of the activity")
-    BigDecimal riaSkey
+    BigDecimal riaSkey,
+
+    @Schema(description = "Actual begin date of the activity")
+    LocalDateTime actualBeginDtTm
 ) {
 }
