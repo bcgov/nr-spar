@@ -17,7 +17,8 @@ export type MoistureContentType = {
   mc: {
     title: string,
     commentPlaceholder: string,
-    testComment: string
+    testComment: string,
+    invalidDateErrorMsg: string
   },
   table: {
     title: string,
