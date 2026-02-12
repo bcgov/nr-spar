@@ -178,14 +178,15 @@ describe('Moisture Content Screen page', () => {
     cy.get('@totalRows')
       .should('have.length', 4);
 
+    cy.wait(ONE_SECOND); // Wait for the row to be added
+
     // Check 'Delete row' button functionality
     cy.get('@totalRows')
       .last()
       .find('td:nth-last-child(1) svg')
-      .click();
+      .click({ force: true });
 
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(HALF_SECOND); // Wait for the row to be deleted
+    cy.wait(ONE_SECOND); // Wait for the row to be deleted
 
     cy.get('@totalRows')
       .should('have.length', 3);
