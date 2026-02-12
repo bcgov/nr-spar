@@ -782,21 +782,35 @@ describe('Moisture Content Screen page', () => {
       .should('have.attr', 'placeholder', 'yyyy/mm/dd');
 
     cy.get('#moisture-content-end-date-picker')
-      .clear()
-      .type('2025-05-28', { delay: TYPE_DELAY })
-      .blur();
+      .click();
+
+    cy.get('.flatpickr-calendar.open')
+      .find('.flatpickr-days')
+      .contains('11')
+      .click();
 
     // Invalid start date
     cy.get('#moisture-content-start-date-picker')
-      .clear()
-      .type('2025-05-29', { delay: TYPE_DELAY })
-      .blur();
+      .click();
+
+    cy.get('.flatpickr-calendar.open')
+      .find('.flatpickr-days')
+      .contains('15')
+      .click();
+
+    // Check invalid date error message
+    cy.get(`.${prefix}--date-picker-container`)
+      .find(`.${prefix}--form-requirement`)
+      .should('contain.text', mcData.mc.invalidDateErrorMsg);
 
     // Valid start date
     cy.get('#moisture-content-start-date-picker')
-      .clear()
-      .type('2025-05-27', { delay: TYPE_DELAY })
-      .blur();
+      .click();
+
+    cy.get('.flatpickr-calendar.open')
+      .find('.flatpickr-days')
+      .contains('10')
+      .click();
   });
 
   it('should check comment box', () => {
