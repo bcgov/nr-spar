@@ -71,6 +71,14 @@ describe('Moisture Content Screen page', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
     cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
+    cy.get('.activity-result-container')
+      .find('tbody tr')
+      .as('totalRows')
+      .should('have.length', 3);
+
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
+
     // Add a new row
     cy.get('.activity-result-action-buttons')
       .find('button')
@@ -157,6 +165,9 @@ describe('Moisture Content Screen page', () => {
       .find('tbody tr')
       .as('totalRows')
       .should('have.length', 3);
+
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     // Check 'Add row' button functionality
     cy.get('.activity-result-action-buttons')
@@ -249,6 +260,10 @@ describe('Moisture Content Screen page', () => {
 
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
+
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
+
     // Check descending sorting functionality of 'Replicate' column
     cy.get('.activity-result-container')
       .find('thead tr')
@@ -303,8 +318,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     // Check ascending sorting functionality of 'Container' column
     cy.get('.activity-result-container')
@@ -364,8 +379,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     // Check ascending sorting functionality of 'Container weight' column
     cy.get('.activity-result-container')
@@ -425,8 +440,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     // Check ascending sorting functionality of 'Fresh seed' column
     cy.get('.activity-result-container')
@@ -486,8 +501,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     // Check ascending sorting functionality of 'Cont + Dry seed' column
     cy.get('.activity-result-container')
@@ -547,8 +562,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     // Check ascending sorting functionality of 'Dry weight' column
     cy.get('.activity-result-container')
@@ -608,8 +623,8 @@ describe('Moisture Content Screen page', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     // Check ascending sorting functionality of 'MC value (%)' column
     cy.get('.activity-result-container')
@@ -669,8 +684,8 @@ describe('Moisture Content Screen page', () => {
     let containerWt: string;
     let contDrySeed: string;
 
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     cy.get('.activity-result-container')
       .find('tbody tr')
@@ -706,8 +721,8 @@ describe('Moisture Content Screen page', () => {
     let freshSeed: string;
     let dryWt: string;
 
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     cy.get('.activity-result-container')
       .find('tbody tr')
@@ -741,7 +756,10 @@ describe('Moisture Content Screen page', () => {
   it('Check Calculate average button functionality', () => {
     cy.intercept('POST', '**/api/moisture-content-cone/514330/calculate-average').as('postCalcAvg');
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
+
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     // Extract all MC values from the 7th column
     const mcValues: number[] = [];
