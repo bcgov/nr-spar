@@ -29,7 +29,6 @@ import {
 } from '../constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from '../definitions';
-
 import './styles.scss';
 
 type AdvancedFiltersProps = {
@@ -103,25 +102,31 @@ const AdvancedFilters = ({
     };
   }, [onClose, anchorRef]);
 
+  const updateSearchParams = <K extends keyof ActivitySearchRequest>(
+    prev: ActivitySearchRequest,
+    key: K,
+    value: ActivitySearchRequest[K] | null
+  ) => {
+    const updated = { ...prev };
+
+    if (value != null) {
+      updated[key] = value;
+    } else {
+      delete updated[key];
+    }
+
+    return updated;
+  };
+
   const handleCheckboxesChanges = (
-    searchField: keyof ActivitySearchRequest,
+    searchField: 'includeHistoricalTests' | 'germTestsOnly' | 'familyLotsOnly',
     value: boolean
   ) => {
-    setSearchParams((prev) => {
-      // If unchecked, remove the field by setting undefined
-      if (!value) {
-        return {
-          ...prev,
-          [searchField]: undefined
-        };
-      }
-
-      return {
-        ...prev,
-        [searchField]: true
-      };
-    });
+    setSearchParams((prev) => (
+      updateSearchParams(prev, searchField, value ? true : null)
+    ));
   };
+
   const handleRequestIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
 
@@ -133,10 +138,7 @@ const AdvancedFilters = ({
       errorMessage = errorMessages.reqId;
     }
 
-    setSearchParams((prev) => ({
-      ...prev,
-      requestId: value
-    }));
+    setSearchParams((prev) => (updateSearchParams(prev, 'requestId', value || null)));
 
     setValidateSearch((prev) => ({
       ...prev,
@@ -149,12 +151,15 @@ const AdvancedFilters = ({
 
   const handleComboBoxesChanges = (
     searchField: keyof ActivitySearchRequest,
-    data: ComboBoxEvent
+    selectedItem: string | undefined
   ) => {
-    setSearchParams((prev) => ({
-      ...prev,
-      [searchField]: data.selectedItem ?? undefined
-    }));
+    setSearchParams((prev) => (
+      updateSearchParams(
+        prev,
+        searchField,
+        selectedItem && selectedItem !== '' ? selectedItem : null
+      )
+    ));
   };
 
   const handleRequestYearChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -174,10 +179,14 @@ const AdvancedFilters = ({
       }
     }
 
-    setSearchParams((prev) => ({
-      ...prev,
-      requestYear: Number.isNaN(parsed) ? undefined : parsed
-    }));
+    setSearchParams((prev) => (
+      updateSearchParams(
+        prev,
+        'requestYear',
+        Number.isNaN(parsed) ? null : parsed ?? null
+      )
+    ));
+
     setValidateSearch((prev) => ({
       ...prev,
       requestYear: {
@@ -198,10 +207,14 @@ const AdvancedFilters = ({
       errorMessage = errorMessages.reqId;
     }
 
-    setSearchParams((prev) => ({
-      ...prev,
-      orchardId: value
-    }));
+    setSearchParams((prev) => (
+      updateSearchParams(
+        prev,
+        'orchardId',
+        value || null
+      )
+    ));
+
     setValidateSearch((prev) => ({
       ...prev,
       orchardId: {
@@ -240,35 +253,17 @@ const AdvancedFilters = ({
     const toKey = `${group}${field}To` as keyof ActivitySearchRequest;
 
     setSearchParams((prev) => {
-      const currentFrom = prev[fromKey];
-      const currentTo = prev[toKey];
-
-      let newFrom = currentFrom;
-      let newTo = currentTo;
+      let updated = prev;
 
       if (range === 'From') {
-        newFrom = value || undefined;
-        newTo = (
-          newFrom && !newTo
-        )
-          ? maxEndDate
-          : newTo;
+        updated = updateSearchParams(updated, fromKey, value ?? null);
       }
 
       if (range === 'To') {
-        newTo = value || undefined;
-        newFrom = (
-          newTo && !newFrom
-        )
-          ? minStartDate
-          : newFrom;
+        updated = updateSearchParams(updated, toKey, value ?? null);
       }
 
-      return {
-        ...prev,
-        [fromKey]: newFrom,
-        [toKey]: newTo
-      };
+      return updated;
     });
   };
 
@@ -318,10 +313,7 @@ const AdvancedFilters = ({
           value = undefined;
       }
 
-      return {
-        ...prev,
-        [groupKey]: value
-      };
+      return updateSearchParams(prev, groupKey, value ?? null);
     });
   };
 
@@ -336,31 +328,7 @@ const AdvancedFilters = ({
   ) => (v === undefined || v === null ? '' : String(v));
 
   const clearFilters = () => {
-    setSearchParams((prev) => ({
-      ...prev,
-      requestId: undefined,
-      requestType: undefined,
-      requestYear: undefined,
-      orchardId: undefined,
-      testCategoryCd: undefined,
-      testRank: undefined,
-      species: undefined,
-      actualBeginDateFrom: undefined,
-      actualBeginDateTo: undefined,
-      actualEndDateFrom: undefined,
-      actualEndDateTo: undefined,
-      revisedStartDateFrom: undefined,
-      revisedStartDateTo: undefined,
-      revisedEndDateFrom: undefined,
-      revisedEndDateTo: undefined,
-      germTrayAssignment: undefined,
-      completeStatus: undefined,
-      acceptanceStatus: undefined,
-      seedlotClass: undefined,
-      includeHistoricalTests: undefined,
-      germTestsOnly: undefined,
-      familyLotsOnly: undefined
-    }));
+    setSearchParams(() => ({} as ActivitySearchRequest));
 
     setValidateSearch((prev) => ({
       ...prev,
@@ -467,7 +435,7 @@ const AdvancedFilters = ({
               titleText="Request type"
               items={requestTypeQuery.data ?? []}
               onChange={(e: ComboBoxEvent) => {
-                handleComboBoxesChanges('requestType', e);
+                handleComboBoxesChanges('requestType', e.selectedItem);
               }}
               selectedItem={toSelectedItemString(searchParams.requestType)}
             />
@@ -509,7 +477,7 @@ const AdvancedFilters = ({
               titleText="Category"
               items={testCategoryQuery.data ?? []}
               onChange={(e: ComboBoxEvent) => {
-                handleComboBoxesChanges('testCategoryCd', e);
+                handleComboBoxesChanges('testCategoryCd', e.selectedItem);
               }}
               selectedItem={toSelectedItemString(searchParams.testCategoryCd)}
             />
@@ -521,7 +489,7 @@ const AdvancedFilters = ({
               titleText="Rank"
               items={testRanks}
               onChange={(e: ComboBoxEvent) => {
-                handleComboBoxesChanges('testRank', e);
+                handleComboBoxesChanges('testRank', e.selectedItem);
               }}
               selectedItem={toSelectedItemString(searchParams.testRank)}
             />
@@ -533,9 +501,11 @@ const AdvancedFilters = ({
               titleText="Species"
               items={vegCodeQuery.data ?? []}
               onChange={(e: ComboBoxEvent) => {
-                handleComboBoxesChanges('species', e);
+                handleComboBoxesChanges('species', e.selectedItem ? e.selectedItem.code : undefined);
               }}
-              selectedItem={toSelectedItemString(searchParams.species)}
+              selectedItem={vegCodeQuery.data?.find(
+                (o) => o.code === searchParams.species
+              )}
             />
           </Column>
         </Row>
