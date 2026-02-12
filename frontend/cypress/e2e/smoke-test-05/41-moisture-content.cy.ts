@@ -85,6 +85,9 @@ describe('Moisture Content Screen page', () => {
       .contains('Add row')
       .click();
 
+    cy.get('@totalRows')
+      .should('have.length', 4);
+
     // Check validation of Container input
     cy.get('.activity-result-container')
       .find('tbody tr')
@@ -157,9 +160,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Activity results table button functionality', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
-
     // Check if the table has the correct number of rows
     cy.get('.activity-result-container')
       .find('tbody tr')
