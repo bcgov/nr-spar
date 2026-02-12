@@ -2,7 +2,8 @@
   "mc": {
     "title": "Moisture content oven for lot",
     "commentPlaceholder": "",
-    "testComment": "This is a test comment"
+    "testComment": "This is a test comment",
+    "invalidDateErrorMsg": "Please enter a valid date"
   },
   "table": {
     "title": "Activity results per replicate",
