@@ -22,7 +22,6 @@ import GenericTable from '../../../../../../components/GenericTable';
 import RequiredFormFieldLabel from '../../../../../../components/RequiredFormFieldLabel';
 import {
   getActivityIds,
-  getActivityRiaSkeys,
   getTestCategoryCodes,
   getActivityDurationUnits
 } from '../../../../../../api-service/consep/testCodesAPI';
@@ -41,7 +40,6 @@ import ComboBoxEvent from '../../../../../../types/ComboBoxEvent';
 import type {
   TestingSearchResponseType,
   ActivityIdType,
-  ActivityRiaSkeyType,
   TestCodeType,
   AddGermTestValidationResponseType
 } from '../../../../../../types/consep/TestingSearchType';
@@ -103,29 +101,7 @@ const AddActivity = ({
       isSeedlot: !isFamilyLotNumber
     }),
     staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS,
-    select: (data: ActivityIdType[]) => data.map((activity) => ({
-      id: activity.standardActivityId,
-      text: activity.activityDescription,
-      activityTypeCd: activity.activityTypeCd,
-      testCategoryCd: activity.testCategoryCd
-    }))
-  });
-
-  const activityRiaSkeyQuery = useQuery({
-    queryKey: ['activity-riaSkeys', requestSkey, itemId],
-    queryFn: () => {
-      if (!requestSkey || !itemId) {
-        throw new Error('requestSkey or itemId is missing');
-      }
-      return getActivityRiaSkeys(requestSkey, itemId);
-    },
-    staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS,
-    select: (data: ActivityRiaSkeyType[]) => data.map((activity) => ({
-      id: activity.riaSkey,
-      text: activity.activityDescription
-    }))
+    gcTime: THREE_HALF_HOURS
   });
 
   const testCategoryQuery = useQuery({
@@ -215,9 +191,6 @@ const AddActivity = ({
     if (activityIdQuery.isError && activityIdQuery.error instanceof Error) {
       failedMessages.push(`Activity IDs: ${activityIdQuery.error.message}`);
     }
-    if (activityRiaSkeyQuery.isError && activityRiaSkeyQuery.error instanceof Error) {
-      failedMessages.push(`Activity RiaSkeys: ${activityRiaSkeyQuery.error.message}`);
-    }
     if (testCategoryQuery.isError && testCategoryQuery.error instanceof Error) {
       failedMessages.push(`Test Category Codes: ${testCategoryQuery.error.message}`);
     }
@@ -236,14 +209,15 @@ const AddActivity = ({
       : null);
   }, [
     activityIdQuery.isError, activityIdQuery.error,
-    activityRiaSkeyQuery.isError, activityRiaSkeyQuery.error,
     testCategoryQuery.isError, testCategoryQuery.error,
     activityDurationUnitQuery.isError, activityDurationUnitQuery.error,
     isCommitmentIndicatorYesQuery.isError, isCommitmentIndicatorYesQuery.error
   ]);
 
   const selectedActivity = useMemo(
-    () => activityIdQuery.data?.find((a) => a.id === addActivityData.standardActivityId),
+    () => activityIdQuery.data?.find(
+      (a) => a.standardActivityId === addActivityData.standardActivityId
+    ),
     [activityIdQuery.data, addActivityData.standardActivityId]
   );
   const isTestActivity = Boolean(selectedActivity?.testCategoryCd);
@@ -288,6 +262,72 @@ const AddActivity = ({
     }));
   };
 
+  const setSelectedActivity = (activity: ActivityIdType) => {
+    setAddActivityData((prev) => {
+      if (!activity) {
+        return {
+          ...prev,
+          standardActivityId: undefined,
+          activityTypeCd: undefined,
+          significantStatusIndicator: 0,
+          testCategoryCd: undefined,
+          activityDuration: undefined,
+          activityTimeUnit: undefined,
+          plannedEndDate: undefined
+        };
+      }
+
+      const updatesFields: Partial<AddActivityRequest> = {};
+      updatesFields.standardActivityId = activity.standardActivityId;
+      updatesFields.activityTypeCd = activity.activityTypeCd;
+      updatesFields.significantStatusIndicator = activity.significantStatusIndicator;
+      updatesFields.testCategoryCd = activity.testCategoryCd ?? undefined;
+      updatesFields.activityDuration = activity.activityDuration !== null
+        && activity.activityDuration !== undefined ? activity.activityDuration : undefined;
+      updatesFields.activityTimeUnit = activity.activityTimeUnit ?? undefined;
+
+      if (
+        prev.plannedStartDate
+        && updatesFields.activityDuration !== null
+        && updatesFields.activityDuration !== undefined
+        && updatesFields.activityTimeUnit
+      ) {
+        const [yearStr, monthStr, dayStr] = prev.plannedStartDate.split('-');
+        const startDate = new Date(
+          Number(yearStr),
+          Number(monthStr) - 1,
+          Number(dayStr)
+        );
+        const duration = updatesFields.activityDuration;
+        const tempEndDate = new Date(startDate.getTime());
+
+        switch (updatesFields.activityTimeUnit) {
+          case 'HR':
+            tempEndDate.setHours(tempEndDate.getHours() + duration);
+            break;
+          case 'DY':
+            tempEndDate.setDate(tempEndDate.getDate() + duration);
+            break;
+          case 'WK':
+            tempEndDate.setDate(tempEndDate.getDate() + duration * 7);
+            break;
+          case 'MO':
+            tempEndDate.setMonth(tempEndDate.getMonth() + duration);
+            break;
+          case 'YR':
+            tempEndDate.setFullYear(tempEndDate.getFullYear() + duration);
+            break;
+          default:
+            tempEndDate.setDate(tempEndDate.getDate() + duration);
+        }
+
+        updatesFields.plannedEndDate = toLocalDateString(tempEndDate);
+      }
+
+      return { ...prev, ...updatesFields };
+    });
+  };
+
   return (
     <div>
       {showGermTestWarning && (
@@ -319,34 +359,14 @@ const AddActivity = ({
           className="add-activity-select"
           titleText={<RequiredFormFieldLabel text="Activity" />}
           items={activityIdQuery.data ?? []}
-          itemToString={(item: { id: string; text: string } | null) => item?.text ?? ''}
+          itemToString={(item: ActivityIdType | null) => item?.activityDescription ?? ''}
           selectedItem={activityIdQuery.data?.find(
-            (o) => o.id === addActivityData.standardActivityId
+            (o) => o.standardActivityId === addActivityData.standardActivityId
           )}
           onChange={(e: ComboBoxEvent) => {
-            if (e.selectedItem) {
-              updateField('standardActivityId', e.selectedItem.id);
-              updateField('activityTypeCd', e.selectedItem.activityTypeCd);
-              if (!e.selectedItem.testCategoryCd) {
-                updateField('testCategoryCd', undefined);
-              }
-            } else {
-              updateField('standardActivityId', undefined);
-              updateField('activityTypeCd', undefined);
-              updateField('testCategoryCd', undefined);
-            }
+            const activity = e.selectedItem as ActivityIdType;
+            setSelectedActivity(activity);
           }}
-        />
-        <ComboBox
-          id="add-activity-part-of-activity-select"
-          className="add-activity-select"
-          titleText="Part of activity"
-          items={activityRiaSkeyQuery.data ?? []}
-          itemToString={(item: { id: number; text: string } | null) => item?.text ?? ''}
-          selectedItem={activityRiaSkeyQuery.data?.find(
-            (o) => o.id === addActivityData.associatedRiaKey
-          )}
-          onChange={(e: ComboBoxEvent) => updateField('associatedRiaKey', e.selectedItem ? e.selectedItem.id : undefined)}
         />
         {isTestActivity && (
           <ComboBox

@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
@@ -85,7 +84,6 @@ class ActivityServiceTest {
         "ST1",
         "AC1",
         "TC1",
-        new BigDecimal("33874"),
         LocalDate.of(2024, 1, 1),
         LocalDate.of(2024, 1, 2),
         null,
@@ -200,7 +198,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         null, // Not a test activity
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -237,7 +234,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
-        validActivityCreateDto.associatedRiaKey(),
         LocalDate.of(2024, 1, 10),
         LocalDate.of(2024, 1, 2),
         validActivityCreateDto.revisedStartDate(),
@@ -267,7 +263,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -301,7 +296,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         validActivityCreateDto.testCategoryCd(),
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -335,7 +329,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         "NON", // <-- Not STD
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -372,7 +365,6 @@ class ActivityServiceTest {
         validActivityCreateDto.standardActivityId(),
         validActivityCreateDto.activityTypeCd(),
         null, // missing testCategoryCd
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -414,7 +406,6 @@ class ActivityServiceTest {
         "ST2",
         "AC2",
         "TC1", // invalid testCategoryCd for non-test activity
-        validActivityCreateDto.associatedRiaKey(),
         validActivityCreateDto.plannedStartDate(),
         validActivityCreateDto.plannedEndDate(),
         validActivityCreateDto.revisedStartDate(),
@@ -440,38 +431,6 @@ class ActivityServiceTest {
         "The selected activity is not a test activity; test category code should be null.",
         ex.getReason()
     );
-  }
-
-  /* ----------------------- Get Activity By RequestSkey And ItemId ---------------------------*/
-  @Test
-  void getActivityByRequestSkeyAndItemId_shouldReturnExpectedDtos() {
-    BigDecimal requestSkey = new BigDecimal("422679");
-    String itemId = "A";
-    List<Object[]> repoResult = List.of(
-        new Object[] { new BigDecimal("809210"), "G11 germination test" },
-        new Object[] { new BigDecimal("805643"), "Extend strat 35 days" }
-    );
-    when(activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId))
-        .thenReturn(repoResult);
-    List<ActivityRequestItemDto> activityResult =
-        activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
-
-    assertEquals(2, activityResult.size());
-    assertEquals(new BigDecimal("809210"), activityResult.get(0).riaSkey());
-    assertEquals("G11 germination test", activityResult.get(0).activityDescription());
-    assertEquals(new BigDecimal("805643"), activityResult.get(1).riaSkey());
-    assertEquals("Extend strat 35 days", activityResult.get(1).activityDescription());
-  }
-
-  @Test
-  void getActivityByRequestSkeyAndItemId_shouldReturnEmptyList_whenNoData() {
-    BigDecimal requestSkey = new BigDecimal("422679");
-    String itemId = "A";
-    when(activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId))
-        .thenReturn(List.of());
-    List<ActivityRequestItemDto> activityResult =
-        activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
-    assertEquals(0, activityResult.size());
   }
 
   /* ------------------------ Get Activity Ids -----------------------------------------------*/
