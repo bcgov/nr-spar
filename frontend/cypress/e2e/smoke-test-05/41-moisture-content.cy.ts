@@ -1,4 +1,6 @@
-import { HALF_SECOND, TYPE_DELAY } from '../../constants';
+import {
+  HALF_SECOND, ONE_SECOND, THREE_SECONDS, TYPE_DELAY
+} from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { mockMoistureContentApi } from '../../support/mockApiConsep';
 import { MoistureContentType, SeedlotReplicateInfoType } from '../../definitions';
@@ -89,9 +91,7 @@ describe('Moisture Content Screen page', () => {
       .should('have.length', 4);
 
     // Check validation of Container input
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .as('totalRows')
+    cy.get('@totalRows')
       .eq(3)
       .find('input[name="containerId"]')
       .click()
@@ -257,7 +257,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check sorting by Replicate number', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
@@ -314,7 +314,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check sorting by Container number', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
@@ -375,7 +375,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check sorting by Container weight', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
@@ -436,7 +436,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check sorting by Fresh seed', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
@@ -497,7 +497,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check sorting by Cont + Dry seed', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
@@ -558,7 +558,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check sorting by Dry weight', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
@@ -619,7 +619,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check sorting by MC value (%)', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
@@ -680,7 +680,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check Dry weight value', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     let containerWt: string;
     let contDrySeed: string;
@@ -717,7 +717,7 @@ describe('Moisture Content Screen page', () => {
 
   it('Check MC value(%) value', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     let freshSeed: string;
     let dryWt: string;
