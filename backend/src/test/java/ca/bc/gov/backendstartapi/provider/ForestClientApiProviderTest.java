@@ -433,7 +433,7 @@ class ForestClientApiProviderTest {
 
     when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
 
-    String url = "/null/clients/findByNames?page=0&size=50&clientName=" + clientName;
+    String url = "/null/clients/findByNames?page=0&size=50&clientName=" + clientName.toLowerCase();
 
     mockRestServiceServer
         .expect(requestTo(url))
@@ -457,7 +457,7 @@ class ForestClientApiProviderTest {
 
     when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
 
-    String url = "/null/clients/findByNames?page=0&size=50&clientName=" + clientName;
+    String url = "/null/clients/findByNames?page=0&size=50&clientName=" + clientName.toLowerCase();
 
     String json =
         """
