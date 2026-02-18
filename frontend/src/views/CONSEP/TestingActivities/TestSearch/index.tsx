@@ -62,8 +62,6 @@ const csvConfig = mkConfig({
 });
 const LOT_INPUT_KEYS = ['lot-input-1', 'lot-input-2', 'lot-input-3', 'lot-input-4', 'lot-input-5'] as const;
 const toDate = (value?: string) => (value ? new Date(`${value}T00:00:00`) : undefined);
-const toLocalDateString = (date: Date) => date.toLocaleDateString('en-CA');
-const todayString = toLocalDateString(new Date());
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
@@ -567,13 +565,13 @@ const TestSearch = () => {
                 onChange={(dates: Date[]) => {
                   handleWithdrawalDateChange(dates, 'start');
                 }}
-                defaultValue={todayString}
+                defaultValue={dateField.todayString}
                 minDate={dateField.minStartDate.toISOString().slice(0, 10)}
-                maxDate={todayString}
+                maxDate={dateField.todayString}
                 value={
                   searchParams.seedWithdrawalStartDate
                     ? toDate(searchParams.seedWithdrawalStartDate)
-                    : toDate(todayString)
+                    : toDate(dateField.todayString)
                 }
                 style={{ minWidth: '9rem' }}
               >

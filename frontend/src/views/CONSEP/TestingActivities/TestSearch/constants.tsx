@@ -10,13 +10,15 @@ import { ActivitySearchValidation, ValidationErrorType } from './definitions';
 export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
 const today = new Date();
+const todayString = today.toISOString().slice(0, 10);
 const minStartDate = new Date(today.getFullYear() - 300, today.getMonth(), today.getDate());
 const maxEndDate = new Date(today.getFullYear() + 300, today.getMonth(), today.getDate());
 export const dateField = {
   placeholderText: 'yyyy/mm/dd',
   helperText: 'year/month/day',
   minStartDate,
-  maxEndDate
+  maxEndDate,
+  todayString
 };
 
 export const formatDateCell = (value: string | null) => {
