@@ -1,7 +1,6 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
@@ -14,13 +13,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,32 +59,11 @@ public class ActivityEndpoint {
   }
 
   /**
-   * Retrieves activities for the given request skey and item id.
-   *
-   * @param requestSkey the request skey to filter activities
-   * @param itemId the item id to filter activities
-   * @return a list of ActivityRequestItemDto containing the activity key and description
-   */
-  @GetMapping("/request/{requestSkey}/item/{itemId}")
-  @ApiResponse(
-      responseCode = "200",
-      description = "Successfully retrieved the activities by requestSkey and itemId."
-  )
-  @ApiAuthResponse
-  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public List<ActivityRequestItemDto> getActivityByRequestSkeyAndItemId(
-      @PathVariable BigDecimal requestSkey,
-      @PathVariable String itemId
-  ) {
-    return activityService.getActivityByRequestSkeyAndItemId(requestSkey, itemId);
-  }
-
-  /**
    * Retrieves standard activity IDs and descriptions for seedlot and/or family lot numbers.
    *
    * @param isFamilyLot a boolean indicating if the request is for getting familylot activities
    * @param isSeedlot a boolean indicating if the request is for getting seedlot activities
-   * @return a list of StandardActivityDto containing the activity id and description
+   * @return a list of StandardActivityDto
    */
   @GetMapping("/ids")
   @ApiResponse(
