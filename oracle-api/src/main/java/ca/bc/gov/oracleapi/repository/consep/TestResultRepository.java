@@ -1,7 +1,9 @@
 package ca.bc.gov.oracleapi.repository.consep;
 
+import ca.bc.gov.oracleapi.dto.consep.TestResultDatesDto;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -41,5 +43,68 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
       nativeQuery = true)
   void updateTestResultAvgValue(
       @Param("riaKey") BigDecimal riaKey,
-      @Param("average") Double average);
+      @Param("average") Double average
+  );
+
+  @Query("""
+        SELECT
+          rst.warmStratStartDate,
+          tr.warmStratHours,
+          rst.drybackStartDate,
+          rst.activityType,
+          tr.soakHours,
+          tr.stratHours
+        FROM TestResultEntity rst
+        JOIN TestRegimeEntity tr
+          ON rst.activityType = tr.seedlotTestCode
+        WHERE rst.riaKey = :riaKey
+      """)
+  TestResultDatesDto getActivityResultDates(
+      @Param("riaKey") BigDecimal riaKey
+  );
+
+  @Modifying()
+  @Transactional
+  @Query("""
+      UPDATE TestResultEntity rst
+         SET rst.germinatorTrayId = :trayId,
+             rst.warmStratStartDate =
+               CASE
+                 WHEN :warmStratHours IS NOT NULL
+                 THEN :trayWarmStratDate
+                 ELSE rst.warmStratStartDate
+               END,
+             rst.stratStartDt = :trayColdStratDate,
+             rst.drybackStartDate =
+               CASE
+                 WHEN rst.activityTypeCd = 'G64'
+                 THEN :trayDrybackDate
+                 ELSE rst.drybackStartDate
+               END,
+             rst.germinatorEntry = :trayGerminatorEntryDate,
+             rst.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE rst.riaKey = :riaKey
+      """)
+  void saveGerminatorTray(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("trayId") Integer trayId,
+      @Param("warmStratHours") Integer warmStratHours,
+      @Param("trayWarmStratDate") LocalDate trayWarmStratDate,
+      @Param("trayColdStratDate") LocalDate trayColdStratDate,
+      @Param("trayDrybackDate") LocalDate trayDrybackDate,
+      @Param("trayGerminatorEntryDate") LocalDate trayGerminatorEntryDate
+  );
+
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE TestResultEntity rst
+         SET rst.germinatorTrayId = :trayId,
+             rst.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE rst.riaKey = :riaKey
+      """)
+  void updateGerminatorTray(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("trayId") Integer trayId
+  );
 }

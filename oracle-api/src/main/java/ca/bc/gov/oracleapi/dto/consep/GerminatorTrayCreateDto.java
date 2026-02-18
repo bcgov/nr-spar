@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
  * creating a new {@link ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity} instance.
  */
 public record GerminatorTrayCreateDto(
-    @Schema(description = "Test category code")
+    @Schema(description = "Activity type code")
     @Size(max = 3)
-    String testCategoryCd,
+    String activityTypeCd,
 
     @Schema(description = "Primary key of the activity")
     BigDecimal riaSkey,
