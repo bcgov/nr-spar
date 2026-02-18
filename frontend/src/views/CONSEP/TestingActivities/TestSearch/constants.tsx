@@ -9,8 +9,15 @@ import { ActivitySearchValidation, ValidationErrorType } from './definitions';
 
 export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
-export const minStartDate = '1900-01-01';
-export const maxEndDate = '9999-12-31';
+const today = new Date();
+const minStartDate = new Date(today.getFullYear() - 300, today.getMonth(), today.getDate());
+const maxEndDate = new Date(today.getFullYear() + 300, today.getMonth(), today.getDate());
+export const dateField = {
+  placeholderText: 'yyyy/mm/dd',
+  helperText: 'year/month/day',
+  minStartDate,
+  maxEndDate
+};
 
 export const formatDateCell = (value: string | null) => {
   if (!value) return '';
