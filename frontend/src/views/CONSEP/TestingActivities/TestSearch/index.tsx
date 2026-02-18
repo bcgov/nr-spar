@@ -40,8 +40,7 @@ import {
   testSearchCrumbs,
   iniActSearchValidation,
   errorMessages,
-  minStartDate,
-  maxEndDate,
+  dateField,
   formatExportData,
   columnVisibilityLocalStorageKey
 } from './constants';
@@ -63,6 +62,8 @@ const csvConfig = mkConfig({
 });
 const LOT_INPUT_KEYS = ['lot-input-1', 'lot-input-2', 'lot-input-3', 'lot-input-4', 'lot-input-5'] as const;
 const toDate = (value?: string) => (value ? new Date(`${value}T00:00:00`) : undefined);
+const toLocalDateString = (date: Date) => date.toLocaleDateString('en-CA');
+const todayString = toLocalDateString(new Date());
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
@@ -377,6 +378,12 @@ const TestSearch = () => {
   const handleWithdrawalDateChange = (dates: Date[], type: 'start' | 'end') => {
     const raw = dates?.[0];
     const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : undefined;
+    const maxEnd = dateField.maxEndDate instanceof Date
+      ? dateField.maxEndDate.toISOString().slice(0, 10)
+      : dateField.maxEndDate;
+    const minStart = dateField.minStartDate instanceof Date
+      ? dateField.minStartDate.toISOString().slice(0, 10)
+      : dateField.minStartDate;
 
     setSearchParams((prev) => {
       const currentStart = prev.seedWithdrawalStartDate;
@@ -388,13 +395,13 @@ const TestSearch = () => {
       if (type === 'start') {
         seedWithdrawalStartDate = value || undefined;
         seedWithdrawalEndDate = seedWithdrawalStartDate
-          && !seedWithdrawalEndDate ? maxEndDate : undefined;
+          && !seedWithdrawalEndDate ? maxEnd : undefined;
       }
 
       if (type === 'end') {
         seedWithdrawalEndDate = value || undefined;
         seedWithdrawalStartDate = seedWithdrawalEndDate
-          && !seedWithdrawalStartDate ? minStartDate : undefined;
+          && !seedWithdrawalStartDate ? minStart : undefined;
       }
 
       return {
@@ -560,10 +567,13 @@ const TestSearch = () => {
                 onChange={(dates: Date[]) => {
                   handleWithdrawalDateChange(dates, 'start');
                 }}
+                defaultValue={todayString}
+                minDate={dateField.minStartDate.toISOString().slice(0, 10)}
+                maxDate={todayString}
                 value={
-                  searchParams.seedWithdrawalStartDate !== minStartDate
+                  searchParams.seedWithdrawalStartDate
                     ? toDate(searchParams.seedWithdrawalStartDate)
-                    : undefined
+                    : toDate(todayString)
                 }
                 style={{ minWidth: '9rem' }}
               >
@@ -571,6 +581,8 @@ const TestSearch = () => {
                   id="withdrawal-start-date-input"
                   labelText="Withdrawal start"
                   autoComplete="off"
+                  placeholder="yyyy/mm/dd"
+                  helperText="year/month/day"
                 />
               </DatePicker>
               <DatePicker
@@ -581,8 +593,10 @@ const TestSearch = () => {
                   handleWithdrawalDateChange(dates, 'end');
                 }}
                 minDate={searchParams.seedWithdrawalStartDate || undefined}
+                maxDate={dateField.maxEndDate.toISOString().slice(0, 10)}
                 value={
-                  searchParams.seedWithdrawalEndDate !== maxEndDate
+                  searchParams.seedWithdrawalEndDate
+                  !== dateField.maxEndDate.toISOString().slice(0, 10)
                     ? toDate(searchParams.seedWithdrawalEndDate)
                     : undefined
                 }
@@ -592,6 +606,8 @@ const TestSearch = () => {
                   id="withdrawal-end-date-input"
                   labelText="Withdrawal end"
                   autoComplete="off"
+                  placeholder="yyyy/mm/dd"
+                  helperText="year/month/day"
                 />
               </DatePicker>
               <div className="filters-row-buttons">
