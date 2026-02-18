@@ -579,8 +579,8 @@ const TestSearch = () => {
                   id="withdrawal-start-date-input"
                   labelText="Withdrawal start"
                   autoComplete="off"
-                  placeholder="yyyy/mm/dd"
-                  helperText="year/month/day"
+                  placeholder={dateField.placeholderText}
+                  helperText={dateField.helperText}
                 />
               </DatePicker>
               <DatePicker
@@ -604,8 +604,8 @@ const TestSearch = () => {
                   id="withdrawal-end-date-input"
                   labelText="Withdrawal end"
                   autoComplete="off"
-                  placeholder="yyyy/mm/dd"
-                  helperText="year/month/day"
+                  placeholder={dateField.placeholderText}
+                  helperText={dateField.helperText}
                 />
               </DatePicker>
               <div className="filters-row-buttons">
