@@ -386,8 +386,8 @@ const AddActivity = ({
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
-            minDate={dateField.minStartDate}
-            maxDate={addActivityData.plannedEndDate ?? dateField.maxEndDate}
+            minDate={dateField.minWithdrawStartDate}
+            maxDate={addActivityData.plannedEndDate ?? dateField.maxWithdrawEndDate}
             value={[addActivityData.plannedStartDate ?? todayString]}
             onChange={(dates: Date[]) => {
               if (dates[0]) {
@@ -406,8 +406,8 @@ const AddActivity = ({
           </DatePicker>
           <DatePicker
             datePickerType="single"
-            minDate={addActivityData.plannedStartDate ?? dateField.minStartDate}
-            maxDate={dateField.maxEndDate}
+            minDate={addActivityData.plannedStartDate ?? dateField.minWithdrawStartDate}
+            maxDate={dateField.maxWithdrawEndDate}
             dateFormat={DATE_FORMAT}
             value={addActivityData.plannedEndDate ? [addActivityData.plannedEndDate] : []}
             onChange={(dates: Date[]) => {
