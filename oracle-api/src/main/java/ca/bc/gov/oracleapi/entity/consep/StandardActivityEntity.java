@@ -20,13 +20,13 @@ public class StandardActivityEntity {
   @Column(name = "STNDRD_ACTIVITY_ID", length = 3, nullable = false)
   private String standardActivityId;
 
-  @Column(name = "ACTIVITY_TYPE_CD", length = 3)
+  @Column(name = "ACTIVITY_TYPE_CD", length = 3, nullable = false)
   private String activityTypeCd;
 
   @Column(name = "TEST_CATEGORY_CD", length = 3)
   private String testCategoryCd;
 
-  @Column(name = "SIGNIFICNT_STS_IND", precision = 5)
+  @Column(name = "SIGNIFICNT_STS_IND", precision = 5, nullable = false)
   private Integer significantStatusIndicator;
 
   @Column(name = "ACTIVITY_DURATION", precision = 5)

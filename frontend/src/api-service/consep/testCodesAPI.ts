@@ -1,7 +1,7 @@
 import ApiConfig from '../ApiConfig';
 import api from '../api';
 
-import { TestCodeType, ActivityIdType, ActivityRiaSkeyType } from '../../types/consep/TestingSearchType';
+import { TestCodeType, ActivityIdType } from '../../types/consep/TestingSearchType';
 
 export const getTestTypeCodes = () => {
   const url = `${ApiConfig.testCodes}/type`;
@@ -26,11 +26,6 @@ export const getRequestTypes = () => {
 export const getActivityIds = (params?: { isFamilyLot?: boolean; isSeedlot?: boolean }) => {
   const url = `${ApiConfig.activities}/ids`;
   return api.get(url, { params }).then((res: { data: ActivityIdType[] }) => res.data);
-};
-
-export const getActivityRiaSkeys = (requestSkey: number, itemId: string) => {
-  const url = `${ApiConfig.activities}/request/${requestSkey}/item/${itemId}`;
-  return api.get(url).then((res: { data: ActivityRiaSkeyType[] }) => res.data);
 };
 
 export const getActivityDurationUnits = () => {

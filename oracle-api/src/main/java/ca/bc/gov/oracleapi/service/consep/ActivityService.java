@@ -3,7 +3,6 @@ package ca.bc.gov.oracleapi.service.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivityRequestItemDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
@@ -187,7 +186,6 @@ public class ActivityService {
     newActivityEntity.setStandardActivityId(activityCreateDto.standardActivityId());
     newActivityEntity.setActivityTypeCode(activityCreateDto.activityTypeCd());
     newActivityEntity.setTestCategoryCode(activityCreateDto.testCategoryCd());
-    newActivityEntity.setAssociatedRiaKey(activityCreateDto.associatedRiaKey());
     newActivityEntity.setPlannedStartDate(activityCreateDto.plannedStartDate());
     newActivityEntity.setPlannedEndDate(activityCreateDto.plannedEndDate());
     newActivityEntity.setRevisedStartDate(activityCreateDto.revisedStartDate());
@@ -236,27 +234,12 @@ public class ActivityService {
   }
 
   /**
-   * Retrieves all activities for the given request skey and item id,
-   * mapping the result to ActivityRequestItemDto records.
-   *
-   * @param requestSkey the request skey to filter activities
-   * @param itemId the item id to filter activities
-   * @return a list of ActivityRequestItemDto containing the activity key and description
-   */
-  public List<ActivityRequestItemDto> getActivityByRequestSkeyAndItemId(BigDecimal requestSkey, String itemId) {
-    return activityRepository.findActivityByRequestSkeyAndItemId(requestSkey, itemId)
-        .stream()
-        .map(arr -> new ActivityRequestItemDto((BigDecimal) arr[0], (String) arr[1]))
-        .toList();
-  }
-
-  /**
    * Retrieves all unique standard activity IDs and descriptions
    * used for seedlot and/or family lot contexts.
    *
    * @param isFamilyLot true for familylot
    * @param isSeedlot true for seedlot
-   * @return list of StandardActivityDto containing standardActivityId and activityDescription
+   * @return list of StandardActivityDto
    */
   public List<StandardActivityDto> getStandardActivityIds(boolean isFamilyLot, boolean isSeedlot) {
     List<StandardActivityEntity> activities = new ArrayList<>();
@@ -283,9 +266,12 @@ public class ActivityService {
         )
         .map(a -> new StandardActivityDto(
             a.getStandardActivityId(),
+            a.getActivityDesc(),
             a.getActivityTypeCd(),
             a.getTestCategoryCd(),
-            a.getActivityDesc()
+            a.getSignificantStatusIndicator(),
+            a.getActivityDuration(),
+            a.getActivityTimeUnit()
         ))
         .toList();
   }
