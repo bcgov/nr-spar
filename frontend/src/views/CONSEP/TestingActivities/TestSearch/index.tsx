@@ -566,7 +566,7 @@ const TestSearch = () => {
                   handleWithdrawalDateChange(dates, 'start');
                 }}
                 defaultValue={dateField.todayString}
-                minDate={dateField.minWithdrawStartDate.toISOString().slice(0, 10)}
+                minDate={dateField.minWithdrawStartDate}
                 maxDate={dateField.todayString}
                 value={
                   searchParams.seedWithdrawalStartDate
@@ -591,7 +591,7 @@ const TestSearch = () => {
                   handleWithdrawalDateChange(dates, 'end');
                 }}
                 minDate={searchParams.seedWithdrawalStartDate || undefined}
-                maxDate={dateField.maxWithdrawEndDate.toISOString().slice(0, 10)}
+                maxDate={dateField.maxWithdrawEndDate}
                 value={
                   searchParams.seedWithdrawalEndDate
                   !== dateField.maxWithdrawEndDate.toISOString().slice(0, 10)
