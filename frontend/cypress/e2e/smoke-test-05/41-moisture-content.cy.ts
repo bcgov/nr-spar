@@ -769,6 +769,7 @@ describe('Moisture Content Screen page', () => {
 
     // Extract all MC values from the 7th column
     const mcValues: number[] = [];
+    let averageMcValues: number = 0;
     cy.get('.activity-result-container')
       .find('tbody tr')
       .then(($rows) => {
@@ -780,11 +781,14 @@ describe('Moisture Content Screen page', () => {
           const mcNum = parseFloat(mcText) || 0;
           mcValues.push(mcNum);
         });
+      })
+      .then(() => {
+        // eslint-disable-next-line no-unused-expressions
+        expect(mcValues).to.not.be.empty;
+        // Calculate average
+        const sum = mcValues.reduce((acc, val) => acc + val, 0);
+        averageMcValues = mcValues.length > 0 ? sum / mcValues.length : 0;
       });
-
-    // Calculate average
-    const sum = mcValues.reduce((acc, val) => acc + val, 0);
-    const averageMcValues = mcValues.length > 0 ? sum / mcValues.length : 0;
 
     cy.get('.consep-registration-button-row')
       .find('button')
