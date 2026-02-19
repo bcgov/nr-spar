@@ -652,7 +652,12 @@ const TestSearch = () => {
         <Row>
           <Column>
             {alert?.message && (
-              <InlineNotification lowContrast kind={alert.status} subtitle={alert?.message} />
+              <InlineNotification
+                lowContrast
+                kind={alert.status}
+                subtitle={alert?.message}
+                onCloseButtonClick={() => setAlert(null)}
+              />
             )}
           </Column>
         </Row>
