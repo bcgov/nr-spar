@@ -63,7 +63,7 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
       @Param("riaKey") BigDecimal riaKey
   );
 
-  @Modifying()
+  @Modifying
   @Transactional
   @Query("""
       UPDATE TestResultEntity rst
@@ -74,10 +74,10 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
                  THEN :trayWarmStratDate
                  ELSE rst.warmStratStartDate
                END,
-             rst.stratStartDt = :trayColdStratDate,
+             rst.stratStartDate = :trayColdStratDate,
              rst.drybackStartDate =
                CASE
-                 WHEN rst.activityTypeCd = 'G64'
+                 WHEN rst.activityType = 'G64'
                  THEN :trayDrybackDate
                  ELSE rst.drybackStartDate
                END,

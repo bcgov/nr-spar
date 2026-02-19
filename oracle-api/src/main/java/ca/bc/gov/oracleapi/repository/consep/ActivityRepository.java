@@ -64,15 +64,16 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
   @Transactional
   @Query("""
           UPDATE ActivityEntity a
-             SET a.actualBeginDateTime = :nowDateTime,
-                 a.revisedStartDate = :nowDateTime,
+             SET a.actualBeginDateTime = :actualBeginDateTime,
+                 a.revisedStartDate = :revisedStartDate,
                  a.revisedEndDate = :revisedEndDate,
                  a.updateTimestamp = CURRENT_TIMESTAMP
            WHERE a.riaKey = :riaKey
       """)
   void updateActualBeginAndRevisedDates(
       @Param("riaKey") BigDecimal riaKey,
-      @Param("nowDateTime") LocalDateTime nowDateTime,
+      @Param("actualBeginDateTime") LocalDateTime actualBeginDateTime,
+      @Param("revisedStartDate") LocalDate revisedStartDate,
       @Param("revisedEndDate") LocalDate revisedEndDate
   );
 

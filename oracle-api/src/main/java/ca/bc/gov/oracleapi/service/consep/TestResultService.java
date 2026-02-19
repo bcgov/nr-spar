@@ -105,14 +105,14 @@ public class TestResultService {
       );
 
       int trayNumber = 0;
+      GerminatorTrayEntity currentTray = null;
+      Integer trayId = null;
 
       // Loop through activities
       for (int i = 0; i < activities.size(); i++) {
         GerminatorTrayCreateDto activity = activities.get(i);
         BigDecimal activityRiaSkey = activity.riaSkey();
         LocalDateTime actualBeginDtTm = activity.actualBeginDtTm();
-        GerminatorTrayEntity currentTray = null;
-        Integer trayId = null;
 
         // Every 5 items → new tray (0, 5, 10, 15...)
         if (i % 5 == 0) {
@@ -164,12 +164,12 @@ public class TestResultService {
                 activityRiaSkey
             );
             SparLog.error(message);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
           }
 
-          Integer warmStratHours = testResultDates.getWarmStratHours();
-          Integer soakHours = testResultDates.getSoakHours();
-          Integer stratHours = testResultDates.getStratHours();
+          Integer warmStratHours = testResultDates.warmStratHours();
+          Integer soakHours = testResultDates.soakHours();
+          Integer stratHours = testResultDates.stratHours();
 
           // Defensive: Default short-circuit for nulls
           int soak = (soakHours != null) ? soakHours : 0;
@@ -199,12 +199,13 @@ public class TestResultService {
               ? today.plusDays(activityDuration) : null;
           activityRepository.updateActualBeginAndRevisedDates(
               activityRiaSkey,
-              now,
+              today.atStartOfDay(),
+              today,
               revisedEndDate
           );
           SparLog.info("Updated dates for activity {}: "
                   + "actual_begin_dt_tm={}, revised_start_dt={}, revised_end_dt={}",
-              activityRiaSkey, now, revisedEndDate
+              activityRiaSkey, today.atStartOfDay(), today, revisedEndDate
           );
         } else {
           testResultRepository.updateGerminatorTray(
@@ -216,16 +217,18 @@ public class TestResultService {
 
         // Ensure RTS or TST commitment processed - may update 0 rows
         // Find activities with same request_skey and item_id but different ria_skey
-        List<ActivityEntity> conflictActivities = activityRepository.findConflictingActivities(
-            activityRiaSkey,
-            activityEntity.getRequestSkey(),
-            activityEntity.getItemId()
-        );
+        if ("RTS".equals(activityTypeCd) || "TST".equals(activityTypeCd)) {
+          List<ActivityEntity> conflictActivities = activityRepository.findConflictingActivities(
+              activityRiaSkey,
+              activityEntity.getRequestSkey(),
+              activityEntity.getItemId()
+          );
 
-        if (conflictActivities.isEmpty()) {
-          // Perform update
-          activityRepository.markSignificantAndCommit(activityRiaSkey);
-          SparLog.info("Commit processed for activity {}", activityRiaSkey);
+          if (conflictActivities.isEmpty()) {
+            // Perform update
+            activityRepository.markSignificantAndCommit(activityRiaSkey);
+            SparLog.info("Commit processed for activity {}", activityRiaSkey);
+          }
         }
       }
     }
