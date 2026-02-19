@@ -70,12 +70,10 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Activity results table validation', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
     cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
 
     cy.get('.activity-result-container')
       .find('tbody tr')
-      .as('totalRows')
       .should('have.length', 3);
 
     // Wait for table to have at least one row with content
@@ -165,7 +163,6 @@ describe('Moisture Content Screen page', () => {
     // Check if the table has the correct number of rows
     cy.get('.activity-result-container')
       .find('tbody tr')
-      .as('totalRows')
       .should('have.length', 3);
 
     // Wait for table to have at least one row with content
@@ -298,6 +295,7 @@ describe('Moisture Content Screen page', () => {
           .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
 
+    // Check ascending sorting functionality of 'Replicate' column
     cy.get('@tableHeading')
       .contains(mcData.table.column1)
       .click();
@@ -357,6 +355,7 @@ describe('Moisture Content Screen page', () => {
           .to.be.lessThan(parseInt(ascendingSecondRow, 10));
       });
 
+    // Check descending sorting functionality of 'Container' column
     cy.get('@tableHeading')
       .contains(mcData.table.column2)
       .click();
@@ -388,7 +387,7 @@ describe('Moisture Content Screen page', () => {
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check ascending sorting functionality of 'Container weight' column
+    // Check descending sorting functionality of 'Container weight' column
     cy.get('.activity-result-container')
       .find('thead tr')
       .find('th div')
@@ -418,6 +417,7 @@ describe('Moisture Content Screen page', () => {
           .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
 
+    // Check ascending sorting functionality of 'Container weight' column
     cy.get('@tableHeading')
       .contains(mcData.table.column3)
       .click();
@@ -449,7 +449,7 @@ describe('Moisture Content Screen page', () => {
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check ascending sorting functionality of 'Fresh seed' column
+    // Check descending sorting functionality of 'Fresh seed' column
     cy.get('.activity-result-container')
       .find('thead tr')
       .find('th div')
@@ -479,6 +479,7 @@ describe('Moisture Content Screen page', () => {
           .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
 
+    // Check ascending sorting functionality of 'Fresh seed' column
     cy.get('@tableHeading')
       .contains(mcData.table.column4)
       .click();
@@ -510,7 +511,7 @@ describe('Moisture Content Screen page', () => {
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check ascending sorting functionality of 'Cont + Dry seed' column
+    // Check descending sorting functionality of 'Cont + Dry seed' column
     cy.get('.activity-result-container')
       .find('thead tr')
       .find('th div')
@@ -540,6 +541,7 @@ describe('Moisture Content Screen page', () => {
           .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
 
+    // Check ascending sorting functionality of 'Cont + Dry seed' column
     cy.get('@tableHeading')
       .contains(mcData.table.column5)
       .click();
@@ -571,7 +573,7 @@ describe('Moisture Content Screen page', () => {
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check ascending sorting functionality of 'Dry weight' column
+    // Check descending sorting functionality of 'Dry weight' column
     cy.get('.activity-result-container')
       .find('thead tr')
       .find('th div')
@@ -601,6 +603,7 @@ describe('Moisture Content Screen page', () => {
           .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
 
+    // Check ascending sorting functionality of 'Dry weight' column
     cy.get('@tableHeading')
       .contains(mcData.table.column6)
       .click();
@@ -647,7 +650,7 @@ describe('Moisture Content Screen page', () => {
       .find('td:nth-child(7)')
       .invoke('text')
       .then(($mcValue: any) => {
-        descendingFirstRow = $mcValue;
+        ascendingFirstRow = $mcValue;
       });
 
     cy.get('.activity-result-container')
@@ -657,11 +660,12 @@ describe('Moisture Content Screen page', () => {
       .find('td:nth-child(7)')
       .invoke('text')
       .then(($mcValue: any) => {
-        const descendingSecondRow: string = $mcValue;
-        expect(parseInt(descendingFirstRow, 10))
-          .to.be.lessThan(parseInt(descendingSecondRow, 10));
+        const ascendingSecondRow: string = $mcValue;
+        expect(parseInt(ascendingFirstRow, 10))
+          .to.be.lessThan(parseInt(ascendingSecondRow, 10));
       });
 
+    // Check descending sorting functionality of 'MC value (%)' column
     cy.get('@tableHeading')
       .contains(mcData.table.column7)
       .click();
@@ -670,16 +674,16 @@ describe('Moisture Content Screen page', () => {
       .find('td:nth-child(7)')
       .invoke('text')
       .then(($mcValue: any) => {
-        ascendingFirstRow = $mcValue;
+        descendingFirstRow = $mcValue;
       });
 
     cy.get('@secondRow')
       .find('td:nth-child(7)')
       .invoke('text')
       .then(($mcValue: any) => {
-        const ascendingSecondRow: string = $mcValue;
-        expect(parseInt(ascendingFirstRow, 10))
-          .to.be.greaterThan(parseInt(ascendingSecondRow, 10));
+        const descendingSecondRow: string = $mcValue;
+        expect(parseInt(descendingFirstRow, 10))
+          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
   });
 
