@@ -29,19 +29,6 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
   void clearExistingProcessCommitment(BigDecimal requestSkey, String itemId, BigDecimal riaKey);
 
   @Query("""
-      SELECT a.riaKey, s.activityDesc
-      FROM ActivityEntity a
-      JOIN StandardActivityEntity s ON s.standardActivityId = a.standardActivityId
-      WHERE a.requestSkey = :requestSkey
-        AND a.itemId = :itemId
-      ORDER BY a.revisedStartDate
-      """)
-  List<Object[]> findActivityByRequestSkeyAndItemId(
-      @Param("requestSkey") BigDecimal requestSkey,
-      @Param("itemId") String itemId
-  );
-
-  @Query("""
         SELECT a.activityTypeCode
         FROM ActivityEntity a
         JOIN TestResultEntity t

@@ -31,10 +31,6 @@ public record ActivityCreateDto(
     @Size(max = 3)
     String testCategoryCd,
 
-    @Schema(description = "Associated RIA key")
-    @Digits(integer = 10, fraction = 0)
-    BigDecimal associatedRiaKey,
-
     @Schema(description = "Planned start date for the activity")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @NotNull
