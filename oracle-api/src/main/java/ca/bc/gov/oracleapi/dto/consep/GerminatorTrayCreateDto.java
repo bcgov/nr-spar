@@ -23,7 +23,7 @@ public record GerminatorTrayCreateDto(
     BigDecimal riaSkey,
 
     @Schema(description = "Actual begin date of the activity")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     LocalDateTime actualBeginDtTm
 ) {
 }
