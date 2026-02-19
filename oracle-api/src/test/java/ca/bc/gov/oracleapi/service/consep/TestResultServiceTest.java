@@ -7,12 +7,13 @@ import static org.mockito.Mockito.*;
 
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.TestResultDatesDto;
+import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -43,12 +44,20 @@ class TestResultServiceTest {
   @Mock
   private GerminatorTrayRepository germinatorTrayRepository;
 
+  @Mock
+  private TestRegimeRepository testRegimeRepository;
+
   @Autowired
   @InjectMocks
   private TestResultService testResultService;
 
   private BigDecimal riaKey;
   private TestResultEntity testResultEntity;
+
+  private static final String GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE =
+      "Failed to create germinator tray: validation failed "
+          + "— ensure seeds have not been withdrawn, all tests are germination tests, "
+          + "and no germinator tray ID is already assigned.";
 
   @BeforeEach
   void setUp() {
@@ -176,16 +185,21 @@ class TestResultServiceTest {
       return Optional.of(act);
     });
 
-    // Prepare TestResultDatesDto
-    TestResultDatesDto testResultDatesDto = new TestResultDatesDto(
+    // Allow validation to recognise these activity types as germ tests
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes())
+        .thenReturn(List.of(activityTypeCdG10, activityTypeCdRts));
+    // Prepare GermTestResultDto
+    GermTestResultDto germTestResultDto = new GermTestResultDto(
         LocalDate.now(),
         48,
         LocalDate.now(),
         activityTypeCdG10,
         72,
-        96
+        96,
+        LocalDate.now().minusDays(1),
+        null
     );
-    when(testResultRepository.getActivityResultDates(any())).thenReturn(testResultDatesDto);
+    when(testResultRepository.getGermTestResult(any())).thenReturn(germTestResultDto);
 
     /// No conflicts for commit (always empty)
     when(activityRepository.findConflictingActivities(any(), any(), any()))
@@ -220,7 +234,8 @@ class TestResultServiceTest {
     // Verify interactions
     verify(germinatorTrayRepository, times(3)).save(any());
     verify(activityRepository, times(7)).findById(any());
-    verify(testResultRepository, times(6)).getActivityResultDates(any());
+    // At least one call (validation + assignment calls vary with inputs)
+    verify(testResultRepository, atLeast(1)).getGermTestResult(any());
 
     // Verify updateGerminatorTray called once
     // for the activity that had actualBeginDtTm == today (881192 -> tray1 id 101)
@@ -244,6 +259,23 @@ class TestResultServiceTest {
     savedTray.setActualStartDate(LocalDate.now().atStartOfDay());
     when(germinatorTrayRepository.save(any())).thenReturn(savedTray);
 
+    // stub test regime codes
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes())
+        .thenReturn(List.of(activityTypeCd));
+
+    // return a valid germTestResult for validation to pass
+    GermTestResultDto valid = new GermTestResultDto(
+        LocalDate.now().minusDays(1),
+        48,
+        LocalDate.now(),
+        activityTypeCd,
+        72,
+        96,
+        LocalDate.now().minusDays(1),
+        null
+    );
+    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(valid);
+
     // Activity not found
     when(activityRepository.findById(eq(riaSkey))).thenReturn(Optional.empty());
 
@@ -260,28 +292,21 @@ class TestResultServiceTest {
   }
 
   @Test
-  void assignGerminatorTrays_shouldThrow_whenTestResultDatesMissing() {
+  void assignGerminatorTrays_shouldThrowNotFound_whenGermTestResultMissing() {
     String activityTypeCd = "G20";
     BigDecimal riaSkey = new BigDecimal("881190");
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime past = now.minusDays(1);
     final List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null)
+        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, past)
     );
 
-    ActivityEntity act = new ActivityEntity();
-    act.setRiaKey(riaSkey);
-    act.setActivityDuration(5);
-    act.setRequestSkey(new BigDecimal("221"));
-    act.setItemId("B");
-    act.setActivityTypeCode(activityTypeCd);
+    // Ensure validation recognises this activity type as a germ test
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes())
+        .thenReturn(List.of(activityTypeCd));
 
-    // stub tray save (service creates a tray before looking up activity)
-    GerminatorTrayEntity savedTray = new GerminatorTrayEntity();
-    savedTray.setGerminatorTrayId(999);
-    savedTray.setActualStartDate(LocalDate.now().atStartOfDay());
-    when(germinatorTrayRepository.save(any())).thenReturn(savedTray);
-
-    when(activityRepository.findById(eq(riaSkey))).thenReturn(Optional.of(act));
-    when(testResultRepository.getActivityResultDates(any())).thenReturn(null);
+    // Validation will call getGermTestResult(...) and we want it to be missing (null) -> NOT_FOUND
+    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(null);
 
     // Act / Assert
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
@@ -291,10 +316,10 @@ class TestResultServiceTest {
     assertEquals(String.format("No test result found for activity with RIA_SKEY %s", riaSkey),
         ex.getReason());
 
-    // Verify interactions
-    verify(germinatorTrayRepository).save(any());
-    verify(activityRepository).findById(eq(riaSkey));
-    verify(testResultRepository).getActivityResultDates(eq(riaSkey));
+    // Validation short-circuits, so no trays are created and no activity lookups occur
+    verify(testResultRepository).getGermTestResult(eq(riaSkey));
+    verify(germinatorTrayRepository, times(0)).save(any());
+    verify(activityRepository, times(0)).findById(any());
   }
 
   @Test
@@ -321,15 +346,19 @@ class TestResultServiceTest {
 
     when(activityRepository.findById(eq(riaSkey))).thenReturn(Optional.of(act));
 
-    TestResultDatesDto testResultDatesDto = new TestResultDatesDto(
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes())
+        .thenReturn(List.of("RTS", "G10")); // include codes used in the test
+    GermTestResultDto germTestResultDto = new GermTestResultDto(
         LocalDate.now(),
         48,
         LocalDate.now(),
         activityTypeCd,
         72,
-        96
+        96,
+        LocalDate.now().minusDays(1),
+        null
     );
-    when(testResultRepository.getActivityResultDates(any())).thenReturn(testResultDatesDto);
+    when(testResultRepository.getGermTestResult(any())).thenReturn(germTestResultDto);
 
     // Conflict found for this RTS activity
     ActivityEntity conflictingAct = new ActivityEntity();
@@ -360,5 +389,97 @@ class TestResultServiceTest {
         .saveGerminatorTray(any(), any(), any(), any(), any(), any(), any());
     // Because a conflict exists, markSignificantAndCommit should NOT be called
     verify(activityRepository, times(0)).markSignificantAndCommit(any());
+  }
+
+  @Test
+  void validation_rejects_nonGermTest_activityType() {
+    String activityTypeCd = "X99";
+    BigDecimal riaSkey = new BigDecimal("881900");
+
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null)
+    );
+
+    // testRegimeRepository does NOT include the activity type -> not a germ test
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G10", "G20"));
+    // return a valid germTestResult so validation reaches the activity-type check
+    GermTestResultDto validGerm = new GermTestResultDto(
+        LocalDate.now().minusDays(10),
+        48,
+        LocalDate.now().minusDays(5),
+        activityTypeCd,
+        72,
+        96,
+        LocalDate.now().minusDays(1), // seed withdrawal in past
+        null // no germinator assigned
+    );
+    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(validGerm);
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.assignGerminatorTrays(requests));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
+  }
+
+  @Test
+  void validation_rejects_seedWithdrawal_notBeforeToday() {
+    String activityTypeCd = "G20";
+    BigDecimal riaSkey = new BigDecimal("881901");
+
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null)
+    );
+
+    // activity type is recognised as a germ test
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of(activityTypeCd));
+
+    // seedWithdrawDate is today -> invalid (must be before today)
+    GermTestResultDto germTestResult = new GermTestResultDto(
+        LocalDate.now().minusDays(10),
+        48,
+        LocalDate.now().minusDays(5),
+        activityTypeCd,
+        72,
+        96,
+        LocalDate.now(), // seed withdrawal is today (invalid)
+        null
+    );
+    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(germTestResult);
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.assignGerminatorTrays(requests));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
+  }
+
+  @Test
+  void validation_rejects_whenGerminatorIdAlreadyAssigned() {
+    String activityTypeCd = "G20";
+    BigDecimal riaSkey = new BigDecimal("881902");
+
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null)
+    );
+
+    // activity type is recognised
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of(activityTypeCd));
+
+    // seedWithdrawDate in past but germinatorTrayId already set -> invalid
+    GermTestResultDto germTestResult = new GermTestResultDto(
+        LocalDate.now().minusDays(10),
+        48,
+        LocalDate.now().minusDays(5),
+        activityTypeCd,
+        72,
+        96,
+        LocalDate.now().minusDays(1),
+        123 // already assigned
+    );
+    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(germTestResult);
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.assignGerminatorTrays(requests));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
   }
 }

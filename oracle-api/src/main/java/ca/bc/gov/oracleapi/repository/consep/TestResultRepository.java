@@ -1,6 +1,6 @@
 package ca.bc.gov.oracleapi.repository.consep;
 
-import ca.bc.gov.oracleapi.dto.consep.TestResultDatesDto;
+import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -53,13 +53,15 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
           rst.drybackStartDate,
           rst.activityType,
           tr.soakHours,
-          tr.stratHours
+          tr.stratHours,
+          rst.seedWithdrawDate,
+          rst.germinatorTrayId
         FROM TestResultEntity rst
         JOIN TestRegimeEntity tr
           ON rst.activityType = tr.seedlotTestCode
         WHERE rst.riaKey = :riaKey
       """)
-  TestResultDatesDto getActivityResultDates(
+  GermTestResultDto getGermTestResult(
       @Param("riaKey") BigDecimal riaKey
   );
 

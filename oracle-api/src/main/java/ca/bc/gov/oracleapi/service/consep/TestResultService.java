@@ -3,12 +3,13 @@ package ca.bc.gov.oracleapi.service.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.TestResultDatesDto;
+import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,6 +32,7 @@ public class TestResultService {
   private final TestResultRepository testResultRepository;
   private final GerminatorTrayRepository germinatorTrayRepository;
   private final ActivityRepository activityRepository;
+  private final TestRegimeRepository testRegimeRepository;
 
   /**
    * Update the test status to "completed".
@@ -83,9 +85,12 @@ public class TestResultService {
       );
     }
 
-    List<GerminatorTrayCreateResponseDto> trayResponses = new ArrayList<>();
+    // Validate selected seed tests meet the requirement
+    validateCreateGerminatorTrayParameter(requests);
+
     LocalDate today = LocalDate.now();
     LocalDateTime now = LocalDateTime.now();
+    List<GerminatorTrayCreateResponseDto> trayResponses = new ArrayList<>();
 
     // Group by testCategoryCd (G10, G20, G44, G64...)
     Map<String, List<GerminatorTrayCreateDto>> groupedByActivityType =
@@ -156,20 +161,12 @@ public class TestResultService {
 
         if (actualBeginDtTm == null || !actualBeginDtTm.toLocalDate().equals(today)) {
           // Assign test to tray
-          TestResultDatesDto testResultDates =
-              testResultRepository.getActivityResultDates(activityRiaSkey);
-          if (testResultDates == null) {
-            String message = String.format(
-                "No test result found for activity with RIA_SKEY %s",
-                activityRiaSkey
-            );
-            SparLog.error(message);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
-          }
+          GermTestResultDto germTestResult =
+              testResultRepository.getGermTestResult(activityRiaSkey);
 
-          Integer warmStratHours = testResultDates.warmStratHours();
-          Integer soakHours = testResultDates.soakHours();
-          Integer stratHours = testResultDates.stratHours();
+          Integer warmStratHours = germTestResult.warmStratHours();
+          Integer soakHours = germTestResult.soakHours();
+          Integer stratHours = germTestResult.stratHours();
 
           // Defensive: Default short-circuit for nulls
           int soak = (soakHours != null) ? soakHours : 0;
@@ -233,5 +230,65 @@ public class TestResultService {
       }
     }
     return trayResponses;
+  }
+
+  /**
+   * Validate each GerminatorTrayCreateDto in the incoming request list.
+   *
+   * Checks performed for each request:
+   *  - seedWithdrawalDate must be present and strictly before today
+   *  - activityTypeCodes must be a germ test type
+   *  - germinatorTrayId must be null (no existing tray id assigned)
+   */
+  private void validateCreateGerminatorTrayParameter(
+      List<GerminatorTrayCreateDto> requests
+  ) {
+    LocalDate today = LocalDate.now();
+    String errorMessage = "Failed to create germinator tray: validation failed "
+        + "— ensure seeds have not been withdrawn, all tests are germination tests, "
+        + "and no germinator tray ID is already assigned.";
+    List<String> germTestCodes =
+        testRegimeRepository.findAllGermTestActivityTypeCodes();
+
+    for (GerminatorTrayCreateDto req : requests) {
+      GermTestResultDto germTestResult =
+          testResultRepository.getGermTestResult(req.riaSkey());
+
+      if (germTestResult == null) {
+        String message = String.format(
+            "No test result found for activity with RIA_SKEY %s",
+            req.riaSkey()
+        );
+        SparLog.error(message);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
+      }
+
+      LocalDate seedWithdrawalDate = germTestResult.seedWithdrawDate();
+      boolean isGermTest = germTestCodes.contains(req.activityTypeCd());
+
+      // must be a germ test
+      if (!isGermTest) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            errorMessage
+        );
+      }
+
+      // seedWithdrawalDate must be present and strictly before today
+      if (seedWithdrawalDate == null || !seedWithdrawalDate.isBefore(today)) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            errorMessage
+        );
+      }
+
+      // germinatorTrayId must not already be assigned
+      if (germTestResult.germinatorTrayId() != null) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            errorMessage
+        );
+      }
+    }
   }
 }
