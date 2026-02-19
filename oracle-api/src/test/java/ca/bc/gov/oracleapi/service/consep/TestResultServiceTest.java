@@ -195,7 +195,7 @@ class TestResultServiceTest {
         activityTypeCdG10,
         72,
         96,
-        LocalDate.now().minusDays(1),
+        LocalDate.now().plusDays(1),
         null
     );
     when(testResultRepository.getGermTestResult(any())).thenReturn(germTestResultDto);
@@ -270,7 +270,7 @@ class TestResultServiceTest {
         activityTypeCd,
         72,
         96,
-        LocalDate.now().minusDays(1),
+        LocalDate.now().plusDays(1),
         null
     );
     when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(valid);
@@ -354,7 +354,7 @@ class TestResultServiceTest {
         activityTypeCd,
         72,
         96,
-        LocalDate.now().minusDays(1),
+        LocalDate.now().plusDays(1),
         null
     );
     when(testResultRepository.getGermTestResult(any())).thenReturn(germTestResultDto);
@@ -411,7 +411,7 @@ class TestResultServiceTest {
         activityTypeCd,
         72,
         96,
-        LocalDate.now().minusDays(1), // seed withdrawal in past
+        LocalDate.now().plusDays(1), // seed withdrawal in future
         null // no germinator assigned
     );
     when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(validGerm);
@@ -473,7 +473,7 @@ class TestResultServiceTest {
         activityTypeCd,
         72,
         96,
-        LocalDate.now().minusDays(1),
+        LocalDate.now().plusDays(1),
         123 // already assigned
     );
     when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(germTestResult);

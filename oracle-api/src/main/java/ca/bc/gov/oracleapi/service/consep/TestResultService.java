@@ -1,9 +1,9 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,10 +23,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-/** The class for Moisture Content Cones Service. */
+/** The class for Moisture Content Cones Service and test result service. */
 @Service
 @RequiredArgsConstructor
 public class TestResultService {
@@ -83,7 +83,6 @@ public class TestResultService {
    * @param requests the list of germinator tray creation requests to be assigned to trays
    * @return a list of responses describing the trays that were created and their assignments
    */
-  @Transactional
   public List<GerminatorTrayCreateResponseDto> assignGerminatorTrays(
       List<GerminatorTrayCreateDto> requests
   ) {
@@ -94,14 +93,14 @@ public class TestResultService {
       );
     }
 
-    // Validate selected seed tests meet the requirement
-    validateCreateGerminatorTrayParameter(requests);
+    // Validate selected seed tests and collect their GermTestResultDto values in one pass.
+    Map<BigDecimal, GermTestResultDto> germTestCache = collectAndValidateGermTestResults(requests);
 
     LocalDate today = LocalDate.now();
     LocalDateTime now = LocalDateTime.now();
     List<GerminatorTrayCreateResponseDto> trayResponses = new ArrayList<>();
 
-    // Group by testCategoryCd (G10, G20, G44, G64...)
+    // Group by activityTypeCd (G10, G20, G44, G64...)
     Map<String, List<GerminatorTrayCreateDto>> groupedByActivityType =
         requests.stream()
             .collect(Collectors.groupingBy(GerminatorTrayCreateDto::activityTypeCd));
@@ -170,8 +169,7 @@ public class TestResultService {
 
         if (actualBeginDtTm == null || !actualBeginDtTm.toLocalDate().equals(today)) {
           // Assign test to tray
-          GermTestResultDto germTestResult =
-              testResultRepository.getGermTestResult(activityRiaSkey);
+          GermTestResultDto germTestResult = germTestCache.get(activityRiaSkey);
 
           Integer warmStratHours = germTestResult.warmStratHours();
           Integer soakHours = germTestResult.soakHours();
@@ -249,14 +247,18 @@ public class TestResultService {
   }
 
   /**
-   * Validate each GerminatorTrayCreateDto in the incoming request list.
+   * Validate each GerminatorTrayCreateDto in the incoming request list and collect
+   * GermTestResultDto objects for reuse.
    *
    * Checks performed for each request:
-   *  - seedWithdrawalDate must be present and strictly before today
-   *  - activityTypeCodes must be a germ test type
+   *  - seedWithdrawalDate must be present and strictly after today
+   *  - activityTypeCd must be a germ test type
    *  - germinatorTrayId must be null (no existing tray id assigned)
+   * Returns a map from RIA_SKEY to the corresponding GermTestResultDto for reuse
+   * during assignment (avoids calling the repository twice per activity).
+   * Throws ResponseStatusException on the first validation failure.
    */
-  private void validateCreateGerminatorTrayParameter(
+  private Map<BigDecimal, GermTestResultDto> collectAndValidateGermTestResults(
       List<GerminatorTrayCreateDto> requests
   ) {
     LocalDate today = LocalDate.now();
@@ -266,6 +268,7 @@ public class TestResultService {
     List<String> germTestCodes =
         testRegimeRepository.findAllGermTestActivityTypeCodes();
 
+    Map<BigDecimal, GermTestResultDto> resultMap = new HashMap<>(requests.size());
     for (GerminatorTrayCreateDto req : requests) {
       GermTestResultDto germTestResult =
           testResultRepository.getGermTestResult(req.riaSkey());
@@ -290,8 +293,8 @@ public class TestResultService {
         );
       }
 
-      // seedWithdrawalDate must be present and strictly before today
-      if (seedWithdrawalDate == null || !seedWithdrawalDate.isBefore(today)) {
+      // seedWithdrawalDate must be present and strictly after today
+      if (seedWithdrawalDate == null || !seedWithdrawalDate.isAfter(today)) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             errorMessage
@@ -305,6 +308,11 @@ public class TestResultService {
             errorMessage
         );
       }
+
+      // cache for reuse later (prevents duplicate DB calls)
+      resultMap.put(req.riaSkey(), germTestResult);
     }
+
+    return resultMap;
   }
 }
