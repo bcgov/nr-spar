@@ -24,7 +24,7 @@ export const dateField = {
   },
   get todayString() {
     const today = new Date();
-    return today.toISOString().slice(0, 10);
+    return today.toLocaleDateString('en-CA');
   }
 };
 
