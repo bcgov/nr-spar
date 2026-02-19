@@ -724,7 +724,7 @@ describe('Moisture Content Screen page', () => {
       });
   });
 
-  it('Check MC value(%) value', () => {
+  it('Check MC value(%) calculation', () => {
     cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
     cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
