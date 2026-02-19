@@ -391,7 +391,7 @@ const TestSearch = () => {
       let seedWithdrawalEndDate = currentEnd;
 
       if (type === 'start') {
-        seedWithdrawalStartDate = value || dateField.todayString;
+        seedWithdrawalStartDate = value || undefined;
         seedWithdrawalEndDate = seedWithdrawalStartDate
           && !seedWithdrawalEndDate ? maxEnd : currentEnd;
       }
