@@ -11,16 +11,21 @@ export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
 export const minStartDate = '1900-01-01';
 export const maxEndDate = '9999-12-31';
-const today = new Date();
-const todayString = today.toISOString().slice(0, 10);
-const minWithdrawStartDate = new Date(today.getFullYear() - 300, today.getMonth(), today.getDate());
-const maxWithdrawEndDate = new Date(today.getFullYear() + 300, today.getMonth(), today.getDate());
 export const dateField = {
   placeholderText: 'yyyy/mm/dd',
   helperText: 'year/month/day',
-  minWithdrawStartDate,
-  maxWithdrawEndDate,
-  todayString
+  get minWithdrawStartDate() {
+    const today = new Date();
+    return new Date(today.getFullYear() - 300, today.getMonth(), today.getDate());
+  },
+  get maxWithdrawEndDate() {
+    const today = new Date();
+    return new Date(today.getFullYear() + 300, today.getMonth(), today.getDate());
+  },
+  get todayString() {
+    const today = new Date();
+    return today.toISOString().slice(0, 10);
+  }
 };
 
 export const formatDateCell = (value: string | null) => {
