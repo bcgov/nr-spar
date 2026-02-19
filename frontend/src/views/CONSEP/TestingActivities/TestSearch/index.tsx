@@ -391,15 +391,15 @@ const TestSearch = () => {
       let seedWithdrawalEndDate = currentEnd;
 
       if (type === 'start') {
-        seedWithdrawalStartDate = value || undefined;
+        seedWithdrawalStartDate = value || dateField.todayString;
         seedWithdrawalEndDate = seedWithdrawalStartDate
-          && !seedWithdrawalEndDate ? maxEnd : undefined;
+          && !seedWithdrawalEndDate ? maxEnd : currentEnd;
       }
 
       if (type === 'end') {
         seedWithdrawalEndDate = value || undefined;
         seedWithdrawalStartDate = seedWithdrawalEndDate
-          && !seedWithdrawalStartDate ? minStart : undefined;
+          && !seedWithdrawalStartDate ? minStart : currentStart;
       }
 
       return {
