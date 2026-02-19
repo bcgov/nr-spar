@@ -168,15 +168,6 @@ const MoistureContent = () => {
   };
 
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
-    setActivityRecord({
-      ...activityRecord,
-      ...record
-    });
-    updateActivityRecordMutation.mutate({
-      ...activityRecord,
-      ...record
-    });
-
     const updatedRecord = { ...activityRecord, ...record };
     // Validate dates if either date is being updated
     if (record.actualBeginDateTime || record.actualEndDateTime) {
