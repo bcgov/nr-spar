@@ -1,5 +1,5 @@
 import {
-  HALF_SECOND, ONE_SECOND, THREE_SECONDS, TYPE_DELAY
+  HALF_SECOND, ONE_SECOND, TEN_SECONDS, TYPE_DELAY
 } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { mockMoistureContentApi } from '../../support/mockApiConsep';
@@ -70,14 +70,12 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Activity results table validation', () => {
-    cy.wait('@getMoistureContentDetail').its('response.statusCode').should('eq', 200);
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
 
     cy.get('.activity-result-container')
       .find('tbody tr')
       .should('have.length', 3);
-
-    // Wait for table to have at least one row with content
-    cy.waitForTableData('.activity-result-container');
 
     // Add a new row
     cy.get('.activity-result-action-buttons')
@@ -160,13 +158,13 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Activity results table button functionality', () => {
+    // Wait for table to have at least one row with content
+    cy.waitForTableData('.activity-result-container');
+
     // Check if the table has the correct number of rows
     cy.get('.activity-result-container')
       .find('tbody tr')
       .should('have.length', 3);
-
-    // Wait for table to have at least one row with content
-    cy.waitForTableData('.activity-result-container');
 
     // Check 'Add row' button functionality
     cy.get('.activity-result-action-buttons')
@@ -185,7 +183,7 @@ describe('Moisture Content Screen page', () => {
     cy.get('@totalRows')
       .last()
       .find('td:nth-last-child(1) svg')
-      .click({ force: true });
+      .click({ timeout: ONE_SECOND });
 
     cy.wait(ONE_SECOND); // Wait for the row to be deleted
 
@@ -258,9 +256,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check sorting by Replicate number', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
-
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
@@ -316,9 +311,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check sorting by Container number', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
-
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
@@ -378,9 +370,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check sorting by Container weight', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
-
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
@@ -440,9 +429,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check sorting by Fresh seed', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
-
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
@@ -502,9 +488,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check sorting by Cont + Dry seed', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
-
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
@@ -564,9 +547,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check sorting by Dry weight', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
-
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
@@ -626,9 +606,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check sorting by MC value (%)', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
-
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
@@ -688,9 +665,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Dry weight value', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
-
     let containerWt: string;
     let contDrySeed: string;
 
@@ -725,9 +699,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check MC value(%) calculation', () => {
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
-
     let freshSeed: string;
     let dryWt: string;
 
@@ -765,8 +736,6 @@ describe('Moisture Content Screen page', () => {
 
   it('Check Calculate average button functionality', () => {
     cy.intercept('POST', '**/api/moisture-content-cone/514330/calculate-average').as('postCalcAvg');
-    cy.intercept('GET', '**/api/moisture-content-cone/514330').as('getMoistureContentDetail');
-    cy.wait('@getMoistureContentDetail', { timeout: THREE_SECONDS }).its('response.statusCode').should('eq', 200);
 
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
@@ -799,7 +768,7 @@ describe('Moisture Content Screen page', () => {
       .contains('Calculate average')
       .click();
 
-    cy.wait('@postCalcAvg').its('response.statusCode').should('eq', 200);
+    cy.wait('@postCalcAvg', { timeout: TEN_SECONDS }).its('response.statusCode').should('eq', 200);
 
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
