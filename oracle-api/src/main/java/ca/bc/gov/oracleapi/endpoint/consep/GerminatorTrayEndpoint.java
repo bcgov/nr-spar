@@ -49,7 +49,7 @@ public class GerminatorTrayEndpoint {
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<GerminatorTrayCreateResponseDto> assignGerminatorTrays(
-      @Valid @RequestBody List<GerminatorTrayCreateDto> requests
+      @Valid @RequestBody List<@Valid GerminatorTrayCreateDto> requests
   ) {
     return testResultService.assignGerminatorTrays(requests);
   }

@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -96,6 +97,50 @@ class GerminatorTrayEndpointTest {
             .content(objectMapper.writeValueAsString(requests)))
         .andExpect(status().isBadRequest());
 
+    // Verify that the service was invoked
+    verify(testResultService, times(1)).assignGerminatorTrays(requests);
+  }
+
+  @Test
+  void assignGerminatorTrays_propagatesNotFoundWhenActivitiesMissing_andCallsService()
+      throws Exception {
+    // Arrange - request list with one valid-looking entry
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), LocalDateTime.now())
+    );
+    when(testResultService.assignGerminatorTrays(any()))
+        .thenThrow(new ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Activities not found for provided SRM IDs"
+        ));
+    // Act / Assert
+    mockMvc.perform(post(BASE_URL)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requests)))
+        .andExpect(status().isNotFound());
+    // Verify that the service was invoked
+    verify(testResultService, times(1)).assignGerminatorTrays(requests);
+  }
+
+  @Test
+  void assignGerminatorTrays_propagatesNotFoundWhenTestResultDatesMissing_andCallsService()
+      throws Exception {
+    // Arrange - request list with one valid-looking entry
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), LocalDateTime.now())
+    );
+    when(testResultService.assignGerminatorTrays(any()))
+        .thenThrow(new ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Test result dates are missing for provided activities"
+        ));
+    // Act / Assert
+    mockMvc.perform(post(BASE_URL)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requests)))
+        .andExpect(status().isNotFound());
     // Verify that the service was invoked
     verify(testResultService, times(1)).assignGerminatorTrays(requests);
   }

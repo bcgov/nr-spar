@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /** The class for Moisture Content Cones Service. */
@@ -72,9 +73,17 @@ public class TestResultService {
   }
 
   /**
-   * Assign germinator trays based on test category.
-   * One tray is created for every 5 activities per test type.
+   * Assign germinator trays for the given activities.
+   * Activities are first grouped by activity type (as indicated by
+   * {@link GerminatorTrayCreateDto#activityTypeCd()}). Within each activity type group,
+   * a sequence of trays is created, with each tray holding up to 5 activities/tests.
+   * When a group contains more than 5 activities, additional trays are created so that
+   * no tray exceeds this limit.
+   *
+   * @param requests the list of germinator tray creation requests to be assigned to trays
+   * @return a list of responses describing the trays that were created and their assignments
    */
+  @Transactional
   public List<GerminatorTrayCreateResponseDto> assignGerminatorTrays(
       List<GerminatorTrayCreateDto> requests
   ) {
@@ -215,16 +224,23 @@ public class TestResultService {
         // Ensure RTS or TST commitment processed - may update 0 rows
         // Find activities with same request_skey and item_id but different ria_skey
         if ("RTS".equals(activityTypeCd) || "TST".equals(activityTypeCd)) {
-          List<ActivityEntity> conflictActivities = activityRepository.findConflictingActivities(
-              activityRiaSkey,
-              activityEntity.getRequestSkey(),
-              activityEntity.getItemId()
-          );
+          if (activityEntity.getRequestSkey() != null && activityEntity.getItemId() != null) {
+            List<ActivityEntity> conflictActivities = activityRepository.findConflictingActivities(
+                activityRiaSkey,
+                activityEntity.getRequestSkey(),
+                activityEntity.getItemId()
+            );
 
-          if (conflictActivities.isEmpty()) {
-            // Perform update
-            activityRepository.markSignificantAndCommit(activityRiaSkey);
-            SparLog.info("Commit processed for activity {}", activityRiaSkey);
+            if (conflictActivities.isEmpty()) {
+              // Perform update
+              activityRepository.markSignificantAndCommit(activityRiaSkey);
+              SparLog.info("Commit processed for activity {}", activityRiaSkey);
+            }
+          } else {
+            SparLog.warn(
+                "Skipping commitment processing for activity {} because requestSkey or itemId is null",
+                activityRiaSkey
+            );
           }
         }
       }

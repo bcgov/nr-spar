@@ -4,10 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
+import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
@@ -238,7 +237,7 @@ class TestResultServiceTest {
     verify(testResultRepository, atLeast(1)).getGermTestResult(any());
 
     // Verify updateGerminatorTray called once
-    // for the activity that had actualBeginDtTm == today (881192 -> tray1 id 101)
+    // for the activity that had actualBeginDtTm == today (881192 -> tray2 id 102)
     verify(testResultRepository).updateGerminatorTray(new BigDecimal("881192"), 102);
 
     // No conflicts -> markSignificantAndCommit should be called for the RTS activity (881197)
@@ -387,6 +386,8 @@ class TestResultServiceTest {
     verify(germinatorTrayRepository, times(1)).save(any());
     verify(testResultRepository, times(1))
         .saveGerminatorTray(any(), any(), any(), any(), any(), any(), any());
+    // Verify that conflicts were actually checked
+    verify(activityRepository, times(1)).findConflictingActivities(any(), any(), any());
     // Because a conflict exists, markSignificantAndCommit should NOT be called
     verify(activityRepository, times(0)).markSignificantAndCommit(any());
   }

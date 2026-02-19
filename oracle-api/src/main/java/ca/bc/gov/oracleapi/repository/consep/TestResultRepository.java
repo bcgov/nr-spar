@@ -51,7 +51,7 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
           rst.warmStratStartDate,
           tr.warmStratHours,
           rst.drybackStartDate,
-          rst.activityType,
+          rst.activityType as activityTypeCd,
           tr.soakHours,
           tr.stratHours,
           rst.seedWithdrawDate,
