@@ -167,7 +167,7 @@ public class TestResultService {
                 )
             );
 
-        if (actualBeginDtTm == null || !actualBeginDtTm.toLocalDate().equals(today)) {
+        if (actualBeginDtTm != null && !actualBeginDtTm.toLocalDate().equals(today)) {
           // Assign test to tray
           GermTestResultDto germTestResult = germTestCache.get(activityRiaSkey);
 

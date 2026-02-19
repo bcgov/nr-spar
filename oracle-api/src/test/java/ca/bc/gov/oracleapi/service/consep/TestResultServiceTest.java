@@ -126,7 +126,7 @@ class TestResultServiceTest {
     String activityTypeCdRts = "RTS";
     LocalDateTime now = LocalDateTime.now();
     final List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881191"), null),
+        new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881191"), now.minusDays(2)),
         new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881192"), now),
         new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881193"), now.minusDays(1)),
         new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881194"), now.minusDays(1)),
@@ -327,7 +327,7 @@ class TestResultServiceTest {
     String activityTypeCd = "RTS";
     BigDecimal riaSkey = new BigDecimal("881197");
     final List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null)
+        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, LocalDateTime.now().minusDays(1))
     );
 
     ActivityEntity act = new ActivityEntity();
@@ -432,7 +432,8 @@ class TestResultServiceTest {
     );
 
     // activity type is recognised as a germ test
-    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of(activityTypeCd));
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes())
+        .thenReturn(List.of(activityTypeCd));
 
     // seedWithdrawDate is today -> invalid (must be before today)
     GermTestResultDto germTestResult = new GermTestResultDto(
