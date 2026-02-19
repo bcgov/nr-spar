@@ -87,7 +87,9 @@ describe('Moisture Content Screen page', () => {
       .contains('Add row')
       .click();
 
-    cy.get('@totalRows')
+    cy.get('.activity-result-container')
+      .find('tbody tr')
+      .as('totalRows')
       .should('have.length', 4);
 
     // Check validation of Container input
@@ -175,7 +177,9 @@ describe('Moisture Content Screen page', () => {
       .contains('Add row')
       .click();
 
-    cy.get('@totalRows')
+    cy.get('.activity-result-container')
+      .find('tbody tr')
+      .as('totalRows')
       .should('have.length', 4);
 
     cy.wait(ONE_SECOND); // Wait for the row to be added
@@ -188,7 +192,8 @@ describe('Moisture Content Screen page', () => {
 
     cy.wait(ONE_SECOND); // Wait for the row to be deleted
 
-    cy.get('@totalRows')
+    cy.get('.activity-result-container')
+      .find('tbody tr')
       .should('have.length', 3);
 
     // Check Accept checkbox functionality
