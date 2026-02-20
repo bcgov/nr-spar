@@ -15,6 +15,6 @@ export function mockMoistureContentApi() {
 
   cy.intercept(
     { method: 'POST', url: '**/api/moisture-content-cone/514330/calculate-average' },
-    { statusCode: 200, body: { averageMc: 38.67 } } // mock average value
+    { statusCode: 200, fixture: 'moisture-content-cal-avg.json' }
   ).as('postCalcAvg');
 }

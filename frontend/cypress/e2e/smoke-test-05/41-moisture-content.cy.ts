@@ -695,14 +695,19 @@ describe('Moisture Content Screen page', () => {
       .contains('Calculate average')
       .click();
 
-    // Wait for the mocked POST request
-    cy.wait('@postCalcAvg').its('response.statusCode').should('eq', 200);
+    // Wait for the mocked POST request and load fixture
+    cy.wait('@postCalcAvg').then((interception) => {
+      expect(interception.response!.statusCode).to.eq(200);
 
-    // Assert the displayed average matches the mocked value
-    cy.get('.activity-summary')
-      .find('.activity-summary-info-value')
-      .eq(4)
-      .should('have.text', '38.67');
+      // Get the mocked average from the fixture
+      const { body: { averageMc } } = interception.response!;
+
+      // Assert the displayed average matches the mocked value
+      cy.get('.activity-summary')
+        .find('.activity-summary-info-value')
+        .eq(4)
+        .should('have.text', averageMc.toFixed(2));
+    });
   });
 
   it('should have correct Date functionality and validations', () => {
