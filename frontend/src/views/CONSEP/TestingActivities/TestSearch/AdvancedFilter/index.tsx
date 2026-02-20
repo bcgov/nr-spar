@@ -517,6 +517,8 @@ const AdvancedFilters = ({
                   datePickerType="single"
                   className="advanced-date-input"
                   dateFormat={DATE_FORMAT}
+                  minDate={dateField.minStartDate}
+                  maxDate={dateField.maxEndDate}
                   onChange={(e: Array<Date>) => {
                     const fromField = dateType === 'revised' ? 'StartDate' : 'BeginDate';
                     handleAdvDateChange(e, dateType as 'actual' | 'revised', fromField, 'From');
@@ -546,6 +548,7 @@ const AdvancedFilters = ({
                       ? searchParams.actualBeginDateFrom ?? undefined
                       : searchParams.revisedStartDateFrom ?? undefined
                   }
+                  maxDate={dateField.maxEndDate}
                   onChange={(e: Array<Date>) => {
                     const fromField = dateType === 'revised' ? 'StartDate' : 'BeginDate';
                     handleAdvDateChange(e, dateType as 'actual' | 'revised', fromField, 'To');
@@ -570,6 +573,8 @@ const AdvancedFilters = ({
                   datePickerType="single"
                   className="advanced-date-input"
                   dateFormat={DATE_FORMAT}
+                  minDate={dateField.minStartDate}
+                  maxDate={dateField.maxEndDate}
                   onChange={(e: Array<Date>) => {
                     handleAdvDateChange(e, dateType as 'actual' | 'revised', 'EndDate', 'From');
                   }}
