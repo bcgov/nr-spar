@@ -16,10 +16,10 @@ export function mockMoistureContentApi() {
   cy.intercept(
     { method: 'POST', url: '**/api/moisture-content-cone/514330/calculate-average' },
     { statusCode: 200, fixture: 'moisture-content-cal-avg.json' }
-  ).as('postCalcAvg');
+  ).as('POST_calculate_average');
 
   cy.intercept(
     { method: 'DELETE', url: '**/api/moisture-content-cone/514330/*' },
     { statusCode: 200, fixture: 'seedlot-replicate-info.json' }
-  ).as('deleteReplicate');
+  ).as('DELETE_replicate');
 }

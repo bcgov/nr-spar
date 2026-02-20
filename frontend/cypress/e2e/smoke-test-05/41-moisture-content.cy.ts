@@ -687,12 +687,6 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Calculate average button functionality', () => {
-    cy.intercept(
-      'POST',
-      '**/api/moisture-content-cone/514330/calculate-average',
-      { fixture: 'moisture-content-cal-avg.json' }
-    ).as('POST_calculate_average');
-
     // Ensure table is loaded
     cy.waitForTableData('.activity-result-container');
 
