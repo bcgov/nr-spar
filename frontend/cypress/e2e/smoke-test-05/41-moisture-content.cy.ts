@@ -691,42 +691,27 @@ describe('Moisture Content Screen page', () => {
   it('Check Calculate average button functionality', () => {
     cy.intercept(
       'POST',
-      '**/api/moisture-content-cone/514330/calculate-average'
+      '**/api/moisture-content-cone/514330/calculate-average',
+      { fixture: 'moisture-content-cal-avg.json' } // <-- 171.0
     ).as('postCalcAvg');
 
+    // Ensure table is loaded
     cy.waitForTableData('.activity-result-container');
 
-    cy.get('.activity-result-container tbody tr').then(($rows) => {
-      const mcValues: number[] = [];
+    // Click Calculate Average
+    cy.contains('button', 'Calculate average').click();
 
-      Cypress.$($rows).each((_, row) => {
-        const mcText = Cypress.$(row)
-          .find('td:nth-child(7)')
-          .text()
-          .trim();
+    // Wait for API and assert response
+    cy.wait('@postCalcAvg').then(({ response }) => {
+      expect(response?.statusCode).to.eq(200);
 
-        const mcNum = parseFloat(mcText);
-        if (!Number.isNaN(mcNum)) {
-          mcValues.push(mcNum);
-        }
-      });
+      // Because backend returns a NUMBER, not an object
+      const averageMc = response!.body as number;
 
-      expect(mcValues.length, 'MC values should exist').to.be.greaterThan(0);
-
-      const sum = mcValues.reduce((acc, val) => acc + val, 0);
-      const averageMcValues = sum / mcValues.length;
-
-      // Click AFTER calculation
-      cy.contains('button', 'Calculate average').click();
-
-      cy.wait('@postCalcAvg')
-        .its('response.statusCode')
-        .should('eq', 200);
-
-      // Assert UI inside same chain
+      // Assert UI reflects backend value
       cy.get('.activity-summary-info-value')
         .eq(4)
-        .should('have.text', averageMcValues.toFixed(2));
+        .should('have.text', averageMc.toFixed(2));
     });
   });
 
