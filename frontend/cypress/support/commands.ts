@@ -129,14 +129,13 @@ Cypress.Commands.add('closeMenuIfOpen', () => {
 });
 
 Cypress.Commands.add('waitForTableData', (tableSelector: string, timeout: number = THREE_SECONDS) => {
-  cy.wait(timeout); // Wait for the table data to load
   cy.get(tableSelector)
     .find('tbody tr', { timeout })
-    .should('have.length.greaterThan', 0)
+    .should('have.length.greaterThan', 0);
+
+  cy.get(tableSelector)
+    .find('tbody tr', { timeout })
     .first()
     .find('td:nth-child(2) input', { timeout })
-    .should(($input) => {
-      const val = $input.val();
-      return expect(val).to.not.be.empty;
-    });
+    .should(($input) => expect($input.val()).to.not.be.empty);
 });
