@@ -376,12 +376,12 @@ const TestSearch = () => {
   const handleWithdrawalDateChange = (dates: Date[], type: 'start' | 'end') => {
     const raw = dates?.[0];
     const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : undefined;
-    const maxEnd = dateField.maxWithdrawEndDate instanceof Date
-      ? dateField.maxWithdrawEndDate.toISOString().slice(0, 10)
-      : dateField.maxWithdrawEndDate;
-    const minStart = dateField.minWithdrawStartDate instanceof Date
-      ? dateField.minWithdrawStartDate.toISOString().slice(0, 10)
-      : dateField.minWithdrawStartDate;
+    const maxEnd = dateField.maxEndDate instanceof Date
+      ? dateField.maxEndDate.toISOString().slice(0, 10)
+      : dateField.maxEndDate;
+    const minStart = dateField.minStartDate instanceof Date
+      ? dateField.minStartDate.toISOString().slice(0, 10)
+      : dateField.minStartDate;
 
     setSearchParams((prev) => {
       const currentStart = prev.seedWithdrawalStartDate;
@@ -566,7 +566,7 @@ const TestSearch = () => {
                   handleWithdrawalDateChange(dates, 'start');
                 }}
                 defaultValue={dateField.todayString}
-                minDate={dateField.minWithdrawStartDate}
+                minDate={dateField.minStartDate}
                 maxDate={dateField.todayString}
                 value={
                   searchParams.seedWithdrawalStartDate
@@ -591,10 +591,10 @@ const TestSearch = () => {
                   handleWithdrawalDateChange(dates, 'end');
                 }}
                 minDate={searchParams.seedWithdrawalStartDate || undefined}
-                maxDate={dateField.maxWithdrawEndDate}
+                maxDate={dateField.maxEndDate}
                 value={
                   searchParams.seedWithdrawalEndDate
-                  !== dateField.maxWithdrawEndDate.toISOString().slice(0, 10)
+                  !== dateField.maxEndDate.toISOString().slice(0, 10)
                     ? toDate(searchParams.seedWithdrawalEndDate)
                     : undefined
                 }

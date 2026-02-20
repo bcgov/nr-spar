@@ -9,16 +9,14 @@ import { ActivitySearchValidation, ValidationErrorType } from './definitions';
 
 export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
-export const minStartDate = '1900-01-01';
-export const maxEndDate = '9999-12-31';
 export const dateField = {
   placeholderText: 'yyyy/mm/dd',
   helperText: 'year/month/day',
-  get minWithdrawStartDate() {
+  get minStartDate() {
     const today = new Date();
     return new Date(today.getFullYear() - 300, today.getMonth(), today.getDate());
   },
-  get maxWithdrawEndDate() {
+  get maxEndDate() {
     const today = new Date();
     return new Date(today.getFullYear() + 300, today.getMonth(), today.getDate());
   },
