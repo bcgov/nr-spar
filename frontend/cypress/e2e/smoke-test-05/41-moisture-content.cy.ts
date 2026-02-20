@@ -218,352 +218,282 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check sorting by Replicate number', () => {
-    let ascendingFirstRow: string;
-    let descendingFirstRow: string;
-
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check descending sorting functionality of 'Replicate' column
-    cy.get('.activity-result-container')
-      .find('thead tr')
-      .find('th div')
-      .as('tableHeading')
+    // Click header to sort descending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column1)
       .click();
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    // Re-query first two rows after descending sort
+    cy.get('.activity-result-container tbody tr')
       .eq(0)
-      .as('firstRow')
       .find('td:nth-child(1)')
-      .then(($replicateNum) => {
-        descendingFirstRow = $replicateNum.text();
+      .then(($first) => {
+        const descendingFirstRow = $first.text();
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(1)')
+          .then(($second) => {
+            const descendingSecondRow = $second.text();
+            expect(parseInt(descendingFirstRow, 10))
+              .to.be.greaterThan(parseInt(descendingSecondRow, 10));
+          });
       });
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .eq(1)
-      .as('secondRow')
-      .find('td:nth-child(1)')
-      .then(($replicateNum) => {
-        const descendingSecondRow: string = $replicateNum.text();
-        expect(parseInt(descendingFirstRow, 10))
-          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
-      });
-
-    // Check ascending sorting functionality of 'Replicate' column
-    cy.get('@tableHeading')
+    // Click header again to sort ascending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column1)
       .click();
 
-    cy.get('@firstRow')
+    // Re-query first two rows after ascending sort
+    cy.get('.activity-result-container tbody tr')
+      .eq(0)
       .find('td:nth-child(1)')
-      .then(($replicateNum) => {
-        ascendingFirstRow = $replicateNum.text();
-      });
-
-    cy.get('@secondRow')
-      .find('td:nth-child(1)')
-      .then(($replicateNum) => {
-        const ascendingSecondRow: string = $replicateNum.text();
-        expect(parseInt(ascendingFirstRow, 10))
-          .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+      .then(($first) => {
+        const ascendingFirstRow = $first.text();
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(1)')
+          .then(($second) => {
+            const ascendingSecondRow = $second.text();
+            expect(parseInt(ascendingFirstRow, 10))
+              .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+          });
       });
   });
 
   it('Check sorting by Container number', () => {
-    let ascendingFirstRow: string;
-    let descendingFirstRow: string;
-
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check ascending sorting functionality of 'Container' column
-    cy.get('.activity-result-container')
-      .find('thead tr')
-      .find('th div')
-      .as('tableHeading')
+    // Click header to sort ascending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column2)
       .click();
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    // Re-query the first two rows after sort
+    cy.get('.activity-result-container tbody tr')
       .eq(0)
-      .as('firstRow')
       .find('td:nth-child(2) input')
       .invoke('val')
-      .then(($containerNum: any) => {
-        ascendingFirstRow = $containerNum;
+      .then((firstVal: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(2) input')
+          .invoke('val')
+          .then((secondVal: any) => {
+            expect(parseInt(firstVal, 10)).to.be.lessThan(parseInt(secondVal, 10));
+          });
       });
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .eq(1)
-      .as('secondRow')
-      .find('td:nth-child(2) input')
-      .invoke('val')
-      .then(($containerNum: any) => {
-        const ascendingSecondRow: string = $containerNum;
-        expect(parseInt(ascendingFirstRow, 10))
-          .to.be.lessThan(parseInt(ascendingSecondRow, 10));
-      });
-
-    // Check descending sorting functionality of 'Container' column
-    cy.get('@tableHeading')
+    // Click header again to sort descending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column2)
       .click();
 
-    cy.get('@firstRow')
+    // Re-query the first two rows after descending sort
+    cy.get('.activity-result-container tbody tr')
+      .eq(0)
       .find('td:nth-child(2) input')
       .invoke('val')
-      .then(($containerNum: any) => {
-        descendingFirstRow = $containerNum;
-      });
-
-    cy.get('@secondRow')
-      .find('td:nth-child(2) input')
-      .invoke('val')
-      .then(($containerNum: any) => {
-        const descendingSecondRow: string = $containerNum;
-        expect(parseInt(descendingFirstRow, 10))
-          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
+      .then((firstVal: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(2) input')
+          .invoke('val')
+          .then((secondVal: any) => {
+            expect(parseInt(firstVal, 10)).to.be.greaterThan(parseInt(secondVal, 10));
+          });
       });
   });
 
   it('Check sorting by Container weight', () => {
-    let ascendingFirstRow: string;
-    let descendingFirstRow: string;
-
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check descending sorting functionality of 'Container weight' column
-    cy.get('.activity-result-container')
-      .find('thead tr')
-      .find('th div')
-      .as('tableHeading')
+    // Click header to sort descending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column3)
       .click();
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    // Re-query first two rows after descending sort
+    cy.get('.activity-result-container tbody tr')
       .eq(0)
-      .as('firstRow')
       .find('td:nth-child(3) input')
       .invoke('val')
-      .then(($containerWt: any) => {
-        descendingFirstRow = $containerWt;
+      .then((descendingFirstRow: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(3) input')
+          .invoke('val')
+          .then((descendingSecondRow: any) => {
+            expect(parseInt(descendingFirstRow, 10))
+              .to.be.greaterThan(parseInt(descendingSecondRow, 10));
+          });
       });
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .eq(1)
-      .as('secondRow')
-      .find('td:nth-child(3) input')
-      .invoke('val')
-      .then(($containerWt: any) => {
-        const descendingSecondRow: string = $containerWt;
-        expect(parseInt(descendingFirstRow, 10))
-          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
-      });
-
-    // Check ascending sorting functionality of 'Container weight' column
-    cy.get('@tableHeading')
+    // Click header again to sort ascending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column3)
       .click();
 
-    cy.get('@firstRow')
+    // Re-query first two rows after ascending sort
+    cy.get('.activity-result-container tbody tr')
+      .eq(0)
       .find('td:nth-child(3) input')
       .invoke('val')
-      .then(($containerWt: any) => {
-        ascendingFirstRow = $containerWt;
-      });
-
-    cy.get('@secondRow')
-      .find('td:nth-child(3) input')
-      .invoke('val')
-      .then(($containerWt: any) => {
-        const ascendingSecondRow: string = $containerWt;
-        expect(parseInt(ascendingFirstRow, 10))
-          .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+      .then((ascendingFirstRow: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(3) input')
+          .invoke('val')
+          .then((ascendingSecondRow: any) => {
+            expect(parseInt(ascendingFirstRow, 10))
+              .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+          });
       });
   });
 
   it('Check sorting by Fresh seed', () => {
-    let ascendingFirstRow: string;
-    let descendingFirstRow: string;
-
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check descending sorting functionality of 'Fresh seed' column
-    cy.get('.activity-result-container')
-      .find('thead tr')
-      .find('th div')
-      .as('tableHeading')
+    // Click header to sort descending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column4)
       .click();
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    // Re-query first two rows after descending sort
+    cy.get('.activity-result-container tbody tr')
       .eq(0)
-      .as('firstRow')
       .find('td:nth-child(4) input')
       .invoke('val')
-      .then(($freshSeed: any) => {
-        descendingFirstRow = $freshSeed;
+      .then((descendingFirstRow: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(4) input')
+          .invoke('val')
+          .then((descendingSecondRow: any) => {
+            expect(parseInt(descendingFirstRow, 10))
+              .to.be.greaterThan(parseInt(descendingSecondRow, 10));
+          });
       });
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .eq(1)
-      .as('secondRow')
-      .find('td:nth-child(4) input')
-      .invoke('val')
-      .then(($freshSeed: any) => {
-        const descendingSecondRow: string = $freshSeed;
-        expect(parseInt(descendingFirstRow, 10))
-          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
-      });
-
-    // Check ascending sorting functionality of 'Fresh seed' column
-    cy.get('@tableHeading')
+    // Click header again to sort ascending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column4)
       .click();
 
-    cy.get('@firstRow')
+    // Re-query first two rows after ascending sort
+    cy.get('.activity-result-container tbody tr')
+      .eq(0)
       .find('td:nth-child(4) input')
       .invoke('val')
-      .then(($freshSeed: any) => {
-        ascendingFirstRow = $freshSeed;
-      });
-
-    cy.get('@secondRow')
-      .find('td:nth-child(4) input')
-      .invoke('val')
-      .then(($freshSeed: any) => {
-        const ascendingSecondRow: string = $freshSeed;
-        expect(parseInt(ascendingFirstRow, 10))
-          .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+      .then((ascendingFirstRow: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(4) input')
+          .invoke('val')
+          .then((ascendingSecondRow: any) => {
+            expect(parseInt(ascendingFirstRow, 10))
+              .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+          });
       });
   });
 
   it('Check sorting by Cont + Dry seed', () => {
-    let ascendingFirstRow: string;
-    let descendingFirstRow: string;
-
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check descending sorting functionality of 'Cont + Dry seed' column
-    cy.get('.activity-result-container')
-      .find('thead tr')
-      .find('th div')
-      .as('tableHeading')
+    // Click header to sort descending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column5)
       .click();
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    // Re-query first two rows after descending sort
+    cy.get('.activity-result-container tbody tr')
       .eq(0)
-      .as('firstRow')
       .find('td:nth-child(5) input')
       .invoke('val')
-      .then(($contDrySeed: any) => {
-        descendingFirstRow = $contDrySeed;
+      .then((descendingFirstRow: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(5) input')
+          .invoke('val')
+          .then((descendingSecondRow: any) => {
+            expect(parseInt(descendingFirstRow, 10))
+              .to.be.greaterThan(parseInt(descendingSecondRow, 10));
+          });
       });
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .eq(1)
-      .as('secondRow')
-      .find('td:nth-child(5) input')
-      .invoke('val')
-      .then(($contDrySeed: any) => {
-        const descendingSecondRow: string = $contDrySeed;
-        expect(parseInt(descendingFirstRow, 10))
-          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
-      });
-
-    // Check ascending sorting functionality of 'Cont + Dry seed' column
-    cy.get('@tableHeading')
+    // Click header again to sort ascending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column5)
       .click();
 
-    cy.get('@firstRow')
+    // Re-query first two rows after ascending sort
+    cy.get('.activity-result-container tbody tr')
+      .eq(0)
       .find('td:nth-child(5) input')
       .invoke('val')
-      .then(($contDrySeed: any) => {
-        ascendingFirstRow = $contDrySeed;
-      });
-
-    cy.get('@secondRow')
-      .find('td:nth-child(5) input')
-      .invoke('val')
-      .then(($contDrySeed: any) => {
-        const ascendingSecondRow: string = $contDrySeed;
-        expect(parseInt(ascendingFirstRow, 10))
-          .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+      .then((ascendingFirstRow: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(5) input')
+          .invoke('val')
+          .then((ascendingSecondRow: any) => {
+            expect(parseInt(ascendingFirstRow, 10))
+              .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+          });
       });
   });
 
   it('Check sorting by Dry weight', () => {
-    let ascendingFirstRow: string;
-    let descendingFirstRow: string;
-
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check descending sorting functionality of 'Dry weight' column
-    cy.get('.activity-result-container')
-      .find('thead tr')
-      .find('th div')
-      .as('tableHeading')
+    // Click header to sort descending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column6)
       .click();
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    // Re-query first two rows after descending sort
+    cy.get('.activity-result-container tbody tr')
       .eq(0)
-      .as('firstRow')
       .find('td:nth-child(6)')
       .invoke('text')
-      .then(($dryWt: any) => {
-        descendingFirstRow = $dryWt;
+      .then((descendingFirstRow: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(6)')
+          .invoke('text')
+          .then((descendingSecondRow: any) => {
+            expect(parseInt(descendingFirstRow, 10))
+              .to.be.greaterThan(parseInt(descendingSecondRow, 10));
+          });
       });
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .eq(1)
-      .as('secondRow')
-      .find('td:nth-child(6)')
-      .invoke('text')
-      .then(($dryWt: any) => {
-        const descendingSecondRow: string = $dryWt;
-        expect(parseInt(descendingFirstRow, 10))
-          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
-      });
-
-    // Check ascending sorting functionality of 'Dry weight' column
-    cy.get('@tableHeading')
+    // Click header again to sort ascending
+    cy.get('.activity-result-container thead tr th div')
       .contains(mcData.table.column6)
       .click();
 
-    cy.get('@firstRow')
+    // Re-query first two rows after ascending sort
+    cy.get('.activity-result-container tbody tr')
+      .eq(0)
       .find('td:nth-child(6)')
       .invoke('text')
-      .then(($dryWt: any) => {
-        ascendingFirstRow = $dryWt;
-      });
-
-    cy.get('@secondRow')
-      .find('td:nth-child(6)')
-      .invoke('text')
-      .then(($dryWt: any) => {
-        const ascendingSecondRow: string = $dryWt;
-        expect(parseInt(ascendingFirstRow, 10))
-          .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+      .then((ascendingFirstRow: any) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(6)')
+          .invoke('text')
+          .then((ascendingSecondRow: any) => {
+            expect(parseInt(ascendingFirstRow, 10))
+              .to.be.lessThan(parseInt(ascendingSecondRow, 10));
+          });
       });
   });
 
@@ -617,72 +547,78 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Dry weight value', () => {
-    let containerWt: string;
-    let contDrySeed: string;
-
-    // Wait for table to have at least one row with content
+    // Wait for table to have at least one row
     cy.waitForTableData('.activity-result-container');
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    cy.get('.activity-result-container tbody tr')
       .eq(0)
-      .as('firstRow')
+      .as('firstRow');
+
+    // Capture container weight
+    cy.get('@firstRow')
       .find('td:nth-child(3) input')
       .invoke('val')
-      .then(($value: any) => {
-        containerWt = $value;
-      });
+      .as('containerWt');
 
+    // Capture container + dry seed weight
     cy.get('@firstRow')
       .find('td:nth-child(5) input')
       .invoke('val')
-      .then(($value: any) => {
-        contDrySeed = $value;
-      });
+      .as('contDrySeed');
 
+    // Capture dry weight displayed
     cy.get('@firstRow')
       .find('td:nth-child(6)')
       .invoke('text')
-      .then(($text: any) => {
-        const dryWt = $text;
-        expect(parseInt(contDrySeed, 10) - parseInt(containerWt, 10))
-          .to.be.equal(parseInt(dryWt, 10));
+      .then((dryWtText) => {
+        // Use aliases to get the values
+        cy.get('@containerWt').then((containerWt: any) => {
+          cy.get('@contDrySeed').then((contDrySeed: any) => {
+            const expectedDry = parseFloat(contDrySeed) - parseFloat(containerWt);
+            const actualDry = parseFloat(dryWtText);
+
+            expect(actualDry, 'Dry weight calculation').to.eq(expectedDry);
+          });
+        });
       });
   });
 
   it('Check MC value(%) calculation', () => {
-    let freshSeed: string;
-    let dryWt: string;
-
-    // Wait for table to have at least one row with content
+    // Wait for table to have at least one row
     cy.waitForTableData('.activity-result-container');
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    // Get first row
+    cy.get('.activity-result-container tbody tr')
       .eq(0)
-      .as('firstRow')
+      .as('firstRow');
+
+    // Capture freshSeed value (column 4)
+    cy.get('@firstRow')
       .find('td:nth-child(4) input')
       .invoke('val')
-      .then(($value: any) => {
-        freshSeed = $value;
-      });
+      .as('freshSeed');
 
+    // Capture dry weight (column 6)
     cy.get('@firstRow')
       .find('td:nth-child(6)')
       .invoke('text')
-      .then(($value: any) => {
-        dryWt = $value;
-      });
+      .as('dryWt');
 
+    // Capture MC value (column 7) and assert calculation
     cy.get('@firstRow')
       .find('td:nth-child(7)')
       .invoke('text')
-      .then(($text: any) => {
-        const mcValue = $text;
-        // eslint-disable-next-line max-len
-        const expectedMcValue = ((parseInt(freshSeed, 10) - parseInt(dryWt, 10)) / parseInt(freshSeed, 10)) * 100;
-        expect(Math.round(expectedMcValue))
-          .to.be.equal(parseInt(mcValue, 10));
+      .then((mcValueText) => {
+        cy.get('@freshSeed').then((freshSeed: any) => {
+          cy.get('@dryWt').then((dryWt: any) => {
+            const fresh = parseFloat(freshSeed);
+            const dry = parseFloat(dryWt);
+            const expectedMcValue = ((fresh - dry) / fresh) * 100;
+            const actualMcValue = parseFloat(mcValueText);
+
+            expect(Math.round(actualMcValue), 'MC value (%)').to.eq(Math.round(expectedMcValue));
+          });
+        });
       });
   });
 
@@ -690,17 +626,25 @@ describe('Moisture Content Screen page', () => {
     // Ensure table is loaded
     cy.waitForTableData('.activity-result-container');
 
+    // Check all rows so they are included in the average calculation
+    cy.get('.activity-result-container tbody tr').each(($row) => {
+      cy.wrap($row)
+        .find('td[data-index="7"] input[type="checkbox"]')
+        .check()
+        .should('be.checked'); // verify natural check
+    });
+
     // Click Calculate Average
     cy.contains('button', 'Calculate average').click();
 
-    // Wait for API and assert response
+    // Wait for API response
     cy.wait('@POST_calculate_average').then(({ response }) => {
       expect(response?.statusCode).to.eq(200);
 
-      // Because backend returns a NUMBER, not an object
+      // Backend returns a number directly
       const averageMc = response!.body as number;
 
-      // Assert UI reflects backend value
+      // Assert UI shows this value
       cy.get('.activity-summary-info-value')
         .eq(4)
         .invoke('text')
