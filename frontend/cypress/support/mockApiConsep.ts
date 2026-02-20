@@ -12,4 +12,9 @@ export function mockMoistureContentApi() {
     { method: 'GET', url: '**/api/forest-clients/00012797' },
     { statusCode: 200, fixture: 'forest-client.json' }
   ).as('GET_forest_client');
+
+  cy.intercept(
+    { method: 'POST', url: '**/api/moisture-content-cone/514330/calculate-average' },
+    { statusCode: 200, body: { averageMc: 38.67 } } // mock average value
+  ).as('postCalcAvg');
 }

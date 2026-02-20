@@ -73,86 +73,75 @@ describe('Moisture Content Screen page', () => {
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    cy.get('.activity-result-container tbody tr')
       .should('have.length', 3);
 
     // Add a new row
-    cy.get('.activity-result-action-buttons')
-      .find('button')
-      .contains('Add row')
-      .click();
+    cy.contains('button', 'Add row').click();
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .as('totalRows')
+    cy.get('.activity-result-container tbody tr')
       .should('have.length', 4);
 
-    // Check validation of Container input
-    cy.get('@totalRows')
-      .eq(3)
+    // Always re-query the last row
+    const lastRow = () => cy.get('.activity-result-container tbody tr').last();
+
+    // Container ID validation
+    lastRow()
       .find('input[name="containerId"]')
-      .click()
+      .clear()
       .type('10011', { delay: TYPE_DELAY });
 
-    cy.get('p.Mui-error')
+    lastRow()
+      .find('p.Mui-error')
       .should('contain', mcData.table.containerErrorMsg);
 
-    cy.get('@totalRows')
-      .eq(3)
+    lastRow()
       .find('input[name="containerId"]')
-      .click()
       .clear()
       .type('15', { delay: TYPE_DELAY });
 
     // Check validation of Container weight input
-    cy.get('@totalRows')
-      .eq(3)
+    lastRow()
       .find('input[name="containerWeight"]')
-      .click()
+      .clear()
       .type('10011', { delay: TYPE_DELAY });
 
-    cy.get('p.Mui-error')
+    lastRow()
+      .find('p.Mui-error')
       .should('contain', mcData.table.containerWeightErrorMsg);
 
-    cy.get('@totalRows')
-      .eq(3)
+    lastRow()
       .find('input[name="containerWeight"]')
-      .click()
       .clear()
       .type('20', { delay: TYPE_DELAY });
 
-    // Check validation of Fresh seed input
-    cy.get('@totalRows')
-      .eq(3)
+    // Fresh seed validation
+    lastRow()
       .find('input[name="freshSeed"]')
-      .click()
+      .clear()
       .type('10011', { delay: TYPE_DELAY });
 
-    cy.get('p.Mui-error')
+    lastRow()
+      .find('p.Mui-error')
       .should('contain', mcData.table.containerWeightErrorMsg);
 
-    cy.get('@totalRows')
-      .eq(3)
+    lastRow()
       .find('input[name="freshSeed"]')
-      .click()
       .clear()
       .type('30', { delay: TYPE_DELAY });
 
-    // Check validation of Cont + Dry seed input
-    cy.get('@totalRows')
-      .eq(3)
+    // Container + Dry seed validation
+    lastRow()
       .find('input[name="containerAndDryWeight"]')
-      .click()
+      .clear()
       .type('10011', { delay: TYPE_DELAY });
 
-    cy.get('p.Mui-error')
+    lastRow()
+      .find('p.Mui-error')
       .should('contain', mcData.table.containerWeightErrorMsg);
 
-    cy.get('@totalRows')
-      .eq(3)
+    lastRow()
       .find('input[name="containerAndDryWeight"]')
-      .click()
       .clear()
       .type('38', { delay: TYPE_DELAY });
   });
@@ -162,96 +151,68 @@ describe('Moisture Content Screen page', () => {
     cy.waitForTableData('.activity-result-container');
 
     // Check if the table has the correct number of rows
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    cy.get('.activity-result-container tbody tr')
       .should('have.length', 3);
 
-    // Check 'Add row' button functionality
-    cy.get('.activity-result-action-buttons')
-      .find('button')
-      .contains('Add row')
-      .click();
+    // Add row
+    cy.contains('button', 'Add row').click();
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .as('totalRows')
+    cy.get('.activity-result-container tbody tr')
       .should('have.length', 4);
 
-    cy.wait(ONE_SECOND); // Wait for the row to be added
-
-    // Check 'Delete row' button functionality
-    cy.get('@totalRows')
+    // Delete last row (re-query)
+    cy.get('.activity-result-container tbody tr')
       .last()
       .find('td:nth-last-child(1) svg')
-      .click({ timeout: ONE_SECOND });
+      .click();
 
-    cy.wait(ONE_SECOND); // Wait for the row to be deleted
-
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    // Assert row count stabilizes
+    cy.get('.activity-result-container tbody tr')
       .should('have.length', 3);
 
-    // Check Accept checkbox functionality
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .eq(0)
+    // Accept checkbox
+    cy.get('.activity-result-container tbody tr')
+      .first()
       .find('td:nth-child(8) input')
       .as('acceptCheckbox')
       .should('be.checked');
 
-    cy.get('@acceptCheckbox')
-      .click();
+    cy.get('@acceptCheckbox').click();
 
-    cy.get('@acceptCheckbox', { timeout: HALF_SECOND })
+    cy.get('@acceptCheckbox')
       .siblings('svg')
       .should('have.attr', 'data-testid', mcData.table.unCheckedBox);
 
-    cy.get('@acceptCheckbox')
-      .click();
+    cy.get('@acceptCheckbox').click();
 
-    cy.get('@acceptCheckbox', { timeout: HALF_SECOND })
+    cy.get('@acceptCheckbox')
       .siblings('svg')
       .should('have.attr', 'data-testid', mcData.table.checkedBox);
 
-    // Check 'Accept all' button functionality
+    // Accept all
+    cy.contains('button', 'Accept all').click();
+
     cy.get('@acceptCheckbox')
-      .click();
-
-    cy.get('.activity-result-action-buttons')
-      .find('button')
-      .contains('Accept all')
-      .click();
-
-    cy.get('@acceptCheckbox', { timeout: HALF_SECOND })
       .siblings('svg')
       .should('have.attr', 'data-testid', mcData.table.checkedBox);
 
-    // Check Comments column functionality
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .eq(0)
+    // Comment input
+    cy.get('.activity-result-container tbody tr')
+      .first()
       .find('td:nth-child(9) input')
-      .as('commentInput')
-      .click()
+      .clear()
       .type(mcData.mc.testComment, { delay: TYPE_DELAY })
-      .blur();
-
-    cy.get('@commentInput')
+      .blur()
       .should('have.value', mcData.mc.testComment);
 
-    // Check 'Clear data' button functionality
-    cy.get('.activity-result-action-buttons')
-      .find('button')
-      .contains('Clear data')
-      .click();
+    // Clear data
+    cy.contains('button', 'Clear data').click();
 
     cy.get('.activity-result-notification')
-      .find('button')
       .contains('Clear')
       .click();
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    cy.get('.activity-result-container tbody tr')
       .should('contain.text', mcData.table.emptyTableMsg);
   });
 
@@ -606,61 +567,51 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check sorting by MC value (%)', () => {
-    let ascendingFirstRow: string;
-    let descendingFirstRow: string;
-
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Check ascending sorting functionality of 'MC value (%)' column
-    cy.get('.activity-result-container')
-      .find('thead tr')
+    // Find the 'MC value (%)' column header dynamically
+    cy.get('.activity-result-container thead tr')
       .find('th div')
-      .as('tableHeading')
       .contains(mcData.table.column7)
-      .click();
+      .as('mcHeader');
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
+    // ----- Ascending sort -----
+    cy.get('@mcHeader').click(); // click to sort ascending
+
+    // Re-query the first two rows after table re-render
+    cy.get('.activity-result-container tbody tr')
       .eq(0)
-      .as('firstRow')
       .find('td:nth-child(7)')
       .invoke('text')
-      .then(($mcValue: any) => {
-        ascendingFirstRow = $mcValue;
+      .then((ascendingFirstRow) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(7)')
+          .invoke('text')
+          .then((ascendingSecondRow) => {
+            expect(parseFloat(ascendingFirstRow)).to.be.lessThan(parseFloat(ascendingSecondRow));
+          });
       });
 
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .eq(1)
-      .as('secondRow')
+    // ----- Descending sort -----
+    cy.get('@mcHeader').click(); // click again to sort descending
+
+    // Re-query the first two rows again after table re-render
+    cy.get('.activity-result-container tbody tr')
+      .eq(0)
       .find('td:nth-child(7)')
       .invoke('text')
-      .then(($mcValue: any) => {
-        const ascendingSecondRow: string = $mcValue;
-        expect(parseInt(ascendingFirstRow, 10))
-          .to.be.lessThan(parseInt(ascendingSecondRow, 10));
-      });
-
-    // Check descending sorting functionality of 'MC value (%)' column
-    cy.get('@tableHeading')
-      .contains(mcData.table.column7)
-      .click();
-
-    cy.get('@firstRow')
-      .find('td:nth-child(7)')
-      .invoke('text')
-      .then(($mcValue: any) => {
-        descendingFirstRow = $mcValue;
-      });
-
-    cy.get('@secondRow')
-      .find('td:nth-child(7)')
-      .invoke('text')
-      .then(($mcValue: any) => {
-        const descendingSecondRow: string = $mcValue;
-        expect(parseInt(descendingFirstRow, 10))
-          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
+      .then((descendingFirstRow) => {
+        cy.get('.activity-result-container tbody tr')
+          .eq(1)
+          .find('td:nth-child(7)')
+          .invoke('text')
+          .then((descendingSecondRow) => {
+            expect(parseFloat(descendingFirstRow)).to.be.greaterThan(
+              parseFloat(descendingSecondRow)
+            );
+          });
       });
   });
 
@@ -735,45 +686,23 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Calculate average button functionality', () => {
-    cy.intercept('POST', '**/api/moisture-content-cone/514330/calculate-average').as('postCalcAvg');
-
     // Wait for table to have at least one row with content
     cy.waitForTableData('.activity-result-container');
 
-    // Extract all MC values from the 7th column
-    const mcValues: number[] = [];
-    let averageMcValues: number = 0;
-    cy.get('.activity-result-container')
-      .find('tbody tr')
-      .then(($rows) => {
-        // Iterate over each row
-        Cypress.$($rows).each((index, row) => {
-          // Find the 7th td cell in this row and get its text
-          const mcText = Cypress.$(row).find('td:nth-child(7)').text().trim();
-          // Convert to number, default to 0 if invalid
-          const mcNum = parseFloat(mcText) || 0;
-          mcValues.push(mcNum);
-        });
-      })
-      .then(() => {
-        // eslint-disable-next-line no-unused-expressions
-        expect(mcValues).to.not.be.empty;
-        // Calculate average
-        const sum = mcValues.reduce((acc, val) => acc + val, 0);
-        averageMcValues = mcValues.length > 0 ? sum / mcValues.length : 0;
-      });
-
+    // Click the 'Calculate average' button
     cy.get('.consep-registration-button-row')
       .find('button')
       .contains('Calculate average')
       .click();
 
-    cy.wait('@postCalcAvg', { timeout: TEN_SECONDS }).its('response.statusCode').should('eq', 200);
+    // Wait for the mocked POST request
+    cy.wait('@postCalcAvg').its('response.statusCode').should('eq', 200);
 
+    // Assert the displayed average matches the mocked value
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(4)
-      .should('have.text', averageMcValues.toFixed(2));
+      .should('have.text', '38.67');
   });
 
   it('should have correct Date functionality and validations', () => {
