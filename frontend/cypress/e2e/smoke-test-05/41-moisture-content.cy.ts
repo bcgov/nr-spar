@@ -711,9 +711,11 @@ describe('Moisture Content Screen page', () => {
       // Assert UI reflects backend value
       cy.get('.activity-summary-info-value')
         .eq(4)
-        .should('have.text', averageMc.toFixed(2));
-    });
-  });
+        .invoke('text')
+        .then((text) => {
+          expect(parseFloat(text)).to.eq(averageMc);
+        });
+      });
 
   it('should have correct Date functionality and validations', () => {
     // Check if the date input has a placeholder
