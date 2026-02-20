@@ -166,6 +166,9 @@ describe('Moisture Content Screen page', () => {
       .find('td:nth-last-child(1) svg')
       .click();
 
+    // Wait for the delete API to finish
+    cy.wait('@deleteReplicate');
+
     // Assert row count stabilizes
     cy.get('.activity-result-container tbody tr')
       .should('have.length', 3);
@@ -686,7 +689,7 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Calculate average button functionality', () => {
-    // Wait for table to have at least one row with content
+    // Wait for the table to have at least one row
     cy.waitForTableData('.activity-result-container');
 
     // Click the 'Calculate average' button
@@ -695,12 +698,16 @@ describe('Moisture Content Screen page', () => {
       .contains('Calculate average')
       .click();
 
-    // Wait for the mocked POST request and load fixture
-    cy.wait('@postCalcAvg').then((interception) => {
-      expect(interception.response!.statusCode).to.eq(200);
+    // Wait for the POST request and assert the response
+    cy.wait('@postCalcAvg').then(({ response }) => {
+      // Make sure response exists
+      if (!response) throw new Error('Intercepted response is undefined');
 
-      // Get the mocked average from the fixture
-      const { body: { averageMc } } = interception.response!;
+      // Assert status code
+      expect(response.statusCode).to.eq(200);
+
+      // Destructure the mocked averageMc from the response body
+      const { averageMc } = response.body;
 
       // Assert the displayed average matches the mocked value
       cy.get('.activity-summary')
