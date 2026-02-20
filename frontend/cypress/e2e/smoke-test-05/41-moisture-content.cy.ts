@@ -631,25 +631,23 @@ describe('Moisture Content Screen page', () => {
       cy.wrap($row)
         .find('td[data-index="7"] input[type="checkbox"]')
         .check()
-        .should('be.checked'); // verify natural check
+        .should('be.checked');
     });
 
     // Click Calculate Average
     cy.contains('button', 'Calculate average').click();
 
-    // Wait for API response
+    // Wait for API response and get the mocked value dynamically
     cy.wait('@POST_calculate_average').then(({ response }) => {
       expect(response?.statusCode).to.eq(200);
-
-      // Backend returns a number directly
       const averageMc = response!.body as number;
 
-      // Assert UI shows this value
+      // Assert UI shows the same value (retry until UI updates)
       cy.get('.activity-summary-info-value')
         .eq(4)
-        .invoke('text')
-        .then((text) => {
-          expect(parseFloat(text)).to.eq(averageMc);
+        .should(($el) => {
+          const displayedValue = parseFloat($el.text());
+          expect(displayedValue).to.eq(averageMc);
         });
     });
   });
