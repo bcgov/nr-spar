@@ -165,7 +165,7 @@ describe('Moisture Content Screen page', () => {
       .click();
 
     // Wait for the delete API to finish
-    cy.wait('@deleteReplicate');
+    cy.wait('@DELETE_replicate');
 
     // Assert row count stabilizes
     cy.get('.activity-result-container tbody tr')
@@ -687,20 +687,26 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Calculate average button functionality', () => {
-    // Table is populated via mocked GET
+    cy.intercept(
+      'POST',
+      '**/api/moisture-content-cone/514330/calculate-average',
+      { fixture: 'moisture-content-cal-avg.json' }
+    ).as('POST_calculate_average');
+
+    // Ensure table is loaded
     cy.waitForTableData('.activity-result-container');
 
     // Click Calculate Average
     cy.contains('button', 'Calculate average').click();
 
     // Wait for API and assert response
-    cy.wait('@postCalcAvg').then(({ response }) => {
+    cy.wait('@POST_calculate_average').then(({ response }) => {
       expect(response?.statusCode).to.eq(200);
 
-      // Backend returns a NUMBER (ResponseEntity<Double>)
+      // Because backend returns a NUMBER, not an object
       const averageMc = response!.body as number;
 
-      // Assert UI reflects backend value (numeric comparison, not string)
+      // Assert UI reflects backend value
       cy.get('.activity-summary-info-value')
         .eq(4)
         .invoke('text')
