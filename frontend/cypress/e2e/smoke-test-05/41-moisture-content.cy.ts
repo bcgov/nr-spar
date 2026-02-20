@@ -689,31 +689,44 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Calculate average button functionality', () => {
-    // Wait for the table to have at least one row
+    cy.intercept(
+      'POST',
+      '**/api/moisture-content-cone/514330/calculate-average'
+    ).as('postCalcAvg');
+
     cy.waitForTableData('.activity-result-container');
 
-    // Click the 'Calculate average' button
-    cy.get('.consep-registration-button-row')
-      .find('button')
-      .contains('Calculate average')
-      .click();
+    cy.get('.activity-result-container tbody tr').then(($rows) => {
+      const mcValues: number[] = [];
 
-    // Wait for the POST request and assert the response
-    cy.wait('@postCalcAvg').then(({ response }) => {
-      // Make sure response exists
-      if (!response) throw new Error('Intercepted response is undefined');
+      Cypress.$($rows).each((_, row) => {
+        const mcText = Cypress.$(row)
+          .find('td:nth-child(7)')
+          .text()
+          .trim();
 
-      // Assert status code
-      expect(response.statusCode).to.eq(200);
+        const mcNum = parseFloat(mcText);
+        if (!Number.isNaN(mcNum)) {
+          mcValues.push(mcNum);
+        }
+      });
 
-      // Destructure the mocked averageMc from the response body
-      const { averageMc } = response.body;
+      expect(mcValues.length, 'MC values should exist').to.be.greaterThan(0);
 
-      // Assert the displayed average matches the mocked value
-      cy.get('.activity-summary')
-        .find('.activity-summary-info-value')
+      const sum = mcValues.reduce((acc, val) => acc + val, 0);
+      const averageMcValues = sum / mcValues.length;
+
+      // Click AFTER calculation
+      cy.contains('button', 'Calculate average').click();
+
+      cy.wait('@postCalcAvg')
+        .its('response.statusCode')
+        .should('eq', 200);
+
+      // Assert UI inside same chain
+      cy.get('.activity-summary-info-value')
         .eq(4)
-        .should('have.text', averageMc.toFixed(2));
+        .should('have.text', averageMcValues.toFixed(2));
     });
   });
 
