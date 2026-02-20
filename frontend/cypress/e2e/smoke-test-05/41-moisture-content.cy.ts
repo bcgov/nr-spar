@@ -1,6 +1,4 @@
-import {
-  HALF_SECOND, ONE_SECOND, TEN_SECONDS, TYPE_DELAY
-} from '../../constants';
+import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { mockMoistureContentApi } from '../../support/mockApiConsep';
 import { MoistureContentType, SeedlotReplicateInfoType } from '../../definitions';
@@ -689,13 +687,7 @@ describe('Moisture Content Screen page', () => {
   });
 
   it('Check Calculate average button functionality', () => {
-    cy.intercept(
-      'POST',
-      '**/api/moisture-content-cone/514330/calculate-average',
-      { fixture: 'moisture-content-cal-avg.json' } // <-- 171.0
-    ).as('postCalcAvg');
-
-    // Ensure table is loaded
+    // Table is populated via mocked GET
     cy.waitForTableData('.activity-result-container');
 
     // Click Calculate Average
@@ -705,17 +697,18 @@ describe('Moisture Content Screen page', () => {
     cy.wait('@postCalcAvg').then(({ response }) => {
       expect(response?.statusCode).to.eq(200);
 
-      // Because backend returns a NUMBER, not an object
+      // Backend returns a NUMBER (ResponseEntity<Double>)
       const averageMc = response!.body as number;
 
-      // Assert UI reflects backend value
+      // Assert UI reflects backend value (numeric comparison, not string)
       cy.get('.activity-summary-info-value')
         .eq(4)
         .invoke('text')
         .then((text) => {
           expect(parseFloat(text)).to.eq(averageMc);
         });
-      });
+    });
+  });
 
   it('should have correct Date functionality and validations', () => {
     // Check if the date input has a placeholder
