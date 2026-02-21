@@ -43,7 +43,8 @@ import {
   minStartDate,
   maxEndDate,
   formatExportData,
-  columnVisibilityLocalStorageKey
+  columnVisibilityLocalStorageKey,
+  isFamilyLot
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import {
@@ -322,7 +323,7 @@ const TestSearch = () => {
         };
       }
 
-      const isFamily = lot.toUpperCase().startsWith('F');
+      const isFamily = isFamilyLot(lot);
       const limit = isFamily ? 13 : 5;
       return lot.length > limit
         ? {
@@ -364,8 +365,7 @@ const TestSearch = () => {
       lotNumbers: validationResults
     }));
     // Auto-tab to next input if current input is valid and has reached max length
-    const isFamily = sanitizedValue.toUpperCase().startsWith('F');
-    const maxLength = isFamily ? 13 : 5;
+    const maxLength = isFamilyLot(sanitizedValue) ? 13 : 5;
 
     if (
       !validationResults[index].error
