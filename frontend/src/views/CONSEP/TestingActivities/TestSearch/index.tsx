@@ -337,10 +337,26 @@ const TestSearch = () => {
     const lots = updatedInputs.map((val) => val.trim()).filter((val) => val.length > 0);
 
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
+
+    const validationResults = validateLotNumbers(updatedInputs);
     setValidateSearch((prev) => ({
       ...prev,
-      lotNumbers: validateLotNumbers(updatedInputs)
+      lotNumbers: validationResults
     }));
+    // Auto-tab to next input if current input is valid and has reached max length
+    const isFamily = sanitizedValue.toUpperCase().startsWith('F');
+    const maxLength = isFamily ? 13 : 5;
+
+    if (
+      !validationResults[index].error
+      && sanitizedValue.trim().length === maxLength
+      && index < rawLotInput.length - 1
+    ) {
+      const nextInput = document.getElementById(`lot-input-${index + 1}`);
+      if (nextInput) {
+        nextInput.focus();
+      }
+    }
     resetAlert();
   };
 
