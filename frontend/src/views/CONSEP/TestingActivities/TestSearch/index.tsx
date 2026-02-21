@@ -327,8 +327,11 @@ const TestSearch = () => {
   };
 
   const handleLotInputChange = (index: number, value: string) => {
+    // Allow only alphanumeric characters
+    const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
+
     const updatedInputs = [...rawLotInput];
-    updatedInputs[index] = value;
+    updatedInputs[index] = sanitizedValue;
     setRawLotInput(updatedInputs);
 
     const lots = updatedInputs.map((val) => val.trim()).filter((val) => val.length > 0);
