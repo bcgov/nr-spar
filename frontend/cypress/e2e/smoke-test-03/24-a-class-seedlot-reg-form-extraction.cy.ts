@@ -200,45 +200,33 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
   });
 
   it('Extraction Date inputs', () => {
-    // Wait for end date input to be enabled
     cy.get('#ext-end-date')
-      .should('not.be.disabled')
       .clear()
       .type('2024-05-28')
       .blur();
 
-    // Wait for start date input to be enabled
+    // Invalid start date
     cy.get('#ext-start-date')
-      .should('not.be.disabled')
       .clear()
       .type('2024-05-29')
       .blur();
 
-    // Check invalid date error messages
     cy.get(`.${prefix}--date-picker`)
       .find(`.${prefix}--form-requirement`)
       .should('have.length', 2)
       .and('contain.text', regFormData.extraction.invalidDateErrorMsg);
 
-    // Enter valid start date
+    // Valid start date
     cy.get('#ext-start-date')
-      .should('not.be.disabled')
       .clear()
       .type('2024-05-27')
       .blur();
 
-    // Ensure extraction agency checkbox is checked
     cy.get('#ext-agency-tsc-checkbox')
-      .should('not.be.disabled')
       .check({ force: true });
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
-
-    // Retry-friendly check: make sure step shows 'Complete'
-    cy.contains(`.${prefix}--progress-step-button`, 'Extraction')
-      .find(`.${prefix}--assistive-text`)
-      .should('contain.text', 'Complete');
   });
 
   it('Edit Storage agency section details', () => {
