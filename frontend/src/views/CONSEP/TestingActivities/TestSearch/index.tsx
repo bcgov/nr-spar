@@ -297,21 +297,41 @@ const TestSearch = () => {
     return updated;
   };
 
-  const validateLotNumbers = (lots: string[]) => lots.map((lot) => {
-    if (!lot.trim()) {
-      return { error: false, errorMessage: '' };
-    }
+  const validateLotNumbers = (lots: string[]) => {
+    const trimmedLots = lots.map((lot) => lot.trim().toUpperCase());
+    const duplicates = new Set<string>();
 
-    const isFamily = lot.toUpperCase().startsWith('F');
-    const limit = isFamily ? 13 : 5;
-
-    return lot.length > limit
-      ? {
-        error: true,
-        errorMessage: isFamily ? errorMessages.familyLotMaxChar : errorMessages.lotMaxChar
+    // Find duplicates
+    trimmedLots.forEach((lot, index) => {
+      if (lot && trimmedLots.indexOf(lot) !== index) {
+        duplicates.add(lot);
       }
-      : { error: false, errorMessage: '' };
-  });
+    });
+
+    return lots.map((lot) => {
+      if (!lot.trim()) {
+        return { error: false, errorMessage: '' };
+      }
+      const trimmedLot = lot.trim().toUpperCase();
+
+      // Check for duplicates
+      if (duplicates.has(trimmedLot)) {
+        return {
+          error: true,
+          errorMessage: errorMessages.lotDuplicate
+        };
+      }
+
+      const isFamily = lot.toUpperCase().startsWith('F');
+      const limit = isFamily ? 13 : 5;
+      return lot.length > limit
+        ? {
+          error: true,
+          errorMessage: isFamily ? errorMessages.familyLotMaxChar : errorMessages.lotMaxChar
+        }
+        : { error: false, errorMessage: '' };
+    });
+  };
 
   const padSeedlotNumber = (value: string): string => {
     if (/^f/i.test(value)) {
