@@ -46,7 +46,8 @@ import {
   formatExportData,
   columnVisibilityLocalStorageKey,
   ADV_FILTER_KEYS,
-  ADV_FILTER_LABELS
+  ADV_FILTER_LABELS,
+  initialErrorValue
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import {
@@ -673,11 +674,18 @@ const TestSearch = () => {
                       delete updated[tag.key];
                       return updated;
                     });
+                    // Reset validation for requestId, requestYear, orchardId
+                    if (['requestId', 'requestYear', 'orchardId'].includes(tag.key)) {
+                      setValidateSearch((prev) => ({
+                        ...prev,
+                        [tag.key]: initialErrorValue
+                      }));
+                    }
                   }}
                 >
                   {tag.label}
                   {': '}
-                  { tag.value}
+                  {tag.value}
                 </Tag>
               ))}
             </Column>
