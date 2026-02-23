@@ -299,12 +299,19 @@ const TestSearch = () => {
   };
 
   const validateLotNumbers = (lots: string[]) => {
-    const trimmedLots = lots.map((lot) => lot.trim().toUpperCase());
+    const normalizeLot = (lot: string) => {
+      const trimmed = lot.trim();
+      if (!trimmed) return '';
+      const upper = trimmed.toUpperCase();
+      return /^F/i.test(upper) ? upper : padSeedlotNumber(upper);
+    };
+
+    const normalizedLots = lots.map(normalizeLot);
     const duplicates = new Set<string>();
 
     // Find duplicates
-    trimmedLots.forEach((lot, index) => {
-      if (lot && trimmedLots.indexOf(lot) !== index) {
+    normalizedLots.forEach((lot, index) => {
+      if (lot && normalizedLots.indexOf(lot) !== index) {
         duplicates.add(lot);
       }
     });
@@ -313,10 +320,11 @@ const TestSearch = () => {
       if (!lot.trim()) {
         return { error: false, errorMessage: '' };
       }
-      const trimmedLot = lot.trim().toUpperCase();
+
+      const normalizedLot = normalizeLot(lot);
 
       // Check for duplicates
-      if (duplicates.has(trimmedLot)) {
+      if (duplicates.has(normalizedLot)) {
         return {
           error: true,
           errorMessage: errorMessages.lotDuplicate
