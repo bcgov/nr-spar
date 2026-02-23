@@ -34,12 +34,14 @@ describe('Dashboard page test', () => {
     cy.isPageTitle(NavigationLabels.Dashboard);
 
     cy.get('.favourite-activities-cards')
-      .find('.empty-section-title')
-      .contains(dashboardPageData.emptySectionTitle);
+      .should('exist')
+      .within(() => {
+        cy.contains('.empty-section-title', dashboardPageData.emptySectionTitle)
+          .should('be.visible');
 
-    cy.get('.favourite-activities-cards')
-      .find('.empty-section-subtitle')
-      .contains(dashboardPageData.emptySectionSubtitle);
+        cy.contains('.empty-section-subtitle', dashboardPageData.emptySectionSubtitle)
+          .should('be.visible');
+      });
   });
 
   /**
@@ -55,15 +57,17 @@ describe('Dashboard page test', () => {
       .find(`.${prefix}--popover-container`)
       .click();
 
-    // Navigate to Dashboard page
+    // Navigate back to Dashboard
     cy.navigateTo(NavigationLabels.Dashboard);
 
     // Check if seedlot card is appearing at favourites activities
     cy.get('.favourite-activities-cards')
-      .find('.fav-card-content')
-      .find('.fav-card-title-large')
-      .contains('Seedlots')
-      .click();
+      .should('exist')
+      .within(() => {
+        cy.contains('.fav-card-content .fav-card-title-large', 'Seedlots')
+          .should('be.visible')
+          .click();
+      });
 
     cy.isPageTitle(NavigationLabels.Seedlots);
   });
@@ -79,6 +83,7 @@ describe('Dashboard page test', () => {
     // Highlight Seedlots Dashboard Card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main')
+      .should('have.length.at.least', 1)
       .first()
       .find('button.fav-card-overflow')
       .click();
@@ -97,9 +102,10 @@ describe('Dashboard page test', () => {
    * Delete a favourite card should remove it from the dashboard and display an empty section.
    */
   it('should delete a card from favourite activities', () => {
-    // Delete the first card
+    // Delete the first highlighted card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main-highlighted')
+      .should('have.length.at.least', 1)
       .first()
       .find('button.fav-card-overflow')
       .click();
@@ -108,11 +114,16 @@ describe('Dashboard page test', () => {
       .contains('Delete shortcut')
       .click();
 
+    // Verify no highlighted cards remain
     cy.get('.fav-card-main-highlighted')
       .should('have.length', 0);
 
+    // Verify empty section appears
     cy.get('.favourite-activities-cards')
-      .find('.empty-section-title')
-      .should('have.text', dashboardPageData.emptySectionTitle);
+      .should('exist')
+      .within(() => {
+        cy.contains('.empty-section-title', dashboardPageData.emptySectionTitle)
+          .should('be.visible');
+      });
   });
 });

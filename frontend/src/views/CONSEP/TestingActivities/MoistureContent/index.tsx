@@ -59,6 +59,20 @@ const MoistureContent = () => {
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>();
   const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [dateErrors, setDateErrors] = useState<{ startDate?: string; endDate?: string }>({});
+
+  // Validation function to check if start date is before end date
+  const validateDates = (startDate: Date | null, endDate: Date | null) => {
+    const errors: { startDate?: string; endDate?: string } = {};
+
+    if (startDate && endDate && startDate > endDate) {
+      errors.startDate = fieldsConfig.startDate.invalidText;
+      errors.endDate = fieldsConfig.endDate.invalidText;
+    }
+
+    setDateErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
@@ -154,14 +168,23 @@ const MoistureContent = () => {
   };
 
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
-    setActivityRecord({
-      ...activityRecord,
-      ...record
-    });
-    updateActivityRecordMutation.mutate({
-      ...activityRecord,
-      ...record
-    });
+    const updatedRecord = { ...activityRecord, ...record };
+    // Validate dates if either date is being updated
+    if (record.actualBeginDateTime || record.actualEndDateTime) {
+      const beginDateTime = record.actualBeginDateTime
+        || activityRecord?.actualBeginDateTime;
+      const endDateTime = record.actualEndDateTime
+        || activityRecord?.actualEndDateTime;
+      const startDate = beginDateTime ? new Date(beginDateTime) : null;
+      const endDate = endDateTime ? new Date(endDateTime) : null;
+
+      if (!validateDates(startDate, endDate)) {
+        return; // Don't update if validation fails
+      }
+    }
+
+    setActivityRecord(updatedRecord);
+    updateActivityRecordMutation.mutate(updatedRecord);
   };
 
   const validateTest = useMutation({
@@ -334,11 +357,10 @@ const MoistureContent = () => {
       <Row className="consep-moisture-content-title">
         <PageTitle
           title={`${mcVariation?.description} for lot 
-          ${
-            !seedlotNumber || seedlotNumber === '00000'
-              ? testActivity?.familyLotNumber
-              : seedlotNumber
-          }`}
+          ${!seedlotNumber || seedlotNumber === '00000'
+            ? testActivity?.familyLotNumber
+            : seedlotNumber
+            }`}
         />
         <>
           {
@@ -396,6 +418,7 @@ const MoistureContent = () => {
               placeholder="yyyy/mm/dd"
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
+              invalid={!!dateErrors.startDate}
               value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
@@ -427,6 +450,7 @@ const MoistureContent = () => {
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
+              invalid={!!dateErrors.endDate}
               value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
