@@ -153,7 +153,9 @@ describe('Moisture Content Screen page', () => {
       .should('have.length', 3);
 
     // Add row
-    cy.contains('button', 'Add row').click();
+    cy.get('.activity-result-action-buttons')
+      .contains('button', 'Add row')
+      .click();
 
     cy.get('.activity-result-container tbody tr')
       .should('have.length', 4);
@@ -191,7 +193,9 @@ describe('Moisture Content Screen page', () => {
       .should('have.attr', 'data-testid', mcData.table.checkedBox);
 
     // Accept all
-    cy.contains('button', 'Accept all').click();
+    cy.get('.activity-result-action-buttons')
+      .contains('button', 'Accept all')
+      .click();
 
     cy.get('@acceptCheckbox')
       .siblings('svg')
@@ -207,7 +211,9 @@ describe('Moisture Content Screen page', () => {
       .should('have.value', mcData.mc.testComment);
 
     // Clear data
-    cy.contains('button', 'Clear data').click();
+    cy.get('.activity-result-action-buttons')
+      .contains('button', 'Clear data')
+      .click();
 
     cy.get('.activity-result-notification')
       .contains('Clear')
