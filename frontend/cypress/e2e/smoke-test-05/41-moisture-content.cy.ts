@@ -228,7 +228,7 @@ describe('Moisture Content Screen page', () => {
     cy.waitForTableData('.activity-result-container');
 
     // Click header to sort descending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column1)
       .click();
 
@@ -249,7 +249,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     // Click header again to sort ascending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column1)
       .click();
 
@@ -275,7 +275,7 @@ describe('Moisture Content Screen page', () => {
     cy.waitForTableData('.activity-result-container');
 
     // Click header to sort ascending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column2)
       .click();
 
@@ -295,7 +295,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     // Click header again to sort descending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column2)
       .click();
 
@@ -320,7 +320,7 @@ describe('Moisture Content Screen page', () => {
     cy.waitForTableData('.activity-result-container');
 
     // Click header to sort descending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column3)
       .click();
 
@@ -341,7 +341,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     // Click header again to sort ascending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column3)
       .click();
 
@@ -414,7 +414,7 @@ describe('Moisture Content Screen page', () => {
     cy.waitForTableData('.activity-result-container');
 
     // Click header to sort descending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column5)
       .click();
 
@@ -435,7 +435,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     // Click header again to sort ascending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column5)
       .click();
 
@@ -461,7 +461,7 @@ describe('Moisture Content Screen page', () => {
     cy.waitForTableData('.activity-result-container');
 
     // Click header to sort descending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column6)
       .click();
 
@@ -482,7 +482,7 @@ describe('Moisture Content Screen page', () => {
       });
 
     // Click header again to sort ascending
-    cy.get('.activity-result-container thead tr th div')
+    cy.get('.activity-result-container thead tr th')
       .contains(mcData.table.column6)
       .click();
 
@@ -509,7 +509,7 @@ describe('Moisture Content Screen page', () => {
 
     // Find the 'MC value (%)' column header dynamically
     cy.get('.activity-result-container thead tr')
-      .find('th div')
+      .find('th')
       .contains(mcData.table.column7)
       .as('mcHeader');
 
@@ -641,7 +641,9 @@ describe('Moisture Content Screen page', () => {
     });
 
     // Click Calculate Average
-    cy.contains('button', 'Calculate average').click();
+    cy.get('.activity-result-action-buttons')
+      .contains('button', 'Calculate average')
+      .click();
 
     // Wait for API response and get the mocked value dynamically
     cy.wait('@POST_calculate_average').then(({ response }) => {
