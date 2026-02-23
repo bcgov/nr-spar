@@ -298,6 +298,19 @@ const TestSearch = () => {
     return updated;
   };
 
+  const padSeedlotNumber = (value: string): string => {
+    if (/^f/i.test(value)) {
+      return value;
+    }
+
+    // Seedlot must be numeric
+    if (!/^\d+$/.test(value)) {
+      return value;
+    }
+
+    return value.padStart(5, '0');
+  };
+
   const validateLotNumbers = (lots: string[]) => {
     const normalizeLot = (lot: string) => {
       const trimmed = lot.trim();
@@ -340,19 +353,6 @@ const TestSearch = () => {
         }
         : { error: false, errorMessage: '' };
     });
-  };
-
-  const padSeedlotNumber = (value: string): string => {
-    if (/^f/i.test(value)) {
-      return value;
-    }
-
-    // Seedlot must be numeric
-    if (!/^\d+$/.test(value)) {
-      return value;
-    }
-
-    return value.padStart(5, '0');
   };
 
   const handleLotInputChange = (index: number, value: string) => {
