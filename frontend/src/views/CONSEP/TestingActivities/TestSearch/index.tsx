@@ -47,6 +47,7 @@ import {
   columnVisibilityLocalStorageKey,
   ADV_FILTER_KEYS,
   ADV_FILTER_LABELS,
+  ADV_FILTER_STATUS_MAPS,
   initialErrorValue
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
@@ -414,21 +415,6 @@ const TestSearch = () => {
     key: keyof ActivitySearchRequest,
     value: boolean | number | string | string[]
   ): string => {
-    const statusMaps: Partial<Record<keyof ActivitySearchRequest, Record<number, string>>> = {
-      completeStatus: {
-        [-1]: 'Complete',
-        0: 'Incomplete'
-      },
-      acceptanceStatus: {
-        [-1]: 'Accepted',
-        0: 'Unaccepted'
-      },
-      germTrayAssignment: {
-        [-1]: 'Assigned',
-        0: 'Unassigned'
-      }
-    };
-
     if (Array.isArray(value)) {
       return value.join(', ');
     }
@@ -438,7 +424,7 @@ const TestSearch = () => {
     }
 
     if (typeof value === 'number') {
-      return statusMaps[key]?.[value] ?? String(value);
+      return ADV_FILTER_STATUS_MAPS[key]?.[value] ?? String(value);
     }
 
     return value;

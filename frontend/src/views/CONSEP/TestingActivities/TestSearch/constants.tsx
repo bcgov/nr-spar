@@ -352,8 +352,24 @@ export const ADV_FILTER_LABELS: Partial<Record<keyof ActivitySearchRequest, stri
   completeStatus: 'Completion status',
   acceptanceStatus: 'Acceptance status',
   seedlotClass: 'Seedlot class'
-};
+} as const;
 
 export const ADV_FILTER_KEYS = Object.keys(
   ADV_FILTER_LABELS
-) as Array<keyof ActivitySearchRequest>;
+) as Array<keyof typeof ADV_FILTER_LABELS>;
+
+export const ADV_FILTER_STATUS_MAPS:
+  Partial<Record<keyof ActivitySearchRequest, Record<number, string>>> = {
+    completeStatus: {
+      [-1]: 'Complete',
+      0: 'Incomplete'
+    },
+    acceptanceStatus: {
+      [-1]: 'Accepted',
+      0: 'Unaccepted'
+    },
+    germTrayAssignment: {
+      [-1]: 'Assigned',
+      0: 'Unassigned'
+    }
+  };
