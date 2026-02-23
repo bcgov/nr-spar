@@ -213,7 +213,7 @@ class TestResultServiceTest {
     );
     when(testResultRepository.getGermTestResult(any())).thenReturn(germTestResultDto);
 
-    /// No conflicts for commit (always empty)
+    // No conflicts for commit (always empty)
     when(activityRepository.findConflictingActivities(any(), any(), any()))
         .thenReturn(Collections.emptyList());
 
@@ -286,10 +286,10 @@ class TestResultServiceTest {
         LocalDate.now().plusDays(1),
         null
     );
-    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(valid);
+    when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(valid);
 
     // Activity not found
-    when(activityRepository.findById(eq(riaSkey))).thenReturn(Optional.empty());
+    when(activityRepository.findById(riaSkey)).thenReturn(Optional.empty());
 
     // Act / Assert
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
@@ -300,7 +300,7 @@ class TestResultServiceTest {
 
     // Verify interactions
     verify(germinatorTrayRepository).save(any());
-    verify(activityRepository).findById(eq(riaSkey));
+    verify(activityRepository).findById(riaSkey);
   }
 
   @Test
@@ -318,7 +318,7 @@ class TestResultServiceTest {
         .thenReturn(List.of(activityTypeCd));
 
     // Validation will call getGermTestResult(...) and we want it to be missing (null) -> NOT_FOUND
-    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(null);
+    when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(null);
 
     // Act / Assert
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
@@ -329,7 +329,7 @@ class TestResultServiceTest {
         ex.getReason());
 
     // Validation short-circuits, so no trays are created and no activity lookups occur
-    verify(testResultRepository).getGermTestResult(eq(riaSkey));
+    verify(testResultRepository).getGermTestResult(riaSkey);
     verify(germinatorTrayRepository, times(0)).save(any());
     verify(activityRepository, times(0)).findById(any());
   }
@@ -356,7 +356,7 @@ class TestResultServiceTest {
     tray.setActualStartDate(LocalDate.now().atStartOfDay());
     when(germinatorTrayRepository.save(any())).thenReturn(tray);
 
-    when(activityRepository.findById(eq(riaSkey))).thenReturn(Optional.of(act));
+    when(activityRepository.findById(riaSkey)).thenReturn(Optional.of(act));
 
     when(testRegimeRepository.findAllGermTestActivityTypeCodes())
         .thenReturn(List.of("RTS", "G10")); // include codes used in the test
@@ -427,7 +427,7 @@ class TestResultServiceTest {
         LocalDate.now().plusDays(1), // seed withdrawal in future
         null // no germinator assigned
     );
-    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(validGerm);
+    when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(validGerm);
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> testResultService.assignGerminatorTrays(requests));
@@ -459,7 +459,7 @@ class TestResultServiceTest {
         LocalDate.now(), // seed withdrawal is today (invalid)
         null
     );
-    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(germTestResult);
+    when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(germTestResult);
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> testResultService.assignGerminatorTrays(requests));
@@ -490,7 +490,7 @@ class TestResultServiceTest {
         LocalDate.now().plusDays(1),
         123 // already assigned
     );
-    when(testResultRepository.getGermTestResult(eq(riaSkey))).thenReturn(germTestResult);
+    when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(germTestResult);
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> testResultService.assignGerminatorTrays(requests));
