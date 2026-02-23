@@ -45,7 +45,8 @@ import {
   maxEndDate,
   formatExportData,
   columnVisibilityLocalStorageKey,
-  ADV_FILTER_KEYS
+  ADV_FILTER_KEYS,
+  ADV_FILTER_LABELS
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import {
@@ -409,29 +410,48 @@ const TestSearch = () => {
   };
 
   const formatTagValue = (
+    key: keyof ActivitySearchRequest,
     value: boolean | number | string | string[]
   ): string => {
-    if (typeof value === 'boolean') return 'Yes';
-    if (typeof value === 'number') return String(value);
-    if (typeof value === 'string') return value;
+    const statusMaps: Partial<Record<keyof ActivitySearchRequest, Record<number, string>>> = {
+      completeStatus: {
+        [-1]: 'Complete',
+        0: 'Incomplete'
+      },
+      acceptanceStatus: {
+        [-1]: 'Accepted',
+        0: 'Unaccepted'
+      },
+      germTrayAssignment: {
+        [-1]: 'Assigned',
+        0: 'Unassigned'
+      }
+    };
 
-    return String(value);
-  };
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
 
-  const formatTagLabel = (key: string): string => {
-    const withSpaces = key.replace(/([A-Z])/g, ' $1');
-    return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+
+    if (typeof value === 'number') {
+      return statusMaps[key]?.[value] ?? String(value);
+    }
+
+    return value;
   };
 
   const advancedFilterTags = ADV_FILTER_KEYS.flatMap((key) => {
     const value = searchParams[key];
-    if (value === undefined || value === null) return [];
+    if (value == null) return [];
 
     return [
       {
         key,
-        label: formatTagLabel(key),
-        value: formatTagValue(value)
+        label: ADV_FILTER_LABELS[key],
+        value: formatTagValue(key, value)
       }
     ];
   });

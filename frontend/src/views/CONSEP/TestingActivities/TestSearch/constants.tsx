@@ -329,27 +329,31 @@ export const formatExportData = {
 
 export const columnVisibilityLocalStorageKey = 'test-activity-table-columns-visibility';
 
-export const ADV_FILTER_KEYS: Array<keyof ActivitySearchRequest> = [
-  'includeHistoricalTests',
-  'germTestsOnly',
-  'familyLotsOnly',
-  'requestId',
-  'requestType',
-  'requestYear',
-  'orchardId',
-  'testCategoryCd',
-  'testRank',
-  'species',
-  'actualBeginDateFrom',
-  'actualBeginDateTo',
-  'actualEndDateFrom',
-  'actualEndDateTo',
-  'revisedStartDateFrom',
-  'revisedStartDateTo',
-  'revisedEndDateFrom',
-  'revisedEndDateTo',
-  'germTrayAssignment',
-  'completeStatus',
-  'acceptanceStatus',
-  'seedlotClass'
-];
+export const ADV_FILTER_LABELS: Partial<Record<keyof ActivitySearchRequest, string>> = {
+  includeHistoricalTests: 'Include historical tests',
+  germTestsOnly: 'Germ tests only',
+  familyLotsOnly: 'Family lots only',
+  requestId: 'Request ID',
+  requestType: 'Request type',
+  requestYear: 'Request year',
+  orchardId: 'Orchard ID',
+  testCategoryCd: 'Test category',
+  testRank: 'Test rank',
+  species: 'Species',
+  actualBeginDateFrom: 'Actual begin date (from)',
+  actualBeginDateTo: 'Actual begin date (to)',
+  actualEndDateFrom: 'Actual end date (from)',
+  actualEndDateTo: 'Actual end date (to)',
+  revisedStartDateFrom: 'Revised start date (from)',
+  revisedStartDateTo: 'Revised start date (to)',
+  revisedEndDateFrom: 'Revised end date (from)',
+  revisedEndDateTo: 'Revised end date (to)',
+  germTrayAssignment: 'Germ tray assignment',
+  completeStatus: 'Completion status',
+  acceptanceStatus: 'Acceptance status',
+  seedlotClass: 'Seedlot class'
+};
+
+export const ADV_FILTER_KEYS = Object.keys(
+  ADV_FILTER_LABELS
+) as Array<keyof ActivitySearchRequest>;

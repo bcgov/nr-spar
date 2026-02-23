@@ -75,8 +75,9 @@
     }
   }
 
-  .consep-test-search-advanced-filter-tags .bx--tag {
-    margin-left: 0rem;
+  .consep-test-search-advanced-filter-tags .#{vars.$bcgov-prefix}--tag {
+    margin-left: 0;
+    max-width: 21rem;
   }
 
   input[type='number']::-webkit-outer-spin-button,
@@ -111,7 +112,7 @@
       .MuiBox-root {
         padding: 0rem;
 
-        .bx--col {
+        .#{vars.$bcgov-prefix}--col {
           padding-right: 0rem;
         }
       }
@@ -123,7 +124,7 @@
         border-left: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
       }
 
-      .concep-test-search-table-toolbar-button.bx--btn--tertiary {
+      .concep-test-search-table-toolbar-button.#{vars.$bcgov-prefix}--btn--tertiary {
         padding: 0.83rem 0.75rem;
       }
 
