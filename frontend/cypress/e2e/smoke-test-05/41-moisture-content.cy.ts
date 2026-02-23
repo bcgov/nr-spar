@@ -641,7 +641,7 @@ describe('Moisture Content Screen page', () => {
     });
 
     // Click Calculate Average
-    cy.get('.activity-result-action-buttons')
+    cy.get('.consep-registration-button-row')
       .contains('button', 'Calculate average')
       .click();
 
