@@ -3,7 +3,7 @@
 
 import '@cypress/code-coverage/support';
 import {
-  THIRTY_SECONDS, HALF_SECOND, TYPE_DELAY
+  THIRTY_SECONDS, HALF_SECOND, TYPE_DELAY, THREE_SECONDS
 } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 import prefix from '../../src/styles/classPrefix';
@@ -126,4 +126,16 @@ Cypress.Commands.add('closeMenuIfOpen', () => {
         cy.wrap($btn).should('have.attr', 'aria-label', 'Open menu');
       }
     });
+});
+
+Cypress.Commands.add('waitForTableData', (tableSelector: string, timeout: number = THREE_SECONDS) => {
+  cy.get(tableSelector)
+    .find('tbody tr', { timeout })
+    .should('have.length.greaterThan', 0);
+
+  cy.get(tableSelector)
+    .find('tbody tr', { timeout })
+    .first()
+    .find('td:nth-child(2) input', { timeout })
+    .should(($input) => expect($input.val()).to.not.be.empty);
 });
