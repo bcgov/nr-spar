@@ -15,7 +15,8 @@ import {
   TextInput,
   InlineNotification,
   FormLabel,
-  FilterableMultiSelect
+  FilterableMultiSelect,
+  Tag
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
 // eslint-disable-next-line import/no-unresolved
@@ -43,7 +44,8 @@ import {
   minStartDate,
   maxEndDate,
   formatExportData,
-  columnVisibilityLocalStorageKey
+  columnVisibilityLocalStorageKey,
+  ADV_FILTER_KEYS
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import {
@@ -406,6 +408,34 @@ const TestSearch = () => {
     resetAlert();
   };
 
+  const formatTagValue = (
+    value: boolean | number | string | string[]
+  ): string => {
+    if (typeof value === 'boolean') return 'Yes';
+    if (typeof value === 'number') return String(value);
+    if (typeof value === 'string') return value;
+
+    return String(value);
+  };
+
+  const formatTagLabel = (key: string): string => {
+    const withSpaces = key.replace(/([A-Z])/g, ' $1');
+    return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
+  };
+
+  const advancedFilterTags = ADV_FILTER_KEYS.flatMap((key) => {
+    const value = searchParams[key];
+    if (value === undefined || value === null) return [];
+
+    return [
+      {
+        key,
+        label: formatTagLabel(key),
+        value: formatTagValue(value)
+      }
+    ];
+  });
+
   const handleCloseAdvSearch = () => {
     setOpenAdvSearch(false);
     setModalAnchor(null);
@@ -608,6 +638,28 @@ const TestSearch = () => {
                   Search activity
                 </Button>
               </div>
+            </Column>
+          </Row>
+          <Row className="consep-test-search-advanced-filter-tags">
+            <Column>
+              {advancedFilterTags.map((tag) => (
+                <Tag
+                  key={String(tag.key)}
+                  type="blue"
+                  filter
+                  onClose={() => {
+                    setSearchParams((prev) => {
+                      const updated = { ...prev };
+                      delete updated[tag.key];
+                      return updated;
+                    });
+                  }}
+                >
+                  {tag.label}
+                  {': '}
+                  { tag.value}
+                </Tag>
+              ))}
             </Column>
           </Row>
           {openAdvSearch && modalAnchor && (

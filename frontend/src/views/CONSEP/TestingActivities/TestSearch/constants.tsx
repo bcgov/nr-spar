@@ -5,7 +5,7 @@ import { Tag } from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
 import { CrumbType } from '../../../../components/Breadcrumbs/definitions';
 import { TestingSearchResponseType } from '../../../../types/consep/TestingSearchType';
-import { ActivitySearchValidation, ValidationErrorType } from './definitions';
+import { ActivitySearchValidation, ValidationErrorType, ActivitySearchRequest } from './definitions';
 
 export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
@@ -328,3 +328,28 @@ export const formatExportData = {
 };
 
 export const columnVisibilityLocalStorageKey = 'test-activity-table-columns-visibility';
+
+export const ADV_FILTER_KEYS: Array<keyof ActivitySearchRequest> = [
+  'includeHistoricalTests',
+  'germTestsOnly',
+  'familyLotsOnly',
+  'requestId',
+  'requestType',
+  'requestYear',
+  'orchardId',
+  'testCategoryCd',
+  'testRank',
+  'species',
+  'actualBeginDateFrom',
+  'actualBeginDateTo',
+  'actualEndDateFrom',
+  'actualEndDateTo',
+  'revisedStartDateFrom',
+  'revisedStartDateTo',
+  'revisedEndDateFrom',
+  'revisedEndDateTo',
+  'germTrayAssignment',
+  'completeStatus',
+  'acceptanceStatus',
+  'seedlotClass'
+];
