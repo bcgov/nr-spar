@@ -411,6 +411,21 @@ const TestSearch = () => {
     resetAlert();
   };
 
+    // prevent user from typing '-'
+    // & allow ctrl/cmd + ';' to auto-fill today's date in date inputs
+    const handleDatePicker = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    type: 'start' | 'end'
+  ) => {
+    if (e.key === '-') {
+      e.preventDefault();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === ';') {
+      e.preventDefault();
+      handleWithdrawalDateChange([dateField.todayDate], type);
+    }
+  };
+
   const handleCloseAdvSearch = () => {
     setOpenAdvSearch(false);
     setModalAnchor(null);
@@ -565,13 +580,12 @@ const TestSearch = () => {
                 onChange={(dates: Date[]) => {
                   handleWithdrawalDateChange(dates, 'start');
                 }}
-                defaultValue={dateField.todayString}
                 minDate={dateField.minStartDate}
                 maxDate={dateField.todayString}
                 value={
                   searchParams.seedWithdrawalStartDate
                     ? toDate(searchParams.seedWithdrawalStartDate)
-                    : toDate(dateField.todayString)
+                    : undefined
                 }
                 style={{ minWidth: '9rem' }}
               >
@@ -581,11 +595,7 @@ const TestSearch = () => {
                   autoComplete="off"
                   placeholder={dateField.placeholderText}
                   helperText={dateField.helperText}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === '-') {
-                      e.preventDefault();
-                    }
-                  }}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'start')}
                 />
               </DatePicker>
               <DatePicker
@@ -611,11 +621,7 @@ const TestSearch = () => {
                   autoComplete="off"
                   placeholder={dateField.placeholderText}
                   helperText={dateField.helperText}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === '-') {
-                      e.preventDefault();
-                    }
-                  }}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'end')}
                 />
               </DatePicker>
               <div className="filters-row-buttons">
