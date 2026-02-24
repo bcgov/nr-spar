@@ -71,8 +71,18 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .then(($checkbox) => {
         if ($checkbox.is(':not(:checked)')) {
           cy.get('#default-owner-checkbox').check({ force: true });
-          // Save changes
-          cy.saveSeedlotRegFormProgress();
+
+          // Inline wait for save confirmation
+          cy.get('button.form-action-btn')
+            .contains('Save')
+            .click();
+
+          // Wait for the "Changes saved!" message
+          cy.contains('Changes saved!', { timeout: 30000 }).should('be.visible');
+
+          // Optional: wait until any inline loading spinners disappear
+          cy.get('svg.bx--inline-loading__spinner', { timeout: 30000 })
+            .should('not.exist');
         }
       })
       .should('be.checked');

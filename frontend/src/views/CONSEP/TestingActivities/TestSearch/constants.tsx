@@ -50,6 +50,7 @@ export const errorMessages = {
   lotMax: 'Maximum of 5 lot numbers allowed.',
   lotMaxChar: '5 character max for seedlot numbers',
   familyLotMaxChar: '13 character max for family lot numbers',
+  lotDuplicate: 'Duplicate lot number entered',
   germTrayMax: '5 digits max',
   reqId: '5 character max',
   reqYearSize: 'Year must be a 4-digit number',
