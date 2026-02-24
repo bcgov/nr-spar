@@ -204,7 +204,7 @@ const AdvancedFilters = ({
 
     if (value.length > 3) {
       error = true;
-      errorMessage = errorMessages.reqId;
+      errorMessage = errorMessages.orchardId;
     }
 
     setSearchParams((prev) => (
