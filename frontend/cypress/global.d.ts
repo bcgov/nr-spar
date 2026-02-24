@@ -59,5 +59,14 @@ declare namespace Cypress {
      * cy.closeMenuIfOpen()
      */
     closeMenuIfOpen(): void
+    /**
+     * Custom command to wait for table data to be loaded by checking for the presence of rows.
+     *
+     * @param tableSelector {string} - The selector for the table element
+     * @param timeout {number} - Optional timeout in milliseconds
+     * @example
+     * cy.waitForTableData('.my-table')
+     */
+    waitForTableData(tableSelector: string, timeout?: number): void
   }
 }

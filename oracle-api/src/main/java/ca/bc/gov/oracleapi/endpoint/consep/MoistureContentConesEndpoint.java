@@ -381,6 +381,7 @@ public class MoistureContentConesEndpoint {
       @ApiResponse(responseCode = "400", description = "Invalid input data"),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public ResponseEntity<Double> calculateAverage(
         @Parameter(
             name = "riaKey",
