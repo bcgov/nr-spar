@@ -15,7 +15,8 @@ import {
   TextInput,
   InlineNotification,
   FormLabel,
-  FilterableMultiSelect
+  FilterableMultiSelect,
+  Tag
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
 // eslint-disable-next-line import/no-unresolved
@@ -43,6 +44,10 @@ import {
   dateField,
   formatExportData,
   columnVisibilityLocalStorageKey,
+  ADV_FILTER_KEYS,
+  ADV_FILTER_LABELS,
+  ADV_FILTER_STATUS_MAPS,
+  initialErrorValue,
   isFamilyLot
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
@@ -494,6 +499,38 @@ const TestSearch = () => {
     }
   };
 
+  const formatTagValue = (
+    key: keyof ActivitySearchRequest,
+    value: boolean | number | string | string[]
+  ): string => {
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+
+    if (typeof value === 'number') {
+      return ADV_FILTER_STATUS_MAPS[key]?.[value] ?? String(value);
+    }
+
+    return value;
+  };
+
+  const advancedFilterTags = ADV_FILTER_KEYS.flatMap((key) => {
+    const value = searchParams[key];
+    if (value == null) return [];
+
+    return [
+      {
+        key,
+        label: ADV_FILTER_LABELS[key],
+        value: formatTagValue(key, value)
+      }
+    ];
+  });
+
   const handleCloseAdvSearch = () => {
     setOpenAdvSearch(false);
     setModalAnchor(null);
@@ -708,6 +745,35 @@ const TestSearch = () => {
                   Search activity
                 </Button>
               </div>
+            </Column>
+          </Row>
+          <Row className="consep-test-search-advanced-filter-tags">
+            <Column>
+              {advancedFilterTags.map((tag) => (
+                <Tag
+                  key={String(tag.key)}
+                  type="blue"
+                  filter
+                  onClose={() => {
+                    setSearchParams((prev) => {
+                      const updated = { ...prev };
+                      delete updated[tag.key];
+                      return updated;
+                    });
+                    // Reset validation for requestId, requestYear, orchardId
+                    if (['requestId', 'requestYear', 'orchardId'].includes(tag.key)) {
+                      setValidateSearch((prev) => ({
+                        ...prev,
+                        [tag.key]: initialErrorValue
+                      }));
+                    }
+                  }}
+                >
+                  {tag.label}
+                  {': '}
+                  {tag.value}
+                </Tag>
+              ))}
             </Column>
           </Row>
           {openAdvSearch && modalAnchor && (
