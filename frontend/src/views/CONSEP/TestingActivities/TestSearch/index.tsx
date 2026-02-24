@@ -581,6 +581,11 @@ const TestSearch = () => {
                   autoComplete="off"
                   placeholder={dateField.placeholderText}
                   helperText={dateField.helperText}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                    if (e.key === '-') {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </DatePicker>
               <DatePicker
@@ -606,6 +611,11 @@ const TestSearch = () => {
                   autoComplete="off"
                   placeholder={dateField.placeholderText}
                   helperText={dateField.helperText}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                    if (e.key === '-') {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </DatePicker>
               <div className="filters-row-buttons">
