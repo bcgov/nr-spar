@@ -631,6 +631,8 @@ const TestSearch = () => {
                 maxDate={dateField.todayString}
                 value={
                   searchParams.seedWithdrawalStartDate
+                  && searchParams.seedWithdrawalStartDate
+                  !== dateField.minStartDate.toISOString().slice(0, 10)
                     ? toDate(searchParams.seedWithdrawalStartDate)
                     : undefined
                 }
