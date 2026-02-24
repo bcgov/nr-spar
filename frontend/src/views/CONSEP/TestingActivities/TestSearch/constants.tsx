@@ -20,10 +20,6 @@ export const dateField = {
     const today = new Date();
     return new Date(today.getFullYear() + 300, today.getMonth(), today.getDate());
   },
-  get todayString() {
-    const today = new Date();
-    return today.toLocaleDateString('en-CA');
-  },
   get todayDate() {
     const today = new Date();
     const localDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
