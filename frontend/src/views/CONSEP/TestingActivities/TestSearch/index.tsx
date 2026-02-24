@@ -90,6 +90,24 @@ const TestSearch = () => {
     width: number;
   } | null>(null);
 
+  // Track which date picker needs refocus after auto-filling today's date via shortcut
+  const [pendingDatePickerFocus, setPendingDatePickerFocus] = useState<'start' | 'end' | null>(null);
+
+  useEffect(() => {
+    // Refocus input after state updates to reopen calendar picker with the correct month
+    if (pendingDatePickerFocus) {
+      const inputElement = document.getElementById(
+        `withdrawal-${pendingDatePickerFocus}-date-input`
+      ) as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
+        setPendingDatePickerFocus(null);
+      }
+    }
+  }, [searchParams.seedWithdrawalStartDate,
+    searchParams.seedWithdrawalEndDate,
+    pendingDatePickerFocus]);
+
   const advSearchRef = useRef<HTMLButtonElement>(null);
 
   const resetAlert = () => {
@@ -469,7 +487,10 @@ const TestSearch = () => {
     }
     if ((e.ctrlKey || e.metaKey) && e.key === ';') {
       e.preventDefault();
+      const inputElement = e.currentTarget;
+      inputElement.blur();
       handleWithdrawalDateChange([dateField.todayDate], type);
+      setPendingDatePickerFocus(type);
     }
   };
 
@@ -631,8 +652,8 @@ const TestSearch = () => {
                 maxDate={dateField.todayDate}
                 value={
                   searchParams.seedWithdrawalStartDate
-                  && searchParams.seedWithdrawalStartDate
-                  !== dateField.minStartDate.toISOString().slice(0, 10)
+                    && searchParams.seedWithdrawalStartDate
+                    !== dateField.minStartDate.toISOString().slice(0, 10)
                     ? toDate(searchParams.seedWithdrawalStartDate)
                     : undefined
                 }
