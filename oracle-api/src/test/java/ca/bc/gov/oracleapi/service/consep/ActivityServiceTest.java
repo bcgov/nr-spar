@@ -22,10 +22,7 @@ import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
-import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
-import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
-import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
-import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
+import ca.bc.gov.oracleapi.repository.consep.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -61,11 +58,15 @@ class ActivityServiceTest {
   @Mock
   private TestRegimeRepository testRegimeRepository;
 
+  @Mock
+  private SparRequestRepository sparRequestRepository;
+
   @Autowired
   @InjectMocks
   private ActivityService activityService;
 
   private BigDecimal riaKey;
+  private String seedingRequestSt;
   private ActivityEntity activityEntity;
   private ActivityCreateDto validActivityCreateDto;
   private StandardActivityEntity standardActivity;
@@ -80,10 +81,11 @@ class ActivityServiceTest {
     activityEntity.setActualEndDateTime(LocalDateTime.now().minusDays(2));
     activityEntity.setRiaComment("Test comment");
 
+    seedingRequestSt = "SRQ";
     validActivityCreateDto = new ActivityCreateDto(
         "ST1",
         "AC1",
-        "TC1",
+        "STD",
         LocalDate.of(2024, 1, 1),
         LocalDate.of(2024, 1, 2),
         null,
@@ -171,6 +173,8 @@ class ActivityServiceTest {
     when(testResultRepository.save(any(TestResultEntity.class))).thenAnswer(i -> i.getArgument(0));
     when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
         .thenReturn(Optional.of(standardActivity));
+    when(sparRequestRepository.findRequestTypeStByRequestSkey(validActivityCreateDto.requestSkey()))
+        .thenReturn(seedingRequestSt);
 
     ActivitySearchResponseDto createdActivity =
         activityService.createActivity(validActivityCreateDto);
@@ -338,7 +342,7 @@ class ActivityServiceTest {
         validActivityCreateDto.significantStatusIndicator(),
         validActivityCreateDto.processCommitIndicator(),
         validActivityCreateDto.requestSkey(),
-        "1234ABC", // <-- First 4 chars numeric ("1234"), which is a seedling request id
+        validActivityCreateDto.requestId(),
         validActivityCreateDto.itemId(),
         validActivityCreateDto.vegetationState(),
         validActivityCreateDto.seedlotNumber(),
@@ -347,6 +351,8 @@ class ActivityServiceTest {
 
     when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
         .thenReturn(Optional.of(standardActivity));
+    when(sparRequestRepository.findRequestTypeStByRequestSkey(validActivityCreateDto.requestSkey()))
+        .thenReturn(seedingRequestSt);
 
     ResponseStatusException ex = assertThrows(
         ResponseStatusException.class, () -> activityService.createActivity(invalidDto)

@@ -9,10 +9,7 @@ import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
-import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
-import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
-import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
-import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
+import ca.bc.gov.oracleapi.repository.consep.*;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,6 +33,7 @@ public class ActivityService {
   private final TestResultRepository testResultRepository;
   private final StandardActivityRepository standardActivityRepository;
   private final TestRegimeRepository testRegimeRepository;
+  private final SparRequestRepository sparRequestRepository;
 
   /**
    * Update activity table.
@@ -157,10 +155,10 @@ public class ActivityService {
       }
     }
 
-    String requestId = activityCreateDto.requestId();
-    if (isTestActivity && requestId != null && requestId.length() >= 4) {
-      String first4 = requestId.substring(0, 4);
-      if (first4.chars().allMatch(Character::isDigit)) { // Seedling request
+    BigDecimal requestSkey = activityCreateDto.requestSkey();
+    if (isTestActivity && requestSkey != null) {
+      String requestTypeSt = sparRequestRepository.findRequestTypeStByRequestSkey(requestSkey);
+      if ("SRQ".equals(requestTypeSt)) { // Seedling request
         if (!"STD".equals(testCategoryCd)) {
           throw new ResponseStatusException(
               HttpStatus.BAD_REQUEST,
