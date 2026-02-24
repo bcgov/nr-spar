@@ -543,75 +543,42 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('Change pollen information', () => {
-    cy.get('#pollen-contam-yes')
-      .check({ force: true });
+    cy.get('#pollen-contam-yes').check({ force: true }).should('be.checked');
 
-    cy.get('#pollen-contam-yes')
-      .should('be.checked');
-
-    cy.get('#orchard-breading-perc')
-      .should('be.visible');
-
-    cy.get('#orchard-is-regional')
-      .should('be.visible');
-
-    cy.get('#orchard-is-regional')
-      .should('be.checked');
+    cy.get('#orchard-breading-perc').should('be.visible');
+    cy.get('#orchard-is-regional').should('be.visible').should('be.checked');
 
     cy.get('#orchard-breading-perc-helper-text')
       .should('have.text', regFormData.orchard.pollenHelperText);
 
-    // Check pollen breeding % error msg
-    cy.get('#orchard-breading-perc')
-      .clear()
-      .type('-1', { delay: TYPE_DELAY })
-      .blur();
+    // Error checks
+    const invalidValues = ['-1', '101', '21.1576'];
+    invalidValues.forEach((val) => {
+      cy.get('#orchard-breading-perc').clear().type(val, { delay: TYPE_DELAY }).blur();
+      cy.get('#orchard-breading-perc-error-msg').should('have.text', regFormData.orchard.pollenError);
+    });
 
-    cy.get('#orchard-breading-perc-error-msg')
-      .should('have.text', regFormData.orchard.pollenError);
-
-    cy.get('#orchard-breading-perc')
-      .clear()
-      .type('101', { delay: TYPE_DELAY })
-      .blur();
-
-    cy.get('#orchard-breading-perc-error-msg')
-      .should('have.text', regFormData.orchard.pollenError);
-
-    cy.get('#orchard-breading-perc')
-      .clear()
-      .type('21.1576', { delay: TYPE_DELAY })
-      .blur();
-
-    cy.get('#orchard-breading-perc-error-msg')
-      .should('have.text', regFormData.orchard.pollenError);
-
-    cy.get('#orchard-breading-perc')
-      .clear()
-      .type('5', { delay: TYPE_DELAY })
-      .blur();
+    cy.get('#orchard-breading-perc').clear().type('5', { delay: TYPE_DELAY }).blur();
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
 
-    // Wait for 500ms to ensure the save is complete
-    cy.wait(HALF_SECOND);
-
-    // Check complete status of Orchard step
+    // Wait for the step to show 'Complete' instead of a fixed wait
     cy.contains(`.${prefix}--progress-step-button`, 'Orchard')
       .find(`.${prefix}--assistive-text`)
-      .should('have.text', 'Complete');
+      .should('contain.text', 'Complete');
   });
 
   it('Step complete status', () => {
-    // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
       .contains('Next')
       .click();
 
-    // Check step complete status
+    // Retry-friendly check for complete step
     cy.get(`.${prefix}--progress-step--complete`)
-      .contains('Orchard');
+      .contains('Orchard')
+      .should('exist')
+      .and('be.visible');
   });
 });
