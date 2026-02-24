@@ -628,7 +628,7 @@ const TestSearch = () => {
                   handleWithdrawalDateChange(dates, 'start');
                 }}
                 minDate={dateField.minStartDate}
-                maxDate={dateField.todayString}
+                maxDate={dateField.todayDate}
                 value={
                   searchParams.seedWithdrawalStartDate
                   && searchParams.seedWithdrawalStartDate
