@@ -411,9 +411,9 @@ const TestSearch = () => {
     resetAlert();
   };
 
-    // prevent user from typing '-'
-    // & allow ctrl/cmd + ';' to auto-fill today's date in date inputs
-    const handleDatePicker = (
+  // prevent user from typing '-'
+  // & allow ctrl/cmd + ';' to auto-fill today's date in date inputs
+  const handleDatePicker = (
     e: React.KeyboardEvent<HTMLInputElement>,
     type: 'start' | 'end'
   ) => {
@@ -609,7 +609,7 @@ const TestSearch = () => {
                 maxDate={dateField.maxEndDate}
                 value={
                   searchParams.seedWithdrawalEndDate
-                  !== dateField.maxEndDate.toISOString().slice(0, 10)
+                    !== dateField.maxEndDate.toISOString().slice(0, 10)
                     ? toDate(searchParams.seedWithdrawalEndDate)
                     : undefined
                 }
