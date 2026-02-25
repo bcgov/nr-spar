@@ -105,14 +105,14 @@ public class TestResultService {
         requests.stream()
             .collect(Collectors.groupingBy(GerminatorTrayCreateDto::activityTypeCd));
 
-    // Loop per test type
+    // Loop per activity type code
     for (Map.Entry<String, List<GerminatorTrayCreateDto>> entry : groupedByActivityType.entrySet()) {
 
       String activityTypeCd = entry.getKey();
       List<GerminatorTrayCreateDto> activities = entry.getValue();
 
       SparLog.info(
-          "Creating germinator trays for test type {} with {} activities",
+          "Creating germinator trays for activity type code {} with {} activities",
           activityTypeCd,
           activities.size()
       );
@@ -251,7 +251,7 @@ public class TestResultService {
    * GermTestResultDto objects for reuse.
    *
    * Checks performed for each request:
-   *  - seedWithdrawalDate must be present and strictly after today
+   *  - seedWithdrawalDate must be present and strictly before today
    *  - activityTypeCd must be a germ test type
    *  - germinatorTrayId must be null (no existing tray id assigned)
    * Returns a map from RIA_SKEY to the corresponding GermTestResultDto for reuse
@@ -293,8 +293,8 @@ public class TestResultService {
         );
       }
 
-      // seedWithdrawalDate must be present and strictly after today
-      if (seedWithdrawalDate == null || !seedWithdrawalDate.isAfter(today)) {
+      // seedWithdrawalDate must be present and strictly before today
+      if (seedWithdrawalDate == null || !seedWithdrawalDate.isBefore(today)) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             errorMessage
