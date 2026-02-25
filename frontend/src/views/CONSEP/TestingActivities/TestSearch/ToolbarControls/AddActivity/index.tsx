@@ -29,8 +29,7 @@ import { addActivities, validateAddGermTest } from '../../../../../../api-servic
 import isCommitmentIndicatorYes from '../../../../../../api-service/requestSeedlotAndVeglotAPI';
 import {
   DATE_FORMAT,
-  maxEndDate,
-  minStartDate,
+  dateField,
   toSelectedItemString,
   isFamilyLot
 } from '../../constants';
@@ -387,8 +386,8 @@ const AddActivity = ({
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
-            minDate={minStartDate}
-            maxDate={addActivityData.plannedEndDate ?? maxEndDate}
+            minDate={dateField.minStartDate}
+            maxDate={addActivityData.plannedEndDate ?? dateField.maxEndDate}
             value={[addActivityData.plannedStartDate ?? todayString]}
             onChange={(dates: Date[]) => {
               if (dates[0]) {
@@ -407,8 +406,8 @@ const AddActivity = ({
           </DatePicker>
           <DatePicker
             datePickerType="single"
-            minDate={addActivityData.plannedStartDate ?? minStartDate}
-            maxDate={maxEndDate}
+            minDate={addActivityData.plannedStartDate ?? dateField.minStartDate}
+            maxDate={dateField.maxEndDate}
             dateFormat={DATE_FORMAT}
             value={addActivityData.plannedEndDate ? [addActivityData.plannedEndDate] : []}
             onChange={(dates: Date[]) => {

@@ -41,8 +41,7 @@ import {
   testSearchCrumbs,
   iniActSearchValidation,
   errorMessages,
-  minStartDate,
-  maxEndDate,
+  dateField,
   formatExportData,
   columnVisibilityLocalStorageKey,
   ADV_FILTER_KEYS,
@@ -95,6 +94,24 @@ const TestSearch = () => {
     left: number;
     width: number;
   } | null>(null);
+
+  // Track which date picker needs refocus after auto-filling today's date via shortcut
+  const [pendingDatePickerFocus, setPendingDatePickerFocus] = useState<'start' | 'end' | null>(null);
+
+  useEffect(() => {
+    // Refocus input after state updates to reopen calendar picker with the correct month
+    if (pendingDatePickerFocus) {
+      const inputElement = document.getElementById(
+        `withdrawal-${pendingDatePickerFocus}-date-input`
+      ) as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
+        setPendingDatePickerFocus(null);
+      }
+    }
+  }, [searchParams.seedWithdrawalStartDate,
+    searchParams.seedWithdrawalEndDate,
+    pendingDatePickerFocus]);
 
   const advSearchRef = useRef<HTMLButtonElement>(null);
 
@@ -428,34 +445,56 @@ const TestSearch = () => {
 
   const handleWithdrawalDateChange = (dates: Date[], type: 'start' | 'end') => {
     const raw = dates?.[0];
-    const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : undefined;
+    const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : null;
 
     setSearchParams((prev) => {
-      const currentStart = prev.seedWithdrawalStartDate;
       const currentEnd = prev.seedWithdrawalEndDate;
 
-      let seedWithdrawalStartDate = currentStart;
-      let seedWithdrawalEndDate = currentEnd;
+      const updatedParams = { ...prev };
 
       if (type === 'start') {
-        seedWithdrawalStartDate = value || undefined;
-        seedWithdrawalEndDate = seedWithdrawalStartDate
-          && !seedWithdrawalEndDate ? maxEndDate : undefined;
+        if (value) {
+          updatedParams.seedWithdrawalStartDate = value;
+
+          // Reset end date if it is smaller than the new start date
+          if (currentEnd && value > currentEnd) {
+            delete updatedParams.seedWithdrawalEndDate;
+          }
+        } else {
+          delete updatedParams.seedWithdrawalStartDate;
+        }
       }
 
       if (type === 'end') {
-        seedWithdrawalEndDate = value || undefined;
-        seedWithdrawalStartDate = seedWithdrawalEndDate
-          && !seedWithdrawalStartDate ? minStartDate : undefined;
+        if (value) {
+          updatedParams.seedWithdrawalEndDate = value;
+        } else {
+          delete updatedParams.seedWithdrawalEndDate;
+        }
       }
 
-      return {
-        ...prev,
-        seedWithdrawalStartDate,
-        seedWithdrawalEndDate
-      };
+      return updatedParams;
     });
+
     resetAlert();
+  };
+
+  // prevent user from typing '-'
+  // & allow ctrl/cmd + ';' to auto-fill today's date in date inputs
+  const handleDatePicker = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    type: 'start' | 'end'
+  ) => {
+    if (e.key === '-') {
+      e.preventDefault();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === ';') {
+      e.preventDefault();
+      const inputElement = e.currentTarget;
+      inputElement.blur();
+      handleWithdrawalDateChange([dateField.todayDate], type);
+      setPendingDatePickerFocus(type);
+    }
   };
 
   const formatTagValue = (
@@ -644,8 +683,12 @@ const TestSearch = () => {
                 onChange={(dates: Date[]) => {
                   handleWithdrawalDateChange(dates, 'start');
                 }}
+                minDate={dateField.minStartDate}
+                maxDate={dateField.todayDate}
                 value={
-                  searchParams.seedWithdrawalStartDate !== minStartDate
+                  searchParams.seedWithdrawalStartDate
+                    && searchParams.seedWithdrawalStartDate
+                    !== dateField.minStartDate.toISOString().slice(0, 10)
                     ? toDate(searchParams.seedWithdrawalStartDate)
                     : undefined
                 }
@@ -655,6 +698,9 @@ const TestSearch = () => {
                   id="withdrawal-start-date-input"
                   labelText="Withdrawal start"
                   autoComplete="off"
+                  placeholder={dateField.placeholderText}
+                  helperText={dateField.helperText}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'start')}
                 />
               </DatePicker>
               <DatePicker
@@ -664,9 +710,11 @@ const TestSearch = () => {
                 onChange={(dates: Date[]) => {
                   handleWithdrawalDateChange(dates, 'end');
                 }}
-                minDate={searchParams.seedWithdrawalStartDate || undefined}
+                minDate={searchParams.seedWithdrawalStartDate || dateField.minStartDate}
+                maxDate={dateField.maxEndDate}
                 value={
-                  searchParams.seedWithdrawalEndDate !== maxEndDate
+                  searchParams.seedWithdrawalEndDate
+                    !== dateField.maxEndDate.toISOString().slice(0, 10)
                     ? toDate(searchParams.seedWithdrawalEndDate)
                     : undefined
                 }
@@ -676,6 +724,9 @@ const TestSearch = () => {
                   id="withdrawal-end-date-input"
                   labelText="Withdrawal end"
                   autoComplete="off"
+                  placeholder={dateField.placeholderText}
+                  helperText={dateField.helperText}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'end')}
                 />
               </DatePicker>
               <div className="filters-row-buttons">
