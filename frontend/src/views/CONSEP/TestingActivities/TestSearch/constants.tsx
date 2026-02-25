@@ -5,7 +5,7 @@ import { Tag } from '@carbon/react';
 import ROUTES from '../../../../routes/constants';
 import { CrumbType } from '../../../../components/Breadcrumbs/definitions';
 import { TestingSearchResponseType } from '../../../../types/consep/TestingSearchType';
-import { ActivitySearchValidation, ValidationErrorType } from './definitions';
+import { ActivitySearchValidation, ValidationErrorType, ActivitySearchRequest } from './definitions';
 
 export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
@@ -50,6 +50,7 @@ export const errorMessages = {
   lotMax: 'Maximum of 5 lot numbers allowed.',
   lotMaxChar: '5 character max for seedlot numbers',
   familyLotMaxChar: '13 character max for family lot numbers',
+  lotDuplicate: 'Duplicate lot number entered',
   germTrayMax: '5 digits max',
   reqId: '5 character max',
   reqYearSize: 'Year must be a 4-digit number',
@@ -328,3 +329,48 @@ export const formatExportData = {
 };
 
 export const columnVisibilityLocalStorageKey = 'test-activity-table-columns-visibility';
+
+export const ADV_FILTER_LABELS: Partial<Record<keyof ActivitySearchRequest, string>> = {
+  includeHistoricalTests: 'Include historical tests',
+  germTestsOnly: 'Germ tests only',
+  familyLotsOnly: 'Family lots only',
+  requestId: 'Request ID',
+  requestType: 'Request type',
+  requestYear: 'Request year',
+  orchardId: 'Orchard ID',
+  testCategoryCd: 'Test category',
+  testRank: 'Test rank',
+  species: 'Species',
+  actualBeginDateFrom: 'Actual begin date (from)',
+  actualBeginDateTo: 'Actual begin date (to)',
+  actualEndDateFrom: 'Actual end date (from)',
+  actualEndDateTo: 'Actual end date (to)',
+  revisedStartDateFrom: 'Revised start date (from)',
+  revisedStartDateTo: 'Revised start date (to)',
+  revisedEndDateFrom: 'Revised end date (from)',
+  revisedEndDateTo: 'Revised end date (to)',
+  germTrayAssignment: 'Germ tray assignment',
+  completeStatus: 'Completion status',
+  acceptanceStatus: 'Acceptance status',
+  seedlotClass: 'Seedlot class'
+} as const;
+
+export const ADV_FILTER_KEYS = Object.keys(
+  ADV_FILTER_LABELS
+) as Array<keyof typeof ADV_FILTER_LABELS>;
+
+export const ADV_FILTER_STATUS_MAPS:
+  Partial<Record<keyof ActivitySearchRequest, Record<number, string>>> = {
+    completeStatus: {
+      [-1]: 'Complete',
+      0: 'Incomplete'
+    },
+    acceptanceStatus: {
+      [-1]: 'Accepted',
+      0: 'Unaccepted'
+    },
+    germTrayAssignment: {
+      [-1]: 'Assigned',
+      0: 'Unassigned'
+    }
+  };

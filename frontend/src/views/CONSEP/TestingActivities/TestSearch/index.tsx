@@ -15,7 +15,8 @@ import {
   TextInput,
   InlineNotification,
   FormLabel,
-  FilterableMultiSelect
+  FilterableMultiSelect,
+  Tag
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
 // eslint-disable-next-line import/no-unresolved
@@ -43,7 +44,12 @@ import {
   minStartDate,
   maxEndDate,
   formatExportData,
-  columnVisibilityLocalStorageKey
+  columnVisibilityLocalStorageKey,
+  ADV_FILTER_KEYS,
+  ADV_FILTER_LABELS,
+  ADV_FILTER_STATUS_MAPS,
+  initialErrorValue,
+  isFamilyLot
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import {
@@ -297,22 +303,6 @@ const TestSearch = () => {
     return updated;
   };
 
-  const validateLotNumbers = (lots: string[]) => lots.map((lot) => {
-    if (!lot.trim()) {
-      return { error: false, errorMessage: '' };
-    }
-
-    const isFamily = lot.toUpperCase().startsWith('F');
-    const limit = isFamily ? 13 : 5;
-
-    return lot.length > limit
-      ? {
-        error: true,
-        errorMessage: isFamily ? errorMessages.familyLotMaxChar : errorMessages.lotMaxChar
-      }
-      : { error: false, errorMessage: '' };
-  });
-
   const padSeedlotNumber = (value: string): string => {
     if (/^f/i.test(value)) {
       return value;
@@ -326,18 +316,80 @@ const TestSearch = () => {
     return value.padStart(5, '0');
   };
 
+  const validateLotNumbers = (lots: string[]) => {
+    const normalizeLot = (lot: string) => {
+      const trimmed = lot.trim();
+      if (!trimmed) return '';
+      const upper = trimmed.toUpperCase();
+      return /^F/i.test(upper) ? upper : padSeedlotNumber(upper);
+    };
+
+    const normalizedLots = lots.map(normalizeLot);
+    const duplicates = new Set<string>();
+
+    // Find duplicates
+    normalizedLots.forEach((lot, index) => {
+      if (lot && normalizedLots.indexOf(lot) !== index) {
+        duplicates.add(lot);
+      }
+    });
+
+    return lots.map((lot) => {
+      if (!lot.trim()) {
+        return { error: false, errorMessage: '' };
+      }
+
+      const normalizedLot = normalizeLot(lot);
+
+      // Check for duplicates
+      if (duplicates.has(normalizedLot)) {
+        return {
+          error: true,
+          errorMessage: errorMessages.lotDuplicate
+        };
+      }
+
+      const isFamily = isFamilyLot(lot);
+      const limit = isFamily ? 13 : 5;
+      return lot.length > limit
+        ? {
+          error: true,
+          errorMessage: isFamily ? errorMessages.familyLotMaxChar : errorMessages.lotMaxChar
+        }
+        : { error: false, errorMessage: '' };
+    });
+  };
+
   const handleLotInputChange = (index: number, value: string) => {
+    // Allow only alphanumeric characters
+    const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
+
     const updatedInputs = [...rawLotInput];
-    updatedInputs[index] = value;
+    updatedInputs[index] = sanitizedValue;
     setRawLotInput(updatedInputs);
 
     const lots = updatedInputs.map((val) => val.trim()).filter((val) => val.length > 0);
 
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
+
+    const validationResults = validateLotNumbers(updatedInputs);
     setValidateSearch((prev) => ({
       ...prev,
-      lotNumbers: validateLotNumbers(updatedInputs)
+      lotNumbers: validationResults
     }));
+    // Auto-tab to next input if current input is valid and has reached max length
+    const maxLength = isFamilyLot(sanitizedValue) ? 13 : 5;
+
+    if (
+      !validationResults[index].error
+      && sanitizedValue.trim().length === maxLength
+      && index < rawLotInput.length - 1
+    ) {
+      const nextInput = document.getElementById(`lot-input-${index + 1}`);
+      if (nextInput) {
+        nextInput.focus();
+      }
+    }
     resetAlert();
   };
 
@@ -405,6 +457,38 @@ const TestSearch = () => {
     });
     resetAlert();
   };
+
+  const formatTagValue = (
+    key: keyof ActivitySearchRequest,
+    value: boolean | number | string | string[]
+  ): string => {
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+
+    if (typeof value === 'number') {
+      return ADV_FILTER_STATUS_MAPS[key]?.[value] ?? String(value);
+    }
+
+    return value;
+  };
+
+  const advancedFilterTags = ADV_FILTER_KEYS.flatMap((key) => {
+    const value = searchParams[key];
+    if (value == null) return [];
+
+    return [
+      {
+        key,
+        label: ADV_FILTER_LABELS[key],
+        value: formatTagValue(key, value)
+      }
+    ];
+  });
 
   const handleCloseAdvSearch = () => {
     setOpenAdvSearch(false);
@@ -608,6 +692,35 @@ const TestSearch = () => {
                   Search activity
                 </Button>
               </div>
+            </Column>
+          </Row>
+          <Row className="consep-test-search-advanced-filter-tags">
+            <Column>
+              {advancedFilterTags.map((tag) => (
+                <Tag
+                  key={String(tag.key)}
+                  type="blue"
+                  filter
+                  onClose={() => {
+                    setSearchParams((prev) => {
+                      const updated = { ...prev };
+                      delete updated[tag.key];
+                      return updated;
+                    });
+                    // Reset validation for requestId, requestYear, orchardId
+                    if (['requestId', 'requestYear', 'orchardId'].includes(tag.key)) {
+                      setValidateSearch((prev) => ({
+                        ...prev,
+                        [tag.key]: initialErrorValue
+                      }));
+                    }
+                  }}
+                >
+                  {tag.label}
+                  {': '}
+                  {tag.value}
+                </Tag>
+              ))}
             </Column>
           </Row>
           {openAdvSearch && modalAnchor && (
