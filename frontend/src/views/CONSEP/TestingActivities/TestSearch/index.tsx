@@ -445,39 +445,37 @@ const TestSearch = () => {
 
   const handleWithdrawalDateChange = (dates: Date[], type: 'start' | 'end') => {
     const raw = dates?.[0];
-    const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : undefined;
-    const maxEnd = dateField.maxEndDate instanceof Date
-      ? dateField.maxEndDate.toISOString().slice(0, 10)
-      : dateField.maxEndDate;
-    const minStart = dateField.minStartDate instanceof Date
-      ? dateField.minStartDate.toISOString().slice(0, 10)
-      : dateField.minStartDate;
+    const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : null;
 
     setSearchParams((prev) => {
-      const currentStart = prev.seedWithdrawalStartDate;
       const currentEnd = prev.seedWithdrawalEndDate;
 
-      let seedWithdrawalStartDate = currentStart;
-      let seedWithdrawalEndDate = currentEnd;
+      const updatedParams = { ...prev };
 
       if (type === 'start') {
-        seedWithdrawalStartDate = value || undefined;
-        seedWithdrawalEndDate = seedWithdrawalStartDate
-          && !seedWithdrawalEndDate ? maxEnd : currentEnd;
+        if (value) {
+          updatedParams.seedWithdrawalStartDate = value;
+
+          // Reset end date if it is smaller than the new start date
+          if (currentEnd && value > currentEnd) {
+            delete updatedParams.seedWithdrawalEndDate;
+          }
+        } else {
+          delete updatedParams.seedWithdrawalStartDate;
+        }
       }
 
       if (type === 'end') {
-        seedWithdrawalEndDate = value || undefined;
-        seedWithdrawalStartDate = seedWithdrawalEndDate
-          && !seedWithdrawalStartDate ? minStart : currentStart;
+        if (value) {
+          updatedParams.seedWithdrawalEndDate = value;
+        } else {
+          delete updatedParams.seedWithdrawalEndDate;
+        }
       }
 
-      return {
-        ...prev,
-        seedWithdrawalStartDate,
-        seedWithdrawalEndDate
-      };
+      return updatedParams;
     });
+
     resetAlert();
   };
 
@@ -712,7 +710,7 @@ const TestSearch = () => {
                 onChange={(dates: Date[]) => {
                   handleWithdrawalDateChange(dates, 'end');
                 }}
-                minDate={searchParams.seedWithdrawalStartDate || undefined}
+                minDate={searchParams.seedWithdrawalStartDate || dateField.minStartDate}
                 maxDate={dateField.maxEndDate}
                 value={
                   searchParams.seedWithdrawalEndDate
