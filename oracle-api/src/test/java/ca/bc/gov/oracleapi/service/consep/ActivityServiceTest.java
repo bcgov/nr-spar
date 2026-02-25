@@ -177,8 +177,6 @@ class ActivityServiceTest {
     when(testResultRepository.save(any(TestResultEntity.class))).thenAnswer(i -> i.getArgument(0));
     when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
         .thenReturn(Optional.of(standardActivity));
-    when(sparRequestRepository.findRequestTypeStByRequestSkey(validActivityCreateDto.requestSkey()))
-        .thenReturn(seedlingRequestTypeSt);
 
     ActivitySearchResponseDto createdActivity =
         activityService.createActivity(validActivityCreateDto);
