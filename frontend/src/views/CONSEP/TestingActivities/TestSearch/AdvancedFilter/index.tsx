@@ -24,8 +24,8 @@ import { getRequestTypes, getTestCategoryCodes } from '../../../../../api-servic
 
 import type { TestCodeType } from '../../../../../types/consep/TestingSearchType';
 import {
-  advDateTypes, DATE_FORMAT, errorMessages, initialErrorValue, maxEndDate,
-  minStartDate, SAFE_MARGIN, testRanks, toSelectedItemString
+  advDateTypes, DATE_FORMAT, errorMessages, initialErrorValue,
+  SAFE_MARGIN, testRanks, toSelectedItemString, dateField
 } from '../constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from '../definitions';
@@ -517,6 +517,8 @@ const AdvancedFilters = ({
                   datePickerType="single"
                   className="advanced-date-input"
                   dateFormat={DATE_FORMAT}
+                  minDate={dateField.minStartDate}
+                  maxDate={dateField.maxEndDate}
                   onChange={(e: Array<Date>) => {
                     const fromField = dateType === 'revised' ? 'StartDate' : 'BeginDate';
                     handleAdvDateChange(e, dateType as 'actual' | 'revised', fromField, 'From');
@@ -525,7 +527,7 @@ const AdvancedFilters = ({
                     dateType === 'actual'
                       ? searchParams.actualBeginDateFrom
                       : searchParams.revisedStartDateFrom,
-                    minStartDate
+                    dateField.minStartDate.toISOString().slice(0, 10)
                   )}
                 >
                   <DatePickerInput
@@ -546,6 +548,7 @@ const AdvancedFilters = ({
                       ? searchParams.actualBeginDateFrom ?? undefined
                       : searchParams.revisedStartDateFrom ?? undefined
                   }
+                  maxDate={dateField.maxEndDate}
                   onChange={(e: Array<Date>) => {
                     const fromField = dateType === 'revised' ? 'StartDate' : 'BeginDate';
                     handleAdvDateChange(e, dateType as 'actual' | 'revised', fromField, 'To');
@@ -554,7 +557,7 @@ const AdvancedFilters = ({
                     dateType === 'actual'
                       ? searchParams.actualBeginDateTo
                       : searchParams.revisedStartDateTo,
-                    maxEndDate
+                    dateField.maxEndDate.toISOString().slice(0, 10)
                   )}
                 >
                   <DatePickerInput
@@ -570,6 +573,8 @@ const AdvancedFilters = ({
                   datePickerType="single"
                   className="advanced-date-input"
                   dateFormat={DATE_FORMAT}
+                  minDate={dateField.minStartDate}
+                  maxDate={dateField.maxEndDate}
                   onChange={(e: Array<Date>) => {
                     handleAdvDateChange(e, dateType as 'actual' | 'revised', 'EndDate', 'From');
                   }}
@@ -577,7 +582,7 @@ const AdvancedFilters = ({
                     dateType === 'actual'
                       ? searchParams.actualEndDateFrom
                       : searchParams.revisedEndDateFrom,
-                    minStartDate
+                    dateField.minStartDate.toISOString().slice(0, 10)
                   )}
                 >
                   <DatePickerInput
@@ -605,7 +610,7 @@ const AdvancedFilters = ({
                     dateType === 'actual'
                       ? searchParams.actualEndDateTo
                       : searchParams.revisedEndDateTo,
-                    maxEndDate
+                    dateField.maxEndDate.toISOString().slice(0, 10)
                   )}
                 >
                   <DatePickerInput
