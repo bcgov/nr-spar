@@ -13,16 +13,16 @@ import java.time.LocalDateTime;
  * creating a new {@link ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity} instance.
  */
 public record GerminatorTrayCreateDto(
-    @Schema(description = "Activity type code")
+    @Schema(description = "Activity type code", example = "G10")
     @Size(max = 3)
     @NotBlank
     String activityTypeCd,
 
-    @Schema(description = "Primary key of the activity")
+    @Schema(description = "Primary key of the activity", example = "70712")
     @NotNull
     BigDecimal riaSkey,
 
-    @Schema(description = "Actual begin date of the activity")
+    @Schema(description = "Actual begin date of the activity", example = "1994-09-22T00:00:00")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     LocalDateTime actualBeginDtTm
 ) {

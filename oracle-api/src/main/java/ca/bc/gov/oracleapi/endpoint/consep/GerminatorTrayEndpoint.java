@@ -42,7 +42,7 @@ public class GerminatorTrayEndpoint {
   @PostMapping("")
   @ResponseStatus(HttpStatus.OK)
   @ApiResponse(
-      responseCode = "200",
+      responseCode = "201",
       description = "Successfully assigned trays for the provided activities.",
       content = @Content(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class))
   )

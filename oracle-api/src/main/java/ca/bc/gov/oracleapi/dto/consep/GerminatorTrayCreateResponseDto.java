@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  */
 public record GerminatorTrayCreateResponseDto(
     String activityTypeCd,
-    Integer germinatorTrayId,
+    int germinatorTrayId,
     LocalDateTime actualStartDate
 ) {
 }

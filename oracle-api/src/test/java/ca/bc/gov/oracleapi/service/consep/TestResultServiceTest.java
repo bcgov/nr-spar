@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -169,7 +170,7 @@ class TestResultServiceTest {
       }
       // G10 group: systemTrayNo 1 -> tray2 (id 102), systemTrayNo 2 -> tray3 (id 103)
       if ("G10".equals(arg.getActivityTypeCd())) {
-        if (arg.getSystemTrayNo() != null && arg.getSystemTrayNo() == 1) {
+        if (arg.getSystemTrayNo() != null && arg.getSystemTrayNo().equals(1)) {
           return tray2;
         } else {
           return tray3;
@@ -329,8 +330,8 @@ class TestResultServiceTest {
 
     // Validation short-circuits, so no trays are created and no activity lookups occur
     verify(testResultRepository).getGermTestResult(riaSkey);
-    verify(germinatorTrayRepository, times(0)).save(any());
-    verify(activityRepository, times(0)).findById(any());
+    verify(germinatorTrayRepository, never()).save(any());
+    verify(activityRepository, never()).findById(any());
   }
 
   @Test
@@ -401,7 +402,7 @@ class TestResultServiceTest {
     // Verify that conflicts were actually checked
     verify(activityRepository, times(1)).findConflictingActivities(any(), any(), any());
     // Because a conflict exists, markSignificantAndCommit should NOT be called
-    verify(activityRepository, times(0)).markSignificantAndCommit(any());
+    verify(activityRepository, never()).markSignificantAndCommit(any());
   }
 
   @Test
