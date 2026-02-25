@@ -9,7 +9,11 @@ import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
-import ca.bc.gov.oracleapi.repository.consep.*;
+import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.SparRequestRepository;
+import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -157,9 +161,9 @@ public class ActivityService {
 
     BigDecimal requestSkey = activityCreateDto.requestSkey();
     if (isTestActivity && requestSkey != null) {
-      String requestTypeSt = sparRequestRepository.findRequestTypeStByRequestSkey(requestSkey);
-      if ("SRQ".equals(requestTypeSt)) { // Seedling request
-        if (!"STD".equals(testCategoryCd)) {
+      if (!"STD".equals(testCategoryCd)) {
+        String requestTypeSt = sparRequestRepository.findRequestTypeStByRequestSkey(requestSkey);
+        if ("SRQ".equals(requestTypeSt)) { // Seedling request
           throw new ResponseStatusException(
               HttpStatus.BAD_REQUEST,
               "TEST_CATEGORY_CD must be 'STD' because Request ID is a Seedling Request"

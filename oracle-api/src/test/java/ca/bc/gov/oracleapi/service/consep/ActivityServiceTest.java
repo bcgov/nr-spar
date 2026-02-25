@@ -22,7 +22,11 @@ import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
-import ca.bc.gov.oracleapi.repository.consep.*;
+import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.SparRequestRepository;
+import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -66,7 +70,7 @@ class ActivityServiceTest {
   private ActivityService activityService;
 
   private BigDecimal riaKey;
-  private String seedingRequestSt;
+  private String seedlingRequestTypeSt;
   private ActivityEntity activityEntity;
   private ActivityCreateDto validActivityCreateDto;
   private StandardActivityEntity standardActivity;
@@ -81,7 +85,7 @@ class ActivityServiceTest {
     activityEntity.setActualEndDateTime(LocalDateTime.now().minusDays(2));
     activityEntity.setRiaComment("Test comment");
 
-    seedingRequestSt = "SRQ";
+    seedlingRequestTypeSt = "SRQ";
     validActivityCreateDto = new ActivityCreateDto(
         "ST1",
         "AC1",
@@ -174,7 +178,7 @@ class ActivityServiceTest {
     when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
         .thenReturn(Optional.of(standardActivity));
     when(sparRequestRepository.findRequestTypeStByRequestSkey(validActivityCreateDto.requestSkey()))
-        .thenReturn(seedingRequestSt);
+        .thenReturn(seedlingRequestTypeSt);
 
     ActivitySearchResponseDto createdActivity =
         activityService.createActivity(validActivityCreateDto);
@@ -352,7 +356,7 @@ class ActivityServiceTest {
     when(standardActivityRepository.findById(validActivityCreateDto.standardActivityId()))
         .thenReturn(Optional.of(standardActivity));
     when(sparRequestRepository.findRequestTypeStByRequestSkey(validActivityCreateDto.requestSkey()))
-        .thenReturn(seedingRequestSt);
+        .thenReturn(seedlingRequestTypeSt);
 
     ResponseStatusException ex = assertThrows(
         ResponseStatusException.class, () -> activityService.createActivity(invalidDto)
