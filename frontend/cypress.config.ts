@@ -1,8 +1,7 @@
 import { defineConfig } from 'cypress';
+import codeCoverageTask from '@cypress/code-coverage/task';
 import cypressSplit from 'cypress-split';
 import { ONE_MINUTE } from './cypress/constants';
-
-declare const require: any;
 
 let CypressData: { [k: string]: any } = {};
 
@@ -48,7 +47,7 @@ export default defineConfig({
     video: true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
-      require('@cypress/code-coverage/task')(on, config);
+      codeCoverageTask(on, config);
       cypressSplit(on, config);
       // implement node event listeners here
       on('task', {

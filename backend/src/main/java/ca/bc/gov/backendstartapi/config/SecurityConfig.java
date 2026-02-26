@@ -49,6 +49,12 @@ public class SecurityConfig {
                 customize
                     .requestMatchers("/api/**")
                     .authenticated()
+                    // Allow only safe actuator endpoints
+                    .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus")
+                    .permitAll()
+                    // Deny all other actuator endpoints
+                    .requestMatchers("/actuator/**")
+                    .denyAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
                     .anyRequest()
