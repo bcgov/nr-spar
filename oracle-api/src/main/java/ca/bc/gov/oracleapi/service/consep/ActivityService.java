@@ -10,6 +10,7 @@ import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.SparRequestRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
@@ -36,6 +37,7 @@ public class ActivityService {
   private final TestResultRepository testResultRepository;
   private final StandardActivityRepository standardActivityRepository;
   private final TestRegimeRepository testRegimeRepository;
+  private final SparRequestRepository sparRequestRepository;
 
   /**
    * Update activity table.
@@ -157,11 +159,11 @@ public class ActivityService {
       }
     }
 
-    String requestId = activityCreateDto.requestId();
-    if (isTestActivity && requestId != null && requestId.length() >= 4) {
-      String first4 = requestId.substring(0, 4);
-      if (first4.chars().allMatch(Character::isDigit)) { // Seedling request
-        if (!"STD".equals(testCategoryCd)) {
+    BigDecimal requestSkey = activityCreateDto.requestSkey();
+    if (isTestActivity && requestSkey != null) {
+      if (!"STD".equals(testCategoryCd)) {
+        String requestTypeSt = sparRequestRepository.findRequestTypeStByRequestSkey(requestSkey);
+        if ("SRQ".equals(requestTypeSt)) { // Seedling request
           throw new ResponseStatusException(
               HttpStatus.BAD_REQUEST,
               "TEST_CATEGORY_CD must be 'STD' because Request ID is a Seedling Request"
