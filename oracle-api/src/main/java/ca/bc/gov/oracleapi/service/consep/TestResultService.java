@@ -323,13 +323,20 @@ public class TestResultService {
    *
    * @param request contains the germinator tray ID and the germinator ID to assign
    * @return a response DTO confirming the assignment
-   * @throws ResponseStatusException if the tray is not found
+   * @throws ResponseStatusException if the request is null or if the tray is not found
    */
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
       GerminatorTrayAssignGerminatorIdDto request
   ) {
+    if (request == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Germinator tray assignment request cannot be null"
+      );
+    }
+
     SparLog.info(
-      "Assigning germinator ID {} to tray ID {}",
+        "Assigning germinator ID {} to germinator tray ID {}",
         request.germinatorId(),
         request.germinatorTrayId()
     );
