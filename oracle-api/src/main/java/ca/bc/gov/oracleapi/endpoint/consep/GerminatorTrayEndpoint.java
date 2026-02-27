@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * This class exposes germinator tray resources API.
@@ -80,10 +81,10 @@ public class GerminatorTrayEndpoint {
   ) {
     // Validate that the tray ID in the path matches the one in the request body
     if (!germinatorTrayId.equals(request.germinatorTrayId())) {
-      throw new IllegalArgumentException(
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
           "Germinator tray ID in path does not match the ID in request body"
       );
-    }
-    return testResultService.assignGerminatorIdToTray(request);
+    }    return testResultService.assignGerminatorIdToTray(request);
   }
 }
