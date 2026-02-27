@@ -223,7 +223,7 @@ class GerminatorTrayEndpointTest {
   }
 
   @Test
-  void assignGerminatorIdToTray_returns400_whenGerminatorIdMissing() throws Exception {
+  void whenGerminatorIdBlank() throws Exception {
     // Arrange - empty germinator ID
     Integer germinatorTrayId = 101;
     GerminatorTrayAssignGerminatorIdDto request =
