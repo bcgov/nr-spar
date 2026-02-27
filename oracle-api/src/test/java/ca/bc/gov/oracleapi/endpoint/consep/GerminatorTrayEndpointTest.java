@@ -5,11 +5,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
@@ -142,5 +145,98 @@ class GerminatorTrayEndpointTest {
         .andExpect(status().isNotFound());
     // Verify that the service was invoked
     verify(testResultService, times(1)).assignGerminatorTrays(requests);
+  }
+
+  @Test
+  void assignGerminatorIdToTray_returns200AndBody_andCallsService() throws Exception {
+    // Arrange
+    Integer germinatorTrayId = 101;
+    String germinatorId = "A";
+    GerminatorTrayAssignGerminatorIdDto request =
+        new GerminatorTrayAssignGerminatorIdDto(germinatorTrayId, germinatorId);
+
+    GerminatorTrayAssignGerminatorIdResponseDto response =
+        new GerminatorTrayAssignGerminatorIdResponseDto(
+            germinatorTrayId,
+            germinatorId
+        );
+
+    when(testResultService.assignGerminatorIdToTray(any())).thenReturn(response);
+
+    // Act / Assert
+    mockMvc.perform(patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.germinatorTrayId").value(101))
+        .andExpect(jsonPath("$.germinatorId").value("A"));
+
+    // Verify service was called
+    verify(testResultService, times(1)).assignGerminatorIdToTray(request);
+  }
+
+  @Test
+  void assignGerminatorIdToTray_returns404_whenTrayNotFound() throws Exception {
+    // Arrange
+    Integer germinatorTrayId = 999;
+    String germinatorId = "A";
+    GerminatorTrayAssignGerminatorIdDto request =
+        new GerminatorTrayAssignGerminatorIdDto(germinatorTrayId, germinatorId);
+
+    when(testResultService.assignGerminatorIdToTray(any()))
+        .thenThrow(new ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Germinator tray not found with ID: " + germinatorTrayId
+        ));
+
+    // Act / Assert
+    mockMvc.perform(patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isNotFound());
+
+    // Verify service was called
+    verify(testResultService, times(1)).assignGerminatorIdToTray(request);
+  }
+
+  @Test
+  void assignGerminatorIdToTray_returns400_whenPathAndBodyIdMismatch() throws Exception {
+    // Arrange - path has ID 101 but body has ID 102
+    Integer pathTrayId = 101;
+    Integer bodyTrayId = 102;
+    String germinatorId = "A";
+    GerminatorTrayAssignGerminatorIdDto request =
+        new GerminatorTrayAssignGerminatorIdDto(bodyTrayId, germinatorId);
+
+    // Act / Assert
+    mockMvc.perform(patch(BASE_URL + "/" + pathTrayId + "/germinator-id")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+
+    // Verify service was NOT called because validation failed
+    verify(testResultService, times(0)).assignGerminatorIdToTray(any());
+  }
+
+  @Test
+  void whenGerminatorIdBlank() throws Exception {
+    // Arrange - empty germinator ID
+    Integer germinatorTrayId = 101;
+    GerminatorTrayAssignGerminatorIdDto request =
+        new GerminatorTrayAssignGerminatorIdDto(germinatorTrayId, "");
+
+    // Act / Assert
+    mockMvc.perform(patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+
+    // Verify service was NOT called because validation failed
+    verify(testResultService, times(0)).assignGerminatorIdToTray(any());
   }
 }
