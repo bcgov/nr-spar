@@ -49,6 +49,13 @@ public class SecurityConfig {
                 customize
                     .requestMatchers("/api/**")
                     .authenticated()
+                    // Explicitly permit OpenAPI and Swagger UI endpoints
+                    .requestMatchers(
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
+                    )
+                    .permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
                     .anyRequest()
