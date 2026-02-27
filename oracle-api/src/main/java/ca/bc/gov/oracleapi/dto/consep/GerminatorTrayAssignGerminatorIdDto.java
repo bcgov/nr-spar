@@ -14,7 +14,7 @@ public record GerminatorTrayAssignGerminatorIdDto(
     @NotNull
     Integer germinatorTrayId,
 
-    @Schema(description = "Germinator ID to assign to the tray", example = "A")
+    @Schema(description = "Germinator ID to assign to the tray", example = "1")
     @Size(max = 1)
     @NotBlank
     String germinatorId
