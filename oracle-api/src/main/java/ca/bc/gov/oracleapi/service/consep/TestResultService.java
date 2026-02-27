@@ -329,6 +329,7 @@ public class TestResultService {
       GerminatorTrayAssignGerminatorIdDto request
   ) {
     SparLog.info(
+      "Assigning germinator ID {} to tray ID {}",
         request.germinatorId(),
         request.germinatorTrayId()
     );
@@ -343,6 +344,7 @@ public class TestResultService {
     germinatorTrayRepository.save(tray);
 
     SparLog.info(
+        "Successfully assigned germinator ID {} to tray ID {}",
         request.germinatorId(),
         request.germinatorTrayId()
     );
