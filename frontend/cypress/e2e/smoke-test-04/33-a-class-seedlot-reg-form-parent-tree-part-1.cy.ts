@@ -34,9 +34,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
         cy.visit(url);
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
-        cy.get('.title-row')
-          .should('be.visible')
-          .and('contain.text', regFormData.parentTree.title);
+        cy.get('.title-row').should('be.visible').and('contain.text', regFormData.parentTree.title);
+      });
     });
   });
 
