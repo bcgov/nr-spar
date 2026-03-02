@@ -152,7 +152,7 @@ class GerminatorTrayEndpointTest {
                 germinatorTrayId,
                 germinatorId);
 
-        when(testResultService.assignGerminatorIdToTray(any())).thenReturn(response);
+        when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId)).thenReturn(response);
 
         // Act / Assert
         mockMvc.perform(patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
@@ -164,8 +164,8 @@ class GerminatorTrayEndpointTest {
                 .andExpect(jsonPath("$.germinatorTrayId").value(101))
                 .andExpect(jsonPath("$.germinatorId").value("A"));
 
-        // Verify service was called
-        verify(testResultService, times(1)).assignGerminatorIdToTray(request);
+        // Verify service was called with the individual parameters
+        verify(testResultService, times(1)).assignGerminatorIdToTray(germinatorTrayId, germinatorId);
     }
 
     @Test
@@ -176,7 +176,7 @@ class GerminatorTrayEndpointTest {
         GerminatorTrayAssignGerminatorIdDto request = new GerminatorTrayAssignGerminatorIdDto(germinatorTrayId,
                 germinatorId);
 
-        when(testResultService.assignGerminatorIdToTray(any()))
+        when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
                 .thenThrow(new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Germinator tray not found with ID: " + germinatorTrayId));
@@ -188,8 +188,8 @@ class GerminatorTrayEndpointTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
 
-        // Verify service was called
-        verify(testResultService, times(1)).assignGerminatorIdToTray(request);
+        // Verify service was called with the individual parameters
+        verify(testResultService, times(1)).assignGerminatorIdToTray(germinatorTrayId, germinatorId);
     }
 
     @Test
@@ -208,7 +208,7 @@ class GerminatorTrayEndpointTest {
                 .andExpect(status().isBadRequest());
 
         // Verify service was NOT called because validation failed
-        verify(testResultService, times(0)).assignGerminatorIdToTray(any());
+        verify(testResultService, times(0)).assignGerminatorIdToTray(any(Integer.class), any(String.class));
     }
 
     @Test
@@ -225,6 +225,6 @@ class GerminatorTrayEndpointTest {
                 .andExpect(status().isBadRequest());
 
         // Verify service was NOT called because validation failed
-        verify(testResultService, times(0)).assignGerminatorIdToTray(any());
+        verify(testResultService, times(0)).assignGerminatorIdToTray(any(Integer.class), any(String.class));
     }
 }
