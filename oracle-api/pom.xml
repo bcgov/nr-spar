@@ -39,7 +39,8 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
 		<sonar.organization>bcgov-sonarcloud</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-    <oci.revision>${project.version}</oci.revision>
+    	<oci.revision>${project.version}</oci.revision>
+		<hibernate.version>6.6.42.Final</hibernate.version>
 	</properties>
 
 	<profiles>
@@ -192,6 +193,7 @@
       <plugin>
         <groupId>org.hibernate.orm.tooling</groupId>
         <artifactId>hibernate-enhance-maven-plugin</artifactId>
+        <version>${hibernate.version}</version>
         <executions>
           <execution>
             <id>enhance</id>

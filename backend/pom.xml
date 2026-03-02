@@ -39,6 +39,7 @@
     <sonar.organization>bcgov-sonarcloud</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <oci.revision>${project.version}</oci.revision>
+    <hibernate.version>6.6.42.Final</hibernate.version>
   </properties>
 
   <profiles>
@@ -150,8 +151,9 @@
 
     <!-- Geospatial -->
     <dependency>
-        <groupId>org.hibernate.orm</groupId>
+        <groupId>org.hibernate</groupId>
         <artifactId>hibernate-spatial</artifactId>
+        <version>${hibernate.version}</version>
     </dependency>
 
     <!-- Database -->
@@ -217,6 +219,7 @@
       <plugin>
         <groupId>org.hibernate.orm.tooling</groupId>
         <artifactId>hibernate-enhance-maven-plugin</artifactId>
+        <version>${hibernate.version}</version>
         <executions>
           <execution>
             <id>enhance</id>
