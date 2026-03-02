@@ -45,7 +45,7 @@ public class GerminatorTrayEndpoint {
    * @return a list of GerminatorTrayCreateResponseDto, one per created tray
    */
   @PostMapping("")
-  @ResponseStatus(HttpStatus.OK)
+  @ResponseStatus(HttpStatus.CREATED)
   @ApiResponse(responseCode = "201", description = "Successfully assigned trays for the provided activities.", content = @Content(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class)))
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
