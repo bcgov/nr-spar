@@ -314,10 +314,10 @@ public class TestResultService {
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
       Integer germinatorTrayId,
       String germinatorId) {
-    if (germinatorTrayId == null || germinatorId == null) {
+    if (germinatorTrayId == null || germinatorId == null || germinatorId.isBlank()) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Germinator tray ID and germinator ID cannot be null");
+          "Germinator tray ID and germinator ID cannot be null or blank");
     }
 
     SparLog.info(
