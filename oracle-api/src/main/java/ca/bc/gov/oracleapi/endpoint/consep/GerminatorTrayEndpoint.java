@@ -69,12 +69,6 @@ public class GerminatorTrayEndpoint {
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
       @PathVariable Integer germinatorTrayId,
       @Valid @RequestBody GerminatorTrayAssignGerminatorIdDto request) {
-    // Validate that the tray ID in the path matches the one in the request body
-    if (!germinatorTrayId.equals(request.germinatorTrayId())) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST,
-          "Germinator tray ID in path does not match the ID in request body");
-    }
     return testResultService.assignGerminatorIdToTray(germinatorTrayId, request.germinatorId());
   }
 }
