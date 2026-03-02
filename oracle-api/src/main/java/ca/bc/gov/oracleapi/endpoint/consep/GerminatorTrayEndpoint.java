@@ -46,16 +46,11 @@ public class GerminatorTrayEndpoint {
    */
   @PostMapping("")
   @ResponseStatus(HttpStatus.OK)
-  @ApiResponse(
-      responseCode = "201",
-      description = "Successfully assigned trays for the provided activities.",
-      content = @Content(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class))
-  )
+  @ApiResponse(responseCode = "201", description = "Successfully assigned trays for the provided activities.", content = @Content(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class)))
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<GerminatorTrayCreateResponseDto> assignGerminatorTrays(
-      @Valid @RequestBody List<@Valid GerminatorTrayCreateDto> requests
-  ) {
+      @Valid @RequestBody List<@Valid GerminatorTrayCreateDto> requests) {
     return testResultService.assignGerminatorTrays(requests);
   }
 
@@ -63,28 +58,23 @@ public class GerminatorTrayEndpoint {
    * Assigns a germinator ID to an existing germinator tray.
    *
    * @param germinatorTrayId the ID of the germinator tray
-   * @param request the request containing the germinator ID to assign
+   * @param request          the request containing the germinator ID to assign
    * @return a response DTO confirming the assignment
    */
   @PatchMapping("/{germinatorTrayId}/germinator-id")
   @ResponseStatus(HttpStatus.OK)
-  @ApiResponse(
-      responseCode = "200",
-      description = "Successfully assigned germinator ID to the tray.",
-      content = @Content(schema = @Schema(implementation = GerminatorTrayAssignGerminatorIdResponseDto.class))
-  )
+  @ApiResponse(responseCode = "200", description = "Successfully assigned germinator ID to the tray.", content = @Content(schema = @Schema(implementation = GerminatorTrayAssignGerminatorIdResponseDto.class)))
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
       @PathVariable Integer germinatorTrayId,
-      @Valid @RequestBody GerminatorTrayAssignGerminatorIdDto request
-  ) {
+      @Valid @RequestBody GerminatorTrayAssignGerminatorIdDto request) {
     // Validate that the tray ID in the path matches the one in the request body
     if (!germinatorTrayId.equals(request.germinatorTrayId())) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Germinator tray ID in path does not match the ID in request body"
-      );
-    }    return testResultService.assignGerminatorIdToTray(request);
+          "Germinator tray ID in path does not match the ID in request body");
+    }
+    return testResultService.assignGerminatorIdToTray(request);
   }
 }
