@@ -75,6 +75,6 @@ public class GerminatorTrayEndpoint {
           HttpStatus.BAD_REQUEST,
           "Germinator tray ID in path does not match the ID in request body");
     }
-    return testResultService.assignGerminatorIdToTray(request);
+    return testResultService.assignGerminatorIdToTray(germinatorTrayId, request.germinatorId());
   }
 }
