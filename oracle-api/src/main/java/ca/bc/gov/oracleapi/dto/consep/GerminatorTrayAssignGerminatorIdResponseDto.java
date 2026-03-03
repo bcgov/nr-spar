@@ -7,5 +7,6 @@ package ca.bc.gov.oracleapi.dto.consep;
  */
 public record GerminatorTrayAssignGerminatorIdResponseDto(
         Integer germinatorTrayId,
-        String germinatorId) {
+        String germinatorId
+) {
 }
