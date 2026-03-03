@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Checkbox, Button, InlineNotification } from '@carbon/react';
 import { useMutation } from '@tanstack/react-query';
+import ROUTES from '../../../../../../routes/constants';
 import { assignGerminatorTrays } from '../../../../../../api-service/consep/germinatorTrayAPI';
 import { GermTrayCreateResponseType } from '../../../../../../types/consep/GerminatorTrayType';
 import { GermTrayOptions, CreateGermTrayProps, CreateGermTrayRequest } from './definitions';
@@ -24,12 +26,14 @@ const CreateGermTray = (
     status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
+  const navigate = useNavigate();
 
   const createGerminatorTrayMutation = useMutation({
     mutationFn: (payload: CreateGermTrayRequest[]) => assignGerminatorTrays(payload),
     onSuccess: (data: GermTrayCreateResponseType[]) => {
-      console.log('Successfully created germinator trays:', data);
-      onClose(); // Close the modal on success
+      navigate(ROUTES.MAINTAIN_GERMINATION_TRAY_SCREEN, {
+        state: { germinatorTrays: data }
+      });
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || error.message || 'Assign germinator trays API request failed';
@@ -54,11 +58,16 @@ const CreateGermTray = (
   };
 
   return (
-    <div className="create-germ-tray-content">
+    <div className="consep-create-germ-tray-modal">
       {alert?.message && (
-        <InlineNotification lowContrast kind={alert.status} subtitle={alert?.message} />
+        <InlineNotification
+          className="consep-create-germ-tray-modal-alert"
+          lowContrast
+          kind={alert.status}
+          subtitle={alert?.message}
+        />
       )}
-      <div className="germ-tray-options">
+      <div className="consep-create-germ-tray-options">
         <Checkbox
           id="print-dish-labels"
           labelText="Print dish labels"
@@ -84,7 +93,7 @@ const CreateGermTray = (
           onChange={() => handleCheckboxChange('printGerminationTestRecord')}
         />
       </div>
-      <div className="germ-tray-actions">
+      <div className="consep-create-germ-tray-actions">
         <Button kind="secondary" onClick={onClose}>
           Cancel
         </Button>
