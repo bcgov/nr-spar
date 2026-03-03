@@ -69,7 +69,9 @@ const ApiConfig = {
 
   activities: `${oracleServerHost}/api/activities`,
 
-  requestSeedLotAndVegLot: `${oracleServerHost}/api/request-seedlot-and-veglot`
+  requestSeedLotAndVegLot: `${oracleServerHost}/api/request-seedlot-and-veglot`,
+
+  germinatorTrays: `${oracleServerHost}/api/germinator-trays`
 };
 
 export default ApiConfig;

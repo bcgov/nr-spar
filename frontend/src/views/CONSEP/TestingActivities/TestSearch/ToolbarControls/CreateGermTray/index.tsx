@@ -1,20 +1,40 @@
 import React, { useState } from 'react';
-import { Checkbox, Button } from '@carbon/react';
-import { GermTrayOptions, CreateGermTrayProps } from './definitions';
+import { Checkbox, Button, InlineNotification } from '@carbon/react';
+import { useMutation } from '@tanstack/react-query';
+import { assignGerminatorTrays } from '../../../../../../api-service/consep/germinatorTrayAPI';
+import { GermTrayCreateResponseType } from '../../../../../../types/consep/GerminatorTrayType';
+import { GermTrayOptions, CreateGermTrayProps, CreateGermTrayRequest } from './definitions';
 import './styles.scss';
 
 const CreateGermTray = (
   {
+    table,
     onClose,
-    onSubmit,
     isLoading = false
   }: CreateGermTrayProps
 ) => {
+  const selectedRows = table.getSelectedRowModel()?.rows.map((row) => row.original) ?? [];
   const [options, setOptions] = useState<GermTrayOptions>({
     printDishLabels: false,
     printGerminationTrayLabels: false,
     printGerminationCoverSheet: false,
     printGerminationTestRecord: false
+  });
+  const [alert, setAlert] = useState<{
+    status: 'error' | 'info' | 'success' | 'warning';
+    message: string;
+  } | null>(null);
+
+  const createGerminatorTrayMutation = useMutation({
+    mutationFn: (payload: CreateGermTrayRequest[]) => assignGerminatorTrays(payload),
+    onSuccess: (data: GermTrayCreateResponseType[]) => {
+      console.log('Successfully created germinator trays:', data);
+      onClose(); // Close the modal on success
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || 'Assign germinator trays API request failed';
+      setAlert({ status: 'error', message });
+    }
   });
 
   const handleCheckboxChange = (key: keyof GermTrayOptions) => {
@@ -25,11 +45,19 @@ const CreateGermTray = (
   };
 
   const handleSubmit = () => {
-    onSubmit(options);
+    const requestPayload: CreateGermTrayRequest[] = selectedRows.map((row) => ({
+      activityTypeCd: row.activityTypeCd,
+      riaSkey: row.riaSkey,
+      actualBeginDtTm: row.actualBeginDtTm
+    }));
+    createGerminatorTrayMutation.mutate(requestPayload);
   };
 
   return (
     <div className="create-germ-tray-content">
+      {alert?.message && (
+        <InlineNotification lowContrast kind={alert.status} subtitle={alert?.message} />
+      )}
       <div className="germ-tray-options">
         <Checkbox
           id="print-dish-labels"
