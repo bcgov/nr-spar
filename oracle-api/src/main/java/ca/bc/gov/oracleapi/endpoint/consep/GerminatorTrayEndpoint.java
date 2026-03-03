@@ -48,14 +48,13 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "201",
       description = "Successfully assigned trays for the provided activities.",
-      content =
-      @Content(
-          schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class))
+      content = @Content(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class))
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<GerminatorTrayCreateResponseDto> assignGerminatorTrays(
-      @Valid @RequestBody List<@Valid GerminatorTrayCreateDto> requests) {
+      @Valid @RequestBody List<@Valid GerminatorTrayCreateDto> requests
+  ) {
     return testResultService.assignGerminatorTrays(requests);
   }
 
@@ -79,7 +78,8 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
       @PathVariable Integer germinatorTrayId,
-      @Valid @RequestBody GerminatorTrayAssignGerminatorIdDto request) {
+      @Valid @RequestBody GerminatorTrayAssignGerminatorIdDto request
+  ) {
     return testResultService.assignGerminatorIdToTray(germinatorTrayId, request.germinatorId());
   }
 }
