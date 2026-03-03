@@ -24,10 +24,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        split_index: [0, 1, 2, 3]
+        smoke_test_folder: [
+          smoke-test-01,
+          smoke-test-02,
+          smoke-test-03,
+          smoke-test-04,
+          smoke-test-05
+        ]
     env:
-      SPLIT: 4
-      SPLIT_INDEX: ${{ matrix.split_index }}
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ vars.CYPRESS_USERNAME }}
       CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
@@ -58,7 +62,7 @@ jobs:
           node_version: "22"
           commands: |
             npm ci
-            npx start-server-and-test start http://localhost:3000 cy:run
+            npx start-server-and-test start http://localhost:3000 "cypress run --browser chrome --spec cypress/e2e/${{ matrix.smoke_test_folder }}/*.cy.{js,ts}"
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
@@ -77,5 +81,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cypress-videos-chrome-${{ matrix.split_index }}
+          name: cypress-videos-chrome-${{ matrix.smoke_test_folder }}
           path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/

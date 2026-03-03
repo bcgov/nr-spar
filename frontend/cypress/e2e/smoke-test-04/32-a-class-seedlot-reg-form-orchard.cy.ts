@@ -43,7 +43,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
         cy.visit(url);
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
-        cy.get('.seedlot-orchard-title-row').contains(regFormData.orchard.title);
+        cy.get('.seedlot-orchard-title-row').should('be.visible').and('contain.text', regFormData.orchard.title);
       });
     });
   });
