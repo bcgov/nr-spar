@@ -47,7 +47,7 @@ class GerminatorTrayEndpointTest {
     private static final String BASE_URL = "/api/germinator-trays";
 
     @Test
-    void assignGerminatorTrays_returns200AndBody_andCallsService() throws Exception {
+    void assignGerminatorTrays_returns201AndBody_andCallsService() throws Exception {
         // Arrange - use current time for payload
         LocalDateTime now = LocalDateTime.now();
         List<GerminatorTrayCreateDto> requests = List.of(
