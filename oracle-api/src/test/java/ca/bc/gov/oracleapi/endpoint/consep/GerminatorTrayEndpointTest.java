@@ -145,13 +145,18 @@ class GerminatorTrayEndpointTest {
         // Arrange
         Integer germinatorTrayId = 101;
         String germinatorId = "A";
-        GerminatorTrayAssignGerminatorIdDto request = new GerminatorTrayAssignGerminatorIdDto(germinatorId);
+        GerminatorTrayAssignGerminatorIdDto request =
+                new GerminatorTrayAssignGerminatorIdDto(germinatorId);
 
-        GerminatorTrayAssignGerminatorIdResponseDto response = new GerminatorTrayAssignGerminatorIdResponseDto(
+        GerminatorTrayAssignGerminatorIdResponseDto response =
+        new GerminatorTrayAssignGerminatorIdResponseDto(
                 germinatorTrayId,
-                germinatorId);
+                germinatorId
+        );
 
-        when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId)).thenReturn(response);
+        when(testResultService.assignGerminatorIdToTray(
+                germinatorTrayId, germinatorId))
+                .thenReturn(response);
 
         // Act / Assert
         mockMvc.perform(patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
@@ -172,7 +177,8 @@ class GerminatorTrayEndpointTest {
         // Arrange
         Integer germinatorTrayId = 999;
         String germinatorId = "A";
-        GerminatorTrayAssignGerminatorIdDto request = new GerminatorTrayAssignGerminatorIdDto(germinatorId);
+        GerminatorTrayAssignGerminatorIdDto request =
+                new GerminatorTrayAssignGerminatorIdDto(germinatorId);
 
         when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
                 .thenThrow(new ResponseStatusException(
@@ -194,7 +200,8 @@ class GerminatorTrayEndpointTest {
     void assignGerminatorIdToTray_returns400_whenGerminatorIdBlank() throws Exception {
         // Arrange - empty germinator ID
         Integer germinatorTrayId = 101;
-        GerminatorTrayAssignGerminatorIdDto request = new GerminatorTrayAssignGerminatorIdDto("");
+        GerminatorTrayAssignGerminatorIdDto request =
+                new GerminatorTrayAssignGerminatorIdDto("");
 
         // Act / Assert
         mockMvc.perform(patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
@@ -204,6 +211,7 @@ class GerminatorTrayEndpointTest {
                 .andExpect(status().isBadRequest());
 
         // Verify service was NOT called because validation failed
-        verify(testResultService, times(0)).assignGerminatorIdToTray(any(Integer.class), any(String.class));
+        verify(testResultService, times(0))
+                .assignGerminatorIdToTray(any(Integer.class), any(String.class));
     }
 }

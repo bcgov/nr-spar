@@ -46,7 +46,13 @@ public class GerminatorTrayEndpoint {
    */
   @PostMapping("")
   @ResponseStatus(HttpStatus.CREATED)
-  @ApiResponse(responseCode = "201", description = "Successfully assigned trays for the provided activities.", content = @Content(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class)))
+  @ApiResponse(
+      responseCode = "201",
+      description = "Successfully assigned trays for the provided activities.",
+      content =
+      @Content(
+          schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class))
+  )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<GerminatorTrayCreateResponseDto> assignGerminatorTrays(
@@ -63,7 +69,13 @@ public class GerminatorTrayEndpoint {
    */
   @PatchMapping("/{germinatorTrayId}/germinator-id")
   @ResponseStatus(HttpStatus.OK)
-  @ApiResponse(responseCode = "200", description = "Successfully assigned germinator ID to the tray.", content = @Content(schema = @Schema(implementation = GerminatorTrayAssignGerminatorIdResponseDto.class)))
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully assigned germinator ID to the tray.",
+      content =
+      @Content(
+          schema = @Schema(implementation = GerminatorTrayAssignGerminatorIdResponseDto.class))
+  )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
