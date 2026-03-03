@@ -76,29 +76,25 @@ public class TestResultService {
   /**
    * Assign germinator trays for the given activities.
    * Activities are first grouped by activity type (as indicated by
-   * {@link GerminatorTrayCreateDto#activityTypeCd()}). Within each activity type
-   * group,
-   * a sequence of trays is created, with each tray holding up to 5
-   * activities/tests.
-   * When a group contains more than 5 activities, additional trays are created so
-   * that
+   * {@link GerminatorTrayCreateDto#activityTypeCd()}). Within each activity type group,
+   * a sequence of trays is created, with each tray holding up to 5 activities/tests.
+   * When a group contains more than 5 activities, additional trays are created so that
    * no tray exceeds this limit.
    *
-   * @param requests the list of germinator tray creation requests to be assigned
-   *                 to trays
-   * @return a list of responses describing the trays that were created and their
-   *         assignments
+   * @param requests the list of germinator tray creation requests to be assigned to trays
+   * @return a list of responses describing the trays that were created and their assignments
    */
   public List<GerminatorTrayCreateResponseDto> assignGerminatorTrays(
-      List<GerminatorTrayCreateDto> requests) {
+      List<GerminatorTrayCreateDto> requests
+  ) {
     if (requests == null || requests.isEmpty()) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Create germinator tray request list cannot be null or empty");
+          "Create germinator tray request list cannot be null or empty"
+      );
     }
 
-    // Validate selected seed tests and collect their GermTestResultDto values in
-    // one pass.
+    // Validate selected seed tests and collect their GermTestResultDto values in one pass.
     Map<BigDecimal, GermTestResultDto> germTestCache = collectAndValidateGermTestResults(requests);
 
     LocalDate today = LocalDate.now();
@@ -106,8 +102,9 @@ public class TestResultService {
     List<GerminatorTrayCreateResponseDto> trayResponses = new ArrayList<>();
 
     // Group by activityTypeCd (G10, G20, G44, G64...)
-    Map<String, List<GerminatorTrayCreateDto>> groupedByActivityType = requests.stream()
-        .collect(Collectors.groupingBy(GerminatorTrayCreateDto::activityTypeCd));
+    Map<String, List<GerminatorTrayCreateDto>> groupedByActivityType =
+        requests.stream()
+            .collect(Collectors.groupingBy(GerminatorTrayCreateDto::activityTypeCd));
 
     // Loop per activity type code
     for (Map.Entry<String, List<GerminatorTrayCreateDto>> entry : groupedByActivityType.entrySet()) {
@@ -118,7 +115,8 @@ public class TestResultService {
       SparLog.info(
           "Creating germinator trays for activity type code {} with {} activities",
           activityTypeCd,
-          activities.size());
+          activities.size()
+      );
 
       int trayNumber = 0;
       GerminatorTrayEntity currentTray = null;
@@ -148,22 +146,27 @@ public class TestResultService {
               "Created germinator tray {} for activity type {} (tray no {})",
               trayId,
               activityTypeCd,
-              trayNumber);
+              trayNumber
+          );
 
           // Add newly created tray to response
           trayResponses.add(new GerminatorTrayCreateResponseDto(
               activityTypeCd,
               trayId,
-              currentTray.getActualStartDate()));
+              currentTray.getActualStartDate()
+          ));
         }
 
         SparLog.debug("Processing activity {} (activity type: {}), actualBeginDtTm: {}, trayId: {}",
             activityRiaSkey, activityTypeCd, actualBeginDtTm, trayId);
 
         ActivityEntity activityEntity = activityRepository.findById(activityRiaSkey)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Activity not found in CNS_T_RQST_ITM_ACTVTY table"));
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Activity not found in CNS_T_RQST_ITM_ACTVTY table"
+                )
+            );
 
         if (actualBeginDtTm != null && !actualBeginDtTm.toLocalDate().equals(today)) {
           // Assign test to tray
@@ -190,27 +193,30 @@ public class TestResultService {
               trayWarmStratDate,
               trayColdStratDate,
               trayDrybackDate,
-              trayGerminatorEntryDate);
+              trayGerminatorEntryDate
+          );
 
           SparLog.info("Assign activity {} to tray {}", activityRiaSkey, trayId);
 
           // Update test activity dates
           Integer activityDuration = activityEntity.getActivityDuration();
           LocalDate revisedEndDate = (activityDuration != null)
-              ? today.plusDays(activityDuration)
-              : null;
+              ? today.plusDays(activityDuration) : null;
           activityRepository.updateActualBeginAndRevisedDates(
               activityRiaSkey,
               today.atStartOfDay(),
               today,
-              revisedEndDate);
+              revisedEndDate
+          );
           SparLog.info("Updated dates for activity {}: "
-              + "actual_begin_dt_tm={}, revised_start_dt={}, revised_end_dt={}",
-              activityRiaSkey, today.atStartOfDay(), today, revisedEndDate);
+                  + "actual_begin_dt_tm={}, revised_start_dt={}, revised_end_dt={}",
+              activityRiaSkey, today.atStartOfDay(), today, revisedEndDate
+          );
         } else {
           testResultRepository.updateGerminatorTray(
               activityRiaSkey,
-              trayId);
+              trayId
+          );
           SparLog.info("Set tray {} for already started activity {}", trayId, activityRiaSkey);
         }
 
@@ -221,7 +227,8 @@ public class TestResultService {
             List<ActivityEntity> conflictActivities = activityRepository.findConflictingActivities(
                 activityRiaSkey,
                 activityEntity.getRequestSkey(),
-                activityEntity.getItemId());
+                activityEntity.getItemId()
+            );
 
             if (conflictActivities.isEmpty()) {
               // Perform update
@@ -231,7 +238,8 @@ public class TestResultService {
           } else {
             SparLog.warn(
                 "Skipping commitment processing for activity {} because requestSkey or itemId is null",
-                activityRiaSkey);
+                activityRiaSkey
+            );
           }
         }
       }
@@ -240,34 +248,37 @@ public class TestResultService {
   }
 
   /**
-   * Validate each GerminatorTrayCreateDto in the incoming request list and
-   * collect
+   * Validate each GerminatorTrayCreateDto in the incoming request list and collect
    * GermTestResultDto objects for reuse.
    *
    * Checks performed for each request:
-   * - seedWithdrawalDate must be present and strictly before today
-   * - activityTypeCd must be a germ test type
-   * - germinatorTrayId must be null (no existing tray id assigned)
+   *  - seedWithdrawalDate must be present and strictly before today
+   *  - activityTypeCd must be a germ test type
+   *  - germinatorTrayId must be null (no existing tray id assigned)
    * Returns a map from RIA_SKEY to the corresponding GermTestResultDto for reuse
    * during assignment (avoids calling the repository twice per activity).
    * Throws ResponseStatusException on the first validation failure.
    */
   private Map<BigDecimal, GermTestResultDto> collectAndValidateGermTestResults(
-      List<GerminatorTrayCreateDto> requests) {
+      List<GerminatorTrayCreateDto> requests
+  ) {
     LocalDate today = LocalDate.now();
     String errorMessage = "Failed to create germinator tray: validation failed "
         + "— ensure seeds have not been withdrawn, all tests are germination tests, "
         + "and no germinator tray ID is already assigned.";
-    List<String> germTestCodes = testRegimeRepository.findAllGermTestActivityTypeCodes();
+    List<String> germTestCodes =
+        testRegimeRepository.findAllGermTestActivityTypeCodes();
 
     Map<BigDecimal, GermTestResultDto> resultMap = new HashMap<>(requests.size());
     for (GerminatorTrayCreateDto req : requests) {
-      GermTestResultDto germTestResult = testResultRepository.getGermTestResult(req.riaSkey());
+      GermTestResultDto germTestResult =
+          testResultRepository.getGermTestResult(req.riaSkey());
 
       if (germTestResult == null) {
         String message = String.format(
             "No test result found for activity with RIA_SKEY %s",
-            req.riaSkey());
+            req.riaSkey()
+        );
         SparLog.error(message);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
       }
@@ -279,21 +290,24 @@ public class TestResultService {
       if (!isGermTest) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            errorMessage);
+            errorMessage
+        );
       }
 
       // seedWithdrawalDate must be present and strictly before today
       if (seedWithdrawalDate == null || !seedWithdrawalDate.isBefore(today)) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            errorMessage);
+            errorMessage
+        );
       }
 
       // germinatorTrayId must not already be assigned
       if (germTestResult.germinatorTrayId() != null) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            errorMessage);
+            errorMessage
+        );
       }
 
       // cache for reuse later (prevents duplicate DB calls)
@@ -313,7 +327,8 @@ public class TestResultService {
    */
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
       Integer germinatorTrayId,
-      String germinatorId) {
+      String germinatorId
+  ) {
     if (germinatorTrayId == null || germinatorId == null || germinatorId.isBlank()) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
@@ -340,6 +355,7 @@ public class TestResultService {
 
     return new GerminatorTrayAssignGerminatorIdResponseDto(
         germinatorTrayId,
-        germinatorId);
+        germinatorId
+    );
   }
 }
