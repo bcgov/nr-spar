@@ -10,5 +10,6 @@ import java.time.LocalDateTime;
 public record GerminatorTrayCreateResponseDto(
         String activityTypeCd,
         int germinatorTrayId,
-        LocalDateTime actualStartDate) {
+        LocalDateTime actualStartDate
+) {
 }
