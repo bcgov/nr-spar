@@ -192,7 +192,8 @@ public class ActivitySearchService {
         activitySearchResultEntity.getItemId(),
         activitySearchResultEntity.getSeedlotSample(),
         activitySearchResultEntity.getRiaSkey(),
-        activitySearchResultEntity.getActivityTypeCd()
+        activitySearchResultEntity.getActivityTypeCd(),
+        activitySearchResultEntity.getGermTestInd()
     );
   }
 

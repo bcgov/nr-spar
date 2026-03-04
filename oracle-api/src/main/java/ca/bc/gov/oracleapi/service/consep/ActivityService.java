@@ -379,7 +379,8 @@ public class ActivityService {
         e.getItemId(),
         null,
         e.getRiaKey().intValue(),
-        e.getActivityTypeCode()
+        e.getActivityTypeCode(),
+        null
     );
   }
 }
