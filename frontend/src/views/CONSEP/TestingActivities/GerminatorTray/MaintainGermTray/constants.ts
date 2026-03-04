@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { type MRT_ColumnDef } from 'material-react-table';
+import { formatDateCell } from '../../TestSearch/constants';
 import { GermTrayColumn } from './definitions';
 
 export const getGermTrayColumns = (): MRT_ColumnDef<GermTrayColumn>[] => [
@@ -11,7 +12,8 @@ export const getGermTrayColumns = (): MRT_ColumnDef<GermTrayColumn>[] => [
   {
     accessorKey: 'actualStartDate',
     header: 'Soak start date',
-    enableEditing: false
+    enableEditing: false,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'activityTypeCd',
