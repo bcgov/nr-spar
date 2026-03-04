@@ -12,7 +12,6 @@ export interface GermTrayOptions {
 export interface CreateGermTrayProps {
   table: MRT_TableInstance<TestingSearchResponseType>;
   onClose: () => void;
-  isLoading?: boolean;
 }
 
 export interface CreateGermTrayRequest {

@@ -29,7 +29,7 @@ const MaintainGermTray = () => {
       <Row className="consep-maintain-germ-tray-title">
         <PageTitle title="Maintain germ tray" />
       </Row>
-      <Row className="concep-maintain-germ-tray-table">
+      <Row className="consep-maintain-germ-tray-table">
         <GenericTable
           columns={germTrayColumns}
           data={germinatorTrays}

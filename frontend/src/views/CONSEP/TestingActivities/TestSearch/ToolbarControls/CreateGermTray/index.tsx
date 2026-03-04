@@ -11,8 +11,7 @@ import './styles.scss';
 const CreateGermTray = (
   {
     table,
-    onClose,
-    isLoading = false
+    onClose
   }: CreateGermTrayProps
 ) => {
   const selectedRows = table.getSelectedRowModel()?.rows.map((row) => row.original) ?? [];
@@ -97,7 +96,7 @@ const CreateGermTray = (
         <Button kind="secondary" onClick={onClose}>
           Cancel
         </Button>
-        <Button kind="primary" onClick={handleSubmit} disabled={isLoading}>
+        <Button kind="primary" onClick={handleSubmit}>
           Create germination tray
         </Button>
       </div>
