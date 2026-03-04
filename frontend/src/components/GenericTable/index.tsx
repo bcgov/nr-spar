@@ -113,16 +113,19 @@ const GenericTable = <T extends Record<string, any>>({
     enablePagination,
     manualPagination,
     rowCount,
-    ...(manualPagination && {
-      onPaginationChange: (
-        updaterOrValue: MRT_PaginationState | ((old: MRT_PaginationState) => MRT_PaginationState)
-      ) => {
-        const newPagination: MRT_PaginationState = typeof updaterOrValue === 'function'
-          ? updaterOrValue(basicTable.getState().pagination)
-          : updaterOrValue;
-        onPaginationChange?.(newPagination.pageIndex, newPagination.pageSize);
-      }
-    }),
+    ...(manualPagination
+      ? {
+        onPaginationChange: (
+          updaterOrValue: MRT_PaginationState | ((old: MRT_PaginationState) => MRT_PaginationState)
+        ) => {
+          const newPagination: MRT_PaginationState =
+            typeof updaterOrValue === 'function'
+              ? updaterOrValue(basicTable.getState().pagination)
+              : updaterOrValue;
+
+          onPaginationChange?.(newPagination.pageIndex, newPagination.pageSize);
+        }
+      } : {}),
     muiPaginationProps: {
       showRowsPerPage: true,
       shape: 'rounded'

@@ -96,7 +96,7 @@ const CreateGermTray = (
         <Button kind="secondary" onClick={onClose}>
           Cancel
         </Button>
-        <Button kind="primary" onClick={handleSubmit}>
+        <Button kind="primary" onClick={handleSubmit} disabled={createGerminatorTrayMutation.isPending}>
           Create germination tray
         </Button>
       </div>
