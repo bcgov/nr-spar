@@ -118,10 +118,9 @@ const GenericTable = <T extends Record<string, any>>({
         onPaginationChange: (
           updaterOrValue: MRT_PaginationState | ((old: MRT_PaginationState) => MRT_PaginationState)
         ) => {
-          const newPagination: MRT_PaginationState =
-            typeof updaterOrValue === 'function'
-              ? updaterOrValue(basicTable.getState().pagination)
-              : updaterOrValue;
+          const newPagination: MRT_PaginationState = typeof updaterOrValue === 'function'
+            ? updaterOrValue(basicTable.getState().pagination)
+            : updaterOrValue;
 
           onPaginationChange?.(newPagination.pageIndex, newPagination.pageSize);
         }
