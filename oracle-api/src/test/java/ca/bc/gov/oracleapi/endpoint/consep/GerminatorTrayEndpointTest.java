@@ -22,6 +22,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -243,30 +245,27 @@ class GerminatorTrayEndpointTest {
         .assignGerminatorIdToTray(any(Integer.class), any(String.class));
   }
 
-  @Test
-  void assignGerminatorIdToTray_returns200_withValidSingleCharacterIds() throws Exception {
-    // Arrange - test with different valid single characters
+  @ParameterizedTest
+  @ValueSource(strings = {"A", "X", "Z", "1", "9"})
+  void assignGerminatorIdToTray_returns200_withValidSingleCharacterIds(String germinatorId) throws Exception {
+    // Arrange
     Integer germinatorTrayId = 101;
-    String[] validIds = {"A", "X", "Z", "1", "9"};
+    GerminatorTrayAssignGerminatorIdDto request =
+        new GerminatorTrayAssignGerminatorIdDto(germinatorId);
+    GerminatorTrayAssignGerminatorIdResponseDto response =
+        new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId);
 
-    for (String germinatorId : validIds) {
-      GerminatorTrayAssignGerminatorIdDto request =
-          new GerminatorTrayAssignGerminatorIdDto(germinatorId);
-      GerminatorTrayAssignGerminatorIdResponseDto response =
-          new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId);
+    when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
+        .thenReturn(response);
 
-      when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
-          .thenReturn(response);
-
-      // Act / Assert
-      mockMvc
-          .perform(
-              patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
-                  .with(csrf())
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(request)))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.germinatorId").value(germinatorId));
-    }
+    // Act / Assert
+    mockMvc
+        .perform(
+            patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.germinatorId").value(germinatorId));
   }
 }
