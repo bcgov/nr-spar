@@ -29,7 +29,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
         cy.visit(url);
         cy.url().should('contains', url);
         // Wait for the page title to be visible before proceeding
-        cy.get('.title-row').contains(regFormData.parentTree.title);
+        cy.get('.title-row').should('be.visible').and('contain.text', regFormData.parentTree.title);
         cy.get('#parent-tree-step-tab-list-id')
           .find('button')
           .contains('Calculation of SMP mix')
