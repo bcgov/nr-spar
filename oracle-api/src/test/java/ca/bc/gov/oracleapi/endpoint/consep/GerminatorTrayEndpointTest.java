@@ -182,8 +182,7 @@ class GerminatorTrayEndpointTest {
   @Test
   void assignGerminatorTrays_returns400_whenRiaKeyIsNull() throws Exception {
     // Arrange - invalid request with null RIA key
-    List<GerminatorTrayCreateDto> requests =
-        List.of(new GerminatorTrayCreateDto("G10", null, LocalDateTime.now()));
+    String invalidJson = "[{\"activityTypeCd\":\"G10\",\"riaSkey\":null}]";
 
     // Act / Assert
     mockMvc
@@ -191,7 +190,7 @@ class GerminatorTrayEndpointTest {
             post(BASE_URL)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requests)))
+                .content(invalidJson))
         .andExpect(status().isBadRequest());
 
     // Verify service was NOT called due to request validation failure
