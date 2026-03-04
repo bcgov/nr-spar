@@ -34,6 +34,10 @@ const MaintainGermTray = () => {
           columns={germTrayColumns}
           data={germinatorTrays}
           hideToolbar
+          enablePagination
+          initialState={{
+            pagination: { pageSize: 5, pageIndex: 0 }
+          }}
         />
       </Row>
     </FlexGrid>
