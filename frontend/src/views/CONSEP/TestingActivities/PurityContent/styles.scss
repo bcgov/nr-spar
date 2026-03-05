@@ -1,5 +1,5 @@
-@use '@carbon/type';
-@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use "@carbon/type";
+@use "@bcgov-nr/nr-theme/design-tokens/variables.scss" as vars;
 
 .consep-purity-content {
   .consep-purity-content-title {
@@ -136,13 +136,22 @@
       height: 1rem;
     }
 
-    .#{vars.$bcgov-prefix}--modal-footer{
+    .#{vars.$bcgov-prefix}--modal-footer {
       height: auto;
     }
 
-    .#{vars.$bcgov-prefix}--modal-header__label{
-      @include type.type-style('label-01');
+    .#{vars.$bcgov-prefix}--modal-header__label {
+      @include type.type-style("label-01");
     }
   }
 
+  .consep-purity-content-alert {
+    margin-bottom: 2rem;
+    position: fixed;
+    top: 3rem;
+    left: 50%;
+    transform: translateX(-40%);
+    width: 100%;
+    z-index: 1000;
+  }
 }
