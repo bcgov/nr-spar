@@ -158,10 +158,10 @@ const TestListTable = ({
         modalHeading="Create germination tray"
         onRequestClose={() => setShowCreateGermTray(false)}
       >
-        {showCreateGermTray && (
+        {showCreateGermTray && tableRef.current && (
           <CreateGermTray
+            table={tableRef.current}
             onClose={() => setShowCreateGermTray(false)}
-            onSubmit={() => {}}
           />
         )}
       </Modal>
