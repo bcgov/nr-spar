@@ -264,7 +264,7 @@ public class TestResultService {
     LocalDate today = LocalDate.now();
     String errorMessage = "Could not create germinator tray. Possible reasons: "
         + "Seed has not been withdrawn, not all tests are germination tests, "
-        + "and/or no germinator tray ID is assigned.";
+        + "and/or a germinator tray ID is already assigned.";
     List<String> germTestCodes =
         testRegimeRepository.findAllGermTestActivityTypeCodes();
 
