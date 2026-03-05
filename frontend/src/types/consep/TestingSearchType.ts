@@ -12,9 +12,9 @@ export type TestingSearchResponseType = {
   purityPct: number | null;
   seedsPerGram: number | null;
   otherTestResult: number | null;
-  testCompleteInd: number;
-  acceptResultInd: number;
-  significntStsInd: number;
+  testCompleteInd: 0 | -1 | null;
+  acceptResultInd: 0 | -1 | null;
+  significntStsInd: 0 | -1 | null;
   seedWithdrawalDate: string | null;
   revisedEndDt: string | null;
   actualBeginDtTm: string | null;
@@ -26,6 +26,7 @@ export type TestingSearchResponseType = {
   seedlotSample: string;
   riaSkey: number;
   activityTypeCd: string;
+  germTestInd: 0 | -1 | null;
 };
 
 // Type for pagination details

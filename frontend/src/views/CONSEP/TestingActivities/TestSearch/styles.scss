@@ -132,6 +132,11 @@
         margin-left: 0.5rem;
         margin-top: 0.15rem;
       }
+
+      .concep-test-search-create-germ-tray-tooltip
+      .#{vars.$bcgov-prefix}--popover-content {
+        margin-top: 0.8rem;
+      }
     }
 
     .concep-test-search-table {
