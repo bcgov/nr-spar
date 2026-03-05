@@ -11,8 +11,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -80,10 +80,10 @@ public class GerminatorTrayEndpoint {
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
       @PathVariable Integer germinatorTrayId,
       @RequestBody
-      @NotBlank
-      @Size(max = 1)
-      String germinatorId
+      @Min(value = 0, message = "Germinator ID must be a non-negative number")
+      @Max(value = 9, message = "Germinator ID must be a single digit (0-9)")
+      Integer germinatorId
   ) {
-    return testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId);
+    return testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId.toString());
   }
 }
