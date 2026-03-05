@@ -302,7 +302,7 @@ class GerminatorTrayEndpointTest {
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(String.valueOf(germinatorId)))
+                .content(objectMapper.writeValueAsString(germinatorId.toString())))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.germinatorId").value(germinatorId.toString()));
   }
