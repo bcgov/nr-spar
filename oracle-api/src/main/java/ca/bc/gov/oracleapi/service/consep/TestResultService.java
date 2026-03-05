@@ -345,6 +345,12 @@ public class TestResultService {
             HttpStatus.NOT_FOUND,
             "Germinator tray not found with ID: " + germinatorTrayId));
 
+    if (tray.getGerminatorId() != null) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Germinator ID already assigned to this tray");
+    }
+
     tray.setGerminatorId(germinatorId);
     germinatorTrayRepository.save(tray);
 
