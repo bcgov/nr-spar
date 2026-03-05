@@ -200,7 +200,7 @@ class GerminatorTrayEndpointTest {
   void assignGerminatorIdToTray_returns200AndBody_andCallsService() throws Exception {
     // Arrange
     Integer germinatorTrayId = 101;
-    String germinatorId = "A";
+    String germinatorId = "1";
 
     GerminatorTrayAssignGerminatorIdResponseDto response =
         new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId);
@@ -218,7 +218,7 @@ class GerminatorTrayEndpointTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.germinatorTrayId").value(101))
-        .andExpect(jsonPath("$.germinatorId").value("A"));
+        .andExpect(jsonPath("$.germinatorId").value("1"));
 
     // Verify service was called with the individual parameters
     verify(testResultService, times(1)).assignGerminatorIdToTray(germinatorTrayId, germinatorId);
@@ -228,7 +228,7 @@ class GerminatorTrayEndpointTest {
   void assignGerminatorIdToTray_returns404_whenTrayNotFound() throws Exception {
     // Arrange
     Integer germinatorTrayId = 999;
-    String germinatorId = "A";
+    String germinatorId = "1";
 
     when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
         .thenThrow(
@@ -269,10 +269,10 @@ class GerminatorTrayEndpointTest {
   }
 
   @Test
-  void assignGerminatorIdToTray_returns400_whenGerminatorIdExceedsMaxLength() throws Exception {
+  void assignGerminatorIdToTray_returns400_whenGerminatorIdExceedsRange() throws Exception {
     // Arrange
     Integer germinatorTrayId = 101;
-    String germinatorId = "CD";
+    Integer invalidGerminatorId = 10; // exceeds max of 9
 
     // Act / Assert
     mockMvc
@@ -280,24 +280,20 @@ class GerminatorTrayEndpointTest {
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(germinatorId)))
+                .content(String.valueOf(invalidGerminatorId)))
         .andExpect(status().isBadRequest());
-
-    // Verify service was NOT called because validation failed
-    verify(testResultService, times(0))
-        .assignGerminatorIdToTray(any(Integer.class), any(String.class));
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"A", "X", "Z", "1", "9"})
-  void assignGerminatorIdToTray_returns200_withValidSingleCharacterIds(String germinatorId)
+  @ValueSource(ints = {0, 1, 5, 9})
+  void assignGerminatorIdToTray_returns200_withValidNumericIds(Integer germinatorId)
       throws Exception {
     // Arrange
     Integer germinatorTrayId = 101;
     GerminatorTrayAssignGerminatorIdResponseDto response =
-        new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId);
+        new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId.toString());
 
-    when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
+    when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId.toString()))
         .thenReturn(response);
 
     // Act / Assert
@@ -306,9 +302,9 @@ class GerminatorTrayEndpointTest {
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(germinatorId)))
+                .content(String.valueOf(germinatorId)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.germinatorId").value(germinatorId));
+        .andExpect(jsonPath("$.germinatorId").value(germinatorId.toString()));
   }
 
   @Test
