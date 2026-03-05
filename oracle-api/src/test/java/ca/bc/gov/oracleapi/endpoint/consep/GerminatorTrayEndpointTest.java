@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
@@ -202,8 +201,6 @@ class GerminatorTrayEndpointTest {
     // Arrange
     Integer germinatorTrayId = 101;
     String germinatorId = "A";
-    GerminatorTrayAssignGerminatorIdDto request =
-        new GerminatorTrayAssignGerminatorIdDto(germinatorId);
 
     GerminatorTrayAssignGerminatorIdResponseDto response =
         new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId);
@@ -217,7 +214,7 @@ class GerminatorTrayEndpointTest {
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(germinatorId)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.germinatorTrayId").value(101))
@@ -232,8 +229,6 @@ class GerminatorTrayEndpointTest {
     // Arrange
     Integer germinatorTrayId = 999;
     String germinatorId = "A";
-    GerminatorTrayAssignGerminatorIdDto request =
-        new GerminatorTrayAssignGerminatorIdDto(germinatorId);
 
     when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
         .thenThrow(
@@ -246,7 +241,7 @@ class GerminatorTrayEndpointTest {
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(germinatorId)))
         .andExpect(status().isNotFound());
 
     // Verify service was called with the individual parameters
@@ -257,7 +252,7 @@ class GerminatorTrayEndpointTest {
   void assignGerminatorIdToTray_returns400_whenGerminatorIdBlank() throws Exception {
     // Arrange - empty germinator ID
     Integer germinatorTrayId = 101;
-    GerminatorTrayAssignGerminatorIdDto request = new GerminatorTrayAssignGerminatorIdDto("");
+    String germinatorId = "";
 
     // Act / Assert
     mockMvc
@@ -265,7 +260,7 @@ class GerminatorTrayEndpointTest {
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(germinatorId)))
         .andExpect(status().isBadRequest());
 
     // Verify service was NOT called because validation failed
@@ -277,7 +272,7 @@ class GerminatorTrayEndpointTest {
   void assignGerminatorIdToTray_returns400_whenGerminatorIdExceedsMaxLength() throws Exception {
     // Arrange
     Integer germinatorTrayId = 101;
-    GerminatorTrayAssignGerminatorIdDto request = new GerminatorTrayAssignGerminatorIdDto("CD");
+    String germinatorId = "CD";
 
     // Act / Assert
     mockMvc
@@ -285,7 +280,7 @@ class GerminatorTrayEndpointTest {
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(germinatorId)))
         .andExpect(status().isBadRequest());
 
     // Verify service was NOT called because validation failed
@@ -299,8 +294,6 @@ class GerminatorTrayEndpointTest {
       throws Exception {
     // Arrange
     Integer germinatorTrayId = 101;
-    GerminatorTrayAssignGerminatorIdDto request =
-        new GerminatorTrayAssignGerminatorIdDto(germinatorId);
     GerminatorTrayAssignGerminatorIdResponseDto response =
         new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId);
 
@@ -313,7 +306,7 @@ class GerminatorTrayEndpointTest {
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(germinatorId)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.germinatorId").value(germinatorId));
   }

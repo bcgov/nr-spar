@@ -1,6 +1,5 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
@@ -12,6 +11,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -62,7 +63,7 @@ public class GerminatorTrayEndpoint {
    * Assigns a germinator ID to an existing germinator tray.
    *
    * @param germinatorTrayId the ID of the germinator tray
-   * @param request          the request containing the germinator ID to assign
+   * @param germinatorId     the germinator ID to assign
    * @return a response DTO confirming the assignment
    */
   @PatchMapping("/{germinatorTrayId}/germinator-id")
@@ -78,8 +79,11 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
       @PathVariable Integer germinatorTrayId,
-      @Valid @RequestBody GerminatorTrayAssignGerminatorIdDto request
+      @RequestBody
+      @NotBlank
+      @Size(max = 1)
+      String germinatorId
   ) {
-    return testResultService.assignGerminatorIdToTray(germinatorTrayId, request.germinatorId());
+    return testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId);
   }
 }
