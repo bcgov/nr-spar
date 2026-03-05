@@ -1,15 +1,20 @@
 package ca.bc.gov.oracleapi.exception;
 
+import ca.bc.gov.oracleapi.config.SparLog;
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+  private final SparLog sparLog;
 
   /**
    * Handles ConstraintViolationException thrown by Jakarta validation.
@@ -20,24 +25,26 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ConstraintViolationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public Map<String, String> handleConstraintViolation(ConstraintViolationException ex) {
+    SparLog.error("Validation constraint violation occurred", ex);
     Map<String, String> errors = new HashMap<>();
     errors.put("error", "Validation failed");
-    errors.put("message", ex.getMessage());
+    errors.put("message", "One or more request fields failed validation");
     return errors;
   }
 
   /**
-   * Handles UserExistsException.
+   * Handles UserExistsException without exposing PII.
    *
    * @param ex the UserExistsException
-   * @return a map with error details
+   * @return a map with sanitized error details
    */
   @ExceptionHandler(UserExistsException.class)
   @ResponseStatus(HttpStatus.CONFLICT)
   public Map<String, String> handleUserExists(UserExistsException ex) {
+    SparLog.error("User registration failed: user already exists", ex);
     Map<String, String> errors = new HashMap<>();
     errors.put("error", "User already exists");
-    errors.put("message", ex.getMessage());
+    errors.put("message", "This user account is already registered");
     return errors;
   }
 }
