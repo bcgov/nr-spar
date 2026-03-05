@@ -1,16 +1,19 @@
-.create-germ-tray-content {
-
+.consep-create-germ-tray-modal {
   margin: 1rem 0;
   padding: 0 1rem;
 
-  .germ-tray-options {
+  .consep-create-germ-tray-modal-alert {
+    margin-bottom: 1rem;
+  }
+
+  .consep-create-germ-tray-options {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     margin-bottom: 1.5rem;
   }
 
-  .germ-tray-actions {
+  .consep-create-germ-tray-actions {
     display: flex;
     gap: 0.3rem;
 

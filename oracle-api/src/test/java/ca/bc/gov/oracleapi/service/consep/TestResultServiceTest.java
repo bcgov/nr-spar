@@ -68,9 +68,9 @@ class TestResultServiceTest {
   private TestResultEntity testResultEntity;
 
   private static final String GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE =
-      "Failed to create germinator tray: validation failed "
-          + "— ensure seeds have not been withdrawn, all tests are germination tests, "
-          + "and no germinator tray ID is already assigned.";
+      "Could not create germinator tray. Possible reasons: "
+          + "Seed has not been withdrawn, not all tests are germination tests, "
+          + "and/or a germinator tray ID is already assigned.";
 
   @BeforeEach
   void setUp() {
