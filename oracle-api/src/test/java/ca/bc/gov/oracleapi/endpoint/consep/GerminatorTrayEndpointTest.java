@@ -290,7 +290,8 @@ class GerminatorTrayEndpointTest {
 
   @ParameterizedTest
   @ValueSource(ints = {0, 1, 5, 9})
-  void assignGerminatorIdToTray_returns200_withValidNumericIds(Integer germinatorId) throws Exception {
+  void assignGerminatorIdToTray_returns200_withValidNumericIds(Integer germinatorId)
+      throws Exception {
     Integer germinatorTrayId = 101;
     GerminatorTrayAssignGerminatorIdResponseDto response =
         new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId.toString());
@@ -310,7 +311,7 @@ class GerminatorTrayEndpointTest {
   }
 
   @Test
-  void assignGerminatorIdToTray_returns400_whenRequestBodyIsNull() throws Exception {
+  void assignGerminatorIdToTray_returns400_whenGerminatorIdParamMissing() throws Exception {
     int germinatorTrayId = 101;
 
     // No param -> Spring sees missing required @RequestParam -> 400
