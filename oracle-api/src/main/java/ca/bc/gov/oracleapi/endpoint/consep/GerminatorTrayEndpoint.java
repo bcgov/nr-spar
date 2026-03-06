@@ -5,14 +5,14 @@ import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
+import ca.bc.gov.oracleapi.service.consep.GerminatorTrayService;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Germinator Trays", description = "Resource to manage germinator trays.")
 public class GerminatorTrayEndpoint {
   private final TestResultService testResultService;
+  private final GerminatorTrayService germinatorTrayService;
 
   /**
    * Assigns germinator trays for a batch of activities.
@@ -79,11 +81,13 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
       @PathVariable Integer germinatorTrayId,
-      @RequestBody
-      @Min(value = 0, message = "Germinator ID must be a non-negative number")
-      @Max(value = 9, message = "Germinator ID must be a single digit (0-9)")
-      Integer germinatorId
+      @RequestParam
+      @Pattern(regexp = "^[0-9]$", message = "Germinator ID must be a single digit (0-9)")
+      String germinatorId
   ) {
-    return testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId.toString());
+    return germinatorTrayService.assignGerminatorIdToTray(
+        germinatorTrayId,
+        germinatorId
+    );
   }
 }

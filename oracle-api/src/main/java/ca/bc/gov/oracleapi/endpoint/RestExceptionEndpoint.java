@@ -4,8 +4,12 @@ import ca.bc.gov.oracleapi.exception.UserExistsException;
 import ca.bc.gov.oracleapi.exception.UserNotFoundException;
 import ca.bc.gov.oracleapi.response.ExceptionResponse;
 import ca.bc.gov.oracleapi.response.ValidationExceptionResponse;
+import jakarta.validation.ConstraintViolationException;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -49,5 +53,27 @@ public class RestExceptionEndpoint {
   ResponseEntity<ExceptionResponse> userNotFound(UserNotFoundException ex) {
     ExceptionResponse exResponse = new ExceptionResponse(ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exResponse);
+  }
+
+  /**
+   * Handle Jakarta Bean Validation exceptions (like @Valid on List elements).
+   *
+   * @param ex ConstraintViolationException instance
+   * @return a JSON message with invalid fields and messages
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  ResponseEntity<ValidationExceptionResponse> handleConstraintViolation(
+      ConstraintViolationException ex
+  ) {
+    List<FieldError> fieldErrors = ex.getConstraintViolations().stream()
+        .map(cv -> new FieldError(
+            cv.getRootBeanClass().getSimpleName(),   // object name
+            cv.getPropertyPath().toString(),         // field name
+            cv.getMessage()                           // error message
+        ))
+        .collect(Collectors.toList());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ValidationExceptionResponse(fieldErrors));
   }
 }

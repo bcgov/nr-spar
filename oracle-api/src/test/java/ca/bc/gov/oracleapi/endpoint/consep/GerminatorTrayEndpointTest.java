@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
+import ca.bc.gov.oracleapi.service.consep.GerminatorTrayService;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -32,43 +33,49 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
+
 @WebMvcTest(GerminatorTrayEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
 class GerminatorTrayEndpointTest {
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-  @Autowired private ObjectMapper objectMapper;
+  @Autowired
+  private ObjectMapper objectMapper;
 
-  @MockBean private TestResultService testResultService;
+  @MockBean
+  private TestResultService testResultService;
+
+  @MockBean
+  private GerminatorTrayService germinatorTrayService;
 
   private static final String BASE_URL = "/api/germinator-trays";
 
+  /* ----------------------- Assign Germinator Trays ----------------------*/
   @Test
   void assignGerminatorTrays_returns201AndBody_andCallsService() throws Exception {
     // Arrange - use current time for payload
     LocalDateTime now = LocalDateTime.now();
-    List<GerminatorTrayCreateDto> requests =
-        List.of(
-            new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), null),
-            new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), now));
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), null),
+        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), now)
+    );
 
     // Prepare service response
     LocalDateTime trayStart = LocalDate.now().atStartOfDay();
-    List<GerminatorTrayCreateResponseDto> responses =
-        List.of(
-            new GerminatorTrayCreateResponseDto("G10", 101, trayStart),
-            new GerminatorTrayCreateResponseDto("G12", 102, trayStart));
+    List<GerminatorTrayCreateResponseDto> responses = List.of(
+        new GerminatorTrayCreateResponseDto("G10", 101, trayStart),
+        new GerminatorTrayCreateResponseDto("G12", 102, trayStart)
+    );
 
     when(testResultService.assignGerminatorTrays(any())).thenReturn(responses);
 
     // Act / Assert
-    mockMvc
-        .perform(
-            post(BASE_URL)
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requests)))
+    mockMvc.perform(post(BASE_URL)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requests)))
         .andExpect(status().isCreated())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.length()").value(2))
@@ -86,18 +93,16 @@ class GerminatorTrayEndpointTest {
     List<GerminatorTrayCreateDto> requests = List.of();
 
     when(testResultService.assignGerminatorTrays(any()))
-        .thenThrow(
-            new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Create germinator tray request list cannot be null or empty"));
+        .thenThrow(new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Create germinator tray request list cannot be null or empty"
+        ));
 
     // Act / Assert
-    mockMvc
-        .perform(
-            post(BASE_URL)
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requests)))
+    mockMvc.perform(post(BASE_URL)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requests)))
         .andExpect(status().isBadRequest());
 
     // Verify that the service was invoked
@@ -108,19 +113,19 @@ class GerminatorTrayEndpointTest {
   void assignGerminatorTrays_propagatesNotFoundWhenActivitiesMissing_andCallsService()
       throws Exception {
     // Arrange - request list with one valid-looking entry
-    List<GerminatorTrayCreateDto> requests =
-        List.of(new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), LocalDateTime.now()));
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), LocalDateTime.now())
+    );
     when(testResultService.assignGerminatorTrays(any()))
-        .thenThrow(
-            new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Activities not found for provided SRM IDs"));
+        .thenThrow(new ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Activities not found for provided SRM IDs"
+        ));
     // Act / Assert
-    mockMvc
-        .perform(
-            post(BASE_URL)
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requests)))
+    mockMvc.perform(post(BASE_URL)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requests)))
         .andExpect(status().isNotFound());
     // Verify that the service was invoked
     verify(testResultService, times(1)).assignGerminatorTrays(requests);
@@ -130,19 +135,19 @@ class GerminatorTrayEndpointTest {
   void assignGerminatorTrays_propagatesNotFoundWhenTestResultDatesMissing_andCallsService()
       throws Exception {
     // Arrange - request list with one valid-looking entry
-    List<GerminatorTrayCreateDto> requests =
-        List.of(new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), LocalDateTime.now()));
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), LocalDateTime.now())
+    );
     when(testResultService.assignGerminatorTrays(any()))
-        .thenThrow(
-            new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Test result dates are missing for provided activities"));
+        .thenThrow(new ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Test result dates are missing for provided activities"
+        ));
     // Act / Assert
-    mockMvc
-        .perform(
-            post(BASE_URL)
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requests)))
+    mockMvc.perform(post(BASE_URL)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requests)))
         .andExpect(status().isNotFound());
     // Verify that the service was invoked
     verify(testResultService, times(1)).assignGerminatorTrays(requests);
@@ -151,8 +156,9 @@ class GerminatorTrayEndpointTest {
   @Test
   void assignGerminatorTrays_returns400_whenRequestBodyIsNull() throws Exception {
     // Act / Assert - sending null body should result in bad request
-    mockMvc
-        .perform(post(BASE_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(""))
+    mockMvc.perform(post(BASE_URL)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(""))
         .andExpect(status().isBadRequest());
 
     // Verify service was NOT called due to request validation failure
@@ -162,16 +168,19 @@ class GerminatorTrayEndpointTest {
   @Test
   void assignGerminatorTrays_returns400_whenActivityTypeCdIsBlank() throws Exception {
     // Arrange - invalid request with blank activity type
-    List<GerminatorTrayCreateDto> requests =
-        List.of(new GerminatorTrayCreateDto("", new BigDecimal("881191"), LocalDateTime.now()));
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto(
+          "",
+          new BigDecimal("881191"),
+          LocalDateTime.now()
+        )
+    );
 
     // Act / Assert
-    mockMvc
-        .perform(
-            post(BASE_URL)
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requests)))
+    mockMvc.perform(post(BASE_URL)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requests)))
         .andExpect(status().isBadRequest());
 
     // Verify service was NOT called due to request validation failure
@@ -184,18 +193,17 @@ class GerminatorTrayEndpointTest {
     String invalidJson = "[{\"activityTypeCd\":\"G10\",\"riaSkey\":null}]";
 
     // Act / Assert
-    mockMvc
-        .perform(
-            post(BASE_URL)
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidJson))
+    mockMvc.perform(post(BASE_URL)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(invalidJson))
         .andExpect(status().isBadRequest());
 
     // Verify service was NOT called due to request validation failure
     verify(testResultService, times(0)).assignGerminatorTrays(any());
   }
 
+  /* ----------------------- Assign Germinator Id to Trays ----------------------*/
   @Test
   void assignGerminatorIdToTray_returns200AndBody_andCallsService() throws Exception {
     // Arrange
@@ -205,7 +213,7 @@ class GerminatorTrayEndpointTest {
     GerminatorTrayAssignGerminatorIdResponseDto response =
         new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId);
 
-    when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
+    when(germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
         .thenReturn(response);
 
     // Act / Assert
@@ -213,115 +221,108 @@ class GerminatorTrayEndpointTest {
         .perform(
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
+                .param("germinatorId", germinatorId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(germinatorId)))
+        )
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.germinatorTrayId").value(101))
         .andExpect(jsonPath("$.germinatorId").value("1"));
 
-    // Verify service was called with the individual parameters
-    verify(testResultService, times(1)).assignGerminatorIdToTray(germinatorTrayId, germinatorId);
+    verify(germinatorTrayService, times(1))
+        .assignGerminatorIdToTray(germinatorTrayId, germinatorId);
   }
 
   @Test
   void assignGerminatorIdToTray_returns404_whenTrayNotFound() throws Exception {
-    // Arrange
     Integer germinatorTrayId = 999;
     String germinatorId = "1";
 
-    when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
-        .thenThrow(
-            new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId));
+    when(germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
+            "Germinator tray not found with ID: " + germinatorTrayId));
 
-    // Act / Assert
     mockMvc
         .perform(
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
+                .param("germinatorId", germinatorId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(germinatorId)))
+        )
         .andExpect(status().isNotFound());
 
-    // Verify service was called with the individual parameters
-    verify(testResultService, times(1)).assignGerminatorIdToTray(germinatorTrayId, germinatorId);
+    verify(germinatorTrayService, times(1))
+        .assignGerminatorIdToTray(germinatorTrayId, germinatorId);
   }
 
   @Test
   void assignGerminatorIdToTray_returns400_whenGerminatorIdBlank() throws Exception {
-    // Arrange - empty germinator ID
-    Integer germinatorTrayId = 101;
+    int germinatorTrayId = 101;
     String germinatorId = "";
 
-    // Act / Assert
     mockMvc
         .perform(
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
+                .param("germinatorId", germinatorId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(germinatorId)))
+        )
         .andExpect(status().isBadRequest());
 
-    // Verify service was NOT called because validation failed
-    verify(testResultService, times(0))
-        .assignGerminatorIdToTray(any(Integer.class), any(String.class));
+    verify(germinatorTrayService, times(0))
+        .assignGerminatorIdToTray(any(), any());
   }
 
   @Test
   void assignGerminatorIdToTray_returns400_whenGerminatorIdExceedsRange() throws Exception {
-    // Arrange
-    Integer germinatorTrayId = 101;
-    Integer invalidGerminatorId = 10; // exceeds max of 9
+    int germinatorTrayId = 101;
+    String invalidGerminatorId = "10"; // exceeds max of 9
 
-    // Act / Assert
     mockMvc
         .perform(
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
+                .param("germinatorId", invalidGerminatorId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(String.valueOf(invalidGerminatorId)))
+        )
         .andExpect(status().isBadRequest());
   }
 
   @ParameterizedTest
   @ValueSource(ints = {0, 1, 5, 9})
-  void assignGerminatorIdToTray_returns200_withValidNumericIds(Integer germinatorId)
-      throws Exception {
-    // Arrange
+  void assignGerminatorIdToTray_returns200_withValidNumericIds(Integer germinatorId) throws Exception {
     Integer germinatorTrayId = 101;
     GerminatorTrayAssignGerminatorIdResponseDto response =
         new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId.toString());
 
-    when(testResultService.assignGerminatorIdToTray(germinatorTrayId, germinatorId.toString()))
+    when(germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId.toString()))
         .thenReturn(response);
 
-    // Act / Assert
     mockMvc
         .perform(
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
+                .param("germinatorId", germinatorId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(germinatorId.toString())))
+        )
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.germinatorId").value(germinatorId.toString()));
   }
 
   @Test
   void assignGerminatorIdToTray_returns400_whenRequestBodyIsNull() throws Exception {
-    // Arrange
-    Integer germinatorTrayId = 101;
+    int germinatorTrayId = 101;
 
-    // Act / Assert - sending null/empty body
+    // No param -> Spring sees missing required @RequestParam -> 400
     mockMvc
         .perform(
             patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(""))
+        )
         .andExpect(status().isBadRequest());
 
-    // Verify service was NOT called
-    verify(testResultService, times(0)).assignGerminatorIdToTray(any(), any());
+    verify(germinatorTrayService, times(0))
+        .assignGerminatorIdToTray(any(), any());
   }
 }
