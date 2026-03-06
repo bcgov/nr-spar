@@ -19,6 +19,7 @@ import FavouriteActivities from '../views/CONSEP/FavouriteActivity';
 import MoistureContent from '../views/CONSEP/TestingActivities/MoistureContent';
 import PurityContent from '../views/CONSEP/TestingActivities/PurityContent';
 import TestSearch from '../views/CONSEP/TestingActivities/TestSearch';
+import MaintainGermTray from '../views/CONSEP/TestingActivities/GerminatorTray/MaintainGermTray';
 
 const BrowserRoutes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
@@ -124,6 +125,12 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.TESTING_ACTIVITIES_LIST,
     element: (
       <TestSearch />
+    )
+  },
+  {
+    path: ROUTES.MAINTAIN_GERMINATION_TRAY_SCREEN,
+    element: (
+      <MaintainGermTray />
     )
   }
 ];
