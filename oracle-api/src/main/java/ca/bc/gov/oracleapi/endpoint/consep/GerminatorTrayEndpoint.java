@@ -1,24 +1,35 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
+import ca.bc.gov.oracleapi.response.ValidationExceptionResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
+import ca.bc.gov.oracleapi.service.consep.GerminatorTrayService;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 
 /**
  * This class exposes germinator tray resources API.
@@ -30,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Germinator Trays", description = "Resource to manage germinator trays.")
 public class GerminatorTrayEndpoint {
   private final TestResultService testResultService;
+  private final GerminatorTrayService germinatorTrayService;
 
   /**
    * Assigns germinator trays for a batch of activities.
@@ -40,7 +52,7 @@ public class GerminatorTrayEndpoint {
    * @return a list of GerminatorTrayCreateResponseDto, one per created tray
    */
   @PostMapping("")
-  @ResponseStatus(HttpStatus.OK)
+  @ResponseStatus(HttpStatus.CREATED)
   @ApiResponse(
       responseCode = "201",
       description = "Successfully assigned trays for the provided activities.",
@@ -52,5 +64,66 @@ public class GerminatorTrayEndpoint {
       @Valid @RequestBody List<@Valid GerminatorTrayCreateDto> requests
   ) {
     return testResultService.assignGerminatorTrays(requests);
+  }
+
+  /**
+   * Assigns a germinator ID to an existing germinator tray.
+   *
+   * @param germinatorTrayId the ID of the germinator tray
+   * @param germinatorId     the germinator ID to assign
+   * @return a response DTO confirming the assignment
+   */
+  @PatchMapping("/{germinatorTrayId}/germinator-id")
+  @ResponseStatus(HttpStatus.OK)
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully assigned germinator ID to the tray.",
+      content =
+      @Content(
+          schema = @Schema(implementation = GerminatorTrayAssignGerminatorIdResponseDto.class))
+  )
+  @ApiAuthResponse
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
+      @PathVariable Integer germinatorTrayId,
+      @RequestParam
+      @Pattern(regexp = "^[0-9]$", message = "Germinator ID must be a single digit (0-9)")
+      String germinatorId
+  ) {
+    return germinatorTrayService.assignGerminatorIdToTray(
+        germinatorTrayId,
+        germinatorId
+    );
+  }
+
+  /**
+   * Handles {@link ConstraintViolationException} thrown when validation
+   * on controller method parameters (e.g. {@code @RequestParam}, {@code @PathVariable})
+   * fails, and returns a {@link ValidationExceptionResponse}.
+   *
+   * Applies only to exceptions raised within {@link GerminatorTrayEndpoint}.
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ValidationExceptionResponse handleConstraintViolation(
+      ConstraintViolationException ex
+  ) {
+
+    List<FieldError> fieldErrors = ex.getConstraintViolations().stream()
+        .map(cv -> {
+          String path = cv.getPropertyPath().toString();
+          String fieldName = path.contains(".")
+              ? path.substring(path.lastIndexOf('.') + 1)
+              : path;
+
+          return new FieldError(
+              cv.getRootBeanClass().getSimpleName(),
+              fieldName,
+              cv.getMessage()
+          );
+        })
+        .toList();
+
+    return new ValidationExceptionResponse(fieldErrors);
   }
 }
