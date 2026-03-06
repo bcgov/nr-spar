@@ -30,7 +30,6 @@ class GerminatorTrayServiceTest {
   @Mock
   private GerminatorTrayRepository germinatorTrayRepository;
 
-  @Autowired
   @InjectMocks
   private GerminatorTrayService germinatorTrayService;
 

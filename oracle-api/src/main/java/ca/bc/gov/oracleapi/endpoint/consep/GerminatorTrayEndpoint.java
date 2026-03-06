@@ -110,11 +110,18 @@ public class GerminatorTrayEndpoint {
   ) {
 
     List<FieldError> fieldErrors = ex.getConstraintViolations().stream()
-        .map(cv -> new FieldError(
-            cv.getRootBeanClass().getSimpleName(),
-            cv.getPropertyPath().toString(),
-            cv.getMessage()
-        ))
+        .map(cv -> {
+          String path = cv.getPropertyPath().toString();
+          String fieldName = path.contains(".")
+              ? path.substring(path.lastIndexOf('.') + 1)
+              : path;
+
+          return new FieldError(
+              cv.getRootBeanClass().getSimpleName(),
+              fieldName,
+              cv.getMessage()
+          );
+        })
         .toList();
 
     return new ValidationExceptionResponse(fieldErrors);
