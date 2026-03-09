@@ -93,7 +93,7 @@ class ActivityEndpointTest {
         validActivityCreateDto.seedlotNumber(),            // seedlotSample
         12345,                                             // riaSkey (mock value)
         validActivityCreateDto.activityTypeCd(),           // activityTypeCd
-        null,                                              // germTestInd
+        0,                                                 // germTestInd
         null                                               // assignedTrayInd
     );
 

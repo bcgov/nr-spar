@@ -98,7 +98,7 @@ const TestListTable = ({
     if (selectedRows.length === 0) {
       return {
         disabled: true,
-        reason: 'Select one seedlot to create germinator tray.'
+        reason: 'Select one or more seedlots to create a germinator tray.'
       };
     }
 

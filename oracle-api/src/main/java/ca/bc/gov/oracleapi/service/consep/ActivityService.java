@@ -232,7 +232,11 @@ public class ActivityService {
       testResultRepository.save(testResult);
     }
 
-    return mapActivityEntityToSearchResponseDto(savedActivityEntity);
+    List<String> germTestCodes =
+        testRegimeRepository.findAllGermTestActivityTypeCodes();
+    boolean isGermTest = germTestCodes.contains(activityCreateDto.activityTypeCd());
+
+    return mapActivityEntityToSearchResponseDto(savedActivityEntity, isGermTest);
   }
 
   /**
@@ -351,7 +355,10 @@ public class ActivityService {
    * @param e the persisted {@link ActivityEntity} to map
    * @return a populated {@link ActivitySearchResponseDto} suitable for search result displays
    */
-  public static ActivitySearchResponseDto mapActivityEntityToSearchResponseDto(ActivityEntity e) {
+  public static ActivitySearchResponseDto mapActivityEntityToSearchResponseDto(
+      ActivityEntity e,
+      boolean isGermTest
+  ) {
     return new ActivitySearchResponseDto(
         e.getSeedlotNumber() != null ? e.getSeedlotNumber() : e.getFamilyLotNumber(),
         e.getRequestId() + "-" + e.getItemId(),
@@ -380,7 +387,7 @@ public class ActivityService {
         null,
         e.getRiaKey().intValue(),
         e.getActivityTypeCode(),
-        null,
+        isGermTest ? -1 : 0,
         null
     );
   }
