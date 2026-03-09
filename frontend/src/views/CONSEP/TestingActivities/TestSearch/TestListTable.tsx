@@ -104,22 +104,26 @@ const TestListTable = ({
 
     const today = new Date();
 
-    const hasInvalidRow = selectedRows.some(({ original }) => {
-      const withdrawalDate = original.seedWithdrawalDate
-        ? new Date(original.seedWithdrawalDate)
-        : null;
+    const hasInvalidRow = selectedRows.some(
+      ({ original }: { original: TestingSearchResponseType }) => {
+        const withdrawalDate = original.seedWithdrawalDate
+          ? new Date(original.seedWithdrawalDate)
+          : null;
 
-      return (
-        (withdrawalDate && withdrawalDate > today) // if seedlot has not withdraw yet
-        || original.germTestInd !== -1 // if not germ test
-        || original.acceptResultInd === -1 // if already assigned to a tray
-      );
-    });
+        return (
+          (withdrawalDate && withdrawalDate > today) // if seedlot has not withdraw yet
+          || original.germTestInd !== -1 // if not germ test
+          || original.acceptResultInd === -1 // if already assigned to a tray
+        );
+      }
+    );
 
     if (hasInvalidRow) {
       return {
         disabled: true,
-        reason: 'Ensure seeds aren\'t withdrawn, only germination tests are selected, and no tray ID is assigned.'
+        reason: 'Could not create germinator tray. Possible reasons: '
+        + 'Seed has not been withdrawn, not all tests are germination tests, '
+        + 'and/or a germinator tray ID is already assigned.'
       };
     }
 
@@ -271,7 +275,7 @@ const TestListTable = ({
                         label={createTrayState.reason}
                         align="right"
                         className={
-                          isActionButtonsEnabled
+                          selectedRows.length > 0 && createTrayState.disabled
                             ? 'concep-test-search-create-germ-tray-tooltip'
                             : ''
                         }
