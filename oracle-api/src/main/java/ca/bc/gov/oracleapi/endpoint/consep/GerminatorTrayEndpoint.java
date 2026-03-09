@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,10 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-
-/**
- * This class exposes germinator tray resources API.
- */
+/** This class exposes germinator tray resources API. */
 @RestController
 @RequestMapping("/api/germinator-trays")
 @RequiredArgsConstructor
@@ -70,7 +69,7 @@ public class GerminatorTrayEndpoint {
    * Assigns a germinator ID to an existing germinator tray.
    *
    * @param germinatorTrayId the ID of the germinator tray
-   * @param germinatorId     the germinator ID to assign
+   * @param germinatorId the germinator ID to assign
    * @return a response DTO confirming the assignment
    */
   @PatchMapping("/{germinatorTrayId}/germinator-id")
@@ -125,5 +124,17 @@ public class GerminatorTrayEndpoint {
         .toList();
 
     return new ValidationExceptionResponse(fieldErrors);
+  }
+
+  @GetMapping("/{germinatorTrayId}/tests")
+  @ResponseStatus(HttpStatus.OK)
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved tests for the germinator tray.",
+      content = @Content(schema = @Schema(implementation = GerminatorTrayContentsDto.class)))
+  @ApiAuthResponse
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  public List<GerminatorTrayContentsDto> getTestsByTrayId(@PathVariable Integer germinatorTrayId) {
+    return germinatorTrayService.getTrayContents(germinatorTrayId);
   }
 }
