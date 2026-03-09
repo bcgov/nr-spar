@@ -353,6 +353,7 @@ public class ActivityService {
    * in activity search results and table displays.
    *
    * @param e the persisted {@link ActivityEntity} to map
+   * @param isGermTest whether the activity represents a germination test
    * @return a populated {@link ActivitySearchResponseDto} suitable for search result displays
    */
   public static ActivitySearchResponseDto mapActivityEntityToSearchResponseDto(
