@@ -113,7 +113,7 @@ const TestListTable = ({
         return (
           (withdrawalDate && withdrawalDate > today) // if seedlot has not withdraw yet
           || original.germTestInd !== -1 // if not germ test
-          || original.acceptResultInd === -1 // if already assigned to a tray
+          || original.assignedTrayInd === -1 // if already assigned to a tray
         );
       }
     );

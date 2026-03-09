@@ -169,6 +169,7 @@ class ActivitySearchServiceTest {
     entity.setRiaSkey(riaSkey);
     entity.setActivityTypeCd(testTypes.get(0));
     entity.setGermTestInd(0);
+    entity.setAssignedTrayInd(0);
   }
 
   @Test
@@ -248,6 +249,7 @@ class ActivitySearchServiceTest {
     assertThat(activitySearchResponseDto.riaSkey()).isEqualTo(riaSkey);
     assertThat(activitySearchResponseDto.activityTypeCd()).isEqualTo(testTypes.get(0));
     assertThat(activitySearchResponseDto.germTestInd()).isEqualTo(0);
+    assertThat(activitySearchResponseDto.assignedTrayInd()).isEqualTo(0);
 
     verify(activitySearchRepository, times(1)).searchTestingActivities(
         lotNumbers, testTypes, activityIds, germinatorTrayId,

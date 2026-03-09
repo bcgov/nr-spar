@@ -27,6 +27,7 @@ export type TestingSearchResponseType = {
   riaSkey: number;
   activityTypeCd: string;
   germTestInd: 0 | -1 | null;
+  assignedTrayInd: 0 | -1 | null;
 };
 
 // Type for pagination details

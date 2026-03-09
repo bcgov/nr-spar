@@ -380,6 +380,7 @@ public class ActivityService {
         null,
         e.getRiaKey().intValue(),
         e.getActivityTypeCode(),
+        null,
         null
     );
   }

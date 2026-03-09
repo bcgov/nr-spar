@@ -36,7 +36,8 @@ public record ActivitySearchResponseDto(
     String seedlotSample,
     Integer riaSkey,
     String activityTypeCd,
-    Integer germTestInd
+    Integer germTestInd,
+    Integer assignedTrayInd
 ) {
 }
 
