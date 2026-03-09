@@ -2,8 +2,10 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -66,5 +68,20 @@ public class GerminatorTrayService {
         germinatorTrayId,
         germinatorId
     );
+  }
+
+  public List<GerminatorTrayContentsDto> getTrayContents(Integer germinatorTrayId) {
+    if (germinatorTrayId == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Germinator tray ID cannot be null");
+    }
+
+    // Optional but recommended: return 404 if tray id does not exist at all
+    if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId);
+    }
+
+    return germinatorTrayRepository.findTestsByGerminatorTrayId(germinatorTrayId);
   }
 }
