@@ -90,4 +90,25 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
   void markSignificantAndCommit(
       @Param("riaKey") BigDecimal riaKey
   );
+
+  /**
+   * Update the activity's update_timestamp (for parent touch).
+   * Used with optimistic concurrency: only updates if current updateTimestamp matches.
+   *
+   * @param riaKey           the request item activity key
+   * @param updateTimestamp   the expected current update timestamp (optimistic lock)
+   * @return the number of rows updated (0 or 1)
+   */
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE ActivityEntity a
+         SET a.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE a.riaKey = :riaKey
+         AND a.updateTimestamp = :updateTimestamp
+      """)
+  int updateTimestampWhereMatch(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("updateTimestamp") LocalDateTime updateTimestamp
+  );
 }
