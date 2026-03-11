@@ -168,6 +168,8 @@ class ActivitySearchServiceTest {
     entity.setSeedlotSample(seedlotSample);
     entity.setRiaSkey(riaSkey);
     entity.setActivityTypeCd(testTypes.get(0));
+    entity.setGermTestInd(0);
+    entity.setAssignedTrayInd(0);
   }
 
   @Test
@@ -246,6 +248,8 @@ class ActivitySearchServiceTest {
     assertThat(activitySearchResponseDto.seedlotSample()).isEqualTo(seedlotSample);
     assertThat(activitySearchResponseDto.riaSkey()).isEqualTo(riaSkey);
     assertThat(activitySearchResponseDto.activityTypeCd()).isEqualTo(testTypes.get(0));
+    assertThat(activitySearchResponseDto.germTestInd()).isZero();
+    assertThat(activitySearchResponseDto.assignedTrayInd()).isZero();
 
     verify(activitySearchRepository, times(1)).searchTestingActivities(
         lotNumbers, testTypes, activityIds, germinatorTrayId,
