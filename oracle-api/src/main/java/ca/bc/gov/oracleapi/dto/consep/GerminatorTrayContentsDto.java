@@ -1,30 +1,61 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
-import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
-import java.math.BigDecimal;
 
+/** A DTO containing the fields for the contents of tests in germinator tray from consep. */
 public record GerminatorTrayContentsDto(
+    @Schema(description = "Germinator tray id", example = "1311")
     Integer germinatorTrayId,
+
+    @Schema(description = "Vegetation code", example = "PLI")
     String vegetationSt,
+
+    @Schema(description = "Activity type code", example = "G20")
     String activityTypeCd,
+
     LocalDateTime actualStartDate,
+
     LocalDateTime dateCreated,
-    BigDecimal riaSkey,
+
+    @Schema(description = "RIA Key of the test result entry", example = "123")
+    Integer riaSkey,
+
+    @Schema(description = "Request ID of the test result entry", example = "RTS20042360")
     String requestId,
-    BigDecimal requestSkey,
+
+    Integer requestSkey,
+
+    @Schema(description = "Item ID of the test result entry", example = "A")
     String itemId,
+
+    @Schema(description = "Request type of the test result entry", example = "RTS")
     String requestTypeSt,
+
+    @Schema(description = "Seedlot number", example = "30350")
     String seedlotNumber,
+
     LocalDateTime soakStartDate,
+
     LocalDateTime soakEndDate,
-    LocalDate seedWithdrawDate,
-    LocalDate warmStratStartDate,
-    LocalDate drybackStartDate,
+
+    LocalDateTime seedWithdrawDate,
+
+    LocalDateTime warmStratStartDate,
+
+    LocalDateTime drybackStartDate,
+
     LocalDateTime germinatorEntry,
+
     LocalDateTime stratStartDate,
+
+    @Schema(description = "Germinator ID", example = "1")
     String germinatorId,
+
+    @Schema(description = "Standard activity ID", example = "G10")
     String standardActivityId,
+
+    @Schema(description = "Test category code", example = "STD")
     String testCategoryCd
 ) {
 }
