@@ -333,98 +333,123 @@ class GerminatorTrayEndpointTest {
   void deleteTestFromTray_returns204_andCallsService() throws Exception {
     Integer germinatorTrayId = 101;
     BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime activityUpdateTimestamp = LocalDateTime.of(2025, 3, 10, 12, 0, 0);
 
     mockMvc
         .perform(
             delete(BASE_URL + "/" + germinatorTrayId + "/tests/" + riaSkey)
-                .with(csrf()))
+                .with(csrf())
+                .param("activityUpdateTimestamp", activityUpdateTimestamp.toString()))
         .andExpect(status().isNoContent());
 
     verify(germinatorTrayService, times(1))
-        .deleteTestFromTray(germinatorTrayId, riaSkey);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, activityUpdateTimestamp);
   }
 
   @Test
   void deleteTestFromTray_returns409_whenConflict() throws Exception {
     Integer germinatorTrayId = 101;
     BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime activityUpdateTimestamp = LocalDateTime.of(2025, 3, 10, 12, 0, 0);
 
     doThrow(new ResponseStatusException(HttpStatus.CONFLICT,
             GerminatorTrayService.RESELECT_MESSAGE))
         .when(germinatorTrayService)
-        .deleteTestFromTray(germinatorTrayId, riaSkey);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, activityUpdateTimestamp);
 
     mockMvc
         .perform(
             delete(BASE_URL + "/" + germinatorTrayId + "/tests/" + riaSkey)
-                .with(csrf()))
+                .with(csrf())
+                .param("activityUpdateTimestamp", activityUpdateTimestamp.toString()))
         .andExpect(status().isConflict());
 
     verify(germinatorTrayService, times(1))
-        .deleteTestFromTray(germinatorTrayId, riaSkey);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, activityUpdateTimestamp);
   }
 
   @Test
   void deleteTestFromTray_returns404_whenTestNotFound() throws Exception {
     Integer germinatorTrayId = 101;
     BigDecimal riaSkey = new BigDecimal("999999");
+    LocalDateTime activityUpdateTimestamp = LocalDateTime.of(2025, 3, 10, 12, 0, 0);
 
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
             "Test not found for RIA_SKEY: " + riaSkey))
         .when(germinatorTrayService)
-        .deleteTestFromTray(germinatorTrayId, riaSkey);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, activityUpdateTimestamp);
+
+    mockMvc
+        .perform(
+            delete(BASE_URL + "/" + germinatorTrayId + "/tests/" + riaSkey)
+                .with(csrf())
+                .param("activityUpdateTimestamp", activityUpdateTimestamp.toString()))
+        .andExpect(status().isNotFound());
+
+    verify(germinatorTrayService, times(1))
+        .deleteTestFromTray(germinatorTrayId, riaSkey, activityUpdateTimestamp);
+  }
+
+  @Test
+  void deleteTestFromTray_returns400_whenActivityUpdateTimestampMissing() throws Exception {
+    Integer germinatorTrayId = 101;
+    BigDecimal riaSkey = new BigDecimal("881191");
 
     mockMvc
         .perform(
             delete(BASE_URL + "/" + germinatorTrayId + "/tests/" + riaSkey)
                 .with(csrf()))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isBadRequest());
 
-    verify(germinatorTrayService, times(1))
-        .deleteTestFromTray(germinatorTrayId, riaSkey);
+    verify(germinatorTrayService, times(0)).deleteTestFromTray(any(), any(), any());
   }
 
   /* ----------------------- Delete tray ----------------------*/
   @Test
   void deleteTray_returns204_andCallsService() throws Exception {
     Integer germinatorTrayId = 101;
-
+    LocalDateTime activityUpdateTimestamp = LocalDateTime.of(2025, 3, 10, 12, 0, 0);    
     mockMvc
-        .perform(delete(BASE_URL + "/" + germinatorTrayId).with(csrf()))
+        .perform(delete(BASE_URL + "/" + germinatorTrayId).with(csrf())
+            .param("activityUpdateTimestamp", activityUpdateTimestamp.toString()))
         .andExpect(status().isNoContent());
 
-    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId);
+    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, activityUpdateTimestamp);
   }
 
   @Test
   void deleteTray_returns404_whenTrayNotFound() throws Exception {
     Integer germinatorTrayId = 999;
+    LocalDateTime activityUpdateTimestamp = LocalDateTime.of(2025, 3, 10, 12, 0, 0);
 
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
             "Germinator tray not found with ID: " + germinatorTrayId))
         .when(germinatorTrayService)
-        .deleteTray(germinatorTrayId);
+        .deleteTray(germinatorTrayId, activityUpdateTimestamp);
 
     mockMvc
-        .perform(delete(BASE_URL + "/" + germinatorTrayId).with(csrf()))
+        .perform(delete(BASE_URL + "/" + germinatorTrayId).with(csrf())
+            .param("activityUpdateTimestamp", activityUpdateTimestamp.toString()))
         .andExpect(status().isNotFound());
 
-    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId);
+    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, activityUpdateTimestamp);
   }
 
   @Test
   void deleteTray_returns409_whenConflict() throws Exception {
     Integer germinatorTrayId = 101;
+    LocalDateTime activityUpdateTimestamp = LocalDateTime.of(2025, 3, 10, 12, 0, 0);
 
     doThrow(new ResponseStatusException(HttpStatus.CONFLICT,
             GerminatorTrayService.RESELECT_MESSAGE))
         .when(germinatorTrayService)
-        .deleteTray(germinatorTrayId);
+        .deleteTray(germinatorTrayId, activityUpdateTimestamp);
 
     mockMvc
-        .perform(delete(BASE_URL + "/" + germinatorTrayId).with(csrf()))
+        .perform(delete(BASE_URL + "/" + germinatorTrayId).with(csrf())
+            .param("activityUpdateTimestamp", activityUpdateTimestamp.toString()))
         .andExpect(status().isConflict());
 
-    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId);
+    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, activityUpdateTimestamp);
   }
 }

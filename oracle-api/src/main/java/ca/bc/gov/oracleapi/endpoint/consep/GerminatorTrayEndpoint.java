@@ -118,11 +118,13 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void deleteTestFromTray(
       @PathVariable Integer germinatorTrayId,
-      @PathVariable BigDecimal riaSkey
+      @PathVariable BigDecimal riaSkey,
+      @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime activityUpdateTimestamp
   ) {
     germinatorTrayService.deleteTestFromTray(
         germinatorTrayId,
-        riaSkey
+        riaSkey,
+        activityUpdateTimestamp
     );
   }
 
@@ -140,8 +142,11 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(responseCode = "409", description = "Data updated by another user; reselect and retry.")
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public void deleteTray(@PathVariable Integer germinatorTrayId) {
-    germinatorTrayService.deleteTray(germinatorTrayId);
+  public void deleteTray(
+    @PathVariable Integer germinatorTrayId,
+    @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime activityUpdateTimestamp
+  ) {
+    germinatorTrayService.deleteTray(germinatorTrayId, activityUpdateTimestamp);
   }
 
   /**

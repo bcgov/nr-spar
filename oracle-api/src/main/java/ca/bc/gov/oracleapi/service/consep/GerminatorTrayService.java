@@ -95,9 +95,10 @@ public class GerminatorTrayService {
   @Transactional(rollbackFor = ResponseStatusException.class)
   public void deleteTestFromTray(
       Integer germinatorTrayId,
-      BigDecimal riaSkey
+      BigDecimal riaSkey,
+      LocalDateTime activityUpdateTimestamp
   ) {
-    if (germinatorTrayId == null || riaSkey == null) {
+    if (germinatorTrayId == null || riaSkey == null || activityUpdateTimestamp == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
           "Germinator tray ID, RIA key, and activity update timestamp are required");
@@ -122,18 +123,7 @@ public class GerminatorTrayService {
     }
     SparLog.info("Detached test {} from tray {}", riaSkey, germinatorTrayId);
 
-    ActivityEntity activity = activityRepository.findById(riaSkey)
-    .orElseThrow(() -> new ResponseStatusException(
-        HttpStatus.NOT_FOUND,
-        "Activity not found for RIA_SKEY: " + riaSkey));
-    LocalDateTime updateTimestamp = activity.getUpdateTimestamp();
-    if (updateTimestamp == null) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "Activity has no update timestamp for optimistic lock: " + riaSkey);
-    }
-
-    int parentRows = activityRepository.updateTimestampWhereMatch(riaSkey, updateTimestamp);
+    int parentRows = activityRepository.updateTimestampWhereMatch(riaSkey, activityUpdateTimestamp);
     if (parentRows == 0) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
     }
@@ -154,10 +144,11 @@ public class GerminatorTrayService {
    * Uses optimistic concurrency; if any DML affects 0 rows, throws and rolls back.
    *
    * @param germinatorTrayId the tray to delete
+   * @param activityUpdateTimestamp the current update_timestamp of the parent activity (optimistic lock)
    * @throws ResponseStatusException 404 if tray not found, 409 with RESELECT_MESSAGE if any DML affects 0 rows
    */
   @Transactional(rollbackFor = ResponseStatusException.class)
-  public void deleteTray(Integer germinatorTrayId) {
+  public void deleteTray(Integer germinatorTrayId, LocalDateTime activityUpdateTimestamp) {
     if (germinatorTrayId == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
@@ -170,31 +161,21 @@ public class GerminatorTrayService {
           "Germinator tray not found with ID: " + germinatorTrayId);
     }
 
-    List<BigDecimal> riaSKeys = testResultRepository.findRiaKeysByGerminatorTrayId(germinatorTrayId);
-    SparLog.info("Deleting tray {} with {} tests", germinatorTrayId, riaSKeys.size());
+    List<BigDecimal> riaKeys = testResultRepository.findRiaKeysByGerminatorTrayId(germinatorTrayId);
+    SparLog.info("Deleting tray {} with {} tests", germinatorTrayId, riaKeys.size());
 
-    for (BigDecimal riaSKey : riaSKeys) {
-      int detachRows = testResultRepository.detachTestFromTray(riaSKey);
+    for (BigDecimal riaKey : riaKeys) {
+      int detachRows = testResultRepository.detachTestFromTray(riaKey);
       if (detachRows == 0) {
         throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
       }
-      SparLog.info("Detached test {} from tray {}", riaSKey, germinatorTrayId);
+      SparLog.info("Detached test {} from tray {}", riaKey, germinatorTrayId);
 
-      ActivityEntity activity = activityRepository.findById(riaSKey)
-          .orElseThrow(() -> new ResponseStatusException(
-              HttpStatus.NOT_FOUND,
-              "Activity not found for RIA_SKEY: " + riaSKey));
-      LocalDateTime updateTimestamp = activity.getUpdateTimestamp();
-      if (updateTimestamp == null) {
-        throw new ResponseStatusException(
-            HttpStatus.CONFLICT,
-            "Activity has no update timestamp for optimistic lock: " + riaSKey);
-      }
-      int parentRows = activityRepository.updateTimestampWhereMatch(riaSKey, updateTimestamp);
+      int parentRows = activityRepository.updateTimestampWhereMatch(riaKey, activityUpdateTimestamp);
       if (parentRows == 0) {
         throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
       }
-      SparLog.info("Updated activity {} update timestamp", riaSKey);
+      SparLog.info("Updated activity {} update timestamp", riaKey);
     }
 
     int deleteRows = germinatorTrayRepository.deleteByGerminatorTrayId(germinatorTrayId);
