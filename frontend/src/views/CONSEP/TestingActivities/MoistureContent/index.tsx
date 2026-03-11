@@ -350,12 +350,12 @@ const MoistureContent = () => {
     <FlexGrid className="consep-moisture-content">
       {alert?.message
         && (
-          <InlineNotification
-            className="consep-moisture-content-alert"
-            kind={alert?.isSuccess ? 'success' : 'error'}
-            title={alert?.isSuccess ? 'Success' : 'Error'}
-            subtitle={alert?.message}
-          />
+        <InlineNotification
+          lowContrast
+          kind={alert?.isSuccess ? 'success' : 'error'}
+          title={alert?.isSuccess ? 'Success' : 'Error'}
+          subtitle={alert?.message}
+        />
         )}
 
       <Row className="consep-moisture-content-breadcrumb">

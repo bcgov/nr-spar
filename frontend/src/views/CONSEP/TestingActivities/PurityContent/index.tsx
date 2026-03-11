@@ -490,6 +490,7 @@ const PurityContent = () => {
               && impurities[replicateNumber].length >= 10
                 ? (
                   <InlineNotification
+                    lowContrast
                     kind="error"
                     title="Error"
                     role="alert"
@@ -519,6 +520,7 @@ const PurityContent = () => {
         alert?.message
         && (
           <InlineNotification
+            lowContrast
             className="consep-purity-content-alert"
             kind={alert?.isSuccess ? 'success' : 'error'}
             title={alert?.isSuccess ? 'Success' : 'Error'}
