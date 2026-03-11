@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.service.consep.GerminatorTrayService;
@@ -210,8 +210,8 @@ class GerminatorTrayEndpointTest {
     Integer germinatorTrayId = 101;
     String germinatorId = "1";
 
-    GerminatorTrayAssignGerminatorIdResponseDto response =
-        new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId);
+    GerminatorIdAssignResponseDto response =
+        new GerminatorIdAssignResponseDto(germinatorTrayId, germinatorId);
 
     when(germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
         .thenReturn(response);
@@ -293,8 +293,8 @@ class GerminatorTrayEndpointTest {
   void assignGerminatorIdToTray_returns200_withValidNumericIds(Integer germinatorId)
       throws Exception {
     Integer germinatorTrayId = 101;
-    GerminatorTrayAssignGerminatorIdResponseDto response =
-        new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId.toString());
+    GerminatorIdAssignResponseDto response =
+        new GerminatorIdAssignResponseDto(germinatorTrayId, germinatorId.toString());
 
     when(germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId.toString()))
         .thenReturn(response);

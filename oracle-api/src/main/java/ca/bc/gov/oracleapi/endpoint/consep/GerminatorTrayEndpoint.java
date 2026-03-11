@@ -1,6 +1,6 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -80,12 +81,12 @@ public class GerminatorTrayEndpoint {
       description = "Successfully assigned germinator ID to the tray.",
       content =
       @Content(
-          schema = @Schema(implementation = GerminatorTrayAssignGerminatorIdResponseDto.class))
+          schema = @Schema(implementation = GerminatorIdAssignResponseDto.class))
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
-      @PathVariable Integer germinatorTrayId,
+  public GerminatorIdAssignResponseDto assignGerminatorIdToTray(
+      @PathVariable @Max(value = 99999, message = "Tray ID must be at most 5 digits") Integer germinatorTrayId,
       @RequestParam
       @Pattern(regexp = "^[0-9]$", message = "Germinator ID must be a single digit (0-9)")
       String germinatorId

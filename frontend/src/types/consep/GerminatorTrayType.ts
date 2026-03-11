@@ -3,3 +3,8 @@ export type GermTrayCreateResponseType = {
   germinatorTrayId: number;
   actualStartDate: string;
 };
+
+export type GerminatorIdAssignResponseDto = {
+  germinatorTrayId: number;
+  germinatorId: string;
+};

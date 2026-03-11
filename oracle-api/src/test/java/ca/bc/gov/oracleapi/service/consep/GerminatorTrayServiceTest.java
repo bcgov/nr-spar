@@ -9,7 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import java.util.Optional;
@@ -49,7 +49,7 @@ class GerminatorTrayServiceTest {
     when(germinatorTrayRepository.save(tray)).thenReturn(tray);
 
     // Act
-    GerminatorTrayAssignGerminatorIdResponseDto response =
+    GerminatorIdAssignResponseDto response =
         germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId);
 
     // Assert

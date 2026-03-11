@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class GerminatorTrayService {
    * @return a response DTO confirming the assignment
    * @throws ResponseStatusException if the tray is not found
    */
-  public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
+  public GerminatorIdAssignResponseDto assignGerminatorIdToTray(
       Integer germinatorTrayId,
       String germinatorId
   ) {
@@ -62,7 +62,7 @@ public class GerminatorTrayService {
         germinatorTrayId
     );
 
-    return new GerminatorTrayAssignGerminatorIdResponseDto(
+    return new GerminatorIdAssignResponseDto(
         germinatorTrayId,
         germinatorId
     );
