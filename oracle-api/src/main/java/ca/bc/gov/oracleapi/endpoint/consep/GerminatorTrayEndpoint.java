@@ -118,13 +118,11 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void deleteTestFromTray(
       @PathVariable Integer germinatorTrayId,
-      @PathVariable BigDecimal riaSkey,
-      @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime activityUpdateTimestamp
+      @PathVariable BigDecimal riaSkey
   ) {
     germinatorTrayService.deleteTestFromTray(
         germinatorTrayId,
-        riaSkey,
-        activityUpdateTimestamp
+        riaSkey
     );
   }
 
