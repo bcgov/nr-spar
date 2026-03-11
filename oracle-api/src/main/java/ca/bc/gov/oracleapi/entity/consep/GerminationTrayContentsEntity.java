@@ -3,8 +3,6 @@ package ca.bc.gov.oracleapi.entity.consep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -21,7 +19,6 @@ import lombok.Setter;
 public class GerminationTrayContentsEntity {
   
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "GERMINATOR_TRAY_ID", precision = 5, scale = 0, nullable = false)
   private Integer germinatorTrayId;
   @Column(name = "VEGETATION_ST", length = 8)
@@ -34,8 +31,8 @@ public class GerminationTrayContentsEntity {
   private LocalDateTime dateCreated;
   @Column(name = "RIA_SKEY", precision = 10, scale = 0, nullable = false)
   private Integer riaSkey;
-  @Column(name = "REQUEST_ID", scale = 0)
-  private Integer requestId;
+  @Column(name = "REQUEST_ID", length = 11)
+  private String requestId;
   @Column(name = "REQUEST_SKEY", precision = 10, scale = 0)
   private Integer requestSkey;
   @Column(name = "ITEM_ID", length = 1)
@@ -49,7 +46,7 @@ public class GerminationTrayContentsEntity {
   @Column(name = "SOAK_END_DATE")
   private LocalDateTime soakEndDate;
   @Column(name = "SEED_WITHDRAWAL_DATE")
-  private LocalDateTime seedWithdrawalDate;
+  private LocalDateTime seedWithdrawDate;
   @Column(name = "WARM_STRAT_START_DATE")
   private LocalDateTime warmStratStartDate;
   @Column(name = "DRYBACK_START_DATE")
@@ -57,11 +54,11 @@ public class GerminationTrayContentsEntity {
   @Column(name = "GERMINATOR_ENTRY")
   private LocalDateTime germinatorEntry;
   @Column(name = "STRAT_START_DT")
-  private LocalDateTime stratStartDt;
+  private LocalDateTime stratStartDate;
   @Column(name = "GERMINATOR_ID", length = 1)
   private String germinatorId;
   @Column(name = "STNDRD_ACTIVITY_ID", length = 3)
-  private String stndrdActivityId;
+  private String standardActivityId;
   @Column(name = "TEST_CATEGORY_CD", length = 3)
   private String testCategoryCd;
   @Column(name = "TEST_COMPLETE_IND", precision = 5, scale = 0)
