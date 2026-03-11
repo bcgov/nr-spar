@@ -13,24 +13,26 @@ import org.springframework.transaction.annotation.Transactional;
 public interface GerminatorTrayRepository extends JpaRepository<GerminatorTrayEntity, Integer> {
   @Modifying
   @Transactional
-  @Query(
-      """
+  @Query("""
       DELETE FROM GerminatorTrayEntity gtr
        WHERE gtr.germinatorTrayId = :trayId
          AND gtr.revisionCount = :revisionCount
       """)
   int deleteByIdAndRevisionCount(
-      @Param("trayId") Integer trayId, @Param("revisionCount") Long revisionCount);
+      @Param("trayId") Integer trayId,
+      @Param("revisionCount") Long revisionCount
+  );
 
   @Modifying
   @Transactional
-  @Query(
-      """
+  @Query("""
       UPDATE GerminatorTrayEntity gtr
          SET gtr.revisionCount = gtr.revisionCount + 1
        WHERE gtr.germinatorTrayId = :trayId
          AND gtr.revisionCount = :revisionCount
       """)
   int incrementRevisionCountWithVersionCheck(
-      @Param("trayId") Integer trayId, @Param("revisionCount") Long revisionCount);
+      @Param("trayId") Integer trayId,
+      @Param("revisionCount") Long revisionCount
+  );
 }
