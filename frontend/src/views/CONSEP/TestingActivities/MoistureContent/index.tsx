@@ -352,6 +352,7 @@ const MoistureContent = () => {
         && (
         <InlineNotification
           lowContrast
+          className="consep-moisture-content-alert"
           kind={alert?.isSuccess ? 'success' : 'error'}
           title={alert?.isSuccess ? 'Success' : 'Error'}
           subtitle={alert?.message}
