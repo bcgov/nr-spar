@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import Alert from '@mui/material/Alert';
 import {
   FlexGrid,
   Row,
@@ -491,6 +490,7 @@ const PurityContent = () => {
               && impurities[replicateNumber].length >= 10
                 ? (
                   <InlineNotification
+                    lowContrast
                     kind="error"
                     title="Error"
                     role="alert"
@@ -519,12 +519,13 @@ const PurityContent = () => {
       {
         alert?.message
         && (
-          <Alert
-            className="consep-moisture-content-alert"
-            severity={alert?.isSuccess ? 'success' : 'error'}
-          >
-            {alert?.message}
-          </Alert>
+          <InlineNotification
+            lowContrast
+            className="consep-purity-content-alert"
+            kind={alert?.isSuccess ? 'success' : 'error'}
+            title={alert?.isSuccess ? 'Success' : 'Error'}
+            subtitle={alert?.message}
+          />
         )
       }
       <Modal
