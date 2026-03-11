@@ -87,7 +87,9 @@ public class ActivitySearchService {
         .map(String::trim)
         .map(String::toUpperCase)
         .toList();
-      if (testTypes.isEmpty()) testTypes = null;
+      if (testTypes.isEmpty()) {
+        testTypes = null;
+      }
     }
 
     List<String> activityIds = null;
@@ -97,7 +99,9 @@ public class ActivitySearchService {
         .filter(s -> s != null && !s.isBlank())
         .map(String::trim)
         .toList();
-      if (activityIds.isEmpty()) activityIds = null;
+      if (activityIds.isEmpty()) {
+        activityIds = null;
+      }
     }
 
     // Fetch paginated results from repository
@@ -192,7 +196,9 @@ public class ActivitySearchService {
         activitySearchResultEntity.getItemId(),
         activitySearchResultEntity.getSeedlotSample(),
         activitySearchResultEntity.getRiaSkey(),
-        activitySearchResultEntity.getActivityTypeCd()
+        activitySearchResultEntity.getActivityTypeCd(),
+        activitySearchResultEntity.getGermTestInd(),
+        activitySearchResultEntity.getAssignedTrayInd()
     );
   }
 

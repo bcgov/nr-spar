@@ -119,7 +119,7 @@ public class ActivitySearchResultEntity {
   private String orchardId;
 
   @Column(name = "ASSIGNED_TRAY_IND")
-  private Integer assignedTrayId;
+  private Integer assignedTrayInd;
 
   @Column(name = "GENETIC_CLASS_CODE", length = 8)
   private String geneticClassCode;
