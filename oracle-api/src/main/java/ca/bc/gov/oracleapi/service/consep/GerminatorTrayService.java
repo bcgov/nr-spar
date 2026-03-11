@@ -3,7 +3,9 @@ package ca.bc.gov.oracleapi.service.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
+import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
+import ca.bc.gov.oracleapi.repository.consep.GerminationTrayContentsRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class GerminatorTrayService {
 
   private final GerminatorTrayRepository germinatorTrayRepository;
+  private final GerminationTrayContentsRepository germinationTrayContentsRepository;
 
   /**
    * Assign a germinator ID to an existing germinator tray.
@@ -73,15 +76,47 @@ public class GerminatorTrayService {
   public List<GerminatorTrayContentsDto> getTrayContents(Integer germinatorTrayId) {
     if (germinatorTrayId == null) {
       throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Germinator tray ID cannot be null");
+          HttpStatus.BAD_REQUEST,
+          "Germinator tray ID cannot be null"
+      );
     }
 
-    // Optional but recommended: return 404 if tray id does not exist at all
     if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
       throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId);
+          HttpStatus.NOT_FOUND,
+          "Germinator tray not found with ID: " + germinatorTrayId
+      );
     }
 
-    return germinatorTrayRepository.findTestsByGerminatorTrayId(germinatorTrayId);
+    return germinationTrayContentsRepository.findByGerminatorTrayId(germinatorTrayId)
+        .stream()
+        .map(this::toDto)
+        .toList();
+  }
+
+  private GerminatorTrayContentsDto toDto(GerminationTrayContentsEntity e) {
+    return new GerminatorTrayContentsDto(
+        e.getGerminatorTrayId(),
+        e.getVegetationSt(),
+        e.getActivityTypeCd(),
+        e.getActualStartDate(),
+        e.getDateCreated(),
+        e.getRiaSkey(),
+        e.getRequestId(),
+        e.getRequestSkey(),
+        e.getItemId(),
+        e.getRequestTypeSt(),
+        e.getSeedlotNumber(),
+        e.getSoakStartDate(),
+        e.getSoakEndDate(),
+        e.getSeedWithdrawDate(),
+        e.getWarmStratStartDate(),
+        e.getDrybackStartDate(),
+        e.getGerminatorEntry(),
+        e.getStratStartDate(),
+        e.getGerminatorId(),
+        e.getStandardActivityId(),
+        e.getTestCategoryCd()
+    );
   }
 }
