@@ -109,4 +109,20 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
       @Param("riaKey") BigDecimal riaKey,
       @Param("trayId") Integer trayId
   );
+
+long countByGerminatorTrayId(Integer trayId);
+
+@Modifying
+@Transactional
+@Query("""
+    UPDATE TestResultEntity rst
+       SET rst.germinatorTrayId = null,
+           rst.warmStratStartDate = null,
+           rst.stratStartDate = null,
+           rst.drybackStartDate = null,
+           rst.germinatorEntry = null,
+           rst.updateTimestamp = CURRENT_TIMESTAMP
+     WHERE rst.riaKey = :riaKey
+    """)
+void clearGerminatorTrayAssignment(@Param("riaKey") BigDecimal riaKey);
 }
