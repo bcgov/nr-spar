@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import Alert from '@mui/material/Alert';
 import {
   FlexGrid,
   Row,
@@ -10,7 +9,8 @@ import {
   DatePicker,
   DatePickerInput,
   TextArea,
-  ComboBox
+  ComboBox,
+  InlineNotification
 } from '@carbon/react';
 import {
   CheckmarkFilled,
@@ -349,7 +349,15 @@ const MoistureContent = () => {
   return (
     <FlexGrid className="consep-moisture-content">
       {alert?.message
-        && (<Alert className="consep-moisture-content-alert" severity={alert?.isSuccess ? 'success' : 'error'}>{alert?.message}</Alert>)}
+        && (
+        <InlineNotification
+          lowContrast
+          className="consep-moisture-content-alert"
+          kind={alert?.isSuccess ? 'success' : 'error'}
+          title={alert?.isSuccess ? 'Success' : 'Error'}
+          subtitle={alert?.message}
+        />
+        )}
 
       <Row className="consep-moisture-content-breadcrumb">
         <Breadcrumbs crumbs={createBreadcrumbItems()} />
