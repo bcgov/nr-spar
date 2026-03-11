@@ -103,6 +103,7 @@ const TestListTable = ({
     }
 
     const today = new Date();
+    today.setHours(23, 59, 59, 999); // set to be end of the day
 
     const hasInvalidRow = selectedRows.some(
       ({ original }: { original: TestingSearchResponseType }) => {
@@ -111,7 +112,8 @@ const TestListTable = ({
           : null;
 
         return (
-          (!withdrawalDate || withdrawalDate > today) // if seedlot has not withdrawn yet
+          // if seedlot has not withdrawn yet, withdrawal date is after today
+          (!withdrawalDate || withdrawalDate > today)
           || original.germTestInd !== -1 // if not germ test
           || original.assignedTrayInd === -1 // if already assigned to a tray
         );
