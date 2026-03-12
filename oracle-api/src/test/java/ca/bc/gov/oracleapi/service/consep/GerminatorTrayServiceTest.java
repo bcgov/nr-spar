@@ -15,7 +15,6 @@ import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.GerminationTrayContentsRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
-
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -125,7 +124,7 @@ class GerminatorTrayServiceTest {
     );
 
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-    verify(testResultRepository, never()).findById(org.mockito.ArgumentMatchers.any());
+    verify(testResultRepository, never()).findById(any());
   }
 
   @Test
@@ -140,7 +139,7 @@ class GerminatorTrayServiceTest {
 
     assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
     verify(testResultRepository).findById(riaKey);
-    verify(germinatorTrayRepository, never()).findById(org.mockito.ArgumentMatchers.any());
+    verify(germinatorTrayRepository, never()).findById(any());
   }
 
   @Test
@@ -159,7 +158,7 @@ class GerminatorTrayServiceTest {
 
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     verify(testResultRepository).findById(riaKey);
-    verify(germinatorTrayRepository, never()).findById(org.mockito.ArgumentMatchers.any());
+    verify(germinatorTrayRepository, never()).findById(any());
   }
 
   @Test
@@ -187,7 +186,7 @@ class GerminatorTrayServiceTest {
     verify(testResultRepository).clearGerminatorTrayAssignment(riaKey, trayId);
     verify(germinatorTrayRepository).deleteByIdAndRevisionCount(trayId, revision);
     verify(germinatorTrayRepository, never())
-        .incrementRevisionCountWithVersionCheck(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+      .incrementRevisionCountWithVersionCheck(any(), any());
   }
 
   @Test
@@ -216,7 +215,7 @@ class GerminatorTrayServiceTest {
     verify(testResultRepository).clearGerminatorTrayAssignment(riaKey, trayId);
     verify(germinatorTrayRepository).incrementRevisionCountWithVersionCheck(trayId, revision);
     verify(germinatorTrayRepository, never())
-        .deleteByIdAndRevisionCount(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+      .deleteByIdAndRevisionCount(any(), any());
   }
 
   @Test
