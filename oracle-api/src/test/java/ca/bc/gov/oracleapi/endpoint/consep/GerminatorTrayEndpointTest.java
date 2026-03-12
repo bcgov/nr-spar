@@ -1,10 +1,12 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -29,10 +31,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
-
 
 @WebMvcTest(GerminatorTrayEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
@@ -325,5 +327,94 @@ class GerminatorTrayEndpointTest {
 
     verify(germinatorTrayService, times(0))
         .assignGerminatorIdToTray(any(), any());
+  }
+
+  /* ----------------------- Remove Test From Tray ----------------------*/
+  @Test
+  void removeTestFromTray_returns200_andCallsService() throws Exception {
+    BigDecimal riaKey = new BigDecimal("881191");
+
+    mockMvc
+        .perform(
+            delete(BASE_URL + "/tests/" + riaKey)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(germinatorTrayService, times(1)).removeTestFromTray(riaKey);
+  }
+
+  @Test
+  void removeTestFromTray_returns404_whenTestNotFound() throws Exception {
+    BigDecimal riaKey = new BigDecimal("999999");
+
+    doThrow(
+            new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Test result not found for RIA key: " + riaKey
+            ))
+        .when(germinatorTrayService)
+        .removeTestFromTray(riaKey);
+
+    mockMvc
+        .perform(
+            delete(BASE_URL + "/tests/" + riaKey)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
+    verify(germinatorTrayService, times(1)).removeTestFromTray(riaKey);
+  }
+
+  @Test
+  void removeTestFromTray_returns409_whenTrayWasModifiedConcurrently() throws Exception {
+    BigDecimal riaKey = new BigDecimal("881191");
+
+    doThrow(
+            new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Germinator tray was modified by another user. Please refresh and try again."
+            ))
+        .when(germinatorTrayService)
+        .removeTestFromTray(riaKey);
+
+    mockMvc
+        .perform(
+            delete(BASE_URL + "/tests/" + riaKey)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isConflict());
+
+    verify(germinatorTrayService, times(1)).removeTestFromTray(riaKey);
+  }
+
+  @Test
+  @WithAnonymousUser
+  void removeTestFromTray_returns401_whenUnauthorized() throws Exception {
+    BigDecimal riaKey = new BigDecimal("881191");
+
+    mockMvc
+        .perform(
+            delete(BASE_URL + "/tests/" + riaKey)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verify(germinatorTrayService, times(0)).removeTestFromTray(any());
+  }
+
+  @Test
+  @WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
+  void removeTestFromTray_returns403_whenUserDoesNotHaveRequiredRole() throws Exception {
+    BigDecimal riaKey = new BigDecimal("881191");
+
+    mockMvc
+        .perform(
+            delete(BASE_URL + "/tests/" + riaKey)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verify(germinatorTrayService, times(0)).removeTestFromTray(any());
   }
 }
