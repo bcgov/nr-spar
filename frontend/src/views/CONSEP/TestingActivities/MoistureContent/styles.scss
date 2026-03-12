@@ -1,4 +1,4 @@
-@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use "@bcgov-nr/nr-theme/design-tokens/variables.scss" as vars;
 
 .consep-moisture-content-title {
   justify-content: flex-start;
@@ -72,6 +72,8 @@
   margin-bottom: 2rem;
   position: fixed;
   top: 3rem;
-  width: 80%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
   z-index: 1000;
 }

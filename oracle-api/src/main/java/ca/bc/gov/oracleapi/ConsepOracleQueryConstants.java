@@ -44,7 +44,7 @@ public class ConsepOracleQueryConstants {
         AND (:revisedStartDateTo IS NULL OR a.revisedStartDt <= :revisedStartDateTo)
         AND (:revisedEndDateFrom IS NULL OR a.revisedEndDt >= :revisedEndDateFrom)
         AND (:revisedEndDateTo IS NULL OR a.revisedEndDt <= :revisedEndDateTo)
-        AND (:germTrayAssignment IS NULL OR a.assignedTrayId = :germTrayAssignment)
+        AND (:germTrayAssignment IS NULL OR a.assignedTrayInd = :germTrayAssignment)
         AND (:completeStatus IS NULL OR a.testCompleteInd = :completeStatus)
         AND (:acceptanceStatus IS NULL OR a.acceptResultInd = :acceptanceStatus)
         AND (:geneticClassCode IS NULL OR a.geneticClassCode = :geneticClassCode)
