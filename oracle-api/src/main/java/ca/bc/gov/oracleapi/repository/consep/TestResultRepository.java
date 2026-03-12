@@ -110,7 +110,7 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
       @Param("trayId") Integer trayId
   );
 
-long countByGerminatorTrayId(Integer trayId);
+  long countByGerminatorTrayId(Integer trayId);
 
   @Modifying
   @Transactional
