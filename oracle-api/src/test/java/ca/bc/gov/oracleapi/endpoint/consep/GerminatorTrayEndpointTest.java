@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -276,7 +277,7 @@ class GerminatorTrayEndpointTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.germinatorTrayId").value(germinatorTrayId))
-        .andExpect(jsonPath("$.germinatorId").isEmpty());
+        .andExpect(jsonPath("$.germinatorId").value(nullValue()));
 
     verify(germinatorTrayService, times(1))
         .assignGerminatorIdToTray(germinatorTrayId, germinatorId);
