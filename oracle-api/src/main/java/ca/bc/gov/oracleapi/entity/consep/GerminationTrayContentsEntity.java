@@ -5,6 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,11 +32,11 @@ public class GerminationTrayContentsEntity {
   @Column(name = "DATE_CREATED", nullable = false)
   private LocalDateTime dateCreated;
   @Column(name = "RIA_SKEY", precision = 10, scale = 0, nullable = false)
-  private Integer riaSkey;
+  private BigDecimal riaSkey;
   @Column(name = "REQUEST_ID", length = 11)
   private String requestId;
   @Column(name = "REQUEST_SKEY", precision = 10, scale = 0)
-  private Integer requestSkey;
+  private Long requestSkey;
   @Column(name = "ITEM_ID", length = 1)
   private String itemId;
   @Column(name = "REQUEST_TYPE_ST", length = 3)

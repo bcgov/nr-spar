@@ -1,6 +1,8 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /** A DTO containing the fields for the contents of tests in germinator tray from consep. */
@@ -19,12 +21,12 @@ public record GerminatorTrayContentsDto(
     LocalDateTime dateCreated,
 
     @Schema(description = "RIA Key of the test result entry", example = "123")
-    Integer riaSkey,
+    BigDecimal riaSkey,
 
     @Schema(description = "Request ID of the test result entry", example = "RTS20042360")
     String requestId,
 
-    Integer requestSkey,
+    Long requestSkey,
 
     @Schema(description = "Item ID of the test result entry", example = "A")
     String itemId,
