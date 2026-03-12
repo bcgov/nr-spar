@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.service.consep.GerminatorTrayService;
@@ -251,19 +252,6 @@ class GerminatorTrayEndpointTest {
     verify(germinatorTrayService, times(0)).assignGerminatorIdToTray(any(), any());
   }
 
-  @ParameterizedTest
-  @ValueSource(ints = {0, -1})
-  void getTestsByTrayId_returns400_whenTrayIdNotPositive(Integer germinatorTrayId)
-      throws Exception {
-    mockMvc
-        .perform(
-            get(BASE_URL + "/" + germinatorTrayId + "/tests")
-                .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-
-    verify(germinatorTrayService, times(0)).getTrayContents(any());
-  }
-
   @Test
   void assignGerminatorIdToTray_returns404_whenTrayNotFound() throws Exception {
     Integer germinatorTrayId = 999;
@@ -356,6 +344,101 @@ class GerminatorTrayEndpointTest {
 
     verify(germinatorTrayService, times(0))
         .assignGerminatorIdToTray(any(), any());
+  }
+
+  /* ----------------------- Get Tests by Tray ID ----------------------*/
+  @Test
+  void getTestsByTrayId_returns200AndList_andCallsService() throws Exception {
+    Integer germinatorTrayId = 101;
+    List<GerminatorTrayContentsDto> contents =
+        List.of(
+            new GerminatorTrayContentsDto(
+                germinatorTrayId,
+                "PLI",
+                "G20",
+                null,
+                null,
+                new BigDecimal("123"),
+                "RTS20042360",
+                456L,
+                "A",
+                "RTS",
+                "30350",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "1",
+                "G10",
+                "STD"));
+
+    when(germinatorTrayService.getTrayContents(germinatorTrayId)).thenReturn(contents);
+
+    mockMvc
+        .perform(
+            get(BASE_URL + "/" + germinatorTrayId + "/tests")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].germinatorTrayId").value(101))
+        .andExpect(jsonPath("$[0].vegetationSt").value("PLI"));
+
+    verify(germinatorTrayService, times(1)).getTrayContents(germinatorTrayId);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {0, -1})
+  void getTestsByTrayId_returns400_whenTrayIdNotPositive(Integer germinatorTrayId)
+      throws Exception {
+    mockMvc
+        .perform(
+            get(BASE_URL + "/" + germinatorTrayId + "/tests")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).getTrayContents(any());
+  }
+
+  @Test
+  void getTestsByTrayId_returns404_whenTrayNotFound() throws Exception {
+    Integer germinatorTrayId = 999;
+
+    when(germinatorTrayService.getTrayContents(germinatorTrayId))
+        .thenThrow(
+            new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId));
+
+    mockMvc
+        .perform(
+            get(BASE_URL + "/" + germinatorTrayId + "/tests")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
+    verify(germinatorTrayService, times(1)).getTrayContents(germinatorTrayId);
+  }
+
+  @Test
+  @WithAnonymousUser
+  void getTestsByTrayId_returns401_whenUnauthorized() throws Exception {
+    mockMvc
+        .perform(get(BASE_URL + "/101/tests").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verify(germinatorTrayService, times(0)).getTrayContents(any());
+  }
+
+  @Test
+  @WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
+  void getTestsByTrayId_returns403_whenUserDoesNotHaveRequiredRole() throws Exception {
+    mockMvc
+        .perform(get(BASE_URL + "/101/tests").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verify(germinatorTrayService, times(0)).getTrayContents(any());
   }
 
   /* ----------------------- Remove Test From Tray ----------------------*/
