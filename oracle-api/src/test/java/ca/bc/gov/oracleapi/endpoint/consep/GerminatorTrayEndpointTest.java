@@ -256,9 +256,15 @@ class GerminatorTrayEndpointTest {
   }
 
   @Test
-  void assignGerminatorIdToTray_returns400_whenGerminatorIdBlank() throws Exception {
+  void assignGerminatorIdToTray_returns200_whenGerminatorIdBlank_unsetsValue() throws Exception {
     int germinatorTrayId = 101;
     String germinatorId = "";
+
+    GerminatorIdAssignResponseDto response =
+        new GerminatorIdAssignResponseDto(germinatorTrayId, null);
+
+    when(germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
+        .thenReturn(response);
 
     mockMvc
         .perform(
@@ -267,10 +273,11 @@ class GerminatorTrayEndpointTest {
                 .param("germinatorId", germinatorId)
                 .contentType(MediaType.APPLICATION_JSON)
         )
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-    verify(germinatorTrayService, times(0))
-        .assignGerminatorIdToTray(any(), any());
+    verify(germinatorTrayService, times(1))
+        .assignGerminatorIdToTray(germinatorTrayId, germinatorId);
   }
 
   @Test

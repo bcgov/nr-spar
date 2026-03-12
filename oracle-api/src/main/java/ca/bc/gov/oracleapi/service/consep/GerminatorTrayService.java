@@ -28,7 +28,7 @@ public class GerminatorTrayService {
       Integer germinatorTrayId,
       String germinatorId
   ) {
-    if (germinatorTrayId == null || germinatorId == null || germinatorId.isBlank()) {
+    if (germinatorTrayId == null || germinatorId == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
           "Germinator tray ID and germinator ID cannot be null or blank");
@@ -46,20 +46,39 @@ public class GerminatorTrayService {
             "Germinator tray not found with ID: " + germinatorTrayId)
         );
 
-    if (tray.getGerminatorId() != null) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "Germinator ID already assigned to tray: " + germinatorTrayId
+    String previousId = tray.getGerminatorId();
+    if (germinatorId.isBlank()) {
+      SparLog.info(
+          "Unsetting germinator ID for tray {} (previous value: {})",
+          germinatorTrayId,
+          previousId
+      );
+    } else if (previousId == null) {
+      SparLog.info(
+          "Assigning germinator ID {} to tray {}",
+          germinatorId,
+          germinatorTrayId
+      );
+    } else {
+      SparLog.info(
+          "Updating germinator ID for tray {} from {} to {}",
+          germinatorTrayId,
+          previousId,
+          germinatorId
       );
     }
 
-    tray.setGerminatorId(germinatorId);
+    if (germinatorId.isBlank()) {
+      tray.setGerminatorId(null); // unset
+    } else {
+      tray.setGerminatorId(germinatorId);
+    }
     germinatorTrayRepository.save(tray);
 
     SparLog.info(
-        "Successfully assigned germinator ID {} to tray ID {}",
-        germinatorId,
-        germinatorTrayId
+        "Germinator ID for tray {} is now {}",
+        germinatorTrayId,
+        tray.getGerminatorId()
     );
 
     return new GerminatorIdAssignResponseDto(

@@ -83,26 +83,35 @@ class GerminatorTrayServiceTest {
   }
 
   @Test
-  void assignGerminatorIdToTray_shouldThrow_whenGerminatorIdAlreadyAssigned() {
+  void assignGerminatorIdToTray_shouldUpdate_whenGerminatorIdAlreadyAssigned() {
     // Arrange
     Integer germinatorTrayId = 101;
     String newGerminatorId = "7";
 
     GerminatorTrayEntity tray = new GerminatorTrayEntity();
     tray.setGerminatorTrayId(germinatorTrayId);
-    tray.setGerminatorId("2"); // already assigned
+    tray.setGerminatorId("2"); // existing value
 
     when(germinatorTrayRepository.findById(germinatorTrayId))
         .thenReturn(Optional.of(tray));
 
-    // Act / Assert
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
-        germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, newGerminatorId));
+    when(germinatorTrayRepository.save(any(GerminatorTrayEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
-    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
-    assertTrue(ex.getReason().contains("Germinator ID already assigned"));
+    // Act
+    GerminatorIdAssignResponseDto result =
+        germinatorTrayService.assignGerminatorIdToTray(
+            germinatorTrayId,
+            newGerminatorId
+        );
+
+    // Assert
+    assertEquals(germinatorTrayId, result.germinatorTrayId());
+    assertEquals(newGerminatorId, result.germinatorId());
+
+    assertEquals(newGerminatorId, tray.getGerminatorId());
 
     verify(germinatorTrayRepository).findById(germinatorTrayId);
-    verify(germinatorTrayRepository, never()).save(any());
+    verify(germinatorTrayRepository).save(tray);
   }
 }

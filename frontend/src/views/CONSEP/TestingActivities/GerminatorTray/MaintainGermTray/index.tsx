@@ -22,23 +22,12 @@ const BREAD_CRUMB_ITEMS = [{ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIV
 
 const MaintainGermTray = () => {
   const location = useLocation();
-  // const germinatorTrays = location.state?.germinatorTrays?.map(
-  //   (tray: GermTrayCreateResponseType) => ({
-  //     ...tray,
-  //     germinatorId: ''
-  //   })
-  // ) ?? [];
-  const germinatorTrays = [
-    { activityTypeCd: 'G20', germinatorTrayId: 16962, actualStartDate: '2026-03-03T00:00:00' },
-    { activityTypeCd: 'G10', germinatorTrayId: 16963, actualStartDate: '2026-03-03T00:00:00' },
-    { activityTypeCd: 'G12', germinatorTrayId: 16964, actualStartDate: '2026-03-03T00:00:00' },
-    { activityTypeCd: 'G11', germinatorTrayId: 16965, actualStartDate: '2026-03-03T00:00:00' },
-    { activityTypeCd: 'G20', germinatorTrayId: 16966, actualStartDate: '2026-03-03T00:00:00' },
-    { activityTypeCd: 'G10', germinatorTrayId: 16967, actualStartDate: '2026-03-03T00:00:00' }
-  ].map((tray: GermTrayCreateResponseType) => ({
-    ...tray,
-    germinatorId: ''
-  })) ?? [];
+  const germinatorTrays = location.state?.germinatorTrays?.map(
+    (tray: GermTrayCreateResponseType) => ({
+      ...tray,
+      germinatorId: ''
+    })
+  ) ?? [];
   const [alert, setAlert] = useState<{
     status: 'error' | 'info' | 'success' | 'warning';
     message: string;
@@ -86,12 +75,10 @@ const MaintainGermTray = () => {
         );
         trays.forEach((tray) => {
           if (tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId) {
-            if (tray.germinatorId) {
-              assignMutation.mutate({
-                germinatorTrayId: tray.germinatorTrayId,
-                germinatorId: tray.germinatorId
-              });
-            }
+            assignMutation.mutate({
+              germinatorTrayId: tray.germinatorTrayId,
+              germinatorId: tray.germinatorId
+            });
           }
         });
         lastSyncedRef.current = current;

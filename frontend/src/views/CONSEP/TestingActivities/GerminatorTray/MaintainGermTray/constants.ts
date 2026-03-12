@@ -29,9 +29,10 @@ export const getGermTrayColumns = (
     muiEditTextFieldProps: ({ row }) => ({
       value: row.original.germinatorId ?? '',
       onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value.trim(); // keep blank if user deletes
         updateRow({
           ...row.original,
-          germinatorId: e.target.value
+          germinatorId: newValue
         });
       }
     })

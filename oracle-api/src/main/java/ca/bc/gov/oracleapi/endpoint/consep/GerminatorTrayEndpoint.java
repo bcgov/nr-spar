@@ -71,7 +71,7 @@ public class GerminatorTrayEndpoint {
    * Assigns a germinator ID to an existing germinator tray.
    *
    * @param germinatorTrayId the ID of the germinator tray
-   * @param germinatorId     the germinator ID to assign
+   * @param germinatorId     the germinator ID to assign, leave it blank to unassign
    * @return a response DTO confirming the assignment
    */
   @PatchMapping("/{germinatorTrayId}/germinator-id")
@@ -88,7 +88,7 @@ public class GerminatorTrayEndpoint {
   public GerminatorIdAssignResponseDto assignGerminatorIdToTray(
       @PathVariable @Max(value = 99999, message = "Tray ID must be at most 5 digits") Integer germinatorTrayId,
       @RequestParam
-      @Pattern(regexp = "^[0-9]$", message = "Germinator ID must be a single digit (0-9)")
+      @Pattern(regexp = "^$|^[0-9]$", message = "Germinator ID must be a single digit (0-9) or blank")
       String germinatorId
   ) {
     return germinatorTrayService.assignGerminatorIdToTray(
