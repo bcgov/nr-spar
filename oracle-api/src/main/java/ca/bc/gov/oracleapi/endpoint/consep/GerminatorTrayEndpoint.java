@@ -84,7 +84,7 @@ public class GerminatorTrayEndpoint {
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
-      @PathVariable Integer germinatorTrayId,
+      @PathVariable @Positive Integer germinatorTrayId,
       @RequestParam
       @Pattern(regexp = "^[0-9]$", message = "Germinator ID must be a single digit (0-9)")
       String germinatorId
@@ -134,7 +134,7 @@ public class GerminatorTrayEndpoint {
       content = @Content(schema = @Schema(implementation = GerminatorTrayContentsDto.class)))
   @ApiAuthResponse
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
-  public List<GerminatorTrayContentsDto> getTestsByTrayId(@PathVariable Integer germinatorTrayId) {
+  public List<GerminatorTrayContentsDto> getTestsByTrayId(@PathVariable @Positive Integer germinatorTrayId) {
     return germinatorTrayService.getTrayContents(germinatorTrayId);
   }
 }
