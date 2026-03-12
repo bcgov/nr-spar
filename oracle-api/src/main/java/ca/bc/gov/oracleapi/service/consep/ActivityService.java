@@ -232,7 +232,11 @@ public class ActivityService {
       testResultRepository.save(testResult);
     }
 
-    return mapActivityEntityToSearchResponseDto(savedActivityEntity);
+    List<String> germTestCodes =
+        testRegimeRepository.findAllGermTestActivityTypeCodes();
+    boolean isGermTest = germTestCodes.contains(activityCreateDto.activityTypeCd());
+
+    return mapActivityEntityToSearchResponseDto(savedActivityEntity, isGermTest);
   }
 
   /**
@@ -349,9 +353,13 @@ public class ActivityService {
    * in activity search results and table displays.
    *
    * @param e the persisted {@link ActivityEntity} to map
+   * @param isGermTest whether the activity represents a germination test
    * @return a populated {@link ActivitySearchResponseDto} suitable for search result displays
    */
-  public static ActivitySearchResponseDto mapActivityEntityToSearchResponseDto(ActivityEntity e) {
+  public static ActivitySearchResponseDto mapActivityEntityToSearchResponseDto(
+      ActivityEntity e,
+      boolean isGermTest
+  ) {
     return new ActivitySearchResponseDto(
         e.getSeedlotNumber() != null ? e.getSeedlotNumber() : e.getFamilyLotNumber(),
         e.getRequestId() + "-" + e.getItemId(),
@@ -379,7 +387,9 @@ public class ActivityService {
         e.getItemId(),
         null,
         e.getRiaKey().intValue(),
-        e.getActivityTypeCode()
+        e.getActivityTypeCode(),
+        isGermTest ? -1 : 0,
+        null
     );
   }
 }

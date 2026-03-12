@@ -92,6 +92,46 @@ const TestListTable = ({
     }
   ];
 
+  const getCreateGermTrayDisabledState = () => {
+    const selectedRows = tableRef.current?.getSelectedRowModel().rows ?? [];
+
+    if (selectedRows.length === 0) {
+      return {
+        disabled: true,
+        reason: 'Select one or more seedlots to create a germinator tray.'
+      };
+    }
+
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // set to be end of the day
+
+    const hasInvalidRow = selectedRows.some(
+      ({ original }: { original: TestingSearchResponseType }) => {
+        const withdrawalDate = original.seedWithdrawalDate
+          ? new Date(original.seedWithdrawalDate)
+          : null;
+
+        return (
+          // if seedlot has not withdrawn yet, withdrawal date is after today
+          (!withdrawalDate || withdrawalDate > today)
+          || original.germTestInd !== -1 // if not germ test
+          || original.assignedTrayInd === -1 // if already assigned to a tray
+        );
+      }
+    );
+
+    if (hasInvalidRow) {
+      return {
+        disabled: true,
+        reason: 'Could not create germinator tray. Possible reasons: '
+        + 'Seed has not been withdrawn, not all tests are germination tests, '
+        + 'and/or a germinator tray ID is already assigned.'
+      };
+    }
+
+    return { disabled: false, reason: '' };
+  };
+
   return (
     <div className="concep-test-search-table-container">
       <Modal
@@ -200,6 +240,7 @@ const TestListTable = ({
           )}
           renderToolbarInternalActions={({ table }) => {
             tableRef.current = table as MRT_TableInstance<TestingSearchResponseType>;
+            const createTrayState = getCreateGermTrayDisabledState();
             const selectedRows = table.getSelectedRowModel().rows;
             const isActionButtonsEnabled = selectedRows.length === 1;
             const disabledReason = selectedRows.length === 0
@@ -219,20 +260,40 @@ const TestListTable = ({
                       aria-label={label}
                       size="md"
                       className="concep-test-search-table-toolbar-button"
-                      disabled={(label === 'Test history' || label === 'Add activity') && !isActionButtonsEnabled}
+                      disabled={
+                        ((label === 'Test history' || label === 'Add activity') && !isActionButtonsEnabled)
+                        || (label === 'Create germ tray' && createTrayState.disabled)
+                      }
                     >
                       {label}
                       {icon}
                     </Button>
                   );
 
-                  return (label === 'Test history' || label === 'Add activity') && !isActionButtonsEnabled ? (
-                    <Tooltip key={label} label={disabledReason} align="right">
-                      <span>{button}</span>
-                    </Tooltip>
-                  ) : (
-                    button
-                  );
+                  if (label === 'Create germ tray' && createTrayState.disabled) {
+                    return (
+                      <Tooltip
+                        key={label}
+                        label={createTrayState.reason}
+                        align="right"
+                        className={
+                          selectedRows.length > 0 && createTrayState.disabled
+                            ? 'concep-test-search-create-germ-tray-tooltip'
+                            : ''
+                        }
+                      >
+                        <span>{button}</span>
+                      </Tooltip>
+                    );
+                  }
+                  if ((label === 'Test history' || label === 'Add activity') && !isActionButtonsEnabled) {
+                    return (
+                      <Tooltip key={label} label={disabledReason} align="right">
+                        <span>{button}</span>
+                      </Tooltip>
+                    );
+                  }
+                  return button;
                 })}
                 <ShowHideColumnControl
                   table={table as MRT_TableInstance<TestingSearchResponseType>}
