@@ -142,7 +142,7 @@ public class GerminatorTrayEndpoint {
     return germinatorTrayService.getTrayContents(germinatorTrayId);
   }
 
-  @DeleteMapping("/api/germinator-trays/tests/{riaKey}")
+  @DeleteMapping("/tests/{riaKey}")
   @ResponseStatus(HttpStatus.OK)
   @ApiResponse(
       responseCode = "200",
