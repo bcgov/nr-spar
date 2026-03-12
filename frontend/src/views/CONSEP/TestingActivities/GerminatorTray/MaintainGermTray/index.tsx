@@ -43,30 +43,18 @@ const MaintainGermTray = () => {
       germinatorTrayId: number;
       germinatorId: string;
     }) => assignGerminatorId(germinatorTrayId, germinatorId),
-    onError: (error: any, variables) => {
+    onError: (error: any) => {
       const message = error.response?.data?.message || error.message || 'Assign germinator id API request failed';
       setAlert({ status: 'error', message });
-      setTrays((prev) => prev.map((row) => (
-        row.germinatorTrayId === variables.germinatorTrayId ? { ...row, isPending: false } : row
-      )));
     },
-    onSuccess: (data) => {
-      setTrays((prev) => prev.map(
-        (row) => (
-          row.germinatorTrayId === data.germinatorTrayId
-            ? { ...row, germinatorId: data.germinatorId ?? '', isPending: false }
-            : row
-        )
-      ));
-      setAlert(null);
-    }
+    onSuccess: () => { setAlert(null); }
   });
 
   const updateRow = useCallback((updatedRow: GermTrayCreateResponseType) => {
     setTrays((prev) => prev.map(
       (row) => (
         row.germinatorTrayId === updatedRow.germinatorTrayId
-          ? { ...row, ...updatedRow, isPending: true }
+          ? { ...row, ...updatedRow }
           : row
       )
     ));
@@ -74,20 +62,27 @@ const MaintainGermTray = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Use functional state updater to get the latest trays
-      setTrays((currentTrays) => {
-        currentTrays.forEach((tray) => {
-          // only sync rows that have changed and are not pending
-          if (tray.isPending) return;
+      // Prevent overlapping requests
+      if (assignMutation.isPending) return;
 
-          if (tray.germinatorId !== lastSyncedRef.current?.[tray.germinatorTrayId]) {
-            assignMutation.mutate({
-              germinatorTrayId: tray.germinatorTrayId,
-              germinatorId: tray.germinatorId
-            });
-          }
-        });
-        // return the state unchanged
+      // Access trays from state via functional update pattern
+      setTrays((currentTrays) => {
+        const current = JSON.stringify(currentTrays);
+
+        if (current !== lastSyncedRef.current) {
+          const prev: GermTrayColumn[] = JSON.parse(lastSyncedRef.current || '[]');
+          const prevMap = new Map(prev.map((tray) => [tray.germinatorTrayId, tray]));
+
+          currentTrays.forEach((tray) => {
+            if (tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId) {
+              assignMutation.mutate({
+                germinatorTrayId: tray.germinatorTrayId,
+                germinatorId: tray.germinatorId
+              });
+            }
+          });
+          lastSyncedRef.current = current;
+        }
         return currentTrays;
       });
     }, 1000);
