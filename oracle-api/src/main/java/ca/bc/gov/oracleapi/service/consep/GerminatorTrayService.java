@@ -76,8 +76,7 @@ public class GerminatorTrayService {
           HttpStatus.BAD_REQUEST, "Germinator tray ID cannot be null");
     }
 
-    // Optional but recommended: return 404 if tray id does not exist at all
-    if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
+    if (germinatorTrayRepository.findById(germinatorTrayId).isEmpty()) {
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId);
     }
