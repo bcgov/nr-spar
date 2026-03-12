@@ -9,6 +9,7 @@ import ca.bc.gov.oracleapi.response.ValidationExceptionResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.GerminatorTrayService;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -59,7 +60,7 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "201",
       description = "Successfully assigned trays for the provided activities.",
-      content = @Content(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class))
+      content = @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTrayContentsDto.class)))
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
@@ -135,7 +136,7 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "200",
       description = "Successfully retrieved tests for the germinator tray.",
-      content = @Content(schema = @Schema(implementation = GerminatorTrayContentsDto.class)))
+      content = @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTrayContentsDto.class))))
   @ApiAuthResponse
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public List<GerminatorTrayContentsDto> getTestsByTrayId(@PathVariable @Positive Integer germinatorTrayId) {
