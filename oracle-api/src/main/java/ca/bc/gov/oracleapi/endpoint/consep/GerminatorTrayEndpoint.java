@@ -16,11 +16,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -136,5 +140,16 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public List<GerminatorTrayContentsDto> getTestsByTrayId(@PathVariable Integer germinatorTrayId) {
     return germinatorTrayService.getTrayContents(germinatorTrayId);
+  }
+
+  @DeleteMapping("/api/germinator-trays/tests/{riaKey}")
+  @ResponseStatus(HttpStatus.OK)
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully removed test from germinator tray.")
+  @ApiAuthResponse
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  public void removeTestFromTray(@PathVariable @Positive BigDecimal riaKey) {
+    germinatorTrayService.removeTestFromTray(riaKey);
   }
 }
