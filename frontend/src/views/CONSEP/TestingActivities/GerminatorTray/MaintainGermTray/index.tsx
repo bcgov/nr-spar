@@ -61,32 +61,33 @@ const MaintainGermTray = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
+      // Prevent overlapping requests
       if (assignMutation.isPending) return;
 
-      const current = JSON.stringify(trays);
+      // Access trays from state via functional update pattern
+      setTrays((currentTrays) => {
+        const current = JSON.stringify(currentTrays);
 
-      if (current !== lastSyncedRef.current) {
-        // find changed rows only
-        const prev: GermTrayColumn[] = JSON.parse(
-          lastSyncedRef.current || '[]'
-        );
-        const prevMap = new Map(
-          prev.map((tray: GermTrayColumn) => [tray.germinatorTrayId, tray])
-        );
-        trays.forEach((tray) => {
-          if (tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId) {
-            assignMutation.mutate({
-              germinatorTrayId: tray.germinatorTrayId,
-              germinatorId: tray.germinatorId
-            });
-          }
-        });
-        lastSyncedRef.current = current;
-      }
+        if (current !== lastSyncedRef.current) {
+          const prev: GermTrayColumn[] = JSON.parse(lastSyncedRef.current || '[]');
+          const prevMap = new Map(prev.map((tray) => [tray.germinatorTrayId, tray]));
+
+          currentTrays.forEach((tray) => {
+            if (tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId) {
+              assignMutation.mutate({
+                germinatorTrayId: tray.germinatorTrayId,
+                germinatorId: tray.germinatorId
+              });
+            }
+          });
+          lastSyncedRef.current = current;
+        }
+        return currentTrays;
+      });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [trays, assignMutation.isPending]);
+  }, [assignMutation]);
 
   const germTrayColumns = useMemo(() => getGermTrayColumns(updateRow), [updateRow]);
 
@@ -104,6 +105,7 @@ const MaintainGermTray = () => {
             lowContrast
             kind={alert.status}
             subtitle={alert?.message}
+            onClose={() => setAlert(null)}
           />
         </Row>
       )}

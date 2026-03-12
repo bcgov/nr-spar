@@ -6,5 +6,5 @@ export type GermTrayCreateResponseType = {
 
 export type GerminatorIdAssignResponseDto = {
   germinatorTrayId: number;
-  germinatorId: string;
+  germinatorId: string | null;
 };

@@ -83,7 +83,7 @@ public class GerminatorTrayService {
 
     return new GerminatorIdAssignResponseDto(
         germinatorTrayId,
-        germinatorId
+        tray.getGerminatorId()
     );
   }
 }
