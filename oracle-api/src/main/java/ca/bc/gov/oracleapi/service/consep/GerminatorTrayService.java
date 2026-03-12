@@ -83,7 +83,7 @@ public class GerminatorTrayService {
       );
     }
 
-    if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
+    if (germinatorTrayRepository.findById(germinatorTrayId).isEmpty()) {
       throw new ResponseStatusException(
         HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId
       );
