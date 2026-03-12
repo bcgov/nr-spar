@@ -1,7 +1,13 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  useCallback
+} from 'react';
 import { useLocation } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { FlexGrid, Row } from '@carbon/react';
+import { FlexGrid, Row, InlineNotification } from '@carbon/react';
 import GenericTable from '../../../../../components/GenericTable';
 import ROUTES from '../../../../../routes/constants';
 import Breadcrumbs from '../../../../../components/Breadcrumbs';
@@ -16,7 +22,6 @@ const BREAD_CRUMB_ITEMS = [{ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIV
 
 const MaintainGermTray = () => {
   const location = useLocation();
-  const [trays, setTrays] = useState<GermTrayColumn[]>([]);
   // const germinatorTrays = location.state?.germinatorTrays?.map(
   //   (tray: GermTrayCreateResponseType) => ({
   //     ...tray,
@@ -34,8 +39,13 @@ const MaintainGermTray = () => {
     ...tray,
     germinatorId: ''
   })) ?? [];
+  const [alert, setAlert] = useState<{
+    status: 'error' | 'info' | 'success' | 'warning';
+    message: string;
+  } | null>(null);
+  const [trays, setTrays] = useState<GermTrayColumn[]>(germinatorTrays);
+  const lastSyncedRef = useRef<string | null>(JSON.stringify(germinatorTrays));
 
-  const lastSyncedRef = useRef<string | null>(null);
   const assignMutation = useMutation({
     mutationFn: ({
       germinatorTrayId,
@@ -44,20 +54,13 @@ const MaintainGermTray = () => {
       germinatorTrayId: number;
       germinatorId: string;
     }) => assignGerminatorId(germinatorTrayId, germinatorId),
-    onSuccess: () => {
-      console.log('Germinator assigned');
-    },
-    onError: (error) => {
-      console.error('Failed to assign germinator', error);
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || 'Assign germinator id API request failed';
+      setAlert({ status: 'error', message });
     }
   });
 
-  useEffect(() => {
-    setTrays(germinatorTrays);
-    lastSyncedRef.current = JSON.stringify(germinatorTrays);
-  }, [location.state]);
-
-  const updateRow = (updatedRow: GermTrayCreateResponseType) => {
+  const updateRow = useCallback((updatedRow: GermTrayCreateResponseType) => {
     setTrays((prev) => prev.map(
       (row) => (
         row.germinatorTrayId === updatedRow.germinatorTrayId
@@ -65,7 +68,7 @@ const MaintainGermTray = () => {
           : row
       )
     ));
-  };
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -75,10 +78,14 @@ const MaintainGermTray = () => {
 
       if (current !== lastSyncedRef.current) {
         // find changed rows only
-        const prev = JSON.parse(lastSyncedRef.current || '[]');
-
-        trays.forEach((tray, index) => {
-          if (tray.germinatorId !== prev[index]?.germinatorId) {
+        const prev: GermTrayColumn[] = JSON.parse(
+          lastSyncedRef.current || '[]'
+        );
+        const prevMap = new Map(
+          prev.map((tray: GermTrayColumn) => [tray.germinatorTrayId, tray])
+        );
+        trays.forEach((tray) => {
+          if (tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId) {
             if (tray.germinatorId) {
               assignMutation.mutate({
                 germinatorTrayId: tray.germinatorTrayId,
@@ -87,15 +94,14 @@ const MaintainGermTray = () => {
             }
           }
         });
-
         lastSyncedRef.current = current;
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [trays, assignMutation]);
+  }, [trays, assignMutation.isPending]);
 
-  const germTrayColumns = useMemo(() => getGermTrayColumns(updateRow), []);
+  const germTrayColumns = useMemo(() => getGermTrayColumns(updateRow), [updateRow]);
 
   return (
     <FlexGrid className="consep-maintain-germ-tray">
@@ -105,10 +111,19 @@ const MaintainGermTray = () => {
       <Row className="consep-maintain-germ-tray-title">
         <PageTitle title="Maintain germ tray" />
       </Row>
+      {alert?.message && (
+        <Row className="consep-maintain-germ-tray-alert">
+          <InlineNotification
+            lowContrast
+            kind={alert.status}
+            subtitle={alert?.message}
+          />
+        </Row>
+      )}
       <Row className="consep-maintain-germ-tray-table">
         <GenericTable
           columns={germTrayColumns}
-          data={germinatorTrays}
+          data={trays}
           hideToolbar
           enablePagination
           initialState={{

@@ -16,9 +16,9 @@ export const assignGerminatorId = (
   germinatorTrayId: number,
   germinatorId: string
 ) => {
-  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/germinator-id`;
+  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/germinator-id?germinatorId=${encodeURIComponent(germinatorId)}`;
 
   return api
-    .patch(url, { params: { germinatorId } })
+    .patch(url, null)
     .then((res: { data: GerminatorIdAssignResponseDto }) => res.data);
 };

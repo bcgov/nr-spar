@@ -49,7 +49,7 @@ public class GerminatorTrayService {
     if (tray.getGerminatorId() != null) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "Germinator ID already assigned to this tray"
+          "Germinator ID already assigned to tray: " + germinatorTrayId
       );
     }
 
