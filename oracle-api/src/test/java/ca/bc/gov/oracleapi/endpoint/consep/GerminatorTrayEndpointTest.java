@@ -5,6 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -231,6 +232,34 @@ class GerminatorTrayEndpointTest {
 
     verify(germinatorTrayService, times(1))
         .assignGerminatorIdToTray(germinatorTrayId, germinatorId);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {0, -1})
+  void assignGerminatorIdToTray_returns400_whenTrayIdNotPositive(Integer germinatorTrayId)
+      throws Exception {
+    mockMvc
+        .perform(
+            patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
+                .with(csrf())
+                .param("germinatorId", "1")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).assignGerminatorIdToTray(any(), any());
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {0, -1})
+  void getTestsByTrayId_returns400_whenTrayIdNotPositive(Integer germinatorTrayId)
+      throws Exception {
+    mockMvc
+        .perform(
+            get(BASE_URL + "/" + germinatorTrayId + "/tests")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).getTrayContents(any());
   }
 
   @Test
