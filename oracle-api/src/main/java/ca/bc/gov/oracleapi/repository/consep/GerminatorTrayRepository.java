@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
  * This interface enables the germinator tray entity from consep to be retrieved from the database.
  */
 public interface GerminatorTrayRepository extends JpaRepository<GerminatorTrayEntity, Integer> {
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Transactional
   @Query("""
       DELETE FROM GerminatorTrayEntity gtr
@@ -23,7 +23,7 @@ public interface GerminatorTrayRepository extends JpaRepository<GerminatorTrayEn
       @Param("revisionCount") Long revisionCount
   );
 
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Transactional
   @Query("""
       UPDATE GerminatorTrayEntity gtr
