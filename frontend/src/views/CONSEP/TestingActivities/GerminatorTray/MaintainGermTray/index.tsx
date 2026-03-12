@@ -43,9 +43,22 @@ const MaintainGermTray = () => {
       germinatorTrayId: number;
       germinatorId: string;
     }) => assignGerminatorId(germinatorTrayId, germinatorId),
-    onError: (error: any) => {
+    onError: (error: any, variables) => {
       const message = error.response?.data?.message || error.message || 'Assign germinator id API request failed';
       setAlert({ status: 'error', message });
+      setTrays((prev) => prev.map((row) => (
+        row.germinatorTrayId === variables.germinatorTrayId ? { ...row, isPending: false } : row
+      )));
+    },
+    onSuccess: (data) => {
+      setTrays((prev) => prev.map(
+        (row) => (
+          row.germinatorTrayId === data.germinatorTrayId
+            ? { ...row, germinatorId: data.germinatorId ?? '', isPending: false }
+            : row
+        )
+      ));
+      setAlert(null);
     }
   });
 
@@ -53,7 +66,7 @@ const MaintainGermTray = () => {
     setTrays((prev) => prev.map(
       (row) => (
         row.germinatorTrayId === updatedRow.germinatorTrayId
-          ? { ...row, ...updatedRow }
+          ? { ...row, ...updatedRow, isPending: true }
           : row
       )
     ));
@@ -61,27 +74,20 @@ const MaintainGermTray = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Prevent overlapping requests
-      if (assignMutation.isPending) return;
-
-      // Access trays from state via functional update pattern
+      // Use functional state updater to get the latest trays
       setTrays((currentTrays) => {
-        const current = JSON.stringify(currentTrays);
+        currentTrays.forEach((tray) => {
+          // only sync rows that have changed and are not pending
+          if (tray.isPending) return;
 
-        if (current !== lastSyncedRef.current) {
-          const prev: GermTrayColumn[] = JSON.parse(lastSyncedRef.current || '[]');
-          const prevMap = new Map(prev.map((tray) => [tray.germinatorTrayId, tray]));
-
-          currentTrays.forEach((tray) => {
-            if (tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId) {
-              assignMutation.mutate({
-                germinatorTrayId: tray.germinatorTrayId,
-                germinatorId: tray.germinatorId
-              });
-            }
-          });
-          lastSyncedRef.current = current;
-        }
+          if (tray.germinatorId !== lastSyncedRef.current?.[tray.germinatorTrayId]) {
+            assignMutation.mutate({
+              germinatorTrayId: tray.germinatorTrayId,
+              germinatorId: tray.germinatorId
+            });
+          }
+        });
+        // return the state unchanged
         return currentTrays;
       });
     }, 1000);

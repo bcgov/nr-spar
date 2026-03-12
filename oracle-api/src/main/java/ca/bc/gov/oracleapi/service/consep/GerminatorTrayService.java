@@ -20,7 +20,7 @@ public class GerminatorTrayService {
    * Assign a germinator ID to an existing germinator tray.
    *
    * @param germinatorTrayId the ID of the germinator tray
-   * @param germinatorId     the germinator ID to assign
+   * @param germinatorId     the germinator ID to assign, leave it blank to unassign
    * @return a response DTO confirming the assignment
    * @throws ResponseStatusException if the tray is not found
    */
