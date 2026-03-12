@@ -62,33 +62,31 @@ const MaintainGermTray = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Prevent overlapping requests
       if (assignMutation.isPending) return;
 
-      // Access trays from state via functional update pattern
-      setTrays((currentTrays) => {
-        const current = JSON.stringify(currentTrays);
+      const current = JSON.stringify(trays);
+      if (current === lastSyncedRef.current) return;
 
-        if (current !== lastSyncedRef.current) {
-          const prev: GermTrayColumn[] = JSON.parse(lastSyncedRef.current || '[]');
-          const prevMap = new Map(prev.map((tray) => [tray.germinatorTrayId, tray]));
+      const prev: GermTrayColumn[] = JSON.parse(lastSyncedRef.current || '[]');
+      const prevMap = new Map(prev.map((tray) => [tray.germinatorTrayId, tray]));
 
-          currentTrays.forEach((tray) => {
-            if (tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId) {
-              assignMutation.mutate({
-                germinatorTrayId: tray.germinatorTrayId,
-                germinatorId: tray.germinatorId
-              });
-            }
-          });
-          lastSyncedRef.current = current;
-        }
-        return currentTrays;
+      // find the first changed tray only
+      const changedTray = trays.find(
+        (tray) => tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId
+      );
+
+      if (!changedTray) return;
+
+      assignMutation.mutate({
+        germinatorTrayId: changedTray.germinatorTrayId,
+        germinatorId: changedTray.germinatorId
       });
+
+      lastSyncedRef.current = current;
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [assignMutation]);
+  }, [trays, assignMutation]);
 
   const germTrayColumns = useMemo(() => getGermTrayColumns(updateRow), [updateRow]);
 
