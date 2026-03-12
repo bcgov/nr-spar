@@ -333,4 +333,32 @@ class GerminatorTrayServiceTest {
 
     assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
   }
+
+  @Test
+  void removeTestFromTray_shouldThrow404_whenTrayNotFound() {
+    BigDecimal riaKey = new BigDecimal("881191");
+    Integer trayId = 101;
+
+    TestResultEntity test = new TestResultEntity();
+    test.setRiaKey(riaKey);
+    test.setGerminatorTrayId(trayId);
+
+    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(test));
+    when(germinatorTrayRepository.findById(trayId)).thenReturn(Optional.empty());
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> germinatorTrayService.removeTestFromTray(riaKey));
+
+    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+    assertEquals("Germinator tray not found with ID: " + trayId, ex.getReason());
+
+    verify(testResultRepository).findById(riaKey);
+    verify(germinatorTrayRepository).findById(trayId);
+    verify(testResultRepository, never()).countByGerminatorTrayId(any());
+    verify(testResultRepository, never()).clearGerminatorTrayAssignment(any(), any());
+    verify(testResultRepository, never()).existsById(any());
+    verify(germinatorTrayRepository, never()).deleteByIdAndRevisionCount(any(), any());
+    verify(germinatorTrayRepository, never()).incrementRevisionCountWithVersionCheck(any(), any());
+  }
 }
