@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /** The class for Germinator Tray service. */
@@ -120,6 +121,7 @@ public class GerminatorTrayService {
     );
   }
 
+  @Transactional
   public void removeTestFromTray(BigDecimal riaKey) {
     // Validate input
     if (riaKey == null) {
@@ -167,7 +169,20 @@ public class GerminatorTrayService {
     long trayTestCount = testResultRepository.countByGerminatorTrayId(trayId);
 
     // Clear the test assignment from the tray
-    testResultRepository.clearGerminatorTrayAssignment(riaKey);
+    int clearedRows = testResultRepository.clearGerminatorTrayAssignment(riaKey, trayId);
+    if (clearedRows == 0) {
+      boolean stillExists = testResultRepository.existsById(riaKey);
+      if (!stillExists) {
+        throw new ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Test result not found for RIA key: " + riaKey
+        );
+      }
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Test assignment was modified by another user. Please refresh and try again."
+      );
+    }
 
     // Decision: delete tray if last test, otherwise update revision count
     if (trayTestCount == 1) {
