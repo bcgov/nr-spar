@@ -192,7 +192,7 @@ public class GerminatorTrayService {
       if (rowsDeleted == 0) {
         throw new ResponseStatusException(
             HttpStatus.CONFLICT,
-            "Germinator tray was modified by another user. Please refresh and try again."
+            "Germinator tray could not be deleted because it was modified concurrently"
         );
       }
       SparLog.info("Deleted germinator tray {} after removing last test", trayId);
