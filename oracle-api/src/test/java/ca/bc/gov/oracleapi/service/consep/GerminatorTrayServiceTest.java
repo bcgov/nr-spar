@@ -3,7 +3,6 @@ package ca.bc.gov.oracleapi.service.consep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -113,5 +112,22 @@ class GerminatorTrayServiceTest {
 
     verify(germinatorTrayRepository).findById(germinatorTrayId);
     verify(germinatorTrayRepository).save(tray);
+  }
+
+  @Test
+  void assignGerminatorIdToTray_shouldThrow_whenGerminatorIdIsNull() {
+    // Arrange
+    Integer germinatorTrayId = 100;
+    String germinatorId = null;
+
+    // Act & Assert
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+        germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId));
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("Germinator tray ID and germinator ID cannot be null or blank", ex.getReason());
+
+    verify(germinatorTrayRepository, never()).findById(any());
+    verify(germinatorTrayRepository, never()).save(any());
   }
 }

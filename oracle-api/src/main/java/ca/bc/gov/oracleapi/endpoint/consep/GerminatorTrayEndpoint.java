@@ -86,9 +86,13 @@ public class GerminatorTrayEndpoint {
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public GerminatorIdAssignResponseDto assignGerminatorIdToTray(
-      @PathVariable @Max(value = 99999, message = "Tray ID must be at most 5 digits") Integer germinatorTrayId,
+      @PathVariable @Max(value = 99999, message = "Tray ID must be at most 5 digits")
+      Integer germinatorTrayId,
       @RequestParam
-      @Pattern(regexp = "^$|^[0-9]$", message = "Germinator ID must be a single digit (0-9) or blank")
+      @Pattern(
+          regexp = "^$|^\\d$",
+          message = "Germinator ID must be a single digit (0-9) or blank"
+      )
       String germinatorId
   ) {
     return germinatorTrayService.assignGerminatorIdToTray(
