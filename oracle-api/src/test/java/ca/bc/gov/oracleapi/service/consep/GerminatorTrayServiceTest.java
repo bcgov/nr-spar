@@ -277,7 +277,7 @@ class GerminatorTrayServiceTest {
   }
 
   @Test
-  void removeTestFromTray_shouldThrow409_whenDeleteVersionCheckFails() {
+  void removeTestFromTray_shouldThrow409_whenConcurrentDeleteFails() {
     BigDecimal riaKey = new BigDecimal("881191");
     Integer trayId = 101;
     Long revision = 9L;
@@ -296,12 +296,15 @@ class GerminatorTrayServiceTest {
     when(testResultRepository.clearGerminatorTrayAssignment(riaKey, trayId)).thenReturn(1);
     when(germinatorTrayRepository.deleteByIdAndRevisionCount(trayId, revision)).thenReturn(0);
 
-    ResponseStatusException ex = assertThrows(
-        ResponseStatusException.class,
-        () -> germinatorTrayService.removeTestFromTray(riaKey)
-    );
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> germinatorTrayService.removeTestFromTray(riaKey));
 
     assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    assertTrue(
+        ex.getReason()
+            .contains("Germinator tray could not be deleted because it was modified concurrently"));
+    verify(germinatorTrayRepository, never()).incrementRevisionCountWithVersionCheck(any(), any());
   }
 
   @Test
