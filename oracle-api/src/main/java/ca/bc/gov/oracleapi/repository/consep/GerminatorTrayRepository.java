@@ -15,8 +15,12 @@ public interface GerminatorTrayRepository extends JpaRepository<GerminatorTrayEn
   @Transactional
   @Query("""
       DELETE FROM GerminatorTrayEntity gtr
-       WHERE gtr.germinatorTrayId = :trayId
-         AND gtr.revisionCount = :revisionCount
+        WHERE gtr.germinatorTrayId = :trayId
+        AND gtr.revisionCount = :revisionCount
+        AND NOT EXISTS (
+            SELECT 1 FROM TestResultEntity tr
+            WHERE tr.germinatorTrayId = :trayId
+        )
       """)
   int deleteByIdAndRevisionCount(
       @Param("trayId") Integer trayId,
