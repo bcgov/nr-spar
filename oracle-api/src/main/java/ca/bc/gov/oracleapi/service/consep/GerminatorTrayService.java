@@ -73,6 +73,13 @@ public class GerminatorTrayService {
     );
   }
 
+  /**
+   * Retrieve the contents of a germinator tray.
+   *
+   * @param germinatorTrayId the ID of the germinator tray
+   * @return the tray contents, or an empty list if the tray exists but has no contents
+   * @throws ResponseStatusException if the tray ID is null or the tray does not exist
+   */
   public List<GerminatorTrayContentsDto> getTrayContents(Integer germinatorTrayId) {
     if (germinatorTrayId == null) {
       throw new ResponseStatusException(
