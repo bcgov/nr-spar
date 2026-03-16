@@ -79,14 +79,21 @@ public class GerminatorTrayService {
           HttpStatus.BAD_REQUEST, "Germinator tray ID cannot be null");
     }
 
+    var contents = germinationTrayContentsRepository.findByGerminatorTrayId(germinatorTrayId);
+    
+    if (!contents.isEmpty()) {
+      return contents.stream()
+          .map(this::toDto)
+          .toList();
+    }
+
+    // Tray has no contents; check if tray exists before returning empty list
     if (germinatorTrayRepository.findById(germinatorTrayId).isEmpty()) {
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId);
     }
 
-    return germinationTrayContentsRepository.findByGerminatorTrayId(germinatorTrayId).stream()
-        .map(this::toDto)
-        .toList();
+    return List.of();
   }
 
   private GerminatorTrayContentsDto toDto(GerminationTrayContentsEntity e) {
