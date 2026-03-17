@@ -63,6 +63,7 @@ const useReplicates = (
       const updatedList = data.data.replicatesList;
       lastCheckedListRef.current = JSON.stringify(updatedList);
       setReplicatesList(updatedList);
+      updateReplicates(updatedList);
     }
   });
 
@@ -129,6 +130,7 @@ const ActivityResult = ({
     onSuccess: () => {
       setAlert(true, 'Replicates deleted successfully');
       setReplicatesList([]);
+      updateReplicates([]);
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicates: ${(error as AxiosError).message}`);
