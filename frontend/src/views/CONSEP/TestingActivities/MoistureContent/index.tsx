@@ -54,10 +54,9 @@ const MoistureContent = () => {
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
   const [activityRiaKey, setActivityRiaKey] = useState<number>(0);
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
-  const [replicatesData, setReplicatesData] = useState<ReplicateType[]>([]);
+  const [replicates, setReplicates] = useState<ReplicateType[]>([]);
   const [mcType, setMCType] = useState<string>('MCC');
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>();
-  const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [dateErrors, setDateErrors] = useState<{ startDate?: string; endDate?: string }>({});
 
@@ -145,15 +144,14 @@ const MoistureContent = () => {
           testResult: testActivity.moisturePct?.toString()
         }
       );
-      setUpdatedReplicates(testActivityQuery.data.replicatesList);
     }
   }, [testActivity]);
 
   useEffect(() => {
     if (testActivity?.replicatesList && testActivity.replicatesList.length > 0) {
-      setReplicatesData(testActivity.replicatesList);
+      setReplicates(testActivity.replicatesList);
     } else if (mcVariation) {
-      setReplicatesData(initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows));
+      setReplicates(initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows));
     }
   }, [testActivity, riaKey, mcType]);
 
@@ -311,7 +309,7 @@ const MoistureContent = () => {
       icon: Checkmark,
       disabled: testActivity?.testCompleteInd === 1,
       action: () => {
-        const errors = mccReplicatesChecker(updatedReplicates);
+        const errors = mccReplicatesChecker(replicates);
         if (Object.keys(errors).length > 0) {
           setValidationErrors(errors);
         } else {
@@ -372,14 +370,14 @@ const MoistureContent = () => {
         />
         <>
           {
-            testActivity?.testCompleteInd
+            testActivity?.testCompleteInd === 1
               ? (
                 <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
               )
               : null
           }
           {
-            testActivity?.acceptResult
+            testActivity?.acceptResult === 1
               ? (
                 <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
               )
@@ -395,12 +393,12 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-activity-result">
         <ActivityResult
-          replicatesData={replicatesData}
+          replicatesData={replicates}
           replicateType="moistureTest"
           riaKey={activityRiaKey}
-          isEditable={!testActivity?.testCompleteInd}
+          isEditable={testActivity?.testCompleteInd !== 1}
           initValidationErrors={validationErrors}
-          updateReplicates={setUpdatedReplicates}
+          updateReplicates={setReplicates}
           setAlert={handleAlert}
           tableBodyRef={tableBodyRef}
         />

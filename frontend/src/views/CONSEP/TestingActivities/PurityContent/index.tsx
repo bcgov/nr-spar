@@ -62,12 +62,11 @@ const PurityContent = () => {
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
-  const [replicatesData, setReplicatesData] = useState<ReplicateType[]>([]);
+  const [replicates, setReplicates] = useState<ReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
   const [impurities, setImpurities] = useState<ImpurityDisplayType>({});
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'accept'>(COMPLETE);
-  const [updatedReplicates, setUpdatedReplicates] = useState<ReplicateType[]>([]);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
@@ -239,7 +238,6 @@ const PurityContent = () => {
         actualEndDateTime: testActivityQuery.data.actualEndDateTime
       };
       setActivityRecord(activityRecordData);
-      setUpdatedReplicates(testActivityQuery.data.replicatesList);
       if (testActivityQuery.data.debrisList) {
         setImpurities(impuritiesPerReplicate(testActivityQuery.data.debrisList));
       }
@@ -263,9 +261,9 @@ const PurityContent = () => {
 
   useEffect(() => {
     if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
-      setReplicatesData(testActivity.replicatesList);
+      setReplicates(testActivity.replicatesList);
     } else {
-      setReplicatesData(initReplicatesList(riaKey ?? '', 2));
+      setReplicates(initReplicatesList(riaKey ?? '', 2));
     }
   }, [testActivity, riaKey]);
 
@@ -460,7 +458,7 @@ const PurityContent = () => {
   );
 
   const impuritySection = () => (
-    testActivity?.replicatesList.map((replicate) => {
+    replicates.map((replicate) => {
       const { replicateNumber } = replicate;
       return (
         <Column
@@ -540,7 +538,7 @@ const PurityContent = () => {
         }}
         onRequestSubmit={() => {
           if (modalType === COMPLETE) {
-            const errors = purityReplicatesChecker(updatedReplicates);
+            const errors = purityReplicatesChecker(replicates);
 
             if (Object.keys(errors).length > 0) {
               setValidationErrors(errors);
@@ -592,11 +590,11 @@ const PurityContent = () => {
       <Row className="consep-purity-content-activity-result">
         <ActivityResult
           replicateType="purityTest"
-          replicatesData={replicatesData}
+          replicatesData={replicates}
           riaKey={Number(riaKey)}
-          isEditable={!testActivity?.testCompleteInd}
+          isEditable={testActivity?.testCompleteInd !== 1}
           initValidationErrors={validationErrors}
-          updateReplicates={setUpdatedReplicates}
+          updateReplicates={setReplicates}
           setAlert={handleAlert}
           tableBodyRef={tableBodyRef}
           hideActions
