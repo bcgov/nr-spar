@@ -32,6 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @ExtendWith(MockitoExtension.class)
 class GerminatorTrayServiceTest {
+
   @Mock
   private GerminatorTrayRepository germinatorTrayRepository;
 
@@ -39,7 +40,7 @@ class GerminatorTrayServiceTest {
   private GerminatorTrayService germinatorTrayService;
 
   @Mock
-private GerminationTrayContentsRepository germinationTrayContentsRepository;
+  private GerminationTrayContentsRepository germinationTrayContentsRepository;
 
   /*---------------------- Assign Germinator ID to Tray ---------------------------------*/
   @Test
@@ -124,12 +125,29 @@ private GerminationTrayContentsRepository germinationTrayContentsRepository;
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals("Germinator tray ID cannot be null", ex.getReason());
 
-    verify(germinationTrayContentsRepository, never()).findByGerminatorTrayId(any());
     verify(germinatorTrayRepository, never()).findById(any());
+    verify(germinationTrayContentsRepository, never()).findByGerminatorTrayId(any());
   }
 
   @Test
-  void getTrayContents_shouldReturnMappedDtos_whenContentsExist() {
+  void getTrayContents_shouldThrowNotFound_whenTrayDoesNotExist() {
+    Integer trayId = 999;
+
+    when(germinatorTrayRepository.findById(trayId)).thenReturn(Optional.empty());
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> germinatorTrayService.getTrayContents(trayId));
+
+    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+    assertEquals("Germinator tray not found with ID: " + trayId, ex.getReason());
+
+    verify(germinatorTrayRepository, times(1)).findById(trayId);
+    verify(germinationTrayContentsRepository, never()).findByGerminatorTrayId(any());
+  }
+
+  @Test
+  void getTrayContents_shouldReturnMappedDtos_whenTrayExistsAndHasContents() {
     Integer trayId = 101;
 
     GerminationTrayContentsEntity e1 = new GerminationTrayContentsEntity();
@@ -141,6 +159,8 @@ private GerminationTrayContentsRepository germinationTrayContentsRepository;
     e1.setGerminatorEntry(LocalDateTime.of(2026, 3, 3, 10, 0));
     e1.setStratStartDate(LocalDateTime.of(2026, 2, 25, 10, 0));
 
+    when(germinatorTrayRepository.findById(trayId))
+        .thenReturn(Optional.of(new GerminatorTrayEntity()));
     when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId)).thenReturn(List.of(e1));
 
     List<GerminatorTrayContentsDto> result = germinatorTrayService.getTrayContents(trayId);
@@ -155,40 +175,22 @@ private GerminationTrayContentsRepository germinationTrayContentsRepository;
     assertEquals(LocalDateTime.of(2026, 3, 3, 10, 0), dto.germinatorEntry());
     assertEquals(LocalDateTime.of(2026, 2, 25, 10, 0), dto.stratStartDate());
 
+    verify(germinatorTrayRepository, times(1)).findById(trayId);
     verify(germinationTrayContentsRepository, times(1)).findByGerminatorTrayId(trayId);
-    verify(germinatorTrayRepository, never()).findById(any()); // validates optimization
   }
 
   @Test
-  void getTrayContents_shouldReturnEmpty_whenNoContentsButTrayExists() {
+  void getTrayContents_shouldReturnEmpty_whenTrayExistsAndNoContents() {
     Integer trayId = 101;
 
-    when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId)).thenReturn(List.of());
     when(germinatorTrayRepository.findById(trayId))
         .thenReturn(Optional.of(new GerminatorTrayEntity()));
+    when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId)).thenReturn(List.of());
 
     List<GerminatorTrayContentsDto> result = germinatorTrayService.getTrayContents(trayId);
 
     assertTrue(result.isEmpty());
-    verify(germinationTrayContentsRepository).findByGerminatorTrayId(trayId);
-    verify(germinatorTrayRepository).findById(trayId);
-  }
-
-  @Test
-  void getTrayContents_shouldThrowNotFound_whenNoContentsAndTrayMissing() {
-    Integer trayId = 999;
-
-    when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId)).thenReturn(List.of());
-    when(germinatorTrayRepository.findById(trayId)).thenReturn(Optional.empty());
-
-    ResponseStatusException ex =
-        assertThrows(
-            ResponseStatusException.class, () -> germinatorTrayService.getTrayContents(trayId));
-
-    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-    assertEquals("Germinator tray not found with ID: " + trayId, ex.getReason());
-
-    verify(germinationTrayContentsRepository).findByGerminatorTrayId(trayId);
-    verify(germinatorTrayRepository).findById(trayId);
+    verify(germinatorTrayRepository, times(1)).findById(trayId);
+    verify(germinationTrayContentsRepository, times(1)).findByGerminatorTrayId(trayId);
   }
 }
