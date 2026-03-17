@@ -36,7 +36,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
-
 @WebMvcTest(GerminatorTrayEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
 class GerminatorTrayEndpointTest {
@@ -370,7 +369,12 @@ class GerminatorTrayEndpointTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.length()").value(1))
         .andExpect(jsonPath("$[0].germinatorTrayId").value(101))
-        .andExpect(jsonPath("$[0].vegetationSt").value("PLI"));
+        .andExpect(jsonPath("$[0].requestId").value("RTS20042360"))
+        .andExpect(jsonPath("$[0].seedlotNumber").value("A"))
+        .andExpect(jsonPath("$[0].warmStratStartDate").doesNotExist())
+        .andExpect(jsonPath("$[0].drybackStartDate").doesNotExist())
+        .andExpect(jsonPath("$[0].germinatorEntry").doesNotExist())
+        .andExpect(jsonPath("$[0].stratStartDate").doesNotExist());
 
     verify(germinatorTrayService, times(1)).getTrayContents(germinatorTrayId);
   }
