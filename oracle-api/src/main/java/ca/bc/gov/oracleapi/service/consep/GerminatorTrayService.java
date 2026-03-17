@@ -94,37 +94,18 @@ public class GerminatorTrayService {
           .toList();
     }
 
-    // Tray has no contents; check if tray exists before returning empty list
-    if (germinatorTrayRepository.findById(germinatorTrayId).isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId);
-    }
-
     return List.of();
   }
 
   private GerminatorTrayContentsDto toDto(GerminationTrayContentsEntity e) {
     return new GerminatorTrayContentsDto(
         e.getGerminatorTrayId(),
-        e.getVegetationSt(),
-        e.getActivityTypeCd(),
-        e.getActualStartDate(),
-        e.getDateCreated(),
-        e.getRiaSkey(),
         e.getRequestId(),
-        e.getRequestSkey(),
-        e.getItemId(),
-        e.getRequestTypeSt(),
         e.getSeedlotNumber(),
-        e.getSoakStartDate(),
-        e.getSoakEndDate(),
-        e.getSeedWithdrawDate(),
         e.getWarmStratStartDate(),
         e.getDrybackStartDate(),
         e.getGerminatorEntry(),
-        e.getStratStartDate(),
-        e.getGerminatorId(),
-        e.getStandardActivityId(),
-        e.getTestCategoryCd());
+        e.getStratStartDate()
+    );
   }
 }
