@@ -5,13 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
-import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
@@ -223,7 +221,7 @@ class GerminatorTrayServiceTest {
     when(testResultRepository.findRiaKeysByGerminatorTrayId(germinatorTrayId))
         .thenReturn(List.of(riaSkey));
     when(testResultRepository.detachTestFromTray(riaSkey)).thenReturn(1);
-    when(activityRepository.updateTimestampWhereMatch(eq(riaSkey), eq(updateTimestamp)))
+    when(activityRepository.updateTimestampWhereMatch(riaSkey, updateTimestamp))
         .thenReturn(1);
     when(germinatorTrayRepository.deleteByGerminatorTrayId(germinatorTrayId)).thenReturn(1);
 
@@ -258,7 +256,7 @@ class GerminatorTrayServiceTest {
     when(testResultRepository.findRiaKeysByGerminatorTrayId(germinatorTrayId))
         .thenReturn(List.of(riaSkey));
     when(testResultRepository.detachTestFromTray(riaSkey)).thenReturn(1);
-    when(activityRepository.updateTimestampWhereMatch(eq(riaSkey), eq(updateTimestamp)))
+    when(activityRepository.updateTimestampWhereMatch(riaSkey, updateTimestamp))
         .thenReturn(0);
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->

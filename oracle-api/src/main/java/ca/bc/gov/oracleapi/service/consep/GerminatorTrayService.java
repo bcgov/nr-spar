@@ -2,7 +2,6 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
-import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
@@ -117,17 +116,7 @@ public class GerminatorTrayService {
     }
     SparLog.info("Test {} is on tray {}", riaSkey, germinatorTrayId);
 
-    int detachRows = testResultRepository.detachTestFromTray(riaSkey);
-    if (detachRows == 0) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
-    }
-    SparLog.info("Detached test {} from tray {}", riaSkey, germinatorTrayId);
-
-    int parentRows = activityRepository.updateTimestampWhereMatch(riaSkey, activityUpdateTimestamp);
-    if (parentRows == 0) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
-    }
-    SparLog.info("Updated activity {} update timestamp", riaSkey);
+    detachTestAndTouchParent(riaSkey, activityUpdateTimestamp, germinatorTrayId);
 
     int remaining = testResultRepository.countByGerminatorTrayId(germinatorTrayId);
     if (remaining == 0) {
@@ -165,17 +154,7 @@ public class GerminatorTrayService {
     SparLog.info("Deleting tray {} with {} tests", germinatorTrayId, riaKeys.size());
 
     for (BigDecimal riaKey : riaKeys) {
-      int detachRows = testResultRepository.detachTestFromTray(riaKey);
-      if (detachRows == 0) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
-      }
-      SparLog.info("Detached test {} from tray {}", riaKey, germinatorTrayId);
-
-      int parentRows = activityRepository.updateTimestampWhereMatch(riaKey, activityUpdateTimestamp);
-      if (parentRows == 0) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
-      }
-      SparLog.info("Updated activity {} update timestamp", riaKey);
+      detachTestAndTouchParent(riaKey, activityUpdateTimestamp, germinatorTrayId);
     }
 
     int deleteRows = germinatorTrayRepository.deleteByGerminatorTrayId(germinatorTrayId);
@@ -183,5 +162,27 @@ public class GerminatorTrayService {
       throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
     }
     SparLog.info("Tray {} deleted", germinatorTrayId);
+  }
+
+  /**
+   * Detach one test from its tray and update the parent activity's timestamp (optimistic lock).
+   * Throws 409 if either DML affects 0 rows.
+   */
+  private void detachTestAndTouchParent(
+      BigDecimal riaKey,
+      LocalDateTime activityUpdateTimestamp,
+      Integer germinatorTrayId
+  ) {
+    int detachRows = testResultRepository.detachTestFromTray(riaKey);
+    if (detachRows == 0) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
+    }
+    SparLog.info("Detached test {} from tray {}", riaKey, germinatorTrayId);
+
+    int parentRows = activityRepository.updateTimestampWhereMatch(riaKey, activityUpdateTimestamp);
+    if (parentRows == 0) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
+    }
+    SparLog.info("Updated activity {} update timestamp", riaKey);
   }
 }
