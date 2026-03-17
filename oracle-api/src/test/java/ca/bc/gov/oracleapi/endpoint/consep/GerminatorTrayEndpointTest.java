@@ -353,26 +353,12 @@ class GerminatorTrayEndpointTest {
         List.of(
             new GerminatorTrayContentsDto(
                 germinatorTrayId,
-                "PLI",
-                "G20",
-                null,
-                null,
-                new BigDecimal("123"),
                 "RTS20042360",
-                456L,
                 "A",
-                "RTS",
-                "30350",
                 null,
                 null,
                 null,
-                null,
-                null,
-                null,
-                null,
-                "1",
-                "G10",
-                "STD"));
+                null));
 
     when(germinatorTrayService.getTrayContents(germinatorTrayId)).thenReturn(contents);
 
