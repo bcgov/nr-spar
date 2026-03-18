@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -159,9 +160,12 @@ class GerminatorTrayServiceTest {
     e1.setGerminatorEntry(LocalDateTime.of(2026, 3, 3, 10, 0));
     e1.setStratStartDate(LocalDateTime.of(2026, 2, 25, 10, 0));
 
+    LocalDateTime updateTimestamp = LocalDateTime.of(2026, 3, 5, 9, 0);
+
     when(germinatorTrayRepository.findById(trayId))
         .thenReturn(Optional.of(new GerminatorTrayEntity()));
-    when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId)).thenReturn(List.of(e1));
+    when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId))
+        .thenReturn(List.<Object[]>of(new Object[] {e1, updateTimestamp}));
 
     List<GerminatorTrayContentsDto> result = germinatorTrayService.getTrayContents(trayId);
 
@@ -174,6 +178,7 @@ class GerminatorTrayServiceTest {
     assertEquals(LocalDateTime.of(2026, 3, 2, 10, 0), dto.drybackStartDate());
     assertEquals(LocalDateTime.of(2026, 3, 3, 10, 0), dto.germinatorEntry());
     assertEquals(LocalDateTime.of(2026, 2, 25, 10, 0), dto.stratStartDate());
+    assertEquals(updateTimestamp, dto.updateTimestamp());
 
     verify(germinatorTrayRepository, times(1)).findById(trayId);
     verify(germinationTrayContentsRepository, times(1)).findByGerminatorTrayId(trayId);
@@ -192,5 +197,25 @@ class GerminatorTrayServiceTest {
     assertTrue(result.isEmpty());
     verify(germinatorTrayRepository, times(1)).findById(trayId);
     verify(germinationTrayContentsRepository, times(1)).findByGerminatorTrayId(trayId);
+  }
+
+  @Test
+  void getTrayContents_shouldReturnNullUpdateTimestamp_whenActivityNotFound() {
+    Integer trayId = 101;
+
+    GerminationTrayContentsEntity e1 = new GerminationTrayContentsEntity();
+    e1.setGerminatorTrayId(trayId);
+    e1.setRequestId("RTS10000001");
+    e1.setSeedlotNumber("30350");
+
+    when(germinatorTrayRepository.findById(trayId))
+        .thenReturn(Optional.of(new GerminatorTrayEntity()));
+    when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId))
+        .thenReturn(List.<Object[]>of(new Object[] {e1, null})); // null = no matching activity
+
+    List<GerminatorTrayContentsDto> result = germinatorTrayService.getTrayContents(trayId);
+
+    assertEquals(1, result.size());
+    assertNull(result.get(0).updateTimestamp());
   }
 }
