@@ -43,8 +43,6 @@ class GerminatorTrayServiceTest {
   @InjectMocks
   private GerminatorTrayService germinatorTrayService;
 
-  @Mock
-  private GerminationTrayContentsRepository germinationTrayContentsRepository;
 
   /*---------------------- Assign Germinator ID to Tray ---------------------------------*/
   @Test
@@ -146,7 +144,7 @@ class GerminatorTrayServiceTest {
     assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
     assertEquals("Germinator tray not found with ID: " + trayId, ex.getReason());
 
-    verify(germinatorTrayRepository, times(1)).existsById(trayId);
+    verify(germinatorTrayRepository).existsById(trayId);
     verify(germinationTrayContentsRepository, never()).findByGerminatorTrayId(any());
   }
 
@@ -182,8 +180,8 @@ class GerminatorTrayServiceTest {
     assertEquals(LocalDateTime.of(2026, 2, 25, 10, 0), dto.stratStartDate());
     assertEquals(updateTimestamp, dto.updateTimestamp());
 
-    verify(germinatorTrayRepository, times(1)).existsById(trayId);
-    verify(germinationTrayContentsRepository, times(1)).findByGerminatorTrayId(trayId);
+    verify(germinatorTrayRepository).existsById(trayId);
+    verify(germinationTrayContentsRepository).findByGerminatorTrayId(trayId);
   }
 
   @Test
