@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.nullValue;
 
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
@@ -373,11 +374,11 @@ class GerminatorTrayEndpointTest {
         .andExpect(jsonPath("$[0].germinatorTrayId").value(101))
         .andExpect(jsonPath("$[0].requestId").value("RTS20042360"))
         .andExpect(jsonPath("$[0].seedlotNumber").value("A"))
-        .andExpect(jsonPath("$[0].warmStratStartDate").doesNotExist())
-        .andExpect(jsonPath("$[0].drybackStartDate").doesNotExist())
-        .andExpect(jsonPath("$[0].germinatorEntry").doesNotExist())
-        .andExpect(jsonPath("$[0].stratStartDate").doesNotExist())
-        .andExpect(jsonPath("$[0].updateTimestamp").doesNotExist());
+        .andExpect(jsonPath("$[0].warmStratStartDate").value(nullValue()))
+        .andExpect(jsonPath("$[0].drybackStartDate").value(nullValue()))
+        .andExpect(jsonPath("$[0].germinatorEntry").value(nullValue()))
+        .andExpect(jsonPath("$[0].stratStartDate").value(nullValue()))
+        .andExpect(jsonPath("$[0].updateTimestamp").value(nullValue()));
 
     verify(germinatorTrayService, times(1)).getTrayContents(germinatorTrayId);
   }
