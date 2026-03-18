@@ -87,7 +87,7 @@ public class GerminatorTrayService {
           HttpStatus.BAD_REQUEST, "Germinator tray ID cannot be null");
     }
 
-    if (germinatorTrayRepository.findById(germinatorTrayId).isEmpty()) {
+    if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId);
     }
@@ -108,7 +108,6 @@ public class GerminatorTrayService {
         entity.getDrybackStartDate(),
         entity.getGerminatorEntry(),
         entity.getStratStartDate(),
-        updateTimestamp
-    );
+        updateTimestamp);
   }
 }
