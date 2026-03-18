@@ -357,7 +357,9 @@ class GerminatorTrayEndpointTest {
                 null,
                 null,
                 null,
-                null));
+                null,
+                null
+            ));
 
     when(germinatorTrayService.getTrayContents(germinatorTrayId)).thenReturn(contents);
 
@@ -374,7 +376,8 @@ class GerminatorTrayEndpointTest {
         .andExpect(jsonPath("$[0].warmStratStartDate").doesNotExist())
         .andExpect(jsonPath("$[0].drybackStartDate").doesNotExist())
         .andExpect(jsonPath("$[0].germinatorEntry").doesNotExist())
-        .andExpect(jsonPath("$[0].stratStartDate").doesNotExist());
+        .andExpect(jsonPath("$[0].stratStartDate").doesNotExist())
+        .andExpect(jsonPath("$[0].updateTimestamp").doesNotExist());
 
     verify(germinatorTrayService, times(1)).getTrayContents(germinatorTrayId);
   }
