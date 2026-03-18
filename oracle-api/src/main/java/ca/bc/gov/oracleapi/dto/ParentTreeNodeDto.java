@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.dto;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
+import ca.bc.gov.oracleapi.entity.spar.ParentTreeEntity;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;

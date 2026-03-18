@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.dto;
 
+import ca.bc.gov.oracleapi.entity.spar.ParentTreeEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,7 @@ import lombok.ToString;
 
 /**
  * This class holds the fields that will be returned when requesting a {@link
- * ca.bc.gov.oracleapi.entity.ParentTreeEntity} from an {@link
+ * ParentTreeEntity} from an {@link
  * ca.bc.gov.oracleapi.entity.Orchard}.
  */
 @Getter

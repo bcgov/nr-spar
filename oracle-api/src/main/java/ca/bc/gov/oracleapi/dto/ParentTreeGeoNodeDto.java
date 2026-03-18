@@ -1,6 +1,6 @@
 package ca.bc.gov.oracleapi.dto;
 
-import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
+import ca.bc.gov.oracleapi.entity.spar.ParentTreeEntity;
 import java.util.Optional;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

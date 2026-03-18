@@ -1,8 +1,9 @@
 package ca.bc.gov.oracleapi.repository;
 
-import ca.bc.gov.oracleapi.entity.FacilityTypes;
+import ca.bc.gov.oracleapi.entity.spar.FacilityTypes;
 import java.time.LocalDate;
 import java.util.List;
+import ca.bc.gov.oracleapi.repository.spar.FacilityTypesRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

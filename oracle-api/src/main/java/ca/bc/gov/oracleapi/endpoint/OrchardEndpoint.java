@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.endpoint;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.OrchardDto;
 import ca.bc.gov.oracleapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.oracleapi.entity.spar.ParentTreeEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,7 +70,7 @@ public class OrchardEndpoint {
   }
 
   /**
-   * Gets {@link ca.bc.gov.oracleapi.entity.ParentTreeEntity} data to an {@link Orchard}.
+   * Gets {@link ParentTreeEntity} data to an {@link Orchard}.
    *
    * @param orchardId {@link Orchard}'s identification
    * @param spuId Seed Planning Unit's identification

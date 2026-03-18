@@ -6,8 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.entity.VegetationCode;
-import ca.bc.gov.oracleapi.repository.VegetationCodeRepository;
+import ca.bc.gov.oracleapi.entity.spar.VegetationCode;
+import ca.bc.gov.oracleapi.repository.spar.VegetationCodeRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

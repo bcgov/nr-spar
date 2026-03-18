@@ -1,8 +1,8 @@
 package ca.bc.gov.oracleapi.endpoint;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.entity.Seedlot;
-import ca.bc.gov.oracleapi.repository.SeedlotRepository;
+import ca.bc.gov.oracleapi.entity.spar.Seedlot;
+import ca.bc.gov.oracleapi.repository.spar.SeedlotRepository;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

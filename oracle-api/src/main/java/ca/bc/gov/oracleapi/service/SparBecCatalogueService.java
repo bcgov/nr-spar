@@ -2,7 +2,7 @@ package ca.bc.gov.oracleapi.service;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.SparBecZoneDescriptionDto;
-import ca.bc.gov.oracleapi.repository.SparBecCatalogueRepository;
+import ca.bc.gov.oracleapi.repository.spar.SparBecCatalogueRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

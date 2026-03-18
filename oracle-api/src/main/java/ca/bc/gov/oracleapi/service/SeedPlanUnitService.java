@@ -2,12 +2,12 @@ package ca.bc.gov.oracleapi.service;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.SpuDto;
-import ca.bc.gov.oracleapi.entity.SeedPlanUnit;
-import ca.bc.gov.oracleapi.entity.SeedPlanZone;
+import ca.bc.gov.oracleapi.entity.spar.SeedPlanUnit;
+import ca.bc.gov.oracleapi.entity.spar.SeedPlanZone;
 import ca.bc.gov.oracleapi.exception.SpuNotFoundException;
 import ca.bc.gov.oracleapi.exception.SpzNotFoundException;
-import ca.bc.gov.oracleapi.repository.SeedPlanUnitRepository;
-import ca.bc.gov.oracleapi.repository.SeedPlanZoneRepository;
+import ca.bc.gov.oracleapi.repository.spar.SeedPlanUnitRepository;
+import ca.bc.gov.oracleapi.repository.spar.SeedPlanZoneRepository;
 import ca.bc.gov.oracleapi.util.ModelMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

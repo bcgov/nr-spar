@@ -1,8 +1,8 @@
 package ca.bc.gov.oracleapi.endpoint;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.entity.FundingSource;
-import ca.bc.gov.oracleapi.repository.FundingSourceRepository;
+import ca.bc.gov.oracleapi.entity.spar.FundingSource;
+import ca.bc.gov.oracleapi.repository.spar.FundingSourceRepository;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

@@ -1,8 +1,8 @@
 package ca.bc.gov.oracleapi.service;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.repository.RequestSeedlotRepository;
-import ca.bc.gov.oracleapi.repository.RequestVeglotRepository;
+import ca.bc.gov.oracleapi.repository.spar.RequestSeedlotRepository;
+import ca.bc.gov.oracleapi.repository.spar.RequestVeglotRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

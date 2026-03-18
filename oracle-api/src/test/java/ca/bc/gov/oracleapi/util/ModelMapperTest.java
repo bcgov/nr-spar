@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.util;
 
 import ca.bc.gov.oracleapi.dto.ParentTreeDto;
-import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
+import ca.bc.gov.oracleapi.entity.spar.ParentTreeEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -3,7 +3,8 @@ package ca.bc.gov.oracleapi.repository;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.bc.gov.oracleapi.entity.RequestSeedlot;
+import ca.bc.gov.oracleapi.entity.spar.RequestSeedlot;
+import ca.bc.gov.oracleapi.repository.spar.RequestSeedlotRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

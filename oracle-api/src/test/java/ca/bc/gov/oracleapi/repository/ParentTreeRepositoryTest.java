@@ -5,8 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
+import ca.bc.gov.oracleapi.entity.spar.ParentTreeEntity;
 import java.util.List;
+import ca.bc.gov.oracleapi.repository.spar.ParentTreeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

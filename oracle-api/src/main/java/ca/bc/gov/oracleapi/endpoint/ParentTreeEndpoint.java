@@ -3,7 +3,7 @@ package ca.bc.gov.oracleapi.endpoint;
 import ca.bc.gov.oracleapi.dto.GeospatialRequestDto;
 import ca.bc.gov.oracleapi.dto.GeospatialRespondDto;
 import ca.bc.gov.oracleapi.dto.ParentTreeByVegCodeDto;
-import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
+import ca.bc.gov.oracleapi.entity.spar.ParentTreeEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.ParentTreeService;
 import io.swagger.v3.oas.annotations.Operation;

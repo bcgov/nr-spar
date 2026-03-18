@@ -3,7 +3,7 @@ package ca.bc.gov.oracleapi.endpoint;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.AreaOfUseDto;
 import ca.bc.gov.oracleapi.dto.SpzDto;
-import ca.bc.gov.oracleapi.entity.FundingSource;
+import ca.bc.gov.oracleapi.entity.spar.FundingSource;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.AreaOfUseService;
 import io.swagger.v3.oas.annotations.Operation;

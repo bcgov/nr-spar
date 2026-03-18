@@ -6,8 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.entity.FundingSource;
-import ca.bc.gov.oracleapi.repository.FundingSourceRepository;
+import ca.bc.gov.oracleapi.entity.spar.FundingSource;
+import ca.bc.gov.oracleapi.repository.spar.FundingSourceRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;

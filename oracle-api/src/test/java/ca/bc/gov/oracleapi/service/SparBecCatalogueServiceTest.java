@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.SparBecZoneDescriptionDto;
-import ca.bc.gov.oracleapi.entity.SparBecCatalogueEntity;
-import ca.bc.gov.oracleapi.repository.SparBecCatalogueRepository;
+import ca.bc.gov.oracleapi.entity.spar.SparBecCatalogueEntity;
+import ca.bc.gov.oracleapi.repository.spar.SparBecCatalogueRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

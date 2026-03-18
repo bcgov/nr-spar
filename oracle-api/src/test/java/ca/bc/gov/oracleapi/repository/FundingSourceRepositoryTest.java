@@ -1,8 +1,9 @@
 package ca.bc.gov.oracleapi.repository;
 
-import ca.bc.gov.oracleapi.entity.FundingSource;
+import ca.bc.gov.oracleapi.entity.spar.FundingSource;
 import java.time.LocalDate;
 import java.util.List;
+import ca.bc.gov.oracleapi.repository.spar.FundingSourceRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -7,8 +7,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.oracleapi.repository.RequestSeedlotRepository;
-import ca.bc.gov.oracleapi.repository.RequestVeglotRepository;
+import ca.bc.gov.oracleapi.repository.spar.RequestSeedlotRepository;
+import ca.bc.gov.oracleapi.repository.spar.RequestVeglotRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

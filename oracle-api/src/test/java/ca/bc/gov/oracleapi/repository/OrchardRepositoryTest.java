@@ -1,9 +1,10 @@
 package ca.bc.gov.oracleapi.repository;
 
-import ca.bc.gov.oracleapi.entity.OrchardEntity;
-import ca.bc.gov.oracleapi.entity.OrchardLotTypeCode;
+import ca.bc.gov.oracleapi.entity.spar.OrchardEntity;
+import ca.bc.gov.oracleapi.entity.spar.OrchardLotTypeCode;
 import java.util.List;
 import java.util.Optional;
+import ca.bc.gov.oracleapi.repository.spar.OrchardRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
