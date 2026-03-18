@@ -126,7 +126,7 @@ class GerminatorTrayServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals("Germinator tray ID cannot be null", ex.getReason());
 
-    verify(germinatorTrayRepository, never()).findById(any());
+    verify(germinatorTrayRepository, never()).existsById(any());
     verify(germinationTrayContentsRepository, never()).findByGerminatorTrayId(any());
   }
 
@@ -134,7 +134,7 @@ class GerminatorTrayServiceTest {
   void getTrayContents_shouldThrowNotFound_whenTrayDoesNotExist() {
     Integer trayId = 999;
 
-    when(germinatorTrayRepository.findById(trayId)).thenReturn(Optional.empty());
+    when(germinatorTrayRepository.existsById(trayId)).thenReturn(false);
 
     ResponseStatusException ex =
         assertThrows(
@@ -143,7 +143,7 @@ class GerminatorTrayServiceTest {
     assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
     assertEquals("Germinator tray not found with ID: " + trayId, ex.getReason());
 
-    verify(germinatorTrayRepository, times(1)).findById(trayId);
+    verify(germinatorTrayRepository, times(1)).existsById(trayId);
     verify(germinationTrayContentsRepository, never()).findByGerminatorTrayId(any());
   }
 
@@ -162,8 +162,7 @@ class GerminatorTrayServiceTest {
 
     LocalDateTime updateTimestamp = LocalDateTime.of(2026, 3, 5, 9, 0);
 
-    when(germinatorTrayRepository.findById(trayId))
-        .thenReturn(Optional.of(new GerminatorTrayEntity()));
+    when(germinatorTrayRepository.existsById(trayId)).thenReturn(true);
     when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId))
         .thenReturn(List.<Object[]>of(new Object[] {e1, updateTimestamp}));
 
@@ -180,7 +179,7 @@ class GerminatorTrayServiceTest {
     assertEquals(LocalDateTime.of(2026, 2, 25, 10, 0), dto.stratStartDate());
     assertEquals(updateTimestamp, dto.updateTimestamp());
 
-    verify(germinatorTrayRepository, times(1)).findById(trayId);
+    verify(germinatorTrayRepository, times(1)).existsById(trayId);
     verify(germinationTrayContentsRepository, times(1)).findByGerminatorTrayId(trayId);
   }
 
@@ -188,14 +187,13 @@ class GerminatorTrayServiceTest {
   void getTrayContents_shouldReturnEmpty_whenTrayExistsAndNoContents() {
     Integer trayId = 101;
 
-    when(germinatorTrayRepository.findById(trayId))
-        .thenReturn(Optional.of(new GerminatorTrayEntity()));
+    when(germinatorTrayRepository.existsById(trayId)).thenReturn(true);
     when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId)).thenReturn(List.of());
 
     List<GerminatorTrayContentsDto> result = germinatorTrayService.getTrayContents(trayId);
 
     assertTrue(result.isEmpty());
-    verify(germinatorTrayRepository, times(1)).findById(trayId);
+    verify(germinatorTrayRepository, times(1)).existsById(trayId);
     verify(germinationTrayContentsRepository, times(1)).findByGerminatorTrayId(trayId);
   }
 
@@ -208,8 +206,7 @@ class GerminatorTrayServiceTest {
     e1.setRequestId("RTS10000001");
     e1.setSeedlotNumber("30350");
 
-    when(germinatorTrayRepository.findById(trayId))
-        .thenReturn(Optional.of(new GerminatorTrayEntity()));
+    when(germinatorTrayRepository.existsById(trayId)).thenReturn(true);
     when(germinationTrayContentsRepository.findByGerminatorTrayId(trayId))
         .thenReturn(List.<Object[]>of(new Object[] {e1, null})); // null = no matching activity
 
