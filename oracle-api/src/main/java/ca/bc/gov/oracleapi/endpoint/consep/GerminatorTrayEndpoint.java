@@ -129,6 +129,12 @@ public class GerminatorTrayEndpoint {
     return new ValidationExceptionResponse(fieldErrors);
   }
 
+  /**
+   * Retrieves the tests associated with a specific germinator tray.
+   *
+   * @param germinatorTrayId the ID of the germinator tray
+   * @return a list of GerminatorTrayContentsDto representing the tests in the tray
+   */
   @GetMapping("/{germinatorTrayId}/tests")
   @ResponseStatus(HttpStatus.OK)
   @ApiResponse(
