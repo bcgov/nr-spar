@@ -24,6 +24,12 @@ parameters:
   - name: ORACLE_USER
     description: Oracle database username for API
     value: proxy_fsa_spar_read_only_user
+  - name: READ_WRITE_ORACLE_USER
+    description: Oracle database read and write account username for API
+    value: proxy_fsa_spar_read_write_user
+  - name: READ_WRITE_ORACLE_PASSWORD
+    description: Oracle database read and write account password for API
+    required: true
   - name: ORACLE_CERT_SECRET
     description: Oracle database keystore secret
     required: true
@@ -77,6 +83,8 @@ objects:
       oracle-service: ${ORACLE_SERVICE}
       oracle-user: ${ORACLE_USER}
       oracle-secret: ${ORACLE_CERT_SECRET}
+      read-write-oracle-user: ${READ_WRITE_ORACLE_USER}
+      read-write-oracle-password: ${READ_WRITE_ORACLE_PASSWORD}
   - apiVersion: v1
     kind: Secret
     metadata:

@@ -155,6 +155,16 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-password
+                - name: READ_WRITE_DATABASE_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: read-write-oracle-user
+                - name: READ_WRITE_DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: read-write-oracle-password
                 - name: ORACLEDB_SECRET
                   valueFrom:
                     secretKeyRef:
