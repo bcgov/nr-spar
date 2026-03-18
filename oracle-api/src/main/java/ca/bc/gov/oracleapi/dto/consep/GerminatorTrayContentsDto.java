@@ -22,6 +22,7 @@ public record GerminatorTrayContentsDto(
 
     LocalDateTime stratStartDate,
 
+    @Schema(description = "Timestamp for the last update", example = "2025-01-20T12:00:00")
     LocalDateTime updateTimestamp
 ) {
 }
