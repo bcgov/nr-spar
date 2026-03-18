@@ -37,6 +37,9 @@ class GerminatorTrayServiceTest {
   @Mock
   private GerminatorTrayRepository germinatorTrayRepository;
 
+  @Mock
+  private GerminationTrayContentsRepository germinationTrayContentsRepository;
+
   @InjectMocks
   private GerminatorTrayService germinatorTrayService;
 
