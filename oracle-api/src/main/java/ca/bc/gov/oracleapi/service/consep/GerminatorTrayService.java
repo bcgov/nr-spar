@@ -7,6 +7,7 @@ import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.repository.consep.GerminationTrayContentsRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -96,15 +97,18 @@ public class GerminatorTrayService {
         .toList();
   }
 
-  private GerminatorTrayContentsDto toDto(GerminationTrayContentsEntity e) {
+  private GerminatorTrayContentsDto toDto(Object[] row) {
+    var entity = (GerminationTrayContentsEntity) row[0];
+    var updateTimestamp = (LocalDateTime) row[1];
     return new GerminatorTrayContentsDto(
-        e.getGerminatorTrayId(),
-        e.getRequestId(),
-        e.getSeedlotNumber(),
-        e.getWarmStratStartDate(),
-        e.getDrybackStartDate(),
-        e.getGerminatorEntry(),
-        e.getStratStartDate()
+        entity.getGerminatorTrayId(),
+        entity.getRequestId(),
+        entity.getSeedlotNumber(),
+        entity.getWarmStratStartDate(),
+        entity.getDrybackStartDate(),
+        entity.getGerminatorEntry(),
+        entity.getStratStartDate(),
+        updateTimestamp
     );
   }
 }

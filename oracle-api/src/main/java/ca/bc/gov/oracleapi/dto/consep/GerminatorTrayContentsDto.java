@@ -20,6 +20,8 @@ public record GerminatorTrayContentsDto(
 
     LocalDateTime germinatorEntry,
 
-    LocalDateTime stratStartDate
+    LocalDateTime stratStartDate,
+
+    LocalDateTime updateTimestamp
 ) {
 }
