@@ -1,6 +1,5 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
@@ -17,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
@@ -88,7 +86,7 @@ public class GerminatorTrayEndpoint {
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
+  public GerminatorIdAssignResponseDto assignGerminatorIdToTray(
       @PathVariable @Positive Integer germinatorTrayId,
       @RequestParam
       @Pattern(
