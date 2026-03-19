@@ -3,13 +3,12 @@ package ca.bc.gov.oracleapi.service.consep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import java.util.Optional;
@@ -49,7 +48,7 @@ class GerminatorTrayServiceTest {
     when(germinatorTrayRepository.save(tray)).thenReturn(tray);
 
     // Act
-    GerminatorTrayAssignGerminatorIdResponseDto response =
+    GerminatorIdAssignResponseDto response =
         germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId);
 
     // Assert
@@ -83,26 +82,52 @@ class GerminatorTrayServiceTest {
   }
 
   @Test
-  void assignGerminatorIdToTray_shouldThrow_whenGerminatorIdAlreadyAssigned() {
+  void assignGerminatorIdToTray_shouldUpdate_whenGerminatorIdAlreadyAssigned() {
     // Arrange
     Integer germinatorTrayId = 101;
     String newGerminatorId = "7";
 
     GerminatorTrayEntity tray = new GerminatorTrayEntity();
     tray.setGerminatorTrayId(germinatorTrayId);
-    tray.setGerminatorId("2"); // already assigned
+    tray.setGerminatorId("2"); // existing value
 
     when(germinatorTrayRepository.findById(germinatorTrayId))
         .thenReturn(Optional.of(tray));
 
-    // Act / Assert
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
-        germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, newGerminatorId));
+    when(germinatorTrayRepository.save(any(GerminatorTrayEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
-    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
-    assertTrue(ex.getReason().contains("Germinator ID already assigned"));
+    // Act
+    GerminatorIdAssignResponseDto result =
+        germinatorTrayService.assignGerminatorIdToTray(
+            germinatorTrayId,
+            newGerminatorId
+        );
+
+    // Assert
+    assertEquals(germinatorTrayId, result.germinatorTrayId());
+    assertEquals(newGerminatorId, result.germinatorId());
+
+    assertEquals(newGerminatorId, tray.getGerminatorId());
 
     verify(germinatorTrayRepository).findById(germinatorTrayId);
+    verify(germinatorTrayRepository).save(tray);
+  }
+
+  @Test
+  void assignGerminatorIdToTray_shouldThrow_whenGerminatorIdIsNull() {
+    // Arrange
+    Integer germinatorTrayId = 100;
+    String germinatorId = null;
+
+    // Act & Assert
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+        germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId));
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("Germinator tray ID and germinator ID cannot be null or blank", ex.getReason());
+
+    verify(germinatorTrayRepository, never()).findById(any());
     verify(germinatorTrayRepository, never()).save(any());
   }
 }

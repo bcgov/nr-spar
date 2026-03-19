@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.service.consep.GerminatorTrayService;
@@ -210,8 +211,8 @@ class GerminatorTrayEndpointTest {
     Integer germinatorTrayId = 101;
     String germinatorId = "1";
 
-    GerminatorTrayAssignGerminatorIdResponseDto response =
-        new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId);
+    GerminatorIdAssignResponseDto response =
+        new GerminatorIdAssignResponseDto(germinatorTrayId, germinatorId);
 
     when(germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
         .thenReturn(response);
@@ -256,9 +257,15 @@ class GerminatorTrayEndpointTest {
   }
 
   @Test
-  void assignGerminatorIdToTray_returns400_whenGerminatorIdBlank() throws Exception {
+  void assignGerminatorIdToTray_returns200_whenGerminatorIdBlank_unsetsValue() throws Exception {
     int germinatorTrayId = 101;
     String germinatorId = "";
+
+    GerminatorIdAssignResponseDto response =
+        new GerminatorIdAssignResponseDto(germinatorTrayId, null);
+
+    when(germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId))
+        .thenReturn(response);
 
     mockMvc
         .perform(
@@ -267,10 +274,13 @@ class GerminatorTrayEndpointTest {
                 .param("germinatorId", germinatorId)
                 .contentType(MediaType.APPLICATION_JSON)
         )
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.germinatorTrayId").value(germinatorTrayId))
+        .andExpect(jsonPath("$.germinatorId").value(nullValue()));
 
-    verify(germinatorTrayService, times(0))
-        .assignGerminatorIdToTray(any(), any());
+    verify(germinatorTrayService, times(1))
+        .assignGerminatorIdToTray(germinatorTrayId, germinatorId);
   }
 
   @Test
@@ -293,8 +303,8 @@ class GerminatorTrayEndpointTest {
   void assignGerminatorIdToTray_returns200_withValidNumericIds(Integer germinatorId)
       throws Exception {
     Integer germinatorTrayId = 101;
-    GerminatorTrayAssignGerminatorIdResponseDto response =
-        new GerminatorTrayAssignGerminatorIdResponseDto(germinatorTrayId, germinatorId.toString());
+    GerminatorIdAssignResponseDto response =
+        new GerminatorIdAssignResponseDto(germinatorTrayId, germinatorId.toString());
 
     when(germinatorTrayService.assignGerminatorIdToTray(germinatorTrayId, germinatorId.toString()))
         .thenReturn(response);
