@@ -3,6 +3,7 @@ import React from 'react';
 import { type MRT_ColumnDef } from 'material-react-table';
 import { formatDateCell } from '../../TestSearch/constants';
 import { GermTrayColumn } from './definitions';
+import { GermTrayTestType } from '../../../../../types/consep/GerminatorTrayType';
 
 export const getGermTrayColumns = (
   updateRow: (row: GermTrayColumn) => void
@@ -36,5 +37,43 @@ export const getGermTrayColumns = (
         });
       }
     })
+  }
+];
+
+export const getGermTrayTestsColumns = (): MRT_ColumnDef<GermTrayTestType>[] => [
+  {
+    accessorKey: 'seedlotNumber',
+    header: 'Lot #',
+    enableEditing: false
+  },
+  {
+    accessorKey: 'requestId',
+    header: 'Request ID',
+    enableEditing: false
+  },
+  {
+    accessorKey: 'warmStratStartDate',
+    header: 'Warm strat date',
+    enableEditing: false
+  },
+  {
+    accessorKey: 'drybackStartDate',
+    header: 'Dryback',
+    enableEditing: false
+  },
+  {
+    accessorKey: 'stratStartDate',
+    header: 'Cold strat start',
+    enableEditing: false
+  },
+  {
+    accessorKey: 'germinatorEntry',
+    header: 'Germinator Entry',
+    enableEditing: false
+  },
+  {
+    accessorKey: 'updateTimestamp',
+    header: 'Update Timestamp',
+    enableEditing: false
   }
 ];
