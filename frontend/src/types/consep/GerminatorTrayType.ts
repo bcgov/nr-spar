@@ -9,7 +9,7 @@ export type GerminatorIdAssignResponseDto = {
   germinatorId: string | null;
 };
 
-export type GermTrayContentsType = {
+export type GermTrayTestType = {
   germinatorTrayId: number;
   requestId: string;
   seedlotNumber: string;
