@@ -1,7 +1,7 @@
 import ApiConfig from '../ApiConfig';
 import api from '../api';
 import { CreateGermTrayRequest } from '../../views/CONSEP/TestingActivities/TestSearch/ToolbarControls/CreateGermTray/definitions';
-import { GermTrayCreateResponseType, GerminatorIdAssignResponseDto } from '../../types/consep/GerminatorTrayType';
+import { GermTrayTestType, GermTrayCreateResponseType, GerminatorIdAssignResponseDto } from '../../types/consep/GerminatorTrayType';
 
 export const assignGerminatorTrays = (
   requests: CreateGermTrayRequest[]
@@ -21,4 +21,11 @@ export const assignGerminatorId = (
   return api
     .patch(url, null)
     .then((res: { data: GerminatorIdAssignResponseDto }) => res.data);
+};
+
+export const getGerminatorTrayContents = (
+  germinatorTrayId: number
+): Promise<GermTrayTestType[]> => {
+  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/tests`;
+  return api.get(url).then((res: { data: GermTrayTestType[] }) => res.data);
 };
