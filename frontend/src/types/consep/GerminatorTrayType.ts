@@ -8,3 +8,14 @@ export type GerminatorIdAssignResponseDto = {
   germinatorTrayId: number;
   germinatorId: string | null;
 };
+
+export type GermTrayContentsType = {
+  germinatorTrayId: number;
+  requestId: string;
+  seedlotNumber: string;
+  warmStratStartDate: string | null;
+  drybackStartDate: string | null;
+  germinatorEntry: string | null;
+  stratStartDate: string | null;
+  updateTimestamp: string | null;
+};
