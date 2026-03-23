@@ -138,10 +138,10 @@ public class GerminatorTrayService {
    */
   @Transactional(rollbackFor = ResponseStatusException.class)
   public void deleteTray(Integer germinatorTrayId, LocalDateTime activityUpdateTimestamp) {
-    if (germinatorTrayId == null) {
+    if (germinatorTrayId == null || activityUpdateTimestamp == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Germinator tray ID is required");
+          "Germinator tray ID and activity update timestamp are required");
     }
 
     if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
