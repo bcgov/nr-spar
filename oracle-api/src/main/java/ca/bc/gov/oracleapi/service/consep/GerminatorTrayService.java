@@ -1,10 +1,13 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayAssignGerminatorIdResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
+import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.GerminationTrayContentsRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
@@ -28,20 +31,21 @@ public class GerminatorTrayService {
   private final GerminatorTrayRepository germinatorTrayRepository;
   private final TestResultRepository testResultRepository;
   private final ActivityRepository activityRepository;
+  private final GerminationTrayContentsRepository germinationTrayContentsRepository;
 
   /**
    * Assign a germinator ID to an existing germinator tray.
    *
    * @param germinatorTrayId the ID of the germinator tray
-   * @param germinatorId     the germinator ID to assign
+   * @param germinatorId     the germinator ID to assign, leave it blank to unassign
    * @return a response DTO confirming the assignment
    * @throws ResponseStatusException if the tray is not found
    */
-  public GerminatorTrayAssignGerminatorIdResponseDto assignGerminatorIdToTray(
+  public GerminatorIdAssignResponseDto assignGerminatorIdToTray(
       Integer germinatorTrayId,
       String germinatorId
   ) {
-    if (germinatorTrayId == null || germinatorId == null || germinatorId.isBlank()) {
+    if (germinatorTrayId == null || germinatorId == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
           "Germinator tray ID and germinator ID cannot be null or blank");
@@ -59,25 +63,44 @@ public class GerminatorTrayService {
             "Germinator tray not found with ID: " + germinatorTrayId)
         );
 
-    if (tray.getGerminatorId() != null) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "Germinator ID already assigned to this tray"
+    String previousId = tray.getGerminatorId();
+    if (germinatorId.isBlank()) {
+      SparLog.info(
+          "Unsetting germinator ID for tray {} (previous value: {})",
+          germinatorTrayId,
+          previousId
+      );
+    } else if (previousId == null) {
+      SparLog.info(
+          "Assigning germinator ID {} to tray {}",
+          germinatorId,
+          germinatorTrayId
+      );
+    } else {
+      SparLog.info(
+          "Updating germinator ID for tray {} from {} to {}",
+          germinatorTrayId,
+          previousId,
+          germinatorId
       );
     }
 
-    tray.setGerminatorId(germinatorId);
+    if (germinatorId.isBlank()) {
+      tray.setGerminatorId(null); // unset
+    } else {
+      tray.setGerminatorId(germinatorId);
+    }
     germinatorTrayRepository.save(tray);
 
     SparLog.info(
-        "Successfully assigned germinator ID {} to tray ID {}",
-        germinatorId,
-        germinatorTrayId
+        "Germinator ID for tray {} is now {}",
+        germinatorTrayId,
+        tray.getGerminatorId()
     );
 
-    return new GerminatorTrayAssignGerminatorIdResponseDto(
+    return new GerminatorIdAssignResponseDto(
         germinatorTrayId,
-        germinatorId
+        tray.getGerminatorId()
     );
   }
 
@@ -184,5 +207,42 @@ public class GerminatorTrayService {
       throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
     }
     SparLog.info("Updated activity {} update timestamp", riaKey);
+  }
+
+  /**
+   * Retrieve the contents of a germinator tray.
+   *
+   * @param germinatorTrayId the ID of the germinator tray
+   * @return the tray contents, or an empty list if the tray exists but has no contents
+   * @throws ResponseStatusException if the tray ID is null or the tray does not exist
+   */
+  public List<GerminatorTrayContentsDto> getTrayContents(Integer germinatorTrayId) {
+    if (germinatorTrayId == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Germinator tray ID cannot be null");
+    }
+
+    if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId);
+    }
+
+    return germinationTrayContentsRepository.findByGerminatorTrayId(germinatorTrayId).stream()
+        .map(this::toDto)
+        .toList();
+  }
+
+  private GerminatorTrayContentsDto toDto(Object[] row) {
+    var entity = (GerminationTrayContentsEntity) row[0];
+    var updateTimestamp = (LocalDateTime) row[1];
+    return new GerminatorTrayContentsDto(
+        entity.getGerminatorTrayId(),
+        entity.getRequestId(),
+        entity.getSeedlotNumber(),
+        entity.getWarmStratStartDate(),
+        entity.getDrybackStartDate(),
+        entity.getGerminatorEntry(),
+        entity.getStratStartDate(),
+        updateTimestamp);
   }
 }

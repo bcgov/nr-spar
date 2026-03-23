@@ -5,7 +5,7 @@ package ca.bc.gov.oracleapi.dto.consep;
  * assigning a germinator ID to an existing
  * {@link ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity}.
  */
-public record GerminatorTrayAssignGerminatorIdResponseDto(
+public record GerminatorIdAssignResponseDto(
     Integer germinatorTrayId,
     String germinatorId
 ) {
