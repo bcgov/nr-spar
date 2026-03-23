@@ -6,12 +6,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
@@ -30,10 +32,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
-
 
 @WebMvcTest(GerminatorTrayEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
@@ -234,6 +236,21 @@ class GerminatorTrayEndpointTest {
         .assignGerminatorIdToTray(germinatorTrayId, germinatorId);
   }
 
+  @ParameterizedTest
+  @ValueSource(ints = {0, -1})
+  void assignGerminatorIdToTray_returns400_whenTrayIdNotPositive(Integer germinatorTrayId)
+      throws Exception {
+    mockMvc
+        .perform(
+            patch(BASE_URL + "/" + germinatorTrayId + "/germinator-id")
+                .with(csrf())
+                .param("germinatorId", "1")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).assignGerminatorIdToTray(any(), any());
+  }
+
   @Test
   void assignGerminatorIdToTray_returns404_whenTrayNotFound() throws Exception {
     Integer germinatorTrayId = 999;
@@ -335,5 +352,94 @@ class GerminatorTrayEndpointTest {
 
     verify(germinatorTrayService, times(0))
         .assignGerminatorIdToTray(any(), any());
+  }
+
+  /* ----------------------- Get Tests by Tray ID ----------------------*/
+  @Test
+  void getTestsByTrayId_returns200AndList_andCallsService() throws Exception {
+    Integer germinatorTrayId = 101;
+    List<GerminatorTrayContentsDto> contents =
+        List.of(
+            new GerminatorTrayContentsDto(
+                germinatorTrayId,
+                "RTS20042360",
+                "A",
+                null,
+                null,
+                null,
+                null,
+                null
+            ));
+
+    when(germinatorTrayService.getTrayContents(germinatorTrayId)).thenReturn(contents);
+
+    mockMvc
+        .perform(
+            get(BASE_URL + "/" + germinatorTrayId + "/tests")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].germinatorTrayId").value(101))
+        .andExpect(jsonPath("$[0].requestId").value("RTS20042360"))
+        .andExpect(jsonPath("$[0].seedlotNumber").value("A"))
+        .andExpect(jsonPath("$[0].warmStratStartDate").value(nullValue()))
+        .andExpect(jsonPath("$[0].drybackStartDate").value(nullValue()))
+        .andExpect(jsonPath("$[0].germinatorEntry").value(nullValue()))
+        .andExpect(jsonPath("$[0].stratStartDate").value(nullValue()))
+        .andExpect(jsonPath("$[0].updateTimestamp").value(nullValue()));
+
+    verify(germinatorTrayService, times(1)).getTrayContents(germinatorTrayId);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {0, -1})
+  void getTestsByTrayId_returns400_whenTrayIdNotPositive(Integer germinatorTrayId)
+      throws Exception {
+    mockMvc
+        .perform(
+            get(BASE_URL + "/" + germinatorTrayId + "/tests")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).getTrayContents(any());
+  }
+
+  @Test
+  void getTestsByTrayId_returns404_whenTrayNotFound() throws Exception {
+    Integer germinatorTrayId = 999;
+
+    when(germinatorTrayService.getTrayContents(germinatorTrayId))
+        .thenThrow(
+            new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId));
+
+    mockMvc
+        .perform(
+            get(BASE_URL + "/" + germinatorTrayId + "/tests")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
+    verify(germinatorTrayService, times(1)).getTrayContents(germinatorTrayId);
+  }
+
+  @Test
+  @WithAnonymousUser
+  void getTestsByTrayId_returns401_whenUnauthorized() throws Exception {
+    mockMvc
+        .perform(get(BASE_URL + "/101/tests").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verify(germinatorTrayService, times(0)).getTrayContents(any());
+  }
+
+  @Test
+  @WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
+  void getTestsByTrayId_returns403_whenUserDoesNotHaveRequiredRole() throws Exception {
+    mockMvc
+        .perform(get(BASE_URL + "/101/tests").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verify(germinatorTrayService, times(0)).getTrayContents(any());
   }
 }
