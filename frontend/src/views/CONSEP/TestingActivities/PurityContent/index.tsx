@@ -259,13 +259,18 @@ const PurityContent = () => {
     }
   }, [testActivity]);
 
+  // Hydrate from query cache only; local setTestActivity must not reset table replicates
   useEffect(() => {
-    if (testActivity?.replicatesList && testActivity?.replicatesList.length > 0) {
-      setReplicates(testActivity.replicatesList);
+    const { data } = testActivityQuery;
+    if (!data) {
+      return;
+    }
+    if (data.replicatesList && data.replicatesList.length > 0) {
+      setReplicates(data.replicatesList);
     } else {
       setReplicates(initReplicatesList(riaKey ?? '', 2));
     }
-  }, [testActivity, riaKey]);
+  }, [testActivityQuery.data, riaKey]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });

@@ -147,13 +147,19 @@ const MoistureContent = () => {
     }
   }, [testActivity]);
 
+  // Hydrate from query cache only; local setTestActivity must not reset table replicates
   useEffect(() => {
-    if (testActivity?.replicatesList && testActivity.replicatesList.length > 0) {
-      setReplicates(testActivity.replicatesList);
-    } else if (mcVariation) {
-      setReplicates(initReplicatesList(riaKey ?? '', mcVariation.defaultNumberOfRows));
+    const { data } = testActivityQuery;
+    if (!data) {
+      return;
     }
-  }, [testActivity, riaKey, mcType]);
+    const variation = mccVariations[data.standardActivityType as keyof typeof mccVariations];
+    if (data.replicatesList && data.replicatesList.length > 0) {
+      setReplicates(data.replicatesList);
+    } else if (variation) {
+      setReplicates(initReplicatesList(riaKey ?? '', variation.defaultNumberOfRows));
+    }
+  }, [testActivityQuery.data, riaKey]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
     setAlert({ isSuccess, message });

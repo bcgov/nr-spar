@@ -143,7 +143,9 @@ const ActivityResult = ({
 
   const addRow = () => {
     const newRow = { riaKey, replicateNumber: replicatesList.length + 1, replicateAccInd: 1 };
-    setReplicatesList([...replicatesList, newRow]);
+    const next = [...replicatesList, newRow];
+    setReplicatesList(next);
+    updateReplicates(next);
   };
 
   const handleAllClearData = () => {
@@ -169,7 +171,11 @@ const ActivityResult = ({
     {
       label: 'Accept all',
       icon: <Icons.CheckboxChecked size={15} />,
-      action: () => setReplicatesList(replicatesList.map((r) => ({ ...r, replicateAccInd: 1 })))
+      action: () => {
+        const next = replicatesList.map((r) => ({ ...r, replicateAccInd: 1 }));
+        setReplicatesList(next);
+        updateReplicates(next);
+      }
     },
     {
       label: 'Add row',
@@ -219,7 +225,9 @@ const ActivityResult = ({
         : item
     ));
 
-    setReplicatesList(createReplicateList(updatedList));
+    const next = createReplicateList(updatedList);
+    setReplicatesList(next);
+    updateReplicates(next);
   };
 
   const getTableColumns = () => {
