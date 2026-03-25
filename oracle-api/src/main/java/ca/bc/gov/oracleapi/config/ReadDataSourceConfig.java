@@ -62,7 +62,9 @@ public class ReadDataSourceConfig {
     jpaProps.put(
         "hibernate.dialect",
         env.getProperty(
-            "spring.jpa.properties.hibernate.dialect", "org.hibernate.dialect.OracleDialect"));
+            "spring.jpa.properties.hibernate.dialect",
+            env.getProperty(
+                "spring.jpa.database-platform", "org.hibernate.dialect.OracleDialect")));
     jpaProps.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
     String ddlAuto = env.getProperty("spring.jpa.hibernate.ddl-auto");
     if (ddlAuto != null) {
