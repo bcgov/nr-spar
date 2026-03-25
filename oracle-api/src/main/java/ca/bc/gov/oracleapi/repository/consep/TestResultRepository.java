@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -109,4 +110,36 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
       @Param("riaKey") BigDecimal riaKey,
       @Param("trayId") Integer trayId
   );
+
+  /**
+   * Detach a test from its tray by setting germinator_tray_id to null.
+   *
+   * @param riaKey the request item activity key (RIA_SKEY)
+   * @return the number of rows updated (0 or 1)
+   */
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE TestResultEntity rst
+         SET rst.germinatorTrayId = NULL,
+             rst.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE rst.riaKey = :riaKey
+      """)
+  int detachTestFromTray(@Param("riaKey") BigDecimal riaKey);
+
+  /**
+   * Find all RIA_SKEY values for tests currently on the given tray.
+   */
+  @Query("""
+      SELECT rst.riaKey FROM TestResultEntity rst
+       WHERE rst.germinatorTrayId = :germinatorTrayId
+      """)
+  List<BigDecimal> findRiaKeysByGerminatorTrayId(
+      @Param("germinatorTrayId") Integer germinatorTrayId
+  );
+
+  /**
+   * Count how many tests are on the given tray.
+   */
+  int countByGerminatorTrayId(Integer germinatorTrayId);
 }
