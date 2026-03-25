@@ -17,5 +17,6 @@ export type GermTrayTestType = {
   drybackStartDate: string | null;
   germinatorEntry: string | null;
   stratStartDate: string | null;
-  updateTimestamp: string | null;
+  testCompleteInd: number;
+  acceptResultInd: number;
 };

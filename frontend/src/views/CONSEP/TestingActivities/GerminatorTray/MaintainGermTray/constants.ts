@@ -72,8 +72,13 @@ export const getGermTrayTestsColumns = (): MRT_ColumnDef<GermTrayTestType>[] => 
     enableEditing: false
   },
   {
-    accessorKey: 'updateTimestamp',
-    header: 'Update Timestamp',
+    accessorKey: 'testCompleteInd',
+    header: 'Complete',
+    enableEditing: false
+  },
+  {
+    accessorKey: 'acceptResultInd',
+    header: 'Accepted',
     enableEditing: false
   }
 ];
