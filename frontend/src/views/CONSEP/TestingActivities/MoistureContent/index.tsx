@@ -157,7 +157,8 @@ const MoistureContent = () => {
     if (data.replicatesList && data.replicatesList.length > 0) {
       setReplicates(data.replicatesList);
     } else if (variation) {
-      setReplicates(initReplicatesList(riaKey ?? '', variation.defaultNumberOfRows));
+      const rowCount = variation?.defaultNumberOfRows ?? 1;
+      setReplicates(initReplicatesList(riaKey ?? '', rowCount));
     }
   }, [testActivityQuery.data, riaKey]);
 

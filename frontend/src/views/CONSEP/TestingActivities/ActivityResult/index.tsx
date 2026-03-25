@@ -124,6 +124,9 @@ const ActivityResult = ({
     syncWithInitialData
   } = useReplicates(riaKey, replicateType, updateReplicates, setAlert);
 
+  const replicatesListRef = useRef(replicatesList);
+  replicatesListRef.current = replicatesList;
+
   const deleteReplicatesMutation = useMutation({
     mutationFn: (replicateNumbers: number[]) => testingActivitiesAPI(
       replicateType,
@@ -140,7 +143,12 @@ const ActivityResult = ({
     }
   });
 
+  // Hydrate when props differ from local (query/refetch). Skip parent echo of updateReplicates;
+  // otherwise lastCheckedListRef would match before autosave runs.
   useEffect(() => {
+    if (JSON.stringify(replicatesData) === JSON.stringify(replicatesListRef.current)) {
+      return;
+    }
     syncWithInitialData(replicatesData);
   }, [replicatesData]);
 
