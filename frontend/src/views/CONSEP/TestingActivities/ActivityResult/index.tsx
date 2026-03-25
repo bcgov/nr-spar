@@ -64,6 +64,9 @@ const useReplicates = (
       lastCheckedListRef.current = JSON.stringify(updatedList);
       setReplicatesList(updatedList);
       updateReplicates(updatedList);
+    },
+    onError: (error) => {
+      setAlert(false, `Failed to delete replicate: ${(error as AxiosError).message}`);
     }
   });
 
