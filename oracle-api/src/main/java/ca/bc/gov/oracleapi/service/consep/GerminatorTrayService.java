@@ -114,7 +114,7 @@ public class GerminatorTrayService {
    * @param activityUpdateTimestamp  the current update_timestamp of the parent activity (optimistic lock)
    * @throws ResponseStatusException 409 with RESELECT_MESSAGE if any update affects 0 rows
    */
-  @Transactional(rollbackFor = ResponseStatusException.class)
+  @Transactional(value = "readWriteTransactionManager", rollbackFor = ResponseStatusException.class)
   public void deleteTestFromTray(
       Integer germinatorTrayId,
       BigDecimal riaSkey,
@@ -159,7 +159,7 @@ public class GerminatorTrayService {
    * @param activityUpdateTimestamp the current update_timestamp of the parent activity (optimistic lock)
    * @throws ResponseStatusException 404 if tray not found, 409 with RESELECT_MESSAGE if any DML affects 0 rows
    */
-  @Transactional(rollbackFor = ResponseStatusException.class)
+  @Transactional(value = "readWriteTransactionManager", rollbackFor = ResponseStatusException.class)
   public void deleteTray(Integer germinatorTrayId, LocalDateTime activityUpdateTimestamp) {
     if (germinatorTrayId == null || activityUpdateTimestamp == null) {
       throw new ResponseStatusException(

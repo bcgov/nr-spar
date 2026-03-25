@@ -14,7 +14,7 @@ import ca.bc.gov.oracleapi.repository.consep.SparRequestRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class ActivityService {
    * @param riaKey the identifier key
    * @param activityFormDto an object with the values to be updated
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public ActivityEntity updateActivityField(
       @NonNull BigDecimal riaKey,
       @NonNull ActivityFormDto activityFormDto
@@ -112,7 +112,7 @@ public class ActivityService {
    * @param activityCreateDto The DTO containing activity data to be created.
    * @return The saved ActivityEntity.
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public ActivitySearchResponseDto createActivity(ActivityCreateDto activityCreateDto) {
     SparLog.info("Create a new activity");
 

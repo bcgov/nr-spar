@@ -12,7 +12,7 @@ import ca.bc.gov.oracleapi.exception.InvalidTestActivityKeyException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.MccReplicatesRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,7 +120,7 @@ public class MoistureContentService {
    * @param riaKey the identifier key for all table related to MCC
    * @param replicateFormDtos an object with the values to be updated
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public List<MccReplicateEntity> updateReplicateField(
       @NonNull BigDecimal riaKey,
       @NonNull List<MccReplicateFormDto> replicateFormDtos
@@ -240,7 +240,7 @@ public class MoistureContentService {
    * @param riaKey          the identifier key for all table related to MCC
    * @param replicateNumbers the replicate numbers to be deleted
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public void deleteMccReplicates(
       @NonNull BigDecimal riaKey,
       @NonNull List<Integer> replicateNumbers
@@ -268,7 +268,7 @@ public class MoistureContentService {
    * @param riaKey          the identifier key for all table related to MCC
    * @param replicateNumber the replicate number to be deleted
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public Optional<MoistureContentConesDto> deleteMccReplicate(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber

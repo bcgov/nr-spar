@@ -82,6 +82,8 @@ jobs:
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ secrets.ORACLE_SERVICE }}'
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
+            -p ORACLE_WRITE_USER='${{ vars.ORACLE_WRITE_USER }}'
+            -p ORACLE_WRITE_PASSWORD='${{ secrets.ORACLE_WRITE_PASSWORD }}'
             -p ORACLE_CERT_SECRET='${{ secrets.ORACLE_CERT_SECRET }}'
             -p ORACLE_HOST='${{ secrets.ORACLE_HOST }}'
             -p S3_BUCKET='${{ vars.S3_BUCKET }}'

@@ -20,7 +20,7 @@ import ca.bc.gov.oracleapi.repository.consep.PurityReplicateRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class PurityTestService {
 
   private final PurityDebrisRepository debrisRepository;
 
-  @PersistenceContext
+  @PersistenceContext(unitName = "readwrite")
   private EntityManager entityManager;
 
   // The maximum number of replicates is 8 and the entries are sequencial,
@@ -129,7 +129,7 @@ public class PurityTestService {
    * @param riaKey the identifier key for all table related to test activities
    * @param replicateFormDtos an object with the values to be updated
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public List<PurityReplicateEntity> updateReplicateField(
       @NonNull BigDecimal riaKey,
       @NonNull List<PurityReplicateFormDto> replicateFormDtos
@@ -182,7 +182,7 @@ public class PurityTestService {
    * @param riaKey the identifier key for all table related to test activities
    * @param debrisFormDtos an object with the values to be updated
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public List<PurityDebrisDto> updateDebris(
       @NonNull BigDecimal riaKey,
       @NonNull List<PurityDebrisFormDto> debrisFormDtos
@@ -305,7 +305,7 @@ public class PurityTestService {
    * @param riaKey           the identifier key for all table related to tests activities
    * @param replicateNumbers the replicate numbers to be deleted
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public void deletePurityReplicates(
       @NonNull BigDecimal riaKey,
       @NonNull List<Integer> replicateNumbers
@@ -333,7 +333,7 @@ public class PurityTestService {
    * @param riaKey          the identifier key for all table related to tests activities
    * @param replicateNumber the replicate number to be deleted
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public void deleteSinglePurityReplicate(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber
@@ -363,7 +363,7 @@ public class PurityTestService {
    * @param replicateNumber the replicate number of the debris to be deleted
    * @param debrisRank      the rank of the debris to be deleted
    */
-  @Transactional
+  @Transactional("readWriteTransactionManager")
   public List<PurityDebrisDto> deletePurityDebris(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber,
