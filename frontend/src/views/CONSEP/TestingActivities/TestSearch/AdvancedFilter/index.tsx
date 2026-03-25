@@ -133,7 +133,7 @@ const AdvancedFilters = ({
     let error = false;
     let errorMessage = '';
 
-    if (value.length > 5) {
+    if (value.length > 12) {
       error = true;
       errorMessage = errorMessages.reqId;
     }

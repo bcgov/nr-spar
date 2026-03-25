@@ -67,7 +67,7 @@ export const errorMessages = {
   familyLotMaxChar: '13 character max for family lot numbers',
   lotDuplicate: 'Duplicate lot number entered',
   germTrayMax: '5 digits max',
-  reqId: '5 character max',
+  reqId: '12 character max',
   reqYearSize: 'Year must be a 4-digit number',
   reqYearInterval: 'Year must be between 1900 and 9999',
   orchardId: '3 character max'
