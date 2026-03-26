@@ -1,9 +1,11 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
-import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
+import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
@@ -244,5 +246,38 @@ public class GerminatorTrayService {
         entity.getGerminatorEntry(),
         entity.getStratStartDate(),
         updateTimestamp);
+  }
+
+  private String normalizeBlankToNull(String value) {
+    if (value == null) {
+      return null;
+    }
+    String trimmed = value.trim();
+    return trimmed.isBlank() ? null : trimmed;
+  }
+
+  public List<GerminatorTraySearchResponseDto> searchGerminatorTrays(
+      GerminatorTraySearchRequestDto request) {
+    String seedlotOrFamilyLot = normalizeBlankToNull(request.seedlotOrFamilyLot());
+    String requestIdOrItem = normalizeBlankToNull(request.requestIdOrItem());
+
+    // Prevent open search
+    if (seedlotOrFamilyLot == null && requestIdOrItem == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "At least one search criterion is required");
+    }
+
+    // Request ID / item split (same pattern as existing search logic)
+    String requestId = null;
+    String itemId = null;
+    if (requestIdOrItem != null) {
+      requestId =
+          requestIdOrItem.length() >= 11 ? requestIdOrItem.substring(0, 11) : requestIdOrItem;
+      if (requestIdOrItem.length() == 12) {
+        itemId = requestIdOrItem.substring(11, 12);
+      }
+    }
+
+    return germinatorTrayRepository.searchGerminatorTrays(seedlotOrFamilyLot, requestId, itemId);
   }
 }
