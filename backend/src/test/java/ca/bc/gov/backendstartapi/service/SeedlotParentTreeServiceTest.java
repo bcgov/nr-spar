@@ -122,16 +122,25 @@ class SeedlotParentTreeServiceTest {
 
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
-    when(seedlotParentTreeRepository.saveAll(any())).thenReturn(List.of(spt));
-
     SeedlotFormParentTreeSmpDto formStep5Two = createFormDto(4024);
+    SeedlotParentTree spt2 =
+        new SeedlotParentTree(
+            seedlot,
+            formStep5Two.parentTreeId(),
+            formStep5Two.parentTreeNumber(),
+            formStep5Two.coneCount(),
+            formStep5Two.pollenCount(),
+            audit);
+
+    when(seedlotParentTreeRepository.saveAll(any())).thenReturn(List.of(spt, spt2));
 
     List<SeedlotParentTree> list =
         seedlotParentTreeService.saveSeedlotFormStep5(
             seedlot, List.of(formStep5, formStep5Two), true);
 
-    Assertions.assertFalse(list.isEmpty());
-    Assertions.assertEquals(1, list.size());
+    Assertions.assertEquals(2, list.size());
+    Assertions.assertEquals(4023, list.get(0).getParentTreeId());
+    Assertions.assertEquals(4024, list.get(1).getParentTreeId());
   }
 
   @Test
