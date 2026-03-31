@@ -37,6 +37,7 @@ const useReplicates = (
   const [showDeleteNotification, setShowDeleteNotification] = useState(false);
 
   const lastCheckedListRef = useRef<string | null>(null);
+  const isDeletingRef = useRef(false);
 
   const updateReplicateListMutation = useMutation({
     mutationFn: (replicates: ReplicateType[]) => testingActivitiesAPI(
@@ -58,11 +59,21 @@ const useReplicates = (
       'deleteSingleReplicate',
       { riaKey, replicateNumber }
     ),
+    onMutate: () => {
+      isDeletingRef.current = true;
+    },
     onSuccess: (data) => {
       setAlert(true, 'Replicate deleted successfully');
       const updatedList = data.data.replicatesList;
       lastCheckedListRef.current = JSON.stringify(updatedList);
       setReplicatesList(updatedList);
+      updateReplicates(updatedList);
+    },
+    onError: (error) => {
+      setAlert(false, `Failed to delete replicate: ${(error as AxiosError).message}`);
+    },
+    onSettled: () => {
+      isDeletingRef.current = false;
     }
   });
 
@@ -77,7 +88,11 @@ const useReplicates = (
   useEffect(() => {
     const intervalId = setInterval(() => {
       const hasValidationErrors = Object.values(validationErrors).some(Boolean);
-      if (hasValidationErrors || updateReplicateListMutation.isPending) {
+      if (
+        hasValidationErrors
+        || updateReplicateListMutation.isPending
+        || isDeletingRef.current
+      ) {
         return;
       }
 
@@ -100,6 +115,7 @@ const useReplicates = (
     showDeleteNotification,
     setShowDeleteNotification,
     deleteReplicateMutation,
+    isDeletingRef,
     syncWithInitialData
   };
 };
@@ -117,8 +133,12 @@ const ActivityResult = ({
     showDeleteNotification,
     setShowDeleteNotification,
     deleteReplicateMutation,
+    isDeletingRef,
     syncWithInitialData
   } = useReplicates(riaKey, replicateType, updateReplicates, setAlert);
+
+  const replicatesListRef = useRef(replicatesList);
+  replicatesListRef.current = replicatesList;
 
   const deleteReplicatesMutation = useMutation({
     mutationFn: (replicateNumbers: number[]) => testingActivitiesAPI(
@@ -126,22 +146,36 @@ const ActivityResult = ({
       'deleteMultipleReplicates',
       { riaKey, replicateNumbers }
     ),
+    onMutate: () => {
+      isDeletingRef.current = true;
+    },
     onSuccess: () => {
       setAlert(true, 'Replicates deleted successfully');
       setReplicatesList([]);
+      updateReplicates([]);
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicates: ${(error as AxiosError).message}`);
+    },
+    onSettled: () => {
+      isDeletingRef.current = false;
     }
   });
 
+  // Hydrate when props differ from local (query/refetch). Skip parent echo of updateReplicates;
+  // otherwise lastCheckedListRef would match before autosave runs.
   useEffect(() => {
+    if (JSON.stringify(replicatesData) === JSON.stringify(replicatesListRef.current)) {
+      return;
+    }
     syncWithInitialData(replicatesData);
   }, [replicatesData]);
 
   const addRow = () => {
     const newRow = { riaKey, replicateNumber: replicatesList.length + 1, replicateAccInd: 1 };
-    setReplicatesList([...replicatesList, newRow]);
+    const next = [...replicatesList, newRow];
+    setReplicatesList(next);
+    updateReplicates(next);
   };
 
   const handleAllClearData = () => {
@@ -167,7 +201,11 @@ const ActivityResult = ({
     {
       label: 'Accept all',
       icon: <Icons.CheckboxChecked size={15} />,
-      action: () => setReplicatesList(replicatesList.map((r) => ({ ...r, replicateAccInd: 1 })))
+      action: () => {
+        const next = replicatesList.map((r) => ({ ...r, replicateAccInd: 1 }));
+        setReplicatesList(next);
+        updateReplicates(next);
+      }
     },
     {
       label: 'Add row',
@@ -217,7 +255,9 @@ const ActivityResult = ({
         : item
     ));
 
-    setReplicatesList(createReplicateList(updatedList));
+    const next = createReplicateList(updatedList);
+    setReplicatesList(next);
+    updateReplicates(next);
   };
 
   const getTableColumns = () => {
