@@ -271,10 +271,16 @@ public class GerminatorTrayService {
     String requestId = null;
     String itemId = null;
     if (requestIdOrItem != null) {
-      requestId =
-          requestIdOrItem.length() >= 11 ? requestIdOrItem.substring(0, 11) : requestIdOrItem;
-      if (requestIdOrItem.length() == 12) {
-        itemId = requestIdOrItem.substring(11, 12);
+      int lengthOfIdOrItem = requestIdOrItem.length();
+      if (lengthOfIdOrItem != 11 && lengthOfIdOrItem != 12) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "requestId or requestItem must be exactly 11 or 12 characters"
+        );
+      }
+      requestId = requestIdOrItem.substring(0, 11);
+      if (lengthOfIdOrItem == 12) {
+        itemId = requestIdOrItem.substring(11);
       }
     }
 
