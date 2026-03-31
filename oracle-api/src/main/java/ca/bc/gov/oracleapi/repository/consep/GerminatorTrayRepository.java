@@ -54,7 +54,7 @@ public interface GerminatorTrayRepository extends JpaRepository<GerminatorTrayEn
             AND (:requestId IS NULL OR a.requestId = :requestId)
             AND (:itemId IS NULL OR a.itemId = :itemId)
       )
-      ORDER BY tray.systemTrayNo, tray.germinatorTrayId
+      ORDER BY tray.germinatorTrayId
       """)
   List<GerminatorTraySearchResponseDto> searchGerminatorTrays(
       @Param("seedlotOrFamilyLot") String seedlotOrFamilyLot,
