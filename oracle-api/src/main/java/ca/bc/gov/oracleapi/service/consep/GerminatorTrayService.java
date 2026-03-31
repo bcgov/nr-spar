@@ -256,6 +256,18 @@ public class GerminatorTrayService {
     return trimmed.isBlank() ? null : trimmed;
   }
 
+  /**
+   * Search for germinator trays matching the given criteria.
+   *
+   * <p>At least one of {@code seedlotOrFamilyLot} or {@code requestIdOrItem} must be provided. If
+   * {@code requestIdOrItem} is 12 characters, the last character is treated as the item ID. If it
+   * is 11 characters, it is treated as the request ID only.
+   *
+   * @param request the search criteria DTO
+   * @return a list of matching germinator tray search results, or an empty list if none match
+   * @throws ResponseStatusException 400 if both search criteria are blank (open search blocked)
+   * @throws ResponseStatusException 400 if requestIdOrItem is not exactly 11 or 12 characters
+   */
   public List<GerminatorTraySearchResponseDto> searchGerminatorTrays(
       GerminatorTraySearchRequestDto request) {
     String seedlotOrFamilyLot = normalizeBlankToNull(request.seedlotOrFamilyLot());
