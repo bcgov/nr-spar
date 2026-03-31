@@ -462,15 +462,14 @@ class GerminatorTrayServiceTest {
   }
 
   @Test
-  void searchGerminatorTrays_shouldTreatShortRequestAsRequestIdOnly() {
+  void searchGerminatorTrays_shouldRejectInvalidRequestIdOrItemLength() {
     GerminatorTraySearchRequestDto request = new GerminatorTraySearchRequestDto(null, "TST2025");
-
-    when(germinatorTrayRepository.searchGerminatorTrays(null, "TST2025", null))
-        .thenReturn(List.of());
-
-    germinatorTrayService.searchGerminatorTrays(request);
-
-    verify(germinatorTrayRepository).searchGerminatorTrays(null, "TST2025", null);
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> germinatorTrayService.searchGerminatorTrays(request));
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    verify(germinatorTrayRepository, never()).searchGerminatorTrays(any(), any(), any());
   }
 
   @Test
