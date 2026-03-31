@@ -184,7 +184,8 @@ class SeedlotParentTreeServiceTest {
   }
 
   @Test
-  @DisplayName("saveSeedlotFormStep5 with all existing data and canDelete should delete and re-insert")
+  @DisplayName(
+      "saveSeedlotFormStep5 with all existing data and canDelete should delete and re-insert")
   void saveSeedlotFormStep5_withExistingDataAndCanDelete_shouldSucceed() {
     Seedlot seedlot = new Seedlot("99999");
     AuditInformation audit = new AuditInformation("userId");
@@ -226,7 +227,8 @@ class SeedlotParentTreeServiceTest {
 
   @Test
   @DisplayName(
-      "saveSeedlotFormStep5 with existing genetic quality and canDelete=false should throw conflict")
+      "saveSeedlotFormStep5 with existing genetic quality"
+          + " and canDelete=false should throw conflict")
   void saveSeedlotFormStep5_conflictOnGeneticQuality_shouldThrow() {
     Seedlot seedlot = new Seedlot("88888");
 
