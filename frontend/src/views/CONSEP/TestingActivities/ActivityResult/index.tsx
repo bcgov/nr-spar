@@ -37,6 +37,7 @@ const useReplicates = (
   const [showDeleteNotification, setShowDeleteNotification] = useState(false);
 
   const lastCheckedListRef = useRef<string | null>(null);
+  const isDeletingRef = useRef(false);
 
   const updateReplicateListMutation = useMutation({
     mutationFn: (replicates: ReplicateType[]) => testingActivitiesAPI(
@@ -58,6 +59,9 @@ const useReplicates = (
       'deleteSingleReplicate',
       { riaKey, replicateNumber }
     ),
+    onMutate: () => {
+      isDeletingRef.current = true;
+    },
     onSuccess: (data) => {
       setAlert(true, 'Replicate deleted successfully');
       const updatedList = data.data.replicatesList;
@@ -67,6 +71,9 @@ const useReplicates = (
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicate: ${(error as AxiosError).message}`);
+    },
+    onSettled: () => {
+      isDeletingRef.current = false;
     }
   });
 
@@ -81,7 +88,11 @@ const useReplicates = (
   useEffect(() => {
     const intervalId = setInterval(() => {
       const hasValidationErrors = Object.values(validationErrors).some(Boolean);
-      if (hasValidationErrors || updateReplicateListMutation.isPending) {
+      if (
+        hasValidationErrors
+        || updateReplicateListMutation.isPending
+        || isDeletingRef.current
+      ) {
         return;
       }
 
@@ -104,6 +115,7 @@ const useReplicates = (
     showDeleteNotification,
     setShowDeleteNotification,
     deleteReplicateMutation,
+    isDeletingRef,
     syncWithInitialData
   };
 };
@@ -121,6 +133,7 @@ const ActivityResult = ({
     showDeleteNotification,
     setShowDeleteNotification,
     deleteReplicateMutation,
+    isDeletingRef,
     syncWithInitialData
   } = useReplicates(riaKey, replicateType, updateReplicates, setAlert);
 
@@ -133,6 +146,9 @@ const ActivityResult = ({
       'deleteMultipleReplicates',
       { riaKey, replicateNumbers }
     ),
+    onMutate: () => {
+      isDeletingRef.current = true;
+    },
     onSuccess: () => {
       setAlert(true, 'Replicates deleted successfully');
       setReplicatesList([]);
@@ -140,6 +156,9 @@ const ActivityResult = ({
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicates: ${(error as AxiosError).message}`);
+    },
+    onSettled: () => {
+      isDeletingRef.current = false;
     }
   });
 
