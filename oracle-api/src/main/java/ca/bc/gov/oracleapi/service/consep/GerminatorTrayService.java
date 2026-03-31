@@ -273,8 +273,14 @@ public class GerminatorTrayService {
     String seedlotOrFamilyLot = normalizeBlankToNull(request.seedlotOrFamilyLot());
     String requestIdOrItem = normalizeBlankToNull(request.requestIdOrItem());
 
+    SparLog.info(
+        "Searching germinator trays - seedlotOrFamilyLot: {}, requestIdOrItem: {}",
+        seedlotOrFamilyLot,
+        requestIdOrItem);
+
     // Prevent open search
     if (seedlotOrFamilyLot == null && requestIdOrItem == null) {
+      SparLog.info("Rejecting open search: both criteria are null or blank");
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "At least one search criterion is required");
     }
@@ -286,9 +292,7 @@ public class GerminatorTrayService {
       int lengthOfIdOrItem = requestIdOrItem.length();
       if (lengthOfIdOrItem != 11 && lengthOfIdOrItem != 12) {
         throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST,
-            "requestId or requestItem must be exactly 11 or 12 characters"
-        );
+            HttpStatus.BAD_REQUEST, "requestId or requestItem must be exactly 11 or 12 characters");
       }
       requestId = requestIdOrItem.substring(0, 11);
       if (lengthOfIdOrItem == 12) {
@@ -296,6 +300,13 @@ public class GerminatorTrayService {
       }
     }
 
-    return germinatorTrayRepository.searchGerminatorTrays(seedlotOrFamilyLot, requestId, itemId);
+    SparLog.info("Executing tray search - requestId: {}, itemId: {}", requestId, itemId);
+
+    List<GerminatorTraySearchResponseDto> results =
+        germinatorTrayRepository.searchGerminatorTrays(seedlotOrFamilyLot, requestId, itemId);
+
+    SparLog.info("Tray search returned {} result(s)", results.size());
+
+    return results;
   }
 }
