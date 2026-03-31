@@ -30,7 +30,7 @@ public interface GerminatorTrayRepository extends JpaRepository<GerminatorTrayEn
   int deleteByGerminatorTrayId(@Param("germinatorTrayId") Integer germinatorTrayId);
 
   @Query("""
-      SELECT DISTINCT new ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto(
+      SELECT new ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto(
           tray.germinatorTrayId,
           tray.activityTypeCd,
           tray.actualStartDate,
