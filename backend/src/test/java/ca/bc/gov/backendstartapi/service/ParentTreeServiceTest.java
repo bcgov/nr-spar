@@ -2,8 +2,10 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(SpringExtension.class)
 class ParentTreeServiceTest {
@@ -206,5 +209,249 @@ class ParentTreeServiceTest {
         () -> {
           parentTreeService.calculatePtVals(reqDto);
         });
+  }
+
+  @Test
+  @DisplayName("Empty orchardPtVals and smpMix should return empty result")
+  void calculatePtVals_emptyInput() {
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(), List.of(), 0, BigDecimal.ZERO, new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    PtCalculationResDto result = parentTreeService.calculatePtVals(reqDto);
+
+    assertNotNull(result);
+    assertTrue(result.geneticTraits().isEmpty());
+    assertEquals(BigDecimal.ONE, result.calculatedPtVals().getNeValue());
+  }
+
+  @Test
+  @DisplayName("Zero pollen count with null SMP BV fields should succeed")
+  void calculatePtVals_zeroPollenAndNullSmpBv() {
+    SeedlotManagementBreedingValueDto smpBv =
+        new SeedlotManagementBreedingValueDto(
+            null, null, null, null, null, null, null, null, null, null, null, null);
+
+    OrchardParentTreeValsDto pt =
+        new OrchardParentTreeValsDto(
+            "1001",
+            "101",
+            new BigDecimal("100"),
+            BigDecimal.ZERO,
+            0,
+            0,
+            List.of(new GeneticWorthTraitsDto("GVO", new BigDecimal("20"), null, null)));
+
+    PtValsCalReqDto reqDto = new PtValsCalReqDto(List.of(pt), List.of(), 0, null, smpBv);
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(1001L)))
+        .thenReturn(List.of(new GeospatialOracleResDto(1001L, 49, 2, 0, 124, 3, 0, 500)));
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    PtCalculationResDto result = parentTreeService.calculatePtVals(reqDto);
+
+    assertNotNull(result);
+    assertEquals(1, result.geneticTraits().size());
+    assertEquals("GVO", result.geneticTraits().get(0).traitCode());
+    assertEquals(new BigDecimal("20.0"), result.geneticTraits().get(0).calculatedValue());
+  }
+
+  @Test
+  @DisplayName("Zero cone count should produce empty genetic traits")
+  void calculatePtVals_zeroConeCount() {
+    OrchardParentTreeValsDto pt =
+        new OrchardParentTreeValsDto(
+            "2001",
+            "201",
+            BigDecimal.ZERO,
+            new BigDecimal("100"),
+            0,
+            0,
+            List.of(new GeneticWorthTraitsDto("GVO", new BigDecimal("20"), null, null)));
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(pt), List.of(), 0, BigDecimal.ZERO, new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(2001L)))
+        .thenReturn(List.of(new GeospatialOracleResDto(2001L, 49, 2, 0, 124, 3, 0, 500)));
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    PtCalculationResDto result = parentTreeService.calculatePtVals(reqDto);
+
+    assertNotNull(result);
+    assertTrue(result.geneticTraits().isEmpty());
+  }
+
+  @Test
+  @DisplayName("Row with both zero cone and pollen is skipped, non-zero contaminant is applied")
+  void calculatePtVals_skippedRowWithNonZeroContaminant() {
+    OrchardParentTreeValsDto validPt =
+        new OrchardParentTreeValsDto(
+            "3001",
+            "301",
+            new BigDecimal("100"),
+            new BigDecimal("100"),
+            10,
+            15,
+            List.of(new GeneticWorthTraitsDto("GVO", new BigDecimal("20"), null, null)));
+
+    OrchardParentTreeValsDto skippedPt =
+        new OrchardParentTreeValsDto(
+            "3002", "302", BigDecimal.ZERO, BigDecimal.ZERO, 0, 0, List.of());
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(validPt, skippedPt),
+            List.of(),
+            0,
+            new BigDecimal("5.0"),
+            new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(3001L, 3002L)))
+        .thenReturn(
+            List.of(
+                new GeospatialOracleResDto(3001L, 49, 2, 0, 124, 3, 0, 500),
+                new GeospatialOracleResDto(3002L, 50, 0, 0, 125, 0, 0, 600)));
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    PtCalculationResDto result = parentTreeService.calculatePtVals(reqDto);
+
+    assertNotNull(result);
+    assertFalse(result.geneticTraits().isEmpty());
+    assertEquals("GVO", result.geneticTraits().get(0).traitCode());
+  }
+
+  @Test
+  @DisplayName("All twelve genetic traits above threshold should all be returned")
+  void calculatePtVals_allTraitsAboveThreshold() {
+    List<GeneticWorthTraitsDto> allTraits =
+        List.of(
+            new GeneticWorthTraitsDto("AD", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("DFS", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("DFU", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("DFW", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("DSB", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("DSC", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("DSG", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("GVO", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("IWS", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("WDU", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("WVE", new BigDecimal("10"), null, null),
+            new GeneticWorthTraitsDto("WWD", new BigDecimal("10"), null, null));
+
+    OrchardParentTreeValsDto pt =
+        new OrchardParentTreeValsDto(
+            "4001", "401", new BigDecimal("100"), new BigDecimal("100"), 0, 0, allTraits);
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(pt), List.of(), 0, BigDecimal.ZERO, new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(4001L)))
+        .thenReturn(List.of(new GeospatialOracleResDto(4001L, 49, 2, 0, 124, 3, 0, 500)));
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    PtCalculationResDto result = parentTreeService.calculatePtVals(reqDto);
+
+    assertNotNull(result);
+    assertEquals(12, result.geneticTraits().size());
+    for (GeneticWorthTraitsDto trait : result.geneticTraits()) {
+      assertEquals(new BigDecimal("10.0"), trait.calculatedValue());
+    }
+  }
+
+  @Test
+  @DisplayName("SMP mix proportion exceeding one should throw ResponseStatusException")
+  void calculatePtVals_proportionExceedsOne() {
+    GeospatialRequestDto smp = new GeospatialRequestDto(5001L, new BigDecimal("1.5"));
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(), List.of(smp), 0, BigDecimal.ZERO, new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(5001L)))
+        .thenReturn(List.of(new GeospatialOracleResDto(5001L, 49, 2, 0, 124, 3, 0, 500)));
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    assertThrows(
+        ResponseStatusException.class,
+        () -> {
+          parentTreeService.calculatePtVals(reqDto);
+        });
+  }
+
+  @Test
+  @DisplayName("SMP parent tree not found in Oracle map should be skipped")
+  void calculatePtVals_smpPtNotFoundInMap() {
+    GeospatialRequestDto smpA = new GeospatialRequestDto(6001L, new BigDecimal("0.5"));
+    GeospatialRequestDto smpB = new GeospatialRequestDto(6002L, new BigDecimal("0.5"));
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(),
+            List.of(smpA, smpB),
+            0,
+            BigDecimal.ZERO,
+            new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(6001L, 6002L)))
+        .thenReturn(List.of(new GeospatialOracleResDto(6001L, 49, 2, 0, 124, 3, 0, 500)));
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    PtCalculationResDto result = parentTreeService.calculatePtVals(reqDto);
+
+    assertNotNull(result);
+    assertNotNull(result.smpMixMeanGeoData());
+  }
+
+  @Test
+  @DisplayName("Orchard parent tree not found in geo data should be skipped in seedlot calc")
+  void calculatePtVals_orchardPtNotFoundInGeoData() {
+    OrchardParentTreeValsDto pt1 =
+        new OrchardParentTreeValsDto(
+            "7001",
+            "701",
+            new BigDecimal("50"),
+            new BigDecimal("50"),
+            0,
+            0,
+            List.of(new GeneticWorthTraitsDto("GVO", new BigDecimal("20"), null, null)));
+
+    OrchardParentTreeValsDto pt2 =
+        new OrchardParentTreeValsDto(
+            "7002",
+            "702",
+            new BigDecimal("50"),
+            new BigDecimal("50"),
+            0,
+            0,
+            List.of(new GeneticWorthTraitsDto("GVO", new BigDecimal("15"), null, null)));
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(pt1, pt2),
+            List.of(),
+            0,
+            BigDecimal.ZERO,
+            new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(7001L, 7002L)))
+        .thenReturn(List.of(new GeospatialOracleResDto(7001L, 49, 2, 0, 124, 3, 0, 500)));
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    PtCalculationResDto result = parentTreeService.calculatePtVals(reqDto);
+
+    assertNotNull(result);
+    assertNotNull(result.calculatedPtVals().getGeospatialData());
   }
 }
