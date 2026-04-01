@@ -1,9 +1,11 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
-import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
+import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
@@ -244,5 +246,67 @@ public class GerminatorTrayService {
         entity.getGerminatorEntry(),
         entity.getStratStartDate(),
         updateTimestamp);
+  }
+
+  private String normalizeBlankToNull(String value) {
+    if (value == null) {
+      return null;
+    }
+    String trimmed = value.trim();
+    return trimmed.isBlank() ? null : trimmed;
+  }
+
+  /**
+   * Search for germinator trays matching the given criteria.
+   *
+   * <p>At least one of {@code seedlotOrFamilyLot} or {@code requestIdOrItem} must be provided. If
+   * {@code requestIdOrItem} is 12 characters, the last character is treated as the item ID. If it
+   * is 11 characters, it is treated as the request ID only.
+   *
+   * @param request the search criteria DTO
+   * @return a list of matching germinator tray search results, or an empty list if none match
+   * @throws ResponseStatusException 400 if both search criteria are blank (open search blocked)
+   * @throws ResponseStatusException 400 if requestIdOrItem is not exactly 11 or 12 characters
+   */
+  public List<GerminatorTraySearchResponseDto> searchGerminatorTrays(
+      GerminatorTraySearchRequestDto request) {
+    String seedlotOrFamilyLot = normalizeBlankToNull(request.seedlotOrFamilyLot());
+    String requestIdOrItem = normalizeBlankToNull(request.requestIdOrItem());
+
+    SparLog.info(
+        "Searching germinator trays - seedlotOrFamilyLot: {}, requestIdOrItem: {}",
+        seedlotOrFamilyLot,
+        requestIdOrItem);
+
+    // Prevent open search
+    if (seedlotOrFamilyLot == null && requestIdOrItem == null) {
+      SparLog.info("Rejecting open search: both criteria are null or blank");
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "At least one search criterion is required");
+    }
+
+    // Request ID / item split (same pattern as existing search logic)
+    String requestId = null;
+    String itemId = null;
+    if (requestIdOrItem != null) {
+      int lengthOfIdOrItem = requestIdOrItem.length();
+      if (lengthOfIdOrItem != 11 && lengthOfIdOrItem != 12) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "requestId or requestItem must be exactly 11 or 12 characters");
+      }
+      requestId = requestIdOrItem.substring(0, 11);
+      if (lengthOfIdOrItem == 12) {
+        itemId = requestIdOrItem.substring(11);
+      }
+    }
+
+    SparLog.info("Executing tray search - requestId: {}, itemId: {}", requestId, itemId);
+
+    List<GerminatorTraySearchResponseDto> results =
+        germinatorTrayRepository.searchGerminatorTrays(seedlotOrFamilyLot, requestId, itemId);
+
+    SparLog.info("Tray search returned {} result(s)", results.size());
+
+    return results;
   }
 }

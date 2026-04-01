@@ -4,16 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
-import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
+import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
@@ -401,5 +403,85 @@ class GerminatorTrayServiceTest {
 
     assertEquals(1, result.size());
     assertNull(result.get(0).updateTimestamp());
+  }
+
+  /*---------------------- Search germinator trays ---------------------------------*/
+  @Test
+  void searchGerminatorTrays_shouldThrowBadRequest_whenOpenSearch() {
+    GerminatorTraySearchRequestDto request = new GerminatorTraySearchRequestDto("   ", "   ");
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> germinatorTrayService.searchGerminatorTrays(request));
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("At least one search criterion is required", ex.getReason());
+
+    verify(germinatorTrayRepository, never()).searchGerminatorTrays(any(), any(), any());
+  }
+
+  @Test
+  void searchGerminatorTrays_shouldSearchBySeedlotOnly() {
+    GerminatorTraySearchRequestDto request = new GerminatorTraySearchRequestDto("30350", null);
+
+    GerminatorTraySearchResponseDto row =
+        new GerminatorTraySearchResponseDto(
+            1311,
+            "G10",
+            LocalDateTime.of(2025, 3, 12, 0, 0),
+            LocalDateTime.of(2025, 3, 11, 15, 26),
+            0L,
+            2,
+            "4");
+
+    when(germinatorTrayRepository.searchGerminatorTrays("30350", null, null))
+        .thenReturn(List.of(row));
+
+    List<GerminatorTraySearchResponseDto> result =
+        germinatorTrayService.searchGerminatorTrays(request);
+
+    assertEquals(1, result.size());
+    assertEquals(1311, result.get(0).germinatorTrayId());
+    verify(germinatorTrayRepository).searchGerminatorTrays("30350", null, null);
+  }
+
+  @Test
+  void searchGerminatorTrays_shouldSplitRequestItemIntoRequestIdAndItem() {
+    GerminatorTraySearchRequestDto request =
+        new GerminatorTraySearchRequestDto(null, "TST20250025B");
+
+    when(germinatorTrayRepository.searchGerminatorTrays(null, "TST20250025", "B"))
+        .thenReturn(List.of());
+
+    List<GerminatorTraySearchResponseDto> result =
+        germinatorTrayService.searchGerminatorTrays(request);
+
+    assertTrue(result.isEmpty());
+    verify(germinatorTrayRepository).searchGerminatorTrays(null, "TST20250025", "B");
+  }
+
+  @Test
+  void searchGerminatorTrays_shouldRejectInvalidRequestIdOrItemLength() {
+    GerminatorTraySearchRequestDto request = new GerminatorTraySearchRequestDto(null, "TST2025");
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> germinatorTrayService.searchGerminatorTrays(request));
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    verify(germinatorTrayRepository, never()).searchGerminatorTrays(any(), any(), any());
+  }
+
+  @Test
+  void searchGerminatorTrays_shouldUseBothFilters_whenBothProvided() {
+    GerminatorTraySearchRequestDto request =
+        new GerminatorTraySearchRequestDto("FMLY12345", "TST20250025");
+
+    when(germinatorTrayRepository.searchGerminatorTrays("FMLY12345", "TST20250025", null))
+        .thenReturn(List.of());
+
+    germinatorTrayService.searchGerminatorTrays(request);
+
+    verify(germinatorTrayRepository).searchGerminatorTrays("FMLY12345", "TST20250025", null);
   }
 }

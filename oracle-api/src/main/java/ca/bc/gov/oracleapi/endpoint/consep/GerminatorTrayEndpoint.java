@@ -1,9 +1,11 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
 import ca.bc.gov.oracleapi.response.ValidationExceptionResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
@@ -200,5 +202,20 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public List<GerminatorTrayContentsDto> getTestsByTrayId(@PathVariable @Positive Integer germinatorTrayId) {
     return germinatorTrayService.getTrayContents(germinatorTrayId);
+  }
+
+  /** Search germination trays by seedlot/sample and/or request id/item. */
+  @PostMapping("/search")
+  @ResponseStatus(HttpStatus.OK)
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully searched germination trays.",
+      content =
+        @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTraySearchResponseDto.class))))
+  @ApiAuthResponse
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  public List<GerminatorTraySearchResponseDto> searchGerminatorTrays(
+      @Valid @RequestBody GerminatorTraySearchRequestDto request) {
+    return germinatorTrayService.searchGerminatorTrays(request);
   }
 }
