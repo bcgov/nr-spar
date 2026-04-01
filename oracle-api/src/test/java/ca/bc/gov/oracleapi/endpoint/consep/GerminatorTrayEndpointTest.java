@@ -15,10 +15,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.service.consep.GerminatorTrayService;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -567,5 +569,175 @@ class GerminatorTrayEndpointTest {
         .andExpect(status().isForbidden());
 
     verify(germinatorTrayService, times(0)).getTrayContents(any());
+  }
+
+  /* ----------------------- Search germinator trays ----------------------*/
+  @Test
+  void searchGerminatorTrays_returns200AndList_andCallsService() throws Exception {
+    GerminatorTraySearchRequestDto request =
+        new GerminatorTraySearchRequestDto("30350", "TST20250025");
+
+    List<GerminatorTraySearchResponseDto> response =
+        List.of(
+            new GerminatorTraySearchResponseDto(
+                1311,
+                "G10",
+                LocalDateTime.of(2025, 3, 12, 0, 0),
+                LocalDateTime.of(2025, 3, 11, 15, 26),
+                0L,
+                2,
+                "4"));
+
+    when(germinatorTrayService.searchGerminatorTrays(request)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            post(BASE_URL + "/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].germinatorTrayId").value(1311))
+        .andExpect(jsonPath("$[0].activityTypeCd").value("G10"))
+        .andExpect(jsonPath("$[0].systemTrayNo").value(2));
+
+    verify(germinatorTrayService, times(1)).searchGerminatorTrays(request);
+  }
+
+  @Test
+  void searchGerminatorTrays_returns400_whenServiceRejectsOpenSearch() throws Exception {
+    GerminatorTraySearchRequestDto request = new GerminatorTraySearchRequestDto(null, null);
+
+    when(germinatorTrayService.searchGerminatorTrays(request))
+        .thenThrow(
+            new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "At least one search criterion is required"));
+
+    mockMvc
+        .perform(
+            post(BASE_URL + "/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(1)).searchGerminatorTrays(request);
+  }
+
+  @Test
+  void searchGerminatorTrays_returns400_whenRequestValidationFails() throws Exception {
+    String invalidJson =
+        """
+        {
+          "seedlotOrFamilyLot": "30350",
+          "requestIdOrItem": "TST-2025"
+        }
+        """;
+
+    mockMvc
+        .perform(
+            post(BASE_URL + "/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).searchGerminatorTrays(any());
+  }
+
+  @Test
+  void searchGerminatorTrays_returns400_whenRequestIdTooShort() throws Exception {
+    String invalidJson =
+        """
+        {
+          "seedlotOrFamilyLot": "30350",
+          "requestIdOrItem": "TST2025"
+        }
+        """;
+
+    mockMvc
+        .perform(
+            post(BASE_URL + "/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).searchGerminatorTrays(any());
+  }
+
+  @Test
+  void searchGerminatorTrays_returns400_whenRequestIdTooLong() throws Exception {
+    String invalidJson =
+        """
+        {
+          "seedlotOrFamilyLot": "30350",
+          "requestIdOrItem": "TST20250025BC"
+        }
+        """;
+
+    mockMvc
+        .perform(
+            post(BASE_URL + "/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).searchGerminatorTrays(any());
+  }
+
+  @Test
+  void searchGerminatorTrays_returns400_whenFamilyLotInvalidFormat() throws Exception {
+    String invalidJson =
+        """
+        {
+          "seedlotOrFamilyLot": "ABC123",
+          "requestIdOrItem": "TST20250025"
+        }
+        """;
+
+    mockMvc
+        .perform(
+            post(BASE_URL + "/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).searchGerminatorTrays(any());
+  }
+
+  @Test
+  void searchGerminatorTrays_returns200_whenValidFamilyLotAndRequestItem() throws Exception {
+    GerminatorTraySearchRequestDto request =
+        new GerminatorTraySearchRequestDto("FMLY12345", "TST20250025B");
+
+    List<GerminatorTraySearchResponseDto> response =
+        List.of(
+            new GerminatorTraySearchResponseDto(
+                1311,
+                "G10",
+                LocalDateTime.of(2025, 3, 12, 0, 0),
+                LocalDateTime.of(2025, 3, 11, 15, 26),
+                0L,
+                2,
+                "4"));
+
+    when(germinatorTrayService.searchGerminatorTrays(request)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            post(BASE_URL + "/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].germinatorTrayId").value(1311));
+
+    verify(germinatorTrayService, times(1)).searchGerminatorTrays(request);
   }
 }
