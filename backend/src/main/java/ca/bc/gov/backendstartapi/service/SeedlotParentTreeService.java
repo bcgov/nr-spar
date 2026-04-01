@@ -92,7 +92,7 @@ public class SeedlotParentTreeService {
     List<SmpMixGeneticQuality> smpMixGenQltyList =
         smpMixGeneticQualityRepository.findAllBySmpMix_Seedlot_id(seedlot.getId());
 
-    if (!smpMixGenQltyList.isEmpty()) {
+    if (!smpMixGenQltyList.isEmpty() && canDelete) {
       SparLog.info(
           "Deleting {} previous records on the SmpMixGeneticQuality table for seedlot number {}",
           smpMixGenQltyList.size(),
@@ -112,7 +112,7 @@ public class SeedlotParentTreeService {
     // Delete Foreign Keys Dependencies in SmpMix
     List<SmpMix> smpMixs = smpMixRepository.findAllBySeedlot_id(seedlot.getId());
 
-    if (!smpMixs.isEmpty()) {
+    if (!smpMixs.isEmpty() && canDelete) {
       SparLog.info(
           "Deleting {} previous records on the SmpMix table for seedlot number {}",
           smpMixs.size(),
@@ -137,7 +137,7 @@ public class SeedlotParentTreeService {
     List<SeedlotParentTreeSmpMix> sptsmList =
         seedlotParentTreeSmpMixRepository.findAllBySeedlotParentTree_Seedlot_id(seedlot.getId());
 
-    if (!sptsmList.isEmpty()) {
+    if (!sptsmList.isEmpty() && canDelete) {
       SparLog.info(
           "Deleting {} previous records on the SeedlotParentTreeSmpMix table for seedlot number {}",
           sptsmList.size(),
@@ -156,7 +156,7 @@ public class SeedlotParentTreeService {
     List<SeedlotParentTree> sptList =
         seedlotParentTreeRepository.findAllBySeedlot_id(seedlot.getId());
 
-    if (!sptList.isEmpty()) {
+    if (!sptList.isEmpty() && canDelete) {
       SparLog.info(
           "Deleting {} previous records on the SeedlotParentTree table for seedlot number {}",
           sptList.size(),
