@@ -70,7 +70,7 @@ public interface MccReplicatesRepository extends JpaRepository<MccReplicateEntit
         @Param("testReplicateNumbers") List<Integer> testReplicateNumbers
     );
 
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Transactional
   @Query(value = """
     UPDATE CONSEP.CNS_T_TEST_REP_MC t
