@@ -13,11 +13,16 @@ import org.springframework.test.context.TestPropertySource;
 
 @DataJpaTest
 @TestPropertySource(properties = {
-    "spring.datasource.url=jdbc:h2:mem:testdb;"
-    + "MODE=Oracle;"
-    + "DATABASE_TO_UPPER=false;"
-    + "DB_CLOSE_DELAY=-1;"
-    + "INIT=CREATE SCHEMA IF NOT EXISTS CONSEP",
+    "spring.datasource.readwrite.url=jdbc:h2:mem:testdb;"
+        + "MODE=Oracle;"
+        + "DATABASE_TO_UPPER=false;"
+        + "DB_CLOSE_DELAY=-1;"
+        + "INIT=CREATE SCHEMA IF NOT EXISTS CONSEP",
+    "spring.datasource.read.url=jdbc:h2:mem:testdb;"
+        + "MODE=Oracle;"
+        + "DATABASE_TO_UPPER=false;"
+        + "DB_CLOSE_DELAY=-1;"
+        + "INIT=CREATE SCHEMA IF NOT EXISTS CONSEP",
     "spring.jpa.hibernate.ddl-auto=none",
     "spring.sql.init.mode=always"
 })

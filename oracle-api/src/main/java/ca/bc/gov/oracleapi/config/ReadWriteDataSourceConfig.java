@@ -62,7 +62,7 @@ public class ReadWriteDataSourceConfig {
     }
     return builder
         .dataSource(dataSource)
-        .packages("ca.bc.gov.oracleapi.entity")
+        .packages("ca.bc.gov.oracleapi.entity.consep")
         .persistenceUnit("readwrite")
         .properties(jpaProps)
         .build();
