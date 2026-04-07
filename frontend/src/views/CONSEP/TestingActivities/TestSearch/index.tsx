@@ -547,6 +547,7 @@ const TestSearch = () => {
       ...prev,
       [field]: prev[field] + 1
     }));
+    resetAlert();
   };
 
   const advancedFilterTags = ADV_FILTER_KEYS.flatMap((key) => {
