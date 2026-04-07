@@ -392,4 +392,25 @@ public class ActivityService {
         null
     );
   }
+
+  /**
+   * Retrieves all standard activities that correspond to a germination test type, ordered by
+   * activity description for display in a dropdown.
+   *
+   * @return list of StandardActivityDto
+   */
+  public List<StandardActivityDto> getGerminationTestTypes() {
+    return standardActivityRepository.findGerminationTestActivities().stream()
+        .map(
+            a ->
+                new StandardActivityDto(
+                    a.getStandardActivityId(),
+                    a.getActivityDesc(),
+                    a.getActivityTypeCd(),
+                    a.getTestCategoryCd(),
+                    a.getSignificantStatusIndicator(),
+                    a.getActivityDuration(),
+                    a.getActivityTimeUnit()))
+        .toList();
+  }
 }
