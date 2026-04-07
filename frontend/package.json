@@ -80,7 +80,17 @@
     "ts-node": "^10.9.1",
     "vitest": "^4.0.18"
   },
-  "overrides": {},
+  "overrides": {
+    "flatted": ">=3.4.2",
+    "immutable": ">=5.1.5",
+    "lodash": ">=4.18.0",
+    "undici": ">=6.24.0",
+    "picomatch": ">=4.0.4",
+    "fast-xml-parser": ">=5.5.7",
+    "brace-expansion": ">=2.0.3",
+    "serialize-javascript": ">=7.0.5",
+    "yaml": ">=2.7.1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bcgov/nr-spar.git"

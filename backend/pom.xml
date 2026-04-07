@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.11</version>
+    <version>3.5.12</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>ca.bc.gov</groupId>
@@ -40,6 +40,7 @@
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <oci.revision>${project.version}</oci.revision>
     <hibernate.version>6.6.42.Final</hibernate.version>
+    <spring-security.version>6.5.9</spring-security.version>
   </properties>
 
   <profiles>
