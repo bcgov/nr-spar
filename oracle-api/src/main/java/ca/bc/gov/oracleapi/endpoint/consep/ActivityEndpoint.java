@@ -119,7 +119,7 @@ public class ActivityEndpoint {
       content = @Content(schema = @Schema(implementation = StandardActivityDto.class))
   )
   @ApiAuthResponse
-  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<StandardActivityDto> getGerminationTestTypes() {
     return activityService.getGerminationTestTypes();
   }
