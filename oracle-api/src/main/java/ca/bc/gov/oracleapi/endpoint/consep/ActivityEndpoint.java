@@ -8,6 +8,7 @@ import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -116,7 +117,9 @@ public class ActivityEndpoint {
   @ApiResponse(
       responseCode = "200",
       description = "Successfully retrieved germination test activity types.",
-      content = @Content(schema = @Schema(implementation = StandardActivityDto.class))
+      content = @Content(
+        array = @ArraySchema(schema = @Schema(implementation = StandardActivityDto.class))
+    )
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
