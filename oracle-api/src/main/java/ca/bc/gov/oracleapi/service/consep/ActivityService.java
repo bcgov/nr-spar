@@ -39,6 +39,17 @@ public class ActivityService {
   private final TestRegimeRepository testRegimeRepository;
   private final SparRequestRepository sparRequestRepository;
 
+  private StandardActivityDto toStandardActivityDto(StandardActivityEntity a) {
+    return new StandardActivityDto(
+        a.getStandardActivityId(),
+        a.getActivityDesc(),
+        a.getActivityTypeCd(),
+        a.getTestCategoryCd(),
+        a.getSignificantStatusIndicator(),
+        a.getActivityDuration(),
+        a.getActivityTimeUnit());
+  }
+
   /**
    * Update activity table.
    *
@@ -240,8 +251,8 @@ public class ActivityService {
   }
 
   /**
-   * Retrieves all unique standard activity IDs and descriptions
-   * used for seedlot and/or family lot contexts.
+   * Retrieves all unique standard activity IDs and descriptions used for seedlot and/or family lot
+   * contexts.
    *
    * @param isFamilyLot true for familylot
    * @param isSeedlot true for seedlot
@@ -267,18 +278,10 @@ public class ActivityService {
     }
     return map.values().stream()
         .sorted(
-            Comparator.comparing(StandardActivityEntity::getActivityDesc,
-                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
-        )
-        .map(a -> new StandardActivityDto(
-            a.getStandardActivityId(),
-            a.getActivityDesc(),
-            a.getActivityTypeCd(),
-            a.getTestCategoryCd(),
-            a.getSignificantStatusIndicator(),
-            a.getActivityDuration(),
-            a.getActivityTimeUnit()
-        ))
+            Comparator.comparing(
+                StandardActivityEntity::getActivityDesc,
+                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+        .map(this::toStandardActivityDto)
         .toList();
   }
 
@@ -401,16 +404,7 @@ public class ActivityService {
    */
   public List<StandardActivityDto> getGerminationTestTypes() {
     return standardActivityRepository.findGerminationTestActivities().stream()
-        .map(
-            a ->
-                new StandardActivityDto(
-                    a.getStandardActivityId(),
-                    a.getActivityDesc(),
-                    a.getActivityTypeCd(),
-                    a.getTestCategoryCd(),
-                    a.getSignificantStatusIndicator(),
-                    a.getActivityDuration(),
-                    a.getActivityTimeUnit()))
+        .map(this::toStandardActivityDto)
         .toList();
   }
 }
