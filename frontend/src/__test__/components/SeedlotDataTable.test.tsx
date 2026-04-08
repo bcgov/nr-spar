@@ -117,9 +117,10 @@ describe('SeedlotDataTable handleSearch', () => {
     expect(screen.queryByText('67890')).toBeNull();
     expect(screen.queryByText('11111')).toBeNull();
 
-    // Shorten the query — all seedlot numbers contain '1' so all should be back
+    // Shorten the query — rows whose seedlot numbers contain '1' should be shown
     fireEvent.change(searchInput, { target: { value: '1' } });
     expect(screen.getByText('12345')).toBeTruthy();
     expect(screen.getByText('11111')).toBeTruthy();
+    expect(screen.queryByText('67890')).toBeNull();
   });
 });
