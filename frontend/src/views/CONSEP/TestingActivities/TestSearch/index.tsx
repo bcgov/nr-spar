@@ -98,6 +98,10 @@ const TestSearch = () => {
   // Track which date picker needs refocus after auto-filling today's date via shortcut
   const [pendingDatePickerFocus, setPendingDatePickerFocus] = useState<'start' | 'end' | null>(null);
 
+  const [multiSelectResetKeys, setMultiSelectResetKeys] = useState(
+    { testTypes: 0, activityIds: 0 }
+  );
+
   useEffect(() => {
     // Refocus input after state updates to reopen calendar picker with the correct month
     if (pendingDatePickerFocus) {
@@ -516,6 +520,36 @@ const TestSearch = () => {
     return value;
   };
 
+  const primaryFilterTags = [
+    ...(searchParams.testTypes ?? []).map((val) => ({
+      field: 'testTypes' as const,
+      label: 'Test type',
+      value: val
+    })),
+    ...(searchParams.activityIds ?? []).map((val) => ({
+      field: 'activityIds' as const,
+      label: 'Activity',
+      value: val
+    }))
+  ];
+
+  const handlePrimaryTagClose = (
+    field: 'testTypes' | 'activityIds',
+    valueToRemove: string
+  ) => {
+    setSearchParams((prev) => {
+      const currentValues = prev[field];
+      if (!currentValues) return prev;
+      const remaining = currentValues.filter((v) => v !== valueToRemove);
+      return updateSearchParams(prev, field, remaining.length > 0 ? remaining : null);
+    });
+    setMultiSelectResetKeys((prev) => ({
+      ...prev,
+      [field]: prev[field] + 1
+    }));
+    resetAlert();
+  };
+
   const advancedFilterTags = ADV_FILTER_KEYS.flatMap((key) => {
     const value = searchParams[key];
     if (value == null) return [];
@@ -643,10 +677,14 @@ const TestSearch = () => {
           <Row className="consep-test-search-filters">
             <Column className="filters-row">
               <FilterableMultiSelect
+                key={`test-type-${multiSelectResetKeys.testTypes}`}
                 id="test-type-input"
                 className="test-type-input"
                 titleText="Test type"
                 items={testTypeItems}
+                initialSelectedItems={testTypeItems.filter(
+                  (item: { id: string }) => searchParams.testTypes?.includes(item.id)
+                )}
                 itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
                 onChange={(event: { selectedItems: Array<{ id: string }> }) => {
                   handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
@@ -654,10 +692,14 @@ const TestSearch = () => {
                 selectionFeedback="top-after-reopen"
               />
               <FilterableMultiSelect
+                key={`activity-type-${multiSelectResetKeys.activityIds}`}
                 id="activity-type-input"
                 className="activity-type-input"
                 titleText="Choose activity"
                 items={activityIdItems}
+                initialSelectedItems={activityIdItems.filter(
+                  (item: { id: string }) => searchParams.activityIds?.includes(item.id)
+                )}
                 itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
                 onChange={(event: { selectedItems: Array<{ id: string }> }) => {
                   handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
@@ -747,6 +789,18 @@ const TestSearch = () => {
           </Row>
           <Row className="consep-test-search-advanced-filter-tags">
             <Column>
+              {primaryFilterTags.map((tag) => (
+                <Tag
+                  key={`${tag.field}-${tag.value}`}
+                  type="blue"
+                  filter
+                  onClose={() => handlePrimaryTagClose(tag.field, tag.value)}
+                >
+                  {tag.label}
+                  {': '}
+                  {tag.value}
+                </Tag>
+              ))}
               {advancedFilterTags.map((tag) => (
                 <Tag
                   key={String(tag.key)}
