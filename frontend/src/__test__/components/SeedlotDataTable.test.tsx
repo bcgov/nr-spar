@@ -50,9 +50,12 @@ const mockSeedlotData = [
     lastUpdatedAt: '2023-08-10',
     approvedAt: undefined
   }
-] satisfies TestSeedlotData[] as unknown as SeedlotDisplayType[];
+] satisfies TestSeedlotData[];
 
-const renderTable = (seedlotData: SeedlotDisplayType[] = mockSeedlotData, showSearch = true) => {
+const renderTable = (
+  seedlotData: SeedlotDisplayType[] = (mockSeedlotData as unknown as SeedlotDisplayType[]),
+  showSearch = true
+) => {
   const qc = new QueryClient();
   return render(
     <QueryClientProvider client={qc}>
