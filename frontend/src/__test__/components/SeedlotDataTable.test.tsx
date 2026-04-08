@@ -59,6 +59,7 @@ const renderTable = (seedlotData: SeedlotDisplayType[] = mockSeedlotData, showSe
         showSearch={showSearch}
         showPagination={false}
         tablePagination={<div />}
+        isTscAdmin={false}
       />
     </QueryClientProvider>
   );
@@ -117,10 +118,10 @@ describe('SeedlotDataTable handleSearch', () => {
     expect(screen.queryByText('67890')).toBeNull();
     expect(screen.queryByText('11111')).toBeNull();
 
-    // Shorten the query — rows whose seedlot numbers contain '1' should be shown
+    // Shorten the query — '1' appears in fields of all rows so all should be shown
     fireEvent.change(searchInput, { target: { value: '1' } });
     expect(screen.getByText('12345')).toBeTruthy();
     expect(screen.getByText('11111')).toBeTruthy();
-    expect(screen.queryByText('67890')).toBeNull();
+    expect(screen.getByText('67890')).toBeTruthy();
   });
 });
