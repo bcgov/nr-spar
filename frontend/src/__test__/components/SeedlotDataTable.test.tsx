@@ -4,7 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SeedlotDisplayType } from '../../types/SeedlotType';
 import SeedlotDataTable from '../../components/SeedlotTable/Table';
 
-const mockSeedlotData: SeedlotDisplayType[] = [
+// At runtime approvedAt can be null or undefined for unapproved seedlots,
+// even though SeedlotDisplayType declares it as string.
+type TestSeedlotData = Omit<SeedlotDisplayType, 'approvedAt'> & {
+  approvedAt?: string | null;
+};
+
+const mockSeedlotData = [
   {
     seedlotNumber: '12345',
     seedlotClass: 'A',
@@ -29,8 +35,7 @@ const mockSeedlotData: SeedlotDisplayType[] = [
     locationCode: '02',
     createdAt: '2023-02-01',
     lastUpdatedAt: '2023-07-20',
-    // approvedAt is null to simulate unapproved seedlot
-    approvedAt: null as unknown as string
+    approvedAt: null
   },
   {
     seedlotNumber: '11111',
@@ -43,10 +48,9 @@ const mockSeedlotData: SeedlotDisplayType[] = [
     locationCode: '03',
     createdAt: '2023-03-01',
     lastUpdatedAt: '2023-08-10',
-    // approvedAt is undefined to simulate unapproved seedlot
-    approvedAt: undefined as unknown as string
+    approvedAt: undefined
   }
-];
+] satisfies TestSeedlotData[] as unknown as SeedlotDisplayType[];
 
 const renderTable = (seedlotData: SeedlotDisplayType[] = mockSeedlotData, showSearch = true) => {
   const qc = new QueryClient();
