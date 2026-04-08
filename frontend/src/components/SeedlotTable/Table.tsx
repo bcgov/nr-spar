@@ -68,7 +68,7 @@ const SeedlotDataTable = (
         const keys = Object.keys(seedlot) as (keyof SeedlotDisplayType)[];
         let hasMatch: boolean = false;
         keys.forEach((key) => {
-          if (seedlot[key].toLowerCase().includes(searchString)) {
+          if (seedlot[key]?.toLowerCase().includes(searchString)) {
             hasMatch = true;
           }
         });
