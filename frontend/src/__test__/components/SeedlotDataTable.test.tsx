@@ -79,7 +79,7 @@ describe('SeedlotDataTable handleSearch', () => {
     }).not.toThrow();
 
     // The row with 'Spruce Hybrid' should still be visible
-    expect(screen.getByText('12345')).toBeTruthy();
+    expect(screen.getByText('12345')).toBeInTheDocument();
   });
 
   it('should filter rows correctly even when some fields are null', () => {
@@ -89,7 +89,7 @@ describe('SeedlotDataTable handleSearch', () => {
     fireEvent.change(searchInput, { target: { value: 'lodgepole' } });
 
     // Only the row matching 'Lodgepole Pine' should be visible
-    expect(screen.getByText('67890')).toBeTruthy();
+    expect(screen.getByText('67890')).toBeInTheDocument();
     expect(screen.queryByText('12345')).toBeNull();
     expect(screen.queryByText('11111')).toBeNull();
   });
@@ -101,14 +101,14 @@ describe('SeedlotDataTable handleSearch', () => {
 
     // Type a specific query that matches only one row
     fireEvent.change(searchInput, { target: { value: '12345' } });
-    expect(screen.getByText('12345')).toBeTruthy();
+    expect(screen.getByText('12345')).toBeInTheDocument();
     expect(screen.queryByText('67890')).toBeNull();
 
     // Clear the search to see all rows again
     fireEvent.change(searchInput, { target: { value: '' } });
-    expect(screen.getByText('12345')).toBeTruthy();
-    expect(screen.getByText('67890')).toBeTruthy();
-    expect(screen.getByText('11111')).toBeTruthy();
+    expect(screen.getByText('12345')).toBeInTheDocument();
+    expect(screen.getByText('67890')).toBeInTheDocument();
+    expect(screen.getByText('11111')).toBeInTheDocument();
   });
 
   it('should expand results when shortening the search query', () => {
@@ -118,14 +118,14 @@ describe('SeedlotDataTable handleSearch', () => {
 
     // Type a query that matches only one row
     fireEvent.change(searchInput, { target: { value: '12345' } });
-    expect(screen.getByText('12345')).toBeTruthy();
+    expect(screen.getByText('12345')).toBeInTheDocument();
     expect(screen.queryByText('67890')).toBeNull();
     expect(screen.queryByText('11111')).toBeNull();
 
     // Shorten the query — '1' appears in fields of all rows so all should be shown
     fireEvent.change(searchInput, { target: { value: '1' } });
-    expect(screen.getByText('12345')).toBeTruthy();
-    expect(screen.getByText('11111')).toBeTruthy();
-    expect(screen.getByText('67890')).toBeTruthy();
+    expect(screen.getByText('12345')).toBeInTheDocument();
+    expect(screen.getByText('11111')).toBeInTheDocument();
+    expect(screen.getByText('67890')).toBeInTheDocument();
   });
 });
