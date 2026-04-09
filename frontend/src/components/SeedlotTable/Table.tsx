@@ -63,22 +63,16 @@ const SeedlotDataTable = (
       return;
     }
     const searchString = searchValue.toLowerCase();
-    setProcessedData((prevData) => {
-      const filtered = prevData.filter((seedlot) => {
-        const keys = Object.keys(seedlot) as (keyof SeedlotDisplayType)[];
-        let hasMatch: boolean = false;
-        keys.forEach((key) => {
-          if (seedlot[key].toLowerCase().includes(searchString)) {
-            hasMatch = true;
-          }
-        });
-        return hasMatch;
+    const filtered = seedlotData.filter((seedlot) => {
+      const keys = Object.keys(seedlot) as (keyof SeedlotDisplayType)[];
+      return keys.some((key) => {
+        const normalizedValue = seedlot[key] == null
+          ? ''
+          : String(seedlot[key]).toLowerCase();
+        return normalizedValue.includes(searchString);
       });
-      if (filtered.length > 0) {
-        return sortSeedlotsByKey(filtered, sortThisHeader, sortDirection);
-      }
-      return filtered;
     });
+    setProcessedData(sortSeedlotsByKey(filtered, sortThisHeader, sortDirection));
   };
 
   const uniqueAgencies = Array.from(new Set(seedlotData.map((seedlot) => seedlot.applicantAgency)));
