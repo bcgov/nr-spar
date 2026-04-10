@@ -8,6 +8,7 @@ import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 
 /**
  * This class exposes activities resources API.
@@ -105,5 +105,25 @@ public class ActivityEndpoint {
       @RequestParam(required = false) String familyLotNumber
   ) {
     return activityService.validateAddGermTest(activityTypeCd, seedlotNumber, familyLotNumber);
+  }
+
+  /**
+   * Retrieves all standard activities that correspond to a germination test type, ordered by
+   * activity description for use in a dropdown.
+   *
+   * @return a list of {@link StandardActivityDto} representing germination test activity types
+   */
+  @GetMapping("/germination-test-types")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved germination test activity types.",
+      content = @Content(
+        array = @ArraySchema(schema = @Schema(implementation = StandardActivityDto.class))
+    )
+  )
+  @ApiAuthResponse
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public List<StandardActivityDto> getGerminationTestTypes() {
+    return activityService.getGerminationTestTypes();
   }
 }

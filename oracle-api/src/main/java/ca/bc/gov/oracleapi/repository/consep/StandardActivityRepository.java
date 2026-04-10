@@ -10,7 +10,8 @@ import org.springframework.data.jpa.repository.Query;
  * from consep to be retrieved from the database.
  */
 public interface StandardActivityRepository extends JpaRepository<StandardActivityEntity, String> {
-  @Query("""
+  @Query(
+      """
       SELECT sa
       FROM StandardActivityEntity sa
       JOIN TestCodeEntity c
@@ -18,4 +19,14 @@ public interface StandardActivityRepository extends JpaRepository<StandardActivi
       WHERE c.id.columnName = 'FAMILYLOT_TEST_CD'
       """)
   List<StandardActivityEntity> findAllFamilyLotActivities();
+
+  @Query(
+      """
+      SELECT sa
+      FROM StandardActivityEntity sa
+      JOIN TestRegimeEntity r
+      ON sa.activityTypeCd = r.seedlotTestCode
+      ORDER BY sa.activityDesc
+      """)
+  List<StandardActivityEntity> findGerminationTestActivities();
 }
