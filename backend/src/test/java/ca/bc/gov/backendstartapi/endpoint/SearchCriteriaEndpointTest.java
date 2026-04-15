@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.entity.SearchCriteriaEntity;
 import ca.bc.gov.backendstartapi.service.SearchCriteriaService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,12 +30,14 @@ class SearchCriteriaEndpointTest {
 
   @MockBean private SearchCriteriaService searchCriteriaService;
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   private static final String API_PATH = "/api/search-criteria";
   private static final String CONTENT_HEADER = "Content-Type";
   private static final String JSON = "application/json";
 
-  private SearchCriteriaEntity createEntity(String pageId, String criteriaJson) {
-    return new SearchCriteriaEntity("testUser", pageId, criteriaJson);
+  private SearchCriteriaEntity createEntity(String pageId, String criteriaJson) throws Exception {
+    return new SearchCriteriaEntity("testUser", pageId, OBJECT_MAPPER.readTree(criteriaJson));
   }
 
   @Test
@@ -54,7 +57,7 @@ class SearchCriteriaEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.pageId").value(pageId))
-        .andExpect(jsonPath("$.criteriaJson").value(criteriaJson))
+        .andExpect(jsonPath("$.criteriaJson.status").value("active"))
         .andReturn();
   }
 
@@ -95,7 +98,7 @@ class SearchCriteriaEndpointTest {
                 .content(requestBody))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.pageId").value(pageId))
-        .andExpect(jsonPath("$.criteriaJson").value(criteriaJson))
+        .andExpect(jsonPath("$.criteriaJson.status").value("pending"))
         .andReturn();
   }
 

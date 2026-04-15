@@ -40,8 +40,8 @@ public class SearchCriteriaEntity {
   @Schema(description = "The page ID for which criteria are saved", example = "SEEDLOT_SEARCH")
   private String pageId;
 
+  @Column(name = "criteria_json", columnDefinition = "jsonb", nullable = false)
   @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "criteria_json", nullable = false)
   @Schema(description = "Saved criteria as JSON", example = "{\"status\":\"active\"}")
   private JsonNode criteriaJson;
 
