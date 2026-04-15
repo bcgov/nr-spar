@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @ExtendWith(MockitoExtension.class)
 class SearchCriteriaServiceTest {
@@ -31,6 +32,8 @@ class SearchCriteriaServiceTest {
   private SearchCriteriaRepository searchCriteriaRepository;
   @Mock
   private LoggedUserService loggedUserService;
+  @Mock
+  private PlatformTransactionManager transactionManager;
 
   @InjectMocks
   private SearchCriteriaService searchCriteriaService;
