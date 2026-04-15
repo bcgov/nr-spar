@@ -8,10 +8,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Rejects null JSON nodes, missing nodes, and blank JSON text values. */
+/** Rejects null JSON nodes, missing nodes, scalar values, and non-object/array nodes. */
 @Documented
 @Constraint(validatedBy = ValidSearchCriteriaJsonValidator.class)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidSearchCriteriaJson {
 

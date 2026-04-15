@@ -3,7 +3,6 @@ package ca.bc.gov.backendstartapi.dto;
 import ca.bc.gov.backendstartapi.validation.ValidSearchCriteriaJson;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 
 /**
  * Request body for the setCriteria API.
@@ -12,8 +11,7 @@ import jakarta.validation.constraints.NotNull;
  */
 @Schema(description = "Request body for setting search criteria")
 public record SearchCriteriaDto(
-    @NotNull
-        @ValidSearchCriteriaJson
+    @ValidSearchCriteriaJson
         @Schema(
             description = "Search criteria as JSON",
             example = "{\"status\":\"active\"}")
