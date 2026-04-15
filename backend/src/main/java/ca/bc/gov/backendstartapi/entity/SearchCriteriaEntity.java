@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.entity;
 
 import ca.bc.gov.backendstartapi.entity.idclass.SearchCriteriaId;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +17,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** Stores saved search filter criteria per user and page. */
 @Entity
@@ -37,9 +40,10 @@ public class SearchCriteriaEntity {
   @Schema(description = "The page ID for which criteria are saved", example = "SEEDLOT_SEARCH")
   private String pageId;
 
-  @Column(name = "criteria_json", nullable = false, columnDefinition = "TEXT")
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "criteria_json", nullable = false)
   @Schema(description = "Saved criteria as JSON", example = "{\"status\":\"active\"}")
-  private String criteriaJson;
+  private JsonNode criteriaJson;
 
   @Column(name = "update_timestamp", nullable = false)
   private LocalDateTime updateTimestamp;
@@ -49,7 +53,7 @@ public class SearchCriteriaEntity {
   @Setter(AccessLevel.NONE)
   private int revisionCount;
 
-  public SearchCriteriaEntity(String userId, String pageId, String criteriaJson) {
+  public SearchCriteriaEntity(String userId, String pageId, JsonNode criteriaJson) {
     this.userId = userId;
     this.pageId = pageId;
     this.criteriaJson = criteriaJson;
