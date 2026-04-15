@@ -53,6 +53,13 @@ public class SearchCriteriaEntity {
   @Setter(AccessLevel.NONE)
   private int revisionCount;
 
+  /**
+   * Creates a new SearchCriteriaEntity with the given identifiers and criteria JSON.
+   *
+   * @param userId the user ID of the logged-in user
+   * @param pageId the page identifier for which criteria are saved
+   * @param criteriaJson the criteria as a JSON node
+   */
   public SearchCriteriaEntity(String userId, String pageId, JsonNode criteriaJson) {
     this.userId = userId;
     this.pageId = pageId;

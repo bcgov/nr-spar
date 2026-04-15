@@ -15,9 +15,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidSearchCriteriaJson {
 
+  /** Returns the validation error message. */
   String message() default "criteriaJson must be non-null JSON (object or array)";
 
+  /** Returns the validation groups this constraint belongs to. */
   Class<?>[] groups() default {};
 
+  /** Returns the payload associated with this constraint. */
   Class<? extends Payload>[] payload() default {};
 }

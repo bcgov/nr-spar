@@ -22,6 +22,13 @@ public class SearchCriteriaService {
   private final LoggedUserService loggedUserService;
   private final PlatformTransactionManager transactionManager;
 
+  /**
+   * Creates a new SearchCriteriaService.
+   *
+   * @param searchCriteriaRepository repository for persisting search criteria
+   * @param loggedUserService service for retrieving the logged-in user identity
+   * @param transactionManager transaction manager used for upsert operations
+   */
   public SearchCriteriaService(
       SearchCriteriaRepository searchCriteriaRepository,
       LoggedUserService loggedUserService,

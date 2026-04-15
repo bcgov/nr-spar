@@ -46,7 +46,8 @@ class SearchCriteriaServiceTest {
     when(searchCriteriaRepository.updateCriteriaJsonByUserIdAndPageId(
         eq("user1"), eq("PAGE"), eq(node), any()))
         .thenReturn(1);
-    SearchCriteriaEntity persisted = new SearchCriteriaEntity("user1", "PAGE", MAPPER.readTree("{\"a\":2}"));
+    SearchCriteriaEntity persisted =
+        new SearchCriteriaEntity("user1", "PAGE", MAPPER.readTree("{\"a\":2}"));
     when(searchCriteriaRepository.findByUserIdAndPageId("user1", "PAGE"))
         .thenReturn(Optional.of(persisted));
 
