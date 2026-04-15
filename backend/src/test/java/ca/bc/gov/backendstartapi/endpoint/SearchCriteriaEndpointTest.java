@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -85,9 +85,9 @@ class SearchCriteriaEndpointTest {
     String criteriaJson = "{\"status\":\"pending\"}";
     SearchCriteriaEntity entity = createEntity(pageId, criteriaJson);
 
-    when(searchCriteriaService.setCriteria(eq(pageId), anyString())).thenReturn(entity);
+    when(searchCriteriaService.setCriteria(eq(pageId), any())).thenReturn(entity);
 
-    String requestBody = "{\"criteriaJson\":\"{\\\"status\\\":\\\"pending\\\"}\"}";
+    String requestBody = "{\"criteriaJson\":{\"status\":\"pending\"}}";
 
     mockMvc
         .perform(

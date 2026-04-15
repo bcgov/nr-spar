@@ -4,16 +4,13 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.entity.SearchCriteriaEntity;
 import ca.bc.gov.backendstartapi.repository.SearchCriteriaRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 /** Service for managing saved search criteria per user and page. */
 @Service
@@ -21,18 +18,11 @@ public class SearchCriteriaService {
 
   private final SearchCriteriaRepository searchCriteriaRepository;
   private final LoggedUserService loggedUserService;
-  private final EntityManager entityManager;
-  private final ObjectMapper objectMapper;
 
   public SearchCriteriaService(
-      SearchCriteriaRepository searchCriteriaRepository,
-      LoggedUserService loggedUserService,
-      EntityManager entityManager,
-      ObjectMapper objectMapper) {
+      SearchCriteriaRepository searchCriteriaRepository, LoggedUserService loggedUserService) {
     this.searchCriteriaRepository = searchCriteriaRepository;
     this.loggedUserService = loggedUserService;
-    this.entityManager = entityManager;
-    this.objectMapper = objectMapper;
   }
 
   /**
@@ -52,16 +42,18 @@ public class SearchCriteriaService {
    * attempt update first for best performance.
    *
    * @param pageId the page identifier
-   * @param criteriaJson the criteria as a JSON string
+   * @param criteriaJson the criteria as JSON (object or array)
    * @return the persisted entity
    */
   @Transactional
-  public SearchCriteriaEntity setCriteria(String pageId, String criteriaJson) {
+  public SearchCriteriaEntity setCriteria(String pageId, JsonNode criteriaJson) {
     String userId = loggedUserService.getLoggedUserId();
     SparLog.info("Setting search criteria for user {} page {}", userId, pageId);
 
-    JsonNode criteriaNode = parseCriteriaJson(criteriaJson);
-    int updatedRows = updateCriteriaJson(userId, pageId, criteriaNode);
+    LocalDateTime now = LocalDateTime.now(Clock.systemUTC());
+    int updatedRows =
+        searchCriteriaRepository.updateCriteriaJsonByUserIdAndPageId(
+            userId, pageId, criteriaJson, now);
     if (updatedRows > 0) {
       SparLog.info("Updated existing search criteria for user {} page {}", userId, pageId);
       return searchCriteriaRepository
@@ -75,16 +67,16 @@ public class SearchCriteriaService {
                           + pageId));
     }
 
-    SearchCriteriaEntity entity = new SearchCriteriaEntity(userId, pageId, criteriaNode);
+    SearchCriteriaEntity entity = new SearchCriteriaEntity(userId, pageId, criteriaJson);
     try {
-      SearchCriteriaEntity savedEntity = searchCriteriaRepository.save(entity);
-      entityManager.flush();
+      SearchCriteriaEntity savedEntity = searchCriteriaRepository.saveAndFlush(entity);
       SparLog.info("Inserted new search criteria for user {} page {}", userId, pageId);
       return savedEntity;
     } catch (DataIntegrityViolationException ex) {
       SparLog.info(
           "Concurrent insert detected for user {} page {}; retrying update", userId, pageId);
-      updateCriteriaJson(userId, pageId, criteriaNode);
+      searchCriteriaRepository.updateCriteriaJsonByUserIdAndPageId(
+          userId, pageId, criteriaJson, LocalDateTime.now(Clock.systemUTC()));
       return searchCriteriaRepository
           .findByUserIdAndPageId(userId, pageId)
           .orElseThrow(
@@ -98,24 +90,4 @@ public class SearchCriteriaService {
     }
   }
 
-  private int updateCriteriaJson(String userId, String pageId, JsonNode criteriaJson) {
-    return entityManager
-        .createQuery(
-            "update SearchCriteriaEntity s "
-                + "set s.criteriaJson = :criteriaJson "
-                + "where s.userId = :userId and s.pageId = :pageId")
-        .setParameter("criteriaJson", criteriaJson)
-        .setParameter("userId", userId)
-        .setParameter("pageId", pageId)
-        .executeUpdate();
-  }
-
-  private JsonNode parseCriteriaJson(String criteriaJson) {
-    try {
-      return objectMapper.readTree(criteriaJson);
-    } catch (JsonProcessingException ex) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "criteriaJson must be valid JSON", ex);
-    }
-  }
 }
