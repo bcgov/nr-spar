@@ -28,7 +28,7 @@ import lombok.Setter;
 public class SearchCriteriaEntity {
 
   @Id
-  @Column(name = "user_id", length = 30)
+  @Column(name = "user_id", length = 70)
   @Schema(description = "The user ID of the logged-in user", example = "JDOE")
   private String userId;
 
