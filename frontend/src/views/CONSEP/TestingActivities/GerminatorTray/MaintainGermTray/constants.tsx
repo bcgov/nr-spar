@@ -1,9 +1,14 @@
-import React from 'react';
+/* eslint-disable react/prop-types */
 /* eslint-disable camelcase */
+import React from 'react';
 import { type MRT_ColumnDef } from 'material-react-table';
+import { Checkbox } from '@mui/material';
 import { formatDateCell } from '../../TestSearch/constants';
 import { GermTrayColumn } from './definitions';
 import { GermTrayTestType } from '../../../../../types/consep/GerminatorTrayType';
+
+// Supports both legacy (-1) and common (1) truthy indicators.
+const isIndicatorChecked = (value: unknown): boolean => value === -1 || value === 1;
 
 export const getGermTrayColumns = (
   updateRow: (row: GermTrayColumn) => void
@@ -76,11 +81,27 @@ export const getGermTrayTestsColumns = (): MRT_ColumnDef<GermTrayTestType>[] => 
   {
     accessorKey: 'testCompleteInd',
     header: 'Complete',
-    enableEditing: false
+    enableEditing: false,
+    muiTableHeadCellProps: { align: 'center' },
+    muiTableBodyCellProps: { align: 'center' },
+    Cell: ({ cell }) => (
+      <Checkbox
+        checked={isIndicatorChecked(cell.getValue<number | null>())}
+        disabled
+      />
+    )
   },
   {
     accessorKey: 'acceptResultInd',
     header: 'Accepted',
-    enableEditing: false
+    enableEditing: false,
+    muiTableHeadCellProps: { align: 'center' },
+    muiTableBodyCellProps: { align: 'center' },
+    Cell: ({ cell }) => (
+      <Checkbox
+        checked={isIndicatorChecked(cell.getValue<number | null>())}
+        disabled
+      />
+    )
   }
 ];
