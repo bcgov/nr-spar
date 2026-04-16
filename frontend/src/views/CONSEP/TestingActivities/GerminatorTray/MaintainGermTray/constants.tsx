@@ -59,12 +59,14 @@ export const getGermTrayTestsColumns = (): MRT_ColumnDef<GermTrayTestType>[] => 
   {
     accessorKey: 'warmStratStartDate',
     header: 'Warm strat date',
-    enableEditing: false
+    enableEditing: false,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'drybackStartDate',
     header: 'Dryback',
-    enableEditing: false
+    enableEditing: false,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'stratStartDate',
