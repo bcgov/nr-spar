@@ -188,6 +188,8 @@ class GerminatorTrayServiceTest {
     e1.setDrybackStartDate(LocalDateTime.of(2026, 3, 2, 10, 0));
     e1.setGerminatorEntry(LocalDateTime.of(2026, 3, 3, 10, 0));
     e1.setStratStartDate(LocalDateTime.of(2026, 2, 25, 10, 0));
+    e1.setTestCompleteInd(-1);
+    e1.setAcceptResultInd(0);
 
     LocalDateTime updateTimestamp = LocalDateTime.of(2026, 3, 5, 9, 0);
 
@@ -206,6 +208,8 @@ class GerminatorTrayServiceTest {
     assertEquals(LocalDateTime.of(2026, 3, 2, 10, 0), dto.drybackStartDate());
     assertEquals(LocalDateTime.of(2026, 3, 3, 10, 0), dto.germinatorEntry());
     assertEquals(LocalDateTime.of(2026, 2, 25, 10, 0), dto.stratStartDate());
+    assertEquals(-1, dto.testCompleteInd());
+    assertEquals(0, dto.acceptResultInd());
     assertEquals(updateTimestamp, dto.updateTimestamp());
 
     verify(germinatorTrayRepository).existsById(trayId);
