@@ -135,7 +135,7 @@ const MaintainGermTray = () => {
       <Row className="consep-maintain-germ-tray-tests-table">
         <GenericTable
           columns={germTrayTestsColumns}
-          data={(trayContentsQuery.data ?? []) as GermTrayTestType[]}
+          data={(trayContentsQuery.data ?? [])}
           isLoading={trayContentsQuery.isLoading}
           hideToolbar
           enablePagination
