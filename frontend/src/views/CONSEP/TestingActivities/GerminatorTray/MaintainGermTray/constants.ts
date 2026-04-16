@@ -69,12 +69,14 @@ export const getGermTrayTestsColumns = (): MRT_ColumnDef<GermTrayTestType>[] => 
   {
     accessorKey: 'germinatorEntry',
     header: 'Germinator Entry',
-    enableEditing: false
+    enableEditing: false,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'testCompleteInd',
     header: 'Complete',
-    enableEditing: false
+    enableEditing: false,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'acceptResultInd',
