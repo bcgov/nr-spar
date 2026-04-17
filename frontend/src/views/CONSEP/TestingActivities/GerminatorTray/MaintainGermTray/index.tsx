@@ -13,7 +13,7 @@ import ROUTES from '../../../../../routes/constants';
 import Breadcrumbs from '../../../../../components/Breadcrumbs';
 import PageTitle from '../../../../../components/PageTitle';
 import { assignGerminatorId, getGerminatorTrayContents } from '../../../../../api-service/consep/germinatorTrayAPI';
-import { GermTrayCreateResponseType, GermTrayTestType } from '../../../../../types/consep/GerminatorTrayType';
+import { GermTrayCreateResponseType } from '../../../../../types/consep/GerminatorTrayType';
 import { getGermTrayColumns, getGermTrayTestsColumns } from './constants';
 import { GermTrayColumn } from './definitions';
 import './styles.scss';
