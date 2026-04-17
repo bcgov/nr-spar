@@ -43,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-
 /**
  * The test class for Moisture Content Service.
  */
@@ -628,7 +627,8 @@ class ActivityServiceTest {
       + " matchesCurrentTypeCode true when no current A-rank exists")
   void validateAddGermTest_shouldReturnTrueWhenNoCurrentRankA() {
     when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G11", "G12"));
-    when(activityRepository.findTypeCodeForAcceptedGermTestRankA("00098", null)).thenReturn(List.of());
+    when(activityRepository.findTypeCodeForAcceptedGermTestRankA("00098", null))
+        .thenReturn(List.of());
 
     AddGermTestValidationResponseDto result =
         activityService.validateAddGermTest("G11", "00098", null);
@@ -704,4 +704,59 @@ class ActivityServiceTest {
     );
   }
 
+  /* ----------------------- Get Germination Test Types ----------------------------*/
+  @Test
+  void getGerminationTestTypes_shouldReturnMappedDtos_whenActivitiesExist() {
+    StandardActivityEntity activity1 = new StandardActivityEntity();
+    activity1.setStandardActivityId("G11");
+    activity1.setActivityTypeCd("G11");
+    activity1.setTestCategoryCd("GM");
+    activity1.setActivityDesc("Germination Test 11");
+    activity1.setSignificantStatusIndicator(0);
+    activity1.setActivityDuration(10);
+    activity1.setActivityTimeUnit("DY");
+
+    StandardActivityEntity activity2 = new StandardActivityEntity();
+    activity2.setStandardActivityId("G10");
+    activity2.setActivityTypeCd("G10");
+    activity2.setTestCategoryCd("GM");
+    activity2.setActivityDesc("Germination Test 10");
+    activity2.setSignificantStatusIndicator(-1);
+    activity2.setActivityDuration(14);
+    activity2.setActivityTimeUnit("DY");
+
+    when(standardActivityRepository.findGerminationTestActivities())
+        .thenReturn(List.of(activity1, activity2));
+
+    List<StandardActivityDto> result = activityService.getGerminationTestTypes();
+
+    assertThat(result)
+        .hasSize(2)
+        .extracting(StandardActivityDto::standardActivityId)
+        .containsExactly(activity1.getStandardActivityId(), activity2.getStandardActivityId());
+
+    assertThat(result)
+        .extracting(StandardActivityDto::activityTypeCd)
+        .containsExactly(activity1.getActivityTypeCd(), activity2.getActivityTypeCd());
+
+    assertThat(result)
+        .extracting(StandardActivityDto::activityDescription)
+        .containsExactly(activity1.getActivityDesc(), activity2.getActivityDesc());
+
+    assertThat(result)
+        .extracting(StandardActivityDto::testCategoryCd)
+        .containsExactly(activity1.getTestCategoryCd(), activity2.getTestCategoryCd());
+
+    verify(standardActivityRepository, times(1)).findGerminationTestActivities();
+  }
+
+  @Test
+  void getGerminationTestTypes_shouldReturnEmpty_whenNoActivitiesExist() {
+    when(standardActivityRepository.findGerminationTestActivities()).thenReturn(List.of());
+
+    List<StandardActivityDto> result = activityService.getGerminationTestTypes();
+
+    assertThat(result).isEmpty();
+    verify(standardActivityRepository, times(1)).findGerminationTestActivities();
+  }
 }

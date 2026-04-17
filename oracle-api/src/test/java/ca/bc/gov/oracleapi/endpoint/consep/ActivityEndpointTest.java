@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -376,4 +376,45 @@ class ActivityEndpointTest {
         .validateAddGermTest(activityTypeCd, null, null);
   }
 
+  /* ----------------------- Get Germination Test Types ----------------------------*/
+  @Test
+  void getGerminationTestTypes_shouldReturn200AndList() throws Exception {
+    var dto1 = new StandardActivityDto("G11", "Germination Test 11", "G11", "GM", 0, 10, "DY");
+
+    var dto2 = new StandardActivityDto("G10", "Germination Test 10", "G10", "GM", -1, 14, "DY");
+
+    when(activityService.getGerminationTestTypes()).thenReturn(List.of(dto1, dto2));
+
+    mockMvc
+        .perform(get("/api/activities/germination-test-types").with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("$[0].standardActivityId").value(dto1.standardActivityId()))
+        .andExpect(jsonPath("$[0].activityDescription").value(dto1.activityDescription()))
+        .andExpect(jsonPath("$[0].activityTypeCd").value(dto1.activityTypeCd()))
+        .andExpect(jsonPath("$[0].testCategoryCd").value(dto1.testCategoryCd()))
+        .andExpect(
+            jsonPath("$[0].significantStatusIndicator").value(dto1.significantStatusIndicator()))
+        .andExpect(jsonPath("$[0].activityDuration").value(dto1.activityDuration()))
+        .andExpect(jsonPath("$[0].activityTimeUnit").value(dto1.activityTimeUnit()))
+        .andExpect(jsonPath("$[1].standardActivityId").value(dto2.standardActivityId()))
+        .andExpect(jsonPath("$[1].activityDescription").value(dto2.activityDescription()))
+        .andExpect(jsonPath("$[1].activityTypeCd").value(dto2.activityTypeCd()));
+
+    verify(activityService, times(1)).getGerminationTestTypes();
+  }
+
+  @Test
+  void getGerminationTestTypes_shouldReturn200_withEmptyList() throws Exception {
+    when(activityService.getGerminationTestTypes()).thenReturn(List.of());
+
+    mockMvc
+        .perform(get("/api/activities/germination-test-types").with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(0)));
+
+    verify(activityService, times(1)).getGerminationTestTypes();
+  }
 }
