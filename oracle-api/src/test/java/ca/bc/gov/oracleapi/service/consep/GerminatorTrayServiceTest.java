@@ -17,8 +17,12 @@ import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminationTrayContentsRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +49,11 @@ class GerminatorTrayServiceTest {
   @InjectMocks
   private GerminatorTrayService germinatorTrayService;
 
+  @Mock
+  private TestResultRepository testResultRepository;
+
+  @Mock
+  private ActivityRepository activityRepository;
 
   /*---------------------- Assign Germinator ID to Tray ---------------------------------*/
   @Test
@@ -144,6 +153,103 @@ class GerminatorTrayServiceTest {
 
     verify(germinatorTrayRepository, never()).findById(any());
     verify(germinatorTrayRepository, never()).save(any());
+  }
+
+  /*--------------------- Delete test from tray ---------------------------------*/
+  @Test
+  void deleteTestFromTray_shouldDetachAndKeepTray_whenOtherTestsRemain() {
+    Integer trayId = 101;
+    BigDecimal riaSkey = BigDecimal.valueOf(123);
+    LocalDateTime updateTimestamp = LocalDateTime.of(2026, 4, 1, 10, 0);
+
+    TestResultEntity testResult = new TestResultEntity();
+    testResult.setRiaKey(riaSkey);
+    testResult.setGerminatorTrayId(trayId);
+
+    when(testResultRepository.findById(riaSkey)).thenReturn(Optional.of(testResult));
+    when(testResultRepository.detachTestFromTray(riaSkey)).thenReturn(1);
+    when(activityRepository.updateTimestampWhereMatch(riaSkey, updateTimestamp)).thenReturn(1);
+    when(testResultRepository.countByGerminatorTrayId(trayId)).thenReturn(2);
+
+    germinatorTrayService.deleteTestFromTray(trayId, riaSkey, updateTimestamp);
+
+    verify(testResultRepository).findById(riaSkey);
+    verify(testResultRepository).detachTestFromTray(riaSkey);
+    verify(activityRepository).updateTimestampWhereMatch(riaSkey, updateTimestamp);
+    verify(testResultRepository).countByGerminatorTrayId(trayId);
+    verify(germinatorTrayRepository, never()).deleteByGerminatorTrayId(any());
+  }
+
+  @Test
+  void deleteTestFromTray_shouldDeleteTray_whenNoTestsRemain() {
+    Integer trayId = 101;
+    BigDecimal riaSkey = BigDecimal.valueOf(123);
+    LocalDateTime updateTimestamp = LocalDateTime.of(2026, 4, 1, 10, 0);
+
+    TestResultEntity testResult = new TestResultEntity();
+    testResult.setRiaKey(riaSkey);
+    testResult.setGerminatorTrayId(trayId);
+
+    when(testResultRepository.findById(riaSkey)).thenReturn(Optional.of(testResult));
+    when(testResultRepository.detachTestFromTray(riaSkey)).thenReturn(1);
+    when(activityRepository.updateTimestampWhereMatch(riaSkey, updateTimestamp)).thenReturn(1);
+    when(testResultRepository.countByGerminatorTrayId(trayId)).thenReturn(0);
+    when(germinatorTrayRepository.deleteByGerminatorTrayId(trayId)).thenReturn(1);
+
+    germinatorTrayService.deleteTestFromTray(trayId, riaSkey, updateTimestamp);
+
+    verify(germinatorTrayRepository).deleteByGerminatorTrayId(trayId);
+  }
+
+  @Test
+  void deleteTestFromTray_shouldThrowConflict_whenDetachAffectsZeroRows() {
+    Integer trayId = 101;
+    BigDecimal riaSkey = BigDecimal.valueOf(123);
+    LocalDateTime updateTimestamp = LocalDateTime.of(2026, 4, 1, 10, 0);
+
+    TestResultEntity testResult = new TestResultEntity();
+    testResult.setRiaKey(riaSkey);
+    testResult.setGerminatorTrayId(trayId);
+
+    when(testResultRepository.findById(riaSkey)).thenReturn(Optional.of(testResult));
+    when(testResultRepository.detachTestFromTray(riaSkey)).thenReturn(0);
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> germinatorTrayService.deleteTestFromTray(trayId, riaSkey, updateTimestamp));
+
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    assertEquals(GerminatorTrayService.RESELECT_MESSAGE, ex.getReason());
+
+    verify(activityRepository, never()).updateTimestampWhereMatch(any(), any());
+  }
+
+  /*--------------------- Delete tray ---------------------------------*/
+  @Test
+  void deleteTray_shouldDetachAllTestsAndDeleteTray() {
+    Integer trayId = 101;
+    LocalDateTime updateTimestamp = LocalDateTime.of(2026, 4, 1, 10, 0);
+    List<BigDecimal> riaKeys = List.of(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+
+    when(germinatorTrayRepository.existsById(trayId)).thenReturn(true);
+    when(testResultRepository.findRiaKeysByGerminatorTrayId(trayId)).thenReturn(riaKeys);
+    when(testResultRepository.detachTestFromTray(BigDecimal.valueOf(1))).thenReturn(1);
+    when(testResultRepository.detachTestFromTray(BigDecimal.valueOf(2))).thenReturn(1);
+    when(activityRepository.updateTimestampWhereMatch(BigDecimal.valueOf(1), updateTimestamp))
+        .thenReturn(1);
+    when(activityRepository.updateTimestampWhereMatch(BigDecimal.valueOf(2), updateTimestamp))
+        .thenReturn(1);
+    when(germinatorTrayRepository.deleteByGerminatorTrayId(trayId)).thenReturn(1);
+
+    germinatorTrayService.deleteTray(trayId, updateTimestamp);
+
+    verify(testResultRepository).findRiaKeysByGerminatorTrayId(trayId);
+    verify(testResultRepository).detachTestFromTray(BigDecimal.valueOf(1));
+    verify(testResultRepository).detachTestFromTray(BigDecimal.valueOf(2));
+    verify(activityRepository).updateTimestampWhereMatch(BigDecimal.valueOf(1), updateTimestamp);
+    verify(activityRepository).updateTimestampWhereMatch(BigDecimal.valueOf(2), updateTimestamp);
+    verify(germinatorTrayRepository).deleteByGerminatorTrayId(trayId);
   }
 
   @Test
