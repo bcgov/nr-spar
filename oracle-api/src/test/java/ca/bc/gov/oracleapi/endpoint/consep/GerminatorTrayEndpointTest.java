@@ -624,9 +624,10 @@ class GerminatorTrayEndpointTest {
   @Test
   void deleteTray_returns204_whenSuccessful() throws Exception {
     Integer germinatorTrayId = 101;
+    LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");
     String timestamp = "2025-03-12T00:00:00";
 
-    doNothing().when(germinatorTrayService).deleteTray(any(), any());
+    doNothing().when(germinatorTrayService).deleteTray(germinatorTrayId, expectedTimestamp);
 
     mockMvc
         .perform(
@@ -635,17 +636,13 @@ class GerminatorTrayEndpointTest {
                 .param("activityUpdateTimestamp", timestamp))
         .andExpect(status().isNoContent());
 
-    verify(germinatorTrayService, times(1)).deleteTray(any(), any());
+    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, expectedTimestamp);
   }
 
   @Test
   void deleteTray_returns400_whenTimestampParamMissing() throws Exception {
     // Missing required activityUpdateTimestamp param -> 400
-    mockMvc
-        .perform(
-            delete(BASE_URL + "/101")
-                .with(csrf()))
-        .andExpect(status().isBadRequest());
+    mockMvc.perform(delete(BASE_URL + "/101").with(csrf())).andExpect(status().isBadRequest());
 
     verify(germinatorTrayService, times(0)).deleteTray(any(), any());
   }
@@ -653,11 +650,14 @@ class GerminatorTrayEndpointTest {
   @Test
   void deleteTray_returns404_whenTrayNotFound() throws Exception {
     Integer germinatorTrayId = 999;
+    LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");
     String timestamp = "2025-03-12T00:00:00";
 
-    doThrow(new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId))
-        .when(germinatorTrayService).deleteTray(any(), any());
+    doThrow(
+            new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId))
+        .when(germinatorTrayService)
+        .deleteTray(germinatorTrayId, expectedTimestamp);
 
     mockMvc
         .perform(
@@ -666,17 +666,20 @@ class GerminatorTrayEndpointTest {
                 .param("activityUpdateTimestamp", timestamp))
         .andExpect(status().isNotFound());
 
-    verify(germinatorTrayService, times(1)).deleteTray(any(), any());
+    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, expectedTimestamp);
   }
 
   @Test
   void deleteTray_returns409_whenOptimisticConcurrencyConflict() throws Exception {
     Integer germinatorTrayId = 101;
+    LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");
     String timestamp = "2025-03-12T00:00:00";
 
-    doThrow(new ResponseStatusException(
-        HttpStatus.CONFLICT, GerminatorTrayService.RESELECT_MESSAGE))
-        .when(germinatorTrayService).deleteTray(any(), any());
+    doThrow(
+            new ResponseStatusException(
+                HttpStatus.CONFLICT, GerminatorTrayService.RESELECT_MESSAGE))
+        .when(germinatorTrayService)
+        .deleteTray(germinatorTrayId, expectedTimestamp);
 
     mockMvc
         .perform(
@@ -685,7 +688,7 @@ class GerminatorTrayEndpointTest {
                 .param("activityUpdateTimestamp", timestamp))
         .andExpect(status().isConflict());
 
-    verify(germinatorTrayService, times(1)).deleteTray(any(), any());
+    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, expectedTimestamp);
   }
 
   @Test
@@ -719,9 +722,12 @@ class GerminatorTrayEndpointTest {
   void deleteTestFromTray_returns204_whenSuccessful() throws Exception {
     Integer germinatorTrayId = 101;
     BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");
     String timestamp = "2025-03-12T00:00:00";
 
-    doNothing().when(germinatorTrayService).deleteTestFromTray(any(), any(), any());
+    doNothing()
+        .when(germinatorTrayService)
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
 
     mockMvc
         .perform(
@@ -730,16 +736,15 @@ class GerminatorTrayEndpointTest {
                 .param("activityUpdateTimestamp", timestamp))
         .andExpect(status().isNoContent());
 
-    verify(germinatorTrayService, times(1)).deleteTestFromTray(any(), any(), any());
+    verify(germinatorTrayService, times(1))
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
   }
 
   @Test
   void deleteTestFromTray_returns400_whenTimestampParamMissing() throws Exception {
     // Missing required activityUpdateTimestamp param -> 400
     mockMvc
-        .perform(
-            delete(BASE_URL + "/101/tests/881191")
-                .with(csrf()))
+        .perform(delete(BASE_URL + "/101/tests/881191").with(csrf()))
         .andExpect(status().isBadRequest());
 
     verify(germinatorTrayService, times(0)).deleteTestFromTray(any(), any(), any());
@@ -749,11 +754,14 @@ class GerminatorTrayEndpointTest {
   void deleteTestFromTray_returns409_whenOptimisticConcurrencyConflict() throws Exception {
     Integer germinatorTrayId = 101;
     BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");
     String timestamp = "2025-03-12T00:00:00";
 
-    doThrow(new ResponseStatusException(
-        HttpStatus.CONFLICT, GerminatorTrayService.RESELECT_MESSAGE))
-        .when(germinatorTrayService).deleteTestFromTray(any(), any(), any());
+    doThrow(
+            new ResponseStatusException(
+                HttpStatus.CONFLICT, GerminatorTrayService.RESELECT_MESSAGE))
+        .when(germinatorTrayService)
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
 
     mockMvc
         .perform(
@@ -762,18 +770,22 @@ class GerminatorTrayEndpointTest {
                 .param("activityUpdateTimestamp", timestamp))
         .andExpect(status().isConflict());
 
-    verify(germinatorTrayService, times(1)).deleteTestFromTray(any(), any(), any());
+    verify(germinatorTrayService, times(1))
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
   }
 
   @Test
   void deleteTestFromTray_returns404_whenTestNotFound() throws Exception {
     Integer germinatorTrayId = 101;
     BigDecimal riaSkey = new BigDecimal("999999");
+    LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");
     String timestamp = "2025-03-12T00:00:00";
 
-    doThrow(new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "Test not found for RIA_SKEY: " + riaSkey))
-        .when(germinatorTrayService).deleteTestFromTray(any(), any(), any());
+    doThrow(
+            new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Test not found for RIA_SKEY: " + riaSkey))
+        .when(germinatorTrayService)
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
 
     mockMvc
         .perform(
@@ -782,7 +794,8 @@ class GerminatorTrayEndpointTest {
                 .param("activityUpdateTimestamp", timestamp))
         .andExpect(status().isNotFound());
 
-    verify(germinatorTrayService, times(1)).deleteTestFromTray(any(), any(), any());
+    verify(germinatorTrayService, times(1))
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
   }
 
   @Test
