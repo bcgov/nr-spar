@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,6 +38,34 @@ class SearchCriteriaServiceTest {
 
   @InjectMocks
   private SearchCriteriaService searchCriteriaService;
+
+  @Test
+  @DisplayName("getCriteria returns entity when repository finds a row for the logged-in user")
+  void getCriteriaFound() throws Exception {
+    when(loggedUserService.getLoggedUserId()).thenReturn("user1");
+    SearchCriteriaEntity persisted =
+        new SearchCriteriaEntity("user1", "PAGE", MAPPER.readTree("{\"a\":1}"));
+    when(searchCriteriaRepository.findByUserIdAndPageId("user1", "PAGE"))
+        .thenReturn(Optional.of(persisted));
+
+    Optional<SearchCriteriaEntity> result = searchCriteriaService.getCriteria("PAGE");
+
+    verify(searchCriteriaRepository).findByUserIdAndPageId("user1", "PAGE");
+    assertThat(result).containsSame(persisted);
+  }
+
+  @Test
+  @DisplayName("getCriteria returns empty when repository finds no row")
+  void getCriteriaNotFound() {
+    when(loggedUserService.getLoggedUserId()).thenReturn("user1");
+    when(searchCriteriaRepository.findByUserIdAndPageId("user1", "MISSING_PAGE"))
+        .thenReturn(Optional.empty());
+
+    Optional<SearchCriteriaEntity> result = searchCriteriaService.getCriteria("MISSING_PAGE");
+
+    verify(searchCriteriaRepository).findByUserIdAndPageId("user1", "MISSING_PAGE");
+    assertThat(result).isEmpty();
+  }
 
   @Test
   @DisplayName("setCriteria update path uses repository bulk update")
