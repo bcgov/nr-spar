@@ -9,7 +9,6 @@ interface ThemeContextData {
 }
 
 const ThemePreferenceContext = createContext<ThemeContextData>({} as ThemeContextData);
-const currentMode = localStorage.getItem('mode');
 
 /**
  * Create useThemePreference hook.
@@ -43,12 +42,32 @@ function ThemePreference({ children }:ThemePreferenceProps) {
   }, [theme]);
 
   useEffect(() => {
-    if (currentMode === 'dark') {
+    const savedMode = localStorage.getItem('mode');
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = (isDark: boolean) => {
+      setTheme(isDark ? 'g100' : 'g10');
+    };
+
+    if (savedMode === 'dark') {
       setTheme('g100');
-    }
-    if (currentMode === 'light') {
+    } else if (savedMode === 'light') {
       setTheme('g10');
+    } else {
+      applyTheme(mediaQuery.matches);
     }
+
+    const onChange = (event: MediaQueryListEvent) => {
+      if (!localStorage.getItem('mode')) {
+        applyTheme(event.matches);
+      }
+    };
+
+    mediaQuery.addEventListener('change', onChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', onChange);
+    };
   }, []);
 
   return (
