@@ -264,7 +264,7 @@ class GerminatorTrayServiceTest {
             () -> germinatorTrayService.deleteTestFromTray(trayId, riaSkey, updateTimestamp));
 
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-    assertEquals("Test not on the specified tray", ex.getReason());
+    assertEquals("Test is not on the specified tray", ex.getReason());
 
     verify(testResultRepository).findById(riaSkey);
     verify(testResultRepository, never()).detachTestFromTray(any());
