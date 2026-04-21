@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.server.ResponseStatusException;
 
 class JwtSecurityUtilTest {
 
@@ -84,5 +85,51 @@ class JwtSecurityUtilTest {
     Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(builder.build());
 
     Assertions.assertTrue(rolesSet.isEmpty());
+  }
+
+  @Test
+  @DisplayName("Get userId from JWT returns the custom:idp_username claim")
+  void getUserIdFromJwt_happyPath_shouldReturnIdirUsername() {
+    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
+    builder.header("alg", "HS256");
+    builder.header("typ", "JWT");
+    builder.subject("BAGGINGS");
+    builder.claim("custom:idp_username", "BAGGINGS");
+
+    String userId = JwtSecurityUtil.getUserIdFromJwt(builder.build());
+
+    Assertions.assertEquals("BAGGINGS", userId);
+  }
+
+  @Test
+  @DisplayName("Get userId from JWT throws 401 when the claim is missing")
+  void getUserIdFromJwt_missingClaim_shouldThrow401() {
+    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
+    builder.header("alg", "HS256");
+    builder.header("typ", "JWT");
+    builder.subject("BAGGINGS");
+    // no custom:idp_username claim
+
+    ResponseStatusException ex = Assertions.assertThrows(
+        ResponseStatusException.class,
+        () -> JwtSecurityUtil.getUserIdFromJwt(builder.build()));
+
+    Assertions.assertEquals(401, ex.getStatusCode().value());
+  }
+
+  @Test
+  @DisplayName("Get userId from JWT throws 401 when the claim is blank")
+  void getUserIdFromJwt_blankClaim_shouldThrow401() {
+    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
+    builder.header("alg", "HS256");
+    builder.header("typ", "JWT");
+    builder.subject("BAGGINGS");
+    builder.claim("custom:idp_username", "   ");
+
+    ResponseStatusException ex = Assertions.assertThrows(
+        ResponseStatusException.class,
+        () -> JwtSecurityUtil.getUserIdFromJwt(builder.build()));
+
+    Assertions.assertEquals(401, ex.getStatusCode().value());
   }
 }
