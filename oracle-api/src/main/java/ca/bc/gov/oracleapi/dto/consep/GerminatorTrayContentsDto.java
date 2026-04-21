@@ -22,6 +22,12 @@ public record GerminatorTrayContentsDto(
 
     LocalDateTime stratStartDate,
 
+    @Schema(description = "Test complete indicator", example = "0")
+    Integer testCompleteInd,
+
+    @Schema(description = "Accept result indicator", example = "0")
+    Integer acceptResultInd,
+
     @Schema(description = "Timestamp for the last update", example = "2025-01-20T12:00:00")
     LocalDateTime updateTimestamp
 ) {

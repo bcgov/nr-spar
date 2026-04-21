@@ -6,15 +6,15 @@ import React, {
   useCallback
 } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { FlexGrid, Row, InlineNotification } from '@carbon/react';
 import GenericTable from '../../../../../components/GenericTable';
 import ROUTES from '../../../../../routes/constants';
 import Breadcrumbs from '../../../../../components/Breadcrumbs';
 import PageTitle from '../../../../../components/PageTitle';
-import { assignGerminatorId } from '../../../../../api-service/consep/germinatorTrayAPI';
+import { assignGerminatorId, getGerminatorTrayContents } from '../../../../../api-service/consep/germinatorTrayAPI';
 import { GermTrayCreateResponseType } from '../../../../../types/consep/GerminatorTrayType';
-import { getGermTrayColumns } from './constants';
+import { getGermTrayColumns, getGermTrayTestsColumns } from './constants';
 import { GermTrayColumn } from './definitions';
 import './styles.scss';
 
@@ -34,6 +34,27 @@ const MaintainGermTray = () => {
   } | null>(null);
   const [trays, setTrays] = useState<GermTrayColumn[]>(germinatorTrays);
   const lastSyncedRef = useRef<string | null>(JSON.stringify(germinatorTrays));
+  const [selectedTrayId, setSelectedTrayId] = useState<number | null>(null);
+
+  const trayContentsQuery = useQuery({
+    queryKey: ['germinatorTrayContents', selectedTrayId],
+    queryFn: () => getGerminatorTrayContents(selectedTrayId!),
+    enabled: selectedTrayId !== null
+  });
+
+  useEffect(() => {
+    if (trayContentsQuery.isError) {
+      const error = trayContentsQuery.error as any;
+      const message = error?.response?.data?.message
+        || error?.message
+        || 'Failed to load tray contents';
+      setAlert({ status: 'error', message });
+    }
+  }, [trayContentsQuery.isError, trayContentsQuery.error]);
+
+  const handleTrayRowClick = useCallback((row: GermTrayColumn) => {
+    setSelectedTrayId(row.germinatorTrayId);
+  }, []);
 
   const assignMutation = useMutation({
     mutationFn: ({
@@ -89,6 +110,7 @@ const MaintainGermTray = () => {
   }, [trays, assignMutation]);
 
   const germTrayColumns = useMemo(() => getGermTrayColumns(updateRow), [updateRow]);
+  const germTrayTestsColumns = useMemo(() => getGermTrayTestsColumns(), []);
 
   return (
     <FlexGrid className="consep-maintain-germ-tray">
@@ -112,6 +134,19 @@ const MaintainGermTray = () => {
         <GenericTable
           columns={germTrayColumns}
           data={trays}
+          hideToolbar
+          enablePagination
+          onRowClick={handleTrayRowClick}
+          initialState={{
+            pagination: { pageSize: 5, pageIndex: 0 }
+          }}
+        />
+      </Row>
+      <Row className="consep-maintain-germ-tray-tests-table">
+        <GenericTable
+          columns={germTrayTestsColumns}
+          data={(trayContentsQuery.data ?? [])}
+          isLoading={trayContentsQuery.isLoading}
           hideToolbar
           enablePagination
           initialState={{
