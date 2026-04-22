@@ -63,10 +63,18 @@ function ThemePreference({ children }:ThemePreferenceProps) {
       }
     };
 
-    mediaQuery.addEventListener('change', onChange);
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', onChange);
+    } else {
+      mediaQuery.addListener(onChange);
+    }
 
     return () => {
-      mediaQuery.removeEventListener('change', onChange);
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', onChange);
+      } else {
+        mediaQuery.removeListener(onChange);
+      }
     };
   }, []);
 
