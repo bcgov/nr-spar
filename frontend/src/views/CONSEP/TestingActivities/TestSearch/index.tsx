@@ -26,6 +26,7 @@ import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import { getTestTypeCodes, getActivityIds } from '../../../../api-service/consep/testCodesAPI';
+import { getSearchCriteria, setSearchCriteria } from '../../../../api-service/consep/searchCriteriaAPI';
 import type {
   TestingSearchResponseType,
   PaginatedTestingSearchResponseType,
@@ -48,7 +49,8 @@ import {
   ADV_FILTER_LABELS,
   ADV_FILTER_STATUS_MAPS,
   initialErrorValue,
-  isFamilyLot
+  isFamilyLot,
+  TESTING_ACTIVITIES_SEARCH_PAGE_ID
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import {
@@ -234,6 +236,69 @@ const TestSearch = () => {
       sortBy: sort?.id,
       sortDirection: sort?.desc ? 'desc' : 'asc'
     });
+  };
+
+  const savedCriteriaHydratedRef = useRef(false);
+
+  const savedCriteriaQuery = useQuery({
+    queryKey: ['search-criteria', TESTING_ACTIVITIES_SEARCH_PAGE_ID],
+    queryFn: () => getSearchCriteria(TESTING_ACTIVITIES_SEARCH_PAGE_ID),
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false
+  });
+
+  useEffect(() => {
+    if (savedCriteriaHydratedRef.current) return;
+    if (!savedCriteriaQuery.isSuccess) return;
+
+    savedCriteriaHydratedRef.current = true;
+
+    const saved = savedCriteriaQuery.data?.criteriaJson as ActivitySearchRequest | undefined;
+    if (!saved || Object.keys(saved).length === 0) return;
+
+    setSearchParams(saved);
+
+    if (Array.isArray(saved.lotNumbers) && saved.lotNumbers.length > 0) {
+      const restored = ['', '', '', '', ''];
+      saved.lotNumbers.slice(0, 5).forEach((lot, i) => { restored[i] = lot; });
+      setRawLotInput(restored);
+    }
+  }, [savedCriteriaQuery.isSuccess, savedCriteriaQuery.data]);
+
+  useEffect(() => {
+    if (savedCriteriaQuery.error) {
+      setAlert({
+        status: 'error',
+        message: `Failed to load saved search criteria: ${savedCriteriaQuery.error.message}`
+      });
+    }
+  }, [savedCriteriaQuery.error]);
+
+  const saveCriteriaMutation = useMutation({
+    mutationFn: (criteria: ActivitySearchRequest) => setSearchCriteria(
+      TESTING_ACTIVITIES_SEARCH_PAGE_ID,
+      criteria as Record<string, unknown>
+    ),
+    onSuccess: () => {
+      setAlert({
+        status: 'success',
+        message: 'Search criteria saved.'
+      });
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error && error.message ? error.message : 'Unknown error';
+      setAlert({
+        status: 'error',
+        message: `Failed to save search criteria: ${message}`
+      });
+    }
+  });
+
+  const handleSaveCriteria = () => {
+    resetAlert();
+    saveCriteriaMutation.mutate(searchParams);
   };
 
   const testTypeQuery = useQuery({
@@ -837,6 +902,8 @@ const TestSearch = () => {
               alignTo={modalAnchor}
               onClose={handleCloseAdvSearch}
               anchorRef={advSearchRef}
+              onSaveCriteria={handleSaveCriteria}
+              isSavingCriteria={saveCriteriaMutation.isPending}
             />
           )}
         </form>
