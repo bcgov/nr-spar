@@ -57,7 +57,7 @@ jobs:
           echo "version=$VERSION_NUM" >> $GITHUB_OUTPUT
 
       - name: Conventional Changelog Update
-        uses: TriPSs/conventional-changelog-action@91be4f3188da74fe85de9caffcebc80b26d43b5b # v6
+        uses: TriPSs/conventional-changelog-action@952b14bbc4be87e8458a6ac5926fc655608b1b19 # v6
         id: changelog
         continue-on-error: true
         with:
@@ -108,7 +108,7 @@ jobs:
           includeRefIssues: false
 
       - name: Create Release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         if: steps.set-version.outputs.tag != ''
         continue-on-error: true
         env:
