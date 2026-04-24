@@ -3,6 +3,7 @@
 import React from 'react';
 import { type MRT_ColumnDef } from 'material-react-table';
 import { Checkbox } from '@mui/material';
+import { Icons } from '@carbon/icons-react';
 import { formatDateCell } from '../../TestSearch/constants';
 import { GermTrayColumn } from './definitions';
 import { GermTrayTestType } from '../../../../../types/consep/GerminatorTrayType';
@@ -45,7 +46,9 @@ export const getGermTrayColumns = (
   }
 ];
 
-export const getGermTrayTestsColumns = (): MRT_ColumnDef<GermTrayTestType>[] => [
+export const getGermTrayTestsColumns = (
+  onDeleteRow?: (row: GermTrayTestType) => void
+): MRT_ColumnDef<GermTrayTestType>[] => [
   {
     accessorKey: 'seedlotNumber',
     header: 'Lot #',
@@ -103,6 +106,20 @@ export const getGermTrayTestsColumns = (): MRT_ColumnDef<GermTrayTestType>[] => 
       <Checkbox
         checked={isIndicatorChecked(cell.getValue<number | null>())}
         disabled
+      />
+    )
+  },
+  {
+    accessorKey: 'actions',
+    header: '',
+    enableSorting: false,
+    enableEditing: false,
+    size: 50,
+    Cell: ({ row }: { row: { original: GermTrayTestType } }) => (
+      <Icons.TrashCan
+        size={15}
+        style={{ cursor: 'pointer' }}
+        onClick={() => onDeleteRow?.(row.original)}
       />
     )
   }

@@ -247,6 +247,7 @@ public class GerminatorTrayService {
         entity.getStratStartDate(),
         entity.getTestCompleteInd(),
         entity.getAcceptResultInd(),
+        entity.getRiaSkey(),
         updateTimestamp);
   }
 
