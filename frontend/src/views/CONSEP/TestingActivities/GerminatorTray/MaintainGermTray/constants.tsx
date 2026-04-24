@@ -3,7 +3,7 @@
 import React from 'react';
 import { type MRT_ColumnDef } from 'material-react-table';
 import { Checkbox } from '@mui/material';
-import { Icons } from '@carbon/icons-react';
+import { TrashCan } from '@carbon/icons-react';
 import { formatDateCell } from '../../TestSearch/constants';
 import { GermTrayColumn } from './definitions';
 import { GermTrayTestType } from '../../../../../types/consep/GerminatorTrayType';
@@ -116,7 +116,7 @@ export const getGermTrayTestsColumns = (
     enableEditing: false,
     size: 50,
     Cell: ({ row }: { row: { original: GermTrayTestType } }) => (
-      <Icons.TrashCan
+      <TrashCan
         size={15}
         style={{ cursor: 'pointer' }}
         onClick={() => onDeleteRow?.(row.original)}
