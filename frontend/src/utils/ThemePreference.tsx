@@ -43,7 +43,7 @@ function ThemePreference({ children }:ThemePreferenceProps) {
 
   useEffect(() => {
     const savedMode = localStorage.getItem('mode');
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const mediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)');
 
     const applyTheme = (isDark: boolean) => {
       setTheme(isDark ? 'g100' : 'g10');
