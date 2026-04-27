@@ -70,6 +70,10 @@ const csvConfig = mkConfig({
 });
 const LOT_INPUT_KEYS = ['lot-input-1', 'lot-input-2', 'lot-input-3', 'lot-input-4', 'lot-input-5'] as const;
 const toDate = (value?: string) => (value ? new Date(`${value}T00:00:00`) : undefined);
+type SaveCriteriaMutationVariables = {
+  criteria: ActivitySearchRequest;
+  showSuccessAlert?: boolean;
+};
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
@@ -277,15 +281,19 @@ const TestSearch = () => {
   }, [savedCriteriaQuery.error]);
 
   const saveCriteriaMutation = useMutation({
-    mutationFn: (criteria: ActivitySearchRequest) => setSearchCriteria(
-      TESTING_ACTIVITIES_SEARCH_PAGE_ID,
-      criteria as Record<string, unknown>
+    mutationFn: ({ criteria }: SaveCriteriaMutationVariables) => (
+      setSearchCriteria(
+        TESTING_ACTIVITIES_SEARCH_PAGE_ID,
+        criteria as Record<string, unknown>
+      )
     ),
-    onSuccess: () => {
-      setAlert({
-        status: 'success',
-        message: 'Search criteria saved.'
-      });
+    onSuccess: (_data: unknown, variables: SaveCriteriaMutationVariables) => {
+      if (variables.showSuccessAlert) {
+        setAlert({
+          status: 'success',
+          message: 'Search criteria saved.'
+        });
+      }
     },
     onError: (error: unknown) => {
       const message = error instanceof Error && error.message ? error.message : 'Unknown error';
@@ -298,7 +306,7 @@ const TestSearch = () => {
 
   const handleSaveCriteria = () => {
     resetAlert();
-    saveCriteriaMutation.mutate(searchParams);
+    saveCriteriaMutation.mutate({ criteria: searchParams, showSuccessAlert: true });
   };
 
   const testTypeQuery = useQuery({
@@ -682,7 +690,7 @@ const TestSearch = () => {
       }));
     }
 
-    const searchParamstoSend = {
+    const searchParamsToSend = {
       ...searchParams,
       lotNumbers: paddedLotNumbers.length > 0 ? paddedLotNumbers : undefined,
       ...(searchParams.testTypes?.length
@@ -697,7 +705,8 @@ const TestSearch = () => {
         : {})
     };
 
-    searchMutation.mutate({ filter: searchParamstoSend });
+    saveCriteriaMutation.mutate({ criteria: searchParamsToSend });
+    searchMutation.mutate({ filter: searchParamsToSend });
   };
 
   return (
