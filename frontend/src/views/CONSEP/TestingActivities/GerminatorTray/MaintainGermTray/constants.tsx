@@ -3,6 +3,7 @@
 import React from 'react';
 import { type MRT_ColumnDef } from 'material-react-table';
 import { Checkbox } from '@mui/material';
+import { Button } from '@carbon/react';
 import { TrashCan } from '@carbon/icons-react';
 import { formatDateCell } from '../../TestSearch/constants';
 import { GermTrayColumn } from './definitions';
@@ -116,11 +117,15 @@ export const getGermTrayTestsColumns = (
     enableEditing: false,
     size: 50,
     Cell: ({ row }: { row: { original: GermTrayTestType } }) => (
-      <TrashCan
-        size={15}
-        style={{ cursor: 'pointer' }}
+      <Button
+        kind="ghost"
+        size="sm"
+        aria-label="Remove from tray"
+        disabled={row.original.riaSkey == null || row.original.updateTimestamp == null}
         onClick={() => onDeleteRow?.(row.original)}
-      />
+      >
+        <TrashCan size={15} />
+      </Button>
     )
   }
 ];
