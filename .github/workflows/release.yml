@@ -36,7 +36,7 @@ jobs:
       tag: ${{ steps.set-version.outputs.tag }}
       version: ${{ steps.set-version.outputs.version }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -108,7 +108,7 @@ jobs:
           includeRefIssues: false
 
       - name: Create Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
         if: steps.set-version.outputs.tag != ''
         continue-on-error: true
         env:
@@ -150,7 +150,7 @@ jobs:
       matrix:
         package: [backend, frontend, oracle-api]
     steps:
-      - uses: shrink/actions-docker-registry-tag@f04afd0559f66b288586792eb150f45136a927fa # v4
+      - uses: shrink/actions-docker-registry-tag@e6aaef25c595b6e0edd18bf4c7dbfea3abd43299 # v5
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
