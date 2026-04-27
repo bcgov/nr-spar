@@ -58,11 +58,12 @@ const MaintainGermTray = () => {
   }, []);
 
   const deleteFromTrayMutation = useMutation({
-    mutationFn: (row: GermTrayTestType) => deleteTestFromTray(
-      row.germinatorTrayId,
-      row.riaSkey,
-      row.updateTimestamp
-    ),
+    mutationFn: (row: GermTrayTestType) => {
+      if (row.riaSkey == null || row.updateTimestamp == null) {
+        return Promise.reject(new Error('Cannot delete: missing test data'));
+      }
+      return deleteTestFromTray(row.germinatorTrayId, row.riaSkey, row.updateTimestamp);
+    },
     onSuccess: (_, row) => {
       setAlert(null);
       const remainingCount = (trayContentsQuery.data?.length ?? 0) - 1;
@@ -70,7 +71,7 @@ const MaintainGermTray = () => {
         setTrays((prev) => prev.filter((t) => t.germinatorTrayId !== row.germinatorTrayId));
         setSelectedTrayId(null);
       } else {
-        queryClient.invalidateQueries({ queryKey: ['germinatorTrayContents', selectedTrayId] });
+        queryClient.invalidateQueries({ queryKey: ['germinatorTrayContents', row.germinatorTrayId] });
       }
     },
     onError: (error: any) => {
@@ -133,6 +134,10 @@ const MaintainGermTray = () => {
   }, [trays, assignMutation]);
 
   const germTrayColumns = useMemo(() => getGermTrayColumns(updateRow), [updateRow]);
+  const germTrayTestsColumns = useMemo(
+    () => getGermTrayTestsColumns((row) => deleteFromTrayMutation.mutate(row)),
+    [deleteFromTrayMutation]
+  );
 
   return (
     <FlexGrid className="consep-maintain-germ-tray">
@@ -166,7 +171,7 @@ const MaintainGermTray = () => {
       </Row>
       <Row className="consep-maintain-germ-tray-tests-table">
         <GenericTable
-          columns={getGermTrayTestsColumns((row) => deleteFromTrayMutation.mutate(row))}
+          columns={germTrayTestsColumns}
           data={(trayContentsQuery.data ?? [])}
           isLoading={trayContentsQuery.isLoading}
           hideToolbar
