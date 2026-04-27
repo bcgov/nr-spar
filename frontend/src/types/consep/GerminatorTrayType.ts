@@ -19,4 +19,6 @@ export type GermTrayTestType = {
   stratStartDate: string | null;
   testCompleteInd: -1 | 0;
   acceptResultInd: -1 | 0;
+  riaSkey: number | null;
+  updateTimestamp: string | null;
 };

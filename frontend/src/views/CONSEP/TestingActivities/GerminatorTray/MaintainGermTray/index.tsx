@@ -6,14 +6,14 @@ import React, {
   useCallback
 } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlexGrid, Row, InlineNotification } from '@carbon/react';
 import GenericTable from '../../../../../components/GenericTable';
 import ROUTES from '../../../../../routes/constants';
 import Breadcrumbs from '../../../../../components/Breadcrumbs';
 import PageTitle from '../../../../../components/PageTitle';
-import { assignGerminatorId, getGerminatorTrayContents } from '../../../../../api-service/consep/germinatorTrayAPI';
-import { GermTrayCreateResponseType } from '../../../../../types/consep/GerminatorTrayType';
+import { assignGerminatorId, deleteTestFromTray, getGerminatorTrayContents } from '../../../../../api-service/consep/germinatorTrayAPI';
+import { GermTrayCreateResponseType, GermTrayTestType } from '../../../../../types/consep/GerminatorTrayType';
 import { getGermTrayColumns, getGermTrayTestsColumns } from './constants';
 import { GermTrayColumn } from './definitions';
 import './styles.scss';
@@ -22,6 +22,7 @@ const BREAD_CRUMB_ITEMS = [{ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIV
 
 const MaintainGermTray = () => {
   const location = useLocation();
+  const queryClient = useQueryClient();
   const germinatorTrays = location.state?.germinatorTrays?.map(
     (tray: GermTrayCreateResponseType) => ({
       ...tray,
@@ -55,6 +56,29 @@ const MaintainGermTray = () => {
   const handleTrayRowClick = useCallback((row: GermTrayColumn) => {
     setSelectedTrayId(row.germinatorTrayId);
   }, []);
+
+  const deleteFromTrayMutation = useMutation({
+    mutationFn: (row: GermTrayTestType) => {
+      if (row.riaSkey == null || row.updateTimestamp == null) {
+        return Promise.reject(new Error('Cannot delete: missing test data'));
+      }
+      return deleteTestFromTray(row.germinatorTrayId, row.riaSkey, row.updateTimestamp);
+    },
+    onSuccess: (_, row) => {
+      setAlert(null);
+      const remainingCount = (trayContentsQuery.data?.length ?? 0) - 1;
+      if (remainingCount === 0) {
+        setTrays((prev) => prev.filter((t) => t.germinatorTrayId !== row.germinatorTrayId));
+        setSelectedTrayId(null);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['germinatorTrayContents', row.germinatorTrayId] });
+      }
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || error?.message || 'Failed to remove test from tray';
+      setAlert({ status: 'error', message });
+    }
+  });
 
   const assignMutation = useMutation({
     mutationFn: ({
@@ -110,7 +134,10 @@ const MaintainGermTray = () => {
   }, [trays, assignMutation]);
 
   const germTrayColumns = useMemo(() => getGermTrayColumns(updateRow), [updateRow]);
-  const germTrayTestsColumns = useMemo(() => getGermTrayTestsColumns(), []);
+  const germTrayTestsColumns = useMemo(
+    () => getGermTrayTestsColumns((row) => deleteFromTrayMutation.mutate(row)),
+    [deleteFromTrayMutation]
+  );
 
   return (
     <FlexGrid className="consep-maintain-germ-tray">

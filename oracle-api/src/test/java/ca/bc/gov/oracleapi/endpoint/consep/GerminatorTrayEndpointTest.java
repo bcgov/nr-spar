@@ -375,6 +375,7 @@ class GerminatorTrayEndpointTest {
                 null,
                 null,
                 null,
+                null,
                 null
             ));
 

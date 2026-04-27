@@ -29,3 +29,14 @@ export const getGerminatorTrayContents = (
   const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/tests`;
   return api.get(url).then((res: { data: GermTrayTestType[] }) => res.data);
 };
+
+export const deleteTestFromTray = (
+  germinatorTrayId: number,
+  riaSkey: number,
+  activityUpdateTimestamp: string
+): Promise<void> => {
+  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/tests/${riaSkey}`
+      + `?activityUpdateTimestamp=${encodeURIComponent(activityUpdateTimestamp)}`;
+
+  return api.delete(url).then(() => undefined);
+};
