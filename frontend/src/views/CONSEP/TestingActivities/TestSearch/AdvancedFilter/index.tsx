@@ -39,6 +39,8 @@ type AdvancedFiltersProps = {
   alignTo: { top: number; left: number; width: number };
   onClose: () => void;
   anchorRef: React.RefObject<HTMLElement>;
+  onSaveCriteria: () => void;
+  isSavingCriteria: boolean;
 };
 
 const AdvancedFilters = ({
@@ -48,7 +50,9 @@ const AdvancedFilters = ({
   setValidateSearch,
   alignTo,
   onClose,
-  anchorRef
+  anchorRef,
+  onSaveCriteria,
+  isSavingCriteria
 }: AdvancedFiltersProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const windowSize = useWindowSize();
@@ -710,7 +714,8 @@ const AdvancedFilters = ({
           <Button
             size="md"
             kind="tertiary"
-            onClick={() => {}}
+            onClick={onSaveCriteria}
+            disabled={isSavingCriteria}
           >
             Save search criteria
           </Button>
