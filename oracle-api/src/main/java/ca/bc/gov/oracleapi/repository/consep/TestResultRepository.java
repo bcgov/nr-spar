@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.repository.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 
 /**
  * This interface enables the test result entity from consep to be retrieved from the database.
@@ -142,4 +144,54 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
    * Count how many tests are on the given tray.
    */
   int countByGerminatorTrayId(Integer germinatorTrayId);
+
+  @Query(
+      """
+      SELECT new ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto(
+          tst.riaKey,
+          tst.activityType,
+          a.actualBeginDateTime,
+          a.actualEndDateTime,
+          a.testCategoryCode,
+          tst.moistureStatus,
+          tst.sampleDesc,
+          tst.acceptResult,
+          tst.testCompleteInd,
+          a.riaComment,
+          tst.standardTest,
+          tst.testRank,
+          tst.germinationPct,
+          tst.germinationValue,
+          tst.peakValueGrmPct,
+          tst.peakValueNoDays,
+          tst.seedWithdrawDate,
+          a.revisedStartDate,
+          a.revisedEndDate,
+          a.activityDuration,
+          a.activityTimeUnit,
+          tst.stratStartDate,
+          tst.drybackStartDate,
+          tst.warmStratStartDate,
+          tst.germinatorEntry,
+          tst.germinatorTrayId,
+          tst.germinatorId,
+          (a.actualBeginDateTime + (COALESCE(tr.soakHours, 0) / 24.0)),
+          a.imbibedWeight,
+          a.dryWeight,
+          a.drybackWeight,
+          a.intermediateCleaner,
+          r.requestTypeSt
+      )
+      FROM TestResultEntity tst
+      JOIN ActivityEntity a
+      ON a.riaKey = tst.riaKey
+      JOIN SparRequestEntity r
+      ON r.requestSkey = a.requestSkey
+      LEFT JOIN TestRegimeEntity tr
+      ON tr.seedlotTestCode = tst.activityType
+      WHERE tst.riaKey = :riaKey
+      """)
+  Optional<GerminationTestHeaderDto> findGerminationTestHeaderByRiaKey(
+      @Param("riaKey") BigDecimal riaKey
+  );
 }
