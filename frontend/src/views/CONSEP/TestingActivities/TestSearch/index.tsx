@@ -274,13 +274,44 @@ const TestSearch = () => {
     refetchOnWindowFocus: false
   });
 
+  const testTypeQuery = useQuery({
+    queryKey: ['test-type-codes'],
+    queryFn: getTestTypeCodes,
+    staleTime: THREE_HOURS, // data is fresh for 3 hours
+    gcTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
+    select: (data: TestCodeType[]) => data?.map((testCode) => testCode.code) ?? []
+  });
+
+  const activityIdQuery = useQuery({
+    queryKey: ['activity-ids'],
+    queryFn: () => getActivityIds(),
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS,
+    select: (data: ActivityIdType[]) => data?.map((activity) => activity.standardActivityId) ?? []
+  });
+
   useEffect(() => {
     if (savedCriteriaHydratedRef.current) return;
     if (!savedCriteriaQuery.isSuccess) return;
 
     const saved = savedCriteriaQuery.data?.criteriaJson as ActivitySearchRequest | undefined;
-    if (!saved || Object.keys(saved).length === 0) return;
+    if (!saved || Object.keys(saved).length === 0) {
+      return;
+    }
     if (hasUserEditedRef.current) return;
+
+    const needsTestTypes = Array.isArray(saved.testTypes) && saved.testTypes.length > 0;
+    const needsActivityIds = Array.isArray(saved.activityIds) && saved.activityIds.length > 0;
+
+    // FilterableMultiSelect honors `initialSelectedItems` only at mount time, so
+    // we must wait for the option lists to load before hydrating + remounting,
+    // otherwise the saved selections won't appear as the field's defaults.
+    if (needsTestTypes && !testTypeQuery.isSuccess) {
+      return;
+    }
+    if (needsActivityIds && !activityIdQuery.isSuccess) {
+      return;
+    }
 
     setSearchParams(saved);
     savedCriteriaHydratedRef.current = true;
@@ -290,7 +321,21 @@ const TestSearch = () => {
       saved.lotNumbers.slice(0, 5).forEach((lot, i) => { restored[i] = lot; });
       setRawLotInput(restored);
     }
-  }, [savedCriteriaQuery.isSuccess, savedCriteriaQuery.data]);
+
+    // Force the multi-selects to re-mount so `initialSelectedItems`
+    // reflects the just-hydrated saved values.
+    if (needsTestTypes || needsActivityIds) {
+      setMultiSelectResetKeys((prev) => ({
+        testTypes: needsTestTypes ? prev.testTypes + 1 : prev.testTypes,
+        activityIds: needsActivityIds ? prev.activityIds + 1 : prev.activityIds
+      }));
+    }
+  }, [
+    savedCriteriaQuery.isSuccess,
+    savedCriteriaQuery.data,
+    testTypeQuery.isSuccess,
+    activityIdQuery.isSuccess
+  ]);
 
   useEffect(() => {
     if (savedCriteriaQuery.error) {
@@ -324,22 +369,6 @@ const TestSearch = () => {
         message: `Failed to save search criteria: ${message}`
       });
     }
-  });
-
-  const testTypeQuery = useQuery({
-    queryKey: ['test-type-codes'],
-    queryFn: getTestTypeCodes,
-    staleTime: THREE_HOURS, // data is fresh for 3 hours
-    gcTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
-    select: (data: TestCodeType[]) => data?.map((testCode) => testCode.code) ?? []
-  });
-
-  const activityIdQuery = useQuery({
-    queryKey: ['activity-ids'],
-    queryFn: () => getActivityIds(),
-    staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS,
-    select: (data: ActivityIdType[]) => data?.map((activity) => activity.standardActivityId) ?? []
   });
 
   useEffect(() => {
