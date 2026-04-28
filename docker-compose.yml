@@ -24,7 +24,7 @@ x-frontend: &frontend
 services:
   database:
     container_name: database
-    image: postgis/postgis:15-master
+    image: postgis/postgis:16-master
     environment:
       <<: *postgres-vars
     volumes:
@@ -59,7 +59,7 @@ services:
 
   frontend:
     container_name: frontend
-    image: node:22-bullseye-slim
+    image: node:24-bullseye-slim
     ports: ["3000:3000"]
     entrypoint: sh -c "npm ci --ignore-scripts --no-update-notifier && npm run start"
     user: root
@@ -116,7 +116,7 @@ services:
   schemaspy:
     container_name: schemaspy
     profiles: ["schemaspy"]
-    image: schemaspy/schemaspy:6.2.4
+    image: schemaspy/schemaspy:7.0.2
     user: ${UID:-""}:${GID:-""}
     volumes:
       - "./schemaspy/output:/output"
