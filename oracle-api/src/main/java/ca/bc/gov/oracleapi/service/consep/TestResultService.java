@@ -7,6 +7,7 @@ import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
@@ -85,14 +86,62 @@ public class TestResultService {
     SparLog.info("Fetching germination test header for RIA_SKEY: {}", riaKey);
 
     try {
-      return testResultRepository
-          .findGerminationTestHeaderByRiaKey(riaKey)
-          .orElseThrow(
-              () -> {
-                SparLog.warn("No germination test header found for RIA_SKEY: {}", riaKey);
-                return new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY");
-              });
+      GerminationTestHeaderDto dto =
+          testResultRepository
+              .findGerminationTestHeaderByRiaKey(riaKey)
+              .orElseThrow(
+                  () -> {
+                    SparLog.warn("No germination test header found for RIA_SKEY: {}", riaKey);
+                    return new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY");
+                  });
+
+      // Compute soakEndDate in service layer
+      LocalDateTime soakEndDate = null;
+      if (dto.actualBeginDtTm() != null) {
+        // Get soak hours from test result
+        TestRegimeEntity regime = testRegimeRepository.findById(dto.activityTypeCd()).orElse(null);
+        int soakHours =
+            (regime != null && regime.getSoakHours() != null) ? regime.getSoakHours() : 0;
+        soakEndDate = dto.actualBeginDtTm().plusHours(soakHours);
+      }
+
+      // Create new DTO with computed soakEndDate
+      return new GerminationTestHeaderDto(
+          dto.riaSkey(),
+          dto.activityTypeCd(),
+          dto.actualBeginDtTm(),
+          dto.actualEndDtTm(),
+          dto.testCategoryCd(),
+          dto.moistureStatusCd(),
+          dto.sampleDesc(),
+          dto.acceptResultInd(),
+          dto.testCompleteInd(),
+          dto.riaComment(),
+          dto.standardTestInd(),
+          dto.testRank(),
+          dto.germinationPct(),
+          dto.germinationValue(),
+          dto.peakValueGrmPct(),
+          dto.peakValueNoDays(),
+          dto.seedWithdrawalDate(),
+          dto.revisedStartDt(),
+          dto.revisedEndDt(),
+          dto.activityDuration(),
+          dto.actvtyTmUnitSt(),
+          dto.stratStartDt(),
+          dto.drybackStartDate(),
+          dto.warmStratStartDate(),
+          dto.germinatorEntry(),
+          dto.germinatorTrayId(),
+          dto.germinatorId(),
+          soakEndDate,
+          dto.imbibedWt(),
+          dto.dryWeight(),
+          dto.drybackWeight(),
+          dto.intrmdtCleanrInd(),
+          dto.requestTypeSt());
+
     } catch (IncorrectResultSizeDataAccessException ex) {
       SparLog.error("Data integrity issue: multiple rows found for RIA_SKEY {}", riaKey, ex);
       throw new DataIntegrityViolationException(
