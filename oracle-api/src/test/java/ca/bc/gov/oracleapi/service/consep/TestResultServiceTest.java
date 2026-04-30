@@ -14,10 +14,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
@@ -32,12 +34,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -496,5 +501,96 @@ class TestResultServiceTest {
         () -> testResultService.assignGerminatorTrays(requests));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
+  }
+
+  @Test
+  @DisplayName("getGerminationTestHeader should return DTO when riaKey exists")
+  void getGerminationTestHeader_shouldSucceed() {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+
+    GerminationTestHeaderDto dto =
+        new GerminationTestHeaderDto(
+            riaKey,
+            "G64",
+            LocalDateTime.parse("2026-04-15T08:30:00"),
+            LocalDateTime.parse("2026-04-18T16:00:00"),
+            "TST",
+            "MOI",
+            "Primary sample",
+            1,
+            1,
+            "Test comment",
+            1,
+            "A",
+            95,
+            90,
+            88,
+            14,
+            LocalDate.parse("2026-04-10"),
+            LocalDate.parse("2026-04-01"),
+            LocalDate.parse("2026-04-20"),
+            72,
+            "HRS",
+            LocalDate.parse("2026-03-20"),
+            LocalDate.parse("2026-03-25"),
+            LocalDate.parse("2026-03-22"),
+            LocalDate.parse("2026-03-30"),
+            101,
+            "1",
+            null,
+            new BigDecimal("12.345"),
+            new BigDecimal("10.220"),
+            new BigDecimal("9.880"),
+            0,
+            "TSC");
+
+    TestRegimeEntity regime = new TestRegimeEntity();
+    regime.setSeedlotTestCode("G64");
+    regime.setSoakHours(12);
+
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(riaKey))
+        .thenReturn(Optional.of(dto));
+    when(testRegimeRepository.findById("G64")).thenReturn(Optional.of(regime));
+
+    GerminationTestHeaderDto result = testResultService.getGerminationTestHeader(riaKey);
+
+    assertEquals(LocalDateTime.parse("2026-04-15T20:30:00"), result.soakEndDate());
+    assertEquals("G64", result.activityTypeCd());
+    assertEquals("TSC", result.requestTypeSt());
+  }
+
+  @Test
+  @DisplayName("getGerminationTestHeader should throw 404 when riaKey is not found")
+  void getGerminationTestHeader_shouldThrowNotFound() {
+    BigDecimal riaKey = new BigDecimal("9999999999");
+
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(riaKey))
+        .thenReturn(Optional.empty());
+
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getGerminationTestHeader(riaKey));
+
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    assertEquals("No germination test data found for given RIA_SKEY", exception.getReason());
+  }
+
+  @Test
+  @DisplayName(
+      "getGerminationTestHeader should throw data integrity error when multiple rows are returned")
+  void getGerminationTestHeader_shouldThrowDataIntegrityViolation() {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(riaKey))
+        .thenThrow(new IncorrectResultSizeDataAccessException(1));
+
+    DataIntegrityViolationException exception =
+        assertThrows(
+            DataIntegrityViolationException.class,
+            () -> testResultService.getGerminationTestHeader(riaKey));
+
+    assertEquals(
+        "Expected exactly one germination test row for RIA_SKEY " + riaKey, exception.getMessage());
   }
 }
