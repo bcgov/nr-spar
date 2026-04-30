@@ -148,48 +148,48 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
   @Query(
       """
       SELECT new ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto(
-          tst.riaKey,
-          tst.activityType,
-          a.actualBeginDateTime,
-          a.actualEndDateTime,
-          a.testCategoryCode,
-          tst.moistureStatus,
-          tst.sampleDesc,
-          tst.acceptResult,
-          tst.testCompleteInd,
-          a.riaComment,
-          tst.standardTest,
-          tst.testRank,
-          tst.germinationPct,
-          tst.germinationValue,
-          tst.peakValueGrmPct,
-          tst.peakValueNoDays,
-          tst.seedWithdrawDate,
-          a.revisedStartDate,
-          a.revisedEndDate,
-          a.activityDuration,
-          a.activityTimeUnit,
-          tst.stratStartDate,
-          tst.drybackStartDate,
-          tst.warmStratStartDate,
-          tst.germinatorEntry,
-          tst.germinatorTrayId,
-          tst.germinatorId,
-          (a.actualBeginDateTime + (COALESCE(tr.soakHours, 0) / 24.0)),
-          a.imbibedWeight,
-          a.dryWeight,
-          a.drybackWeight,
-          a.intermediateCleaner,
-          r.requestTypeSt
-      )
-      FROM TestResultEntity tst
-      JOIN ActivityEntity a
+            tst.riaKey,
+            tst.activityType,
+            a.actualBeginDateTime,
+            a.actualEndDateTime,
+            a.testCategoryCode,
+            tst.moistureStatus,
+            tst.sampleDesc,
+            tst.acceptResult,
+            tst.testCompleteInd,
+            a.riaComment,
+            tst.standardTest,
+            tst.testRank,
+            tst.germinationPct,
+            tst.germinationValue,
+            tst.peakValueGrmPct,
+            tst.peakValueNoDays,
+            tst.seedWithdrawDate,
+            a.revisedStartDate,
+            a.revisedEndDate,
+            a.activityDuration,
+            a.activityTimeUnit,
+            tst.stratStartDate,
+            tst.drybackStartDate,
+            tst.warmStratStartDate,
+            tst.germinatorEntry,
+            tst.germinatorTrayId,
+            tst.germinatorId,
+            null,
+            a.imbibedWeight,
+            a.dryWeight,
+            a.drybackWeight,
+            a.intermediateCleaner,
+            r.requestTypeSt
+    )
+    FROM TestResultEntity tst
+    JOIN ActivityEntity a
       ON a.riaKey = tst.riaKey
-      JOIN SparRequestEntity r
+    JOIN SparRequestEntity r
       ON r.requestSkey = a.requestSkey
-      LEFT JOIN TestRegimeEntity tr
+    LEFT JOIN TestRegimeEntity tr
       ON tr.seedlotTestCode = tst.activityType
-      WHERE tst.riaKey = :riaKey
+    WHERE tst.riaKey = :riaKey
       """)
   Optional<GerminationTestHeaderDto> findGerminationTestHeaderByRiaKey(
       @Param("riaKey") BigDecimal riaKey
