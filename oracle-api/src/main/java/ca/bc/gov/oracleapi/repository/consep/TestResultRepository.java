@@ -187,8 +187,6 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
       ON a.riaKey = tst.riaKey
     JOIN SparRequestEntity r
       ON r.requestSkey = a.requestSkey
-    LEFT JOIN TestRegimeEntity tr
-      ON tr.seedlotTestCode = tst.activityType
     WHERE tst.riaKey = :riaKey
       """)
   Optional<GerminationTestHeaderDto> findGerminationTestHeaderByRiaKey(
