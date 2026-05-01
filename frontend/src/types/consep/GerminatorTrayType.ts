@@ -22,3 +22,8 @@ export type GermTrayTestType = {
   riaSkey: number | null;
   updateTimestamp: string | null;
 };
+
+export type GermTrayDeleteContentType = {
+  riaSkey: number;
+  updateTimestamp: string;
+};

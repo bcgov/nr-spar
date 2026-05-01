@@ -13,7 +13,8 @@ import { GermTrayTestType } from '../../../../../types/consep/GerminatorTrayType
 const isIndicatorChecked = (value: unknown): boolean => value === -1 || value === 1;
 
 export const getGermTrayColumns = (
-  updateRow: (row: GermTrayColumn) => void
+  updateRow: (row: GermTrayColumn) => void,
+  onDeleteTray?: (row: GermTrayColumn) => void
 ): MRT_ColumnDef<GermTrayColumn>[] => [
   {
     accessorKey: 'germinatorTrayId',
@@ -44,6 +45,28 @@ export const getGermTrayColumns = (
         });
       }
     })
+  },
+  {
+    accessorKey: 'actions',
+    header: '',
+    enableSorting: false,
+    enableEditing: false,
+    size: 50,
+    muiTableHeadCellProps: { align: 'center' },
+    muiTableBodyCellProps: { align: 'center' },
+    Cell: ({ row }: { row: { original: GermTrayColumn } }) => (
+      <Button
+        kind="ghost"
+        size="sm"
+        aria-label="Delete tray"
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          onDeleteTray?.(row.original);
+        }}
+      >
+        <TrashCan size={15} />
+      </Button>
+    )
   }
 ];
 
@@ -53,41 +76,48 @@ export const getGermTrayTestsColumns = (
   {
     accessorKey: 'seedlotNumber',
     header: 'Lot #',
-    enableEditing: false
+    enableEditing: false,
+    size: 80
   },
   {
     accessorKey: 'requestId',
     header: 'Request ID',
-    enableEditing: false
+    enableEditing: false,
+    size: 120
   },
   {
     accessorKey: 'warmStratStartDate',
     header: 'Warm strat date',
     enableEditing: false,
+    size: 110,
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'drybackStartDate',
     header: 'Dryback',
     enableEditing: false,
+    size: 90,
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'stratStartDate',
     header: 'Cold strat start',
     enableEditing: false,
+    size: 110,
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'germinatorEntry',
     header: 'Germinator Entry',
     enableEditing: false,
+    size: 120,
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'testCompleteInd',
     header: 'Complete',
     enableEditing: false,
+    size: 80,
     muiTableHeadCellProps: { align: 'center' },
     muiTableBodyCellProps: { align: 'center' },
     Cell: ({ cell }) => (
@@ -101,6 +131,7 @@ export const getGermTrayTestsColumns = (
     accessorKey: 'acceptResultInd',
     header: 'Accepted',
     enableEditing: false,
+    size: 80,
     muiTableHeadCellProps: { align: 'center' },
     muiTableBodyCellProps: { align: 'center' },
     Cell: ({ cell }) => (
@@ -116,6 +147,8 @@ export const getGermTrayTestsColumns = (
     enableSorting: false,
     enableEditing: false,
     size: 50,
+    muiTableHeadCellProps: { align: 'center' },
+    muiTableBodyCellProps: { align: 'center' },
     Cell: ({ row }: { row: { original: GermTrayTestType } }) => (
       <Button
         kind="ghost"

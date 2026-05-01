@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayDeleteContentDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
@@ -136,12 +137,14 @@ public class GerminatorTrayEndpoint {
 
   /**
    * Deletes a germinator tray. All tests on the tray are detached, each parent activity's
-   * update_timestamp is updated, then the tray is deleted. Uses optimistic concurrency; if any
-   * DML affects 0 rows, returns 409 and rolls back.
+   * update_timestamp is updated, then the tray is deleted. Uses optimistic concurrency with the
+   * original timestamp for each tray content item; if any DML affects 0 rows, returns 409 and
+   * rolls back.
    *
    * @param germinatorTrayId the tray to delete
+   * @param contents         the tray contents with the activity timestamps
    */
-  @DeleteMapping("/{germinatorTrayId}")
+  @PostMapping("/{germinatorTrayId}/delete")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ApiResponse(responseCode = "204", description = "Tray deleted.")
   @ApiResponse(responseCode = "404", description = "Tray not found.")
@@ -150,9 +153,9 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void deleteTray(
     @PathVariable Integer germinatorTrayId,
-    @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime activityUpdateTimestamp
+    @Valid @RequestBody List<@Valid GerminatorTrayDeleteContentDto> contents
   ) {
-    germinatorTrayService.deleteTray(germinatorTrayId, activityUpdateTimestamp);
+    germinatorTrayService.deleteTray(germinatorTrayId, contents);
   }
 
   /**

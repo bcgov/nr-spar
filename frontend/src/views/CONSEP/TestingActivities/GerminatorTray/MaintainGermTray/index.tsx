@@ -7,13 +7,27 @@ import React, {
 } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FlexGrid, Row, InlineNotification } from '@carbon/react';
+import {
+  FlexGrid,
+  Row,
+  InlineNotification,
+  Modal
+} from '@carbon/react';
 import GenericTable from '../../../../../components/GenericTable';
 import ROUTES from '../../../../../routes/constants';
 import Breadcrumbs from '../../../../../components/Breadcrumbs';
 import PageTitle from '../../../../../components/PageTitle';
-import { assignGerminatorId, deleteTestFromTray, getGerminatorTrayContents } from '../../../../../api-service/consep/germinatorTrayAPI';
-import { GermTrayCreateResponseType, GermTrayTestType } from '../../../../../types/consep/GerminatorTrayType';
+import {
+  assignGerminatorId,
+  deleteTestFromTray,
+  deleteGerminatorTray,
+  getGerminatorTrayContents
+} from '../../../../../api-service/consep/germinatorTrayAPI';
+import {
+  GermTrayCreateResponseType,
+  GermTrayDeleteContentType,
+  GermTrayTestType
+} from '../../../../../types/consep/GerminatorTrayType';
 import { getGermTrayColumns, getGermTrayTestsColumns } from './constants';
 import { GermTrayColumn } from './definitions';
 import './styles.scss';
@@ -36,6 +50,8 @@ const MaintainGermTray = () => {
   const [trays, setTrays] = useState<GermTrayColumn[]>(germinatorTrays);
   const lastSyncedRef = useRef<string | null>(JSON.stringify(germinatorTrays));
   const [selectedTrayId, setSelectedTrayId] = useState<number | null>(null);
+  const [pendingDeleteTray, setPendingDeleteTray] = useState<GermTrayColumn | null>(null);
+  const [pendingDeleteTest, setPendingDeleteTest] = useState<GermTrayTestType | null>(null);
 
   const trayContentsQuery = useQuery({
     queryKey: ['germinatorTrayContents', selectedTrayId],
@@ -79,6 +95,56 @@ const MaintainGermTray = () => {
       setAlert({ status: 'error', message });
     }
   });
+
+  const deleteTrayMutation = useMutation({
+    mutationFn: async (tray: GermTrayColumn) => {
+      const queryKey = [
+        'germinatorTrayContents',
+        tray.germinatorTrayId
+      ];
+      const cachedContents = queryClient.getQueryData<GermTrayTestType[]>(queryKey);
+      const contents = cachedContents ?? await queryClient.fetchQuery<GermTrayTestType[]>({
+        queryKey,
+        queryFn: () => getGerminatorTrayContents(tray.germinatorTrayId)
+      });
+
+      const deleteContents: GermTrayDeleteContentType[] = contents.map((content) => {
+        if (content.riaSkey == null || content.updateTimestamp == null) {
+          throw new Error('Cannot delete: missing test data');
+        }
+        return {
+          riaSkey: content.riaSkey,
+          updateTimestamp: content.updateTimestamp
+        };
+      });
+
+      return deleteGerminatorTray(tray.germinatorTrayId, deleteContents);
+    },
+    onSuccess: (_, tray) => {
+      setAlert(null);
+      setTrays((prev) => prev.filter((t) => t.germinatorTrayId !== tray.germinatorTrayId));
+      if (selectedTrayId === tray.germinatorTrayId) {
+        setSelectedTrayId(null);
+        queryClient.removeQueries({ queryKey: ['germinatorTrayContents', tray.germinatorTrayId] });
+      }
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || error?.message || 'Failed to delete tray';
+      setAlert({ status: 'error', message });
+    }
+  });
+
+  const handleConfirmDeleteTray = useCallback(() => {
+    if (!pendingDeleteTray) return;
+    deleteTrayMutation.mutate(pendingDeleteTray);
+    setPendingDeleteTray(null);
+  }, [pendingDeleteTray, deleteTrayMutation]);
+
+  const handleConfirmDeleteTest = useCallback(() => {
+    if (!pendingDeleteTest) return;
+    deleteFromTrayMutation.mutate(pendingDeleteTest);
+    setPendingDeleteTest(null);
+  }, [pendingDeleteTest, deleteFromTrayMutation]);
 
   const assignMutation = useMutation({
     mutationFn: ({
@@ -133,10 +199,22 @@ const MaintainGermTray = () => {
     return () => clearInterval(interval);
   }, [trays, assignMutation]);
 
-  const germTrayColumns = useMemo(() => getGermTrayColumns(updateRow), [updateRow]);
+  const handleDeleteTrayClick = useCallback(
+    (tray: GermTrayColumn) => setPendingDeleteTray(tray),
+    []
+  );
+  const handleDeleteTestClick = useCallback(
+    (test: GermTrayTestType) => setPendingDeleteTest(test),
+    []
+  );
+
+  const germTrayColumns = useMemo(
+    () => getGermTrayColumns(updateRow, handleDeleteTrayClick),
+    [updateRow, handleDeleteTrayClick]
+  );
   const germTrayTestsColumns = useMemo(
-    () => getGermTrayTestsColumns((row) => deleteFromTrayMutation.mutate(row)),
-    [deleteFromTrayMutation]
+    () => getGermTrayTestsColumns(handleDeleteTestClick),
+    [handleDeleteTestClick]
   );
 
   return (
@@ -181,6 +259,33 @@ const MaintainGermTray = () => {
           }}
         />
       </Row>
+      <Modal
+        open={pendingDeleteTray !== null}
+        danger
+        size="sm"
+        modalHeading="Confirm deletion"
+        primaryButtonText="Delete germ tray"
+        secondaryButtonText="Back"
+        onRequestSubmit={handleConfirmDeleteTray}
+        onRequestClose={() => setPendingDeleteTray(null)}
+      >
+        <p>
+          {`Please confirm you want to delete germination tray ${pendingDeleteTray?.germinatorTrayId}. This action cannot be undone.`}
+        </p>
+      </Modal>
+      <Modal
+        open={pendingDeleteTest !== null}
+        danger
+        modalHeading="Confirm deletion"
+        primaryButtonText="Delete germ test"
+        secondaryButtonText="Back"
+        onRequestSubmit={handleConfirmDeleteTest}
+        onRequestClose={() => setPendingDeleteTest(null)}
+      >
+        <p>
+          {`Please confirm you want to delete germination test ID ${pendingDeleteTest?.requestId} for seedlot #${pendingDeleteTest?.seedlotNumber}. This action cannot be undone.`}
+        </p>
+      </Modal>
     </FlexGrid>
   );
 };

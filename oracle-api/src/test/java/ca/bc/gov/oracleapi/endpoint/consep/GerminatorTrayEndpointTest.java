@@ -20,6 +20,7 @@ import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayDeleteContentDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.service.consep.GerminatorTrayService;
@@ -626,24 +627,26 @@ class GerminatorTrayEndpointTest {
   void deleteTray_returns204_whenSuccessful() throws Exception {
     Integer germinatorTrayId = 101;
     LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");
-    String timestamp = "2025-03-12T00:00:00";
+    List<GerminatorTrayDeleteContentDto> contents =
+        List.of(new GerminatorTrayDeleteContentDto(new BigDecimal("881191"), expectedTimestamp));
 
-    doNothing().when(germinatorTrayService).deleteTray(germinatorTrayId, expectedTimestamp);
+    doNothing().when(germinatorTrayService).deleteTray(germinatorTrayId, contents);
 
     mockMvc
         .perform(
-            delete(BASE_URL + "/" + germinatorTrayId)
+            post(BASE_URL + "/" + germinatorTrayId + "/delete")
                 .with(csrf())
-                .param("activityUpdateTimestamp", timestamp))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(contents)))
         .andExpect(status().isNoContent());
 
-    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, expectedTimestamp);
+    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, contents);
   }
 
   @Test
-  void deleteTray_returns400_whenTimestampParamMissing() throws Exception {
-    // Missing required activityUpdateTimestamp param -> 400
-    mockMvc.perform(delete(BASE_URL + "/101").with(csrf())).andExpect(status().isBadRequest());
+  void deleteTray_returns400_whenRequestBodyMissing() throws Exception {
+    // Missing required tray contents body -> 400
+    mockMvc.perform(post(BASE_URL + "/101/delete").with(csrf())).andExpect(status().isBadRequest());
 
     verify(germinatorTrayService, times(0)).deleteTray(any(), any());
   }
@@ -652,44 +655,48 @@ class GerminatorTrayEndpointTest {
   void deleteTray_returns404_whenTrayNotFound() throws Exception {
     Integer germinatorTrayId = 999;
     LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");
-    String timestamp = "2025-03-12T00:00:00";
+    List<GerminatorTrayDeleteContentDto> contents =
+        List.of(new GerminatorTrayDeleteContentDto(new BigDecimal("881191"), expectedTimestamp));
 
     doThrow(
             new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Germinator tray not found with ID: " + germinatorTrayId))
         .when(germinatorTrayService)
-        .deleteTray(germinatorTrayId, expectedTimestamp);
+        .deleteTray(germinatorTrayId, contents);
 
     mockMvc
         .perform(
-            delete(BASE_URL + "/" + germinatorTrayId)
+            post(BASE_URL + "/" + germinatorTrayId + "/delete")
                 .with(csrf())
-                .param("activityUpdateTimestamp", timestamp))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(contents)))
         .andExpect(status().isNotFound());
 
-    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, expectedTimestamp);
+    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, contents);
   }
 
   @Test
   void deleteTray_returns409_whenOptimisticConcurrencyConflict() throws Exception {
     Integer germinatorTrayId = 101;
     LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");
-    String timestamp = "2025-03-12T00:00:00";
+    List<GerminatorTrayDeleteContentDto> contents =
+        List.of(new GerminatorTrayDeleteContentDto(new BigDecimal("881191"), expectedTimestamp));
 
     doThrow(
             new ResponseStatusException(
                 HttpStatus.CONFLICT, GerminatorTrayService.RESELECT_MESSAGE))
         .when(germinatorTrayService)
-        .deleteTray(germinatorTrayId, expectedTimestamp);
+        .deleteTray(germinatorTrayId, contents);
 
     mockMvc
         .perform(
-            delete(BASE_URL + "/" + germinatorTrayId)
+            post(BASE_URL + "/" + germinatorTrayId + "/delete")
                 .with(csrf())
-                .param("activityUpdateTimestamp", timestamp))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(contents)))
         .andExpect(status().isConflict());
 
-    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, expectedTimestamp);
+    verify(germinatorTrayService, times(1)).deleteTray(germinatorTrayId, contents);
   }
 
   @Test
@@ -697,9 +704,12 @@ class GerminatorTrayEndpointTest {
   void deleteTray_returns401_whenUnauthorized() throws Exception {
     mockMvc
         .perform(
-            delete(BASE_URL + "/101")
+            post(BASE_URL + "/101/delete")
                 .with(csrf())
-                .param("activityUpdateTimestamp", "2025-03-12T00:00:00"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    [{"riaSkey":881191,"updateTimestamp":"2025-03-12T00:00:00"}]
+                    """))
         .andExpect(status().isUnauthorized());
 
     verify(germinatorTrayService, times(0)).deleteTray(any(), any());
@@ -710,9 +720,12 @@ class GerminatorTrayEndpointTest {
   void deleteTray_returns403_whenUserDoesNotHaveRequiredRole() throws Exception {
     mockMvc
         .perform(
-            delete(BASE_URL + "/101")
+            post(BASE_URL + "/101/delete")
                 .with(csrf())
-                .param("activityUpdateTimestamp", "2025-03-12T00:00:00"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    [{"riaSkey":881191,"updateTimestamp":"2025-03-12T00:00:00"}]
+                    """))
         .andExpect(status().isForbidden());
 
     verify(germinatorTrayService, times(0)).deleteTray(any(), any());
