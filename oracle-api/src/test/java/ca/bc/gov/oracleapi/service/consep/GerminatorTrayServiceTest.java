@@ -398,6 +398,72 @@ class GerminatorTrayServiceTest {
   }
 
   @Test
+  void deleteTray_shouldThrowBadRequest_whenDuplicateRiaKeyInContents() {
+    Integer trayId = 101;
+    LocalDateTime updateTimestamp = LocalDateTime.of(2026, 4, 1, 10, 0);
+    List<GerminatorTrayDeleteContentDto> contents =
+        List.of(
+            new GerminatorTrayDeleteContentDto(BigDecimal.valueOf(1), updateTimestamp),
+            new GerminatorTrayDeleteContentDto(BigDecimal.valueOf(1), updateTimestamp));
+
+    when(germinatorTrayRepository.existsById(trayId)).thenReturn(true);
+    when(testResultRepository.findRiaKeysByGerminatorTrayId(trayId))
+        .thenReturn(List.of(BigDecimal.valueOf(1)));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> germinatorTrayService.deleteTray(trayId, contents));
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("Duplicate RIA key in tray contents", ex.getReason());
+
+    verify(testResultRepository, never()).detachTestFromTray(any());
+    verify(activityRepository, never()).updateTimestampWhereMatch(any(), any());
+  }
+
+  @Test
+  void deleteTray_shouldThrowConflict_whenContentsHaveExtraRiaKeyNotOnTray() {
+    Integer trayId = 101;
+    LocalDateTime updateTimestamp = LocalDateTime.of(2026, 4, 1, 10, 0);
+    List<BigDecimal> riaKeys = List.of(BigDecimal.valueOf(1));
+    List<GerminatorTrayDeleteContentDto> contents =
+        List.of(
+            new GerminatorTrayDeleteContentDto(BigDecimal.valueOf(1), updateTimestamp),
+            new GerminatorTrayDeleteContentDto(BigDecimal.valueOf(99), updateTimestamp));
+
+    when(germinatorTrayRepository.existsById(trayId)).thenReturn(true);
+    when(testResultRepository.findRiaKeysByGerminatorTrayId(trayId)).thenReturn(riaKeys);
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> germinatorTrayService.deleteTray(trayId, contents));
+
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    assertEquals(GerminatorTrayService.RESELECT_MESSAGE, ex.getReason());
+
+    verify(testResultRepository, never()).detachTestFromTray(any());
+    verify(activityRepository, never()).updateTimestampWhereMatch(any(), any());
+  }
+
+  @Test
+  void deleteTray_shouldSucceed_whenTrayHasNoTests() {
+    Integer trayId = 101;
+    List<GerminatorTrayDeleteContentDto> contents = List.of();
+
+    when(germinatorTrayRepository.existsById(trayId)).thenReturn(true);
+    when(testResultRepository.findRiaKeysByGerminatorTrayId(trayId)).thenReturn(List.of());
+    when(germinatorTrayRepository.deleteByGerminatorTrayId(trayId)).thenReturn(1);
+
+    germinatorTrayService.deleteTray(trayId, contents);
+
+    verify(testResultRepository, never()).detachTestFromTray(any());
+    verify(activityRepository, never()).updateTimestampWhereMatch(any(), any());
+    verify(germinatorTrayRepository).deleteByGerminatorTrayId(trayId);
+  }
+
+  @Test
   void deleteTray_shouldThrowConflict_whenDeleteAffectsZeroRows() {
     Integer trayId = 101;
     LocalDateTime updateTimestamp = LocalDateTime.of(2026, 4, 1, 10, 0);

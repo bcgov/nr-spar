@@ -652,6 +652,40 @@ class GerminatorTrayEndpointTest {
   }
 
   @Test
+  void deleteTray_returns400_whenRiaSkeyIsNull() throws Exception {
+    String body = """
+        [{"riaSkey":null,"updateTimestamp":"2025-03-12T00:00:00"}]
+        """;
+
+    mockMvc
+        .perform(
+            post(BASE_URL + "/101/delete")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).deleteTray(any(), any());
+  }
+
+  @Test
+  void deleteTray_returns400_whenUpdateTimestampIsNull() throws Exception {
+    String body = """
+        [{"riaSkey":881191,"updateTimestamp":null}]
+        """;
+
+    mockMvc
+        .perform(
+            post(BASE_URL + "/101/delete")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).deleteTray(any(), any());
+  }
+
+  @Test
   void deleteTray_returns404_whenTrayNotFound() throws Exception {
     Integer germinatorTrayId = 999;
     LocalDateTime expectedTimestamp = LocalDateTime.parse("2025-03-12T00:00:00");

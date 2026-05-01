@@ -207,7 +207,7 @@ public class GerminatorTrayService {
   ) {
     Map<BigDecimal, LocalDateTime> timestampsByRiaKey = new HashMap<>();
     for (GerminatorTrayDeleteContentDto content : contents) {
-      if (content == null || content.riaSkey() == null || content.updateTimestamp() == null) {
+      if (content.riaSkey() == null || content.updateTimestamp() == null) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             "RIA key and activity update timestamp are required for each tray content item");
