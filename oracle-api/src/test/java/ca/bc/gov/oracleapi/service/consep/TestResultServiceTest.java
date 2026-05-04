@@ -463,7 +463,7 @@ class TestResultServiceTest {
     when(testRegimeRepository.findAllGermTestActivityTypeCodes())
         .thenReturn(List.of(activityTypeCd));
 
-    // seedWithdrawDate is today -> invalid (must be before today)
+    // seedWithdrawDate in past but germinatorTrayId already set -> invalid
     GermTestResultDto germTestResult =
         new GermTestResultDto(
             LocalDate.now().minusDays(10),
@@ -472,8 +472,9 @@ class TestResultServiceTest {
             activityTypeCd,
             72,
             96,
-            LocalDate.now(), // seed withdrawal is today (invalid)
-            null);
+            LocalDate.now().minusDays(1), // ← Change from .plusDays(1)
+            123 // already assigned
+            );
     when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(germTestResult);
 
     ResponseStatusException ex =
