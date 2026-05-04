@@ -99,7 +99,7 @@ public record GerminationTestHeaderDto(
     String germinatorId,
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Schema(description = "Computed soak end datetime (actual_begin_dt_tm + soak_hours/24)", example = "2026-04-15T20:30:00")
+    @Schema(description = "Computed soak end datetime (actual_begin_dt_tm + soak_hours)", example = "2026-04-15T20:30:00")
     LocalDateTime soakEndDate,
 
     @Schema(description = "Imbibed weight", example = "12.345")
