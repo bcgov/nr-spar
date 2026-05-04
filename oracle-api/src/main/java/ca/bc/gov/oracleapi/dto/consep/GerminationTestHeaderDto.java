@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Schema(description = "Germination test header and activity metadata for a specific ria_skey")
 public record GerminationTestHeaderDto(
 
-    @Schema(description = "A surrogate key to uniquely identify each Spar Request", example = "7338")
+    @Schema(description = "Primary key of the activity", example = "7338")
     @NotNull
     BigDecimal riaSkey,
 
