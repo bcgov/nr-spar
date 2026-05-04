@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
     description = "Resource to retrieve Germination Test header and activity metadata.")
 public class GerminationTestEndpoint {
 
-  private TestResultService testResultService;
+  private final TestResultService testResultService;
 
   GerminationTestEndpoint(TestResultService testResultService) {
     this.testResultService = testResultService;
