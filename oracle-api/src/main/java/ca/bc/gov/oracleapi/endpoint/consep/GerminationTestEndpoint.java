@@ -13,9 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
-
 import java.math.BigDecimal;
-
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,33 +45,38 @@ public class GerminationTestEndpoint {
   @Operation(
       summary = "Get germination test header by riaKey",
       description = "Retrieve germination test header and activity metadata under a riaKey.")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Successfully returned germination test header data."),
-      @ApiResponse(
-          responseCode = "401",
-          description = "Access token is missing or invalid",
-          content = @Content(schema = @Schema(implementation = Void.class))),
-      @ApiResponse(
-          responseCode = "404",
-          description = "No data found for the given riaKey",
-          content = @Content(schema = @Schema(hidden = true))),
-      @ApiResponse(
-          responseCode = "500",
-          description = "Data integrity error: more than one row returned",
-          content = @Content(schema = @Schema(hidden = true)))
-  })
-  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully returned germination test header data."),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input: riaKey must be a positive number",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "No data found for the given riaKey",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Data integrity error: more than one row returned",
+            content = @Content(schema = @Schema(hidden = true)))
+      })
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public GerminationTestHeaderDto getGerminationTestHeaderByRiaKey(
       @PathVariable
-      @Positive(message = "riaKey must be a positive number")
-      @Parameter(
-          name = "riaKey",
-          in = ParameterIn.PATH,
-          description = "The ria key.",
-          required = true)
-      BigDecimal riaKey) {
+          @Positive(message = "riaKey must be a positive number")
+          @Parameter(
+              name = "riaKey",
+              in = ParameterIn.PATH,
+              description = "The ria key.",
+              required = true)
+          BigDecimal riaKey) {
 
     SparLog.info("Received request to fetch germination test header for key: {}", riaKey);
     return testResultService.getGerminationTestHeader(riaKey);
