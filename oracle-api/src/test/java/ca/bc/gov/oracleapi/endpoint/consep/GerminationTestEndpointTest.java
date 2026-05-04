@@ -33,41 +33,7 @@ class GerminationTestEndpointTest {
   void getGerminationTestHeader_shouldSucceed() throws Exception {
     BigDecimal riaKey = new BigDecimal("1234567890");
 
-    GerminationTestHeaderDto dto =
-        new GerminationTestHeaderDto(
-            riaKey,
-            "G64",
-            LocalDateTime.parse("2026-04-15T08:30:00"),
-            LocalDateTime.parse("2026-04-18T16:00:00"),
-            "TST",
-            "MOI",
-            "Primary sample",
-            1,
-            1,
-            "Test comment",
-            1,
-            "A",
-            95,
-            90,
-            88,
-            14,
-            LocalDate.parse("2026-04-10"),
-            LocalDate.parse("2026-04-01"),
-            LocalDate.parse("2026-04-20"),
-            72,
-            "HRS",
-            LocalDate.parse("2026-03-20"),
-            LocalDate.parse("2026-03-25"),
-            LocalDate.parse("2026-03-22"),
-            LocalDate.parse("2026-03-30"),
-            101,
-            "1",
-            LocalDateTime.parse("2026-04-15T20:30:00"),
-            new BigDecimal("12.345"),
-            new BigDecimal("10.220"),
-            new BigDecimal("9.880"),
-            0,
-            "TSC");
+    GerminationTestHeaderDto dto = createHeaderDto(riaKey);
 
     when(testResultService.getGerminationTestHeader(riaKey)).thenReturn(dto);
 
@@ -107,5 +73,43 @@ class GerminationTestEndpointTest {
     mockMvc
         .perform(get("/api/germination-tests/{riaKey}", riaKey))
         .andExpect(status().isForbidden());
+  }
+
+  private GerminationTestHeaderDto createHeaderDto(BigDecimal riaKey) {
+    return new GerminationTestHeaderDto(
+        riaKey, // riaSkey
+        "G64", // activityTypeCd
+        LocalDateTime.parse("2026-04-15T08:30:00"), // actualBeginDtTm
+        LocalDateTime.parse("2026-04-18T16:00:00"), // actualEndDtTm
+        "TST", // testCategoryCd
+        "MOI", // moistureStatusCd
+        "Primary sample", // sampleDesc
+        1, // acceptResultInd
+        1, // testCompleteInd
+        "Test comment", // riaComment
+        1, // standardTestInd
+        "A", // testRank
+        95, // germinationPct
+        90, // germinationValue
+        88, // peakValueGrmPct
+        14, // peakValueNoDays
+        LocalDate.parse("2026-04-10"), // seedWithdrawalDate
+        LocalDate.parse("2026-04-01"), // revisedStartDt
+        LocalDate.parse("2026-04-20"), // revisedEndDt
+        72, // activityDuration
+        "HRS", // actvtyTmUnitSt
+        LocalDate.parse("2026-03-20"), // stratStartDt
+        LocalDate.parse("2026-03-25"), // drybackStartDate
+        LocalDate.parse("2026-03-22"), // warmStratStartDate
+        LocalDate.parse("2026-03-30"), // germinatorEntry
+        101, // germinatorTrayId
+        "1", // germinatorId
+        LocalDateTime.parse("2026-04-15T20:30:00"), // soakEndDate
+        new BigDecimal("12.345"), // imbibedWt
+        new BigDecimal("10.220"), // dryWeight
+        new BigDecimal("9.880"), // drybackWeight
+        0, // intrmdtCleanrInd
+        "TSC" // requestTypeSt
+        );
   }
 }

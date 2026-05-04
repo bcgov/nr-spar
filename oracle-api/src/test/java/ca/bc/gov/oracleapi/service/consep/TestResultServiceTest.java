@@ -46,27 +46,19 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * The test class for Test Result Service.
- */
+/** The test class for Test Result Service. */
 @ExtendWith(MockitoExtension.class)
 class TestResultServiceTest {
 
-  @Mock
-  private TestResultRepository testResultRepository;
+  @Mock private TestResultRepository testResultRepository;
 
-  @Mock
-  private ActivityRepository activityRepository;
+  @Mock private ActivityRepository activityRepository;
 
-  @Mock
-  private GerminatorTrayRepository germinatorTrayRepository;
+  @Mock private GerminatorTrayRepository germinatorTrayRepository;
 
-  @Mock
-  private TestRegimeRepository testRegimeRepository;
+  @Mock private TestRegimeRepository testRegimeRepository;
 
-  @Autowired
-  @InjectMocks
-  private TestResultService testResultService;
+  @Autowired @InjectMocks private TestResultService testResultService;
 
   private BigDecimal riaKey;
   private TestResultEntity testResultEntity;
@@ -88,13 +80,11 @@ class TestResultServiceTest {
     testResultEntity.setAcceptResult(1);
   }
 
-
   @Test
   void updateTestResultStatusToCompleted_success() {
     doNothing().when(testResultRepository).updateTestResultStatusToCompleted(riaKey);
 
-    assertDoesNotThrow(() ->
-        testResultService.updateTestResultStatusToCompleted(riaKey));
+    assertDoesNotThrow(() -> testResultService.updateTestResultStatusToCompleted(riaKey));
     verify(testResultRepository).updateTestResultStatusToCompleted(riaKey);
   }
 
@@ -102,8 +92,7 @@ class TestResultServiceTest {
   void acceptTestResult_success() {
     when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultEntity));
 
-    assertDoesNotThrow(() ->
-        testResultService.acceptTestResult(riaKey));
+    assertDoesNotThrow(() -> testResultService.acceptTestResult(riaKey));
     verify(testResultRepository).updateTestResultStatusToAccepted(riaKey);
   }
 
@@ -117,8 +106,9 @@ class TestResultServiceTest {
 
     when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(testResultEntity));
 
-    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
-        testResultService.acceptTestResult(riaKey));
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class, () -> testResultService.acceptTestResult(riaKey));
 
     assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     assertEquals("Test is not completed", exception.getReason());
@@ -127,13 +117,16 @@ class TestResultServiceTest {
   /*---------------------- Assign Germinator Trays ---------------------------------*/
   @Test
   void assignGerminatorTrays_shouldThrow_whenRequestsNullOrEmpty() {
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> testResultService.assignGerminatorTrays(null));
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> testResultService.assignGerminatorTrays(null));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals("Create germinator tray request list cannot be null or empty", ex.getReason());
 
-    ex = assertThrows(ResponseStatusException.class,
-        () -> testResultService.assignGerminatorTrays(Collections.emptyList()));
+    ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.assignGerminatorTrays(Collections.emptyList()));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
   }
 
@@ -143,15 +136,21 @@ class TestResultServiceTest {
     String activityTypeCdG10 = "G10";
     String activityTypeCdRts = "RTS";
     LocalDateTime now = LocalDateTime.now();
-    final List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881191"), now.minusDays(2)),
-        new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881192"), now),
-        new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881193"), now.minusDays(1)),
-        new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881194"), now.minusDays(1)),
-        new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881195"), now.plusDays(2)),
-        new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881196"), now.plusDays(3)),
-        new GerminatorTrayCreateDto(activityTypeCdRts, new BigDecimal("881197"), now.minusDays(4))
-    );
+    final List<GerminatorTrayCreateDto> requests =
+        List.of(
+            new GerminatorTrayCreateDto(
+                activityTypeCdG10, new BigDecimal("881191"), now.minusDays(2)),
+            new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881192"), now),
+            new GerminatorTrayCreateDto(
+                activityTypeCdG10, new BigDecimal("881193"), now.minusDays(1)),
+            new GerminatorTrayCreateDto(
+                activityTypeCdG10, new BigDecimal("881194"), now.minusDays(1)),
+            new GerminatorTrayCreateDto(
+                activityTypeCdG10, new BigDecimal("881195"), now.plusDays(2)),
+            new GerminatorTrayCreateDto(
+                activityTypeCdG10, new BigDecimal("881196"), now.plusDays(3)),
+            new GerminatorTrayCreateDto(
+                activityTypeCdRts, new BigDecimal("881197"), now.minusDays(4)));
 
     // Prepare mock trays: save() should return different tray entities sequentially
     // (3 trays expected)
@@ -167,55 +166,59 @@ class TestResultServiceTest {
     tray3.setGerminatorTrayId(103);
     tray3.setActualStartDate(LocalDate.now().atStartOfDay());
 
-    when(germinatorTrayRepository.save(any())).thenAnswer(inv -> {
-      GerminatorTrayEntity arg = inv.getArgument(0, GerminatorTrayEntity.class);
-      // If it's the RTS group, return tray1 (id 101)
-      if ("RTS".equals(arg.getActivityTypeCd())) {
-        return tray1;
-      }
-      // G10 group: systemTrayNo 1 -> tray2 (id 102), systemTrayNo 2 -> tray3 (id 103)
-      if ("G10".equals(arg.getActivityTypeCd())) {
-        if (arg.getSystemTrayNo() != null && arg.getSystemTrayNo().equals(1)) {
-          return tray2;
-        } else {
-          return tray3;
-        }
-      }
-      // Fallback: return the entity (or a default tray)
-      return arg;
-    });
+    when(germinatorTrayRepository.save(any()))
+        .thenAnswer(
+            inv -> {
+              GerminatorTrayEntity arg = inv.getArgument(0, GerminatorTrayEntity.class);
+              // If it's the RTS group, return tray1 (id 101)
+              if ("RTS".equals(arg.getActivityTypeCd())) {
+                return tray1;
+              }
+              // G10 group: systemTrayNo 1 -> tray2 (id 102), systemTrayNo 2 -> tray3 (id 103)
+              if ("G10".equals(arg.getActivityTypeCd())) {
+                if (arg.getSystemTrayNo() != null && arg.getSystemTrayNo().equals(1)) {
+                  return tray2;
+                } else {
+                  return tray3;
+                }
+              }
+              // Fallback: return the entity (or a default tray)
+              return arg;
+            });
 
     // Mock activityRepository.findById to return an ActivityEntity for any ria key
-    when(activityRepository.findById(any())).thenAnswer(inv -> {
-      BigDecimal key = inv.getArgument(0, BigDecimal.class);
-      ActivityEntity act = new ActivityEntity();
-      act.setRiaKey(key);
-      act.setActivityDuration(7);
-      act.setRequestSkey(new BigDecimal("221"));
-      act.setItemId("A");
-      // Set activityTypeCode based on the specific test keys
-      if (key.compareTo(new BigDecimal("881197")) == 0) {
-        act.setActivityTypeCode(activityTypeCdRts);
-      } else {
-        act.setActivityTypeCode(activityTypeCdG10);
-      }
-      return Optional.of(act);
-    });
+    when(activityRepository.findById(any()))
+        .thenAnswer(
+            inv -> {
+              BigDecimal key = inv.getArgument(0, BigDecimal.class);
+              ActivityEntity act = new ActivityEntity();
+              act.setRiaKey(key);
+              act.setActivityDuration(7);
+              act.setRequestSkey(new BigDecimal("221"));
+              act.setItemId("A");
+              // Set activityTypeCode based on the specific test keys
+              if (key.compareTo(new BigDecimal("881197")) == 0) {
+                act.setActivityTypeCode(activityTypeCdRts);
+              } else {
+                act.setActivityTypeCode(activityTypeCdG10);
+              }
+              return Optional.of(act);
+            });
 
     // Allow validation to recognise these activity types as germ tests
     when(testRegimeRepository.findAllGermTestActivityTypeCodes())
         .thenReturn(List.of(activityTypeCdG10, activityTypeCdRts));
     // Prepare GermTestResultDto
-    GermTestResultDto germTestResultDto = new GermTestResultDto(
-        LocalDate.now(),
-        48,
-        LocalDate.now(),
-        activityTypeCdG10,
-        72,
-        96,
-        LocalDate.now().minusDays(1),
-        null
-    );
+    GermTestResultDto germTestResultDto =
+        new GermTestResultDto(
+            LocalDate.now(),
+            48,
+            LocalDate.now(),
+            activityTypeCdG10,
+            72,
+            96,
+            LocalDate.now().minusDays(1),
+            null);
     when(testResultRepository.getGermTestResult(any())).thenReturn(germTestResultDto);
 
     // No conflicts for commit (always empty)
@@ -223,11 +226,13 @@ class TestResultServiceTest {
         .thenReturn(Collections.emptyList());
 
     // Do nothing for update methods
-    doNothing().when(testResultRepository)
+    doNothing()
+        .when(testResultRepository)
         .saveGerminatorTray(any(), any(), any(), any(), any(), any(), any());
     doNothing().when(testResultRepository).updateGerminatorTray(any(), any());
     doNothing().when(activityRepository).markSignificantAndCommit(any());
-    doNothing().when(activityRepository)
+    doNothing()
+        .when(activityRepository)
         .updateActualBeginAndRevisedDates(any(), any(), any(), any());
 
     // Act
@@ -237,13 +242,15 @@ class TestResultServiceTest {
     // Assert: three trays created
     assertEquals(3, response.size());
     Set<Integer> returnedIds = new HashSet<>();
-    response.forEach(r -> {
-      // activityTypeCd should be either G10 or RTS (grouping key is used in responses)
-      assertTrue(activityTypeCdG10.equals(r.activityTypeCd())
-          || activityTypeCdRts.equals(r.activityTypeCd()));
-      returnedIds.add(r.germinatorTrayId());
-      assertNotNull(r.actualStartDate());
-    });
+    response.forEach(
+        r -> {
+          // activityTypeCd should be either G10 or RTS (grouping key is used in responses)
+          assertTrue(
+              activityTypeCdG10.equals(r.activityTypeCd())
+                  || activityTypeCdRts.equals(r.activityTypeCd()));
+          returnedIds.add(r.germinatorTrayId());
+          assertNotNull(r.actualStartDate());
+        });
     assertTrue(returnedIds.contains(101));
     assertTrue(returnedIds.contains(102));
     assertTrue(returnedIds.contains(103));
@@ -266,9 +273,8 @@ class TestResultServiceTest {
   void assignGerminatorTrays_shouldThrow_whenActivityNotFound() {
     String activityTypeCd = "G20";
     BigDecimal riaSkey = new BigDecimal("881190");
-    final List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null)
-    );
+    final List<GerminatorTrayCreateDto> requests =
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null));
 
     // Stub tray save so service can proceed to activity lookup
     GerminatorTrayEntity savedTray = new GerminatorTrayEntity();
@@ -281,24 +287,25 @@ class TestResultServiceTest {
         .thenReturn(List.of(activityTypeCd));
 
     // return a valid germTestResult for validation to pass
-    GermTestResultDto valid = new GermTestResultDto(
-        LocalDate.now().minusDays(1),
-        48,
-        LocalDate.now(),
-        activityTypeCd,
-        72,
-        96,
-        LocalDate.now().minusDays(1),
-        null
-    );
+    GermTestResultDto valid =
+        new GermTestResultDto(
+            LocalDate.now().minusDays(1),
+            48,
+            LocalDate.now(),
+            activityTypeCd,
+            72,
+            96,
+            LocalDate.now().minusDays(1),
+            null);
     when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(valid);
 
     // Activity not found
     when(activityRepository.findById(riaSkey)).thenReturn(Optional.empty());
 
     // Act / Assert
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> testResultService.assignGerminatorTrays(requests));
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> testResultService.assignGerminatorTrays(requests));
 
     assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
     assertEquals("Activity not found in CNS_T_RQST_ITM_ACTVTY table", ex.getReason());
@@ -314,9 +321,8 @@ class TestResultServiceTest {
     BigDecimal riaSkey = new BigDecimal("881190");
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime past = now.minusDays(1);
-    final List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, past)
-    );
+    final List<GerminatorTrayCreateDto> requests =
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, past));
 
     // Ensure validation recognises this activity type as a germ test
     when(testRegimeRepository.findAllGermTestActivityTypeCodes())
@@ -326,11 +332,13 @@ class TestResultServiceTest {
     when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(null);
 
     // Act / Assert
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> testResultService.assignGerminatorTrays(requests));
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> testResultService.assignGerminatorTrays(requests));
 
     assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-    assertEquals(String.format("No test result found for activity with RIA_SKEY %s", riaSkey),
+    assertEquals(
+        String.format("No test result found for activity with RIA_SKEY %s", riaSkey),
         ex.getReason());
 
     // Validation short-circuits, so no trays are created and no activity lookups occur
@@ -344,9 +352,9 @@ class TestResultServiceTest {
     // Arrange for RTS type using riaSkey 881197
     String activityTypeCd = "RTS";
     BigDecimal riaSkey = new BigDecimal("881197");
-    final List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, LocalDateTime.now().minusDays(1))
-    );
+    final List<GerminatorTrayCreateDto> requests =
+        List.of(
+            new GerminatorTrayCreateDto(activityTypeCd, riaSkey, LocalDateTime.now().minusDays(1)));
 
     ActivityEntity act = new ActivityEntity();
     act.setRiaKey(riaSkey);
@@ -365,16 +373,16 @@ class TestResultServiceTest {
 
     when(testRegimeRepository.findAllGermTestActivityTypeCodes())
         .thenReturn(List.of("RTS", "G10")); // include codes used in the test
-    GermTestResultDto germTestResultDto = new GermTestResultDto(
-        LocalDate.now(),
-        48,
-        LocalDate.now(),
-        activityTypeCd,
-        72,
-        96,
-        LocalDate.now().minusDays(1),
-        null
-    );
+    GermTestResultDto germTestResultDto =
+        new GermTestResultDto(
+            LocalDate.now(),
+            48,
+            LocalDate.now(),
+            activityTypeCd,
+            72,
+            96,
+            LocalDate.now().minusDays(1),
+            null);
     when(testResultRepository.getGermTestResult(any())).thenReturn(germTestResultDto);
 
     // Conflict found for this RTS activity
@@ -384,14 +392,16 @@ class TestResultServiceTest {
         .thenReturn(List.of(conflictingAct));
 
     // Do nothing on updates that WILL be invoked
-    doNothing().when(testResultRepository)
+    doNothing()
+        .when(testResultRepository)
         .saveGerminatorTray(any(), any(), any(), any(), any(), any(), any());
-    doNothing().when(activityRepository).updateActualBeginAndRevisedDates(
-        any(BigDecimal.class),
-        any(LocalDateTime.class),
-        any(LocalDate.class),
-        any(LocalDate.class)
-    );
+    doNothing()
+        .when(activityRepository)
+        .updateActualBeginAndRevisedDates(
+            any(BigDecimal.class),
+            any(LocalDateTime.class),
+            any(LocalDate.class),
+            any(LocalDate.class));
 
     // Act
     List<GerminatorTrayCreateResponseDto> response =
@@ -415,27 +425,28 @@ class TestResultServiceTest {
     String activityTypeCd = "X99";
     BigDecimal riaSkey = new BigDecimal("881900");
 
-    List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null)
-    );
+    List<GerminatorTrayCreateDto> requests =
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null));
 
     // testRegimeRepository does NOT include the activity type -> not a germ test
     when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G10", "G20"));
     // return a valid germTestResult so validation reaches the activity-type check
-    GermTestResultDto validGerm = new GermTestResultDto(
-        LocalDate.now().minusDays(10),
-        48,
-        LocalDate.now().minusDays(5),
-        activityTypeCd,
-        72,
-        96,
-        LocalDate.now().minusDays(1), // seed withdrawal in future
-        null // no germinator assigned
-    );
+    GermTestResultDto validGerm =
+        new GermTestResultDto(
+            LocalDate.now().minusDays(10),
+            48,
+            LocalDate.now().minusDays(5),
+            activityTypeCd,
+            72,
+            96,
+            LocalDate.now().minusDays(1), // seed withdrawal in future
+            null // no germinator assigned
+            );
     when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(validGerm);
 
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> testResultService.assignGerminatorTrays(requests));
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> testResultService.assignGerminatorTrays(requests));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
   }
@@ -445,29 +456,29 @@ class TestResultServiceTest {
     String activityTypeCd = "G20";
     BigDecimal riaSkey = new BigDecimal("881901");
 
-    List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null)
-    );
+    List<GerminatorTrayCreateDto> requests =
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null));
 
     // activity type is recognised as a germ test
     when(testRegimeRepository.findAllGermTestActivityTypeCodes())
         .thenReturn(List.of(activityTypeCd));
 
     // seedWithdrawDate is today -> invalid (must be before today)
-    GermTestResultDto germTestResult = new GermTestResultDto(
-        LocalDate.now().minusDays(10),
-        48,
-        LocalDate.now().minusDays(5),
-        activityTypeCd,
-        72,
-        96,
-        LocalDate.now(), // seed withdrawal is today (invalid)
-        null
-    );
+    GermTestResultDto germTestResult =
+        new GermTestResultDto(
+            LocalDate.now().minusDays(10),
+            48,
+            LocalDate.now().minusDays(5),
+            activityTypeCd,
+            72,
+            96,
+            LocalDate.now(), // seed withdrawal is today (invalid)
+            null);
     when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(germTestResult);
 
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> testResultService.assignGerminatorTrays(requests));
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> testResultService.assignGerminatorTrays(requests));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
   }
@@ -477,28 +488,30 @@ class TestResultServiceTest {
     String activityTypeCd = "G20";
     BigDecimal riaSkey = new BigDecimal("881902");
 
-    List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null)
-    );
+    List<GerminatorTrayCreateDto> requests =
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null));
 
     // activity type is recognised
-    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of(activityTypeCd));
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes())
+        .thenReturn(List.of(activityTypeCd));
 
     // seedWithdrawDate in past but germinatorTrayId already set -> invalid
-    GermTestResultDto germTestResult = new GermTestResultDto(
-        LocalDate.now().minusDays(10),
-        48,
-        LocalDate.now().minusDays(5),
-        activityTypeCd,
-        72,
-        96,
-        LocalDate.now().plusDays(1),
-        123 // already assigned
-    );
+    GermTestResultDto germTestResult =
+        new GermTestResultDto(
+            LocalDate.now().minusDays(10),
+            48,
+            LocalDate.now().minusDays(5),
+            activityTypeCd,
+            72,
+            96,
+            LocalDate.now().plusDays(1),
+            123 // already assigned
+            );
     when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(germTestResult);
 
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> testResultService.assignGerminatorTrays(requests));
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> testResultService.assignGerminatorTrays(requests));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
   }
@@ -508,49 +521,12 @@ class TestResultServiceTest {
   void getGerminationTestHeader_shouldSucceed() {
     BigDecimal riaKey = new BigDecimal("1234567890");
 
-    GerminationTestHeaderDto dto =
-        new GerminationTestHeaderDto(
-            riaKey,
-            "G64",
-            LocalDateTime.parse("2026-04-15T08:30:00"),
-            LocalDateTime.parse("2026-04-18T16:00:00"),
-            "TST",
-            "MOI",
-            "Primary sample",
-            1,
-            1,
-            "Test comment",
-            1,
-            "A",
-            95,
-            90,
-            88,
-            14,
-            LocalDate.parse("2026-04-10"),
-            LocalDate.parse("2026-04-01"),
-            LocalDate.parse("2026-04-20"),
-            72,
-            "HRS",
-            LocalDate.parse("2026-03-20"),
-            LocalDate.parse("2026-03-25"),
-            LocalDate.parse("2026-03-22"),
-            LocalDate.parse("2026-03-30"),
-            101,
-            "1",
-            null,
-            new BigDecimal("12.345"),
-            new BigDecimal("10.220"),
-            new BigDecimal("9.880"),
-            0,
-            "TSC");
-
-    TestRegimeEntity regime = new TestRegimeEntity();
-    regime.setSeedlotTestCode("G64");
-    regime.setSoakHours(12);
+    GerminationTestHeaderDto dto = createHeaderDto(riaKey);
 
     when(testResultRepository.findGerminationTestHeaderByRiaKey(riaKey))
         .thenReturn(Optional.of(dto));
-    when(testRegimeRepository.findById("G64")).thenReturn(Optional.of(regime));
+    when(testRegimeRepository.findById("G64"))
+        .thenReturn(Optional.of(createRegimeWithSoakHours("G64", 12)));
 
     GerminationTestHeaderDto result = testResultService.getGerminationTestHeader(riaKey);
 
@@ -592,5 +568,50 @@ class TestResultServiceTest {
 
     assertEquals(
         "Expected exactly one germination test row for RIA_SKEY " + riaKey, exception.getMessage());
+  }
+
+  private GerminationTestHeaderDto createHeaderDto(BigDecimal riaKey) {
+    return new GerminationTestHeaderDto(
+        riaKey, // riaSkey
+        "G64", // activityTypeCd
+        LocalDateTime.parse("2026-04-15T08:30:00"), // actualBeginDtTm
+        LocalDateTime.parse("2026-04-18T16:00:00"), // actualEndDtTm
+        "TST", // testCategoryCd
+        "MOI", // moistureStatusCd
+        "Primary sample", // sampleDesc
+        1, // acceptResultInd
+        1, // testCompleteInd
+        "Test comment", // riaComment
+        1, // standardTestInd
+        "A", // testRank
+        95, // germinationPct
+        90, // germinationValue
+        88, // peakValueGrmPct
+        14, // peakValueNoDays
+        LocalDate.parse("2026-04-10"), // seedWithdrawalDate
+        LocalDate.parse("2026-04-01"), // revisedStartDt
+        LocalDate.parse("2026-04-20"), // revisedEndDt
+        72, // activityDuration
+        "HRS", // actvtyTmUnitSt
+        LocalDate.parse("2026-03-20"), // stratStartDt
+        LocalDate.parse("2026-03-25"), // drybackStartDate
+        LocalDate.parse("2026-03-22"), // warmStratStartDate
+        LocalDate.parse("2026-03-30"), // germinatorEntry
+        101, // germinatorTrayId
+        "1", // germinatorId
+        null, // soakEndDate computed in service
+        new BigDecimal("12.345"), // imbibedWt
+        new BigDecimal("10.220"), // dryWeight
+        new BigDecimal("9.880"), // drybackWeight
+        0, // intrmdtCleanrInd
+        "TSC" // requestTypeSt
+        );
+  }
+
+  private TestRegimeEntity createRegimeWithSoakHours(String seedlotTestCode, Integer soakHours) {
+    TestRegimeEntity regime = new TestRegimeEntity();
+    regime.setSeedlotTestCode(seedlotTestCode);
+    regime.setSoakHours(soakHours);
+    return regime;
   }
 }
