@@ -439,7 +439,7 @@ class TestResultServiceTest {
             activityTypeCd,
             72,
             96,
-            LocalDate.now().minusDays(1), // seed withdrawal in future
+            LocalDate.now().minusDays(1), // seed withdrawal is before today (valid)
             null // no germinator assigned
             );
     when(testResultRepository.getGermTestResult(riaSkey)).thenReturn(validGerm);
