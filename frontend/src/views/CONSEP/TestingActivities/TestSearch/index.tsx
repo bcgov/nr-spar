@@ -70,6 +70,7 @@ const csvConfig = mkConfig({
   filename: `Testing_Activity_Search_${new Date().toISOString().split('T')[0]}`
 });
 const LOT_INPUT_KEYS = ['lot-input-1', 'lot-input-2', 'lot-input-3', 'lot-input-4', 'lot-input-5'] as const;
+const VALIDATION_ERROR_MESSAGE = 'Errors must be fixed before searching or saving search criteria.';
 const toDate = (value?: string) => (value ? new Date(`${value}T00:00:00`) : undefined);
 type SaveCriteriaMutationVariables = {
   criteria: ActivitySearchRequest;
@@ -493,8 +494,20 @@ const TestSearch = () => {
       : {})
   });
 
+  const hasValidationErrors = (): boolean => Object.values(validateSearch).some(
+    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
+  );
+
   const handleSaveCriteria = () => {
     resetAlert();
+    if (hasValidationErrors()) {
+      setAlert({
+        status: 'error',
+        message: VALIDATION_ERROR_MESSAGE
+      });
+      return;
+    }
+
     saveCriteriaMutation.mutate({
       criteria: buildSearchCriteria(),
       showSuccessAlert: true
@@ -754,10 +767,6 @@ const TestSearch = () => {
     }
   };
 
-  const hasValidationErrors = (): boolean => Object.values(validateSearch).some(
-    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
-  );
-
   const handleSearchClick = () => {
     if (Object.keys(searchParams).length === 0) {
       setAlert({
@@ -779,7 +788,6 @@ const TestSearch = () => {
 
     const searchParamsToSend = buildSearchCriteria(paddedLotNumbers);
 
-    saveCriteriaMutation.mutate({ criteria: searchParamsToSend });
     searchMutation.mutate({ filter: searchParamsToSend });
   };
 
@@ -999,7 +1007,7 @@ const TestSearch = () => {
               <InlineNotification
                 lowContrast
                 kind="error"
-                subtitle="Errors must be fixed to search activities"
+                subtitle={VALIDATION_ERROR_MESSAGE}
               />
             </Column>
           ) : null}

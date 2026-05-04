@@ -56,6 +56,9 @@ const AdvancedFilters = ({
 }: AdvancedFiltersProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const windowSize = useWindowSize();
+  const hasValidationErrors = Object.values(validateSearch).some(
+    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
+  );
 
   const testCategoryQuery = useQuery({
     queryKey: ['test-category-codes'],
@@ -715,7 +718,7 @@ const AdvancedFilters = ({
             size="md"
             kind="tertiary"
             onClick={onSaveCriteria}
-            disabled={isSavingCriteria}
+            disabled={isSavingCriteria || hasValidationErrors}
           >
             Save search criteria
           </Button>
