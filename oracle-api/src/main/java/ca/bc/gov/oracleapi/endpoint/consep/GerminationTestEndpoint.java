@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
+
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** This class exposes germination test resources API. */
 @RestController
 @RequestMapping("/api/germination-tests")
+@Validated
 @Tag(
     name = "GerminationTests",
     description = "Resource to retrieve Germination Test header and activity metadata.")
