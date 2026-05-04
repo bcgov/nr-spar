@@ -6,12 +6,12 @@ import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
 
 /**
  * This interface enables the test result entity from consep to be retrieved from the database.
