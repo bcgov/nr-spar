@@ -1,7 +1,12 @@
 import ApiConfig from '../ApiConfig';
 import api from '../api';
 import { CreateGermTrayRequest } from '../../views/CONSEP/TestingActivities/TestSearch/ToolbarControls/CreateGermTray/definitions';
-import { GermTrayTestType, GermTrayCreateResponseType, GerminatorIdAssignResponseDto } from '../../types/consep/GerminatorTrayType';
+import {
+  GermTrayTestType,
+  GermTrayCreateResponseType,
+  GermTrayDeleteContentType,
+  GerminatorIdAssignResponseDto
+} from '../../types/consep/GerminatorTrayType';
 
 export const assignGerminatorTrays = (
   requests: CreateGermTrayRequest[]
@@ -28,4 +33,24 @@ export const getGerminatorTrayContents = (
 ): Promise<GermTrayTestType[]> => {
   const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/tests`;
   return api.get(url).then((res: { data: GermTrayTestType[] }) => res.data);
+};
+
+export const deleteTestFromTray = (
+  germinatorTrayId: number,
+  riaSkey: number,
+  activityUpdateTimestamp: string
+): Promise<void> => {
+  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/tests/${riaSkey}`
+      + `?activityUpdateTimestamp=${encodeURIComponent(activityUpdateTimestamp)}`;
+
+  return api.delete(url).then(() => undefined);
+};
+
+export const deleteGerminatorTray = (
+  germinatorTrayId: number,
+  contents: GermTrayDeleteContentType[]
+): Promise<void> => {
+  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/delete`;
+
+  return api.post(url, contents).then(() => undefined);
 };
