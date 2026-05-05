@@ -315,4 +315,46 @@ public class TestResultService {
 
     return resultMap;
   }
+
+  /**
+   * Determine the default test rank for a seedlot.
+   * Returns:
+   * - "A" when no accepted STD rank-A test exists for the seedlot
+   * - "P" when an accepted STD rank-A test already exists
+   * - null when rank rules do not apply (non-STD or not accepted)
+   */
+  public String determineTestRank(
+      String seedlotNumber, String testCategoryCd, Integer acceptResultInd) {
+    SparLog.info(
+        "Determining test rank for seedlot={}, testCategoryCd={}, acceptResultInd={}",
+        seedlotNumber,
+        testCategoryCd,
+        acceptResultInd);
+
+    if (seedlotNumber == null || seedlotNumber.isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "seedlotNumber is required");
+    }
+
+    // Rule applies only to accepted STD tests
+    if (!"STD".equalsIgnoreCase(testCategoryCd) || !Integer.valueOf(1).equals(acceptResultInd)) {
+      SparLog.info(
+          "Rank logic not applicable for seedlot={} because testCategoryCd={} or"
+              + " acceptResultInd={}",
+          seedlotNumber,
+          testCategoryCd,
+          acceptResultInd);
+      return null;
+    }
+
+    long existingAcceptedStdRankA = testResultRepository.countAcceptedStdRankA(seedlotNumber);
+    String rank = existingAcceptedStdRankA > 0 ? "P" : "A";
+
+    SparLog.info(
+        "Determined test rank={} for seedlot={} (existing accepted STD rank-A count={})",
+        rank,
+        seedlotNumber,
+        existingAcceptedStdRankA);
+
+    return rank;
+  }
 }
