@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -114,7 +115,7 @@ class GerminationTestEndpointTest {
                 .param("acceptResultInd", "1"))
         .andExpect(status().isBadRequest());
 
-    verify(testResultService, never()).determineTestRank(seedlotNumber, null, 1);
+    verifyNoInteractions(testResultService);
   }
 
   @Test
@@ -127,6 +128,6 @@ class GerminationTestEndpointTest {
                 .param("testCategoryCd", "STD"))
         .andExpect(status().isBadRequest());
 
-    verify(testResultService, never()).determineTestRank(seedlotNumber, "STD", null);
+    verifyNoInteractions(testResultService);
   }
 }
