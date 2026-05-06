@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect
 } from 'react';
+import axios from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
@@ -26,6 +27,7 @@ import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import { getTestTypeCodes, getActivityIds } from '../../../../api-service/consep/testCodesAPI';
+import { getSearchCriteria, setSearchCriteria } from '../../../../api-service/consep/searchCriteriaAPI';
 import type {
   TestingSearchResponseType,
   PaginatedTestingSearchResponseType,
@@ -48,7 +50,8 @@ import {
   ADV_FILTER_LABELS,
   ADV_FILTER_STATUS_MAPS,
   initialErrorValue,
-  isFamilyLot
+  isFamilyLot,
+  TESTING_ACTIVITIES_SEARCH_PAGE_ID
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import {
@@ -67,7 +70,31 @@ const csvConfig = mkConfig({
   filename: `Testing_Activity_Search_${new Date().toISOString().split('T')[0]}`
 });
 const LOT_INPUT_KEYS = ['lot-input-1', 'lot-input-2', 'lot-input-3', 'lot-input-4', 'lot-input-5'] as const;
+const VALIDATION_ERROR_MESSAGE = 'Errors must be fixed before searching or saving search criteria.';
 const toDate = (value?: string) => (value ? new Date(`${value}T00:00:00`) : undefined);
+type SaveCriteriaMutationVariables = {
+  criteria: ActivitySearchRequest;
+  showSuccessAlert?: boolean;
+};
+
+const getErrorMessage = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data as { message?: unknown } | undefined;
+    if (typeof responseData?.message === 'string' && responseData.message) {
+      return responseData.message;
+    }
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (typeof error === 'string' && error) {
+    return error;
+  }
+
+  return 'Unknown error';
+};
 
 const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
@@ -236,6 +263,18 @@ const TestSearch = () => {
     });
   };
 
+  const savedCriteriaHydratedRef = useRef(false);
+  const hasUserEditedRef = useRef(false);
+
+  const savedCriteriaQuery = useQuery({
+    queryKey: ['search-criteria', TESTING_ACTIVITIES_SEARCH_PAGE_ID],
+    queryFn: () => getSearchCriteria(TESTING_ACTIVITIES_SEARCH_PAGE_ID),
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false
+  });
+
   const testTypeQuery = useQuery({
     queryKey: ['test-type-codes'],
     queryFn: getTestTypeCodes,
@@ -250,6 +289,87 @@ const TestSearch = () => {
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
     select: (data: ActivityIdType[]) => data?.map((activity) => activity.standardActivityId) ?? []
+  });
+
+  useEffect(() => {
+    if (savedCriteriaHydratedRef.current) return;
+    if (!savedCriteriaQuery.isSuccess) return;
+
+    const saved = savedCriteriaQuery.data?.criteriaJson as ActivitySearchRequest | undefined;
+    if (!saved || Object.keys(saved).length === 0) {
+      return;
+    }
+    if (hasUserEditedRef.current) return;
+
+    const needsTestTypes = Array.isArray(saved.testTypes) && saved.testTypes.length > 0;
+    const needsActivityIds = Array.isArray(saved.activityIds) && saved.activityIds.length > 0;
+
+    // FilterableMultiSelect honors `initialSelectedItems` only at mount time, so
+    // we must wait for the option lists to load before hydrating + remounting,
+    // otherwise the saved selections won't appear as the field's defaults.
+    if (needsTestTypes && !testTypeQuery.isSuccess) {
+      return;
+    }
+    if (needsActivityIds && !activityIdQuery.isSuccess) {
+      return;
+    }
+
+    setSearchParams(saved);
+    savedCriteriaHydratedRef.current = true;
+
+    if (Array.isArray(saved.lotNumbers) && saved.lotNumbers.length > 0) {
+      const restored = ['', '', '', '', ''];
+      saved.lotNumbers.slice(0, 5).forEach((lot, i) => { restored[i] = lot; });
+      setRawLotInput(restored);
+    }
+
+    // Force the multi-selects to re-mount so `initialSelectedItems`
+    // reflects the just-hydrated saved values.
+    if (needsTestTypes || needsActivityIds) {
+      setMultiSelectResetKeys((prev) => ({
+        testTypes: needsTestTypes ? prev.testTypes + 1 : prev.testTypes,
+        activityIds: needsActivityIds ? prev.activityIds + 1 : prev.activityIds
+      }));
+    }
+  }, [
+    savedCriteriaQuery.isSuccess,
+    savedCriteriaQuery.data,
+    testTypeQuery.isSuccess,
+    activityIdQuery.isSuccess
+  ]);
+
+  useEffect(() => {
+    if (savedCriteriaQuery.error) {
+      const message = getErrorMessage(savedCriteriaQuery.error);
+      setAlert({
+        status: 'error',
+        message: `Failed to load saved search criteria: ${message}`
+      });
+    }
+  }, [savedCriteriaQuery.error]);
+
+  const saveCriteriaMutation = useMutation({
+    mutationFn: ({ criteria }: SaveCriteriaMutationVariables) => (
+      setSearchCriteria(
+        TESTING_ACTIVITIES_SEARCH_PAGE_ID,
+        criteria as Record<string, unknown>
+      )
+    ),
+    onSuccess: (_data: unknown, variables: SaveCriteriaMutationVariables) => {
+      if (variables.showSuccessAlert) {
+        setAlert({
+          status: 'success',
+          message: 'Search criteria saved.'
+        });
+      }
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error);
+      setAlert({
+        status: 'error',
+        message: `Failed to save search criteria: ${message}`
+      });
+    }
   });
 
   useEffect(() => {
@@ -324,6 +444,17 @@ const TestSearch = () => {
     return updated;
   };
 
+  const markUserEdited = () => {
+    hasUserEditedRef.current = true;
+  };
+
+  const setUserEditedSearchParams: React.Dispatch<React.SetStateAction<ActivitySearchRequest>> = (
+    value
+  ) => {
+    markUserEdited();
+    setSearchParams(value);
+  };
+
   const padSeedlotNumber = (value: string): string => {
     if (/^f/i.test(value)) {
       return value;
@@ -335,6 +466,52 @@ const TestSearch = () => {
     }
 
     return value.padStart(5, '0');
+  };
+
+  const getPaddedLotNumbers = () => rawLotInput.reduce<string[]>(
+    (result, inputValue) => {
+      const trimmedValue = inputValue.trim();
+      if (trimmedValue) {
+        result.push(padSeedlotNumber(trimmedValue));
+      }
+      return result;
+    },
+    []
+  );
+
+  const normalizeTestTypes = (testTypes: string[]) => testTypes.map((testType: string) => {
+    const value = (testType ?? '').toLowerCase();
+    if (value === 'sa') return 'GSA';
+    if (value === 'se') return 'GSE';
+    return testType;
+  });
+
+  const buildSearchCriteria = (paddedLotNumbers = getPaddedLotNumbers()) => ({
+    ...searchParams,
+    lotNumbers: paddedLotNumbers.length > 0 ? paddedLotNumbers : undefined,
+    ...(searchParams.testTypes?.length
+      ? { testTypes: normalizeTestTypes(searchParams.testTypes) }
+      : {})
+  });
+
+  const hasValidationErrors = (): boolean => Object.values(validateSearch).some(
+    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
+  );
+
+  const handleSaveCriteria = () => {
+    resetAlert();
+    if (hasValidationErrors()) {
+      setAlert({
+        status: 'error',
+        message: VALIDATION_ERROR_MESSAGE
+      });
+      return;
+    }
+
+    saveCriteriaMutation.mutate({
+      criteria: buildSearchCriteria(),
+      showSuccessAlert: true
+    });
   };
 
   const validateLotNumbers = (lots: string[]) => {
@@ -382,6 +559,7 @@ const TestSearch = () => {
   };
 
   const handleLotInputChange = (index: number, value: string) => {
+    markUserEdited();
     // Allow only alphanumeric characters
     const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
 
@@ -418,6 +596,7 @@ const TestSearch = () => {
     searchField: keyof ActivitySearchRequest,
     data: string[] | null
   ) => {
+    markUserEdited();
     setSearchParams(
       (prev) => updateSearchParams(prev, searchField, data && data.length > 0 ? data : null)
     );
@@ -425,6 +604,7 @@ const TestSearch = () => {
   };
 
   const handleGermTrayIdChange = (e: ChangeEvent<HTMLInputElement>) => {
+    markUserEdited();
     const { value } = e.target;
     const parsed = value === '' ? undefined : parseInt(value, 10);
 
@@ -448,6 +628,7 @@ const TestSearch = () => {
   };
 
   const handleWithdrawalDateChange = (dates: Date[], type: 'start' | 'end') => {
+    markUserEdited();
     const raw = dates?.[0];
     const value = raw instanceof Date ? raw.toISOString().slice(0, 10) : null;
 
@@ -537,6 +718,7 @@ const TestSearch = () => {
     field: 'testTypes' | 'activityIds',
     valueToRemove: string
   ) => {
+    markUserEdited();
     setSearchParams((prev) => {
       const currentValues = prev[field];
       if (!currentValues) return prev;
@@ -585,10 +767,6 @@ const TestSearch = () => {
     }
   };
 
-  const hasValidationErrors = (): boolean => Object.values(validateSearch).some(
-    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
-  );
-
   const handleSearchClick = () => {
     if (Object.keys(searchParams).length === 0) {
       setAlert({
@@ -598,16 +776,7 @@ const TestSearch = () => {
       return;
     }
 
-    const paddedLotNumbers = rawLotInput.reduce<string[]>(
-      (result, inputValue) => {
-        const trimmedValue = inputValue.trim();
-        if (trimmedValue) {
-          result.push(padSeedlotNumber(trimmedValue));
-        }
-        return result;
-      },
-      []
-    );
+    const paddedLotNumbers = getPaddedLotNumbers();
 
     if (paddedLotNumbers.length > 0) {
       setRawLotInput((prev) => prev.map((val) => (val.trim() ? padSeedlotNumber(val) : '')));
@@ -617,22 +786,9 @@ const TestSearch = () => {
       }));
     }
 
-    const searchParamstoSend = {
-      ...searchParams,
-      lotNumbers: paddedLotNumbers.length > 0 ? paddedLotNumbers : undefined,
-      ...(searchParams.testTypes?.length
-        ? {
-          testTypes: searchParams.testTypes.map((t: string) => {
-            const v = (t ?? '').toLowerCase();
-            if (v === 'sa') return 'GSA';
-            if (v === 'se') return 'GSE';
-            return t;
-          })
-        }
-        : {})
-    };
+    const searchParamsToSend = buildSearchCriteria(paddedLotNumbers);
 
-    searchMutation.mutate({ filter: searchParamstoSend });
+    searchMutation.mutate({ filter: searchParamsToSend });
   };
 
   return (
@@ -807,6 +963,7 @@ const TestSearch = () => {
                   type="blue"
                   filter
                   onClose={() => {
+                    markUserEdited();
                     setSearchParams((prev) => {
                       const updated = { ...prev };
                       delete updated[tag.key];
@@ -831,12 +988,14 @@ const TestSearch = () => {
           {openAdvSearch && modalAnchor && (
             <AdvancedFilters
               searchParams={searchParams}
-              setSearchParams={setSearchParams}
+              setSearchParams={setUserEditedSearchParams}
               validateSearch={validateSearch}
               setValidateSearch={setValidateSearch}
               alignTo={modalAnchor}
               onClose={handleCloseAdvSearch}
               anchorRef={advSearchRef}
+              onSaveCriteria={handleSaveCriteria}
+              isSavingCriteria={saveCriteriaMutation.isPending}
             />
           )}
         </form>
@@ -848,7 +1007,7 @@ const TestSearch = () => {
               <InlineNotification
                 lowContrast
                 kind="error"
-                subtitle="Errors must be fixed to search activities"
+                subtitle={VALIDATION_ERROR_MESSAGE}
               />
             </Column>
           ) : null}

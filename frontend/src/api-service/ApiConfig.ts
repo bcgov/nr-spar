@@ -42,6 +42,8 @@ const ApiConfig = {
 
   tscSeedlotStatusUpdate: `${serverHost}/api/tsc-admin/seedlots/{seedlotNumber}/status/{status}`,
 
+  searchCriteria: `${serverHost}/api/search-criteria`,
+
   /**
    * ORACLE API
    */

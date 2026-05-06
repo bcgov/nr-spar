@@ -9,6 +9,7 @@ import { ActivitySearchValidation, ValidationErrorType, ActivitySearchRequest } 
 
 export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
+export const TESTING_ACTIVITIES_SEARCH_PAGE_ID = 'CONSEP_TESTING_ACTIVITIES_SEARCH';
 export const dateField = {
   placeholderText: 'yyyy/mm/dd',
   helperText: 'year/month/day',
