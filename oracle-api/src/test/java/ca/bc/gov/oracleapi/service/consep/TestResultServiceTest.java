@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.service.consep;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -528,7 +529,7 @@ class TestResultServiceTest {
 
     String result = testResultService.determineTestRank(seedlotNumber, "TST", 1);
 
-    assertEquals(null, result);
+    assertNull(result);
     verify(testResultRepository, never()).countAcceptedStdRankA(any());
   }
 
@@ -538,7 +539,7 @@ class TestResultServiceTest {
 
     String result = testResultService.determineTestRank(seedlotNumber, "STD", 0);
 
-    assertEquals(null, result);
+    assertNull(result);
     verify(testResultRepository, never()).countAcceptedStdRankA(any());
   }
 
