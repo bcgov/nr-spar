@@ -497,4 +497,60 @@ class TestResultServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
   }
+
+  @Test
+  void determineTestRank_returnsA_whenStdAcceptedAndNoAcceptedStdRankAExists() {
+    String seedlotNumber = "12345";
+
+    when(testResultRepository.countAcceptedStdRankA(seedlotNumber)).thenReturn(0L);
+
+    String result = testResultService.determineTestRank(seedlotNumber, "STD", 1);
+
+    assertEquals("A", result);
+    verify(testResultRepository).countAcceptedStdRankA(seedlotNumber);
+  }
+
+  @Test
+  void determineTestRank_returnsP_whenStdAcceptedAndAcceptedStdRankAExists() {
+    String seedlotNumber = "12345";
+
+    when(testResultRepository.countAcceptedStdRankA(seedlotNumber)).thenReturn(2L);
+
+    String result = testResultService.determineTestRank(seedlotNumber, "STD", 1);
+
+    assertEquals("P", result);
+    verify(testResultRepository).countAcceptedStdRankA(seedlotNumber);
+  }
+
+  @Test
+  void determineTestRank_returnsNull_whenCategoryIsNotStd() {
+    String seedlotNumber = "12345";
+
+    String result = testResultService.determineTestRank(seedlotNumber, "TST", 1);
+
+    assertEquals(null, result);
+    verify(testResultRepository, never()).countAcceptedStdRankA(any());
+  }
+
+  @Test
+  void determineTestRank_returnsNull_whenAcceptResultIsNotOne() {
+    String seedlotNumber = "12345";
+
+    String result = testResultService.determineTestRank(seedlotNumber, "STD", 0);
+
+    assertEquals(null, result);
+    verify(testResultRepository, never()).countAcceptedStdRankA(any());
+  }
+
+  @Test
+  void determineTestRank_throwsBadRequest_whenSeedlotIsBlank() {
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.determineTestRank(" ", "STD", 1));
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("seedlotNumber is required", ex.getReason());
+    verify(testResultRepository, never()).countAcceptedStdRankA(any());
+  }
 }
