@@ -18,7 +18,8 @@ public record GerminationTestHeaderDto(
     BigDecimal riaSkey,
 
     @Schema(
-        description = "A code which represents the type of Result which will be, or has been recorded against a particular Activity for a Request",
+        description = "A code which represents the type of Result which will be, "
+            + "or has been recorded against a particular Activity for a Request",
         example = "MC"
     )
     String activityTypeCd,
@@ -32,7 +33,8 @@ public record GerminationTestHeaderDto(
     LocalDateTime actualEndDtTm,
 
     @Schema(
-        description = "A code which represents the category of test being performed. Note: Only Standard type tests will be reported to SPAR users",
+        description = "A code which represents the category of test being performed. "
+            + "Note: Only Standard type tests will be reported to SPAR users",
         example = "QA"
     )
     String testCategoryCd,
@@ -84,13 +86,22 @@ public record GerminationTestHeaderDto(
     )
     Integer germinationPct,
 
-    @Schema(description = "The germination value assigned to a seedlot", example = "11")
+    @Schema(
+        description = "The germination value assigned to a seedlot",
+        example = "11"
+    )
     Integer germinationValue,
 
-    @Schema(description = "The peak germination percentage achieved in a certain number of days", example = "62")
+    @Schema(
+        description = "The peak germination percentage achieved in a certain number of days",
+        example = "62"
+    )
     Integer peakValueGrmPct,
 
-    @Schema(description = "The number of days to reach the peak value germination percentage", example = "14")
+    @Schema(
+        description = "The number of days to reach the peak value germination percentage",
+        example = "14"
+    )
     Integer peakValueNoDays,
 
     @Schema(description = "Seed withdrawal date", example = "2026-04-10")
@@ -109,7 +120,8 @@ public record GerminationTestHeaderDto(
     Integer activityDuration,
 
     @Schema(
-        description = "A code which represents a time unit of measure. i.e. Years, Months, Weeks, Days, Hours... etc",
+        description = "A code which represents a time unit of measure. "
+            + "i.e. Years, Months, Weeks, Days, Hours... etc",
         example = "DY"
     )
     String actvtyTmUnitSt,
@@ -133,7 +145,10 @@ public record GerminationTestHeaderDto(
     String germinatorId,
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Schema(description = "Computed soak end datetime (actual_begin_dt_tm + soak_hours)", example = "2026-04-15T20:30:00")
+    @Schema(
+        description = "Computed soak end datetime (actual_begin_dt_tm + soak_hours)",
+        example = "2026-04-15T20:30:00"
+    )
     LocalDateTime soakEndDate,
 
     @Schema(description = "Imbibed weight", example = "12.345")
