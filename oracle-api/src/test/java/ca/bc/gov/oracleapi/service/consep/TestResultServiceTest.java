@@ -519,7 +519,7 @@ class TestResultServiceTest {
   }
 
   @Test
-  void determineTestRank_returnsA_whenStdAcceptedAndNoAcceptedStdRankAExists() {
+  void determineTestRank_returnsA_whenStdAcceptedAndNoAcceptedStdRankA_Exists() {
     String seedlotNumber = "12345";
 
     when(testResultRepository.countAcceptedStdRankA(seedlotNumber)).thenReturn(0L);
@@ -531,7 +531,7 @@ class TestResultServiceTest {
   }
 
   @Test
-  void determineTestRank_returnsP_whenStdAcceptedAndAcceptedStdRankAExists() {
+  void determineTestRank_returnsP_whenStdAcceptedAndAcceptedStdRankA_Exists() {
     String seedlotNumber = "12345";
 
     when(testResultRepository.countAcceptedStdRankA(seedlotNumber)).thenReturn(2L);
@@ -573,6 +573,7 @@ class TestResultServiceTest {
     assertEquals("seedlotNumber is required", ex.getReason());
     verify(testResultRepository, never()).countAcceptedStdRankA(any());
   }
+
   @Test
   @DisplayName("getGerminationTestHeader should return DTO when riaKey exists")
   void getGerminationTestHeader_shouldSucceed() {
