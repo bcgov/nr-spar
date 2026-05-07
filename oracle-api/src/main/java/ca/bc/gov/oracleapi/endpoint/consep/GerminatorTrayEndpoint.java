@@ -64,7 +64,11 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "201",
       description = "Successfully assigned trays for the provided activities.",
-      content = @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class)))
+      content = @Content(
+        array = @ArraySchema(
+          schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class)
+        )
+      )
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
@@ -88,7 +92,8 @@ public class GerminatorTrayEndpoint {
       description = "Successfully assigned germinator ID to the tray.",
       content =
       @Content(
-          schema = @Schema(implementation = GerminatorIdAssignResponseDto.class))
+          schema = @Schema(implementation = GerminatorIdAssignResponseDto.class)
+      )
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
