@@ -1,23 +1,23 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.TestRankResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
-import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
+import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -79,9 +79,9 @@ public class GerminationTestEndpoint {
 
     String rank =
         testResultService.determineTestRank(
-          seedlotNumber,
-          testCategoryCd,
-          acceptResultInd
+            seedlotNumber,
+            testCategoryCd,
+            acceptResultInd
         );
 
     return new TestRankResponseDto(rank);
