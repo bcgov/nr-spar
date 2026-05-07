@@ -77,7 +77,9 @@ public record GerminationTestHeaderDto(
     String testRank,
 
     @Schema(
-        description = "Germination of a seed in a laboratory test is the emergence and development from the seed embryo of those essential structures which are indicative of the ability to produce a normal plant under favorable conditions",
+        description = "Germination of a seed in a laboratory test is the emergence and development "
+            + "from the seed embryo of those essential structures which are indicative of the ability "
+            + "to produce a normal plant under favorable conditions",
         example = "69"
     )
     Integer germinationPct,
