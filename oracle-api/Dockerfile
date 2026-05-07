@@ -10,7 +10,7 @@ RUN ./mvnw package -Pnative -DskipTests -Dskip.unit.tests=true && \
 
 
 ### Deployer
-FROM eclipse-temurin:17.0.18_8-jdk-jammy AS deploy
+FROM eclipse-temurin:25.0.2_10-jdk-jammy AS deploy
 
 # Java vars
 ENV LANG=en_CA.UTF-8
