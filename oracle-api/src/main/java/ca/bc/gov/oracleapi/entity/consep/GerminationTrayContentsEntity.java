@@ -10,6 +10,18 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * JPA entity mapping for CONSEP.CNS58TRAYCONTENTS.
+ *
+ * Represents one activity (identified by RIA_SKEY) currently associated with a
+ * germinator tray, including request metadata, key germination lifecycle dates
+ * (soak, stratification, dryback, entry), and test status indicators.
+ *
+ * Primary key: RIA_SKEY.
+ *
+ * This entity is used to read tray-contents context for germination workflows
+ * and reporting.
+ */
 @Getter
 @Setter
 @Entity
