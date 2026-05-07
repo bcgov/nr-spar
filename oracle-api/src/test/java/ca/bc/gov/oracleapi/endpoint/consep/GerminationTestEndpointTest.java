@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -79,7 +80,7 @@ class GerminationTestEndpointTest {
                 .param("testCategoryCd", "TST")
                 .param("acceptResultInd", "1"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.rank").doesNotExist());
+        .andExpect(jsonPath("$.rank").value(nullValue()));
 
     verify(testResultService, times(1)).determineTestRank(seedlotNumber, "TST", 1);
   }
