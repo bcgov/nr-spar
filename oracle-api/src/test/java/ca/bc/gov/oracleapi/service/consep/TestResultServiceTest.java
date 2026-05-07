@@ -572,6 +572,8 @@ class TestResultServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals("seedlotNumber is required", ex.getReason());
     verify(testResultRepository, never()).countAcceptedStdRankA(any());
+  }
+  @Test
   @DisplayName("getGerminationTestHeader should return DTO when riaKey exists")
   void getGerminationTestHeader_shouldSucceed() {
     BigDecimal riaKey = new BigDecimal("1234567890");
