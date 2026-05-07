@@ -2,9 +2,9 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.TestRankResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
-import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
+import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
