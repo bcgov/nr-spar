@@ -156,7 +156,7 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
         AND rst.testRank = 'A'
       """)
   long countAcceptedStdRankA(
-    @Param("seedlotNumber") String seedlotNumber
+      @Param("seedlotNumber") String seedlotNumber
   );
   @Query(
       """
