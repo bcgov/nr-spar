@@ -100,10 +100,16 @@ public record GerminationTestHeaderDto(
     @Schema(description = "Revised end date", example = "2026-04-20")
     LocalDate revisedEndDt,
 
-    @Schema(description = "The number of standard time units for which an Activity should be completed", example = "1")
+    @Schema(
+        description = "The number of standard time units for which an Activity should be completed",
+        example = "1"
+    )
     Integer activityDuration,
 
-    @Schema(description = "A code which represents a time unit of measure. i.e. Years, Months, Weeks, Days, Hours... etc", example = "DY")
+    @Schema(
+        description = "A code which represents a time unit of measure. i.e. Years, Months, Weeks, Days, Hours... etc",
+        example = "DY"
+    )
     String actvtyTmUnitSt,
 
     @Schema(description = "Stratification start date", example = "2026-03-20")
