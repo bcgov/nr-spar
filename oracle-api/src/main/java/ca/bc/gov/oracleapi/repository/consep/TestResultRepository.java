@@ -158,6 +158,7 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
   long countAcceptedStdRankA(
       @Param("seedlotNumber") String seedlotNumber
   );
+
   @Query(
       """
       SELECT new ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto(
@@ -203,6 +204,6 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
     WHERE tst.riaKey = :riaKey
       """)
   Optional<GerminationTestHeaderDto> findGerminationTestHeaderByRiaKey(
-    @Param("riaKey") BigDecimal riaKey
+      @Param("riaKey") BigDecimal riaKey
   );
 }
