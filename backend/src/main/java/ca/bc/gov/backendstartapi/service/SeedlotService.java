@@ -59,6 +59,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
+import ca.bc.gov.backendstartapi.util.SeedlotMeanGeoCalculator;
 import ca.bc.gov.backendstartapi.util.ValueUtil;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -825,6 +826,10 @@ public class SeedlotService {
       if (!hasAreaOfUseData(seedlot)) {
         SparLog.info("Area of Use data has NOT been set previously, setting area of use data");
         setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+      } else {
+        // Area of Use was set on a prior save; the collection mean above may have
+        // changed, so recompute the mean elevation/lat/long for SPRR048.
+        SeedlotMeanGeoCalculator.applyMeanAreaOfUse(seedlot);
       }
     } else {
       updateApplicantAndSeedlot(seedlot, form.applicantAndSeedlotInfo());
@@ -838,6 +843,10 @@ public class SeedlotService {
       // Override Seedlot Ne, collection elevation, and collection lat long
       // Set values in the Seedlot instance only
       tscAdminService.overrideSeedlotCollElevLatLong(seedlot, form.seedlotReviewGeoInformation());
+
+      // Recompute seedlot mean elevation/lat/long now that the TSC has revised the
+      // area-of-use min/max and the collection mean (legacy SPRR048 reads these mean cols).
+      SeedlotMeanGeoCalculator.applyMeanAreaOfUse(seedlot);
 
       // Override Seedlot Genetic Worth values
       seedlotGeneticWorthService.overrideSeedlotGenWorth(seedlot, form.seedlotReviewGeneticWorth());
@@ -1087,6 +1096,11 @@ public class SeedlotService {
     // Seconds default to 0
     seedlot.setLongitudeSecMax(0);
     seedlot.setLongitudeSecMin(0);
+
+    // STEP 5: derive seedlot mean elevation/lat/long from min/max & collection mean.
+    // Without this the seedlot.elevation column is left NULL and legacy reports
+    // (e.g. SPRR048 Short Form) silently exclude the row.
+    SeedlotMeanGeoCalculator.applyMeanAreaOfUse(seedlot);
 
     // Set SPZs
     List<SeedlotSeedPlanZoneEntity> spzSaveList = new ArrayList<>();
