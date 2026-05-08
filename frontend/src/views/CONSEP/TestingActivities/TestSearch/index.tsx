@@ -152,6 +152,45 @@ const TestSearch = () => {
     }
   };
 
+  const padSeedlotNumber = (value: string): string => {
+    if (/^f/i.test(value)) {
+      return value;
+    }
+
+    // Seedlot must be numeric
+    if (!/^\d+$/.test(value)) {
+      return value;
+    }
+
+    return value.padStart(5, '0');
+  };
+
+  const getPaddedLotNumbers = () => rawLotInput.reduce<string[]>(
+    (result, inputValue) => {
+      const trimmedValue = inputValue.trim();
+      if (trimmedValue) {
+        result.push(padSeedlotNumber(trimmedValue));
+      }
+      return result;
+    },
+    []
+  );
+
+  const normalizeTestTypes = (testTypes: string[]) => testTypes.map((testType: string) => {
+    const value = (testType ?? '').toLowerCase();
+    if (value === 'sa') return 'GSA';
+    if (value === 'se') return 'GSE';
+    return testType;
+  });
+
+  const buildSearchCriteria = (paddedLotNumbers = getPaddedLotNumbers()) => ({
+    ...searchParams,
+    lotNumbers: paddedLotNumbers.length > 0 ? paddedLotNumbers : undefined,
+    ...(searchParams.testTypes?.length
+      ? { testTypes: normalizeTestTypes(searchParams.testTypes) }
+      : {})
+  });
+
   const searchMutation = useMutation({
     mutationFn: ({
       filter,
@@ -246,7 +285,7 @@ const TestSearch = () => {
 
     const sort = newSorting[0];
     searchMutation.mutate({
-      filter: searchParams,
+      filter: buildSearchCriteria(),
       page: paginationInfo.pageNumber,
       size: paginationInfo.pageSize,
       sortBy: sort?.id,
@@ -257,7 +296,7 @@ const TestSearch = () => {
   const handleExportData = () => {
     const sort = sorting[0];
     exportMutation.mutate({
-      filter: searchParams,
+      filter: buildSearchCriteria(),
       sortBy: sort?.id,
       sortDirection: sort?.desc ? 'desc' : 'asc'
     });
@@ -265,6 +304,7 @@ const TestSearch = () => {
 
   const savedCriteriaHydratedRef = useRef(false);
   const hasUserEditedRef = useRef(false);
+  const multiSelectHydratedRef = useRef({ testTypes: false, activityIds: false });
 
   const savedCriteriaQuery = useQuery({
     queryKey: ['search-criteria', TESTING_ACTIVITIES_SEARCH_PAGE_ID],
@@ -295,48 +335,46 @@ const TestSearch = () => {
     if (savedCriteriaHydratedRef.current) return;
     if (!savedCriteriaQuery.isSuccess) return;
 
-    const saved = savedCriteriaQuery.data?.criteriaJson as ActivitySearchRequest | undefined;
-    if (!saved || Object.keys(saved).length === 0) {
-      return;
-    }
+    // Mark hydration as complete on the first successful response, even if the
+    // payload is empty, so a later refetch (e.g. on reconnect) does not re-run
+    // hydration after the user has started editing.
+    savedCriteriaHydratedRef.current = true;
     if (hasUserEditedRef.current) return;
 
-    const needsTestTypes = Array.isArray(saved.testTypes) && saved.testTypes.length > 0;
-    const needsActivityIds = Array.isArray(saved.activityIds) && saved.activityIds.length > 0;
-
-    // FilterableMultiSelect honors `initialSelectedItems` only at mount time, so
-    // we must wait for the option lists to load before hydrating + remounting,
-    // otherwise the saved selections won't appear as the field's defaults.
-    if (needsTestTypes && !testTypeQuery.isSuccess) {
-      return;
-    }
-    if (needsActivityIds && !activityIdQuery.isSuccess) {
-      return;
-    }
+    const saved = savedCriteriaQuery.data?.criteriaJson as ActivitySearchRequest | undefined;
+    if (!saved || Object.keys(saved).length === 0) return;
 
     setSearchParams(saved);
-    savedCriteriaHydratedRef.current = true;
 
     if (Array.isArray(saved.lotNumbers) && saved.lotNumbers.length > 0) {
       const restored = ['', '', '', '', ''];
       saved.lotNumbers.slice(0, 5).forEach((lot, i) => { restored[i] = lot; });
       setRawLotInput(restored);
     }
+    // Multi-selects are remounted in the effects below, once their option
+    // lists are loaded — otherwise FilterableMultiSelect's initialSelectedItems
+    // would resolve against an empty items array.
+  }, [savedCriteriaQuery.isSuccess, savedCriteriaQuery.data]);
 
-    // Force the multi-selects to re-mount so `initialSelectedItems`
-    // reflects the just-hydrated saved values.
-    if (needsTestTypes || needsActivityIds) {
-      setMultiSelectResetKeys((prev) => ({
-        testTypes: needsTestTypes ? prev.testTypes + 1 : prev.testTypes,
-        activityIds: needsActivityIds ? prev.activityIds + 1 : prev.activityIds
-      }));
-    }
-  }, [
-    savedCriteriaQuery.isSuccess,
-    savedCriteriaQuery.data,
-    testTypeQuery.isSuccess,
-    activityIdQuery.isSuccess
-  ]);
+  useEffect(() => {
+    if (multiSelectHydratedRef.current.testTypes) return;
+    if (!savedCriteriaHydratedRef.current) return;
+    if (!testTypeQuery.isSuccess) return;
+    if (!searchParams.testTypes?.length) return;
+
+    multiSelectHydratedRef.current.testTypes = true;
+    setMultiSelectResetKeys((prev) => ({ ...prev, testTypes: prev.testTypes + 1 }));
+  }, [testTypeQuery.isSuccess, searchParams.testTypes]);
+
+  useEffect(() => {
+    if (multiSelectHydratedRef.current.activityIds) return;
+    if (!savedCriteriaHydratedRef.current) return;
+    if (!activityIdQuery.isSuccess) return;
+    if (!searchParams.activityIds?.length) return;
+
+    multiSelectHydratedRef.current.activityIds = true;
+    setMultiSelectResetKeys((prev) => ({ ...prev, activityIds: prev.activityIds + 1 }));
+  }, [activityIdQuery.isSuccess, searchParams.activityIds]);
 
   useEffect(() => {
     if (savedCriteriaQuery.error) {
@@ -408,7 +446,7 @@ const TestSearch = () => {
     const sort = sorting[0];
     searchMutation.mutate(
       {
-        filter: searchParams,
+        filter: buildSearchCriteria(),
         page: pageIndex,
         size: pageSize,
         sortBy: sort?.id,
@@ -454,45 +492,6 @@ const TestSearch = () => {
     markUserEdited();
     setSearchParams(value);
   };
-
-  const padSeedlotNumber = (value: string): string => {
-    if (/^f/i.test(value)) {
-      return value;
-    }
-
-    // Seedlot must be numeric
-    if (!/^\d+$/.test(value)) {
-      return value;
-    }
-
-    return value.padStart(5, '0');
-  };
-
-  const getPaddedLotNumbers = () => rawLotInput.reduce<string[]>(
-    (result, inputValue) => {
-      const trimmedValue = inputValue.trim();
-      if (trimmedValue) {
-        result.push(padSeedlotNumber(trimmedValue));
-      }
-      return result;
-    },
-    []
-  );
-
-  const normalizeTestTypes = (testTypes: string[]) => testTypes.map((testType: string) => {
-    const value = (testType ?? '').toLowerCase();
-    if (value === 'sa') return 'GSA';
-    if (value === 'se') return 'GSE';
-    return testType;
-  });
-
-  const buildSearchCriteria = (paddedLotNumbers = getPaddedLotNumbers()) => ({
-    ...searchParams,
-    lotNumbers: paddedLotNumbers.length > 0 ? paddedLotNumbers : undefined,
-    ...(searchParams.testTypes?.length
-      ? { testTypes: normalizeTestTypes(searchParams.testTypes) }
-      : {})
-  });
 
   const hasValidationErrors = (): boolean => Object.values(validateSearch).some(
     (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
