@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "CNS_T_TEST_REP_GERM")
+@Table(name = "CNS_T_TEST_REP_GERM", schema = "CONSEP")
 @Schema(description = "Represents a single replicate of a germination test in CONSEP")
 public class TestRepGermEntity {
 
@@ -41,7 +41,7 @@ public class TestRepGermEntity {
   @Column(name = "FINAL_UNGRM_DAMAGD", precision = 5, scale = 0)
   private Integer finalUngrmDamagd;
 
-  @Column(name = "git", precision = 5, scale = 0)
+  @Column(name = "FINAL_UNGRM_ROTTEN", precision = 5, scale = 0)
   private Integer finalUngrmRotten;
 
   @Column(name = "FINAL_PREGERM", precision = 5, scale = 0)

@@ -7,7 +7,10 @@ import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
  * Utility class responsible for mapping between {@link TestRepGermEntity}
  * and {@link TestRepGermDto}.
  */
-public class TestRepGermMapper {
+public final class TestRepGermMapper {
+
+  private TestRepGermMapper() {}
+
   /**
    * Converts a {@link TestRepGermEntity} into a {@link TestRepGermDto}.
    *

@@ -17,10 +17,21 @@ public interface TestRepGermRepository
 
   @Query(
       value = """
-        SELECT *
-        FROM CONSEP.CNS_T_TEST_REP_GERM
-        WHERE RIA_SKEY = :riaKey
-        ORDER BY TEST_REPLICATE_NO
+        SELECT RIA_SKEY,
+               TEST_REPLICATE_NO,
+               TOTAL_NO_SEEDS,
+               FINAL_UNGRM_NORMAL,
+               FINAL_UNGRM_SHRVL,
+               FINAL_UNGRM_EMPTY,
+               FINAL_UNGRM_INSCT,
+               FINAL_UNGRM_DAMAGD,
+               FINAL_UNGRM_ROTTEN,
+               FINAL_PREGERM,
+               REP_ACCEPTED_IND,
+               TOLRNC_OVRRDE_DESC
+          FROM CONSEP.CNS_T_TEST_REP_GERM
+         WHERE RIA_SKEY = :riaKey
+         ORDER BY TEST_REPLICATE_NO
       """,
       nativeQuery = true)
   List<TestRepGermEntity> findByRiaKeyOrderByReplicateNumber(

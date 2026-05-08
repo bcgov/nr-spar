@@ -54,6 +54,12 @@ public class TestRepGermEndpoint {
           description = "Access token is missing or invalid",
           content =
               @Content(
+                  schema = @Schema(implementation = Void.class))),
+      @ApiResponse(
+          responseCode = "403",
+          description = "User does not have the required role",
+          content =
+              @Content(
                   schema = @Schema(implementation = Void.class)))
   })
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
