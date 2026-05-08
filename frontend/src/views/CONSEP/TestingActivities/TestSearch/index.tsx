@@ -51,7 +51,8 @@ import {
   ADV_FILTER_STATUS_MAPS,
   initialErrorValue,
   isFamilyLot,
-  TESTING_ACTIVITIES_SEARCH_PAGE_ID
+  TESTING_ACTIVITIES_SEARCH_PAGE_ID,
+  hasValidationErrors
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import {
@@ -310,7 +311,6 @@ const TestSearch = () => {
     queryKey: ['search-criteria', TESTING_ACTIVITIES_SEARCH_PAGE_ID],
     queryFn: () => getSearchCriteria(TESTING_ACTIVITIES_SEARCH_PAGE_ID),
     staleTime: 0,
-    gcTime: 0,
     retry: false,
     refetchOnWindowFocus: false
   });
@@ -493,13 +493,9 @@ const TestSearch = () => {
     setSearchParams(value);
   };
 
-  const hasValidationErrors = (): boolean => Object.values(validateSearch).some(
-    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
-  );
-
   const handleSaveCriteria = () => {
     resetAlert();
-    if (hasValidationErrors()) {
+    if (hasValidationErrors(validateSearch)) {
       setAlert({
         status: 'error',
         message: VALIDATION_ERROR_MESSAGE
@@ -805,7 +801,7 @@ const TestSearch = () => {
           noValidate
           onSubmit={(e) => {
             e.preventDefault();
-            if (!hasValidationErrors()) {
+            if (!hasValidationErrors(validateSearch)) {
               handleSearchClick();
             }
           }}
@@ -935,7 +931,7 @@ const TestSearch = () => {
                   renderIcon={Search}
                   iconDescription="Search activity"
                   size="md"
-                  disabled={hasValidationErrors()}
+                  disabled={hasValidationErrors(validateSearch)}
                 >
                   Search activity
                 </Button>
@@ -1001,7 +997,7 @@ const TestSearch = () => {
       </FlexGrid>
       <FlexGrid>
         <Row className="consep-test-search-alert">
-          {hasValidationErrors() ? (
+          {hasValidationErrors(validateSearch) ? (
             <Column>
               <InlineNotification
                 lowContrast

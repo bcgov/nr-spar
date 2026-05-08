@@ -25,7 +25,7 @@ import { getRequestTypes, getTestCategoryCodes } from '../../../../../api-servic
 import type { TestCodeType } from '../../../../../types/consep/TestingSearchType';
 import {
   advDateTypes, DATE_FORMAT, errorMessages, initialErrorValue,
-  SAFE_MARGIN, testRanks, toSelectedItemString, dateField
+  SAFE_MARGIN, testRanks, toSelectedItemString, dateField, hasValidationErrors
 } from '../constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from '../definitions';
@@ -56,9 +56,7 @@ const AdvancedFilters = ({
 }: AdvancedFiltersProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const windowSize = useWindowSize();
-  const hasValidationErrors = Object.values(validateSearch).some(
-    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
-  );
+  const validationErrors = hasValidationErrors(validateSearch);
 
   const testCategoryQuery = useQuery({
     queryKey: ['test-category-codes'],
@@ -718,7 +716,7 @@ const AdvancedFilters = ({
             size="md"
             kind="tertiary"
             onClick={onSaveCriteria}
-            disabled={isSavingCriteria || hasValidationErrors}
+            disabled={isSavingCriteria || validationErrors}
           >
             Save search criteria
           </Button>

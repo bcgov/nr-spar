@@ -82,6 +82,12 @@ export const iniActSearchValidation: ActivitySearchValidation = {
   orchardId: initialErrorValue
 };
 
+export const hasValidationErrors = (validation: ActivitySearchValidation): boolean => (
+  Object.values(validation).some(
+    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
+  )
+);
+
 export const testRanks: string[] = [
   'A', 'B', 'C', 'P'
 ];
