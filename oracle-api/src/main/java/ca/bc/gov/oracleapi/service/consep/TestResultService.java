@@ -2,10 +2,12 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
@@ -21,6 +23,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -70,6 +74,79 @@ public class TestResultService {
 
     testResultRepository.updateTestResultStatusToAccepted(riaKey);
     SparLog.info("Test result accepted for RIA_SKEY: {}", riaKey);
+  }
+
+  /**
+   * Get the germination test header for the given riaKey.
+   *
+   * @param riaKey the identifier key for the test result table
+   * @return the germination test header
+   */
+  public GerminationTestHeaderDto getGerminationTestHeader(BigDecimal riaKey) {
+    SparLog.info("Fetching germination test header for RIA_SKEY: {}", riaKey);
+
+    try {
+      GerminationTestHeaderDto dto =
+          testResultRepository
+              .findGerminationTestHeaderByRiaKey(riaKey)
+              .orElseThrow(
+                  () -> {
+                    SparLog.warn("No germination test header found for RIA_SKEY: {}", riaKey);
+                    return new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY");
+                  });
+
+      // Compute soakEndDate in service layer
+      LocalDateTime soakEndDate = null;
+      if (dto.actualBeginDtTm() != null) {
+        // Get soak hours from test result
+        TestRegimeEntity regime = testRegimeRepository.findById(dto.activityTypeCd()).orElse(null);
+        int soakHours =
+            (regime != null && regime.getSoakHours() != null) ? regime.getSoakHours() : 0;
+        soakEndDate = dto.actualBeginDtTm().plusHours(soakHours);
+      }
+
+      // Create new DTO with computed soakEndDate
+      return new GerminationTestHeaderDto(
+          dto.riaSkey(),
+          dto.activityTypeCd(),
+          dto.actualBeginDtTm(),
+          dto.actualEndDtTm(),
+          dto.testCategoryCd(),
+          dto.moistureStatusCd(),
+          dto.sampleDesc(),
+          dto.acceptResultInd(),
+          dto.testCompleteInd(),
+          dto.riaComment(),
+          dto.standardTestInd(),
+          dto.testRank(),
+          dto.germinationPct(),
+          dto.germinationValue(),
+          dto.peakValueGrmPct(),
+          dto.peakValueNoDays(),
+          dto.seedWithdrawalDate(),
+          dto.revisedStartDt(),
+          dto.revisedEndDt(),
+          dto.activityDuration(),
+          dto.actvtyTmUnitSt(),
+          dto.stratStartDt(),
+          dto.drybackStartDate(),
+          dto.warmStratStartDate(),
+          dto.germinatorEntry(),
+          dto.germinatorTrayId(),
+          dto.germinatorId(),
+          soakEndDate,
+          dto.imbibedWt(),
+          dto.dryWeight(),
+          dto.drybackWeight(),
+          dto.intrmdtCleanrInd(),
+          dto.requestTypeSt());
+
+    } catch (IncorrectResultSizeDataAccessException ex) {
+      SparLog.error("Data integrity issue: multiple rows found for RIA_SKEY {}", riaKey, ex);
+      throw new DataIntegrityViolationException(
+          "Expected exactly one germination test row for RIA_SKEY " + riaKey, ex);
+    }
   }
 
   /**
@@ -236,9 +313,9 @@ public class TestResultService {
             }
           } else {
             SparLog.warn(
-                "Skipping commitment processing for activity {} because requestSkey or itemId is null",
-                activityRiaSkey
-            );
+                "Skipping commitment processing for activity {} because requestSkey or itemId is"
+                    + " null",
+                activityRiaSkey);
           }
         }
       }
