@@ -19,7 +19,7 @@ class SeedlotMeanGeoCalculatorTest {
   }
 
   @Test
-  void elevation_minEqualsMax_usesMax() {
+  void elevationMinEqualsMaxUsesMaxTest() {
     Seedlot seedlot = baseSeedlot();
     seedlot.setElevationMin(500);
     seedlot.setElevationMax(500);
@@ -30,7 +30,7 @@ class SeedlotMeanGeoCalculatorTest {
   }
 
   @Test
-  void elevation_minNotEqualsMax_usesCollection() {
+  void elevationMinNotEqualsMaxUsesCollectionTest() {
     Seedlot seedlot = baseSeedlot();
     seedlot.setElevationMin(200);
     seedlot.setElevationMax(800);
@@ -41,7 +41,7 @@ class SeedlotMeanGeoCalculatorTest {
   }
 
   @Test
-  void elevation_bothNull_fallsBackToCollection() {
+  void elevationBothNullFallsBackToCollectionTest() {
     // Regression for SPRR048 / issue 2434: when min/max are NULL the mean must still
     // be populated (not left NULL) so the legacy report does not silently drop the row.
     Seedlot seedlot = baseSeedlot();
@@ -50,13 +50,11 @@ class SeedlotMeanGeoCalculatorTest {
 
     SeedlotMeanGeoCalculator.applyMeanAreaOfUse(seedlot);
 
-    // min == max (both null) -> rule says use max, which is null. Caller is expected
-    // to set min/max before calling, but verify behaviour is deterministic.
-    Assertions.assertNull(seedlot.getElevation());
+    Assertions.assertEquals(450, seedlot.getElevation());
   }
 
   @Test
-  void latitude_allDmsComponentsEqual_usesMax() {
+  void latitudeAllDmsComponentsEqualUsesMaxTest() {
     Seedlot seedlot = baseSeedlot();
     seedlot.setLatitudeDegMin(50);
     seedlot.setLatitudeDegMax(50);
@@ -73,7 +71,7 @@ class SeedlotMeanGeoCalculatorTest {
   }
 
   @Test
-  void latitude_anyDmsComponentDiffers_usesCollection() {
+  void latitudeAnyDmsComponentDiffersUsesCollectionTest() {
     Seedlot seedlot = baseSeedlot();
     seedlot.setLatitudeDegMin(50);
     seedlot.setLatitudeDegMax(50);
@@ -90,7 +88,18 @@ class SeedlotMeanGeoCalculatorTest {
   }
 
   @Test
-  void longitude_allDmsComponentsEqual_usesMax() {
+  void latitudeAllDmsComponentsNullFallsBackToCollectionTest() {
+    Seedlot seedlot = baseSeedlot();
+
+    SeedlotMeanGeoCalculator.applyMeanAreaOfUse(seedlot);
+
+    Assertions.assertEquals(49, seedlot.getLatitudeDegrees());
+    Assertions.assertEquals(30, seedlot.getLatitudeMinutes());
+    Assertions.assertEquals(0, seedlot.getLatitudeSeconds());
+  }
+
+  @Test
+  void longitudeAllDmsComponentsEqualUsesMaxTest() {
     Seedlot seedlot = baseSeedlot();
     seedlot.setLongitudeDegMin(125);
     seedlot.setLongitudeDegMax(125);
@@ -107,7 +116,7 @@ class SeedlotMeanGeoCalculatorTest {
   }
 
   @Test
-  void longitude_dmsComponentsDiffer_usesCollection() {
+  void longitudeDmsComponentsDifferUsesCollectionTest() {
     Seedlot seedlot = baseSeedlot();
     seedlot.setLongitudeDegMin(124);
     seedlot.setLongitudeDegMax(125);

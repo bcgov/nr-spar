@@ -6,12 +6,15 @@
 -- columns and silently excluded affected seedlots (e.g. 64220).
 --
 -- Rule (per the Forestry Confluence spec, mirrored in the new Java helper
--- SeedlotMeanGeoCalculator): when min == max the mean = max; otherwise mean falls
--- back to the corresponding collection mean.
+-- SeedlotMeanGeoCalculator): when min == max and max is populated the mean = max;
+-- otherwise mean falls back to the corresponding collection mean. The lat/long
+-- updates use COALESCE per column so already-populated components are preserved.
 
 update spar.seedlot
    set elevation = case
-                     when elevation_min is not distinct from elevation_max then elevation_max
+                     when elevation_max is not null
+                          and elevation_min is not distinct from elevation_max
+                       then elevation_max
                      else collection_elevation
                    end
  where elevation is null
@@ -20,15 +23,21 @@ update spar.seedlot
         or collection_elevation is not null);
 
 update spar.seedlot
-   set latitude_degrees = case when lat_components_match then latitude_deg_max
-                               else collection_latitude_deg end,
-       latitude_minutes = case when lat_components_match then latitude_min_max
-                               else collection_latitude_min end,
-       latitude_seconds = case when lat_components_match then latitude_sec_max
-                               else collection_latitude_sec end
+   set latitude_degrees = coalesce(latitude_degrees,
+                                   case when lat_components_match then latitude_deg_max
+                                        else collection_latitude_deg end),
+       latitude_minutes = coalesce(latitude_minutes,
+                                   case when lat_components_match then latitude_min_max
+                                        else collection_latitude_min end),
+       latitude_seconds = coalesce(latitude_seconds,
+                                   case when lat_components_match then latitude_sec_max
+                                        else collection_latitude_sec end)
   from (
     select seedlot_number,
-           (latitude_deg_min is not distinct from latitude_deg_max
+           (latitude_deg_max is not null
+              and latitude_min_max is not null
+              and latitude_sec_max is not null
+              and latitude_deg_min is not distinct from latitude_deg_max
               and latitude_min_min is not distinct from latitude_min_max
               and latitude_sec_min is not distinct from latitude_sec_max) as lat_components_match
       from spar.seedlot
@@ -42,15 +51,21 @@ update spar.seedlot
         or spar.seedlot.collection_latitude_deg is not null);
 
 update spar.seedlot
-   set longitude_degrees = case when long_components_match then longitude_deg_max
-                                else collection_longitude_deg end,
-       longitude_minutes = case when long_components_match then longitude_min_max
-                                else collection_longitude_min end,
-       longitude_seconds = case when long_components_match then longitude_sec_max
-                                else collection_longitude_sec end
+   set longitude_degrees = coalesce(longitude_degrees,
+                                    case when long_components_match then longitude_deg_max
+                                         else collection_longitude_deg end),
+       longitude_minutes = coalesce(longitude_minutes,
+                                    case when long_components_match then longitude_min_max
+                                         else collection_longitude_min end),
+       longitude_seconds = coalesce(longitude_seconds,
+                                    case when long_components_match then longitude_sec_max
+                                         else collection_longitude_sec end)
   from (
     select seedlot_number,
-           (longitude_deg_min is not distinct from longitude_deg_max
+           (longitude_deg_max is not null
+              and longitude_min_max is not null
+              and longitude_sec_max is not null
+              and longitude_deg_min is not distinct from longitude_deg_max
               and longitude_min_min is not distinct from longitude_min_max
               and longitude_sec_min is not distinct from longitude_sec_max) as long_components_match
       from spar.seedlot

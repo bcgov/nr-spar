@@ -6,8 +6,8 @@ import java.util.Objects;
 /**
  * Implements STEP 5 ("Set Mean Area of Use") of the Forestry Calculating Area of Use Geography
  * specification. For each of elevation / latitude / longitude, the seedlot mean column is set to
- * the area-of-use max when min == max across all DMS components, otherwise it falls back to the
- * collection mean.
+ * the area-of-use max when min == max across all DMS components and max is populated, otherwise
+ * it falls back to the collection mean.
  *
  * <p>The seedlot mean columns are read by legacy reports (e.g. SPRR048 Short Form). Leaving them
  * NULL silently drops rows from those reports.
@@ -22,33 +22,40 @@ public final class SeedlotMeanGeoCalculator {
    */
   public static void applyMeanAreaOfUse(Seedlot seedlot) {
     // Mean Elevation
+    boolean elevationUseMax =
+        seedlot.getElevationMax() != null
+            && Objects.equals(seedlot.getElevationMin(), seedlot.getElevationMax());
     seedlot.setElevation(
-        Objects.equals(seedlot.getElevationMin(), seedlot.getElevationMax())
-            ? seedlot.getElevationMax()
-            : seedlot.getCollectionElevation());
+        elevationUseMax ? seedlot.getElevationMax() : seedlot.getCollectionElevation());
 
-    // Mean Latitude (DMS components must all match for min == max)
-    boolean latEqual =
-        Objects.equals(seedlot.getLatitudeDegMin(), seedlot.getLatitudeDegMax())
+    // Mean Latitude (all DMS max components must be populated and equal to min)
+    boolean latUseMax =
+        seedlot.getLatitudeDegMax() != null
+            && seedlot.getLatitudeMinMax() != null
+            && seedlot.getLatitudeSecMax() != null
+            && Objects.equals(seedlot.getLatitudeDegMin(), seedlot.getLatitudeDegMax())
             && Objects.equals(seedlot.getLatitudeMinMin(), seedlot.getLatitudeMinMax())
             && Objects.equals(seedlot.getLatitudeSecMin(), seedlot.getLatitudeSecMax());
     seedlot.setLatitudeDegrees(
-        latEqual ? seedlot.getLatitudeDegMax() : seedlot.getCollectionLatitudeDeg());
+        latUseMax ? seedlot.getLatitudeDegMax() : seedlot.getCollectionLatitudeDeg());
     seedlot.setLatitudeMinutes(
-        latEqual ? seedlot.getLatitudeMinMax() : seedlot.getCollectionLatitudeMin());
+        latUseMax ? seedlot.getLatitudeMinMax() : seedlot.getCollectionLatitudeMin());
     seedlot.setLatitudeSeconds(
-        latEqual ? seedlot.getLatitudeSecMax() : seedlot.getCollectionLatitudeSec());
+        latUseMax ? seedlot.getLatitudeSecMax() : seedlot.getCollectionLatitudeSec());
 
     // Mean Longitude
-    boolean longEqual =
-        Objects.equals(seedlot.getLongitudeDegMin(), seedlot.getLongitudeDegMax())
+    boolean longUseMax =
+        seedlot.getLongitudeDegMax() != null
+            && seedlot.getLongitudeMinMax() != null
+            && seedlot.getLongitudeSecMax() != null
+            && Objects.equals(seedlot.getLongitudeDegMin(), seedlot.getLongitudeDegMax())
             && Objects.equals(seedlot.getLongitudeMinMin(), seedlot.getLongitudeMinMax())
             && Objects.equals(seedlot.getLongitudeSecMin(), seedlot.getLongitudeSecMax());
     seedlot.setLongitudeDegrees(
-        longEqual ? seedlot.getLongitudeDegMax() : seedlot.getCollectionLongitudeDeg());
+        longUseMax ? seedlot.getLongitudeDegMax() : seedlot.getCollectionLongitudeDeg());
     seedlot.setLongitudeMinutes(
-        longEqual ? seedlot.getLongitudeMinMax() : seedlot.getCollectionLongitudeMin());
+        longUseMax ? seedlot.getLongitudeMinMax() : seedlot.getCollectionLongitudeMin());
     seedlot.setLongitudeSeconds(
-        longEqual ? seedlot.getLongitudeSecMax() : seedlot.getCollectionLongitudeSec());
+        longUseMax ? seedlot.getLongitudeSecMax() : seedlot.getCollectionLongitudeSec());
   }
 }

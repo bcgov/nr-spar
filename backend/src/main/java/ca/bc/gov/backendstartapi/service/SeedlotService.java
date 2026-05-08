@@ -826,6 +826,10 @@ public class SeedlotService {
       if (!hasAreaOfUseData(seedlot)) {
         SparLog.info("Area of Use data has NOT been set previously, setting area of use data");
         setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+      } else {
+        // Area of Use was set on a prior save; the collection mean above may have
+        // changed, so recompute the mean elevation/lat/long for SPRR048.
+        SeedlotMeanGeoCalculator.applyMeanAreaOfUse(seedlot);
       }
     } else {
       updateApplicantAndSeedlot(seedlot, form.applicantAndSeedlotInfo());
