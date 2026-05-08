@@ -2,7 +2,6 @@ package ca.bc.gov.oracleapi.repository.consep;
 
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
-
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -23,13 +22,15 @@ public interface GerminatorTrayRepository extends JpaRepository<GerminatorTrayEn
    */
   @Modifying
   @Transactional
-  @Query("""
+  @Query(
+      """
       DELETE FROM GerminatorTrayEntity t
        WHERE t.germinatorTrayId = :germinatorTrayId
       """)
   int deleteByGerminatorTrayId(@Param("germinatorTrayId") Integer germinatorTrayId);
 
-  @Query("""
+  @Query(
+      """
       SELECT new ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto(
           tray.germinatorTrayId,
           tray.activityTypeCd,
