@@ -131,4 +131,15 @@ class SeedlotMeanGeoCalculatorTest {
     Assertions.assertEquals(15, seedlot.getLongitudeMinutes());
     Assertions.assertEquals(0, seedlot.getLongitudeSeconds());
   }
+
+  @Test
+  void longitudeAllDmsComponentsNullFallsBackToCollectionTest() {
+    Seedlot seedlot = baseSeedlot();
+
+    SeedlotMeanGeoCalculator.applyMeanAreaOfUse(seedlot);
+
+    Assertions.assertEquals(124, seedlot.getLongitudeDegrees());
+    Assertions.assertEquals(15, seedlot.getLongitudeMinutes());
+    Assertions.assertEquals(0, seedlot.getLongitudeSeconds());
+  }
 }
