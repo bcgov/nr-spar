@@ -93,4 +93,13 @@ class TestRepGermEndpointTest {
         .perform(get("/api/test-replicates/881191"))
         .andExpect(status().isForbidden());
   }
+
+  @Test
+  @DisplayName("Get test replicates should return 400 for non-positive riaKey")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
+  void getTestReplicates_shouldReturn400() throws Exception {
+    mockMvc
+        .perform(get("/api/test-replicates/0"))
+        .andExpect(status().isBadRequest());
+  }
 }
