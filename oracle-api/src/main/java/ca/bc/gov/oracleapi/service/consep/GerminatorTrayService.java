@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.service.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayDeleteContentDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
@@ -14,7 +15,10 @@ import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -155,18 +159,23 @@ public class GerminatorTrayService {
 
   /**
    * Delete a tray: detach all tests, update each parent activity timestamp, then delete the tray.
-   * Uses optimistic concurrency; if any DML affects 0 rows, throws and rolls back.
+   * Uses optimistic concurrency with one timestamp per tray item; if any DML affects 0 rows,
+   * throws and rolls back.
    *
    * @param germinatorTrayId the tray to delete
-   * @param activityUpdateTimestamp the current update_timestamp of the parent activity (optimistic lock)
-   * @throws ResponseStatusException 404 if tray not found, 409 with RESELECT_MESSAGE if any DML affects 0 rows
+   * @param contents the tray contents with the current update_timestamp of each parent activity
+   * @throws ResponseStatusException 404 if tray not found, 409 with RESELECT_MESSAGE if any
+   *         DML affects 0 rows
    */
   @Transactional(rollbackFor = ResponseStatusException.class)
-  public void deleteTray(Integer germinatorTrayId, LocalDateTime activityUpdateTimestamp) {
-    if (germinatorTrayId == null || activityUpdateTimestamp == null) {
+  public void deleteTray(
+      Integer germinatorTrayId,
+      List<GerminatorTrayDeleteContentDto> contents
+  ) {
+    if (germinatorTrayId == null || contents == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Germinator tray ID and activity update timestamp are required");
+          "Germinator tray ID and contents are required");
     }
 
     if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
@@ -177,9 +186,13 @@ public class GerminatorTrayService {
 
     List<BigDecimal> riaKeys = testResultRepository.findRiaKeysByGerminatorTrayId(germinatorTrayId);
     SparLog.info("Deleting tray {} with {} tests", germinatorTrayId, riaKeys.size());
+    Map<BigDecimal, LocalDateTime> timestampsByRiaKey = getTimestampsByRiaKey(contents);
+    if (!timestampsByRiaKey.keySet().equals(new HashSet<>(riaKeys))) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
+    }
 
     for (BigDecimal riaKey : riaKeys) {
-      detachTestAndTouchParent(riaKey, activityUpdateTimestamp, germinatorTrayId);
+      detachTestAndTouchParent(riaKey, timestampsByRiaKey.get(riaKey), germinatorTrayId);
     }
 
     int deleteRows = germinatorTrayRepository.deleteByGerminatorTrayId(germinatorTrayId);
@@ -187,6 +200,25 @@ public class GerminatorTrayService {
       throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
     }
     SparLog.info("Tray {} deleted", germinatorTrayId);
+  }
+
+  private Map<BigDecimal, LocalDateTime> getTimestampsByRiaKey(
+      List<GerminatorTrayDeleteContentDto> contents
+  ) {
+    Map<BigDecimal, LocalDateTime> timestampsByRiaKey = new HashMap<>();
+    for (GerminatorTrayDeleteContentDto content : contents) {
+      if (content.riaSkey() == null || content.updateTimestamp() == null) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "RIA key and activity update timestamp are required for each tray content item");
+      }
+      if (timestampsByRiaKey.put(content.riaSkey(), content.updateTimestamp()) != null) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Duplicate RIA key in tray contents");
+      }
+    }
+    return timestampsByRiaKey;
   }
 
   /**
@@ -247,6 +279,7 @@ public class GerminatorTrayService {
         entity.getStratStartDate(),
         entity.getTestCompleteInd(),
         entity.getAcceptResultInd(),
+        entity.getRiaSkey(),
         updateTimestamp);
   }
 
