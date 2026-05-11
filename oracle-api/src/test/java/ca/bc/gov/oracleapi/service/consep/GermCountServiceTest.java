@@ -2,13 +2,14 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.GermCountDto;
+import ca.bc.gov.oracleapi.dto.consep.GermCountSlotDto;
 import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
 import java.math.BigDecimal;
@@ -75,31 +76,30 @@ class GermCountServiceTest {
 
     assertNotNull(dto);
     assertEquals(riaSkey, dto.riaSkey());
+    assertEquals(2, dto.slots().size());
 
-    assertEquals(new BigDecimal("1001"), dto.dailyGermSkey1());
-    assertEquals(LocalDate.of(2026, 4, 1), dto.countDt1());
-    assertEquals(1, dto.dayNoOfTest1());
-    assertEquals(10, dto.rep1NoSeedsGerm1());
-    assertEquals(12, dto.rep2NoSeedsGerm1());
-    assertEquals(11, dto.rep3NoSeedsGerm1());
-    assertEquals(9, dto.rep4NoSeedsGerm1());
-    assertEquals(new BigDecimal("0.4200"), dto.cumulativeGerm1());
+    GermCountSlotDto slot1 = dto.slots().get(0);
+    assertEquals(1, slot1.slotIndex());
+    assertEquals(new BigDecimal("1001"), slot1.dailyGermSkey());
+    assertEquals(LocalDate.of(2026, 4, 1), slot1.countDt());
+    assertEquals(1, slot1.dayNoOfTest());
+    assertEquals(10, slot1.rep1NoSeedsGerm());
+    assertEquals(12, slot1.rep2NoSeedsGerm());
+    assertEquals(11, slot1.rep3NoSeedsGerm());
+    assertEquals(9, slot1.rep4NoSeedsGerm());
+    assertEquals(new BigDecimal("0.4200"), slot1.cumulativeGerm());
 
-    assertEquals(new BigDecimal("1002"), dto.dailyGermSkey2());
-    assertEquals(LocalDate.of(2026, 4, 2), dto.countDt2());
-    assertEquals(2, dto.dayNoOfTest2());
-    assertEquals(14, dto.rep1NoSeedsGerm2());
-    assertEquals(15, dto.rep2NoSeedsGerm2());
-    assertEquals(13, dto.rep3NoSeedsGerm2());
-    assertEquals(16, dto.rep4NoSeedsGerm2());
-    assertEquals(new BigDecimal("0.5800"), dto.cumulativeGerm2());
+    GermCountSlotDto slot2 = dto.slots().get(1);
+    assertEquals(2, slot2.slotIndex());
+    assertEquals(new BigDecimal("1002"), slot2.dailyGermSkey());
+    assertEquals(LocalDate.of(2026, 4, 2), slot2.countDt());
+    assertEquals(2, slot2.dayNoOfTest());
+    assertEquals(14, slot2.rep1NoSeedsGerm());
+    assertEquals(15, slot2.rep2NoSeedsGerm());
+    assertEquals(13, slot2.rep3NoSeedsGerm());
+    assertEquals(16, slot2.rep4NoSeedsGerm());
+    assertEquals(new BigDecimal("0.5800"), slot2.cumulativeGerm());
 
-    // Remaining slots should be null
-    assertNull(dto.dailyGermSkey3());
-    assertNull(dto.countDt3());
-    assertNull(dto.dailyGermSkey13());
-
-    // Audit fields
     assertEquals("USER1", dto.entryUserid());
     assertEquals(LocalDateTime.of(2026, 1, 10, 9, 0), dto.entryTimestamp());
     assertEquals("USER2", dto.updateUserid());
@@ -109,7 +109,7 @@ class GermCountServiceTest {
   }
 
   @Test
-  void getGermCounts_shouldReturnDto_whenAllSlotsAreNull() {
+  void getGermCounts_shouldReturnEmptySlotList_whenAllSlotsAreNull() {
     BigDecimal riaSkey = new BigDecimal("100001");
 
     GermCountEntity entity = new GermCountEntity();
@@ -121,12 +121,7 @@ class GermCountServiceTest {
 
     assertNotNull(dto);
     assertEquals(riaSkey, dto.riaSkey());
-    assertNull(dto.dailyGermSkey1());
-    assertNull(dto.countDt1());
-    assertNull(dto.cumulativeGerm1());
-    assertNull(dto.dailyGermSkey13());
-    assertNull(dto.entryUserid());
-    assertNull(dto.updateTimestamp());
+    assertTrue(dto.slots().isEmpty());
 
     verify(germCountRepository).findById(riaSkey);
   }
