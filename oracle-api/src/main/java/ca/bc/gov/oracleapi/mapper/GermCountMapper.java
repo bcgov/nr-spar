@@ -10,13 +10,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import org.mapstruct.factory.Mappers;
 
 /** Maps between {@link GermCountEntity} and {@link GermCountDto}. */
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface GermCountMapper {
-
-  GermCountMapper mapper = Mappers.getMapper(GermCountMapper.class);
 
   // ── Entity → DTO ──────────────────────────────────────────────────────────
   // riaSkey and all audit fields are auto-wired by name; slots come from the helper.

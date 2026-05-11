@@ -16,7 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class GermCountService {
 
   private final GermCountRepository germCountRepository;
-  private final GermCountMapper mapper = GermCountMapper.mapper;
+  private final GermCountMapper mapper;
 
   /**
    * Retrieve the germination count record for the given RIA_SKEY.
