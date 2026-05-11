@@ -509,6 +509,12 @@
         <artifactId>nimbus-jose-jwt</artifactId>
         <version>10.6</version>
       </dependency>
+      <!-- CVE-2026-42198: pin to 42.7.11 -->
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.7.11</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
