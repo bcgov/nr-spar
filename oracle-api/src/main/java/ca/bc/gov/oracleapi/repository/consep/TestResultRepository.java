@@ -145,6 +145,20 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
    */
   int countByGerminatorTrayId(Integer germinatorTrayId);
 
+  @Query("""
+      SELECT COUNT(rst)
+      FROM TestResultEntity rst
+      JOIN ActivityEntity act
+        ON act.riaKey = rst.riaKey
+      WHERE act.seedlotNumber = :seedlotNumber
+        AND rst.testCategory = 'STD'
+        AND rst.acceptResult = 1
+        AND rst.testRank = 'A'
+      """)
+  long countAcceptedStdRankA(
+      @Param("seedlotNumber") String seedlotNumber
+  );
+
   @Query(
       """
       SELECT new ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto(

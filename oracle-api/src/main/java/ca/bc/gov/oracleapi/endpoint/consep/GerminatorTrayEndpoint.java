@@ -65,7 +65,11 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "201",
       description = "Successfully assigned trays for the provided activities.",
-      content = @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class)))
+      content = @Content(
+        array = @ArraySchema(
+          schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class)
+        )
+      )
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
@@ -89,7 +93,8 @@ public class GerminatorTrayEndpoint {
       description = "Successfully assigned germinator ID to the tray.",
       content =
       @Content(
-          schema = @Schema(implementation = GerminatorIdAssignResponseDto.class))
+          schema = @Schema(implementation = GerminatorIdAssignResponseDto.class)
+      )
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
@@ -163,7 +168,7 @@ public class GerminatorTrayEndpoint {
    * on controller method parameters (e.g. {@code @RequestParam}, {@code @PathVariable})
    * fails, and returns a {@link ValidationExceptionResponse}.
    *
-   * Applies only to exceptions raised within {@link GerminatorTrayEndpoint}.
+   * <p>Applies only to exceptions raised within {@link GerminatorTrayEndpoint}.
    */
   @ExceptionHandler(ConstraintViolationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -200,7 +205,12 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "200",
       description = "Successfully retrieved tests for the germinator tray.",
-      content = @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTrayContentsDto.class))))
+      content = @Content(
+          array = @ArraySchema(
+              schema = @Schema(implementation = GerminatorTrayContentsDto.class)
+          )
+      )
+  )
   @ApiAuthResponse
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public List<GerminatorTrayContentsDto> getTestsByTrayId(@PathVariable @Positive Integer germinatorTrayId) {
@@ -213,8 +223,12 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "200",
       description = "Successfully searched germination trays.",
-      content =
-        @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTraySearchResponseDto.class))))
+      content = @Content(
+          array = @ArraySchema(
+              schema = @Schema(implementation = GerminatorTraySearchResponseDto.class)
+          )
+      )
+  )
   @ApiAuthResponse
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public List<GerminatorTraySearchResponseDto> searchGerminatorTrays(
