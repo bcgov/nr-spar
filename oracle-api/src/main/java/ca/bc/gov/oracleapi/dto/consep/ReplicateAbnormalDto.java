@@ -2,6 +2,15 @@ package ca.bc.gov.oracleapi.dto.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * A DTO representing abnormality data for a seed replicate.
+ * 
+ * This class contains counts of abnormal seeds categorized by the type of abnormality
+ * observed during germination testing. Each field represents the number of seeds
+ * exhibiting a specific abnormal characteristic.
+ * 
+ * This is a reusable class for the replicates used in DailyAbnormalResponseDto.
+ */
 @Schema(description = "This class represents a data object for the replicate abnormality.")
 public class ReplicateAbnormalDto {
   @Schema(
