@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.oracleapi.dto.consep.GermCountDto;
 import ca.bc.gov.oracleapi.dto.consep.GermCountSlotDto;
 import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
+import ca.bc.gov.oracleapi.mapper.GermCountMapper;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,8 +19,10 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,6 +32,9 @@ class GermCountServiceTest {
 
   @Mock
   private GermCountRepository germCountRepository;
+
+  @Spy
+  private GermCountMapper mapper = Mappers.getMapper(GermCountMapper.class);
 
   @InjectMocks
   private GermCountService germCountService;
