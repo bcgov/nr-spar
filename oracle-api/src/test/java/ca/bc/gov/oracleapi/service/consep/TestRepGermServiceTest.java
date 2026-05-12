@@ -72,6 +72,28 @@ class TestRepGermServiceTest {
   }
 
   @Test
+  @DisplayName("Replicate with totalNoSeeds <= 0 should not be accepted")
+  void getTestReplicates_shouldForceNotAcceptedWhenTotalSeedsNotPositive() {
+    BigDecimal riaKey = new BigDecimal("881191");
+    TestRepGermEntity zeroSeeds = buildEntity(riaKey, 1, 0);
+    zeroSeeds.setRepAcceptedInd(1);
+    TestRepGermEntity nullSeeds = buildEntity(riaKey, 2, 0);
+    nullSeeds.setTotalNoSeeds(null);
+    nullSeeds.setRepAcceptedInd(1);
+
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaKey))
+        .thenReturn(List.of(zeroSeeds, nullSeeds));
+
+    List<TestRepGermDto> result = testRepGermService.getTestReplicates(riaKey);
+
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0).totalNoSeeds()).isEqualTo(0);
+    assertThat(result.get(0).repAcceptedInd()).isEqualTo(0);
+    assertThat(result.get(1).totalNoSeeds()).isNull();
+    assertThat(result.get(1).repAcceptedInd()).isEqualTo(0);
+  }
+
+  @Test
   @DisplayName("Get test replicates should return empty list when no replicates exist")
   void getTestReplicates_shouldReturnEmptyList() {
     BigDecimal riaKey = new BigDecimal("999999");

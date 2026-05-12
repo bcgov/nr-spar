@@ -18,10 +18,15 @@ public final class TestRepGermMapper {
    * @return a DTO containing the relevant data from the entity
    */
   public static TestRepGermDto convertToDto(TestRepGermEntity entity) {
+    Integer totalNoSeeds = entity.getTotalNoSeeds();
+    // Issue #2445: a replicate cannot be accepted unless total seeds > 0
+    Integer repAcceptedInd =
+        (totalNoSeeds == null || totalNoSeeds <= 0) ? 0 : entity.getRepAcceptedInd();
+
     return new TestRepGermDto(
         entity.getId().getRiaKey(),
         entity.getId().getReplicateNumber(),
-        entity.getTotalNoSeeds(),
+        totalNoSeeds,
         entity.getFinalUngrmNormal(),
         entity.getFinalUngrmShrvl(),
         entity.getFinalUngrmEmpty(),
@@ -29,7 +34,7 @@ public final class TestRepGermMapper {
         entity.getFinalUngrmDamagd(),
         entity.getFinalUngrmRotten(),
         entity.getFinalPregerm(),
-        entity.getRepAcceptedInd(),
+        repAcceptedInd,
         entity.getTolrncOvrrdeDesc()
     );
   }
