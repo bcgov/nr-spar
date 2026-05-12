@@ -14,16 +14,16 @@ import jakarta.validation.constraints.NotNull;
  * service layer.
 */
 @Schema(description = "Daily abnormal response")
-public class DailyAbnormalResponseDto {
-  @NotNull
-  @Schema(description = "A surrogate access key for DAILY_GERM table.", example = "12345")
-  Long dailyGermSkey;
+public record DailyAbnormalResponseDto(
+    @NotNull
+    @Schema(description = "A surrogate access key for DAILY_GERM table.", example = "12345")
+    Long dailyGermSkey,
 
-  ReplicateAbnormalDto rep1;
+    ReplicateAbnormalDto rep1,
 
-  ReplicateAbnormalDto rep2;
+    ReplicateAbnormalDto rep2,
 
-  ReplicateAbnormalDto rep3;
+    ReplicateAbnormalDto rep3,
 
-  ReplicateAbnormalDto rep4;
-}
+    ReplicateAbnormalDto rep4
+) {}
