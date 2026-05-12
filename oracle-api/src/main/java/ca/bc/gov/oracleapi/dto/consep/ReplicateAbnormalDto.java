@@ -17,61 +17,61 @@ public class ReplicateAbnormalDto {
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to a reverse embryo.",
       example = "1")
-  Integer AbnormalNumReverseEmbryo;
+  Integer abnormalNumReverseEmbryo;
 
   @Schema(
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to a stunted radicle.",
       example = "1")
-  Integer AbnormalNumStuntedRadicle;
+  Integer abnormalNumStuntedRadicle;
 
   @Schema(
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to a stunted hypocotyl.",
       example = "1")
-  Integer AbnormalNumStuntedHypocotyl;
+  Integer abnormalNumStuntedHypocotyl;
 
   @Schema(
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to being rotten.",
       example = "1")
-  Integer AbnormalNumRotten;
+  Integer abnormalNumRotten;
 
   @Schema(
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to a thickened radicle.",
       example = "1")
-  Integer AbnormalNumThickenedRadicle;
+  Integer abnormalNumThickenedRadicle;
 
   @Schema(
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to being twisted.",
       example = "1")
-  Integer AbnormalNumTwisted;
+  Integer abnormalNumTwisted;
 
   @Schema(
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to a megametophyte collar.",
       example = "1")
-  Integer AbnormalNumMegametophyteCollar;
+  Integer abnormalNumMegametophyteCollar;
 
   @Schema(
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to being weak.",
       example = "1")
-  Integer AbnormalNumWeak;
+  Integer abnormalNumWeak;
 
   @Schema(
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to other reasons.",
       example = "1")
-  Integer AbnormalNumOther;
+  Integer abnormalNumOther;
 
   @Schema(
       description = "The number of seeds, of the ones germinated, which were "
           + "observed to be abnormal due to pregermination.",
       example = "1")
-  Integer AbnormalNumPregermination;
+  Integer abnormalNumPregermination;
 
   @Schema(
       description = "The total number of seeds.",
