@@ -4,8 +4,11 @@ import ca.bc.gov.oracleapi.exception.UserExistsException;
 import ca.bc.gov.oracleapi.exception.UserNotFoundException;
 import ca.bc.gov.oracleapi.response.ExceptionResponse;
 import ca.bc.gov.oracleapi.response.ValidationExceptionResponse;
+import jakarta.validation.ConstraintViolationException;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +28,34 @@ public class RestExceptionEndpoint {
       MethodArgumentNotValidException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ValidationExceptionResponse(ex.getFieldErrors()));
+  }
+
+  /**
+   * Handle {@link ConstraintViolationException} raised when validation on
+   * controller method parameters (e.g. {@code @PathVariable}) fails.
+   *
+   * @param ex ConstraintViolationException instance
+   * @return a {@link ValidationExceptionResponse} listing the invalid fields
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  ResponseEntity<ValidationExceptionResponse> constraintViolation(
+      ConstraintViolationException ex) {
+    List<FieldError> fieldErrors = ex.getConstraintViolations().stream()
+        .map(cv -> {
+          String path = cv.getPropertyPath().toString();
+          String fieldName = path.contains(".")
+              ? path.substring(path.lastIndexOf('.') + 1)
+              : path;
+          return new FieldError(
+              cv.getRootBeanClass().getSimpleName(),
+              fieldName,
+              cv.getMessage()
+          );
+        })
+        .toList();
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ValidationExceptionResponse(fieldErrors));
   }
 
   /**
