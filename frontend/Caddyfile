@@ -44,6 +44,10 @@
 		respond `window.config = {"VITE_NRSPARWEBAPP_VERSION":"{$VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}","VITE_USER_POOLS_ID":"{$VITE_USER_POOLS_ID}","VITE_USER_POOLS_WEB_CLIENT_ID":"{$VITE_USER_POOLS_WEB_CLIENT_ID}","VITE_ZONE":"{$VITE_ZONE}"};`
 	}
 
-	try_files {path} /index.html
+	@spaFallback {
+		header Accept *text/html*
+		not path /assets/* /favicon.ico /env.js
+	}
+	try_files @spaFallback {path} /index.html
 	file_server
 }
