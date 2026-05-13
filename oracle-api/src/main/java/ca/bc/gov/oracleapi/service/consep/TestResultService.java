@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
@@ -236,9 +237,9 @@ public class TestResultService {
             }
           } else {
             SparLog.warn(
-                "Skipping commitment processing for activity {} because requestSkey or itemId is null",
-                activityRiaSkey
-            );
+                "Skipping commitment processing for activity {} because requestSkey or itemId is"
+                    + " null",
+                activityRiaSkey);
           }
         }
       }
@@ -314,5 +315,12 @@ public class TestResultService {
     }
 
     return resultMap;
+  }
+
+  public DailyAbnormalResponseDto getDailyAbnormalCounts(BigDecimal dailyGermSkey) {
+    // implementation
+    if (dailyGermSkey == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no dailyGermSkey found");
+    }
   }
 }
