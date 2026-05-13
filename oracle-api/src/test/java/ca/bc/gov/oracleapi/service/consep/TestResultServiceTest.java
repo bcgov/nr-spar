@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.service.consep;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -515,6 +516,62 @@ class TestResultServiceTest {
             ResponseStatusException.class, () -> testResultService.assignGerminatorTrays(requests));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
+  }
+
+  @Test
+  void determineTestRank_returnsA_whenStdAcceptedAndNoAcceptedStdRankA_Exists() {
+    String seedlotNumber = "12345";
+
+    when(testResultRepository.countAcceptedStdRankA(seedlotNumber)).thenReturn(0L);
+
+    String result = testResultService.determineTestRank(seedlotNumber, "STD", 1);
+
+    assertEquals("A", result);
+    verify(testResultRepository).countAcceptedStdRankA(seedlotNumber);
+  }
+
+  @Test
+  void determineTestRank_returnsP_whenStdAcceptedAndAcceptedStdRankA_Exists() {
+    String seedlotNumber = "12345";
+
+    when(testResultRepository.countAcceptedStdRankA(seedlotNumber)).thenReturn(2L);
+
+    String result = testResultService.determineTestRank(seedlotNumber, "STD", 1);
+
+    assertEquals("P", result);
+    verify(testResultRepository).countAcceptedStdRankA(seedlotNumber);
+  }
+
+  @Test
+  void determineTestRank_returnsNull_whenCategoryIsNotStd() {
+    String seedlotNumber = "12345";
+
+    String result = testResultService.determineTestRank(seedlotNumber, "TST", 1);
+
+    assertNull(result);
+    verify(testResultRepository, never()).countAcceptedStdRankA(any());
+  }
+
+  @Test
+  void determineTestRank_returnsNull_whenAcceptResultIsNotOne() {
+    String seedlotNumber = "12345";
+
+    String result = testResultService.determineTestRank(seedlotNumber, "STD", 0);
+
+    assertNull(result);
+    verify(testResultRepository, never()).countAcceptedStdRankA(any());
+  }
+
+  @Test
+  void determineTestRank_throwsBadRequest_whenSeedlotIsBlank() {
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.determineTestRank(" ", "STD", 1));
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("seedlotNumber is required", ex.getReason());
+    verify(testResultRepository, never()).countAcceptedStdRankA(any());
   }
 
   @Test
