@@ -9,6 +9,7 @@ import { ActivitySearchValidation, ValidationErrorType, ActivitySearchRequest } 
 
 export const SAFE_MARGIN = 16;
 export const DATE_FORMAT = 'Y/m/d';
+export const TESTING_ACTIVITIES_SEARCH_PAGE_ID = 'CONSEP_TESTING_ACTIVITIES_SEARCH';
 export const dateField = {
   placeholderText: 'yyyy/mm/dd',
   helperText: 'year/month/day',
@@ -80,6 +81,12 @@ export const iniActSearchValidation: ActivitySearchValidation = {
   requestYear: initialErrorValue,
   orchardId: initialErrorValue
 };
+
+export const hasValidationErrors = (validation: ActivitySearchValidation): boolean => (
+  Object.values(validation).some(
+    (field) => (Array.isArray(field) ? field.some((f) => f.error) : field.error)
+  )
+);
 
 export const testRanks: string[] = [
   'A', 'B', 'C', 'P'
