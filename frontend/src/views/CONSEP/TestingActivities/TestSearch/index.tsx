@@ -20,7 +20,7 @@ import {
   Tag
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
-// eslint-disable-next-line import/no-unresolved
+// eslint-disable-next-line import-x/no-unresolved
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
