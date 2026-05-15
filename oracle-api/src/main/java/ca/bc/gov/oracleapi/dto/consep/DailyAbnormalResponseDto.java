@@ -1,5 +1,7 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
+import java.math.BigDecimal;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,7 +19,7 @@ import jakarta.validation.constraints.NotNull;
 public record DailyAbnormalResponseDto(
     @NotNull
     @Schema(description = "A surrogate access key for DAILY_GERM table.", example = "12345")
-    Long dailyGermSkey,
+    BigDecimal dailyGermSkey,
 
     ReplicateAbnormalDto rep1,
 
