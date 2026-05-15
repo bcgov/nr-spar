@@ -5,10 +5,13 @@ import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.ReplicateAbnormalDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.DailyAbnormalEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
@@ -35,6 +38,7 @@ public class TestResultService {
   private final GerminatorTrayRepository germinatorTrayRepository;
   private final ActivityRepository activityRepository;
   private final TestRegimeRepository testRegimeRepository;
+  private final DailyAbnormalRepository dailyAbnormalRepository;
 
   /**
    * Update the test status to "completed".
@@ -318,9 +322,79 @@ public class TestResultService {
   }
 
   public DailyAbnormalResponseDto getDailyAbnormalCounts(BigDecimal dailyGermSkey) {
-    // implementation
+    // Validate input first
     if (dailyGermSkey == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no dailyGermSkey found");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "dailyGermSkey is required");
     }
+
+    // Lookup entity
+    DailyAbnormalEntity entity = dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey);
+    if (entity == null) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Daily abnormal counts not found for the given key");
+    }
+
+    // Map entity fields into rep1, rep2, rep3, rep4 DTOs
+    ReplicateAbnormalDto rep1 =
+        new ReplicateAbnormalDto(
+            entity.getRep1NoAbnrmRe(),
+            entity.getRep1NoAbnrmSr(),
+            entity.getRep1NoAbnrmSh(),
+            entity.getRep1NoAbnrmRn(),
+            entity.getRep1NoAbnrmTh(),
+            entity.getRep1NoAbnrmTr(),
+            entity.getRep1NoAbnrmCm(),
+            entity.getRep1NoAbnrmWeak(),
+            entity.getRep1NoAbnrmOther(),
+            entity.getRep1NoAbnrmPrgrm(),
+            null
+            );
+
+    ReplicateAbnormalDto rep2 =
+        new ReplicateAbnormalDto(
+            entity.getRep2NoAbnrmRe(),
+            entity.getRep2NoAbnrmSr(),
+            entity.getRep2NoAbnrmSh(),
+            entity.getRep2NoAbnrmRn(),
+            entity.getRep2NoAbnrmTh(),
+            entity.getRep2NoAbnrmTr(),
+            entity.getRep2NoAbnrmCm(),
+            entity.getRep2NoAbnrmWeak(),
+            entity.getRep2NoAbnrmOther(),
+            entity.getRep2NoAbnrmPrgrm(),
+            null);
+
+    ReplicateAbnormalDto rep3 =
+        new ReplicateAbnormalDto(
+            entity.getRep3NoAbnrmRe(),
+            entity.getRep3NoAbnrmSr(),
+            entity.getRep3NoAbnrmSh(),
+            entity.getRep3NoAbnrmRn(),
+            entity.getRep3NoAbnrmTh(),
+            entity.getRep3NoAbnrmTr(),
+            entity.getRep3NoAbnrmCm(),
+            entity.getRep3NoAbnrmWeak(),
+            entity.getRep3NoAbnrmOther(),
+            entity.getRep3NoAbnrmPrgrm(),
+            null);
+
+    ReplicateAbnormalDto rep4 =
+        new ReplicateAbnormalDto(
+            entity.getRep4NoAbnrmRe(),
+            entity.getRep4NoAbnrmSr(),
+            entity.getRep4NoAbnrmSh(),
+            entity.getRep4NoAbnrmRn(),
+            entity.getRep4NoAbnrmTh(),
+            entity.getRep4NoAbnrmTr(),
+            entity.getRep4NoAbnrmCm(),
+            entity.getRep4NoAbnrmWeak(),
+            entity.getRep4NoAbnrmOther(),
+            entity.getRep4NoAbnrmPrgrm(),
+            null);
+
+    DailyAbnormalResponseDto response =
+        new DailyAbnormalResponseDto(entity.getDailyGermSkey(), rep1, rep2, rep3, rep4);
+
+    return response;
   }
 }
