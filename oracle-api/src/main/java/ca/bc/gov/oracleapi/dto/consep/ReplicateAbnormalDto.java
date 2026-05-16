@@ -18,71 +18,67 @@ public record ReplicateAbnormalDto(
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to a reverse embryo.",
             example = "1")
-    Integer abnormalNumReverseEmbryo,
-
+        Integer abnormalNumReverseEmbryo,
     @Schema(
             description =
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to a stunted radicle.",
             example = "1")
-    Integer abnormalNumStuntedRadicle,
-
+        Integer abnormalNumStuntedRadicle,
     @Schema(
             description =
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to a stunted hypocotyl.",
             example = "1")
-    Integer abnormalNumStuntedHypocotyl,
-
+        Integer abnormalNumStuntedHypocotyl,
     @Schema(
             description =
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to being rotten.",
             example = "1")
-    Integer abnormalNumRotten,
+        Integer abnormalNumRotten,
+
+    @Schema(
+            description =
+                "The number of seeds, of the ones germinated,  "
+                    + "which were observed to be abnormal due to a thickened hypocotyl.",
+            example = "1")
+        Integer abnormalNumThickenedHypocotyl,
 
     @Schema(
             description =
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to a thickened radicle.",
             example = "1")
-    Integer abnormalNumThickenedRadicle,
-
+        Integer abnormalNumThickenedRadicle,
     @Schema(
             description =
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to being twisted.",
             example = "1")
-    Integer abnormalNumTwisted,
-
+        Integer abnormalNumTwisted,
     @Schema(
             description =
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to a megametophyte collar.",
             example = "1")
-    Integer abnormalNumMegametophyteCollar,
-
+        Integer abnormalNumMegametophyteCollar,
     @Schema(
             description =
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to being weak.",
             example = "1")
-    Integer abnormalNumWeak,
-
+        Integer abnormalNumWeak,
     @Schema(
             description =
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to other reasons.",
             example = "1")
-    Integer abnormalNumOther,
-
+        Integer abnormalNumOther,
     @Schema(
             description =
                 "The number of seeds, of the ones germinated, which were "
                     + "observed to be abnormal due to pregermination.",
             example = "1")
-    Integer abnormalNumPregermination,
-
-    @Schema(description = "The total number of seeds.", example = "100")
-    Integer totalSeeds
-) {}
+        Integer abnormalNumPregermination,
+    @Schema(description = "The total number of seeds.", example = "100") Integer totalSeeds) {}
