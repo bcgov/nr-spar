@@ -321,6 +321,44 @@ public class TestResultService {
     return resultMap;
   }
 
+  private void validateNonNegativeAbnormalCounts(ReplicateAbnormalDto rep, String repName) {
+    Integer[] values = {
+      rep.abnormalNumReverseEmbryo(),
+      rep.abnormalNumStuntedRadicle(),
+      rep.abnormalNumStuntedHypocotyl(),
+      rep.abnormalNumRotten(),
+      rep.abnormalNumThickenedHypocotyl(),
+      rep.abnormalNumThickenedRadicle(),
+      rep.abnormalNumTwisted(),
+      rep.abnormalNumMegametophyteCollar(),
+      rep.abnormalNumWeak(),
+      rep.abnormalNumOther(),
+      rep.abnormalNumPregermination()
+    };
+
+    String[] fieldNames = {
+      "abnormalNumReverseEmbryo",
+      "abnormalNumStuntedRadicle",
+      "abnormalNumStuntedHypocotyl",
+      "abnormalNumRotten",
+      "abnormalNumThickenedHypocotyl",
+      "abnormalNumThickenedRadicle",
+      "abnormalNumTwisted",
+      "abnormalNumMegametophyteCollar",
+      "abnormalNumWeak",
+      "abnormalNumOther",
+      "abnormalNumPregermination"
+    };
+
+    for (int i = 0; i < values.length; i++) {
+      if (values[i] == null || values[i] < 0) {
+        throw new ResponseStatusException(
+            HttpStatus.UNPROCESSABLE_ENTITY,
+            "Invalid abnormal count in " + repName + ": " + fieldNames[i] + " must be >= 0");
+      }
+    }
+  }
+
   public DailyAbnormalResponseDto getDailyAbnormalCounts(BigDecimal dailyGermSkey) {
     // Validate input first
     if (dailyGermSkey == null) {
@@ -343,6 +381,7 @@ public class TestResultService {
             entity.getRep1NoAbnrmRn(),
             entity.getRep1NoAbnrmTh(),
             entity.getRep1NoAbnrmTr(),
+            entity.getRep1NoAbnrmTw(),
             entity.getRep1NoAbnrmCm(),
             entity.getRep1NoAbnrmWeak(),
             entity.getRep1NoAbnrmOther(),
@@ -358,6 +397,7 @@ public class TestResultService {
             entity.getRep2NoAbnrmRn(),
             entity.getRep2NoAbnrmTh(),
             entity.getRep2NoAbnrmTr(),
+            entity.getRep2NoAbnrmTw(),
             entity.getRep2NoAbnrmCm(),
             entity.getRep2NoAbnrmWeak(),
             entity.getRep2NoAbnrmOther(),
@@ -372,6 +412,7 @@ public class TestResultService {
             entity.getRep3NoAbnrmRn(),
             entity.getRep3NoAbnrmTh(),
             entity.getRep3NoAbnrmTr(),
+            entity.getRep3NoAbnrmTw(),
             entity.getRep3NoAbnrmCm(),
             entity.getRep3NoAbnrmWeak(),
             entity.getRep3NoAbnrmOther(),
@@ -386,11 +427,17 @@ public class TestResultService {
             entity.getRep4NoAbnrmRn(),
             entity.getRep4NoAbnrmTh(),
             entity.getRep4NoAbnrmTr(),
+            entity.getRep4NoAbnrmTw(),
             entity.getRep4NoAbnrmCm(),
             entity.getRep4NoAbnrmWeak(),
             entity.getRep4NoAbnrmOther(),
             entity.getRep4NoAbnrmPrgrm(),
             null);
+
+    validateNonNegativeAbnormalCounts(rep1, "rep1");
+    validateNonNegativeAbnormalCounts(rep2, "rep2");
+    validateNonNegativeAbnormalCounts(rep3, "rep3");
+    validateNonNegativeAbnormalCounts(rep4, "rep4");
 
     DailyAbnormalResponseDto response =
         new DailyAbnormalResponseDto(entity.getDailyGermSkey(), rep1, rep2, rep3, rep4);
