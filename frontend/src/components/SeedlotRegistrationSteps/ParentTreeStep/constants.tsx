@@ -7,9 +7,9 @@ import {
   GeneticWorthInputType
 } from './definitions';
 
-// eslint-disable-next-line import/no-unresolved
+// eslint-disable-next-line import-x/no-unresolved
 import SeedlotCsvTemplate from '../../../assets/csv/Seedlot_composition_template.csv?url';
-// eslint-disable-next-line import/no-unresolved
+// eslint-disable-next-line import-x/no-unresolved
 import SmpMixCsvTemplate from '../../../assets/csv/SMP_Mix_Volume_template.csv?url';
 
 export const DEFAULT_PAGE_SIZE = 40;
