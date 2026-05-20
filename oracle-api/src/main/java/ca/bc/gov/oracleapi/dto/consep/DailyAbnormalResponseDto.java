@@ -21,11 +21,15 @@ public record DailyAbnormalResponseDto(
     @Schema(description = "A surrogate access key for DAILY_GERM table.", example = "12345")
     BigDecimal dailyGermSkey,
 
+    @NotNull
     ReplicateAbnormalDto rep1,
 
+    @NotNull
     ReplicateAbnormalDto rep2,
 
+    @NotNull
     ReplicateAbnormalDto rep3,
 
+    @NotNull
     ReplicateAbnormalDto rep4
 ) {}
