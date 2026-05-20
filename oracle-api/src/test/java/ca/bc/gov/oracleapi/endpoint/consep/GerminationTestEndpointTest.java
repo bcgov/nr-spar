@@ -11,9 +11,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateAbnormalDto;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -24,10 +28,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import org.junit.jupiter.api.DisplayName;
 import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(GerminationTestEndpoint.class)
@@ -83,6 +83,48 @@ public class GerminationTestEndpointTest {
   }
 
   @Test
+  @WithAnonymousUser
+  void getDailyAbnormalCounts_returns401_whenAnonymous() throws Exception {
+    BigDecimal key = new BigDecimal("12345");
+
+    mockMvc.perform(get(BASE_URL + "/{dailyGermSkey}", key)).andExpect(status().isUnauthorized());
+
+    verifyNoInteractions(testResultService);
+  }
+
+  @Test
+  @WithMockUser(username = "SPARTest", roles = "SPAR_NON_ORACLE_USER")
+  void getDailyAbnormalCounts_returns403_whenUnauthorizedRole() throws Exception {
+    BigDecimal key = new BigDecimal("12345");
+
+    mockMvc.perform(get(BASE_URL + "/{dailyGermSkey}", key)).andExpect(status().isForbidden());
+
+    verifyNoInteractions(testResultService);
+  }
+
+  @Test
+  void getDailyAbnormalCounts_returns404_whenNotFound() throws Exception {
+    BigDecimal key = new BigDecimal("12345");
+    when(testResultService.getDailyAbnormalCounts(key))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
+
+    mockMvc.perform(get(BASE_URL + "/{dailyGermSkey}", key)).andExpect(status().isNotFound());
+    verify(testResultService).getDailyAbnormalCounts(key);
+  }
+
+  @Test
+  void getDailyAbnormalCounts_returns422_whenInvalidData() throws Exception {
+    BigDecimal key = new BigDecimal("12345");
+    when(testResultService.getDailyAbnormalCounts(key))
+        .thenThrow(new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "invalid counts"));
+
+    mockMvc
+        .perform(get(BASE_URL + "/{dailyGermSkey}", key))
+        .andExpect(status().isUnprocessableEntity());
+    verify(testResultService).getDailyAbnormalCounts(key);
+  }
+
+  @Test
   void determineTestRank_shouldReturnA() throws Exception {
     String seedlotNumber = "12345";
 
@@ -131,50 +173,6 @@ public class GerminationTestEndpointTest {
         .andExpect(jsonPath("$.rank").value(nullValue()));
 
     verify(testResultService, times(1)).determineTestRank(seedlotNumber, "TST", 1);
-  }
-
-  @Test
-  @WithAnonymousUser
-  void getDailyAbnormalCounts_returns401_whenAnonymous() throws Exception {
-    BigDecimal key = new BigDecimal("12345");
-
-    mockMvc.perform(get(BASE_URL + "/{dailyGermSkey}", key)).andExpect(status().isUnauthorized());
-
-    verifyNoInteractions(testResultService);
-  }
-
-  @Test
-  @WithMockUser(username = "SPARTest", roles = "SPAR_NON_ORACLE_USER")
-  void getDailyAbnormalCounts_returns403_whenUnauthorizedRole() throws Exception {
-    BigDecimal key = new BigDecimal("12345");
-
-    mockMvc.perform(get(BASE_URL + "/{dailyGermSkey}", key)).andExpect(status().isForbidden());
-
-    verifyNoInteractions(testResultService);
-  }
-
-  @Test
-  void getDailyAbnormalCounts_returns404_whenNotFound() throws Exception {
-    BigDecimal key = new BigDecimal("12345");
-    when(testResultService.getDailyAbnormalCounts(key))
-        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
-
-    mockMvc
-        .perform(get(BASE_URL + "/{dailyGermSkey}", key))
-        .andExpect(status().isNotFound());
-    verify(testResultService).getDailyAbnormalCounts(key);
-  }
-
-  @Test
-  void getDailyAbnormalCounts_returns422_whenInvalidData() throws Exception {
-    BigDecimal key = new BigDecimal("12345");
-    when(testResultService.getDailyAbnormalCounts(key))
-        .thenThrow(new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "invalid counts"));
-
-    mockMvc
-        .perform(get(BASE_URL + "/{dailyGermSkey}", key))
-        .andExpect(status().isUnprocessableEntity());
-    verify(testResultService).getDailyAbnormalCounts(key);
   }
 
   @Test
@@ -254,6 +252,17 @@ public class GerminationTestEndpointTest {
   }
 
   @Test
+  @DisplayName("Get germination test header should return 403 for unauthorized role")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_VIEWER")
+  void getGerminationTestHeader_shouldReturn403() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+
+    mockMvc
+        .perform(get("/api/germination-tests/{riaKey}", riaKey))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
   @DisplayName("Get germination test header should return 404 when key is missing")
   @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
   void getGerminationTestHeader_shouldReturn404() throws Exception {
@@ -265,17 +274,6 @@ public class GerminationTestEndpointTest {
     mockMvc
         .perform(get("/api/germination-tests/{riaKey}", riaKey))
         .andExpect(status().isNotFound());
-  }
-
-  @Test
-  @DisplayName("Get germination test header should return 403 for unauthorized role")
-  @WithMockUser(username = "SPARTest", roles = "SPAR_VIEWER")
-  void getGerminationTestHeader_shouldReturn403() throws Exception {
-    BigDecimal riaKey = new BigDecimal("1234567890");
-
-    mockMvc
-        .perform(get("/api/germination-tests/{riaKey}", riaKey))
-        .andExpect(status().isForbidden());
   }
 
   private GerminationTestHeaderDto createHeaderDto(BigDecimal riaKey) {
