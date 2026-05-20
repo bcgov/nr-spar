@@ -1,29 +1,25 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
-<<<<<<< HEAD
+import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
-import ca.bc.gov.oracleapi.response.ApiAuthResponse;
-import ca.bc.gov.oracleapi.security.RoleAccessConfig;
-import ca.bc.gov.oracleapi.service.consep.TestResultService;
-=======
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.TestRankResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
-import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
->>>>>>> main
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-<<<<<<< HEAD
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -31,56 +27,24 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * This class exposes germination test resources API.
  *
- * <p>Provides endpoint operations for retrieving daily abnormal germination
- * counts for a given daily germ key.
+ * <p>Provides endpoint operations for retrieving suggested test rank,
+ * daily abnormal germination counts, and germination test header metadata.
  *
  * <p>Input validation is handled through bean validation annotations and
  * local exception handling for constraint violations.
  */
-=======
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
-import java.math.BigDecimal;
-import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-/** This class exposes germination test resources API. */
->>>>>>> main
 @RestController
 @RequestMapping("/api/germination-tests")
 @RequiredArgsConstructor
 @Validated
-<<<<<<< HEAD
 @Tag(name = "Germination Test", description = "Resource to manage germination tests.")
-public class GerminationTestEndpoint {
-  private final TestResultService testResultService;
-
-  /**
-   * Retrieve daily abnormal germination counts by daily germ key.
-   *
-   * <p>Returns replicate-level abnormal count information (rep1 to rep4)
-   * for the specified daily germ record.
-   *
-   * <p>@param dailyGermSkey the surrogate key of the daily germ record
-   * @return a {@link DailyAbnormalResponseDto} containing abnormal counts for all replicates
-   */
-  @GetMapping("/daily-abnormals/{dailyGermSkey}")
-  @ResponseStatus(HttpStatus.OK)
-=======
-@Tag(
-    name = "GerminationTests",
-    description = "Resource to retrieve Germination Test header and activity metadata.")
 public class GerminationTestEndpoint {
 
   private final TestResultService testResultService;
@@ -122,35 +86,33 @@ public class GerminationTestEndpoint {
               in = ParameterIn.QUERY,
               description = "The accepted result indicator.",
               required = true)
-          Integer acceptResultInd
-  ) {
+          Integer acceptResultInd) {
 
-    String rank =
-        testResultService.determineTestRank(
-            seedlotNumber,
-            testCategoryCd,
-            acceptResultInd
-        );
+    String rank = testResultService.determineTestRank(
+        seedlotNumber,
+        testCategoryCd,
+        acceptResultInd);
 
     return new TestRankResponseDto(rank);
   }
 
   /**
-   * Retrieve germination test header and activity metadata for a single RIA key.
+   * Retrieve daily abnormal germination counts by daily germ key.
    *
-   * @param riaKey Identifier key for test activity related tables.
-   * @return Germination test header data for the given RIA key.
+   * <p>Returns replicate-level abnormal count information (rep1 to rep4)
+   * for the specified daily germ record.
+   *
+   * @param dailyGermSkey the surrogate key of the daily germ record
+   * @return a {@link DailyAbnormalResponseDto} containing abnormal counts for all replicates
    */
-  @GetMapping("/{riaKey}")
+  @GetMapping("/daily-abnormals/{dailyGermSkey}")
   @Operation(
-      summary = "Get germination test header by riaKey",
-      description = "Retrieve germination test header and activity metadata under a riaKey.")
->>>>>>> main
+      summary = "Get daily abnormal germination counts by dailyGermSkey",
+      description = "Retrieve replicate-level abnormal germination counts for a daily germ record.")
   @ApiResponses(
       value = {
         @ApiResponse(
             responseCode = "200",
-<<<<<<< HEAD
             description = "Daily abnormal germination counts for the specified daily germ record.",
             content = @Content(schema = @Schema(implementation = DailyAbnormalResponseDto.class))),
         @ApiResponse(
@@ -168,27 +130,28 @@ public class GerminationTestEndpoint {
       })
   @ApiAuthResponse
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  @ResponseStatus(HttpStatus.OK)
   public DailyAbnormalResponseDto getDailyAbnormalCounts(
       @PathVariable @Positive BigDecimal dailyGermSkey) {
     return testResultService.getDailyAbnormalCounts(dailyGermSkey);
   }
 
   /**
-   * Handle path-variable constraint validation failures.
+   * Retrieve germination test header and activity metadata for a single RIA key.
    *
-   * <p>Converts bean validation {@code ConstraintViolationException}
-   * into an HTTP 400 response for invalid daily germ key values.
-   *
-   * <p>@param ex the validation exception thrown by bean validation
-   * @return a response body containing a validation error message
+   * @param riaKey identifier key for test activity related tables
+   * @return germination test header data for the given RIA key
    */
-  @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public java.util.Map<String, String> handleConstraintViolation(
-      jakarta.validation.ConstraintViolationException ex) {
-    return java.util.Map.of("message", "dailyGermSkey must be greater than 0");
-=======
-            description = "Successfully returned germination test header data."),
+  @GetMapping("/{riaKey}")
+  @Operation(
+      summary = "Get germination test header by riaKey",
+      description = "Retrieve germination test header and activity metadata under a riaKey.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully returned germination test header data.",
+            content = @Content(schema = @Schema(implementation = GerminationTestHeaderDto.class))),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid input: riaKey must be a positive number",
@@ -206,6 +169,7 @@ public class GerminationTestEndpoint {
             description = "Data integrity error: more than one row returned",
             content = @Content(schema = @Schema(hidden = true)))
       })
+  @ApiAuthResponse
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public GerminationTestHeaderDto getGerminationTestHeaderByRiaKey(
       @PathVariable
@@ -219,6 +183,39 @@ public class GerminationTestEndpoint {
 
     SparLog.info("Received request to fetch germination test header for key: {}", riaKey);
     return testResultService.getGerminationTestHeader(riaKey);
->>>>>>> main
+  }
+
+  /**
+   * Handle path-variable constraint validation failures.
+   *
+   * <p>Converts bean validation {@code ConstraintViolationException} into an HTTP 400 response for
+   * invalid daily germ key values.
+   *
+   * @param ex the validation exception thrown by bean validation
+   * @return a response body containing a validation error message
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public Map<String, String> handleConstraintViolation(ConstraintViolationException ex) {
+    String message =
+        ex.getConstraintViolations().stream()
+            .findFirst()
+            .map(
+                cv -> {
+                  String path = cv.getPropertyPath().toString();
+                  String fieldName =
+                      path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
+                  String violationMessage = cv.getMessage();
+
+                  if ("dailyGermSkey".equals(fieldName)
+                      && "must be greater than 0".equals(violationMessage)) {
+                    return "dailyGermSkey must be greater than 0";
+                  }
+
+                  return violationMessage;
+                })
+            .orElse("Validation failed");
+
+    return Map.of("message", message);
   }
 }
