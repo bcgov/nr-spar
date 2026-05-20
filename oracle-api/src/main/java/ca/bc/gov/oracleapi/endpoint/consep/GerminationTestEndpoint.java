@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/germination-tests")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "Germination Test", description = "Resource to manage germination tests.")
+@Tag(name = "Germination Tests", description = "Resource to manage germination tests.")
 public class GerminationTestEndpoint {
 
   private final TestResultService testResultService;
