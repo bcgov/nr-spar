@@ -359,6 +359,21 @@ public class TestResultService {
     }
   }
 
+  private ReplicateAbnormalDto mapReplicateAbnormal(
+      Integer re,
+      Integer sr,
+      Integer sh,
+      Integer rn,
+      Integer th,
+      Integer tr,
+      Integer tw,
+      Integer cm,
+      Integer weak,
+      Integer other,
+      Integer prgrm) {
+    return new ReplicateAbnormalDto(re, sr, sh, rn, th, tr, tw, cm, weak, other, prgrm, null);
+  }
+
   public DailyAbnormalResponseDto getDailyAbnormalCounts(BigDecimal dailyGermSkey) {
     // Validate input first
     if (dailyGermSkey == null) {
@@ -374,7 +389,7 @@ public class TestResultService {
 
     // Map entity fields into rep1, rep2, rep3, rep4 DTOs
     ReplicateAbnormalDto rep1 =
-        new ReplicateAbnormalDto(
+        mapReplicateAbnormal(
             entity.getRep1NoAbnrmRe(),
             entity.getRep1NoAbnrmSr(),
             entity.getRep1NoAbnrmSh(),
@@ -385,12 +400,9 @@ public class TestResultService {
             entity.getRep1NoAbnrmCm(),
             entity.getRep1NoAbnrmWeak(),
             entity.getRep1NoAbnrmOther(),
-            entity.getRep1NoAbnrmPrgrm(),
-            null
-            );
-
+            entity.getRep1NoAbnrmPrgrm());
     ReplicateAbnormalDto rep2 =
-        new ReplicateAbnormalDto(
+        mapReplicateAbnormal(
             entity.getRep2NoAbnrmRe(),
             entity.getRep2NoAbnrmSr(),
             entity.getRep2NoAbnrmSh(),
@@ -401,11 +413,9 @@ public class TestResultService {
             entity.getRep2NoAbnrmCm(),
             entity.getRep2NoAbnrmWeak(),
             entity.getRep2NoAbnrmOther(),
-            entity.getRep2NoAbnrmPrgrm(),
-            null);
-
+            entity.getRep2NoAbnrmPrgrm());
     ReplicateAbnormalDto rep3 =
-        new ReplicateAbnormalDto(
+        mapReplicateAbnormal(
             entity.getRep3NoAbnrmRe(),
             entity.getRep3NoAbnrmSr(),
             entity.getRep3NoAbnrmSh(),
@@ -416,11 +426,9 @@ public class TestResultService {
             entity.getRep3NoAbnrmCm(),
             entity.getRep3NoAbnrmWeak(),
             entity.getRep3NoAbnrmOther(),
-            entity.getRep3NoAbnrmPrgrm(),
-            null);
-
+            entity.getRep3NoAbnrmPrgrm());
     ReplicateAbnormalDto rep4 =
-        new ReplicateAbnormalDto(
+        mapReplicateAbnormal(
             entity.getRep4NoAbnrmRe(),
             entity.getRep4NoAbnrmSr(),
             entity.getRep4NoAbnrmSh(),
@@ -431,8 +439,7 @@ public class TestResultService {
             entity.getRep4NoAbnrmCm(),
             entity.getRep4NoAbnrmWeak(),
             entity.getRep4NoAbnrmOther(),
-            entity.getRep4NoAbnrmPrgrm(),
-            null);
+            entity.getRep4NoAbnrmPrgrm());
 
     validateNonNegativeAbnormalCounts(rep1, "rep1");
     validateNonNegativeAbnormalCounts(rep2, "rep2");
