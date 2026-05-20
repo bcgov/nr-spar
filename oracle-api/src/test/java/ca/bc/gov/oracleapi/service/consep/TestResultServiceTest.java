@@ -483,7 +483,8 @@ class TestResultServiceTest {
     );
 
     // activity type is recognised
-    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of(activityTypeCd));
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes())
+        .thenReturn(List.of(activityTypeCd));
 
     // seedWithdrawDate in past but germinatorTrayId already set -> invalid
     GermTestResultDto germTestResult = new GermTestResultDto(
@@ -505,62 +506,62 @@ class TestResultServiceTest {
   }
 
   private void setRepAbnormalValues(DailyAbnormalEntity entity, int rep, int start) {
-  switch (rep) {
-    case 1 -> {
-      entity.setRep1NoAbnrmRe(start);
-      entity.setRep1NoAbnrmSr(start + 1);
-      entity.setRep1NoAbnrmSh(start + 2);
-      entity.setRep1NoAbnrmRn(start + 3);
-      entity.setRep1NoAbnrmTh(start + 4);
-      entity.setRep1NoAbnrmTr(start + 5);
-      entity.setRep1NoAbnrmTw(start + 6);
-      entity.setRep1NoAbnrmCm(start + 7);
-      entity.setRep1NoAbnrmWeak(start + 8);
-      entity.setRep1NoAbnrmOther(start + 9);
-      entity.setRep1NoAbnrmPrgrm(start + 10);
+    switch (rep) {
+      case 1 -> {
+        entity.setRep1NoAbnrmRe(start);
+        entity.setRep1NoAbnrmSr(start + 1);
+        entity.setRep1NoAbnrmSh(start + 2);
+        entity.setRep1NoAbnrmRn(start + 3);
+        entity.setRep1NoAbnrmTh(start + 4);
+        entity.setRep1NoAbnrmTr(start + 5);
+        entity.setRep1NoAbnrmTw(start + 6);
+        entity.setRep1NoAbnrmCm(start + 7);
+        entity.setRep1NoAbnrmWeak(start + 8);
+        entity.setRep1NoAbnrmOther(start + 9);
+        entity.setRep1NoAbnrmPrgrm(start + 10);
+      }
+      case 2 -> {
+        entity.setRep2NoAbnrmRe(start);
+        entity.setRep2NoAbnrmSr(start + 1);
+        entity.setRep2NoAbnrmSh(start + 2);
+        entity.setRep2NoAbnrmRn(start + 3);
+        entity.setRep2NoAbnrmTh(start + 4);
+        entity.setRep2NoAbnrmTr(start + 5);
+        entity.setRep2NoAbnrmTw(start + 6);
+        entity.setRep2NoAbnrmCm(start + 7);
+        entity.setRep2NoAbnrmWeak(start + 8);
+        entity.setRep2NoAbnrmOther(start + 9);
+        entity.setRep2NoAbnrmPrgrm(start + 10);
+      }
+      case 3 -> {
+        entity.setRep3NoAbnrmRe(start);
+        entity.setRep3NoAbnrmSr(start + 1);
+        entity.setRep3NoAbnrmSh(start + 2);
+        entity.setRep3NoAbnrmRn(start + 3);
+        entity.setRep3NoAbnrmTh(start + 4);
+        entity.setRep3NoAbnrmTr(start + 5);
+        entity.setRep3NoAbnrmTw(start + 6);
+        entity.setRep3NoAbnrmCm(start + 7);
+        entity.setRep3NoAbnrmWeak(start + 8);
+        entity.setRep3NoAbnrmOther(start + 9);
+        entity.setRep3NoAbnrmPrgrm(start + 10);
+      }
+      case 4 -> {
+        entity.setRep4NoAbnrmRe(start);
+        entity.setRep4NoAbnrmSr(start + 1);
+        entity.setRep4NoAbnrmSh(start + 2);
+        entity.setRep4NoAbnrmRn(start + 3);
+        entity.setRep4NoAbnrmTh(start + 4);
+        entity.setRep4NoAbnrmTr(start + 5);
+        entity.setRep4NoAbnrmTw(start + 6);
+        entity.setRep4NoAbnrmCm(start + 7);
+        entity.setRep4NoAbnrmWeak(start + 8);
+        entity.setRep4NoAbnrmOther(start + 9);
+        entity.setRep4NoAbnrmPrgrm(start + 10);
+      }
+      default -> throw new IllegalArgumentException("rep must be 1..4");
     }
-    case 2 -> {
-      entity.setRep2NoAbnrmRe(start);
-      entity.setRep2NoAbnrmSr(start + 1);
-      entity.setRep2NoAbnrmSh(start + 2);
-      entity.setRep2NoAbnrmRn(start + 3);
-      entity.setRep2NoAbnrmTh(start + 4);
-      entity.setRep2NoAbnrmTr(start + 5);
-      entity.setRep2NoAbnrmTw(start + 6);
-      entity.setRep2NoAbnrmCm(start + 7);
-      entity.setRep2NoAbnrmWeak(start + 8);
-      entity.setRep2NoAbnrmOther(start + 9);
-      entity.setRep2NoAbnrmPrgrm(start + 10);
-    }
-    case 3 -> {
-      entity.setRep3NoAbnrmRe(start);
-      entity.setRep3NoAbnrmSr(start + 1);
-      entity.setRep3NoAbnrmSh(start + 2);
-      entity.setRep3NoAbnrmRn(start + 3);
-      entity.setRep3NoAbnrmTh(start + 4);
-      entity.setRep3NoAbnrmTr(start + 5);
-      entity.setRep3NoAbnrmTw(start + 6);
-      entity.setRep3NoAbnrmCm(start + 7);
-      entity.setRep3NoAbnrmWeak(start + 8);
-      entity.setRep3NoAbnrmOther(start + 9);
-      entity.setRep3NoAbnrmPrgrm(start + 10);
-    }
-    case 4 -> {
-      entity.setRep4NoAbnrmRe(start);
-      entity.setRep4NoAbnrmSr(start + 1);
-      entity.setRep4NoAbnrmSh(start + 2);
-      entity.setRep4NoAbnrmRn(start + 3);
-      entity.setRep4NoAbnrmTh(start + 4);
-      entity.setRep4NoAbnrmTr(start + 5);
-      entity.setRep4NoAbnrmTw(start + 6);
-      entity.setRep4NoAbnrmCm(start + 7);
-      entity.setRep4NoAbnrmWeak(start + 8);
-      entity.setRep4NoAbnrmOther(start + 9);
-      entity.setRep4NoAbnrmPrgrm(start + 10);
-    }
-    default -> throw new IllegalArgumentException("rep must be 1..4");
   }
-}
 
   @Test
   void getDailyAbnormalCounts_returnsResponseDto_whenDataValid() throws Exception {
