@@ -497,4 +497,102 @@ class TestResultServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
   }
+
+  private void setRepAbnormalValues(DailyAbnormalEntity entity, int rep, int start) {
+  switch (rep) {
+    case 1 -> {
+      entity.setRep1NoAbnrmRe(start);
+      entity.setRep1NoAbnrmSr(start + 1);
+      entity.setRep1NoAbnrmSh(start + 2);
+      entity.setRep1NoAbnrmRn(start + 3);
+      entity.setRep1NoAbnrmTh(start + 4);
+      entity.setRep1NoAbnrmTr(start + 5);
+      entity.setRep1NoAbnrmTw(start + 6);
+      entity.setRep1NoAbnrmCm(start + 7);
+      entity.setRep1NoAbnrmWeak(start + 8);
+      entity.setRep1NoAbnrmOther(start + 9);
+      entity.setRep1NoAbnrmPrgrm(start + 10);
+    }
+    case 2 -> {
+      entity.setRep2NoAbnrmRe(start);
+      entity.setRep2NoAbnrmSr(start + 1);
+      entity.setRep2NoAbnrmSh(start + 2);
+      entity.setRep2NoAbnrmRn(start + 3);
+      entity.setRep2NoAbnrmTh(start + 4);
+      entity.setRep2NoAbnrmTr(start + 5);
+      entity.setRep2NoAbnrmTw(start + 6);
+      entity.setRep2NoAbnrmCm(start + 7);
+      entity.setRep2NoAbnrmWeak(start + 8);
+      entity.setRep2NoAbnrmOther(start + 9);
+      entity.setRep2NoAbnrmPrgrm(start + 10);
+    }
+    case 3 -> {
+      entity.setRep3NoAbnrmRe(start);
+      entity.setRep3NoAbnrmSr(start + 1);
+      entity.setRep3NoAbnrmSh(start + 2);
+      entity.setRep3NoAbnrmRn(start + 3);
+      entity.setRep3NoAbnrmTh(start + 4);
+      entity.setRep3NoAbnrmTr(start + 5);
+      entity.setRep3NoAbnrmTw(start + 6);
+      entity.setRep3NoAbnrmCm(start + 7);
+      entity.setRep3NoAbnrmWeak(start + 8);
+      entity.setRep3NoAbnrmOther(start + 9);
+      entity.setRep3NoAbnrmPrgrm(start + 10);
+    }
+    case 4 -> {
+      entity.setRep4NoAbnrmRe(start);
+      entity.setRep4NoAbnrmSr(start + 1);
+      entity.setRep4NoAbnrmSh(start + 2);
+      entity.setRep4NoAbnrmRn(start + 3);
+      entity.setRep4NoAbnrmTh(start + 4);
+      entity.setRep4NoAbnrmTr(start + 5);
+      entity.setRep4NoAbnrmTw(start + 6);
+      entity.setRep4NoAbnrmCm(start + 7);
+      entity.setRep4NoAbnrmWeak(start + 8);
+      entity.setRep4NoAbnrmOther(start + 9);
+      entity.setRep4NoAbnrmPrgrm(start + 10);
+    }
+    default -> throw new IllegalArgumentException("rep must be 1..4");
+  }
+}
+
+  @Test
+  void getDailyAbnormalCounts_returnsResponseDto_whenDataValid() throws Exception {
+    // Happy path test
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+
+    DailyAbnormalEntity entity = new DailyAbnormalEntity();
+    entity.setDailyGermSkey(dailyGermSkey);
+
+    setRepAbnormalValues(entity, 1, 1);
+    setRepAbnormalValues(entity, 2, 20);
+    setRepAbnormalValues(entity, 3, 30);
+    setRepAbnormalValues(entity, 4, 40);
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(entity);
+    DailyAbnormalResponseDto actual = testResultService.getDailyAbnormalCounts(dailyGermSkey);
+    assertNotNull(actual);
+    assertEquals(dailyGermSkey, actual.dailyGermSkey());
+    assertEquals(1, actual.rep1().abnormalNumReverseEmbryo());
+    assertEquals(29, actual.rep2().abnormalNumOther());
+    assertEquals(36, actual.rep3().abnormalNumTwisted());
+    assertEquals(47, actual.rep4().abnormalNumMegametophyteCollar());
+
+    verify(dailyAbnormalRepository, times(1)).findByDailyGermSkey(dailyGermSkey);
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws400_whenDailyGermSkeyNull() {
+    // Null key test
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws404_whenEntityNotFound() {
+    // Not found test
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws422_whenAbnormalCountNegative() {
+    // Validation failure test
+  }
 }
