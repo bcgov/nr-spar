@@ -57,7 +57,7 @@ public class DailyAbnormalEntity {
   @Column(name = "RP2_NO_ABNRM_RE", precision = 5, scale = 0)
   private Integer rep2NoAbnrmRe;
 
-    @Column(name = "RP2_NO_ABNRM_SR", precision = 5, scale = 0)
+  @Column(name = "RP2_NO_ABNRM_SR", precision = 5, scale = 0)
   private Integer rep2NoAbnrmSr;
 
   @Column(name = "RP2_NO_ABNRM_SH", precision = 5, scale = 0)
@@ -87,7 +87,7 @@ public class DailyAbnormalEntity {
   @Column(name = "RP2_NO_ABNRM_PRGRM", precision = 5, scale = 0)
   private Integer rep2NoAbnrmPrgrm;
 
-    @Column(name = "RP3_NO_ABNRM_RE", precision = 5, scale = 0)
+  @Column(name = "RP3_NO_ABNRM_RE", precision = 5, scale = 0)
   private Integer rep3NoAbnrmRe;
 
   @Column(name = "RP3_NO_ABNRM_SR", precision = 5, scale = 0)
@@ -123,7 +123,7 @@ public class DailyAbnormalEntity {
   @Column(name = "RP4_NO_ABNRM_RE", precision = 5, scale = 0)
   private Integer rep4NoAbnrmRe;
 
-    @Column(name = "RP4_NO_ABNRM_SR", precision = 5, scale = 0)
+  @Column(name = "RP4_NO_ABNRM_SR", precision = 5, scale = 0)
   private Integer rep4NoAbnrmSr;
 
   @Column(name = "RP4_NO_ABNRM_SH", precision = 5, scale = 0)
