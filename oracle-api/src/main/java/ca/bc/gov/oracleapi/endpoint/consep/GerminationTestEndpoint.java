@@ -15,15 +15,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -132,7 +129,9 @@ public class GerminationTestEndpoint {
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   @ResponseStatus(HttpStatus.OK)
   public DailyAbnormalResponseDto getDailyAbnormalCounts(
-      @PathVariable @Positive BigDecimal dailyGermSkey) {
+      @PathVariable 
+          @Positive(message = "dailyGermSkey must be a positive number")
+          BigDecimal dailyGermSkey) {
     return testResultService.getDailyAbnormalCounts(dailyGermSkey);
   }
 
@@ -183,39 +182,5 @@ public class GerminationTestEndpoint {
 
     SparLog.info("Received request to fetch germination test header for key: {}", riaKey);
     return testResultService.getGerminationTestHeader(riaKey);
-  }
-
-  /**
-   * Handle path-variable constraint validation failures.
-   *
-   * <p>Converts bean validation {@code ConstraintViolationException} into an HTTP 400 response for
-   * invalid daily germ key values.
-   *
-   * @param ex the validation exception thrown by bean validation
-   * @return a response body containing a validation error message
-   */
-  @ExceptionHandler(ConstraintViolationException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public Map<String, String> handleConstraintViolation(ConstraintViolationException ex) {
-    String message =
-        ex.getConstraintViolations().stream()
-            .findFirst()
-            .map(
-                cv -> {
-                  String path = cv.getPropertyPath().toString();
-                  String fieldName =
-                      path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
-                  String violationMessage = cv.getMessage();
-
-                  if ("dailyGermSkey".equals(fieldName)
-                      && "must be greater than 0".equals(violationMessage)) {
-                    return "dailyGermSkey must be greater than 0";
-                  }
-
-                  return violationMessage;
-                })
-            .orElse("Validation failed");
-
-    return Map.of("message", message);
   }
 }
