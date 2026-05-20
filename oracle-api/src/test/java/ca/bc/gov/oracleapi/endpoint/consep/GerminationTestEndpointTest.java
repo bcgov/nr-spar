@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateAbnormalDto;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -66,6 +65,14 @@ public class GerminationTestEndpointTest {
         .andExpect(jsonPath("$.rep4.abnormalNumWeak").value(38));
 
     verify(testResultService).getDailyAbnormalCounts(key);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"0", "-1"})
+  void getDailyAbnormalCounts_returns400_whenPathNotPositive(String badKey) throws Exception {
+    mockMvc.perform(get(BASE_URL + "/{dailyGermSkey}", badKey)).andExpect(status().isBadRequest());
+
+    verifyNoInteractions(testResultService);
   }
 
   @Test
