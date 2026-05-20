@@ -351,7 +351,7 @@ public class TestResultService {
     };
 
     for (int i = 0; i < values.length; i++) {
-      if (values[i] == null || values[i] < 0) {
+      if (values[i] != null && values[i] < 0) {
         throw new ResponseStatusException(
             HttpStatus.UNPROCESSABLE_ENTITY,
             "Invalid abnormal count in " + repName + ": " + fieldNames[i] + " must be >= 0");
