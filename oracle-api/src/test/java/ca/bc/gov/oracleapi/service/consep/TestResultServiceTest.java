@@ -13,13 +13,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.DailyAbnormalEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
@@ -58,6 +61,9 @@ class TestResultServiceTest {
 
   @Mock
   private TestRegimeRepository testRegimeRepository;
+
+  @Mock
+  private DailyAbnormalRepository dailyAbnormalRepository;
 
   @Autowired
   @InjectMocks
@@ -583,16 +589,55 @@ class TestResultServiceTest {
 
   @Test
   void getDailyAbnormalCounts_throws400_whenDailyGermSkeyNull() {
-    // Null key test
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> testResultService.getDailyAbnormalCounts(null));
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("dailyGermSkey is required", ex.getReason());
+    verify(dailyAbnormalRepository, never()).findByDailyGermSkey(any());
   }
 
   @Test
   void getDailyAbnormalCounts_throws404_whenEntityNotFound() {
-    // Not found test
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(null);
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getDailyAbnormalCounts(dailyGermSkey));
+
+    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+    assertEquals("Daily abnormal counts not found for the given key", ex.getReason());
+    verify(dailyAbnormalRepository, times(1)).findByDailyGermSkey(dailyGermSkey);
   }
 
   @Test
   void getDailyAbnormalCounts_throws422_whenAbnormalCountNegative() {
-    // Validation failure test
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+
+    DailyAbnormalEntity entity = new DailyAbnormalEntity();
+    entity.setDailyGermSkey(dailyGermSkey);
+
+    setRepAbnormalValues(entity, 1, 1);
+    setRepAbnormalValues(entity, 2, 20);
+    setRepAbnormalValues(entity, 3, 30);
+    setRepAbnormalValues(entity, 4, 40);
+
+    // Make one value invalid to trigger 422
+    entity.setRep3NoAbnrmTw(-1);
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(entity);
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getDailyAbnormalCounts(dailyGermSkey));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertTrue(ex.getReason().contains("rep3"));
+    assertTrue(ex.getReason().contains("abnormalNumTwisted"));
+    verify(dailyAbnormalRepository, times(1)).findByDailyGermSkey(dailyGermSkey);
   }
 }
