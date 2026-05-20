@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Column, Button } from '@carbon/react';
 import { MapBoundaryVegetation } from '@carbon/icons-react';
-// eslint-disable-next-line import/no-unresolved
+// eslint-disable-next-line import-x/no-unresolved
 import AreaOfUsePdf from '../../../assets/downloadable/test_parent_tree_AOU.pdf?url';
 
 const SeedMapSection = () => (

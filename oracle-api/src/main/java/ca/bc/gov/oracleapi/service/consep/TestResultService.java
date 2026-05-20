@@ -3,12 +3,14 @@ package ca.bc.gov.oracleapi.service.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateAbnormalDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.DailyAbnormalEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
@@ -25,6 +27,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -75,6 +79,79 @@ public class TestResultService {
 
     testResultRepository.updateTestResultStatusToAccepted(riaKey);
     SparLog.info("Test result accepted for RIA_SKEY: {}", riaKey);
+  }
+
+  /**
+   * Get the germination test header for the given riaKey.
+   *
+   * @param riaKey the identifier key for the test result table
+   * @return the germination test header
+   */
+  public GerminationTestHeaderDto getGerminationTestHeader(BigDecimal riaKey) {
+    SparLog.info("Fetching germination test header for RIA_SKEY: {}", riaKey);
+
+    try {
+      GerminationTestHeaderDto dto =
+          testResultRepository
+              .findGerminationTestHeaderByRiaKey(riaKey)
+              .orElseThrow(
+                  () -> {
+                    SparLog.warn("No germination test header found for RIA_SKEY: {}", riaKey);
+                    return new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY");
+                  });
+
+      // Compute soakEndDate in service layer
+      LocalDateTime soakEndDate = null;
+      if (dto.actualBeginDtTm() != null) {
+        // Get soak hours from test result
+        TestRegimeEntity regime = testRegimeRepository.findById(dto.activityTypeCd()).orElse(null);
+        int soakHours =
+            (regime != null && regime.getSoakHours() != null) ? regime.getSoakHours() : 0;
+        soakEndDate = dto.actualBeginDtTm().plusHours(soakHours);
+      }
+
+      // Create new DTO with computed soakEndDate
+      return new GerminationTestHeaderDto(
+          dto.riaSkey(),
+          dto.activityTypeCd(),
+          dto.actualBeginDtTm(),
+          dto.actualEndDtTm(),
+          dto.testCategoryCd(),
+          dto.moistureStatusCd(),
+          dto.sampleDesc(),
+          dto.acceptResultInd(),
+          dto.testCompleteInd(),
+          dto.riaComment(),
+          dto.standardTestInd(),
+          dto.testRank(),
+          dto.germinationPct(),
+          dto.germinationValue(),
+          dto.peakValueGrmPct(),
+          dto.peakValueNoDays(),
+          dto.seedWithdrawalDate(),
+          dto.revisedStartDt(),
+          dto.revisedEndDt(),
+          dto.activityDuration(),
+          dto.actvtyTmUnitSt(),
+          dto.stratStartDt(),
+          dto.drybackStartDate(),
+          dto.warmStratStartDate(),
+          dto.germinatorEntry(),
+          dto.germinatorTrayId(),
+          dto.germinatorId(),
+          soakEndDate,
+          dto.imbibedWt(),
+          dto.dryWeight(),
+          dto.drybackWeight(),
+          dto.intrmdtCleanrInd(),
+          dto.requestTypeSt());
+
+    } catch (IncorrectResultSizeDataAccessException ex) {
+      SparLog.error("Data integrity issue: multiple rows found for RIA_SKEY {}", riaKey, ex);
+      throw new DataIntegrityViolationException(
+          "Expected exactly one germination test row for RIA_SKEY " + riaKey, ex);
+    }
   }
 
   /**
@@ -375,14 +452,16 @@ public class TestResultService {
   }
 
   /**
-   * Retrieve daily abnormal germination counts for a daily germ record.
-   * Looks up the daily abnormal data by daily germ key, maps replicate abnormal
-   * counts into response DTOs, and validates that abnormal counts are not negative.
+   * Retrieve daily abnormal germination counts for a daily germ record. Looks up the daily abnormal
+   * data by daily germ key, maps replicate abnormal counts into response DTOs, and validates that
+   * abnormal counts are not negative.
+   *
    * <p>
+   *
    * @param dailyGermSkey the surrogate key for the daily germ record
    * @return a DailyAbnormalResponseDto containing abnormal counts for replicates 1 to 4
-   * @throws ResponseStatusException if the key is null (400), record is not found (404),
-   *         or abnormal counts are invalid (422)
+   * @throws ResponseStatusException if the key is null (400), record is not found (404), or
+   *     abnormal counts are invalid (422)
    */
   public DailyAbnormalResponseDto getDailyAbnormalCounts(BigDecimal dailyGermSkey) {
     // Validate input first
@@ -460,5 +539,47 @@ public class TestResultService {
         new DailyAbnormalResponseDto(entity.getDailyGermSkey(), rep1, rep2, rep3, rep4);
 
     return response;
+  }
+
+  /**
+   * Determine the default test rank for a seedlot.
+   * Returns:
+   * - "A" when no accepted STD rank-A test exists for the seedlot
+   * - "P" when an accepted STD rank-A test already exists
+   * - null when rank rules do not apply (non-STD or not accepted)
+   */
+  public String determineTestRank(
+      String seedlotNumber, String testCategoryCd, Integer acceptResultInd) {
+    SparLog.info(
+        "Determining test rank for seedlot={}, testCategoryCd={}, acceptResultInd={}",
+        seedlotNumber,
+        testCategoryCd,
+        acceptResultInd);
+
+    if (seedlotNumber == null || seedlotNumber.isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "seedlotNumber is required");
+    }
+
+    // Rule applies only to accepted STD tests
+    if (!"STD".equalsIgnoreCase(testCategoryCd) || !Integer.valueOf(1).equals(acceptResultInd)) {
+      SparLog.info(
+          "Rank logic not applicable for seedlot={} because testCategoryCd={} or"
+              + " acceptResultInd={}",
+          seedlotNumber,
+          testCategoryCd,
+          acceptResultInd);
+      return null;
+    }
+
+    long existingAcceptedStdRankA = testResultRepository.countAcceptedStdRankA(seedlotNumber);
+    String rank = existingAcceptedStdRankA > 0 ? "P" : "A";
+
+    SparLog.info(
+        "Determined test rank={} for seedlot={} (existing accepted STD rank-A count={})",
+        rank,
+        seedlotNumber,
+        existingAcceptedStdRankA);
+
+    return rank;
   }
 }

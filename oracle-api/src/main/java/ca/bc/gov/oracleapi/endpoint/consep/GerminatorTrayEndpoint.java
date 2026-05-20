@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.dto.consep.GerminatorIdAssignResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayContentsDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayDeleteContentDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
@@ -64,7 +65,11 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "201",
       description = "Successfully assigned trays for the provided activities.",
-      content = @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class)))
+      content = @Content(
+        array = @ArraySchema(
+          schema = @Schema(implementation = GerminatorTrayCreateResponseDto.class)
+        )
+      )
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
@@ -88,7 +93,8 @@ public class GerminatorTrayEndpoint {
       description = "Successfully assigned germinator ID to the tray.",
       content =
       @Content(
-          schema = @Schema(implementation = GerminatorIdAssignResponseDto.class))
+          schema = @Schema(implementation = GerminatorIdAssignResponseDto.class)
+      )
   )
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
@@ -136,12 +142,14 @@ public class GerminatorTrayEndpoint {
 
   /**
    * Deletes a germinator tray. All tests on the tray are detached, each parent activity's
-   * update_timestamp is updated, then the tray is deleted. Uses optimistic concurrency; if any
-   * DML affects 0 rows, returns 409 and rolls back.
+   * update_timestamp is updated, then the tray is deleted. Uses optimistic concurrency with the
+   * original timestamp for each tray content item; if any DML affects 0 rows, returns 409 and
+   * rolls back.
    *
    * @param germinatorTrayId the tray to delete
+   * @param contents         the tray contents with the activity timestamps
    */
-  @DeleteMapping("/{germinatorTrayId}")
+  @PostMapping("/{germinatorTrayId}/delete")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ApiResponse(responseCode = "204", description = "Tray deleted.")
   @ApiResponse(responseCode = "404", description = "Tray not found.")
@@ -150,9 +158,9 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void deleteTray(
     @PathVariable Integer germinatorTrayId,
-    @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime activityUpdateTimestamp
+    @Valid @RequestBody List<@Valid GerminatorTrayDeleteContentDto> contents
   ) {
-    germinatorTrayService.deleteTray(germinatorTrayId, activityUpdateTimestamp);
+    germinatorTrayService.deleteTray(germinatorTrayId, contents);
   }
 
   /**
@@ -160,7 +168,7 @@ public class GerminatorTrayEndpoint {
    * on controller method parameters (e.g. {@code @RequestParam}, {@code @PathVariable})
    * fails, and returns a {@link ValidationExceptionResponse}.
    *
-   * Applies only to exceptions raised within {@link GerminatorTrayEndpoint}.
+   * <p>Applies only to exceptions raised within {@link GerminatorTrayEndpoint}.
    */
   @ExceptionHandler(ConstraintViolationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -197,7 +205,12 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "200",
       description = "Successfully retrieved tests for the germinator tray.",
-      content = @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTrayContentsDto.class))))
+      content = @Content(
+          array = @ArraySchema(
+              schema = @Schema(implementation = GerminatorTrayContentsDto.class)
+          )
+      )
+  )
   @ApiAuthResponse
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public List<GerminatorTrayContentsDto> getTestsByTrayId(@PathVariable @Positive Integer germinatorTrayId) {
@@ -210,8 +223,12 @@ public class GerminatorTrayEndpoint {
   @ApiResponse(
       responseCode = "200",
       description = "Successfully searched germination trays.",
-      content =
-        @Content(array = @ArraySchema(schema = @Schema(implementation = GerminatorTraySearchResponseDto.class))))
+      content = @Content(
+          array = @ArraySchema(
+              schema = @Schema(implementation = GerminatorTraySearchResponseDto.class)
+          )
+      )
+  )
   @ApiAuthResponse
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public List<GerminatorTraySearchResponseDto> searchGerminatorTrays(

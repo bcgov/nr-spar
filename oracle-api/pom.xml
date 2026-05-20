@@ -42,6 +42,7 @@
     	<oci.revision>${project.version}</oci.revision>
 		<hibernate.version>6.6.42.Final</hibernate.version>
 		<spring-security.version>6.5.9</spring-security.version>
+		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 	</properties>
 
 	<profiles>
@@ -125,6 +126,11 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${org.mapstruct.version}</version>
 		</dependency>
 
 		<dependency>
@@ -228,6 +234,25 @@
 					<profiles>
             <profile>dev</profile>
           </profiles>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${org.mapstruct.version}</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 
