@@ -40,7 +40,7 @@ public record ReplicateAbnormalDto(
 
     @Schema(
             description =
-                "The number of seeds, of the ones germinated,  "
+                "The number of seeds, of the ones germinated, "
                     + "which were observed to be abnormal due to a thickened hypocotyl.",
             example = "1")
         Integer abnormalNumThickenedHypocotyl,
