@@ -374,6 +374,16 @@ public class TestResultService {
     return new ReplicateAbnormalDto(re, sr, sh, rn, th, tr, tw, cm, weak, other, prgrm, null);
   }
 
+  /**
+   * Retrieve daily abnormal germination counts for a daily germ record.
+   * Looks up the daily abnormal data by daily germ key, maps replicate abnormal
+   * counts into response DTOs, and validates that abnormal counts are not negative.
+   * <p>
+   * @param dailyGermSkey the surrogate key for the daily germ record
+   * @return a DailyAbnormalResponseDto containing abnormal counts for replicates 1 to 4
+   * @throws ResponseStatusException if the key is null (400), record is not found (404),
+   *         or abnormal counts are invalid (422)
+   */
   public DailyAbnormalResponseDto getDailyAbnormalCounts(BigDecimal dailyGermSkey) {
     // Validate input first
     if (dailyGermSkey == null) {

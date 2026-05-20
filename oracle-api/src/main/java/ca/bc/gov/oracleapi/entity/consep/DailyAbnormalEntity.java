@@ -10,6 +10,10 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Entity class representing daily abnormal germination counts.
+ * Maps to the CNS_T_DAILY_ABNORMAL table in the CONSEP schema.
+ */
 @Getter
 @Setter
 @Entity
