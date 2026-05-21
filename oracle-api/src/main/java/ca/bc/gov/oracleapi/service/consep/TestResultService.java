@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -616,66 +617,80 @@ public class TestResultService {
         + nullToZero(rep.abnormalNumPregermination());
   }
 
+  private static final List<Function<GermCountEntity, Integer>> REP1_GERM_GETTERS =
+      List.of(
+          GermCountEntity::getRep1NoSeedsGerm1,
+          GermCountEntity::getRep1NoSeedsGerm2,
+          GermCountEntity::getRep1NoSeedsGerm3,
+          GermCountEntity::getRep1NoSeedsGerm4,
+          GermCountEntity::getRep1NoSeedsGerm5,
+          GermCountEntity::getRep1NoSeedsGerm6,
+          GermCountEntity::getRep1NoSeedsGerm7,
+          GermCountEntity::getRep1NoSeedsGerm8,
+          GermCountEntity::getRep1NoSeedsGerm9,
+          GermCountEntity::getRep1NoSeedsGerm10,
+          GermCountEntity::getRep1NoSeedsGerm11,
+          GermCountEntity::getRep1NoSeedsGerm12,
+          GermCountEntity::getRep1NoSeedsGerm13);
+
+  private static final List<Function<GermCountEntity, Integer>> REP2_GERM_GETTERS =
+      List.of(
+          GermCountEntity::getRep2NoSeedsGerm1,
+          GermCountEntity::getRep2NoSeedsGerm2,
+          GermCountEntity::getRep2NoSeedsGerm3,
+          GermCountEntity::getRep2NoSeedsGerm4,
+          GermCountEntity::getRep2NoSeedsGerm5,
+          GermCountEntity::getRep2NoSeedsGerm6,
+          GermCountEntity::getRep2NoSeedsGerm7,
+          GermCountEntity::getRep2NoSeedsGerm8,
+          GermCountEntity::getRep2NoSeedsGerm9,
+          GermCountEntity::getRep2NoSeedsGerm10,
+          GermCountEntity::getRep2NoSeedsGerm11,
+          GermCountEntity::getRep2NoSeedsGerm12,
+          GermCountEntity::getRep2NoSeedsGerm13);
+
+  private static final List<Function<GermCountEntity, Integer>> REP3_GERM_GETTERS =
+      List.of(
+          GermCountEntity::getRep3NoSeedsGerm1,
+          GermCountEntity::getRep3NoSeedsGerm2,
+          GermCountEntity::getRep3NoSeedsGerm3,
+          GermCountEntity::getRep3NoSeedsGerm4,
+          GermCountEntity::getRep3NoSeedsGerm5,
+          GermCountEntity::getRep3NoSeedsGerm6,
+          GermCountEntity::getRep3NoSeedsGerm7,
+          GermCountEntity::getRep3NoSeedsGerm8,
+          GermCountEntity::getRep3NoSeedsGerm9,
+          GermCountEntity::getRep3NoSeedsGerm10,
+          GermCountEntity::getRep3NoSeedsGerm11,
+          GermCountEntity::getRep3NoSeedsGerm12,
+          GermCountEntity::getRep3NoSeedsGerm13);
+
+  private static final List<Function<GermCountEntity, Integer>> REP4_GERM_GETTERS =
+      List.of(
+          GermCountEntity::getRep4NoSeedsGerm1,
+          GermCountEntity::getRep4NoSeedsGerm2,
+          GermCountEntity::getRep4NoSeedsGerm3,
+          GermCountEntity::getRep4NoSeedsGerm4,
+          GermCountEntity::getRep4NoSeedsGerm5,
+          GermCountEntity::getRep4NoSeedsGerm6,
+          GermCountEntity::getRep4NoSeedsGerm7,
+          GermCountEntity::getRep4NoSeedsGerm8,
+          GermCountEntity::getRep4NoSeedsGerm9,
+          GermCountEntity::getRep4NoSeedsGerm10,
+          GermCountEntity::getRep4NoSeedsGerm11,
+          GermCountEntity::getRep4NoSeedsGerm12,
+          GermCountEntity::getRep4NoSeedsGerm13);
+
   private int sumGerminatedCountsForReplicate(GermCountEntity gc, int replicateNo) {
-    return switch (replicateNo) {
-      case 1 ->
-          nullToZero(gc.getRep1NoSeedsGerm1())
-              + nullToZero(gc.getRep1NoSeedsGerm2())
-              + nullToZero(gc.getRep1NoSeedsGerm3())
-              + nullToZero(gc.getRep1NoSeedsGerm4())
-              + nullToZero(gc.getRep1NoSeedsGerm5())
-              + nullToZero(gc.getRep1NoSeedsGerm6())
-              + nullToZero(gc.getRep1NoSeedsGerm7())
-              + nullToZero(gc.getRep1NoSeedsGerm8())
-              + nullToZero(gc.getRep1NoSeedsGerm9())
-              + nullToZero(gc.getRep1NoSeedsGerm10())
-              + nullToZero(gc.getRep1NoSeedsGerm11())
-              + nullToZero(gc.getRep1NoSeedsGerm12())
-              + nullToZero(gc.getRep1NoSeedsGerm13());
-      case 2 ->
-          nullToZero(gc.getRep2NoSeedsGerm1())
-              + nullToZero(gc.getRep2NoSeedsGerm2())
-              + nullToZero(gc.getRep2NoSeedsGerm3())
-              + nullToZero(gc.getRep2NoSeedsGerm4())
-              + nullToZero(gc.getRep2NoSeedsGerm5())
-              + nullToZero(gc.getRep2NoSeedsGerm6())
-              + nullToZero(gc.getRep2NoSeedsGerm7())
-              + nullToZero(gc.getRep2NoSeedsGerm8())
-              + nullToZero(gc.getRep2NoSeedsGerm9())
-              + nullToZero(gc.getRep2NoSeedsGerm10())
-              + nullToZero(gc.getRep2NoSeedsGerm11())
-              + nullToZero(gc.getRep2NoSeedsGerm12())
-              + nullToZero(gc.getRep2NoSeedsGerm13());
-      case 3 ->
-          nullToZero(gc.getRep3NoSeedsGerm1())
-              + nullToZero(gc.getRep3NoSeedsGerm2())
-              + nullToZero(gc.getRep3NoSeedsGerm3())
-              + nullToZero(gc.getRep3NoSeedsGerm4())
-              + nullToZero(gc.getRep3NoSeedsGerm5())
-              + nullToZero(gc.getRep3NoSeedsGerm6())
-              + nullToZero(gc.getRep3NoSeedsGerm7())
-              + nullToZero(gc.getRep3NoSeedsGerm8())
-              + nullToZero(gc.getRep3NoSeedsGerm9())
-              + nullToZero(gc.getRep3NoSeedsGerm10())
-              + nullToZero(gc.getRep3NoSeedsGerm11())
-              + nullToZero(gc.getRep3NoSeedsGerm12())
-              + nullToZero(gc.getRep3NoSeedsGerm13());
-      case 4 ->
-          nullToZero(gc.getRep4NoSeedsGerm1())
-              + nullToZero(gc.getRep4NoSeedsGerm2())
-              + nullToZero(gc.getRep4NoSeedsGerm3())
-              + nullToZero(gc.getRep4NoSeedsGerm4())
-              + nullToZero(gc.getRep4NoSeedsGerm5())
-              + nullToZero(gc.getRep4NoSeedsGerm6())
-              + nullToZero(gc.getRep4NoSeedsGerm7())
-              + nullToZero(gc.getRep4NoSeedsGerm8())
-              + nullToZero(gc.getRep4NoSeedsGerm9())
-              + nullToZero(gc.getRep4NoSeedsGerm10())
-              + nullToZero(gc.getRep4NoSeedsGerm11())
-              + nullToZero(gc.getRep4NoSeedsGerm12())
-              + nullToZero(gc.getRep4NoSeedsGerm13());
-      default -> throw new IllegalArgumentException("replicateNo must be 1..4");
-    };
+    List<Function<GermCountEntity, Integer>> getters =
+        switch (replicateNo) {
+          case 1 -> REP1_GERM_GETTERS;
+          case 2 -> REP2_GERM_GETTERS;
+          case 3 -> REP3_GERM_GETTERS;
+          case 4 -> REP4_GERM_GETTERS;
+          default -> throw new IllegalArgumentException("replicateNo must be 1..4");
+        };
+    return getters.stream().mapToInt(g -> nullToZero(g.apply(gc))).sum();
   }
 
   private void validateReplicateTotals(
