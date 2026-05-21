@@ -131,6 +131,9 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
 
   const [controlReviewData, setControlReviewData] = useState<boolean>(isReviewDisplay ?? false);
 
+  const canCalculate = !(!isReviewDisplay && isFormSubmitted);
+  const hasSmpMixGeomData = meanGeomInfos.smpMix.meanElevation.value !== '';
+
   const emptySectionDescription = getEmptySectionDescription(setStep);
 
   // Link reference to trigger click event
@@ -178,6 +181,19 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     staleTime: THREE_HOURS, // will not refetch for 3 hours
     gcTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
+
+  useEffect(() => {
+    if (
+      isFormSubmitted
+      && allParentTreeQuery.status === 'success'
+      && Object.keys(state.allParentTreeData).length === 0
+    ) {
+      setStepData('parentTreeStep', {
+        ...state,
+        allParentTreeData: allParentTreeQuery.data
+      });
+    }
+  }, [isFormSubmitted, allParentTreeQuery.status]);
 
   // Effects 'SMP mix' tab
   useEffect(
@@ -533,7 +549,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                   renderRecalcSection()
                 }
                 {
-                  !(!isReviewDisplay && isFormSubmitted)
+                  (canCalculate || hasSmpMixGeomData)
                     ? (
                       <DetailSection>
                         {/* -------- SMP mix mean geospatial data -------- */}
@@ -543,10 +559,14 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                           />
                         </Row>
                         {
-                          renderCalcSection(true)
+                          canCalculate
+                            ? renderCalcSection(true)
+                            : null
                         }
                         {
-                          showInfoSections || isReviewDisplay
+                          showInfoSections
+                          || isReviewDisplay
+                          || hasSmpMixGeomData
                             ? (
                               <InfoSection
                                 infoItems={Object.values(meanGeomInfos.smpMix)}

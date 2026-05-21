@@ -338,6 +338,48 @@ const ContextContainerClassA = ({ children }: props) => {
     getAllSeedlotInfoQuery.error
   ]);
 
+  // Hydrate meanGeomInfos from the stored geospatial data returned by the full-form GET,
+  // so the display values are populated on page load without needing to click Recalculate.
+  useEffect(() => {
+    if (getAllSeedlotInfoQuery.status !== 'success') {
+      return;
+    }
+    const { meanGeomSeedlot, meanGeomSmpMix } = getAllSeedlotInfoQuery.data;
+    if (!meanGeomSeedlot && !meanGeomSmpMix) {
+      return;
+    }
+    setMeanGeomInfos((prev) => ({
+      seedlot: meanGeomSeedlot ? {
+        meanLatitudeDm: {
+          ...prev.seedlot.meanLatitudeDm,
+          value: `${meanGeomSeedlot.meanLatitudeDegree}° ${meanGeomSeedlot.meanLatitudeMinute}'`
+        },
+        meanLongitudeDm: {
+          ...prev.seedlot.meanLongitudeDm,
+          value: `${meanGeomSeedlot.meanLongitudeDegree}° ${meanGeomSeedlot.meanLongitudeMinute}'`
+        },
+        meanElevation: {
+          ...prev.seedlot.meanElevation,
+          value: `${meanGeomSeedlot.meanElevation} m`
+        }
+      } : prev.seedlot,
+      smpMix: meanGeomSmpMix ? {
+        meanLatitudeDm: {
+          ...prev.smpMix.meanLatitudeDm,
+          value: `${meanGeomSmpMix.meanLatitudeDegree}° ${meanGeomSmpMix.meanLatitudeMinute}'`
+        },
+        meanLongitudeDm: {
+          ...prev.smpMix.meanLongitudeDm,
+          value: `${meanGeomSmpMix.meanLongitudeDegree}° ${meanGeomSmpMix.meanLongitudeMinute}'`
+        },
+        meanElevation: {
+          ...prev.smpMix.meanElevation,
+          value: `${meanGeomSmpMix.meanElevation} m`
+        }
+      } : prev.smpMix
+    }));
+  }, [getAllSeedlotInfoQuery.status]);
+
   useEffect(() => {
     if (
       getAllSeedlotInfoQuery.status === 'success'

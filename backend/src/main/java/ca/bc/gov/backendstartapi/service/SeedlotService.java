@@ -639,6 +639,29 @@ public class SeedlotService {
     SeedlotFormSmpParentOutsideDto smpParentOutsideDto =
         new SeedlotFormSmpParentOutsideDto(seedlotInfo.getParentsOutsideTheOrchardUsedInSmp());
 
+    GeospatialRespondDto meanGeomSeedlot = null;
+    if (seedlotInfo.getCollectionLatitudeDeg() != null) {
+      meanGeomSeedlot = new GeospatialRespondDto(
+          seedlotInfo.getCollectionLatitudeDeg(),
+          seedlotInfo.getCollectionLatitudeMin(),
+          seedlotInfo.getCollectionLatitudeSec(),
+          seedlotInfo.getCollectionLongitudeDeg(),
+          seedlotInfo.getCollectionLongitudeMin(),
+          seedlotInfo.getCollectionLongitudeSec(),
+          null,
+          null,
+          seedlotInfo.getCollectionElevation());
+    }
+
+    GeospatialRespondDto meanGeomSmpMix = null;
+    if (!smpMixsData.isEmpty()) {
+      List<GeospatialRequestDto> smpMixIdAndProps = smpMixsData.stream()
+          .map(smpMix -> new GeospatialRequestDto(
+              Long.valueOf(smpMix.getParentTreeId()), smpMix.getProportion()))
+          .collect(Collectors.toList());
+      meanGeomSmpMix = parentTreeService.calcMeanGeospatial(smpMixIdAndProps);
+    }
+
     SeedlotAclassFormDto seedlotAclassFullInfo =
         new SeedlotAclassFormDto(
             new SeedlotFormSubmissionDto(
@@ -655,7 +678,9 @@ public class SeedlotService {
                 List.of(),
                 null,
                 null),
-            calculatedGenWorth);
+            calculatedGenWorth,
+            meanGeomSeedlot,
+            meanGeomSmpMix);
 
     SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
     return seedlotAclassFullInfo;

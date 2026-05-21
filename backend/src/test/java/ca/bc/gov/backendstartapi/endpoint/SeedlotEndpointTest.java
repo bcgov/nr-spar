@@ -499,7 +499,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("getSingleSeedlotAclassFullInfoTest")
   void getSingleSeedlotAclassFullInfoTest() throws Exception {
-    SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(null, null);
+    SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(null, null, null, null);
 
     when(seedlotService.getAclassSeedlotFormInfo(any())).thenReturn(seedlotFullInfo);
 
