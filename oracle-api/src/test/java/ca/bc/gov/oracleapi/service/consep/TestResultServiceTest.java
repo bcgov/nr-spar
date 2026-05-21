@@ -724,53 +724,8 @@ class TestResultServiceTest {
     abnormal.setDailyGermSkey(dailyGermSkey);
 
     // rep1 abnormal total = 20, others 0
+    setAllAbnormalCountsToZero(abnormal);
     abnormal.setRep1NoAbnrmRe(20);
-    abnormal.setRep1NoAbnrmSr(0);
-    abnormal.setRep1NoAbnrmSh(0);
-    abnormal.setRep1NoAbnrmRn(0);
-    abnormal.setRep1NoAbnrmTh(0);
-    abnormal.setRep1NoAbnrmTr(0);
-    abnormal.setRep1NoAbnrmTw(0);
-    abnormal.setRep1NoAbnrmCm(0);
-    abnormal.setRep1NoAbnrmWeak(0);
-    abnormal.setRep1NoAbnrmOther(0);
-    abnormal.setRep1NoAbnrmPrgrm(0);
-
-    abnormal.setRep2NoAbnrmRe(0);
-    abnormal.setRep2NoAbnrmSr(0);
-    abnormal.setRep2NoAbnrmSh(0);
-    abnormal.setRep2NoAbnrmRn(0);
-    abnormal.setRep2NoAbnrmTh(0);
-    abnormal.setRep2NoAbnrmTr(0);
-    abnormal.setRep2NoAbnrmTw(0);
-    abnormal.setRep2NoAbnrmCm(0);
-    abnormal.setRep2NoAbnrmWeak(0);
-    abnormal.setRep2NoAbnrmOther(0);
-    abnormal.setRep2NoAbnrmPrgrm(0);
-
-    abnormal.setRep3NoAbnrmRe(0);
-    abnormal.setRep3NoAbnrmSr(0);
-    abnormal.setRep3NoAbnrmSh(0);
-    abnormal.setRep3NoAbnrmRn(0);
-    abnormal.setRep3NoAbnrmTh(0);
-    abnormal.setRep3NoAbnrmTr(0);
-    abnormal.setRep3NoAbnrmTw(0);
-    abnormal.setRep3NoAbnrmCm(0);
-    abnormal.setRep3NoAbnrmWeak(0);
-    abnormal.setRep3NoAbnrmOther(0);
-    abnormal.setRep3NoAbnrmPrgrm(0);
-
-    abnormal.setRep4NoAbnrmRe(0);
-    abnormal.setRep4NoAbnrmSr(0);
-    abnormal.setRep4NoAbnrmSh(0);
-    abnormal.setRep4NoAbnrmRn(0);
-    abnormal.setRep4NoAbnrmTh(0);
-    abnormal.setRep4NoAbnrmTr(0);
-    abnormal.setRep4NoAbnrmTw(0);
-    abnormal.setRep4NoAbnrmCm(0);
-    abnormal.setRep4NoAbnrmWeak(0);
-    abnormal.setRep4NoAbnrmOther(0);
-    abnormal.setRep4NoAbnrmPrgrm(0);
 
     GermCountEntity germCount = new GermCountEntity();
     germCount.setRiaSkey(riaSkey);
@@ -780,27 +735,16 @@ class TestResultServiceTest {
     germCount.setRep3NoSeedsGerm1(0);
     germCount.setRep4NoSeedsGerm1(0);
 
-    TestRepGermEntity rep1 = new TestRepGermEntity();
-    rep1.setId(new ReplicateId(riaSkey, 1));
-    rep1.setTotalNoSeeds(100);
-
-    TestRepGermEntity rep2 = new TestRepGermEntity();
-    rep2.setId(new ReplicateId(riaSkey, 2));
-    rep2.setTotalNoSeeds(100);
-
-    TestRepGermEntity rep3 = new TestRepGermEntity();
-    rep3.setId(new ReplicateId(riaSkey, 3));
-    rep3.setTotalNoSeeds(100);
-
-    TestRepGermEntity rep4 = new TestRepGermEntity();
-    rep4.setId(new ReplicateId(riaSkey, 4));
-    rep4.setTotalNoSeeds(100);
-
     when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(abnormal);
     when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
-        .thenReturn(java.util.Optional.of(germCount));
+        .thenReturn(Optional.of(germCount));
     when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
-        .thenReturn(List.of(rep1, rep2, rep3, rep4));
+        .thenReturn(
+            List.of(
+                makeReplicate(riaSkey, 1, 100),
+                makeReplicate(riaSkey, 2, 100),
+                makeReplicate(riaSkey, 3, 100),
+                makeReplicate(riaSkey, 4, 100)));
 
     ResponseStatusException ex =
         assertThrows(
