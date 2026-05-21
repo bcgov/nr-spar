@@ -639,29 +639,6 @@ public class SeedlotService {
     SeedlotFormSmpParentOutsideDto smpParentOutsideDto =
         new SeedlotFormSmpParentOutsideDto(seedlotInfo.getParentsOutsideTheOrchardUsedInSmp());
 
-    GeospatialRespondDto meanGeomSeedlot = null;
-    if (seedlotInfo.getCollectionLatitudeDeg() != null) {
-      meanGeomSeedlot = new GeospatialRespondDto(
-          seedlotInfo.getCollectionLatitudeDeg(),
-          seedlotInfo.getCollectionLatitudeMin(),
-          seedlotInfo.getCollectionLatitudeSec(),
-          seedlotInfo.getCollectionLongitudeDeg(),
-          seedlotInfo.getCollectionLongitudeMin(),
-          seedlotInfo.getCollectionLongitudeSec(),
-          null,
-          null,
-          seedlotInfo.getCollectionElevation());
-    }
-
-    GeospatialRespondDto meanGeomSmpMix = null;
-    if (!smpMixsData.isEmpty()) {
-      List<GeospatialRequestDto> smpMixIdAndProps = smpMixsData.stream()
-          .map(smpMix -> new GeospatialRequestDto(
-              Long.valueOf(smpMix.getParentTreeId()), smpMix.getProportion()))
-          .collect(Collectors.toList());
-      meanGeomSmpMix = parentTreeService.calcMeanGeospatial(smpMixIdAndProps);
-    }
-
     SeedlotAclassFormDto seedlotAclassFullInfo =
         new SeedlotAclassFormDto(
             new SeedlotFormSubmissionDto(
@@ -679,11 +656,37 @@ public class SeedlotService {
                 null,
                 null),
             calculatedGenWorth,
-            meanGeomSeedlot,
-            meanGeomSmpMix);
+            buildMeanGeomSeedlot(seedlotInfo),
+            buildMeanGeomSmpMix(smpMixsData));
 
     SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
     return seedlotAclassFullInfo;
+  }
+
+  private GeospatialRespondDto buildMeanGeomSeedlot(Seedlot seedlotInfo) {
+    if (seedlotInfo.getCollectionLatitudeDeg() == null) {
+      return null;
+    }
+    return new GeospatialRespondDto(
+        seedlotInfo.getCollectionLatitudeDeg(),
+        seedlotInfo.getCollectionLatitudeMin(),
+        seedlotInfo.getCollectionLatitudeSec(),
+        seedlotInfo.getCollectionLongitudeDeg(),
+        seedlotInfo.getCollectionLongitudeMin(),
+        seedlotInfo.getCollectionLongitudeSec(),
+        null,
+        null,
+        seedlotInfo.getCollectionElevation());
+  }
+  private GeospatialRespondDto buildMeanGeomSmpMix(List<SmpMix> smpMixsData) {
+    if (smpMixsData.isEmpty()) {
+      return null;
+    }
+    List<GeospatialRequestDto> smpMixIdAndProps = smpMixsData.stream()
+        .map(smpMix -> new GeospatialRequestDto(
+            Long.valueOf(smpMix.getParentTreeId()), smpMix.getProportion()))
+        .collect(Collectors.toList());
+    return parentTreeService.calcMeanGeospatial(smpMixIdAndProps);
   }
 
   /**
