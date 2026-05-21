@@ -832,6 +832,43 @@ class TestResultServiceTest {
   }
 
   @Test
+  void getDailyAbnormalCounts_throws422_whenReplicateNumbersAre1235() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    BigDecimal riaSkey = new BigDecimal("881191");
+
+    DailyAbnormalEntity abnormal = new DailyAbnormalEntity();
+    abnormal.setDailyGermSkey(dailyGermSkey);
+
+    GermCountEntity germCount = new GermCountEntity();
+    germCount.setRiaSkey(riaSkey);
+    germCount.setDailyGermSkey1(dailyGermSkey);
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(abnormal);
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCount));
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+        .thenReturn(
+            List.of(
+                makeReplicate(riaSkey, 1, 100),
+                makeReplicate(riaSkey, 2, 100),
+                makeReplicate(riaSkey, 3, 100),
+                makeReplicate(riaSkey, 5, 100)));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getDailyAbnormalCounts(dailyGermSkey));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertEquals(
+        "Unable to validate replicate totals: missing replicate seed totals", ex.getReason());
+
+    verify(dailyAbnormalRepository, times(1)).findByDailyGermSkey(dailyGermSkey);
+    verify(germCountRepository, times(1)).findByDailyGermSkeyInAnySlot(dailyGermSkey);
+    verify(testRepGermRepository, times(1)).findByRiaKeyOrderByReplicateNumber(riaSkey);
+  }
+
+  @Test
   void getDailyAbnormalCounts_treatsNullAsZero_forGerminatedAndAbnormalCounts() {
     BigDecimal dailyGermSkey = new BigDecimal("12345");
     BigDecimal riaSkey = new BigDecimal("881191");
