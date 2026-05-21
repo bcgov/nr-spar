@@ -572,26 +572,34 @@ public class TestResultService {
     validateNonNegativeAbnormalCounts(rep4, "rep4");
 
     // New cross-checks
+    int matchedSlot = findMatchedDailyGermSlot(germCount, dailyGermSkey);
+
+    if (matchedSlot == -1) {
+      throw new ResponseStatusException(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          "Unable to validate replicate totals: daily germ key not found in germination slots");
+    }
+
     validateReplicateTotals(
         "rep1",
         rep1,
         totalSeedsByRep.getOrDefault(1, 0),
-        sumGerminatedCountsForReplicate(germCount, 1));
+        sumGerminatedCountsForReplicateUpToSlot(germCount, 1, matchedSlot));
     validateReplicateTotals(
         "rep2",
         rep2,
         totalSeedsByRep.getOrDefault(2, 0),
-        sumGerminatedCountsForReplicate(germCount, 2));
+        sumGerminatedCountsForReplicateUpToSlot(germCount, 2, matchedSlot));
     validateReplicateTotals(
         "rep3",
         rep3,
         totalSeedsByRep.getOrDefault(3, 0),
-        sumGerminatedCountsForReplicate(germCount, 3));
+        sumGerminatedCountsForReplicateUpToSlot(germCount, 3, matchedSlot));
     validateReplicateTotals(
         "rep4",
         rep4,
         totalSeedsByRep.getOrDefault(4, 0),
-        sumGerminatedCountsForReplicate(germCount, 4));
+        sumGerminatedCountsForReplicateUpToSlot(germCount, 4, matchedSlot));
 
     DailyAbnormalResponseDto response =
         new DailyAbnormalResponseDto(entity.getDailyGermSkey(), rep1, rep2, rep3, rep4);
@@ -681,7 +689,42 @@ public class TestResultService {
           GermCountEntity::getRep4NoSeedsGerm12,
           GermCountEntity::getRep4NoSeedsGerm13);
 
-  private int sumGerminatedCountsForReplicate(GermCountEntity gc, int replicateNo) {
+  private int findMatchedDailyGermSlot(GermCountEntity gc, BigDecimal dailyGermSkey) {
+    if (dailyGermSkey == null) {
+      return -1;
+    }
+
+    BigDecimal[] slots = {
+      gc.getDailyGermSkey1(),
+      gc.getDailyGermSkey2(),
+      gc.getDailyGermSkey3(),
+      gc.getDailyGermSkey4(),
+      gc.getDailyGermSkey5(),
+      gc.getDailyGermSkey6(),
+      gc.getDailyGermSkey7(),
+      gc.getDailyGermSkey8(),
+      gc.getDailyGermSkey9(),
+      gc.getDailyGermSkey10(),
+      gc.getDailyGermSkey11(),
+      gc.getDailyGermSkey12(),
+      gc.getDailyGermSkey13()
+    };
+
+    for (int i = 0; i < slots.length; i++) {
+      if (slots[i] != null && dailyGermSkey.compareTo(slots[i]) == 0) {
+        return i + 1; // 1..13
+      }
+    }
+
+    return -1;
+  }
+
+  private int sumGerminatedCountsForReplicateUpToSlot(
+      GermCountEntity gc, int replicateNo, int slotInclusive) {
+    if (slotInclusive < 1 || slotInclusive > 13) {
+      throw new IllegalArgumentException("slotInclusive must be 1..13");
+    }
+
     List<Function<GermCountEntity, Integer>> getters =
         switch (replicateNo) {
           case 1 -> REP1_GERM_GETTERS;
@@ -690,7 +733,7 @@ public class TestResultService {
           case 4 -> REP4_GERM_GETTERS;
           default -> throw new IllegalArgumentException("replicateNo must be 1..4");
         };
-    return getters.stream().mapToInt(g -> nullToZero(g.apply(gc))).sum();
+    return getters.stream().limit(slotInclusive).mapToInt(g -> nullToZero(g.apply(gc))).sum();
   }
 
   private void validateReplicateTotals(
