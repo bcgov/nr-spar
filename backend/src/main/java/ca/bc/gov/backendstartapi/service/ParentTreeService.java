@@ -625,7 +625,7 @@ public class ParentTreeService {
    * @param ptreeIdAndProportions List of parent tree id and proportion.
    * @return A List of {@link GeospatialRespondDto}
    */
-  private GeospatialRespondDto calcMeanGeospatial(
+  public GeospatialRespondDto calcMeanGeospatial(
       List<GeospatialRequestDto> ptreeIdAndProportions) {
     SparLog.info(
         "{} parent tree record(s) received to calculate lat long and elevation",
