@@ -34,8 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Provides endpoint operations for retrieving suggested test rank,
  * daily abnormal germination counts, and germination test header metadata.
  *
- * <p>Input validation is handled through bean validation annotations and
- * local exception handling for constraint violations.
+ * <p>Input validation is handled through bean validation annotations,
+ * and constraint violations are processed by the global RestExceptionEndpoint.
  */
 @RestController
 @RequestMapping("/api/germination-tests")
