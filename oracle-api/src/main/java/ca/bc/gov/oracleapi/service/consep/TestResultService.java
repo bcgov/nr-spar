@@ -469,13 +469,8 @@ public class TestResultService {
    * @param dailyGermSkey the surrogate key for the daily germ record
    * @return a DailyAbnormalResponseDto containing abnormal counts for replicates 1 to 4
    * @throws ResponseStatusException if the key is null (400), record is not found (404), abnormal
-<<<<<<< HEAD
-   *     counts are invalid (422), replicate seed totals are missing (422), or abnormal totals
-   *     exceed germinated seed counts (422)
-=======
    *     counts are invalid (422), replicate seed totals are missing (422), or the combined
    *     germinated and abnormal totals exceed the replicate total seed count (422)
->>>>>>> 5a4bdbcc572a62a04e5a89eba90192683e4b2b65
    */
   public DailyAbnormalResponseDto getDailyAbnormalCounts(BigDecimal dailyGermSkey) {
     // Validate input first
