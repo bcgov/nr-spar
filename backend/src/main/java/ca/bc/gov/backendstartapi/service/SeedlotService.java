@@ -678,6 +678,7 @@ public class SeedlotService {
         null,
         seedlotInfo.getCollectionElevation());
   }
+  
   private GeospatialRespondDto buildMeanGeomSmpMix(List<SmpMix> smpMixsData) {
     if (smpMixsData.isEmpty()) {
       return null;
