@@ -176,6 +176,7 @@ public class GerminationTestEndpointTest {
   }
 
   @Test
+  @WithAnonymousUser
   void determineTestRank_shouldReturn401_whenUnauthenticated() throws Exception {
     String seedlotNumber = "12345";
 
