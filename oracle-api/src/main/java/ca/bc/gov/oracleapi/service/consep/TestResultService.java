@@ -469,8 +469,8 @@ public class TestResultService {
    * @param dailyGermSkey the surrogate key for the daily germ record
    * @return a DailyAbnormalResponseDto containing abnormal counts for replicates 1 to 4
    * @throws ResponseStatusException if the key is null (400), record is not found (404), abnormal
-   *     counts are invalid (422), replicate seed totals are missing (422), or abnormal totals exceed
-   *     germinated seed counts (422)
+   *     counts are invalid (422), replicate seed totals are missing (422), or abnormal totals
+   *     exceed germinated seed counts (422)
    */
   public DailyAbnormalResponseDto getDailyAbnormalCounts(BigDecimal dailyGermSkey) {
     // Validate input first
@@ -497,19 +497,19 @@ public class TestResultService {
     List<TestRepGermEntity> replicateRows =
         testRepGermRepository.findByRiaKeyOrderByReplicateNumber(germCount.getRiaSkey());
 
-    if (replicateRows.size() < 4) {
+    Map<Integer, Integer> totalSeedsByRep =
+        replicateRows.stream()
+            .collect(
+                Collectors.toMap(
+                    r -> r.getId().getReplicateNumber(),
+                    r -> nullToZero(r.getTotalNoSeeds()),
+                    (a, b) -> a));
+
+    if (!totalSeedsByRep.keySet().containsAll(List.of(1, 2, 3, 4))) {
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY,
           "Unable to validate replicate totals: missing replicate seed totals");
     }
-
-    Map<Integer, Integer> totalSeedsByRep =
-        replicateRows.stream()
-            .collect(
-                java.util.stream.Collectors.toMap(
-                    r -> r.getId().getReplicateNumber(),
-                    r -> nullToZero(r.getTotalNoSeeds()),
-                    (a, b) -> a));
 
     // Map entity fields into rep1, rep2, rep3, rep4 DTOs
     ReplicateAbnormalDto rep1 =
@@ -583,22 +583,22 @@ public class TestResultService {
     validateReplicateTotals(
         "rep1",
         rep1,
-        totalSeedsByRep.getOrDefault(1, 0),
+        totalSeedsByRep.get(1),
         sumGerminatedCountsForReplicateUpToSlot(germCount, 1, matchedSlot));
     validateReplicateTotals(
         "rep2",
         rep2,
-        totalSeedsByRep.getOrDefault(2, 0),
+        totalSeedsByRep.get(2),
         sumGerminatedCountsForReplicateUpToSlot(germCount, 2, matchedSlot));
     validateReplicateTotals(
         "rep3",
         rep3,
-        totalSeedsByRep.getOrDefault(3, 0),
+        totalSeedsByRep.get(3),
         sumGerminatedCountsForReplicateUpToSlot(germCount, 3, matchedSlot));
     validateReplicateTotals(
         "rep4",
         rep4,
-        totalSeedsByRep.getOrDefault(4, 0),
+        totalSeedsByRep.get(4),
         sumGerminatedCountsForReplicateUpToSlot(germCount, 4, matchedSlot));
 
     DailyAbnormalResponseDto response =
