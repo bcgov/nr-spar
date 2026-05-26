@@ -248,6 +248,9 @@ const MaintainGermTray = () => {
           }}
         />
       </Row>
+      <Row className="consep-maintain-germ-tray-tests-heading">
+        <div className="consep-maintain-germ-tray-tests-title">Tray contents</div>
+      </Row>
       <Row className="consep-maintain-germ-tray-tests-table">
         <GenericTable
           columns={germTrayTestsColumns}
