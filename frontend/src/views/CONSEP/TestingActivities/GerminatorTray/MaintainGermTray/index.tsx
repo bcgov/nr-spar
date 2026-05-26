@@ -11,7 +11,8 @@ import {
   FlexGrid,
   Row,
   InlineNotification,
-  Modal
+  Modal,
+  Button
 } from '@carbon/react';
 import GenericTable from '../../../../../components/GenericTable';
 import ROUTES from '../../../../../routes/constants';
@@ -286,6 +287,20 @@ const MaintainGermTray = () => {
           {`Please confirm you want to delete germination test ID ${pendingDeleteTest?.requestId} for seedlot #${pendingDeleteTest?.seedlotNumber}. This action cannot be undone.`}
         </p>
       </Modal>
+      <Row className="button-row">
+        <Button
+          size="md"
+          kind="tertiary"
+        >
+          Labels
+        </Button>
+        <Button
+          size="md"
+          kind="tertiary"
+        >
+          Comments
+        </Button>
+      </Row>
     </FlexGrid>
   );
 };
