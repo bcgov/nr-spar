@@ -75,7 +75,7 @@ export const getGermTrayTestsColumns = (
 ): MRT_ColumnDef<GermTrayTestType>[] => [
   {
     accessorKey: 'seedlotNumber',
-    header: 'Lot #',
+    header: 'Seedlot #',
     enableEditing: false,
     size: 80
   },
@@ -84,6 +84,13 @@ export const getGermTrayTestsColumns = (
     header: 'Request ID',
     enableEditing: false,
     size: 120
+  },
+  {
+    accessorKey: 'soakEndDate',
+    header: 'Soak end date',
+    enableEditing: false,
+    size: 120,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'warmStratStartDate',
@@ -140,6 +147,20 @@ export const getGermTrayTestsColumns = (
         disabled
       />
     )
+  },
+  {
+    accessorKey: 'vegetationSt',
+    header: 'Species',
+    enableEditing: false,
+    size: 120,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
+  },
+  {
+    accessorKey: 'germinatorId',
+    header: 'Germ ID',
+    enableEditing: false,
+    size: 120,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actions',
