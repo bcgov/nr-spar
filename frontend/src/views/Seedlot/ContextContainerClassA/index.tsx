@@ -49,7 +49,7 @@ import {
   verifyInterimStepCompleteness, validateOrchardStep, verifyOrchardStepCompleteness,
   validateExtractionStep, verifyExtractionStepCompleteness, validateParentStep,
   verifyParentStepCompleteness, checkAllStepsCompletion, getSeedlotPayload,
-  initEmptySteps, resDataToState, fillAreaOfUseData, fillCollectionGeoData
+  initEmptySteps, resDataToState, fillAreaOfUseData, fillCollectionGeoData, buildGeomDisplayValues
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE, initialAreaOfUseData,
@@ -349,46 +349,18 @@ const ContextContainerClassA = ({ children }: props) => {
       setMeanGeomInfos(structuredClone(defaultMeanGeomConfig));
       return;
     }
+    const seedlotDisplay = buildGeomDisplayValues(meanGeomSeedlot);
+    const smpMixDisplay = buildGeomDisplayValues(meanGeomSmpMix);
     setMeanGeomInfos((prev) => ({
-      seedlot: meanGeomSeedlot ? {
-        meanLatitudeDm: {
-          ...prev.seedlot.meanLatitudeDm,
-          value: (meanGeomSeedlot.meanLatitudeMinute != null)
-            ? `${meanGeomSeedlot.meanLatitudeDegree}° ${meanGeomSeedlot.meanLatitudeMinute}'`
-            : ''
-        },
-        meanLongitudeDm: {
-          ...prev.seedlot.meanLongitudeDm,
-          value: (meanGeomSeedlot.meanLongitudeMinute != null)
-            ? `${meanGeomSeedlot.meanLongitudeDegree}° ${meanGeomSeedlot.meanLongitudeMinute}'`
-            : ''
-        },
-        meanElevation: {
-          ...prev.seedlot.meanElevation,
-          value: (meanGeomSeedlot.meanElevation != null)
-            ? `${meanGeomSeedlot.meanElevation} m`
-            : ''
-        }
+      seedlot: seedlotDisplay ? {
+        meanLatitudeDm: { ...prev.seedlot.meanLatitudeDm, value: seedlotDisplay.latDm },
+        meanLongitudeDm: { ...prev.seedlot.meanLongitudeDm, value: seedlotDisplay.lonDm },
+        meanElevation: { ...prev.seedlot.meanElevation, value: seedlotDisplay.elevation }
       } : prev.seedlot,
-      smpMix: meanGeomSmpMix ? {
-        meanLatitudeDm: {
-          ...prev.smpMix.meanLatitudeDm,
-          value: (meanGeomSmpMix.meanLatitudeMinute != null)
-            ? `${meanGeomSmpMix.meanLatitudeDegree}° ${meanGeomSmpMix.meanLatitudeMinute}'`
-            : ''
-        },
-        meanLongitudeDm: {
-          ...prev.smpMix.meanLongitudeDm,
-          value: (meanGeomSmpMix.meanLongitudeMinute != null)
-            ? `${meanGeomSmpMix.meanLongitudeDegree}° ${meanGeomSmpMix.meanLongitudeMinute}'`
-            : ''
-        },
-        meanElevation: {
-          ...prev.smpMix.meanElevation,
-          value: (meanGeomSmpMix.meanElevation != null)
-            ? `${meanGeomSmpMix.meanElevation} m`
-            : ''
-        }
+      smpMix: smpMixDisplay ? {
+        meanLatitudeDm: { ...prev.smpMix.meanLatitudeDm, value: smpMixDisplay.latDm },
+        meanLongitudeDm: { ...prev.smpMix.meanLongitudeDm, value: smpMixDisplay.lonDm },
+        meanElevation: { ...prev.smpMix.meanElevation, value: smpMixDisplay.elevation }
       } : prev.smpMix
     }));
   }, [getAllSeedlotInfoQuery.status, getAllSeedlotInfoQuery.data]);
