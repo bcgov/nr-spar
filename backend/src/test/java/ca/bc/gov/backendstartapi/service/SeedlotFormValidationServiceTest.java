@@ -795,6 +795,22 @@ class SeedlotFormValidationServiceTest {
                     e.fieldId()
                         .equals("seedlotFormInterimDto.intermOtherFacilityDesc"));
     Assertions.assertTrue(hasEmptyError, "Expected error on intermOtherFacilityDesc when empty");
+
+    // whitespace-only description
+    SeedlotSubmissionValidationException exBlank =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withInterimFacility("OTH", "   ")));
+    boolean hasBlankError =
+        exBlank.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId()
+                        .equals("seedlotFormInterimDto.intermOtherFacilityDesc"));
+    Assertions.assertTrue(
+        hasBlankError, "Expected error on intermOtherFacilityDesc when whitespace-only");
   }
 
   @Test

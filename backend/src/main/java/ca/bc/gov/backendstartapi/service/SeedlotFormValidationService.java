@@ -306,7 +306,7 @@ public class SeedlotFormValidationService {
     // intentionally deferred — no intermFacilityCode reference table exists in the database
     // yet (#716).
     if ("OTH".equals(dto.intermFacilityCode())
-        && (dto.intermOtherFacilityDesc() == null || dto.intermOtherFacilityDesc().isEmpty())) {
+        && (dto.intermOtherFacilityDesc() == null || dto.intermOtherFacilityDesc().isBlank())) {
       errors.add(
           new SeedlotValidationError(
               "seedlotFormInterimDto.intermOtherFacilityDesc",
