@@ -56,6 +56,42 @@ public final class TestSeedlotForms {
         base.applicantAndSeedlotInfo());
   }
 
+  /**
+   * Returns a form with the given primary orchard, pollenContaminationInd, and
+   * pollenContaminationPct. All other orchard fields come from {@link #valid()}.
+   */
+  public static SeedlotFormSubmissionDto withPollenContamination(
+      String primaryOrchardId, boolean ind, Integer pct) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormOrchardDto orig = base.seedlotFormOrchardDto();
+    SeedlotFormOrchardDto replaced =
+        new SeedlotFormOrchardDto(
+            primaryOrchardId,
+            null, // no secondary
+            orig.femaleGameticMthdCode(),
+            orig.maleGameticMthdCode(),
+            orig.controlledCrossInd(),
+            orig.biotechProcessesInd(),
+            ind,
+            pct,
+            orig.contaminantPollenBv(),
+            orig.pollenContaminationMthdCode());
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        replaced,
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
   /** Returns a fully-populated, structurally valid {@link SeedlotFormSubmissionDto}. */
   public static SeedlotFormSubmissionDto valid() {
 

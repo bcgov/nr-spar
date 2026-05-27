@@ -122,6 +122,7 @@ public class SeedlotFormValidationService {
     // O2 (HEADLINE): verify the orchard's species matches the seedlot's species
     String orchardVeg = orchardOpt.get().getVegetationCode();
     if (seedlot.getVegetationCode() != null
+        && orchardVeg != null
         && !seedlot.getVegetationCode().equals(orchardVeg)) {
       errors.add(
           new SeedlotValidationError(

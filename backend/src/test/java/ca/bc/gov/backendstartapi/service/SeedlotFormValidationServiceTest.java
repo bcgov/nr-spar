@@ -162,6 +162,53 @@ class SeedlotFormValidationServiceTest {
     Assertions.assertTrue(hasNotActiveError, "Expected 'is not active' error on primaryOrchardId");
   }
 
+  // ----- O2: species mismatch message content --------------------------------
+
+  @Test
+  @DisplayName("O2 (strengthened): species-mismatch error message contains the orchard species code")
+  void orchard_speciesMismatch_errorMessageContainsOrchardSpecies() {
+    // Seedlot is PLI; orchard 405 has vegCode FDC -> message should mention "FDC"
+    stubValidOrchard("405", "FDC");
+
+    Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withOrchardPrimary("405")));
+    boolean hasMessageWithSpecies =
+        ex.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId().equals("seedlotFormOrchardDto.primaryOrchardId")
+                        && e.message().contains("FDC"));
+    Assertions.assertTrue(
+        hasMessageWithSpecies,
+        "Expected species-mismatch error message to contain the orchard species 'FDC'");
+  }
+
+  // ----- O4: invalid secondary orchard -------------------------------------
+
+  @Test
+  @DisplayName("O4: non-existent secondary orchard is rejected")
+  void orchard_invalidSecondary_isRejected() {
+    // Primary 405 is valid, active, species-matching; secondary 406 does not exist
+    stubValidOrchard("405", "PLI");
+    lenient().when(oracleApiProvider.findOrchardById("406")).thenReturn(Optional.empty());
+
+    Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
+    // TestSeedlotForms.valid() has primary "405" and secondary "406"
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
+    boolean hasSecondaryError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.secondaryOrchardId"));
+    Assertions.assertTrue(hasSecondaryError, "Expected error on secondaryOrchardId field");
+  }
+
   // ----- O5: invalid gametic code ------------------------------------------
 
   @Test
@@ -183,6 +230,72 @@ class SeedlotFormValidationServiceTest {
             .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.femaleGameticMthdCode"));
     Assertions.assertTrue(
         hasGameticError, "Expected error on femaleGameticMthdCode field");
+  }
+
+  @Test
+  @DisplayName("O5: invalid male gametic method code is rejected")
+  void orchard_invalidMaleGameticCode_isRejected() {
+    // Orchard valid + active + matching species; female "F3" valid but male "M3" unknown
+    stubValidOrchard("405", "PLI");
+    lenient().when(gameticMethodologyRepository.existsById("F3")).thenReturn(true);
+    lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(false);
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withOrchardPrimary("405")));
+    boolean hasMaleGameticError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.maleGameticMthdCode"));
+    boolean hasNoFemaleError =
+        ex.getErrors().stream()
+            .noneMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.femaleGameticMthdCode"));
+    Assertions.assertTrue(hasMaleGameticError, "Expected error on maleGameticMthdCode field");
+    Assertions.assertTrue(hasNoFemaleError, "Expected no error on femaleGameticMthdCode field");
+  }
+
+  // ----- O7: pollen contamination percentage --------------------------------
+
+  @Test
+  @DisplayName("O7: pollen contamination percentage out of range is rejected")
+  void orchard_pollenContaminationPctOutOfRange_isRejected() {
+    // Orchard valid + active + matching species + valid gametic codes; pct=150 is invalid
+    stubValidOrchard("405", "PLI");
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withPollenContamination("405", true, 150)));
+    boolean hasPollenPctError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.pollenContaminationPct"));
+    Assertions.assertTrue(hasPollenPctError, "Expected error on pollenContaminationPct field");
+  }
+
+  @Test
+  @DisplayName("O7: pollen contamination percentage null when ind=true is rejected")
+  void orchard_pollenContaminationPctNull_isRejected() {
+    // Orchard valid + active + matching species + valid gametic codes; pct=null when ind=true
+    stubValidOrchard("405", "PLI");
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withPollenContamination("405", true, null)));
+    boolean hasPollenPctError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.pollenContaminationPct"));
+    Assertions.assertTrue(
+        hasPollenPctError, "Expected error on pollenContaminationPct when null with ind=true");
   }
 
   // ----- happy path --------------------------------------------------------
