@@ -897,6 +897,132 @@ class SeedlotFormValidationServiceTest {
         () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
   }
 
+  // ----- Extraction step tests (E1-E3) ----------------------------------------
+
+  @Test
+  @DisplayName("E2: storage client/location not found (404) is rejected")
+  void extraction_storageClientNotFound_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    // Make any client/locn pass by default, then override the specific storage pair to 404
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+    // Use a distinct client/locn for storage that won't collide with collection/interim/owner pairs
+    lenient()
+        .when(forestClientService.fetchSingleClientLocation("00088887", "02"))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withStorageClient("00088887", "02")));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormExtractionDto.storageClientNumber"));
+    Assertions.assertTrue(
+        hasError, "Expected error on seedlotFormExtractionDto.storageClientNumber");
+  }
+
+  @Test
+  @DisplayName("E1: extractory client/location not found (404) is rejected")
+  void extraction_extractoryClientNotFound_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    // Make any client/locn pass by default, then override the specific extractory pair to 404
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+    // Use a distinct client/locn for extractory that won't collide with other pairs
+    lenient()
+        .when(forestClientService.fetchSingleClientLocation("00088886", "03"))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withExtractoryClient("00088886", "03")));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormExtractionDto.extractoryClientNumber"));
+    Assertions.assertTrue(
+        hasError, "Expected error on seedlotFormExtractionDto.extractoryClientNumber");
+  }
+
+  @Test
+  @DisplayName("E3: extraction end date before start date is rejected")
+  void extraction_endDateBeforeStart_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withExtractionDates(
+                        LocalDate.of(2024, 11, 10), LocalDate.of(2024, 11, 1))));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormExtractionDto.extractionEndDate"));
+    Assertions.assertTrue(
+        hasError, "Expected error on seedlotFormExtractionDto.extractionEndDate");
+  }
+
+  @Test
+  @DisplayName("E3: temporary storage end date before start date is rejected")
+  void extraction_temporaryStorageEndBeforeStart_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withTemporaryStorageDates(
+                        LocalDate.of(2024, 12, 10), LocalDate.of(2024, 12, 1))));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormExtractionDto.temporaryStrgEndDate"));
+    Assertions.assertTrue(
+        hasError, "Expected error on seedlotFormExtractionDto.temporaryStrgEndDate");
+  }
+
+  @Test
+  @DisplayName("E1-E3: happy path — valid extraction step passes")
+  void extraction_validForm_passes() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot();
+    Assertions.assertDoesNotThrow(
+        () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
+  }
+
   @Test
   @DisplayName("OW4 (boundary): reserved + surplus exactly equal to owned passes")
   void owners_reservedPlusSurplusEqualsOwned_passes() {

@@ -427,6 +427,142 @@ public final class TestSeedlotForms {
   }
 
   /**
+   * Returns a form identical to {@link #valid()} but with the extraction start and end dates
+   * overridden. Useful for E3 (date order) validation tests.
+   */
+  public static SeedlotFormSubmissionDto withExtractionDates(
+      LocalDate extractionStart, LocalDate extractionEnd) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormExtractionDto orig = base.seedlotFormExtractionDto();
+    SeedlotFormExtractionDto replaced =
+        new SeedlotFormExtractionDto(
+            orig.extractoryClientNumber(),
+            orig.extractoryLocnCode(),
+            extractionStart,
+            extractionEnd,
+            orig.storageClientNumber(),
+            orig.storageLocnCode(),
+            orig.temporaryStrgStartDate(),
+            orig.temporaryStrgEndDate());
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        replaced,
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
+   * Returns a form identical to {@link #valid()} but with the temporary storage start and end dates
+   * overridden. Useful for E3 (temporary storage date order) validation tests.
+   */
+  public static SeedlotFormSubmissionDto withTemporaryStorageDates(
+      LocalDate tempStart, LocalDate tempEnd) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormExtractionDto orig = base.seedlotFormExtractionDto();
+    SeedlotFormExtractionDto replaced =
+        new SeedlotFormExtractionDto(
+            orig.extractoryClientNumber(),
+            orig.extractoryLocnCode(),
+            orig.extractionStDate(),
+            orig.extractionEndDate(),
+            orig.storageClientNumber(),
+            orig.storageLocnCode(),
+            tempStart,
+            tempEnd);
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        replaced,
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
+   * Returns a form identical to {@link #valid()} but with the storage client/location overridden.
+   * Useful for E2 (storage client/location 404) validation tests.
+   */
+  public static SeedlotFormSubmissionDto withStorageClient(
+      String clientNumber, String locationCode) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormExtractionDto orig = base.seedlotFormExtractionDto();
+    SeedlotFormExtractionDto replaced =
+        new SeedlotFormExtractionDto(
+            orig.extractoryClientNumber(),
+            orig.extractoryLocnCode(),
+            orig.extractionStDate(),
+            orig.extractionEndDate(),
+            clientNumber,
+            locationCode,
+            orig.temporaryStrgStartDate(),
+            orig.temporaryStrgEndDate());
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        replaced,
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
+   * Returns a form identical to {@link #valid()} but with the extractory client/location
+   * overridden. Useful for E1 (extractory client/location 404) validation tests.
+   */
+  public static SeedlotFormSubmissionDto withExtractoryClient(
+      String clientNumber, String locationCode) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormExtractionDto orig = base.seedlotFormExtractionDto();
+    SeedlotFormExtractionDto replaced =
+        new SeedlotFormExtractionDto(
+            clientNumber,
+            locationCode,
+            orig.extractionStDate(),
+            orig.extractionEndDate(),
+            orig.storageClientNumber(),
+            orig.storageLocnCode(),
+            orig.temporaryStrgStartDate(),
+            orig.temporaryStrgEndDate());
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        replaced,
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
    * Returns a form identical to {@link #valid()} but with the given cone collection method codes.
    * Useful for cone-code validation tests.
    */

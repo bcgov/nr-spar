@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
@@ -323,9 +324,41 @@ public class SeedlotFormValidationService {
     }
   }
 
-  @SuppressWarnings("unused") // TODO(#716): remove @SuppressWarnings once this step is implemented
   private void validateExtractionStep(
       SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    // implemented in Task 8
+    SeedlotFormExtractionDto dto = form.seedlotFormExtractionDto();
+    if (dto == null) {
+      return;
+    }
+    // E1: verify extractory client + location exist in Forest Client API
+    validateClientLocation(
+        dto.extractoryClientNumber(),
+        dto.extractoryLocnCode(),
+        "seedlotFormExtractionDto.extractoryClientNumber",
+        errors);
+    // E2: verify storage client + location exist in Forest Client API
+    validateClientLocation(
+        dto.storageClientNumber(),
+        dto.storageLocnCode(),
+        "seedlotFormExtractionDto.storageClientNumber",
+        errors);
+    // E3: extraction end date must not precede start date
+    if (dto.extractionStDate() != null
+        && dto.extractionEndDate() != null
+        && dto.extractionEndDate().isBefore(dto.extractionStDate())) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormExtractionDto.extractionEndDate",
+              "Extraction end date must not be before the start date."));
+    }
+    // E3: temporary storage end date must not precede start date
+    if (dto.temporaryStrgStartDate() != null
+        && dto.temporaryStrgEndDate() != null
+        && dto.temporaryStrgEndDate().isBefore(dto.temporaryStrgStartDate())) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormExtractionDto.temporaryStrgEndDate",
+              "Temporary storage end date must not be before the start date."));
+    }
   }
 }
