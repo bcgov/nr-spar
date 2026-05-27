@@ -73,8 +73,6 @@ class SeedlotFormValidationServiceTest {
             Optional.of(new ActiveOrchardSpuEntity(orchardId, 7, true, false, false)));
     lenient().when(gameticMethodologyRepository.existsById("F3")).thenReturn(true);
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(true);
-    // pollen contamination method code from TestSeedlotForms.valid() is "true" — treat as valid
-    lenient().when(gameticMethodologyRepository.existsById("true")).thenReturn(true);
   }
 
   // ----- smoke test --------------------------------------------------------
@@ -99,7 +97,6 @@ class SeedlotFormValidationServiceTest {
     lenient().when(oracleApiProvider.findOrchardById("999")).thenReturn(Optional.empty());
     lenient().when(gameticMethodologyRepository.existsById("F3")).thenReturn(true);
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(true);
-    lenient().when(gameticMethodologyRepository.existsById("true")).thenReturn(true);
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -148,7 +145,6 @@ class SeedlotFormValidationServiceTest {
     lenient().when(orchardService.findSpuIdByOrchard("405")).thenReturn(Optional.empty());
     lenient().when(gameticMethodologyRepository.existsById("F3")).thenReturn(true);
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(true);
-    lenient().when(gameticMethodologyRepository.existsById("true")).thenReturn(true);
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =

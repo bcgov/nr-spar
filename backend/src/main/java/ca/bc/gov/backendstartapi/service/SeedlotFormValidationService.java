@@ -93,19 +93,8 @@ public class SeedlotFormValidationService {
                   + " is not a valid gametic methodology code."));
     }
 
-    // O6: pollen contamination method code — validated against gametic methodology repository
-    // (no separate lookup table exists for pollen contamination method codes in this schema)
-    String pollenMthdCode = dto.pollenContaminationMthdCode();
-    if (pollenMthdCode != null
-        && !pollenMthdCode.isBlank()
-        && !gameticMethodologyRepository.existsById(pollenMthdCode)) {
-      errors.add(
-          new SeedlotValidationError(
-              "seedlotFormOrchardDto.pollenContaminationMthdCode",
-              "Pollen contamination method code "
-                  + pollenMthdCode
-                  + " is not a valid gametic methodology code."));
-    }
+    // Note: pollenContaminationMthdCode has no lookup table (no FK; values like "RPM");
+    // validation deferred — see #716 spec open questions.
 
     // O7: if pollenContaminationInd is true, pollenContaminationPct must be non-null and 0..100
     if (Boolean.TRUE.equals(dto.pollenContaminationInd())) {

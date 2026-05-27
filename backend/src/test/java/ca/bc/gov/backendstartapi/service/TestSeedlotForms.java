@@ -105,7 +105,7 @@ public final class TestSeedlotForms {
             false,
             22,
             new BigDecimal("45.6"),
-            "true");
+            "RPM");
 
     // Step 5 – Parent tree / SMP mix
     ParentTreeGeneticQualityDto genQuality =
