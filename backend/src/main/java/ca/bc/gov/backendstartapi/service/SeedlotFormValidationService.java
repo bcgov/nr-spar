@@ -301,7 +301,10 @@ public class SeedlotFormValidationService {
         dto.intermStrgLocnCode(),
         "seedlotFormInterimDto.intermStrgClientNumber",
         errors);
-    // I2 (partial): OTH facility type requires a description
+    // I2 (partial): OTH facility type requires a description.
+    // Full facility-code validation (checking intermFacilityCode against a lookup table) is
+    // intentionally deferred — no intermFacilityCode reference table exists in the database
+    // yet (#716).
     if ("OTH".equals(dto.intermFacilityCode())
         && (dto.intermOtherFacilityDesc() == null || dto.intermOtherFacilityDesc().isEmpty())) {
       errors.add(
