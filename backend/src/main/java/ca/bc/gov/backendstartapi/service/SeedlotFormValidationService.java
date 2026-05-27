@@ -226,6 +226,10 @@ public class SeedlotFormValidationService {
     }
   }
 
+  private BigDecimal nz(BigDecimal v) {
+    return v == null ? BigDecimal.ZERO : v;
+  }
+
   private void validateOwnershipStep(
       SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
     var owners = form.seedlotFormOwnershipDtoList();
@@ -283,10 +287,6 @@ public class SeedlotFormValidationService {
               "seedlotFormOwnershipDtoList",
               "Total owned percentage across owners must equal 100, was " + totalOwned + "."));
     }
-  }
-
-  private BigDecimal nz(BigDecimal v) {
-    return v == null ? BigDecimal.ZERO : v;
   }
 
   @SuppressWarnings("unused") // TODO(#716): remove @SuppressWarnings once this step is implemented

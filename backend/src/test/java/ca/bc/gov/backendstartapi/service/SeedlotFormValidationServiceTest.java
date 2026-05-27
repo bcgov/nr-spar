@@ -634,7 +634,8 @@ class SeedlotFormValidationServiceTest {
                             new BigDecimal("30")))));
     boolean hasError =
         ex.getErrors().stream()
-            .anyMatch(e -> e.fieldId().contains("originalPctRsrvd"));
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormOwnershipDtoList[0].originalPctRsrvd"));
     Assertions.assertTrue(
         hasError, "Expected error on originalPctRsrvd when reserved+surplus exceeds owned");
   }
@@ -670,7 +671,8 @@ class SeedlotFormValidationServiceTest {
                     seedlot, TestSeedlotForms.withOwners(ownerWithBadCode)));
     boolean hasError =
         ex.getErrors().stream()
-            .anyMatch(e -> e.fieldId().contains("methodOfPaymentCode"));
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormOwnershipDtoList[0].methodOfPaymentCode"));
     Assertions.assertTrue(hasError, "Expected error on methodOfPaymentCode for invalid code");
   }
 
@@ -698,7 +700,7 @@ class SeedlotFormValidationServiceTest {
         ex.getErrors().stream()
             .anyMatch(
                 e ->
-                    e.fieldId().contains("ownerClientNumber")
+                    e.fieldId().equals("seedlotFormOwnershipDtoList[1].ownerClientNumber")
                         && e.message().contains("Duplicate owner"));
     Assertions.assertTrue(hasError, "Expected duplicate-pair error on ownerClientNumber");
   }
@@ -728,7 +730,8 @@ class SeedlotFormValidationServiceTest {
                         TestSeedlotForms.owner("00099999", "99", new BigDecimal("100")))));
     boolean hasError =
         ex.getErrors().stream()
-            .anyMatch(e -> e.fieldId().contains("ownerClientNumber"));
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormOwnershipDtoList[0].ownerClientNumber"));
     Assertions.assertTrue(
         hasError, "Expected error on ownerClientNumber when client/location is not found");
   }
@@ -749,5 +752,29 @@ class SeedlotFormValidationServiceTest {
                 seedlot,
                 TestSeedlotForms.withOwners(
                     TestSeedlotForms.owner("00012797", "00", new BigDecimal("100")))));
+  }
+
+  @Test
+  @DisplayName("OW4 (boundary): reserved + surplus exactly equal to owned passes")
+  void owners_reservedPlusSurplusEqualsOwned_passes() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    // owned=100, rsrvd=60, srpls=40 -> 60+40=100 == owned (OW4 uses strictly-greater, so equal
+    // passes); owned=100 also satisfies OW3
+    Seedlot seedlot = validSeedlot();
+    Assertions.assertDoesNotThrow(
+        () ->
+            service.validateSeedlotForm(
+                seedlot,
+                TestSeedlotForms.withOwners(
+                    TestSeedlotForms.ownerFull(
+                        "00012797", "00",
+                        new BigDecimal("100"),
+                        new BigDecimal("60"),
+                        new BigDecimal("40")))));
   }
 }
