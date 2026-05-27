@@ -93,8 +93,8 @@ class SeedlotEndpointTest {
       "seedlotFormCollectionDto": {
         "collectionClientNumber": "00012797",
         "collectionLocnCode": "02",
-        "collectionStartDate": "2023-12-06T00:00:00Z",
-        "collectionEndDate": "2023-12-06T00:00:00Z",
+        "collectionStartDate": "2023-12-06",
+        "collectionEndDate": "2023-12-06",
         "noOfContainers": 2,
         "volPerContainer": 4,
         "clctnVolume": 8,
@@ -115,8 +115,8 @@ class SeedlotEndpointTest {
       "seedlotFormInterimDto": {
         "intermStrgClientNumber": "00012797",
         "intermStrgLocnCode": "01",
-        "intermStrgStDate": "2023-12-06T00:00:00Z",
-        "intermStrgEndDate": "2023-12-06T00:00:00Z",
+        "intermStrgStDate": "2023-12-06",
+        "intermStrgEndDate": "2023-12-06",
         "intermStrgLocn": "Some location",
         "intermFacilityCode": "OCV"
       },
@@ -131,6 +131,7 @@ class SeedlotEndpointTest {
         "contaminantPollenBv": 45.6,
         "pollenContaminationMthdCode": "true"
       },
+      "seedlotFormParentTreeDtoList": [],
       "seedlotFormParentTreeSmpDtoList": [
         {
           "seedlotNumber": "87",
@@ -154,12 +155,12 @@ class SeedlotEndpointTest {
       "seedlotFormExtractionDto": {
         "extractoryClientNumber": "00012797",
         "extractoryLocnCode": "01",
-        "extractionStDate": "2023-12-06T00:00:00Z",
-        "extractionEndDate": "2023-12-06T00:00:00Z",
+        "extractionStDate": "2023-12-06",
+        "extractionEndDate": "2023-12-06",
         "storageClientNumber": "00012797",
         "storageLocnCode": "01",
-        "temporaryStrgStartDate": "2023-12-06T00:00:00Z",
-        "temporaryStrgEndDate": "2023-12-06T00:00:00Z"
+        "temporaryStrgStartDate": "2023-12-06",
+        "temporaryStrgEndDate": "2023-12-06"
       }
     }
       """;
@@ -617,6 +618,36 @@ class SeedlotEndpointTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.seedlotNumber").value("123"))
         .andExpect(jsonPath("$.seedlotStatusCode").value("PND"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot Form submitted with a null required field should return 400")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
+  void submitSeedlotForm_missingRequiredField_shouldReturn400() throws Exception {
+    String invalidBody =
+        """
+        {
+          "seedlotFormCollectionDto": null,
+          "seedlotFormOwnershipDtoList": [],
+          "seedlotFormInterimDto": null,
+          "seedlotFormOrchardDto": null,
+          "seedlotFormParentTreeDtoList": [],
+          "seedlotFormParentTreeSmpDtoList": [],
+          "seedlotFormSmpParentOutsideDto": null,
+          "seedlotFormExtractionDto": null
+        }
+        """;
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 63000)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(invalidBody))
+        .andDo(print())
+        .andExpect(status().isBadRequest())
         .andReturn();
   }
 
