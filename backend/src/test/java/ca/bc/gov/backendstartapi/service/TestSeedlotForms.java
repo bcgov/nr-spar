@@ -240,6 +240,40 @@ public final class TestSeedlotForms {
   }
 
   /**
+   * Returns a form identical to {@link #valid()} but with the given {@code noOfContainers} value.
+   * Useful for C4 non-positive volume validation tests.
+   */
+  public static SeedlotFormSubmissionDto withCollectionContainers(BigDecimal noOfContainers) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormCollectionDto orig = base.seedlotFormCollectionDto();
+    SeedlotFormCollectionDto replaced =
+        new SeedlotFormCollectionDto(
+            orig.collectionClientNumber(),
+            orig.collectionLocnCode(),
+            orig.collectionStartDate(),
+            orig.collectionEndDate(),
+            noOfContainers,
+            orig.volPerContainer(),
+            orig.clctnVolume(),
+            orig.seedlotComment(),
+            orig.coneCollectionMethodCodes());
+    return new SeedlotFormSubmissionDto(
+        replaced,
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
    * Returns a form identical to {@link #valid()} but with the given cone collection method codes.
    * Useful for cone-code validation tests.
    */

@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GameticMethodologyRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -400,6 +401,7 @@ class SeedlotFormValidationServiceTest {
   @DisplayName("C3: collection end date before start date is rejected")
   void collection_endDateBeforeStart_isRejected() {
     stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI"); // secondary orchard in valid() base form
     stubValidForestClient();
     stubValidConeMethods();
 
@@ -412,6 +414,11 @@ class SeedlotFormValidationServiceTest {
                     seedlot,
                     TestSeedlotForms.withCollectionDates(
                         LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 1))));
+    // Only the collection date error should be present (no spurious secondary-orchard error)
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .allMatch(e -> e.fieldId().startsWith("seedlotFormCollectionDto")),
+        "Expected only collection-step errors");
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -423,6 +430,7 @@ class SeedlotFormValidationServiceTest {
   @DisplayName("C2: invalid cone collection method code is rejected")
   void collection_invalidConeMethodCode_isRejected() {
     stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI"); // secondary orchard in valid() base form
     stubValidForestClient();
     // Override: code 99 is invalid; leave anyInt() stub from stubValidConeMethods but override 99
     lenient().when(coneCollectionMethodRepository.existsById(anyInt())).thenReturn(true);
@@ -435,11 +443,59 @@ class SeedlotFormValidationServiceTest {
             () ->
                 service.validateSeedlotForm(
                     seedlot, TestSeedlotForms.withConeCollectionMethodCodes(List.of(99))));
+    // Only the collection error should be present (no spurious secondary-orchard error)
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .allMatch(e -> e.fieldId().startsWith("seedlotFormCollectionDto")),
+        "Expected only collection-step errors");
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
                 e -> e.fieldId().equals("seedlotFormCollectionDto.coneCollectionMethodCodes"));
     Assertions.assertTrue(hasError, "Expected error on coneCollectionMethodCodes field");
+  }
+
+  @Test
+  @DisplayName("C4: non-positive collection quantity (noOfContainers) is rejected")
+  void collection_nonPositiveVolume_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI"); // secondary orchard in valid() base form
+    stubValidForestClient();
+    stubValidConeMethods();
+
+    Seedlot seedlot = validSeedlot();
+
+    // Zero should be rejected
+    SeedlotSubmissionValidationException exZero =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withCollectionContainers(BigDecimal.ZERO)));
+    boolean hasZeroError =
+        exZero.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId().equals("seedlotFormCollectionDto.noOfContainers")
+                        && e.message().equals("Value must be greater than zero."));
+    Assertions.assertTrue(hasZeroError, "Expected noOfContainers error for zero");
+
+    // Negative should also be rejected
+    SeedlotSubmissionValidationException exNeg =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withCollectionContainers(new BigDecimal("-1"))));
+    boolean hasNegError =
+        exNeg.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId().equals("seedlotFormCollectionDto.noOfContainers")
+                        && e.message().equals("Value must be greater than zero."));
+    Assertions.assertTrue(hasNegError, "Expected noOfContainers error for negative value");
   }
 
   @Test
