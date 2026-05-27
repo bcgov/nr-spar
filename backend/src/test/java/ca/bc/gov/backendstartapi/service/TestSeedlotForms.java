@@ -12,6 +12,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Reusable test fixtures for {@link SeedlotFormSubmissionDto}. Later tasks add static factory
@@ -202,5 +203,73 @@ public final class TestSeedlotForms {
         null, // seedlotReviewGeneticWorth – review path only
         null, // seedlotReviewGeoInformation – review path only
         null); // applicantAndSeedlotInfo – review path only
+  }
+
+  /**
+   * Returns a form identical to {@link #valid()} but with the given collection start/end dates.
+   * Useful for date-order validation tests.
+   */
+  public static SeedlotFormSubmissionDto withCollectionDates(LocalDate start, LocalDate end) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormCollectionDto orig = base.seedlotFormCollectionDto();
+    SeedlotFormCollectionDto replaced =
+        new SeedlotFormCollectionDto(
+            orig.collectionClientNumber(),
+            orig.collectionLocnCode(),
+            start,
+            end,
+            orig.noOfContainers(),
+            orig.volPerContainer(),
+            orig.clctnVolume(),
+            orig.seedlotComment(),
+            orig.coneCollectionMethodCodes());
+    return new SeedlotFormSubmissionDto(
+        replaced,
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
+   * Returns a form identical to {@link #valid()} but with the given cone collection method codes.
+   * Useful for cone-code validation tests.
+   */
+  public static SeedlotFormSubmissionDto withConeCollectionMethodCodes(List<Integer> codes) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormCollectionDto orig = base.seedlotFormCollectionDto();
+    SeedlotFormCollectionDto replaced =
+        new SeedlotFormCollectionDto(
+            orig.collectionClientNumber(),
+            orig.collectionLocnCode(),
+            orig.collectionStartDate(),
+            orig.collectionEndDate(),
+            orig.noOfContainers(),
+            orig.volPerContainer(),
+            orig.clctnVolume(),
+            orig.seedlotComment(),
+            new ArrayList<>(codes));
+    return new SeedlotFormSubmissionDto(
+        replaced,
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
   }
 }

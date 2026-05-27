@@ -1,15 +1,21 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 
+import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GameticMethodologyRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +23,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(SpringExtension.class)
 class SeedlotFormValidationServiceTest {
@@ -75,6 +83,35 @@ class SeedlotFormValidationServiceTest {
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(true);
   }
 
+  /**
+   * Lenient-stubs forestClientService so any fetchSingleClientLocation call succeeds.
+   * Reused by collection step tests and must be called in any test that runs validateSeedlotForm
+   * with a form that has a non-null collectionClientNumber/collectionLocnCode.
+   */
+  private void stubValidForestClient() {
+    ForestClientLocationDto loc =
+        new ForestClientLocationDto(
+            "00012797", "00", "Main Office", "01382",
+            "123 Forest Way", null, null,
+            "VICTORIA", "BC", "V8W1A1", "CANADA",
+            null, null, null, null, null,
+            ForestClientExpiredEnum.N, ForestClientExpiredEnum.N,
+            null, null);
+    lenient()
+        .when(forestClientService.fetchSingleClientLocation(anyString(), anyString()))
+        .thenReturn(loc);
+  }
+
+  /**
+   * Lenient-stubs coneCollectionMethodRepository so any existsById call returns true.
+   * Reused by collection step tests.
+   */
+  private void stubValidConeMethods() {
+    lenient()
+        .when(coneCollectionMethodRepository.existsById(anyInt()))
+        .thenReturn(true);
+  }
+
   // ----- smoke test --------------------------------------------------------
 
   @Test
@@ -83,6 +120,8 @@ class SeedlotFormValidationServiceTest {
     // Stub both orchards (405 primary, 406 secondary) from TestSeedlotForms.valid()
     stubValidOrchard("405", "PLI");
     stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
     Assertions.assertDoesNotThrow(
@@ -97,6 +136,8 @@ class SeedlotFormValidationServiceTest {
     lenient().when(oracleApiProvider.findOrchardById("999")).thenReturn(Optional.empty());
     lenient().when(gameticMethodologyRepository.existsById("F3")).thenReturn(true);
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(true);
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -117,6 +158,8 @@ class SeedlotFormValidationServiceTest {
   void orchard_speciesMismatch_isRejected() {
     // Seedlot is PLI; orchard 405 has vegCode FDC -> mismatch
     stubValidOrchard("405", "FDC");
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
     SeedlotSubmissionValidationException ex =
@@ -145,6 +188,8 @@ class SeedlotFormValidationServiceTest {
     lenient().when(orchardService.findSpuIdByOrchard("405")).thenReturn(Optional.empty());
     lenient().when(gameticMethodologyRepository.existsById("F3")).thenReturn(true);
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(true);
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -169,6 +214,8 @@ class SeedlotFormValidationServiceTest {
   void orchard_speciesMismatch_errorMessageContainsOrchardSpecies() {
     // Seedlot is PLI; orchard 405 has vegCode FDC -> message should mention "FDC"
     stubValidOrchard("405", "FDC");
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
     SeedlotSubmissionValidationException ex =
@@ -196,6 +243,8 @@ class SeedlotFormValidationServiceTest {
     // Primary 405 is valid, active, species-matching; secondary 406 does not exist
     stubValidOrchard("405", "PLI");
     lenient().when(oracleApiProvider.findOrchardById("406")).thenReturn(Optional.empty());
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
     // TestSeedlotForms.valid() has primary "405" and secondary "406"
@@ -217,6 +266,8 @@ class SeedlotFormValidationServiceTest {
     // Orchard valid + active + matching species, but femaleGameticMthdCode "F3" unknown
     stubValidOrchard("405", "PLI");
     lenient().when(gameticMethodologyRepository.existsById("F3")).thenReturn(false);
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -239,6 +290,8 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("405", "PLI");
     lenient().when(gameticMethodologyRepository.existsById("F3")).thenReturn(true);
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(false);
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -264,6 +317,8 @@ class SeedlotFormValidationServiceTest {
   void orchard_pollenContaminationPctOutOfRange_isRejected() {
     // Orchard valid + active + matching species + valid gametic codes; pct=150 is invalid
     stubValidOrchard("405", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -283,6 +338,8 @@ class SeedlotFormValidationServiceTest {
   void orchard_pollenContaminationPctNull_isRejected() {
     // Orchard valid + active + matching species + valid gametic codes; pct=null when ind=true
     stubValidOrchard("405", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -304,11 +361,116 @@ class SeedlotFormValidationServiceTest {
   @DisplayName("Happy path: valid orchard, matching species, active, valid gametic codes passes")
   void orchard_validOrchard_passes() {
     stubValidOrchard("405", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot();
     Assertions.assertDoesNotThrow(
         () ->
             service.validateSeedlotForm(
                 seedlot, TestSeedlotForms.withOrchardPrimary("405")));
+  }
+
+  // ----- Collection step tests (C1-C4) ------------------------------------
+
+  @Test
+  @DisplayName("C1: client/location not found (404) is rejected")
+  void collection_clientLocationNotFound_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidConeMethods();
+    // Override: collection client/location throws 404
+    lenient()
+        .when(forestClientService.fetchSingleClientLocation("00012797", "00"))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "nf"));
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormCollectionDto.collectionClientNumber"));
+    Assertions.assertTrue(hasError, "Expected error on collectionClientNumber field");
+  }
+
+  @Test
+  @DisplayName("C3: collection end date before start date is rejected")
+  void collection_endDateBeforeStart_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withCollectionDates(
+                        LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 1))));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormCollectionDto.collectionEndDate"));
+    Assertions.assertTrue(hasError, "Expected error on collectionEndDate field");
+  }
+
+  @Test
+  @DisplayName("C2: invalid cone collection method code is rejected")
+  void collection_invalidConeMethodCode_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidForestClient();
+    // Override: code 99 is invalid; leave anyInt() stub from stubValidConeMethods but override 99
+    lenient().when(coneCollectionMethodRepository.existsById(anyInt())).thenReturn(true);
+    lenient().when(coneCollectionMethodRepository.existsById(99)).thenReturn(false);
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withConeCollectionMethodCodes(List.of(99))));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormCollectionDto.coneCollectionMethodCodes"));
+    Assertions.assertTrue(hasError, "Expected error on coneCollectionMethodCodes field");
+  }
+
+  @Test
+  @DisplayName("C1: upstream 5xx from forest client propagates as ResponseStatusException")
+  void collection_upstream5xx_propagates() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidConeMethods();
+    lenient()
+        .when(forestClientService.fetchSingleClientLocation(anyString(), anyString()))
+        .thenThrow(
+            new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR, "upstream error"));
+
+    Seedlot seedlot = validSeedlot();
+    Assertions.assertThrows(
+        ResponseStatusException.class,
+        () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()),
+        "Expected 5xx ResponseStatusException to propagate unchanged");
+  }
+
+  @Test
+  @DisplayName("C1-C4: happy path — valid collection form passes")
+  void collection_validForm_passes() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+
+    Seedlot seedlot = validSeedlot();
+    Assertions.assertDoesNotThrow(
+        () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
   }
 }

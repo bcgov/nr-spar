@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
@@ -11,12 +12,14 @@ import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GameticMethodologyRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /** Server-side validation for the seedlot a-class submission form. */
 @Service
@@ -142,10 +145,78 @@ public class SeedlotFormValidationService {
     }
   }
 
-  @SuppressWarnings("unused") // TODO(#716): remove @SuppressWarnings once this step is implemented
   private void validateCollectionStep(
       SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    // implemented in Task 5
+    SeedlotFormCollectionDto dto = form.seedlotFormCollectionDto();
+    if (dto == null) {
+      return;
+    }
+    // C1: verify collection client + location exist in Forest Client API
+    validateClientLocation(
+        dto.collectionClientNumber(),
+        dto.collectionLocnCode(),
+        "seedlotFormCollectionDto.collectionClientNumber",
+        errors);
+    // C2: each cone collection method code must exist in the reference table
+    if (dto.coneCollectionMethodCodes() != null) {
+      for (Integer code : dto.coneCollectionMethodCodes()) {
+        if (code == null || !coneCollectionMethodRepository.existsById(code)) {
+          errors.add(
+              new SeedlotValidationError(
+                  "seedlotFormCollectionDto.coneCollectionMethodCodes",
+                  "Invalid cone collection method code: " + code));
+        }
+      }
+    }
+    // C3: end date must not precede start date
+    if (dto.collectionStartDate() != null
+        && dto.collectionEndDate() != null
+        && dto.collectionEndDate().isBefore(dto.collectionStartDate())) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.collectionEndDate",
+              "Collection end date must not be before the start date."));
+    }
+    // C4: quantity fields must be positive
+    requirePositive(
+        dto.noOfContainers(), "seedlotFormCollectionDto.noOfContainers", errors);
+    requirePositive(
+        dto.volPerContainer(), "seedlotFormCollectionDto.volPerContainer", errors);
+    requirePositive(
+        dto.clctnVolume(), "seedlotFormCollectionDto.clctnVolume", errors);
+  }
+
+  /**
+   * Validates that a forest client + location pair exists. A 4xx response from the upstream API is
+   * treated as a user validation error; 5xx and network failures propagate unchanged.
+   */
+  private void validateClientLocation(
+      String clientNumber,
+      String locationCode,
+      String fieldId,
+      List<SeedlotValidationError> errors) {
+    if (clientNumber == null || locationCode == null) {
+      return; // structural check handled by @Valid
+    }
+    try {
+      forestClientService.fetchSingleClientLocation(clientNumber, locationCode);
+    } catch (ResponseStatusException e) {
+      if (e.getStatusCode().is4xxClientError()) {
+        errors.add(
+            new SeedlotValidationError(
+                fieldId,
+                "Client " + clientNumber + " / location " + locationCode + " does not exist."));
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  private void requirePositive(
+      BigDecimal value, String fieldId, List<SeedlotValidationError> errors) {
+    if (value != null && value.signum() <= 0) {
+      errors.add(new SeedlotValidationError(fieldId, "Value must be greater than zero."));
+    }
   }
 
   @SuppressWarnings("unused") // TODO(#716): remove @SuppressWarnings once this step is implemented
