@@ -379,8 +379,9 @@ class SeedlotFormValidationServiceTest {
   void collection_clientLocationNotFound_isRejected() {
     stubValidOrchard("405", "PLI");
     stubValidOrchard("406", "PLI");
+    stubValidForestClient();
     stubValidConeMethods();
-    // Override: collection client/location throws 404
+    // Override the specific collection client/location call to throw 404
     lenient()
         .when(forestClientService.fetchSingleClientLocation("00012797", "00"))
         .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "nf"));
@@ -515,6 +516,27 @@ class SeedlotFormValidationServiceTest {
         ResponseStatusException.class,
         () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()),
         "Expected 5xx ResponseStatusException to propagate unchanged");
+  }
+
+  @Test
+  @DisplayName("C1: upstream 403 (non-404 4xx) from forest client propagates, not a validation error")
+  void collection_clientLocationForbidden_propagates() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    // Override the specific collection client/location call to throw 403
+    lenient()
+        .when(forestClientService.fetchSingleClientLocation("00012797", "00"))
+        .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "forbidden"));
+
+    Seedlot seedlot = validSeedlot();
+    // A 403 indicates a programming/config error and must propagate, NOT become a
+    // SeedlotSubmissionValidationException "does not exist" error.
+    Assertions.assertThrows(
+        ResponseStatusException.class,
+        () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()),
+        "Expected 403 ResponseStatusException to propagate unchanged");
   }
 
   @Test

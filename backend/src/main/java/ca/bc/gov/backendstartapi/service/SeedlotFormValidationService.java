@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -187,8 +188,12 @@ public class SeedlotFormValidationService {
   }
 
   /**
-   * Validates that a forest client + location pair exists. A 4xx response from the upstream API is
-   * treated as a user validation error; 5xx and network failures propagate unchanged.
+   * Validates that a forest client + location pair exists. Only a 404 (NOT_FOUND) response from the
+   * upstream forest-client API is treated as a user validation error ("does not exist"). ALL other
+   * outcomes propagate unchanged: other 4xx responses (e.g. 400/401/403/409, which indicate a SPAR
+   * programming or configuration error), 5xx responses, and raw network failures (e.g.
+   * ResourceAccessException, which is not a ResponseStatusException and is therefore not caught
+   * here).
    */
   private void validateClientLocation(
       String clientNumber,
@@ -201,7 +206,7 @@ public class SeedlotFormValidationService {
     try {
       forestClientService.fetchSingleClientLocation(clientNumber, locationCode);
     } catch (ResponseStatusException e) {
-      if (e.getStatusCode().is4xxClientError()) {
+      if (e.getStatusCode().value() == HttpStatus.NOT_FOUND.value()) {
         errors.add(
             new SeedlotValidationError(
                 fieldId,
