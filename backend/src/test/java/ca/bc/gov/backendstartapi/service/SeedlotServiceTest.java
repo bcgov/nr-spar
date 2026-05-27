@@ -847,6 +847,9 @@ class SeedlotServiceTest {
     verify(tscAdminService, times(1)).overrideAreaOfUse(any(), any());
     verify(tscAdminService, times(1)).overrideSeedlotCollElevLatLong(any(), any());
     verify(seedlotGeneticWorthService, times(1)).overrideSeedlotGenWorth(any(), any());
+
+    // Review/override path (isFromRegularForm=false) must NOT trigger form validation.
+    verify(seedlotFormValidationService, never()).validateSeedlotForm(any(), any());
   }
 
   @Test

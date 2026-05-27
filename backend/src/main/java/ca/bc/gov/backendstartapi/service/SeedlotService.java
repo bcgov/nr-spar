@@ -755,7 +755,11 @@ public class SeedlotService {
         currentSeedlotStatus.equals("PND") || currentSeedlotStatus.equals("INC") || isTscAdmin;
 
     // Validate the entire form before any mutation; throws 400 with all errors if invalid.
-    seedlotFormValidationService.validateSeedlotForm(seedlot, form);
+    // Scoped to the regular submission path; the TSC review/override path (isFromRegularForm=false)
+    // is intentionally NOT validated here yet — see #716 spec open question (TSC review path).
+    if (isFromRegularForm) {
+      seedlotFormValidationService.validateSeedlotForm(seedlot, form);
+    }
 
     /*
      * Merging entities script:
