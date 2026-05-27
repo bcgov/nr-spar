@@ -9,12 +9,12 @@ import java.util.List;
 @Schema(description = "The JSON object containing all the Seedlot registration form field values.")
 public record SeedlotFormSubmissionDto(
     @NotNull @Valid SeedlotFormCollectionDto seedlotFormCollectionDto,
-    @NotNull List<SeedlotFormOwnershipDto> seedlotFormOwnershipDtoList,
+    @NotNull @Valid List<SeedlotFormOwnershipDto> seedlotFormOwnershipDtoList,
     @NotNull @Valid SeedlotFormInterimDto seedlotFormInterimDto,
     @NotNull @Valid SeedlotFormOrchardDto seedlotFormOrchardDto,
-    @NotNull List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
-    @NotNull List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeSmpDtoList,
-    SeedlotFormSmpParentOutsideDto seedlotFormSmpParentOutsideDto,
+    @NotNull @Valid List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
+    @NotNull @Valid List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeSmpDtoList,
+    @NotNull SeedlotFormSmpParentOutsideDto seedlotFormSmpParentOutsideDto,
     @NotNull @Valid SeedlotFormExtractionDto seedlotFormExtractionDto,
     List<SeedlotReviewSeedPlanZoneDto> seedlotReviewSeedPlanZones,
     SeedlotReviewElevationLatLongDto seedlotReviewElevationLatLong,

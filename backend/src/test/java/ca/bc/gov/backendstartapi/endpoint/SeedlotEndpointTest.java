@@ -152,6 +152,9 @@ class SeedlotEndpointTest {
           ]
         }
       ],
+      "seedlotFormSmpParentOutsideDto": {
+        "smpParentsOutside": 2
+      },
       "seedlotFormExtractionDto": {
         "extractoryClientNumber": "00012797",
         "extractoryLocnCode": "01",
@@ -646,6 +649,82 @@ class SeedlotEndpointTest {
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(invalidBody))
+        .andDo(print())
+        .andExpect(status().isBadRequest())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot Form submitted with null seedlotFormSmpParentOutsideDto should return 400")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
+  void submitSeedlotForm_nullSmpParentOutside_shouldReturn400() throws Exception {
+    String bodyWithNullSmpParent =
+        """
+        {
+          "seedlotFormCollectionDto": {
+            "collectionClientNumber": "00012797",
+            "collectionLocnCode": "02",
+            "collectionStartDate": "2023-12-06",
+            "collectionEndDate": "2023-12-06",
+            "noOfContainers": 2,
+            "volPerContainer": 4,
+            "clctnVolume": 8,
+            "seedlotComment": "Any comment",
+            "coneCollectionMethodCodes": [1, 2]
+          },
+          "seedlotFormOwnershipDtoList": [
+            {
+              "ownerClientNumber": "00012797",
+              "ownerLocnCode": "02",
+              "originalPctOwned": 100,
+              "originalPctRsrvd": 100,
+              "originalPctSrpls": 5,
+              "methodOfPaymentCode": "CLA",
+              "sparFundSrceCode": "ITC"
+            }
+          ],
+          "seedlotFormInterimDto": {
+            "intermStrgClientNumber": "00012797",
+            "intermStrgLocnCode": "01",
+            "intermStrgStDate": "2023-12-06",
+            "intermStrgEndDate": "2023-12-06",
+            "intermStrgLocn": "Some location",
+            "intermFacilityCode": "OCV"
+          },
+          "seedlotFormOrchardDto": {
+            "primaryOrchardId": "405",
+            "femaleGameticMthdCode": "F3",
+            "maleGameticMthdCode": "M3",
+            "controlledCrossInd": false,
+            "biotechProcessesInd": true,
+            "pollenContaminationInd": false,
+            "pollenContaminationPct": 22,
+            "contaminantPollenBv": 45.6,
+            "pollenContaminationMthdCode": "true"
+          },
+          "seedlotFormParentTreeDtoList": [],
+          "seedlotFormParentTreeSmpDtoList": [],
+          "seedlotFormSmpParentOutsideDto": null,
+          "seedlotFormExtractionDto": {
+            "extractoryClientNumber": "00012797",
+            "extractoryLocnCode": "01",
+            "extractionStDate": "2023-12-06",
+            "extractionEndDate": "2023-12-06",
+            "storageClientNumber": "00012797",
+            "storageLocnCode": "01",
+            "temporaryStrgStartDate": "2023-12-06",
+            "temporaryStrgEndDate": "2023-12-06"
+          }
+        }
+        """;
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 63000)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(bodyWithNullSmpParent))
         .andDo(print())
         .andExpect(status().isBadRequest())
         .andReturn();
