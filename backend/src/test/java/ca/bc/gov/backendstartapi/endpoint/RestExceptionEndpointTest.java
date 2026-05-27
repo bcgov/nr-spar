@@ -30,5 +30,7 @@ class RestExceptionEndpointTest {
     assertEquals(
         "seedlotFormOrchardDto.primaryOrchardId",
         resp.getBody().getFields().get(0).fieldName());
+    assertEquals("bad", resp.getBody().getFields().get(0).fieldMessage());
+    assertEquals("1 field(s) with validation problems!", resp.getBody().getErrorMessage());
   }
 }

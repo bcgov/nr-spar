@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public class SeedlotSubmissionValidationException extends RuntimeException {
 
-  private final transient List<SeedlotValidationError> errors;
+  private final List<SeedlotValidationError> errors;
 
   /**
    * Creates a new instance with the given list of field-level validation errors.
