@@ -1,10 +1,11 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
+import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GameticMethodologyRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 class SeedlotFormValidationServiceTest {
 
-  @Mock OracleApiProvider oracleApiProvider;
+  @Mock Provider oracleApiProvider;
 
   @Mock OrchardService orchardService;
 
@@ -46,6 +47,7 @@ class SeedlotFormValidationServiceTest {
   void validateSeedlotForm_smoke_shouldPassWithNoErrors() {
     Seedlot seedlot = new Seedlot("63000");
     // All step methods are no-ops; expect no exception to be thrown.
-    service.validateSeedlotForm(seedlot, TestSeedlotForms.valid());
+    Assertions.assertDoesNotThrow(
+        () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
   }
 }

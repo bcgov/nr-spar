@@ -14,8 +14,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Reusable test fixtures for {@link SeedlotFormSubmissionDto}. Later tasks extend this class with
- * step-specific mutators.
+ * Reusable test fixtures for {@link SeedlotFormSubmissionDto}. Later tasks add static factory
+ * mutators (e.g. withInvalidOrchard()) to this class with step-specific variants.
  */
 public final class TestSeedlotForms {
 
