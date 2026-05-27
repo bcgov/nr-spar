@@ -2,11 +2,13 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +51,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
+import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
@@ -56,6 +59,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
@@ -843,5 +847,56 @@ class SeedlotServiceTest {
     verify(tscAdminService, times(1)).overrideAreaOfUse(any(), any());
     verify(tscAdminService, times(1)).overrideSeedlotCollElevLatLong(any(), any());
     verify(seedlotGeneticWorthService, times(1)).overrideSeedlotGenWorth(any(), any());
+  }
+
+  @Test
+  @DisplayName("No DB mutation when validation fails: seedlotRepository.save and step services are never called")
+  void updateSeedlotWithForm_invalidForm_doesNotPersist() {
+    String statusCode = "PND";
+    SeedlotStatusEntity seedlotStatusEntity =
+        new SeedlotStatusEntity(
+            statusCode, "Pending", new EffectiveDateRange(LocalDate.now().minusDays(1L), LocalDate.now()));
+
+    String seedlotNumber = "63636";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setSeedlotStatus(seedlotStatusEntity);
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+
+    // Stub validation to throw, simulating a form that fails validation
+    doThrow(
+            new SeedlotSubmissionValidationException(
+                List.of(new SeedlotValidationError("x", "bad"))))
+        .when(seedlotFormValidationService)
+        .validateSeedlotForm(any(), any());
+
+    SeedlotFormOrchardDto formOrchardDto =
+        new SeedlotFormOrchardDto("405", null, null, null, null, false, false, 0, null, null);
+
+    SeedlotFormSubmissionDto form =
+        new SeedlotFormSubmissionDto(
+            mock(SeedlotFormCollectionDto.class),
+            List.of(mock(SeedlotFormOwnershipDto.class)),
+            mock(SeedlotFormInterimDto.class),
+            formOrchardDto,
+            List.of(mock(SeedlotFormParentTreeSmpDto.class)),
+            List.of(mock(SeedlotFormParentTreeSmpDto.class)),
+            mock(SeedlotFormSmpParentOutsideDto.class),
+            mock(SeedlotFormExtractionDto.class),
+            List.of(mock(SeedlotReviewSeedPlanZoneDto.class)),
+            mock(SeedlotReviewElevationLatLongDto.class),
+            List.of(mock(GeneticWorthTraitsDto.class)),
+            mock(SeedlotReviewGeoInformationDto.class),
+            null);
+
+    // The call must throw SeedlotSubmissionValidationException
+    Assertions.assertThrows(
+        SeedlotSubmissionValidationException.class,
+        () -> seedlotService.updateSeedlotWithForm(seedlotNumber, form, false, true, "SUB"));
+
+    // CRITICAL: repository save must never be called
+    verify(seedlotRepository, never()).save(any());
+
+    // CRITICAL: step-1 service must never be called (proves mutations were blocked)
+    verify(seedlotCollectionMethodService, never()).saveSeedlotFormStep1(any(), any(), anyBoolean());
   }
 }

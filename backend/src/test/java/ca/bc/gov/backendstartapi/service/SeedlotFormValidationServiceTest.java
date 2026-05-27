@@ -1023,6 +1023,50 @@ class SeedlotFormValidationServiceTest {
         () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
   }
 
+  // ----- Aggregate multi-step error test -------------------------------------
+
+  @Test
+  @DisplayName("Aggregate: errors from multiple steps are all collected and thrown together")
+  void validate_collectsErrorsAcrossMultipleSteps() {
+    // Primary orchard "405" has vegCode "FDC" while seedlot is "PLI" → species mismatch (O2)
+    stubValidOrchard("405", "FDC");
+    // Secondary orchard "406" is valid, active, and matching so it does not add noise
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
+
+    // collection end (May 1) before start (May 10) → C3 date-order error
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withOrchardAndCollectionDates(
+                        "405",
+                        LocalDate.of(2024, 5, 10),
+                        LocalDate.of(2024, 5, 1))));
+
+    Assertions.assertTrue(
+        ex.getErrors().size() >= 2,
+        "Expected at least 2 validation errors (one orchard, one collection), got: "
+            + ex.getErrors().size());
+
+    boolean hasOrchardError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.primaryOrchardId"));
+    Assertions.assertTrue(hasOrchardError, "Expected error on primaryOrchardId (species mismatch)");
+
+    boolean hasCollectionDateError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.collectionEndDate"));
+    Assertions.assertTrue(
+        hasCollectionDateError, "Expected error on collectionEndDate (end before start)");
+  }
+
   @Test
   @DisplayName("OW4 (boundary): reserved + surplus exactly equal to owned passes")
   void owners_reservedPlusSurplusEqualsOwned_passes() {

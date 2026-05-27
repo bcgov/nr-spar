@@ -563,6 +563,62 @@ public final class TestSeedlotForms {
   }
 
   /**
+   * Returns a form combining a primary-orchard override (no secondary) AND collection date
+   * override. Useful for aggregate multi-step error tests where both the orchard step and the
+   * collection step must fail simultaneously.
+   *
+   * <p>All other fields remain identical to {@link #valid()}.
+   */
+  public static SeedlotFormSubmissionDto withOrchardAndCollectionDates(
+      String primaryOrchardId, LocalDate collectionStart, LocalDate collectionEnd) {
+    SeedlotFormSubmissionDto base = valid();
+
+    // Override orchard: keep valid gametic codes but swap primary and drop secondary
+    SeedlotFormOrchardDto origOrchard = base.seedlotFormOrchardDto();
+    SeedlotFormOrchardDto replacedOrchard =
+        new SeedlotFormOrchardDto(
+            primaryOrchardId,
+            null, // no secondary
+            origOrchard.femaleGameticMthdCode(),
+            origOrchard.maleGameticMthdCode(),
+            origOrchard.controlledCrossInd(),
+            origOrchard.biotechProcessesInd(),
+            origOrchard.pollenContaminationInd(),
+            origOrchard.pollenContaminationPct(),
+            origOrchard.contaminantPollenBv(),
+            origOrchard.pollenContaminationMthdCode());
+
+    // Override collection dates
+    SeedlotFormCollectionDto origCollection = base.seedlotFormCollectionDto();
+    SeedlotFormCollectionDto replacedCollection =
+        new SeedlotFormCollectionDto(
+            origCollection.collectionClientNumber(),
+            origCollection.collectionLocnCode(),
+            collectionStart,
+            collectionEnd,
+            origCollection.noOfContainers(),
+            origCollection.volPerContainer(),
+            origCollection.clctnVolume(),
+            origCollection.seedlotComment(),
+            origCollection.coneCollectionMethodCodes());
+
+    return new SeedlotFormSubmissionDto(
+        replacedCollection,
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        replacedOrchard,
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
    * Returns a form identical to {@link #valid()} but with the given cone collection method codes.
    * Useful for cone-code validation tests.
    */
