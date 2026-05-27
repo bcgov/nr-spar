@@ -11,8 +11,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
@@ -895,7 +895,7 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("getAclassSeedlotFormInfo with collection coordinates returns populated meanGeomSeedlot")
+  @DisplayName("getAclassSeedlotFormInfo with collection coords returns meanGeomSeedlot")
   void getAclassSeedlotFormInfo_withCollectionCoords_returnsMeanGeomSeedlot() {
     String seedlotNumber = "0000011";
     Seedlot seedlotEntity = new Seedlot(seedlotNumber);
@@ -963,7 +963,7 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("getAclassSeedlotFormInfo with smpMix and Oracle success returns populated meanGeomSmpMix")
+  @DisplayName("getAclassSeedlotFormInfo with smpMix Oracle success returns meanGeomSmpMix")
   void getAclassSeedlotFormInfo_withSmpMix_oracleSuccess_returnsMeanGeomSmpMix() {
     String seedlotNumber = "0000015";
     Seedlot seedlotEntity = new Seedlot(seedlotNumber);
