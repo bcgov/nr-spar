@@ -754,6 +754,133 @@ class SeedlotFormValidationServiceTest {
                     TestSeedlotForms.owner("00012797", "00", new BigDecimal("100")))));
   }
 
+  // ----- Interim step tests (I1-I3) ----------------------------------------
+
+  @Test
+  @DisplayName("I2: OTH facility without description (null) is rejected")
+  void interim_otherFacilityWithoutDescription_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot();
+    // null description
+    SeedlotSubmissionValidationException exNull =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withInterimFacility("OTH", null)));
+    boolean hasNullError =
+        exNull.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId()
+                        .equals("seedlotFormInterimDto.intermOtherFacilityDesc"));
+    Assertions.assertTrue(hasNullError, "Expected error on intermOtherFacilityDesc when null");
+
+    // empty-string description
+    SeedlotSubmissionValidationException exEmpty =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withInterimFacility("OTH", "")));
+    boolean hasEmptyError =
+        exEmpty.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId()
+                        .equals("seedlotFormInterimDto.intermOtherFacilityDesc"));
+    Assertions.assertTrue(hasEmptyError, "Expected error on intermOtherFacilityDesc when empty");
+  }
+
+  @Test
+  @DisplayName("I2: OTH facility with description passes")
+  void interim_otherFacilityWithDescription_passes() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot();
+    Assertions.assertDoesNotThrow(
+        () ->
+            service.validateSeedlotForm(
+                seedlot, TestSeedlotForms.withInterimFacility("OTH", "Barn")));
+  }
+
+  @Test
+  @DisplayName("I3: interim end date before start date is rejected")
+  void interim_endDateBeforeStart_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withInterimDates(
+                        LocalDate.of(2024, 6, 10), LocalDate.of(2024, 6, 1))));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormInterimDto.intermStrgEndDate"));
+    Assertions.assertTrue(hasError, "Expected error on intermStrgEndDate when end is before start");
+  }
+
+  @Test
+  @DisplayName("I1: interim client/location not found (404) is rejected")
+  void interim_clientLocationNotFound_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    // Make any client/locn pass by default, then override the specific interim pair to 404
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+    // Use a distinct client/locn that won't collide with the collection "00012797"/"00" stub
+    lenient()
+        .when(forestClientService.fetchSingleClientLocation("00099998", "01"))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withInterimClient("00099998", "01")));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormInterimDto.intermStrgClientNumber"));
+    Assertions.assertTrue(
+        hasError, "Expected error on intermStrgClientNumber when client/location not found");
+  }
+
+  @Test
+  @DisplayName("I1-I3: happy path — valid interim step passes")
+  void interim_validForm_passes() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot();
+    Assertions.assertDoesNotThrow(
+        () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
+  }
+
   @Test
   @DisplayName("OW4 (boundary): reserved + surplus exactly equal to owned passes")
   void owners_reservedPlusSurplusEqualsOwned_passes() {

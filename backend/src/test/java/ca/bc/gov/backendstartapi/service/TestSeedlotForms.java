@@ -332,6 +332,101 @@ public final class TestSeedlotForms {
   }
 
   /**
+   * Returns a form identical to {@link #valid()} but with the interim facility code and description
+   * overridden. Useful for I2 (OTH description) validation tests.
+   */
+  public static SeedlotFormSubmissionDto withInterimFacility(
+      String intermFacilityCode, String intermOtherFacilityDesc) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormInterimDto orig = base.seedlotFormInterimDto();
+    SeedlotFormInterimDto replaced =
+        new SeedlotFormInterimDto(
+            orig.intermStrgClientNumber(),
+            orig.intermStrgLocnCode(),
+            orig.intermStrgStDate(),
+            orig.intermStrgEndDate(),
+            intermOtherFacilityDesc,
+            intermFacilityCode);
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        base.seedlotFormOwnershipDtoList(),
+        replaced,
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
+   * Returns a form identical to {@link #valid()} but with the interim storage start and end dates
+   * overridden. Useful for I3 (date order) validation tests.
+   */
+  public static SeedlotFormSubmissionDto withInterimDates(LocalDate start, LocalDate end) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormInterimDto orig = base.seedlotFormInterimDto();
+    SeedlotFormInterimDto replaced =
+        new SeedlotFormInterimDto(
+            orig.intermStrgClientNumber(),
+            orig.intermStrgLocnCode(),
+            start,
+            end,
+            orig.intermOtherFacilityDesc(),
+            orig.intermFacilityCode());
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        base.seedlotFormOwnershipDtoList(),
+        replaced,
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
+   * Returns a form identical to {@link #valid()} but with the interim client/location overridden.
+   * Useful for I1 (client/location 404) validation tests.
+   */
+  public static SeedlotFormSubmissionDto withInterimClient(
+      String clientNumber, String locationCode) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormInterimDto orig = base.seedlotFormInterimDto();
+    SeedlotFormInterimDto replaced =
+        new SeedlotFormInterimDto(
+            clientNumber,
+            locationCode,
+            orig.intermStrgStDate(),
+            orig.intermStrgEndDate(),
+            orig.intermOtherFacilityDesc(),
+            orig.intermFacilityCode());
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        base.seedlotFormOwnershipDtoList(),
+        replaced,
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
    * Returns a form identical to {@link #valid()} but with the given cone collection method codes.
    * Useful for cone-code validation tests.
    */

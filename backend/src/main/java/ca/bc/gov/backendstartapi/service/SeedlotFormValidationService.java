@@ -289,10 +289,35 @@ public class SeedlotFormValidationService {
     }
   }
 
-  @SuppressWarnings("unused") // TODO(#716): remove @SuppressWarnings once this step is implemented
   private void validateInterimStep(
       SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    // implemented in Task 7
+    var dto = form.seedlotFormInterimDto();
+    if (dto == null) {
+      return;
+    }
+    // I1: verify interim storage client + location exist in Forest Client API
+    validateClientLocation(
+        dto.intermStrgClientNumber(),
+        dto.intermStrgLocnCode(),
+        "seedlotFormInterimDto.intermStrgClientNumber",
+        errors);
+    // I2 (partial): OTH facility type requires a description
+    if ("OTH".equals(dto.intermFacilityCode())
+        && (dto.intermOtherFacilityDesc() == null || dto.intermOtherFacilityDesc().isEmpty())) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormInterimDto.intermOtherFacilityDesc",
+              "A storage facility description is required when the facility type is 'Other'."));
+    }
+    // I3: end date must not precede start date
+    if (dto.intermStrgStDate() != null
+        && dto.intermStrgEndDate() != null
+        && dto.intermStrgEndDate().isBefore(dto.intermStrgStDate())) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormInterimDto.intermStrgEndDate",
+              "Interim storage end date must not be before the start date."));
+    }
   }
 
   @SuppressWarnings("unused") // TODO(#716): remove @SuppressWarnings once this step is implemented
