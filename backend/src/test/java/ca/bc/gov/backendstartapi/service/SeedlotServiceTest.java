@@ -32,6 +32,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
@@ -51,7 +52,6 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
-import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
@@ -898,5 +898,8 @@ class SeedlotServiceTest {
 
     // CRITICAL: step-1 service must never be called (proves mutations were blocked)
     verify(seedlotCollectionMethodService, never()).saveSeedlotFormStep1(any(), any(), anyBoolean());
+
+    // CRITICAL: step-2 service must never be called (proves mutations were blocked)
+    verify(seedlotOwnerQuantityService, never()).saveSeedlotFormStep2(any(), any(), anyBoolean());
   }
 }
