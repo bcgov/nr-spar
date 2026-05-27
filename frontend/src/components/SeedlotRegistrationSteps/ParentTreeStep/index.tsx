@@ -182,18 +182,23 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     gcTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
   useEffect(() => {
     if (
       isFormSubmitted
       && allParentTreeQuery.status === 'success'
-      && Object.keys(state.allParentTreeData).length === 0
+      && allParentTreeQuery.data
+      && Object.keys(stateRef.current.allParentTreeData).length === 0
     ) {
       setStepData('parentTreeStep', {
-        ...state,
+        ...stateRef.current,
         allParentTreeData: allParentTreeQuery.data
       });
     }
-  }, [isFormSubmitted, allParentTreeQuery.status]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFormSubmitted, allParentTreeQuery.status, allParentTreeQuery.data]);
 
   // Effects 'SMP mix' tab
   useEffect(

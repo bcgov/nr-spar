@@ -346,39 +346,52 @@ const ContextContainerClassA = ({ children }: props) => {
     }
     const { meanGeomSeedlot, meanGeomSmpMix } = getAllSeedlotInfoQuery.data;
     if (!meanGeomSeedlot && !meanGeomSmpMix) {
+      setMeanGeomInfos(structuredClone(defaultMeanGeomConfig));
       return;
     }
     setMeanGeomInfos((prev) => ({
       seedlot: meanGeomSeedlot ? {
         meanLatitudeDm: {
           ...prev.seedlot.meanLatitudeDm,
-          value: `${meanGeomSeedlot.meanLatitudeDegree}° ${meanGeomSeedlot.meanLatitudeMinute}'`
+          value: (meanGeomSeedlot.meanLatitudeMinute != null)
+            ? `${meanGeomSeedlot.meanLatitudeDegree}° ${meanGeomSeedlot.meanLatitudeMinute}'`
+            : ''
         },
         meanLongitudeDm: {
           ...prev.seedlot.meanLongitudeDm,
-          value: `${meanGeomSeedlot.meanLongitudeDegree}° ${meanGeomSeedlot.meanLongitudeMinute}'`
+          value: (meanGeomSeedlot.meanLongitudeMinute != null)
+            ? `${meanGeomSeedlot.meanLongitudeDegree}° ${meanGeomSeedlot.meanLongitudeMinute}'`
+            : ''
         },
         meanElevation: {
           ...prev.seedlot.meanElevation,
-          value: `${meanGeomSeedlot.meanElevation} m`
+          value: (meanGeomSeedlot.meanElevation != null)
+            ? `${meanGeomSeedlot.meanElevation} m`
+            : ''
         }
       } : prev.seedlot,
       smpMix: meanGeomSmpMix ? {
         meanLatitudeDm: {
           ...prev.smpMix.meanLatitudeDm,
-          value: `${meanGeomSmpMix.meanLatitudeDegree}° ${meanGeomSmpMix.meanLatitudeMinute}'`
+          value: (meanGeomSmpMix.meanLatitudeMinute != null)
+            ? `${meanGeomSmpMix.meanLatitudeDegree}° ${meanGeomSmpMix.meanLatitudeMinute}'`
+            : ''
         },
         meanLongitudeDm: {
           ...prev.smpMix.meanLongitudeDm,
-          value: `${meanGeomSmpMix.meanLongitudeDegree}° ${meanGeomSmpMix.meanLongitudeMinute}'`
+          value: (meanGeomSmpMix.meanLongitudeMinute != null)
+            ? `${meanGeomSmpMix.meanLongitudeDegree}° ${meanGeomSmpMix.meanLongitudeMinute}'`
+            : ''
         },
         meanElevation: {
           ...prev.smpMix.meanElevation,
-          value: `${meanGeomSmpMix.meanElevation} m`
+          value: (meanGeomSmpMix.meanElevation != null)
+            ? `${meanGeomSmpMix.meanElevation} m`
+            : ''
         }
       } : prev.smpMix
     }));
-  }, [getAllSeedlotInfoQuery.status]);
+  }, [getAllSeedlotInfoQuery.status, getAllSeedlotInfoQuery.data]);
 
   useEffect(() => {
     if (
