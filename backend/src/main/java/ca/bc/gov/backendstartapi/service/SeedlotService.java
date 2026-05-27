@@ -126,6 +126,8 @@ public class SeedlotService {
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
 
+  private final SeedlotFormValidationService seedlotFormValidationService;
+
   /**
    * Creates a Seedlot in the database.
    *
@@ -751,6 +753,9 @@ public class SeedlotService {
      */
     boolean canDelete =
         currentSeedlotStatus.equals("PND") || currentSeedlotStatus.equals("INC") || isTscAdmin;
+
+    // Validate the entire form before any mutation; throws 400 with all errors if invalid.
+    seedlotFormValidationService.validateSeedlotForm(seedlot, form);
 
     /*
      * Merging entities script:

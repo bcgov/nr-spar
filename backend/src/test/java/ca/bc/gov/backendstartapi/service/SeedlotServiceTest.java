@@ -119,6 +119,8 @@ class SeedlotServiceTest {
 
   @Mock Provider oracleApiProvider;
 
+  @Mock SeedlotFormValidationService seedlotFormValidationService;
+
   private SeedlotService seedlotService;
 
   private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
@@ -174,7 +176,8 @@ class SeedlotServiceTest {
             seedlotSeedPlanZoneRepository,
             parentTreeService,
             tscAdminService,
-            oracleApiProvider);
+            oracleApiProvider,
+            seedlotFormValidationService);
   }
 
   @Test
