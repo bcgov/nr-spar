@@ -11,8 +11,8 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Reusable test fixtures for {@link SeedlotFormSubmissionDto}. Later tasks add static factory

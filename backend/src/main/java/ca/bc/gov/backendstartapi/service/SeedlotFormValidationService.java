@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GameticMethodologyRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -173,14 +174,12 @@ public class SeedlotFormValidationService {
       }
     }
     // C3: end date must not precede start date
-    if (dto.collectionStartDate() != null
-        && dto.collectionEndDate() != null
-        && dto.collectionEndDate().isBefore(dto.collectionStartDate())) {
-      errors.add(
-          new SeedlotValidationError(
-              "seedlotFormCollectionDto.collectionEndDate",
-              "Collection end date must not be before the start date."));
-    }
+    requireEndNotBeforeStart(
+        dto.collectionStartDate(),
+        dto.collectionEndDate(),
+        "seedlotFormCollectionDto.collectionEndDate",
+        "Collection end date must not be before the start date.",
+        errors);
     // C4: quantity fields must be positive
     requirePositive(
         dto.noOfContainers(), "seedlotFormCollectionDto.noOfContainers", errors);
@@ -229,6 +228,17 @@ public class SeedlotFormValidationService {
 
   private BigDecimal nz(BigDecimal v) {
     return v == null ? BigDecimal.ZERO : v;
+  }
+
+  private void requireEndNotBeforeStart(
+      LocalDate start,
+      LocalDate end,
+      String fieldId,
+      String message,
+      List<SeedlotValidationError> errors) {
+    if (start != null && end != null && end.isBefore(start)) {
+      errors.add(new SeedlotValidationError(fieldId, message));
+    }
   }
 
   private void validateOwnershipStep(
@@ -314,14 +324,12 @@ public class SeedlotFormValidationService {
               "A storage facility description is required when the facility type is 'Other'."));
     }
     // I3: end date must not precede start date
-    if (dto.intermStrgStDate() != null
-        && dto.intermStrgEndDate() != null
-        && dto.intermStrgEndDate().isBefore(dto.intermStrgStDate())) {
-      errors.add(
-          new SeedlotValidationError(
-              "seedlotFormInterimDto.intermStrgEndDate",
-              "Interim storage end date must not be before the start date."));
-    }
+    requireEndNotBeforeStart(
+        dto.intermStrgStDate(),
+        dto.intermStrgEndDate(),
+        "seedlotFormInterimDto.intermStrgEndDate",
+        "Interim storage end date must not be before the start date.",
+        errors);
   }
 
   private void validateExtractionStep(
@@ -342,23 +350,19 @@ public class SeedlotFormValidationService {
         dto.storageLocnCode(),
         "seedlotFormExtractionDto.storageClientNumber",
         errors);
-    // E3: extraction end date must not precede start date
-    if (dto.extractionStDate() != null
-        && dto.extractionEndDate() != null
-        && dto.extractionEndDate().isBefore(dto.extractionStDate())) {
-      errors.add(
-          new SeedlotValidationError(
-              "seedlotFormExtractionDto.extractionEndDate",
-              "Extraction end date must not be before the start date."));
-    }
-    // E3: temporary storage end date must not precede start date
-    if (dto.temporaryStrgStartDate() != null
-        && dto.temporaryStrgEndDate() != null
-        && dto.temporaryStrgEndDate().isBefore(dto.temporaryStrgStartDate())) {
-      errors.add(
-          new SeedlotValidationError(
-              "seedlotFormExtractionDto.temporaryStrgEndDate",
-              "Temporary storage end date must not be before the start date."));
-    }
+    // E3a: extraction dates
+    requireEndNotBeforeStart(
+        dto.extractionStDate(),
+        dto.extractionEndDate(),
+        "seedlotFormExtractionDto.extractionEndDate",
+        "Extraction end date must not be before the start date.",
+        errors);
+    // E3b: temporary storage dates
+    requireEndNotBeforeStart(
+        dto.temporaryStrgStartDate(),
+        dto.temporaryStrgEndDate(),
+        "seedlotFormExtractionDto.temporaryStrgEndDate",
+        "Temporary storage end date must not be before the start date.",
+        errors);
   }
 }
