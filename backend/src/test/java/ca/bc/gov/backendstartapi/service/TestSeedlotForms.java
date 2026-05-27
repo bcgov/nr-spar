@@ -21,6 +21,41 @@ public final class TestSeedlotForms {
 
   private TestSeedlotForms() {}
 
+  /**
+   * Returns a form identical to {@link #valid()} but with the given primary orchard ID and no
+   * secondary orchard. Useful for orchard-step validation tests.
+   */
+  public static SeedlotFormSubmissionDto withOrchardPrimary(String primaryOrchardId) {
+    SeedlotFormSubmissionDto base = valid();
+    SeedlotFormOrchardDto orig = base.seedlotFormOrchardDto();
+    SeedlotFormOrchardDto replaced =
+        new SeedlotFormOrchardDto(
+            primaryOrchardId,
+            null, // no secondary
+            orig.femaleGameticMthdCode(),
+            orig.maleGameticMthdCode(),
+            orig.controlledCrossInd(),
+            orig.biotechProcessesInd(),
+            orig.pollenContaminationInd(),
+            orig.pollenContaminationPct(),
+            orig.contaminantPollenBv(),
+            orig.pollenContaminationMthdCode());
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        replaced,
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
   /** Returns a fully-populated, structurally valid {@link SeedlotFormSubmissionDto}. */
   public static SeedlotFormSubmissionDto valid() {
 
