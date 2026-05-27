@@ -14,8 +14,10 @@ import ca.bc.gov.backendstartapi.repository.GameticMethodologyRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -224,10 +226,67 @@ public class SeedlotFormValidationService {
     }
   }
 
-  @SuppressWarnings("unused") // TODO(#716): remove @SuppressWarnings once this step is implemented
   private void validateOwnershipStep(
       SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    // implemented in Task 6
+    var owners = form.seedlotFormOwnershipDtoList();
+    if (owners == null || owners.isEmpty()) {
+      return;
+    }
+
+    BigDecimal totalOwned = BigDecimal.ZERO;
+    Set<String> seenPairs = new HashSet<>();
+
+    for (int i = 0; i < owners.size(); i++) {
+      var o = owners.get(i);
+      String base = "seedlotFormOwnershipDtoList[" + i + "]";
+
+      // OW1: client/location must exist in Forest Client API
+      validateClientLocation(
+          o.ownerClientNumber(), o.ownerLocnCode(), base + ".ownerClientNumber", errors);
+
+      // OW2: method of payment code must exist in reference table
+      if (o.methodOfPaymentCode() != null
+          && !methodOfPaymentRepository.existsById(o.methodOfPaymentCode())) {
+        errors.add(
+            new SeedlotValidationError(
+                base + ".methodOfPaymentCode",
+                "Invalid method of payment code: " + o.methodOfPaymentCode()));
+      }
+
+      // OW5: duplicate owner client+location pair
+      if (o.ownerClientNumber() != null && o.ownerLocnCode() != null) {
+        String key = o.ownerClientNumber() + "|" + o.ownerLocnCode();
+        if (!seenPairs.add(key)) {
+          errors.add(
+              new SeedlotValidationError(
+                  base + ".ownerClientNumber", "Duplicate owner client/location: " + key));
+        }
+      }
+
+      // OW4: reserved + surplus must not exceed owned
+      BigDecimal owned = nz(o.originalPctOwned());
+      BigDecimal rsrvd = nz(o.originalPctRsrvd());
+      BigDecimal srpls = nz(o.originalPctSrpls());
+      if (rsrvd.add(srpls).compareTo(owned) > 0) {
+        errors.add(
+            new SeedlotValidationError(
+                base + ".originalPctRsrvd",
+                "Reserved + surplus percentage cannot exceed the owned percentage."));
+      }
+      totalOwned = totalOwned.add(owned);
+    }
+
+    // OW3: sum of all owned percentages must equal 100
+    if (totalOwned.compareTo(new BigDecimal("100")) != 0) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormOwnershipDtoList",
+              "Total owned percentage across owners must equal 100, was " + totalOwned + "."));
+    }
+  }
+
+  private BigDecimal nz(BigDecimal v) {
+    return v == null ? BigDecimal.ZERO : v;
   }
 
   @SuppressWarnings("unused") // TODO(#716): remove @SuppressWarnings once this step is implemented

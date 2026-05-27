@@ -6,6 +6,7 @@ import static org.mockito.Mockito.lenient;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
@@ -113,6 +114,16 @@ class SeedlotFormValidationServiceTest {
         .thenReturn(true);
   }
 
+  /**
+   * Lenient-stubs methodOfPaymentRepository so any existsById call returns true.
+   * Must be called in any test that runs validateSeedlotForm with a form that has owners.
+   */
+  private void stubValidMethodOfPayment() {
+    lenient()
+        .when(methodOfPaymentRepository.existsById(anyString()))
+        .thenReturn(true);
+  }
+
   // ----- smoke test --------------------------------------------------------
 
   @Test
@@ -123,6 +134,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("406", "PLI");
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
     Assertions.assertDoesNotThrow(
@@ -139,6 +151,7 @@ class SeedlotFormValidationServiceTest {
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(true);
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -161,6 +174,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("405", "FDC");
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
     SeedlotSubmissionValidationException ex =
@@ -191,6 +205,7 @@ class SeedlotFormValidationServiceTest {
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(true);
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -217,6 +232,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("405", "FDC");
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
     SeedlotSubmissionValidationException ex =
@@ -246,6 +262,7 @@ class SeedlotFormValidationServiceTest {
     lenient().when(oracleApiProvider.findOrchardById("406")).thenReturn(Optional.empty());
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
     // TestSeedlotForms.valid() has primary "405" and secondary "406"
@@ -269,6 +286,7 @@ class SeedlotFormValidationServiceTest {
     lenient().when(gameticMethodologyRepository.existsById("F3")).thenReturn(false);
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -293,6 +311,7 @@ class SeedlotFormValidationServiceTest {
     lenient().when(gameticMethodologyRepository.existsById("M3")).thenReturn(false);
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -320,6 +339,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("405", "PLI");
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -341,6 +361,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("405", "PLI");
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -364,6 +385,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("405", "PLI");
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
     Assertions.assertDoesNotThrow(
@@ -381,6 +403,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("406", "PLI");
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
     // Override the specific collection client/location call to throw 404
     lenient()
         .when(forestClientService.fetchSingleClientLocation("00012797", "00"))
@@ -405,6 +428,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("406", "PLI"); // secondary orchard in valid() base form
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
     SeedlotSubmissionValidationException ex =
@@ -433,6 +457,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("405", "PLI");
     stubValidOrchard("406", "PLI"); // secondary orchard in valid() base form
     stubValidForestClient();
+    stubValidMethodOfPayment();
     // Override: code 99 is invalid; leave anyInt() stub from stubValidConeMethods but override 99
     lenient().when(coneCollectionMethodRepository.existsById(anyInt())).thenReturn(true);
     lenient().when(coneCollectionMethodRepository.existsById(99)).thenReturn(false);
@@ -463,6 +488,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("406", "PLI"); // secondary orchard in valid() base form
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
 
@@ -505,6 +531,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("405", "PLI");
     stubValidOrchard("406", "PLI");
     stubValidConeMethods();
+    stubValidMethodOfPayment();
     lenient()
         .when(forestClientService.fetchSingleClientLocation(anyString(), anyString()))
         .thenThrow(
@@ -525,6 +552,7 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("406", "PLI");
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
     // Override the specific collection client/location call to throw 403
     lenient()
         .when(forestClientService.fetchSingleClientLocation("00012797", "00"))
@@ -546,9 +574,180 @@ class SeedlotFormValidationServiceTest {
     stubValidOrchard("406", "PLI");
     stubValidForestClient();
     stubValidConeMethods();
+    stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
     Assertions.assertDoesNotThrow(
         () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
+  }
+
+  // ----- Ownership step tests (OW1-OW5) ------------------------------------
+
+  @Test
+  @DisplayName("OW3: owned percentages not summing to 100 is rejected")
+  void owners_percentDoesNotSumTo100_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    // Two owners: 60 + 30 = 90, not 100
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withOwners(
+                        TestSeedlotForms.owner("00012797", "00", new BigDecimal("60")),
+                        TestSeedlotForms.owner("00012798", "00", new BigDecimal("30")))));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormOwnershipDtoList"));
+    Assertions.assertTrue(hasError, "Expected error on seedlotFormOwnershipDtoList for sum != 100");
+  }
+
+  @Test
+  @DisplayName("OW4: reserved + surplus > owned is rejected")
+  void owners_reservedPlusSurplusExceedsOwned_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    // owned=100, rsrvd=80, srpls=30 -> 80+30=110 > 100
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withOwners(
+                        TestSeedlotForms.ownerFull(
+                            "00012797", "00",
+                            new BigDecimal("100"),
+                            new BigDecimal("80"),
+                            new BigDecimal("30")))));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().contains("originalPctRsrvd"));
+    Assertions.assertTrue(
+        hasError, "Expected error on originalPctRsrvd when reserved+surplus exceeds owned");
+  }
+
+  @Test
+  @DisplayName("OW2: invalid method of payment code is rejected")
+  void owners_invalidPaymentCode_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    // Override: "BAD_CODE" is invalid; any other code (via anyString) is valid
+    lenient().when(methodOfPaymentRepository.existsById(anyString())).thenReturn(true);
+    lenient().when(methodOfPaymentRepository.existsById("BAD_CODE")).thenReturn(false);
+
+    // Build owner with a bad payment code directly using the record constructor
+    SeedlotFormOwnershipDto ownerWithBadCode =
+        new SeedlotFormOwnershipDto(
+            "00012797",
+            "00",
+            new BigDecimal("100"),
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            "BAD_CODE",
+            "ITC");
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot, TestSeedlotForms.withOwners(ownerWithBadCode)));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().contains("methodOfPaymentCode"));
+    Assertions.assertTrue(hasError, "Expected error on methodOfPaymentCode for invalid code");
+  }
+
+  @Test
+  @DisplayName("OW5: duplicate owner client+location pair is rejected")
+  void owners_duplicatePair_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    // Two owners with same client+locn (50+50=100 so OW3 passes), but duplicate pair
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withOwners(
+                        TestSeedlotForms.owner("00012797", "00", new BigDecimal("50")),
+                        TestSeedlotForms.owner("00012797", "00", new BigDecimal("50")))));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId().contains("ownerClientNumber")
+                        && e.message().contains("Duplicate owner"));
+    Assertions.assertTrue(hasError, "Expected duplicate-pair error on ownerClientNumber");
+  }
+
+  @Test
+  @DisplayName("OW1: owner client/location not found (404) is rejected")
+  void owners_clientLocationNotFound_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    // stubValidForestClient makes anyString/anyString succeed; override specific pair to 404
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+    // Owner uses client "00099999" / locn "99" — override to throw 404
+    lenient()
+        .when(forestClientService.fetchSingleClientLocation("00099999", "99"))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () ->
+                service.validateSeedlotForm(
+                    seedlot,
+                    TestSeedlotForms.withOwners(
+                        TestSeedlotForms.owner("00099999", "99", new BigDecimal("100")))));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().contains("ownerClientNumber"));
+    Assertions.assertTrue(
+        hasError, "Expected error on ownerClientNumber when client/location is not found");
+  }
+
+  @Test
+  @DisplayName("OW1-OW5: happy path — valid single owner (100%) passes")
+  void owners_validSingleOwner_passes() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot();
+    Assertions.assertDoesNotThrow(
+        () ->
+            service.validateSeedlotForm(
+                seedlot,
+                TestSeedlotForms.withOwners(
+                    TestSeedlotForms.owner("00012797", "00", new BigDecimal("100")))));
   }
 }

@@ -274,6 +274,64 @@ public final class TestSeedlotForms {
   }
 
   /**
+   * Returns a form identical to {@link #valid()} but with the ownership list replaced by the given
+   * owners. Useful for ownership-step validation tests (OW1-OW5).
+   */
+  public static SeedlotFormSubmissionDto withOwners(SeedlotFormOwnershipDto... owners) {
+    SeedlotFormSubmissionDto base = valid();
+    return new SeedlotFormSubmissionDto(
+        base.seedlotFormCollectionDto(),
+        List.of(owners),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormOrchardDto(),
+        base.seedlotFormParentTreeDtoList(),
+        base.seedlotFormParentTreeSmpDtoList(),
+        base.seedlotFormSmpParentOutsideDto(),
+        base.seedlotFormExtractionDto(),
+        base.seedlotReviewSeedPlanZones(),
+        base.seedlotReviewElevationLatLong(),
+        base.seedlotReviewGeneticWorth(),
+        base.seedlotReviewGeoInformation(),
+        base.applicantAndSeedlotInfo());
+  }
+
+  /**
+   * Builds an owner with reserved/surplus set to 0 and the valid payment/fund codes from
+   * {@link #valid()}. Useful for constructing simple ownership scenarios.
+   */
+  public static SeedlotFormOwnershipDto owner(
+      String clientNumber, String locnCode, BigDecimal pctOwned) {
+    return new SeedlotFormOwnershipDto(
+        clientNumber,
+        locnCode,
+        pctOwned,
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        "CLA",
+        "ITC");
+  }
+
+  /**
+   * Builds an owner with full control over all percentage values and the valid payment/fund codes
+   * from {@link #valid()}.
+   */
+  public static SeedlotFormOwnershipDto ownerFull(
+      String clientNumber,
+      String locnCode,
+      BigDecimal owned,
+      BigDecimal rsrvd,
+      BigDecimal srpls) {
+    return new SeedlotFormOwnershipDto(
+        clientNumber,
+        locnCode,
+        owned,
+        rsrvd,
+        srpls,
+        "CLA",
+        "ITC");
+  }
+
+  /**
    * Returns a form identical to {@link #valid()} but with the given cone collection method codes.
    * Useful for cone-code validation tests.
    */
