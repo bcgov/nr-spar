@@ -159,3 +159,17 @@ updateSeedlotWithForm (SeedlotService)
 - Test that *multiple* errors across steps are returned together in one 400.
 - Endpoint/integration test proving no DB mutation occurs on invalid input.
 - Regression test that valid submissions still succeed unchanged.
+
+---
+
+## 7. As-built decisions (resolved during implementation)
+
+These record where the shipped code diverged from / resolved the questions above:
+
+- **O6 `pollenContaminationMthdCode` — dropped (not deferred-with-stub, removed).** Investigation showed `pollen_contamination_mthd_code` has no FK/lookup table and the frontend sends `"RPM"` (varchar(4)), which is not a gametic-methodology code. Validating it against `GameticMethodologyRepository` would have rejected **every** real submission, so the check was removed entirely. A real lookup is a follow-up.
+- **Interim facility code (open Q1) — only `OTH → description required` enforced** (now `isBlank()`-based). No facility-code table exists; full validation deferred. Documented inline.
+- **Owner % rule (open Q2) — implemented as exact `sum == 100`** (BigDecimal `compareTo`, scale-insensitive). Still pending product confirmation for partial-draft states.
+- **TSC review/override path (open Q4 re: scope) — NOT validated.** `updateSeedlotWithForm` serves both the regular form (`isFromRegularForm=true`) and the TSC review/override endpoint (`false`). The validation call is gated on `isFromRegularForm`, so the TSC path keeps its prior behaviour and is not subject to these new 400s (avoids regressing edits to historical seedlots). **Needs product decision** before extending validation to the TSC path.
+- **Forest-client errors — only HTTP 404 is treated as "client/location does not exist."** Other 4xx (400/401/403), 5xx, and raw network failures propagate unchanged rather than being reported as user validation errors.
+- **Parent-tree validation (P1–P3) — deferred to Phase 2** (Oracle cost + unconfirmed data shape). The parent-tree list fields are `@NotNull @Valid` at the container level (null rejected, empty `[]` accepted); no `validateParentTreeStep` exists yet.
+- **Structured 400 contract** is delivered via a new `SeedlotValidationError` record + `SeedlotSubmissionValidationException` (extends `RuntimeException`) rendered through the existing `ValidationExceptionResponse` by `RestExceptionEndpoint` — rather than extending the old `SeedlotFormValidationException` as originally sketched in §3.
