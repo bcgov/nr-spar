@@ -1,4 +1,3 @@
-
 .consep-maintain-germ-tray {
   .consep-maintain-germ-tray-breadcrumb {
     margin-bottom: 0.5rem;
@@ -8,10 +7,71 @@
     padding-left: 0;
   }
 
-  .consep-maintain-germ-tray-table, .consep-maintain-germ-tray-alert {
+  .consep-maintain-germ-tray-table,
+  .consep-maintain-germ-tray-alert {
     margin-top: 0.5rem;
-    width: 50%;
+    width: 100%;
     min-width: 52rem;
+  }
+
+    .consep-maintain-germ-tray-table {
+      .consep-maintain-germ-tray-search-toolbar {
+        width: inherit;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+  
+        #find-germination-tray {
+          border: none;
+        }
+  
+        #germinator-entry-filter {
+          border: none;
+        }
+      }
+  
+      .consep-maintain-germ-tray-table-topbar {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+
+  .consep-maintain-germ-tray-tests-table {
+    .consep-maintain-germ-tray-tests-table {
+      .MuiBox-root:has(.consep-maintain-germ-tray-pagination-actions) {
+        width: inherit;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .consep-maintain-germ-tray-pagination-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .MuiTablePagination-toolbar {
+        justify-content: flex-start;
+        padding-left: 1rem;
+      }
+    }
+  }
+
+  .consep-maintain-germ-tray-tests-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 0;
+  }
+
+  .consep-maintain-germ-tray-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
 }
