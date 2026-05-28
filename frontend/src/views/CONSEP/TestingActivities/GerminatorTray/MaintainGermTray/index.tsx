@@ -12,7 +12,8 @@ import {
   Row,
   InlineNotification,
   Modal,
-  Button
+  Button,
+  TextInput
 } from '@carbon/react';
 import GenericTable from '../../../../../components/GenericTable';
 import ROUTES from '../../../../../routes/constants';
@@ -49,6 +50,7 @@ const MaintainGermTray = () => {
     message: string;
   } | null>(null);
   const [trays, setTrays] = useState<GermTrayColumn[]>(germinatorTrays);
+  const [traySearch, setTraySearch] = useState('');
   const lastSyncedRef = useRef<string | null>(JSON.stringify(germinatorTrays));
   const [selectedTrayId, setSelectedTrayId] = useState<number | null>(null);
   const [pendingDeleteTray, setPendingDeleteTray] = useState<GermTrayColumn | null>(null);
@@ -240,7 +242,34 @@ const MaintainGermTray = () => {
         <GenericTable
           columns={germTrayColumns}
           data={trays}
-          hideToolbar
+          hideToolbar={false}
+          renderTopToolbarCustomActions={() => (
+            <div className="consep-maintain-germ-tray-search-toolbar">
+              <div className="consep-maintain-germ-tray-table-topbar">
+                <div className="consep-maintain-germ-tray-tests-title">Find germination tray:</div>
+                <TextInput
+                  id="find-germination-tray"
+                  labelText=""
+                  hideLabel
+                  placeholder="Tray ID"
+                  size="sm"
+                  value={traySearch}
+                  onChange={(e: any) => setTraySearch(e.target.value)}
+                />
+              </div>
+
+              <div className="consep-maintain-germ-tray-table-topbar">
+                <div className="consep-maintain-germ-tray-germ-entry-label">Germinator entry:</div>
+                <TextInput
+                  id="germinator-entry-filter"
+                  labelText=""
+                  hideLabel
+                  placeholder="Germinator entry"
+                  size="sm"
+                />
+              </div>
+            </div>
+          )}
           enablePagination
           onRowClick={handleTrayRowClick}
           initialState={{
