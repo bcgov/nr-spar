@@ -45,6 +45,7 @@ type Props<T extends Record<string, any>> = {
   renderToolbarInternalActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   renderTopToolbarCustomActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   hideToolbar?: boolean;
+  renderBottomToolbarCustomActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
 };
 
 const GenericTable = <T extends Record<string, any>>({
@@ -81,6 +82,7 @@ const GenericTable = <T extends Record<string, any>>({
   tableBodyRef,
   renderToolbarInternalActions,
   renderTopToolbarCustomActions,
+  renderBottomToolbarCustomActions,
   hideToolbar = true
 }: Props<T>) => {
   const { theme: carbonTheme } = useThemePreference();
@@ -252,7 +254,8 @@ const GenericTable = <T extends Record<string, any>>({
       noRecordsToDisplay: 'No data found'
     },
     renderToolbarInternalActions,
-    renderTopToolbarCustomActions
+    renderTopToolbarCustomActions,
+    renderBottomToolbarCustomActions
   });
 
   return (
