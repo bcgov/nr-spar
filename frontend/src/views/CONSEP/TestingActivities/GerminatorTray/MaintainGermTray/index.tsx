@@ -256,7 +256,14 @@ const MaintainGermTray = () => {
           columns={germTrayTestsColumns}
           data={(trayContentsQuery.data ?? [])}
           isLoading={trayContentsQuery.isLoading}
-          hideToolbar
+          hideToolbar={false}
+          renderTopToolbarCustomActions={() => ( <div className="consep-maintain-germ-tray-tests-title">Tray contents</div> )}
+          renderBottomToolbarCustomActions={() => (
+            <div className="consep-maintain-germ-tray-pagination-actions">
+              <Button size="sm" kind="ghost">No filter</Button>
+              <Button size="sm" kind="secondary">Search</Button>
+            </div>
+          )}
           enablePagination
           initialState={{
             pagination: { pageSize: 5, pageIndex: 0 }
