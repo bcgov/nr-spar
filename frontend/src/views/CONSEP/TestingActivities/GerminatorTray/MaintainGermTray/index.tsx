@@ -326,18 +326,27 @@ const MaintainGermTray = () => {
           {`Please confirm you want to delete germination test ID ${pendingDeleteTest?.requestId} for seedlot #${pendingDeleteTest?.seedlotNumber}. This action cannot be undone.`}
         </p>
       </Modal>
-      <Row className="button-row">
+      <Row className="consep-maintain-germ-tray-buttons">
+        <div>
+          <Button
+            size="md"
+            kind="tertiary"
+          >
+            Labels
+          </Button>
+          <Button
+            size="md"
+            kind="tertiary"
+          >
+
+            Comments
+          </Button>
+        </div>
         <Button
           size="md"
           kind="tertiary"
         >
-          Labels
-        </Button>
-        <Button
-          size="md"
-          kind="tertiary"
-        >
-          Comments
+          Remove Tray Contents
         </Button>
       </Row>
     </FlexGrid>
