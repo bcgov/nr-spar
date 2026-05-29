@@ -272,13 +272,16 @@ public class GerminatorTrayService {
     return new GerminatorTrayContentsDto(
         entity.getGerminatorTrayId(),
         entity.getRequestId(),
+        entity.getVegetationSt(),
         entity.getSeedlotNumber(),
+        entity.getSoakEndDate(),
         entity.getWarmStratStartDate(),
         entity.getDrybackStartDate(),
         entity.getGerminatorEntry(),
         entity.getStratStartDate(),
         entity.getTestCompleteInd(),
         entity.getAcceptResultInd(),
+        entity.getGerminatorId(),
         entity.getRiaSkey(),
         updateTimestamp);
   }
