@@ -1,3 +1,5 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
 .consep-maintain-germ-tray {
   .consep-maintain-germ-tray-breadcrumb {
     margin-bottom: 0.5rem;
@@ -7,58 +9,81 @@
     padding-left: 0;
   }
 
+  .consep-maintain-germ-tray-activity-summary {
+    margin-top: 0.5rem;
+  }
+
   .consep-maintain-germ-tray-table,
   .consep-maintain-germ-tray-alert {
-    margin-top: 0.5rem;
-    width: 100%;
+    margin-top: 1.5rem;
+    width: inherit;
     min-width: 52rem;
   }
 
-    .consep-maintain-germ-tray-table {
-      .consep-maintain-germ-tray-search-toolbar {
-        width: inherit;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-  
-        #find-germination-tray {
-          border: none;
-        }
-  
-        #germinator-entry-filter {
-          border: none;
-        }
+  .consep-maintain-germ-tray-table {
+    border: thin solid var(--#{vars.$bcgov-prefix}-border-subtle-02, #DFDFE1);
+
+    .consep-maintain-germ-tray-search-toolbar {
+      width: inherit;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+
+      #find-germination-tray {
+        border: none;
       }
-  
-      .consep-maintain-germ-tray-table-topbar {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
+
+      #germinator-entry-filter {
+        border: none;
       }
     }
 
+    .consep-maintain-germ-tray-table-topbar {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .MuiBox-root:has(.consep-maintain-germ-tray-pagination-actions) {
+      width: inherit;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .consep-maintain-germ-tray-pagination-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+
   .consep-maintain-germ-tray-tests-table {
-    .consep-maintain-germ-tray-tests-table {
-      .MuiBox-root:has(.consep-maintain-germ-tray-pagination-actions) {
-        width: inherit;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-      }
+    margin-top: 1.5rem;
+    border: thin solid var(--#{vars.$bcgov-prefix}-border-subtle-02, #DFDFE1);
 
-      .consep-maintain-germ-tray-pagination-actions {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
+    .MuiBox-root:has(.consep-maintain-germ-tray-pagination-actions) {
+      width: inherit;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
 
-      .MuiTablePagination-toolbar {
-        justify-content: flex-start;
-        padding-left: 1rem;
-      }
+    .consep-maintain-germ-tray-pagination-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .MuiTablePagination-toolbar {
+      justify-content: flex-start;
+      padding-left: 1rem;
     }
   }
 
@@ -69,9 +94,16 @@
   }
 
   .consep-maintain-germ-tray-buttons {
+    margin-top: 1rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+
+    .consep-maintain-germ-tray-left-buttons {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+    }
   }
 
 }
