@@ -243,11 +243,32 @@ const MaintainGermTray = () => {
     };
 
   const summaryColumns = useMemo<SummaryColumn<GermTraySummaryItem>[]>(() => ([
-    { key: 'activity', label: 'Activity', renderValue: (d) => d?.activity ?? '', emphasize: true },
-    { key: 'testResult', label: 'Test result', renderValue: (d) => d?.testResult ?? '' },
-    { key: 'seedlotNumber', label: 'Seedlot#', renderValue: (d) => d?.seedlotNumber ?? '' },
-    { key: 'requestId', label: 'Request ID', renderValue: (d) => d?.requestId ?? '' },
-    { key: 'species', label: 'Species', renderValue: (d) => d?.species ?? '' }
+    {
+      key: 'activity',
+      label: 'Activity',
+      renderValue: (d) => d?.activity ?? '',
+      emphasize: true
+    },
+    {
+      key: 'testResult',
+      label: 'Test result',
+      renderValue: (d) => d?.testResult ?? ''
+    },
+    {
+      key: 'seedlotNumber',
+      label: 'Seedlot#',
+      renderValue: (d) => d?.seedlotNumber ?? ''
+    },
+    {
+      key: 'requestId',
+      label: 'Request ID',
+      renderValue: (d) => d?.requestId ?? ''
+    },
+    {
+      key: 'species',
+      label: 'Species',
+      renderValue: (d) => d?.species ?? ''
+    }
   ]), []);
 
   const renderTrayActions = () => (
