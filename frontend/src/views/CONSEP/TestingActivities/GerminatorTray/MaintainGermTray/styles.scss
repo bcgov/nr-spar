@@ -87,9 +87,12 @@
     }
   }
 
+  .MuiBox-root:has(.consep-maintain-germ-tray-tests-title) {
+    margin: 0 1rem;
+  }
+
   .consep-maintain-germ-tray-tests-title {
     font-size: 0.875rem;
-    font-weight: 600;
     padding: 0.5rem 0;
   }
 
