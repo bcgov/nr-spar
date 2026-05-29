@@ -14,7 +14,7 @@ public record SeedlotFormSubmissionDto(
     @NotNull @Valid SeedlotFormOrchardDto seedlotFormOrchardDto,
     @NotNull @Valid List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
     @NotNull @Valid List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeSmpDtoList,
-    @NotNull SeedlotFormSmpParentOutsideDto seedlotFormSmpParentOutsideDto,
+    @NotNull @Valid SeedlotFormSmpParentOutsideDto seedlotFormSmpParentOutsideDto,
     @NotNull @Valid SeedlotFormExtractionDto seedlotFormExtractionDto,
     List<SeedlotReviewSeedPlanZoneDto> seedlotReviewSeedPlanZones,
     SeedlotReviewElevationLatLongDto seedlotReviewElevationLatLong,
