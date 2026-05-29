@@ -243,10 +243,8 @@ public class SeedlotFormValidationService {
 
   private void validateOwnershipStep(
       SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    var owners = form.seedlotFormOwnershipDtoList();
-    if (owners == null || owners.isEmpty()) {
-      return;
-    }
+    var owners =
+        form.seedlotFormOwnershipDtoList() == null ? List.of() : form.seedlotFormOwnershipDtoList();
 
     BigDecimal totalOwned = BigDecimal.ZERO;
     Set<String> seenPairs = new HashSet<>();
