@@ -19,6 +19,7 @@ import GenericTable from '../../../../../components/GenericTable';
 import ROUTES from '../../../../../routes/constants';
 import Breadcrumbs from '../../../../../components/Breadcrumbs';
 import PageTitle from '../../../../../components/PageTitle';
+import SummaryGrid, { SummaryColumn } from '../../../../../components/CONSEP/SummaryGrid';
 import {
   assignGerminatorId,
   deleteTestFromTray,
@@ -220,6 +221,42 @@ const MaintainGermTray = () => {
     [handleDeleteTestClick]
   );
 
+  type GermTraySummaryItem = {
+    activity?: string;
+    testResult?: string;
+    seedlotNumber?: string;
+    requestId?: string;
+    species?: string;
+  };
+
+  const selectedTray = trays.find((tray) => tray.germinatorTrayId === selectedTrayId);
+  const firstTrayTest = trayContentsQuery.data?.[0];
+
+  const summaryItem: GermTraySummaryItem | undefined = selectedTrayId == null
+    ? undefined
+    : {
+      activity: selectedTray?.activityTypeCd ?? '',
+      testResult: firstTrayTest?.testCompleteInd === -1 ? 'Completed' : 'Pending',
+      seedlotNumber: firstTrayTest?.seedlotNumber ?? '',
+      requestId: firstTrayTest?.requestId ?? '',
+      species: ''
+    };
+
+  const summaryColumns = useMemo<SummaryColumn<GermTraySummaryItem>[]>(() => ([
+    { key: 'activity', label: 'Activity', renderValue: (d) => d?.activity ?? '', emphasize: true },
+    { key: 'testResult', label: 'Test result', renderValue: (d) => d?.testResult ?? '' },
+    { key: 'seedlotNumber', label: 'Seedlot#', renderValue: (d) => d?.seedlotNumber ?? '' },
+    { key: 'requestId', label: 'Request ID', renderValue: (d) => d?.requestId ?? '' },
+    { key: 'species', label: 'Species', renderValue: (d) => d?.species ?? '' }
+  ]), []);
+
+  const renderTrayActions = () => (
+    <div className="consep-maintain-germ-tray-pagination-actions">
+      <Button size="sm" kind="ghost">No filter</Button>
+      <Button size="sm" kind="secondary">Search</Button>
+    </div>
+  );
+
   return (
     <FlexGrid className="consep-maintain-germ-tray">
       <Row className="consep-maintain-germ-tray-breadcrumb">
@@ -238,6 +275,13 @@ const MaintainGermTray = () => {
           />
         </Row>
       )}
+      <Row className="consep-maintain-germ-tray-activity-summary">
+        <SummaryGrid
+          item={summaryItem}
+          isFetching={trayContentsQuery.isLoading}
+          columns={summaryColumns}
+        />
+      </Row>
       <Row className="consep-maintain-germ-tray-table">
         <GenericTable
           columns={germTrayColumns}
@@ -270,6 +314,7 @@ const MaintainGermTray = () => {
               </div>
             </div>
           )}
+          renderBottomToolbarCustomActions={renderTrayActions}
           enablePagination
           onRowClick={handleTrayRowClick}
           initialState={{
@@ -283,13 +328,8 @@ const MaintainGermTray = () => {
           data={(trayContentsQuery.data ?? [])}
           isLoading={trayContentsQuery.isLoading}
           hideToolbar={false}
-          renderTopToolbarCustomActions={() => ( <div className="consep-maintain-germ-tray-tests-title">Tray contents</div> )}
-          renderBottomToolbarCustomActions={() => (
-            <div className="consep-maintain-germ-tray-pagination-actions">
-              <Button size="sm" kind="ghost">No filter</Button>
-              <Button size="sm" kind="secondary">Search</Button>
-            </div>
-          )}
+          renderTopToolbarCustomActions={() => (<div className="consep-maintain-germ-tray-tests-title">Tray contents</div>)}
+          renderBottomToolbarCustomActions={renderTrayActions}
           enablePagination
           initialState={{
             pagination: { pageSize: 5, pageIndex: 0 }
@@ -324,7 +364,7 @@ const MaintainGermTray = () => {
         </p>
       </Modal>
       <Row className="consep-maintain-germ-tray-buttons">
-        <div>
+        <div className="consep-maintain-germ-tray-left-buttons">
           <Button
             size="md"
             kind="tertiary"
