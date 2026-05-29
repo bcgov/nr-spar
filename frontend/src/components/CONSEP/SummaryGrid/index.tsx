@@ -4,6 +4,7 @@ import {
   Column,
   RadioButtonSkeleton
 } from '@carbon/react';
+import './styles.scss';
 
 type SummaryColumn<T> = {
   key: string;
