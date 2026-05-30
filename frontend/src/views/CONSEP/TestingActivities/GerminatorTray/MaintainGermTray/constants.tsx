@@ -153,21 +153,18 @@ export const getGermTrayTestsColumns = (
     header: 'Label',
     enableEditing: false,
     size: 80,
-    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'vegetationSt',
     header: 'Species',
     enableEditing: false,
     size: 80,
-    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'germinatorId',
     header: 'Germ ID',
     enableEditing: false,
     size: 80,
-    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'actions',
