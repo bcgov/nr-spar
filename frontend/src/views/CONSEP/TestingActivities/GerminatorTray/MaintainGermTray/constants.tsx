@@ -152,19 +152,19 @@ export const getGermTrayTestsColumns = (
     accessorKey: 'null', // no entity linked to label, use appropriate key if there is one in the future
     header: 'Label',
     enableEditing: false,
-    size: 80,
+    size: 80
   },
   {
     accessorKey: 'vegetationSt',
     header: 'Species',
     enableEditing: false,
-    size: 80,
+    size: 80
   },
   {
     accessorKey: 'germinatorId',
     header: 'Germ ID',
     enableEditing: false,
-    size: 80,
+    size: 80
   },
   {
     accessorKey: 'actions',
