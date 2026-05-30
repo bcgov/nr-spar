@@ -239,7 +239,7 @@ const MaintainGermTray = () => {
       testResult: firstTrayTest?.testCompleteInd === -1 ? 'Completed' : 'Pending',
       seedlotNumber: firstTrayTest?.seedlotNumber ?? '',
       requestId: firstTrayTest?.requestId ?? '',
-      species: ''
+      species: firstTrayTest?.vegetationSt ?? ''
     };
 
   const summaryColumns = useMemo<SummaryColumn<GermTraySummaryItem>[]>(() => ([
