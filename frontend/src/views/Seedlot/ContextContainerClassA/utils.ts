@@ -47,6 +47,35 @@ import {
 } from './definitions';
 import { GenWorthCodeEnum, SingleParentTreeGeneticObj } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
+import { MeanGeomDataType } from '../../../types/PtCalcTypes';
+
+export type GeomDisplayValues = {
+  latDm: string;
+  lonDm: string;
+  elevation: string;
+};
+
+/**
+ * Formats the DMS geospatial fields from a MeanGeomDataType into display strings,
+ * returning empty strings for individual fields that are null to avoid rendering
+ * literal "null" in the UI.
+ */
+export const buildGeomDisplayValues = (
+  geomData: MeanGeomDataType | null
+): GeomDisplayValues | null => {
+  if (!geomData) return null;
+  return {
+    latDm: geomData.meanLatitudeMinute != null
+      ? `${geomData.meanLatitudeDegree}° ${geomData.meanLatitudeMinute}'`
+      : '',
+    lonDm: geomData.meanLongitudeMinute != null
+      ? `${geomData.meanLongitudeDegree}° ${geomData.meanLongitudeMinute}'`
+      : '',
+    elevation: geomData.meanElevation != null
+      ? `${geomData.meanElevation} m`
+      : ''
+  };
+};
 
 export const initProgressBar = (
   currentStep: number,

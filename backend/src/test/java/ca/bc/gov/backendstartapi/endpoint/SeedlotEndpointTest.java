@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
@@ -499,13 +500,39 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("getSingleSeedlotAclassFullInfoTest")
   void getSingleSeedlotAclassFullInfoTest() throws Exception {
-    SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(null, null);
+    SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(null, null, null, null);
 
     when(seedlotService.getAclassSeedlotFormInfo(any())).thenReturn(seedlotFullInfo);
 
     mockMvc
         .perform(get("/api/seedlots/0000000/a-class-full-form").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$.meanGeomSeedlot").doesNotExist())
+        .andExpect(jsonPath("$.meanGeomSmpMix").doesNotExist())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotAclassFullInfoWithGeomTest")
+  void getSingleSeedlotAclassFullInfoWithGeomTest() throws Exception {
+    GeospatialRespondDto meanGeomSeedlot = new GeospatialRespondDto(
+        49, 30, 0, 124, 15, 0, null, null, 800);
+    GeospatialRespondDto meanGeomSmpMix = new GeospatialRespondDto(
+        50, 0, 0, 125, 0, 0, null, null, 900);
+    SeedlotAclassFormDto seedlotFullInfo =
+        new SeedlotAclassFormDto(null, null, meanGeomSeedlot, meanGeomSmpMix);
+
+    when(seedlotService.getAclassSeedlotFormInfo(any())).thenReturn(seedlotFullInfo);
+
+    mockMvc
+        .perform(get("/api/seedlots/0000000/a-class-full-form").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.meanGeomSeedlot.meanLatitudeDegree").value(49))
+        .andExpect(jsonPath("$.meanGeomSeedlot.meanLongitudeDegree").value(124))
+        .andExpect(jsonPath("$.meanGeomSeedlot.meanElevation").value(800))
+        .andExpect(jsonPath("$.meanGeomSmpMix.meanLatitudeDegree").value(50))
+        .andExpect(jsonPath("$.meanGeomSmpMix.meanLongitudeDegree").value(125))
+        .andExpect(jsonPath("$.meanGeomSmpMix.meanElevation").value(900))
         .andReturn();
   }
 
