@@ -11,9 +11,13 @@ import java.util.List;
  * @param parentTrees a list with all parent trees related to the orchard
  * @param calculatedValues the results of all calculation made on the backend related
  *                         to the seedlot
+ * @param meanGeomSeedlot the persisted weighted-mean geospatial data for the seedlot
+ * @param meanGeomSmpMix the computed weighted-mean geospatial data for the SMP mix
  */
 @Schema(description = "An object with seedlot related data, for a-class seedlots")
 public record SeedlotAclassFormDto(
     SeedlotFormSubmissionDto seedlotData,
-    List<GeneticWorthTraitsDto> calculatedValues
+    List<GeneticWorthTraitsDto> calculatedValues,
+    GeospatialRespondDto meanGeomSeedlot,
+    GeospatialRespondDto meanGeomSmpMix
 ) {}
