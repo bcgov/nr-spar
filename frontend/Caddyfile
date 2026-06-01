@@ -44,10 +44,19 @@
 		respond `window.config = {"VITE_NRSPARWEBAPP_VERSION":"{$VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}","VITE_USER_POOLS_ID":"{$VITE_USER_POOLS_ID}","VITE_USER_POOLS_WEB_CLIENT_ID":"{$VITE_USER_POOLS_WEB_CLIENT_ID}","VITE_ZONE":"{$VITE_ZONE}"};`
 	}
 
-	@spaFallback {
-		header Accept *text/html*
-		not path /assets/* /favicon.ico /env.js
+	# SPA fallback only for browser navigations (Accept: text/html).
+	# Uses handle blocks (not try_files with a matcher) so the /env.js handler
+	# above takes precedence — try_files runs in the rewrite phase before handle
+	# and ignores named matchers, which would rewrite the virtual /env.js to
+	# /index.html and serve it as text/html.
+	@html header Accept *text/html*
+	handle @html {
+		try_files {path} /index.html
+		file_server
 	}
-	try_files @spaFallback {path} /index.html
-	file_server
+
+	# Everything else (assets, etc.) served normally; genuine 404 if missing.
+	handle {
+		file_server
+	}
 }
