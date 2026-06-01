@@ -63,15 +63,11 @@ const MaintainGermTray = () => {
     enabled: selectedTrayId !== null
   });
 
-  useEffect(() => {
-    if (trayContentsQuery.isError) {
-      const error = trayContentsQuery.error as any;
-      const message = error?.response?.data?.message
-        || error?.message
-        || 'Failed to load tray contents';
-      setAlert({ status: 'error', message });
-    }
-  }, [trayContentsQuery.isError, trayContentsQuery.error]);
+const trayContentsErrorMessage = trayContentsQuery.isError
+  ? ((trayContentsQuery.error as any)?.response?.data?.message
+    || (trayContentsQuery.error as any)?.message
+    || 'Failed to load tray contents')
+  : null;
 
   const handleTrayRowClick = useCallback((row: GermTrayColumn) => {
     setSelectedTrayId(row.germinatorTrayId);
@@ -221,6 +217,13 @@ const MaintainGermTray = () => {
     [handleDeleteTestClick]
   );
 
+  const filteredTrays = useMemo(() => {
+    const term = traySearch.trim().toLowerCase();
+    if (!term) return trays;
+
+    return trays.filter((row) => String(row.germinatorTrayId).toLowerCase().includes(term));
+  }, [trays, traySearch]);
+
   type GermTraySummaryItem = {
     activity?: string;
     testResult?: string;
@@ -286,12 +289,12 @@ const MaintainGermTray = () => {
       <Row className="consep-maintain-germ-tray-title">
         <PageTitle title="Maintain germ tray" />
       </Row>
-      {alert?.message && (
+      {(alert?.message || trayContentsErrorMessage) && (
         <Row className="consep-maintain-germ-tray-alert">
           <InlineNotification
             lowContrast
-            kind={alert.status}
-            subtitle={alert?.message}
+            kind={alert?.status ?? 'error'}
+            subtitle={alert?.message ?? trayContentsErrorMessage}
             onClose={() => setAlert(null)}
           />
         </Row>
@@ -306,7 +309,7 @@ const MaintainGermTray = () => {
       <Row className="consep-maintain-germ-tray-table">
         <GenericTable
           columns={germTrayColumns}
-          data={trays}
+          data={filteredTrays}
           hideToolbar={false}
           renderTopToolbarCustomActions={() => (
             <div className="consep-maintain-germ-tray-search-toolbar">
@@ -316,7 +319,7 @@ const MaintainGermTray = () => {
                   id="find-germination-tray"
                   labelText=""
                   hideLabel
-                  placeholder="Tray ID"
+                  placeholder="Germ tray"
                   size="sm"
                   value={traySearch}
                   onChange={(e: any) => setTraySearch(e.target.value)}
