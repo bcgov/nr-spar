@@ -63,11 +63,11 @@ const MaintainGermTray = () => {
     enabled: selectedTrayId !== null
   });
 
-const trayContentsErrorMessage = trayContentsQuery.isError
-  ? ((trayContentsQuery.error as any)?.response?.data?.message
-    || (trayContentsQuery.error as any)?.message
-    || 'Failed to load tray contents')
-  : null;
+  const trayContentsErrorMessage = trayContentsQuery.isError
+    ? ((trayContentsQuery.error as any)?.response?.data?.message
+      || (trayContentsQuery.error as any)?.message
+      || 'Failed to load tray contents')
+    : null;
 
   const handleTrayRowClick = useCallback((row: GermTrayColumn) => {
     setSelectedTrayId(row.germinatorTrayId);
