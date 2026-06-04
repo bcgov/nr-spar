@@ -111,4 +111,33 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("riaKey") BigDecimal riaKey,
       @Param("updateTimestamp") LocalDateTime updateTimestamp
   );
+
+  /**
+   * Update activity dates/comment with optimistic locking (issue #2447).
+   *
+   * @return rows updated; 0 means the row changed since it was read (409).
+   */
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE ActivityEntity a
+         SET a.actualBeginDateTime = :actualBeginDateTime,
+             a.actualEndDateTime = :actualEndDateTime,
+             a.revisedStartDate = :revisedStartDate,
+             a.revisedEndDate = :revisedEndDate,
+             a.riaComment = :riaComment,
+             a.intermediateCleaner = :intermediateCleaner,
+             a.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE a.riaKey = :riaKey
+         AND a.updateTimestamp = :expectedUpdateTimestamp
+      """)
+  int updateGerminationTestActivity(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("actualBeginDateTime") LocalDateTime actualBeginDateTime,
+      @Param("actualEndDateTime") LocalDateTime actualEndDateTime,
+      @Param("revisedStartDate") LocalDate revisedStartDate,
+      @Param("revisedEndDate") LocalDate revisedEndDate,
+      @Param("riaComment") String riaComment,
+      @Param("intermediateCleaner") Integer intermediateCleaner,
+      @Param("expectedUpdateTimestamp") LocalDateTime expectedUpdateTimestamp);
 }
