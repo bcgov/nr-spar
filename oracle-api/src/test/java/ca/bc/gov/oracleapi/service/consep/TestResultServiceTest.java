@@ -1184,7 +1184,7 @@ class TestResultServiceTest {
         ResponseStatusException.class,
         () -> testResultService.updateGerminationTest(
             RIA_KEY,
-            updateDto(false, false, LocalDateTime.now().plusDays(2), null, null)));
+            updateDto(false, false, LocalDateTime.of(2099, 1, 1, 0, 0), null, null)));
 
     assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
   }
