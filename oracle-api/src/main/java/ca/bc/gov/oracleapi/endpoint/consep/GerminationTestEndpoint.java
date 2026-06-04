@@ -1,9 +1,10 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.TestRankResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
-import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,21 +19,29 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** This class exposes germination test resources API. */
+/**
+ * This class exposes germination test resources API.
+ *
+ * <p>Provides endpoint operations for retrieving suggested test rank,
+ * daily abnormal germination counts, and germination test header metadata.
+ *
+ * <p>Input validation is handled through bean validation annotations,
+ * and constraint violations are processed by the global RestExceptionEndpoint.
+ */
 @RestController
 @RequestMapping("/api/germination-tests")
 @RequiredArgsConstructor
 @Validated
-@Tag(
-    name = "GerminationTests",
-    description = "Resource to retrieve Germination Test header and activity metadata.")
+@Tag(name = "Germination Tests", description = "Resource to manage germination tests.")
 public class GerminationTestEndpoint {
 
   private final TestResultService testResultService;
@@ -74,24 +83,63 @@ public class GerminationTestEndpoint {
               in = ParameterIn.QUERY,
               description = "The accepted result indicator.",
               required = true)
-          Integer acceptResultInd
-  ) {
+          Integer acceptResultInd) {
 
-    String rank =
-        testResultService.determineTestRank(
-            seedlotNumber,
-            testCategoryCd,
-            acceptResultInd
-        );
+    String rank = testResultService.determineTestRank(
+        seedlotNumber,
+        testCategoryCd,
+        acceptResultInd);
 
     return new TestRankResponseDto(rank);
   }
 
   /**
+   * Retrieve daily abnormal germination counts by daily germ key.
+   *
+   * <p>Returns replicate-level abnormal count information (rep1 to rep4)
+   * for the specified daily germ record.
+   *
+   * @param dailyGermSkey the surrogate key of the daily germ record
+   * @return a {@link DailyAbnormalResponseDto} containing abnormal counts for all replicates
+   */
+  @GetMapping("/daily-abnormals/{dailyGermSkey}")
+  @Operation(
+      summary = "Get daily abnormal germination counts by dailyGermSkey",
+      description = "Retrieve replicate-level abnormal germination counts for a daily germ record.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Daily abnormal germination counts for the specified daily germ record.",
+            content = @Content(schema = @Schema(implementation = DailyAbnormalResponseDto.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid dailyGermSkey supplied",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Daily abnormal counts not found for the given key",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "422",
+            description = "Daily abnormal counts contain invalid values",
+            content = @Content(schema = @Schema(hidden = true)))
+      })
+  @ApiAuthResponse
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  @ResponseStatus(HttpStatus.OK)
+  public DailyAbnormalResponseDto getDailyAbnormalCounts(
+      @PathVariable 
+          @Positive(message = "dailyGermSkey must be a positive number")
+          BigDecimal dailyGermSkey) {
+    return testResultService.getDailyAbnormalCounts(dailyGermSkey);
+  }
+
+  /**
    * Retrieve germination test header and activity metadata for a single RIA key.
    *
-   * @param riaKey Identifier key for test activity related tables.
-   * @return Germination test header data for the given RIA key.
+   * @param riaKey identifier key for test activity related tables
+   * @return germination test header data for the given RIA key
    */
   @GetMapping("/{riaKey}")
   @Operation(
@@ -101,7 +149,8 @@ public class GerminationTestEndpoint {
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Successfully returned germination test header data."),
+            description = "Successfully returned germination test header data.",
+            content = @Content(schema = @Schema(implementation = GerminationTestHeaderDto.class))),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid input: riaKey must be a positive number",
@@ -119,6 +168,7 @@ public class GerminationTestEndpoint {
             description = "Data integrity error: more than one row returned",
             content = @Content(schema = @Schema(hidden = true)))
       })
+  @ApiAuthResponse
   @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
   public GerminationTestHeaderDto getGerminationTestHeaderByRiaKey(
       @PathVariable

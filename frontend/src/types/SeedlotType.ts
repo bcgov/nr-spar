@@ -323,5 +323,7 @@ export type SeedlotProgressPayloadType = {
 
 export type SeedlotAClassFullResponseType = {
   seedlotData: SeedlotAClassSubmitType,
-  calculatedValues: Array<SeedlotCalculationsResultsType>
+  calculatedValues: Array<SeedlotCalculationsResultsType>,
+  meanGeomSeedlot: MeanGeomDataType | null,
+  meanGeomSmpMix: MeanGeomDataType | null
 }
