@@ -1,12 +1,16 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -274,6 +279,95 @@ public class GerminationTestEndpointTest {
 
     mockMvc
         .perform(get("/api/germination-tests/{riaKey}", riaKey))
+        .andExpect(status().isNotFound());
+  }
+
+  private static final String UPDATE_BODY = """
+      {
+        "testCategoryCode": "STD",
+        "acceptResultInd": true,
+        "testCompleteInd": true,
+        "germinatorId": "A",
+        "seedWithdrawalDate": "2026-04-30",
+        "actualBeginDateTime": "2026-05-02T08:00:00",
+        "actualEndDateTime": "2026-05-20T16:00:00",
+        "riaComment": "looks good",
+        "commentIsCritical": false,
+        "testResultUpdateTimestamp": "2026-05-01T10:00:00",
+        "riaUpdateTimestamp": "2026-05-01T11:00:00"
+      }
+      """;
+
+  @Test
+  void updateGerminationTest_validBody_returns200WithHeader() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    GerminationTestHeaderDto response = createHeaderDto(riaKey);
+    when(testResultService.updateGerminationTest(eq(riaKey), any()))
+        .thenReturn(response);
+
+    mockMvc
+        .perform(patch("/api/germination-tests/{riaKey}", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(UPDATE_BODY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.riaSkey").value(1234567890L))
+        .andExpect(jsonPath("$.requestTypeSt").value("TSC"));
+
+    verify(testResultService).updateGerminationTest(eq(riaKey), any());
+  }
+
+  @Test
+  void updateGerminationTest_missingMandatoryField_returns400() throws Exception {
+    String missingCategory = UPDATE_BODY.replace("\"testCategoryCode\": \"STD\",", "");
+
+    mockMvc
+        .perform(patch("/api/germination-tests/{riaKey}", new BigDecimal("1234"))
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(missingCategory))
+        .andExpect(status().isBadRequest());
+
+    verifyNoInteractions(testResultService);
+  }
+
+  @Test
+  void updateGerminationTest_serviceSaysConflict_returns409() throws Exception {
+    when(testResultService.updateGerminationTest(any(), any()))
+        .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "stale"));
+
+    mockMvc
+        .perform(patch("/api/germination-tests/{riaKey}", new BigDecimal("1234"))
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(UPDATE_BODY))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  void updateGerminationTest_serviceSaysUnprocessable_returns422() throws Exception {
+    when(testResultService.updateGerminationTest(any(), any()))
+        .thenThrow(new ResponseStatusException(
+            HttpStatus.UNPROCESSABLE_ENTITY, "cannot accept incomplete test"));
+
+    mockMvc
+        .perform(patch("/api/germination-tests/{riaKey}", new BigDecimal("1234"))
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(UPDATE_BODY))
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void updateGerminationTest_serviceSaysNotFound_returns404() throws Exception {
+    when(testResultService.updateGerminationTest(any(), any()))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "missing"));
+
+    mockMvc
+        .perform(patch("/api/germination-tests/{riaKey}", new BigDecimal("1234"))
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(UPDATE_BODY))
         .andExpect(status().isNotFound());
   }
 
