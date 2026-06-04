@@ -369,16 +369,19 @@ class GerminatorTrayEndpointTest {
             new GerminatorTrayContentsDto(
                 germinatorTrayId,
                 "RTS20042360",
-                "A",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-            ));
+                null, // vegetationSt
+                "A", // seedlotNumber
+                null, // soakEndDate
+                null, // warmStratStartDate
+                null, // drybackStartDate
+                null, // germinatorEntry
+                null, // stratStartDate
+                null, // testCompleteInd
+                null, // acceptResultInd
+                null, // germinatorId
+                null, // riaSkey
+                null // updateTimestamp
+                ));
 
     when(germinatorTrayService.getTrayContents(germinatorTrayId)).thenReturn(contents);
 
@@ -653,7 +656,8 @@ class GerminatorTrayEndpointTest {
 
   @Test
   void deleteTray_returns400_whenRiaSkeyIsNull() throws Exception {
-    String body = """
+    String body =
+        """
         [{"riaSkey":null,"updateTimestamp":"2025-03-12T00:00:00"}]
         """;
 
@@ -670,7 +674,8 @@ class GerminatorTrayEndpointTest {
 
   @Test
   void deleteTray_returns400_whenUpdateTimestampIsNull() throws Exception {
-    String body = """
+    String body =
+        """
         [{"riaSkey":881191,"updateTimestamp":null}]
         """;
 
@@ -741,7 +746,8 @@ class GerminatorTrayEndpointTest {
             post(BASE_URL + "/101/delete")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(
+                    """
                     [{"riaSkey":881191,"updateTimestamp":"2025-03-12T00:00:00"}]
                     """))
         .andExpect(status().isUnauthorized());
@@ -757,7 +763,8 @@ class GerminatorTrayEndpointTest {
             post(BASE_URL + "/101/delete")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(
+                    """
                     [{"riaSkey":881191,"updateTimestamp":"2025-03-12T00:00:00"}]
                     """))
         .andExpect(status().isForbidden());

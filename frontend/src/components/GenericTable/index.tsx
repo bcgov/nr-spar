@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   type MRT_ColumnDef,
   type MRT_PaginationState,
@@ -8,6 +8,7 @@ import {
   useMaterialReactTable
 } from 'material-react-table';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useThemePreference } from '../../utils/ThemePreference';
 
 type Props<T extends Record<string, any>> = {
   columns: MRT_ColumnDef<T>[];
@@ -44,26 +45,8 @@ type Props<T extends Record<string, any>> = {
   renderToolbarInternalActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   renderTopToolbarCustomActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   hideToolbar?: boolean;
+  renderBottomToolbarCustomActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
 };
-
-const COLOR_GREY_20 = '#DFDFE1';
-const WHITE = '#ffffff';
-const COLOR_GREY_10 = '#F3F3F5';
-
-const theme = createTheme({
-  components: {
-    MuiInputBase: {
-      styleOverrides: {
-        root: {
-          fontSize: '0.875rem'
-        },
-        input: {
-          padding: 0
-        }
-      }
-    }
-  }
-});
 
 const GenericTable = <T extends Record<string, any>>({
   columns,
@@ -99,8 +82,41 @@ const GenericTable = <T extends Record<string, any>>({
   tableBodyRef,
   renderToolbarInternalActions,
   renderTopToolbarCustomActions,
+  renderBottomToolbarCustomActions,
   hideToolbar = true
 }: Props<T>) => {
+  const { theme: carbonTheme } = useThemePreference();
+  const isDark = carbonTheme === 'g100';
+
+  const colors = useMemo(() => ({
+    rowEven: isDark ? '#262626' : '#F3F3F5',
+    rowOdd: isDark ? '#1f1f1f' : '#ffffff',
+    header: isDark ? '#393939' : '#DFDFE1',
+    hover: isDark ? '#525252' : '#DFDFE1',
+    tableBg: isDark ? '#161616' : '#ffffff',
+    menuBg: isDark ? '#262626' : '#ffffff',
+    pinnedRowBg: isDark ? '#262626' : '#f4f4f4',
+    selectedRowBg: isDark ? '#393939' : '#e5e5e5'
+  }), [isDark]);
+
+  const muiTheme = useMemo(() => createTheme({
+    palette: {
+      mode: isDark ? 'dark' : 'light'
+    },
+    components: {
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            fontSize: '0.875rem'
+          },
+          input: {
+            padding: 0
+          }
+        }
+      }
+    }
+  }), [isDark]);
+
   const basicTable = useMaterialReactTable({
     columns,
     data,
@@ -129,12 +145,19 @@ const GenericTable = <T extends Record<string, any>>({
       showRowsPerPage: true,
       shape: 'rounded'
     },
+    mrtTheme: {
+      baseBackgroundColor: colors.tableBg,
+      menuBackgroundColor: colors.menuBg,
+      pinnedRowBackgroundColor: colors.pinnedRowBg,
+      selectedRowBackgroundColor: colors.selectedRowBg
+    },
     muiTablePaperProps: {
       sx: {
         overflow: 'hidden',
         borderRadius: 0,
         boxShadow: 'none',
         width: '100%',
+        backgroundColor: colors.tableBg,
         ...(enablePagination
           ? {
             // only hide the top toolbar when pagination is enabled
@@ -157,7 +180,7 @@ const GenericTable = <T extends Record<string, any>>({
       onClick: () => onRowClick?.(row.original),
       sx: {
         cursor: onRowClick ? 'pointer' : 'default',
-        backgroundColor: row.index % 2 === 0 ? COLOR_GREY_10 : WHITE
+        backgroundColor: row.index % 2 === 0 ? colors.rowEven : colors.rowOdd
       }
     }),
     muiTableBodyCellProps: {
@@ -173,13 +196,13 @@ const GenericTable = <T extends Record<string, any>>({
           }),
         '&:hover': {
           outline: 'none',
-          backgroundColor: COLOR_GREY_20
+          backgroundColor: colors.hover
         }
       }
     },
     muiTableHeadRowProps: {
       sx: {
-        backgroundColor: COLOR_GREY_20
+        backgroundColor: colors.header
       }
     },
     muiTableHeadCellProps: {
@@ -231,11 +254,12 @@ const GenericTable = <T extends Record<string, any>>({
       noRecordsToDisplay: 'No data found'
     },
     renderToolbarInternalActions,
-    renderTopToolbarCustomActions
+    renderTopToolbarCustomActions,
+    renderBottomToolbarCustomActions
   });
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={muiTheme}>
       <MaterialReactTable table={basicTable} />
     </ThemeProvider>
   );
