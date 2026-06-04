@@ -45,6 +45,9 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class TestResultService {
 
+  /** Rank "A" is the primary/best rank assigned to the first accepted STD germination test. */
+  private static final String RANK_A = "A";
+
   private final TestResultRepository testResultRepository;
   private final GerminatorTrayRepository germinatorTrayRepository;
   private final ActivityRepository activityRepository;
@@ -789,34 +792,13 @@ public class TestResultService {
     String activityType = storedTest.getActivityType();
     String category = dto.testCategoryCode();
 
-    int updOriginal = 0;
-    int updCurrent = 0;
-    if (accept) {
-      LocalDateTime minEnd = testResultRepository
-          .findMinCompletedAcceptedEndDate(seedlotNumber, activityType, category);
-      LocalDateTime maxEnd = testResultRepository
-          .findMaxCompletedAcceptedEndDate(seedlotNumber, activityType, category);
-      if (maxEnd == null || effectiveEnd.isAfter(maxEnd)) {
-        updCurrent = -1;
-      }
-      if (minEnd == null || effectiveEnd.isBefore(minEnd)) {
-        updOriginal = -1;
-      }
-    }
+    int[] flags = computeOriginalCurrentFlags(
+        accept, effectiveEnd, seedlotNumber, activityType, category);
+    int updOriginal = flags[0];
+    int updCurrent = flags[1];
 
-    String updRank = null;
-    if ("STD".equals(category) && accept) {
-      List<TestResultEntity> rankATests =
-          testResultRepository.findRankATestsBySeedlot(seedlotNumber);
-      boolean anotherTestIsCurrent = rankATests.stream()
-          .anyMatch(t -> Integer.valueOf(-1).equals(t.getCurrentTest())
-              && !riaKey.equals(t.getRiaKey()));
-      if (updOriginal == -1 && updCurrent == -1 && rankATests.isEmpty()) {
-        updRank = "A";
-      } else if (updCurrent == -1 && anotherTestIsCurrent) {
-        updRank = "A";
-      }
-    }
+    String updRank = computeRankUpdate(
+        accept, category, seedlotNumber, riaKey, updOriginal, updCurrent);
 
     boolean storedComplete = storedTest.getTestCompleteInd() != null
         && storedTest.getTestCompleteInd() != 0;
@@ -861,7 +843,8 @@ public class TestResultService {
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND, "No germination test found for riaKey " + riaKey));
 
-    // Spec comment: "the first completed activity processes the commitment".
+    // Spec: "the first completed activity processes the commitment" — skip if a sibling activity
+    // already has processCommitIndicator set (findConflictingActivities non-empty).
     if (complete && ("RTS".equals(refreshed.requestTypeSt())
         || "TST".equals(refreshed.requestTypeSt()))) {
       boolean alreadyProcessed = !activityRepository.findConflictingActivities(
@@ -872,6 +855,78 @@ public class TestResultService {
     }
 
     return refreshed;
+  }
+
+  /**
+   * Computes the original-test and current-test flag values for a germination test update.
+   *
+   * <p>Returns an {@code int[2]} where index 0 is {@code updOriginal} and index 1 is
+   * {@code updCurrent}. Each value is {@code -1} (set) or {@code 0} (leave unchanged).
+   *
+   * <p>Note: accept =&gt; complete =&gt; effectiveEnd non-null
+   * (enforced in validateGerminationTestUpdate).
+   *
+   * @param accept whether the test is being accepted
+   * @param effectiveEnd the resolved test-end timestamp (non-null when accept is true)
+   * @param seedlotNumber the seedlot number
+   * @param activityType the activity type code
+   * @param category the test category code
+   * @return int[2] with [updOriginal, updCurrent]
+   */
+  private int[] computeOriginalCurrentFlags(
+      boolean accept, LocalDateTime effectiveEnd,
+      String seedlotNumber, String activityType, String category) {
+
+    int updOriginal = 0;
+    int updCurrent = 0;
+    if (accept) {
+      // accept => complete => effectiveEnd non-null (enforced in validateGerminationTestUpdate)
+      LocalDateTime minEnd = testResultRepository
+          .findMinCompletedAcceptedEndDate(seedlotNumber, activityType, category);
+      LocalDateTime maxEnd = testResultRepository
+          .findMaxCompletedAcceptedEndDate(seedlotNumber, activityType, category);
+      if (maxEnd == null || effectiveEnd.isAfter(maxEnd)) {
+        updCurrent = -1;
+      }
+      if (minEnd == null || effectiveEnd.isBefore(minEnd)) {
+        updOriginal = -1;
+      }
+    }
+    return new int[]{updOriginal, updCurrent};
+  }
+
+  /**
+   * Determines the rank value to write when accepting a STD germination test.
+   *
+   * <p>Returns {@value #RANK_A} when this test should become the primary (rank A) result,
+   * or {@code null} when no rank change is needed.
+   *
+   * @param accept whether the test is being accepted
+   * @param category the test category code
+   * @param seedlotNumber the seedlot number
+   * @param riaKey the test's RIA key (used to exclude self from sibling checks)
+   * @param updOriginal the original-test flag computed by {@link #computeOriginalCurrentFlags}
+   * @param updCurrent the current-test flag computed by {@link #computeOriginalCurrentFlags}
+   * @return rank string or {@code null}
+   */
+  private String computeRankUpdate(
+      boolean accept, String category, String seedlotNumber,
+      BigDecimal riaKey, int updOriginal, int updCurrent) {
+
+    if (!"STD".equals(category) || !accept) {
+      return null;
+    }
+    List<TestResultEntity> rankATests =
+        testResultRepository.findRankATestsBySeedlot(seedlotNumber);
+    boolean anotherTestIsCurrent = rankATests.stream()
+        .anyMatch(t -> Integer.valueOf(-1).equals(t.getCurrentTest())
+            && !riaKey.equals(t.getRiaKey()));
+    if (updOriginal == -1 && updCurrent == -1 && rankATests.isEmpty()) {
+      return RANK_A;
+    } else if (updCurrent == -1 && anotherTestIsCurrent) {
+      return RANK_A;
+    }
+    return null;
   }
 
   private LocalDate computeRevisedEndDate(
@@ -967,7 +1022,7 @@ public class TestResultService {
     }
 
     long existingAcceptedStdRankA = testResultRepository.countAcceptedStdRankA(seedlotNumber);
-    String rank = existingAcceptedStdRankA > 0 ? "P" : "A";
+    String rank = existingAcceptedStdRankA > 0 ? "P" : RANK_A;
 
     SparLog.info(
         "Determined test rank={} for seedlot={} (existing accepted STD rank-A count={})",
