@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
@@ -1369,6 +1370,80 @@ class TestResultServiceTest {
         eq(begin.toLocalDate()),
         eq(begin.toLocalDate().plusDays(21)),
         isNull(), eq(0), eq(RIA_TS));
+  }
+
+  @Test
+  void updateGerminationTest_completeRtsRequest_processesCommitment() {
+    mockHappyPathRepos();
+    when(testResultRepository.findMinCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(null);
+    when(testResultRepository.findMaxCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(null);
+    when(testResultRepository.findRankATestsBySeedlot(anyString()))
+        .thenReturn(List.of());
+    when(activityRepository.findConflictingActivities(
+        RIA_KEY, new BigDecimal("9001"), "A"))
+        .thenReturn(List.of());
+
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+    LocalDateTime end = LocalDateTime.of(2026, 5, 20, 16, 0);
+    testResultService.updateGerminationTest(
+        RIA_KEY, updateDto(true, true, begin, end, null));
+
+    verify(activityRepository).markSignificantAndCommit(RIA_KEY);
+  }
+
+  @Test
+  void updateGerminationTest_commitmentAlreadyProcessed_skipsCommit() {
+    mockHappyPathRepos();
+    when(testResultRepository.findMinCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(null);
+    when(testResultRepository.findMaxCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(null);
+    when(testResultRepository.findRankATestsBySeedlot(anyString()))
+        .thenReturn(List.of());
+    when(activityRepository.findConflictingActivities(
+        RIA_KEY, new BigDecimal("9001"), "A"))
+        .thenReturn(List.of(new ActivityEntity()));
+
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+    LocalDateTime end = LocalDateTime.of(2026, 5, 20, 16, 0);
+    testResultService.updateGerminationTest(
+        RIA_KEY, updateDto(true, true, begin, end, null));
+
+    verify(activityRepository, never()).markSignificantAndCommit(any());
+  }
+
+  @Test
+  void updateGerminationTest_notComplete_skipsCommitmentAndGermLocDelete() {
+    mockHappyPathRepos();
+
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+    testResultService.updateGerminationTest(
+        RIA_KEY, updateDto(false, false, begin, null, null));
+
+    verify(activityRepository, never()).markSignificantAndCommit(any());
+    verify(testResultRepository, never()).deleteAssignedGermLocation(any());
+  }
+
+  @Test
+  void updateGerminationTest_completeFirstTime_removesAssignedGermLocation() {
+    mockHappyPathRepos();
+    when(testResultRepository.findMinCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(null);
+    when(testResultRepository.findMaxCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(null);
+    when(testResultRepository.findRankATestsBySeedlot(anyString()))
+        .thenReturn(List.of());
+    when(activityRepository.findConflictingActivities(any(), any(), any()))
+        .thenReturn(List.of());
+
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+    LocalDateTime end = LocalDateTime.of(2026, 5, 20, 16, 0);
+    testResultService.updateGerminationTest(
+        RIA_KEY, updateDto(true, true, begin, end, null));
+
+    verify(testResultRepository).deleteAssignedGermLocation(RIA_KEY);
   }
 
   private void setAllAbnormalCountsToZero(DailyAbnormalEntity entity) {
