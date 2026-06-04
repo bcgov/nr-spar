@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
@@ -1206,6 +1208,167 @@ class TestResultServiceTest {
                 LocalDateTime.of(2026, 5, 20, 8, 0), null)));
 
     assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+  }
+
+  /*---------------------- updateGerminationTest update flow ---------------------------------*/
+
+  private GerminationTestHeaderDto headerDto() {
+    return new GerminationTestHeaderDto(
+        RIA_KEY, "G23", null, null, "STD", null, null, 0, 0, null, -1, null,
+        null, null, null, null, null, null, null, 21, "DY", null, null, null,
+        null, null, null, null, null, null, null, null, "RTS");
+  }
+
+  private void mockHappyPathRepos() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+    when(testResultRepository.updateGerminationTestHeader(
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(1);
+    when(activityRepository.updateGerminationTestActivity(
+        any(), any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(1);
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(RIA_KEY))
+        .thenReturn(Optional.of(headerDto()));
+  }
+
+  @Test
+  void updateGerminationTest_notAccepted_writesZeroFlagsAndNullRank() {
+    mockHappyPathRepos();
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+
+    testResultService.updateGerminationTest(RIA_KEY, updateDto(false, false, begin, null, null));
+
+    verify(testResultRepository).updateGerminationTestHeader(
+        eq(RIA_KEY), eq(0), eq(0), isNull(), eq(0), eq(0),
+        eq("A"), eq(LocalDate.of(2026, 4, 30)), eq("STD"), eq(TST_TS));
+    verify(testResultRepository, never()).resetOriginalTestIndForSiblings(
+        any(), any(), any(), any());
+    verify(testResultRepository, never()).resetCurrentTestIndForSiblings(
+        any(), any(), any(), any());
+  }
+
+  @Test
+  void updateGerminationTest_acceptedNoSiblings_setsOriginalCurrentAndRankA() {
+    mockHappyPathRepos();
+    when(testResultRepository.findMinCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(null);
+    when(testResultRepository.findMaxCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(null);
+    when(testResultRepository.findRankATestsBySeedlot("60001"))
+        .thenReturn(List.of());
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+    LocalDateTime end = LocalDateTime.of(2026, 5, 20, 16, 0);
+
+    testResultService.updateGerminationTest(RIA_KEY, updateDto(true, true, begin, end, null));
+
+    verify(testResultRepository).updateGerminationTestHeader(
+        eq(RIA_KEY), eq(-1), eq(-1), eq("A"), eq(-1), eq(-1),
+        eq("A"), eq(LocalDate.of(2026, 4, 30)), eq("STD"), eq(TST_TS));
+    verify(testResultRepository).resetOriginalTestIndForSiblings(
+        RIA_KEY, "G23", "STD", "60001");
+    verify(testResultRepository).resetCurrentTestIndForSiblings(
+        RIA_KEY, "G23", "STD", "60001");
+  }
+
+  @Test
+  void updateGerminationTest_acceptedBetweenSiblingEnds_keepsFlagsZero() {
+    mockHappyPathRepos();
+    when(testResultRepository.findMinCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(LocalDateTime.of(2026, 5, 1, 0, 0));
+    when(testResultRepository.findMaxCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(LocalDateTime.of(2026, 5, 30, 0, 0));
+    when(testResultRepository.findRankATestsBySeedlot("60001"))
+        .thenReturn(List.of());
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+    LocalDateTime end = LocalDateTime.of(2026, 5, 20, 16, 0);
+
+    testResultService.updateGerminationTest(RIA_KEY, updateDto(true, true, begin, end, null));
+
+    verify(testResultRepository).updateGerminationTestHeader(
+        eq(RIA_KEY), eq(0), eq(0), isNull(), eq(-1), eq(-1),
+        eq("A"), eq(LocalDate.of(2026, 4, 30)), eq("STD"), eq(TST_TS));
+  }
+
+  @Test
+  void updateGerminationTest_acceptedLatestEnd_replacesCurrentRankA() {
+    mockHappyPathRepos();
+    when(testResultRepository.findMinCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(LocalDateTime.of(2026, 5, 1, 0, 0));
+    when(testResultRepository.findMaxCompletedAcceptedEndDate(any(), any(), any()))
+        .thenReturn(LocalDateTime.of(2026, 5, 10, 0, 0));
+    TestResultEntity otherRankA = new TestResultEntity();
+    otherRankA.setRiaKey(new BigDecimal("9999"));
+    otherRankA.setCurrentTest(-1);
+    when(testResultRepository.findRankATestsBySeedlot("60001"))
+        .thenReturn(List.of(otherRankA));
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+    LocalDateTime end = LocalDateTime.of(2026, 5, 20, 16, 0);
+
+    testResultService.updateGerminationTest(RIA_KEY, updateDto(true, true, begin, end, null));
+
+    verify(testResultRepository).updateGerminationTestHeader(
+        eq(RIA_KEY), eq(0), eq(-1), eq("A"), eq(-1), eq(-1),
+        eq("A"), eq(LocalDate.of(2026, 4, 30)), eq("STD"), eq(TST_TS));
+    verify(testResultRepository).resetCurrentTestIndForSiblings(
+        RIA_KEY, "G23", "STD", "60001");
+    verify(testResultRepository, never()).resetOriginalTestIndForSiblings(
+        any(), any(), any(), any());
+  }
+
+  @Test
+  void updateGerminationTest_staleTestResultTimestamp_throwsConflict() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+    when(testResultRepository.updateGerminationTestHeader(
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(0);
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY, updateDto(false, false, LocalDateTime.of(2026, 5, 2, 8, 0), null, null)));
+
+    assertEquals(HttpStatus.CONFLICT, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_staleActivityTimestamp_throwsConflict() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+    when(testResultRepository.updateGerminationTestHeader(
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(1);
+    when(activityRepository.updateGerminationTestActivity(
+        any(), any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(0);
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY, updateDto(false, false, LocalDateTime.of(2026, 5, 2, 8, 0), null, null)));
+
+    assertEquals(HttpStatus.CONFLICT, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_incompleteWithoutEnd_derivesRevisedEndFromDuration() {
+    mockHappyPathRepos();
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+
+    testResultService.updateGerminationTest(RIA_KEY, updateDto(false, false, begin, null, null));
+
+    verify(activityRepository).updateGerminationTestActivity(
+        eq(RIA_KEY), eq(begin), isNull(),
+        eq(begin.toLocalDate()),
+        eq(begin.toLocalDate().plusDays(21)),
+        isNull(), eq(0), eq(RIA_TS));
   }
 
   private void setAllAbnormalCountsToZero(DailyAbnormalEntity entity) {

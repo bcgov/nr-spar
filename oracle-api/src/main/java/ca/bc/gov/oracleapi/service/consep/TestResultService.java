@@ -779,8 +779,117 @@ public class TestResultService {
 
     validateGerminationTestUpdate(dto, storedTest, accept, complete);
 
-    // Updates implemented in the next tasks.
-    throw new UnsupportedOperationException("not yet implemented");
+    // Spec: when Complete is checked, Test End defaults to now.
+    LocalDateTime effectiveEnd = dto.actualEndDateTime();
+    if (complete && effectiveEnd == null) {
+      effectiveEnd = LocalDateTime.now();
+    }
+
+    String seedlotNumber = storedActivity.getSeedlotNumber();
+    String activityType = storedTest.getActivityType();
+    String category = dto.testCategoryCode();
+
+    int updOriginal = 0;
+    int updCurrent = 0;
+    if (accept) {
+      LocalDateTime minEnd = testResultRepository
+          .findMinCompletedAcceptedEndDate(seedlotNumber, activityType, category);
+      LocalDateTime maxEnd = testResultRepository
+          .findMaxCompletedAcceptedEndDate(seedlotNumber, activityType, category);
+      if (maxEnd == null || effectiveEnd.isAfter(maxEnd)) {
+        updCurrent = -1;
+      }
+      if (minEnd == null || effectiveEnd.isBefore(minEnd)) {
+        updOriginal = -1;
+      }
+    }
+
+    String updRank = null;
+    if ("STD".equals(category) && accept) {
+      List<TestResultEntity> rankATests =
+          testResultRepository.findRankATestsBySeedlot(seedlotNumber);
+      boolean anotherTestIsCurrent = rankATests.stream()
+          .anyMatch(t -> Integer.valueOf(-1).equals(t.getCurrentTest())
+              && !riaKey.equals(t.getRiaKey()));
+      if (updOriginal == -1 && updCurrent == -1 && rankATests.isEmpty()) {
+        updRank = "A";
+      } else if (updCurrent == -1 && anotherTestIsCurrent) {
+        updRank = "A";
+      }
+    }
+
+    boolean storedComplete = storedTest.getTestCompleteInd() != null
+        && storedTest.getTestCompleteInd() != 0;
+    if (complete && !storedComplete) {
+      testResultRepository.deleteAssignedGermLocation(riaKey);
+    }
+
+    int testRows = testResultRepository.updateGerminationTestHeader(
+        riaKey, updOriginal, updCurrent, updRank,
+        complete ? -1 : 0, accept ? -1 : 0,
+        dto.germinatorId(), dto.seedWithdrawalDate(), category,
+        dto.testResultUpdateTimestamp());
+    if (testRows == 0) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "Test result was modified by another user; reload and retry");
+    }
+
+    int activityRows = activityRepository.updateGerminationTestActivity(
+        riaKey, dto.actualBeginDateTime(), effectiveEnd,
+        dto.actualBeginDateTime() == null ? null : dto.actualBeginDateTime().toLocalDate(),
+        computeRevisedEndDate(effectiveEnd, dto.actualBeginDateTime(),
+            storedActivity.getActivityDuration(), storedActivity.getActivityTimeUnit()),
+        dto.riaComment(),
+        Boolean.TRUE.equals(dto.commentIsCritical()) ? -1 : 0,
+        dto.riaUpdateTimestamp());
+    if (activityRows == 0) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "Activity was modified by another user; reload and retry");
+    }
+
+    if (updOriginal == -1) {
+      testResultRepository.resetOriginalTestIndForSiblings(
+          riaKey, activityType, category, seedlotNumber);
+    }
+    if (updCurrent == -1) {
+      testResultRepository.resetCurrentTestIndForSiblings(
+          riaKey, activityType, category, seedlotNumber);
+    }
+
+    GerminationTestHeaderDto refreshed = testResultRepository
+        .findGerminationTestHeaderByRiaKey(riaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No germination test found for riaKey " + riaKey));
+
+    // Spec comment: "the first completed activity processes the commitment".
+    if (complete && ("RTS".equals(refreshed.requestTypeSt())
+        || "TST".equals(refreshed.requestTypeSt()))) {
+      boolean alreadyProcessed = !activityRepository.findConflictingActivities(
+          riaKey, storedActivity.getRequestSkey(), storedActivity.getItemId()).isEmpty();
+      if (!alreadyProcessed) {
+        activityRepository.markSignificantAndCommit(riaKey);
+      }
+    }
+
+    return refreshed;
+  }
+
+  private LocalDate computeRevisedEndDate(
+      LocalDateTime effectiveEnd, LocalDateTime begin,
+      Integer duration, String timeUnit) {
+    if (effectiveEnd != null) {
+      return effectiveEnd.toLocalDate();
+    }
+    if (begin == null || duration == null) {
+      return null;
+    }
+    return switch (timeUnit == null ? "DY" : timeUnit) {
+      case "HR" -> begin.plusHours(duration).toLocalDate();
+      case "WK" -> begin.plusWeeks(duration).toLocalDate();
+      case "MO" -> begin.plusMonths(duration).toLocalDate();
+      case "YR" -> begin.plusYears(duration).toLocalDate();
+      default -> begin.plusDays(duration).toLocalDate();
+    };
   }
 
   private void validateGerminationTestUpdate(
