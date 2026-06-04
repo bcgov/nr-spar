@@ -245,6 +245,7 @@ const GenericTable = <T extends Record<string, any>>({
     enableColumnResizing,
     enableEditing,
     enableStickyHeader,
+    enableKeyboardShortcuts: false,
     createDisplayMode: 'row',
     editDisplayMode: 'table',
     renderRowActions: renderRowActions
