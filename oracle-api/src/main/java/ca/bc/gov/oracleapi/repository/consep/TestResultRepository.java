@@ -195,7 +195,9 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
             a.dryWeight,
             a.drybackWeight,
             a.intermediateCleaner,
-            r.requestTypeSt
+            r.requestTypeSt,
+            tst.updateTimestamp,
+            a.updateTimestamp
     )
     FROM TestResultEntity tst
     JOIN ActivityEntity a
@@ -220,8 +222,8 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
       WHERE a.seedlotNumber = :seedlotNumber
         AND t.activityType = :activityType
         AND t.testCategory = :testCategory
-        AND t.testCompleteInd = -1
-        AND t.acceptResult = -1
+        AND t.testCompleteInd <> 0
+        AND t.acceptResult <> 0
       """)
   LocalDateTime findMinCompletedAcceptedEndDate(
       @Param("seedlotNumber") String seedlotNumber,
@@ -237,8 +239,8 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
       WHERE a.seedlotNumber = :seedlotNumber
         AND t.activityType = :activityType
         AND t.testCategory = :testCategory
-        AND t.testCompleteInd = -1
-        AND t.acceptResult = -1
+        AND t.testCompleteInd <> 0
+        AND t.acceptResult <> 0
       """)
   LocalDateTime findMaxCompletedAcceptedEndDate(
       @Param("seedlotNumber") String seedlotNumber,

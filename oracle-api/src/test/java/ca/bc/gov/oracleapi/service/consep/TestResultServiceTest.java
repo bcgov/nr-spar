@@ -1047,7 +1047,9 @@ class TestResultServiceTest {
         new BigDecimal("10.220"), // dryWeight
         new BigDecimal("9.880"), // drybackWeight
         0, // intrmdtCleanrInd
-        "TSC" // requestTypeSt
+        "TSC", // requestTypeSt
+        TST_TS, // testResultUpdateTimestamp
+        RIA_TS // riaUpdateTimestamp
         );
   }
 
@@ -1217,7 +1219,7 @@ class TestResultServiceTest {
     return new GerminationTestHeaderDto(
         RIA_KEY, "G23", null, null, "STD", null, null, 0, 0, null, -1, null,
         null, null, null, null, null, null, null, 21, "DY", null, null, null,
-        null, null, null, null, null, null, null, null, "RTS");
+        null, null, null, null, null, null, null, null, "RTS", TST_TS, RIA_TS);
   }
 
   private void mockHappyPathRepos() {
@@ -1290,6 +1292,29 @@ class TestResultServiceTest {
 
     verify(testResultRepository).updateGerminationTestHeader(
         eq(RIA_KEY), eq(0), eq(0), isNull(), eq(-1), eq(-1),
+        eq("A"), eq(LocalDate.of(2026, 4, 30)), eq("STD"), eq(TST_TS));
+  }
+
+  @Test
+  void updateGerminationTest_acceptedEndEqualsSiblingEnds_keepsFlagsSet() {
+    // Re-saving a test whose end ties the sibling min/max must keep both
+    // flags (field-description semantics: only strictly earlier/later ends
+    // clear them). Guards against the strict-comparison regression.
+    mockHappyPathRepos();
+    LocalDateTime tiedEnd = LocalDateTime.of(2026, 5, 20, 16, 0);
+    when(testResultRepository.findMinCompletedAcceptedEndDate("60001", "G23", "STD"))
+        .thenReturn(tiedEnd);
+    when(testResultRepository.findMaxCompletedAcceptedEndDate("60001", "G23", "STD"))
+        .thenReturn(tiedEnd);
+    when(testResultRepository.findRankATestsBySeedlot("60001"))
+        .thenReturn(List.of());
+
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 2, 8, 0);
+    testResultService.updateGerminationTest(
+        RIA_KEY, updateDto(true, true, begin, tiedEnd, null));
+
+    verify(testResultRepository).updateGerminationTestHeader(
+        eq(RIA_KEY), eq(-1), eq(-1), eq("A"), eq(-1), eq(-1),
         eq("A"), eq(LocalDate.of(2026, 4, 30)), eq("STD"), eq(TST_TS));
   }
 

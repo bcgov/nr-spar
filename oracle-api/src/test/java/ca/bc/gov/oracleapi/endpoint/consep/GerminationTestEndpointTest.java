@@ -405,7 +405,9 @@ public class GerminationTestEndpointTest {
         new BigDecimal("10.220"), // dryWeight
         new BigDecimal("9.880"), // drybackWeight
         0, // intrmdtCleanrInd
-        "TSC" // requestTypeSt
+        "TSC", // requestTypeSt
+        LocalDateTime.parse("2026-05-01T10:00:00"), // testResultUpdateTimestamp
+        LocalDateTime.parse("2026-05-01T11:00:00") // riaUpdateTimestamp
     );
   }
 }

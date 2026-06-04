@@ -115,6 +115,10 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
   /**
    * Update activity dates/comment with optimistic locking (issue #2447).
    *
+   * <p>The INTRMDT_CLEANR_IND column ({@code intermediateCleaner}) is repurposed by the
+   * germination test screen to store the "Comment is Critical" flag, hence the
+   * {@code commentIsCritical} parameter name.
+   *
    * @return rows updated; 0 means the row changed since it was read (409).
    */
   @Modifying
@@ -126,7 +130,7 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
              a.revisedStartDate = :revisedStartDate,
              a.revisedEndDate = :revisedEndDate,
              a.riaComment = :riaComment,
-             a.intermediateCleaner = :intermediateCleaner,
+             a.intermediateCleaner = :commentIsCritical,
              a.updateTimestamp = CURRENT_TIMESTAMP
        WHERE a.riaKey = :riaKey
          AND a.updateTimestamp = :expectedUpdateTimestamp
@@ -138,6 +142,6 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("revisedStartDate") LocalDate revisedStartDate,
       @Param("revisedEndDate") LocalDate revisedEndDate,
       @Param("riaComment") String riaComment,
-      @Param("intermediateCleaner") Integer intermediateCleaner,
+      @Param("commentIsCritical") Integer commentIsCritical,
       @Param("expectedUpdateTimestamp") LocalDateTime expectedUpdateTimestamp);
 }

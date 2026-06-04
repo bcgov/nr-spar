@@ -157,7 +157,9 @@ public class TestResultService {
           dto.dryWeight(),
           dto.drybackWeight(),
           dto.intrmdtCleanrInd(),
-          dto.requestTypeSt());
+          dto.requestTypeSt(),
+          dto.testResultUpdateTimestamp(),
+          dto.riaUpdateTimestamp());
 
     } catch (IncorrectResultSizeDataAccessException ex) {
       SparLog.error("Data integrity issue: multiple rows found for RIA_SKEY {}", riaKey, ex);
@@ -780,13 +782,14 @@ public class TestResultService {
     boolean accept = Boolean.TRUE.equals(dto.acceptResultInd());
     boolean complete = Boolean.TRUE.equals(dto.testCompleteInd());
 
-    validateGerminationTestUpdate(dto, storedTest, accept, complete);
-
-    // Spec: when Complete is checked, Test End defaults to now.
+    // Spec: when Complete is checked, Test End defaults to now. Resolved before
+    // validation so the end-after-begin rule also covers the defaulted value.
     LocalDateTime effectiveEnd = dto.actualEndDateTime();
     if (complete && effectiveEnd == null) {
       effectiveEnd = LocalDateTime.now();
     }
+
+    validateGerminationTestUpdate(dto, storedTest, accept, complete, effectiveEnd);
 
     String seedlotNumber = storedActivity.getSeedlotNumber();
     String activityType = storedTest.getActivityType();
@@ -885,10 +888,13 @@ public class TestResultService {
           .findMinCompletedAcceptedEndDate(seedlotNumber, activityType, category);
       LocalDateTime maxEnd = testResultRepository
           .findMaxCompletedAcceptedEndDate(seedlotNumber, activityType, category);
-      if (maxEnd == null || effectiveEnd.isAfter(maxEnd)) {
+      // Field-description semantics: current stays set unless some test ends
+      // strictly LATER; original unless some test ends strictly EARLIER. Ties
+      // (e.g. re-saving the same test) therefore keep the flag.
+      if (maxEnd == null || !effectiveEnd.isBefore(maxEnd)) {
         updCurrent = -1;
       }
-      if (minEnd == null || effectiveEnd.isBefore(minEnd)) {
+      if (minEnd == null || !effectiveEnd.isAfter(minEnd)) {
         updOriginal = -1;
       }
     }
@@ -919,7 +925,7 @@ public class TestResultService {
     List<TestResultEntity> rankATests =
         testResultRepository.findRankATestsBySeedlot(seedlotNumber);
     boolean anotherTestIsCurrent = rankATests.stream()
-        .anyMatch(t -> Integer.valueOf(-1).equals(t.getCurrentTest())
+        .anyMatch(t -> t.getCurrentTest() != null && t.getCurrentTest() != 0
             && !riaKey.equals(t.getRiaKey()));
     if (updOriginal == -1 && updCurrent == -1 && rankATests.isEmpty()) {
       return RANK_A;
@@ -949,7 +955,7 @@ public class TestResultService {
 
   private void validateGerminationTestUpdate(
       GerminationTestUpdateFormDto dto, TestResultEntity storedTest,
-      boolean accept, boolean complete) {
+      boolean accept, boolean complete, LocalDateTime effectiveEnd) {
 
     if (accept && !complete) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
@@ -965,8 +971,8 @@ public class TestResultService {
               + " or a comment or test end is provided");
     }
 
-    if (dto.actualBeginDateTime() != null && dto.actualEndDateTime() != null
-        && !dto.actualEndDateTime().isAfter(dto.actualBeginDateTime())) {
+    if (dto.actualBeginDateTime() != null && effectiveEnd != null
+        && !effectiveEnd.isAfter(dto.actualBeginDateTime())) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Test end must be after begin date");
     }
