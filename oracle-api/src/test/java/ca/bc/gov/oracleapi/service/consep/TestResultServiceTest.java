@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestUpdateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
@@ -1059,6 +1060,152 @@ class TestResultServiceTest {
     rep.setId(new ReplicateId(riaSkey, repNo));
     rep.setTotalNoSeeds(totalSeeds);
     return rep;
+  }
+
+  /*---------------------- updateGerminationTest validations ---------------------------------*/
+
+  private static final BigDecimal RIA_KEY = new BigDecimal("1234");
+  private static final LocalDateTime TST_TS = LocalDateTime.of(2026, 5, 1, 10, 0);
+  private static final LocalDateTime RIA_TS = LocalDateTime.of(2026, 5, 1, 11, 0);
+
+  private TestResultEntity storedTest(Integer completeInd, String category) {
+    TestResultEntity entity = new TestResultEntity();
+    entity.setRiaKey(RIA_KEY);
+    entity.setActivityType("G23");
+    entity.setTestCategory(category);
+    entity.setTestCompleteInd(completeInd);
+    entity.setUpdateTimestamp(TST_TS);
+    return entity;
+  }
+
+  private ActivityEntity storedActivity() {
+    ActivityEntity activity = new ActivityEntity();
+    activity.setRiaKey(RIA_KEY);
+    activity.setSeedlotNumber("60001");
+    activity.setRequestSkey(new BigDecimal("9001"));
+    activity.setItemId("A");
+    activity.setActivityDuration(21);
+    activity.setActivityTimeUnit("DY");
+    activity.setUpdateTimestamp(RIA_TS);
+    return activity;
+  }
+
+  private GerminationTestUpdateFormDto updateDto(
+      Boolean accept, Boolean complete,
+      LocalDateTime begin, LocalDateTime end, String comment) {
+    return new GerminationTestUpdateFormDto(
+        "STD", accept, complete, "A", LocalDate.of(2026, 4, 30),
+        begin, end, comment, false, TST_TS, RIA_TS);
+  }
+
+  @Test
+  void updateGerminationTest_unknownRiaKey_throwsNotFound() {
+    when(testResultRepository.findById(RIA_KEY)).thenReturn(Optional.empty());
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY,
+            updateDto(false, false, LocalDateTime.of(2026, 5, 2, 8, 0), null, null)));
+
+    assertEquals(HttpStatus.NOT_FOUND, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_acceptWithoutComplete_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY,
+            updateDto(true, false, LocalDateTime.of(2026, 5, 2, 8, 0), null, null)));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_completeWithoutBeginDate_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY, updateDto(false, true, null, null, null)));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_commentWithoutBeginDate_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY, updateDto(false, false, null, null, "a comment")));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_endNotAfterBegin_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 10, 8, 0);
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY, updateDto(false, false, begin, begin.minusDays(1), null)));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_beginInFuture_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY,
+            updateDto(false, false, LocalDateTime.now().plusDays(2), null, null)));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_categoryChangeOnCompletedTest_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(-1, "QA")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+
+    // dto category is STD, stored is QA and test already complete
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY,
+            updateDto(false, true,
+                LocalDateTime.of(2026, 5, 2, 8, 0),
+                LocalDateTime.of(2026, 5, 20, 8, 0), null)));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
   }
 
   private void setAllAbnormalCountsToZero(DailyAbnormalEntity entity) {

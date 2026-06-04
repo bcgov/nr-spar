@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestUpdateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
@@ -33,6 +34,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -750,6 +752,78 @@ public class TestResultService {
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY,
           repName + " germinated + abnormal total exceeds total seeds");
+    }
+  }
+
+  /**
+   * Update a germination test header and its activity as a single unit.
+   * Implements issue #2447 / Confluence "Update (test and activity)".
+   *
+   * @param riaKey the test's RIA key
+   * @param dto the fields to update
+   * @return the refreshed germination test header
+   */
+  @Transactional
+  public GerminationTestHeaderDto updateGerminationTest(
+      BigDecimal riaKey, GerminationTestUpdateFormDto dto) {
+
+    TestResultEntity storedTest = testResultRepository.findById(riaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No germination test found for riaKey " + riaKey));
+    ActivityEntity storedActivity = activityRepository.findById(riaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No activity found for riaKey " + riaKey));
+
+    boolean accept = Boolean.TRUE.equals(dto.acceptResultInd());
+    boolean complete = Boolean.TRUE.equals(dto.testCompleteInd());
+
+    validateGerminationTestUpdate(dto, storedTest, accept, complete);
+
+    // Updates implemented in the next tasks.
+    throw new UnsupportedOperationException("not yet implemented");
+  }
+
+  private void validateGerminationTestUpdate(
+      GerminationTestUpdateFormDto dto, TestResultEntity storedTest,
+      boolean accept, boolean complete) {
+
+    if (accept && !complete) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Cannot accept a test that has not been marked as complete");
+    }
+
+    boolean beginRequired = accept || complete
+        || (dto.riaComment() != null && !dto.riaComment().isBlank())
+        || dto.actualEndDateTime() != null;
+    if (beginRequired && dto.actualBeginDateTime() == null) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Begin date is mandatory when the test is accepted or complete,"
+              + " or a comment or test end is provided");
+    }
+
+    if (dto.actualBeginDateTime() != null && dto.actualEndDateTime() != null
+        && !dto.actualEndDateTime().isAfter(dto.actualBeginDateTime())) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Test end must be after begin date");
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    if (dto.actualBeginDateTime() != null && dto.actualBeginDateTime().isAfter(now)) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Begin date cannot be in the future");
+    }
+    if (dto.seedWithdrawalDate() != null
+        && dto.seedWithdrawalDate().isAfter(now.toLocalDate())) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Seed withdrawal date cannot be in the future");
+    }
+
+    boolean storedComplete = storedTest.getTestCompleteInd() != null
+        && storedTest.getTestCompleteInd() != 0;
+    if (storedComplete
+        && !dto.testCategoryCode().equals(storedTest.getTestCategory())) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Category cannot be updated once the test is complete");
     }
   }
 
