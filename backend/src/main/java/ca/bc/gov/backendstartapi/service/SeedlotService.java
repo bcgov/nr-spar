@@ -47,6 +47,7 @@ import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.exception.OracleApiProviderException;
+import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
@@ -657,10 +658,47 @@ public class SeedlotService {
                 List.of(),
                 null,
                 null),
-            calculatedGenWorth);
+            calculatedGenWorth,
+            buildMeanGeomSeedlot(seedlotInfo),
+            buildMeanGeomSmpMix(smpMixsData));
 
     SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
     return seedlotAclassFullInfo;
+  }
+
+  private GeospatialRespondDto buildMeanGeomSeedlot(Seedlot seedlotInfo) {
+    if (seedlotInfo.getCollectionLatitudeDeg() == null
+        || seedlotInfo.getCollectionLongitudeDeg() == null) {
+      return null;
+    }
+    return new GeospatialRespondDto(
+        seedlotInfo.getCollectionLatitudeDeg(),
+        seedlotInfo.getCollectionLatitudeMin(),
+        seedlotInfo.getCollectionLatitudeSec(),
+        seedlotInfo.getCollectionLongitudeDeg(),
+        seedlotInfo.getCollectionLongitudeMin(),
+        seedlotInfo.getCollectionLongitudeSec(),
+        null,
+        null,
+        seedlotInfo.getCollectionElevation());
+  }
+
+  private GeospatialRespondDto buildMeanGeomSmpMix(List<SmpMix> smpMixsData) {
+    if (smpMixsData.isEmpty()) {
+      return null;
+    }
+    List<GeospatialRequestDto> smpMixIdAndProps = smpMixsData.stream()
+        .map(smpMix -> new GeospatialRequestDto(
+            (long) smpMix.getParentTreeId(), smpMix.getProportion()))
+        .toList();
+    try {
+      return parentTreeService.calcMeanGeospatial(smpMixIdAndProps);
+    } catch (PtGeoDataNotFoundException e) {
+      SparLog.warn(
+          "Oracle geospatial data unavailable for SMP mix parent trees: {}",
+          e.getMessage());
+      return null;
+    }
   }
 
   /**

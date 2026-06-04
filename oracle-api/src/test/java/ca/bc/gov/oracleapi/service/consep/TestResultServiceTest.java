@@ -14,17 +14,25 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.DailyAbnormalEntity;
+import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
+import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestRepGermRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -51,15 +59,30 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(MockitoExtension.class)
 class TestResultServiceTest {
 
-  @Mock private TestResultRepository testResultRepository;
+  @Mock
+  private TestResultRepository testResultRepository;
 
-  @Mock private ActivityRepository activityRepository;
+  @Mock
+  private ActivityRepository activityRepository;
 
-  @Mock private GerminatorTrayRepository germinatorTrayRepository;
+  @Mock
+  private GerminatorTrayRepository germinatorTrayRepository;
 
-  @Mock private TestRegimeRepository testRegimeRepository;
+  @Mock
+  private TestRegimeRepository testRegimeRepository;
 
-  @Autowired @InjectMocks private TestResultService testResultService;
+  @Mock
+  private DailyAbnormalRepository dailyAbnormalRepository;
+
+  @Mock
+  private GermCountRepository germCountRepository;
+
+  @Mock
+  private TestRepGermRepository testRepGermRepository;
+
+  @Autowired
+  @InjectMocks
+  private TestResultService testResultService;
 
   private BigDecimal riaKey;
   private TestResultEntity testResultEntity;
@@ -518,6 +541,364 @@ class TestResultServiceTest {
     assertEquals(GERMINATOR_TRAY_VALIDATION_ERROR_MESSAGE, ex.getReason());
   }
 
+  private void setRepAbnormalValues(DailyAbnormalEntity entity, int rep, int start) {
+    switch (rep) {
+      case 1 -> {
+        entity.setRep1NoAbnrmRe(start);
+        entity.setRep1NoAbnrmSr(start + 1);
+        entity.setRep1NoAbnrmSh(start + 2);
+        entity.setRep1NoAbnrmRn(start + 3);
+        entity.setRep1NoAbnrmTh(start + 4);
+        entity.setRep1NoAbnrmTr(start + 5);
+        entity.setRep1NoAbnrmTw(start + 6);
+        entity.setRep1NoAbnrmCm(start + 7);
+        entity.setRep1NoAbnrmWeak(start + 8);
+        entity.setRep1NoAbnrmOther(start + 9);
+        entity.setRep1NoAbnrmPrgrm(start + 10);
+      }
+      case 2 -> {
+        entity.setRep2NoAbnrmRe(start);
+        entity.setRep2NoAbnrmSr(start + 1);
+        entity.setRep2NoAbnrmSh(start + 2);
+        entity.setRep2NoAbnrmRn(start + 3);
+        entity.setRep2NoAbnrmTh(start + 4);
+        entity.setRep2NoAbnrmTr(start + 5);
+        entity.setRep2NoAbnrmTw(start + 6);
+        entity.setRep2NoAbnrmCm(start + 7);
+        entity.setRep2NoAbnrmWeak(start + 8);
+        entity.setRep2NoAbnrmOther(start + 9);
+        entity.setRep2NoAbnrmPrgrm(start + 10);
+      }
+      case 3 -> {
+        entity.setRep3NoAbnrmRe(start);
+        entity.setRep3NoAbnrmSr(start + 1);
+        entity.setRep3NoAbnrmSh(start + 2);
+        entity.setRep3NoAbnrmRn(start + 3);
+        entity.setRep3NoAbnrmTh(start + 4);
+        entity.setRep3NoAbnrmTr(start + 5);
+        entity.setRep3NoAbnrmTw(start + 6);
+        entity.setRep3NoAbnrmCm(start + 7);
+        entity.setRep3NoAbnrmWeak(start + 8);
+        entity.setRep3NoAbnrmOther(start + 9);
+        entity.setRep3NoAbnrmPrgrm(start + 10);
+      }
+      case 4 -> {
+        entity.setRep4NoAbnrmRe(start);
+        entity.setRep4NoAbnrmSr(start + 1);
+        entity.setRep4NoAbnrmSh(start + 2);
+        entity.setRep4NoAbnrmRn(start + 3);
+        entity.setRep4NoAbnrmTh(start + 4);
+        entity.setRep4NoAbnrmTr(start + 5);
+        entity.setRep4NoAbnrmTw(start + 6);
+        entity.setRep4NoAbnrmCm(start + 7);
+        entity.setRep4NoAbnrmWeak(start + 8);
+        entity.setRep4NoAbnrmOther(start + 9);
+        entity.setRep4NoAbnrmPrgrm(start + 10);
+      }
+      default -> throw new IllegalArgumentException("rep must be 1..4");
+    }
+  }
+
+  @Test
+  void getDailyAbnormalCounts_returnsResponseDto_whenDataValid() throws Exception {
+    // Happy path test
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+
+    DailyAbnormalEntity entity = new DailyAbnormalEntity();
+    entity.setDailyGermSkey(dailyGermSkey);
+
+    BigDecimal riaSkey = new BigDecimal("881191");
+
+    GermCountEntity germCount = new GermCountEntity();
+    germCount.setRiaSkey(riaSkey);
+    germCount.setDailyGermSkey1(dailyGermSkey);
+
+    // Keep germinated totals low so cross-check passes against total seeds (100).
+    germCount.setRep1NoSeedsGerm1(10);
+    germCount.setRep2NoSeedsGerm1(10);
+    germCount.setRep3NoSeedsGerm1(10);
+    germCount.setRep4NoSeedsGerm1(10);
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(entity);
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCount));
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+        .thenReturn(
+            List.of(
+                makeReplicate(riaSkey, 1, 100),
+                makeReplicate(riaSkey, 2, 100),
+                makeReplicate(riaSkey, 3, 100),
+                makeReplicate(riaSkey, 4, 100)));
+
+    setRepAbnormalValues(entity, 1, 0);
+    setRepAbnormalValues(entity, 2, 1);
+    setRepAbnormalValues(entity, 3, 2);
+    setRepAbnormalValues(entity, 4, 3);
+
+    DailyAbnormalResponseDto actual = testResultService.getDailyAbnormalCounts(dailyGermSkey);
+    assertNotNull(actual);
+    assertEquals(dailyGermSkey, actual.dailyGermSkey());
+    assertEquals(0, actual.rep1().abnormalNumReverseEmbryo());
+    assertEquals(10, actual.rep2().abnormalNumOther());
+    assertEquals(8, actual.rep3().abnormalNumTwisted());
+    assertEquals(10, actual.rep4().abnormalNumMegametophyteCollar());
+
+    verify(dailyAbnormalRepository, times(1)).findByDailyGermSkey(dailyGermSkey);
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws400_whenDailyGermSkeyNull() {
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> testResultService.getDailyAbnormalCounts(null));
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("dailyGermSkey is required", ex.getReason());
+    verify(dailyAbnormalRepository, never()).findByDailyGermSkey(any());
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws404_whenEntityNotFound() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(null);
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getDailyAbnormalCounts(dailyGermSkey));
+
+    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+    assertEquals("Daily abnormal counts not found for the given key", ex.getReason());
+    verify(dailyAbnormalRepository, times(1)).findByDailyGermSkey(dailyGermSkey);
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws422_whenAbnormalCountNegative() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    BigDecimal riaSkey = new BigDecimal("881191");
+
+    DailyAbnormalEntity entity = new DailyAbnormalEntity();
+    entity.setDailyGermSkey(dailyGermSkey);
+
+    // keep values modest; this test is about negativity, not overflow
+    setRepAbnormalValues(entity, 1, 0);
+    setRepAbnormalValues(entity, 2, 0);
+    setRepAbnormalValues(entity, 3, 0);
+    setRepAbnormalValues(entity, 4, 0);
+
+    // Make one value invalid to trigger 422
+    entity.setRep3NoAbnrmTw(-1);
+
+    GermCountEntity germCount = new GermCountEntity();
+    germCount.setRiaSkey(riaSkey);
+    germCount.setDailyGermSkey1(dailyGermSkey);
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(entity);
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCount));
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+        .thenReturn(
+            List.of(
+                makeReplicate(riaSkey, 1, 100),
+                makeReplicate(riaSkey, 2, 100),
+                makeReplicate(riaSkey, 3, 100),
+                makeReplicate(riaSkey, 4, 100)));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getDailyAbnormalCounts(dailyGermSkey));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertTrue(ex.getReason().contains("rep3"));
+    assertTrue(ex.getReason().contains("abnormalNumTwisted"));
+    verify(dailyAbnormalRepository, times(1)).findByDailyGermSkey(dailyGermSkey);
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws422_whenGerminatedPlusAbnormalExceedsTotalSeeds() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    BigDecimal riaSkey = new BigDecimal("881191");
+
+    DailyAbnormalEntity abnormal = new DailyAbnormalEntity();
+    abnormal.setDailyGermSkey(dailyGermSkey);
+
+    // rep1 abnormal total = 20, others 0
+    setAllAbnormalCountsToZero(abnormal);
+    abnormal.setRep1NoAbnrmRe(20);
+
+    GermCountEntity germCount = new GermCountEntity();
+    germCount.setRiaSkey(riaSkey);
+    germCount.setDailyGermSkey1(dailyGermSkey);
+    germCount.setRep1NoSeedsGerm1(90); // germinated total for rep1 = 90
+    germCount.setRep2NoSeedsGerm1(0);
+    germCount.setRep3NoSeedsGerm1(0);
+    germCount.setRep4NoSeedsGerm1(0);
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(abnormal);
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCount));
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+        .thenReturn(
+            List.of(
+                makeReplicate(riaSkey, 1, 100),
+                makeReplicate(riaSkey, 2, 100),
+                makeReplicate(riaSkey, 3, 100),
+                makeReplicate(riaSkey, 4, 100)));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getDailyAbnormalCounts(dailyGermSkey));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertTrue(ex.getReason().contains("rep1"));
+    assertTrue(ex.getReason().contains("exceeds total seeds"));
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws422_whenRep1GerminatedTotalExceedsTotalSeeds() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    BigDecimal riaSkey = new BigDecimal("881191");
+
+    DailyAbnormalEntity abnormal = new DailyAbnormalEntity();
+    abnormal.setDailyGermSkey(dailyGermSkey);
+    setAllAbnormalCountsToZero(abnormal);
+
+    GermCountEntity germCount = new GermCountEntity();
+    germCount.setRiaSkey(riaSkey);
+    germCount.setDailyGermSkey1(dailyGermSkey);
+    germCount.setRep1NoSeedsGerm1(101); // > 100
+    germCount.setRep2NoSeedsGerm1(0);
+    germCount.setRep3NoSeedsGerm1(0);
+    germCount.setRep4NoSeedsGerm1(0);
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(abnormal);
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCount));
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+        .thenReturn(
+            List.of(
+                makeReplicate(riaSkey, 1, 100),
+                makeReplicate(riaSkey, 2, 100),
+                makeReplicate(riaSkey, 3, 100),
+                makeReplicate(riaSkey, 4, 100)));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getDailyAbnormalCounts(dailyGermSkey));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertTrue(ex.getReason().contains("rep1"));
+    assertTrue(ex.getReason().contains("germinated total exceeds total seeds"));
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws422_whenReplicateRowsLessThanFour() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    BigDecimal riaSkey = new BigDecimal("881191");
+
+    DailyAbnormalEntity abnormal = new DailyAbnormalEntity();
+    abnormal.setDailyGermSkey(dailyGermSkey);
+    setAllAbnormalCountsToZero(abnormal);
+
+    GermCountEntity germCount = new GermCountEntity();
+    germCount.setRiaSkey(riaSkey);
+    germCount.setDailyGermSkey1(dailyGermSkey);
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(abnormal);
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCount));
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+        .thenReturn(
+            List.of(
+                makeReplicate(riaSkey, 1, 100),
+                makeReplicate(riaSkey, 2, 100),
+                makeReplicate(riaSkey, 3, 100))); // only 3 rows
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getDailyAbnormalCounts(dailyGermSkey));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertEquals(
+        "Unable to validate replicate totals: missing replicate seed totals", ex.getReason());
+
+    verify(dailyAbnormalRepository, times(1)).findByDailyGermSkey(dailyGermSkey);
+    verify(germCountRepository, times(1)).findByDailyGermSkeyInAnySlot(dailyGermSkey);
+    verify(testRepGermRepository, times(1)).findByRiaKeyOrderByReplicateNumber(riaSkey);
+  }
+
+  @Test
+  void getDailyAbnormalCounts_throws422_whenReplicateNumbersAre1235() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    BigDecimal riaSkey = new BigDecimal("881191");
+
+    DailyAbnormalEntity abnormal = new DailyAbnormalEntity();
+    abnormal.setDailyGermSkey(dailyGermSkey);
+
+    GermCountEntity germCount = new GermCountEntity();
+    germCount.setRiaSkey(riaSkey);
+    germCount.setDailyGermSkey1(dailyGermSkey);
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(abnormal);
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCount));
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+        .thenReturn(
+            List.of(
+                makeReplicate(riaSkey, 1, 100),
+                makeReplicate(riaSkey, 2, 100),
+                makeReplicate(riaSkey, 3, 100),
+                makeReplicate(riaSkey, 5, 100)));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.getDailyAbnormalCounts(dailyGermSkey));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertEquals(
+        "Unable to validate replicate totals: missing replicate seed totals", ex.getReason());
+
+    verify(dailyAbnormalRepository, times(1)).findByDailyGermSkey(dailyGermSkey);
+    verify(germCountRepository, times(1)).findByDailyGermSkeyInAnySlot(dailyGermSkey);
+    verify(testRepGermRepository, times(1)).findByRiaKeyOrderByReplicateNumber(riaSkey);
+  }
+
+  @Test
+  void getDailyAbnormalCounts_treatsNullAsZero_forGerminatedAndAbnormalCounts() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    BigDecimal riaSkey = new BigDecimal("881191");
+
+    DailyAbnormalEntity abnormal = new DailyAbnormalEntity();
+    abnormal.setDailyGermSkey(dailyGermSkey);
+    // leave all abnormal fields null intentionally
+
+    GermCountEntity germCount = new GermCountEntity();
+    germCount.setRiaSkey(riaSkey);
+    germCount.setDailyGermSkey1(dailyGermSkey);
+    // leave all repXNoSeedsGermY null intentionally
+
+    when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(abnormal);
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCount));
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+        .thenReturn(
+            List.of(
+                makeReplicate(riaSkey, 1, 100),
+                makeReplicate(riaSkey, 2, 100),
+                makeReplicate(riaSkey, 3, 100),
+                makeReplicate(riaSkey, 4, 100)));
+
+    DailyAbnormalResponseDto result = testResultService.getDailyAbnormalCounts(dailyGermSkey);
+
+    assertNotNull(result);
+    assertEquals(dailyGermSkey, result.dailyGermSkey());
+  }
+
   @Test
   void determineTestRank_returnsA_whenStdAcceptedAndNoAcceptedStdRankA_Exists() {
     String seedlotNumber = "12345";
@@ -671,5 +1052,66 @@ class TestResultServiceTest {
     regime.setSeedlotTestCode(seedlotTestCode);
     regime.setSoakHours(soakHours);
     return regime;
+  }
+
+  private TestRepGermEntity makeReplicate(BigDecimal riaSkey, int repNo, int totalSeeds) {
+    TestRepGermEntity rep = new TestRepGermEntity();
+    rep.setId(new ReplicateId(riaSkey, repNo));
+    rep.setTotalNoSeeds(totalSeeds);
+    return rep;
+  }
+
+  private void setAllAbnormalCountsToZero(DailyAbnormalEntity entity) {
+    // rep1
+    entity.setRep1NoAbnrmRe(0);
+    entity.setRep1NoAbnrmSr(0);
+    entity.setRep1NoAbnrmSh(0);
+    entity.setRep1NoAbnrmRn(0);
+    entity.setRep1NoAbnrmTh(0);
+    entity.setRep1NoAbnrmTr(0);
+    entity.setRep1NoAbnrmTw(0);
+    entity.setRep1NoAbnrmCm(0);
+    entity.setRep1NoAbnrmWeak(0);
+    entity.setRep1NoAbnrmOther(0);
+    entity.setRep1NoAbnrmPrgrm(0);
+
+    // rep2
+    entity.setRep2NoAbnrmRe(0);
+    entity.setRep2NoAbnrmSr(0);
+    entity.setRep2NoAbnrmSh(0);
+    entity.setRep2NoAbnrmRn(0);
+    entity.setRep2NoAbnrmTh(0);
+    entity.setRep2NoAbnrmTr(0);
+    entity.setRep2NoAbnrmTw(0);
+    entity.setRep2NoAbnrmCm(0);
+    entity.setRep2NoAbnrmWeak(0);
+    entity.setRep2NoAbnrmOther(0);
+    entity.setRep2NoAbnrmPrgrm(0);
+
+    // rep3
+    entity.setRep3NoAbnrmRe(0);
+    entity.setRep3NoAbnrmSr(0);
+    entity.setRep3NoAbnrmSh(0);
+    entity.setRep3NoAbnrmRn(0);
+    entity.setRep3NoAbnrmTh(0);
+    entity.setRep3NoAbnrmTr(0);
+    entity.setRep3NoAbnrmTw(0);
+    entity.setRep3NoAbnrmCm(0);
+    entity.setRep3NoAbnrmWeak(0);
+    entity.setRep3NoAbnrmOther(0);
+    entity.setRep3NoAbnrmPrgrm(0);
+
+    // rep4
+    entity.setRep4NoAbnrmRe(0);
+    entity.setRep4NoAbnrmSr(0);
+    entity.setRep4NoAbnrmSh(0);
+    entity.setRep4NoAbnrmRn(0);
+    entity.setRep4NoAbnrmTh(0);
+    entity.setRep4NoAbnrmTr(0);
+    entity.setRep4NoAbnrmTw(0);
+    entity.setRep4NoAbnrmCm(0);
+    entity.setRep4NoAbnrmWeak(0);
+    entity.setRep4NoAbnrmOther(0);
+    entity.setRep4NoAbnrmPrgrm(0);
   }
 }
