@@ -8,14 +8,14 @@ export type GeneticTrait = {
 
 export type MeanGeomDataType = {
   meanLatitudeDegree: number;
-  meanLatitudeMinute: number;
-  meanLatitudeSecond: number;
+  meanLatitudeMinute: number | null;
+  meanLatitudeSecond: number | null;
   meanLongitudeDegree: number;
-  meanLongitudeMinute: number;
-  meanLongitudeSecond: number;
-  meanLatitude: number;
-  meanLongitude: number;
-  meanElevation: number;
+  meanLongitudeMinute: number | null;
+  meanLongitudeSecond: number | null;
+  meanLatitude: number | null;
+  meanLongitude: number | null;
+  meanElevation: number | null;
 };
 
 export type CalcPayloadResType = {

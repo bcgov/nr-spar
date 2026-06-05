@@ -11,12 +11,15 @@ import {
   FlexGrid,
   Row,
   InlineNotification,
-  Modal
+  Modal,
+  Button,
+  TextInput
 } from '@carbon/react';
 import GenericTable from '../../../../../components/GenericTable';
 import ROUTES from '../../../../../routes/constants';
 import Breadcrumbs from '../../../../../components/Breadcrumbs';
 import PageTitle from '../../../../../components/PageTitle';
+import SummaryGrid, { SummaryColumn } from '../../../../../components/CONSEP/SummaryGrid';
 import {
   assignGerminatorId,
   deleteTestFromTray,
@@ -48,6 +51,7 @@ const MaintainGermTray = () => {
     message: string;
   } | null>(null);
   const [trays, setTrays] = useState<GermTrayColumn[]>(germinatorTrays);
+  const [traySearch, setTraySearch] = useState('');
   const lastSyncedRef = useRef<string | null>(JSON.stringify(germinatorTrays));
   const [selectedTrayId, setSelectedTrayId] = useState<number | null>(null);
   const [pendingDeleteTray, setPendingDeleteTray] = useState<GermTrayColumn | null>(null);
@@ -59,15 +63,11 @@ const MaintainGermTray = () => {
     enabled: selectedTrayId !== null
   });
 
-  useEffect(() => {
-    if (trayContentsQuery.isError) {
-      const error = trayContentsQuery.error as any;
-      const message = error?.response?.data?.message
-        || error?.message
-        || 'Failed to load tray contents';
-      setAlert({ status: 'error', message });
-    }
-  }, [trayContentsQuery.isError, trayContentsQuery.error]);
+  const trayContentsErrorMessage = trayContentsQuery.isError
+    ? ((trayContentsQuery.error as any)?.response?.data?.message
+      || (trayContentsQuery.error as any)?.message
+      || 'Failed to load tray contents')
+    : null;
 
   const handleTrayRowClick = useCallback((row: GermTrayColumn) => {
     setSelectedTrayId(row.germinatorTrayId);
@@ -217,6 +217,70 @@ const MaintainGermTray = () => {
     [handleDeleteTestClick]
   );
 
+  const filteredTrays = useMemo(() => {
+    const term = traySearch.trim().toLowerCase();
+    if (!term) return trays;
+
+    return trays.filter((row) => String(row.germinatorTrayId).toLowerCase().includes(term));
+  }, [trays, traySearch]);
+
+  type GermTraySummaryItem = {
+    activity?: string;
+    testResult?: string;
+    seedlotNumber?: string;
+    requestId?: string;
+    species?: string;
+  };
+
+  const selectedTray = trays.find((tray) => tray.germinatorTrayId === selectedTrayId);
+  const firstTrayTest = trayContentsQuery.data?.[0];
+
+  const summaryItem: GermTraySummaryItem | undefined = selectedTrayId == null
+    ? undefined
+    : {
+      activity: selectedTray?.activityTypeCd ?? '',
+      testResult: firstTrayTest?.testCompleteInd === -1 ? 'Completed' : 'Pending',
+      seedlotNumber: firstTrayTest?.seedlotNumber ?? '',
+      requestId: firstTrayTest?.requestId ?? '',
+      species: firstTrayTest?.vegetationSt ?? ''
+    };
+
+  const summaryColumns = useMemo<SummaryColumn<GermTraySummaryItem>[]>(() => ([
+    {
+      key: 'activity',
+      label: 'Activity',
+      renderValue: (d) => d?.activity ?? '',
+      emphasize: true
+    },
+    {
+      key: 'testResult',
+      label: 'Test result',
+      renderValue: (d) => d?.testResult ?? ''
+    },
+    {
+      key: 'seedlotNumber',
+      label: 'Seedlot#',
+      renderValue: (d) => d?.seedlotNumber ?? ''
+    },
+    {
+      key: 'requestId',
+      label: 'Request ID',
+      renderValue: (d) => d?.requestId ?? ''
+    },
+    {
+      key: 'species',
+      label: 'Species',
+      renderValue: (d) => d?.species ?? ''
+    }
+  ]), []);
+
+  const renderTrayActions = () => (
+    <div className="consep-maintain-germ-tray-pagination-actions">
+      <Button size="sm" kind="ghost">No filter</Button>
+      <Button size="sm" kind="secondary">Search</Button>
+    </div>
+  );
+
   return (
     <FlexGrid className="consep-maintain-germ-tray">
       <Row className="consep-maintain-germ-tray-breadcrumb">
@@ -225,21 +289,56 @@ const MaintainGermTray = () => {
       <Row className="consep-maintain-germ-tray-title">
         <PageTitle title="Maintain germ tray" />
       </Row>
-      {alert?.message && (
+      {(alert?.message || trayContentsErrorMessage) && (
         <Row className="consep-maintain-germ-tray-alert">
           <InlineNotification
             lowContrast
-            kind={alert.status}
-            subtitle={alert?.message}
+            kind={alert?.status ?? 'error'}
+            subtitle={alert?.message ?? trayContentsErrorMessage}
             onClose={() => setAlert(null)}
           />
         </Row>
       )}
+      <Row className="consep-maintain-germ-tray-activity-summary">
+        <SummaryGrid
+          item={summaryItem}
+          isFetching={trayContentsQuery.isLoading}
+          columns={summaryColumns}
+        />
+      </Row>
       <Row className="consep-maintain-germ-tray-table">
         <GenericTable
           columns={germTrayColumns}
-          data={trays}
-          hideToolbar
+          data={filteredTrays}
+          hideToolbar={false}
+          renderTopToolbarCustomActions={() => (
+            <div className="consep-maintain-germ-tray-search-toolbar">
+              <div className="consep-maintain-germ-tray-table-topbar">
+                <div className="consep-maintain-germ-tray-tests-title">Find germination tray:</div>
+                <TextInput
+                  id="find-germination-tray"
+                  labelText=""
+                  hideLabel
+                  placeholder="Germ tray"
+                  size="sm"
+                  value={traySearch}
+                  onChange={(e: any) => setTraySearch(e.target.value)}
+                />
+              </div>
+
+              <div className="consep-maintain-germ-tray-table-topbar">
+                <div className="consep-maintain-germ-tray-germ-entry-label">Germinator entry:</div>
+                <TextInput
+                  id="germinator-entry-filter"
+                  labelText=""
+                  hideLabel
+                  placeholder="Germinator entry"
+                  size="sm"
+                />
+              </div>
+            </div>
+          )}
+          renderBottomToolbarCustomActions={renderTrayActions}
           enablePagination
           onRowClick={handleTrayRowClick}
           initialState={{
@@ -252,7 +351,9 @@ const MaintainGermTray = () => {
           columns={germTrayTestsColumns}
           data={(trayContentsQuery.data ?? [])}
           isLoading={trayContentsQuery.isLoading}
-          hideToolbar
+          hideToolbar={false}
+          renderTopToolbarCustomActions={() => (<div className="consep-maintain-germ-tray-tests-title">Tray contents</div>)}
+          renderBottomToolbarCustomActions={renderTrayActions}
           enablePagination
           initialState={{
             pagination: { pageSize: 5, pageIndex: 0 }
@@ -286,6 +387,29 @@ const MaintainGermTray = () => {
           {`Please confirm you want to delete germination test ID ${pendingDeleteTest?.requestId} for seedlot #${pendingDeleteTest?.seedlotNumber}. This action cannot be undone.`}
         </p>
       </Modal>
+      <Row className="consep-maintain-germ-tray-buttons">
+        <div className="consep-maintain-germ-tray-left-buttons">
+          <Button
+            size="md"
+            kind="tertiary"
+          >
+            Labels
+          </Button>
+          <Button
+            size="md"
+            kind="tertiary"
+          >
+
+            Comments
+          </Button>
+        </div>
+        <Button
+          size="md"
+          kind="tertiary"
+        >
+          Remove Tray Contents
+        </Button>
+      </Row>
     </FlexGrid>
   );
 };

@@ -56,7 +56,10 @@ const MoistureContent = () => {
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [replicates, setReplicates] = useState<ReplicateType[]>([]);
   const [mcType, setMCType] = useState<string>('MCC');
-  const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>();
+  const [alert, setAlert] = useState<{
+    isSuccess: boolean;
+    message: string;
+  } | null>();
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [dateErrors, setDateErrors] = useState<{ startDate?: string; endDate?: string }>({});
 

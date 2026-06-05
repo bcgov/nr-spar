@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
@@ -96,8 +97,8 @@ class SeedlotEndpointTest {
       "seedlotFormCollectionDto": {
         "collectionClientNumber": "00012797",
         "collectionLocnCode": "02",
-        "collectionStartDate": "2023-12-06T00:00:00Z",
-        "collectionEndDate": "2023-12-06T00:00:00Z",
+        "collectionStartDate": "2023-12-06",
+        "collectionEndDate": "2023-12-06",
         "noOfContainers": 2,
         "volPerContainer": 4,
         "clctnVolume": 8,
@@ -118,8 +119,8 @@ class SeedlotEndpointTest {
       "seedlotFormInterimDto": {
         "intermStrgClientNumber": "00012797",
         "intermStrgLocnCode": "01",
-        "intermStrgStDate": "2023-12-06T00:00:00Z",
-        "intermStrgEndDate": "2023-12-06T00:00:00Z",
+        "intermStrgStDate": "2023-12-06",
+        "intermStrgEndDate": "2023-12-06",
         "intermStrgLocn": "Some location",
         "intermFacilityCode": "OCV"
       },
@@ -134,6 +135,7 @@ class SeedlotEndpointTest {
         "contaminantPollenBv": 45.6,
         "pollenContaminationMthdCode": "true"
       },
+      "seedlotFormParentTreeDtoList": [],
       "seedlotFormParentTreeSmpDtoList": [
         {
           "seedlotNumber": "87",
@@ -154,15 +156,18 @@ class SeedlotEndpointTest {
           ]
         }
       ],
+      "seedlotFormSmpParentOutsideDto": {
+        "smpParentsOutside": 2
+      },
       "seedlotFormExtractionDto": {
         "extractoryClientNumber": "00012797",
         "extractoryLocnCode": "01",
-        "extractionStDate": "2023-12-06T00:00:00Z",
-        "extractionEndDate": "2023-12-06T00:00:00Z",
+        "extractionStDate": "2023-12-06",
+        "extractionEndDate": "2023-12-06",
         "storageClientNumber": "00012797",
         "storageLocnCode": "01",
-        "temporaryStrgStartDate": "2023-12-06T00:00:00Z",
-        "temporaryStrgEndDate": "2023-12-06T00:00:00Z"
+        "temporaryStrgStartDate": "2023-12-06",
+        "temporaryStrgEndDate": "2023-12-06"
       }
     }
       """;
@@ -502,13 +507,39 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("getSingleSeedlotAclassFullInfoTest")
   void getSingleSeedlotAclassFullInfoTest() throws Exception {
-    SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(null, null);
+    SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(null, null, null, null);
 
     when(seedlotService.getAclassSeedlotFormInfo(any())).thenReturn(seedlotFullInfo);
 
     mockMvc
         .perform(get("/api/seedlots/0000000/a-class-full-form").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$.meanGeomSeedlot").doesNotExist())
+        .andExpect(jsonPath("$.meanGeomSmpMix").doesNotExist())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotAclassFullInfoWithGeomTest")
+  void getSingleSeedlotAclassFullInfoWithGeomTest() throws Exception {
+    GeospatialRespondDto meanGeomSeedlot = new GeospatialRespondDto(
+        49, 30, 0, 124, 15, 0, null, null, 800);
+    GeospatialRespondDto meanGeomSmpMix = new GeospatialRespondDto(
+        50, 0, 0, 125, 0, 0, null, null, 900);
+    SeedlotAclassFormDto seedlotFullInfo =
+        new SeedlotAclassFormDto(null, null, meanGeomSeedlot, meanGeomSmpMix);
+
+    when(seedlotService.getAclassSeedlotFormInfo(any())).thenReturn(seedlotFullInfo);
+
+    mockMvc
+        .perform(get("/api/seedlots/0000000/a-class-full-form").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.meanGeomSeedlot.meanLatitudeDegree").value(49))
+        .andExpect(jsonPath("$.meanGeomSeedlot.meanLongitudeDegree").value(124))
+        .andExpect(jsonPath("$.meanGeomSeedlot.meanElevation").value(800))
+        .andExpect(jsonPath("$.meanGeomSmpMix.meanLatitudeDegree").value(50))
+        .andExpect(jsonPath("$.meanGeomSmpMix.meanLongitudeDegree").value(125))
+        .andExpect(jsonPath("$.meanGeomSmpMix.meanElevation").value(900))
         .andReturn();
   }
 
@@ -620,6 +651,147 @@ class SeedlotEndpointTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.seedlotNumber").value("123"))
         .andExpect(jsonPath("$.seedlotStatusCode").value("PND"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot Form submitted with a null required field should return 400")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
+  void submitSeedlotForm_missingRequiredField_shouldReturn400() throws Exception {
+    String invalidBody =
+        """
+        {
+          "seedlotFormCollectionDto": null,
+          "seedlotFormOwnershipDtoList": [],
+          "seedlotFormInterimDto": null,
+          "seedlotFormOrchardDto": null,
+          "seedlotFormParentTreeDtoList": [],
+          "seedlotFormParentTreeSmpDtoList": [],
+          "seedlotFormSmpParentOutsideDto": null,
+          "seedlotFormExtractionDto": null
+        }
+        """;
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 63000)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(invalidBody))
+        .andDo(print())
+        .andExpect(status().isBadRequest())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot Form submitted with a literal null body should return 400")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
+  void submitSeedlotForm_literalNullBody_shouldReturn400() throws Exception {
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 63000)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content("null"))
+        .andExpect(status().isBadRequest())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot Form submitted with empty seedlotFormSmpParentOutsideDto should return 400")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
+  void submitSeedlotForm_emptySmpParentOutsideObject_shouldReturn400() throws Exception {
+    // {} passes the @NotNull on the object itself; the nested @NotNull on
+    // smpParentsOutside must reject it before it reaches the calculation path.
+    String bodyWithEmptySmpParent =
+        WHOLE_SEEDLOT_FORM_JSON.replace("\"smpParentsOutside\": 2", "");
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 63000)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(bodyWithEmptySmpParent))
+        .andExpect(status().isBadRequest())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot Form submitted with null seedlotFormSmpParentOutsideDto should return 400")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
+  void submitSeedlotForm_nullSmpParentOutside_shouldReturn400() throws Exception {
+    String bodyWithNullSmpParent =
+        """
+        {
+          "seedlotFormCollectionDto": {
+            "collectionClientNumber": "00012797",
+            "collectionLocnCode": "02",
+            "collectionStartDate": "2023-12-06",
+            "collectionEndDate": "2023-12-06",
+            "noOfContainers": 2,
+            "volPerContainer": 4,
+            "clctnVolume": 8,
+            "seedlotComment": "Any comment",
+            "coneCollectionMethodCodes": [1, 2]
+          },
+          "seedlotFormOwnershipDtoList": [
+            {
+              "ownerClientNumber": "00012797",
+              "ownerLocnCode": "02",
+              "originalPctOwned": 100,
+              "originalPctRsrvd": 100,
+              "originalPctSrpls": 5,
+              "methodOfPaymentCode": "CLA",
+              "sparFundSrceCode": "ITC"
+            }
+          ],
+          "seedlotFormInterimDto": {
+            "intermStrgClientNumber": "00012797",
+            "intermStrgLocnCode": "01",
+            "intermStrgStDate": "2023-12-06",
+            "intermStrgEndDate": "2023-12-06",
+            "intermStrgLocn": "Some location",
+            "intermFacilityCode": "OCV"
+          },
+          "seedlotFormOrchardDto": {
+            "primaryOrchardId": "405",
+            "femaleGameticMthdCode": "F3",
+            "maleGameticMthdCode": "M3",
+            "controlledCrossInd": false,
+            "biotechProcessesInd": true,
+            "pollenContaminationInd": false,
+            "pollenContaminationPct": 22,
+            "contaminantPollenBv": 45.6,
+            "pollenContaminationMthdCode": "true"
+          },
+          "seedlotFormParentTreeDtoList": [],
+          "seedlotFormParentTreeSmpDtoList": [],
+          "seedlotFormSmpParentOutsideDto": null,
+          "seedlotFormExtractionDto": {
+            "extractoryClientNumber": "00012797",
+            "extractoryLocnCode": "01",
+            "extractionStDate": "2023-12-06",
+            "extractionEndDate": "2023-12-06",
+            "storageClientNumber": "00012797",
+            "storageLocnCode": "01",
+            "temporaryStrgStartDate": "2023-12-06",
+            "temporaryStrgEndDate": "2023-12-06"
+          }
+        }
+        """;
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 63000)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(bodyWithNullSmpParent))
+        .andDo(print())
+        .andExpect(status().isBadRequest())
         .andReturn();
   }
 

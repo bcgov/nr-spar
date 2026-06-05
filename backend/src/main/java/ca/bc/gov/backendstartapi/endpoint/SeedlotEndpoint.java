@@ -461,7 +461,7 @@ public class SeedlotEndpoint {
               schema = @Schema(type = "integer", format = "int64"))
           @PathVariable
           String seedlotNumber,
-      @RequestBody SeedlotFormSubmissionDto form) {
+      @RequestBody @Valid SeedlotFormSubmissionDto form) {
     long started = Instant.now().toEpochMilli();
     boolean isTscAdmin = loggedUserService.isTscAdminLogged();
     SeedlotStatusResponseDto createDto =

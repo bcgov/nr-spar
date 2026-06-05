@@ -2,16 +2,19 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
@@ -30,6 +33,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
@@ -52,10 +56,12 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
@@ -119,6 +125,8 @@ class SeedlotServiceTest {
 
   @Mock Provider oracleApiProvider;
 
+  @Mock SeedlotFormValidationService seedlotFormValidationService;
+
   private SeedlotService seedlotService;
 
   private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
@@ -174,7 +182,8 @@ class SeedlotServiceTest {
             seedlotSeedPlanZoneRepository,
             parentTreeService,
             tscAdminService,
-            oracleApiProvider);
+            oracleApiProvider,
+            seedlotFormValidationService);
   }
 
   @Test
@@ -840,5 +849,224 @@ class SeedlotServiceTest {
     verify(tscAdminService, times(1)).overrideAreaOfUse(any(), any());
     verify(tscAdminService, times(1)).overrideSeedlotCollElevLatLong(any(), any());
     verify(seedlotGeneticWorthService, times(1)).overrideSeedlotGenWorth(any(), any());
+
+    // Review/override path (isFromRegularForm=false) must NOT trigger form validation.
+    verify(seedlotFormValidationService, never()).validateSeedlotForm(any(), any());
+  }
+
+  @Test
+  @DisplayName("No DB mutation when validation fails: seedlotRepository.save and step services are never called")
+  void updateSeedlotWithForm_invalidForm_doesNotPersist() {
+    String statusCode = "PND";
+    SeedlotStatusEntity seedlotStatusEntity =
+        new SeedlotStatusEntity(
+            statusCode, "Pending", new EffectiveDateRange(LocalDate.now().minusDays(1L), LocalDate.now()));
+
+    String seedlotNumber = "63636";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setSeedlotStatus(seedlotStatusEntity);
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+
+    // Stub validation to throw, simulating a form that fails validation
+    doThrow(
+            new SeedlotSubmissionValidationException(
+                List.of(new SeedlotValidationError("x", "bad"))))
+        .when(seedlotFormValidationService)
+        .validateSeedlotForm(any(), any());
+
+    SeedlotFormOrchardDto formOrchardDto =
+        new SeedlotFormOrchardDto("405", null, null, null, null, false, false, 0, null, null);
+
+    SeedlotFormSubmissionDto form =
+        new SeedlotFormSubmissionDto(
+            mock(SeedlotFormCollectionDto.class),
+            List.of(mock(SeedlotFormOwnershipDto.class)),
+            mock(SeedlotFormInterimDto.class),
+            formOrchardDto,
+            List.of(mock(SeedlotFormParentTreeSmpDto.class)),
+            List.of(mock(SeedlotFormParentTreeSmpDto.class)),
+            mock(SeedlotFormSmpParentOutsideDto.class),
+            mock(SeedlotFormExtractionDto.class),
+            List.of(mock(SeedlotReviewSeedPlanZoneDto.class)),
+            mock(SeedlotReviewElevationLatLongDto.class),
+            List.of(mock(GeneticWorthTraitsDto.class)),
+            mock(SeedlotReviewGeoInformationDto.class),
+            null);
+
+    // The call must throw SeedlotSubmissionValidationException
+    Assertions.assertThrows(
+        SeedlotSubmissionValidationException.class,
+        () -> seedlotService.updateSeedlotWithForm(seedlotNumber, form, false, true, "SUB"));
+
+    // CRITICAL: repository save must never be called
+    verify(seedlotRepository, never()).save(any());
+
+    // CRITICAL: step-1 service must never be called (proves mutations were blocked)
+    verify(seedlotCollectionMethodService, never()).saveSeedlotFormStep1(any(), any(), anyBoolean());
+
+    // CRITICAL: step-2 service must never be called (proves mutations were blocked)
+    verify(seedlotOwnerQuantityService, never()).saveSeedlotFormStep2(any(), any(), anyBoolean());
+  }
+
+  /**
+   * Sets up the minimum Mockito stubs required for getAclassSeedlotFormInfo to reach the
+   * buildMeanGeom* methods without failing on earlier service calls.
+   */
+  private void setupAclassFormMinMocks(
+      String seedlotNumber, Seedlot seedlotEntity, List<SmpMix> smpMixList) {
+    AuditInformation audit = new AuditInformation("userId");
+    when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
+
+    Integer parentTreeId = 4023;
+    SeedlotFormParentTreeSmpDto parentTreeDto = createParentTreeDto(parentTreeId);
+    ParentTreeGeneticQualityDto sptgqDto = createParentTreeGenQuaDto();
+
+    SeedlotParentTree spt =
+        new SeedlotParentTree(
+            seedlotEntity,
+            parentTreeDto.parentTreeId(),
+            parentTreeDto.parentTreeNumber(),
+            parentTreeDto.coneCount(),
+            parentTreeDto.pollenCount(),
+            audit);
+    SeedlotParentTreeGeneticQuality sptgq =
+        new SeedlotParentTreeGeneticQuality(
+            spt,
+            sptgqDto.geneticTypeCode(),
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
+            sptgqDto.geneticQualityValue(),
+            audit);
+    SeedlotGeneticWorth seedlotGenWor =
+        new SeedlotGeneticWorth(
+            seedlotEntity,
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null, BigDecimal.ZERO),
+            audit);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlotEntity));
+    when(seedlotParentTreeService.getAllSeedlotParentTree(seedlotNumber)).thenReturn(List.of(spt));
+    when(seedlotParentTreeGeneticQualityService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(List.of(sptgq));
+    when(smpMixService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(smpMixList);
+    when(seedlotParentTreeSmpMixService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(List.of());
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(List.of(seedlotGenWor));
+    when(seedlotCollectionMethodService.getAllSeedlotCollectionMethodsBySeedlot(seedlotNumber))
+        .thenReturn(List.of());
+    when(seedlotOwnerQuantityService.findAllBySeedlot(seedlotNumber)).thenReturn(List.of());
+    when(seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotNumber))
+        .thenReturn(List.of());
+  }
+
+  @Test
+  @DisplayName("getAclassSeedlotFormInfo with collection coords returns meanGeomSeedlot")
+  void getAclassSeedlotFormInfo_withCollectionCoords_returnsMeanGeomSeedlot() {
+    String seedlotNumber = "0000011";
+    Seedlot seedlotEntity = new Seedlot(seedlotNumber);
+    seedlotEntity.setCollectionLatitudeDeg(49);
+    seedlotEntity.setCollectionLatitudeMin(30);
+    seedlotEntity.setCollectionLongitudeDeg(124);
+    seedlotEntity.setCollectionLongitudeMin(15);
+    seedlotEntity.setCollectionElevation(800);
+
+    setupAclassFormMinMocks(seedlotNumber, seedlotEntity, List.of());
+
+    SeedlotAclassFormDto result = seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNotNull(result.meanGeomSeedlot());
+    Assertions.assertEquals(49, result.meanGeomSeedlot().getMeanLatitudeDegree());
+    Assertions.assertEquals(30, result.meanGeomSeedlot().getMeanLatitudeMinute());
+    Assertions.assertEquals(124, result.meanGeomSeedlot().getMeanLongitudeDegree());
+    Assertions.assertEquals(15, result.meanGeomSeedlot().getMeanLongitudeMinute());
+    Assertions.assertEquals(800, result.meanGeomSeedlot().getMeanElevation());
+    Assertions.assertNull(result.meanGeomSeedlot().getMeanLatitude());
+    Assertions.assertNull(result.meanGeomSeedlot().getMeanLongitude());
+  }
+
+  @Test
+  @DisplayName("getAclassSeedlotFormInfo with null latitude degree returns null meanGeomSeedlot")
+  void getAclassSeedlotFormInfo_withNullLatDeg_returnsNullMeanGeomSeedlot() {
+    String seedlotNumber = "0000012";
+    Seedlot seedlotEntity = new Seedlot(seedlotNumber);
+    // collectionLatitudeDeg stays null
+    seedlotEntity.setCollectionLongitudeDeg(124);
+
+    setupAclassFormMinMocks(seedlotNumber, seedlotEntity, List.of());
+
+    SeedlotAclassFormDto result = seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNull(result.meanGeomSeedlot());
+  }
+
+  @Test
+  @DisplayName("getAclassSeedlotFormInfo with null longitude degree returns null meanGeomSeedlot")
+  void getAclassSeedlotFormInfo_withNullLonDeg_returnsNullMeanGeomSeedlot() {
+    String seedlotNumber = "0000013";
+    Seedlot seedlotEntity = new Seedlot(seedlotNumber);
+    seedlotEntity.setCollectionLatitudeDeg(49);
+    // collectionLongitudeDeg stays null
+
+    setupAclassFormMinMocks(seedlotNumber, seedlotEntity, List.of());
+
+    SeedlotAclassFormDto result = seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNull(result.meanGeomSeedlot());
+  }
+
+  @Test
+  @DisplayName("getAclassSeedlotFormInfo with empty smpMix list returns null meanGeomSmpMix")
+  void getAclassSeedlotFormInfo_withEmptySmpMix_returnsNullMeanGeomSmpMix() {
+    String seedlotNumber = "0000014";
+    Seedlot seedlotEntity = new Seedlot(seedlotNumber);
+
+    setupAclassFormMinMocks(seedlotNumber, seedlotEntity, List.of());
+
+    SeedlotAclassFormDto result = seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNull(result.meanGeomSmpMix());
+  }
+
+  @Test
+  @DisplayName("getAclassSeedlotFormInfo with smpMix Oracle success returns meanGeomSmpMix")
+  void getAclassSeedlotFormInfo_withSmpMix_oracleSuccess_returnsMeanGeomSmpMix() {
+    String seedlotNumber = "0000015";
+    Seedlot seedlotEntity = new Seedlot(seedlotNumber);
+    AuditInformation audit = new AuditInformation("userId");
+
+    SmpMix smpMix =
+        new SmpMix(seedlotEntity, 4023, "87", 50, new BigDecimal("0.5"), audit, 0);
+
+    GeospatialRespondDto expectedGeom =
+        new GeospatialRespondDto(50, 0, 0, 125, 0, 0, null, null, 900);
+    when(parentTreeService.calcMeanGeospatial(any())).thenReturn(expectedGeom);
+
+    setupAclassFormMinMocks(seedlotNumber, seedlotEntity, List.of(smpMix));
+
+    SeedlotAclassFormDto result = seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNotNull(result.meanGeomSmpMix());
+    Assertions.assertEquals(50, result.meanGeomSmpMix().getMeanLatitudeDegree());
+    Assertions.assertEquals(125, result.meanGeomSmpMix().getMeanLongitudeDegree());
+    Assertions.assertEquals(900, result.meanGeomSmpMix().getMeanElevation());
+  }
+
+  @Test
+  @DisplayName("getAclassSeedlotFormInfo with smpMix and Oracle throws returns null meanGeomSmpMix")
+  void getAclassSeedlotFormInfo_withSmpMix_oracleThrows_returnsNullMeanGeomSmpMix() {
+    String seedlotNumber = "0000016";
+    Seedlot seedlotEntity = new Seedlot(seedlotNumber);
+    AuditInformation audit = new AuditInformation("userId");
+
+    SmpMix smpMix =
+        new SmpMix(seedlotEntity, 4023, "87", 50, new BigDecimal("0.5"), audit, 0);
+
+    when(parentTreeService.calcMeanGeospatial(any())).thenThrow(new PtGeoDataNotFoundException());
+
+    setupAclassFormMinMocks(seedlotNumber, seedlotEntity, List.of(smpMix));
+
+    SeedlotAclassFormDto result = seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertNull(result.meanGeomSmpMix());
   }
 }

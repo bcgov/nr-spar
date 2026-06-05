@@ -50,7 +50,7 @@ import {
   verifyInterimStepCompleteness, validateOrchardStep, verifyOrchardStepCompleteness,
   validateExtractionStep, verifyExtractionStepCompleteness, validateParentStep,
   verifyParentStepCompleteness, checkAllStepsCompletion, getSeedlotPayload,
-  initEmptySteps, resDataToState, fillAreaOfUseData, fillCollectionGeoData
+  initEmptySteps, resDataToState, fillAreaOfUseData, fillCollectionGeoData, buildGeomDisplayValues
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE, initialAreaOfUseData,
@@ -357,6 +357,33 @@ const ContextContainerClassA = ({ children }: props) => {
     getAllSeedlotInfoQuery.status,
     getAllSeedlotInfoQuery.error
   ]);
+
+  // Hydrate meanGeomInfos from the stored geospatial data returned by the full-form GET,
+  // so the display values are populated on page load without needing to click Recalculate.
+  useEffect(() => {
+    if (getAllSeedlotInfoQuery.status !== 'success') {
+      return;
+    }
+    const { meanGeomSeedlot, meanGeomSmpMix } = getAllSeedlotInfoQuery.data;
+    if (!meanGeomSeedlot && !meanGeomSmpMix) {
+      setMeanGeomInfos(structuredClone(defaultMeanGeomConfig));
+      return;
+    }
+    const seedlotDisplay = buildGeomDisplayValues(meanGeomSeedlot);
+    const smpMixDisplay = buildGeomDisplayValues(meanGeomSmpMix);
+    setMeanGeomInfos((prev) => ({
+      seedlot: seedlotDisplay ? {
+        meanLatitudeDm: { ...prev.seedlot.meanLatitudeDm, value: seedlotDisplay.latDm },
+        meanLongitudeDm: { ...prev.seedlot.meanLongitudeDm, value: seedlotDisplay.lonDm },
+        meanElevation: { ...prev.seedlot.meanElevation, value: seedlotDisplay.elevation }
+      } : prev.seedlot,
+      smpMix: smpMixDisplay ? {
+        meanLatitudeDm: { ...prev.smpMix.meanLatitudeDm, value: smpMixDisplay.latDm },
+        meanLongitudeDm: { ...prev.smpMix.meanLongitudeDm, value: smpMixDisplay.lonDm },
+        meanElevation: { ...prev.smpMix.meanElevation, value: smpMixDisplay.elevation }
+      } : prev.smpMix
+    }));
+  }, [getAllSeedlotInfoQuery.status, getAllSeedlotInfoQuery.data]);
 
   useEffect(() => {
     if (

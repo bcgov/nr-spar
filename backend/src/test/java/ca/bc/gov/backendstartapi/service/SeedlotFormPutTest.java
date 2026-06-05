@@ -97,6 +97,8 @@ class SeedlotFormPutTest {
 
   @Mock Provider oracleApiProvider;
 
+  @Mock SeedlotFormValidationService seedlotFormValidationService;
+
   @BeforeEach
   void setup() {
     seedlotService =
@@ -119,7 +121,8 @@ class SeedlotFormPutTest {
             seedlotSeedPlanZoneRepository,
             parentTreeService,
             tscAdminService,
-            oracleApiProvider);
+            oracleApiProvider,
+            seedlotFormValidationService);
   }
 
   private SeedlotService seedlotService;

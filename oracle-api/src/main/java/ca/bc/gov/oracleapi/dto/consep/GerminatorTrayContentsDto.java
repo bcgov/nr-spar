@@ -11,8 +11,13 @@ public record GerminatorTrayContentsDto(
     @Schema(description = "Request ID of the test result entry", example = "RTS20042360")
     String requestId,
 
+    String vegetationSt,
+
     @Schema(description = "Seedlot number", example = "30350")
     String seedlotNumber,
+
+    @Schema(description = "Soak end date", example = "2025-01-20T12:00:00")
+    LocalDateTime soakEndDate,
 
     LocalDateTime warmStratStartDate,
 
@@ -27,6 +32,8 @@ public record GerminatorTrayContentsDto(
 
     @Schema(description = "Accept result indicator", example = "0")
     Integer acceptResultInd,
+
+    String germinatorId,
 
     @Schema(description = "Request item activity key", example = "12345")
     java.math.BigDecimal riaSkey,
