@@ -855,7 +855,7 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("No DB mutation when validation fails: repository.save and step services are never called")
+  @DisplayName("No DB mutation when validation fails: repo.save and step services are never called")
   void updateSeedlotWithForm_invalidForm_doesNotPersist() {
     String statusCode = "PND";
     SeedlotStatusEntity seedlotStatusEntity =
