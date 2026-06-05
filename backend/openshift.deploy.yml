@@ -76,7 +76,7 @@ objects:
         metadata:
           annotations:
             prometheus.io/scrape: "true"
-            prometheus.io/port: "8090"
+            prometheus.io/port: "8091"
             prometheus.io/path: "/metrics"
           labels:
             app: ${NAME}-${ZONE}
@@ -136,17 +136,19 @@ objects:
               ports:
                 - name: container-port
                   containerPort: 8090
+                - name: management-port
+                  containerPort: 8091
               readinessProbe:
                 httpGet:
                   path: /health
-                  port: container-port
+                  port: management-port
               livenessProbe:
                 httpGet:
                   path: /health
-                  port: container-port
+                  port: management-port
               startupProbe:
                 tcpSocket:
-                  port: container-port
+                  port: management-port
                 failureThreshold: 45
   - apiVersion: v1
     kind: Service
