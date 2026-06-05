@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.response;
 
+import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Getter;
@@ -34,5 +35,20 @@ public class ValidationExceptionResponse {
             .map(error -> new FieldIssue(error.getField(), error.getDefaultMessage()))
             .toList();
     this.errorMessage = String.format(MESSAGE_TEMPLATE, fields.size());
+  }
+
+  /**
+   * Build a response from seedlot submission validation errors.
+   *
+   * @param errors the list of seedlot field-level errors
+   * @return a new {@link ValidationExceptionResponse}
+   */
+  public static ValidationExceptionResponse fromSeedlotErrors(
+      List<SeedlotValidationError> errors) {
+    List<FieldError> fieldErrors =
+        errors.stream()
+            .map(e -> new FieldError("seedlotForm", e.fieldId(), e.message()))
+            .toList();
+    return new ValidationExceptionResponse(fieldErrors);
   }
 }

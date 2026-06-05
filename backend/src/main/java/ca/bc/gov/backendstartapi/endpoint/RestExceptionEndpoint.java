@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,5 +23,18 @@ public class RestExceptionEndpoint {
       MethodArgumentNotValidException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ValidationExceptionResponse(ex.getFieldErrors()));
+  }
+
+  /**
+   * Handle seedlot submission validation errors.
+   *
+   * @param ex the exception carrying the list of field-level errors
+   * @return a 400 response with all validation problems listed
+   */
+  @ExceptionHandler(SeedlotSubmissionValidationException.class)
+  ResponseEntity<ValidationExceptionResponse> seedlotSubmissionValidation(
+      SeedlotSubmissionValidationException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(ValidationExceptionResponse.fromSeedlotErrors(ex.getErrors()));
   }
 }
