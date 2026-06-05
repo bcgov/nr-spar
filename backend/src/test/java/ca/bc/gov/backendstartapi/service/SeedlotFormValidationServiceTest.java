@@ -610,6 +610,24 @@ class SeedlotFormValidationServiceTest {
   }
 
   @Test
+  @DisplayName("OW3: empty ownership list is rejected (total 0 != 100)")
+  void owners_emptyList_isRejected() {
+    stubValidOrchard("405", "PLI");
+    stubValidOrchard("406", "PLI");
+    stubValidConeMethods();
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.withOwners()));
+    boolean hasError =
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormOwnershipDtoList"));
+    Assertions.assertTrue(hasError, "Expected error on seedlotFormOwnershipDtoList for empty list");
+  }
+
+  @Test
   @DisplayName("OW4: reserved + surplus > owned is rejected")
   void owners_reservedPlusSurplusExceedsOwned_isRejected() {
     stubValidOrchard("405", "PLI");

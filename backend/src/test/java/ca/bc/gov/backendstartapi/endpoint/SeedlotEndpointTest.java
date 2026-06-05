@@ -682,6 +682,41 @@ class SeedlotEndpointTest {
   }
 
   @Test
+  @DisplayName("Seedlot Form submitted with a literal null body should return 400")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
+  void submitSeedlotForm_literalNullBody_shouldReturn400() throws Exception {
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 63000)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content("null"))
+        .andExpect(status().isBadRequest())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot Form submitted with empty seedlotFormSmpParentOutsideDto should return 400")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
+  void submitSeedlotForm_emptySmpParentOutsideObject_shouldReturn400() throws Exception {
+    // {} passes the @NotNull on the object itself; the nested @NotNull on
+    // smpParentsOutside must reject it before it reaches the calculation path.
+    String bodyWithEmptySmpParent =
+        WHOLE_SEEDLOT_FORM_JSON.replace("\"smpParentsOutside\": 2", "");
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 63000)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(bodyWithEmptySmpParent))
+        .andExpect(status().isBadRequest())
+        .andReturn();
+  }
+
+  @Test
   @DisplayName("Seedlot Form submitted with null seedlotFormSmpParentOutsideDto should return 400")
   @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
   void submitSeedlotForm_nullSmpParentOutside_shouldReturn400() throws Exception {

@@ -5,6 +5,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -243,14 +244,16 @@ public class SeedlotFormValidationService {
 
   private void validateOwnershipStep(
       SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    var owners =
-        form.seedlotFormOwnershipDtoList() == null ? List.of() : form.seedlotFormOwnershipDtoList();
+    List<SeedlotFormOwnershipDto> owners =
+        form.seedlotFormOwnershipDtoList() == null
+            ? List.<SeedlotFormOwnershipDto>of()
+            : form.seedlotFormOwnershipDtoList();
 
     BigDecimal totalOwned = BigDecimal.ZERO;
     Set<String> seenPairs = new HashSet<>();
 
     for (int i = 0; i < owners.size(); i++) {
-      var o = owners.get(i);
+      SeedlotFormOwnershipDto o = owners.get(i);
       String base = "seedlotFormOwnershipDtoList[" + i + "]";
 
       // OW1: client/location must exist in Forest Client API
