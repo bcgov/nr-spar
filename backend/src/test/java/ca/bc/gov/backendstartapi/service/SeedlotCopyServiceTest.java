@@ -181,7 +181,7 @@ class SeedlotCopyServiceTest {
   // ── Field resets ─────────────────────────────────────────────────────────────
 
   @Test
-  @DisplayName("Field resets: containers=1, volumes=0.01, comment prefixed, approvedUserId=COPIED_LOT, declaration cleared")
+  @DisplayName("Field resets: containers=1, volumes=0.01, comment prefixed, declaration cleared")
   void fieldResets_appliedCorrectly() {
     Seedlot source = buildSourceSeedlot();
     source.setComment("my original comment");
