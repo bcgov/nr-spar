@@ -224,9 +224,7 @@ class SeedlotServiceTest {
     Exception excBclass =
         Assertions.assertThrows(
             InvalidSeedlotRequestException.class,
-            () -> {
-              seedlotService.createSeedlot(createDtoB);
-            });
+            () -> seedlotService.createSeedlot(createDtoB));
 
     Assertions.assertEquals(BAD_REQUEST_STR, excBclass.getMessage());
   }
@@ -240,9 +238,7 @@ class SeedlotServiceTest {
 
     Assertions.assertThrows(
         SeedlotStatusNotFoundException.class,
-        () -> {
-          seedlotService.createSeedlot(createSeedlotDto());
-        });
+        () -> seedlotService.createSeedlot(createSeedlotDto()));
   }
 
   @Test
@@ -258,9 +254,7 @@ class SeedlotServiceTest {
 
     Assertions.assertThrows(
         GeneticClassNotFoundException.class,
-        () -> {
-          seedlotService.createSeedlot(createSeedlotDto());
-        });
+        () -> seedlotService.createSeedlot(createSeedlotDto()));
   }
 
   @Test
@@ -281,9 +275,7 @@ class SeedlotServiceTest {
 
     Assertions.assertThrows(
         SeedlotSourceNotFoundException.class,
-        () -> {
-          seedlotService.createSeedlot(createSeedlotDto());
-        });
+        () -> seedlotService.createSeedlot(createSeedlotDto()));
   }
 
   @Test
@@ -356,9 +348,7 @@ class SeedlotServiceTest {
 
     Assertions.assertThrows(
         ClientIdForbiddenException.class,
-        () -> {
-          seedlotService.getSeedlotByClientId("1234", 0, 0);
-        });
+        () -> seedlotService.getSeedlotByClientId("1234", 0, 0));
   }
 
   @Test
@@ -413,9 +403,7 @@ class SeedlotServiceTest {
     Exception exc =
         Assertions.assertThrows(
             SeedlotNotFoundException.class,
-            () -> {
-              seedlotService.getSingleSeedlotInfo(seedlotNumber);
-            });
+            () -> seedlotService.getSingleSeedlotInfo(seedlotNumber));
 
     Assertions.assertEquals(SEEDLOT_NOT_FOUND_STR, exc.getMessage());
   }
@@ -459,7 +447,7 @@ class SeedlotServiceTest {
     when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId))
         .thenReturn(Optional.of(seedlotOrchard));
 
-    Integer spuId = 7;
+    int spuId = 7;
     ActiveOrchardSpuEntity activeOrchardSpuEntity =
         new ActiveOrchardSpuEntity(orchardId, spuId, true, false, false);
 
@@ -657,9 +645,7 @@ class SeedlotServiceTest {
     Exception exc =
         Assertions.assertThrows(
             SeedlotNotFoundException.class,
-            () -> {
-              seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
-            });
+            () -> seedlotService.getAclassSeedlotFormInfo(seedlotNumber));
 
     Assertions.assertEquals(SEEDLOT_NOT_FOUND_STR, exc.getMessage());
   }
@@ -676,9 +662,7 @@ class SeedlotServiceTest {
 
     Assertions.assertThrows(
         SeedlotNotFoundException.class,
-        () -> {
-          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
-        });
+        () -> seedlotService.patchApplicantInfo(seedlotNumber, testDto));
   }
 
   @Test
@@ -697,9 +681,7 @@ class SeedlotServiceTest {
 
     Assertions.assertThrows(
         SeedlotSourceNotFoundException.class,
-        () -> {
-          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
-        });
+        () -> seedlotService.patchApplicantInfo(seedlotNumber, testDto));
   }
 
   @Test
@@ -715,9 +697,7 @@ class SeedlotServiceTest {
 
     Assertions.assertThrows(
         SeedlotConflictDataException.class,
-        () -> {
-          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
-        });
+        () -> seedlotService.patchApplicantInfo(seedlotNumber, testDto));
   }
 
   @Test
@@ -861,7 +841,8 @@ class SeedlotServiceTest {
     SeedlotStatusEntity seedlotStatusEntity =
         new SeedlotStatusEntity(
             statusCode, "Pending",
-            new EffectiveDateRange(LocalDate.now().minusDays(1L), LocalDate.now()));
+            new EffectiveDateRange(
+                LocalDate.of(2020, 1, 1), LocalDate.of(2099, 12, 31)));
 
     String seedlotNumber = "63636";
     Seedlot seedlot = new Seedlot(seedlotNumber);
