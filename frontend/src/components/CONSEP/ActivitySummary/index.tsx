@@ -1,12 +1,6 @@
-import React from 'react';
-import {
-  Row,
-  Column,
-  RadioButtonSkeleton
-} from '@carbon/react';
-
+import React, { useMemo } from 'react';
 import { ActivitySummaryType } from '../../../types/consep/TestingActivityType';
-
+import SummaryGrid, { type SummaryColumn } from '../SummaryGrid';
 import './styles.scss';
 
 interface ActivitySummaryProps {
@@ -14,71 +8,50 @@ interface ActivitySummaryProps {
   isFetching: boolean;
 }
 
-const renderFieldValue = (
-  name: keyof ActivitySummaryType,
-  isFetching: boolean,
-  item?: ActivitySummaryType
-) => {
-  if (isFetching) {
-    return <RadioButtonSkeleton />;
-  }
-  if (item) {
-    return (
-      <p className="activity-summary-info-value">
-        {name === 'testResult' && item[name] ? Number(item[name]).toFixed(1) : item[name]}
-      </p>
-    );
-  }
-  return null;
-};
+const ActivitySummary = ({ item, isFetching }: ActivitySummaryProps) => {
+  const columns = useMemo<SummaryColumn<ActivitySummaryType>[]>(() => ([
+    {
+      key: 'activity',
+      label: 'Activity',
+      renderValue: (data) => data?.activity ?? '',
+      emphasize: true
+    },
+    {
+      key: 'lot',
+      label: 'Lot number',
+      renderValue: (data) => (
+        !data?.seedlotNumber || data.seedlotNumber === '00000'
+          ? data?.familyLotNumber ?? ''
+          : data.seedlotNumber
+      )
+    },
+    {
+      key: 'requestId',
+      label: 'Request ID',
+      renderValue: (data) => data?.requestId ?? ''
+    },
+    {
+      key: 'species',
+      label: 'Species',
+      renderValue: (data) => data?.speciesAndClass ?? ''
+    },
+    {
+      key: 'testResult',
+      label: 'Test result',
+      renderValue: (data) => (
+        data?.testResult ? Number(data.testResult).toFixed(1) : ''
+      ),
+      emphasize: true
+    }
+  ]), []);
 
-const ActivitySummary = ({ item, isFetching }: ActivitySummaryProps) => (
-  <div className="activity-summary-container">
-    <Row className="activity-summary">
-      <Column className="info-col">
-        <p className="activity-summary-info-label">
-          Activity
-        </p>
-        {
-          renderFieldValue('activity', isFetching, item)
-        }
-      </Column>
-      <Column className="info-col">
-        <p className="activity-summary-info-label">
-          Lot number
-        </p>
-        {
-          !item?.seedlotNumber || item.seedlotNumber === '00000'
-            ? renderFieldValue('familyLotNumber', isFetching, item)
-            : renderFieldValue('seedlotNumber', isFetching, item)
-        }
-      </Column>
-      <Column className="info-col">
-        <p className="activity-summary-info-label">
-          Request ID
-        </p>
-        {
-          renderFieldValue('requestId', isFetching, item)
-        }
-      </Column>
-      <Column className="info-col">
-        <p className="activity-summary-info-label">
-          Species
-        </p>
-        {
-          renderFieldValue('speciesAndClass', isFetching, item)
-        }
-      </Column>
-      <Column className="info-col">
-        <p className="activity-summary-info-label">
-          Test result
-        </p>
-        {
-          renderFieldValue('testResult', isFetching, item)
-        }
-      </Column>
-    </Row>
-  </div>
-);
+  return (
+    <SummaryGrid
+      item={item}
+      isFetching={isFetching}
+      columns={columns}
+    />
+  );
+};
 
 export default ActivitySummary;
