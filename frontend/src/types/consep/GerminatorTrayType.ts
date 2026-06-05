@@ -13,12 +13,15 @@ export type GermTrayTestType = {
   germinatorTrayId: number;
   requestId: string;
   seedlotNumber: string;
+  soakEndDate: string | null;
   warmStratStartDate: string | null;
   drybackStartDate: string | null;
   germinatorEntry: string | null;
   stratStartDate: string | null;
   testCompleteInd: -1 | 0;
   acceptResultInd: -1 | 0;
+  vegetationSt: string | null;
+  germinatorId: string | null;
   riaSkey: number | null;
   updateTimestamp: string | null;
 };

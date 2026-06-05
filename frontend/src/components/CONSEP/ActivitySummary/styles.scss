@@ -1,33 +1,14 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
-@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
 @use '@carbon/type';
 
 .activity-summary-container {
-  width: 100%;
-  padding: 0rem;
-  background-color: colors.$gray-10;
-  border: 1px solid colors.$gray-20;
-  border-radius: 0.2rem;
-
   .#{vars.$bcgov-prefix}--row {
-    margin: 1rem 2rem 1.2rem;
-    justify-content: flex-start;
-    gap: 0.5rem;
-    color: var(--#{vars.$bcgov-prefix}-text-primary);
-
     .info-col:first-child .activity-summary-info-value {
       font-weight: bold;
     }
 
     .info-col:last-child .activity-summary-info-value {
       font-weight: bold;
-    }
-
-    .info-col {
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      gap: 0.5rem;
     }
   }
 
@@ -37,19 +18,7 @@
     margin-bottom: 0.25rem;
   }
 
-  .activity-summary-info-section>div {
+  .activity-summary-info-section > div {
     margin-right: 3.5rem;
-  }
-
-  .activity-summary-info-label {
-    align-self: center;
-    @include type.type-style('label-01');
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .activity-summary-info-value {
-    align-self: center;;
   }
 }

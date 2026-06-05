@@ -75,7 +75,7 @@ export const getGermTrayTestsColumns = (
 ): MRT_ColumnDef<GermTrayTestType>[] => [
   {
     accessorKey: 'seedlotNumber',
-    header: 'Lot #',
+    header: 'Seedlot #',
     enableEditing: false,
     size: 80
   },
@@ -86,36 +86,43 @@ export const getGermTrayTestsColumns = (
     size: 120
   },
   {
+    accessorKey: 'soakEndDate',
+    header: 'Soak end dt',
+    enableEditing: false,
+    size: 120,
+    Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
+  },
+  {
     accessorKey: 'warmStratStartDate',
-    header: 'Warm strat date',
+    header: 'Warm strat dt',
     enableEditing: false,
     size: 110,
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'drybackStartDate',
-    header: 'Dryback',
+    header: 'Dryback dt',
     enableEditing: false,
     size: 90,
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'stratStartDate',
-    header: 'Cold strat start',
+    header: 'Cold strat start dt',
     enableEditing: false,
     size: 110,
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'germinatorEntry',
-    header: 'Germinator Entry',
+    header: 'Germ entry',
     enableEditing: false,
     size: 120,
     Cell: ({ cell }) => formatDateCell(cell.getValue<string | null>())
   },
   {
     accessorKey: 'testCompleteInd',
-    header: 'Complete',
+    header: 'Comp',
     enableEditing: false,
     size: 80,
     muiTableHeadCellProps: { align: 'center' },
@@ -129,7 +136,7 @@ export const getGermTrayTestsColumns = (
   },
   {
     accessorKey: 'acceptResultInd',
-    header: 'Accepted',
+    header: 'Acc',
     enableEditing: false,
     size: 80,
     muiTableHeadCellProps: { align: 'center' },
@@ -140,6 +147,24 @@ export const getGermTrayTestsColumns = (
         disabled
       />
     )
+  },
+  {
+    accessorKey: 'null', // no entity linked to label, use appropriate key if there is one in the future
+    header: 'Label',
+    enableEditing: false,
+    size: 80
+  },
+  {
+    accessorKey: 'vegetationSt',
+    header: 'Species',
+    enableEditing: false,
+    size: 80
+  },
+  {
+    accessorKey: 'germinatorId',
+    header: 'Germ ID',
+    enableEditing: false,
+    size: 80
   },
   {
     accessorKey: 'actions',
