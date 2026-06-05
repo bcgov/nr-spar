@@ -110,7 +110,7 @@ const App: React.FC = () => {
         <NavigateProvider onRedirect={handleRedirectTo403}>
           <CustomQueryProvider>
             <ToastContainer />
-            <RouterProvider router={browserRouter} />
+            <RouterProvider key={`${signed}-${Boolean(selectedClientRoles)}`} router={browserRouter} />
             <ReactQueryDevtools initialIsOpen={false} />
           </CustomQueryProvider>
         </NavigateProvider>
