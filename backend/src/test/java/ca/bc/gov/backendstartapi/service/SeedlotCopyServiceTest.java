@@ -3,8 +3,8 @@ package ca.bc.gov.backendstartapi.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -181,7 +181,7 @@ class SeedlotCopyServiceTest {
   // ── Field resets ─────────────────────────────────────────────────────────────
 
   @Test
-  @DisplayName("Field resets: numberOfContainers=1, volumes=0.01, comment prefixed, approvedUserId=COPIED_LOT, declaration cleared")
+  @DisplayName("Field resets: containers=1, volumes=0.01, comment prefixed, approvedUserId=COPIED_LOT, declaration cleared")
   void fieldResets_appliedCorrectly() {
     Seedlot source = buildSourceSeedlot();
     source.setComment("my original comment");

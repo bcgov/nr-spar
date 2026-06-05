@@ -199,7 +199,8 @@ public class SeedlotCopyService {
 
   private void copyOrchards(String sourceNumber, Seedlot target, AuditInformation audit) {
     orchardRepository.findAllBySeedlot_id(sourceNumber).forEach(source -> {
-      SeedlotOrchard copy = new SeedlotOrchard(target, source.getIsPrimary(), source.getOrchardId());
+      SeedlotOrchard copy =
+          new SeedlotOrchard(target, source.getIsPrimary(), source.getOrchardId());
       copy.setAuditInformation(audit);
       orchardRepository.save(copy);
     });
