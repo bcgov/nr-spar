@@ -33,6 +33,7 @@ import { MEDIUM_SCREEN_WIDTH, MINISTRY_OF_FOREST_ID } from '../../../shared-cons
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import AuthContext from '../../../contexts/AuthContext';
+import CopySeedlotModal from './CopySeedlotModal';
 
 import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
@@ -59,6 +60,8 @@ const SeedlotDetails = () => {
     || seedlotData?.seedlotStatus === 'Complete'
     || seedlotData?.seedlotStatus === 'Approved';
 
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+
   const manageOptions = [
     {
       text: 'Edit seedlot applicant',
@@ -72,8 +75,8 @@ const SeedlotDetails = () => {
     },
     {
       text: 'Duplicate seedlot',
-      onClickFunction: () => null,
-      disabled: true
+      onClickFunction: () => setIsCopyModalOpen(true),
+      disabled: !isTscAdmin
     },
     {
       text: 'Delete seedlot',
@@ -278,6 +281,11 @@ const SeedlotDetails = () => {
           </Tabs>
         </Column>
       </Row>
+      <CopySeedlotModal
+        open={isCopyModalOpen}
+        seedlotNumber={seedlotNumber ?? ''}
+        onClose={() => setIsCopyModalOpen(false)}
+      />
     </FlexGrid>
   );
 };
