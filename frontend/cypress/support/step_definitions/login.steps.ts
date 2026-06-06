@@ -68,8 +68,10 @@ Then('I open the user profile panel', () => {
 });
 
 Then('I should see my login service prefix', () => {
-  const loginService = Cypress.env('LOGIN_SERVICE') === 'BCeID' ? 'BCeID: ' : 'IDIR: ';
-  cy.get('.user-data').find('p').contains(loginService).should('exist');
+  cy.env(['LOGIN_SERVICE']).then((env) => {
+    const loginService = env.LOGIN_SERVICE === 'BCeID' ? 'BCeID: ' : 'IDIR: ';
+    cy.get('.user-data').find('p').contains(loginService).should('exist');
+  });
 });
 
 Then('I should see an email address', () => {
