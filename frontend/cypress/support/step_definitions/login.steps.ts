@@ -10,18 +10,24 @@ When('I click the {string} login button', (provider: string) => {
 });
 
 Then('I should see the {string} logo', (logoId: string) => {
-  const loginUrl = Cypress.env('LOGIN_SERVICE') === 'BCeID'
-    ? Cypress.env('idirLoginUrl')
-    : Cypress.env('businessBceIdLoginUrl');
+  cy.env(['LOGIN_SERVICE', 'idirLoginUrl', 'businessBceIdLoginUrl']).then((env) => {
+    const loginUrl = env.LOGIN_SERVICE === 'BCeID'
+      ? env.businessBceIdLoginUrl
+      : env.idirLoginUrl;
 
-  cy.url().then((url) => {
-    if (url.includes('.gov.bc.ca')) {
-      cy.get(`#${logoId}`).should('be.visible');
-    } else {
-      cy.origin(loginUrl, { args: { logoId } }, ({ logoId: id }) => {
-        cy.get(`#${id}`).should('be.visible');
-      });
-    }
+    cy.url().then((url) => {
+      if (url.includes('.gov.bc.ca')) {
+        cy.get(`#${logoId}`).should('be.visible');
+      } else {
+        if (!loginUrl) {
+          throw new Error('Missing login URL env var for selected login service');
+        }
+
+        cy.origin(loginUrl, { args: { logoId } }, ({ logoId: id }) => {
+          cy.get(`#${id}`).should('be.visible');
+        });
+      }
+    });
   });
 });
 
@@ -54,7 +60,7 @@ Then('the URL should contain {string}', (segment: string) => {
 });
 
 Then('I can read {string}', (text: string) => {
-  cy.contains(text);
+  cy.contains(text).should('be.visible');
 });
 
 Then('I open the user profile panel', () => {
@@ -63,9 +69,9 @@ Then('I open the user profile panel', () => {
 
 Then('I should see my login service prefix', () => {
   const loginService = Cypress.env('LOGIN_SERVICE') === 'BCeID' ? 'BCeID: ' : 'IDIR: ';
-  cy.get('.user-data').find('p').contains(loginService);
+  cy.get('.user-data').find('p').contains(loginService).should('exist');
 });
 
 Then('I should see an email address', () => {
-  cy.get('.user-data').find('p').contains('@');
+  cy.get('.user-data').find('p').contains('@').should('exist');
 });
