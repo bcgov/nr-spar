@@ -1,6 +1,9 @@
 import { defineConfig } from 'cypress';
 import codeCoverageTask from '@cypress/code-coverage/task';
 import cypressSplit from 'cypress-split';
+import { addCucumberPreprocessorPlugin } from '@badeball/cypress-cucumber-preprocessor';
+import { createEsbuildPlugin } from '@badeball/cypress-cucumber-preprocessor/esbuild';
+import createBundler from '@bahmutov/cypress-esbuild-preprocessor';
 import { ONE_MINUTE } from './cypress/constants';
 
 let CypressData: { [k: string]: any } = {};
@@ -37,7 +40,9 @@ export default defineConfig({
       '**/22-a-class-seedlot-reg-form-collection-interim.cy.ts',
       '**/23-a-class-seedlot-reg-form-ownership.cy.ts',
       '**/24-a-class-seedlot-reg-form-extraction.cy.ts',
-      '**/41-moisture-content.cy.ts'
+      '**/41-moisture-content.cy.ts',
+      // Cucumber feature files
+      '**/features/*.feature'
     ],
     chromeWebSecurity: false,
     retries: {
@@ -45,11 +50,15 @@ export default defineConfig({
     },
     defaultCommandTimeout: ONE_MINUTE,
     video: true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setupNodeEvents(on, config) {
+    async setupNodeEvents(on, config) {
       codeCoverageTask(on, config);
       cypressSplit(on, config);
+      await addCucumberPreprocessorPlugin(on, config);
       // implement node event listeners here
+      on(
+        'file:preprocessor',
+        createBundler({ plugins: [createEsbuildPlugin(config)] })
+      );
       on('task', {
         log(args) {
           // eslint-disable-next-line no-console
