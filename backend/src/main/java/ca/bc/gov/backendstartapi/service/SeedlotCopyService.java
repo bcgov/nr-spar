@@ -329,9 +329,10 @@ public class SeedlotCopyService {
   }
 
   /**
-   * Creates a minimal draft entry in {@code seedlot_registration_a_class_save} with {@code
-   * allStepData = null}. The frontend detects null and calls {@code getAClassSeedlotFullForm} to
-   * hydrate the registration form directly from the target's normalized tables.
+   * Creates a minimal draft entry in {@code seedlot_registration_a_class_save} with
+   * {@code allStepData = {}} (an empty map). The frontend detects the empty payload and calls
+   * {@code getAClassSeedlotFullForm} to hydrate the registration form directly from the target's
+   * normalized tables.
    */
   private void createAndSaveDraft(Seedlot target, String userId) {
     Map<String, Object> stepStatus =

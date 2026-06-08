@@ -588,7 +588,7 @@ public class SeedlotEndpoint {
               in = ParameterIn.PATH,
               description = "Source seedlot number",
               required = true,
-              schema = @Schema(type = "integer", format = "int64"))
+              schema = @Schema(type = "string", pattern = "\\d{5}", example = "62001"))
       @PathVariable String seedlotNumber) {
     long started = Instant.now().toEpochMilli();
     String userId = loggedUserService.getLoggedUserId();
