@@ -835,14 +835,16 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("No DB mutation when validation fails: repo.save and step services are never called")
+  @DisplayName(
+      "No DB mutation when validation fails: seedlotRepository.save and step services"
+          + " are never called")
   void updateSeedlotWithForm_invalidForm_doesNotPersist() {
     String statusCode = "PND";
     SeedlotStatusEntity seedlotStatusEntity =
         new SeedlotStatusEntity(
-            statusCode, "Pending",
-            new EffectiveDateRange(
-                LocalDate.of(2020, 1, 1), LocalDate.of(2099, 12, 31)));
+            statusCode,
+            "Pending",
+            new EffectiveDateRange(LocalDate.now().minusDays(1L), LocalDate.now()));
 
     String seedlotNumber = "63636";
     Seedlot seedlot = new Seedlot(seedlotNumber);

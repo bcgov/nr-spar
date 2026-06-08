@@ -226,7 +226,8 @@ class SeedlotFormValidationServiceTest {
   // ----- O2: species mismatch message content --------------------------------
 
   @Test
-  @DisplayName("O2: species-mismatch error message contains the orchard species code")
+  @DisplayName(
+      "O2 (strengthened): species-mismatch error message contains the orchard species code")
   void orchard_speciesMismatch_errorMessageContainsOrchardSpecies() {
     // Seedlot is PLI; orchard 405 has vegCode FDC -> message should mention "FDC"
     stubValidOrchard("405", "FDC");
@@ -536,7 +537,8 @@ class SeedlotFormValidationServiceTest {
   }
 
   @Test
-  @DisplayName("C1: upstream 403 from forest client propagates, not a validation error")
+  @DisplayName(
+      "C1: upstream 403 (non-404 4xx) from forest client propagates, not a validation error")
   void collection_clientLocationForbidden_propagates() {
     stubValidOrchard("405", "PLI");
     stubValidOrchard("406", "PLI");
