@@ -855,12 +855,16 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("No DB mutation when validation fails: seedlotRepository.save and step services are never called")
+  @DisplayName(
+      "No DB mutation when validation fails: seedlotRepository.save and step services"
+          + " are never called")
   void updateSeedlotWithForm_invalidForm_doesNotPersist() {
     String statusCode = "PND";
     SeedlotStatusEntity seedlotStatusEntity =
         new SeedlotStatusEntity(
-            statusCode, "Pending", new EffectiveDateRange(LocalDate.now().minusDays(1L), LocalDate.now()));
+            statusCode,
+            "Pending",
+            new EffectiveDateRange(LocalDate.now().minusDays(1L), LocalDate.now()));
 
     String seedlotNumber = "63636";
     Seedlot seedlot = new Seedlot(seedlotNumber);
@@ -902,7 +906,8 @@ class SeedlotServiceTest {
     verify(seedlotRepository, never()).save(any());
 
     // CRITICAL: step-1 service must never be called (proves mutations were blocked)
-    verify(seedlotCollectionMethodService, never()).saveSeedlotFormStep1(any(), any(), anyBoolean());
+    verify(seedlotCollectionMethodService, never())
+        .saveSeedlotFormStep1(any(), any(), anyBoolean());
 
     // CRITICAL: step-2 service must never be called (proves mutations were blocked)
     verify(seedlotOwnerQuantityService, never()).saveSeedlotFormStep2(any(), any(), anyBoolean());
