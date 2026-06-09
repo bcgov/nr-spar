@@ -1155,11 +1155,15 @@ export const resDataToState = (
     fullFormData.seedlotFormCollectionDto
   ),
   ownershipStep: initOwnershipState(
-    defaultAgencyNumber,
-    fullFormData.seedlotFormOwnershipDtoList,
+    fullFormData.seedlotFormOwnershipDtoList.length > 0
+      ? defaultAgencyNumber
+      : '',
+    fullFormData.seedlotFormOwnershipDtoList.length > 0
+      ? fullFormData.seedlotFormOwnershipDtoList
+      : emptyOwnershipStep,
     methodsOfPaymentData,
     fundingSourcesData,
-    true
+    fullFormData.seedlotFormOwnershipDtoList.length > 0
   ),
   interimStep: initInterimState(
     fullFormData.seedlotFormInterimDto.intermStrgClientNumber,

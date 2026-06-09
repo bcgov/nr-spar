@@ -46,6 +46,14 @@ export type StepMap = {
   [key: number]: keyof ProgressIndicatorConfig;
 }
 
+/** Lifecycle of seedlot form load — controls when the form mounts and when draft saves run. */
+export type FormPhase =
+  | 'booting'
+  | 'loading-draft'
+  | 'hydrating-from-tables'
+  | 'loading-submitted'
+  | 'ready';
+
 export type SaveTooltipProps = {
   saveStatus: string | null;
   saveDescription: string;

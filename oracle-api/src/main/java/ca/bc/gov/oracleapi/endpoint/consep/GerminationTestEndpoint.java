@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestUpdateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.TestRankResponseDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
@@ -22,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -182,5 +186,60 @@ public class GerminationTestEndpoint {
 
     SparLog.info("Received request to fetch germination test header for key: {}", riaKey);
     return testResultService.getGerminationTestHeader(riaKey);
+  }
+
+  /**
+   * Update a germination test header and its activity as one unit.
+   *
+   * <p>original_test_ind, current_test_ind and test_rank are computed by the
+   * backend and cannot be set by the client (issue #2447).
+   *
+   * @param riaKey identifier key for test activity related tables
+   * @param updateDto fields to update
+   * @return the refreshed germination test header
+   */
+  @PatchMapping(value = "/{riaKey}", consumes = "application/json")
+  @Operation(
+      summary = "Update germination test header and activity",
+      description = "Updates test status, dates, category and comment;"
+          + " the backend computes original/current/rank flags.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully updated the germination test.",
+            content = @Content(schema = @Schema(implementation = GerminationTestHeaderDto.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request body",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "No data found for the given riaKey",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Record was modified by another user (stale update timestamp)",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "422",
+            description = "Business rule violation",
+            content = @Content(schema = @Schema(hidden = true)))
+      })
+  @ApiAuthResponse
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  public GerminationTestHeaderDto updateGerminationTest(
+      @PathVariable
+          @Positive(message = "riaKey must be a positive number")
+          @Parameter(
+              name = "riaKey",
+              in = ParameterIn.PATH,
+              description = "The ria key.",
+              required = true)
+          BigDecimal riaKey,
+      @Valid @RequestBody GerminationTestUpdateFormDto updateDto) {
+
+    SparLog.info("Received request to update germination test for key: {}", riaKey);
+    return testResultService.updateGerminationTest(riaKey, updateDto);
   }
 }

@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestUpdateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
@@ -36,12 +37,16 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /** The class for Moisture Content Cones Service and test result service. */
 @Service
 @RequiredArgsConstructor
 public class TestResultService {
+
+  /** Rank "A" is the primary/best rank assigned to the first accepted STD germination test. */
+  private static final String RANK_A = "A";
 
   private final TestResultRepository testResultRepository;
   private final GerminatorTrayRepository germinatorTrayRepository;
@@ -152,7 +157,9 @@ public class TestResultService {
           dto.dryWeight(),
           dto.drybackWeight(),
           dto.intrmdtCleanrInd(),
-          dto.requestTypeSt());
+          dto.requestTypeSt(),
+          dto.testResultUpdateTimestamp(),
+          dto.riaUpdateTimestamp());
 
     } catch (IncorrectResultSizeDataAccessException ex) {
       SparLog.error("Data integrity issue: multiple rows found for RIA_SKEY {}", riaKey, ex);
@@ -754,6 +761,243 @@ public class TestResultService {
   }
 
   /**
+   * Update a germination test header and its activity as a single unit.
+   * Implements issue #2447 / Confluence "Update (test and activity)".
+   *
+   * @param riaKey the test's RIA key
+   * @param dto the fields to update
+   * @return the refreshed germination test header
+   */
+  @Transactional
+  public GerminationTestHeaderDto updateGerminationTest(
+      BigDecimal riaKey, GerminationTestUpdateFormDto dto) {
+
+    TestResultEntity storedTest = testResultRepository.findById(riaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No germination test found for riaKey " + riaKey));
+    ActivityEntity storedActivity = activityRepository.findById(riaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No activity found for riaKey " + riaKey));
+
+    boolean accept = Boolean.TRUE.equals(dto.acceptResultInd());
+    boolean complete = Boolean.TRUE.equals(dto.testCompleteInd());
+
+    // Spec: when Complete is checked, Test End defaults to now. Resolved before
+    // validation so the end-after-begin rule also covers the defaulted value.
+    LocalDateTime effectiveEnd = dto.actualEndDateTime();
+    if (complete && effectiveEnd == null) {
+      effectiveEnd = LocalDateTime.now();
+    }
+
+    validateGerminationTestUpdate(dto, storedTest, accept, complete, effectiveEnd);
+
+    String seedlotNumber = storedActivity.getSeedlotNumber();
+    String activityType = storedTest.getActivityType();
+    String category = dto.testCategoryCode();
+
+    int[] flags = computeOriginalCurrentFlags(
+        accept, effectiveEnd, seedlotNumber, activityType, category);
+    int updOriginal = flags[0];
+    int updCurrent = flags[1];
+
+    String updRank = computeRankUpdate(
+        accept, category, seedlotNumber, riaKey, updOriginal, updCurrent);
+
+    boolean storedComplete = storedTest.getTestCompleteInd() != null
+        && storedTest.getTestCompleteInd() != 0;
+    if (complete && !storedComplete) {
+      testResultRepository.deleteAssignedGermLocation(riaKey);
+    }
+
+    int testRows = testResultRepository.updateGerminationTestHeader(
+        riaKey, updOriginal, updCurrent, updRank,
+        complete ? -1 : 0, accept ? -1 : 0,
+        dto.germinatorId(), dto.seedWithdrawalDate(), category,
+        dto.testResultUpdateTimestamp());
+    if (testRows == 0) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "Test result was modified by another user; reload and retry");
+    }
+
+    int activityRows = activityRepository.updateGerminationTestActivity(
+        riaKey, dto.actualBeginDateTime(), effectiveEnd,
+        dto.actualBeginDateTime() == null ? null : dto.actualBeginDateTime().toLocalDate(),
+        computeRevisedEndDate(effectiveEnd, dto.actualBeginDateTime(),
+            storedActivity.getActivityDuration(), storedActivity.getActivityTimeUnit()),
+        dto.riaComment(),
+        Boolean.TRUE.equals(dto.commentIsCritical()) ? -1 : 0,
+        dto.riaUpdateTimestamp());
+    if (activityRows == 0) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "Activity was modified by another user; reload and retry");
+    }
+
+    if (updOriginal == -1) {
+      testResultRepository.resetOriginalTestIndForSiblings(
+          riaKey, activityType, category, seedlotNumber);
+    }
+    if (updCurrent == -1) {
+      testResultRepository.resetCurrentTestIndForSiblings(
+          riaKey, activityType, category, seedlotNumber);
+    }
+
+    GerminationTestHeaderDto refreshed = testResultRepository
+        .findGerminationTestHeaderByRiaKey(riaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No germination test found for riaKey " + riaKey));
+
+    // Spec: "the first completed activity processes the commitment" — skip if a sibling activity
+    // already has processCommitIndicator set (findConflictingActivities non-empty).
+    if (complete && ("RTS".equals(refreshed.requestTypeSt())
+        || "TST".equals(refreshed.requestTypeSt()))) {
+      boolean alreadyProcessed = !activityRepository.findConflictingActivities(
+          riaKey, storedActivity.getRequestSkey(), storedActivity.getItemId()).isEmpty();
+      if (!alreadyProcessed) {
+        activityRepository.markSignificantAndCommit(riaKey);
+      }
+    }
+
+    return refreshed;
+  }
+
+  /**
+   * Computes the original-test and current-test flag values for a germination test update.
+   *
+   * <p>Returns an {@code int[2]} where index 0 is {@code updOriginal} and index 1 is
+   * {@code updCurrent}. Each value is {@code -1} (set) or {@code 0} (leave unchanged).
+   *
+   * <p>Note: accept =&gt; complete =&gt; effectiveEnd non-null
+   * (enforced in validateGerminationTestUpdate).
+   *
+   * @param accept whether the test is being accepted
+   * @param effectiveEnd the resolved test-end timestamp (non-null when accept is true)
+   * @param seedlotNumber the seedlot number
+   * @param activityType the activity type code
+   * @param category the test category code
+   * @return int[2] with [updOriginal, updCurrent]
+   */
+  private int[] computeOriginalCurrentFlags(
+      boolean accept, LocalDateTime effectiveEnd,
+      String seedlotNumber, String activityType, String category) {
+
+    int updOriginal = 0;
+    int updCurrent = 0;
+    if (accept) {
+      // accept => complete => effectiveEnd non-null (enforced in validateGerminationTestUpdate)
+      LocalDateTime minEnd = testResultRepository
+          .findMinCompletedAcceptedEndDate(seedlotNumber, activityType, category);
+      LocalDateTime maxEnd = testResultRepository
+          .findMaxCompletedAcceptedEndDate(seedlotNumber, activityType, category);
+      // Field-description semantics: current stays set unless some test ends
+      // strictly LATER; original unless some test ends strictly EARLIER. Ties
+      // (e.g. re-saving the same test) therefore keep the flag.
+      if (maxEnd == null || !effectiveEnd.isBefore(maxEnd)) {
+        updCurrent = -1;
+      }
+      if (minEnd == null || !effectiveEnd.isAfter(minEnd)) {
+        updOriginal = -1;
+      }
+    }
+    return new int[]{updOriginal, updCurrent};
+  }
+
+  /**
+   * Determines the rank value to write when accepting a STD germination test.
+   *
+   * <p>Returns {@value #RANK_A} when this test should become the primary (rank A) result,
+   * or {@code null} when no rank change is needed.
+   *
+   * @param accept whether the test is being accepted
+   * @param category the test category code
+   * @param seedlotNumber the seedlot number
+   * @param riaKey the test's RIA key (used to exclude self from sibling checks)
+   * @param updOriginal the original-test flag computed by {@link #computeOriginalCurrentFlags}
+   * @param updCurrent the current-test flag computed by {@link #computeOriginalCurrentFlags}
+   * @return rank string or {@code null}
+   */
+  private String computeRankUpdate(
+      boolean accept, String category, String seedlotNumber,
+      BigDecimal riaKey, int updOriginal, int updCurrent) {
+
+    if (!"STD".equals(category) || !accept) {
+      return null;
+    }
+    List<TestResultEntity> rankATests =
+        testResultRepository.findRankATestsBySeedlot(seedlotNumber);
+    boolean anotherTestIsCurrent = rankATests.stream()
+        .anyMatch(t -> t.getCurrentTest() != null && t.getCurrentTest() != 0
+            && !riaKey.equals(t.getRiaKey()));
+    if (updOriginal == -1 && updCurrent == -1 && rankATests.isEmpty()) {
+      return RANK_A;
+    } else if (updCurrent == -1 && anotherTestIsCurrent) {
+      return RANK_A;
+    }
+    return null;
+  }
+
+  private LocalDate computeRevisedEndDate(
+      LocalDateTime effectiveEnd, LocalDateTime begin,
+      Integer duration, String timeUnit) {
+    if (effectiveEnd != null) {
+      return effectiveEnd.toLocalDate();
+    }
+    if (begin == null || duration == null) {
+      return null;
+    }
+    return switch (timeUnit == null ? "DY" : timeUnit) {
+      case "HR" -> begin.plusHours(duration).toLocalDate();
+      case "WK" -> begin.plusWeeks(duration).toLocalDate();
+      case "MO" -> begin.plusMonths(duration).toLocalDate();
+      case "YR" -> begin.plusYears(duration).toLocalDate();
+      default -> begin.plusDays(duration).toLocalDate();
+    };
+  }
+
+  private void validateGerminationTestUpdate(
+      GerminationTestUpdateFormDto dto, TestResultEntity storedTest,
+      boolean accept, boolean complete, LocalDateTime effectiveEnd) {
+
+    if (accept && !complete) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Cannot accept a test that has not been marked as complete");
+    }
+
+    boolean beginRequired = accept || complete
+        || (dto.riaComment() != null && !dto.riaComment().isBlank())
+        || dto.actualEndDateTime() != null;
+    if (beginRequired && dto.actualBeginDateTime() == null) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Begin date is mandatory when the test is accepted or complete,"
+              + " or a comment or test end is provided");
+    }
+
+    if (dto.actualBeginDateTime() != null && effectiveEnd != null
+        && !effectiveEnd.isAfter(dto.actualBeginDateTime())) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Test end must be after begin date");
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    if (dto.actualBeginDateTime() != null && dto.actualBeginDateTime().isAfter(now)) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Begin date cannot be in the future");
+    }
+    if (dto.seedWithdrawalDate() != null
+        && dto.seedWithdrawalDate().isAfter(now.toLocalDate())) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Seed withdrawal date cannot be in the future");
+    }
+
+    boolean storedComplete = storedTest.getTestCompleteInd() != null
+        && storedTest.getTestCompleteInd() != 0;
+    if (storedComplete
+        && !dto.testCategoryCode().equals(storedTest.getTestCategory())) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Category cannot be updated once the test is complete");
+    }
+  }
+
+  /**
    * Determine the default test rank for a seedlot.
    * Returns:
    * - "A" when no accepted STD rank-A test exists for the seedlot
@@ -784,7 +1028,7 @@ public class TestResultService {
     }
 
     long existingAcceptedStdRankA = testResultRepository.countAcceptedStdRankA(seedlotNumber);
-    String rank = existingAcceptedStdRankA > 0 ? "P" : "A";
+    String rank = existingAcceptedStdRankA > 0 ? "P" : RANK_A;
 
     SparLog.info(
         "Determined test rank={} for seedlot={} (existing accepted STD rank-A count={})",
