@@ -32,6 +32,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
+import ca.bc.gov.backendstartapi.service.SeedlotCopyService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -44,12 +45,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -61,17 +62,19 @@ class SeedlotEndpointTest {
 
   private final ClassLoader classLoader = getClass().getClassLoader();
 
-  @MockBean private SmpCalculationCsvTableParser smpCalculationCsvTableParser;
+  @MockitoBean private SmpCalculationCsvTableParser smpCalculationCsvTableParser;
 
   private MockMvc mockMvc;
 
-  @MockBean ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
+  @MockitoBean ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
 
-  @MockBean SeedlotService seedlotService;
+  @MockitoBean SeedlotService seedlotService;
 
-  @MockBean SaveSeedlotFormService saveSeedlotFormService;
+  @MockitoBean SeedlotCopyService seedlotCopyService;
 
-  @MockBean LoggedUserService loggedUserService;
+  @MockitoBean SaveSeedlotFormService saveSeedlotFormService;
+
+  @MockitoBean LoggedUserService loggedUserService;
 
   private final WebApplicationContext webApplicationContext;
 

@@ -54,8 +54,7 @@ const RegPage = () => {
     getFormDraftQuery,
     seedlotSpecies,
     popSizeAndDiversityConfig,
-    isFormSubmitted,
-    seedlotDataLoaded
+    isFormReady
   } = useContext(ClassAContext);
 
   const reloadFormDraft = () => getFormDraftQuery.refetch();
@@ -173,8 +172,7 @@ const RegPage = () => {
         <Row>
           <Column className="seedlot-registration-row">
             {
-              (isFetchingData || submitSeedlot.status === 'pending')
-              || (isFormSubmitted && !seedlotDataLoaded)
+              (isFetchingData || submitSeedlot.status === 'pending' || !isFormReady)
                 ? <Loading />
                 : (
                   <RegForm

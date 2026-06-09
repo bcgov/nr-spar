@@ -17,6 +17,7 @@ import ca.bc.gov.backendstartapi.repository.GameticMethodologyRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -154,10 +155,11 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var form999 = TestSeedlotForms.withOrchardPrimary("999");
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.withOrchardPrimary("999")));
+            () -> service.validateSeedlotForm(seedlot, form999));
     Assertions.assertFalse(ex.getErrors().isEmpty(), "Expected at least one validation error");
     boolean hasOrchardError =
         ex.getErrors().stream()
@@ -177,12 +179,11 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
+    var formMismatch = TestSeedlotForms.withOrchardPrimary("405");
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withOrchardPrimary("405")));
+            () -> service.validateSeedlotForm(seedlot, formMismatch));
     boolean hasOrchardError =
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.primaryOrchardId"));
@@ -208,12 +209,11 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formInactive = TestSeedlotForms.withOrchardPrimary("405");
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withOrchardPrimary("405")));
+            () -> service.validateSeedlotForm(seedlot, formInactive));
     boolean hasNotActiveError =
         ex.getErrors().stream()
             .anyMatch(
@@ -236,12 +236,11 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
+    var formSpeciesMismatch = TestSeedlotForms.withOrchardPrimary("405");
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withOrchardPrimary("405")));
+            () -> service.validateSeedlotForm(seedlot, formSpeciesMismatch));
     boolean hasMessageWithSpecies =
         ex.getErrors().stream()
             .anyMatch(
@@ -267,10 +266,11 @@ class SeedlotFormValidationServiceTest {
 
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
     // TestSeedlotForms.valid() has primary "405" and secondary "406"
+    var formValidBase = TestSeedlotForms.valid();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
+            () -> service.validateSeedlotForm(seedlot, formValidBase));
     boolean hasSecondaryError =
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.secondaryOrchardId"));
@@ -290,12 +290,11 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formBadFemale = TestSeedlotForms.withOrchardPrimary("405");
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withOrchardPrimary("405")));
+            () -> service.validateSeedlotForm(seedlot, formBadFemale));
     boolean hasGameticError =
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.femaleGameticMthdCode"));
@@ -315,12 +314,11 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formBadMale = TestSeedlotForms.withOrchardPrimary("405");
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withOrchardPrimary("405")));
+            () -> service.validateSeedlotForm(seedlot, formBadMale));
     boolean hasMaleGameticError =
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.maleGameticMthdCode"));
@@ -343,12 +341,11 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formPollenHigh = TestSeedlotForms.withPollenContamination("405", true, 150);
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withPollenContamination("405", true, 150)));
+            () -> service.validateSeedlotForm(seedlot, formPollenHigh));
     boolean hasPollenPctError =
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.pollenContaminationPct"));
@@ -365,12 +362,11 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formPollenNull = TestSeedlotForms.withPollenContamination("405", true, null);
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withPollenContamination("405", true, null)));
+            () -> service.validateSeedlotForm(seedlot, formPollenNull));
     boolean hasPollenPctError =
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormOrchardDto.pollenContaminationPct"));
@@ -411,10 +407,11 @@ class SeedlotFormValidationServiceTest {
         .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "nf"));
 
     Seedlot seedlot = validSeedlot();
+    var formCollectionClient = TestSeedlotForms.valid();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
+            () -> service.validateSeedlotForm(seedlot, formCollectionClient));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -432,14 +429,12 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formBadCollectionDates = TestSeedlotForms.withCollectionDates(
+        LocalDate.of(2024, Month.MAY, 10), LocalDate.of(2024, Month.MAY, 1));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withCollectionDates(
-                        LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 1))));
+            () -> service.validateSeedlotForm(seedlot, formBadCollectionDates));
     // Only the collection date error should be present (no spurious secondary-orchard error)
     Assertions.assertTrue(
         ex.getErrors().stream()
@@ -464,12 +459,11 @@ class SeedlotFormValidationServiceTest {
     lenient().when(coneCollectionMethodRepository.existsById(99)).thenReturn(false);
 
     Seedlot seedlot = validSeedlot();
+    var formBadConeMethod = TestSeedlotForms.withConeCollectionMethodCodes(List.of(99));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withConeCollectionMethodCodes(List.of(99))));
+            () -> service.validateSeedlotForm(seedlot, formBadConeMethod));
     // Only the collection error should be present (no spurious secondary-orchard error)
     Assertions.assertTrue(
         ex.getErrors().stream()
@@ -494,13 +488,11 @@ class SeedlotFormValidationServiceTest {
     Seedlot seedlot = validSeedlot();
 
     // Zero should be rejected
+    var formZeroContainers = TestSeedlotForms.withCollectionContainers(BigDecimal.ZERO);
     SeedlotSubmissionValidationException exZero =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withCollectionContainers(BigDecimal.ZERO)));
+            () -> service.validateSeedlotForm(seedlot, formZeroContainers));
     boolean hasZeroError =
         exZero.getErrors().stream()
             .anyMatch(
@@ -510,13 +502,11 @@ class SeedlotFormValidationServiceTest {
     Assertions.assertTrue(hasZeroError, "Expected noOfContainers error for zero");
 
     // Negative should also be rejected
+    var formNegContainers = TestSeedlotForms.withCollectionContainers(new BigDecimal("-1"));
     SeedlotSubmissionValidationException exNeg =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withCollectionContainers(new BigDecimal("-1"))));
+            () -> service.validateSeedlotForm(seedlot, formNegContainers));
     boolean hasNegError =
         exNeg.getErrors().stream()
             .anyMatch(
@@ -596,15 +586,13 @@ class SeedlotFormValidationServiceTest {
 
     // Two owners: 60 + 30 = 90, not 100
     Seedlot seedlot = validSeedlot();
+    var formBadOwnerSum = TestSeedlotForms.withOwners(
+        TestSeedlotForms.owner("00012797", "00", new BigDecimal("60")),
+        TestSeedlotForms.owner("00012798", "00", new BigDecimal("30")));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withOwners(
-                        TestSeedlotForms.owner("00012797", "00", new BigDecimal("60")),
-                        TestSeedlotForms.owner("00012798", "00", new BigDecimal("30")))));
+            () -> service.validateSeedlotForm(seedlot, formBadOwnerSum));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormOwnershipDtoList"));
@@ -619,10 +607,11 @@ class SeedlotFormValidationServiceTest {
     stubValidConeMethods();
 
     Seedlot seedlot = validSeedlot();
+    var formEmptyOwners = TestSeedlotForms.withOwners();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.withOwners()));
+            () -> service.validateSeedlotForm(seedlot, formEmptyOwners));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormOwnershipDtoList"));
@@ -640,18 +629,16 @@ class SeedlotFormValidationServiceTest {
 
     // owned=100, rsrvd=80, srpls=30 -> 80+30=110 > 100
     Seedlot seedlot = validSeedlot();
+    var formExceedsOwned = TestSeedlotForms.withOwners(
+        TestSeedlotForms.ownerFull(
+            "00012797", "00",
+            new BigDecimal("100"),
+            new BigDecimal("80"),
+            new BigDecimal("30")));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withOwners(
-                        TestSeedlotForms.ownerFull(
-                            "00012797", "00",
-                            new BigDecimal("100"),
-                            new BigDecimal("80"),
-                            new BigDecimal("30")))));
+            () -> service.validateSeedlotForm(seedlot, formExceedsOwned));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -683,12 +670,11 @@ class SeedlotFormValidationServiceTest {
             "ITC");
 
     Seedlot seedlot = validSeedlot();
+    var formBadPayment = TestSeedlotForms.withOwners(ownerWithBadCode);
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withOwners(ownerWithBadCode)));
+            () -> service.validateSeedlotForm(seedlot, formBadPayment));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -707,15 +693,13 @@ class SeedlotFormValidationServiceTest {
 
     // Two owners with same client+locn (50+50=100 so OW3 passes), but duplicate pair
     Seedlot seedlot = validSeedlot();
+    var formDuplicateOwners = TestSeedlotForms.withOwners(
+        TestSeedlotForms.owner("00012797", "00", new BigDecimal("50")),
+        TestSeedlotForms.owner("00012797", "00", new BigDecimal("50")));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withOwners(
-                        TestSeedlotForms.owner("00012797", "00", new BigDecimal("50")),
-                        TestSeedlotForms.owner("00012797", "00", new BigDecimal("50")))));
+            () -> service.validateSeedlotForm(seedlot, formDuplicateOwners));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -740,14 +724,12 @@ class SeedlotFormValidationServiceTest {
         .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
 
     Seedlot seedlot = validSeedlot();
+    var formOwnerNotFound = TestSeedlotForms.withOwners(
+        TestSeedlotForms.owner("00099999", "99", new BigDecimal("100")));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withOwners(
-                        TestSeedlotForms.owner("00099999", "99", new BigDecimal("100")))));
+            () -> service.validateSeedlotForm(seedlot, formOwnerNotFound));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -787,12 +769,11 @@ class SeedlotFormValidationServiceTest {
 
     Seedlot seedlot = validSeedlot();
     // null description
+    var formInterimNull = TestSeedlotForms.withInterimFacility("OTH", null);
     SeedlotSubmissionValidationException exNull =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withInterimFacility("OTH", null)));
+            () -> service.validateSeedlotForm(seedlot, formInterimNull));
     boolean hasNullError =
         exNull.getErrors().stream()
             .anyMatch(
@@ -802,12 +783,11 @@ class SeedlotFormValidationServiceTest {
     Assertions.assertTrue(hasNullError, "Expected error on intermOtherFacilityDesc when null");
 
     // empty-string description
+    var formInterimEmpty = TestSeedlotForms.withInterimFacility("OTH", "");
     SeedlotSubmissionValidationException exEmpty =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withInterimFacility("OTH", "")));
+            () -> service.validateSeedlotForm(seedlot, formInterimEmpty));
     boolean hasEmptyError =
         exEmpty.getErrors().stream()
             .anyMatch(
@@ -817,12 +797,11 @@ class SeedlotFormValidationServiceTest {
     Assertions.assertTrue(hasEmptyError, "Expected error on intermOtherFacilityDesc when empty");
 
     // whitespace-only description
+    var formInterimBlank = TestSeedlotForms.withInterimFacility("OTH", "   ");
     SeedlotSubmissionValidationException exBlank =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withInterimFacility("OTH", "   ")));
+            () -> service.validateSeedlotForm(seedlot, formInterimBlank));
     boolean hasBlankError =
         exBlank.getErrors().stream()
             .anyMatch(
@@ -859,14 +838,12 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formBadInterimDates = TestSeedlotForms.withInterimDates(
+        LocalDate.of(2024, Month.JUNE, 10), LocalDate.of(2024, Month.JUNE, 1));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withInterimDates(
-                        LocalDate.of(2024, 6, 10), LocalDate.of(2024, 6, 1))));
+            () -> service.validateSeedlotForm(seedlot, formBadInterimDates));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -889,12 +866,11 @@ class SeedlotFormValidationServiceTest {
         .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
 
     Seedlot seedlot = validSeedlot();
+    var formInterimClientMissing = TestSeedlotForms.withInterimClient("00099998", "01");
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withInterimClient("00099998", "01")));
+            () -> service.validateSeedlotForm(seedlot, formInterimClientMissing));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -904,8 +880,8 @@ class SeedlotFormValidationServiceTest {
   }
 
   @Test
-  @DisplayName("I1-I3: happy path — valid interim step passes")
-  void interim_validForm_passes() {
+  @DisplayName("I1-I3: valid interim dates (start before end) pass")
+  void interim_validDates_passes() {
     stubValidOrchard("405", "PLI");
     stubValidOrchard("406", "PLI");
     stubValidForestClient();
@@ -913,8 +889,10 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formValidInterim = TestSeedlotForms.withInterimDates(
+        LocalDate.of(2024, Month.JUNE, 1), LocalDate.of(2024, Month.JUNE, 10));
     Assertions.assertDoesNotThrow(
-        () -> service.validateSeedlotForm(seedlot, TestSeedlotForms.valid()));
+        () -> service.validateSeedlotForm(seedlot, formValidInterim));
   }
 
   // ----- Extraction step tests (E1-E3) ----------------------------------------
@@ -934,12 +912,11 @@ class SeedlotFormValidationServiceTest {
         .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
 
     Seedlot seedlot = validSeedlot();
+    var formStorageMissing = TestSeedlotForms.withStorageClient("00088887", "02");
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withStorageClient("00088887", "02")));
+            () -> service.validateSeedlotForm(seedlot, formStorageMissing));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -963,12 +940,11 @@ class SeedlotFormValidationServiceTest {
         .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
 
     Seedlot seedlot = validSeedlot();
+    var formExtractoryMissing = TestSeedlotForms.withExtractoryClient("00088886", "03");
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot, TestSeedlotForms.withExtractoryClient("00088886", "03")));
+            () -> service.validateSeedlotForm(seedlot, formExtractoryMissing));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -987,14 +963,12 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formBadExtractionDates = TestSeedlotForms.withExtractionDates(
+        LocalDate.of(2024, Month.NOVEMBER, 10), LocalDate.of(2024, Month.NOVEMBER, 1));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withExtractionDates(
-                        LocalDate.of(2024, 11, 10), LocalDate.of(2024, 11, 1))));
+            () -> service.validateSeedlotForm(seedlot, formBadExtractionDates));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -1013,14 +987,12 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     Seedlot seedlot = validSeedlot();
+    var formBadTempStorageDates = TestSeedlotForms.withTemporaryStorageDates(
+        LocalDate.of(2024, Month.DECEMBER, 10), LocalDate.of(2024, Month.DECEMBER, 1));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withTemporaryStorageDates(
-                        LocalDate.of(2024, 12, 10), LocalDate.of(2024, 12, 1))));
+            () -> service.validateSeedlotForm(seedlot, formBadTempStorageDates));
     boolean hasError =
         ex.getErrors().stream()
             .anyMatch(
@@ -1059,16 +1031,14 @@ class SeedlotFormValidationServiceTest {
     Seedlot seedlot = validSeedlot(); // vegetationCode = "PLI"
 
     // collection end (May 1) before start (May 10) → C3 date-order error
+    var formAggregate = TestSeedlotForms.withOrchardAndCollectionDates(
+        "405",
+        LocalDate.of(2024, Month.MAY, 10),
+        LocalDate.of(2024, Month.MAY, 1));
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () ->
-                service.validateSeedlotForm(
-                    seedlot,
-                    TestSeedlotForms.withOrchardAndCollectionDates(
-                        "405",
-                        LocalDate.of(2024, 5, 10),
-                        LocalDate.of(2024, 5, 1))));
+            () -> service.validateSeedlotForm(seedlot, formAggregate));
 
     Assertions.assertTrue(
         ex.getErrors().size() >= 2,

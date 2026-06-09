@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useMemo, useRef, useState
+  useCallback, useEffect, useMemo, useRef, useState
 } from 'react';
 import {
   useNavigate, useParams, useSearchParams, useLocation
@@ -19,6 +19,7 @@ import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
 import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
+import { getAllParentTrees } from '../../../api-service/parentTreeAPI';
 import {
   TEN_SECONDS, THREE_HALF_HOURS, THREE_HOURS, FIVE_SECONDS
 } from '../../../config/TimeUnits';
@@ -41,7 +42,7 @@ import { StringInputType } from '../../../types/FormInputType';
 
 import ClassAContext, { ClassAContextType } from './context';
 import {
-  AllStepData, AreaOfUseDataType, ProgressIndicatorConfig, ProgressStepStatus
+  AllStepData, AreaOfUseDataType, FormPhase, ProgressIndicatorConfig, ProgressStepStatus
 } from './definitions';
 import {
   initProgressBar, getSpeciesOptionByCode, validateCollectionStep, verifyCollectionStepCompleteness,
@@ -67,8 +68,7 @@ const ContextContainerClassA = ({ children }: props) => {
   const { seedlotNumber } = useParams();
   const [searchParams] = useSearchParams();
   const stepParam = searchParams.get('step');
-
-  const isPageRendered = useRef(false);
+  const [formPhase, setFormPhase] = useState<FormPhase>('booting');
 
   const [formStep, setFormStep] = useState<number>(
     stepParam
@@ -137,11 +137,28 @@ const ContextContainerClassA = ({ children }: props) => {
   const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
   const [geoInfoVals, setGeoInfoVals] = useState<GeoInfoValType>(() => INITIAL_GEO_INFO_VALS);
 
+  const isFormReady = formPhase === 'ready';
+  const canPersistDraft = isFormReady && isFormIncomplete;
+
   const getAllSeedlotInfoQuery = useQuery({
     queryKey: ['seedlot-full-form', seedlotNumber],
     queryFn: () => getAClassSeedlotFullForm(seedlotNumber ?? ''),
-    enabled: isFormSubmitted,
+    enabled: formPhase === 'hydrating-from-tables' || formPhase === 'loading-submitted',
     refetchOnWindowFocus: false
+  });
+
+  const seedlotSpeciesForCatalog = getSpeciesOptionByCode(
+    seedlotQuery.data?.seedlot.vegetationCode,
+    vegCodeQuery.data
+  );
+
+  const parentTreeCatalogQuery = useQuery({
+    queryKey: ['parent-trees', 'vegetation-codes', seedlotSpeciesForCatalog.code],
+    queryFn: () => getAllParentTrees(seedlotSpeciesForCatalog.code),
+    enabled: (formPhase === 'hydrating-from-tables' || formPhase === 'loading-submitted')
+      && seedlotSpeciesForCatalog.code !== '',
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS
   });
 
   // Initialize all step's state here
@@ -306,8 +323,11 @@ const ContextContainerClassA = ({ children }: props) => {
   useEffect(() => {
     if (seedlotQuery.status === 'success') {
       const seedlotStatusCode = seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode;
-      if (seedlotStatusCode !== 'PND' && seedlotStatusCode !== 'INC') {
+      if (seedlotStatusCode === 'PND' || seedlotStatusCode === 'INC') {
+        setFormPhase('loading-draft');
+      } else {
         setIsFormSubmitted(true);
+        setFormPhase('loading-submitted');
       }
 
       fillCollectionGeoData(setGeoInfoVals, setPopSizeAndDiversityConfig, seedlotQuery.data);
@@ -368,6 +388,7 @@ const ContextContainerClassA = ({ children }: props) => {
   useEffect(() => {
     if (
       getAllSeedlotInfoQuery.status === 'success'
+      && parentTreeCatalogQuery.status === 'success'
       && fundingSourcesQuery.status === 'success'
       && methodsOfPaymentQuery.status === 'success'
       && gameticMethodologyQuery.status === 'success'
@@ -379,16 +400,19 @@ const ContextContainerClassA = ({ children }: props) => {
       const fullFormData = getAllSeedlotInfoQuery.data.seedlotData;
       const defaultAgencyNumber = seedlotQuery.data?.seedlot.applicantClientNumber;
 
-      setAllStepData(
-        resDataToState(
-          fullFormData,
-          defaultAgencyNumber,
-          methodsOfPaymentQuery.data,
-          fundingSourcesQuery.data,
-          orchardQuery.data,
-          gameticMethodologyQuery.data
-        )
+      const hydratedState = resDataToState(
+        fullFormData,
+        defaultAgencyNumber,
+        methodsOfPaymentQuery.data,
+        fundingSourcesQuery.data,
+        orchardQuery.data,
+        gameticMethodologyQuery.data
       );
+
+      hydratedState.parentTreeStep.allParentTreeData = parentTreeCatalogQuery.data;
+
+      setAllStepData(hydratedState);
+      setFormPhase('ready');
     } else if (getAllSeedlotInfoQuery.status === 'error') {
       const error = getAllSeedlotInfoQuery.error as AxiosError;
       if (error.response?.status !== 404) {
@@ -399,6 +423,7 @@ const ContextContainerClassA = ({ children }: props) => {
     }
   }, [
     getAllSeedlotInfoQuery.status,
+    parentTreeCatalogQuery.status,
     fundingSourcesQuery.status,
     methodsOfPaymentQuery.status,
     gameticMethodologyQuery.status,
@@ -406,21 +431,6 @@ const ContextContainerClassA = ({ children }: props) => {
     seedlotQuery.status,
     seedlotQuery.fetchStatus,
     getAllSeedlotInfoQuery.fetchStatus
-  ]);
-
-  const [seedlotDataLoaded, setSeedlotDataLoaded] = useState<boolean>(false);
-
-  useEffect(() => {
-    const emptySeedlotData = initEmptySteps();
-    if (
-      getAllSeedlotInfoQuery.status === 'success'
-      && allStepData !== emptySeedlotData
-    ) {
-      setSeedlotDataLoaded(true);
-    }
-  }, [
-    getAllSeedlotInfoQuery.status,
-    allStepData
   ]);
 
   /**
@@ -584,45 +594,45 @@ const ContextContainerClassA = ({ children }: props) => {
     retry: 0
   });
 
-  const handleSaveBtn = () => {
-    setSaveStatus('active');
-    setSaveDescription(smartSaveText.loading);
-    if (!saveProgress.isPending) {
-      saveProgress.mutate();
+  const persistDraft = useCallback((options?: { showLoading?: boolean }) => {
+    if (!canPersistDraft || saveProgress.isPending || saveStatus === 'conflict') {
+      return;
     }
+    if (options?.showLoading) {
+      setSaveStatus('active');
+      setSaveDescription(smartSaveText.loading);
+    }
+    saveProgress.mutate();
+  }, [canPersistDraft, saveProgress, saveStatus]);
+
+  const persistDraftRef = useRef(persistDraft);
+  persistDraftRef.current = persistDraft;
+
+  const handleSaveBtn = () => {
+    persistDraft({ showLoading: true });
   };
 
   const location = useLocation();
 
-  /**
-   * For save progress on page leave.
-   */
+  /** Save draft when navigating away, only after the form has finished loading. */
   useEffect(() => () => {
-    // Prevent save on first render.
-    if (isPageRendered.current && isFormIncomplete) {
-      saveProgress.mutate();
-    }
-    isPageRendered.current = true;
+    persistDraftRef.current();
   }, [location]);
 
-  /**
-   * For auto save on interval.
-   */
+  /** Auto-save on edit threshold and on a fixed interval. */
   useEffect(() => {
-    if (numOfEdit.current >= MAX_EDIT_BEFORE_SAVE && isFormIncomplete && saveStatus !== 'conflict') {
-      if (!saveProgress.isPending) {
-        saveProgress.mutate();
-      }
+    if (numOfEdit.current >= MAX_EDIT_BEFORE_SAVE) {
+      persistDraftRef.current();
     }
 
     const interval = setInterval(() => {
-      if (numOfEdit.current > 0 && !saveProgress.isPending && isFormIncomplete && saveStatus !== 'conflict') {
-        saveProgress.mutate();
+      if (numOfEdit.current > 0) {
+        persistDraftRef.current();
       }
     }, TEN_SECONDS);
 
     return () => clearInterval(interval);
-  }, [numOfEdit.current, saveStatus]);
+  }, [saveStatus, formPhase]);
 
   /**
    * Fetch the seedlot form draft only if the status of the seedlot is pending or incomplete.
@@ -640,7 +650,15 @@ const ContextContainerClassA = ({ children }: props) => {
    */
   useEffect(() => {
     if (getFormDraftQuery.status === 'success') {
-      setAllStepData(getFormDraftQuery.data.allStepData);
+      // When allStepData is empty ({}) the seedlot was freshly copied: trigger getAllSeedlotInfoQuery
+      // to hydrate the form from the target's normalized tables instead of the draft column.
+      const draftKeys = Object.keys(getFormDraftQuery.data.allStepData ?? {});
+      if (draftKeys.length === 0) {
+        setFormPhase('hydrating-from-tables');
+      } else {
+        setAllStepData(getFormDraftQuery.data.allStepData);
+        setFormPhase('ready');
+      }
       const savedStatus = getFormDraftQuery.data.progressStatus;
       const currStepName = stepMap[formStep];
       savedStatus[currStepName].isCurrent = true;
@@ -665,6 +683,7 @@ const ContextContainerClassA = ({ children }: props) => {
           seedlotQuery.data.seedlot.applicantClientNumber,
           getDefaultLocationCode()
         );
+        setFormPhase('ready');
       }
     }
   }, [
@@ -787,6 +806,7 @@ const ContextContainerClassA = ({ children }: props) => {
         defaultCode: getDefaultLocationCode(),
         isFormSubmitted,
         isFormIncomplete,
+        isFormReady,
         handleSaveBtn,
         saveStatus,
         saveDescription,
@@ -808,7 +828,6 @@ const ContextContainerClassA = ({ children }: props) => {
           || fundingSourcesQuery.isFetching
           || getFormDraftQuery.isFetching
         ),
-        seedlotDataLoaded,
         genWorthInfoItems,
         setGenWorthInfoItems,
         weightedGwInfoItems,
@@ -828,7 +847,7 @@ const ContextContainerClassA = ({ children }: props) => {
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
       vegCodeQuery.status, formStep,
-      isFormSubmitted, isFormIncomplete,
+      isFormSubmitted, isFormIncomplete, isFormReady, formPhase,
       saveStatus, saveDescription, lastSaveTimestamp, allStepCompleted,
       progressStatus, submitSeedlot, saveProgress.status, getAllSeedlotInfoQuery.status,
       methodsOfPaymentQuery.status, orchardQuery.status, gameticMethodologyQuery.status,
