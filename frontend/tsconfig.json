@@ -9,15 +9,20 @@
       "ES2022"
     ],
     "allowJs": true,
-    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "ignoreDeprecations": "6.0",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -25,7 +30,8 @@
     "outDir": "./build/"
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "cypress.config.ts"
   ],
   "exclude": [
     "node_modules",
