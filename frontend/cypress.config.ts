@@ -21,7 +21,8 @@ export default defineConfig({
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
-      '**/01-login-page.cy.ts',
+      // Cucumber feature files
+      '**/features/*.feature',
       '**/02-create-a-class-seedlot.cy.ts',
       '**/03-seedlot-dashboard.cy.ts',
       '**/04-seedlot-detail.cy.ts',
@@ -40,9 +41,7 @@ export default defineConfig({
       '**/22-a-class-seedlot-reg-form-collection-interim.cy.ts',
       '**/23-a-class-seedlot-reg-form-ownership.cy.ts',
       '**/24-a-class-seedlot-reg-form-extraction.cy.ts',
-      '**/41-moisture-content.cy.ts',
-      // Cucumber feature files
-      '**/features/*.feature'
+      '**/41-moisture-content.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
