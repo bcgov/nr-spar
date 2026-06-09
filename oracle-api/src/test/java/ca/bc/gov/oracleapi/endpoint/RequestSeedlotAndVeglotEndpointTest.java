@@ -4,18 +4,22 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.oracleapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.oracleapi.service.RequestLotService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(RequestSeedlotAndVeglotEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
@@ -71,6 +75,78 @@ class RequestSeedlotAndVeglotEndpointTest {
     mockMvc
         .perform(
             get("/api/request-seedlot-and-veglot/commitment/{requestSkey}/{itemId}", 123L, "1")
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSeedlotAndSpeciesSuccessTest")
+  void getSeedlotAndSpeciesSuccessTest() throws Exception {
+    Long requestKey = 500L;
+
+    when(requestSeedlotAndVeglotService.getSeedlotAndSpecies(requestKey))
+        .thenReturn(new SeedlotSpeciesDto(16258L, "PLI"));
+
+    mockMvc
+        .perform(
+            get("/api/request-seedlot-and-veglot/seedlot-species/{requestKey}", requestKey)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.seedlotNumber").value(16258L))
+        .andExpect(jsonPath("$.vegetationCode").value("PLI"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSeedlotAndSpeciesNotFoundTest")
+  void getSeedlotAndSpeciesNotFoundTest() throws Exception {
+    Long requestKey = 404L;
+
+    when(requestSeedlotAndVeglotService.getSeedlotAndSpecies(requestKey))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    mockMvc
+        .perform(
+            get("/api/request-seedlot-and-veglot/seedlot-species/{requestKey}", requestKey)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSeedlotAndSpeciesAllowsAuthenticatedUserWithoutSparRole")
+  @WithMockUser(username = "ExternalAppUser", roles = "SOME_EXTERNAL_ROLE")
+  void getSeedlotAndSpeciesAllowsAuthenticatedUserWithoutSparRole() throws Exception {
+    Long requestKey = 500L;
+
+    when(requestSeedlotAndVeglotService.getSeedlotAndSpecies(requestKey))
+        .thenReturn(new SeedlotSpeciesDto(16258L, "PLI"));
+
+    mockMvc
+        .perform(
+            get("/api/request-seedlot-and-veglot/seedlot-species/{requestKey}", requestKey)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.seedlotNumber").value(16258L))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSeedlotAndSpeciesUnauthorizedTest")
+  @WithAnonymousUser
+  void getSeedlotAndSpeciesUnauthorizedTest() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/request-seedlot-and-veglot/seedlot-species/{requestKey}", 500L)
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))

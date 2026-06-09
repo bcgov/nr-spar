@@ -11,6 +11,14 @@ import java.lang.annotation.Target;
 public @interface RoleAccessConfig {
 
   /**
+   * Sentinel role that grants access to any authenticated user, regardless of their roles.
+   * Authentication itself is still enforced by the security filter chain on {@code /api/**}. Use
+   * this for endpoints intended to be consumed by external applications whose users authenticate
+   * through the shared Cognito/IDIR pool but do not carry SPAR roles.
+   */
+  String ANY_AUTHENTICATED = "ANY_AUTHENTICATED";
+
+  /**
    * Defines an array with one or more roles.
    *
    * @return An array containing the roles
