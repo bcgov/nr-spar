@@ -14,7 +14,7 @@ export interface AuthContextData {
   setClientRoles: (clientRoles: UserClientRolesType, reload?: boolean) => void;
   isTscAdmin: boolean;
 }
-//will remove this
+/*will remove this*/
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
