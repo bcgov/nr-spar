@@ -63,7 +63,7 @@ jobs:
           node_version: "22"
           commands: |
             npm ci
-            npx start-server-and-test start http://localhost:3000 "cypress run --browser chrome --spec cypress/e2e/{features,${{ matrix.smoke_test_folder }}}/**/*.{feature,cy.ts,cy.js}"
+            npx start-server-and-test start http://localhost:3000 "cypress run --browser chrome --spec cypress/e2e/{${{ matrix.smoke_test_folder }}}/**/*.{feature,cy.ts,cy.js}"
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
