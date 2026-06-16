@@ -919,10 +919,13 @@ export const convertOrchard = (
   parentTreeRows: RowDataDictType
 ): OrchardFormSubmitType => {
   const primaryOrchardId = orchardData.orchards.primaryOrchard.value.code;
-  const secondaryOrchardId = (orchardData.orchards.primaryOrchard.value.code
-    !== orchardData.orchards.secondaryOrchard.value.code)
-    ? orchardData.orchards.secondaryOrchard.value.code
-    : null;
+  const secondaryCode = orchardData.orchards.secondaryOrchard.value.code;
+  const secondaryOrchardId =
+    orchardData.orchards.secondaryOrchard.enabled
+    && secondaryCode
+    && primaryOrchardId !== secondaryCode
+      ? secondaryCode
+      : null;
 
   return ({
     primaryOrchardId,
