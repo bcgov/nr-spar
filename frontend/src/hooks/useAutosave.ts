@@ -12,9 +12,10 @@ export type UseAutosaveOptions<T> = {
   isEqual?: (a: T, b: T) => boolean;
 };
 
-export type UseAutosaveResult = {
+export type UseAutosaveResult<T> = {
   flush: () => void;
   cancel: () => void;
+  markSaved: (value: T) => void;
 };
 
 const defaultIsEqual = <T>(a: T, b: T): boolean => JSON.stringify(a) === JSON.stringify(b);
@@ -26,7 +27,7 @@ function useAutosave<T>({
   delay = DEFAULT_DELAY,
   maxWait = DEFAULT_MAX_WAIT,
   isEqual = defaultIsEqual
-}: UseAutosaveOptions<T>): UseAutosaveResult {
+}: UseAutosaveOptions<T>): UseAutosaveResult<T> {
   // Latest values held in refs so timer callbacks and event listeners always
   // read current values without needing to re-subscribe.
   const dataRef = useRef(data);
@@ -100,7 +101,12 @@ function useAutosave<T>({
     };
   }, []);
 
-  return { flush: save, cancel: clearTimers };
+  const markSaved = (value: T) => {
+    clearTimers();
+    savedRef.current = value;
+  };
+
+  return { flush: save, cancel: clearTimers, markSaved };
 }
 
 export default useAutosave;

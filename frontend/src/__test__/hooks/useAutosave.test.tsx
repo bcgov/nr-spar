@@ -107,4 +107,22 @@ describe('useAutosave', () => {
     act(() => { vi.advanceTimersByTime(1000); });
     expect(onSave).not.toHaveBeenCalled();
   });
+
+  it('does not re-save a value that was externally marked as saved', () => {
+    const onSave = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ data }) => useAutosave({ data, onSave, delay: 800 }),
+      { initialProps: { data: { v: 0 } } }
+    );
+
+    rerender({ data: { v: 1 } });
+    act(() => { result.current.markSaved({ v: 1 }); });
+    act(() => { vi.advanceTimersByTime(1000); });
+    expect(onSave).not.toHaveBeenCalled();
+
+    rerender({ data: { v: 2 } });
+    act(() => { vi.advanceTimersByTime(800); });
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith({ v: 2 }, { v: 1 });
+  });
 });

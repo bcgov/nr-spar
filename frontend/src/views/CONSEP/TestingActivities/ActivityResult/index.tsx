@@ -50,6 +50,15 @@ const useReplicates = (
     }
   });
 
+  const { markSaved } = useAutosave<ReplicateType[]>({
+    data: replicatesList,
+    onSave: (list) => updateReplicateListMutation.mutate(list),
+    enabled:
+      !Object.values(validationErrors).some(Boolean)
+      && !updateReplicateListMutation.isPending
+      && !isDeletingRef.current
+  });
+
   const deleteReplicateMutation = useMutation({
     mutationFn: (replicateNumber: number) => testingActivitiesAPI(
       replicateType,
@@ -64,6 +73,7 @@ const useReplicates = (
       const updatedList = data.data.replicatesList;
       setReplicatesList(updatedList);
       updateReplicates(updatedList);
+      markSaved(updatedList);
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicate: ${(error as AxiosError).message}`);
@@ -76,17 +86,9 @@ const useReplicates = (
   const syncWithInitialData = (data: ReplicateType[]) => {
     setIsLoading(true);
     setReplicatesList(data);
+    markSaved(data);
     setIsLoading(false);
   };
-
-  useAutosave<ReplicateType[]>({
-    data: replicatesList,
-    onSave: (list) => updateReplicateListMutation.mutate(list),
-    enabled:
-      !Object.values(validationErrors).some(Boolean)
-      && !updateReplicateListMutation.isPending
-      && !isDeletingRef.current
-  });
 
   return {
     replicatesList,
@@ -98,7 +100,8 @@ const useReplicates = (
     setShowDeleteNotification,
     deleteReplicateMutation,
     isDeletingRef,
-    syncWithInitialData
+    syncWithInitialData,
+    markSaved
   };
 };
 
@@ -116,7 +119,8 @@ const ActivityResult = ({
     setShowDeleteNotification,
     deleteReplicateMutation,
     isDeletingRef,
-    syncWithInitialData
+    syncWithInitialData,
+    markSaved
   } = useReplicates(riaKey, replicateType, updateReplicates, setAlert);
 
   const replicatesListRef = useRef(replicatesList);
@@ -135,6 +139,7 @@ const ActivityResult = ({
       setAlert(true, 'Replicates deleted successfully');
       setReplicatesList([]);
       updateReplicates([]);
+      markSaved([]);
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicates: ${(error as AxiosError).message}`);
