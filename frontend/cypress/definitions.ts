@@ -9,6 +9,13 @@ export type SeedlotRegType = {
   withinBc: boolean
 };
 
+export type SeedlotDashboardDataType = {
+  secondSectionTitle: string,
+  secondSectionSubtitle: string,
+  emptySectionTitle: string,
+  emptySectionSubtitle: string
+};
+
 export type SeedlotRegFixtureType = {
   [species: string]: SeedlotRegType
 };
