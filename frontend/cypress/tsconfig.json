@@ -1,11 +1,12 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.tsx", "../cypress.config.ts"],
   "exclude": [],
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "dom"],
+    "target": "ES2022",
+    "lib": ["dom", "ES2022"],
     "types": ["cypress", "node"],
+    "ignoreDeprecations": "6.0",
     "isolatedModules": false,
     "allowJs": true,
     "noEmit": true,

@@ -1,0 +1,52 @@
+name: Create Gherkin Feature from Issue
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  create-feature:
+    if: contains(github.event.issue.labels.*.name, 'gherkin')
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Extract feature content
+        id: feature
+        uses: bcgov/action-gherkin-issue-processor@996c4dd154e93e49a3ddeead7c26c18c3a1602f3 # v1.1.3
+        with:
+          issue: ${{ github.event.issue.number }}
+          default_title: "[Test Case]: REPLACE WITH YOUR TEST CASE TITLE"
+          update_title: true
+
+      - name: Create feature file
+        run: echo "${{ steps.feature.outputs.feature }}" > cypress/e2e/features/upt_${{ github.event.issue.number }}.feature
+
+      - name: Commit & Push changes
+        uses: Andro999b/push@c77535fe7a94645f7ceca83e48e6cc977620710e # v1.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: test/upt_${{ github.event.issue.number }}
+          force: true
+          message: |
+            test(upt #${{ github.event.issue.number }}): ${{ steps.feature.outputs.title }}
+
+            Closes #${{ github.event.issue.number }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        with:
+          branch: test/upt_${{ github.event.issue.number }}
+          title: "test(upt #${{ github.event.issue.number }}): ${{ steps.feature.outputs.title }}"
+          body: |
+            ${{ github.event.issue.body }}
+
+            Closes #${{ github.event.issue.number }}

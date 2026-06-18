@@ -10,72 +10,119 @@ import prefix from '../../src/styles/classPrefix';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
 
-Cypress.Commands.add('login', () => {
-  const config = {
-    username: Cypress.env('USERNAME'),
-    password: Cypress.env('PASSWORD'),
-    timeout: HALF_SECOND,
-    loginService: Cypress.env('LOGIN_SERVICE') ?? 'IDIR',
-    delay: TYPE_DELAY
-  };
+Cypress.Commands.add('login', () => cy
+  .env<{
+    USERNAME?: string;
+    PASSWORD?: string;
+    LOGIN_SERVICE?: string;
+    idirLoginUrl?: string;
+    businessBceIdLoginUrl?: string;
+  }>([
+    'USERNAME',
+    'PASSWORD',
+    'LOGIN_SERVICE',
+    'idirLoginUrl',
+    'businessBceIdLoginUrl'
+  ])
+  .then((env) => {
+    const config = {
+      username: env.USERNAME ?? '',
+      password: env.PASSWORD ?? '',
+      timeout: HALF_SECOND,
+      loginService: env.LOGIN_SERVICE ?? 'IDIR',
+      delay: TYPE_DELAY
+    };
 
-  cy.session(
-    config.username,
-    () => {
-      cy.on('uncaught:exception', (err) => {
-        if (err.message.includes('missing ) after argument list')) {
-          return false; // Suppress this known error, avoid failing test
-        }
-        return true; // Fail test on other errors
-      });
-      const loginBtnId = `landing-button__${config.loginService.toLowerCase()}`;
-      const loginLogo = `#${config.loginService.toLowerCase()}Logo`;
-      const loginUrl = config.loginService === 'IDIR'
-        ? Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
-      cy.clearAllCookies();
-      cy.clearAllLocalStorage();
-      cy.clearAllSessionStorage();
-      cy.visit('/');
-      cy.getByDataTest(loginBtnId).click();
-      cy.url().then((url) => {
-        if (url.includes('.gov.bc.ca')) {
-          cy.get(loginLogo, { timeout: config.timeout }).should('be.visible');
-          cy.get('input[name=user]')
-            .clear()
-            .type(config.username, { delay: config.delay });
-          cy.get('input[name=password]')
-            .clear()
-            .type(config.password, { delay: config.delay });
-          cy.get('input[name=btnSubmit]').click();
-        } else {
-          cy.origin(
-            loginUrl,
-            { args: config },
-            ({
-              username, password, delay, timeout
-            }) => {
-              cy.get(`#${config.loginService.toLowerCase()}Logo`, { timeout }).should('be.visible');
-              cy.get('input[name=user]').clear().type(username, { delay });
-              cy.get('input[name=password]').clear().type(password, { delay });
-              cy.get('input[name=btnSubmit]').click();
-            }
-          );
-        }
-      });
-      cy.get('.bx--contained-list-item__content').contains('WESTERN FOREST PRODUCTS INC.').click();
-      cy.get('.action-btn').contains('Continue').click();
-
-      cy.url().should('contains', '/dashboard');
-      cy.setCookie('is-cypress-logged-in', 'true');
-    },
-    {
-      validate: () => {
-        cy.getCookie('is-cypress-logged-in').should('exist');
-      },
-      cacheAcrossSpecs: true
+    if (!config.username || !config.password) {
+      throw new Error('Missing Cypress env vars: USERNAME or PASSWORD');
     }
-  );
-});
+
+    const loginUrl = config.loginService === 'IDIR'
+      ? env.idirLoginUrl
+      : env.businessBceIdLoginUrl;
+
+    return cy.session(
+      config.username,
+      () => {
+        cy.on('uncaught:exception', (err) => {
+          if (err.message.includes('missing ) after argument list')) {
+            return false;
+          }
+          return true;
+        });
+
+        const loginBtnId = `landing-button__${config.loginService.toLowerCase()}`;
+        const loginLogo = `#${config.loginService.toLowerCase()}Logo`;
+
+        cy.clearAllCookies();
+        cy.clearAllLocalStorage();
+        cy.clearAllSessionStorage();
+        cy.visit('/');
+        cy.getByDataTest(loginBtnId).click();
+
+        const SUBMIT_SELECTOR = 'input[name=btnSubmit]';
+
+        cy.url().then((url) => {
+          if (url.includes('.gov.bc.ca')) {
+            cy.get(loginLogo, { timeout: config.timeout }).should('be.visible');
+            cy.get('input[name=user]').clear().type(config.username, { delay: config.delay });
+            cy.get('input[name=password]').clear().type(config.password, { delay: config.delay });
+            cy.get('body').then(($body) => {
+              const $submit = $body.find(SUBMIT_SELECTOR);
+              if ($submit.length > 0) {
+                cy.wrap($submit.first()).click();
+              }
+            });
+          } else {
+            if (!loginUrl) {
+              throw new Error('Missing login URL env var for selected login service');
+            }
+
+            cy.origin(
+              loginUrl,
+              {
+                args: {
+                  username: config.username,
+                  password: config.password,
+                  delay: config.delay,
+                  timeout: config.timeout,
+                  loginService: config.loginService
+                }
+              },
+              ({
+                username, password, delay, timeout, loginService
+              }) => {
+                cy.get(`#${loginService.toLowerCase()}Logo`, { timeout }).should('be.visible');
+                cy.get('input[name=user]').clear().type(username, { delay });
+                cy.get('input[name=password]').clear().type(password, { delay });
+                const submitSelector = 'input[name=btnSubmit]';
+                cy.get('body').then(($body) => {
+                  const $submit = $body.find(submitSelector);
+                  if ($submit.length > 0) {
+                    cy.wrap($submit.first()).click();
+                  }
+                });
+              }
+            );
+          }
+        });
+
+        cy.get('.bx--contained-list-item__content')
+          .contains('WESTERN FOREST PRODUCTS INC.')
+          .click();
+        cy.get('.action-btn').contains('Continue').click();
+
+        cy.url().should('contains', '/dashboard');
+        cy.setCookie('is-cypress-logged-in', 'true');
+      },
+      {
+        validate: () => {
+          cy.getCookie('is-cypress-logged-in').should('exist');
+        },
+        cacheAcrossSpecs: true
+      }
+    );
+  }));
 
 Cypress.Commands.add('navigateTo', (menuItem) => {
   cy.get(NavigationSelectors.NavigationSideMenu)

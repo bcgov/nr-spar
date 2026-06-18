@@ -1,6 +1,9 @@
 import { defineConfig } from 'cypress';
 import codeCoverageTask from '@cypress/code-coverage/task';
 import cypressSplit from 'cypress-split';
+import { addCucumberPreprocessorPlugin } from '@badeball/cypress-cucumber-preprocessor';
+import { createEsbuildPlugin } from '@badeball/cypress-cucumber-preprocessor/esbuild';
+import createBundler from '@bahmutov/cypress-esbuild-preprocessor';
 import { ONE_MINUTE } from './cypress/constants';
 
 let CypressData: { [k: string]: any } = {};
@@ -18,7 +21,8 @@ export default defineConfig({
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
-      '**/01-login-page.cy.ts',
+      // Cucumber feature files
+      '**/features/*.feature',
       '**/02-create-a-class-seedlot.cy.ts',
       '**/03-seedlot-dashboard.cy.ts',
       '**/04-seedlot-detail.cy.ts',
@@ -45,11 +49,15 @@ export default defineConfig({
     },
     defaultCommandTimeout: ONE_MINUTE,
     video: true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setupNodeEvents(on, config) {
+    async setupNodeEvents(on, config) {
       codeCoverageTask(on, config);
       cypressSplit(on, config);
+      await addCucumberPreprocessorPlugin(on, config);
       // implement node event listeners here
+      on(
+        'file:preprocessor',
+        createBundler({ plugins: [createEsbuildPlugin(config)] })
+      );
       on('task', {
         log(args) {
           // eslint-disable-next-line no-console

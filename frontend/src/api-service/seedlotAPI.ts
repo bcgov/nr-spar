@@ -2,7 +2,7 @@ import RevisionCountDto from '../types/RevisionCountDto';
 import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
 import {
   RichSeedlotType, SeedlotAClassFullResponseType, SeedlotAClassSubmitType,
-  SeedlotProgressPayloadType, SeedlotsReturnType
+  SeedlotCreateResponseType, SeedlotProgressPayloadType, SeedlotsReturnType
 } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
 import api from './api';
@@ -76,4 +76,9 @@ export const getAClassSeedlotFullForm = (seedlotNumber: string) => {
 export const getSeedlotFromOracleDbBySeedlotNumber = (seedlotNumber: string) => {
   const url = ApiConfig.seedlotFromOracleDbBySeedlotNumber.replace('{seedlotNumber}', seedlotNumber);
   return api.get(url);
+};
+
+export const postCopySeedlot = (sourceSeedlotNumber: string) => {
+  const url = `${ApiConfig.seedlots}/${sourceSeedlotNumber}/copy`;
+  return api.post(url, {}).then((res): SeedlotCreateResponseType => res.data);
 };

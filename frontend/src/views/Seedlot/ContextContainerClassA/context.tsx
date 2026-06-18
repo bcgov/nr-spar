@@ -40,6 +40,7 @@ export type ClassAContextType = {
   defaultCode: string,
   isFormSubmitted: boolean,
   isFormIncomplete: boolean,
+  isFormReady: boolean,
   handleSaveBtn: () => void,
   saveStatus: string | null,
   saveDescription: string,
@@ -59,7 +60,6 @@ export type ClassAContextType = {
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => void,
   saveProgressStatus: MutationStatusType,
   isFetchingData: boolean,
-  seedlotDataLoaded: boolean,
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: React.Dispatch<
     React.SetStateAction<Record<keyof PrimitiveRowItem | keyof StrTypeRowItem, InfoDisplayObj[]>>
@@ -95,6 +95,7 @@ const ClassAContext = createContext<ClassAContextType>({
   defaultCode: '',
   isFormSubmitted: false,
   isFormIncomplete: true,
+  isFormReady: false,
   handleSaveBtn: () => { },
   saveStatus: null,
   saveDescription: '',
@@ -109,7 +110,6 @@ const ClassAContext = createContext<ClassAContextType>({
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => { },
   saveProgressStatus: 'idle',
   isFetchingData: false,
-  seedlotDataLoaded: false,
   geoInfoVals: {} as GeoInfoValType,
   genWorthVals: {} as GenWorthValType,
   setGenWorthVal: () => { },

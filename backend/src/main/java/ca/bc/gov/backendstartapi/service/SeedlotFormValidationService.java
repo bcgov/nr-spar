@@ -72,7 +72,7 @@ public class SeedlotFormValidationService {
         seedlot, dto.primaryOrchardId(), "seedlotFormOrchardDto.primaryOrchardId", errors);
 
     // O4: secondary orchard (same O1-O3 checks, only when present)
-    if (dto.secondaryOrchardId() != null) {
+    if (dto.secondaryOrchardId() != null && !dto.secondaryOrchardId().isBlank()) {
       validateOrchardId(
           seedlot,
           dto.secondaryOrchardId(),
@@ -120,7 +120,7 @@ public class SeedlotFormValidationService {
 
   private void validateOrchardId(
       Seedlot seedlot, String orchardId, String fieldId, List<SeedlotValidationError> errors) {
-    if (orchardId == null) {
+    if (orchardId == null || orchardId.isBlank()) {
       return;
     }
     Optional<OrchardDto> orchardOpt = oracleApiProvider.findOrchardById(orchardId);

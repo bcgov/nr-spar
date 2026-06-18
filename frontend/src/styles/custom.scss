@@ -452,3 +452,17 @@ label.#{vars.$bcgov-prefix}--label--disabled {
 label.#{vars.$bcgov-prefix}--label {
   line-height: var(--#{vars.$bcgov-prefix}-label-01-line-height, 1.5rem);
 }
+
+.spar-modal {
+  .#{vars.$bcgov-prefix}--btn {
+    block-size: 0;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-footer {
+    height: auto;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-content {
+    padding-bottom: 2.5rem;
+  }
+}

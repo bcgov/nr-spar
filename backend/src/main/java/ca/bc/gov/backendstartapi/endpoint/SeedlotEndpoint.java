@@ -16,6 +16,7 @@ import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
+import ca.bc.gov.backendstartapi.service.SeedlotCopyService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -72,6 +73,8 @@ public class SeedlotEndpoint {
   private final SmpCalculationCsvTableParser smpCalculationTableParser;
 
   private final SeedlotService seedlotService;
+
+  private final SeedlotCopyService seedlotCopyService;
 
   private final SaveSeedlotFormService saveSeedlotFormService;
 
@@ -548,6 +551,51 @@ public class SeedlotEndpoint {
           String seedlotNumber) {
 
     return saveSeedlotFormService.getFormClassA(seedlotNumber);
+  }
+
+  /**
+   * Creates a copy of an existing seedlot under a new seedlot number.
+   *
+   * @param seedlotNumber the source seedlot number to copy
+   * @return a {@link SeedlotStatusResponseDto} with the new seedlot number and INC status
+   */
+  @PostMapping("/{seedlotNumber}/copy")
+  @Operation(
+      summary = "Copy a seedlot to a new seedlot number",
+      description =
+          "Copies an existing Class A seedlot to a new auto-assigned number in the copy band"
+              + " (62000–62998).")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Seedlot successfully copied."),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Copy band exhausted.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Source seedlot not found.",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN"})
+  public ResponseEntity<SeedlotStatusResponseDto> copySeedlot(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Source seedlot number",
+              required = true,
+              schema = @Schema(type = "string", pattern = "\\d{5}", example = "62001"))
+      @PathVariable String seedlotNumber) {
+    long started = Instant.now().toEpochMilli();
+    String userId = loggedUserService.getLoggedUserId();
+    SeedlotStatusResponseDto response = seedlotCopyService.copySeedlot(seedlotNumber, userId);
+    long finished = Instant.now().toEpochMilli();
+    SparLog.info("Time spent: {} ms - copy seedlot", (finished - started));
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   /** Retrieve only the progress_status column from the form progress table. */

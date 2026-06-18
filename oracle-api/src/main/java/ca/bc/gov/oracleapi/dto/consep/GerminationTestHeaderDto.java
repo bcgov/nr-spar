@@ -164,6 +164,22 @@ public record GerminationTestHeaderDto(
     Integer intrmdtCleanrInd,
 
     @Schema(description = "Request type status", example = "TSC")
-    String requestTypeSt
+    String requestTypeSt,
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Schema(
+        description = "update_timestamp of the test result row;"
+            + " echo back as testResultUpdateTimestamp when updating (optimistic lock)",
+        example = "2026-05-01T10:00:00"
+    )
+    LocalDateTime testResultUpdateTimestamp,
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Schema(
+        description = "update_timestamp of the activity row;"
+            + " echo back as riaUpdateTimestamp when updating (optimistic lock)",
+        example = "2026-05-01T11:00:00"
+    )
+    LocalDateTime riaUpdateTimestamp
 ) {
 }

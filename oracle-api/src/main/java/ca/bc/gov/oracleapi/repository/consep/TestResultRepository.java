@@ -5,6 +5,7 @@ import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -194,7 +195,9 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
             a.dryWeight,
             a.drybackWeight,
             a.intermediateCleaner,
-            r.requestTypeSt
+            r.requestTypeSt,
+            tst.updateTimestamp,
+            a.updateTimestamp
     )
     FROM TestResultEntity tst
     JOIN ActivityEntity a
@@ -206,4 +209,145 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
   Optional<GerminationTestHeaderDto> findGerminationTestHeaderByRiaKey(
       @Param("riaKey") BigDecimal riaKey
   );
+
+  /**
+   * Earliest actual end among completed (+accepted) tests of the same
+   * seedlot / activity type / category. Spec: "Update (test and activity)".
+   */
+  @Query("""
+      SELECT MIN(a.actualEndDateTime)
+      FROM TestResultEntity t
+      JOIN ActivityEntity a
+        ON a.riaKey = t.riaKey
+      WHERE a.seedlotNumber = :seedlotNumber
+        AND t.activityType = :activityType
+        AND t.testCategory = :testCategory
+        AND t.testCompleteInd <> 0
+        AND t.acceptResult <> 0
+      """)
+  LocalDateTime findMinCompletedAcceptedEndDate(
+      @Param("seedlotNumber") String seedlotNumber,
+      @Param("activityType") String activityType,
+      @Param("testCategory") String testCategory);
+
+  /** Latest actual end among completed (+accepted) tests; see min variant. */
+  @Query("""
+      SELECT MAX(a.actualEndDateTime)
+      FROM TestResultEntity t
+      JOIN ActivityEntity a
+        ON a.riaKey = t.riaKey
+      WHERE a.seedlotNumber = :seedlotNumber
+        AND t.activityType = :activityType
+        AND t.testCategory = :testCategory
+        AND t.testCompleteInd <> 0
+        AND t.acceptResult <> 0
+      """)
+  LocalDateTime findMaxCompletedAcceptedEndDate(
+      @Param("seedlotNumber") String seedlotNumber,
+      @Param("activityType") String activityType,
+      @Param("testCategory") String testCategory);
+
+  /** All rank 'A' tests for a seedlot (rank computation input). */
+  @Query("""
+      SELECT t
+      FROM TestResultEntity t
+      JOIN ActivityEntity a
+        ON a.riaKey = t.riaKey
+      WHERE a.seedlotNumber = :seedlotNumber
+        AND t.testRank = 'A'
+      """)
+  List<TestResultEntity> findRankATestsBySeedlot(
+      @Param("seedlotNumber") String seedlotNumber);
+
+  /**
+   * Update the germination test header with optimistic locking.
+   * Related Test Results columns are zeroed on save per spec.
+   *
+   * @return rows updated; 0 means the row changed since it was read (409).
+   */
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE TestResultEntity t
+         SET t.originalTest = :originalTest,
+             t.currentTest = :currentTest,
+             t.testRank = :testRank,
+             t.testCompleteInd = :testCompleteInd,
+             t.acceptResult = :acceptResult,
+             t.germinatorId = :germinatorId,
+             t.seedWithdrawDate = :seedWithdrawDate,
+             t.testCategory = :testCategory,
+             t.moisturePct = 0,
+             t.weightPer100 = 0,
+             t.seedsPerGram = 0,
+             t.purityPct = 0,
+             t.otherTestResult = 0,
+             t.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE t.riaKey = :riaKey
+         AND t.updateTimestamp = :expectedUpdateTimestamp
+      """)
+  int updateGerminationTestHeader(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("originalTest") Integer originalTest,
+      @Param("currentTest") Integer currentTest,
+      @Param("testRank") String testRank,
+      @Param("testCompleteInd") Integer testCompleteInd,
+      @Param("acceptResult") Integer acceptResult,
+      @Param("germinatorId") String germinatorId,
+      @Param("seedWithdrawDate") LocalDate seedWithdrawDate,
+      @Param("testCategory") String testCategory,
+      @Param("expectedUpdateTimestamp") LocalDateTime expectedUpdateTimestamp);
+
+  /** Reset original_test_ind on sibling tests (post-update, AC #5). */
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE TestResultEntity t
+         SET t.originalTest = 0,
+             t.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE t.riaKey <> :riaKey
+         AND t.activityType = :activityType
+         AND t.testCategory = :testCategory
+         AND EXISTS (
+               SELECT 1 FROM ActivityEntity a
+                WHERE a.riaKey = t.riaKey
+                  AND a.seedlotNumber = :seedlotNumber)
+      """)
+  int resetOriginalTestIndForSiblings(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("activityType") String activityType,
+      @Param("testCategory") String testCategory,
+      @Param("seedlotNumber") String seedlotNumber);
+
+  /** Reset current_test_ind on sibling tests (post-update, AC #5). */
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE TestResultEntity t
+         SET t.currentTest = 0,
+             t.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE t.riaKey <> :riaKey
+         AND t.activityType = :activityType
+         AND t.testCategory = :testCategory
+         AND EXISTS (
+               SELECT 1 FROM ActivityEntity a
+                WHERE a.riaKey = t.riaKey
+                  AND a.seedlotNumber = :seedlotNumber)
+      """)
+  int resetCurrentTestIndForSiblings(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("activityType") String activityType,
+      @Param("testCategory") String testCategory,
+      @Param("seedlotNumber") String seedlotNumber);
+
+  /**
+   * Remove the test from its germinator location when Complete is first
+   * checked. No entity maps CNS_T_ASSIGND_GERM_LOC, hence native SQL.
+   */
+  @Modifying
+  @Transactional
+  @Query(
+      value = "DELETE FROM CONSEP.CNS_T_ASSIGND_GERM_LOC WHERE RIA_SKEY = :riaKey",
+      nativeQuery = true)
+  void deleteAssignedGermLocation(@Param("riaKey") BigDecimal riaKey);
 }
