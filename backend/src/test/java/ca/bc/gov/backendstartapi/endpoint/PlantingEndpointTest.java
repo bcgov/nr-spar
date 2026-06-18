@@ -65,25 +65,6 @@ class PlantingEndpointTest {
   }
 
   @Test
-  @DisplayName("getSeedlotAndSpeciesByRequestKeyAllowsAuthenticatedUserWithoutSparRole")
-  @WithMockUser(username = "ExternalAppUser", roles = "SOME_EXTERNAL_ROLE")
-  void getSeedlotAndSpeciesByRequestKeyAllowsAuthenticatedUserWithoutSparRole() throws Exception {
-    Long requestKey = 500L;
-
-    when(plantingService.getSeedlotAndSpeciesByRequestKey(requestKey))
-        .thenReturn(new SeedlotSpeciesDto(16258L, "PLI"));
-
-    mockMvc
-        .perform(
-            get("/api/planting/request-key/{requestKey}", requestKey)
-                .with(csrf().asHeader())
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.seedlotNumber").value(16258L))
-        .andReturn();
-  }
-
-  @Test
   @DisplayName("getSeedlotAndSpeciesByRequestKeyUnauthorizedTest")
   @WithAnonymousUser
   void getSeedlotAndSpeciesByRequestKeyUnauthorizedTest() throws Exception {

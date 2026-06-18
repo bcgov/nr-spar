@@ -121,26 +121,6 @@ class RequestSeedlotAndVeglotEndpointTest {
   }
 
   @Test
-  @DisplayName("getSeedlotAndSpeciesAllowsAuthenticatedUserWithoutSparRole")
-  @WithMockUser(username = "ExternalAppUser", roles = "SOME_EXTERNAL_ROLE")
-  void getSeedlotAndSpeciesAllowsAuthenticatedUserWithoutSparRole() throws Exception {
-    Long requestKey = 500L;
-
-    when(requestSeedlotAndVeglotService.getSeedlotAndSpecies(requestKey))
-        .thenReturn(new SeedlotSpeciesDto(16258L, "PLI"));
-
-    mockMvc
-        .perform(
-            get("/api/request-seedlot-and-veglot/seedlot-species/{requestKey}", requestKey)
-                .with(csrf().asHeader())
-                .header("Content-Type", "application/json")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.seedlotNumber").value(16258L))
-        .andReturn();
-  }
-
-  @Test
   @DisplayName("getSeedlotAndSpeciesUnauthorizedTest")
   @WithAnonymousUser
   void getSeedlotAndSpeciesUnauthorizedTest() throws Exception {

@@ -62,10 +62,6 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
    */
   private boolean matchUserRoleWithResourceRoles(
       List<String> rolesRequired, List<String> userRoles) {
-    if (rolesRequired.contains(RoleAccessConfig.ANY_AUTHENTICATED)) {
-      SparLog.debug("Request allowed for any authenticated user");
-      return true;
-    }
     for (String requiredRole : rolesRequired) {
       if (userRoles.contains(requiredRole)) {
         SparLog.debug("Request allowed by user role: {}", requiredRole);

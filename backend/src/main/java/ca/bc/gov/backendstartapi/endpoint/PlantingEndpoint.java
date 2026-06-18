@@ -17,19 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * This class exposes planting related information to external applications.
- *
- * <p>Endpoints in this controller are intentionally gated with
- * {@link RoleAccessConfig#ANY_AUTHENTICATED} rather than SPAR roles: they are consumed by an
- * external application whose users authenticate through the same Cognito/IDIR pool but do not carry
- * SPAR roles. The exposed data (seedlot number + species) is non-sensitive reference data.
- * Replace the marker with specific roles (or add a dedicated group) if access ever needs to be
- * narrowed.
- */
+/** This class exposes planting related information. */
 @RestController
 @RequestMapping(path = "/api/planting", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Planting", description = "Resource for external consumers to resolve planting data")
+@Tag(name = "Planting", description = "Resource to resolve planting data")
 public class PlantingEndpoint {
 
   private final PlantingService plantingService;
@@ -59,7 +50,7 @@ public class PlantingEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
-  @RoleAccessConfig({RoleAccessConfig.ANY_AUTHENTICATED})
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public SeedlotSpeciesDto getSeedlotAndSpeciesByRequestKey(
       @PathVariable
           @Parameter(

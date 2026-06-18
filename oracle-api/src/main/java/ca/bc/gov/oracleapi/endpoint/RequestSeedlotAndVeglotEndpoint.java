@@ -63,11 +63,6 @@ public class RequestSeedlotAndVeglotEndpoint {
   /**
    * Fetch the seedlot and species (vegetation code) for a request key.
    *
-   * <p>This endpoint is intentionally authenticated-only (no {@link RoleAccessConfig} role gate):
-   * it is consumed via the backend by an external application whose users authenticate through the
-   * same Cognito/IDIR pool but do not carry SPAR roles. The data (seedlot number + species) is
-   * non-sensitive reference data. Add a role gate here if access ever needs to be narrowed.
-   *
    * @param requestKey the request key to look up
    * @return the {@link SeedlotSpeciesDto} mapped to the request key
    */
@@ -96,7 +91,7 @@ public class RequestSeedlotAndVeglotEndpoint {
             description = "The request key does not exist",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  @RoleAccessConfig({RoleAccessConfig.ANY_AUTHENTICATED})
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public SeedlotSpeciesDto getSeedlotAndSpecies(@PathVariable Long requestKey) {
     SparLog.info("Fetching seedlot and species for requestKey {}", requestKey);
 
