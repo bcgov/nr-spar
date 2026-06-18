@@ -1,8 +1,6 @@
 import React, {
   useMemo,
   useState,
-  useRef,
-  useEffect,
   useCallback
 } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -33,6 +31,7 @@ import {
 } from '../../../../../types/consep/GerminatorTrayType';
 import { getGermTrayColumns, getGermTrayTestsColumns } from './constants';
 import { GermTrayColumn } from './definitions';
+import useAutosave from '../../../../../hooks/useAutosave';
 import './styles.scss';
 
 const BREAD_CRUMB_ITEMS = [{ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES }];
@@ -52,7 +51,6 @@ const MaintainGermTray = () => {
   } | null>(null);
   const [trays, setTrays] = useState<GermTrayColumn[]>(germinatorTrays);
   const [traySearch, setTraySearch] = useState('');
-  const lastSyncedRef = useRef<string | null>(JSON.stringify(germinatorTrays));
   const [selectedTrayId, setSelectedTrayId] = useState<number | null>(null);
   const [pendingDeleteTray, setPendingDeleteTray] = useState<GermTrayColumn | null>(null);
   const [pendingDeleteTest, setPendingDeleteTest] = useState<GermTrayTestType | null>(null);
@@ -161,6 +159,25 @@ const MaintainGermTray = () => {
     onSuccess: () => { setAlert(null); }
   });
 
+  useAutosave<GermTrayColumn[]>({
+    data: trays,
+    enabled: !assignMutation.isPending,
+    onSave: (curr, prev) => {
+      const prevMap = new Map(
+        (prev ?? []).map((tray) => [tray.germinatorTrayId, tray])
+      );
+      const changedTray = curr.find(
+        (tray) => tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId
+      );
+      if (changedTray) {
+        assignMutation.mutate({
+          germinatorTrayId: changedTray.germinatorTrayId,
+          germinatorId: changedTray.germinatorId
+        });
+      }
+    }
+  });
+
   const updateRow = useCallback((updatedRow: GermTrayCreateResponseType) => {
     setTrays((prev) => prev.map(
       (row) => (
@@ -170,34 +187,6 @@ const MaintainGermTray = () => {
       )
     ));
   }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (assignMutation.isPending) return;
-
-      const current = JSON.stringify(trays);
-      if (current === lastSyncedRef.current) return;
-
-      const prev: GermTrayColumn[] = JSON.parse(lastSyncedRef.current || '[]');
-      const prevMap = new Map(prev.map((tray) => [tray.germinatorTrayId, tray]));
-
-      // find the first changed tray only
-      const changedTray = trays.find(
-        (tray) => tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId
-      );
-
-      if (!changedTray) return;
-
-      assignMutation.mutate({
-        germinatorTrayId: changedTray.germinatorTrayId,
-        germinatorId: changedTray.germinatorId
-      });
-
-      lastSyncedRef.current = current;
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [trays, assignMutation]);
 
   const handleDeleteTrayClick = useCallback(
     (tray: GermTrayColumn) => setPendingDeleteTray(tray),
