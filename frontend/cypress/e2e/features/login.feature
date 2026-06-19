@@ -2,9 +2,9 @@ Feature: Login page
 
   Scenario: Landing page displays correct content
     Given I visit the landing page
-    Then I can see the title "Welcome to SPAR"
-    And I can see the subtitle "Seed Planning and Registry Application"
-    And I can see the description "Register and store your seed and meet your annual reforestation needs using SPAR"
+    Then I can see the login title "Welcome to SPAR"
+    And I can see the login subtitle "Seed Planning and Registry Application"
+    And I can see the login description "Register and store your seed and meet your annual reforestation needs using SPAR"
 
   Scenario Outline: User can open a login provider page
     Given I visit the landing page
@@ -18,7 +18,7 @@ Feature: Login page
 
   Scenario: Unauthenticated user is redirected to landing page
     When I visit "/dashboard" without logging in
-    Then I can see the title "Welcome to SPAR"
+    Then I can see the login title "Welcome to SPAR"
 
   Scenario: Authenticated user lands on dashboard
     Given I am logged in
