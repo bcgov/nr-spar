@@ -70,6 +70,13 @@ public class RequestLotService {
           HttpStatus.NOT_FOUND, "No seedlot found for the given request key");
     }
 
+    if (results.size() > 1) {
+      SparLog.warn(
+          "Multiple seedlot/species rows found for requestKey {} ({} rows); returning the first result",
+          requestKey,
+          results.size());
+    }
+
     return results.get(0);
   }
 }
