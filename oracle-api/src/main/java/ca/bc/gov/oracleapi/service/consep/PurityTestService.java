@@ -115,6 +115,7 @@ public class PurityTestService {
             activityData.get().getRiaComment(),
             activityData.get().getActualBeginDateTime(),
             activityData.get().getActualEndDateTime(),
+            activityData.get().getUpdateTimestamp(),
             replicatesList,
             debrisList);
 
