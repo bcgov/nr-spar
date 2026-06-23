@@ -73,6 +73,11 @@ const PurityContent = () => {
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
+  // Serialize autosaves to avoid sending a stale optimistic-lock timestamp.
+  const inFlightRef = useRef<boolean>(false);
+  const pendingRef = useRef<boolean>(false);
+  const latestRecordRef = useRef<ActivityRecordType | undefined>(undefined);
+
   const { isConflict, markConflict, clearConflict } = useActivityConflict();
 
   const testActivityQuery = useQuery({
@@ -130,7 +135,18 @@ const PurityContent = () => {
     onSuccess: (response) => {
       const newTimestamp = response?.data?.updateTimestamp;
       if (newTimestamp) {
+        latestRecordRef.current = latestRecordRef.current
+          ? { ...latestRecordRef.current, updateTimestamp: newTimestamp }
+          : latestRecordRef.current;
         setActivityRecord((prev) => (prev ? { ...prev, updateTimestamp: newTimestamp } : prev));
+      }
+      inFlightRef.current = false;
+      if (pendingRef.current) {
+        pendingRef.current = false;
+        if (latestRecordRef.current) {
+          inFlightRef.current = true;
+          updateActivityRecordMutation.mutate(latestRecordRef.current);
+        }
       }
       setAlert({ isSuccess: true, message: 'Activity record updated successfully' });
       setTimeout(() => {
@@ -138,6 +154,8 @@ const PurityContent = () => {
       }, 3000);
     },
     onError: (error) => {
+      inFlightRef.current = false;
+      pendingRef.current = false;
       if ((error as AxiosError).response?.status === 409) {
         markConflict();
         return;
@@ -251,6 +269,7 @@ const PurityContent = () => {
         updateTimestamp: testActivityQuery.data.updateTimestamp
       };
       setActivityRecord(activityRecordData);
+      latestRecordRef.current = activityRecordData;
       if (testActivityQuery.data.debrisList) {
         setImpurities(impuritiesPerReplicate(testActivityQuery.data.debrisList));
       }
@@ -299,18 +318,24 @@ const PurityContent = () => {
     testActivityQuery.refetch().then(() => clearConflict());
   };
 
+  const doSave = (record: ActivityRecordType) => {
+    inFlightRef.current = true;
+    updateActivityRecordMutation.mutate(record);
+  };
+
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
     if (isConflict) {
       return;
     }
-    setActivityRecord({
-      ...activityRecord,
-      ...record
-    });
-    updateActivityRecordMutation.mutate({
-      ...activityRecord,
-      ...record
-    });
+    const base = latestRecordRef.current ?? activityRecord;
+    const merged = { ...base, ...record };
+    setActivityRecord(merged);
+    latestRecordRef.current = merged;
+    if (inFlightRef.current) {
+      pendingRef.current = true;
+      return;
+    }
+    doSave(merged);
   };
 
   const createBreadcrumbItems = () => {

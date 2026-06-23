@@ -85,6 +85,11 @@ const MoistureContent = () => {
   // Reference to the table body for extracting MC Values
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
+  // Serialize autosaves to avoid sending a stale optimistic-lock timestamp.
+  const inFlightRef = useRef<boolean>(false);
+  const pendingRef = useRef<boolean>(false);
+  const latestRecordRef = useRef<ActivityRecordType | undefined>(undefined);
+
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
     queryFn: () => testingActivitiesAPI('moistureTest', 'getDataByRiaKey', { riaKey }),
@@ -100,7 +105,18 @@ const MoistureContent = () => {
     onSuccess: (response) => {
       const newTimestamp = response?.data?.updateTimestamp;
       if (newTimestamp) {
+        latestRecordRef.current = latestRecordRef.current
+          ? { ...latestRecordRef.current, updateTimestamp: newTimestamp }
+          : latestRecordRef.current;
         setActivityRecord((prev) => (prev ? { ...prev, updateTimestamp: newTimestamp } : prev));
+      }
+      inFlightRef.current = false;
+      if (pendingRef.current) {
+        pendingRef.current = false;
+        if (latestRecordRef.current) {
+          inFlightRef.current = true;
+          updateActivityRecordMutation.mutate(latestRecordRef.current);
+        }
       }
       setAlert({ isSuccess: true, message: 'Activity record updated successfully' });
       setTimeout(() => {
@@ -108,6 +124,8 @@ const MoistureContent = () => {
       }, 3000);
     },
     onError: (error) => {
+      inFlightRef.current = false;
+      pendingRef.current = false;
       if ((error as AxiosError).response?.status === 409) {
         markConflict();
         return;
@@ -145,6 +163,7 @@ const MoistureContent = () => {
         updateTimestamp: testActivityQuery.data.updateTimestamp
       };
       setActivityRecord(activityRecordData);
+      latestRecordRef.current = activityRecordData;
     }
   }, [testActivityQuery.status, testActivityQuery.isFetched]);
 
@@ -192,17 +211,21 @@ const MoistureContent = () => {
     testActivityQuery.refetch().then(() => clearConflict());
   };
 
+  const doSave = (record: ActivityRecordType) => {
+    inFlightRef.current = true;
+    updateActivityRecordMutation.mutate(record);
+  };
+
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
     if (isConflict) {
       return;
     }
-    const updatedRecord = { ...activityRecord, ...record };
+    const base = latestRecordRef.current ?? activityRecord;
+    const merged = { ...base, ...record };
     // Validate dates if either date is being updated
     if (record.actualBeginDateTime || record.actualEndDateTime) {
-      const beginDateTime = record.actualBeginDateTime
-        || activityRecord?.actualBeginDateTime;
-      const endDateTime = record.actualEndDateTime
-        || activityRecord?.actualEndDateTime;
+      const beginDateTime = merged.actualBeginDateTime;
+      const endDateTime = merged.actualEndDateTime;
       const startDate = beginDateTime ? new Date(beginDateTime) : null;
       const endDate = endDateTime ? new Date(endDateTime) : null;
 
@@ -211,8 +234,13 @@ const MoistureContent = () => {
       }
     }
 
-    setActivityRecord(updatedRecord);
-    updateActivityRecordMutation.mutate(updatedRecord);
+    setActivityRecord(merged);
+    latestRecordRef.current = merged;
+    if (inFlightRef.current) {
+      pendingRef.current = true;
+      return;
+    }
+    doSave(merged);
   };
 
   const validateTest = useMutation({

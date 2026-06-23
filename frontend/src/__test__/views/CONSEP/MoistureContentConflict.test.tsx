@@ -96,4 +96,66 @@ describe('MoistureContent optimistic-lock conflict', () => {
     });
     await waitFor(() => expect(updateMock).not.toHaveBeenCalled());
   });
+
+  it('does not raise a false conflict during back-to-back edits (serialized autosave)', async () => {
+    // Each successful save resolves after a tick and returns a fresh timestamp.
+    // This reproduces the race: a second edit fires before the first save's
+    // onSuccess writes back the new timestamp.
+    let callCount = 0;
+    updateMock.mockImplementation(() => {
+      callCount += 1;
+      const ts = `2025-02-0${callCount}T00:00:00`;
+      return new Promise((resolve) => {
+        setTimeout(() => resolve({ data: { updateTimestamp: ts } }), 0);
+      });
+    });
+
+    renderView();
+
+    await screen.findByText(/Moisture content cones for lot/i);
+    const comments = await screen.findByLabelText(/Comments/i);
+
+    // Fire two edits in quick succession, before the first save resolves.
+    await act(async () => {
+      fireEvent.change(comments, { target: { value: 'edit one' } });
+      fireEvent.change(comments, { target: { value: 'edit two' } });
+    });
+
+    // Flush all pending timers/microtasks so the trailing save can run.
+    await act(async () => {
+      await new Promise((r) => { setTimeout(r, 0); });
+      await new Promise((r) => { setTimeout(r, 0); });
+    });
+
+    // (a) No false conflict banner.
+    expect(screen.queryByText('Conflict detected')).not.toBeInTheDocument();
+    // (b) The trailing save fired with the second edit's value.
+    expect(updateMock).toHaveBeenCalledTimes(2);
+    const lastCallArg = updateMock.mock.calls.at(-1)?.[0];
+    expect(lastCallArg.record.riaComment).toBe('edit two');
+    // The trailing save must carry the timestamp written back by the first save.
+    expect(lastCallArg.record.updateTimestamp).toBe('2025-02-01T00:00:00');
+  });
+
+  it('clears the conflict banner when Reload is clicked (refetches and clears)', async () => {
+    const conflictError = Object.assign(new Error('Conflict'), { response: { status: 409 } });
+    updateMock.mockRejectedValue(conflictError);
+    renderView();
+
+    await screen.findByText(/Moisture content cones for lot/i);
+    const comments = await screen.findByLabelText(/Comments/i);
+    await act(async () => {
+      fireEvent.change(comments, { target: { value: 'edit one' } });
+    });
+
+    await waitFor(() => expect(screen.getByText('Conflict detected')).toBeInTheDocument());
+
+    // Click Reload: refetch resolves (the GET mock resolves immediately) -> clearConflict.
+    const reloadButton = screen.getByRole('button', { name: /Reload/i });
+    await act(async () => {
+      fireEvent.click(reloadButton);
+    });
+
+    await waitFor(() => expect(screen.queryByText('Conflict detected')).not.toBeInTheDocument());
+  });
 });

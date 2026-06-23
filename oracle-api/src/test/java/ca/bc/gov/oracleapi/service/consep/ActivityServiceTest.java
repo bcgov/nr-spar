@@ -124,12 +124,15 @@ class ActivityServiceTest {
         expected
     );
 
+    LocalDateTime reloadedTimestamp = LocalDateTime.parse("2099-01-01T00:00:00");
+
     ActivityEntity reloaded = new ActivityEntity();
     reloaded.setRiaKey(riaKey);
     reloaded.setTestCategoryCode("STD");
     reloaded.setActualBeginDateTime(activityDto.actualBeginDateTime());
     reloaded.setActualEndDateTime(activityDto.actualEndDateTime());
     reloaded.setRiaComment("Updated comment");
+    reloaded.setUpdateTimestamp(reloadedTimestamp);
 
     when(activityRepository.updateActivityFieldWithLock(
         eq(riaKey), any(), any(), eq("STD"), eq("Updated comment"), eq(expected)))
@@ -140,6 +143,7 @@ class ActivityServiceTest {
 
     assertEquals("STD", result.getTestCategoryCode());
     assertEquals("Updated comment", result.getRiaComment());
+    assertEquals(reloadedTimestamp, result.getUpdateTimestamp());
     verify(activityRepository, times(1)).updateActivityFieldWithLock(
         eq(riaKey), any(), any(), eq("STD"), eq("Updated comment"), eq(expected));
     verify(activityRepository, never()).save(any(ActivityEntity.class));
