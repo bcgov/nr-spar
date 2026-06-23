@@ -164,17 +164,23 @@ const MaintainGermTray = () => {
     enabled: !assignMutation.isPending,
     onSave: (curr, prev) => {
       const prevMap = new Map(
-        (prev ?? []).map((tray) => [tray.germinatorTrayId, tray])
+        (prev ?? []).map((tray) => [tray.germinatorTrayId, tray.germinatorId])
       );
-      const changedTray = curr.find(
-        (tray) => tray.germinatorId !== prevMap.get(tray.germinatorTrayId)?.germinatorId
-      );
-      if (changedTray) {
-        assignMutation.mutate({
-          germinatorTrayId: changedTray.germinatorTrayId,
-          germinatorId: changedTray.germinatorId
-        });
-      }
+
+      const updates = curr
+        .filter((tray) => tray.germinatorId !== prevMap.get(tray.germinatorTrayId))
+        .map((tray) => ({
+          germinatorTrayId: tray.germinatorTrayId,
+          germinatorId: tray.germinatorId
+        }));
+
+      if (updates.length === 0) return;
+
+      void (async () => {
+        for (const update of updates) {
+          await assignMutation.mutateAsync(update);
+        }
+      })();
     }
   });
 
