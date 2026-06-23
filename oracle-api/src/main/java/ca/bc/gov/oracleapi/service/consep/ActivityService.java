@@ -51,10 +51,13 @@ public class ActivityService {
   }
 
   /**
-   * Update activity table.
+   * Update activity table with optimistic locking (issue #2516).
    *
    * @param riaKey the identifier key
-   * @param activityFormDto an object with the values to be updated
+   * @param activityFormDto an object with the values to be updated, including the
+   *     updateTimestamp the client last read
+   * @return the reloaded activity, carrying the new updateTimestamp
+   * @throws ResponseStatusException 409 if the row changed since it was read, 404 if absent
    */
   @Transactional
   public ActivityEntity updateActivityField(
@@ -63,24 +66,27 @@ public class ActivityService {
   ) {
     SparLog.info("Updating activity with riaKey: {}", riaKey);
 
-    ActivityEntity activity = activityRepository.findById(riaKey)
-        .orElseGet(() -> {
-          SparLog.info("No existing activity found for riaKey: {}. Creating a new one.", riaKey);
-          ActivityEntity newActivity = new ActivityEntity();
-          newActivity.setRiaKey(riaKey);
-          return newActivity;
-        });
+    int rows = activityRepository.updateActivityFieldWithLock(
+        riaKey,
+        activityFormDto.actualBeginDateTime(),
+        activityFormDto.actualEndDateTime(),
+        activityFormDto.testCategoryCode(),
+        activityFormDto.riaComment(),
+        activityFormDto.updateTimestamp());
 
-    activity.setActualBeginDateTime(activityFormDto.actualBeginDateTime());
-    activity.setActualEndDateTime(activityFormDto.actualEndDateTime());
-    activity.setTestCategoryCode(activityFormDto.testCategoryCode());
-    activity.setRiaComment(activityFormDto.riaComment());
-
-    ActivityEntity savedActivity = activityRepository.save(activity);
+    if (rows == 0) {
+      if (activityRepository.existsById(riaKey)) {
+        SparLog.warn("Optimistic lock conflict updating activity riaKey: {}", riaKey);
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Activity was modified by another user; reload and retry");
+      }
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found");
+    }
 
     SparLog.info("Activity with riaKey: {} saved successfully.", riaKey);
-
-    return savedActivity;
+    return activityRepository.findById(riaKey).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
   }
 
   /**
