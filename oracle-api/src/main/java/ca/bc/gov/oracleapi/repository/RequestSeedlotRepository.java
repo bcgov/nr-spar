@@ -29,7 +29,7 @@ public interface RequestSeedlotRepository extends JpaRepository<RequestSeedlot, 
    * @return a list with at most one {@link SeedlotSpeciesDto}; empty when the key does not exist
    */
   @Query("""
-      SELECT new ca.bc.gov.oracleapi.dto.SeedlotSpeciesDto(rs.seedlotNumber, sr.vegetationCode)
+      SELECT DISTINCT new ca.bc.gov.oracleapi.dto.SeedlotSpeciesDto(rs.seedlotNumber, sr.vegetationCode)
       FROM RequestSeedlot rs, SparRequest sr
       WHERE rs.requestSkey = sr.requestSkey
         AND rs.requestSkey = :requestKey
