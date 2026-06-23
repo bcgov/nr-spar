@@ -10,10 +10,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class PlantingService {
 
-  @Qualifier("oracleApi")
-  private Provider oracleApiProvider;
+  private final Provider oracleApiProvider;
 
-  PlantingService(Provider oracleApiProvider) {
+  PlantingService(@Qualifier("oracleApi") Provider oracleApiProvider) {
     this.oracleApiProvider = oracleApiProvider;
   }
 
