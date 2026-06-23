@@ -38,6 +38,8 @@ import StatusTag from '../../../../components/StatusTag';
 import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
 import { mccReplicatesChecker } from './utils';
+import useActivityConflict from '../hooks/useActivityConflict';
+import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
 
 import {
   DATE_FORMAT, fieldsConfig, mccVariations
@@ -78,6 +80,8 @@ const MoistureContent = () => {
 
   const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
+  const { isConflict, markConflict, clearConflict } = useActivityConflict();
+
   // Reference to the table body for extracting MC Values
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
@@ -93,13 +97,21 @@ const MoistureContent = () => {
       'updateActivityRecord',
       { riaKey, record }
     ),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const newTimestamp = response?.data?.updateTimestamp;
+      if (newTimestamp) {
+        setActivityRecord((prev) => (prev ? { ...prev, updateTimestamp: newTimestamp } : prev));
+      }
       setAlert({ isSuccess: true, message: 'Activity record updated successfully' });
       setTimeout(() => {
         setAlert(null);
       }, 3000);
     },
     onError: (error) => {
+      if ((error as AxiosError).response?.status === 409) {
+        markConflict();
+        return;
+      }
       setAlert({
         isSuccess: false,
         message: `Failed to update activity record: ${(error as AxiosError).message}`
@@ -129,7 +141,8 @@ const MoistureContent = () => {
         testCategoryCode: testActivityQuery.data.testCategoryCode,
         riaComment: testActivityQuery.data.riaComment,
         actualBeginDateTime: testActivityQuery.data.actualBeginDateTime,
-        actualEndDateTime: testActivityQuery.data.actualEndDateTime
+        actualEndDateTime: testActivityQuery.data.actualEndDateTime,
+        updateTimestamp: testActivityQuery.data.updateTimestamp
       };
       setActivityRecord(activityRecordData);
     }
@@ -175,7 +188,14 @@ const MoistureContent = () => {
     );
   };
 
+  const handleReloadOnConflict = () => {
+    testActivityQuery.refetch().then(() => clearConflict());
+  };
+
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
+    if (isConflict) {
+      return;
+    }
     const updatedRecord = { ...activityRecord, ...record };
     // Validate dates if either date is being updated
     if (record.actualBeginDateTime || record.actualEndDateTime) {
@@ -356,6 +376,12 @@ const MoistureContent = () => {
 
   return (
     <FlexGrid className="consep-moisture-content">
+      {isConflict && (
+        <ConflictNotification
+          className="consep-moisture-content-conflict"
+          onReload={handleReloadOnConflict}
+        />
+      )}
       {alert?.message
         && (
         <InlineNotification
