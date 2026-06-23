@@ -113,6 +113,32 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
   );
 
   /**
+   * Update moisture/purity activity dates, category, and comment with optimistic locking
+   * (issue #2516).
+   *
+   * @return rows updated; 0 means the row changed since it was read (409).
+   */
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE ActivityEntity a
+         SET a.actualBeginDateTime = :actualBeginDateTime,
+             a.actualEndDateTime = :actualEndDateTime,
+             a.testCategoryCode = :testCategoryCode,
+             a.riaComment = :riaComment,
+             a.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE a.riaKey = :riaKey
+         AND a.updateTimestamp = :expectedUpdateTimestamp
+      """)
+  int updateActivityFieldWithLock(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("actualBeginDateTime") LocalDateTime actualBeginDateTime,
+      @Param("actualEndDateTime") LocalDateTime actualEndDateTime,
+      @Param("testCategoryCode") String testCategoryCode,
+      @Param("riaComment") String riaComment,
+      @Param("expectedUpdateTimestamp") LocalDateTime expectedUpdateTimestamp);
+
+  /**
    * Update activity dates/comment with optimistic locking (issue #2447).
    *
    * <p>The INTRMDT_CLEANR_IND column ({@code intermediateCleaner}) is repurposed by the
