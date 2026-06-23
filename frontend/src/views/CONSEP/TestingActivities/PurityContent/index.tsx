@@ -51,6 +51,8 @@ import { impuritiesPerReplicate, purityReplicatesChecker } from './utils';
 import {
   DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
+import useActivityConflict from '../hooks/useActivityConflict';
+import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
 
 import './styles.scss';
 
@@ -70,6 +72,8 @@ const PurityContent = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+
+  const { isConflict, markConflict, clearConflict } = useActivityConflict();
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
@@ -123,13 +127,21 @@ const PurityContent = () => {
       'updateActivityRecord',
       { riaKey, record }
     ),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const newTimestamp = response?.data?.updateTimestamp;
+      if (newTimestamp) {
+        setActivityRecord((prev) => (prev ? { ...prev, updateTimestamp: newTimestamp } : prev));
+      }
       setAlert({ isSuccess: true, message: 'Activity record updated successfully' });
       setTimeout(() => {
         setAlert(null);
       }, 3000);
     },
     onError: (error) => {
+      if ((error as AxiosError).response?.status === 409) {
+        markConflict();
+        return;
+      }
       setAlert({
         isSuccess: false,
         message: `Failed to update activity record: ${(error as AxiosError).message}`
@@ -235,7 +247,8 @@ const PurityContent = () => {
         testCategoryCode: testActivityQuery.data.testCategoryCode,
         riaComment: testActivityQuery.data.riaComment,
         actualBeginDateTime: testActivityQuery.data.actualBeginDateTime,
-        actualEndDateTime: testActivityQuery.data.actualEndDateTime
+        actualEndDateTime: testActivityQuery.data.actualEndDateTime,
+        updateTimestamp: testActivityQuery.data.updateTimestamp
       };
       setActivityRecord(activityRecordData);
       if (testActivityQuery.data.debrisList) {
@@ -282,7 +295,14 @@ const PurityContent = () => {
     );
   };
 
+  const handleReloadOnConflict = () => {
+    testActivityQuery.refetch().then(() => clearConflict());
+  };
+
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
+    if (isConflict) {
+      return;
+    }
     setActivityRecord({
       ...activityRecord,
       ...record
@@ -519,6 +539,12 @@ const PurityContent = () => {
 
   return (
     <FlexGrid className="consep-purity-content">
+      {isConflict && (
+        <ConflictNotification
+          className="consep-purity-content-conflict"
+          onReload={handleReloadOnConflict}
+        />
+      )}
       {
         alert?.message
         && (
