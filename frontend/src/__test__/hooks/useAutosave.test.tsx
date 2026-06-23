@@ -125,4 +125,23 @@ describe('useAutosave', () => {
     expect(onSave).toHaveBeenCalledTimes(1);
     expect(onSave).toHaveBeenCalledWith({ v: 2 }, { v: 1 });
   });
+
+  it('retries a value after a failed save', async () => {
+    const onSave = vi.fn()
+      .mockRejectedValueOnce(new Error('Save failed'))
+      .mockResolvedValueOnce(undefined);
+    const { result, rerender } = renderHook(
+      ({ data }) => useAutosave({ data, onSave, delay: 800 }),
+      { initialProps: { data: { v: 0 } } }
+    );
+
+    rerender({ data: { v: 1 } });
+    await act(async () => { await result.current.flush(); });
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenLastCalledWith({ v: 1 }, { v: 0 });
+
+    await act(async () => { await result.current.flush(); });
+    expect(onSave).toHaveBeenCalledTimes(2);
+    expect(onSave).toHaveBeenLastCalledWith({ v: 1 }, { v: 0 });
+  });
 });

@@ -5,7 +5,7 @@ const DEFAULT_MAX_WAIT = 3000;
 
 export type UseAutosaveOptions<T> = {
   data: T;
-  onSave: (data: T, previous: T | undefined) => void;
+  onSave: (data: T, previous: T | undefined) => void | Promise<void>;
   enabled?: boolean;
   delay?: number;
   maxWait?: number;
@@ -13,7 +13,7 @@ export type UseAutosaveOptions<T> = {
 };
 
 export type UseAutosaveResult<T> = {
-  flush: () => void;
+  flush: () => Promise<void>;
   cancel: () => void;
   markSaved: (value: T) => void;
 };
@@ -55,7 +55,7 @@ function useAutosave<T>({
     }
   };
 
-  const save = () => {
+  const save = async () => {
     clearTimers();
     if (!enabledRef.current) {
       return;
@@ -65,8 +65,12 @@ function useAutosave<T>({
     if (isEqualRef.current(current, previous)) {
       return;
     }
-    savedRef.current = current;
-    onSaveRef.current(current, previous);
+    try {
+      await onSaveRef.current(current, previous);
+      savedRef.current = current;
+    } catch {
+      // Keep the previous saved snapshot so the same data can be retried.
+    }
   };
 
   // Schedule a debounced save whenever data changes and differs from the
@@ -92,11 +96,12 @@ function useAutosave<T>({
         save();
       }
     };
+    const handlePageHide = () => { save(); };
     document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('pagehide', save);
+    window.addEventListener('pagehide', handlePageHide);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('pagehide', save);
+      window.removeEventListener('pagehide', handlePageHide);
       save();
     };
   }, []);

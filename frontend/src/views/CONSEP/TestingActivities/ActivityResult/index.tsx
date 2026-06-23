@@ -52,7 +52,7 @@ const useReplicates = (
 
   const { markSaved } = useAutosave<ReplicateType[]>({
     data: replicatesList,
-    onSave: (list) => updateReplicateListMutation.mutate(list),
+    onSave: (list) => updateReplicateListMutation.mutateAsync(list),
     enabled:
       !Object.values(validationErrors).some(Boolean)
       && !updateReplicateListMutation.isPending

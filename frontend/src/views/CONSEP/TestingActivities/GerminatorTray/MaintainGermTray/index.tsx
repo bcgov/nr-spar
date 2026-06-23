@@ -162,7 +162,7 @@ const MaintainGermTray = () => {
   useAutosave<GermTrayColumn[]>({
     data: trays,
     enabled: !assignMutation.isPending,
-    onSave: (curr, prev) => {
+    onSave: async (curr, prev) => {
       const prevMap = new Map(
         (prev ?? []).map((tray) => [tray.germinatorTrayId, tray.germinatorId])
       );
@@ -176,11 +176,12 @@ const MaintainGermTray = () => {
 
       if (updates.length === 0) return;
 
-      void (async () => {
-        for (const update of updates) {
-          await assignMutation.mutateAsync(update);
-        }
-      })();
+      await updates.reduce<Promise<void>>(
+        (promise, update) => promise.then(
+          () => assignMutation.mutateAsync(update).then(() => undefined)
+        ),
+        Promise.resolve()
+      );
     }
   });
 
