@@ -1,24 +1,30 @@
 import { DependencyDefinition } from './definitions';
 import { env } from '../../env';
 
-const POSTGRES_BACKEND_ENV = env.VITE_SERVER_URL.includes('localhost') ? 'DEV' : env.VITE_SERVER_URL;
-const ORACLE_BACKEND_ENV = env.VITE_ORACLE_SERVER_URL.includes('localhost') ? 'DEV' : env.VITE_ORACLE_SERVER_URL;
+const configuredUrl = (value: unknown) => (
+  typeof value === 'string' && value.length > 0 ? value : null
+);
+
+const postgresServerUrl = configuredUrl(env.VITE_SERVER_URL);
+const oracleServerUrl = configuredUrl(env.VITE_ORACLE_SERVER_URL);
+
+const dependencyEnvironmentName = (url: string) => (
+  url.includes('localhost') ? 'DEV' : (env.VITE_ZONE ?? 'DEV')
+);
 
 export const SPAR_DEPENDENCIES: DependencyDefinition[] = [
-  {
-    name: `SPAR Postgres Backend ${POSTGRES_BACKEND_ENV === 'DEV' && env.VITE_SERVER_URL.includes('localhost')
-      ? 'DEV' : env.VITE_ZONE}`,
+  ...(postgresServerUrl ? [{
+    name: `SPAR Postgres Backend ${dependencyEnvironmentName(postgresServerUrl)}`,
     queryKey: 'postgres-backend-healthcheck',
-    healthCheckUrl: `${env.VITE_SERVER_URL}/health`,
+    healthCheckUrl: `${postgresServerUrl}/health`,
     icon: 'DatabasePostgreSql'
-  },
-  {
-    name: `SPAR Oracle Backend ${ORACLE_BACKEND_ENV === 'DEV' && env.VITE_SERVER_URL.includes('localhost')
-      ? 'DEV' : env.VITE_ZONE}`,
+  }] : []),
+  ...(oracleServerUrl ? [{
+    name: `SPAR Oracle Backend ${dependencyEnvironmentName(oracleServerUrl)}`,
     queryKey: 'oracle-backend-healthcheck',
-    healthCheckUrl: `${env.VITE_ORACLE_SERVER_URL}/actuator/health`,
+    healthCheckUrl: `${oracleServerUrl}/actuator/health`,
     icon: 'IbmDb2'
-  },
+  }] : []),
   {
     name: 'Forest Access Management API',
     queryKey: 'fam-healthcheck',

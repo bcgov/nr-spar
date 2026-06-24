@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+  <Document>
+    <name>10 — KML 2.2 with Google Earth gx:* extensions</name>
+    <Placemark>
+      <name>gx:Track (should be skipped — not a polygon)</name>
+      <gx:Track>
+        <when>2024-01-01T00:00:00Z</when>
+        <gx:coord>-123.37 48.43 0</gx:coord>
+        <when>2024-01-01T00:10:00Z</when>
+        <gx:coord>-123.35 48.45 0</gx:coord>
+      </gx:Track>
+    </Placemark>
+    <Placemark>
+      <name>Regular polygon alongside gx: extension</name>
+      <Polygon><outerBoundaryIs><LinearRing>
+        <coordinates>-123.96,49.16,0 -123.9,49.16,0 -123.9,49.2,0 -123.96,49.2,0 -123.96,49.16,0</coordinates>
+      </LinearRing></outerBoundaryIs></Polygon>
+    </Placemark>
+  </Document>
+</kml>

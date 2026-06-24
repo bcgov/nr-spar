@@ -214,3 +214,4 @@ oracle-api/config
 
 # Tools
 .codebuddy
+.gstack/

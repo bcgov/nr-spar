@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>04 — KML 2.2 Three Placemarks</name>
+    <Placemark><name>Victoria</name>
+      <Polygon><outerBoundaryIs><LinearRing>
+        <coordinates>-123.4,48.43,0 -123.35,48.43,0 -123.35,48.47,0 -123.4,48.47,0 -123.4,48.43,0</coordinates>
+      </LinearRing></outerBoundaryIs></Polygon>
+    </Placemark>
+    <Placemark><name>Nanaimo</name>
+      <Polygon><outerBoundaryIs><LinearRing>
+        <coordinates>-123.96,49.16,0 -123.9,49.16,0 -123.9,49.2,0 -123.96,49.2,0 -123.96,49.16,0</coordinates>
+      </LinearRing></outerBoundaryIs></Polygon>
+    </Placemark>
+    <Placemark><name>Vancouver</name>
+      <Polygon><outerBoundaryIs><LinearRing>
+        <coordinates>-123.14,49.27,0 -123.08,49.27,0 -123.08,49.3,0 -123.14,49.3,0 -123.14,49.27,0</coordinates>
+      </LinearRing></outerBoundaryIs></Polygon>
+    </Placemark>
+  </Document>
+</kml>

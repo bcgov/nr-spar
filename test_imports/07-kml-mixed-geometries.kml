@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>07 — KML 2.2 Mixed (Polygon + Point + LineString)</name>
+    <Placemark><name>The Polygon</name>
+      <Polygon><outerBoundaryIs><LinearRing>
+        <coordinates>-123.4,48.43,0 -123.35,48.43,0 -123.35,48.47,0 -123.4,48.47,0 -123.4,48.43,0</coordinates>
+      </LinearRing></outerBoundaryIs></Polygon>
+    </Placemark>
+    <Placemark><name>A Point</name>
+      <Point><coordinates>-123.94,49.17,0</coordinates></Point>
+    </Placemark>
+    <Placemark><name>A LineString</name>
+      <LineString>
+        <coordinates>-123.15,49.27,0 -123.10,49.28,0 -123.08,49.30,0</coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>

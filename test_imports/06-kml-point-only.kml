@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>06 — KML 2.2 Points Only (no polygons)</name>
+    <Placemark><name>Point A</name>
+      <Point><coordinates>-123.37,48.43,0</coordinates></Point>
+    </Placemark>
+    <Placemark><name>Point B</name>
+      <Point><coordinates>-123.93,49.17,0</coordinates></Point>
+    </Placemark>
+    <Placemark><name>Point C</name>
+      <Point><coordinates>-123.12,49.28,0</coordinates></Point>
+    </Placemark>
+  </Document>
+</kml>

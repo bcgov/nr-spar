@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 
 /** A registered seedlot. */
@@ -352,6 +353,9 @@ public class Seedlot implements Serializable {
 
   @Column(name = "mean_geom")
   private Point meanGeom;
+
+  @Column(name = "collection_geom")
+  private MultiPolygon collectionGeom;
 
   // end geographic
 

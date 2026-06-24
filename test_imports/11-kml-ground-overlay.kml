@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>11 — KML 2.2 with GroundOverlay + Polygon</name>
+    <GroundOverlay>
+      <name>A fake ground overlay (should be skipped)</name>
+      <Icon><href>https://example.com/overlay.png</href></Icon>
+      <LatLonBox>
+        <north>49.3</north><south>48.4</south><east>-123.0</east><west>-124.0</west>
+      </LatLonBox>
+    </GroundOverlay>
+    <Placemark>
+      <name>The real polygon</name>
+      <Polygon><outerBoundaryIs><LinearRing>
+        <coordinates>-123.14,49.27,0 -123.08,49.27,0 -123.08,49.3,0 -123.14,49.3,0 -123.14,49.27,0</coordinates>
+      </LinearRing></outerBoundaryIs></Polygon>
+    </Placemark>
+  </Document>
+</kml>

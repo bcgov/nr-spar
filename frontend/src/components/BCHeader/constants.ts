@@ -2,7 +2,14 @@ import { env } from '../../env';
 import ROUTES from '../../routes/constants';
 import { RightPanelType } from './definitions';
 
-export const VERSION: string = `${env.VITE_NRSPARWEBAPP_VERSION}`;
+// Defensive fallback: `env.VITE_NRSPARWEBAPP_VERSION` is undefined in the
+// DEV-LOCAL POC container where the build-time substitution doesn't run,
+// which previously surfaced as a literal "undefined" in the sidebar
+// footer. Use the string 'DEV-LOCAL' so the version label still reads
+// correctly when the var is missing.
+export const VERSION: string = env.VITE_NRSPARWEBAPP_VERSION
+  ? `${env.VITE_NRSPARWEBAPP_VERSION}`
+  : 'DEV-LOCAL';
 
 export const HOME_LINK = ROUTES.DASHBOARD;
 

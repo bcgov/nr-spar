@@ -2,6 +2,8 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotAoiDto;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotAoiResponseDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
@@ -584,5 +586,62 @@ public class SeedlotEndpoint {
           String seedlotNumber) {
 
     return saveSeedlotFormService.getFormStatusClassA(seedlotNumber);
+  }
+
+  /**
+   * Save an Area of Interest (AOI) polygon for a seedlot.
+   *
+   * <p>Persists a user-drawn GeoJSON polygon (Polygon or MultiPolygon) to the
+   * {@code spar.seedlot.collection_geom} column as a JTS {@code MultiPolygon} in SRID 4326.
+   * Returns a confirmation payload including the save timestamp and any intersecting BEC zones
+   * (currently always an empty list — see service TODO for Phase 2).
+   *
+   * @param seedlotNumber the seedlot to attach the AOI to
+   * @param request the AOI request body containing a GeoJSON Feature
+   * @return a {@link SaveSeedlotAoiResponseDto} confirming the save
+   */
+  @Operation(
+      summary = "Save AOI polygon for a seedlot",
+      description =
+          """
+          Persists a user-drawn Area of Interest (AOI) polygon to the seedlot's
+          `collection_geom` column. Accepts a GeoJSON Feature with a Polygon or
+          MultiPolygon geometry; returns an acknowledgement including intersecting
+          BEC zones (empty list until the BEC lookup is wired up).
+          """)
+  @PostMapping(path = "/{seedlotNumber}/aoi", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "AOI polygon was successfully saved."),
+        @ApiResponse(
+            responseCode = "400",
+            description = "The AOI polygon geometry is missing or malformed.",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "No seedlot matches the given seedlot number",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public SaveSeedlotAoiResponseDto saveAoi(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber,
+      @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "GeoJSON Feature containing a Polygon or MultiPolygon geometry",
+              required = true)
+          @RequestBody
+          @Valid
+          SaveSeedlotAoiDto request) {
+    return seedlotService.saveAoi(seedlotNumber, request);
   }
 }

@@ -1,8 +1,16 @@
 import { env } from '../env';
 
-const serverHost = env.VITE_SERVER_URL;
+const configuredUrl = (value: unknown, fallback: string) => {
+  const url = typeof value === 'string' ? value.trim() : '';
+  return url.length > 0 ? url.replace(/\/+$/, '') : fallback;
+};
 
-const oracleServerHost = env.VITE_ORACLE_SERVER_URL;
+const serverHost = configuredUrl(env.VITE_SERVER_URL, 'http://localhost:8090');
+
+const oracleServerHost = configuredUrl(
+  env.VITE_ORACLE_SERVER_URL,
+  'https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca'
+);
 
 const ApiConfig = {
   /**
@@ -41,6 +49,19 @@ const ApiConfig = {
   tscSeedlotEdit: `${serverHost}/api/tsc-admin/seedlots/{seedlotNumber}/edit`,
 
   tscSeedlotStatusUpdate: `${serverHost}/api/tsc-admin/seedlots/{seedlotNumber}/status/{status}`,
+
+  /**
+   * SPAR Map AOI save endpoint.
+   *
+   * Backed by `POST /api/seedlots/{seedlotNumber}/aoi` (Phase 1 of Risk #1
+   * resolution, 2026-04-07). The backend Flyway migration (V48), Seedlot
+   * entity column (`collection_geom`), DTOs, service method, and controller
+   * are all in place. This path mirrors the base mapping of
+   * `SeedlotEndpoint` (`/api/seedlots`) — the React POC no longer uses a
+   * `/v1/` prefix since the rest of the FDS API is unversioned. See
+   * `sparMapApi.ts` for the request/response contract.
+   */
+  sparMapAoi: `${serverHost}/api/seedlots/{seedlotNumber}/aoi`,
 
   /**
    * ORACLE API

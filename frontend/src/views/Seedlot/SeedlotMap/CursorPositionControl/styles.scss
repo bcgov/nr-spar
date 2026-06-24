@@ -1,0 +1,42 @@
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+
+// Floating cursor-position readout. Positioned at the bottom-right of
+// the Leaflet workspace, above the attribution control, narrow enough
+// to leave room for the collapsible card stack which floats higher up
+// on the right edge.
+.cursor-position-control {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1rem;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid colors.$gray-20;
+  border-radius: 0.25rem;
+  box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.16);
+  padding: 0.375rem 0.5rem;
+  font-size: 0.6875rem;
+  font-family: 'BC Sans Mono', 'SF Mono', 'Menlo', monospace;
+  color: colors.$gray-100;
+  pointer-events: none;
+  min-width: 240px;
+
+  &__row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  &__label {
+    flex: 0 0 60px;
+    font-weight: 600;
+    color: colors.$gray-70;
+  }
+
+  &__value {
+    flex: 1 1 auto;
+    text-align: right;
+    color: colors.$gray-100;
+  }
+}

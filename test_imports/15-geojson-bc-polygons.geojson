@@ -1,0 +1,41 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Goldstream Provincial Park area" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-123.55, 48.47],
+          [-123.52, 48.47],
+          [-123.52, 48.49],
+          [-123.55, 48.49],
+          [-123.55, 48.47]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Sooke Hills area" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-123.65, 48.42],
+          [-123.60, 48.42],
+          [-123.60, 48.45],
+          [-123.65, 48.45],
+          [-123.65, 48.42]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Skipped point (not a polygon)" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.37, 48.43]
+      }
+    }
+  ]
+}

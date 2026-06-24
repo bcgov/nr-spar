@@ -48,41 +48,39 @@ const findFindAndLastName = (displayName: string, provider: string): Array<strin
 const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] => {
   const separator = '_';
 
-  const cognitoGroups: string[] = accessToken['cognito:groups'];
-  if (!cognitoGroups) {
-    return [];
-  }
-
   const parsedClientRoles: UserClientRolesType[] = [];
+  const cognitoGroups: string[] | undefined = accessToken['cognito:groups'];
 
-  cognitoGroups.forEach((cognitoRole) => {
-    if (!cognitoRole.includes(separator)) {
-      throw new Error(`Invalid role format with string: ${cognitoRole}`);
-    }
-    const lastUnderscoreIndex = cognitoRole.lastIndexOf(separator);
-    let role = cognitoRole.substring(0, lastUnderscoreIndex);
-    let clientId = cognitoRole.substring(lastUnderscoreIndex + 1);
+  if (cognitoGroups) {
+    cognitoGroups.forEach((cognitoRole) => {
+      if (!cognitoRole.includes(separator)) {
+        throw new Error(`Invalid role format with string: ${cognitoRole}`);
+      }
+      const lastUnderscoreIndex = cognitoRole.lastIndexOf(separator);
+      let role = cognitoRole.substring(0, lastUnderscoreIndex);
+      let clientId = cognitoRole.substring(lastUnderscoreIndex + 1);
 
-    // If the last substring after an underscore is not a number then it's a concrete role,
-    // we need to manually assign it a MoF client id for now.
-    if (Number.isNaN(Number(clientId))) {
-      clientId = MINISTRY_OF_FOREST_ID;
-      role = cognitoRole;
-    }
+      // If the last substring after an underscore is not a number then it's a concrete role,
+      // we need to manually assign it a MoF client id for now.
+      if (Number.isNaN(Number(clientId))) {
+        clientId = MINISTRY_OF_FOREST_ID;
+        role = cognitoRole;
+      }
 
-    // Check if a client id already exist in parsed client role
-    const found = parsedClientRoles.find((clientRoles) => clientRoles.clientId === clientId);
+      // Check if a client id already exist in parsed client role
+      const found = parsedClientRoles.find((clientRoles) => clientRoles.clientId === clientId);
 
-    if (found) {
-      const idx = parsedClientRoles.findIndex((clientRoles) => clientRoles.clientId === clientId);
-      parsedClientRoles[idx].roles.push(role);
-    } else {
-      parsedClientRoles.push({
-        clientId,
-        roles: [role]
-      });
-    }
-  });
+      if (found) {
+        const idx = parsedClientRoles.findIndex((clientRoles) => clientRoles.clientId === clientId);
+        parsedClientRoles[idx].roles.push(role);
+      } else {
+        parsedClientRoles.push({
+          clientId,
+          roles: [role]
+        });
+      }
+    });
+  }
 
   return parsedClientRoles;
 };

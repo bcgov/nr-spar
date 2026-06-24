@@ -10,6 +10,8 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotAoiDto;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotAoiResponseDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
@@ -60,18 +62,27 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import ca.bc.gov.backendstartapi.util.ValueUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -1210,5 +1221,190 @@ public class SeedlotService {
         seedlot.getTemporaryStorageEndDate(), formStep6.temporaryStrgEndDate())) {
       seedlot.setTemporaryStorageEndDate(formStep6.temporaryStrgEndDate());
     }
+  }
+
+  /**
+   * Persist a user-drawn Area of Interest (AOI) polygon for a seedlot.
+   *
+   * <p>Accepts a GeoJSON Feature (or raw Polygon / MultiPolygon) in the request body, converts it
+   * to a JTS {@link MultiPolygon} with SRID 4326, repairs self-intersections via {@code buffer(0)},
+   * unions overlapping polygons via {@code union()} (matching the legacy {@code processMultiPoly}
+   * behavior), writes the result to the {@code collection_geom} column, and returns a confirmation
+   * DTO.
+   *
+   * <p>The request may carry a {@code becZones} list of intersecting BEC zone codes derived
+   * client-side via a direct WFS call to DataBC openmaps (see {@code becZonesApi.ts} on the
+   * frontend). This follows the silva architectural pattern — client does the geospatial
+   * work, the backend stays geospatial-dumb. The zones are echoed back in the response DTO
+   * without server-side re-verification; if the client omitted them (or the client's openmaps
+   * call failed), an empty list is returned instead.
+   *
+   * @param seedlotNumber the seedlot number from the URL path
+   * @param request the AOI payload containing a GeoJSON Feature and derived BEC zones
+   * @return a {@link SaveSeedlotAoiResponseDto} confirming the save
+   * @throws SeedlotNotFoundException if the seedlot number doesn't exist
+   * @throws InvalidSeedlotRequestException if the GeoJSON geometry is missing or malformed
+   */
+  @Transactional
+  public SaveSeedlotAoiResponseDto saveAoi(String seedlotNumber, SaveSeedlotAoiDto request) {
+    SparLog.info("Saving AOI polygon for seedlot {}", seedlotNumber);
+
+    Seedlot seedlot =
+        seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+
+    if (request == null || request.polygon() == null || request.polygon().geometry() == null) {
+      SparLog.warn("AOI request missing polygon geometry for seedlot {}", seedlotNumber);
+      throw new InvalidSeedlotRequestException();
+    }
+
+    MultiPolygon multiPolygon = convertGeoJsonToMultiPolygon(request.polygon().geometry());
+    multiPolygon = repairAndUnionGeometry(multiPolygon);
+    seedlot.setCollectionGeom(multiPolygon);
+    seedlotRepository.save(seedlot);
+
+    List<String> becZones =
+        request.becZones() == null ? Collections.emptyList() : request.becZones();
+
+    SparLog.info(
+        "Saved AOI polygon for seedlot {} with {} intersecting BEC zone(s)",
+        seedlotNumber,
+        becZones.size());
+
+    return new SaveSeedlotAoiResponseDto(seedlotNumber, true, LocalDateTime.now(), becZones);
+  }
+
+  /**
+   * Convert a GeoJSON geometry {@link JsonNode} to a JTS {@link MultiPolygon} in SRID 4326.
+   *
+   * <p>Supports GeoJSON {@code Polygon} and {@code MultiPolygon} types; a bare Polygon is wrapped
+   * in a single-element MultiPolygon so the database column shape is uniform.
+   *
+   * <p>A minimal hand-rolled parser is used rather than {@code jts-io-common}'s {@code
+   * GeoJsonReader} because the latter is not on the classpath — only {@code jts-core} is brought
+   * in transitively by {@code hibernate-spatial}. Adding a new dependency for this single call
+   * site would be disproportionate for Phase 1.
+   *
+   * @param geometry the raw GeoJSON geometry node
+   * @return a JTS {@link MultiPolygon} with SRID 4326
+   * @throws InvalidSeedlotRequestException if the geometry type or coordinates are invalid
+   */
+  private MultiPolygon convertGeoJsonToMultiPolygon(JsonNode geometry) {
+    if (!geometry.hasNonNull("type") || !geometry.hasNonNull("coordinates")) {
+      SparLog.warn("AOI geometry missing 'type' or 'coordinates'");
+      throw new InvalidSeedlotRequestException();
+    }
+    String type = geometry.get("type").asText();
+    JsonNode coordinates = geometry.get("coordinates");
+
+    GeometryFactory gf = new GeometryFactory(new PrecisionModel(), 4326);
+
+    Polygon[] polygons;
+    if ("Polygon".equalsIgnoreCase(type)) {
+      polygons = new Polygon[] {parsePolygon(coordinates, gf)};
+    } else if ("MultiPolygon".equalsIgnoreCase(type)) {
+      if (!coordinates.isArray() || coordinates.size() == 0) {
+        SparLog.warn("AOI MultiPolygon coordinates array is empty or invalid");
+        throw new InvalidSeedlotRequestException();
+      }
+      polygons = new Polygon[coordinates.size()];
+      for (int i = 0; i < coordinates.size(); i++) {
+        polygons[i] = parsePolygon(coordinates.get(i), gf);
+      }
+    } else {
+      SparLog.warn("AOI geometry type must be Polygon or MultiPolygon, got: {}", type);
+      throw new InvalidSeedlotRequestException();
+    }
+
+    MultiPolygon mp = gf.createMultiPolygon(polygons);
+    mp.setSRID(4326);
+    return mp;
+  }
+
+  /** Parse a single GeoJSON Polygon coordinates node into a JTS {@link Polygon}. */
+  private Polygon parsePolygon(JsonNode coords, GeometryFactory gf) {
+    if (!coords.isArray() || coords.size() == 0) {
+      SparLog.warn("AOI Polygon coordinates array is empty or invalid");
+      throw new InvalidSeedlotRequestException();
+    }
+    LinearRing shell = parseLinearRing(coords.get(0), gf);
+    LinearRing[] holes = new LinearRing[coords.size() - 1];
+    for (int i = 1; i < coords.size(); i++) {
+      holes[i - 1] = parseLinearRing(coords.get(i), gf);
+    }
+    return gf.createPolygon(shell, holes);
+  }
+
+  /** Parse a GeoJSON linear ring (array of [lon, lat] pairs) into a JTS {@link LinearRing}. */
+  private LinearRing parseLinearRing(JsonNode ring, GeometryFactory gf) {
+    if (!ring.isArray() || ring.size() < 4) {
+      SparLog.warn("AOI linear ring must have at least 4 coordinate pairs");
+      throw new InvalidSeedlotRequestException();
+    }
+    Coordinate[] coordinates = new Coordinate[ring.size()];
+    for (int i = 0; i < ring.size(); i++) {
+      JsonNode pair = ring.get(i);
+      if (!pair.isArray() || pair.size() < 2) {
+        SparLog.warn("AOI coordinate pair must contain at least [lon, lat]");
+        throw new InvalidSeedlotRequestException();
+      }
+      double lon = pair.get(0).asDouble();
+      double lat = pair.get(1).asDouble();
+      coordinates[i] = new Coordinate(lon, lat);
+    }
+    return gf.createLinearRing(coordinates);
+  }
+
+  /**
+   * Repair self-intersections and union overlapping polygons, matching the legacy Struts SPAR
+   * {@code processMultiPoly} behavior in {@code Spr01SeedlotRegAction}.
+   *
+   * <p>Two JTS operations are applied in sequence:
+   *
+   * <ol>
+   *   <li>{@code buffer(0)} — the standard JTS technique for repairing self-intersecting rings.
+   *       Equivalent to PostGIS {@code ST_MakeValid(ST_Buffer(geom, 0))}. A self-intersecting
+   *       polygon that would fail OGC validity checks becomes a valid (Multi)Polygon.
+   *   <li>{@code union()} — dissolves overlapping regions between constituent polygons so area
+   *       calculations don't double-count shared space. Equivalent to PostGIS {@code ST_Union}.
+   *       The legacy flow ran this server-side before persisting; the React POC's client-side
+   *       {@code @turf/boolean-valid} check catches obvious topology errors but does NOT union
+   *       overlapping rings, so this server-side step is essential for accuracy.
+   * </ol>
+   *
+   * <p>The result is normalized to {@link MultiPolygon} regardless of whether the union collapsed
+   * multiple polygons into a single {@link Polygon}, so the database column type stays consistent.
+   *
+   * @param input the raw parsed MultiPolygon from client GeoJSON
+   * @return a repaired, unioned MultiPolygon with the original SRID preserved
+   * @throws InvalidSeedlotRequestException if the union produces an unexpected geometry type
+   */
+  private MultiPolygon repairAndUnionGeometry(MultiPolygon input) {
+    int srid = input.getSRID();
+    GeometryFactory gf = input.getFactory();
+
+    // buffer(0) repairs self-intersecting rings
+    Geometry repaired = input.buffer(0);
+
+    // union() dissolves overlapping regions between constituent polygons
+    Geometry unioned = repaired.union();
+
+    // Normalize to MultiPolygon for consistent column type
+    MultiPolygon result;
+    if (unioned instanceof MultiPolygon mp) {
+      result = mp;
+    } else if (unioned instanceof Polygon poly) {
+      result = gf.createMultiPolygon(new Polygon[] {poly});
+    } else {
+      SparLog.warn(
+          "Polygon repair+union produced unexpected geometry type: {}", unioned.getGeometryType());
+      throw new InvalidSeedlotRequestException();
+    }
+
+    result.setSRID(srid);
+    SparLog.info(
+        "Repaired AOI geometry: {} input polygon(s) → {} output polygon(s)",
+        input.getNumGeometries(),
+        result.getNumGeometries());
+    return result;
   }
 }

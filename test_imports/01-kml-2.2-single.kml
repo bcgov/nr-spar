@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>01 — KML 2.2 Single Polygon</name>
+    <Placemark>
+      <name>Victoria Test Area</name>
+      <description>A single polygon for the simplest KML 2.2 test case.</description>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>-123.4,48.43,0 -123.35,48.43,0 -123.35,48.47,0 -123.4,48.47,0 -123.4,48.43,0</coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+  </Document>
+</kml>
