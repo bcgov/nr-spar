@@ -7,6 +7,7 @@ import {
   fetchBecZonesIntersecting,
   fetchBecZoneByMapLabel,
   buildBecZoneByMapLabelUrl,
+  becVariantFromFeatureCollection,
   OPENMAPS_WFS_URL,
   BEC_QUERY_LAYER
 } from '../../api-service/becZonesApi';
@@ -347,5 +348,24 @@ describe('fetchBecZoneByMapLabel', () => {
   it('returns null on non-2xx (fail-open so the panel stays interactive)', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse({}, false, 503));
     expect(await fetchBecZoneByMapLabel('IDFmw1')).toBeNull();
+  });
+});
+
+describe('becVariantFromFeatureCollection', () => {
+  it('maps MAP_LABEL + zone/subzone/variant from the first feature', () => {
+    const v = becVariantFromFeatureCollection({
+      features: [{ properties: { MAP_LABEL: 'IDFmw1', ZONE: 'IDF', SUBZONE: 'mw', VARIANT: '1' } }]
+    });
+    expect(v).toEqual({ mapLabel: 'IDFmw1', zone: 'IDF', subzone: 'mw', variant: '1' });
+  });
+
+  it('falls back to ZONE when MAP_LABEL absent', () => {
+    expect(becVariantFromFeatureCollection({ features: [{ properties: { ZONE: 'CWH' } }] }))
+      .toEqual({ mapLabel: 'CWH', zone: 'CWH', subzone: null, variant: null });
+  });
+
+  it('returns null when no usable feature', () => {
+    expect(becVariantFromFeatureCollection({ features: [] })).toBeNull();
+    expect(becVariantFromFeatureCollection({ features: [{ properties: {} }] })).toBeNull();
   });
 });

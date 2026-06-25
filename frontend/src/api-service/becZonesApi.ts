@@ -341,3 +341,62 @@ export const fetchBecZonesIntersecting = async (
   const sampleZones = await fetchBecZonesForInteriorSamples(feature.geometry);
   return sampleZones.length > 0 ? sampleZones : intersectingZones;
 };
+
+export interface BecVariant {
+  mapLabel: string;
+  zone: string;
+  subzone: string | null;
+  variant: string | null;
+}
+
+const BEC_VARIANT_TIMEOUT_MS = 15000;
+
+/** Map the first WFS feature's BEC attributes into a BecVariant, or null. */
+export const becVariantFromFeatureCollection = (
+  json: { features?: Array<{ properties?: Record<string, unknown> }> }
+): BecVariant | null => {
+  const p = json.features?.[0]?.properties;
+  if (!p) {
+    return null;
+  }
+  const mapLabel = typeof p.MAP_LABEL === 'string' ? p.MAP_LABEL : '';
+  const zone = typeof p.ZONE === 'string' ? p.ZONE : '';
+  if (!mapLabel && !zone) {
+    return null;
+  }
+  return {
+    mapLabel: mapLabel || zone,
+    zone,
+    subzone: typeof p.SUBZONE === 'string' ? p.SUBZONE : null,
+    variant: typeof p.VARIANT === 'string' ? p.VARIANT : null
+  };
+};
+
+/** Fetch the BEC variant (MAP_LABEL) at a WGS84 centroid; fail-soft to null. */
+export const fetchBecVariantAt = async (centroid: Position): Promise<BecVariant | null> => {
+  const params = new URLSearchParams({
+    service: 'WFS',
+    version: '2.0.0',
+    request: 'GetFeature',
+    typeNames: BEC_QUERY_LAYER,
+    outputFormat: 'application/json',
+    propertyName: 'MAP_LABEL,ZONE,SUBZONE,VARIANT',
+    count: '1',
+    CQL_FILTER: `INTERSECTS(GEOMETRY,POINT(${pointToBcAlbersWkt(centroid)}))`
+  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), BEC_VARIANT_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${OPENMAPS_WFS_URL}?${params.toString()}`, {
+      signal: controller.signal
+    });
+    if (!res.ok) {
+      return null;
+    }
+    return becVariantFromFeatureCollection(await res.json());
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
