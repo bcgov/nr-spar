@@ -22,5 +22,4 @@ export const meanLatLng = (feature: Feature<MultiPolygon>): MeanLatLng | null =>
 export const formatLatLng = (m: MeanLatLng): string => `${m.lat.toFixed(4)}, ${m.lng.toFixed(4)}`;
 
 /** Format an elevation band as e.g. "310–540 m" (en dash, rounded). */
-export const formatElevationRange = (minM: number, maxM: number): string =>
-  `${Math.round(minM)}–${Math.round(maxM)} m`;
+export const formatElevationRange = (minM: number, maxM: number): string => `${Math.round(minM)}–${Math.round(maxM)} m`;
