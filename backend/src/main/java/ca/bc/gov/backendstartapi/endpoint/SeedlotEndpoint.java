@@ -589,6 +589,34 @@ public class SeedlotEndpoint {
   }
 
   /**
+   * Read the saved Area of Interest (AOI) polygon for a seedlot.
+   *
+   * <p>Returns the persisted {@code collection_geom} as a GeoJSON {@code Feature<MultiPolygon>}
+   * (SRID 4326), or {@code 204 No Content} when none has been drawn. Lets the registration form
+   * re-display the saved collection area on load — surviving a page refresh.
+   *
+   * @param seedlotNumber the seedlot whose AOI to read
+   * @return the saved AOI as a GeoJSON Feature, or 204 when none exists
+   */
+  @Operation(
+      summary = "Read the saved AOI polygon for a seedlot",
+      description = "Returns the seedlot's saved collection-area geometry as a GeoJSON Feature.")
+  @GetMapping("/{seedlotNumber}/aoi")
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public ResponseEntity<JsonNode> getAoi(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber) {
+    JsonNode feature = seedlotService.getSavedAoi(seedlotNumber);
+    return feature == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(feature);
+  }
+
+  /**
    * Save an Area of Interest (AOI) polygon for a seedlot.
    *
    * <p>Persists a user-drawn GeoJSON polygon (Polygon or MultiPolygon) to the

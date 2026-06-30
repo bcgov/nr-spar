@@ -63,6 +63,9 @@ import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import ca.bc.gov.backendstartapi.util.ValueUtil;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -1274,6 +1277,19 @@ public class SeedlotService {
   }
 
   /**
+   * Read the saved collection-area geometry for a seedlot as a GeoJSON Feature so the registration
+   * form can re-display it on load (surviving a page refresh).
+   *
+   * @param seedlotNumber the seedlot to read
+   * @return a GeoJSON {@code Feature<MultiPolygon>} node, or {@code null} when none is saved
+   */
+  public JsonNode getSavedAoi(String seedlotNumber) {
+    Seedlot seedlot =
+        seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+    return multiPolygonToGeoJsonFeature(seedlot.getCollectionGeom());
+  }
+
+  /**
    * Convert a GeoJSON geometry {@link JsonNode} to a JTS {@link MultiPolygon} in SRID 4326.
    *
    * <p>Supports GeoJSON {@code Polygon} and {@code MultiPolygon} types; a bare Polygon is wrapped
@@ -1352,6 +1368,53 @@ public class SeedlotService {
       coordinates[i] = new Coordinate(lon, lat);
     }
     return gf.createLinearRing(coordinates);
+  }
+
+  /**
+   * Serialize a JTS {@link MultiPolygon} back into a GeoJSON {@code Feature<MultiPolygon>} node so
+   * the registration form can read the saved collection area on load and survive a page refresh.
+   * Inverse of {@link #convertGeoJsonToMultiPolygon}; hand-rolled for the same reason (no {@code
+   * jts-io-common} on the classpath).
+   *
+   * @param mp the persisted collection-area geometry (SRID 4326)
+   * @return a GeoJSON Feature node, or {@code null} when {@code mp} is null
+   */
+  private JsonNode multiPolygonToGeoJsonFeature(MultiPolygon mp) {
+    if (mp == null) {
+      return null;
+    }
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode feature = mapper.createObjectNode();
+    feature.put("type", "Feature");
+    feature.set("properties", mapper.createObjectNode());
+
+    ObjectNode geometry = mapper.createObjectNode();
+    geometry.put("type", "MultiPolygon");
+    ArrayNode polygons = mapper.createArrayNode();
+    for (int p = 0; p < mp.getNumGeometries(); p++) {
+      Polygon polygon = (Polygon) mp.getGeometryN(p);
+      ArrayNode rings = mapper.createArrayNode();
+      rings.add(ringToCoordinates(polygon.getExteriorRing().getCoordinates(), mapper));
+      for (int h = 0; h < polygon.getNumInteriorRing(); h++) {
+        rings.add(ringToCoordinates(polygon.getInteriorRingN(h).getCoordinates(), mapper));
+      }
+      polygons.add(rings);
+    }
+    geometry.set("coordinates", polygons);
+    feature.set("geometry", geometry);
+    return feature;
+  }
+
+  /** Convert a ring's coordinates into a GeoJSON {@code [[lon, lat], ...]} array node. */
+  private ArrayNode ringToCoordinates(Coordinate[] coordinates, ObjectMapper mapper) {
+    ArrayNode ring = mapper.createArrayNode();
+    for (Coordinate coordinate : coordinates) {
+      ArrayNode pair = mapper.createArrayNode();
+      pair.add(coordinate.x);
+      pair.add(coordinate.y);
+      ring.add(pair);
+    }
+    return ring;
   }
 
   /**
