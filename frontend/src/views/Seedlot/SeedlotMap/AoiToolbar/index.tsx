@@ -1,9 +1,11 @@
 import React, { useRef, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import area from '@turf/area';
 import { IconButton, InlineNotification, ActionableNotification } from '@carbon/react';
 import {
   Draw,
   Edit,
+  Erase,
   Upload,
   TrashCan,
   Undo,
@@ -169,6 +171,7 @@ const AoiToolbar = ({
     clearAois,
     startDraw,
     startEdit,
+    startRemovalMode,
     clearMapLayers,
     cancelAoiMode,
     addImportedLayersToMap,
@@ -195,6 +198,10 @@ const AoiToolbar = ({
   } = useSparMap();
   const save = useAoiSave(seedlotNumber);
   const navigate = useNavigate();
+  // POC: registration-form integration. When the map is launched from a form
+  // with a `returnTo`, a successful Submit hands the collection-area summary
+  // back to that form via router state instead of just showing a toast.
+  const [searchParams] = useSearchParams();
 
   const [validation, setValidation] = useState<InlineMessage | null>(null);
   const [isValidating, setIsValidating] = useState(false);
@@ -284,6 +291,16 @@ const AoiToolbar = ({
     exitIdentify();
     exitMeasureAndMarkup();
     startEdit();
+  };
+
+  // Delete a single polygon: enter Geoman removal mode, then the user
+  // clicks the polygon they want gone. Distinct from Clear Last (pops the
+  // most recent) and Clear All (wipes everything).
+  const onDeletePolygon = () => {
+    setValidation(null);
+    exitIdentify();
+    exitMeasureAndMarkup();
+    startRemovalMode();
   };
 
   const onToggleIdentify = () => {
@@ -433,7 +450,38 @@ const AoiToolbar = ({
       return;
     }
     highlightBecZones([]);
-    save.mutate(feature);
+
+    // POC: when not launched from a form, keep the standalone behaviour
+    // (fire-and-forget save + inline success toast).
+    const returnTo = searchParams.get('returnTo');
+    if (!returnTo) {
+      save.mutate(feature);
+      return;
+    }
+
+    // Launched from the registration form: await the save, then return the
+    // collection-area summary to the form so it can display + reconcile it.
+    try {
+      await save.mutateAsync(feature);
+    } catch (err) {
+      setValidation({
+        kind: 'error',
+        title: 'Save failed',
+        subtitle: err instanceof Error ? err.message : 'Could not save the collection area.'
+      });
+      return;
+    }
+    const areaHectares = Math.round((area(feature) / 10000) * 100) / 100;
+    navigate(returnTo, {
+      state: {
+        collectionAreaSummary: {
+          polygonCount: aois.length,
+          areaHectares,
+          becZones: becCheck.becZones,
+          savedAt: new Date().toISOString()
+        }
+      }
+    });
   };
 
   /**
@@ -615,7 +663,7 @@ const AoiToolbar = ({
               <ZoomIn />
             </IconButton>
             <IconButton
-              label="Edit Polygon"
+              label="Edit Polygon (drag a vertex to move; right-click a vertex to remove it)"
               align="bottom"
               kind="ghost"
               onClick={onEditPolygon}
@@ -623,6 +671,16 @@ const AoiToolbar = ({
               data-testid="aoi-edit-polygon"
             >
               <Edit />
+            </IconButton>
+            <IconButton
+              label="Delete Polygon (click a polygon on the map to delete it)"
+              align="bottom"
+              kind="ghost"
+              onClick={onDeletePolygon}
+              disabled={!hasAoi}
+              data-testid="aoi-delete-polygon"
+            >
+              <Erase />
             </IconButton>
             <IconButton
               label="Clear Last Polygon"

@@ -79,6 +79,25 @@ export const saveAoi = async (req: SaveAoiRequest): Promise<SaveAoiResponse> => 
   return (await res.json()) as SaveAoiResponse;
 };
 
+/**
+ * Read the saved collection-area polygon for a seedlot (the production
+ * read-back). Returns the GeoJSON Feature, or null when none is saved
+ * (HTTP 204) or the seedlot has no AOI yet.
+ *
+ * POC transport note: like `saveAoi`, this uses `fetch` directly. For
+ * production it should route through the authenticated `api` wrapper.
+ */
+export const fetchSavedAoi = async (
+  seedlotNumber: string
+): Promise<Feature<MultiPolygon> | null> => {
+  const url = ApiConfig.sparMapAoi.replace('{seedlotNumber}', seedlotNumber);
+  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  if (!res.ok || res.status === 204) {
+    return null;
+  }
+  return (await res.json()) as Feature<MultiPolygon>;
+};
+
 // Keep the import alive so the file still type-checks against the axios
 // instance contract — a follow-up will restore the axios path once the
 // dev auth bypass is removed.

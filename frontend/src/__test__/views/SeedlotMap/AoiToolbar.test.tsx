@@ -212,6 +212,19 @@ describe('AoiToolbar', () => {
     expect(zoomToAois).not.toHaveBeenCalled();
   });
 
+  it('exposes a per-polygon Delete button in the polygon group, gated on having an AOI', () => {
+    renderToolbar();
+    fireEvent.click(screen.getByTestId('aoi-group-aoi'));
+    // Delete Polygon enters Geoman removal mode (click a polygon to
+    // delete just that one). Like Edit / Clear Last / Clear All it is
+    // disabled until at least one polygon exists, so we assert presence
+    // and the empty-state gate here; the click-to-delete behaviour runs
+    // through Geoman and is exercised in the browser, not this harness.
+    const del = screen.getByTestId('aoi-delete-polygon') as HTMLButtonElement;
+    expect(del).toBeTruthy();
+    expect(del.disabled).toBe(true);
+  });
+
   it('exposes Back / Forward view-history buttons in the view group', () => {
     const { goBackView, goForwardView } = renderToolbar();
     fireEvent.click(screen.getByTestId('aoi-group-view'));

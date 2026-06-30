@@ -118,17 +118,18 @@ describe('GeomCalcPanel', () => {
     ).toBeTruthy();
   });
 
-  it('renders one row per polygon in context', () => {
+  it('renders one stat block per polygon in context', () => {
     const square = buildSquarePolygon(-123, 49, 1);
     const triangle = buildNneTriangle();
     render(wrap(<SeedAndRender aois={[square, triangle]} />));
-    // Two data rows should appear (the totals row also exists but is
-    // identified separately).
+    // Two per-polygon stat blocks appear (the totals block exists too,
+    // identified separately and only when there is more than one polygon).
     expect(screen.queryByTestId('geom-calc-panel')).toBeTruthy();
     expect(screen.queryByTestId('geom-calc-totals-row')).toBeTruthy();
-    // The first data row index should be 1.
-    expect(screen.queryByText('1')).toBeTruthy();
-    expect(screen.queryByText('2')).toBeTruthy();
+    expect(screen.queryByTestId('geom-calc-item-1')).toBeTruthy();
+    expect(screen.queryByTestId('geom-calc-item-2')).toBeTruthy();
+    expect(screen.queryByText('Polygon 1')).toBeTruthy();
+    expect(screen.queryByText('Polygon 2')).toBeTruthy();
   });
 
   it('reports area in hectares (a 1 km square ≈ 100 ha)', () => {
@@ -171,25 +172,13 @@ describe('GeomCalcPanel', () => {
     }
   });
 
-  it('labels the longest edge bearing with a compass direction (NNE for the test triangle)', () => {
-    const triangle = buildNneTriangle();
-    render(wrap(<SeedAndRender aois={[triangle]} />));
-    // The longest edge of the triangle is the NNE leg, so the cell
-    // should contain the compass label "NNE" with a bearing in
-    // parentheses. We use queryAllByText with a regex because the
-    // surrounding cell may include additional structure.
-    const cellCandidates = screen
-      .queryAllByText(/NNE\s*\(\d+°\)/);
-    expect(cellCandidates.length).toBeGreaterThan(0);
-  });
-
   it('renders a coordinate-readout toggle per polygon row', () => {
     const square = buildSquarePolygon(-123, 49, 1);
     render(wrap(<SeedAndRender aois={[square]} />));
     expect(screen.queryByTestId('geom-calc-coords-toggle-1')).toBeTruthy();
   });
 
-  it('renders an "Elevation" column header', () => {
+  it('renders an "Elevation" stat label', () => {
     const square = buildSquarePolygon(-123, 49, 1);
     render(wrap(<SeedAndRender aois={[square]} />));
     expect(screen.queryByText('Elevation')).toBeTruthy();

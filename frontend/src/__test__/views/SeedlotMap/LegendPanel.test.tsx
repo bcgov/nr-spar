@@ -1,112 +1,90 @@
-import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { useEffect } from 'react';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
-import LegendPanel, {
-  buildLegendUrl,
-} from '../../../views/Seedlot/SeedlotMap/LegendPanel';
-import type { SparMapOverlayLayer } from '../../../types/SparMapTypes';
+import LegendPanel, { swatchStyle } from '../../../views/Seedlot/SeedlotMap/LegendPanel';
+import { SparMapProvider, useSparMap } from '../../../contexts/SparMapContext';
+import type { LegendOverlayData, LegendSwatch } from '../../../api-service/legendApi';
 
-/**
- * Unit tests for the LEGEND panel. Covers the accordion rendering
- * branch, the empty-state Tile branch, and the WMS URL builder — the
- * URL composition is the full contract of the legend fetch so we want
- * direct assertions on it.
- */
+const polygonSwatch: LegendSwatch = {
+  geometry: 'polygon',
+  fill: '#E6E600',
+  fillOpacity: 0.65,
+  stroke: '#ff6500',
+  strokeWidth: 1,
+  strokeOpacity: 0.65
+};
 
-describe('buildLegendUrl', () => {
-  const baseOverlay: SparMapOverlayLayer = {
-    id: 'test-layer',
-    label: 'Test Layer',
-    url: 'https://openmaps.gov.bc.ca/geo/pub/wms',
-    layers: 'pub:WHSE_FOREST_VEGETATION.BEC_BIOGEOCLIMATIC_POLY',
-    visible: true,
-    identifyEligible: true,
-    legendEligible: true,
-  };
-
-  it('appends GetLegendGraphic params to a WMS URL without a query string', () => {
-    const url = buildLegendUrl(baseOverlay);
-    expect(url.startsWith('https://openmaps.gov.bc.ca/geo/pub/wms?')).toBe(true);
-    expect(url).toContain('service=WMS');
-    expect(url).toContain('version=1.3.0');
-    expect(url).toContain('request=GetLegendGraphic');
-    expect(url).toContain('format=image%2Fpng');
-    expect(url).toContain('transparent=true');
-    // URLSearchParams encodes the colon in pub:WHSE_... → pub%3A...
-    expect(url).toMatch(/layer=pub%3AWHSE_FOREST_VEGETATION\.BEC_BIOGEOCLIMATIC_POLY/);
+describe('LegendPanel swatchStyle', () => {
+  it('renders a polygon swatch as a filled, bordered square', () => {
+    const style = swatchStyle(polygonSwatch);
+    expect(style.backgroundColor).toBe('#E6E600');
+    expect(style.border).toBe('1px solid #ff6500');
+    expect(style.borderRadius).toBe(2);
   });
 
-  it('uses the first layer name when the overlay lists multiple comma-separated layers', () => {
-    const multiLayerOverlay: SparMapOverlayLayer = {
-      ...baseOverlay,
-      layers: 'pub:LAYER_ONE,pub:LAYER_TWO,pub:LAYER_THREE',
-    };
-    const url = buildLegendUrl(multiLayerOverlay);
-    expect(url).toMatch(/layer=pub%3ALAYER_ONE/);
-    expect(url).not.toMatch(/layer=pub%3ALAYER_TWO/);
+  it('renders a point swatch as a circle', () => {
+    const style = swatchStyle({ ...polygonSwatch, geometry: 'point' });
+    expect(style.borderRadius).toBe('50%');
   });
 
-  it('joins params with & when the overlay URL already has a query string', () => {
-    const urlWithQuery: SparMapOverlayLayer = {
-      ...baseOverlay,
-      url: 'https://example.com/wms?token=abc',
-    };
-    const url = buildLegendUrl(urlWithQuery);
-    expect(url.startsWith('https://example.com/wms?token=abc&')).toBe(true);
-    expect(url).toContain('service=WMS');
+  it('renders a line swatch as a colored rule', () => {
+    const style = swatchStyle({
+      geometry: 'line', fill: null, fillOpacity: 0, stroke: '#1f6fdb', strokeWidth: 3, strokeOpacity: 1
+    });
+    expect(style.borderTop).toBe('3px solid #1f6fdb');
+    expect(style.height).toBe(0);
   });
 
-  it('passes an overlay style through to GetLegendGraphic', () => {
-    const styledOverlay: SparMapOverlayLayer = {
-      ...baseOverlay,
-      styles: '1414',
-    };
-    const url = buildLegendUrl(styledOverlay);
-    expect(url).toContain('style=1414');
+  it('falls back to neutral colors when fill/stroke are null', () => {
+    const style = swatchStyle({
+      geometry: 'polygon', fill: null, fillOpacity: 1, stroke: null, strokeWidth: 1, strokeOpacity: 1
+    });
+    expect(style.backgroundColor).toBe('transparent');
+    expect(style.border).toBe('1px solid #888888');
   });
 });
 
+const renderPanel = (data: LegendOverlayData[]) => {
+  const Bridge = () => {
+    const { setLegendData } = useSparMap();
+    useEffect(() => {
+      setLegendData(data);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    return null;
+  };
+  return render(
+    <MemoryRouter>
+      <SparMapProvider>
+        <Bridge />
+        <LegendPanel />
+      </SparMapProvider>
+    </MemoryRouter>
+  );
+};
+
 describe('LegendPanel', () => {
-  it('renders an accordion item per visible, legend-eligible overlay (aoua)', () => {
-    render(<LegendPanel theme="aoua" />);
-    // Wrapper renders with the test id regardless of branch
-    expect(screen.queryByTestId('legend-panel')).toBeTruthy();
-    // aoua's defaults include the SPZ Natural Stand layer (visible +
-    // legend-eligible). The transportation layer is visibility-off so
-    // should not render an accordion item.
-    expect(screen.queryByTestId('legend-panel-item-spz_natural_stand')).toBeTruthy();
-    expect(screen.queryByTestId('legend-panel-item-transportation')).toBeFalsy();
+  it('shows an empty-state when there is no legend data', () => {
+    renderPanel([]);
+    expect(screen.getByTestId('legend-panel-empty')).toBeTruthy();
   });
 
-  it('renders a legend image with alt text for each visible overlay', () => {
-    render(<LegendPanel theme="aoua" />);
-    const img = screen.queryByTestId('legend-panel-image-spz_natural_stand') as HTMLImageElement | null;
-    expect(img).toBeTruthy();
-    expect(img?.getAttribute('alt')).toMatch(/Legend for Seed Plan Zones - Natural Stand/);
-    expect(img?.getAttribute('src')).toMatch(/GetLegendGraphic/);
-  });
-
-  it('renders the empty-state Tile when no overlays are visible + legend-eligible', async () => {
-    // Every shipped theme has at least one default-on legend-eligible
-    // overlay now (matching the legacy CWM defaults). Exercise the
-    // empty-state branch by stubbing the theme registry to return a
-    // profile with no overlays for this test only.
-    vi.resetModules();
-    vi.doMock('../../../config/leaflet-themes', async (orig) => {
-      const actual = await orig<typeof import('../../../config/leaflet-themes')>();
-      const realDefault = actual.getThemeProfile('default');
-      return {
-        ...actual,
-        getThemeProfile: () => ({ ...realDefault, overlays: [] }),
-      };
-    });
-    const { default: LegendPanelStubbed } = await import(
-      '../../../views/Seedlot/SeedlotMap/LegendPanel'
-    );
-    render(<LegendPanelStubbed theme="default" />);
-    expect(screen.queryByTestId('legend-panel-empty')).toBeTruthy();
-    expect(screen.queryByText(/No legend available for this theme/)).toBeTruthy();
-    vi.doUnmock('../../../config/leaflet-themes');
+  it('renders an accordion section per overlay with a row per in-view rule', () => {
+    renderPanel([
+      {
+        id: 'spz',
+        label: 'SPZ',
+        rules: [
+          { label: 'Georgia Lowlands', swatch: polygonSwatch },
+          { label: 'Maritime', swatch: polygonSwatch }
+        ]
+      }
+    ]);
+    expect(screen.getByTestId('legend-panel-item-spz')).toBeTruthy();
+    expect(screen.getAllByTestId('legend-panel-row-spz')).toHaveLength(2);
+    expect(screen.getByText('Georgia Lowlands')).toBeTruthy();
+    expect(screen.getByText('Maritime')).toBeTruthy();
   });
 });

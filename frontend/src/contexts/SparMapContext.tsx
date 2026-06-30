@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import type { LatLngBoundsExpression } from 'leaflet';
 import type { AoiPolygon } from '../types/SparMapTypes';
+import type { LegendOverlayData } from '../api-service/legendApi';
 
 export interface MarkupPointCoordinate {
   lat: number;
@@ -24,6 +25,12 @@ export interface MarkupPointCoordinate {
 export interface MapControls {
   startDraw: () => void;
   startEdit: () => void;
+  /**
+   * Enable Geoman global removal mode — the next polygon the user clicks
+   * is deleted (fires pm:remove, which rebuilds AOI state). Backs the
+   * "Delete Polygon" toolbar button. Mutually exclusive with draw/edit.
+   */
+  startRemovalMode: () => void;
   clearMapLayers: () => void;
   /** Disable any active AOI draw/edit mode without removing AOI layers. */
   cancelAoiMode: (() => void) | null;
@@ -155,6 +162,7 @@ export interface MapControls {
 const NOOP_MAP_CONTROLS: MapControls = {
   startDraw: () => {},
   startEdit: () => {},
+  startRemovalMode: () => {},
   clearMapLayers: () => {},
   cancelAoiMode: null,
   addImportedLayersToMap: () => {},
@@ -276,6 +284,8 @@ interface SparMapContextValue {
   // component has mounted.
   startDraw: () => void;
   startEdit: () => void;
+  /** Enable Geoman removal mode — click a polygon to delete it. */
+  startRemovalMode: () => void;
   clearMapLayers: () => void;
   /** Disable any active AOI draw/edit mode without removing AOI layers. */
   cancelAoiMode: (() => void) | null;
@@ -366,6 +376,16 @@ interface SparMapContextValue {
   toggleCatalogLayer: (id: string) => void;
 
   /**
+   * Dynamic legend entries for the overlays currently visible in the map
+   * view. Produced by `<LegendDataLayer>` (GeoServer JSON legend, trimmed
+   * to the viewport via hideEmptyRules) and rendered by `<LegendPanel>`.
+   * Empty when no legend-eligible overlay has symbols in the current view.
+   */
+  legendData: LegendOverlayData[];
+  /** Replace the dynamic legend entries. Called by `<LegendDataLayer>`. */
+  setLegendData: (data: LegendOverlayData[]) => void;
+
+  /**
    * When true, `<GraticuleLayer>` renders a lat/lng grid overlay on the
    * map. Toggle via the AoiToolbar/MapToolbar GRATICULE button. Mirrors
    * the legacy CWM GRATICULE tool from map-config.json.
@@ -453,6 +473,7 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
   const [mapControls, setMapControlsState] = useState<MapControls>(NOOP_MAP_CONTROLS);
   const [identifyActive, setIdentifyActiveState] = useState(false);
   const [activeCatalogLayers, setActiveCatalogLayers] = useState<string[]>([]);
+  const [legendData, setLegendData] = useState<LegendOverlayData[]>([]);
   const [graticuleVisible, setGraticuleVisibleState] = useState(false);
   const setGraticuleVisible = useCallback((visible: boolean) => {
     setGraticuleVisibleState(visible);
@@ -632,6 +653,7 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
     setSpeciesCode,
     startDraw: mapControls.startDraw,
     startEdit: mapControls.startEdit,
+    startRemovalMode: mapControls.startRemovalMode,
     clearMapLayers: mapControls.clearMapLayers,
     cancelAoiMode: mapControls.cancelAoiMode,
     addImportedLayersToMap: mapControls.addImportedLayersToMap,
@@ -660,6 +682,8 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
     setIdentifyActive,
     activeCatalogLayers,
     toggleCatalogLayer,
+    legendData,
+    setLegendData,
     graticuleVisible,
     setGraticuleVisible,
     liveAoiValidation,
@@ -672,7 +696,7 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
   }), [
     aois, becZoneCodes, becNotSuit, becZoneShape, extentBounds, seedlotNumber,
     veglotNumber, spzIds, spzCode, speciesCode, mapControls, viewHistoryAvail,
-    identifyActive, activeCatalogLayers, graticuleVisible, liveAoiValidation,
+    identifyActive, activeCatalogLayers, legendData, graticuleVisible, liveAoiValidation,
     measurementMode, measurementResult, addAoi, removeLastAoi, clearAois,
     replaceAoi, setAois, setBecZones, setExtentBounds, setHighlightPoint,
     setSpzIds, setSpzCode, setSpeciesCode, setIdentifyActive, toggleCatalogLayer,

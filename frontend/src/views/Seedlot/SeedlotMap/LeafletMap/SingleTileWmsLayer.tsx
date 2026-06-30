@@ -60,6 +60,20 @@ export class SingleTileWmsLeafletLayer extends L.Layer {
     this.refresh();
   }
 
+  /**
+   * Expose the WMS endpoint, layer name(s), and whether the layer is
+   * currently within its scale range — for the dynamic legend, which reads
+   * the live map to decide which layers' legends to show.
+   */
+  getLegendInfo() {
+    return {
+      url: this.wmsOptions.url,
+      layers: this.wmsOptions.layers,
+      styles: this.wmsOptions.styles,
+      inScaleRange: this.isInScaleRange()
+    };
+  }
+
   private isInScaleRange() {
     const map = this.mapInstance;
     if (!map) return false;

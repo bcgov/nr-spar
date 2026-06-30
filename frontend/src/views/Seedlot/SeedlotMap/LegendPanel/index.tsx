@@ -1,93 +1,56 @@
-import React, { useState } from 'react';
-import {
-  Accordion,
-  AccordionItem,
-  Tile,
-  InlineNotification
-} from '@carbon/react';
+import React, { type CSSProperties } from 'react';
+import { Accordion, AccordionItem, Tile } from '@carbon/react';
 
-import { getThemeProfile } from '../../../../config/leaflet-themes';
-import type {
-  SparMapTheme,
-  SparMapOverlayLayer
-} from '../../../../types/SparMapTypes';
-
-interface LegendPanelProps {
-  theme: SparMapTheme;
-}
+import { useSparMap } from '../../../../contexts/SparMapContext';
+import type { LegendSwatch } from '../../../../api-service/legendApi';
 
 /**
- * Build a WMS `GetLegendGraphic` URL for a single overlay. Uses the
- * first layer name in the comma-separated `overlay.layers` list because
- * most WMS servers (GeoServer, QGIS Server, MapServer) return a legend
- * per layer name rather than a composite legend for a grouped layer
- * request. If the overlay ships multiple layer names we keep the first
- * one as the representative legend; the identify flow already handles
- * the full comma-list via GetFeatureInfo.
- *
- * Exported for unit testing — the URL composition is the full contract
- * of the legend fetch, so we want a direct assertion without mounting
- * the component.
+ * Inline style for one legend swatch, derived from a style rule's
+ * symbolizer. Polygons render as a filled, bordered square; points as a
+ * filled circle; lines as a colored horizontal rule. Exported so the
+ * mapping from swatch → CSS can be unit-tested without mounting the panel.
  */
-export const buildLegendUrl = (overlay: SparMapOverlayLayer): string => {
-  const layerName = (overlay.layers ?? '').split(',')[0]?.trim() ?? '';
-  const params = new URLSearchParams({
-    service: 'WMS',
-    version: '1.3.0',
-    request: 'GetLegendGraphic',
-    layer: layerName,
-    format: 'image/png',
-    transparent: 'true'
-  });
-  if (overlay.styles) {
-    params.set('style', overlay.styles.split(',')[0]?.trim() ?? overlay.styles);
+export const swatchStyle = (swatch: LegendSwatch): CSSProperties => {
+  if (swatch.geometry === 'line') {
+    return {
+      width: 16,
+      height: 0,
+      flex: '0 0 auto',
+      borderTop: `${Math.max(2, Math.round(swatch.strokeWidth))}px solid ${swatch.stroke ?? '#161616'}`
+    };
   }
-  const separator = overlay.url.includes('?') ? '&' : '?';
-  return `${overlay.url}${separator}${params.toString()}`;
+  return {
+    width: 16,
+    height: 16,
+    flex: '0 0 auto',
+    boxSizing: 'border-box',
+    border: `1px solid ${swatch.stroke ?? '#888888'}`,
+    backgroundColor: swatch.fill ?? 'transparent',
+    borderRadius: swatch.geometry === 'point' ? '50%' : 2
+  };
 };
 
 /**
- * LEGEND panel — Carbon Accordion listing the WMS legend graphic for
- * each visible overlay in the active theme profile. Replicates the
- * legacy SPAR cwmSparmap.jsp LEGEND panel which shipped as a static
- * HTML block per theme; the React port reads the overlay list out of
- * the theme profile and fetches legend graphics on demand.
+ * LEGEND panel — the dynamic, text-based legend. Renders one accordion
+ * section per overlay currently visible in the map view, each listing the
+ * style rules (color swatch + label) that have features in the current
+ * extent. The data is produced by `<LegendDataLayer>` from GeoServer's JSON
+ * legend (trimmed to the viewport via `hideEmptyRules`) and read here from
+ * `SparMapContext.legendData`.
  *
- * Only overlays flagged `legendEligible` and currently `visible` are
- * rendered. When the active theme has no eligible overlays (e.g. the
- * `default` theme which has an empty overlay list), the panel renders
- * an empty-state Tile so the layout doesn't collapse.
- *
- * Graceful degradation — if a legend image fails to load (WMS server
- * down, network error, unsupported layer name), the row swaps the
- * broken `<img>` for a Carbon InlineNotification so the rest of the
- * panel keeps working.
+ * Replaces the legacy raster `GetLegendGraphic` `<img>` legend, which
+ * couldn't scale, printed poorly, and showed a layer's full symbology
+ * regardless of what was actually on the map. When nothing is in view the
+ * panel shows an empty-state Tile so the layout doesn't collapse.
  */
-const LegendPanel = ({ theme }: LegendPanelProps) => {
-  const profile = getThemeProfile(theme);
-  const legendLayers = profile.overlays.filter(
-    (overlay) => overlay.visible && overlay.legendEligible
-  );
+const LegendPanel = () => {
+  const { legendData } = useSparMap();
 
-  // Track which overlay IDs have failed to load — used to swap the
-  // `<img>` for a fallback notification. A Set keeps membership checks
-  // O(1) and avoids re-rendering the whole list on each failure.
-  const [failedIds, setFailedIds] = useState<Set<string>>(new Set());
-
-  const markFailed = (id: string) => {
-    setFailedIds((prev) => {
-      if (prev.has(id)) return prev;
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
-  };
-
-  if (legendLayers.length === 0) {
+  if (legendData.length === 0) {
     return (
       <div className="legend-panel" data-testid="legend-panel">
         <Tile data-testid="legend-panel-empty">
-          No legend available for this theme.
+          No legend symbols in the current view.
         </Tile>
       </div>
     );
@@ -96,38 +59,34 @@ const LegendPanel = ({ theme }: LegendPanelProps) => {
   return (
     <div className="legend-panel" data-testid="legend-panel">
       <Accordion>
-        {legendLayers.map((overlay) => {
-          const legendUrl = buildLegendUrl(overlay);
-          const hasFailed = failedIds.has(overlay.id);
-          return (
-            <AccordionItem
-              title={overlay.label}
-              key={overlay.id}
-              open
-              data-testid={`legend-panel-item-${overlay.id}`}
-            >
-              {hasFailed ? (
-                <InlineNotification
-                  kind="warning"
-                  title={`Legend unavailable for ${overlay.label}`}
-                  subtitle="The WMS server did not return a legend graphic for this layer."
-                  lowContrast
-                  hideCloseButton
-                  data-testid={`legend-panel-fallback-${overlay.id}`}
-                />
-              ) : (
-                <img
-                  className="legend-panel__image"
-                  src={legendUrl}
-                  alt={`Legend for ${overlay.label}`}
-                  loading="lazy"
-                  onError={() => markFailed(overlay.id)}
-                  data-testid={`legend-panel-image-${overlay.id}`}
-                />
-              )}
-            </AccordionItem>
-          );
-        })}
+        {legendData.map((overlay) => (
+          <AccordionItem
+            title={overlay.label}
+            key={overlay.id}
+            open
+            data-testid={`legend-panel-item-${overlay.id}`}
+          >
+            <ul className="legend-panel__rules">
+              {overlay.rules.map((rule, index) => (
+                <li
+                  className="legend-panel__row"
+                  // Rule labels can repeat (e.g. multiple "Other"); the index
+                  // disambiguates and the list is static for a given render.
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={`${overlay.id}-${index}-${rule.label}`}
+                  data-testid={`legend-panel-row-${overlay.id}`}
+                >
+                  <span
+                    className="legend-panel__swatch"
+                    style={swatchStyle(rule.swatch)}
+                    aria-hidden="true"
+                  />
+                  <span className="legend-panel__label">{rule.label}</span>
+                </li>
+              ))}
+            </ul>
+          </AccordionItem>
+        ))}
       </Accordion>
     </div>
   );

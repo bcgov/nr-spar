@@ -1,13 +1,15 @@
 import html2canvas from 'html2canvas';
 
 import type { SparMapTheme } from '../../../types/SparMapTypes';
-import { getThemeProfile } from '../../../config/leaflet-themes';
-import { buildLegendUrl } from './LegendPanel';
 
 export interface PrintMapOptions {
   /** Seedlot number shown in the print header + footer. */
   seedlotNumber: string;
-  /** Active map theme — used to look up the visible legend overlays. */
+  /**
+   * Active map theme. Reserved for the print legend, which is temporarily
+   * omitted (see the note in `printMap` below) and returns with the
+   * dynamic text-based legend.
+   */
   theme: SparMapTheme;
   /** Optional notes block printed in the bottom band. */
   notes?: string;
@@ -30,17 +32,18 @@ const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (ch) => {
   }
 });
 
-const escapeHtmlAttr = (s: string): string => escapeHtml(s);
-
 /**
  * Templated print layout mirroring the legacy SPAR
  * `assets/print-landscape.html` structure:
  *   - 8.5 x 11 landscape page with a 1cm margin and a 2-px frame
  *   - Top band: BC Gov wordmark + map title + seedlot number + date
- *   - Left ~80%: raster map capture (html2canvas)
- *   - Right ~20%: WMS GetLegendGraphic images per visible legend-
- *     eligible overlay
+ *   - Map area: full-width raster map capture (html2canvas)
  *   - Bottom band: BC Gov disclaimer + notes + scale + north arrow
+ *
+ * The right-side legend column is temporarily omitted: the WMS
+ * GetLegendGraphic rasters loaded and scaled unreliably in the print
+ * window. It returns with the dynamic text-based legend, which renders
+ * as DOM (loads instantly, scales cleanly) instead of external images.
  *
  * Leaflet tiles render via CSS transform stacks that browser print
  * engines can't composite reliably, so we capture the map area to a
@@ -49,7 +52,7 @@ const escapeHtmlAttr = (s: string): string => escapeHtml(s);
  * around the map is vector HTML.
  */
 export const printMap = async (options: PrintMapOptions): Promise<void> => {
-  const { seedlotNumber, theme, notes } = options;
+  const { seedlotNumber, notes } = options;
   const mapEl = document.querySelector('.leaflet-container') as HTMLElement | null;
   if (!mapEl) return;
   try {
@@ -105,14 +108,6 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
     const scaleControl = document.querySelector('.leaflet-control-scale-line');
     const scaleText = scaleControl ? scaleControl.textContent : '';
 
-    // Collect WMS GetLegendGraphic URLs for visible legend-eligible
-    // overlays in the active theme. Mirrors the legacy print template's
-    // right-side legend column.
-    const profile = getThemeProfile(theme);
-    const legends = profile.overlays
-      .filter((o) => o.visible && o.legendEligible)
-      .map((o) => ({ label: o.label, url: buildLegendUrl(o) }));
-
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     const dateStr = new Date().toLocaleDateString();
@@ -144,14 +139,9 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
     .print-header__title { font-size: 1.25rem; font-weight: 600; }
     .print-header__seedlot { font-size: 0.9rem; color: #333; }
     .print-header__date { font-size: 0.75rem; color: #666; }
-    .print-body { display: grid; grid-template-columns: 1fr 220px; gap: 0.75rem; min-height: 0; }
+    .print-body { display: grid; grid-template-columns: 1fr; gap: 0.75rem; min-height: 0; }
     .print-map { border: 1px solid #161616; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .print-map img { width: 100%; height: 100%; object-fit: contain; }
-    .print-legend { border: 1px solid #161616; padding: 0.5rem; overflow-y: auto; }
-    .print-legend h3 { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; border-bottom: 1px solid #888; padding-bottom: 0.25rem; }
-    .print-legend__item { margin-bottom: 0.5rem; }
-    .print-legend__label { font-size: 0.65rem; font-weight: 600; margin-bottom: 0.125rem; color: #444; }
-    .print-legend__img { max-width: 100%; height: auto; }
     .print-footer {
       display: grid;
       grid-template-columns: 3fr 2fr 1fr auto;
@@ -181,17 +171,6 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
     <div class="print-body">
       <div class="print-map">
         <img src="${dataUrl}" alt="Map snapshot for seedlot ${seedlotNumber}" />
-      </div>
-      <div class="print-legend">
-        <h3>Legend</h3>
-        ${legends.length === 0
-    ? '<div class="print-legend__item"><span class="print-legend__label">No legend-eligible overlays visible.</span></div>'
-    : legends.map((l) => `
-            <div class="print-legend__item">
-              <div class="print-legend__label">${escapeHtml(l.label)}</div>
-              <img class="print-legend__img" src="${escapeHtmlAttr(l.url)}" alt="${escapeHtml(l.label)} legend" />
-            </div>
-          `).join('')}
       </div>
     </div>
     <div class="print-footer">

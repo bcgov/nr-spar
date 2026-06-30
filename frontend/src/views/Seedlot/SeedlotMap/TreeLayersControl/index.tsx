@@ -158,19 +158,6 @@ const BASE_LAYERS: readonly BaseLayerDef[] = [
     )
   },
   {
-    name: 'BC Gov Orthophoto',
-    build: () => L.tileLayer.wms('https://openmaps.gov.bc.ca/imagex/ecw_wms.dll', {
-      layers: 'BC_BC_BC_XC1M_BCALB_1995_2004',
-      styles: '',
-      format: 'image/png',
-      transparent: true,
-      version: '1.1.1',
-      tileSize: 256,
-      attribution: 'Orthophoto &copy; <a href="https://www2.gov.bc.ca/">Government of British Columbia</a>',
-      maxZoom: 19
-    })
-  },
-  {
     name: 'ESRI World Imagery (satellite)',
     build: () => L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',

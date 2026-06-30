@@ -99,7 +99,13 @@ const AoiDrawLayer = () => {
     map.pm.setGlobalOptions({
       pathOptions: LEGACY_AOI_STYLE,
       templineStyle: { color: LEGACY_AOI_STYLE.color },
-      hintlineStyle: { color: LEGACY_AOI_STYLE.color, dashArray: [5, 5] }
+      hintlineStyle: { color: LEGACY_AOI_STYLE.color, dashArray: [5, 5] },
+      // Vertex editing in global edit mode: dragging a vertex moves it,
+      // and right-clicking a vertex removes it. Set explicitly rather than
+      // relying on Geoman's default so vertex-removal stays deterministic
+      // across geoman-free versions. Dragging the faint mid-edge markers
+      // adds a new vertex (Geoman default, no option needed).
+      removeVertexOn: 'contextmenu'
     });
 
     // Run live topology validation against the current Geoman layer
@@ -169,17 +175,31 @@ const AoiDrawLayer = () => {
       cancelAoiMode: () => {
         map.pm?.disableDraw?.();
         map.pm?.disableGlobalEditMode?.();
+        map.pm?.disableGlobalRemovalMode?.();
       },
       startDraw: () => {
         map.pm?.disableGlobalEditMode?.();
+        map.pm?.disableGlobalRemovalMode?.();
         if (map.pm?.enableDraw) {
           map.pm.enableDraw('Polygon');
         }
       },
       startEdit: () => {
         map.pm?.disableDraw?.();
+        map.pm?.disableGlobalRemovalMode?.();
         if (map.pm?.enableGlobalEditMode) {
           map.pm.enableGlobalEditMode();
+        }
+      },
+      // Delete a single polygon: enable Geoman global removal mode so the
+      // next polygon the user clicks on the map is deleted. Geoman fires
+      // pm:remove, which `handleRemove` uses to rebuild the AOI list from
+      // the remaining layers. Mutually exclusive with draw + edit.
+      startRemovalMode: () => {
+        map.pm?.disableDraw?.();
+        map.pm?.disableGlobalEditMode?.();
+        if (map.pm?.enableGlobalRemovalMode) {
+          map.pm.enableGlobalRemovalMode();
         }
       },
       clearMapLayers: () => {
@@ -373,6 +393,7 @@ const AoiDrawLayer = () => {
       _setMapControls({
         startDraw: () => {},
         startEdit: () => {},
+        startRemovalMode: () => {},
         clearMapLayers: () => {},
         cancelAoiMode: null,
         addImportedLayersToMap: () => {},

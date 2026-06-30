@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import area from '@turf/area';
 import { useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
@@ -10,9 +11,22 @@ import {
   DatePickerInput,
   DatePicker,
   TextArea,
-  CheckboxSkeleton
+  CheckboxSkeleton,
+  Button,
+  Tile,
+  Tag
 } from '@carbon/react';
+import { Location } from '@carbon/icons-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import validator from 'validator';
+
+import { fetchSavedAoi } from '../../../api-service/sparMapApi';
+import { fetchBecZonesIntersecting, fetchBecVariantAt } from '../../../api-service/becZonesApi';
+import { fetchPolygonElevationRange } from '../../../api-service/elevationApi';
+import { fetchForestDistrict } from '../../../api-service/forestDistrictApi';
+import {
+  meanLatLng, formatLatLng, formatElevationRange
+} from './collectionAreaDerivations';
 
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { now } from '../../../utils/DateUtils';
@@ -45,10 +59,114 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
     setStepData,
     defaultClientNumber,
     defaultCode,
-    isFormSubmitted
+    isFormSubmitted,
+    seedlotNumber
   } = useContext(ClassAContext);
 
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
+
+  // POC: launch the SPAR collection-area map and read back the summary it
+  // hands to the form via router state (see AoiToolbar.onSubmit). Production
+  // (Approach A) would instead re-fetch `collectionGeom` from the full-form GET.
+  const navigate = useNavigate();
+  const location = useLocation();
+  type CollectionAreaSummary = {
+    polygonCount: number;
+    areaHectares: number;
+    becZones: string[];
+    savedAt: string;
+  };
+  // Fresh hand-off from the map (router state) takes precedence; on a plain
+  // page refresh that state is gone, so we re-load the saved geometry from the
+  // backend (production read-back) and re-derive the same summary.
+  const freshSummary = (location.state as {
+    collectionAreaSummary?: CollectionAreaSummary;
+  } | null)?.collectionAreaSummary;
+  const [savedSummary, setSavedSummary] = useState<CollectionAreaSummary | null>(null);
+
+  useEffect(() => {
+    if (!seedlotNumber || freshSummary) {
+      return undefined;
+    }
+    let cancelled = false;
+    fetchSavedAoi(seedlotNumber)
+      .then(async (geom) => {
+        if (cancelled || !geom) {
+          return;
+        }
+        let becZones: string[] = [];
+        try {
+          becZones = await fetchBecZonesIntersecting(geom);
+        } catch {
+          becZones = [];
+        }
+        if (!cancelled) {
+          setSavedSummary({
+            polygonCount: geom.geometry.coordinates.length,
+            areaHectares: Math.round((area(geom) / 10000) * 100) / 100,
+            becZones,
+            savedAt: ''
+          });
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [seedlotNumber, freshSummary]);
+
+  const collectionAreaSummary = freshSummary ?? savedSummary;
+
+  type DerivedAttrs = {
+    latLng: string | null;
+    elevation: string | null;
+    becVariant: string | null;
+    forestDistrict: string | null;
+  };
+  const [derived, setDerived] = useState<DerivedAttrs | null>(null);
+
+  useEffect(() => {
+    if (!seedlotNumber) {
+      return undefined;
+    }
+    let cancelled = false;
+    fetchSavedAoi(seedlotNumber)
+      .then(async (geom) => {
+        if (cancelled || !geom) {
+          return;
+        }
+        const mean = meanLatLng(geom);
+        const centroid = mean ? [mean.lng, mean.lat] : null;
+        const [elevation, becVariant, forestDistrict] = await Promise.all([
+          fetchPolygonElevationRange(geom)
+            .then((e) => (e ? formatElevationRange(e.minM, e.maxM) : null))
+            .catch(() => null),
+          centroid
+            ? fetchBecVariantAt(centroid).then((v) => v?.mapLabel ?? null).catch(() => null)
+            : Promise.resolve(null),
+          centroid ? fetchForestDistrict(centroid).catch(() => null) : Promise.resolve(null)
+        ]);
+        if (!cancelled) {
+          setDerived({
+            latLng: mean ? formatLatLng(mean) : null,
+            elevation,
+            becVariant,
+            forestDistrict
+          });
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [seedlotNumber]);
+
+  const launchCollectionAreaMap = () => {
+    const formPath = `/seedlots/a-class-registration/${seedlotNumber}`;
+    navigate(
+      `/seedlots/map/${seedlotNumber}?theme=COLAREA&returnTo=${encodeURIComponent(formPath)}`
+    );
+  };
 
   const setClientAndCode = (
     agency: StringInputType,
@@ -173,6 +291,62 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
           }
         </Column>
       </Row>
+      {
+        isReview
+          ? null
+          : (
+            <Row className="collection-step-row collection-area-map-section">
+              <Column sm={4} md={8} lg={16} xlg={16}>
+                <Button
+                  kind="tertiary"
+                  size="md"
+                  renderIcon={Location}
+                  onClick={launchCollectionAreaMap}
+                  disabled={isFormSubmitted || !seedlotNumber}
+                >
+                  {
+                    collectionAreaSummary
+                      ? 'Edit collection area on map'
+                      : 'Define collection area on map'
+                  }
+                </Button>
+                {
+                  collectionAreaSummary
+                    ? (
+                      <Tile className="collection-area-summary">
+                        <p><strong>Collection area saved</strong></p>
+                        <p>
+                          {`${collectionAreaSummary.polygonCount} polygon(s) · `}
+                          {`${collectionAreaSummary.areaHectares} ha`}
+                        </p>
+                        {
+                          collectionAreaSummary.becZones.length > 0
+                            ? (
+                              <p>
+                                {'BEC zone(s): '}
+                                {collectionAreaSummary.becZones.map((zone) => (
+                                  <Tag key={zone} type="green">{zone}</Tag>
+                                ))}
+                              </p>
+                            )
+                            : null
+                        }
+                        {derived ? (
+                          <>
+                            <p>{`Mean lat/long: ${derived.latLng ?? '—'}`}</p>
+                            <p>{`Elevation: ${derived.elevation ?? '—'}`}</p>
+                            <p>{`BEC variant: ${derived.becVariant ?? '—'}`}</p>
+                            <p>{`Forest district: ${derived.forestDistrict ?? '—'}`}</p>
+                          </>
+                        ) : null}
+                      </Tile>
+                    )
+                    : null
+                }
+              </Column>
+            </Row>
+          )
+      }
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
@@ -301,7 +475,8 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
                   id={state.selectedCollectionCodes.id}
                 >
                   {
-                    (coneCollectionMethodsQuery.data as MultiOptionsObj[])
+                    /* POC-demo guard: render even if the reference query 401s in local dev */
+                    ((coneCollectionMethodsQuery.data as MultiOptionsObj[]) ?? [])
                       .sort((a, b) => a.description.localeCompare(b.description))
                       .map((method) => (
                         <Checkbox

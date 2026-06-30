@@ -52,6 +52,11 @@ const MeasureControl = () => {
   const modeRef = useRef<'distance' | 'area' | 'point' | null>(null);
   modeRef.current = measurementMode;
 
+  // True once a distance/area measurement has been finished by a
+  // double-click. The next single-click then starts a fresh measurement
+  // instead of extending the finished one (the tool stays armed).
+  const finishedRef = useRef(false);
+
   const formatDistanceKm = useCallback((km: number): string => {
     if (!Number.isFinite(km) || km <= 0) return '0 m';
     if (km < 1) return `${Math.round(km * 1000)} m`;
@@ -201,6 +206,7 @@ const MeasureControl = () => {
     setPoints([]);
     layerGroupRef.current.clearLayers();
     setMeasurementResult(null);
+    finishedRef.current = false;
   }, [measurementMode, setMeasurementResult]);
 
   // Single-click extends the measurement (or drops the point in point
@@ -215,23 +221,32 @@ const MeasureControl = () => {
       return;
     }
     setPoints((prev) => {
-      const next = [...prev, e.latlng];
+      // After a double-click finish, the next click starts a fresh
+      // measurement rather than extending the locked one.
+      const base = finishedRef.current ? [] : prev;
+      finishedRef.current = false;
+      const next = [...base, e.latlng];
       renderMeasurement(next, mode, false);
       return next;
     });
   });
 
-  // Double-click finishes distance / area measurement and turns mode
-  // off so a subsequent single-click doesn't extend a stale line.
+  // Double-click finishes the distance / area measurement. The tool stays
+  // armed (mode active); the next click starts a new measurement.
   useMapEvent('dblclick', () => {
     const mode = modeRef.current;
     if (!mode || mode === 'point') return;
+    finishedRef.current = true;
     setPoints((prev) => {
-      if (prev.length >= 2) renderMeasurement(prev, mode, true);
-      return prev;
+      // A double-click fires two 'click' events first, both at the finish
+      // point — drop the duplicate vertex they added before finishing.
+      let pts = prev;
+      if (pts.length >= 2 && pts[pts.length - 1].equals(pts[pts.length - 2], 1e-6)) {
+        pts = pts.slice(0, -1);
+      }
+      if (pts.length >= 2) renderMeasurement(pts, mode, true);
+      return pts;
     });
-    // Leave mode active — legacy CWM kept the tool armed so users
-    // could measure multiple things without re-clicking the button.
   });
 
   // Suppress the map's double-click zoom while measuring + crosshair

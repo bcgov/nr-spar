@@ -212,13 +212,12 @@ describe('LeafletMap', () => {
   // `<LayersControl.Overlay>` structure. Layer mounting is now
   // imperative inside `<TreeLayersControl>` (uses `useMap()` +
   // `L.control.layers.tree`), so these assertions no longer apply
-  // verbatim. The underlying invariants — 6 basemaps including
-  // orthophoto, full registry exposed per theme, BEC scale bands,
+  // verbatim. The underlying invariants — 5 basemaps, full registry
+  // exposed per theme, BEC scale bands,
   // COLAREA default-visible set — moved to dedicated tests:
   //   - registry assertions: src/__test__/config/leaflet-themes.test.ts
   //   - tree control structure: TreeLayersControl.test.tsx (TODO)
   it.todo('renders a basemap tile layer (moved to TreeLayersControl tests)');
-  it.todo('includes a BC Gov Orthophoto basemap option served via WMS (moved to TreeLayersControl tests)');
   it.todo('renders all overlay layers via the layer panel (moved to TreeLayersControl tests)');
   it.todo('renders BEC overlays as CWM-style single-tile WMS with legacy scale bands (moved to TreeLayersControl tests)');
   it.todo('checks the legacy COLAREA BEC reference overlays by default (moved to TreeLayersControl tests)');

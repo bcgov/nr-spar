@@ -710,20 +710,58 @@
 }
 
 .geom-calc-panel {
-  .cds--data-table-container {
-    width: 100%;
-  }
-
-  &__coords {
-    margin-top: 0.5rem;
+  &__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.75rem;
   }
 
-  &__coords-row .cds--btn {
+  &__item {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid colors.$gray-20;
+
+    &:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
+
+  &__item-title {
+    margin-bottom: 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  &__stats {
+    margin: 0;
+  }
+
+  &__stat {
+    display: flex;
     justify-content: space-between;
-    width: 100%;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+
+    dt {
+      color: colors.$gray-70;
+    }
+
+    dd {
+      margin: 0;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__totals {
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid colors.$gray-30;
+    font-weight: 600;
   }
 
   &__coords-list {
@@ -746,13 +784,26 @@
     font-weight: 600;
   }
 
-  .legend-panel__image {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    background: colors.$white;
-    padding: 0.25rem;
-    border: 1px solid colors.$gray-20;
+  .legend-panel__rules {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .legend-panel__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.125rem 0;
+    font-size: 0.8125rem;
+  }
+
+  .legend-panel__swatch {
+    display: inline-block;
+  }
+
+  .legend-panel__label {
+    line-height: 1.2;
   }
 }
 
@@ -936,6 +987,16 @@
 .leaflet-bottom.leaflet-left {
   left: 1rem;
   bottom: 1rem;
+}
+
+// The top-right layers control opens a tall panel that would otherwise be
+// covered by the bottom-right info cards — the "Polygon statistics" card
+// (`.map-overlay--top-right-stack`) and the cursor-position readout
+// (`.cursor-position-control`), both z-index 1000 and rendered after the
+// map in the DOM. Lift the whole top-right Leaflet control stack above them
+// so the open layer list stays fully visible and clickable.
+.leaflet-top.leaflet-right {
+  z-index: 1100;
 }
 
 // Match nr-silva's distinctive horizontal zoom bar — rotate the whole

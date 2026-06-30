@@ -114,7 +114,7 @@ const SPU_GRM_SPECIES: Array<{ code: string; styleId: string; nameOverride?: str
   { code: 'YC', styleId: '4444' }
 ];
 
-const speciesLabel = (code: string, nameOverride?: string): string => {
+export const speciesLabel = (code: string, nameOverride?: string): string => {
   const name = nameOverride ?? SPECIES_NAMES[code] ?? code;
   return `${code} - ${name}`;
 };
@@ -489,6 +489,23 @@ export const LEGACY_SPAR_LAYERS: readonly LegacySparLayer[] = BASE_SPAR_LAYERS.m
 const REGISTRY_BY_ID: Record<string, LegacySparLayer> = Object.fromEntries(
   LEGACY_SPAR_LAYERS.map((layer) => [layer.id, layer])
 );
+
+// Reverse lookup from the WMS `layers` value (`pub:<layerName>`) back to the
+// app's display label, so the dynamic legend can show the same name the
+// layer panel does instead of GeoServer's published title.
+const LABEL_BY_WMS_LAYER: Record<string, string> = Object.fromEntries(
+  LEGACY_SPAR_LAYERS.map((entry) => [`pub:${entry.layerName}`, entry.displayName])
+);
+
+/**
+ * Resolve a WMS `layers` string (e.g. `pub:WHSE_ADMIN_BOUNDARIES.ADM_NR_REGIONS_SPG`,
+ * optionally comma-separated) to the legacy SPAR layer's display label.
+ * Returns undefined when the layer is not in the legacy registry.
+ */
+export const legacyLayerLabel = (wmsLayers: string): string | undefined => {
+  const first = wmsLayers.split(',')[0]?.trim() ?? wmsLayers;
+  return LABEL_BY_WMS_LAYER[first];
+};
 
 /**
  * Default visibility set for the AOU A/B/B+ and plantsite themes — matches

@@ -330,7 +330,7 @@ export const SeedlotMapBody = () => {
               </button>
             </div>
             <div className="map-overlay__body">
-              <LegendPanel theme={theme} />
+              <LegendPanel />
             </div>
           </div>
         )}

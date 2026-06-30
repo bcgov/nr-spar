@@ -19,6 +19,7 @@ import BecHighlightLayer from '../BecHighlightLayer';
 import PointHighlightLayer from '../PointHighlightLayer';
 import SpzHighlightLayer from '../SpzHighlightLayer';
 import AoiDrawLayer from '../AoiDrawLayer';
+import LegendDataLayer from '../LegendDataLayer';
 import MeasureControl from '../MeasureControl';
 import ViewControl from '../ViewControl';
 import MarkupPointLayer from '../MarkupPointLayer';
@@ -264,6 +265,10 @@ const LeafletMap = ({ theme }: LeafletMapProps) => {
             the toolbars (all rendered OUTSIDE MapContainer) can
             manipulate the map view. Side-effect only — renders null. */}
         <ViewControl initialBounds={initialBounds} />
+        {/* Drives the dynamic legend: fetches GeoServer JSON legends for
+            the visible overlays, trimmed to the current viewport, and
+            pushes them to context for <LegendPanel>. Side-effect only. */}
+        <LegendDataLayer />
         {/* Lat/lng graticule overlay. Self-gates on
             `graticuleVisible` context state — renders nothing when
             disabled. Theme-agnostic; available on every map. */}

@@ -56,9 +56,26 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
 
   private wfsOptions: SeedlotPointsLayerOptions;
 
+  // Distinct VEGETATION_CODEs currently rendered, surfaced to the dynamic
+  // legend's "Species" key (the markers are coloured by species).
+  private renderedSpecies: string[] = [];
+
   constructor(options: SeedlotPointsLayerOptions) {
     super([]);
     this.wfsOptions = options;
+  }
+
+  /** Distinct VEGETATION_CODEs currently rendered — read by the legend. */
+  getRenderedSpecies(): string[] {
+    return this.renderedSpecies;
+  }
+
+  private setRenderedSpecies(codes: string[]): void {
+    this.renderedSpecies = codes;
+    // Tell the dynamic legend the in-view species changed so it can refresh
+    // its "Species" key. Fires on the map so <LegendDataLayer> can listen
+    // without holding a reference to every point layer.
+    this.mapInstance?.fire('spar:pointsrendered');
   }
 
   onAdd(map: L.Map): this {
@@ -76,6 +93,9 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
       this.fetchTimer = null;
     }
     this.clearLayers();
+    // Drop the species directly (no event) — the map's `layerremove` is
+    // what prompts <LegendDataLayer> to refresh once removal completes.
+    this.renderedSpecies = [];
     this.mapInstance = null;
     super.onRemove(map);
     return this;
@@ -111,6 +131,7 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
 
     if (!this.isInScaleRange()) {
       this.clearLayers();
+      this.setRenderedSpecies([]);
       return;
     }
 
@@ -145,7 +166,10 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
   private renderPoints(points: SeedlotPoint[]): void {
     this.clearLayers();
     const { labelText } = this.wfsOptions;
+    const species = new Set<string>();
     points.forEach((p) => {
+      const code = (p.vegetationCode ?? '').toUpperCase();
+      if (code) species.add(code);
       const color = colorForSpecies(p.vegetationCode);
       const marker = L.circleMarker([p.lat, p.lng], {
         radius: 5,
@@ -158,6 +182,7 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
       marker.bindPopup(this.popupHtml(p, labelText));
       this.addLayer(marker);
     });
+    this.setRenderedSpecies([...species]);
   }
 
   // eslint-disable-next-line class-methods-use-this
