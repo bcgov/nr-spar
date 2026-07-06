@@ -5,7 +5,7 @@ Feature: My seedlots
     When I visit "/seedlots/my-seedlots"
     Then the URL should contain "/seedlots/my-seedlots"
     And the a-class seedlot fixture is loaded
-    And I can see the title "My seedlots"
+    And I can see the title "My Seedlots"
 
   Scenario: User can start a new seedlot registration from My seedlots
     When I click the register a new seedlot button
