@@ -84,7 +84,7 @@ public class ActivityService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found");
     }
 
-    SparLog.info("Activity with riaKey: {} saved successfully.", riaKey);
+    SparLog.info("Activity with riaKey: {} updated successfully.", riaKey);
     return activityRepository.findById(riaKey).orElseThrow(
         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
   }
