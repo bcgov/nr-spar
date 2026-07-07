@@ -116,7 +116,7 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
    * Update moisture/purity activity dates, category, and comment with optimistic locking
    * (issue #2516).
    *
-   * @return rows updated; 0 means the row changed since it was read (409).
+   * @return rows updated; 0 means either the row is missing or its updateTimestamp no longer matches.
    */
   @Modifying
   @Transactional
