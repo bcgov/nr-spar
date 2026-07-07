@@ -10,6 +10,7 @@ import GenericTable from '../../../../components/GenericTable';
 import { ReplicateType, TestingTypes } from '../../../../types/consep/TestingActivityType';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
 import { getMccColumns, getPurityColumns, TABLE_TITLE } from './constants';
+import useAutosave from '../../../../hooks/useAutosave';
 
 import './styles.scss';
 
@@ -36,7 +37,6 @@ const useReplicates = (
   const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
   const [showDeleteNotification, setShowDeleteNotification] = useState(false);
 
-  const lastCheckedListRef = useRef<string | null>(null);
   const isDeletingRef = useRef(false);
 
   const updateReplicateListMutation = useMutation({
@@ -45,12 +45,18 @@ const useReplicates = (
       'updateMultipleReplicates',
       { riaKey, replicates }
     ),
-    onSuccess: (_, variables) => {
-      lastCheckedListRef.current = JSON.stringify(variables);
-    },
     onError: (error) => {
       setAlert(false, `Failed to update replicates: ${(error as AxiosError).message}`);
     }
+  });
+
+  const { markSaved } = useAutosave<ReplicateType[]>({
+    data: replicatesList,
+    onSave: (list) => updateReplicateListMutation.mutateAsync(list),
+    enabled:
+      !Object.values(validationErrors).some(Boolean)
+      && !updateReplicateListMutation.isPending
+      && !isDeletingRef.current
   });
 
   const deleteReplicateMutation = useMutation({
@@ -65,9 +71,9 @@ const useReplicates = (
     onSuccess: (data) => {
       setAlert(true, 'Replicate deleted successfully');
       const updatedList = data.data.replicatesList;
-      lastCheckedListRef.current = JSON.stringify(updatedList);
       setReplicatesList(updatedList);
       updateReplicates(updatedList);
+      markSaved(updatedList);
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicate: ${(error as AxiosError).message}`);
@@ -79,32 +85,10 @@ const useReplicates = (
 
   const syncWithInitialData = (data: ReplicateType[]) => {
     setIsLoading(true);
-    const dataString = JSON.stringify(data);
     setReplicatesList(data);
-    lastCheckedListRef.current = dataString;
+    markSaved(data);
     setIsLoading(false);
   };
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const hasValidationErrors = Object.values(validationErrors).some(Boolean);
-      if (
-        hasValidationErrors
-        || updateReplicateListMutation.isPending
-        || isDeletingRef.current
-      ) {
-        return;
-      }
-
-      const currentListString = JSON.stringify(replicatesList);
-      if (currentListString !== lastCheckedListRef.current) {
-        updateReplicateListMutation.mutate(replicatesList);
-        updateReplicates(replicatesList);
-      }
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [replicatesList, validationErrors, updateReplicateListMutation]);
 
   return {
     replicatesList,
@@ -116,7 +100,8 @@ const useReplicates = (
     setShowDeleteNotification,
     deleteReplicateMutation,
     isDeletingRef,
-    syncWithInitialData
+    syncWithInitialData,
+    markSaved
   };
 };
 
@@ -134,7 +119,8 @@ const ActivityResult = ({
     setShowDeleteNotification,
     deleteReplicateMutation,
     isDeletingRef,
-    syncWithInitialData
+    syncWithInitialData,
+    markSaved
   } = useReplicates(riaKey, replicateType, updateReplicates, setAlert);
 
   const replicatesListRef = useRef(replicatesList);
@@ -153,6 +139,7 @@ const ActivityResult = ({
       setAlert(true, 'Replicates deleted successfully');
       setReplicatesList([]);
       updateReplicates([]);
+      markSaved([]);
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicates: ${(error as AxiosError).message}`);
@@ -162,8 +149,7 @@ const ActivityResult = ({
     }
   });
 
-  // Hydrate when props differ from local (query/refetch). Skip parent echo of updateReplicates;
-  // otherwise lastCheckedListRef would match before autosave runs.
+  // Hydrate when props differ from local (query/refetch). Skip parent echo of updateReplicates.
   useEffect(() => {
     if (JSON.stringify(replicatesData) === JSON.stringify(replicatesListRef.current)) {
       return;
