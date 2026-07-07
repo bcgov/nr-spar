@@ -31,15 +31,15 @@ Then('I should see the {string} logo', (logoId: string) => {
   });
 });
 
-Then('I can see the title {string}', (text: string) => {
+Then('I can see the login title {string}', (text: string) => {
   cy.getByDataTest('landing-title').should('have.text', text);
 });
 
-Then('I can see the subtitle {string}', (text: string) => {
+Then('I can see the login subtitle {string}', (text: string) => {
   cy.getByDataTest('landing-subtitle').should('have.text', text);
 });
 
-Then('I can see the description {string}', (text: string) => {
+Then('I can see the login description {string}', (text: string) => {
   cy.getByDataTest('landing-desc').should('have.text', text);
 });
 

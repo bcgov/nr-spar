@@ -1,6 +1,6 @@
 export enum NavigationLabels {
   Dashboard = 'Dashboard',
-  Seedlots = 'Seedlots',
+  Seedlots = 'Seedlots'
 }
 
 export enum SeedlotActivities {
@@ -9,5 +9,5 @@ export enum SeedlotActivities {
 
 export enum PageHeaderLabels {
   CreateAClass = 'Create A-class seedlot',
-  MySeedlots = 'My Seedlots',
+  MySeedlots = 'My Seedlots'
 }
