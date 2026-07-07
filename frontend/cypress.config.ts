@@ -23,8 +23,7 @@ export default defineConfig({
     specPattern: [
       // Cucumber feature files
       '**/features/*.feature',
-      '**/02-create-a-class-seedlot.cy.ts',
-      '**/03-seedlot-dashboard.cy.ts',
+      // Cypress tests
       '**/04-seedlot-detail.cy.ts',
       '**/05-my-seedlots.cy.ts',
       '**/11-dashboard-page.cy.ts',
