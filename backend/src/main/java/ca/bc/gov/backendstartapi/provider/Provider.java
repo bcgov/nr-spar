@@ -5,6 +5,7 @@ import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import java.util.HashMap;
@@ -58,6 +59,10 @@ public interface Provider {
 
   default List<OrchardDto> findOrchardsByVegCode(String vegCode) {
     return List.of();
+  }
+
+  default SeedlotSpeciesDto getSeedlotAndSpeciesByRequestKey(Long requestKey) {
+    return null;
   }
 
   // Common methods

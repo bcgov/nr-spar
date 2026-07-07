@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.oracleapi.service.RequestLotService;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,5 +58,49 @@ public class RequestSeedlotAndVeglotEndpoint {
     boolean commitmentChecked = requestSeedlotAndVeglotService.isCommitmentIndicatorYes(requestSkey, itemId);
     SparLog.info("Commitment indicator for requestSkey {} and itemId {}: {}", requestSkey, itemId, commitmentChecked);
     return commitmentChecked;
+  }
+
+  /**
+   * Fetch the seedlot and species (vegetation code) for a request key.
+   *
+   * @param requestKey the request key to look up
+   * @return the {@link SeedlotSpeciesDto} mapped to the request key
+   */
+  @GetMapping(
+      path = "/seedlot-species/{requestKey}",
+      produces = "application/json")
+  @Operation(
+      summary = "Retrieve the seedlot and species by request key",
+      description = "Returns the seedlot number and species (vegetation code) mapped to a valid"
+          + " request key. A request key maps to exactly one seedlot (1:1).")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Returns the seedlot and species for the given request key",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = SeedlotSpeciesDto.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "The request key does not exist",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "The request key maps to more than one seedlot",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public SeedlotSpeciesDto getSeedlotAndSpecies(@PathVariable Long requestKey) {
+    SparLog.info("Fetching seedlot and species for requestKey {}", requestKey);
+
+    SeedlotSpeciesDto result = requestSeedlotAndVeglotService.getSeedlotAndSpecies(requestKey);
+    SparLog.info("Found seedlot and species for requestKey {}", requestKey);
+    return result;
   }
 }
