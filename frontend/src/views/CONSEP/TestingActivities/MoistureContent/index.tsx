@@ -207,8 +207,11 @@ const MoistureContent = () => {
     );
   };
 
-  const handleReloadOnConflict = () => {
-    testActivityQuery.refetch().then(() => clearConflict());
+  const handleReloadOnConflict = async () => {
+    const result = await testActivityQuery.refetch();
+    if (result.status === 'success') {
+      clearConflict();
+    }
   };
 
   const doSave = (record: ActivityRecordType) => {
