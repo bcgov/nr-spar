@@ -31,4 +31,8 @@ public class RequestSeedlot {
   @Column(name = "COMMITMENT_IND")
   @Schema(description = "The commitment indicator associated with the request", example = "Y")
   private String commitmentInd;
+
+  @Column(name = "SEEDLOT_NUMBER")
+  @Schema(description = "The seedlot number associated with the request", example = "16258")
+  private Long seedlotNumber;
 }

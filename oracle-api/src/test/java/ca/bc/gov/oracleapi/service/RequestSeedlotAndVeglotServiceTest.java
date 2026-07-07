@@ -1,20 +1,26 @@
 package ca.bc.gov.oracleapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.oracleapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.oracleapi.repository.RequestSeedlotRepository;
 import ca.bc.gov.oracleapi.repository.RequestVeglotRepository;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class RequestSeedlotAndVeglotServiceTest {
@@ -78,5 +84,51 @@ class RequestSeedlotAndVeglotServiceTest {
     verify(requestSeedlotRepository).existsCommitmentYes(requestSkey, itemId);
     verify(requestVeglotRepository).existsCommitmentYes(requestSkey, itemId);
     verifyNoMoreInteractions(requestSeedlotRepository, requestVeglotRepository);
+  }
+
+  @Test
+  @DisplayName("getSeedlotAndSpecies_shouldReturnDto_whenRequestKeyExists")
+  void getSeedlotAndSpecies_shouldReturnDto_whenRequestKeyExists() {
+    Long requestKey = 500L;
+    SeedlotSpeciesDto dto = new SeedlotSpeciesDto(16258L, "PLI");
+
+    when(requestSeedlotRepository.findSeedlotAndSpeciesByRequestKey(requestKey))
+        .thenReturn(List.of(dto));
+
+    SeedlotSpeciesDto result = service.getSeedlotAndSpecies(requestKey);
+
+    assertEquals(dto, result);
+    verify(requestSeedlotRepository).findSeedlotAndSpeciesByRequestKey(requestKey);
+  }
+
+  @Test
+  @DisplayName("getSeedlotAndSpecies_shouldThrowNotFound_whenRequestKeyDoesNotExist")
+  void getSeedlotAndSpecies_shouldThrowNotFound_whenRequestKeyDoesNotExist() {
+    Long requestKey = 404L;
+
+    when(requestSeedlotRepository.findSeedlotAndSpeciesByRequestKey(requestKey))
+        .thenReturn(List.of());
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> service.getSeedlotAndSpecies(requestKey));
+
+    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+  }
+
+  @Test
+  @DisplayName("getSeedlotAndSpecies_shouldThrowConflict_whenRequestKeyMapsToMultipleSeedlots")
+  void getSeedlotAndSpecies_shouldThrowConflict_whenRequestKeyMapsToMultipleSeedlots() {
+    Long requestKey = 500L;
+
+    when(requestSeedlotRepository.findSeedlotAndSpeciesByRequestKey(requestKey))
+        .thenReturn(
+            List.of(new SeedlotSpeciesDto(16258L, "PLI"), new SeedlotSpeciesDto(16259L, "PLI")));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> service.getSeedlotAndSpecies(requestKey));
+
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
   }
 }
