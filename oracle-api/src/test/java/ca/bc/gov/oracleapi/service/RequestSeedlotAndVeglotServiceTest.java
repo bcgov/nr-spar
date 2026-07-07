@@ -115,4 +115,20 @@ class RequestSeedlotAndVeglotServiceTest {
 
     assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
   }
+
+  @Test
+  @DisplayName("getSeedlotAndSpecies_shouldThrowConflict_whenRequestKeyMapsToMultipleSeedlots")
+  void getSeedlotAndSpecies_shouldThrowConflict_whenRequestKeyMapsToMultipleSeedlots() {
+    Long requestKey = 500L;
+
+    when(requestSeedlotRepository.findSeedlotAndSpeciesByRequestKey(requestKey))
+        .thenReturn(
+            List.of(new SeedlotSpeciesDto(16258L, "PLI"), new SeedlotSpeciesDto(16259L, "PLI")));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class, () -> service.getSeedlotAndSpecies(requestKey));
+
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+  }
 }

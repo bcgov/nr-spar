@@ -56,7 +56,8 @@ public class RequestLotService {
    *
    * @param requestKey the request key to look up
    * @return the {@link SeedlotSpeciesDto} for the request key
-   * @throws ResponseStatusException with 404 status when the request key does not exist
+   * @throws ResponseStatusException with 404 status when the request key does not exist, or 409
+   *     status when the request key maps to more than one seedlot
    */
   public SeedlotSpeciesDto getSeedlotAndSpecies(Long requestKey) {
     SparLog.info("Finding seedlot and species for requestKey {}", requestKey);
@@ -72,9 +73,11 @@ public class RequestLotService {
 
     if (results.size() > 1) {
       SparLog.warn(
-          "Multiple seedlot/species rows found for requestKey {} ({} rows); returning the first result",
+          "Multiple seedlot/species rows found for requestKey {} ({} rows)",
           requestKey,
           results.size());
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Multiple seedlots found for the given request key");
     }
 
     return results.get(0);

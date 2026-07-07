@@ -121,6 +121,24 @@ class RequestSeedlotAndVeglotEndpointTest {
   }
 
   @Test
+  @DisplayName("getSeedlotAndSpeciesConflictTest")
+  void getSeedlotAndSpeciesConflictTest() throws Exception {
+    Long requestKey = 500L;
+
+    when(requestSeedlotAndVeglotService.getSeedlotAndSpecies(requestKey))
+        .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT));
+
+    mockMvc
+        .perform(
+            get("/api/request-seedlot-and-veglot/seedlot-species/{requestKey}", requestKey)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isConflict())
+        .andReturn();
+  }
+
+  @Test
   @DisplayName("getSeedlotAndSpeciesUnauthorizedTest")
   @WithAnonymousUser
   void getSeedlotAndSpeciesUnauthorizedTest() throws Exception {

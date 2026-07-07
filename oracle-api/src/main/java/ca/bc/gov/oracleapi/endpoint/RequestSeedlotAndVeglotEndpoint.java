@@ -89,6 +89,10 @@ public class RequestSeedlotAndVeglotEndpoint {
         @ApiResponse(
             responseCode = "404",
             description = "The request key does not exist",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "The request key maps to more than one seedlot",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
