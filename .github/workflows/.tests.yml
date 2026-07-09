@@ -62,7 +62,12 @@ jobs:
           node_version: "22"
           commands: |
             npm ci
-            npx start-server-and-test start http://localhost:3000 "cypress run --browser chrome --spec cypress/e2e/{features,${{ matrix.test_folder }}}/**/*.{feature,cy.ts,cy.js}"
+            if [ "${{ matrix.test_folder }}" = "features" ]; then
+              SPEC="cypress/e2e/features/**/*.{feature,cy.ts,cy.js}"
+            else
+              SPEC="cypress/e2e/${{ matrix.test_folder }}/**/*.{cy.ts,cy.js}"
+            fi
+            npx start-server-and-test start http://localhost:3000 "cypress run --browser chrome --spec $SPEC"
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
