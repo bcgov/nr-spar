@@ -334,8 +334,7 @@ public class GermCountService {
   }
 
   private DailyAbnormalEntity toAbnormalEntity(BigDecimal skey, DayGermCountDto d) {
-    DailyAbnormalEntity e =
-        dailyAbnormalRepository.findById(skey).orElseGet(DailyAbnormalEntity::new);
+    DailyAbnormalEntity e = new DailyAbnormalEntity();
     e.setDailyGermSkey(skey);
     setRep1(e, d.rep1Abnormal());
     setRep2(e, d.rep2Abnormal());
