@@ -59,6 +59,10 @@ public class GermCountService {
   /**
    * Insert or update the daily germination counts for one test (AC1, AC2, AC4).
    *
+   * <p>This is a full-replacement upsert: the request must carry the complete set of days for the
+   * test (not a delta). Cumulative germination and the rep null-to-zero normalization are
+   * computed only from the submitted days, so callers must resend the full day grid on update.
+   *
    * @param riaSkey       the test key (path)
    * @param request       days + replicates payload
    * @param requestUserId the authenticated user id, for audit columns
@@ -166,6 +170,7 @@ public class GermCountService {
 
     List<GermCountSlotDto> slots = new ArrayList<>(sortedDays.size());
     long cumulative = 0;
+    // Days are processed in slotIndex order; validateAscendingDates guarantees this tracks dayNoOfTest/date order.
     for (DayGermCountDto d : sortedDays) {
       Integer r1 = normalize(d.rep1NoSeedsGerm(), repUsed[0]);
       Integer r2 = normalize(d.rep2NoSeedsGerm(), repUsed[1]);
