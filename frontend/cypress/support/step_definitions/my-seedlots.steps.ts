@@ -1,6 +1,7 @@
 import { When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
+import { CREATED_SPECIES_KEYS } from '../helpers/species-key';
 import { NUM_OF_LOOPS } from '../../constants';
 
 type SortColumn =
@@ -106,8 +107,6 @@ const parseTotalCount = (paginationText: string): number => {
   }
   return parseInt(match[1], 10);
 };
-
-const CREATED_SPECIES_KEYS = ['pli', 'cw', 'dr', 'ep', 'fdc'] as const;
 
 const loadFixtureData = (): Cypress.Chainable<SeedlotRegFixtureType> => cy.get('@aClassSeedlotData').then((data) => {
   const typedData = data as unknown as SeedlotRegFixtureType;

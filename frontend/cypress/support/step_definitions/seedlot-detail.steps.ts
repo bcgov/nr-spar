@@ -1,5 +1,6 @@
 import { Given, Then } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
+import { CREATED_SPECIES_KEYS } from '../helpers/species-key';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 let fixtureData: SeedlotRegFixtureType;
@@ -11,8 +12,8 @@ Given('I open a seedlot detail page for a saved seedlot number', () => {
     fixtureData = fData as SeedlotRegFixtureType;
 
     // Pick a random species to test
-      const speciesKeys = Object.keys(fixtureData);
-      speciesKey = speciesKeys[Math.floor(Math.random() * (speciesKeys.length - 1))];
+      const speciesKeys = CREATED_SPECIES_KEYS;
+      speciesKey = speciesKeys[Math.floor(Math.random() * (speciesKeys.length))];
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNumber = sNumber as string;
         cy.visit(`/seedlots/details/${seedlotNumber}`);
