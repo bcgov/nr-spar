@@ -5,14 +5,22 @@ import ca.bc.gov.oracleapi.dto.consep.DayGermCountDto;
 import ca.bc.gov.oracleapi.dto.consep.GermCountDto;
 import ca.bc.gov.oracleapi.dto.consep.GermCountSlotDto;
 import ca.bc.gov.oracleapi.dto.consep.GermCountUpsertRequestDto;
+import ca.bc.gov.oracleapi.dto.consep.ReplicateAbnormalDto;
+import ca.bc.gov.oracleapi.dto.consep.TestRepGermFormDto;
+import ca.bc.gov.oracleapi.entity.consep.DailyAbnormalEntity;
 import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
+import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
+import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.mapper.GermCountMapper;
+import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
+import ca.bc.gov.oracleapi.repository.consep.TestRepGermRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +39,8 @@ public class GermCountService {
 
   private final GermCountRepository germCountRepository;
   private final GermCountMapper mapper;
+  private final DailyAbnormalRepository dailyAbnormalRepository;
+  private final TestRepGermRepository testRepGermRepository;
 
   /**
    * Retrieve the germination count record for the given RIA_SKEY.
@@ -86,6 +96,8 @@ public class GermCountService {
     days.sort(Comparator.comparingInt(DayGermCountDto::slotIndex));
     validateSlots(days);
     validateAscendingDates(days);
+    validateAbnormalRanges(days);
+    validateSeedTotals(days, request.replicates());
 
     LocalDateTime now = LocalDateTime.now();
     GermCountEntity entity;
@@ -115,6 +127,9 @@ public class GermCountService {
     entity.setUpdateUserid(requestUserId);
     entity.setUpdateTimestamp(now);
     germCountRepository.save(entity);
+
+    saveAbnormals(days, slots);
+    saveReplicates(riaSkey, request.replicates());
 
     SparLog.info("Saved germ counts for RIA_SKEY: {}", riaSkey);
     return mapper.toDto(entity);
@@ -199,5 +214,201 @@ public class GermCountService {
 
   private static long zero(Integer value) {
     return value == null ? 0L : value;
+  }
+
+  private void validateAbnormalRanges(List<DayGermCountDto> days) {
+    for (DayGermCountDto d : days) {
+      checkRep(d.rep1Abnormal(), d.slotIndex(), 1);
+      checkRep(d.rep2Abnormal(), d.slotIndex(), 2);
+      checkRep(d.rep3Abnormal(), d.slotIndex(), 3);
+      checkRep(d.rep4Abnormal(), d.slotIndex(), 4);
+    }
+  }
+
+  private void checkRep(ReplicateAbnormalDto a, int slot, int rep) {
+    if (a == null) {
+      return;
+    }
+    Integer[] values = {
+        a.abnormalNumReverseEmbryo(), a.abnormalNumStuntedRadicle(),
+        a.abnormalNumStuntedHypocotyl(), a.abnormalNumRotten(),
+        a.abnormalNumThickenedHypocotyl(), a.abnormalNumThickenedRadicle(),
+        a.abnormalNumTwisted(), a.abnormalNumMegametophyteCollar(),
+        a.abnormalNumWeak(), a.abnormalNumOther(), a.abnormalNumPregermination()
+    };
+    for (Integer v : values) {
+      if (v != null && (v < 0 || v > 999)) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Abnormal count must be between 0 and 999 (slot " + slot + ", rep " + rep + ")");
+      }
+    }
+  }
+
+  private void validateSeedTotals(
+      List<DayGermCountDto> days, List<TestRepGermFormDto> replicates) {
+    Map<Integer, Integer> totalByRep = new HashMap<>();
+    for (TestRepGermFormDto r : replicates) {
+      if (r.replicateNumber() == null) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "replicateNumber is required for each replicate");
+      }
+      totalByRep.put(r.replicateNumber(), r.totalNoSeeds());
+    }
+    long[] germ = new long[5];
+    long[] abn = new long[5];
+    for (DayGermCountDto d : days) {
+      germ[1] += zero(d.rep1NoSeedsGerm());
+      germ[2] += zero(d.rep2NoSeedsGerm());
+      germ[3] += zero(d.rep3NoSeedsGerm());
+      germ[4] += zero(d.rep4NoSeedsGerm());
+      abn[1] += sumAbnormal(d.rep1Abnormal());
+      abn[2] += sumAbnormal(d.rep2Abnormal());
+      abn[3] += sumAbnormal(d.rep3Abnormal());
+      abn[4] += sumAbnormal(d.rep4Abnormal());
+    }
+    for (int n = 1; n <= 4; n++) {
+      Integer total = totalByRep.get(n);
+      if (total == null) {
+        continue;
+      }
+      long used = germ[n] + abn[n];
+      if (used > total) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Replicate " + n + ": germinated + abnormal (" + used
+                + ") exceeds total seeds (" + total + ")");
+      }
+    }
+  }
+
+  private static long sumAbnormal(ReplicateAbnormalDto a) {
+    if (a == null) {
+      return 0L;
+    }
+    return zero(a.abnormalNumReverseEmbryo()) + zero(a.abnormalNumStuntedRadicle())
+        + zero(a.abnormalNumStuntedHypocotyl()) + zero(a.abnormalNumRotten())
+        + zero(a.abnormalNumThickenedHypocotyl()) + zero(a.abnormalNumThickenedRadicle())
+        + zero(a.abnormalNumTwisted()) + zero(a.abnormalNumMegametophyteCollar())
+        + zero(a.abnormalNumWeak()) + zero(a.abnormalNumOther())
+        + zero(a.abnormalNumPregermination());
+  }
+
+  private void saveAbnormals(List<DayGermCountDto> days, List<GermCountSlotDto> slots) {
+    Map<Integer, DayGermCountDto> dayBySlot = new HashMap<>();
+    for (DayGermCountDto d : days) {
+      dayBySlot.put(d.slotIndex(), d);
+    }
+    List<DailyAbnormalEntity> toSave = new ArrayList<>();
+    for (GermCountSlotDto s : slots) {
+      if (s.dailyGermSkey() == null) {
+        continue;
+      }
+      toSave.add(toAbnormalEntity(s.dailyGermSkey(), dayBySlot.get(s.slotIndex())));
+    }
+    if (!toSave.isEmpty()) {
+      dailyAbnormalRepository.saveAll(toSave);
+    }
+  }
+
+  private DailyAbnormalEntity toAbnormalEntity(BigDecimal skey, DayGermCountDto d) {
+    DailyAbnormalEntity e =
+        dailyAbnormalRepository.findById(skey).orElseGet(DailyAbnormalEntity::new);
+    e.setDailyGermSkey(skey);
+    setRep1(e, d.rep1Abnormal());
+    setRep2(e, d.rep2Abnormal());
+    setRep3(e, d.rep3Abnormal());
+    setRep4(e, d.rep4Abnormal());
+    return e;
+  }
+
+  private static void setRep1(DailyAbnormalEntity e, ReplicateAbnormalDto a) {
+    if (a == null) {
+      return;
+    }
+    e.setRep1NoAbnrmRe(a.abnormalNumReverseEmbryo());
+    e.setRep1NoAbnrmSr(a.abnormalNumStuntedRadicle());
+    e.setRep1NoAbnrmSh(a.abnormalNumStuntedHypocotyl());
+    e.setRep1NoAbnrmRn(a.abnormalNumRotten());
+    e.setRep1NoAbnrmTh(a.abnormalNumThickenedHypocotyl());
+    e.setRep1NoAbnrmTr(a.abnormalNumThickenedRadicle());
+    e.setRep1NoAbnrmTw(a.abnormalNumTwisted());
+    e.setRep1NoAbnrmCm(a.abnormalNumMegametophyteCollar());
+    e.setRep1NoAbnrmWeak(a.abnormalNumWeak());
+    e.setRep1NoAbnrmOther(a.abnormalNumOther());
+    e.setRep1NoAbnrmPrgrm(a.abnormalNumPregermination());
+  }
+
+  private static void setRep2(DailyAbnormalEntity e, ReplicateAbnormalDto a) {
+    if (a == null) {
+      return;
+    }
+    e.setRep2NoAbnrmRe(a.abnormalNumReverseEmbryo());
+    e.setRep2NoAbnrmSr(a.abnormalNumStuntedRadicle());
+    e.setRep2NoAbnrmSh(a.abnormalNumStuntedHypocotyl());
+    e.setRep2NoAbnrmRn(a.abnormalNumRotten());
+    e.setRep2NoAbnrmTh(a.abnormalNumThickenedHypocotyl());
+    e.setRep2NoAbnrmTr(a.abnormalNumThickenedRadicle());
+    e.setRep2NoAbnrmTw(a.abnormalNumTwisted());
+    e.setRep2NoAbnrmCm(a.abnormalNumMegametophyteCollar());
+    e.setRep2NoAbnrmWeak(a.abnormalNumWeak());
+    e.setRep2NoAbnrmOther(a.abnormalNumOther());
+    e.setRep2NoAbnrmPrgrm(a.abnormalNumPregermination());
+  }
+
+  private static void setRep3(DailyAbnormalEntity e, ReplicateAbnormalDto a) {
+    if (a == null) {
+      return;
+    }
+    e.setRep3NoAbnrmRe(a.abnormalNumReverseEmbryo());
+    e.setRep3NoAbnrmSr(a.abnormalNumStuntedRadicle());
+    e.setRep3NoAbnrmSh(a.abnormalNumStuntedHypocotyl());
+    e.setRep3NoAbnrmRn(a.abnormalNumRotten());
+    e.setRep3NoAbnrmTh(a.abnormalNumThickenedHypocotyl());
+    e.setRep3NoAbnrmTr(a.abnormalNumThickenedRadicle());
+    e.setRep3NoAbnrmTw(a.abnormalNumTwisted());
+    e.setRep3NoAbnrmCm(a.abnormalNumMegametophyteCollar());
+    e.setRep3NoAbnrmWeak(a.abnormalNumWeak());
+    e.setRep3NoAbnrmOther(a.abnormalNumOther());
+    e.setRep3NoAbnrmPrgrm(a.abnormalNumPregermination());
+  }
+
+  private static void setRep4(DailyAbnormalEntity e, ReplicateAbnormalDto a) {
+    if (a == null) {
+      return;
+    }
+    e.setRep4NoAbnrmRe(a.abnormalNumReverseEmbryo());
+    e.setRep4NoAbnrmSr(a.abnormalNumStuntedRadicle());
+    e.setRep4NoAbnrmSh(a.abnormalNumStuntedHypocotyl());
+    e.setRep4NoAbnrmRn(a.abnormalNumRotten());
+    e.setRep4NoAbnrmTh(a.abnormalNumThickenedHypocotyl());
+    e.setRep4NoAbnrmTr(a.abnormalNumThickenedRadicle());
+    e.setRep4NoAbnrmTw(a.abnormalNumTwisted());
+    e.setRep4NoAbnrmCm(a.abnormalNumMegametophyteCollar());
+    e.setRep4NoAbnrmWeak(a.abnormalNumWeak());
+    e.setRep4NoAbnrmOther(a.abnormalNumOther());
+    e.setRep4NoAbnrmPrgrm(a.abnormalNumPregermination());
+  }
+
+  private void saveReplicates(BigDecimal riaSkey, List<TestRepGermFormDto> replicates) {
+    List<TestRepGermEntity> toSave = new ArrayList<>();
+    for (TestRepGermFormDto r : replicates) {
+      ReplicateId id = new ReplicateId(riaSkey, r.replicateNumber());
+      TestRepGermEntity e =
+          testRepGermRepository.findById(id).orElseGet(TestRepGermEntity::new);
+      e.setId(id);
+      e.setTotalNoSeeds(r.totalNoSeeds());
+      e.setFinalUngrmNormal(r.finalUngrmNormal());
+      e.setFinalUngrmShrvl(r.finalUngrmShrvl());
+      e.setFinalUngrmEmpty(r.finalUngrmEmpty());
+      e.setFinalUngrmInsct(r.finalUngrmInsct());
+      e.setFinalUngrmDamagd(r.finalUngrmDamagd());
+      e.setFinalUngrmRotten(r.finalUngrmRotten());
+      e.setFinalPregerm(r.finalPregerm());
+      e.setRepAcceptedInd(r.repAcceptedInd());
+      e.setTolrncOvrrdeDesc(r.tolrncOvrrdeDesc());
+      toSave.add(e);
+    }
+    testRepGermRepository.saveAll(toSave);
   }
 }
