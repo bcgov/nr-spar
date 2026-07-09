@@ -268,7 +268,14 @@ public class GermCountService {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "replicateNumber must be between 1 and 4");
       }
-      totalByRep.put(r.replicateNumber(), r.totalNoSeeds());
+      if (r.totalNoSeeds() == null) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "totalNoSeeds is required for each replicate");
+      }
+      if (totalByRep.put(r.replicateNumber(), r.totalNoSeeds()) != null) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Duplicate replicateNumber: " + r.replicateNumber());
+      }
     }
     long[] germ = new long[5];
     long[] abn = new long[5];
