@@ -15,6 +15,8 @@ import ca.bc.gov.oracleapi.mapper.GermCountMapper;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRepGermRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +43,9 @@ public class GermCountService {
   private final GermCountMapper mapper;
   private final DailyAbnormalRepository dailyAbnormalRepository;
   private final TestRepGermRepository testRepGermRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   /**
    * Retrieve the germination count record for the given RIA_SKEY.
@@ -132,6 +137,12 @@ public class GermCountService {
     saveReplicates(riaSkey, request.replicates());
 
     SparLog.info("Saved germ counts for RIA_SKEY: {}", riaSkey);
+
+    if (entityManager != null) {
+      entityManager.flush();
+      entityManager.refresh(entity);
+    }
+
     return mapper.toDto(entity);
   }
 
@@ -252,6 +263,10 @@ public class GermCountService {
       if (r.replicateNumber() == null) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "replicateNumber is required for each replicate");
+      }
+      if (r.replicateNumber() < 1 || r.replicateNumber() > 4) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "replicateNumber must be between 1 and 4");
       }
       totalByRep.put(r.replicateNumber(), r.totalNoSeeds());
     }

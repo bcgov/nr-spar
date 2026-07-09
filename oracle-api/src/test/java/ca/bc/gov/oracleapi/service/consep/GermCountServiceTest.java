@@ -391,4 +391,16 @@ class GermCountServiceTest {
         () -> germCountService.upsertGermCounts(riaSkey, req, "USER1"));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
   }
+
+  @Test
+  void upsert_replicateNumberOutOfRange_throwsBadRequest() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    DayGermCountDto d = day(1, LocalDate.of(2026, 4, 1), 1, 1, 1, 1, 1);
+    GermCountUpsertRequestDto req = new GermCountUpsertRequestDto(
+        null, List.of(d), List.of(rep(5, 100)));
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> germCountService.upsertGermCounts(riaSkey, req, "USER1"));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    verify(germCountRepository, never()).save(any());
+  }
 }
