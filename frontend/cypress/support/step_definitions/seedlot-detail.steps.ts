@@ -1,5 +1,5 @@
 import { Given, Then } from '@badeball/cypress-cucumber-preprocessor';
-import prefix from '@/styles/classPrefix';
+import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 let fixtureData: SeedlotRegFixtureType;
