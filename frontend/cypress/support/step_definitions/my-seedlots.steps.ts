@@ -107,12 +107,14 @@ const parseTotalCount = (paginationText: string): number => {
   return parseInt(match[1], 10);
 };
 
+const CREATED_SPECIES_KEYS = ['pli', 'cw', 'dr', 'ep', 'fdc'] as const;
+
 const loadFixtureData = (): Cypress.Chainable<SeedlotRegFixtureType> => cy.get('@aClassSeedlotData').then((data) => {
   const typedData = data as unknown as SeedlotRegFixtureType;
   fixtureData = typedData;
-  speciesKeys = Object.keys(typedData);
+  speciesKeys = CREATED_SPECIES_KEYS.filter((key) => typedData[key]);
   return typedData;
-  });
+});
 
 When('I click the register a new seedlot button', () => {
   cy.get('.my-seedlot-title')
