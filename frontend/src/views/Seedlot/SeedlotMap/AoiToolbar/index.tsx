@@ -194,7 +194,8 @@ const AoiToolbar = ({
     goForwardView,
     canGoBack,
     canGoForward,
-    liveAoiValidation
+    liveAoiValidation,
+    legendData
   } = useSparMap();
   const save = useAoiSave(seedlotNumber);
   const navigate = useNavigate();
@@ -490,7 +491,7 @@ const AoiToolbar = ({
    * `<MapToolbar>` can share the same flow without duplicating the
    * html2canvas dance.
    */
-  const onPrint = () => printMap({ seedlotNumber, theme });
+  const onPrint = () => printMap({ seedlotNumber, theme, legendData });
 
   /**
    * Toggle fullscreen on the seedlot map workspace. We fullscreen the

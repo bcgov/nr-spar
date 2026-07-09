@@ -96,7 +96,8 @@ const MapToolbar = ({
     cancelDrawPoint,
     cancelAoiMode,
     zoomToBC,
-    zoomToInitialExtent
+    zoomToInitialExtent,
+    legendData
   } = useSparMap();
   const [pinPanelOpen, setPinPanelOpen] = useState(false);
   const [pinLat, setPinLat] = useState('');
@@ -183,7 +184,7 @@ const MapToolbar = ({
   };
 
   const onPrintClick = () => {
-    printMap({ seedlotNumber, theme });
+    printMap({ seedlotNumber, theme, legendData });
   };
 
   // The Measure button now always opens the Measurement Tools panel —
