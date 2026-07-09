@@ -131,7 +131,7 @@ public class GermCountService {
     mapper.applySlots(slots, entity);
     entity.setUpdateUserid(requestUserId);
     entity.setUpdateTimestamp(now);
-    germCountRepository.save(entity);
+    entity = germCountRepository.save(entity);
 
     saveAbnormals(days, slots);
     saveReplicates(riaSkey, request.replicates());
