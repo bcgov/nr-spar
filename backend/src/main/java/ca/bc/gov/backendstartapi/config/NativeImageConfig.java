@@ -25,7 +25,7 @@ import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
@@ -103,7 +103,7 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     PtValsCalReqDto.class,
     RevisionCountDto.class,
     SameSpeciesTreeDto.class,
-    SaveSeedlotFormDtoClassA.class,
+    SaveSeedlotFormDto.class,
     SeedPlanZoneDto.class,
     SeedlotAclassFormDto.class,
     SeedlotApplicationPatchDto.class,

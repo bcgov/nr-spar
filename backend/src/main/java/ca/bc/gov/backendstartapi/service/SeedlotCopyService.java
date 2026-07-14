@@ -3,15 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
-import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
-import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
-import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
-import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
-import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
-import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
-import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
-import ca.bc.gov.backendstartapi.entity.SmpMix;
-import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
+import ca.bc.gov.backendstartapi.entity.*;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
@@ -19,7 +11,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
-import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
+import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
@@ -45,7 +37,7 @@ public class SeedlotCopyService {
 
   private final SeedlotRepository seedlotRepository;
   private final SeedlotStatusService seedlotStatusService;
-  private final SaveSeedlotProgressRepositoryClassA saveProgressRepository;
+  private final SaveSeedlotProgressRepository saveProgressRepository;
   private final SeedlotGeneticWorthRepository geneticWorthRepository;
   private final SeedlotSeedPlanZoneRepository seedPlanZoneRepository;
   private final SeedlotParentTreeRepository parentTreeRepository;
@@ -346,8 +338,8 @@ public class SeedlotCopyService {
             "parent", stepStatus,
             "extraction", stepStatus);
 
-    SaveSeedlotProgressEntityClassA draft =
-        new SaveSeedlotProgressEntityClassA(
+    SaveSeedlotProgressEntity draft =
+        new SaveSeedlotProgressEntity(
             target, Map.of(), progressStatus, new AuditInformation(userId));
 
     saveProgressRepository.save(draft);

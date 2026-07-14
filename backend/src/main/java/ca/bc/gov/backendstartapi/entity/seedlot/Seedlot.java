@@ -353,6 +353,53 @@ public class Seedlot implements Serializable {
   @Column(name = "mean_geom")
   private Point meanGeom;
 
+  // region B-class natural stand
+  @Column(name = "superior_provenance_ind", length = 1)
+  private String superiorProvenanceInd;
+
+  @Column(name = "org_unit_no")
+  private Integer orgUnitNo;
+
+  @Column(name = "collection_location_desc", length = 30)
+  private String collectionLocationDesc;
+
+  @Column(name = "provenance_id")
+  private Integer provenanceId;
+
+  @Column(name = "collection_standard_met_ind", length = 1)
+  private String collectionStandardMetInd;
+
+  @Column(name = "collection_area_radius", precision = 6, scale = 1)
+  private BigDecimal collectionAreaRadius;
+
+  @Column(name = "capture_method_code", length = 30)
+  private String captureMethodCode;
+
+  @Column(name = "seed_plan_zone_code", length = 3)
+  private String seedPlanZoneCode;
+
+  @Column(name = "collection_seed_plan_zone_ind", length = 1)
+  private String collectionSeedPlanZoneInd;
+
+  @Column(name = "seed_coast_area_code", length = 3)
+  private String seedCoastAreaCode;
+
+  @Column(name = "collection_bgc_validated_ind", length = 1)
+  private String collectionBgcValidatedInd;
+
+  @Column(name = "bec_override_ind", length = 1)
+  private String becOverrideInd;
+
+  @Column(name = "bec_override_comment", length = 2000)
+  private String becOverrideComment;
+
+  @Column(name = "number_trees_from_code", length = 3)
+  private String numberTreesFromCode;
+
+  @Column(name = "is_lot_split_ind", length = 1)
+  private String isLotSplitInd;
+  // endregion
+
   // end geographic
 
   public Seedlot(String id) {

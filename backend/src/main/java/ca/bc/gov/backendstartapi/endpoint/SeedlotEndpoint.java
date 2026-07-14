@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
-import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
@@ -510,7 +510,7 @@ public class SeedlotEndpoint {
           @PathVariable
           @NonNull
           String seedlotNumber,
-      @RequestBody SaveSeedlotFormDtoClassA data) {
+      @RequestBody SaveSeedlotFormDto data) {
 
     RevisionCountDto revCountDto = saveSeedlotFormService.saveFormClassA(seedlotNumber, data);
 
@@ -539,7 +539,7 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public SaveSeedlotFormDtoClassA getFormProgressClassA(
+  public SaveSeedlotFormDto getFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,

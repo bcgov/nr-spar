@@ -14,17 +14,7 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
-import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
-import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
-import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
-import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
-import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
-import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
-import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
-import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
-import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
-import ca.bc.gov.backendstartapi.entity.SmpMix;
-import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
+import ca.bc.gov.backendstartapi.entity.*;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
@@ -32,7 +22,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
-import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
+import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
@@ -59,7 +49,7 @@ class SeedlotCopyServiceTest {
 
   @Mock private SeedlotRepository seedlotRepository;
   @Mock private SeedlotStatusService seedlotStatusService;
-  @Mock private SaveSeedlotProgressRepositoryClassA saveProgressRepository;
+  @Mock private SaveSeedlotProgressRepository saveProgressRepository;
   @Mock private SeedlotGeneticWorthRepository geneticWorthRepository;
   @Mock private SeedlotSeedPlanZoneRepository seedPlanZoneRepository;
   @Mock private SeedlotParentTreeRepository parentTreeRepository;
@@ -246,8 +236,8 @@ class SeedlotCopyServiceTest {
 
     service.copySeedlot(SOURCE_NUM, USER_ID);
 
-    ArgumentCaptor<SaveSeedlotProgressEntityClassA> captor =
-        ArgumentCaptor.forClass(SaveSeedlotProgressEntityClassA.class);
+    ArgumentCaptor<SaveSeedlotProgressEntity> captor =
+        ArgumentCaptor.forClass(SaveSeedlotProgressEntity.class);
     verify(saveProgressRepository).save(captor.capture());
     assertNotNull(captor.getValue().getAllStepData());
     assertTrue(captor.getValue().getAllStepData().isEmpty());
