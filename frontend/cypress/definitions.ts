@@ -37,6 +37,28 @@ export type MoistureContentType = {
   }
 };
 
+export type PurityContentType = {
+  mc: {
+    title: string,
+    commentPlaceholder: string,
+    testComment: string,
+    invalidDateErrorMsg: string
+  },
+  table: {
+    title: string,
+    column1: string,
+    column2: string,
+    column3: string,
+    column4: string,
+    column5: string,
+    column6: string,
+    column7: string,
+    checkedBox: string,
+    unCheckedBox: string,
+    emptyTableMsg: string
+  }
+};
+
 export type ReplicateType = {
   riaKey: number;
   replicateNumber: number;
