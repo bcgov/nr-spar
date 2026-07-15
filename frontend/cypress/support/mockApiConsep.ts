@@ -5,7 +5,7 @@
 export function mockMoistureContentApi() {
   cy.intercept(
     { method: 'GET', url: '**/api/moisture-content-cone/514330' },
-    { statusCode: 200, fixture: 'seedlot-replicate-info.json' }
+    { statusCode: 200, fixture: 'moisture-seedlot-replicate-info.json' }
   ).as('GET_moisture_content_cone');
 
   cy.intercept(
@@ -20,6 +20,11 @@ export function mockMoistureContentApi() {
 
   cy.intercept(
     { method: 'DELETE', url: '**/api/moisture-content-cone/514330/*' },
-    { statusCode: 200, fixture: 'seedlot-replicate-info.json' }
+    { statusCode: 200, fixture: 'moisture-seedlot-replicate-info.json' }
   ).as('DELETE_replicate');
+
+  cy.intercept(
+    { method: 'GET', url: '**/api/purity-tests/79082/*' },
+    { statusCode: 200, fixture: 'purity-seedlot-replicate-info.json' }
+  ).as('GET_purity_content_cone');
 }
