@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.dto;
 
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -35,5 +36,6 @@ public class SeedlotDto {
       description =
           "Class B enrichments (AOU SPZ slots, role flags, collection geometry). Present only"
               + " for Class B seedlots.")
-  private SeedlotBclassDetailDto bClassDetail;
+  @JsonProperty("bClassDetail")
+  private SeedlotBclassDetailDto bclassDetail;
 }

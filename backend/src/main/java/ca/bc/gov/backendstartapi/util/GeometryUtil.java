@@ -2,8 +2,8 @@ package ca.bc.gov.backendstartapi.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.geolatte.geom.jts.JTS;
 import org.geolatte.geom.json.GeolatteGeomModule;
+import org.geolatte.geom.jts.JTS;
 import org.locationtech.jts.geom.Geometry;
 import org.springframework.lang.Nullable;
 

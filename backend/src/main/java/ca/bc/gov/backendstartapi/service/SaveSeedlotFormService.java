@@ -192,10 +192,12 @@ public class SaveSeedlotFormService {
    *
    * @param seedlot the seedlot to attach the draft to
    */
-  public void recreateEmptyBClassDraft(@NonNull Seedlot seedlot) {
+  public void recreateEmptyBclassDraft(@NonNull Seedlot seedlot) {
     SparLog.info("Recreating empty B-class draft for seedlot {}", seedlot.getId());
 
-    saveSeedlotProgressRepository.findById(seedlot.getId()).ifPresent(saveSeedlotProgressRepository::delete);
+    saveSeedlotProgressRepository
+        .findById(seedlot.getId())
+        .ifPresent(saveSeedlotProgressRepository::delete);
 
     Map<String, Object> stepStatus =
         Map.of("isComplete", false, "isCurrent", false, "isInvalid", false);

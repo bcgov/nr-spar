@@ -61,7 +61,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
-import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionClassBMapper;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionBclassMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
@@ -132,7 +132,7 @@ class SeedlotServiceTest {
 
   @Mock SeedlotCollectionGeometryService seedlotCollectionGeometryService;
 
-  @Mock SeedlotFormCollectionClassBMapper seedlotFormCollectionClassBMapper;
+  @Mock SeedlotFormCollectionBclassMapper seedlotFormCollectionBclassMapper;
 
   @Mock SaveSeedlotFormService saveSeedlotFormService;
 
@@ -195,7 +195,7 @@ class SeedlotServiceTest {
             seedlotFormValidationService,
             seedlotCollectionGeometryRepository,
             seedlotCollectionGeometryService,
-            seedlotFormCollectionClassBMapper,
+            seedlotFormCollectionBclassMapper,
             saveSeedlotFormService);
   }
 

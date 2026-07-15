@@ -175,7 +175,7 @@ class SeedlotEndpointTest {
         "temporaryStrgEndDate": "2023-12-06"
       }
     }
-    """;
+      """;
 
   private static final String SEEDLOT_FORM_PROGRESS_JSON =
       """
@@ -1050,7 +1050,8 @@ class SeedlotEndpointTest {
   void getCollectionGeometry_shouldSucceed() throws Exception {
     when(seedlotCollectionGeometryService.getBySeedlotNumber(any()))
         .thenReturn(
-            new SeedlotCollectionGeometryDto("53001", "{\"type\":\"Polygon\"}", 1, null, null, null, 0));
+            new SeedlotCollectionGeometryDto(
+                "53001", "{\"type\":\"Polygon\"}", 1, null, null, null, 0));
 
     mockMvc
         .perform(

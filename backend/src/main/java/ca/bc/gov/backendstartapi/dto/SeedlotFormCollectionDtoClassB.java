@@ -24,14 +24,18 @@ public record SeedlotFormCollectionDtoClassB(
         BigDecimal volPerContainer,
     @Schema(description = "Total cone volume (noOfContainers × volPerContainer).", example = "25")
         BigDecimal clctnVolume,
-    @Schema(description = "General comment for the seedlot.", example = "Collected from south slope")
+    @Schema(
+            description = "General comment for the seedlot.",
+            example = "Collected from south slope")
         String seedlotComment,
     @Schema(
             description = "Codes representing the cone collection methods used.",
             example = "[1, 2]")
         List<Integer> coneCollectionMethodCodes,
     // ─── B-class specific collection fields ──────────────────────────────────
-    @Schema(description = "Description of the collection location.", example = "South ridge block 12")
+    @Schema(
+            description = "Description of the collection location.",
+            example = "South ridge block 12")
         String collectionLocationDesc,
     @Schema(description = "Ministry org unit number.", example = "73")
         Integer orgUnitNo,
@@ -43,7 +47,9 @@ public record SeedlotFormCollectionDtoClassB(
         String captureMethodCode,
     @Schema(description = "Seed plan zone code.", example = "M")
         String seedPlanZoneCode,
-    @Schema(description = "Indicates if collection falls within the seed plan zone (Y/N).", example = "Y")
+    @Schema(
+            description = "Indicates if collection falls within the seed plan zone (Y/N).",
+            example = "Y")
         String collectionSeedPlanZoneInd,
     @Schema(description = "Seed coast area code.", example = "001")
         String seedCoastAreaCode,
@@ -53,7 +59,9 @@ public record SeedlotFormCollectionDtoClassB(
         String becOverrideInd,
     @Schema(description = "Comment explaining the BEC override.")
         String becOverrideComment,
-    @Schema(description = "Code representing the number of trees the seedlot was collected from.", example = "GT5")
+    @Schema(
+            description = "Code representing the number of trees the seedlot was collected from.",
+            example = "GT5")
         String numberTreesFromCode,
     @Schema(description = "Lot split indicator (Y/N).", example = "N")
         String isLotSplitInd,
@@ -130,5 +138,8 @@ public record SeedlotFormCollectionDtoClassB(
     @Schema(description = "BEC version ID.", example = "12")
         Integer becVersionId,
     // ─── Collection polygon (optional, written to seedlot_collection_geometry) ─
-    @Schema(description = "GeoJSON polygon (SRID 3005) representing the collection area; null if no polygon captured.")
+    @Schema(
+            description =
+                "GeoJSON polygon (SRID 3005) representing the collection area; null if no"
+                    + " polygon captured.")
         String collectionGeometryGeoJson) {}

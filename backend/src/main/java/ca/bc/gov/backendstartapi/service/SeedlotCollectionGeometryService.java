@@ -34,7 +34,8 @@ public class SeedlotCollectionGeometryService {
   public SeedlotCollectionGeometryDto getBySeedlotNumber(@NonNull String seedlotNumber) {
     SparLog.info("Fetching collection geometry for seedlot {}", seedlotNumber);
 
-    Seedlot seedlot = seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+    Seedlot seedlot =
+        seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
     loggedUserService.verifySeedlotAccessPrivilege(seedlot.getApplicantClientNumber());
 
     SeedlotCollectionGeometry geometry =

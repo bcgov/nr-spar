@@ -12,13 +12,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-class SeedlotFormCollectionClassBMapperTest {
+class SeedlotFormCollectionBclassMapperTest {
 
-  private SeedlotFormCollectionClassBMapper mapper;
+  private SeedlotFormCollectionBclassMapper mapper;
 
   @BeforeEach
   void setUp() {
-    mapper = Mappers.getMapper(SeedlotFormCollectionClassBMapper.class);
+    mapper = Mappers.getMapper(SeedlotFormCollectionBclassMapper.class);
   }
 
   @Test

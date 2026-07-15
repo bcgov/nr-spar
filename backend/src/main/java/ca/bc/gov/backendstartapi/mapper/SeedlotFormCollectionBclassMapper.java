@@ -10,12 +10,15 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-/** Maps B-class collection step fields between {@link Seedlot} and {@link SeedlotFormCollectionDtoClassB}. */
+/**
+ * Maps B-class collection step fields between {@link Seedlot} and {@link
+ * SeedlotFormCollectionDtoClassB}.
+ */
 @Mapper(
     componentModel = "spring",
     unmappedTargetPolicy = ReportingPolicy.IGNORE,
     unmappedSourcePolicy = ReportingPolicy.IGNORE)
-public interface SeedlotFormCollectionClassBMapper {
+public interface SeedlotFormCollectionBclassMapper {
 
   @Mapping(target = "collectionLocnCode", source = "seedlot.collectionLocationCode")
   @Mapping(target = "noOfContainers", source = "seedlot.numberOfContainers")
@@ -25,6 +28,10 @@ public interface SeedlotFormCollectionClassBMapper {
   SeedlotFormCollectionDtoClassB toDto(
       Seedlot seedlot, String collectionGeometryGeoJson, List<Integer> coneCollectionMethodCodes);
 
+  /**
+   * Copies renamed collection DTO fields onto an existing seedlot. Collection dates are applied in
+   * {@link #applyDatesOnlyWhenChanged} so unchanged values do not bump the revision.
+   */
   @Mapping(target = "collectionLocationCode", source = "collectionLocnCode")
   @Mapping(target = "numberOfContainers", source = "noOfContainers")
   @Mapping(target = "containerVolume", source = "volPerContainer")
@@ -34,6 +41,7 @@ public interface SeedlotFormCollectionClassBMapper {
   @Mapping(target = "collectionEndDate", ignore = true)
   void applyToSeedlot(SeedlotFormCollectionDtoClassB dto, @MappingTarget Seedlot seedlot);
 
+  /** Applies collection dates only when they differ from the current seedlot values. */
   @AfterMapping
   default void applyDatesOnlyWhenChanged(
       SeedlotFormCollectionDtoClassB dto, @MappingTarget Seedlot seedlot) {

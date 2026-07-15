@@ -3,7 +3,15 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
-import ca.bc.gov.backendstartapi.entity.*;
+import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.SmpMix;
+import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
@@ -75,7 +83,7 @@ public class SeedlotCopyService {
             .findById(sourceSeedlotNumber)
             .orElseThrow(SeedlotNotFoundException::new);
 
-    boolean isClassB = isClassBSeedlot(source);
+    boolean isClassB = isBclassSeedlot(source);
     String targetNumber = resolveTargetNumber(isClassB);
 
     SparLog.info(
@@ -106,8 +114,9 @@ public class SeedlotCopyService {
     return new SeedlotStatusResponseDto(targetNumber, Constants.PENDING_SEEDLOT_STATUS);
   }
 
-  private boolean isClassBSeedlot(Seedlot source) {
-    if (source.getGeneticClass() == null || source.getGeneticClass().getGeneticClassCode() == null) {
+  private boolean isBclassSeedlot(Seedlot source) {
+    if (source.getGeneticClass() == null
+        || source.getGeneticClass().getGeneticClassCode() == null) {
       throw new SeedlotFormValidationException(
           "Source seedlot " + source.getId() + " has no genetic class.");
     }

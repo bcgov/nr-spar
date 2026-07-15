@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
 import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
@@ -18,7 +19,6 @@ import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -167,7 +167,8 @@ class SaveSeedlotFormServiceTest {
   @DisplayName("Delete progress should remove an existing draft.")
   void deleteForm_shouldSucceed() {
     SaveSeedlotProgressEntity entity =
-        new SaveSeedlotProgressEntity(testSeedlotB, Map.of(), Map.of(), new AuditInformation("user"));
+        new SaveSeedlotProgressEntity(
+            testSeedlotB, Map.of(), Map.of(), new AuditInformation("user"));
     when(saveSeedlotProgressRepository.findById(SEEDLOT_NUMBER_B)).thenReturn(Optional.of(entity));
 
     saveSeedlotFormService.deleteForm(SEEDLOT_NUMBER_B);
@@ -187,14 +188,16 @@ class SaveSeedlotFormServiceTest {
 
   @Test
   @DisplayName("Recreate empty B-class draft should replace any existing draft.")
-  void recreateEmptyBClassDraft_shouldSucceed() {
+  void recreateEmptyBclassDraft_shouldSucceed() {
     SaveSeedlotProgressEntity existing =
-        new SaveSeedlotProgressEntity(testSeedlotB, Map.of("old", true), Map.of(), new AuditInformation("user"));
-    when(saveSeedlotProgressRepository.findById(SEEDLOT_NUMBER_B)).thenReturn(Optional.of(existing));
+        new SaveSeedlotProgressEntity(
+            testSeedlotB, Map.of("old", true), Map.of(), new AuditInformation("user"));
+    when(saveSeedlotProgressRepository.findById(SEEDLOT_NUMBER_B))
+        .thenReturn(Optional.of(existing));
     when(saveSeedlotProgressRepository.save(any())).thenReturn(existing);
     when(loggedUserService.createAuditCurrentUser()).thenReturn(new AuditInformation("user"));
 
-    saveSeedlotFormService.recreateEmptyBClassDraft(testSeedlotB);
+    saveSeedlotFormService.recreateEmptyBclassDraft(testSeedlotB);
 
     verify(saveSeedlotProgressRepository).delete(existing);
     verify(saveSeedlotProgressRepository).save(any());

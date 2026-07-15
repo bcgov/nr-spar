@@ -1,6 +1,11 @@
 package ca.bc.gov.backendstartapi.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -10,7 +15,17 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
-import ca.bc.gov.backendstartapi.entity.*;
+import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
+import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.SmpMix;
+import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -637,7 +652,7 @@ class SeedlotCopyServiceTest {
 
   // ── Class B copy ─────────────────────────────────────────────────────────────
 
-  private void stubCommonForBCopy() {
+  private void stubCommonForBclassCopy() {
     when(seedlotRepository.findById(SOURCE_B_NUM))
         .thenReturn(Optional.of(buildSourceSeedlot(SOURCE_B_NUM, "B")));
     when(seedlotRepository.findNextSeedlotNumber(
@@ -651,8 +666,8 @@ class SeedlotCopyServiceTest {
 
   @Test
   @DisplayName("Auto-assign B: empty copy band starts at 52000")
-  void autoAssign_emptyBBand_assignsMin() {
-    stubCommonForBCopy();
+  void autoAssign_emptyBclassBand_assignsMin() {
+    stubCommonForBclassCopy();
 
     SeedlotStatusResponseDto result = service.copySeedlot(SOURCE_B_NUM, USER_ID);
 
@@ -662,7 +677,7 @@ class SeedlotCopyServiceTest {
 
   @Test
   @DisplayName("Auto-assign B: next slot after existing max")
-  void autoAssign_partialBBand_assignsNextAfterMax() {
+  void autoAssign_partialBclassBand_assignsNextAfterMax() {
     when(seedlotRepository.findById(SOURCE_B_NUM))
         .thenReturn(Optional.of(buildSourceSeedlot(SOURCE_B_NUM, "B")));
     when(seedlotRepository.findNextSeedlotNumber(
@@ -693,8 +708,8 @@ class SeedlotCopyServiceTest {
 
   @Test
   @DisplayName("B copy: skips A-only child entities (orchards / parent trees / SMP)")
-  void copyB_skipsAOnlyChildren() {
-    stubCommonForBCopy();
+  void copyBclass_skipsAclassOnlyChildren() {
+    stubCommonForBclassCopy();
 
     service.copySeedlot(SOURCE_B_NUM, USER_ID);
 
@@ -716,7 +731,7 @@ class SeedlotCopyServiceTest {
         ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity.class));
     when(cmSrc.getConeCollectionMethodOtherDescription()).thenReturn("other");
 
-    stubCommonForBCopy();
+    stubCommonForBclassCopy();
     when(geneticWorthRepository.findAllBySeedlot_id(SOURCE_B_NUM)).thenReturn(List.of(gwSrc));
     when(geneticWorthRepository.save(any())).thenAnswer(i -> i.getArgument(0));
     when(collectionMethodRepository.findAllBySeedlot_id(SOURCE_B_NUM)).thenReturn(List.of(cmSrc));
@@ -730,8 +745,8 @@ class SeedlotCopyServiceTest {
 
   @Test
   @DisplayName("B copy: draft progress keys are B wizard steps only")
-  void copyB_draftHasBProgressKeys() {
-    stubCommonForBCopy();
+  void copyBclass_draftHasBclassProgressKeys() {
+    stubCommonForBclassCopy();
 
     service.copySeedlot(SOURCE_B_NUM, USER_ID);
 

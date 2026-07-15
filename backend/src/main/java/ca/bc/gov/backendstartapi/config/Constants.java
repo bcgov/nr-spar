@@ -16,6 +16,9 @@ public final class Constants {
   public static final String SUBMITTED_SEEDLOT_STATUS = "SUB";
   public static final String MINISTRY_OF_FORESTS_ID = "00012797";
 
-  /** Feature class key for natural-stand collection area polygons (Oracle {@code spr_spatial_utils}). */
+  /**
+   * Feature class key for natural-stand collection area polygons (Oracle {@code
+   * spr_spatial_utils}).
+   */
   public static final int FEATURE_CLASS_SKEY_COLL_AREA = 1;
 }

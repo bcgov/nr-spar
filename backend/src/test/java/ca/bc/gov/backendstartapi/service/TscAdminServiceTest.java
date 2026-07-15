@@ -145,9 +145,7 @@ class TscAdminServiceTest {
 
   @Test
   @DisplayName("Putting a B-class seedlot back to pending recreates an empty draft")
-  void updateSeedlotStatus_bClassPending_shouldRecreateDraft() {
-    SeedlotStatusEntity seedlotStatus = createValidStatus("PND");
-
+  void updateSeedlotStatus_bclassPending_shouldRecreateDraft() {
     String seedlotNumber = "53001";
 
     Seedlot seedlot = new Seedlot(seedlotNumber);
@@ -156,13 +154,14 @@ class TscAdminServiceTest {
     seedlot.setGeneticClass(geneticClass);
     seedlot.setSeedlotStatus(createValidStatus("SUB"));
 
+    final SeedlotStatusEntity seedlotStatus = createValidStatus("PND");
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
     when(seedlotStatusService.getValidSeedlotStatus("PND")).thenReturn(Optional.of(seedlotStatus));
     when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
 
     tscAdminService.updateSeedlotStatus(seedlotNumber, "PND");
 
-    verify(saveSeedlotFormService, times(1)).recreateEmptyBClassDraft(seedlot);
+    verify(saveSeedlotFormService, times(1)).recreateEmptyBclassDraft(seedlot);
   }
 
   @Test

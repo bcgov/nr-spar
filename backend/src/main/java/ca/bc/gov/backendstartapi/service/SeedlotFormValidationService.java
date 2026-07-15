@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
@@ -9,7 +10,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -92,7 +92,10 @@ public class SeedlotFormValidationService {
     }
   }
 
-  private void validateBclassCollectionStep(Seedlot seedlot, SeedlotFormSubmissionDtoClassB form, List<SeedlotValidationError> errors) {
+  private void validateBclassCollectionStep(
+      Seedlot seedlot,
+      SeedlotFormSubmissionDtoClassB form,
+      List<SeedlotValidationError> errors) {
 
     SeedlotFormCollectionDtoClassB dto = form.seedlotFormCollectionDto();
     if (dto == null) {
@@ -163,7 +166,8 @@ public class SeedlotFormValidationService {
     }
   }
 
-  private void validateAouSpzStep(List<SeedPlanZoneDto> spzList, List<SeedlotValidationError> errors) {
+  private void validateAouSpzStep(
+      List<SeedPlanZoneDto> spzList, List<SeedlotValidationError> errors) {
     if (spzList == null || spzList.isEmpty()) {
       return;
     }

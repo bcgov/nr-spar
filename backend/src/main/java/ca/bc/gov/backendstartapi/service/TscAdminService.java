@@ -17,12 +17,12 @@ import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.util.ValueUtil;
+import jakarta.transaction.Transactional;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -111,8 +111,8 @@ public class TscAdminService {
     // recreate an empty draft so the registration wizard can hydrate from
     // normalized tables via GET .../b-class-full-form.
     if (Constants.PENDING_SEEDLOT_STATUS.equals(status)
-        && isBClassSeedlot(seedlotSaved)) {
-      saveSeedlotFormService.recreateEmptyBClassDraft(seedlotSaved);
+        && isBclassSeedlot(seedlotSaved)) {
+      saveSeedlotFormService.recreateEmptyBclassDraft(seedlotSaved);
     }
 
     SparLog.info("Seedlot number {} status updated to {}!", seedlotNumber, status);
@@ -120,7 +120,7 @@ public class TscAdminService {
     return seedlotSaved;
   }
 
-  private boolean isBClassSeedlot(Seedlot seedlot) {
+  private boolean isBclassSeedlot(Seedlot seedlot) {
     return seedlot.getGeneticClass() != null
         && "B".equals(seedlot.getGeneticClass().getGeneticClassCode());
   }
