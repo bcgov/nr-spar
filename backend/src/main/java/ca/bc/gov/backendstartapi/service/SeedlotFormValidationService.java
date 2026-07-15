@@ -36,6 +36,9 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class SeedlotFormValidationService {
 
+  private static final String COLLECTION_CONE_METHOD_CODES_FIELD =
+      "seedlotFormCollectionDto.coneCollectionMethodCodes";
+
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
   private final OrchardService orchardService;
@@ -116,22 +119,32 @@ public class SeedlotFormValidationService {
     requirePositive(dto.volPerContainer(), "seedlotFormCollectionDto.volPerContainer", errors);
     requirePositive(dto.clctnVolume(), "seedlotFormCollectionDto.clctnVolume", errors);
 
-    if (dto.coneCollectionMethodCodes() == null || dto.coneCollectionMethodCodes().isEmpty()) {
+    validateBclassConeCollectionMethods(dto.coneCollectionMethodCodes(), errors);
+    validateBclassRequiredCollectionCodes(dto, errors);
+    validateBclassBecAndBcSourceRules(seedlot, dto, errors);
+  }
+
+  private void validateBclassConeCollectionMethods(
+      List<Integer> codes, List<SeedlotValidationError> errors) {
+    if (codes == null || codes.isEmpty()) {
       errors.add(
           new SeedlotValidationError(
-              "seedlotFormCollectionDto.coneCollectionMethodCodes",
+              COLLECTION_CONE_METHOD_CODES_FIELD,
               "At least one cone collection method is required."));
-    } else {
-      for (Integer code : dto.coneCollectionMethodCodes()) {
-        if (code == null || !coneCollectionMethodRepository.existsById(code)) {
-          errors.add(
-              new SeedlotValidationError(
-                  "seedlotFormCollectionDto.coneCollectionMethodCodes",
-                  "Invalid cone collection method code: " + code));
-        }
+      return;
+    }
+    for (Integer code : codes) {
+      if (code == null || !coneCollectionMethodRepository.existsById(code)) {
+        errors.add(
+            new SeedlotValidationError(
+                COLLECTION_CONE_METHOD_CODES_FIELD,
+                "Invalid cone collection method code: " + code));
       }
     }
+  }
 
+  private void validateBclassRequiredCollectionCodes(
+      SeedlotFormCollectionDtoClassB dto, List<SeedlotValidationError> errors) {
     if (dto.captureMethodCode() == null || dto.captureMethodCode().isBlank()) {
       errors.add(
           new SeedlotValidationError(
@@ -144,7 +157,12 @@ public class SeedlotFormValidationService {
               "seedlotFormCollectionDto.numberTreesFromCode",
               "Number of trees collected from is required."));
     }
+  }
 
+  private void validateBclassBecAndBcSourceRules(
+      Seedlot seedlot,
+      SeedlotFormCollectionDtoClassB dto,
+      List<SeedlotValidationError> errors) {
     if (Boolean.TRUE.equals(seedlot.getSourceInBc()) && dto.orgUnitNo() == null) {
       errors.add(
           new SeedlotValidationError(
@@ -304,7 +322,7 @@ public class SeedlotFormValidationService {
         if (code == null || !coneCollectionMethodRepository.existsById(code)) {
           errors.add(
               new SeedlotValidationError(
-                  "seedlotFormCollectionDto.coneCollectionMethodCodes",
+                  COLLECTION_CONE_METHOD_CODES_FIELD,
                   "Invalid cone collection method code: " + code));
         }
       }

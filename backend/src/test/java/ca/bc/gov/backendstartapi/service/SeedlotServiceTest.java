@@ -17,11 +17,15 @@ import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassDetailDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
@@ -29,6 +33,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
@@ -72,6 +77,7 @@ import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -137,8 +143,6 @@ class SeedlotServiceTest {
   @Mock SaveSeedlotFormService saveSeedlotFormService;
 
   private SeedlotService seedlotService;
-
-  private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
 
   private static final String SEEDLOT_NOT_FOUND_STR = "404 NOT_FOUND \"Seedlot doesn't exist\"";
 
@@ -1077,5 +1081,199 @@ class SeedlotServiceTest {
 
     Assertions.assertNotNull(result);
     Assertions.assertNull(result.meanGeomSmpMix());
+  }
+
+  @Test
+  @DisplayName("getBclassSeedlotFormInfo succeeds with empty child data")
+  void getBclassSeedlotFormInfo_shouldSucceed() {
+    String seedlotNumber = "53001";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
+
+    SeedlotFormCollectionDtoClassB collectionDto =
+        mock(SeedlotFormCollectionDtoClassB.class);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotCollectionGeometryRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+    when(seedlotCollectionMethodService.getAllSeedlotCollectionMethodsBySeedlot(seedlotNumber))
+        .thenReturn(List.of(1));
+    when(seedlotFormCollectionBclassMapper.toDto(seedlot, null, List.of(1)))
+        .thenReturn(collectionDto);
+    when(seedlotOwnerQuantityService.findAllBySeedlot(seedlotNumber)).thenReturn(List.of());
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(List.of());
+
+    SeedlotBclassFormDto result = seedlotService.getBclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(collectionDto, result.collectionStep());
+    Assertions.assertTrue(result.ownershipStep().isEmpty());
+    Assertions.assertNull(result.collectionGeometry());
+  }
+
+  @Test
+  @DisplayName("getBclassSeedlotFormInfo missing seedlot throws")
+  void getBclassSeedlotFormInfo_notFound_shouldThrow() {
+    when(seedlotRepository.findById("53099")).thenReturn(Optional.empty());
+    Assertions.assertThrows(
+        SeedlotNotFoundException.class, () -> seedlotService.getBclassSeedlotFormInfo("53099"));
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotInfo for B-class fills bclassDetail")
+  void getSingleSeedlotInfo_bclass_fillsDetail() {
+    String seedlotNumber = "53001";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
+    seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+    seedlot.setProvenanceId(42);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    doNothing().when(loggedUserService).verifySeedlotAccessPrivilege(anyString());
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
+    when(seedlotCollectionGeometryRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(List.of());
+
+    SeedlotDto dto = seedlotService.getSingleSeedlotInfo(seedlotNumber);
+
+    Assertions.assertNotNull(dto.getBclassDetail());
+    SeedlotBclassDetailDto detail = dto.getBclassDetail();
+    Assertions.assertEquals(42, detail.provenanceId());
+    Assertions.assertTrue(detail.aouSpzList().isEmpty());
+  }
+
+  @Test
+  @DisplayName("submitSeedlotFormClassB pending seedlot succeeds")
+  void submitSeedlotFormClassB_pending_shouldSucceed() {
+    String seedlotNumber = "53001";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    SeedlotStatusEntity pending =
+        new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
+    SeedlotStatusEntity submitted =
+        new SeedlotStatusEntity("SUB", "Submitted", DATE_RANGE);
+    seedlot.setSeedlotStatus(pending);
+    seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+
+    SeedlotFormCollectionDtoClassB collection =
+        new SeedlotFormCollectionDtoClassB(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.SEPTEMBER, 1),
+            LocalDate.of(2024, Month.SEPTEMBER, 30),
+            new BigDecimal("2"),
+            new BigDecimal("4"),
+            new BigDecimal("8"),
+            "comment",
+            List.of(1),
+            "South ridge",
+            73,
+            "Y",
+            new BigDecimal("500"),
+            "CLIMB",
+            "M",
+            "Y",
+            "001",
+            "Y",
+            "N",
+            null,
+            "GT5",
+            "N",
+            "N",
+            null,
+            49,
+            30,
+            0,
+            123,
+            0,
+            0,
+            800,
+            600,
+            1000,
+            600,
+            1000,
+            49,
+            0,
+            50,
+            0,
+            122,
+            0,
+            124,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null,
+            'N',
+            'W',
+            "CDF",
+            "Coastal Douglas-fir",
+            "mm",
+            '1',
+            12,
+            null);
+    SeedlotFormOwnershipDto ownership =
+        new SeedlotFormOwnershipDto(
+            "00012797",
+            "00",
+            new BigDecimal("100"),
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            "CLA",
+            "ITC");
+    SeedlotFormInterimDto interim =
+        new SeedlotFormInterimDto(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.OCTOBER, 1),
+            LocalDate.of(2024, Month.OCTOBER, 31),
+            null,
+            "OCV");
+    SeedlotFormExtractionDto extraction =
+        new SeedlotFormExtractionDto(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.NOVEMBER, 1),
+            LocalDate.of(2024, Month.NOVEMBER, 30),
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.DECEMBER, 1),
+            LocalDate.of(2024, Month.DECEMBER, 31));
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            collection,
+            List.of(ownership),
+            interim,
+            extraction,
+            List.of(new SeedPlanZoneDto("M", "Maritime", false)),
+            List.of(new GeneticWorthTraitsDto("GVO", new BigDecimal("12"), null, null)));
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    doNothing().when(seedlotFormValidationService).validateBclassSeedlotForm(any(), any());
+    doNothing().when(seedlotFormCollectionBclassMapper).applyToSeedlot(any(), any());
+    doNothing()
+        .when(seedlotCollectionMethodService)
+        .saveConeCollectionMethods(any(), any(), anyBoolean());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), anyBoolean()))
+        .thenReturn(List.of());
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
+    when(geneticClassRepository.findById("B"))
+        .thenReturn(Optional.of(new GeneticClassEntity("B", "B class", DATE_RANGE)));
+    when(loggedUserService.createAuditCurrentUser()).thenReturn(new AuditInformation("user"));
+    when(seedlotSeedPlanZoneRepository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
+    when(seedlotGeneticWorthService.saveSeedlotGenWorth(any(), any())).thenReturn(List.of());
+    when(loggedUserService.getLoggedUserId()).thenReturn("user@idir");
+    doNothing().when(seedlotCollectionGeometryService).saveOrUpdate(any(), any(), anyString());
+    when(seedlotStatusService.getValidSeedlotStatus("SUB")).thenReturn(Optional.of(submitted));
+    when(seedlotRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    doNothing().when(saveSeedlotFormService).deleteForm(seedlotNumber);
+
+    SeedlotStatusResponseDto response =
+        seedlotService.submitSeedlotFormClassB(seedlotNumber, form, false);
+
+    Assertions.assertEquals(seedlotNumber, response.seedlotNumber());
+    Assertions.assertEquals("SUB", response.seedlotStatusCode());
+    verify(saveSeedlotFormService).deleteForm(seedlotNumber);
+    verify(seedlotCollectionGeometryService).saveOrUpdate(any(), any(), anyString());
   }
 }

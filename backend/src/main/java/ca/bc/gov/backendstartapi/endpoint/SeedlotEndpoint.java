@@ -518,9 +518,7 @@ public class SeedlotEndpoint {
           String seedlotNumber,
       @RequestBody SaveSeedlotFormDto data) {
 
-    RevisionCountDto revCountDto = saveSeedlotFormService.saveForm(seedlotNumber, data);
-
-    return revCountDto;
+    return saveSeedlotFormService.saveForm(seedlotNumber, data);
   }
 
   /** Retrieves the saved Seedlot reg form. */

@@ -47,6 +47,7 @@ import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SmpMixRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +80,8 @@ class SeedlotCopyServiceTest {
   private static final String SOURCE_B_NUM = "53001";
   private static final String USER_ID = "testUser";
   private static final EffectiveDateRange DATE_RANGE =
-      new EffectiveDateRange(LocalDate.of(1900, 1, 1), LocalDate.of(9999, 12, 31));
+      new EffectiveDateRange(
+          LocalDate.of(1900, Month.JANUARY, 1), LocalDate.of(9999, Month.DECEMBER, 31));
 
   private Seedlot buildSourceSeedlot() {
     return buildSourceSeedlot(SOURCE_NUM, "A");

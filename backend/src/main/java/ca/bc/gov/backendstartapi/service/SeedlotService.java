@@ -1283,7 +1283,7 @@ public class SeedlotService {
                         owner.getOriginalPercentageSurplus(),
                         owner.getMethodOfPayment().getMethodOfPaymentCode(),
                         owner.getFundingSourceCode()))
-            .collect(Collectors.toList());
+            .toList();
 
     SeedlotFormInterimDto interimStep =
         new SeedlotFormInterimDto(

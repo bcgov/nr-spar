@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDtoClassB;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +33,7 @@ class SeedlotFormCollectionBclassMapperTest {
     assertThat(dto.collectionClientNumber()).isEqualTo("00012797");
     assertThat(dto.coneCollectionMethodCodes()).containsExactly(1, 2);
     assertThat(dto.collectionLocnCode()).isEqualTo("02");
-    assertThat(dto.collectionStartDate()).isEqualTo(LocalDate.of(2024, 5, 1));
+    assertThat(dto.collectionStartDate()).isEqualTo(LocalDate.of(2024, Month.MAY, 1));
     assertThat(dto.noOfContainers()).isEqualByComparingTo(new BigDecimal("10"));
     assertThat(dto.volPerContainer()).isEqualByComparingTo(new BigDecimal("2.5"));
     assertThat(dto.clctnVolume()).isEqualByComparingTo(new BigDecimal("25"));
@@ -55,8 +56,8 @@ class SeedlotFormCollectionBclassMapperTest {
 
     assertThat(seedlot.getCollectionClientNumber()).isEqualTo("00012797");
     assertThat(seedlot.getCollectionLocationCode()).isEqualTo("02");
-    assertThat(seedlot.getCollectionStartDate()).isEqualTo(LocalDate.of(2024, 5, 1));
-    assertThat(seedlot.getCollectionEndDate()).isEqualTo(LocalDate.of(2024, 5, 15));
+    assertThat(seedlot.getCollectionStartDate()).isEqualTo(LocalDate.of(2024, Month.MAY, 1));
+    assertThat(seedlot.getCollectionEndDate()).isEqualTo(LocalDate.of(2024, Month.MAY, 15));
     assertThat(seedlot.getNumberOfContainers()).isEqualByComparingTo(new BigDecimal("10"));
     assertThat(seedlot.getContainerVolume()).isEqualByComparingTo(new BigDecimal("2.5"));
     assertThat(seedlot.getTotalConeVolume()).isEqualByComparingTo(new BigDecimal("25"));
@@ -147,8 +148,8 @@ class SeedlotFormCollectionBclassMapperTest {
     Seedlot seedlot = new Seedlot("12345");
     seedlot.setCollectionClientNumber("00012797");
     seedlot.setCollectionLocationCode("02");
-    seedlot.setCollectionStartDate(LocalDate.of(2024, 5, 1));
-    seedlot.setCollectionEndDate(LocalDate.of(2024, 5, 15));
+    seedlot.setCollectionStartDate(LocalDate.of(2024, Month.MAY, 1));
+    seedlot.setCollectionEndDate(LocalDate.of(2024, Month.MAY, 15));
     seedlot.setNumberOfContainers(new BigDecimal("10"));
     seedlot.setContainerVolume(new BigDecimal("2.5"));
     seedlot.setTotalConeVolume(new BigDecimal("25"));
@@ -167,8 +168,8 @@ class SeedlotFormCollectionBclassMapperTest {
     return new SeedlotFormCollectionDtoClassB(
         "00012797",
         "02",
-        LocalDate.of(2024, 5, 1),
-        LocalDate.of(2024, 5, 15),
+        LocalDate.of(2024, Month.MAY, 1),
+        LocalDate.of(2024, Month.MAY, 15),
         new BigDecimal("10"),
         new BigDecimal("2.5"),
         new BigDecimal("25"),
