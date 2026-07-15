@@ -1149,8 +1149,6 @@ class SeedlotServiceTest {
     Seedlot seedlot = new Seedlot(seedlotNumber);
     SeedlotStatusEntity pending =
         new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
-    SeedlotStatusEntity submitted =
-        new SeedlotStatusEntity("SUB", "Submitted", DATE_RANGE);
     seedlot.setSeedlotStatus(pending);
     seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
 
@@ -1264,6 +1262,8 @@ class SeedlotServiceTest {
     when(seedlotGeneticWorthService.saveSeedlotGenWorth(any(), any())).thenReturn(List.of());
     when(loggedUserService.getLoggedUserId()).thenReturn("user@idir");
     doNothing().when(seedlotCollectionGeometryService).saveOrUpdate(any(), any(), anyString());
+    final SeedlotStatusEntity submitted =
+        new SeedlotStatusEntity("SUB", "Submitted", DATE_RANGE);
     when(seedlotStatusService.getValidSeedlotStatus("SUB")).thenReturn(Optional.of(submitted));
     when(seedlotRepository.save(any())).thenAnswer(i -> i.getArgument(0));
     doNothing().when(saveSeedlotFormService).deleteForm(seedlotNumber);
