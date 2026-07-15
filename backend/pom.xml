@@ -502,7 +502,12 @@
           <configLocation>.mvn/google_checks.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <linkXRef>false</linkXRef>
-          <excludes>**/generated-sources/**</excludes>
+          <sourceDirectories>
+            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+          </sourceDirectories>
+          <testSourceDirectories>
+            <testSourceDirectory>${project.build.testSourceDirectory}</testSourceDirectory>
+          </testSourceDirectories>
         </configuration>
         <executions>
           <execution>
