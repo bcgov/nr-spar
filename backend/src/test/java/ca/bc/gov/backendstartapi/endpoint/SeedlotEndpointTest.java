@@ -175,7 +175,7 @@ class SeedlotEndpointTest {
         "temporaryStrgEndDate": "2023-12-06"
       }
     }
-      """;
+    """;
 
   private static final String SEEDLOT_FORM_PROGRESS_JSON =
       """
@@ -197,7 +197,10 @@ class SeedlotEndpointTest {
             "volPerContainer": 2.5,
             "clctnVolume": 25,
             "seedlotComment": "Test comment",
-            "coneCollectionMethodCodes": [1, 2]
+            "coneCollectionMethodCodes": [1, 2],
+            "collectionElevation": 800,
+            "collectionElevationMin": 600,
+            "collectionElevationMax": 1000
           },
           "seedlotFormOwnershipDtoList": [
             {
