@@ -502,6 +502,7 @@
           <configLocation>.mvn/google_checks.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <linkXRef>false</linkXRef>
+          <excludes>**/generated-sources/**</excludes>
         </configuration>
         <executions>
           <execution>
