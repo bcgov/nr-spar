@@ -1,0 +1,21 @@
+{
+  "mc": {
+    "title": "Purity for lot",
+    "commentPlaceholder": "My comments about this activity",
+    "testComment": "This is a test comment",
+    "invalidDateErrorMsg": "Please enter a valid date"
+  },
+  "table": {
+    "title": "Activity results per replicate",
+    "column1": "Replicate",
+    "column2": "Pure seed weight (g)",
+    "column3": "Inert matter weight (g)",
+    "column4": "Other seed weight (g)",
+    "column5": "Purity",
+    "column6": "Acc",
+    "column7": "Comments",
+    "checkedBox": "CheckBoxIcon",
+    "unCheckedBox": "CheckBoxOutlineBlankIcon",
+    "emptyTableMsg": "No data found"
+  }
+}
