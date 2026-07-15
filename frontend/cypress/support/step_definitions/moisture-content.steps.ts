@@ -1,0 +1,173 @@
+import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
+import { mockMoistureContentApi } from '../mockApiConsep';
+import { MoistureContentType, SeedlotReplicateInfoType } from '../../definitions';
+
+let mcData: MoistureContentType;
+let seedlotData: SeedlotReplicateInfoType;
+
+const assertActivitySummary = (
+  summaryData: SeedlotReplicateInfoType,
+  expectedResultValue: number
+) => {
+  cy.get('.activity-summary')
+    .find('.activity-summary-info-value')
+    .eq(0)
+    .should('have.text', summaryData.activityType);
+
+  cy.get('.activity-summary')
+    .find('.activity-summary-info-value')
+    .eq(1)
+    .should('have.text', summaryData.seedlotNumber);
+
+  cy.get('.activity-summary')
+    .find('.activity-summary-info-value')
+    .eq(2)
+    .should('have.text', summaryData.requestId);
+
+  cy.get('.activity-summary')
+    .find('.activity-summary-info-value')
+    .eq(3)
+    .should('have.text', `${summaryData.vegetationCode} | ${summaryData.geneticClassCode}`);
+
+  cy.get('.activity-summary')
+    .find('.activity-summary-info-value')
+    .eq(4)
+    .should(($el) => {
+      const displayedValue = parseFloat($el.text());
+      expect(displayedValue).to.eq(expectedResultValue);
+    });
+};
+
+Given('moisture content API responses are mocked', () => {
+  mockMoistureContentApi();
+});
+
+Given('the moisture content fixture is loaded', () => {
+  cy.fixture('moisture-content').then((data: MoistureContentType) => {
+    mcData = data;
+    cy.wrap(data).as('mcData');
+  });
+});
+
+Given('the seedlot replicate info fixture is loaded', () => {
+  cy.fixture('moisture-seedlot-replicate-info').then((data: SeedlotReplicateInfoType) => {
+    seedlotData = data;
+    cy.wrap(data).as('seedlotData');
+  });
+});
+
+Then('I can see the moisture content page title', () => {
+  cy.get('.consep-moisture-content-title')
+    .find('h1')
+    .should('contain.text', mcData.mc.title);
+});
+
+Then('I can see the activity results table title', () => {
+  cy.get('.activity-result-actions-title')
+    .find('h3')
+    .should('contain.text', mcData.table.title);
+});
+
+Then('the activity summary should match seedlot replicate info for moisture content', () => {
+  assertActivitySummary(seedlotData, seedlotData.moisturePct);
+});
+
+Then('the moisture activity results table initially shows {int} rows', (rowCount: number) => {
+  cy.waitForTableData('.activity-result-container');
+
+  cy.get('.activity-result-container tbody tr')
+    .should('have.length', rowCount);
+});
+
+When('I add a new moisture replicate row', () => {
+  cy.contains('button', 'Add row').click();
+});
+
+Then('the moisture activity results table shows {int} rows', (rowCount: number) => {
+  cy.get('.activity-result-container tbody tr')
+    .should('have.length', rowCount);
+});
+
+When('I enter {string} in the last moisture row container id field', (value: string) => {
+  cy.get('.activity-result-container tbody tr')
+    .last()
+    .find('input[name="containerId"]')
+    .clear()
+    .type(value);
+});
+
+Then('the last moisture row should show the container id validation error', () => {
+  cy.get('.activity-result-container tbody tr')
+    .last()
+    .find('p.Mui-error')
+    .should('contain', mcData.table.containerErrorMsg);
+});
+
+When('I enter {string} in the last moisture row container weight field', (value: string) => {
+  cy.get('.activity-result-container tbody tr')
+    .last()
+    .find('input[name="containerWeight"]')
+    .clear()
+    .type(value);
+});
+
+Then('the last moisture row should show the container weight validation error', () => {
+  cy.get('.activity-result-container tbody tr')
+    .last()
+    .find('p.Mui-error')
+    .should('contain', mcData.table.containerWeightErrorMsg);
+});
+
+When('I enter {string} in the last moisture row fresh seed field', (value: string) => {
+  cy.get('.activity-result-container tbody tr')
+    .last()
+    .find('input[name="freshSeed"]')
+    .clear()
+    .type(value);
+});
+
+Then('the last moisture row should show the fresh seed validation error', () => {
+  cy.get('.activity-result-container tbody tr')
+    .last()
+    .find('p.Mui-error')
+    .should('contain', mcData.table.containerWeightErrorMsg);
+});
+
+When('I enter {string} in the last moisture row container and dry weight field', (value: string) => {
+  cy.get('.activity-result-container tbody tr')
+    .last()
+    .find('input[name="containerAndDryWeight"]')
+    .clear()
+    .type(value);
+});
+
+Then('the last moisture row should show the container and dry weight validation error', () => {
+  cy.get('.activity-result-container tbody tr')
+    .last()
+    .find('p.Mui-error')
+    .should('contain', mcData.table.containerWeightErrorMsg);
+});
+
+When('I calculate average moisture content from accepted replicates', () => {
+  cy.waitForTableData('.activity-result-container');
+
+  cy.get('.activity-result-container tbody tr').each(($row) => {
+    cy.wrap($row)
+      .find('td[data-index="7"] input[type="checkbox"]')
+      .check()
+      .should('be.checked');
+  });
+
+  cy.get('.consep-registration-button-row')
+    .contains('button', 'Calculate average')
+    .click();
+});
+
+Then('the activity summary result value should equal the calculate-average API response', () => {
+  cy.wait('@POST_calculate_average').then(({ response }) => {
+    expect(response?.statusCode).to.eq(200);
+    const averageMc = Number(response?.body);
+
+    assertActivitySummary(seedlotData, averageMc);
+  });
+});
