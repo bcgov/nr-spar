@@ -30,4 +30,10 @@ public class SeedlotDto {
 
   @Schema(description = "Seedlot genetic worth stored values in the database")
   private List<GeneticWorthTraitsDto> calculatedValues;
+
+  @Schema(
+      description =
+          "Class B enrichments (AOU SPZ slots, role flags, collection geometry). Present only"
+              + " for Class B seedlots.")
+  private SeedlotBclassDetailDto bClassDetail;
 }

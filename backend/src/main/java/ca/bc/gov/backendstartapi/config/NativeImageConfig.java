@@ -28,6 +28,11 @@ import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotCollectionGeometryDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassDetailDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDtoClassB;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
@@ -106,6 +111,11 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     SaveSeedlotFormDto.class,
     SeedPlanZoneDto.class,
     SeedlotAclassFormDto.class,
+    SeedlotBclassDetailDto.class,
+    SeedlotBclassFormDto.class,
+    SeedlotFormCollectionDtoClassB.class,
+    SeedlotFormSubmissionDtoClassB.class,
+    SeedlotCollectionGeometryDto.class,
     SeedlotApplicationPatchDto.class,
     SeedlotCreateDto.class,
     SeedlotDto.class,

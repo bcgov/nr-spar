@@ -166,4 +166,54 @@ public class SaveSeedlotFormService {
       throw new JsonParsingException();
     }
   }
+
+  /**
+   * Removes the wizard draft row for a seedlot, if one exists.
+   *
+   * @param seedlotNumber the seedlot number
+   */
+  public void deleteForm(@NonNull String seedlotNumber) {
+    SparLog.info("Deleting seedlot registration draft for seedlot {}", seedlotNumber);
+
+    saveSeedlotProgressRepository
+        .findById(seedlotNumber)
+        .ifPresent(
+            entity -> {
+              loggedUserService.verifySeedlotAccessPrivilege(
+                  entity.getSeedlot().getApplicantClientNumber());
+              saveSeedlotProgressRepository.delete(entity);
+              SparLog.info("Seedlot registration draft deleted for seedlot {}", seedlotNumber);
+            });
+  }
+
+  /**
+   * Creates a fresh empty B-class wizard draft so the frontend can hydrate from normalized tables
+   * via {@code GET .../b-class-full-form}.
+   *
+   * @param seedlot the seedlot to attach the draft to
+   */
+  public void recreateEmptyBClassDraft(@NonNull Seedlot seedlot) {
+    SparLog.info("Recreating empty B-class draft for seedlot {}", seedlot.getId());
+
+    saveSeedlotProgressRepository.findById(seedlot.getId()).ifPresent(saveSeedlotProgressRepository::delete);
+
+    Map<String, Object> stepStatus =
+        Map.of("isComplete", false, "isCurrent", false, "isInvalid", false);
+    Map<String, Object> progressStatus =
+        Map.of(
+            "collection", stepStatus,
+            "ownership", stepStatus,
+            "interim", stepStatus,
+            "extraction", stepStatus);
+
+    SaveSeedlotProgressEntity draft =
+        new SaveSeedlotProgressEntity(
+            seedlot,
+            Map.of(),
+            progressStatus,
+            loggedUserService.createAuditCurrentUser());
+
+    saveSeedlotProgressRepository.save(draft);
+    SparLog.info("Empty B-class draft created for seedlot {}", seedlot.getId());
+  }
 }

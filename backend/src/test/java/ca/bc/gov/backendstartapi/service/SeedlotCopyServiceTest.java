@@ -1,10 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -16,6 +12,7 @@ import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.*;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
+import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
@@ -34,6 +31,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SmpMixRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,13 +61,25 @@ class SeedlotCopyServiceTest {
   private SeedlotCopyService service;
 
   private static final String SOURCE_NUM = "63001";
+  private static final String SOURCE_B_NUM = "53001";
   private static final String USER_ID = "testUser";
+  private static final EffectiveDateRange DATE_RANGE =
+      new EffectiveDateRange(LocalDate.of(1900, 1, 1), LocalDate.of(9999, 12, 31));
 
   private Seedlot buildSourceSeedlot() {
-    Seedlot s = new Seedlot(SOURCE_NUM);
+    return buildSourceSeedlot(SOURCE_NUM, "A");
+  }
+
+  private Seedlot buildSourceSeedlot(String number, String geneticClassCode) {
+    Seedlot s = new Seedlot(number);
     SeedlotStatusEntity status = new SeedlotStatusEntity();
     status.setSeedlotStatusCode("SUB");
     s.setSeedlotStatus(status);
+    s.setGeneticClass(
+        new GeneticClassEntity(
+            geneticClassCode,
+            geneticClassCode + " class seedlot",
+            DATE_RANGE));
     s.setComment("original comment");
     s.setNumberOfContainers(BigDecimal.TEN);
     s.setContainerVolume(new BigDecimal("5.00"));
@@ -223,7 +233,7 @@ class SeedlotCopyServiceTest {
   // ── Draft creation ───────────────────────────────────────────────────────────
 
   @Test
-  @DisplayName("Draft: SaveSeedlotProgressEntityClassA is saved with allStepData = empty map")
+  @DisplayName("Draft: SaveSeedlotProgressEntity is saved with allStepData = empty map")
   void draft_savedWithEmptyAllStepData() {
     when(seedlotRepository.findById(SOURCE_NUM)).thenReturn(Optional.of(buildSourceSeedlot()));
     when(seedlotRepository.findNextSeedlotNumber(
@@ -623,5 +633,152 @@ class SeedlotCopyServiceTest {
     service.copySeedlot(SOURCE_NUM, USER_ID);
 
     verify(smpMixGeneticQualityRepository, never()).save(any());
+  }
+
+  // ── Class B copy ─────────────────────────────────────────────────────────────
+
+  private void stubCommonForBCopy() {
+    when(seedlotRepository.findById(SOURCE_B_NUM))
+        .thenReturn(Optional.of(buildSourceSeedlot(SOURCE_B_NUM, "B")));
+    when(seedlotRepository.findNextSeedlotNumber(
+            Constants.CLASS_B_COPY_MIN, Constants.CLASS_B_COPY_MAX))
+        .thenReturn(null);
+    when(seedlotStatusService.findById(Constants.PENDING_SEEDLOT_STATUS))
+        .thenReturn(Optional.of(pndStatus()));
+    when(seedlotRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    stubChildRepos();
+  }
+
+  @Test
+  @DisplayName("Auto-assign B: empty copy band starts at 52000")
+  void autoAssign_emptyBBand_assignsMin() {
+    stubCommonForBCopy();
+
+    SeedlotStatusResponseDto result = service.copySeedlot(SOURCE_B_NUM, USER_ID);
+
+    assertEquals("52000", result.seedlotNumber());
+    assertEquals(Constants.PENDING_SEEDLOT_STATUS, result.seedlotStatusCode());
+  }
+
+  @Test
+  @DisplayName("Auto-assign B: next slot after existing max")
+  void autoAssign_partialBBand_assignsNextAfterMax() {
+    when(seedlotRepository.findById(SOURCE_B_NUM))
+        .thenReturn(Optional.of(buildSourceSeedlot(SOURCE_B_NUM, "B")));
+    when(seedlotRepository.findNextSeedlotNumber(
+            Constants.CLASS_B_COPY_MIN, Constants.CLASS_B_COPY_MAX))
+        .thenReturn(52005);
+    when(seedlotStatusService.findById(Constants.PENDING_SEEDLOT_STATUS))
+        .thenReturn(Optional.of(pndStatus()));
+    when(seedlotRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    stubChildRepos();
+
+    SeedlotStatusResponseDto result = service.copySeedlot(SOURCE_B_NUM, USER_ID);
+
+    assertEquals("52006", result.seedlotNumber());
+  }
+
+  @Test
+  @DisplayName("Auto-assign B: band exhausted when next >= CLASS_B_COPY_MAX throws 400")
+  void autoAssign_bBandExhausted_throws400() {
+    when(seedlotRepository.findById(SOURCE_B_NUM))
+        .thenReturn(Optional.of(buildSourceSeedlot(SOURCE_B_NUM, "B")));
+    when(seedlotRepository.findNextSeedlotNumber(
+            Constants.CLASS_B_COPY_MIN, Constants.CLASS_B_COPY_MAX))
+        .thenReturn(Constants.CLASS_B_COPY_MAX - 1);
+
+    assertThrows(
+        SeedlotFormValidationException.class, () -> service.copySeedlot(SOURCE_B_NUM, USER_ID));
+  }
+
+  @Test
+  @DisplayName("B copy: skips A-only child entities (orchards / parent trees / SMP)")
+  void copyB_skipsAOnlyChildren() {
+    stubCommonForBCopy();
+
+    service.copySeedlot(SOURCE_B_NUM, USER_ID);
+
+    verify(orchardRepository, never()).findAllBySeedlot_id(anyString());
+    verify(parentTreeRepository, never()).findAllBySeedlot_id(anyString());
+    verify(smpMixRepository, never()).findAllBySeedlot_id(anyString());
+  }
+
+  @Test
+  @DisplayName("B copy: shares genetic worth / plan zones / collection methods with A path")
+  void copyB_copiesSharedChildren() {
+    SeedlotGeneticWorth gwSrc = mock(SeedlotGeneticWorth.class);
+    when(gwSrc.getGeneticWorth()).thenReturn(mock(GeneticWorthEntity.class));
+    when(gwSrc.getGeneticQualityValue()).thenReturn(new BigDecimal("1.2"));
+    when(gwSrc.getTestedParentTreeContributionPercentage()).thenReturn(new BigDecimal("10.00"));
+
+    SeedlotCollectionMethod cmSrc = mock(SeedlotCollectionMethod.class);
+    when(cmSrc.getConeCollectionMethod()).thenReturn(mock(
+        ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity.class));
+    when(cmSrc.getConeCollectionMethodOtherDescription()).thenReturn("other");
+
+    stubCommonForBCopy();
+    when(geneticWorthRepository.findAllBySeedlot_id(SOURCE_B_NUM)).thenReturn(List.of(gwSrc));
+    when(geneticWorthRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    when(collectionMethodRepository.findAllBySeedlot_id(SOURCE_B_NUM)).thenReturn(List.of(cmSrc));
+    when(collectionMethodRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    service.copySeedlot(SOURCE_B_NUM, USER_ID);
+
+    verify(geneticWorthRepository).save(any());
+    verify(collectionMethodRepository).save(any());
+  }
+
+  @Test
+  @DisplayName("B copy: draft progress keys are B wizard steps only")
+  void copyB_draftHasBProgressKeys() {
+    stubCommonForBCopy();
+
+    service.copySeedlot(SOURCE_B_NUM, USER_ID);
+
+    ArgumentCaptor<SaveSeedlotProgressEntity> captor =
+        ArgumentCaptor.forClass(SaveSeedlotProgressEntity.class);
+    verify(saveProgressRepository).save(captor.capture());
+    assertTrue(captor.getValue().getAllStepData().isEmpty());
+    assertTrue(captor.getValue().getProgressStatus().containsKey("collection"));
+    assertTrue(captor.getValue().getProgressStatus().containsKey("ownership"));
+    assertTrue(captor.getValue().getProgressStatus().containsKey("interim"));
+    assertTrue(captor.getValue().getProgressStatus().containsKey("extraction"));
+    assertFalse(captor.getValue().getProgressStatus().containsKey("orchard"));
+    assertFalse(captor.getValue().getProgressStatus().containsKey("parent"));
+  }
+
+  @Test
+  @DisplayName("B copy: genetic class B is preserved on target")
+  void copyB_preservesGeneticClass() {
+    Seedlot[] captured = new Seedlot[1];
+    when(seedlotRepository.findById(SOURCE_B_NUM))
+        .thenReturn(Optional.of(buildSourceSeedlot(SOURCE_B_NUM, "B")));
+    when(seedlotRepository.findNextSeedlotNumber(
+            Constants.CLASS_B_COPY_MIN, Constants.CLASS_B_COPY_MAX))
+        .thenReturn(null);
+    when(seedlotStatusService.findById(Constants.PENDING_SEEDLOT_STATUS))
+        .thenReturn(Optional.of(pndStatus()));
+    when(seedlotRepository.save(any()))
+        .thenAnswer(
+            i -> {
+              captured[0] = i.getArgument(0);
+              return captured[0];
+            });
+    stubChildRepos();
+
+    service.copySeedlot(SOURCE_B_NUM, USER_ID);
+
+    assertEquals("B", captured[0].getGeneticClass().getGeneticClassCode());
+  }
+
+  @Test
+  @DisplayName("Source with missing genetic class throws 400")
+  void sourceMissingGeneticClass_throws400() {
+    Seedlot source = buildSourceSeedlot();
+    source.setGeneticClass(null);
+    when(seedlotRepository.findById(SOURCE_NUM)).thenReturn(Optional.of(source));
+
+    assertThrows(
+        SeedlotFormValidationException.class, () -> service.copySeedlot(SOURCE_NUM, USER_ID));
   }
 }

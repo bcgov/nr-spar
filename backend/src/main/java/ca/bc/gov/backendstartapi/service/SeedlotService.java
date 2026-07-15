@@ -12,6 +12,11 @@ import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassDetailDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotCollectionGeometryDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDtoClassB;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
@@ -42,6 +47,7 @@ import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionGeometry;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
@@ -53,13 +59,16 @@ import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionClassBMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
+import ca.bc.gov.backendstartapi.util.GeometryUtil;
 import ca.bc.gov.backendstartapi.util.SeedlotMeanGeoCalculator;
 import ca.bc.gov.backendstartapi.util.ValueUtil;
 import jakarta.transaction.Transactional;
@@ -129,6 +138,14 @@ public class SeedlotService {
 
   private final SeedlotFormValidationService seedlotFormValidationService;
 
+  private final SeedlotCollectionGeometryRepository seedlotCollectionGeometryRepository;
+
+  private final SeedlotCollectionGeometryService seedlotCollectionGeometryService;
+
+  private final SeedlotFormCollectionClassBMapper seedlotFormCollectionClassBMapper;
+
+  private final SaveSeedlotFormService saveSeedlotFormService;
+
   /**
    * Creates a Seedlot in the database.
    *
@@ -184,20 +201,23 @@ public class SeedlotService {
   private String nextSeedlotNumber(Character seedlotClassCode) {
     SparLog.info("Retrieving next seedlot number for class-{}", seedlotClassCode);
 
+    Integer min;
+    Integer max;
     if (seedlotClassCode.equals('B')) {
-      SparLog.error("Class-b seedlots not implemented yet!");
-      throw new InvalidSeedlotRequestException();
+      min = Constants.CLASS_B_SEEDLOT_NUM_MIN;
+      max = Constants.CLASS_B_SEEDLOT_NUM_MAX;
+    } else {
+      min = Constants.CLASS_A_SEEDLOT_NUM_MIN;
+      max = Constants.CLASS_A_SEEDLOT_NUM_MAX;
     }
 
-    Integer seedlotNumber =
-        seedlotRepository.findNextSeedlotNumber(
-            Constants.CLASS_A_SEEDLOT_NUM_MIN, Constants.CLASS_A_SEEDLOT_NUM_MAX);
+    Integer seedlotNumber = seedlotRepository.findNextSeedlotNumber(min, max);
 
     if (!ValueUtil.hasValue(seedlotNumber)) {
-      seedlotNumber = Constants.CLASS_A_SEEDLOT_NUM_MIN;
+      seedlotNumber = min;
+    } else {
+      seedlotNumber += 1;
     }
-
-    seedlotNumber += 1;
 
     SparLog.info("Next seedlot number for class-{} {}", seedlotClassCode, seedlotNumber);
     return String.valueOf(seedlotNumber);
@@ -254,14 +274,29 @@ public class SeedlotService {
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
 
-    String clientId = seedlotEntity.getApplicantClientNumber();
-
-    loggedUserService.verifySeedlotAccessPrivilege(clientId);
+    loggedUserService.verifySeedlotAccessPrivilege(seedlotEntity.getApplicantClientNumber());
 
     SeedlotDto seedlotDto = new SeedlotDto();
-
     seedlotDto.setSeedlot(seedlotEntity);
 
+    if (isBClassSeedlot(seedlotEntity)) {
+      fillBClassSeedlotDetail(seedlotDto);
+    } else {
+      fillAClassSeedlotDetail(seedlotDto);
+    }
+
+    seedlotDto.setCalculatedValues(loadGeneticWorthTraits(seedlotNumber));
+
+    return seedlotDto;
+  }
+
+  private boolean isBClassSeedlot(Seedlot seedlot) {
+    return seedlot.getGeneticClass() != null
+        && "B".equals(seedlot.getGeneticClass().getGeneticClassCode());
+  }
+
+  private void fillAClassSeedlotDetail(SeedlotDto seedlotDto) {
+    String seedlotNumber = seedlotDto.getSeedlot().getId();
     fillPrimarySpu(seedlotDto);
 
     SparLog.info("Finding associated seedlot SPZs for seedlot {}", seedlotNumber);
@@ -272,14 +307,13 @@ public class SeedlotService {
     SparLog.info("Found {} SPZs for seedlot {}", spzList.size(), seedlotNumber);
 
     SeedPlanZoneDto primarySpz = null;
-
     List<SeedPlanZoneDto> additionalSpzList = new ArrayList<>();
 
-    if (spzList.size() > 0) {
+    if (!spzList.isEmpty()) {
       List<SeedlotSeedPlanZoneEntity> primarySpzList =
-          spzList.stream().filter(spz -> spz.getIsPrimary()).toList();
+          spzList.stream().filter(SeedlotSeedPlanZoneEntity::getIsPrimary).toList();
 
-      if (primarySpzList.size() > 0) {
+      if (!primarySpzList.isEmpty()) {
         SeedlotSeedPlanZoneEntity primarySpzEntity = primarySpzList.get(0);
         primarySpz =
             new SeedPlanZoneDto(
@@ -299,31 +333,69 @@ public class SeedlotService {
     }
 
     seedlotDto.setPrimarySpz(primarySpz);
-
     seedlotDto.setAdditionalSpzList(additionalSpzList);
+  }
 
+  private void fillBClassSeedlotDetail(SeedlotDto seedlotDto) {
+    Seedlot seedlot = seedlotDto.getSeedlot();
+    String seedlotNumber = seedlot.getId();
+
+    List<SeedPlanZoneDto> aouSpzList = loadBClassAouSpzList(seedlotNumber);
+    SeedlotCollectionGeometryDto collectionGeometry = loadCollectionGeometryOrNull(seedlotNumber);
+
+    seedlotDto.setBClassDetail(
+        new SeedlotBclassDetailDto(
+            aouSpzList, collectionGeometry, seedlot.getProvenanceId()));
+  }
+
+  private List<SeedPlanZoneDto> loadBClassAouSpzList(String seedlotNumber) {
+    return seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber).stream()
+        .map(
+            spz ->
+                new SeedPlanZoneDto(
+                    spz.getSpzCode(), spz.getSpzDescription(), spz.getIsPrimary()))
+        .toList();
+  }
+
+  private SeedlotCollectionGeometryDto loadCollectionGeometryOrNull(String seedlotNumber) {
+    return seedlotCollectionGeometryRepository
+        .findById(seedlotNumber)
+        .map(this::toCollectionGeometryDto)
+        .orElse(null);
+  }
+
+  private SeedlotCollectionGeometryDto toCollectionGeometryDto(SeedlotCollectionGeometry geometry) {
+    return new SeedlotCollectionGeometryDto(
+        geometry.getSeedlotNumber(),
+        GeometryUtil.toGeoJson(geometry.getGeometry()),
+        geometry.getFeatureClassSkey(),
+        geometry.getFeatureArea(),
+        geometry.getFeaturePerimeter(),
+        geometry.getObservationDate(),
+        geometry.getRevisionCount());
+  }
+
+  private List<GeneticWorthTraitsDto> loadGeneticWorthTraits(String seedlotNumber) {
     SparLog.info("Finding Seedlot genetic worth for seedlot number {}", seedlotNumber);
     List<SeedlotGeneticWorth> genWorthData =
         seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber);
 
     List<GeneticWorthTraitsDto> genWorthTraits = new ArrayList<>();
     genWorthData.forEach(
-        (genWorth) -> {
+        genWorth -> {
           GeneticWorthTraitsDto dto =
               new GeneticWorthTraitsDto(
                   genWorth.getGeneticWorthCode(),
-                  null,
+                  genWorth.getGeneticQualityValue(),
                   genWorth.getGeneticQualityValue(),
                   genWorth.getTestedParentTreeContributionPercentage());
           genWorthTraits.add(dto);
         });
-    seedlotDto.setCalculatedValues(genWorthTraits);
     SparLog.info(
         "Found {} Seedlot genetic worth stored for seedlot number {}",
         genWorthTraits.size(),
         seedlotNumber);
-
-    return seedlotDto;
+    return genWorthTraits;
   }
 
   /**
@@ -1170,6 +1242,191 @@ public class SeedlotService {
     seedlotSeedPlanZoneRepository.saveAll(spzSaveList);
 
     SparLog.info("Area of Use values set");
+  }
+
+  /**
+   * Retrieve all B-class form data for a submitted seedlot (mirrors A-class full-form).
+   *
+   * @param seedlotNumber the seedlot number to fetch
+   * @return a {@link SeedlotBclassFormDto} with all form step data
+   */
+  public SeedlotBclassFormDto getBclassSeedlotFormInfo(@NonNull String seedlotNumber) {
+    SparLog.info("Retrieving complete B-class form info for seedlot {}", seedlotNumber);
+
+    Seedlot seedlot = seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+
+    SeedlotCollectionGeometryDto geometryDto = loadCollectionGeometryOrNull(seedlotNumber);
+
+    List<Integer> coneCollectionMethodCodes =
+        seedlotCollectionMethodService.getAllSeedlotCollectionMethodsBySeedlot(seedlot.getId());
+
+    SeedlotFormCollectionDtoClassB collectionStep =
+        seedlotFormCollectionClassBMapper.toDto(
+            seedlot,
+            geometryDto != null ? geometryDto.geometryGeoJson() : null,
+            coneCollectionMethodCodes);
+
+    List<SeedlotFormOwnershipDto> ownershipStep =
+        seedlotOwnerQuantityService.findAllBySeedlot(seedlot.getId()).stream()
+            .filter(
+                owner ->
+                    owner.getOriginalPercentageOwned() != null
+                        && owner.getOriginalPercentageOwned().compareTo(BigDecimal.ZERO) > 0)
+            .map(
+                owner ->
+                    new SeedlotFormOwnershipDto(
+                        owner.getOwnerClientNumber(),
+                        owner.getOwnerLocationCode(),
+                        owner.getOriginalPercentageOwned(),
+                        owner.getOriginalPercentageReserved(),
+                        owner.getOriginalPercentageSurplus(),
+                        owner.getMethodOfPayment().getMethodOfPaymentCode(),
+                        owner.getFundingSourceCode()))
+            .collect(Collectors.toList());
+
+    SeedlotFormInterimDto interimStep =
+        new SeedlotFormInterimDto(
+            seedlot.getInterimStorageClientNumber(),
+            seedlot.getInterimStorageLocationCode(),
+            seedlot.getInterimStorageStartDate(),
+            seedlot.getInterimStorageEndDate(),
+            seedlot.getInterimStorageOtherFacilityDesc(),
+            seedlot.getInterimStorageFacilityCode());
+
+    SeedlotFormExtractionDto extractionStep =
+        new SeedlotFormExtractionDto(
+            seedlot.getExtractionClientNumber(),
+            seedlot.getExtractionLocationCode(),
+            seedlot.getExtractionStartDate(),
+            seedlot.getExtractionEndDate(),
+            seedlot.getStorageClientNumber(),
+            seedlot.getStorageLocationCode(),
+            seedlot.getTemporaryStorageStartDate(),
+            seedlot.getTemporaryStorageEndDate());
+
+    List<SeedPlanZoneDto> aouSpzList = loadBClassAouSpzList(seedlotNumber);
+    List<GeneticWorthTraitsDto> geneticWorthTraits = loadGeneticWorthTraits(seedlotNumber);
+
+    SparLog.info("B-class form info assembled for seedlot {}", seedlotNumber);
+    return new SeedlotBclassFormDto(
+        collectionStep, ownershipStep, interimStep, extractionStep, geometryDto, aouSpzList,
+        geneticWorthTraits);
+  }
+
+  /**
+   * Materializes the B-class wizard draft to the normalized tables (mirrors
+   * {@code updateSeedlotWithForm} for A-class but without parent trees / genetic worth).
+   *
+   * @param seedlotNumber the seedlot to submit
+   * @param form the full B-class form payload
+   * @param isTscAdmin whether the caller is a TSC admin (governs whether delete is allowed)
+   * @return a {@link SeedlotStatusResponseDto} with the new status
+   */
+  @Transactional
+  public SeedlotStatusResponseDto submitSeedlotFormClassB(@NonNull String seedlotNumber, SeedlotFormSubmissionDtoClassB form, boolean isTscAdmin) {
+
+    SparLog.info("Submitting B-class form for seedlot {}", seedlotNumber);
+
+    Seedlot seedlot = seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+    seedlotFormValidationService.validateBclassSeedlotForm(seedlot, form);
+
+    String currentStatus = seedlot.getSeedlotStatus().getSeedlotStatusCode();
+    boolean canDelete = currentStatus.equals("PND") || currentStatus.equals("INC") || isTscAdmin;
+
+    SeedlotFormCollectionDtoClassB col = form.seedlotFormCollectionDto();
+    seedlotFormCollectionClassBMapper.applyToSeedlot(col, seedlot);
+
+    seedlotCollectionMethodService.saveConeCollectionMethods(seedlot, col.coneCollectionMethodCodes(), canDelete);
+
+    SeedlotMeanGeoCalculator.applyMeanAreaOfUse(seedlot);
+
+    // Ownership (step 2 – reuses A-class service)
+    seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, form.seedlotFormOwnershipDtoList(), canDelete);
+
+    // Interim (step 3)
+    saveSeedlotFormStep3(seedlot, form.seedlotFormInterimDto());
+
+    // Extraction (step 4 for B-class – equivalent to step 6 for A-class)
+    saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
+
+    saveBclassAouSpzList(seedlot, form.aouSpzList(), canDelete);
+    saveBclassGeneticWorth(seedlot, form.geneticWorthTraits());
+
+    // Collection geometry (optional polygon)
+    String userId = loggedUserService.getLoggedUserId();
+    seedlotCollectionGeometryService.saveOrUpdate(seedlot, col.collectionGeometryGeoJson(), userId);
+
+    if (currentStatus.equals("PND") || currentStatus.equals("INC")) {
+      setSeedlotDeclaredInfo(seedlot);
+    }
+
+    // Status → SUB
+    setSeedlotStatus(seedlot, Constants.SUBMITTED_SEEDLOT_STATUS);
+
+    seedlot.setAuditInformation(new AuditInformation(userId));
+    seedlotRepository.save(seedlot);
+
+    saveSeedlotFormService.deleteForm(seedlotNumber);
+
+    SparLog.info("B-class seedlot {} submitted successfully", seedlotNumber);
+    return new SeedlotStatusResponseDto(seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  private void saveBclassAouSpzList(
+      Seedlot seedlot, List<SeedPlanZoneDto> spzList, boolean canDelete) {
+    if (spzList == null) {
+      spzList = List.of();
+    }
+
+    if (canDelete) {
+      List<SeedlotSeedPlanZoneEntity> existing =
+          seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlot.getId());
+      if (!existing.isEmpty()) {
+        seedlotSeedPlanZoneRepository.deleteAll(existing);
+      }
+    }
+
+    GeneticClassEntity genBClass =
+        geneticClassRepository.findById("B").orElseThrow(GeneticClassNotFoundException::new);
+    AuditInformation audit = loggedUserService.createAuditCurrentUser();
+
+    List<SeedlotSeedPlanZoneEntity> toSave = new ArrayList<>();
+    for (SeedPlanZoneDto spzDto : spzList) {
+      if (spzDto == null || spzDto.getCode() == null || spzDto.getCode().isBlank()) {
+        continue;
+      }
+      String description =
+          spzDto.getDescription() != null ? spzDto.getDescription() : spzDto.getCode();
+      SeedlotSeedPlanZoneEntity entity =
+          new SeedlotSeedPlanZoneEntity(seedlot, spzDto.getCode(), genBClass, false, description);
+      entity.setAuditInformation(audit);
+      toSave.add(entity);
+    }
+
+    if (!toSave.isEmpty()) {
+      seedlotSeedPlanZoneRepository.saveAll(toSave);
+    }
+  }
+
+  private void saveBclassGeneticWorth(Seedlot seedlot, List<GeneticWorthTraitsDto> traits) {
+    if (traits == null || traits.isEmpty()) {
+      seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, List.of());
+      return;
+    }
+
+    List<GeneticWorthTraitsDto> normalized =
+        traits.stream()
+            .filter(t -> t != null && t.traitCode() != null)
+            .map(
+                t ->
+                    new GeneticWorthTraitsDto(
+                        t.traitCode(),
+                        t.traitValue(),
+                        t.calculatedValue() != null ? t.calculatedValue() : t.traitValue(),
+                        null))
+            .toList();
+
+    seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, normalized);
   }
 
   private void setSeedlotStatus(Seedlot seedlot, String newStatus) {

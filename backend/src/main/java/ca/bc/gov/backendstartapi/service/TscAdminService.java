@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +45,8 @@ public class TscAdminService {
   private final GeneticClassRepository geneticClassRepository;
 
   private final LoggedUserService loggedUserService;
+
+  private final SaveSeedlotFormService saveSeedlotFormService;
 
   /**
    * Retrieve a paginated list of seedlot for a given user.
@@ -74,6 +78,7 @@ public class TscAdminService {
    * @param seedlotNumber The {@link Seedlot} identification.
    * @param status String option defining the Seedlot status code.
    */
+  @Transactional
   public Seedlot updateSeedlotStatus(String seedlotNumber, String status) {
     SparLog.info("Received Seedlot number {} for approval or disapproval", seedlotNumber);
 
@@ -101,9 +106,23 @@ public class TscAdminService {
     seedlotEntity.setSeedlotStatus(seedlotStatus.get());
 
     Seedlot seedlotSaved = seedlotRepository.saveAndFlush(seedlotEntity);
+
+    // B-class submit removes the wizard draft. Sending the lot back to PND must
+    // recreate an empty draft so the registration wizard can hydrate from
+    // normalized tables via GET .../b-class-full-form.
+    if (Constants.PENDING_SEEDLOT_STATUS.equals(status)
+        && isBClassSeedlot(seedlotSaved)) {
+      saveSeedlotFormService.recreateEmptyBClassDraft(seedlotSaved);
+    }
+
     SparLog.info("Seedlot number {} status updated to {}!", seedlotNumber, status);
 
     return seedlotSaved;
+  }
+
+  private boolean isBClassSeedlot(Seedlot seedlot) {
+    return seedlot.getGeneticClass() != null
+        && "B".equals(seedlot.getGeneticClass().getGeneticClassCode());
   }
 
   /**

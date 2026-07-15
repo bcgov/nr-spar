@@ -55,15 +55,16 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
-import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionClassBMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -127,6 +128,14 @@ class SeedlotServiceTest {
 
   @Mock SeedlotFormValidationService seedlotFormValidationService;
 
+  @Mock SeedlotCollectionGeometryRepository seedlotCollectionGeometryRepository;
+
+  @Mock SeedlotCollectionGeometryService seedlotCollectionGeometryService;
+
+  @Mock SeedlotFormCollectionClassBMapper seedlotFormCollectionClassBMapper;
+
+  @Mock SaveSeedlotFormService saveSeedlotFormService;
+
   private SeedlotService seedlotService;
 
   private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
@@ -183,7 +192,11 @@ class SeedlotServiceTest {
             parentTreeService,
             tscAdminService,
             oracleApiProvider,
-            seedlotFormValidationService);
+            seedlotFormValidationService,
+            seedlotCollectionGeometryRepository,
+            seedlotCollectionGeometryService,
+            seedlotFormCollectionClassBMapper,
+            saveSeedlotFormService);
   }
 
   @Test
@@ -214,19 +227,30 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("testCreateSeedlotBClassNotImplementedYet")
-  void createSeedlotTest_bClassSeedlot_shouldThrowException() {
-    // B class - not implemented yet
+  @DisplayName("createSeedlotBClassTest")
+  void createSeedlotTest_bClassSeedlot_shouldSucceed() {
+    when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(53000);
+    String incStatusCode = "INC";
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
+
+    SeedlotSourceEntity sourceEntity =
+        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE, null);
+    when(seedlotSourceRepository.findById("TPT")).thenReturn(Optional.of(sourceEntity));
+
+    GeneticClassEntity classEntity = new GeneticClassEntity("B", "B class seedlot", DATE_RANGE);
+    when(geneticClassRepository.findById("B")).thenReturn(Optional.of(classEntity));
+
+    when(loggedUserService.getLoggedUserId()).thenReturn("testuser@idir");
+
     SeedlotCreateDto createDtoB =
         new SeedlotCreateDto(
             "00012797", "01", "user.lastname@domain.com", "FDI", "TPT", true, true, 'B');
 
-    Exception excBclass =
-        Assertions.assertThrows(
-            InvalidSeedlotRequestException.class,
-            () -> seedlotService.createSeedlot(createDtoB));
-
-    Assertions.assertEquals(BAD_REQUEST_STR, excBclass.getMessage());
+    SeedlotStatusResponseDto response = seedlotService.createSeedlot(createDtoB);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals("53001", response.seedlotNumber());
   }
 
   @Test
