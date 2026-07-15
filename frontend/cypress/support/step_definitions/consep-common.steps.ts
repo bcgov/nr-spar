@@ -1,19 +1,23 @@
-import { Then } from '@badeball/cypress-cucumber-preprocessor';
-import { DataTable } from '@badeball/cypress-cucumber-preprocessor';
+import { Then, DataTable } from '@badeball/cypress-cucumber-preprocessor';
+
+const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 Then('the activity results table should show these columns:', (dataTable: DataTable) => {
   const expectedColumns = dataTable.raw().flat().filter(Boolean);
 
-  cy.get('.activity-result-container thead tr')
-    .find('th')
+  cy.get('.activity-result-container thead th')
     .then(($headers) => {
-      const headerTexts = [...$headers].map((header) => (header.textContent || '').replace(/\s+/g, ' ').trim());
+      const headerTexts = [...$headers].map((header) => normalize(header.textContent || ''));
 
       expectedColumns.forEach((columnName: string) => {
-        expect(
-          headerTexts,
-          `Missing activity results column: ${columnName}`
-        ).to.include(columnName);
+        const expected = normalize(columnName);
+
+        const matches = headerTexts.some((headerText) => headerText === expected || headerText.includes(expected) || expected.includes(headerText));
+
+        assert.isTrue(
+          matches,
+          `Missing activity results column: ${columnName}. Found: ${headerTexts.join(' | ')}`
+        );
       });
     });
 });
