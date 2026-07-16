@@ -21,3 +21,39 @@ Then('the activity results table should show these columns:', (dataTable: DataTa
       });
     });
 });
+
+Then('the activity summary should match the seedlot replicate info', () => {
+  cy.get('@seedlotData').then((seedlotData: any) => {
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(0)
+      .should('have.text', seedlotData.activityType);
+
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(1)
+      .should('have.text', seedlotData.seedlotNumber);
+
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(2)
+      .should('have.text', seedlotData.requestId);
+
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(3)
+      .should('have.text', `${seedlotData.vegetationCode} | ${seedlotData.geneticClassCode}`);
+
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(4)
+      .should(($el) => {
+        const displayedValue = ($el.text() || '').trim();
+        const expectedValue = seedlotData.moisturePct == null
+          ? ''
+          : Number(seedlotData.moisturePct).toFixed(1);
+
+        expect(displayedValue).to.eq(expectedValue);
+      });
+  });
+});

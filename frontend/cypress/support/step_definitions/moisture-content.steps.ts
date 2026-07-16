@@ -5,39 +5,6 @@ import { MoistureContentType, SeedlotReplicateInfoType } from '../../definitions
 let mcData: MoistureContentType;
 let seedlotData: SeedlotReplicateInfoType;
 
-const assertActivitySummary = (
-  summaryData: SeedlotReplicateInfoType,
-  expectedResultValue: number
-) => {
-  cy.get('.activity-summary')
-    .find('.activity-summary-info-value')
-    .eq(0)
-    .should('have.text', summaryData.activityType);
-
-  cy.get('.activity-summary')
-    .find('.activity-summary-info-value')
-    .eq(1)
-    .should('have.text', summaryData.seedlotNumber);
-
-  cy.get('.activity-summary')
-    .find('.activity-summary-info-value')
-    .eq(2)
-    .should('have.text', summaryData.requestId);
-
-  cy.get('.activity-summary')
-    .find('.activity-summary-info-value')
-    .eq(3)
-    .should('have.text', `${summaryData.vegetationCode} | ${summaryData.geneticClassCode}`);
-
-  cy.get('.activity-summary')
-    .find('.activity-summary-info-value')
-    .eq(4)
-    .should(($el) => {
-      const displayedValue = parseFloat($el.text());
-      expect(displayedValue).to.eq(expectedResultValue);
-    });
-};
-
 Given('moisture content API responses are mocked', () => {
   mockMoistureContentApi();
 });
@@ -66,10 +33,6 @@ Then('I can see the activity results table title', () => {
   cy.get('.activity-result-actions-title')
     .find('h3')
     .should('contain.text', mcData.table.title);
-});
-
-Then('the activity summary should match seedlot replicate info for moisture content', () => {
-  assertActivitySummary(seedlotData, seedlotData.moisturePct);
 });
 
 Then('the moisture activity results table initially shows {int} rows', (rowCount: number) => {
@@ -168,6 +131,12 @@ Then('the activity summary result value should equal the calculate-average API r
     expect(response?.statusCode).to.eq(200);
     const averageMc = Number(response?.body);
 
-    assertActivitySummary(seedlotData, averageMc);
+    cy.get('.activity-summary')
+      .find('.activity-summary-info-value')
+      .eq(4)
+      .should(($el) => {
+        const displayedValue = parseFloat(($el.text() || '').trim());
+        expect(displayedValue).to.eq(averageMc);
+      });
   });
 });
