@@ -26,13 +26,9 @@ public class SuperiorProvenanceEntity {
   @Schema(description = "Species vegetation code.", example = "FDC")
   private String vegetationCode;
 
-  @Column(name = "DESCRIPTION")
+  @Column(name = "PROVENANCE_DESCRIPTION")
   @Schema(description = "Display name.", example = "Fraser Valley Provenance")
   private String provenanceDescription;
-
-  @Column(name = "HERITAGE_IND")
-  @Schema(description = "Heritage indicator (Y/N).", example = "N")
-  private String heritageInd;
 
   @Column(name = "EFFECTIVE_DATE")
   @Schema(description = "Code effective date.", type = "string", format = "date")

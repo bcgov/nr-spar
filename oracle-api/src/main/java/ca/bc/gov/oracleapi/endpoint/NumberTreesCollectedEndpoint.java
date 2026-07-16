@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.entity.NumberTreesCollectedCodeEntity;
+import ca.bc.gov.oracleapi.dto.CodeDescriptionDto;
 import ca.bc.gov.oracleapi.repository.NumberTreesCollectedCodeRepository;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,14 +25,15 @@ public class NumberTreesCollectedEndpoint {
 
   private final NumberTreesCollectedCodeRepository numberTreesCollectedCodeRepository;
 
-  NumberTreesCollectedEndpoint(NumberTreesCollectedCodeRepository numberTreesCollectedCodeRepository) {
+  NumberTreesCollectedEndpoint(
+      NumberTreesCollectedCodeRepository numberTreesCollectedCodeRepository) {
     this.numberTreesCollectedCodeRepository = numberTreesCollectedCodeRepository;
   }
 
   /**
    * Retrieve all valid number of trees collected from codes.
    *
-   * @return A list of {@link NumberTreesCollectedCodeEntity} with all found result.
+   * @return A list of {@link CodeDescriptionDto} with all found result.
    */
   @GetMapping(produces = "application/json")
   @Operation(
@@ -50,17 +51,17 @@ public class NumberTreesCollectedEndpoint {
             content =
                 @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = NumberTreesCollectedCodeEntity.class))),
+                    schema = @Schema(implementation = CodeDescriptionDto.class))),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<NumberTreesCollectedCodeEntity> getAllValidNumberTreesCollected() {
+  public List<CodeDescriptionDto> getAllValidNumberTreesCollected() {
     SparLog.info("Fetching all valid number of trees collected from codes");
 
-    List<NumberTreesCollectedCodeEntity> resultList = numberTreesCollectedCodeRepository.findAllValid();
+    List<CodeDescriptionDto> resultList = numberTreesCollectedCodeRepository.findAllValid();
     SparLog.info("{} valid number of trees collected from codes found.", resultList.size());
 
     return resultList;

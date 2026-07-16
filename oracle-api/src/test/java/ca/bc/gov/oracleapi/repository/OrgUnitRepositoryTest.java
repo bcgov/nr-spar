@@ -1,6 +1,6 @@
 package ca.bc.gov.oracleapi.repository;
 
-import ca.bc.gov.oracleapi.entity.OrgUnitEntity;
+import ca.bc.gov.oracleapi.dto.OrgUnitDto;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -18,30 +18,30 @@ class OrgUnitRepositoryTest {
 
   @Autowired private OrgUnitRepository orgUnitRepository;
 
-  private boolean isValid(OrgUnitEntity entity) {
+  private boolean isValid(OrgUnitDto dto) {
     LocalDate today = LocalDate.now();
-    return !entity.getEffectiveDate().isAfter(today) && entity.getExpiryDate().isAfter(today);
+    return !dto.effectiveDate().isAfter(today) && dto.expiryDate().isAfter(today);
   }
 
   @Test
   @DisplayName("findAllDistrictsTest")
   @Sql(scripts = {"classpath:scripts/OrgUnitRepositoryTest_findAllTest.sql"})
   void findAllDistrictsTest() {
-    List<OrgUnitEntity> districts = orgUnitRepository.findAllDistricts();
+    List<OrgUnitDto> districts = orgUnitRepository.findAllDistricts();
 
     Assertions.assertFalse(districts.isEmpty());
     Assertions.assertEquals(2, districts.size());
 
-    OrgUnitEntity dcc = districts.get(0);
-    Assertions.assertEquals(45, dcc.getOrgUnitNo());
-    Assertions.assertEquals("DCC", dcc.getOrgUnitCode());
-    Assertions.assertEquals("Cariboo-Chilcotin Natural Resource District", dcc.getOrgUnitName());
-    Assertions.assertEquals(45, dcc.getRollupDistNo());
+    OrgUnitDto dcc = districts.get(0);
+    Assertions.assertEquals(45, dcc.orgUnitNo());
+    Assertions.assertEquals("DCC", dcc.orgUnitCode());
+    Assertions.assertEquals("Cariboo-Chilcotin Natural Resource District", dcc.orgUnitName());
+    Assertions.assertEquals(45, dcc.rollupDistNo());
     Assertions.assertTrue(isValid(dcc));
 
-    OrgUnitEntity dpg = districts.get(1);
-    Assertions.assertEquals(46, dpg.getOrgUnitNo());
-    Assertions.assertEquals("DPG", dpg.getOrgUnitCode());
+    OrgUnitDto dpg = districts.get(1);
+    Assertions.assertEquals(46, dpg.orgUnitNo());
+    Assertions.assertEquals("DPG", dpg.orgUnitCode());
     Assertions.assertTrue(isValid(dpg));
   }
 }

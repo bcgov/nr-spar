@@ -1,6 +1,6 @@
 package ca.bc.gov.oracleapi.repository;
 
-import ca.bc.gov.oracleapi.entity.SeedCoastAreaCodeEntity;
+import ca.bc.gov.oracleapi.dto.CodeDescriptionDto;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -18,33 +18,33 @@ class SeedCoastAreaCodeEntityRepositoryTest {
 
   @Autowired private SeedCoastAreaRepository seedCoastAreaRepository;
 
-  private boolean isValid(SeedCoastAreaCodeEntity seedCoastAreaCodeEntity) {
+  private boolean isValid(CodeDescriptionDto dto) {
     LocalDate today = LocalDate.now();
 
-    if (seedCoastAreaCodeEntity.getEffectiveDate().isAfter(today)) {
+    if (dto.effectiveDate().isAfter(today)) {
       return false;
     }
 
-    return seedCoastAreaCodeEntity.getExpiryDate().isAfter(today);
+    return dto.expiryDate().isAfter(today);
   }
 
   @Test
   @DisplayName("findAllTest")
   @Sql(scripts = {"classpath:scripts/SeedCoastAreaRepositoryTest_findAllTest.sql"})
   void findAllTest() {
-    List<SeedCoastAreaCodeEntity> areas = seedCoastAreaRepository.findAllValid();
+    List<CodeDescriptionDto> areas = seedCoastAreaRepository.findAllValid();
 
     Assertions.assertFalse(areas.isEmpty());
     Assertions.assertEquals(2, areas.size());
 
-    SeedCoastAreaCodeEntity north = areas.get(0);
-    Assertions.assertEquals("N", north.getCode());
-    Assertions.assertEquals("North Coast", north.getDescription());
+    CodeDescriptionDto north = areas.get(0);
+    Assertions.assertEquals("N", north.code());
+    Assertions.assertEquals("North Coast", north.description());
     Assertions.assertTrue(isValid(north));
 
-    SeedCoastAreaCodeEntity south = areas.get(1);
-    Assertions.assertEquals("S", south.getCode());
-    Assertions.assertEquals("South Coast", south.getDescription());
+    CodeDescriptionDto south = areas.get(1);
+    Assertions.assertEquals("S", south.code());
+    Assertions.assertEquals("South Coast", south.description());
     Assertions.assertTrue(isValid(south));
   }
 }

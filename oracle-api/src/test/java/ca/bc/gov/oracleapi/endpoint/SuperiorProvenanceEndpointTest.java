@@ -8,9 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.entity.SuperiorProvenanceEntity;
+import ca.bc.gov.oracleapi.dto.SuperiorProvenanceDto;
 import ca.bc.gov.oracleapi.repository.SuperiorProvenanceRepository;
-import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,15 +34,8 @@ class SuperiorProvenanceEndpointTest {
   @Test
   @DisplayName("findByVegetationCode returns provenance list")
   void findByVegetationCodeTest() throws Exception {
-    SuperiorProvenanceEntity entity = new SuperiorProvenanceEntity();
-    entity.setProvenanceId(1);
-    entity.setVegetationCode("FDC");
-    entity.setProvenanceDescription("Fraser Valley Provenance");
-    entity.setHeritageInd("N");
-    entity.setEffectiveDate(LocalDate.parse("1905-01-01"));
-    entity.setExpiryDate(LocalDate.parse("9999-12-31"));
-
-    when(superiorProvenanceRepository.findValidByVegetationCode(any())).thenReturn(List.of(entity));
+    when(superiorProvenanceRepository.findValidByVegetationCode(any()))
+        .thenReturn(List.of(new SuperiorProvenanceDto(1, "FDC", "Fraser Valley Provenance")));
 
     mockMvc
         .perform(
@@ -56,7 +48,6 @@ class SuperiorProvenanceEndpointTest {
         .andExpect(jsonPath("$[0].provenanceId").value(1))
         .andExpect(jsonPath("$[0].vegetationCode").value("FDC"))
         .andExpect(jsonPath("$[0].provenanceDescription").value("Fraser Valley Provenance"))
-        .andExpect(jsonPath("$[0].heritageInd").value("N"))
         .andReturn();
   }
 

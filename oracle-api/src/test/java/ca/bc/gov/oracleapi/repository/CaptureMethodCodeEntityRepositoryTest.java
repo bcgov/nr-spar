@@ -1,6 +1,6 @@
 package ca.bc.gov.oracleapi.repository;
 
-import ca.bc.gov.oracleapi.entity.CaptureMethodCodeEntity;
+import ca.bc.gov.oracleapi.dto.CodeDescriptionDto;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -18,33 +18,33 @@ class CaptureMethodCodeEntityRepositoryTest {
 
   @Autowired private CaptureMethodRepository captureMethodRepository;
 
-  private boolean isValid(CaptureMethodCodeEntity captureMethodCodeEntity) {
+  private boolean isValid(CodeDescriptionDto dto) {
     LocalDate today = LocalDate.now();
 
-    if (captureMethodCodeEntity.getEffectiveDate().isAfter(today)) {
+    if (dto.effectiveDate().isAfter(today)) {
       return false;
     }
 
-    return captureMethodCodeEntity.getExpiryDate().isAfter(today);
+    return dto.expiryDate().isAfter(today);
   }
 
   @Test
   @DisplayName("findAllTest")
   @Sql(scripts = {"classpath:scripts/CaptureMethodRepositoryTest_findAllTest.sql"})
   void findAllTest() {
-    List<CaptureMethodCodeEntity> methods = captureMethodRepository.findAllValid();
+    List<CodeDescriptionDto> methods = captureMethodRepository.findAllValid();
 
     Assertions.assertFalse(methods.isEmpty());
     Assertions.assertEquals(2, methods.size());
 
-    CaptureMethodCodeEntity gps = methods.get(0);
-    Assertions.assertEquals("GPS", gps.getCode());
-    Assertions.assertEquals("GPS", gps.getDescription());
+    CodeDescriptionDto gps = methods.get(0);
+    Assertions.assertEquals("GPS", gps.code());
+    Assertions.assertEquals("GPS", gps.description());
     Assertions.assertTrue(isValid(gps));
 
-    CaptureMethodCodeEntity map = methods.get(1);
-    Assertions.assertEquals("MAP", map.getCode());
-    Assertions.assertEquals("Map", map.getDescription());
+    CodeDescriptionDto map = methods.get(1);
+    Assertions.assertEquals("MAP", map.code());
+    Assertions.assertEquals("Map", map.description());
     Assertions.assertTrue(isValid(map));
   }
 }

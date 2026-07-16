@@ -6,19 +6,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.entity.CaptureMethodCodeEntity;
+import ca.bc.gov.oracleapi.dto.CodeDescriptionDto;
 import ca.bc.gov.oracleapi.repository.CaptureMethodRepository;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(CaptureMethodEndpoint.class)
@@ -32,23 +31,19 @@ class CaptureMethodCodeEntityEndpointTest {
   @Test
   @DisplayName("findAllSuccessTest")
   void findAllSuccessTest() throws Exception {
-    CaptureMethodCodeEntity gps = new CaptureMethodCodeEntity();
-    gps.setCode("GPS");
-    gps.setDescription("GPS");
-    gps.setEffectiveDate(LocalDate.parse("1905-01-01"));
-    gps.setExpiryDate(LocalDate.parse("9999-12-31"));
-
-    CaptureMethodCodeEntity map = new CaptureMethodCodeEntity();
-    map.setCode("MAP");
-    map.setDescription("Map");
-    map.setEffectiveDate(LocalDate.parse("1905-01-01"));
-    map.setExpiryDate(LocalDate.parse("9999-12-31"));
-
-    List<CaptureMethodCodeEntity> methods = new ArrayList<>();
-    methods.add(gps);
-    methods.add(map);
-
-    when(captureMethodRepository.findAllValid()).thenReturn(methods);
+    when(captureMethodRepository.findAllValid())
+        .thenReturn(
+            List.of(
+                new CodeDescriptionDto(
+                    "GPS",
+                    "GPS",
+                    LocalDate.parse("1905-01-01"),
+                    LocalDate.parse("9999-12-31")),
+                new CodeDescriptionDto(
+                    "MAP",
+                    "Map",
+                    LocalDate.parse("1905-01-01"),
+                    LocalDate.parse("9999-12-31"))));
 
     mockMvc
         .perform(

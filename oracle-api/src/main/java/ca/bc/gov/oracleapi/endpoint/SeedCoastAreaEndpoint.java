@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.entity.SeedCoastAreaCodeEntity;
+import ca.bc.gov.oracleapi.dto.CodeDescriptionDto;
 import ca.bc.gov.oracleapi.repository.SeedCoastAreaRepository;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +30,7 @@ public class SeedCoastAreaEndpoint {
   /**
    * Retrieve all valid seed coast areas.
    *
-   * @return A list of {@link SeedCoastAreaCodeEntity} with all found result.
+   * @return A list of {@link CodeDescriptionDto} with all found result.
    */
   @GetMapping(produces = "application/json")
   @Operation(
@@ -46,17 +46,17 @@ public class SeedCoastAreaEndpoint {
             content =
                 @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = SeedCoastAreaCodeEntity.class))),
+                    schema = @Schema(implementation = CodeDescriptionDto.class))),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<SeedCoastAreaCodeEntity> getAllValidSeedCoastAreas() {
+  public List<CodeDescriptionDto> getAllValidSeedCoastAreas() {
     SparLog.info("Fetching all valid seed coast areas");
 
-    List<SeedCoastAreaCodeEntity> resultList = seedCoastAreaRepository.findAllValid();
+    List<CodeDescriptionDto> resultList = seedCoastAreaRepository.findAllValid();
     SparLog.info("{} valid seed coast areas found.", resultList.size());
 
     return resultList;

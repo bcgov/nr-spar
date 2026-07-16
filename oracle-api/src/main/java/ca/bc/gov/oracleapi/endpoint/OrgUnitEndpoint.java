@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.entity.OrgUnitEntity;
+import ca.bc.gov.oracleapi.dto.OrgUnitDto;
 import ca.bc.gov.oracleapi.repository.OrgUnitRepository;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +30,7 @@ public class OrgUnitEndpoint {
   /**
    * Retrieve all valid district org units.
    *
-   * @return A list of {@link OrgUnitEntity} for all current, non-expired districts.
+   * @return A list of {@link OrgUnitDto} for all current, non-expired districts.
    */
   @GetMapping(produces = "application/json")
   @Operation(
@@ -47,17 +47,17 @@ public class OrgUnitEndpoint {
             content =
                 @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = OrgUnitEntity.class))),
+                    schema = @Schema(implementation = OrgUnitDto.class))),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<OrgUnitEntity> getAllDistrictOrgUnits() {
+  public List<OrgUnitDto> getAllDistrictOrgUnits() {
     SparLog.info("Fetching all valid district org units");
 
-    List<OrgUnitEntity> resultList = orgUnitRepository.findAllDistricts();
+    List<OrgUnitDto> resultList = orgUnitRepository.findAllDistricts();
     SparLog.info("{} valid district org units found.", resultList.size());
 
     return resultList;

@@ -6,19 +6,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.entity.SeedCoastAreaCodeEntity;
+import ca.bc.gov.oracleapi.dto.CodeDescriptionDto;
 import ca.bc.gov.oracleapi.repository.SeedCoastAreaRepository;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(SeedCoastAreaEndpoint.class)
@@ -32,23 +31,19 @@ class SeedCoastAreaCodeEntityEndpointTest {
   @Test
   @DisplayName("findAllSuccessTest")
   void findAllSuccessTest() throws Exception {
-    SeedCoastAreaCodeEntity north = new SeedCoastAreaCodeEntity();
-    north.setCode("N");
-    north.setDescription("North Coast");
-    north.setEffectiveDate(LocalDate.parse("1905-01-01"));
-    north.setExpiryDate(LocalDate.parse("9999-12-31"));
-
-    SeedCoastAreaCodeEntity south = new SeedCoastAreaCodeEntity();
-    south.setCode("S");
-    south.setDescription("South Coast");
-    south.setEffectiveDate(LocalDate.parse("1905-01-01"));
-    south.setExpiryDate(LocalDate.parse("9999-12-31"));
-
-    List<SeedCoastAreaCodeEntity> areas = new ArrayList<>();
-    areas.add(north);
-    areas.add(south);
-
-    when(seedCoastAreaRepository.findAllValid()).thenReturn(areas);
+    when(seedCoastAreaRepository.findAllValid())
+        .thenReturn(
+            List.of(
+                new CodeDescriptionDto(
+                    "N",
+                    "North Coast",
+                    LocalDate.parse("1905-01-01"),
+                    LocalDate.parse("9999-12-31")),
+                new CodeDescriptionDto(
+                    "S",
+                    "South Coast",
+                    LocalDate.parse("1905-01-01"),
+                    LocalDate.parse("9999-12-31"))));
 
     mockMvc
         .perform(

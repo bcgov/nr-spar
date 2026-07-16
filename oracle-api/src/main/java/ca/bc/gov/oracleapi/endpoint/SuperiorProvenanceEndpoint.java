@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.entity.SuperiorProvenanceEntity;
+import ca.bc.gov.oracleapi.dto.SuperiorProvenanceDto;
 import ca.bc.gov.oracleapi.repository.SuperiorProvenanceRepository;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,14 +53,15 @@ public class SuperiorProvenanceEndpoint {
             content =
                 @Content(
                     array =
-                        @ArraySchema(schema = @Schema(implementation = SuperiorProvenanceEntity.class)))),
+                        @ArraySchema(
+                            schema = @Schema(implementation = SuperiorProvenanceDto.class)))),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<SuperiorProvenanceEntity> findByVegetationCode(
+  public List<SuperiorProvenanceDto> findByVegetationCode(
       @RequestParam("vegetationCode")
           @Parameter(
               name = "vegetationCode",
@@ -72,7 +73,7 @@ public class SuperiorProvenanceEndpoint {
           String vegetationCode) {
     SparLog.info("Fetching superior provenances for vegetation code {}", vegetationCode);
 
-    List<SuperiorProvenanceEntity> results =
+    List<SuperiorProvenanceDto> results =
         superiorProvenanceRepository.findValidByVegetationCode(vegetationCode.toUpperCase());
     SparLog.info(
         "{} superior provenances found for vegetation code {}", results.size(), vegetationCode);

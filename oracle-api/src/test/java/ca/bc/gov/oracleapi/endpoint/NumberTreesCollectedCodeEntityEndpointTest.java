@@ -6,19 +6,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.entity.NumberTreesCollectedCodeEntity;
+import ca.bc.gov.oracleapi.dto.CodeDescriptionDto;
 import ca.bc.gov.oracleapi.repository.NumberTreesCollectedCodeRepository;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(NumberTreesCollectedEndpoint.class)
@@ -32,23 +31,19 @@ class NumberTreesCollectedCodeEntityEndpointTest {
   @Test
   @DisplayName("findAllSuccessTest")
   void findAllSuccessTest() throws Exception {
-    NumberTreesCollectedCodeEntity code1 = new NumberTreesCollectedCodeEntity();
-    code1.setCode("1");
-    code1.setDescription("1 to 10 trees");
-    code1.setEffectiveDate(LocalDate.parse("1905-01-01"));
-    code1.setExpiryDate(LocalDate.parse("9999-12-31"));
-
-    NumberTreesCollectedCodeEntity code2 = new NumberTreesCollectedCodeEntity();
-    code2.setCode("2");
-    code2.setDescription("11 to 50 trees");
-    code2.setEffectiveDate(LocalDate.parse("1905-01-01"));
-    code2.setExpiryDate(LocalDate.parse("9999-12-31"));
-
-    List<NumberTreesCollectedCodeEntity> codes = new ArrayList<>();
-    codes.add(code1);
-    codes.add(code2);
-
-    when(numberTreesCollectedCodeRepository.findAllValid()).thenReturn(codes);
+    when(numberTreesCollectedCodeRepository.findAllValid())
+        .thenReturn(
+            List.of(
+                new CodeDescriptionDto(
+                    "1",
+                    "1 to 10 trees",
+                    LocalDate.parse("1905-01-01"),
+                    LocalDate.parse("9999-12-31")),
+                new CodeDescriptionDto(
+                    "2",
+                    "11 to 50 trees",
+                    LocalDate.parse("1905-01-01"),
+                    LocalDate.parse("9999-12-31"))));
 
     mockMvc
         .perform(

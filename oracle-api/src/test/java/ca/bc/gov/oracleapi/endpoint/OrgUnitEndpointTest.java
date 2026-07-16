@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.entity.OrgUnitEntity;
+import ca.bc.gov.oracleapi.dto.OrgUnitDto;
 import ca.bc.gov.oracleapi.repository.OrgUnitRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -14,10 +14,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(OrgUnitEndpoint.class)
@@ -31,23 +31,23 @@ class OrgUnitEndpointTest {
   @Test
   @DisplayName("findAllDistrictsSuccessTest")
   void findAllDistrictsSuccessTest() throws Exception {
-    OrgUnitEntity dcc = new OrgUnitEntity();
-    dcc.setOrgUnitNo(45);
-    dcc.setOrgUnitCode("DCC");
-    dcc.setOrgUnitName("Cariboo-Chilcotin Natural Resource District");
-    dcc.setRollupDistNo(45);
-    dcc.setEffectiveDate(LocalDate.parse("1905-01-01"));
-    dcc.setExpiryDate(LocalDate.parse("9999-12-31"));
-
-    OrgUnitEntity dpg = new OrgUnitEntity();
-    dpg.setOrgUnitNo(46);
-    dpg.setOrgUnitCode("DPG");
-    dpg.setOrgUnitName("Prince George Natural Resource District");
-    dpg.setRollupDistNo(46);
-    dpg.setEffectiveDate(LocalDate.parse("1905-01-01"));
-    dpg.setExpiryDate(LocalDate.parse("9999-12-31"));
-
-    when(orgUnitRepository.findAllDistricts()).thenReturn(List.of(dcc, dpg));
+    when(orgUnitRepository.findAllDistricts())
+        .thenReturn(
+            List.of(
+                new OrgUnitDto(
+                    45,
+                    "DCC",
+                    "Cariboo-Chilcotin Natural Resource District",
+                    45,
+                    LocalDate.parse("1905-01-01"),
+                    LocalDate.parse("9999-12-31")),
+                new OrgUnitDto(
+                    46,
+                    "DPG",
+                    "Prince George Natural Resource District",
+                    46,
+                    LocalDate.parse("1905-01-01"),
+                    LocalDate.parse("9999-12-31"))));
 
     mockMvc
         .perform(

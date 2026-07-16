@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.repository;
 
+import ca.bc.gov.oracleapi.dto.OrgUnitDto;
 import ca.bc.gov.oracleapi.entity.OrgUnitEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,10 +16,14 @@ public interface OrgUnitRepository extends JpaRepository<OrgUnitEntity, Integer>
    * itself). Only non-expired, already-effective records are returned.
    */
   @Query(
-      "select o from OrgUnitEntity o"
-          + " WHERE o.orgUnitNo = o.rollupDistNo"
-          + " AND CURRENT_DATE >= o.effectiveDate"
-          + " AND CURRENT_DATE < o.expiryDate"
-          + " ORDER BY o.orgUnitCode")
-  List<OrgUnitEntity> findAllDistricts();
+      """
+      SELECT new ca.bc.gov.oracleapi.dto.OrgUnitDto(
+        o.orgUnitNo, o.orgUnitCode, o.orgUnitName, o.rollupDistNo, o.effectiveDate, o.expiryDate)
+      FROM OrgUnitEntity o
+      WHERE o.orgUnitNo = o.rollupDistNo
+        AND CURRENT_DATE >= o.effectiveDate
+        AND CURRENT_DATE < o.expiryDate
+      ORDER BY o.orgUnitCode
+      """)
+  List<OrgUnitDto> findAllDistricts();
 }

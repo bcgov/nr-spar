@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.repository;
 
+import ca.bc.gov.oracleapi.dto.SuperiorProvenanceDto;
 import ca.bc.gov.oracleapi.entity.SuperiorProvenanceEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,10 +12,15 @@ public interface SuperiorProvenanceRepository
     extends JpaRepository<SuperiorProvenanceEntity, Integer> {
 
   @Query(
-      value =
-          "select sp from SuperiorProvenanceEntity sp WHERE sp.vegetationCode = :vegetationCode "
-              + "AND CURRENT_DATE >= sp.effectiveDate AND CURRENT_DATE < sp.expiryDate "
-              + "ORDER BY sp.provenanceDescription")
-  List<SuperiorProvenanceEntity> findValidByVegetationCode(
+      """
+      SELECT new ca.bc.gov.oracleapi.dto.SuperiorProvenanceDto(
+        sp.provenanceId, sp.vegetationCode, sp.provenanceDescription)
+      FROM SuperiorProvenanceEntity sp
+      WHERE sp.vegetationCode = :vegetationCode
+        AND CURRENT_DATE >= sp.effectiveDate
+        AND CURRENT_DATE < sp.expiryDate
+      ORDER BY sp.provenanceDescription
+      """)
+  List<SuperiorProvenanceDto> findValidByVegetationCode(
       @Param("vegetationCode") String vegetationCode);
 }

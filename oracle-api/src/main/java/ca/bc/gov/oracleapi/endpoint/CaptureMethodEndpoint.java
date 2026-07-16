@@ -1,7 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.entity.CaptureMethodCodeEntity;
+import ca.bc.gov.oracleapi.dto.CodeDescriptionDto;
 import ca.bc.gov.oracleapi.repository.CaptureMethodRepository;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +30,7 @@ public class CaptureMethodEndpoint {
   /**
    * Retrieve all valid capture methods.
    *
-   * @return A list of {@link CaptureMethodCodeEntity} with all found result.
+   * @return A list of {@link CodeDescriptionDto} with all found result.
    */
   @GetMapping(produces = "application/json")
   @Operation(
@@ -46,17 +46,17 @@ public class CaptureMethodEndpoint {
             content =
                 @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = CaptureMethodCodeEntity.class))),
+                    schema = @Schema(implementation = CodeDescriptionDto.class))),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<CaptureMethodCodeEntity> getAllValidCaptureMethods() {
+  public List<CodeDescriptionDto> getAllValidCaptureMethods() {
     SparLog.info("Fetching all valid capture methods");
 
-    List<CaptureMethodCodeEntity> resultList = captureMethodRepository.findAllValid();
+    List<CodeDescriptionDto> resultList = captureMethodRepository.findAllValid();
     SparLog.info("{} valid capture methods found.", resultList.size());
 
     return resultList;
