@@ -3,7 +3,6 @@ import { mockMoistureContentApi } from '../mockApiConsep';
 import { MoistureContentType, SeedlotReplicateInfoType } from '../../definitions';
 
 let mcData: MoistureContentType;
-let seedlotData: SeedlotReplicateInfoType;
 
 Given('moisture content API responses are mocked', () => {
   mockMoistureContentApi();
@@ -18,7 +17,6 @@ Given('the moisture content fixture is loaded', () => {
 
 Given('the seedlot replicate info fixture is loaded', () => {
   cy.fixture('moisture-seedlot-replicate-info').then((data: SeedlotReplicateInfoType) => {
-    seedlotData = data;
     cy.wrap(data).as('seedlotData');
   });
 });
