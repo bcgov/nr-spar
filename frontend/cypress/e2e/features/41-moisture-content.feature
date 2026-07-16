@@ -13,7 +13,7 @@ Scenario: Manual moisture content page loads core headings
   And I can see the activity results table title
 
 Scenario: Activity summary displays expected seedlot values
-  Then the activity summary should match seedlot replicate info for moisture content
+  Then the activity summary should match the seedlot replicate info
 
 Scenario: Activity results table shows expected moisture columns
   Then the activity results table should show these columns:
