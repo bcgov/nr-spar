@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "CORP_CAPTURE_METHOD", schema = "THE")
+@Table(name = "CORP_CAPTURE_METHOD")
 @Schema(description = "Represents a Capture Method code in the database")
 public class CaptureMethodCodeEntity {
 
