@@ -41,7 +41,6 @@ import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { StringInputType } from '../../../types/FormInputType';
 
 import ClassAContext, { ClassAContextType } from './context';
-import SeedlotRegWizardContext, { SeedlotRegWizardStepData } from '../../../contexts/SeedlotRegWizardContext';
 import {
   AllStepData, AreaOfUseDataType, FormPhase, ProgressIndicatorConfig, ProgressStepStatus
 } from './definitions';
@@ -857,36 +856,9 @@ const ContextContainerClassA = ({ children }: props) => {
     ]
   );
 
-  const wizardContextValue = useMemo(
-    () => ({
-      allStepData: {
-        collectionStep: allStepData.collectionStep,
-        ownershipStep: allStepData.ownershipStep,
-        interimStep: allStepData.interimStep,
-        extractionStorageStep: allStepData.extractionStorageStep
-      } as SeedlotRegWizardStepData,
-      setStepData: (stepName: keyof SeedlotRegWizardStepData, stepData: unknown) => {
-        setStepData(stepName as keyof AllStepData, stepData);
-      },
-      defaultClientNumber: seedlotQuery.data?.seedlot.applicantClientNumber ?? '',
-      defaultCode: getDefaultLocationCode(),
-      isFormSubmitted,
-      seedlotNumber
-    }),
-    [
-      allStepData,
-      isFormSubmitted,
-      seedlotNumber,
-      seedlotQuery.data?.seedlot.applicantClientNumber,
-      seedlotQuery.data?.seedlot.applicantLocationCode
-    ]
-  );
-
   return (
     <ClassAContext.Provider value={contextData}>
-      <SeedlotRegWizardContext.Provider value={wizardContextValue}>
-        {children}
-      </SeedlotRegWizardContext.Provider>
+      {children}
     </ClassAContext.Provider>
   );
 };
