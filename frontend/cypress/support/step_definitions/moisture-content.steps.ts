@@ -15,7 +15,7 @@ Given('the moisture content fixture is loaded', () => {
   });
 });
 
-Given('the seedlot replicate info fixture is loaded', () => {
+Given('the moisture seedlot replicate info fixture is loaded', () => {
   cy.fixture('moisture-seedlot-replicate-info').then((data: SeedlotReplicateInfoType) => {
     cy.wrap(data).as('seedlotData');
   });
