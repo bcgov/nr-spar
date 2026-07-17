@@ -38,11 +38,13 @@ export type MoistureContentType = {
 };
 
 export type PurityContentType = {
-  mc: {
+  pc: {
     title: string,
     commentPlaceholder: string,
     testComment: string,
-    invalidDateErrorMsg: string
+    invalidDateErrorMsg: string,
+    impurityBtn: string,
+    maxImpuritiesErrorMsg: string
   },
   table: {
     title: string,
