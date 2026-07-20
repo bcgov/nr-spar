@@ -1,10 +1,7 @@
-import { QueryObserverResult } from '@tanstack/react-query';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { BClassCollectionForm } from '../../../components/SeedlotRegistrationSteps/BClassCollectionStep/definitions';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
-import { MutationStatusType } from '../../../types/QueryStatusType';
-import { SeedlotBClassProgressPayloadType } from '../../../types/SeedlotType';
 
 export type BClassAllStepData = {
   collectionStep: BClassCollectionForm,

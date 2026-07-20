@@ -8,7 +8,6 @@ import { RowDataDictType, NotifCtrlType } from '../../../components/SeedlotRegis
 import { MutationStatusType } from '../../../types/QueryStatusType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OptionsInputType, StringInputType } from '../../../types/FormInputType';
-import { SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
 
 export type ParentTreeStepDataObj = {

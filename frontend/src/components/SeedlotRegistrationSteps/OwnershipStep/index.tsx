@@ -10,7 +10,6 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
-
 import SeedlotRegWizardContext from '../../../contexts/SeedlotRegWizardContext';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';

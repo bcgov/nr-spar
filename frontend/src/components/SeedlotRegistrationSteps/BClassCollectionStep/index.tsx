@@ -15,7 +15,7 @@ import {
   NumberInput,
   RadioButtonGroup,
   RadioButton,
-  Link,
+  Button,
   DropdownSkeleton,
   RadioButtonSkeleton
 } from '@carbon/react';
@@ -44,7 +44,12 @@ import {
   DATE_FORMAT, agencyFieldsProps, fieldsConfig
 } from './constants';
 import { BClassCollectionForm } from './definitions';
-import { calcVolume, getBecVariantItems, isBecVariantRequired, isNumNotInRange } from './utils';
+import {
+  calcVolume,
+  getBecVariantItems,
+  isBecVariantRequired,
+  isNumNotInRange
+} from './utils';
 
 import './styles.scss';
 
@@ -157,6 +162,13 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     () => getBecVariantItems(becCatalogueQuery.data, selectedZoneCode, selectedSubzoneCode),
     [becCatalogueQuery.data, selectedZoneCode, selectedSubzoneCode]
   );
+
+  let becVariantPlaceholder = 'None';
+  if (!selectedSubzoneCode) {
+    becVariantPlaceholder = 'Choose subzone first';
+  } else if (becVariantItems.length > 0) {
+    becVariantPlaceholder = 'Choose variant';
+  }
 
   const handleDateChange = (isStartDate: boolean, value: string) => {
     const clonedState = structuredClone(state);
@@ -453,11 +465,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
               <ComboBox
                 id={state.becVariant.id}
                 titleText={fieldsConfig.becSection.variantLabel}
-                placeholder={
-                  !selectedSubzoneCode
-                    ? 'Choose subzone first'
-                    : (becVariantItems.length > 0 ? 'Choose variant' : 'None')
-                }
+                placeholder={becVariantPlaceholder}
                 items={becVariantItems}
                 itemToString={(item: MultiOptionsObj | null) => (item ? item.label : '')}
                 selectedItem={state.becVariant.value.code ? state.becVariant.value : null}
@@ -472,9 +480,9 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
       {!isReview ? (
         <Row className="b-class-collection-row">
           <Column sm={4} md={8} lg={16} xlg={16}>
-            <Link href="#" className="bec-search-link" onClick={(e: React.MouseEvent) => e.preventDefault()}>
+            <Button kind="ghost" className="bec-search-link">
               {fieldsConfig.becSection.becSearchLink}
-            </Link>
+            </Button>
           </Column>
         </Row>
       ) : null}
@@ -861,8 +869,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
             labelText={fieldsConfig.comments.labelText}
             readOnly={readOnly}
             placeholder={fieldsConfig.comments.placeholder}
-            defaultValue={state.comments.value}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+            value={state.comments.value}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
               handleComment(e.target.value);
             }}
             rows={5}

@@ -392,7 +392,7 @@ public class SeedlotService {
           GeneticWorthTraitsDto dto =
               new GeneticWorthTraitsDto(
                   genWorth.getGeneticWorthCode(),
-                  genWorth.getGeneticQualityValue(),
+                  null,
                   genWorth.getGeneticQualityValue(),
                   genWorth.getTestedParentTreeContributionPercentage());
           genWorthTraits.add(dto);
