@@ -1,0 +1,19 @@
+meta {
+  name: Get Capture Methods
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/capture-methods
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token:
+}
