@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,6 +18,8 @@ import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import ca.bc.gov.backendstartapi.util.GeometryUtil;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -104,7 +107,9 @@ class SeedlotCollectionGeometryServiceTest {
 
     assertEquals(SEEDLOT_NUMBER, dto.seedlotNumber());
     assertEquals(42, dto.featureClassSkey());
-    assertEquals("Polygon", dto.geometryGeoJson().substring(9, 16));
+
+    JsonNode geoJson = assertDoesNotThrow(() -> new ObjectMapper().readTree(dto.geometryGeoJson()));
+    assertEquals("Polygon", geoJson.get("type").asText());
   }
 
   @Test
