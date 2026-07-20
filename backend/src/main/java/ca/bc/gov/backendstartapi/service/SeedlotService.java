@@ -219,6 +219,12 @@ public class SeedlotService {
       seedlotNumber += 1;
     }
 
+    if (seedlotNumber > max) {
+      SparLog.error(
+          "Class-{} seedlot number band exhausted (max {} reached)", seedlotClassCode, max);
+      throw new InvalidSeedlotRequestException();
+    }
+
     SparLog.info("Next seedlot number for class-{} {}", seedlotClassCode, seedlotNumber);
     return String.valueOf(seedlotNumber);
   }
@@ -386,7 +392,7 @@ public class SeedlotService {
           GeneticWorthTraitsDto dto =
               new GeneticWorthTraitsDto(
                   genWorth.getGeneticWorthCode(),
-                  genWorth.getGeneticQualityValue(),
+                  null,
                   genWorth.getGeneticQualityValue(),
                   genWorth.getTestedParentTreeContributionPercentage());
           genWorthTraits.add(dto);
@@ -1256,6 +1262,8 @@ public class SeedlotService {
     Seedlot seedlot =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
+    loggedUserService.verifySeedlotAccessPrivilege(seedlot.getApplicantClientNumber());
+
     SeedlotCollectionGeometryDto geometryDto = loadCollectionGeometryOrNull(seedlotNumber);
 
     List<Integer> coneCollectionMethodCodes =
@@ -1331,6 +1339,9 @@ public class SeedlotService {
 
     Seedlot seedlot =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+
+    loggedUserService.verifySeedlotAccessPrivilege(seedlot.getApplicantClientNumber());
+
     seedlotFormValidationService.validateBclassSeedlotForm(seedlot, form);
 
     String currentStatus = seedlot.getSeedlotStatus().getSeedlotStatusCode();
