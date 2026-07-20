@@ -1,0 +1,19 @@
+meta {
+  name: Get Org Unit Districts
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/org-unit-districts
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token:
+}
