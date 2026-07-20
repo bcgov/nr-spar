@@ -6,8 +6,14 @@ import static org.mockito.Mockito.lenient;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDtoClassB;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
+import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
@@ -1079,5 +1085,657 @@ class SeedlotFormValidationServiceTest {
                         new BigDecimal("100"),
                         new BigDecimal("60"),
                         new BigDecimal("40")))));
+  }
+
+  // ----- Class B validation ------------------------------------------------
+
+  private Seedlot validBclassSeedlot() {
+    Seedlot seedlot = new Seedlot("53001");
+    seedlot.setVegetationCode("FDC");
+    seedlot.setSourceInBc(true);
+    GeneticClassEntity geneticClass = new GeneticClassEntity();
+    geneticClass.setGeneticClassCode("B");
+    seedlot.setGeneticClass(geneticClass);
+    return seedlot;
+  }
+
+  private SeedlotFormCollectionDtoClassB validBclassCollection() {
+    return new SeedlotFormCollectionDtoClassB(
+        "00012797",
+        "00",
+        LocalDate.of(2024, Month.SEPTEMBER, 1),
+        LocalDate.of(2024, Month.SEPTEMBER, 30),
+        new BigDecimal("2"),
+        new BigDecimal("4"),
+        new BigDecimal("8"),
+        "Test B-class collection",
+        List.of(1, 2),
+        "South ridge",
+        73,
+        "Y",
+        new BigDecimal("500"),
+        "CLIMB",
+        "M",
+        "Y",
+        "001",
+        "Y",
+        "N",
+        null,
+        "GT5",
+        "N",
+        "N",
+        null,
+        49,
+        30,
+        0,
+        123,
+        0,
+        0,
+        800,
+        600,
+        1000,
+        600,
+        1000,
+        49,
+        0,
+        50,
+        0,
+        122,
+        0,
+        124,
+        0,
+        0,
+        0,
+        0,
+        0,
+        null,
+        'N',
+        'W',
+        "CDF",
+        "Coastal Douglas-fir",
+        "mm",
+        '1',
+        12,
+        null);
+  }
+
+  private SeedlotFormSubmissionDtoClassB validBclassForm() {
+    SeedlotFormOwnershipDto ownership =
+        new SeedlotFormOwnershipDto(
+            "00012797",
+            "00",
+            new BigDecimal("100"),
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            "CLA",
+            "ITC");
+    SeedlotFormInterimDto interim =
+        new SeedlotFormInterimDto(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.OCTOBER, 1),
+            LocalDate.of(2024, Month.OCTOBER, 31),
+            null,
+            "OCV");
+    SeedlotFormExtractionDto extraction =
+        new SeedlotFormExtractionDto(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.NOVEMBER, 1),
+            LocalDate.of(2024, Month.NOVEMBER, 30),
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.DECEMBER, 1),
+            LocalDate.of(2024, Month.DECEMBER, 31));
+    return new SeedlotFormSubmissionDtoClassB(
+        validBclassCollection(),
+        List.of(ownership),
+        interim,
+        extraction,
+        List.of(new SeedPlanZoneDto("M", "Maritime", false)),
+        List.of());
+  }
+
+  @Test
+  @DisplayName("B-class: valid form passes validation")
+  void validateBclassSeedlotForm_valid_shouldPass() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Assertions.assertDoesNotThrow(
+        () -> service.validateBclassSeedlotForm(validBclassSeedlot(), validBclassForm()));
+  }
+
+  @Test
+  @DisplayName("B-class: non-B genetic class is rejected")
+  void validateBclassSeedlotForm_notBclass_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validSeedlot();
+    SeedlotFormSubmissionDtoClassB form = validBclassForm();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(seedlot, form));
+    Assertions.assertTrue(
+        ex.getErrors().stream().anyMatch(e -> e.fieldId().equals("seedlotNumber")));
+  }
+
+  @Test
+  @DisplayName("B-class: missing cone collection methods is rejected")
+  void validateBclassSeedlotForm_missingConeMethods_isRejected() {
+    stubValidForestClient();
+    stubValidMethodOfPayment();
+
+    SeedlotFormCollectionDtoClassB collection =
+        new SeedlotFormCollectionDtoClassB(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.SEPTEMBER, 1),
+            LocalDate.of(2024, Month.SEPTEMBER, 30),
+            new BigDecimal("2"),
+            new BigDecimal("4"),
+            new BigDecimal("8"),
+            "comment",
+            List.of(),
+            "South ridge",
+            73,
+            "Y",
+            new BigDecimal("500"),
+            "CLIMB",
+            "M",
+            "Y",
+            "001",
+            "Y",
+            "N",
+            null,
+            "GT5",
+            "N",
+            "N",
+            null,
+            49,
+            30,
+            0,
+            123,
+            0,
+            0,
+            800,
+            600,
+            1000,
+            600,
+            1000,
+            49,
+            0,
+            50,
+            0,
+            122,
+            0,
+            124,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null,
+            'N',
+            'W',
+            "CDF",
+            "Coastal Douglas-fir",
+            "mm",
+            '1',
+            12,
+            null);
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            collection,
+            validBclassForm().seedlotFormOwnershipDtoList(),
+            validBclassForm().seedlotFormInterimDto(),
+            validBclassForm().seedlotFormExtractionDto(),
+            List.of(),
+            List.of());
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId().equals("seedlotFormCollectionDto.coneCollectionMethodCodes")));
+  }
+
+  @Test
+  @DisplayName("B-class: invalid cone collection method code is rejected")
+  void validateBclassSeedlotForm_invalidConeMethod_isRejected() {
+    stubValidForestClient();
+    stubValidMethodOfPayment();
+    lenient().when(coneCollectionMethodRepository.existsById(1)).thenReturn(false);
+
+    SeedlotFormSubmissionDtoClassB form = validBclassForm();
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId().equals("seedlotFormCollectionDto.coneCollectionMethodCodes")
+                        && e.message().contains("Invalid")));
+  }
+
+  @Test
+  @DisplayName("B-class: org unit required when BC Source is true")
+  void validateBclassSeedlotForm_bcSourceMissingOrgUnit_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormCollectionDtoClassB collection =
+        new SeedlotFormCollectionDtoClassB(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.SEPTEMBER, 1),
+            LocalDate.of(2024, Month.SEPTEMBER, 30),
+            new BigDecimal("2"),
+            new BigDecimal("4"),
+            new BigDecimal("8"),
+            "comment",
+            List.of(1),
+            "South ridge",
+            null,
+            "Y",
+            new BigDecimal("500"),
+            "CLIMB",
+            "M",
+            "Y",
+            "001",
+            "Y",
+            "N",
+            null,
+            "GT5",
+            "N",
+            "N",
+            null,
+            49,
+            30,
+            0,
+            123,
+            0,
+            0,
+            800,
+            600,
+            1000,
+            600,
+            1000,
+            49,
+            0,
+            50,
+            0,
+            122,
+            0,
+            124,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null,
+            'N',
+            'W',
+            "CDF",
+            "Coastal Douglas-fir",
+            "mm",
+            '1',
+            12,
+            null);
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            collection,
+            validBclassForm().seedlotFormOwnershipDtoList(),
+            validBclassForm().seedlotFormInterimDto(),
+            validBclassForm().seedlotFormExtractionDto(),
+            List.of(),
+            List.of());
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.orgUnitNo")));
+  }
+
+  @Test
+  @DisplayName("B-class: BEC override without comment is rejected")
+  void validateBclassSeedlotForm_becOverrideWithoutComment_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormCollectionDtoClassB collection =
+        new SeedlotFormCollectionDtoClassB(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.SEPTEMBER, 1),
+            LocalDate.of(2024, Month.SEPTEMBER, 30),
+            new BigDecimal("2"),
+            new BigDecimal("4"),
+            new BigDecimal("8"),
+            "comment",
+            List.of(1),
+            "South ridge",
+            73,
+            "Y",
+            new BigDecimal("500"),
+            "CLIMB",
+            "M",
+            "Y",
+            "001",
+            "Y",
+            "Y",
+            "  ",
+            "GT5",
+            "N",
+            "N",
+            null,
+            49,
+            30,
+            0,
+            123,
+            0,
+            0,
+            800,
+            600,
+            1000,
+            600,
+            1000,
+            49,
+            0,
+            50,
+            0,
+            122,
+            0,
+            124,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null,
+            'N',
+            'W',
+            "CDF",
+            "Coastal Douglas-fir",
+            "mm",
+            '1',
+            12,
+            null);
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            collection,
+            validBclassForm().seedlotFormOwnershipDtoList(),
+            validBclassForm().seedlotFormInterimDto(),
+            validBclassForm().seedlotFormExtractionDto(),
+            List.of(),
+            List.of());
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.becOverrideComment")));
+  }
+
+  @Test
+  @DisplayName("B-class: collection BGC must be validated")
+  void validateBclassSeedlotForm_bgcNotValidated_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormCollectionDtoClassB collection =
+        new SeedlotFormCollectionDtoClassB(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.SEPTEMBER, 1),
+            LocalDate.of(2024, Month.SEPTEMBER, 30),
+            new BigDecimal("2"),
+            new BigDecimal("4"),
+            new BigDecimal("8"),
+            "comment",
+            List.of(1),
+            "South ridge",
+            73,
+            "Y",
+            new BigDecimal("500"),
+            "CLIMB",
+            "M",
+            "Y",
+            "001",
+            "N",
+            "N",
+            null,
+            "GT5",
+            "N",
+            "N",
+            null,
+            49,
+            30,
+            0,
+            123,
+            0,
+            0,
+            800,
+            600,
+            1000,
+            600,
+            1000,
+            49,
+            0,
+            50,
+            0,
+            122,
+            0,
+            124,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null,
+            'N',
+            'W',
+            "CDF",
+            "Coastal Douglas-fir",
+            "mm",
+            '1',
+            12,
+            null);
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            collection,
+            validBclassForm().seedlotFormOwnershipDtoList(),
+            validBclassForm().seedlotFormInterimDto(),
+            validBclassForm().seedlotFormExtractionDto(),
+            List.of(),
+            List.of());
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(
+                e -> e.fieldId().equals("seedlotFormCollectionDto.collectionBgcValidatedInd")));
+  }
+
+  @Test
+  @DisplayName("B-class: primary SPZ slot is rejected")
+  void validateBclassSeedlotForm_primaryAouSpz_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            validBclassCollection(),
+            validBclassForm().seedlotFormOwnershipDtoList(),
+            validBclassForm().seedlotFormInterimDto(),
+            validBclassForm().seedlotFormExtractionDto(),
+            List.of(new SeedPlanZoneDto("M", "Maritime", true)),
+            List.of());
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream().anyMatch(e -> e.fieldId().startsWith("aouSpzList")));
+  }
+
+  @Test
+  @DisplayName("B-class: more than 8 AOU SPZ slots is rejected")
+  void validateBclassSeedlotForm_tooManyAouSpz_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    List<SeedPlanZoneDto> spzList =
+        java.util.stream.IntStream.rangeClosed(1, 9)
+            .mapToObj(i -> new SeedPlanZoneDto("S" + i, "Zone " + i, false))
+            .toList();
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            validBclassCollection(),
+            validBclassForm().seedlotFormOwnershipDtoList(),
+            validBclassForm().seedlotFormInterimDto(),
+            validBclassForm().seedlotFormExtractionDto(),
+            spzList,
+            List.of());
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream().anyMatch(e -> e.fieldId().equals("aouSpzList")));
+  }
+
+  @Test
+  @DisplayName("B-class: duplicate AOU SPZ codes are rejected")
+  void validateBclassSeedlotForm_duplicateAouSpz_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            validBclassCollection(),
+            validBclassForm().seedlotFormOwnershipDtoList(),
+            validBclassForm().seedlotFormInterimDto(),
+            validBclassForm().seedlotFormExtractionDto(),
+            List.of(
+                new SeedPlanZoneDto("M", "Maritime", false),
+                new SeedPlanZoneDto("M", "Maritime again", false)),
+            List.of());
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream().anyMatch(e -> e.message().contains("Duplicate")));
+  }
+
+  @Test
+  @DisplayName("B-class: missing capture method is rejected")
+  void validateBclassSeedlotForm_missingCaptureMethod_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormCollectionDtoClassB collection =
+        new SeedlotFormCollectionDtoClassB(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.SEPTEMBER, 1),
+            LocalDate.of(2024, Month.SEPTEMBER, 30),
+            new BigDecimal("2"),
+            new BigDecimal("4"),
+            new BigDecimal("8"),
+            "comment",
+            List.of(1),
+            "South ridge",
+            73,
+            "Y",
+            new BigDecimal("500"),
+            "  ",
+            "M",
+            "Y",
+            "001",
+            "Y",
+            "N",
+            null,
+            "GT5",
+            "N",
+            "N",
+            null,
+            49,
+            30,
+            0,
+            123,
+            0,
+            0,
+            800,
+            600,
+            1000,
+            600,
+            1000,
+            49,
+            0,
+            50,
+            0,
+            122,
+            0,
+            124,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null,
+            'N',
+            'W',
+            "CDF",
+            "Coastal Douglas-fir",
+            "mm",
+            '1',
+            12,
+            null);
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            collection,
+            validBclassForm().seedlotFormOwnershipDtoList(),
+            validBclassForm().seedlotFormInterimDto(),
+            validBclassForm().seedlotFormExtractionDto(),
+            List.of(),
+            List.of());
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.captureMethodCode")));
   }
 }

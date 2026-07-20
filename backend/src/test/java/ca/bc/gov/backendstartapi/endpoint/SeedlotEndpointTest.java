@@ -20,6 +20,7 @@ import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotCollectionGeometryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
@@ -27,11 +28,13 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotCollectionGeometryNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
+import ca.bc.gov.backendstartapi.service.SeedlotCollectionGeometryService;
 import ca.bc.gov.backendstartapi.service.SeedlotCopyService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
@@ -73,6 +76,8 @@ class SeedlotEndpointTest {
   @MockitoBean SeedlotCopyService seedlotCopyService;
 
   @MockitoBean SaveSeedlotFormService saveSeedlotFormService;
+
+  @MockitoBean SeedlotCollectionGeometryService seedlotCollectionGeometryService;
 
   @MockitoBean LoggedUserService loggedUserService;
 
@@ -177,6 +182,50 @@ class SeedlotEndpointTest {
         {
           "allStepData": {},
           "progressStatus": {}
+        }
+      """;
+
+  private static final String BCLASS_SUBMISSION_JSON =
+      """
+        {
+          "seedlotFormCollectionDto": {
+            "collectionClientNumber": "00012797",
+            "collectionLocnCode": "01",
+            "collectionStartDate": "2024-05-01",
+            "collectionEndDate": "2024-05-15",
+            "noOfContainers": 10,
+            "volPerContainer": 2.5,
+            "clctnVolume": 25,
+            "seedlotComment": "Test comment",
+            "coneCollectionMethodCodes": [1, 2],
+            "collectionElevation": 800,
+            "collectionElevationMin": 600,
+            "collectionElevationMax": 1000
+          },
+          "seedlotFormOwnershipDtoList": [
+            {
+              "ownerClientNumber": "00012797",
+              "ownerLocnCode": "01",
+              "originalPctOwned": 100,
+              "originalPctRsrvd": 100,
+              "originalPctSrpls": 5,
+              "methodOfPaymentCode": "CLA",
+              "sparFundSrceCode": "ITC"
+            }
+          ],
+          "seedlotFormInterimDto": {
+            "intermStrgClientNumber": "00012797",
+            "intermStrgLocnCode": "01",
+            "intermStrgStDate": "2024-06-01",
+            "intermStrgEndDate": "2024-06-30",
+            "intermFacilityCode": "OCV"
+          },
+          "seedlotFormExtractionDto": {
+            "extractoryClientNumber": "00012797",
+            "extractoryLocnCode": "01",
+            "storageClientNumber": "00012797",
+            "storageLocnCode": "01"
+          }
         }
       """;
 
@@ -800,7 +849,7 @@ class SeedlotEndpointTest {
   void saveSeedlotFormProgress_notFoundSeedlot_shouldThrowException() throws Exception {
     doThrow(new SeedlotNotFoundException())
         .when(saveSeedlotFormService)
-        .saveFormClassA(any(), any());
+        .saveForm(any(), any());
 
     mockMvc
         .perform(
@@ -816,7 +865,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Save seedlot form progress should Succeed")
   void saveSeedlotFormProgress_notFoundSeedlot_shouldSucceed() throws Exception {
-    when(saveSeedlotFormService.saveFormClassA(any(), any())).thenReturn(new RevisionCountDto(0));
+    when(saveSeedlotFormService.saveForm(any(), any())).thenReturn(new RevisionCountDto(0));
 
     mockMvc
         .perform(
@@ -832,7 +881,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Get seedlot form progress but not found")
   void getSeedlotFormProgress_notFound_shouldThrowException() throws Exception {
-    when(saveSeedlotFormService.getFormClassA(any()))
+    when(saveSeedlotFormService.getForm(any()))
         .thenThrow(new SeedlotFormProgressNotFoundException());
 
     mockMvc
@@ -847,7 +896,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Get seedlot form progress should succeed")
   void getSeedlotFormProgress_shouldSucceed() throws Exception {
-    when(saveSeedlotFormService.getFormClassA(any()))
+    when(saveSeedlotFormService.getForm(any()))
         .thenReturn(new SaveSeedlotFormDto(null, null, 1));
 
     mockMvc
@@ -862,7 +911,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Get seedlot form progress status but not found")
   void getSeedlotFormProgressStatus_notFound_shouldThrowException() throws Exception {
-    when(saveSeedlotFormService.getFormStatusClassA(any()))
+    when(saveSeedlotFormService.getFormStatus(any()))
         .thenThrow(new SeedlotFormProgressNotFoundException());
 
     mockMvc
@@ -877,7 +926,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Get seedlot form progress status should succeed")
   void getSeedlotFormProgressStatus_shouldSucceed() throws Exception {
-    when(saveSeedlotFormService.getFormStatusClassA(any())).thenReturn(null);
+    when(saveSeedlotFormService.getFormStatus(any())).thenReturn(null);
 
     mockMvc
         .perform(
@@ -885,6 +934,199 @@ class SeedlotEndpointTest {
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Save B-class seedlot form progress but seedlot not found")
+  void saveSeedlotFormProgressClassB_notFoundSeedlot_shouldThrowException() throws Exception {
+    doThrow(new SeedlotNotFoundException())
+        .when(saveSeedlotFormService)
+        .saveForm(any(), any());
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/b-class-form-progress", "12345")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(SEEDLOT_FORM_PROGRESS_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Save B-class seedlot form progress should succeed")
+  void saveSeedlotFormProgressClassB_shouldSucceed() throws Exception {
+    when(saveSeedlotFormService.saveForm(any(), any())).thenReturn(new RevisionCountDto(0));
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/b-class-form-progress", "12345")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(SEEDLOT_FORM_PROGRESS_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get B-class seedlot form progress but not found")
+  void getSeedlotFormProgressClassB_notFound_shouldThrowException() throws Exception {
+    when(saveSeedlotFormService.getForm(any()))
+        .thenThrow(new SeedlotFormProgressNotFoundException());
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/b-class-form-progress", "12345")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get B-class seedlot form progress should succeed")
+  void getSeedlotFormProgressClassB_shouldSucceed() throws Exception {
+    when(saveSeedlotFormService.getForm(any()))
+        .thenReturn(new SaveSeedlotFormDto(null, null, 1));
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/b-class-form-progress", "12345")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get B-class seedlot form progress status but not found")
+  void getSeedlotFormProgressStatusClassB_notFound_shouldThrowException() throws Exception {
+    when(saveSeedlotFormService.getFormStatus(any()))
+        .thenThrow(new SeedlotFormProgressNotFoundException());
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/b-class-form-progress/status", "12345")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get B-class seedlot form progress status should succeed")
+  void getSeedlotFormProgressStatusClassB_shouldSucceed() throws Exception {
+    when(saveSeedlotFormService.getFormStatus(any())).thenReturn(null);
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/b-class-form-progress/status", "12345")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get collection geometry but not found")
+  void getCollectionGeometry_notFound_shouldThrowException() throws Exception {
+    when(seedlotCollectionGeometryService.getBySeedlotNumber(any()))
+        .thenThrow(new SeedlotCollectionGeometryNotFoundException());
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/collection-geometry", "53001")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get collection geometry should succeed")
+  void getCollectionGeometry_shouldSucceed() throws Exception {
+    when(seedlotCollectionGeometryService.getBySeedlotNumber(any()))
+        .thenReturn(
+            new SeedlotCollectionGeometryDto(
+                "53001", "{\"type\":\"Polygon\"}", 1, null, null, null, 0));
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/collection-geometry", "53001")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.seedlotNumber").value("53001"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get B-class full form but seedlot not found")
+  void getBclassFullForm_notFound_shouldReturn404() throws Exception {
+    when(seedlotService.getBclassSeedlotFormInfo(any())).thenThrow(new SeedlotNotFoundException());
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/b-class-full-form", "53001")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get B-class full form should succeed")
+  void getBclassFullForm_shouldSucceed() throws Exception {
+    ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto dto =
+        new ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto(
+            null, List.of(), null, null, null, List.of(), List.of());
+    when(seedlotService.getBclassSeedlotFormInfo(any())).thenReturn(dto);
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/b-class-full-form", "53001")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Submit B-class form but seedlot not found")
+  void submitBclassForm_notFound_shouldReturn404() throws Exception {
+    when(seedlotService.submitSeedlotFormClassB(any(), any(), anyBoolean()))
+        .thenThrow(new SeedlotNotFoundException());
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/b-class-submission", "53001")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(BCLASS_SUBMISSION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Submit B-class form should succeed")
+  void submitBclassForm_shouldSucceed() throws Exception {
+    when(seedlotService.submitSeedlotFormClassB(any(), any(), anyBoolean()))
+        .thenReturn(new SeedlotStatusResponseDto("53001", "SUB"));
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/b-class-submission", "53001")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(BCLASS_SUBMISSION_JSON))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.seedlotNumber").value("53001"))
+        .andExpect(jsonPath("$.seedlotStatusCode").value("SUB"))
         .andReturn();
   }
 }
