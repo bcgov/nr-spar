@@ -74,11 +74,9 @@ const SeedlotCreatedFeedback = () => {
                   <Row className="navigate-btn">
                     <Column sm={4} md={4} lg={12} xlg={10} max={8}>
                       <Button
-                        /*
                         onClick={() => navigate(
                           addParamToPath(ROUTES.SEEDLOT_B_CLASS_REGISTRATION, seedlotNumber ?? '')
                         )}
-                        */
                         size="lg"
                         className="btn-scf"
                       >
