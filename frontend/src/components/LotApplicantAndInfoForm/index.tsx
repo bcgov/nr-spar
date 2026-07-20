@@ -107,11 +107,7 @@ const LotApplicantAndInfoForm = ({
       <Row className="section-title">
         <Column lg={8}>
           <h2>Applicant agency</h2>
-          {
-            isReview
-              ? null
-              : <Subtitle text="Enter the applicant agency information" />
-          }
+          {!isReview && <Subtitle text="Enter the applicant agency information" />}
         </Column>
       </Row>
       <ClientAndCodeInput
@@ -150,18 +146,13 @@ const LotApplicantAndInfoForm = ({
         </Column>
       </Row>
       {
-        isSeedlot && seedlotInfoProps
-          ? (
-            <>
-              {
-                isReview
-                  ? <Divider />
-                  : null
-              }
-              <ResolvedSeedlotInfoSection {...seedlotInfoProps} />
-            </>
-          )
-          : null // The false case is reserved for vegLog
+        // The false case is reserved for vegLot
+        isSeedlot && seedlotInfoProps && (
+          <>
+            {isReview && <Divider />}
+            <ResolvedSeedlotInfoSection {...seedlotInfoProps} />
+          </>
+        )
       }
     </FlexGrid>
   );
