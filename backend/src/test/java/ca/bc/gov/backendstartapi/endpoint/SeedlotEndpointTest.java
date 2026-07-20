@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
-import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
@@ -848,7 +848,7 @@ class SeedlotEndpointTest {
   @DisplayName("Get seedlot form progress should succeed")
   void getSeedlotFormProgress_shouldSucceed() throws Exception {
     when(saveSeedlotFormService.getFormClassA(any()))
-        .thenReturn(new SaveSeedlotFormDtoClassA(null, null, 1));
+        .thenReturn(new SaveSeedlotFormDto(null, null, 1));
 
     mockMvc
         .perform(
