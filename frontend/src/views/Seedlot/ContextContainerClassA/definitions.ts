@@ -60,7 +60,7 @@ export type SaveTooltipProps = {
   mutationStatus: MutationStatusType;
   lastSaveTimestamp: string;
   handleSaveBtn: Function;
-  reloadFormDraft: () => Promise<QueryObserverResult<SeedlotProgressPayloadType, unknown>>
+  reloadFormDraft: () => Promise<QueryObserverResult<unknown, unknown>>
 }
 
 export type RegFormProps = {
