@@ -1,10 +1,10 @@
-import { BecCatalogueItem } from '../../../api-service/becCatalogueAPI';
-import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
+import { BecCatalogueItem } from '@/api-service/becCatalogueAPI';
+import { EmptyMultiOptObj } from '@/shared-constants/shared-constants';
+import { BClassCollectionFormSubmitType } from '@/types/SeedlotType';
+import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '@/utils/FormInputUtils';
+import { initCollectionState } from '@/views/Seedlot/ContextContainerClassA/utils';
+import { emptyCollectionStep } from '@/views/Seedlot/ContextContainerClassA/constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { BClassCollectionFormSubmitType } from '../../../types/SeedlotType';
-import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
-import { initCollectionState } from '../../../views/Seedlot/ContextContainerClassA/utils';
-import { emptyCollectionStep } from '../../../views/Seedlot/ContextContainerClassA/constants';
 import { BClassCollectionForm } from './definitions';
 import { calcVolume, isNumNotInRange } from '../CollectionStep/utils';
 
@@ -89,9 +89,9 @@ export const initBClassCollectionStateFromDto = (
     collectionLocnCode: collectionData.collectionLocnCode,
     collectionStartDate: collectionData.collectionStartDate,
     collectionEndDate: collectionData.collectionEndDate,
-    noOfContainers: collectionData.noOfContainers,
-    volPerContainer: collectionData.volPerContainer,
-    clctnVolume: collectionData.clctnVolume,
+    noOfContainers: nullableToString(collectionData.noOfContainers),
+    volPerContainer: nullableToString(collectionData.volPerContainer),
+    clctnVolume: nullableToString(collectionData.clctnVolume),
     seedlotComment: collectionData.seedlotComment ?? '',
     coneCollectionMethodCodes: collectionData.coneCollectionMethodCodes ?? []
   });
@@ -200,12 +200,9 @@ export const verifyBClassCollectionStepCompleteness = (
     || !collectionData.becSubzone.value.code) {
     return false;
   }
-  if (isBecVariantRequired(
-    becCatalogue,
-    collectionData.becZone.value.code,
-    collectionData.becSubzone.value.code
-  ) && !collectionData.becVariant.value.code) {
-    return false;
-  }
-  return true;
+  return !(isBecVariantRequired(
+      becCatalogue,
+      collectionData.becZone.value.code,
+      collectionData.becSubzone.value.code
+  ) && !collectionData.becVariant.value.code);
 };
