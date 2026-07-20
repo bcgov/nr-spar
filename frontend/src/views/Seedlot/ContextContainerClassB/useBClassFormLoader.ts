@@ -163,10 +163,6 @@ export const useBClassFormLoader = ({
       return;
     }
 
-    if (seedlotQuery.error instanceof AxiosError && seedlotQuery.error.response?.status === 404) {
-      return;
-    }
-
     if (editable && !draftSettled) {
       setLoadState({ status: 'loading' });
       return;
