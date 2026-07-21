@@ -10,7 +10,7 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
-import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import SeedlotRegWizardContext from '../../../contexts/SeedlotRegWizardContext';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
@@ -56,7 +56,7 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     defaultCode,
     isFormSubmitted,
     seedlotNumber
-  } = useContext(ClassAContext);
+  } = useContext(SeedlotRegWizardContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
   const [originalSeedQty, setOriginalSeedQty] = useState<number>(0);
@@ -97,7 +97,6 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     queryKey: ['funding-sources'],
     queryFn: getFundingSources,
     select: (data) => getMultiOptList(data),
-    enabled: !isFormSubmitted,
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS
   });

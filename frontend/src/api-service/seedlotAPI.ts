@@ -2,6 +2,7 @@ import RevisionCountDto from '../types/RevisionCountDto';
 import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
 import {
   RichSeedlotType, SeedlotAClassFullResponseType, SeedlotAClassSubmitType,
+  SeedlotBClassFullResponseType, SeedlotBClassProgressPayloadType, SeedlotBClassSubmitType,
   SeedlotCreateResponseType, SeedlotProgressPayloadType, SeedlotsReturnType
 } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
@@ -71,6 +72,34 @@ export const getAClassSeedlotDraft = (seedlotNumber: string) => {
 export const getAClassSeedlotFullForm = (seedlotNumber: string) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-full-form`;
   return api.get(url).then((res) => res.data as SeedlotAClassFullResponseType);
+};
+
+export const getBClassSeedlotDraft = (seedlotNumber: string) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/b-class-form-progress`;
+  return api.get(url);
+};
+
+export const putBClassSeedlotProgress = (
+  seedlotNumber: string,
+  payload: SeedlotBClassProgressPayloadType
+) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/b-class-form-progress`;
+  return api.put(url, payload).then((res): RevisionCountDto => res.data);
+};
+
+export const putBClassSeedlot = (seedlotNumber: string, payload: SeedlotBClassSubmitType) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/b-class-submission`;
+  return api.put(url, payload);
+};
+
+export const getBClassSeedlotProgressStatus = (seedlotNumber: string) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/b-class-form-progress/status`;
+  return api.get(url);
+};
+
+export const getBClassSeedlotFullForm = (seedlotNumber: string) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/b-class-full-form`;
+  return api.get(url).then((res) => res.data as SeedlotBClassFullResponseType);
 };
 
 export const getSeedlotFromOracleDbBySeedlotNumber = (seedlotNumber: string) => {

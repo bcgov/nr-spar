@@ -53,6 +53,16 @@ const ApiConfig = {
 
   facilityTypes: `${oracleServerHost}/api/facility-types`,
 
+  numberTreesCollected: `${oracleServerHost}/api/number-trees-collected`,
+
+  captureMethods: `${oracleServerHost}/api/capture-methods`,
+
+  becCatalogue: `${oracleServerHost}/api/bec-catalogue`,
+
+  orgUnitDistricts: `${oracleServerHost}/api/org-unit-districts`,
+
+  seedCoastAreas: `${oracleServerHost}/api/seed-coast-areas`,
+
   oracleOrchards: `${oracleServerHost}/api/orchards`,
 
   areaOfUseSpzList: `${oracleServerHost}/api/area-of-use/spz-list/vegetation-code`,

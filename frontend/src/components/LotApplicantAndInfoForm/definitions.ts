@@ -13,7 +13,7 @@ export type FormProps = {
   isSeedlot: boolean, // If it's not a seedlot then it's veglot
   isEdit: boolean,
   isReview?: boolean,
-  isBClass?: boolean,
+  geneticClass?: 'A' | 'B',
   seedlotFormData?: SeedlotRegFormType,
   setSeedlotFormData?: React.Dispatch<React.SetStateAction<SeedlotRegFormType>>
 }

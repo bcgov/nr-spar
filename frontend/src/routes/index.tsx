@@ -7,12 +7,14 @@ import { getStoredPath } from '../utils/PathUtils';
 import Dashboard from '../views/Dashboard/dashboard';
 import SeedlotDashboard from '../views/Seedlot/SeedlotDashboard';
 import CreateAClass from '../views/Seedlot/CreateAClass';
+import CreateBClass from '../views/Seedlot/CreateBClass';
 import EditAClassApplication from '../views/Seedlot/EditAClassApplication';
 import MySeedlots from '../views/Seedlot/MySeedlots';
 import SeedlotCreatedFeedback from '../views/Seedlot/SeedlotCreatedFeedback';
 import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
 import SeedlotReview from '../views/Seedlot/SeedlotReview';
 import SeedlotRegFormClassA from '../views/Seedlot/SeedlotRegFormClassA';
+import SeedlotRegFormClassB from '../views/Seedlot/SeedlotRegFormClassB';
 import ReviewSeedlots from '../views/Seedlot/ReviewSeedlots';
 import FourOhThree from '../views/ErrorViews/FourOhThree';
 import FavouriteActivities from '../views/CONSEP/FavouriteActivity';
@@ -56,6 +58,12 @@ const BrowserRoutes: Array<RouteObject> = [
     )
   },
   {
+    path: ROUTES.SEEDLOTS_B_CLASS_CREATION,
+    element: (
+      <CreateBClass />
+    )
+  },
+  {
     path: ROUTES.SEEDLOT_CREATION_SUCCESS,
     element: (
       <SeedlotCreatedFeedback />
@@ -71,6 +79,12 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.SEEDLOT_A_CLASS_REGISTRATION,
     element: (
       <SeedlotRegFormClassA />
+    )
+  },
+  {
+    path: ROUTES.SEEDLOT_B_CLASS_REGISTRATION,
+    element: (
+      <SeedlotRegFormClassB />
     )
   },
   {

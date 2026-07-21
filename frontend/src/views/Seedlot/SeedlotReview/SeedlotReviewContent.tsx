@@ -23,7 +23,7 @@ import ErrorToast from '../../../components/Toast/ErrorToast';
 import ApplicantAndSeedlotRead from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Read';
 import ApplicantAndSeedlotEdit from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Edit';
 import { SeedlotPatchPayloadType, SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
-import { InitialSeedlotRegFormData } from '../CreateAClass/constants';
+import { InitialAClassSeedlotRegFormData } from '../CreateSeedlotClass/constants';
 import CollectionReviewRead from '../../../components/SeedlotReviewSteps/Collection/Read';
 import CollectionReviewEdit from '../../../components/SeedlotReviewSteps/Collection/Edit';
 import OwnershipReviewRead from '../../../components/SeedlotReviewSteps/Ownership/Read';
@@ -53,7 +53,7 @@ import { GeneticTrait } from '../../../types/PtCalcTypes';
 import { getSeedlotBreadcrumbs } from '../../../utils/BreadcrumbUtils';
 
 import ClassAContext from '../ContextContainerClassA/context';
-import { validateRegForm } from '../CreateAClass/utils';
+import { validateRegForm } from '../CreateSeedlotClass/utils';
 import {
   getSeedlotPayload,
   initOwnershipState,
@@ -136,7 +136,7 @@ const SeedlotReviewContent = () => {
   const [
     applicantData,
     setApplicantData
-  ] = useState<SeedlotRegFormType>(InitialSeedlotRegFormData);
+  ] = useState<SeedlotRegFormType>(InitialAClassSeedlotRegFormData);
 
   const {
     allStepData,

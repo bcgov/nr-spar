@@ -12,7 +12,7 @@ import {
 import Subtitle from '../../Subtitle';
 import ScrollToTop from '../../ScrollToTop';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
-import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import SeedlotRegWizardContext from '../../../contexts/SeedlotRegWizardContext';
 import { now } from '../../../utils/DateUtils';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
@@ -38,7 +38,7 @@ const ExtractionAndStorage = (
     allStepData: { extractionStorageStep: state },
     setStepData,
     isFormSubmitted
-  } = useContext(ClassAContext);
+  } = useContext(SeedlotRegWizardContext);
 
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
