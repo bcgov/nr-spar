@@ -7,9 +7,6 @@ import {
   initBClassCollectionState,
   initBClassCollectionStateFromDto
 } from '../../../components/SeedlotRegistrationSteps/BClassCollectionStep/utils';
-import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
-import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
-import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import {
   BClassCollectionFormSubmitType,
   RichSeedlotType,
@@ -41,7 +38,7 @@ import {
   BClassAllStepData,
   BClassProgressIndicatorConfig
 } from './definitions';
-import { initialProgressConfig, stepMap } from './constants';
+import { stepMap } from './constants';
 
 export const initProgressBar = (
   currentStep: number,
