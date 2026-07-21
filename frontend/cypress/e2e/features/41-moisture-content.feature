@@ -49,19 +49,19 @@ Feature: CONSEP manual moisture content activity summary
     Then the activity summary result value should equal the calculate-average API response
 
   Scenario: Moisture content start and end dates can be set
-    When I set the "moisture content" end date to "2025/06/11"
-    And I set the "moisture content" start date to "2025/06/10"
+    When I set the "moisture content" start date to "10"
+    And I set the "moisture content" end date to "11"
 
   Scenario: Setting start date after end date shows validation error
-    When I set the "moisture content" end date to "2025/06/11"
-    And I set the "moisture content" start date to "2025/06/15"
+    When I set the "moisture content" end date to "11"
+    And I set the "moisture content" start date to "15"
     Then the date range should show a validation error
 
   Scenario: Select category dropdown
-    When I select the "purity content" page category "QA"
-    Then the "purity content" page category should be "QA"
+    When I select the "moisture content" page category "QA"
+    Then the "moisture content" page category should be "QA"
 
   Scenario: Comment box accepts text input
-    Then the comment input should have placeholder
+    Then the "moisture content" comment input should have placeholder
     When I enter the "moisture content" page comment
     Then the "moisture content" page comment should be visible

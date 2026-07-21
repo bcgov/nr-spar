@@ -1,6 +1,7 @@
 import { Then, When, DataTable } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
 import { MoistureContentType, PurityContentType } from '../../definitions';
+import { TYPE_DELAY } from '../../constants';
 
 let moistureData: MoistureContentType;
 let purityData: PurityContentType;
@@ -31,6 +32,17 @@ const CONSEP_PAGE_IDS: Record<string, { startDate: string; endDate: string; comm
     endDate: '#purity-content-end-date-picker',
     comments: '#purity-content-comments',
     category: '#purity-content-category'
+  }
+};
+
+const getCommentPlaceholder = (page: string): string => {
+  switch (page) {
+    case 'moisture content':
+      return moistureData.mc.commentPlaceholder;
+    case 'purity content':
+      return purityData.pc.commentPlaceholder;
+    default:
+      return '';
   }
 };
 
@@ -90,18 +102,28 @@ Then('the activity summary should match the seedlot replicate info', () => {
   });
 });
 
-When('I set the {string} start date to {string}', (page: string, dateValue: string) => {
+When('I set the {string} start date to {string}', (page: string, dayValue: string) => {
   cy.get(CONSEP_PAGE_IDS[page].startDate)
-    .clear()
-    .type(dateValue)
-    .blur();
+    .click();
+
+  cy.get('.flatpickr-calendar.open')
+    .find('.flatpickr-days')
+    .find('span.flatpickr-day')
+    .filter(':visible')
+    .contains(dayValue)
+    .click({ force: true });
 });
 
-When('I set the {string} end date to {string}', (page: string, dateValue: string) => {
+When('I set the {string} end date to {string}', (page: string, dayValue: string) => {
   cy.get(CONSEP_PAGE_IDS[page].endDate)
-    .clear()
-    .type(dateValue)
-    .blur();
+    .click();
+
+  cy.get('.flatpickr-calendar.open')
+    .find('.flatpickr-days')
+    .find('span.flatpickr-day')
+    .filter(':visible')
+    .contains(dayValue)
+    .click({ force: true });
 });
 
 Then('the date range should show a validation error', () => {
@@ -120,18 +142,19 @@ When('I select the {string} page category {string}', (page: string, category: st
 
 Then('the {string} page category should be {string}', (page: string, category: string) => {
   cy.get(CONSEP_PAGE_IDS[page].category)
-    .should('contain.text', category);
+    .should('contain.value', category);
 });
 
-Then('the comment input should have placeholder', () => {
-  cy.get(CONSEP_PAGE_IDS['purity content'].comments)
-    .should('have.attr', 'placeholder', moistureData.mc.commentPlaceholder);
+Then('the {string} comment input should have placeholder', (page: string) => {
+  cy.get(CONSEP_PAGE_IDS[page].comments)
+    .should('have.attr', 'placeholder', getCommentPlaceholder(page));
 });
 
 When('I enter the {string} page comment', (page: string) => {
   cy.get(CONSEP_PAGE_IDS[page].comments)
     .clear()
-    .type(moistureData.mc.testComment);
+    .type(moistureData.mc.testComment, { delay: TYPE_DELAY })
+    .blur();
 });
 
 Then('the {string} page comment should be visible', (page: string) => {
