@@ -16,7 +16,7 @@ Given('the purity content fixture is loaded', () => {
   });
 });
 
-Given('the purity seedlot replicate info fixture is loaded', () => {
+Given('the purity seedlot replicate info fixture is loaded for purity content', () => {
   cy.fixture('purity-seedlot-replicate-info').then((data: SeedlotReplicateInfoType) => {
     cy.wrap(data).as('seedlotData');
   });
@@ -37,7 +37,8 @@ Then('I can see the activity results table title for purity content', () => {
 Then('I can see the impurities section title', () => {
   cy.get('.consep-impurity-title')
     .find('h4')
-    .should('have.text', 'Impurities');
+    .should('have.text', 'Impurities')
+    .as('impurityTitle');
 });
 
 When('I add an impurity row for replicate {string}', (replicateNumber: string) => {
@@ -62,6 +63,8 @@ When('I select impurity type {string} for replicate {string} rank {string}', (
       cy.contains(`.${prefix}--list-box__menu-item__option`, impurityType)
         .click();
     });
+
+  cy.get('@impurityTitle').click();
 });
 
 Then('impurity rank {string} for replicate {string} should show type {string}', (
