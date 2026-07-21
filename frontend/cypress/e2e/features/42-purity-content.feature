@@ -55,6 +55,6 @@ Feature: CONSEP manual purity content screen
     Then the "purity content" page category should be "QA"
 
   Scenario: Comment box accepts text input
-    Then the comment input should have placeholder
+    Then the "purity content" comment input should have placeholder
     When I enter the "purity content" page comment
     Then the "purity content" page comment should be visible
