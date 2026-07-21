@@ -13,6 +13,7 @@ import MySeedlots from '../views/Seedlot/MySeedlots';
 import SeedlotCreatedFeedback from '../views/Seedlot/SeedlotCreatedFeedback';
 import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
 import SeedlotReview from '../views/Seedlot/SeedlotReview';
+import SeedlotReviewClassB from '../views/Seedlot/SeedlotReviewClassB';
 import SeedlotRegFormClassA from '../views/Seedlot/SeedlotRegFormClassA';
 import SeedlotRegFormClassB from '../views/Seedlot/SeedlotRegFormClassB';
 import ReviewSeedlots from '../views/Seedlot/ReviewSeedlots';
@@ -103,6 +104,12 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.SEEDLOT_A_CLASS_REVIEW,
     element: (
       <SeedlotReview />
+    )
+  },
+  {
+    path: ROUTES.SEEDLOT_B_CLASS_REVIEW,
+    element: (
+      <SeedlotReviewClassB />
     )
   },
   {

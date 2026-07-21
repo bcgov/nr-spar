@@ -316,6 +316,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         <Column>
           <TextInput
             id={state.latDeg.id}
+            labelText="Latitude degrees"
+            hideLabel
             placeholder={fieldsConfig.latLongSection.degreePlaceholder}
             value={state.latDeg.value}
             readOnly={readOnly}
@@ -327,6 +329,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         <Column>
           <TextInput
             id={state.latMin.id}
+            labelText="Latitude minutes"
+            hideLabel
             placeholder={fieldsConfig.latLongSection.minutePlaceholder}
             value={state.latMin.value}
             readOnly={readOnly}
@@ -338,6 +342,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         <Column>
           <TextInput
             id={state.latSec.id}
+            labelText="Latitude seconds"
+            hideLabel
             placeholder={fieldsConfig.latLongSection.secondPlaceholder}
             value={state.latSec.value}
             readOnly={readOnly}
@@ -363,6 +369,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         <Column>
           <TextInput
             id={state.longDeg.id}
+            labelText="Longitude degrees"
+            hideLabel
             placeholder={fieldsConfig.latLongSection.degreePlaceholder}
             value={state.longDeg.value}
             readOnly={readOnly}
@@ -374,6 +382,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         <Column>
           <TextInput
             id={state.longMin.id}
+            labelText="Longitude minutes"
+            hideLabel
             placeholder={fieldsConfig.latLongSection.minutePlaceholder}
             value={state.longMin.value}
             readOnly={readOnly}
@@ -385,6 +395,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         <Column>
           <TextInput
             id={state.longSec.id}
+            labelText="Longitude seconds"
+            hideLabel
             placeholder={fieldsConfig.latLongSection.secondPlaceholder}
             value={state.longSec.value}
             readOnly={readOnly}
