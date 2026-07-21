@@ -1,10 +1,10 @@
 {
-  "mc": {
+  "pc": {
     "title": "Purity for lot",
     "commentPlaceholder": "My comments about this activity",
     "testComment": "This is a test comment",
     "invalidDateErrorMsg": "Please enter a valid date",
-    "impurityBtn": "Add impurity",
+    "impurityBtn": "Add Impurities",
     "maxImpuritiesErrorMsg": "You can only add up to 10 impurities for each replicate."
   },
   "table": {
