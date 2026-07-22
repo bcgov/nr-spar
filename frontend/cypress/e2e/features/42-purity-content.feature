@@ -7,6 +7,7 @@ Feature: CONSEP manual purity content screen
     And the purity seedlot replicate info fixture is loaded for purity content
     When I visit "/consep/manual-purity-content/79082"
     Then the URL should contain "/consep/manual-purity-content/79082"
+    And the activity results table has loaded
 
   Scenario: Purity content page loads core headings
     Then I can see the purity content page title
@@ -42,8 +43,8 @@ Feature: CONSEP manual purity content screen
     And I should see the maximum impurity error for replicate "2"
 
   Scenario: Update date fields
-    When I set the "purity content" end date to "2025/06/11"
-    And I set the "purity content" start date to "2025/06/10"
+    When I set the "purity content" start date to "2025/06/10"
+    And I set the "purity content" end date to "2025/06/11"
 
   Scenario: Setting start date after end date shows validation error
     When I set the "purity content" end date to "2025/06/11"
@@ -51,8 +52,8 @@ Feature: CONSEP manual purity content screen
     Then the date range should show a validation error
 
   Scenario: Select category dropdown
-    When I select the "purity content" page category "QA"
-    Then the "purity content" page category should be "QA"
+    When I select the "purity content" page category "Quality assurance"
+    Then the "purity content" page category should be "Quality assurance"
 
   Scenario: Comment box accepts text input
     Then the "purity content" comment input should have placeholder

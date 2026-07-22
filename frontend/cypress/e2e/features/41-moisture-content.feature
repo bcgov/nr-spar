@@ -7,6 +7,7 @@ Feature: CONSEP manual moisture content activity summary
     And the moisture seedlot replicate info fixture is loaded
     When I visit "/consep/manual-moisture-content/514330"
     Then the URL should contain "/consep/manual-moisture-content/514330"
+    And the activity results table has loaded
 
   Scenario: Manual moisture content page loads core headings
     Then I can see the moisture content page title
@@ -49,12 +50,12 @@ Feature: CONSEP manual moisture content activity summary
     Then the activity summary result value should equal the calculate-average API response
 
   Scenario: Moisture content start and end dates can be set
-    When I set the "moisture content" start date to "10"
-    And I set the "moisture content" end date to "11"
+    When I set the "moisture content" start date to "2025/06/10"
+    And I set the "moisture content" end date to "2025/06/11"
 
   Scenario: Setting start date after end date shows validation error
-    When I set the "moisture content" end date to "11"
-    And I set the "moisture content" start date to "15"
+    When I set the "moisture content" end date to "2025/06/11"
+    And I set the "moisture content" start date to "2025/06/15"
     Then the date range should show a validation error
 
   Scenario: Select category dropdown
