@@ -68,5 +68,14 @@ declare namespace Cypress {
      * cy.waitForTableData('.my-table')
      */
     waitForTableData(tableSelector: string, timeout?: number): void
+    /**
+     * Custom command to set the date on a flatpickr element.
+     *
+     * @param selector {string} - The selector for the flatpickr element
+     * @param dateValue {string} - The date value in the format 'YYYY-MM-DD'
+     * @example
+     * cy.setFlatpickrDate('#menu-date', '2023-01-01')
+     */
+    setFlatpickrDate(selector: string, dateValue: string): void
   }
 }

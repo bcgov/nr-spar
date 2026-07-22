@@ -186,3 +186,22 @@ Cypress.Commands.add('waitForTableData', (tableSelector: string, timeout: number
     .find('td:nth-child(2) input', { timeout })
     .should(($input) => expect($input.val()).to.not.be.empty);
 });
+
+Cypress.Commands.add('setFlatpickrDate', (selector: string, dateValue: string) => {
+  cy.get(`${selector}.flatpickr-input`)
+    .should('exist')
+    .then(($dt) => {
+      const element = $dt.get(0) as HTMLElement;
+      // eslint-disable-next-line no-underscore-dangle
+      const flatpickrApi = (element as Record<string, any>)._flatpickr;
+
+      if (flatpickrApi) {
+        flatpickrApi.setDate(dateValue, true, 'Y/m/d');
+      }
+
+      cy.wrap($dt)
+        .trigger('input')
+        .trigger('change')
+        .trigger('blur');
+    });
+});
