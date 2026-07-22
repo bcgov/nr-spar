@@ -37,8 +37,7 @@ Then('I can see the activity results table title for purity content', () => {
 Then('I can see the impurities section title', () => {
   cy.get('.consep-impurity-title')
     .find('h4')
-    .should('have.text', 'Impurities')
-    .as('impurityTitle');
+    .should('have.text', 'Impurities');
 });
 
 When('I add an impurity row for replicate {string}', (replicateNumber: string) => {
@@ -64,7 +63,9 @@ When('I select impurity type {string} for replicate {string} rank {string}', (
         .click();
     });
 
-  cy.get('@impurityTitle').click();
+  cy.get('.consep-impurity-title')
+    .find('h4')
+    .click();
 });
 
 Then('impurity rank {string} for replicate {string} should show type {string}', (
