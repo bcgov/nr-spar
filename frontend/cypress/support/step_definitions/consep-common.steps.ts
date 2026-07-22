@@ -46,6 +46,10 @@ const getCommentPlaceholder = (page: string): string => {
   }
 };
 
+Then('the activity results table has loaded', () => {
+  cy.waitForTableData('.activity-result-container');
+});
+
 Then('the activity results table should show these columns:', (dataTable: DataTable) => {
   const expectedColumns = dataTable.raw().flat().filter(Boolean);
 
@@ -102,28 +106,12 @@ Then('the activity summary should match the seedlot replicate info', () => {
   });
 });
 
-When('I set the {string} start date to {string}', (page: string, dayValue: string) => {
-  cy.get(CONSEP_PAGE_IDS[page].startDate)
-    .click();
-
-  cy.get('.flatpickr-calendar.open')
-    .find('.flatpickr-days')
-    .find('span.flatpickr-day')
-    .filter(':visible')
-    .contains(dayValue)
-    .click({ force: true });
+When('I set the {string} start date to {string}', (page: string, dateValue: string) => {
+  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue);
 });
 
-When('I set the {string} end date to {string}', (page: string, dayValue: string) => {
-  cy.get(CONSEP_PAGE_IDS[page].endDate)
-    .click();
-
-  cy.get('.flatpickr-calendar.open')
-    .find('.flatpickr-days')
-    .find('span.flatpickr-day')
-    .filter(':visible')
-    .contains(dayValue)
-    .click({ force: true });
+When('I set the {string} end date to {string}', (page: string, dateValue: string) => {
+  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].endDate, dateValue);
 });
 
 Then('the date range should show a validation error', () => {
