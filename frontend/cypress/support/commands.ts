@@ -198,10 +198,5 @@ Cypress.Commands.add('setFlatpickrDate', (selector: string, dateValue: string) =
       if (flatpickrApi) {
         flatpickrApi.setDate(dateValue, true, 'Y/m/d');
       }
-
-      cy.wrap($dt)
-        .trigger('input')
-        .trigger('change')
-        .trigger('blur');
     });
 });
