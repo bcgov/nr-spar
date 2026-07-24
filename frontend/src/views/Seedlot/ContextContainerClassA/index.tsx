@@ -521,7 +521,7 @@ const ContextContainerClassA = ({ children }: props) => {
   const submitSeedlot = useMutation({
     mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
     onSuccess: async () => {
-      await queryClient.removeQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      queryClient.removeQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
       navigate({
         pathname: addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''),
