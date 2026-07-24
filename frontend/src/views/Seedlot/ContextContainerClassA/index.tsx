@@ -769,7 +769,16 @@ const ContextContainerClassA = ({ children }: props) => {
   const [ctrlGwInfoItems, setCtrlGwInfoItems] = useState<boolean>(true);
 
   useEffect(() => {
-    if (ctrlGwInfoItems && Object.keys(genWorthInfoItems).length !== 0) {
+    // Wait for the calculated values to arrive before filling the gen worth info items.
+    // configHeaderOpt seeds genWorthInfoItems with placeholder values as soon as the species
+    // resolves, which happens before the full-form query populates calculatedValues. Consuming
+    // the one-shot ctrlGwInfoItems flag too early would lock in the placeholders and leave the
+    // read-only genetic worth values blank on submitted/review screens.
+    if (
+      ctrlGwInfoItems
+      && calculatedValues.length !== 0
+      && Object.keys(genWorthInfoItems).length !== 0
+    ) {
       fillGwInfoItems();
       setCtrlGwInfoItems(false);
     }

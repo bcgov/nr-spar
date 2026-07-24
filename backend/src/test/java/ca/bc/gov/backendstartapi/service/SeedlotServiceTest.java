@@ -969,6 +969,31 @@ class SeedlotServiceTest {
   }
 
   @Test
+  @DisplayName("getAclassSeedlotFormInfo recomputes meanGeomSeedlot from parent tree data")
+  void getAclassSeedlotFormInfo_recomputesMeanGeomSeedlot() {
+    String seedlotNumber = "0000017";
+    Seedlot seedlotEntity = new Seedlot(seedlotNumber);
+    // Stored collection coords that must be overridden by the recomputed orchard mean.
+    seedlotEntity.setCollectionLatitudeDeg(49);
+    seedlotEntity.setCollectionLongitudeDeg(124);
+
+    GeospatialRespondDto recomputed =
+        new GeospatialRespondDto(50, 8, 0, 118, 46, 0, null, null, 1090);
+    when(parentTreeService.calcSeedlotMeanGeospatial(any())).thenReturn(recomputed);
+
+    setupAclassFormMinMocks(seedlotNumber, seedlotEntity, List.of());
+
+    SeedlotAclassFormDto result = seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNotNull(result.meanGeomSeedlot());
+    Assertions.assertEquals(50, result.meanGeomSeedlot().getMeanLatitudeDegree());
+    Assertions.assertEquals(8, result.meanGeomSeedlot().getMeanLatitudeMinute());
+    Assertions.assertEquals(118, result.meanGeomSeedlot().getMeanLongitudeDegree());
+    Assertions.assertEquals(46, result.meanGeomSeedlot().getMeanLongitudeMinute());
+    Assertions.assertEquals(1090, result.meanGeomSeedlot().getMeanElevation());
+  }
+
+  @Test
   @DisplayName("getAclassSeedlotFormInfo with null latitude degree returns null meanGeomSeedlot")
   void getAclassSeedlotFormInfo_withNullLatDeg_returnsNullMeanGeomSeedlot() {
     String seedlotNumber = "0000012";
