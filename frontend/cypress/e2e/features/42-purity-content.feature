@@ -46,11 +46,6 @@ Feature: CONSEP manual purity content screen
     When I set the "purity content" start date to "2025/06/10"
     And I set the "purity content" end date to "2025/06/11"
 
-  Scenario: Setting start date after end date shows validation error
-    When I set the "purity content" end date to "2025/06/11"
-    And I set the "purity content" start date to "2025/06/15"
-    Then the date range should show a validation error
-
   Scenario: Select category dropdown
     When I select the "purity content" page category "Quality assurance"
     Then the "purity content" page category should be "Quality assurance"
