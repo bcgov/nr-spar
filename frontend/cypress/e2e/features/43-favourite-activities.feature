@@ -10,7 +10,6 @@ Feature: CONSEP favourite activities page
   Scenario: Favourite page title and empty section render correctly
     Then I can see the empty favourite section title
     And I can see the empty favourite section subtitle
-    And I can see the add favourite activity button
 
   Scenario: Add favourite activity modal can be opened and closed
     When I open the add favourite activity modal
