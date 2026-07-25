@@ -55,8 +55,7 @@ Feature: CONSEP manual moisture content activity summary
 
   Scenario: Setting start date after end date shows validation error
     When I set the "moisture content" end date to "2025/06/11"
-    And I set the "moisture content" start date to "2025/06/15"
-    Then the date range should show a validation error
+    And I set the "moisture content" start date to "2025/06/15", expect a date validation error
 
   Scenario: Select category dropdown
     When I select the "moisture content" page category "QA"
