@@ -61,6 +61,15 @@ export type PurityContentType = {
   }
 };
 
+export type FavouriteActivitiesType = {
+  fa: {
+    title: string;
+    subtitle: string;
+    favouriteActivitiesBtn: string;
+  };
+  table: Record<string, string>;
+};
+
 export type ReplicateType = {
   riaKey: number;
   replicateNumber: number;
