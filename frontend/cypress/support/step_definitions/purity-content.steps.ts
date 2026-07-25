@@ -77,10 +77,14 @@ Then('impurity rank {string} for replicate {string} should show type {string}', 
     .contains('h5', `Replicate ${replicateNumber}`)
     .parent()
     .within(() => {
-      cy.get(`#impurity-rank-${rank}-`)
+      // Check that the impurity rank input has the correct value
+      cy.get(`#impurity-rank-${rank}-${impurityType}`)
         .should('contain.value', rank);
+
+      // Check that the impurity type input has the correct value
       cy.get('.consep-impurity-combobox')
-        .should('contain.text', impurityType);
+        .find('input')
+        .should('contain.value', impurityType);
     });
 });
 
