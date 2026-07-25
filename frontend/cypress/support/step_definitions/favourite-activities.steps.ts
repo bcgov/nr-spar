@@ -7,6 +7,7 @@ import {
 import prefix from '../../../src/styles/classPrefix';
 import { FavouriteActivitiesType } from '../../definitions';
 import { FavouriteMockItem, mockFavouriteActivitiesApi } from '../mockApiConsep';
+import { loadFixtureAndAlias } from '../helpers/fixture-loader';
 
 let favouriteContent: FavouriteActivitiesType;
 
@@ -64,9 +65,8 @@ Given('favourite activities API responses are mocked', () => {
 });
 
 Given('the favourite activities content fixture is loaded', () => {
-  cy.fixture('favourite-activities-content').then((data: FavouriteActivitiesType) => {
+  loadFixtureAndAlias<FavouriteActivitiesType>('favourite-activities-content', 'favouriteContent', (data) => {
     favouriteContent = data;
-    cy.wrap(data).as('favouriteContent');
   });
 });
 

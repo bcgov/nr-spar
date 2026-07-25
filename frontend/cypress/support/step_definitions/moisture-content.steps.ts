@@ -1,6 +1,7 @@
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import { mockMoistureContentApi } from '../mockApiConsep';
 import { MoistureContentType, SeedlotReplicateInfoType } from '../../definitions';
+import { loadFixtureAndAlias } from '../helpers/fixture-loader';
 
 let mcData: MoistureContentType;
 
@@ -9,16 +10,13 @@ Given('moisture content API responses are mocked', () => {
 });
 
 Given('the moisture content fixture is loaded', () => {
-  cy.fixture('moisture-content').then((data: MoistureContentType) => {
+  loadFixtureAndAlias<MoistureContentType>('moisture-content', 'mcData', (data) => {
     mcData = data;
-    cy.wrap(data).as('mcData');
   });
 });
 
 Given('the moisture seedlot replicate info fixture is loaded', () => {
-  cy.fixture('moisture-seedlot-replicate-info').then((data: SeedlotReplicateInfoType) => {
-    cy.wrap(data).as('seedlotData');
-  });
+  loadFixtureAndAlias<SeedlotReplicateInfoType>('moisture-seedlot-replicate-info', 'seedlotData');
 });
 
 Then('I can see the moisture content page title', () => {

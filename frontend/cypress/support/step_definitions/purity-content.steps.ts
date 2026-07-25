@@ -2,6 +2,7 @@ import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
 import { mockPurityContentApi } from '../mockApiConsep';
 import { PurityContentType, SeedlotReplicateInfoType } from '../../definitions';
+import { loadFixtureAndAlias } from '../helpers/fixture-loader';
 
 let purityData: PurityContentType;
 
@@ -10,16 +11,13 @@ Given('purity content API responses are mocked', () => {
 });
 
 Given('the purity content fixture is loaded', () => {
-  cy.fixture('purity-content').then((data: PurityContentType) => {
+  loadFixtureAndAlias<PurityContentType>('purity-content', 'purityData', (data) => {
     purityData = data;
-    cy.wrap(data).as('purityData');
   });
 });
 
 Given('the purity seedlot replicate info fixture is loaded for purity content', () => {
-  cy.fixture('purity-seedlot-replicate-info').then((data: SeedlotReplicateInfoType) => {
-    cy.wrap(data).as('seedlotData');
-  });
+  loadFixtureAndAlias<SeedlotReplicateInfoType>('purity-seedlot-replicate-info', 'seedlotData');
 });
 
 Then('I can see the purity content page title', () => {
