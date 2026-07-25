@@ -76,6 +76,6 @@ declare namespace Cypress {
      * @example
      * cy.setFlatpickrDate('#menu-date', '2023-01-01')
      */
-    setFlatpickrDate(selector: string, dateValue: string): void
+    setFlatpickrDate(selector: string, dateValue: string): Chainable<JQuery<HTMLElement>>
   }
 }
