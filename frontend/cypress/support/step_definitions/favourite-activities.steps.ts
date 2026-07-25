@@ -1,18 +1,17 @@
-import { Given, Then, When, DataTable } from '@badeball/cypress-cucumber-preprocessor';
+import {
+  Given,
+  Then,
+  When,
+  DataTable
+} from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
 import { FavouriteActivitiesType } from '../../definitions';
+import { FavouriteMockItem, mockFavouriteActivitiesApi } from '../mockApiConsep';
 
 let favouriteContent: FavouriteActivitiesType;
-type FavItem = {
-  id: number;
-  activity: string;
-  highlighted: boolean;
-};
 
-let favStore: FavItem[] = [];
+let favStore: FavouriteMockItem[] = [];
 let nextId = 1;
-
-const apiPath = '**/api/favourite-activities**';
 
 const getFixtureRowNames = (): string[] => {
   if (!favouriteContent) {
@@ -37,13 +36,14 @@ const toActivityKey = (header: string): string => {
 
 const addActivityByHeader = (header: string) => {
   if (!getFixtureRowNames().includes(header)) {
-    throw new Error('Header is not in favourite-activities-content fixture: ' + header);
+    throw new Error(`Header is not in favourite-activities-content fixture: ${header}`);
   }
 
   const key = toActivityKey(header);
 
   if (!favStore.some((x) => x.activity === key) && favStore.length < 12) {
-    favStore.push({ id: nextId++, activity: key, highlighted: false });
+    favStore.push({ id: nextId, activity: key, highlighted: false });
+    nextId += 1;
   }
 };
 
@@ -51,39 +51,16 @@ Given('favourite activities API responses are mocked', () => {
   favStore = [];
   nextId = 1;
 
-  cy.intercept('GET', apiPath, (req) => {
-    req.reply({
-      statusCode: 200,
-      body: favStore
-    });
-  }).as('GET_favourite_activities');
-
-  cy.intercept('POST', apiPath, (req) => {
-    const body = (req.body ?? []) as Array<{ activity: string }>;
-    body.forEach((item) => {
-      if (!favStore.some((x) => x.activity === item.activity) && favStore.length < 12) {
-        favStore.push({
-          id: nextId++,
-          activity: item.activity,
-          highlighted: false
-        });
-      }
-    });
-
-    req.reply({ statusCode: 200, body: body });
-  }).as('POST_favourite_activities');
-
-  cy.intercept('PATCH', '**/api/favourite-activities/*', (req) => {
-    const id = Number(req.url.split('/').pop());
-    favStore = favStore.map((x) => (x.id === id ? { ...x, highlighted: !x.highlighted } : x));
-    req.reply({ statusCode: 200, body: {} });
-  }).as('PATCH_favourite_activities');
-
-  cy.intercept('DELETE', '**/api/favourite-activities/*', (req) => {
-    const id = Number(req.url.split('/').pop());
-    favStore = favStore.filter((x) => x.id !== id);
-    req.reply({ statusCode: 200, body: {} });
-  }).as('DELETE_favourite_activities');
+  mockFavouriteActivitiesApi({
+    getFavStore: () => favStore,
+    setFavStore: (items) => {
+      favStore = items;
+    },
+    getNextId: () => nextId,
+    setNextId: (id) => {
+      nextId = id;
+    }
+  });
 });
 
 Given('the favourite activities content fixture is loaded', () => {
@@ -107,25 +84,22 @@ Then('I can see the empty favourite section subtitle', () => {
   cy.contains('.consep-fav-non-content-subtitle', favouriteContent.fa.subtitle).should('be.visible');
 });
 
-Then('I can see the add favourite activity button', () => {
-  cy.contains('button.consep-fav-non-content-btn', favouriteContent.fa.favouriteActivitiesBtn).should('be.visible');
-});
-
 When('I open the add favourite activity modal', () => {
-  cy.contains('button', /Add favourite activity|Add favourite/).click();
+  cy.contains('button.consep-fav-non-content-btn', favouriteContent.fa.favouriteActivitiesBtn).click();
+  cy.get('[role="dialog"][aria-label="Add favourite activity"]').as('favouriteActivityModal');
 });
 
 Then('I can see the favourite activity modal', () => {
-  cy.get('.favourite-activity-modal').should('be.visible');
-  cy.contains('h2', 'Add favourite activity').should('be.visible');
+  cy.get('@favouriteActivityModal').should('be.visible');
+  cy.get('@favouriteActivityModal').contains('h2', 'Add favourite activity').should('be.visible');
 });
 
 When('I close the favourite activity modal', () => {
-  cy.contains('button', 'Cancel').click();
+  cy.get('@favouriteActivityModal').contains('button', 'Cancel').click();
 });
 
 Then('I should not see the favourite activity modal', () => {
-  cy.get('.favourite-activity-modal').should('not.exist');
+  cy.get('@favouriteActivityModal').should('not.be.visible');
 });
 
 When('I search favourite activities for {string}', (term: string) => {
@@ -165,7 +139,7 @@ When('I highlight favourite card {string}', (activityName: string) => {
     .find('button.fav-card-overflow')
     .click();
 
-  cy.get('.fav-card-menu-options, .' + prefix + '--overflow-menu-options')
+  cy.get(`.fav-card-menu-options, .${prefix}--overflow-menu-options`)
     .contains('Highlight shortcut')
     .click();
 
@@ -183,7 +157,7 @@ When('I delete favourite card {string}', (activityName: string) => {
     .find('button.fav-card-overflow')
     .click();
 
-  cy.get('.fav-card-menu-options, .' + prefix + '--overflow-menu-options')
+  cy.get(`.fav-card-menu-options, .${prefix}--overflow-menu-options`)
     .contains('Delete shortcut')
     .click();
 
@@ -192,6 +166,17 @@ When('I delete favourite card {string}', (activityName: string) => {
 });
 
 When('I select the first 12 favourite activities', () => {
+  cy.get('.bx--pagination__left')
+    .scrollIntoView()
+    .as('paginationLeft')
+    .within(() => {
+      cy.get('.bx--select-input').select('15');
+    });
+
+  cy.get('@paginationLeft')
+    .contains('.bx--pagination__items-count', '1–15 of 48 items')
+    .should('exist');
+
   getFixtureRowNames().slice(0, 12).forEach((activityName) => {
     cy.contains(`.${prefix}--data-table tbody tr`, activityName).click();
   });
