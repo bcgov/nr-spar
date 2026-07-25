@@ -114,10 +114,14 @@ When('I set the {string} end date to {string}', (page: string, dateValue: string
   cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].endDate, dateValue);
 });
 
-Then('the date range should show a validation error', () => {
-  cy.get(`.${prefix}--date-picker-container`)
-    .find(`.${prefix}--form-requirement`)
-    .should('contain.text', moistureData.mc.invalidDateErrorMsg);
+When('I set the {string} start date to {string}, expect a date validation error', (page: string, dateValue: string) => {
+  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue)
+    .then(() => {
+      cy.contains(
+        `.${prefix}--form-requirement`,
+        moistureData.mc.invalidDateErrorMsg
+      ).should('be.visible');
+    });
 });
 
 When('I select the {string} page category {string}', (page: string, category: string) => {
