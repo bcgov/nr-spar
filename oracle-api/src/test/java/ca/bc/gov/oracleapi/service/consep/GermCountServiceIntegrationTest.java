@@ -8,6 +8,7 @@ import ca.bc.gov.oracleapi.dto.consep.GermCountUpsertRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateAbnormalDto;
 import ca.bc.gov.oracleapi.dto.consep.TestRepGermFormDto;
 import ca.bc.gov.oracleapi.mapper.GermCountMapper;
+import ca.bc.gov.oracleapi.mapper.TestRepGermFormMapper;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRepGermRepository;
@@ -68,8 +69,10 @@ class GermCountServiceIntegrationTest {
   @BeforeEach
   void setUp() {
     GermCountMapper mapper = Mappers.getMapper(GermCountMapper.class);
+    TestRepGermFormMapper repFormMapper = Mappers.getMapper(TestRepGermFormMapper.class);
     germCountService = new GermCountService(
-        germCountRepository, mapper, dailyAbnormalRepository, testRepGermRepository);
+        germCountRepository, mapper, repFormMapper,
+        dailyAbnormalRepository, testRepGermRepository);
     ReflectionTestUtils.setField(germCountService, "entityManager", entityManager);
   }
 

@@ -12,6 +12,7 @@ import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.mapper.GermCountMapper;
+import ca.bc.gov.oracleapi.mapper.TestRepGermFormMapper;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRepGermRepository;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +41,12 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class GermCountService {
 
+  /** Number of numbered day slots the CNS_T_GERM_COUNT row carries. */
+  static final int MAX_SLOTS = 13;
+
   private final GermCountRepository germCountRepository;
   private final GermCountMapper mapper;
+  private final TestRepGermFormMapper testRepGermFormMapper;
   private final DailyAbnormalRepository dailyAbnormalRepository;
   private final TestRepGermRepository testRepGermRepository;
 
@@ -75,36 +81,25 @@ public class GermCountService {
    * Insert or update the daily germination counts for one test (AC1, AC2, AC4).
    *
    * <p>This is a full-replacement upsert: the request must carry the complete set of days for the
-   * test (not a delta). Cumulative germination and the rep null-to-zero normalization are
-   * computed only from the submitted days, so callers must resend the full day grid on update.
+   * test (not a delta). Every one of the {@value #MAX_SLOTS} slots is rewritten on each call — a
+   * slot the request omits, or submits without a count date, is cleared, and any abnormal rows
+   * that its surrogate key owned are deleted. Cumulative germination and the rep null-to-zero
+   * normalization are therefore computed over the submitted days alone.
    *
    * @param riaSkey       the test key (path)
    * @param request       days + replicates payload
    * @param requestUserId the authenticated user id, for audit columns
    * @return the saved germ count DTO
    */
-  @Transactional(rollbackFor = ResponseStatusException.class)
+  @Transactional
   public GermCountDto upsertGermCounts(
       BigDecimal riaSkey, GermCountUpsertRequestDto request, String requestUserId) {
-    if (riaSkey == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RIA_SKEY cannot be null");
-    }
-    if (request == null || request.days() == null || request.days().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one day is required");
-    }
-    if (request.replicates() == null || request.replicates().isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "At least one replicate is required");
-    }
-
     List<DayGermCountDto> days = new ArrayList<>(request.days());
     days.sort(Comparator.comparingInt(DayGermCountDto::slotIndex));
-    validateSlots(days);
+    validateNoDuplicateSlots(days);
     validateAscendingDates(days);
-    validateAbnormalRanges(days);
     validateSeedTotals(days, request.replicates());
 
-    LocalDateTime now = LocalDateTime.now();
     GermCountEntity entity;
     if (germCountRepository.existsById(riaSkey)) {
       if (request.updateTimestamp() == null) {
@@ -117,23 +112,28 @@ public class GermCountService {
         throw new ResponseStatusException(
             HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
       }
+      // The guard above already stamped update_timestamp with the DB clock and cleared the
+      // persistence context, so this re-read carries the authoritative new lock value.
       entity = germCountRepository.findById(riaSkey).orElseThrow(() ->
           new ResponseStatusException(
               HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry"));
     } else {
       entity = new GermCountEntity();
+      LocalDateTime now = LocalDateTime.now();
       entity.setRiaSkey(riaSkey);
       entity.setEntryUserid(requestUserId);
       entity.setEntryTimestamp(now);
+      entity.setUpdateTimestamp(now);
     }
 
+    Set<BigDecimal> skeysBefore = referencedSkeys(entity);
     List<GermCountSlotDto> slots = buildSlotsForSave(days, entity);
     mapper.applySlots(slots, entity);
     entity.setUpdateUserid(requestUserId);
-    entity.setUpdateTimestamp(now);
     entity = germCountRepository.save(entity);
 
     saveAbnormals(days, slots);
+    deleteOrphanedAbnormals(skeysBefore, slots);
     saveReplicates(riaSkey, request.replicates());
 
     SparLog.info("Saved germ counts for RIA_SKEY: {}", riaSkey);
@@ -146,13 +146,13 @@ public class GermCountService {
     return mapper.toDto(entity);
   }
 
-  private void validateSlots(List<DayGermCountDto> days) {
+  /**
+   * Rejects the same slot being submitted twice. The 1-{@value #MAX_SLOTS} range and the
+   * not-null constraint are enforced by bean validation on {@link DayGermCountDto}.
+   */
+  private void validateNoDuplicateSlots(List<DayGermCountDto> days) {
     Set<Integer> seen = new HashSet<>();
     for (DayGermCountDto d : days) {
-      if (d.slotIndex() == null || d.slotIndex() < 1 || d.slotIndex() > 13) {
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST, "slotIndex must be between 1 and 13");
-      }
       if (!seen.add(d.slotIndex())) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Duplicate slotIndex: " + d.slotIndex());
@@ -176,44 +176,62 @@ public class GermCountService {
   }
 
   /**
-   * Builds the slot list to persist: assigns a new DAILY_GERM_SKEY only for dated days
-   * that don't already have one (AC2), applies rep null-to-zero for used replicates,
-   * and recomputes cumulative germination as the running sum across days (AC4).
+   * Builds the full {@value #MAX_SLOTS}-slot list to persist. Every slot is emitted so the save
+   * is a true full replacement: a slot the request omits, or submits without a count date, is
+   * emitted blank so its columns are cleared. Dated days keep their existing DAILY_GERM_SKEY or
+   * get a freshly sequenced one (AC2), get rep null-to-zero applied for used replicates, and
+   * carry the running cumulative germination (AC4). Undated slots contribute nothing to the
+   * running total.
    */
   List<GermCountSlotDto> buildSlotsForSave(
       List<DayGermCountDto> sortedDays, GermCountEntity entity) {
     Map<Integer, BigDecimal> existingSkeys =
         mapper.buildSlots(entity).stream()
             .collect(Collectors.toMap(GermCountSlotDto::slotIndex, GermCountSlotDto::dailyGermSkey));
+    Map<Integer, DayGermCountDto> submitted =
+        sortedDays.stream()
+            .filter(d -> d.countDt() != null)
+            .collect(Collectors.toMap(DayGermCountDto::slotIndex, d -> d));
 
     boolean[] repUsed = new boolean[4];
-    for (DayGermCountDto d : sortedDays) {
+    for (DayGermCountDto d : submitted.values()) {
       if (d.rep1NoSeedsGerm() != null) repUsed[0] = true;
       if (d.rep2NoSeedsGerm() != null) repUsed[1] = true;
       if (d.rep3NoSeedsGerm() != null) repUsed[2] = true;
       if (d.rep4NoSeedsGerm() != null) repUsed[3] = true;
     }
 
-    List<GermCountSlotDto> slots = new ArrayList<>(sortedDays.size());
+    List<GermCountSlotDto> slots = new ArrayList<>(MAX_SLOTS);
     long cumulative = 0;
-    // Days are processed in slotIndex order; validateAscendingDates guarantees this tracks dayNoOfTest/date order.
-    for (DayGermCountDto d : sortedDays) {
+    // Slots are walked in index order; validateAscendingDates guarantees that tracks date order.
+    for (int slotIndex = 1; slotIndex <= MAX_SLOTS; slotIndex++) {
+      DayGermCountDto d = submitted.get(slotIndex);
+      if (d == null) {
+        slots.add(blankSlot(slotIndex));
+        continue;
+      }
+
       Integer r1 = normalize(d.rep1NoSeedsGerm(), repUsed[0]);
       Integer r2 = normalize(d.rep2NoSeedsGerm(), repUsed[1]);
       Integer r3 = normalize(d.rep3NoSeedsGerm(), repUsed[2]);
       Integer r4 = normalize(d.rep4NoSeedsGerm(), repUsed[3]);
       cumulative += zero(r1) + zero(r2) + zero(r3) + zero(r4);
 
-      BigDecimal skey = existingSkeys.get(d.slotIndex());
-      if (d.countDt() != null && skey == null) {
+      BigDecimal skey = existingSkeys.get(slotIndex);
+      if (skey == null) {
         skey = germCountRepository.nextDailyGermSkey();
       }
 
       slots.add(new GermCountSlotDto(
-          d.slotIndex(), skey, d.countDt(), d.dayNoOfTest(),
+          slotIndex, skey, d.countDt(), d.dayNoOfTest(),
           r1, r2, r3, r4, BigDecimal.valueOf(cumulative)));
     }
     return slots;
+  }
+
+  /** An empty slot, written to clear every numbered column at that position. */
+  private static GermCountSlotDto blankSlot(int slotIndex) {
+    return new GermCountSlotDto(slotIndex, null, null, null, null, null, null, null, null);
   }
 
   private static Integer normalize(Integer value, boolean repUsed) {
@@ -227,51 +245,14 @@ public class GermCountService {
     return value == null ? 0L : value;
   }
 
-  private void validateAbnormalRanges(List<DayGermCountDto> days) {
-    for (DayGermCountDto d : days) {
-      checkRep(d.rep1Abnormal(), d.slotIndex(), 1);
-      checkRep(d.rep2Abnormal(), d.slotIndex(), 2);
-      checkRep(d.rep3Abnormal(), d.slotIndex(), 3);
-      checkRep(d.rep4Abnormal(), d.slotIndex(), 4);
-    }
-  }
-
-  private void checkRep(ReplicateAbnormalDto a, int slot, int rep) {
-    if (a == null) {
-      return;
-    }
-    Integer[] values = {
-        a.abnormalNumReverseEmbryo(), a.abnormalNumStuntedRadicle(),
-        a.abnormalNumStuntedHypocotyl(), a.abnormalNumRotten(),
-        a.abnormalNumThickenedHypocotyl(), a.abnormalNumThickenedRadicle(),
-        a.abnormalNumTwisted(), a.abnormalNumMegametophyteCollar(),
-        a.abnormalNumWeak(), a.abnormalNumOther(), a.abnormalNumPregermination()
-    };
-    for (Integer v : values) {
-      if (v != null && (v < 0 || v > 999)) {
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST,
-            "Abnormal count must be between 0 and 999 (slot " + slot + ", rep " + rep + ")");
-      }
-    }
-  }
-
+  /**
+   * Cross-field check that no replicate has more germinated + abnormal seeds than it holds.
+   * Per-field null and range constraints live on the request DTOs.
+   */
   private void validateSeedTotals(
       List<DayGermCountDto> days, List<TestRepGermFormDto> replicates) {
     Map<Integer, Integer> totalByRep = new HashMap<>();
     for (TestRepGermFormDto r : replicates) {
-      if (r.replicateNumber() == null) {
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST, "replicateNumber is required for each replicate");
-      }
-      if (r.replicateNumber() < 1 || r.replicateNumber() > 4) {
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST, "replicateNumber must be between 1 and 4");
-      }
-      if (r.totalNoSeeds() == null) {
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST, "totalNoSeeds is required for each replicate");
-      }
       if (totalByRep.put(r.replicateNumber(), r.totalNoSeeds()) != null) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Duplicate replicateNumber: " + r.replicateNumber());
@@ -331,6 +312,37 @@ public class GermCountService {
     if (!toSave.isEmpty()) {
       dailyAbnormalRepository.saveAll(toSave);
     }
+  }
+
+  /** The DAILY_GERM_SKEY values the row referenced before this save. */
+  private Set<BigDecimal> referencedSkeys(GermCountEntity entity) {
+    return mapper.buildSlots(entity).stream()
+        .map(GermCountSlotDto::dailyGermSkey)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Drops abnormal rows whose surrogate key the germ count row no longer points at, so a slot
+   * cleared by this full-replacement save does not leave its abnormals behind.
+   */
+  private void deleteOrphanedAbnormals(
+      Set<BigDecimal> skeysBefore, List<GermCountSlotDto> slots) {
+    if (skeysBefore.isEmpty()) {
+      return;
+    }
+    Set<BigDecimal> stillReferenced =
+        slots.stream()
+            .map(GermCountSlotDto::dailyGermSkey)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+    List<BigDecimal> orphaned =
+        skeysBefore.stream().filter(skey -> !stillReferenced.contains(skey)).toList();
+    if (orphaned.isEmpty()) {
+      return;
+    }
+    SparLog.info("Deleting {} orphaned daily abnormal row(s)", orphaned.size());
+    dailyAbnormalRepository.deleteAllById(orphaned);
   }
 
   private DailyAbnormalEntity toAbnormalEntity(BigDecimal skey, DayGermCountDto d) {
@@ -418,16 +430,7 @@ public class GermCountService {
       TestRepGermEntity e =
           testRepGermRepository.findById(id).orElseGet(TestRepGermEntity::new);
       e.setId(id);
-      e.setTotalNoSeeds(r.totalNoSeeds());
-      e.setFinalUngrmNormal(r.finalUngrmNormal());
-      e.setFinalUngrmShrvl(r.finalUngrmShrvl());
-      e.setFinalUngrmEmpty(r.finalUngrmEmpty());
-      e.setFinalUngrmInsct(r.finalUngrmInsct());
-      e.setFinalUngrmDamagd(r.finalUngrmDamagd());
-      e.setFinalUngrmRotten(r.finalUngrmRotten());
-      e.setFinalPregerm(r.finalPregerm());
-      e.setRepAcceptedInd(r.repAcceptedInd());
-      e.setTolrncOvrrdeDesc(r.tolrncOvrrdeDesc());
+      testRepGermFormMapper.updateEntity(r, e);
       toSave.add(e);
     }
     testRepGermRepository.saveAll(toSave);

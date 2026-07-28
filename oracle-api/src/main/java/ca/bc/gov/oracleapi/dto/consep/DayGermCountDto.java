@@ -1,6 +1,9 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -8,6 +11,8 @@ import java.time.LocalDate;
 @Schema(description = "One day of daily germination counts plus that day's abnormals")
 public record DayGermCountDto(
     @NotNull
+    @Min(value = 1, message = "slotIndex must be between 1 and 13")
+    @Max(value = 13, message = "slotIndex must be between 1 and 13")
     @Schema(description = "Slot position (1-13), selects which numbered columns to write", example = "1")
     Integer slotIndex,
 
@@ -22,8 +27,8 @@ public record DayGermCountDto(
     @Schema(description = "Replicate 3 seeds germinated this day", example = "11") Integer rep3NoSeedsGerm,
     @Schema(description = "Replicate 4 seeds germinated this day", example = "9") Integer rep4NoSeedsGerm,
 
-    @Schema(description = "Replicate 1 abnormals for this day") ReplicateAbnormalDto rep1Abnormal,
-    @Schema(description = "Replicate 2 abnormals for this day") ReplicateAbnormalDto rep2Abnormal,
-    @Schema(description = "Replicate 3 abnormals for this day") ReplicateAbnormalDto rep3Abnormal,
-    @Schema(description = "Replicate 4 abnormals for this day") ReplicateAbnormalDto rep4Abnormal
+    @Valid @Schema(description = "Replicate 1 abnormals for this day") ReplicateAbnormalDto rep1Abnormal,
+    @Valid @Schema(description = "Replicate 2 abnormals for this day") ReplicateAbnormalDto rep2Abnormal,
+    @Valid @Schema(description = "Replicate 3 abnormals for this day") ReplicateAbnormalDto rep3Abnormal,
+    @Valid @Schema(description = "Replicate 4 abnormals for this day") ReplicateAbnormalDto rep4Abnormal
 ) {}

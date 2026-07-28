@@ -2,6 +2,8 @@ package ca.bc.gov.oracleapi.dto.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,10 +14,14 @@ public record GermCountUpsertRequestDto(
     LocalDateTime updateTimestamp,
 
     @Valid
+    @NotEmpty(message = "at least one day is required")
+    @Size(max = 13, message = "at most 13 days are allowed")
     @Schema(description = "Per-day germination counts and abnormals (1-13 days)")
     List<DayGermCountDto> days,
 
     @Valid
+    @NotEmpty(message = "at least one replicate is required")
+    @Size(max = 4, message = "at most 4 replicates are allowed")
     @Schema(description = "Replicate totals (1-4)")
     List<TestRepGermFormDto> replicates
 ) {}

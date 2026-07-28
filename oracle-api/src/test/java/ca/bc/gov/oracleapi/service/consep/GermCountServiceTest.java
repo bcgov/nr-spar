@@ -1,7 +1,9 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
@@ -19,6 +21,7 @@ import ca.bc.gov.oracleapi.entity.consep.DailyAbnormalEntity;
 import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
 import ca.bc.gov.oracleapi.mapper.GermCountMapper;
+import ca.bc.gov.oracleapi.mapper.TestRepGermFormMapper;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRepGermRepository;
@@ -54,6 +57,10 @@ class GermCountServiceTest {
 
   @Spy
   private GermCountMapper mapper = Mappers.getMapper(GermCountMapper.class);
+
+  @Spy
+  private TestRepGermFormMapper testRepGermFormMapper =
+      Mappers.getMapper(TestRepGermFormMapper.class);
 
   @InjectMocks
   private GermCountService germCountService;
@@ -241,6 +248,111 @@ class GermCountServiceTest {
   }
 
   @Test
+  void upsert_clearsSlotsAbsentFromRequest_andDeletesTheirAbnormals() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
+
+    // Existing row holds three dated days; the request will resend only slot 1.
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setUpdateTimestamp(ts);
+    existing.setDailyGermSkey1(new BigDecimal("3001"));
+    existing.setCountDt1(LocalDate.of(2026, 4, 1));
+    existing.setRep1NoSeedsGerm1(10);
+    existing.setCumulativeGerm1(new BigDecimal("10"));
+    existing.setDailyGermSkey2(new BigDecimal("3002"));
+    existing.setCountDt2(LocalDate.of(2026, 4, 2));
+    existing.setRep1NoSeedsGerm2(20);
+    existing.setCumulativeGerm2(new BigDecimal("30"));
+    existing.setDailyGermSkey3(new BigDecimal("3003"));
+    existing.setCountDt3(LocalDate.of(2026, 4, 3));
+    existing.setRep1NoSeedsGerm3(30);
+    existing.setCumulativeGerm3(new BigDecimal("60"));
+
+    stubChildSaves();
+    when(germCountRepository.existsById(riaSkey)).thenReturn(true);
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    List<DayGermCountDto> days = List.of(day(1, LocalDate.of(2026, 4, 1), 1, 10, 0, 0, 0));
+
+    germCountService.upsertGermCounts(riaSkey, request(ts, days), "USER1");
+
+    ArgumentCaptor<GermCountEntity> captor = ArgumentCaptor.forClass(GermCountEntity.class);
+    verify(germCountRepository).save(captor.capture());
+    GermCountEntity saved = captor.getValue();
+
+    // Slot 1 keeps its original surrogate key rather than burning a new sequence value.
+    assertEquals(new BigDecimal("3001"), saved.getDailyGermSkey1());
+    // Slots 2 and 3 were omitted, so every one of their columns is cleared.
+    assertNull(saved.getDailyGermSkey2());
+    assertNull(saved.getCountDt2());
+    assertNull(saved.getRep1NoSeedsGerm2());
+    assertNull(saved.getCumulativeGerm2());
+    assertNull(saved.getDailyGermSkey3());
+    assertNull(saved.getCountDt3());
+    assertNull(saved.getRep1NoSeedsGerm3());
+    assertNull(saved.getCumulativeGerm3());
+
+    // The abnormal rows the cleared slots owned are removed, slot 1's is kept.
+    ArgumentCaptor<List<BigDecimal>> deleted = ArgumentCaptor.forClass(List.class);
+    verify(dailyAbnormalRepository).deleteAllById(deleted.capture());
+    assertEquals(2, deleted.getValue().size());
+    assertTrue(deleted.getValue().containsAll(
+        List.of(new BigDecimal("3002"), new BigDecimal("3003"))));
+    assertFalse(deleted.getValue().contains(new BigDecimal("3001")));
+  }
+
+  @Test
+  void upsert_undatedSlotIsBlank_andDoesNotAddToCumulative() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
+
+    // Slot 2 already has a surrogate key; the request resubmits it with no count date.
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setUpdateTimestamp(ts);
+    existing.setDailyGermSkey2(new BigDecimal("3002"));
+    existing.setCountDt2(LocalDate.of(2026, 4, 2));
+
+    stubChildSaves();
+    when(germCountRepository.existsById(riaSkey)).thenReturn(true);
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.nextDailyGermSkey()).thenReturn(new BigDecimal("4001"));
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    List<DayGermCountDto> days = new ArrayList<>();
+    days.add(day(1, LocalDate.of(2026, 4, 1), 1, 10, 0, 0, 0));
+    // no countDt: a blank row the user has not filled in yet
+    days.add(new DayGermCountDto(2, null, 2, 5, 0, 0, 0,
+        zeroAbnormal(), zeroAbnormal(), zeroAbnormal(), zeroAbnormal()));
+    days.add(day(3, LocalDate.of(2026, 4, 3), 3, 7, 0, 0, 0));
+
+    germCountService.upsertGermCounts(riaSkey, request(ts, days), "USER1");
+
+    ArgumentCaptor<GermCountEntity> captor = ArgumentCaptor.forClass(GermCountEntity.class);
+    verify(germCountRepository).save(captor.capture());
+    GermCountEntity saved = captor.getValue();
+
+    // The undated slot keeps no surrogate key, no counts, and no cumulative value.
+    assertNull(saved.getDailyGermSkey2());
+    assertNull(saved.getRep1NoSeedsGerm2());
+    assertNull(saved.getCumulativeGerm2());
+    // Its 5 germinated seeds must not leak into the running total: 10 then 10+7.
+    assertEquals(0, saved.getCumulativeGerm1().compareTo(new BigDecimal("10")));
+    assertEquals(0, saved.getCumulativeGerm3().compareTo(new BigDecimal("17")));
+
+    // Only the two dated slots get abnormal rows written.
+    ArgumentCaptor<List<DailyAbnormalEntity>> abCaptor = ArgumentCaptor.forClass(List.class);
+    verify(dailyAbnormalRepository).saveAll(abCaptor.capture());
+    assertEquals(2, abCaptor.getValue().size());
+  }
+
+  @Test
   void upsert_update_withMatchingTimestamp_succeeds() {
     BigDecimal riaSkey = new BigDecimal("881191");
     LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
@@ -299,16 +411,6 @@ class GermCountServiceTest {
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> germCountService.upsertGermCounts(riaSkey, request(null, days), "USER1"));
-    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-  }
-
-  @Test
-  void upsert_emptyDays_throwsBadRequest() {
-    BigDecimal riaSkey = new BigDecimal("881191");
-    GermCountUpsertRequestDto req = new GermCountUpsertRequestDto(
-        null, List.of(), List.of(rep(1, 100)));
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> germCountService.upsertGermCounts(riaSkey, req, "USER1"));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
   }
 
@@ -376,31 +478,4 @@ class GermCountServiceTest {
     verify(germCountRepository).save(any());
   }
 
-  @Test
-  void upsert_abnormalOutOfRange_throwsBadRequest() {
-    BigDecimal riaSkey = new BigDecimal("881191");
-    ReplicateAbnormalDto bad =
-        new ReplicateAbnormalDto(1000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
-    DayGermCountDto d = new DayGermCountDto(
-        1, LocalDate.of(2026, 4, 1), 1, 1, 1, 1, 1,
-        bad, zeroAbnormal(), zeroAbnormal(), zeroAbnormal());
-    GermCountUpsertRequestDto req = new GermCountUpsertRequestDto(
-        null, List.of(d), List.of(rep(1, 100), rep(2, 100), rep(3, 100), rep(4, 100)));
-
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> germCountService.upsertGermCounts(riaSkey, req, "USER1"));
-    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-  }
-
-  @Test
-  void upsert_replicateNumberOutOfRange_throwsBadRequest() {
-    BigDecimal riaSkey = new BigDecimal("881191");
-    DayGermCountDto d = day(1, LocalDate.of(2026, 4, 1), 1, 1, 1, 1, 1);
-    GermCountUpsertRequestDto req = new GermCountUpsertRequestDto(
-        null, List.of(d), List.of(rep(5, 100)));
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> germCountService.upsertGermCounts(riaSkey, req, "USER1"));
-    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-    verify(germCountRepository, never()).save(any());
-  }
 }
