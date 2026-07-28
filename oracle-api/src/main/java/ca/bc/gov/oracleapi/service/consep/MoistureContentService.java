@@ -107,6 +107,7 @@ public class MoistureContentService {
             activityData.get().getRiaComment(),
             activityData.get().getActualBeginDateTime(),
             activityData.get().getActualEndDateTime(),
+            activityData.get().getUpdateTimestamp(),
             activityData.get().getStandardActivityId(),
             replicatesList);
 

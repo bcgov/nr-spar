@@ -51,6 +51,8 @@ import { impuritiesPerReplicate, purityReplicatesChecker } from './utils';
 import {
   DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
+import useActivityConflict from '../hooks/useActivityConflict';
+import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
 
 import './styles.scss';
 
@@ -70,6 +72,13 @@ const PurityContent = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+
+  // Serialize autosaves to avoid sending a stale optimistic-lock timestamp.
+  const inFlightRef = useRef<boolean>(false);
+  const pendingRef = useRef<boolean>(false);
+  const latestRecordRef = useRef<ActivityRecordType | undefined>(undefined);
+
+  const { isConflict, markConflict, clearConflict } = useActivityConflict();
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
@@ -123,13 +132,34 @@ const PurityContent = () => {
       'updateActivityRecord',
       { riaKey, record }
     ),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const newTimestamp = response?.data?.updateTimestamp;
+      if (newTimestamp) {
+        latestRecordRef.current = latestRecordRef.current
+          ? { ...latestRecordRef.current, updateTimestamp: newTimestamp }
+          : latestRecordRef.current;
+        setActivityRecord((prev) => (prev ? { ...prev, updateTimestamp: newTimestamp } : prev));
+      }
+      inFlightRef.current = false;
+      if (pendingRef.current) {
+        pendingRef.current = false;
+        if (latestRecordRef.current) {
+          inFlightRef.current = true;
+          updateActivityRecordMutation.mutate(latestRecordRef.current);
+        }
+      }
       setAlert({ isSuccess: true, message: 'Activity record updated successfully' });
       setTimeout(() => {
         setAlert(null);
       }, 3000);
     },
     onError: (error) => {
+      inFlightRef.current = false;
+      pendingRef.current = false;
+      if ((error as AxiosError).response?.status === 409) {
+        markConflict();
+        return;
+      }
       setAlert({
         isSuccess: false,
         message: `Failed to update activity record: ${(error as AxiosError).message}`
@@ -235,9 +265,11 @@ const PurityContent = () => {
         testCategoryCode: testActivityQuery.data.testCategoryCode,
         riaComment: testActivityQuery.data.riaComment,
         actualBeginDateTime: testActivityQuery.data.actualBeginDateTime,
-        actualEndDateTime: testActivityQuery.data.actualEndDateTime
+        actualEndDateTime: testActivityQuery.data.actualEndDateTime,
+        updateTimestamp: testActivityQuery.data.updateTimestamp
       };
       setActivityRecord(activityRecordData);
+      latestRecordRef.current = activityRecordData;
       if (testActivityQuery.data.debrisList) {
         setImpurities(impuritiesPerReplicate(testActivityQuery.data.debrisList));
       }
@@ -282,15 +314,31 @@ const PurityContent = () => {
     );
   };
 
+  const handleReloadOnConflict = async () => {
+    const result = await testActivityQuery.refetch();
+    if (result.status === 'success') {
+      clearConflict();
+    }
+  };
+
+  const doSave = (record: ActivityRecordType) => {
+    inFlightRef.current = true;
+    updateActivityRecordMutation.mutate(record);
+  };
+
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
-    setActivityRecord({
-      ...activityRecord,
-      ...record
-    });
-    updateActivityRecordMutation.mutate({
-      ...activityRecord,
-      ...record
-    });
+    if (isConflict) {
+      return;
+    }
+    const base = latestRecordRef.current ?? activityRecord;
+    const merged = { ...base, ...record };
+    setActivityRecord(merged);
+    latestRecordRef.current = merged;
+    if (inFlightRef.current) {
+      pendingRef.current = true;
+      return;
+    }
+    doSave(merged);
   };
 
   const createBreadcrumbItems = () => {
@@ -519,6 +567,12 @@ const PurityContent = () => {
 
   return (
     <FlexGrid className="consep-purity-content">
+      {isConflict && (
+        <ConflictNotification
+          className="consep-purity-content-conflict"
+          onReload={handleReloadOnConflict}
+        />
+      )}
       {
         alert?.message
         && (

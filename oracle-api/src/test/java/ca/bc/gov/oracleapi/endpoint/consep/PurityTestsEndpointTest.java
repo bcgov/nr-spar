@@ -129,6 +129,7 @@ class PurityTestsEndpointTest {
             "Comment for this test",
             LocalDateTime.parse("2013-08-01T00:00:00"),
             LocalDateTime.parse("2013-08-01T00:00:00"),
+            LocalDateTime.parse("2013-08-01T00:00:00"),
             replicatesList,
             List.of(debris1)
         ));
@@ -230,7 +231,8 @@ class PurityTestsEndpointTest {
         "STD",
         LocalDateTime.parse("2013-08-01T00:00:00"),
         LocalDateTime.parse("2013-08-01T00:00:00"),
-        "New comment"
+        "New comment",
+        LocalDateTime.parse("2013-08-01T00:00:00")
     );
 
     ActivityEntity activityEntity = new ActivityEntity();
@@ -269,7 +271,8 @@ class PurityTestsEndpointTest {
         "TST",
         LocalDateTime.parse("2013-08-01T00:00:00"),
         LocalDateTime.parse("2013-08-01T00:00:00"),
-        "Not found comment"
+        "Not found comment",
+        LocalDateTime.parse("2013-08-01T00:00:00")
     );
 
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity entry not found"))
@@ -289,6 +292,7 @@ class PurityTestsEndpointTest {
   void updatePurityActivity_shouldReturnInvalid() throws Exception {
     BigDecimal riaKey = new BigDecimal(1234567890);
     ActivityFormDto activityFormDto = new ActivityFormDto(
+        null,
         null,
         null,
         null,
@@ -579,5 +583,30 @@ class PurityTestsEndpointTest {
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("PATCH activity returns 409 on optimistic lock conflict")
+  void updateActivityField_conflict_returns409() throws Exception {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    ActivityFormDto activityFormDto = new ActivityFormDto(
+        "STD",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-09-01T00:00:00"),
+        "Comment",
+        LocalDateTime.parse("2013-09-01T00:00:00")
+    );
+
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT,
+            "Activity was modified by another user; reload and retry"))
+        .when(activityService).updateActivityField(any(), any());
+
+    mockMvc
+        .perform(patch("/api/purity-tests/{riaKey}", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(activityFormDto)))
+        .andExpect(status().isConflict());
   }
 }
