@@ -7,7 +7,8 @@ Feature: Create A-class seedlot
     And I can see the title "Seedlots"
     And the a-class seedlot fixture is loaded
 
-  Scenario Outline: Register an A-class seedlot and store the created number for "<speciesKey>"
+  # Keep this table in sync with NUM_OF_LOOPS in cypress/constants.ts
+  Scenario Outline: Register an A-class seedlot and store the created number for "<speciesKey>" (loop <loop>)
     When I start a-class seedlot registration
     Then I should be on the create a-class page
     When I fill agency number for "<speciesKey>"
@@ -27,9 +28,19 @@ Feature: Create A-class seedlot
     And I store created seedlot number for "<speciesKey>"
 
     Examples:
-      | speciesKey |
-      | pli        |
-      | cw         |
-      | dr         |
-      | ep         |
-      | fdc        |
+      | loop | speciesKey |
+      | 1    | pli        |
+      | 1    | cw         |
+      | 1    | dr         |
+      | 1    | ep         |
+      | 1    | fdc        |
+      | 2    | pli        |
+      | 2    | cw         |
+      | 2    | dr         |
+      | 2    | ep         |
+      | 2    | fdc        |
+      | 3    | pli        |
+      | 3    | cw         |
+      | 3    | dr         |
+      | 3    | ep         |
+      | 3    | fdc        |

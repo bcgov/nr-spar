@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -453,5 +454,58 @@ class ParentTreeServiceTest {
 
     assertNotNull(result);
     assertNotNull(result.calculatedPtVals().getGeospatialData());
+  }
+
+  @Test
+  @DisplayName("calcSeedlotMeanGeospatial with no orchard parent trees returns null")
+  void calcSeedlotMeanGeospatial_emptyOrchard_returnsNull() {
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(), List.of(), 0, null, new SeedlotManagementBreedingValueDto());
+
+    assertNull(parentTreeService.calcSeedlotMeanGeospatial(reqDto));
+  }
+
+  @Test
+  @DisplayName("calcSeedlotMeanGeospatial without Oracle geospatial data returns null")
+  void calcSeedlotMeanGeospatial_noOracleData_returnsNull() {
+    OrchardParentTreeValsDto pt =
+        new OrchardParentTreeValsDto(
+            "8001", "801", new BigDecimal("100"), BigDecimal.ZERO, 0, 0, List.of());
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(pt), List.of(), 0, null, new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(8001L))).thenReturn(List.of());
+
+    assertNull(parentTreeService.calcSeedlotMeanGeospatial(reqDto));
+  }
+
+  @Test
+  @DisplayName("calcSeedlotMeanGeospatial recomputes the weighted orchard mean")
+  void calcSeedlotMeanGeospatial_success_returnsMean() {
+    // Single parent tree with all female (cone) contribution and no SMP: the weighted mean equals
+    // this tree's own coordinates.
+    OrchardParentTreeValsDto pt =
+        new OrchardParentTreeValsDto(
+            "9001", "901", new BigDecimal("100"), BigDecimal.ZERO, 0, 0, List.of());
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(pt), List.of(), 0, null, new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(9001L)))
+        .thenReturn(List.of(new GeospatialOracleResDto(9001L, 49, 2, 0, 124, 3, 0, 500)));
+
+    GeospatialRespondDto result = parentTreeService.calcSeedlotMeanGeospatial(reqDto);
+
+    assertNotNull(result);
+    assertEquals(49, result.getMeanLatitudeDegree());
+    assertEquals(2, result.getMeanLatitudeMinute());
+    assertEquals(124, result.getMeanLongitudeDegree());
+    assertEquals(3, result.getMeanLongitudeMinute());
+    assertEquals(500, result.getMeanElevation());
   }
 }

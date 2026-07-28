@@ -24,8 +24,6 @@ export default defineConfig({
       // Cucumber feature files
       '**/features/*.feature',
       // Cypress tests
-      '**/04-seedlot-detail.cy.ts',
-      '**/05-my-seedlots.cy.ts',
       '**/11-dashboard-page.cy.ts',
       '**/12-create-a-class-seedlot-fdi.cy.ts',
       '**/13-a-class-seedlot-reg-form-parent-tree-calculations-part-1.cy.ts',

@@ -9,6 +9,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
@@ -186,5 +187,46 @@ class OracleApiProviderTest {
         () -> {
           oracleApiProvider.findOrchardsByVegCode(vegCode);
         });
+  }
+
+  @Test
+  @DisplayName("getSeedlotAndSpeciesByRequestKey - success should return dto")
+  void getSeedlotAndSpeciesByRequestKey_success_shouldReturnDto() {
+    Long requestKey = 500L;
+    String url = "/null/api/request-seedlot-and-veglot/seedlot-species/" + requestKey;
+
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    String json =
+        """
+        {
+          "seedlotNumber": 16258,
+          "vegetationCode": "PLI"
+        }
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    SeedlotSpeciesDto result = oracleApiProvider.getSeedlotAndSpeciesByRequestKey(requestKey);
+
+    Assertions.assertEquals(16258L, result.seedlotNumber());
+    Assertions.assertEquals("PLI", result.vegetationCode());
+  }
+
+  @Test
+  @DisplayName("getSeedlotAndSpeciesByRequestKey - not found should throw ResponseStatusException")
+  void getSeedlotAndSpeciesByRequestKey_notFound_shouldThrow() {
+    Long requestKey = 404L;
+    String url = "/null/api/request-seedlot-and-veglot/seedlot-species/" + requestKey;
+
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    assertThrows(
+        ResponseStatusException.class,
+        () -> oracleApiProvider.getSeedlotAndSpeciesByRequestKey(requestKey));
   }
 }

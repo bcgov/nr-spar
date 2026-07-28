@@ -356,26 +356,26 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
   };
 
   const renderCalcSection = (isSmpMix: boolean) => {
-    if (!isFormSubmitted && !isReviewDisplay) {
-      if (!isSmpMix) {
-        return (
-          <>
-            <DescriptionBox header="Genetic worth, effective population size and geospatial data" />
-            <CalculateMetrics
-              disableOptions={disableOptions}
-              setShowInfoSections={setShowInfoSections}
-            />
-          </>
-        );
-      }
-      return (
+    if (isReviewDisplay) {
+      return null;
+    }
+    const calculateButton = !isFormSubmitted
+      ? (
         <CalculateMetrics
           disableOptions={disableOptions}
           setShowInfoSections={setShowInfoSections}
         />
+      )
+      : null;
+    if (!isSmpMix) {
+      return (
+        <>
+          <DescriptionBox header="Genetic worth, effective population size and geospatial data" />
+          {calculateButton}
+        </>
       );
     }
-    return null;
+    return calculateButton;
   };
 
   const renderSubSections = () => {
@@ -489,49 +489,43 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                   renderRecalcSection()
                 }
                 {/* -------- Calculate Button Row -------- */}
-                {
-                  !(!isReviewDisplay && isFormSubmitted)
-                    ? (
-                      <DetailSection>
-                        {
-                          renderCalcSection(false)
-                        }
-                        {
-                          showInfoSections
-                            ? (
-                              <>
-                                {
-                                  renderSubSections()
-                                }
-                                {/* -------- Seedlot mean geospatial data -------- */}
-                                <Row className="info-section-sub-title">
-                                  <Column>
-                                    {
-                                      !isReviewDisplay
-                                        ? 'Orchard parent tree geospatial summary'
-                                        : 'Collection geospatial summary'
-                                    }
-                                  </Column>
-                                </Row>
-                                {
-                                  isReviewDisplay
-                                    ? (
-                                      <SpatialData isReviewRead={isReviewRead ?? false} />
-                                    )
-                                    : (
-                                      <InfoSection
-                                        infoItems={Object.values(meanGeomInfos.seedlot)}
-                                      />
-                                    )
-                                }
-                              </>
-                            )
-                            : null
-                        }
-                      </DetailSection>
-                    )
-                    : null
-                }
+                <DetailSection>
+                  {
+                    renderCalcSection(false)
+                  }
+                  {
+                    (showInfoSections || isFormSubmitted)
+                      ? (
+                        <>
+                          {
+                            renderSubSections()
+                          }
+                          {/* -------- Seedlot mean geospatial data -------- */}
+                          <Row className="info-section-sub-title">
+                            <Column>
+                              {
+                                !isReviewDisplay
+                                  ? 'Orchard parent tree geospatial summary'
+                                  : 'Collection geospatial summary'
+                              }
+                            </Column>
+                          </Row>
+                          {
+                            isReviewDisplay
+                              ? (
+                                <SpatialData isReviewRead={isReviewRead ?? false} />
+                              )
+                              : (
+                                <InfoSection
+                                  infoItems={Object.values(meanGeomInfos.seedlot)}
+                                />
+                              )
+                          }
+                        </>
+                      )
+                      : null
+                  }
+                </DetailSection>
               </>
             )
             : (
