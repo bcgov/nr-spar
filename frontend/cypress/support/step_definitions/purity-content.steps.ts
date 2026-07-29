@@ -21,16 +21,6 @@ Given('the purity seedlot replicate info fixture is loaded for purity content', 
   loadFixtureAndAlias<SeedlotReplicateInfoType>('purity-seedlot-replicate-info', 'seedlotData');
 });
 
-Then('purity API mocks should be used', () => {
-  cy.wait('@GET_purity_content_cone')
-    .its('response.statusCode')
-    .should('eq', 200);
-
-  cy.wait('@GET_impurity_codes')
-    .its('response.statusCode')
-    .should('eq', 200);
-});
-
 Then('I can see the purity content page title', () => {
   cy.get('.consep-purity-content-title')
     .find('h1')
