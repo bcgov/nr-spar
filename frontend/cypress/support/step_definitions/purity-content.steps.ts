@@ -3,6 +3,7 @@ import prefix from '../../../src/styles/classPrefix';
 import { mockPurityContentApi } from '../mockApiConsep';
 import { PurityContentType, SeedlotReplicateInfoType } from '../../definitions';
 import { loadFixtureAndAlias } from '../helpers/fixture-loader';
+import { getImpurityRowAt, getPurityReplicateSection } from '../helpers/purity-helper';
 
 let purityData: PurityContentType;
 
@@ -39,8 +40,7 @@ Then('I can see the impurities section title', () => {
 });
 
 When('I add an impurity row for replicate {string}', (replicateNumber: string) => {
-  cy.contains('.consep-purity-content-replicate h5', `Replicate ${replicateNumber}`)
-    .parent()
+  getPurityReplicateSection(replicateNumber)
     .contains('button', purityData.pc.impurityBtn)
     .click();
 });
@@ -50,16 +50,13 @@ When('I select impurity type {string} for replicate {string} rank {string}', (
   replicateNumber: string,
   rank: string
 ) => {
-  cy.get('.consep-purity-content-replicate')
-    .contains('h5', `Replicate ${replicateNumber}`)
-    .parent()
-    .within(() => {
-      cy.get(`#impurity-rank-${rank}-`).should('be.visible');
-      cy.get('.consep-impurity-combobox')
-        .click();
-      cy.contains(`.${prefix}--list-box__menu-item__option`, impurityType)
-        .click();
-    });
+  getPurityReplicateSection(replicateNumber).within(() => {
+    cy.get(`#impurity-rank-${rank}-`).should('be.visible');
+    cy.get('.consep-impurity-combobox')
+      .click();
+    cy.contains(`.${prefix}--list-box__menu-item__option`, impurityType)
+      .click();
+  });
 
   cy.get('.consep-impurity-title')
     .find('h4')
@@ -71,30 +68,23 @@ Then('impurity rank {string} for replicate {string} should show type {string}', 
   replicateNumber: string,
   impurityType: string
 ) => {
-  cy.get('.consep-purity-content-replicate')
-    .contains('h5', `Replicate ${replicateNumber}`)
-    .parent()
-    .within(() => {
-      // Check that the impurity rank input has the correct value
-      cy.get(`#impurity-rank-${rank}-${impurityType}`)
-        .should('contain.value', rank);
+  getPurityReplicateSection(replicateNumber).within(() => {
+    // Check that the impurity rank input has the correct value
+    cy.get(`#impurity-rank-${rank}-${impurityType}`)
+      .should('contain.value', rank);
 
-      // Check that the impurity type input has the correct value
-      cy.get('.consep-impurity-combobox')
-        .find('input')
-        .should('contain.value', impurityType);
-    });
+    // Check that the impurity type input has the correct value
+    cy.get('.consep-impurity-combobox')
+      .find('input')
+      .should('contain.value', impurityType);
+  });
 });
 
 When('I delete impurity row with rank {string} for replicate {string}', (
   rank: string,
   replicateNumber: string
 ) => {
-  cy.get('.consep-purity-content-replicate')
-    .contains('h5', `Replicate ${replicateNumber}`)
-    .parent()
-    .find('.consep-impurity-content')
-    .eq(Number(rank) - 1)
+  getImpurityRowAt(replicateNumber, rank)
     .find('.consep-impurity-content-remove button')
     .click();
 
@@ -106,34 +96,27 @@ Then('impurity at index {string} for replicate {string} should have rank {string
   replicateNumber: string,
   rank: string
 ) => {
-  cy.get('.consep-purity-content-replicate')
-    .contains('h5', `Replicate ${replicateNumber}`)
-    .parent()
-    .find('.consep-impurity-content')
-    .eq(Number(index) - 1)
+  getImpurityRowAt(replicateNumber, index)
     .find('.debris-rank-input input')
     .should('have.value', rank);
 });
 
 When('I add {int} impurity rows for replicate {string}', (count: number, replicateNumber: string) => {
   Cypress._.times(count, () => {
-    cy.contains('.consep-purity-content-replicate h5', `Replicate ${replicateNumber}`)
-      .parent()
+    getPurityReplicateSection(replicateNumber)
       .contains('button', purityData.pc.impurityBtn)
       .click();
   });
 });
 
 Then('the add impurity button should not be visible for replicate {string}', (replicateNumber: string) => {
-  cy.contains('.consep-purity-content-replicate h5', `Replicate ${replicateNumber}`)
-    .parent()
+  getPurityReplicateSection(replicateNumber)
     .find('button')
     .should('not.contain.text', purityData.pc.impurityBtn);
 });
 
 Then('I should see the maximum impurity error for replicate {string}', (replicateNumber: string) => {
-  cy.contains('.consep-purity-content-replicate h5', `Replicate ${replicateNumber}`)
-    .parent()
+  getPurityReplicateSection(replicateNumber)
     .contains(purityData.pc.maxImpuritiesErrorMsg)
     .should('be.visible');
 });
