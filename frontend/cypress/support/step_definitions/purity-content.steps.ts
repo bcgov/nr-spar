@@ -89,8 +89,6 @@ When('I delete impurity row with rank {string} for replicate {string}', (
   getImpurityRowAt(replicateNumber, rank)
     .find('.consep-impurity-content-remove button')
     .click();
-
-  cy.wait('@DELETE_impurity');
 });
 
 Then('impurity at index {string} for replicate {string} should have rank {string}', (
