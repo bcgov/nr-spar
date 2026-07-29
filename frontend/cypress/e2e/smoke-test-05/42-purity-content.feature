@@ -5,6 +5,7 @@ Feature: CONSEP manual purity content screen
     And purity content API responses are mocked
     And the purity content fixture is loaded
     And the purity seedlot replicate info fixture is loaded for purity content
+    And purity API mocks should be used
     When I visit "/consep/manual-purity-content/79082"
     Then the URL should contain "/consep/manual-purity-content/79082"
     And the activity results table has loaded
