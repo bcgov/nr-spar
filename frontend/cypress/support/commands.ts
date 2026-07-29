@@ -195,8 +195,9 @@ Cypress.Commands.add('setFlatpickrDate', (selector: string, dateValue: string) =
       // eslint-disable-next-line no-underscore-dangle
       const flatpickrApi = (element as Record<string, any>)._flatpickr;
 
-      if (flatpickrApi) {
-        flatpickrApi.setDate(dateValue, true, 'Y/m/d');
+      if (!flatpickrApi) {
+        throw new Error(`Flatpickr is not initialized for ${selector}`);
       }
+      flatpickrApi.setDate(dateValue, true, 'Y/m/d');
     });
 });
