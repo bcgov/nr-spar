@@ -4,6 +4,5 @@ export const loadFixtureAndAlias = <T>(
   assign?: (data: T) => void
 ) => cy.fixture(fixtureName).then((data: T) => {
   if (assign) assign(data);
-  cy.wrap(data).as(alias);
-  return data;
+  return cy.wrap(data).as(alias);
 });
