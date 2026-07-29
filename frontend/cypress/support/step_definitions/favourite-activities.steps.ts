@@ -8,6 +8,7 @@ import prefix from '../../../src/styles/classPrefix';
 import { FavouriteActivitiesType } from '../../definitions';
 import { FavouriteMockItem, mockFavouriteActivitiesApi } from '../mockApiConsep';
 import { loadFixtureAndAlias } from '../helpers/fixture-loader';
+import { getFavouriteCardLabel, runFavouriteCardMenuAction } from '../helpers/favourite-card';
 
 let favouriteContent: FavouriteActivitiesType;
 
@@ -126,25 +127,15 @@ When('I submit favourite activity modal', () => {
 });
 
 Then('I should see favourite card {string}', (activityName: string) => {
-  cy.contains('.consep-fav-card p, .consep-fav-card-highlighted p', activityName).should('be.visible');
+  getFavouriteCardLabel(activityName).should('be.visible');
 });
 
 Then('I should not see favourite card {string}', (activityName: string) => {
-  cy.contains('.consep-fav-card p, .consep-fav-card-highlighted p', activityName).should('not.exist');
+  getFavouriteCardLabel(activityName).should('not.exist');
 });
 
 When('I highlight favourite card {string}', (activityName: string) => {
-  cy.contains('.consep-fav-card p, .consep-fav-card-highlighted p', activityName)
-    .closest('.consep-fav-card, .consep-fav-card-highlighted')
-    .find('button.fav-card-overflow')
-    .click();
-
-  cy.get(`.fav-card-menu-options, .${prefix}--overflow-menu-options`)
-    .contains('Highlight shortcut')
-    .click();
-
-  cy.wait('@PATCH_favourite_activities');
-  cy.wait('@GET_favourite_activities');
+  runFavouriteCardMenuAction(activityName, 'Highlight shortcut', ['@PATCH_favourite_activities', '@GET_favourite_activities']);
 });
 
 Then('favourite card {string} should be highlighted', (activityName: string) => {
@@ -152,17 +143,7 @@ Then('favourite card {string} should be highlighted', (activityName: string) => 
 });
 
 When('I delete favourite card {string}', (activityName: string) => {
-  cy.contains('.consep-fav-card p, .consep-fav-card-highlighted p', activityName)
-    .closest('.consep-fav-card, .consep-fav-card-highlighted')
-    .find('button.fav-card-overflow')
-    .click();
-
-  cy.get(`.fav-card-menu-options, .${prefix}--overflow-menu-options`)
-    .contains('Delete shortcut')
-    .click();
-
-  cy.wait('@DELETE_favourite_activities');
-  cy.wait('@GET_favourite_activities');
+  runFavouriteCardMenuAction(activityName, 'Delete shortcut', ['@DELETE_favourite_activities', '@GET_favourite_activities']);
 });
 
 When('I select the first 12 favourite activities', () => {
