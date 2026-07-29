@@ -30,6 +30,65 @@ export type FavouriteMockItem = {
   highlighted: boolean;
 };
 
+type FavouriteMockState = {
+  getFavStore: () => FavouriteMockItem[];
+  setFavStore: (items: FavouriteMockItem[]) => void;
+  getNextId: () => number;
+  setNextId: (id: number) => void;
+};
+
+/**
+ * Sets up Cypress intercepts for favourite activities APIs with in-memory state.
+ */
+export function mockFavouriteActivitiesApi(state: FavouriteMockState) {
+  const apiPath = '**/api/favourite-activities**';
+
+  cy.intercept('GET', apiPath, (req) => {
+    req.reply({
+      statusCode: 200,
+      body: state.getFavStore()
+    });
+  }).as('GET_favourite_activities');
+
+  cy.intercept('POST', apiPath, (req) => {
+    const body = (req.body ?? []) as Array<{ activity: string }>;
+    const current = [...state.getFavStore()];
+    let nextId = state.getNextId();
+
+    body.forEach((item) => {
+      if (!current.some((x) => x.activity === item.activity) && current.length < 12) {
+        current.push({
+          id: nextId,
+          activity: item.activity,
+          highlighted: false
+        });
+        nextId += 1;
+      }
+    });
+
+    state.setFavStore(current);
+    state.setNextId(nextId);
+
+    req.reply({ statusCode: 200, body });
+  }).as('POST_favourite_activities');
+
+  cy.intercept('PATCH', '**/api/favourite-activities/*', (req) => {
+    const id = Number(req.url.split('/').pop());
+    const updated = state.getFavStore().map((x) => (x.id === id ? { ...x, highlighted: !x.highlighted } : x));
+    state.setFavStore(updated);
+
+    req.reply({ statusCode: 200, body: {} });
+  }).as('PATCH_favourite_activities');
+
+  cy.intercept('DELETE', '**/api/favourite-activities/*', (req) => {
+    const id = Number(req.url.split('/').pop());
+    const updated = state.getFavStore().filter((x) => x.id !== id);
+    state.setFavStore(updated);
+
+    req.reply({ statusCode: 200, body: {} });
+  }).as('DELETE_favourite_activities');
+}
+
 /**
  * Sets up Cypress intercepts for purity content tests and debris APIs
  * with predefined fixture responses for testing purposes.
