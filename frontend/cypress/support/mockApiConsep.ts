@@ -24,14 +24,18 @@ export function mockMoistureContentApi() {
   ).as('DELETE_replicate');
 }
 
+/**
+ * Sets up Cypress intercepts for purity content tests and debris APIs
+ * with predefined fixture responses for testing purposes.
+ */
 export function mockPurityContentApi() {
   cy.intercept(
-    { method: 'GET', url: '**/api/purity-tests/79082/*' },
+    { method: 'GET', url: '**/api/purity-tests/79082*' },
     { statusCode: 200, fixture: 'purity-seedlot-replicate-info.json' }
   ).as('GET_purity_content_cone');
 
   cy.intercept(
-    { method: 'DELETE', url: '**/api/purity-tests/debris/79082/**' },
+    { method: 'DELETE', url: '**/api/purity-tests/debris/79082*' },
     {
       statusCode: 200,
       body: [
