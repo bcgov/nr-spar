@@ -13,7 +13,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-24.04
     env:
-      CYPRESS_TARGET_FOLDER: cypress/e2e/smoke-test-05
+      CYPRESS_TARGET_FOLDER: frontend/cypress/e2e/smoke-test-05
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
