@@ -25,7 +25,7 @@ jobs:
       fail-fast: false
       matrix:
         test_folder: [
-          features,
+          smoke-test-01,
           smoke-test-02,
           smoke-test-03,
           smoke-test-04,
@@ -62,11 +62,7 @@ jobs:
           node_version: "22"
           commands: |
             npm ci
-            if [ "${{ matrix.test_folder }}" = "features" ]; then
-              SPEC="cypress/e2e/features/**/*.{feature,cy.ts,cy.js}"
-            else
-              SPEC="cypress/e2e/${{ matrix.test_folder }}/**/*.{cy.ts,cy.js}"
-            fi
+              SPEC="cypress/e2e/${{ matrix.test_folder }}/**/*.{feature,cy.ts,cy.js}"
             npx start-server-and-test start http://localhost:3000 "cypress run --browser chrome --spec $SPEC"
           dir: frontend
           sonar_args: >
@@ -76,12 +72,13 @@ jobs:
             -Dsonar.sources=src/
             -Dsonar.exclusions=src/__test__/**/*
             -Dsonar.exclusions=src/mock-server/**/*
-            -Dsonar.test.inclusions=cypress/e2e/features/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-01/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-02/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-03/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-04/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-05/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
+
       - name: Upload videos
         uses: actions/upload-artifact@v7
         if: always()
