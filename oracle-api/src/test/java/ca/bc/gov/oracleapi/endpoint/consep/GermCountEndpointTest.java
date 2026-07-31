@@ -1,9 +1,13 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,6 +41,21 @@ class GermCountEndpointTest {
   private GermCountService germCountService;
 
   private static final String BASE_URL = "/api/germ-counts";
+
+  private static final String VALID_BODY = """
+      {
+        "days": [
+          {"slotIndex":1,"countDt":"2026-04-01","dayNoOfTest":1,
+           "rep1NoSeedsGerm":10,"rep2NoSeedsGerm":12,"rep3NoSeedsGerm":11,"rep4NoSeedsGerm":9}
+        ],
+        "replicates": [
+          {"replicateNumber":1,"totalNoSeeds":100},
+          {"replicateNumber":2,"totalNoSeeds":100},
+          {"replicateNumber":3,"totalNoSeeds":100},
+          {"replicateNumber":4,"totalNoSeeds":100}
+        ]
+      }
+      """;
 
   private GermCountDto buildDto(BigDecimal riaSkey) {
     return new GermCountDto(
@@ -129,5 +148,162 @@ class GermCountEndpointTest {
         .andExpect(status().isForbidden());
 
     verify(germCountService, times(0)).getGermCounts(null);
+  }
+
+  @Test
+  void upsert_returns200_whenServiceSucceeds() throws Exception {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    when(germCountService.upsertGermCounts(eq(riaSkey), any(), any()))
+        .thenReturn(buildDto(riaSkey));
+
+    mockMvc
+        .perform(put(BASE_URL + "/" + riaSkey)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(VALID_BODY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.riaSkey").value(881191));
+
+    verify(germCountService, times(1)).upsertGermCounts(eq(riaSkey), any(), any());
+  }
+
+  @Test
+  void upsert_returns409_whenServiceThrowsConflict() throws Exception {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    when(germCountService.upsertGermCounts(eq(riaSkey), any(), any()))
+        .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "conflict"));
+
+    mockMvc
+        .perform(put(BASE_URL + "/" + riaSkey)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(VALID_BODY))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  void upsert_returns400_whenBodyInvalid() throws Exception {
+    // days[0] missing required slotIndex -> bean validation 400
+    String badBody = """
+        {"days":[{"countDt":"2026-04-01","dayNoOfTest":1}],
+         "replicates":[{"replicateNumber":1,"totalNoSeeds":100}]}
+        """;
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(badBody))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void upsert_returns400_whenDaysEmpty() throws Exception {
+    String badBody = """
+        {"days":[],
+         "replicates":[{"replicateNumber":1,"totalNoSeeds":100}]}
+        """;
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(badBody))
+        .andExpect(status().isBadRequest());
+
+    verify(germCountService, times(0)).upsertGermCounts(any(), any(), any());
+  }
+
+  @Test
+  void upsert_returns400_whenReplicatesEmpty() throws Exception {
+    String badBody = """
+        {"days":[{"slotIndex":1,"countDt":"2026-04-01","dayNoOfTest":1}],
+         "replicates":[]}
+        """;
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(badBody))
+        .andExpect(status().isBadRequest());
+
+    verify(germCountService, times(0)).upsertGermCounts(any(), any(), any());
+  }
+
+  @Test
+  void upsert_returns400_whenSlotIndexOutOfRange() throws Exception {
+    String badBody = """
+        {"days":[{"slotIndex":14,"countDt":"2026-04-01","dayNoOfTest":1}],
+         "replicates":[{"replicateNumber":1,"totalNoSeeds":100}]}
+        """;
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(badBody))
+        .andExpect(status().isBadRequest());
+
+    verify(germCountService, times(0)).upsertGermCounts(any(), any(), any());
+  }
+
+  @Test
+  void upsert_returns400_whenReplicateNumberOutOfRange() throws Exception {
+    String badBody = """
+        {"days":[{"slotIndex":1,"countDt":"2026-04-01","dayNoOfTest":1}],
+         "replicates":[{"replicateNumber":5,"totalNoSeeds":100}]}
+        """;
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(badBody))
+        .andExpect(status().isBadRequest());
+
+    verify(germCountService, times(0)).upsertGermCounts(any(), any(), any());
+  }
+
+  @Test
+  void upsert_returns400_whenAbnormalCountOutOfRange() throws Exception {
+    String badBody = """
+        {"days":[{"slotIndex":1,"countDt":"2026-04-01","dayNoOfTest":1,
+                  "rep1Abnormal":{"abnormalNumReverseEmbryo":1000}}],
+         "replicates":[{"replicateNumber":1,"totalNoSeeds":100}]}
+        """;
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(badBody))
+        .andExpect(status().isBadRequest());
+
+    verify(germCountService, times(0)).upsertGermCounts(any(), any(), any());
+  }
+
+  @Test
+  void upsert_returns400_whenMoreThan13Days() throws Exception {
+    StringBuilder days = new StringBuilder();
+    for (int i = 1; i <= 14; i++) {
+      days.append(i > 1 ? "," : "")
+          .append("{\"slotIndex\":").append(Math.min(i, 13)).append('}');
+    }
+    String badBody = "{\"days\":[" + days
+        + "],\"replicates\":[{\"replicateNumber\":1,\"totalNoSeeds\":100}]}";
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(badBody))
+        .andExpect(status().isBadRequest());
+
+    verify(germCountService, times(0)).upsertGermCounts(any(), any(), any());
+  }
+
+  @Test
+  @WithAnonymousUser
+  void upsert_returns401_whenAnonymous() throws Exception {
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(VALID_BODY))
+        .andExpect(status().isUnauthorized());
   }
 }

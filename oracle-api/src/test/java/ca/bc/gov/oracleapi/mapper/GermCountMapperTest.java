@@ -2,6 +2,9 @@ package ca.bc.gov.oracleapi.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.bc.gov.oracleapi.dto.consep.GermCountDto;
 import ca.bc.gov.oracleapi.dto.consep.GermCountSlotDto;
@@ -239,6 +242,35 @@ class GermCountMapperTest {
     assertThatThrownBy(() -> mapper.toEntity(dto))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("99");
+  }
+
+  // ── applySlots(List<GermCountSlotDto>, GermCountEntity) ─────────────────────
+
+  @Test
+  void applySlots_setsNumberedColumns_forGivenSlots() {
+    GermCountEntity e = new GermCountEntity();
+
+    mapper.applySlots(
+        List.of(
+            new GermCountSlotDto(1, new BigDecimal("1001"), LocalDate.of(2026, 4, 1), 1, 10, 12, 11, 9, new BigDecimal("42.0000")),
+            new GermCountSlotDto(3, new BigDecimal("1003"), LocalDate.of(2026, 4, 3), 3, 5, 6, 7, 8, new BigDecimal("100.0000"))),
+        e);
+
+    assertEquals(new BigDecimal("1001"), e.getDailyGermSkey1());
+    assertEquals(LocalDate.of(2026, 4, 1), e.getCountDt1());
+    assertEquals(10, e.getRep1NoSeedsGerm1());
+    assertEquals(new BigDecimal("42.0000"), e.getCumulativeGerm1());
+    assertEquals(new BigDecimal("1003"), e.getDailyGermSkey3());
+    assertEquals(8, e.getRep4NoSeedsGerm3());
+    assertNull(e.getDailyGermSkey2());
+  }
+
+  @Test
+  void applySlots_throws_forInvalidIndex() {
+    GermCountEntity e = new GermCountEntity();
+    List<GermCountSlotDto> bad =
+        List.of(new GermCountSlotDto(14, null, null, null, 0, 0, 0, 0, null));
+    assertThrows(IllegalArgumentException.class, () -> mapper.applySlots(bad, e));
   }
 
   // ── Roundtrip ────────────────────────────────────────────────────────────
