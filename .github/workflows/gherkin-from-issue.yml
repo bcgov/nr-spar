@@ -4,10 +4,13 @@ on:
   issues:
     types:
       - opened
+      - labeled
+      - edited
+      - reopened
 
 jobs:
   create-feature:
-    if: contains(github.event.issue.labels.*.name, 'gherkin')
+    if: (github.event.action == 'labeled' && github.event.label.name == 'gherkin') || (github.event.action != 'labeled' && contains(github.event.issue.labels.*.name, 'gherkin'))
     permissions:
       contents: write
       pull-requests: write
