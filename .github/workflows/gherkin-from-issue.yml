@@ -12,6 +12,8 @@ jobs:
       contents: write
       pull-requests: write
     runs-on: ubuntu-24.04
+    env:
+      CYPRESS_TARGET_FOLDER: frontend/cypress/e2e/smoke-test-05
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -28,7 +30,9 @@ jobs:
           update_title: true
 
       - name: Create feature file
-        run: echo "${{ steps.feature.outputs.feature }}" > cypress/e2e/features/upt_${{ github.event.issue.number }}.feature
+        run: |
+          mkdir -p "${CYPRESS_TARGET_FOLDER}"
+          printf '%s\n' "${{ steps.feature.outputs.feature }}" > "${CYPRESS_TARGET_FOLDER}/upt_${{ github.event.issue.number }}.feature"
 
       - name: Commit & Push changes
         uses: Andro999b/push@c77535fe7a94645f7ceca83e48e6cc977620710e # v1.3
