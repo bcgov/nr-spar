@@ -52,7 +52,7 @@ jobs:
       - if: steps.triggers.outputs.triggered == 'false'
         run: echo "No tests required/triggered!"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: steps.triggers.outputs.triggered == 'true'
 
       - name: Run Cypress CI
