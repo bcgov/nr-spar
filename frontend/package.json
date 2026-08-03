@@ -41,9 +41,9 @@
     "web-vitals": "^5.0.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.6",
-    "@babel/plugin-syntax-flow": "^7.27.1",
-    "@babel/plugin-transform-react-jsx": "^7.27.1",
+    "@babel/core": "^8.0.0",
+    "@babel/plugin-syntax-flow": "^8.0.0",
+    "@babel/plugin-transform-react-jsx": "^8.0.0",
     "@badeball/cypress-cucumber-preprocessor": "^24.0.1",
     "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
     "@cypress/code-coverage": "^4.0.0",
