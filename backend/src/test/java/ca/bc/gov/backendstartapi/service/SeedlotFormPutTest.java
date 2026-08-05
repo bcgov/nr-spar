@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
@@ -13,6 +14,7 @@ import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
+import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
@@ -53,6 +55,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -483,6 +486,15 @@ class SeedlotFormPutTest {
     Assertions.assertNotNull(scDto);
     Assertions.assertEquals("5432", scDto.seedlotNumber());
     Assertions.assertEquals("SUB", scDto.seedlotStatusCode());
+
+    // #2616: the submit-time recalculation must carry the weighted SMP mix breeding values,
+    // otherwise every smp*Contribution term is multiplied by zero and the genetic worth
+    // persisted for review/approve silently drops the SMP contribution.
+    ArgumentCaptor<PtValsCalReqDto> ptValsCaptor = ArgumentCaptor.forClass(PtValsCalReqDto.class);
+    verify(parentTreeService).calculatePtVals(ptValsCaptor.capture());
+    Assertions.assertNotNull(ptValsCaptor.getValue().smpBv());
+    // mocked SMP mix row is GVO 18 at proportion 100 -> 1800
+    Assertions.assertEquals(1800.0, ptValsCaptor.getValue().smpBv().getGvo(), 0.0001);
 
     Assertions.assertEquals(
         mockedForm.seedlotFormInterimDto().intermStrgClientNumber(),

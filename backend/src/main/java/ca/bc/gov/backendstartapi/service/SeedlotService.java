@@ -68,6 +68,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -970,6 +971,62 @@ public class SeedlotService {
     SparLog.info("BEC values set");
   }
 
+  /**
+   * Computes the weighted SMP mix breeding values that feed the SMP contribution term of the
+   * genetic worth calculation.
+   *
+   * <p>The calculator multiplies each SMP breeding value by SMP success and the female crop
+   * contribution, so an all-zero value silently removes the SMP contribution from the persisted
+   * genetic worth. Mirrors what the registration form computes client-side: for each trait, the
+   * sum over the SMP mix rows of {@code geneticQualityValue * proportion}, where proportion is the
+   * row's share of the total volume (0-1).
+   *
+   * @param smpPtDtoList the submitted SMP mix parent trees, each carrying its proportion and
+   *     genetic qualities; may be null or empty
+   * @return the per-trait weighted SMP breeding values, all zero when there is no SMP mix
+   */
+  static SeedlotManagementBreedingValueDto calculateSmpMixBreedingValues(
+      List<SeedlotFormParentTreeSmpDto> smpPtDtoList) {
+    Map<String, BigDecimal> weightedByTrait = new HashMap<>();
+
+    if (smpPtDtoList != null) {
+      for (SeedlotFormParentTreeSmpDto smpPt : smpPtDtoList) {
+        BigDecimal proportion = smpPt.proportion();
+        if (proportion == null || smpPt.parentTreeGeneticQualities() == null) {
+          continue;
+        }
+        for (ParentTreeGeneticQualityDto genQual : smpPt.parentTreeGeneticQualities()) {
+          if (genQual.geneticWorthCode() == null || genQual.geneticQualityValue() == null) {
+            continue;
+          }
+          weightedByTrait.merge(
+              genQual.geneticWorthCode().toLowerCase(),
+              genQual.geneticQualityValue().multiply(proportion),
+              BigDecimal::add);
+        }
+      }
+    }
+
+    return new SeedlotManagementBreedingValueDto(
+        traitValue(weightedByTrait, "ad"),
+        traitValue(weightedByTrait, "dfs"),
+        traitValue(weightedByTrait, "dfu"),
+        traitValue(weightedByTrait, "dfw"),
+        traitValue(weightedByTrait, "dsb"),
+        traitValue(weightedByTrait, "dsc"),
+        traitValue(weightedByTrait, "dsg"),
+        traitValue(weightedByTrait, "gvo"),
+        traitValue(weightedByTrait, "iws"),
+        traitValue(weightedByTrait, "wdu"),
+        traitValue(weightedByTrait, "wve"),
+        traitValue(weightedByTrait, "wwd"));
+  }
+
+  private static Double traitValue(Map<String, BigDecimal> weightedByTrait, String traitCode) {
+    BigDecimal value = weightedByTrait.get(traitCode);
+    return value == null ? 0.0 : value.doubleValue();
+  }
+
   private void setParentTreeContribution(
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> orchardPtDtoList,
@@ -984,7 +1041,7 @@ public class SeedlotService {
     PtValsCalReqDto ptValsCalReqDto =
         new PtValsCalReqDto(
             orchardPtVals, smpMixIdAndProps, smpParentsOutside,
-                contaminantPollenBv, new SeedlotManagementBreedingValueDto());
+                contaminantPollenBv, calculateSmpMixBreedingValues(smpPtDtoList));
 
     PtCalculationResDto ptCalculationResDto = parentTreeService.calculatePtVals(ptValsCalReqDto);
 
