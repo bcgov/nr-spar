@@ -1123,7 +1123,8 @@ class SeedlotServiceTest {
                 "0.5",
                 List.of(
                     new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("30"), null, null),
-                    new ParentTreeGeneticQualityDto("BV", "WVE", new BigDecimal("6"), null, null))));
+                    new ParentTreeGeneticQualityDto(
+                        "BV", "WVE", new BigDecimal("6"), null, null))));
 
     SeedlotManagementBreedingValueDto smpBv =
         SeedlotService.calculateSmpMixBreedingValues(smpMix);
