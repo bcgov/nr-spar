@@ -10,9 +10,10 @@ import {
   DropdownSkeleton
 } from '@carbon/react';
 import { TrashCan } from '@carbon/icons-react';
+import { StringInputType } from '@/types/FormInputType';
+import { FilterObj, filterInput } from '@/utils/FilterUtils';
 import ClientAndCodeInput from '../../../ClientAndCodeInput';
 
-import { StringInputType } from '../../../../types/FormInputType';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 
@@ -20,7 +21,6 @@ import { validatePerc } from '../utils';
 
 import { SingleOwnerForm } from '../definitions';
 import { inputText, DEFAULT_INDEX, agencyFieldsProps } from '../constants';
-import { FilterObj, filterInput } from '../../../../utils/FilterUtils';
 
 import './styles.scss';
 
@@ -232,9 +232,14 @@ const SingleOwnerInfo = ({
                     titleText={inputText.funding.titleText}
                     direction="top"
                     onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
-                    invalid={ownerInfo.fundingSource.isInvalid}
-                    invalidText={inputText.funding.invalidText}
+                    invalid={ownerInfo.fundingSource.isInvalid || fundingSourcesQuery.isError}
+                    invalidText={
+                      fundingSourcesQuery.isError
+                        ? inputText.funding.fetchError
+                        : inputText.funding.invalidText
+                    }
                     readOnly={readOnly}
+                    disabled={fundingSourcesQuery.isError}
                   />
                 )
             }
@@ -257,11 +262,15 @@ const SingleOwnerInfo = ({
                     titleText={inputText.payment.titleText}
                     direction="top"
                     onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
-                    invalid={ownerInfo.methodOfPayment.isInvalid}
-                    invalidText={inputText.payment.invalidText}
+                    invalid={ownerInfo.methodOfPayment.isInvalid || methodsOfPaymentQuery.isError}
+                    invalidText={
+                      methodsOfPaymentQuery.isError
+                        ? inputText.payment.fetchError
+                        : inputText.payment.invalidText
+                    }
                     readOnly={readOnly}
+                    disabled={methodsOfPaymentQuery.isError}
                   />
-
                 )
             }
           </Column>
