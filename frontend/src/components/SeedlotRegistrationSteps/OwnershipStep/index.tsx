@@ -11,12 +11,8 @@ import {
 import { Add } from '@carbon/icons-react';
 
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
-import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
-import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import { getSeedlotFromOracleDbBySeedlotNumber } from '../../../api-service/seedlotAPI';
 import TitleAccordion from '../../TitleAccordion';
 import ScrollToTop from '../../ScrollToTop';
@@ -53,7 +49,9 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     defaultClientNumber: defaultAgency,
     defaultCode,
     isFormSubmitted,
-    seedlotNumber
+    seedlotNumber,
+    fundingSourcesQuery,
+    methodsOfPaymentQuery
   } = useContext(ClassAContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
@@ -90,23 +88,6 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     const portionsInvalid = !arePortionsValid(clonedState);
     setPortionsValid(clonedState, portionsInvalid);
   };
-
-  const fundingSourcesQuery = useQuery({
-    queryKey: ['funding-sources'],
-    queryFn: getFundingSources,
-    select: (data) => getMultiOptList(data),
-    enabled: !isFormSubmitted,
-    staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
-  });
-
-  const methodsOfPaymentQuery = useQuery({
-    queryKey: ['methods-of-payment'],
-    queryFn: getMethodsOfPayment,
-    select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
-    staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
-  });
 
   const getSeedlotBySeedlotNumberQuery = useQuery({
     queryKey: ['get-seedlot-by-seedlotNumber', seedlotNumber],

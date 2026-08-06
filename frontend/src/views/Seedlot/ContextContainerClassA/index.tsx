@@ -285,12 +285,16 @@ const ContextContainerClassA = ({ children }: props) => {
     numOfEdit.current += 1;
   };
 
+  // retry: false lets the query settle (isFetched) after a single failed attempt so the form
+  // never hangs behind the full-page loader; the field surfaces the failure and asks the user
+  // to refresh instead.
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
     queryFn: getFundingSources,
     select: (data) => getMultiOptList(data),
     staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS,
+    retry: false
   });
 
   const methodsOfPaymentQuery = useQuery({
@@ -298,7 +302,8 @@ const ContextContainerClassA = ({ children }: props) => {
     queryFn: getMethodsOfPayment,
     select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
     staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS,
+    retry: false
   });
 
   const gameticMethodologyQuery = useQuery({
@@ -403,7 +408,7 @@ const ContextContainerClassA = ({ children }: props) => {
       getAllSeedlotInfoQuery.status === 'success'
       && parentTreeCatalogQuery.status === 'success'
       && fundingSourcesQuery.status === 'success'
-      && methodsOfPaymentQuery.status === 'success'
+      && methodsOfPaymentQuery.isFetched
       && gameticMethodologyQuery.status === 'success'
       && orchardQuery.status === 'success'
       && seedlotQuery.status === 'success'
@@ -416,7 +421,7 @@ const ContextContainerClassA = ({ children }: props) => {
       const hydratedState = resDataToState(
         fullFormData,
         defaultAgencyNumber,
-        methodsOfPaymentQuery.data,
+        methodsOfPaymentQuery.data ?? [],
         fundingSourcesQuery.data,
         orchardQuery.data,
         gameticMethodologyQuery.data
@@ -438,7 +443,7 @@ const ContextContainerClassA = ({ children }: props) => {
     getAllSeedlotInfoQuery.status,
     parentTreeCatalogQuery.status,
     fundingSourcesQuery.status,
-    methodsOfPaymentQuery.status,
+    methodsOfPaymentQuery.isFetched,
     gameticMethodologyQuery.status,
     orchardQuery.status,
     seedlotQuery.status,
@@ -693,12 +698,12 @@ const ContextContainerClassA = ({ children }: props) => {
         navigate(`/seedlots/details/${seedlotNumber}`);
       } else if (
         seedlotQuery.status === 'success'
-        && methodsOfPaymentQuery.status === 'success'
+        && methodsOfPaymentQuery.isFetched
         && formPhase === 'loading-draft'
       ) {
         // First open (no draft): apply agency/location and default method of payment once.
         // Copy/hydrate paths set ownership from tables and must not get this default.
-        const defaultPayment = methodsOfPaymentQuery.data.find((m) => m.isDefault);
+        const defaultPayment = methodsOfPaymentQuery.data?.find((m) => m.isDefault);
         setDefaultClientAndCode(
           seedlotQuery.data.seedlot.applicantClientNumber,
           getDefaultLocationCode(),
@@ -711,7 +716,8 @@ const ContextContainerClassA = ({ children }: props) => {
     getFormDraftQuery.status,
     getFormDraftQuery.fetchStatus,
     seedlotQuery.status,
-    methodsOfPaymentQuery.status,
+    methodsOfPaymentQuery.isFetched,
+    methodsOfPaymentQuery.data,
     formPhase
   ]);
 
@@ -875,7 +881,9 @@ const ContextContainerClassA = ({ children }: props) => {
         setAreaOfUseData,
         isCalculatingPt,
         setIsCalculatingPt,
-        getFormDraftQuery
+        getFormDraftQuery,
+        fundingSourcesQuery,
+        methodsOfPaymentQuery
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
