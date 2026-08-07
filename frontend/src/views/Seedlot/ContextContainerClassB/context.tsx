@@ -9,6 +9,7 @@ import {
   SeedlotType
 } from '../../../types/SeedlotType';
 import { MutationStatusType } from '../../../types/QueryStatusType';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import {
   BClassAllStepData,
@@ -44,7 +45,9 @@ export type ClassBContextType = {
   getBClassSeedlotPayload: (
     allStepData: BClassAllStepData,
     richSeedlotData?: RichSeedlotType
-  ) => SeedlotBClassSubmitType
+  ) => SeedlotBClassSubmitType,
+  fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>,
+  methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>
 };
 
 const ClassBContext = createContext<ClassBContextType>({
@@ -73,7 +76,9 @@ const ClassBContext = createContext<ClassBContextType>({
   submitSeedlot: {} as UseMutationResult<
     AxiosResponse<unknown, unknown>, unknown, SeedlotBClassSubmitType, unknown
   >,
-  getBClassSeedlotPayload: () => ({} as SeedlotBClassSubmitType)
+  getBClassSeedlotPayload: () => ({} as SeedlotBClassSubmitType),
+  fundingSourcesQuery: {} as UseQueryResult<MultiOptionsObj[], unknown>,
+  methodsOfPaymentQuery: {} as UseQueryResult<MultiOptionsObj[], unknown>
 });
 
 export default ClassBContext;

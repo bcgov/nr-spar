@@ -74,7 +74,9 @@ const ContextContainerClassB = ({ children }: props) => {
     isFetchingData,
     defaultClientNumber,
     defaultLocationCode,
-    resetEditsOnHydrate
+    resetEditsOnHydrate,
+    fundingSourcesQuery,
+    methodsOfPaymentQuery
   } = useBClassFormLoader({ seedlotNumber, formStep });
 
   const becCatalogueQuery = useQuery({
@@ -310,7 +312,9 @@ const ContextContainerClassB = ({ children }: props) => {
       isFetchingData,
       getFormDraftQuery,
       submitSeedlot,
-      getBClassSeedlotPayload
+      getBClassSeedlotPayload,
+      fundingSourcesQuery,
+      methodsOfPaymentQuery
     }),
     [
       seedlotNumber,
@@ -330,6 +334,8 @@ const ContextContainerClassB = ({ children }: props) => {
       isFetchingData,
       defaultClientNumber,
       defaultLocationCode,
+      fundingSourcesQuery,
+      methodsOfPaymentQuery,
       getFormDraftQuery,
       submitSeedlot.status
     ]

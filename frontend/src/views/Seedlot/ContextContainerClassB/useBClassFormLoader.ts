@@ -2,7 +2,7 @@ import {
   Dispatch, SetStateAction, useEffect, useRef, useState
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
 import {
@@ -11,6 +11,7 @@ import {
 import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import { RichSeedlotType, SeedlotBClassProgressPayloadType } from '../../../types/SeedlotType';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import ROUTES from '../../../routes/constants';
@@ -60,6 +61,8 @@ type UseBClassFormLoaderResult = {
   defaultClientNumber: string;
   defaultLocationCode: string;
   resetEditsOnHydrate: () => void;
+  fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>;
+  methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>;
 };
 
 export const useBClassFormLoader = ({
@@ -125,18 +128,18 @@ export const useBClassFormLoader = ({
     queryKey: ['funding-sources'],
     queryFn: getFundingSources,
     select: (data) => getMultiOptList(data),
-    enabled: needsFullForm,
     staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS,
+    retry: false
   });
 
   const methodsOfPaymentQuery = useQuery({
     queryKey: ['methods-of-payment'],
     queryFn: getMethodsOfPayment,
     select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
-    enabled: needsFullForm,
     staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS,
+    retry: false
   });
 
   const ownershipLookupsReady = !needsFullForm
@@ -307,8 +310,8 @@ export const useBClassFormLoader = ({
   const isFetchingData = seedlotQuery.isFetching
     || (editable && getFormDraftQuery.isFetching)
     || (needsFullForm && fullFormQuery.isFetching)
-    || (needsFullForm && fundingSourcesQuery.isFetching)
-    || (needsFullForm && methodsOfPaymentQuery.isFetching);
+    || fundingSourcesQuery.isFetching
+    || methodsOfPaymentQuery.isFetching;
 
   const resetEditsOnHydrate = () => {
     hydrationKeyRef.current = null;
@@ -331,7 +334,9 @@ export const useBClassFormLoader = ({
     isFetchingData,
     defaultClientNumber,
     defaultLocationCode,
-    resetEditsOnHydrate
+    resetEditsOnHydrate,
+    fundingSourcesQuery,
+    methodsOfPaymentQuery
   };
 };
 

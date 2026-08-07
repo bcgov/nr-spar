@@ -8,13 +8,18 @@ import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/E
 import ClassBContext from '../ContextContainerClassB/context';
 
 const RegForm = () => {
-  const { formStep } = useContext(ClassBContext);
+  const { formStep, fundingSourcesQuery, methodsOfPaymentQuery } = useContext(ClassBContext);
 
   switch (formStep) {
     case 0:
       return <BClassCollectionStep />;
     case 1:
-      return <OwnershipStep />;
+      return (
+        <OwnershipStep
+          fundingSourcesQuery={fundingSourcesQuery}
+          methodsOfPaymentQuery={methodsOfPaymentQuery}
+        />
+      );
     case 2:
       return <InterimStep />;
     case 3:

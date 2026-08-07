@@ -2,7 +2,9 @@ import React, {
   useState, useRef, useContext,
   useEffect
 } from 'react';
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useQueries, useQuery, useQueryClient, UseQueryResult
+} from '@tanstack/react-query';
 import {
   Accordion,
   AccordionItem,
@@ -11,8 +13,8 @@ import {
 import { Add } from '@carbon/icons-react';
 
 import SeedlotRegWizardContext from '../../../contexts/SeedlotRegWizardContext';
-import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import { getSeedlotFromOracleDbBySeedlotNumber } from '../../../api-service/seedlotAPI';
 import TitleAccordion from '../../TitleAccordion';
@@ -37,22 +39,26 @@ import { MAX_OWNERS } from './constants';
 import './styles.scss';
 
 type OwnershipStepProps = {
-  isReview?: boolean
+  isReview?: boolean,
+  fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>,
+  methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>
 }
 
 /*
   Component
 */
-const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
+const OwnershipStep = ({
+  isReview = false,
+  fundingSourcesQuery,
+  methodsOfPaymentQuery
+}: OwnershipStepProps) => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
     defaultClientNumber: defaultAgency,
     defaultCode,
     isFormSubmitted,
-    seedlotNumber,
-    fundingSourcesQuery,
-    methodsOfPaymentQuery
+    seedlotNumber
   } = useContext(SeedlotRegWizardContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
