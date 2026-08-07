@@ -1,0 +1,19 @@
+meta {
+  name: Get B-Class Full Form
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/seedlots/{{seedlotNumber}}/b-class-full-form
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}

@@ -20,13 +20,14 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/** Quantification of a given genetic quality in a seedlot. */
+/** Wizard draft progress for an in-flight seedlot registration (A-class or B-class). */
 @Entity
-@Table(name = "seedlot_registration_a_class_save", schema = "spar")
+@Table(name = "seedlot_registration_save", schema = "spar")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
 @Setter
-public class SaveSeedlotProgressEntityClassA {
+public class SaveSeedlotProgressEntity {
+
   @Id
   @Column(name = "seedlot_number")
   private String seedlotNumber;
@@ -50,10 +51,8 @@ public class SaveSeedlotProgressEntityClassA {
   @Setter(AccessLevel.NONE)
   private int revisionCount;
 
-  /**
-   * Constructor for SaveSeedlotProgressEntityClassA.
-   */
-  public SaveSeedlotProgressEntityClassA(
+  /** Full constructor used when creating a new draft record. */
+  public SaveSeedlotProgressEntity(
       Seedlot seedlot,
       Map<String, Object> allStepData,
       Map<String, Object> progressStatus,

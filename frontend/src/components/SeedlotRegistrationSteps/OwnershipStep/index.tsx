@@ -2,7 +2,9 @@ import React, {
   useState, useRef, useContext,
   useEffect
 } from 'react';
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useQueries, useQuery, useQueryClient, UseQueryResult
+} from '@tanstack/react-query';
 import {
   Accordion,
   AccordionItem,
@@ -10,15 +12,10 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
-import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
+import SeedlotRegWizardContext from '../../../contexts/SeedlotRegWizardContext';
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
-import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
-import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
-import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import { getSeedlotFromOracleDbBySeedlotNumber } from '../../../api-service/seedlotAPI';
 import TitleAccordion from '../../TitleAccordion';
 import ScrollToTop from '../../ScrollToTop';
@@ -42,13 +39,19 @@ import { MAX_OWNERS } from './constants';
 import './styles.scss';
 
 type OwnershipStepProps = {
-  isReview?: boolean
+  isReview?: boolean,
+  fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>,
+  methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>
 }
 
 /*
   Component
 */
-const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
+const OwnershipStep = ({
+  isReview = false,
+  fundingSourcesQuery,
+  methodsOfPaymentQuery
+}: OwnershipStepProps) => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
@@ -56,7 +59,7 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     defaultCode,
     isFormSubmitted,
     seedlotNumber
-  } = useContext(ClassAContext);
+  } = useContext(SeedlotRegWizardContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
   const [originalSeedQty, setOriginalSeedQty] = useState<number>(0);
@@ -93,42 +96,11 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     setPortionsValid(clonedState, portionsInvalid);
   };
 
-  const fundingSourcesQuery = useQuery({
-    queryKey: ['funding-sources'],
-    queryFn: getFundingSources,
-    select: (data) => getMultiOptList(data),
-    enabled: !isFormSubmitted,
-    staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
-  });
-
-  const methodsOfPaymentQuery = useQuery({
-    queryKey: ['methods-of-payment'],
-    queryFn: getMethodsOfPayment,
-    select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
-    staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
-  });
-
   const getSeedlotBySeedlotNumberQuery = useQuery({
     queryKey: ['get-seedlot-by-seedlotNumber', seedlotNumber],
     queryFn: () => getSeedlotFromOracleDbBySeedlotNumber(seedlotNumber ?? ''),
     enabled: isReview && !!seedlotNumber
   });
-
-  // Set default method of payment for the first owner.
-  useEffect(() => {
-    if (methodsOfPaymentQuery.status === 'success') {
-      const methods = methodsOfPaymentQuery.data;
-      const defaultMethodArr = methods.filter((data: MultiOptionsObj) => data.isDefault);
-      const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
-      if (!state[0].methodOfPayment.value?.code && !state[0].methodOfPayment.hasChanged) {
-        const tempOwnershipData = structuredClone(state);
-        tempOwnershipData[0].methodOfPayment.value = defaultMethod;
-        setStepData('ownershipStep', tempOwnershipData);
-      }
-    }
-  }, [methodsOfPaymentQuery.status, methodsOfPaymentQuery.fetchStatus]);
 
   const addAnOwner = () => {
     // Maximum # of ownership can be set

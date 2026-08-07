@@ -1,0 +1,19 @@
+meta {
+  name: Get B-Class Form Progress Status
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/seedlots/{{seedlotNumber}}/b-class-form-progress/status
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Accept: application/json
+}

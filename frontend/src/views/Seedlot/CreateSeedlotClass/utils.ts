@@ -1,9 +1,12 @@
 import React from 'react';
 
+import { SeedlotRegFormType, SeedlotRegPayloadType } from '@/types/SeedlotRegistrationTypes';
 import focusById from '../../../utils/FocusUtils';
-import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../../types/SeedlotRegistrationTypes';
 
-export const convertToPayload = (formData: SeedlotRegFormType): SeedlotRegPayloadType => ({
+export const convertToPayload = (
+  formData: SeedlotRegFormType,
+  geneticClass: 'A' | 'B'
+): SeedlotRegPayloadType => ({
   applicantClientNumber: formData.client.value,
   applicantLocationCode: formData.locationCode.value,
   applicantEmailAddress: formData.email.value,
@@ -11,7 +14,7 @@ export const convertToPayload = (formData: SeedlotRegFormType): SeedlotRegPayloa
   seedlotSourceCode: formData.sourceCode.value,
   toBeRegistrdInd: formData.willBeRegistered.value,
   bcSourceInd: formData.isBcSource.value,
-  geneticClassCode: 'A'
+  geneticClassCode: geneticClass
 });
 
 export const setInputValidation = (
@@ -33,13 +36,11 @@ export const validateRegForm = (
   setSeedlotFormData: React.Dispatch<React.SetStateAction<SeedlotRegFormType>>
 ): boolean => {
   let isValid = false;
-  // Validate client
   if (seedlotFormData.client.isInvalid || !seedlotFormData.client.value) {
     setInputValidation('client', true, setSeedlotFormData);
     focusById(seedlotFormData.client.id);
     return isValid;
   }
-  // Validate location code
   if (
     seedlotFormData.locationCode.isInvalid
     || !seedlotFormData.locationCode.value
@@ -48,19 +49,16 @@ export const validateRegForm = (
     focusById(seedlotFormData.locationCode.id);
     return isValid;
   }
-  // Validate email
   if (seedlotFormData.email.isInvalid || !seedlotFormData.email.value) {
     setInputValidation('email', true, setSeedlotFormData);
     focusById(seedlotFormData.email.id);
     return isValid;
   }
-  // Validate species
   if (seedlotFormData.species.isInvalid || !seedlotFormData.species.value.code) {
     setInputValidation('species', true, setSeedlotFormData);
     focusById(seedlotFormData.species.id);
     return isValid;
   }
-  // Source code, and the two booleans always have a default value so there's no need to check.
   isValid = true;
   return isValid;
 };

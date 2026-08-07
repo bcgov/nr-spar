@@ -36,8 +36,10 @@ import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionBclassMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -99,6 +101,14 @@ class SeedlotFormPutTest {
 
   @Mock SeedlotFormValidationService seedlotFormValidationService;
 
+  @Mock SeedlotCollectionGeometryRepository seedlotCollectionGeometryRepository;
+
+  @Mock SeedlotCollectionGeometryService seedlotCollectionGeometryService;
+
+  @Mock SeedlotFormCollectionBclassMapper seedlotFormCollectionBclassMapper;
+
+  @Mock SaveSeedlotFormService saveSeedlotFormService;
+
   @BeforeEach
   void setup() {
     seedlotService =
@@ -122,7 +132,11 @@ class SeedlotFormPutTest {
             parentTreeService,
             tscAdminService,
             oracleApiProvider,
-            seedlotFormValidationService);
+            seedlotFormValidationService,
+            seedlotCollectionGeometryRepository,
+            seedlotCollectionGeometryService,
+            seedlotFormCollectionBclassMapper,
+            saveSeedlotFormService);
   }
 
   private SeedlotService seedlotService;
