@@ -154,7 +154,9 @@ public class PurityTestsEndpoint {
       value = {
           @ApiResponse(responseCode = "200", description = "Field successfully updated"),
           @ApiResponse(responseCode = "400", description = "Invalid object"),
-          @ApiResponse(responseCode = "404", description = "Activity entry not found")
+          @ApiResponse(responseCode = "404", description = "Activity entry not found"),
+          @ApiResponse(responseCode = "409",
+              description = "Activity was modified by another user (stale update timestamp)")
       })
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public ActivityEntity updateActivityField(

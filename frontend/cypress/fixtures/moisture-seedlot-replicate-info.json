@@ -1,0 +1,56 @@
+{
+  "testCompleteInd": 0,
+  "sampleDesc": null,
+  "moistureStatus": null,
+  "moisturePct": 86.5,
+  "acceptResult": 0,
+  "requestId": "SSP20000093",
+  "seedlotNumber": "60662",
+  "familyLotNumber": null,
+  "geneticClassCode": "A",
+  "vegetationCode": "FDC",
+  "activityType": "MC",
+  "testCategoryCode": "STD",
+  "riaComment": null,
+  "actualBeginDateTime": "2025-06-09T07:00:00",
+  "actualEndDateTime": "2025-06-25T07:00:00",
+  "standardActivityType": "MC",
+  "replicatesList": [
+    {
+      "riaKey": 514330,
+      "replicateNumber": 1,
+      "containerId": "33",
+      "containerWeight": 22,
+      "freshSeed": 33,
+      "containerAndDryWeight": 44,
+      "dryWeight": 22,
+      "replicateAccInd": 1,
+      "replicateComment": null,
+      "overrideReason": null
+    },
+    {
+      "riaKey": 514330,
+      "replicateNumber": 2,
+      "containerId": "444",
+      "containerWeight": 5,
+      "freshSeed": 45,
+      "containerAndDryWeight": 220,
+      "dryWeight": 10,
+      "replicateAccInd": 1,
+      "replicateComment": null,
+      "overrideReason": null
+    },
+    {
+      "riaKey": 514330,
+      "replicateNumber": 3,
+      "containerId": "15",
+      "containerWeight": 30,
+      "freshSeed": 30,
+      "containerAndDryWeight": 419,
+      "dryWeight": 11,
+      "replicateAccInd": 1,
+      "replicateComment": null,
+      "overrideReason": null
+    }
+  ]
+}

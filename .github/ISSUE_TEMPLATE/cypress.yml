@@ -8,18 +8,36 @@ body:
       value: |
         ## 📝 Gherkin Scenario Submission
 
-        Thank you for contributing! Please provide your Gherkin scenario in the format below. 
+        Please provide your NR-SPAR Cypress/Cucumber scenario in the format below.
 
         ### Gherkin/Cucumber Test Scenario
-        - ✍️ **Write or paste your Gherkin scenario in the first block**:  
-          - Ensure the scenario follows the structure of **Given**, **When**, **Then**.
-          - Ensure the scenario contains a **Feature** and **Scenario** instruction.
-          - You can have multiple **Scenarios** in a single **Feature**.
-          - Pay attention to the **indentation** and **keywords**, as misconfigured files will cause issues when executed.
-          - Pay attention to the data you're using in your scenario. Make sure it don't pose a security risk or exposes any **REAL** [personal identifiable information](https://www2.gov.bc.ca/gov/content/governments/services-for-government/information-management-technology/privacy/personal-information).
-          - If you're unsure how to format your scenario, [click here for a guide](https://github.com/bcgov/nr-forest-client/tree/main/cypress#readme).
-        - 🧩 **Additional instructions**:  
-          - Use the second block to provide any **non-default** steps or custom behavior that doesn’t fit into our predefined instructions. You can find a list of ready-made instructions in [our documentation](https://github.com/bcgov/nr-forest-client/tree/main/cypress#readme).
+        - ✍️ **Write or paste your Gherkin scenario in the first block.**
+        - Ensure the scenario follows the structure of `Feature`, `Scenario`, `Given`, `When`, `Then`, `And`, or `But`.
+        - You can have multiple scenarios in a single feature.
+        - Pay close attention to indentation, spacing, and keyword casing.
+        - Keep the `gherkin` label on this issue so the automation workflow can generate the feature file.
+        - For detailed Cucumber/Gherkin formatting guidance and examples, see:
+          [Cypress Cucumber guide](https://github.com/bcgov/nr-forest-client/tree/main/cypress#readme)
+        - Do not include real personal or sensitive information in the scenario content.
+        - Before requesting new steps, check the reusable NR-SPAR instructions in our documentation:
+          [Reusable step instructions](https://github.com/bcgov/nr-spar/wiki/Cucumber-Gherkin-reusable-step-instructions)
+
+        ### Additional Instructions
+        - Use the second block only for behavior that is not already covered by existing reusable NR-SPAR steps.
+        - Examples:
+          - a brand new page or workflow
+          - a new API mock requirement
+          - a new fixture requirement
+          - a new UI action or validation not covered by current steps
+
+        ### Generated Test File Location
+        - Submitted scenarios are converted into `.feature` files for the NR-SPAR Cypress smoke test suite.
+        - Generated feature files are placed into the configured smoke test folder, not a legacy `features` folder.
+
+        ### Troubleshooting
+        - If the feature file PR is not created, check that this issue still has the `gherkin` label.
+        - If the workflow shows as skipped, verify the issue label and that the issue event triggered the workflow.
+        - The automation workflow for this template is: `.github/workflows/gherkin-from-issue.yml`.
 
         ### Example
 
