@@ -620,6 +620,47 @@ public class ParentTreeService {
   }
 
   /**
+   * Recompute the seedlot mean geospatial (weighted orchard parent tree latitude, longitude and
+   * elevation) from stored parent tree data, reusing the same algorithm as the live calculation.
+   *
+   * <p>The mean is not persisted on its own, so this is used to display the value on
+   * submitted/review screens without relying on it having been saved at submission time.
+   *
+   * @param ptVals the reconstructed calculation request. Only the orchard parent tree cone/pollen
+   *     counts, SMP success and the SMP mix proportions are relevant to the geospatial mean.
+   * @return the seedlot mean geospatial, or {@code null} when the required Oracle geospatial data
+   *     is unavailable.
+   */
+  public GeospatialRespondDto calcSeedlotMeanGeospatial(PtValsCalReqDto ptVals) {
+    if (ptVals.orchardPtVals().isEmpty()) {
+      return null;
+    }
+
+    List<Long> orchardPtIds =
+        ptVals.orchardPtVals().stream()
+            .map(OrchardParentTreeValsDto::parentTreeId)
+            .map(Long::parseLong)
+            .toList();
+
+    // calcSeedlotGeoData silently skips parent trees without Oracle geospatial data and would
+    // return zeroed coordinates if none were found. Guard here so the caller can render "no data"
+    // instead of a bogus 0 latitude/longitude.
+    if (oracleApiProvider.getPtGeospatialDataByIdList(orchardPtIds).isEmpty()) {
+      SparLog.warn("Oracle geospatial data unavailable for the seedlot's orchard parent trees.");
+      return null;
+    }
+
+    try {
+      GeospatialRespondDto smpMixGeoData = calcMeanGeospatial(ptVals.smpMixIdAndProps());
+      return calcSeedlotGeoData(ptVals, smpMixGeoData);
+    } catch (PtGeoDataNotFoundException e) {
+      SparLog.warn(
+          "Oracle geospatial data unavailable for SMP mix parent trees: {}", e.getMessage());
+      return null;
+    }
+  }
+
+  /**
    * Calculate mean geospatial values given a list of {@link GeospatialRequestDto}.
    *
    * @param ptreeIdAndProportions List of parent tree id and proportion.

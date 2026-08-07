@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
@@ -153,6 +154,41 @@ public class OracleApiProvider implements Provider {
           "GET parent tree lat long from Oracle - Response code error: {}, {}",
           httpExc.getStatusCode(),
           httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    }
+  }
+
+  /**
+   * Fetch the seedlot and species (vegetation code) mapped to a request key from oracle-api.
+   *
+   * @param requestKey the request key to look up
+   * @return the {@link SeedlotSpeciesDto} mapped to the request key
+   * @throws ResponseStatusException propagating the oracle-api status (e.g. 404) on error
+   */
+  @Override
+  public SeedlotSpeciesDto getSeedlotAndSpeciesByRequestKey(Long requestKey) {
+    String oracleApiUrl =
+        String.format(
+            "%s/api/request-seedlot-and-veglot/seedlot-species/{requestKey}", rootUri);
+
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "getSeedlotAndSpeciesByRequestKey",
+        oracleApiUrl);
+
+    try {
+      ResponseEntity<SeedlotSpeciesDto> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              SeedlotSpeciesDto.class,
+              createParamsMap("requestKey", requestKey.toString()));
+      SparLog.info("GET seedlot and species by request key - Success response!");
+      return response.getBody();
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET seedlot and species by request key - Response code error: {}",
+          httpExc.getStatusCode());
       throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
     }
   }

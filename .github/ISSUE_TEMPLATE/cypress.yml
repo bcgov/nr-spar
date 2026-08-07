@@ -1,7 +1,7 @@
 name: User provided automated tests
 description: Submit Gherkin scenarios to generate .feature files for our test suite.
 title: '[Test Case]: REPLACE WITH YOUR TEST CASE TITLE'
-labels: gherkin, automated test
+labels: [gherkin, automated test]
 body:
   - type: markdown
     attributes:
