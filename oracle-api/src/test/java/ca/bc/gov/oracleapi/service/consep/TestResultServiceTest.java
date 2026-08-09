@@ -976,6 +976,10 @@ class TestResultServiceTest {
     assertEquals(LocalDateTime.parse("2026-04-15T20:30:00"), result.soakEndDate());
     assertEquals("G64", result.activityTypeCd());
     assertEquals("TSC", result.requestTypeSt());
+    assertEquals("TST20170140", result.requestId());
+    assertEquals("64132", result.seedlotNumber());
+    assertNull(result.familyLotNumber());
+    assertEquals("SX", result.vegetationState());
   }
 
   @Test
@@ -1049,7 +1053,11 @@ class TestResultServiceTest {
         0, // intrmdtCleanrInd
         "TSC", // requestTypeSt
         TST_TS, // testResultUpdateTimestamp
-        RIA_TS // riaUpdateTimestamp
+        RIA_TS, // riaUpdateTimestamp
+        "TST20170140", // requestId
+        "64132", // seedlotNumber
+        null, // familyLotNumber
+        "SX" // vegetationState
         );
   }
 
@@ -1219,7 +1227,8 @@ class TestResultServiceTest {
     return new GerminationTestHeaderDto(
         RIA_KEY, "G23", null, null, "STD", null, null, 0, 0, null, -1, null,
         null, null, null, null, null, null, null, 21, "DY", null, null, null,
-        null, null, null, null, null, null, null, null, "RTS", TST_TS, RIA_TS);
+        null, null, null, null, null, null, null, null, "RTS", TST_TS, RIA_TS,
+        null, null, null, null);
   }
 
   private void mockHappyPathRepos() {
