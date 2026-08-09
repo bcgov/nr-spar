@@ -127,9 +127,12 @@ const DailyGermTable = ({
                       aria-label={`Replicate ${repNumber} number of seeds`}
                       value={rep.totalNoSeeds ?? ''}
                       disabled={!isEditable}
-                      onChange={(e) => updateReplicate(repNumber, {
-                        totalNoSeeds: e.target.value === '' ? undefined : parseInt(e.target.value, 10)
-                      })}
+                      onChange={(e) => {
+                        const parsed = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+                        updateReplicate(repNumber, {
+                          totalNoSeeds: Number.isNaN(parsed) ? undefined : parsed
+                        });
+                      }}
                     />
                   </td>
                   <td>
