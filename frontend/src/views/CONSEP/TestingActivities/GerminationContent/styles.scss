@@ -59,3 +59,37 @@
     }
   }
 }
+
+.consep-germination-content {
+  padding: 2rem;
+
+  .consep-germination-content-header-card {
+    background: var(--cds-layer-01, #f4f4f4);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+
+    input[readonly] {
+      background: transparent;
+      border-bottom: none;
+    }
+
+    .consep-germination-content-header-field {
+      display: flex;
+      flex-direction: column;
+
+      .consep-germination-content-header-label {
+        font-size: 0.75rem;
+        color: var(--cds-text-secondary, #525252);
+      }
+
+      .consep-germination-content-header-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .consep-germination-content-table {
+    margin-top: 1.5rem;
+  }
+}
