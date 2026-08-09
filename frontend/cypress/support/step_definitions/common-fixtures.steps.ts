@@ -1,8 +1,7 @@
 import { Given } from '@badeball/cypress-cucumber-preprocessor';
 import { SeedlotRegFixtureType } from '../../definitions';
+import { loadFixtureAndAlias } from '../helpers/fixture-loader';
 
 Given('the a-class seedlot fixture is loaded', () => {
-  cy.fixture('aclass-seedlot').then((data: SeedlotRegFixtureType) => {
-    cy.wrap(data).as('aClassSeedlotData');
-  });
+  loadFixtureAndAlias<SeedlotRegFixtureType>('aclass-seedlot', 'aClassSeedlotData');
 });

@@ -1,0 +1,38 @@
+{
+    "testCompleteInd": -1,
+    "sampleDesc": null,
+    "moistureStatus": null,
+    "moisturePct": null,
+    "acceptResult": 0,
+    "requestId": "ASP19950001",
+    "seedlotNumber": "01409",
+    "familyLotNumber": null,
+    "geneticClassCode": "A",
+    "vegetationCode": "SX",
+    "activityType": "MC",
+    "testCategoryCode": "STD",
+    "riaComment": null,
+    "actualBeginDateTime": "1995-02-01T00:00:00",
+    "actualEndDateTime": "1999-07-20T16:24:15",
+    "replicatesList": [
+        {
+            "riaKey": 79082,
+            "replicateNumber": 1,
+            "pureSeedWeight": 2,
+            "otherSeedWeight": 2.3,
+            "inertMttrWeight": 1.5,
+            "replicateAccInd": 1,
+            "overrideReason": null
+        },
+        {
+            "riaKey": 79082,
+            "replicateNumber": 2,
+            "pureSeedWeight": 1,
+            "otherSeedWeight": 0.56,
+            "inertMttrWeight": 1.32,
+            "replicateAccInd": 1,
+            "overrideReason": null
+        }
+    ],
+    "debrisList": []
+}
