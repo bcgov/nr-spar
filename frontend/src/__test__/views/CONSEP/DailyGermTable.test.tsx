@@ -79,6 +79,23 @@ describe('DailyGermTable', () => {
     );
   });
 
+  it('guards NaN when # seeds receives a value that does not parse to an integer', () => {
+    const props = renderTable();
+    // '.5' survives the number-input value sanitizer (valid float) but parseInt('.5', 10) is NaN
+    fireEvent.change(screen.getByTestId('germ-seeds-1'), { target: { value: '.5' } });
+    expect(props.onReplicatesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ replicateNumber: 1, totalNoSeeds: undefined })
+      ])
+    );
+    // state must never receive NaN
+    (props.onReplicatesChange as ReturnType<typeof vi.fn>).mock.calls.forEach(([reps]) => {
+      (reps as GermReplicateType[]).forEach((rep) => {
+        expect(Number.isNaN(rep.totalNoSeeds as number)).toBe(false);
+      });
+    });
+  });
+
   it('disables inputs when not editable', () => {
     renderTable({ isEditable: false });
     expect(screen.getByTestId('germ-date-1')).toBeDisabled();
