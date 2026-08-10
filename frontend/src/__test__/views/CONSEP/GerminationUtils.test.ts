@@ -55,6 +55,19 @@ describe('rep totals and over-limit', () => {
     expect(errors['rep-1']).toBe('Total germinated (110) exceeds number of seeds (100)');
     expect(errors['rep-2']).toBeUndefined();
   });
+
+  // C3: a cleared "# seeds" cell leaves totalNoSeeds undefined. The backend
+  // rejects the whole payload with a @NotNull 400, so autosave must be blocked
+  // client-side with a rep-scoped error.
+  it('flags a replicate whose number of seeds is missing', () => {
+    const reps = [
+      { replicateNumber: 1, totalNoSeeds: undefined },
+      { replicateNumber: 2, totalNoSeeds: 100 }
+    ] as any;
+    const errors = checkOverLimit(slots, reps);
+    expect(errors['rep-1']).toBe('Number of seeds is required');
+    expect(errors['rep-2']).toBeUndefined();
+  });
 });
 
 describe('calcGermPct', () => {

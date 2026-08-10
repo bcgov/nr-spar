@@ -52,8 +52,16 @@ export const checkOverLimit = (
 ): Record<string, string> => {
   const errors: Record<string, string> = {};
   replicates.forEach((rep) => {
+    // A cleared "# seeds" cell (undefined) must block autosave: the backend
+    // rejects a payload missing totalNoSeeds with a @NotNull 400 that discards
+    // the whole request, including valid count edits (C3). Typing stays
+    // unblocked — this only gates the save.
+    if (rep.totalNoSeeds === undefined) {
+      errors[`rep-${rep.replicateNumber}`] = 'Number of seeds is required';
+      return;
+    }
     const total = calcRepTotal(slots, rep.replicateNumber as 1 | 2 | 3 | 4);
-    if (rep.totalNoSeeds !== undefined && total > rep.totalNoSeeds) {
+    if (total > rep.totalNoSeeds) {
       errors[`rep-${rep.replicateNumber}`] = `Total germinated (${total}) exceeds number of seeds (${rep.totalNoSeeds})`;
     }
   });
