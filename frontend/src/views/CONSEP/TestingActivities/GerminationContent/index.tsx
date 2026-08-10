@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, {
+  useEffect, useMemo, useRef, useState
+} from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -53,7 +55,30 @@ const GerminationContent = () => {
   const [replicates, setReplicates] = useState<GermReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
   const [updateTimestamp, setUpdateTimestamp] = useState<string | undefined>(undefined);
+  // Hydration completes once both the germ-count query (200 or 404) and the
+  // replicates query have settled — until then autosave must stay disabled,
+  // otherwise the pre-hydration empty/default state would be saved as if it
+  // were a real edit. Held in state so autosave re-evaluates its `enabled`
+  // gate when it flips true.
+  const [isHydrated, setIsHydrated] = useState(false);
   const { isConflict, markConflict, clearConflict } = useActivityConflict();
+
+  // Latest slots/replicates mirrored into refs so a hydration effect can hand
+  // useAutosave a combined { slots, replicates } snapshot as already-saved,
+  // even when only one half is being set in that effect. Mirroring during
+  // render is the "latest ref" pattern — read only in effects below, never to
+  // drive rendering — so the lint warning does not apply here.
+  const slotsRef = useRef<GermCountSlotType[]>(slots);
+  // eslint-disable-next-line react-hooks/refs
+  slotsRef.current = slots;
+  const replicatesRef = useRef<GermReplicateType[]>(replicates);
+  // eslint-disable-next-line react-hooks/refs
+  replicatesRef.current = replicates;
+  // markSaved is created by useAutosave below, but the hydration effects run
+  // after that hook on every render; a ref lets them call the latest instance.
+  const markSavedRef = useRef<(v: { slots: GermCountSlotType[]; replicates: GermReplicateType[] }) => void>(
+    () => {}
+  );
 
   const headerQuery = useQuery({
     queryKey: ['germination-test-header', riaKey],
@@ -85,31 +110,54 @@ const GerminationContent = () => {
     } else if (headerQuery.data) {
       setHeader(headerQuery.data);
     }
-  }, [headerQuery.status, headerQuery.isFetched]);
+    // headerQuery.data is included so a conflict-reload refetch (I5) that
+    // returns a changed header — e.g. testCompleteInd flipping to 1 — actually
+    // reapplies; status/isFetched alone can stay unchanged across a refetch.
+  }, [headerQuery.status, headerQuery.isFetched, headerQuery.data]);
 
-  // Hydrate slots: merge sparse API slots into the fixed 13-slot grid
+  // Hydrate slots: merge sparse API slots into the fixed 13-slot grid.
+  // Sets state AND marks the resulting { slots, replicates } snapshot as
+  // already-saved in the same effect (via refs for the replicates half), so
+  // useAutosave's savedRef is never a render behind the hydrated data — the
+  // C1 ghost-PUT root cause. germ-counts may legitimately 404 (no row yet):
+  // isFetched (not data) is what settles this half.
   useEffect(() => {
+    if (!germCountQuery.isFetched) {
+      return;
+    }
+    const nextSlots = emptySlots();
     if (germCountQuery.data) {
-      const next = emptySlots();
       germCountQuery.data.slots.forEach((slot) => {
-        next[slot.slotIndex - 1] = slot;
+        nextSlots[slot.slotIndex - 1] = slot;
       });
-      setSlots(next);
       setUpdateTimestamp(germCountQuery.data.updateTimestamp);
     }
-  }, [germCountQuery.data]);
+    setSlots(nextSlots);
+    slotsRef.current = nextSlots;
+    if (replicatesQuery.isFetched && headerQuery.data) {
+      markSavedRef.current({ slots: nextSlots, replicates: replicatesRef.current });
+      setIsHydrated(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [germCountQuery.isFetched, germCountQuery.data]);
 
-  // Hydrate replicates: API rows or category defaults (AC4)
+  // Hydrate replicates: API rows or category defaults (AC4). Same
+  // set-state-then-markSaved discipline as the slots effect.
   useEffect(() => {
     if (!headerQuery.data || !replicatesQuery.isFetched) {
       return;
     }
     const fetched = replicatesQuery.data;
-    if (fetched && fetched.length > 0) {
-      setReplicates(fetched);
-    } else {
-      setReplicates(defaultReplicates(headerQuery.data.testCategoryCd));
+    const nextReplicates = (fetched && fetched.length > 0)
+      ? fetched
+      : defaultReplicates(headerQuery.data.testCategoryCd);
+    setReplicates(nextReplicates);
+    replicatesRef.current = nextReplicates;
+    if (germCountQuery.isFetched) {
+      markSavedRef.current({ slots: slotsRef.current, replicates: nextReplicates });
+      setIsHydrated(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [replicatesQuery.isFetched, replicatesQuery.data, headerQuery.data]);
 
   const validationErrors = useMemo(() => ({
@@ -119,12 +167,6 @@ const GerminationContent = () => {
 
   const hasDatedSlot = slots.some((slot) => slot.countDt);
   const isEditable = header?.testCompleteInd !== 1 && !isConflict;
-
-  // Hydration completes once both the germ-count query (200 or 404) and the
-  // replicates query have settled — until then autosave must stay disabled,
-  // otherwise the pre-hydration empty/default state would be saved as if it
-  // were a real edit.
-  const isHydrated = germCountQuery.isFetched && replicatesQuery.isFetched;
 
   const saveMutation = useMutation({
     mutationFn: (data: { slots: GermCountSlotType[]; replicates: GermReplicateType[] }) => (
@@ -167,23 +209,26 @@ const GerminationContent = () => {
       && !saveMutation.isPending
   });
 
-  // Mark the freshly hydrated data as already-saved so the debounce/maxWait
-  // timers in useAutosave never fire for the initial load itself — only for
-  // edits made after hydration. This must run from an effect keyed on the
-  // hydration flags (not assigned inline during render via a ref) so it
-  // fires exactly once per hydration, after state settles, avoiding a
-  // spurious early PUT with empty days on first render.
-  useEffect(() => {
-    if (isHydrated) {
-      markSaved(autosaveData);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHydrated]);
+  // Keep the ref the hydration effects call pointing at the latest markSaved.
+  // markSaved is a fresh closure each render but always mutates the same
+  // savedRef inside useAutosave, so the hydration effects (which run after
+  // this assignment on every commit) hand it the freshly hydrated snapshot —
+  // never a stale pre-hydration closure. This replaces the old
+  // [isHydrated]-keyed markSaved effect whose captured autosaveData lagged a
+  // render behind and produced the C1 ghost PUT. Assigning during render (not
+  // in an effect) is deliberate: effects run after render, so this guarantees
+  // the ref is current before the hydration effects below fire this commit.
+  // eslint-disable-next-line react-hooks/refs
+  markSavedRef.current = markSaved;
 
   const handleReloadOnConflict = async () => {
+    // Refetch the header too (I5): germinatorEntry drives day-number calc and
+    // testCompleteInd gates isEditable, so a stale header would leave both
+    // wrong after a conflict reload.
     const [countResult] = await Promise.all([
       germCountQuery.refetch(),
-      replicatesQuery.refetch()
+      replicatesQuery.refetch(),
+      headerQuery.refetch()
     ]);
     // germ-counts may legitimately 404 (no row yet); only a fresh read matters
     if (countResult.status === 'success' || countResult.status === 'error') {
