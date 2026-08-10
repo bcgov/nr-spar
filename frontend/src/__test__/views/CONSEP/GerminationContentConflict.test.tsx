@@ -11,21 +11,24 @@ vi.mock('../../../components/PageTitle', () => ({
 }));
 
 const putMock = vi.fn();
+const headerMock = vi.fn();
 vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
-  getGerminationTestHeader: () => Promise.resolve({
-    riaSkey: 123,
-    activityTypeCd: 'G10',
-    testCategoryCd: 'QA',
-    testCompleteInd: 0,
-    acceptResultInd: 0,
-    germinatorEntry: '2024-10-31'
-  }),
+  getGerminationTestHeader: (...args: unknown[]) => headerMock(...args),
   getGermCounts: () => Promise.reject(
     Object.assign(new Error('Not found'), { response: { status: 404 } })
   ),
   getTestReplicates: () => Promise.resolve([]),
   putGermCounts: (...args: unknown[]) => putMock(...args)
 }));
+
+const baseHeader = {
+  riaSkey: 123,
+  activityTypeCd: 'G10',
+  testCategoryCd: 'QA',
+  testCompleteInd: 0,
+  acceptResultInd: 0,
+  germinatorEntry: '2024-10-31'
+};
 
 vi.mock('react-router-dom', async (orig) => ({
   ...(await orig<typeof import('react-router-dom')>()),
@@ -48,6 +51,8 @@ describe('GerminationContent optimistic-lock conflict', () => {
 
   beforeEach(() => {
     putMock.mockReset();
+    headerMock.mockReset();
+    headerMock.mockResolvedValue({ ...baseHeader });
     // TanStack Query's mutate() applies .catch(noop) but the rejected Promise
     // from the mutationFn may still surface as an "unhandledRejection" for a
     // microtask before the catch is registered. Suppress it here.
@@ -84,5 +89,39 @@ describe('GerminationContent optimistic-lock conflict', () => {
     fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '6' } });
     await new Promise((resolve) => { setTimeout(resolve, 4000); });
     expect(putMock).not.toHaveBeenCalled();
+  }, 15000);
+
+  // Regression for I5: the conflict reload must refetch the HEADER too, not
+  // just germ-counts + replicates. germinatorEntry (day-calc anchor) and
+  // testCompleteInd (the isEditable gate) live on the header, so a stale
+  // header would leave the screen editable/miscalculating after reload.
+  // Assertion: header refetch returns testCompleteInd:1 and the inputs become
+  // disabled after Reload. (Also proves getGerminationTestHeader ran twice.)
+  it('refetches the header on conflict reload and applies the fresh testCompleteInd', async () => {
+    const conflictError = Object.assign(new Error('Conflict'), { response: { status: 409 } });
+    putMock.mockRejectedValue(conflictError);
+    // Initial load: editable. Reload: test now complete -> read-only.
+    headerMock
+      .mockResolvedValueOnce({ ...baseHeader, testCompleteInd: 0 })
+      .mockResolvedValue({ ...baseHeader, testCompleteInd: 1 });
+    renderView();
+
+    await screen.findByText(/Germination test result/i);
+    expect(screen.getByTestId('germ-date-1')).not.toBeDisabled();
+
+    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '2024-11-04' } });
+    fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
+
+    await waitFor(
+      () => expect(screen.getByText('Conflict detected')).toBeInTheDocument(),
+      { timeout: 5000 }
+    );
+
+    fireEvent.click(screen.getByText('Reload'));
+
+    // The refetched header (testCompleteInd:1) must reapply and disable inputs.
+    await waitFor(() => expect(screen.getByTestId('germ-date-1')).toBeDisabled());
+    // Header endpoint hit at least twice: initial mount + conflict reload.
+    expect(headerMock.mock.calls.length).toBeGreaterThanOrEqual(2);
   }, 15000);
 });
