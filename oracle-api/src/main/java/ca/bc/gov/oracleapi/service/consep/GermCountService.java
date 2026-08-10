@@ -307,7 +307,16 @@ public class GermCountService {
       if (s.dailyGermSkey() == null) {
         continue;
       }
-      toSave.add(toAbnormalEntity(s.dailyGermSkey(), dayBySlot.get(s.slotIndex())));
+      DayGermCountDto day = dayBySlot.get(s.slotIndex());
+      // Skip days that carry no abnormal DTOs at all (this UI never sends
+      // them). Writing an all-null DailyAbnormalEntity here would merge over
+      // and NULL out any abnormals an earlier edit recorded for the day. When
+      // any rep abnormal DTO IS present we still upsert, preserving prior
+      // behaviour for callers that do send abnormals.
+      if (!hasAnyAbnormal(day)) {
+        continue;
+      }
+      toSave.add(toAbnormalEntity(s.dailyGermSkey(), day));
     }
     if (!toSave.isEmpty()) {
       dailyAbnormalRepository.saveAll(toSave);
@@ -343,6 +352,15 @@ public class GermCountService {
     }
     SparLog.info("Deleting {} orphaned daily abnormal row(s)", orphaned.size());
     dailyAbnormalRepository.deleteAllById(orphaned);
+  }
+
+  /** True when the day carries at least one non-null rep abnormal DTO. */
+  private static boolean hasAnyAbnormal(DayGermCountDto d) {
+    if (d == null) {
+      return false;
+    }
+    return d.rep1Abnormal() != null || d.rep2Abnormal() != null
+        || d.rep3Abnormal() != null || d.rep4Abnormal() != null;
   }
 
   private DailyAbnormalEntity toAbnormalEntity(BigDecimal skey, DayGermCountDto d) {
