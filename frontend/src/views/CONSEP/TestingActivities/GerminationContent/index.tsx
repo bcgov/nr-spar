@@ -157,7 +157,7 @@ const GerminationContent = () => {
 
   const { markSaved } = useAutosave({
     data: autosaveData,
-    onSave: (data) => saveMutation.mutateAsync(data),
+    onSave: async (data) => { await saveMutation.mutateAsync(data); },
     enabled:
       isHydrated
       && isEditable
