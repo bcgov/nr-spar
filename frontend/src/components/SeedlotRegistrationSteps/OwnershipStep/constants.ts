@@ -36,12 +36,14 @@ export const inputText = {
   funding: {
     placeholder: 'Choose a funding source option',
     titleText: 'Funding source',
-    invalidText: 'Please choose a valid funding source option'
+    invalidText: 'Please choose a valid funding source option',
+    fetchError: 'Failed to load funding sources. Refresh to try again or contact support'
   },
   payment: {
     placeholder: 'Choose a method of payment',
     titleText: 'Method of payment',
-    invalidText: 'Please choose a valid method of payment'
+    invalidText: 'Please choose a valid method of payment',
+    fetchError: 'Failed to load methods of payment. Refresh to try again or contact support'
   },
   greaterThan: 'Value must be lower or equal to 100',
   lowerThan: 'Value must be higher or equal to 0',
