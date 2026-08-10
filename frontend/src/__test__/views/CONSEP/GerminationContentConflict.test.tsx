@@ -74,15 +74,13 @@ describe('GerminationContent optimistic-lock conflict', () => {
     );
 
     putMock.mockClear();
-    // Deviation from brief: the brief's second edit targeted germ-count-2-1,
-    // but DailyGermTable disables a replicate's count input until that slot
-    // has a countDt (see DailyGermTable.tsx: `disabled={!isEditable ||
-    // !slot.countDt}`). Slot 2 never received a date in this test, so
-    // germ-count-2-1 is disabled and fireEvent.change on it would be a
-    // no-op, making the "no further autosave" assertion vacuous. Slot 1
-    // already has a date from the first edit above, so germ-count-1-1
-    // stays enabled and is a real edit attempt while conflicted -- also
-    // consistent with the isEditable=false-on-conflict guard.
+    // Edit after the conflict: fireEvent.change fires React onChange even on
+    // disabled inputs in jsdom, so this edit lands in component state despite
+    // every input being disabled while conflicted (isEditable is false). The
+    // assertion therefore proves useAutosave's `enabled` gate -- isEditable
+    // folds in isConflict -- is what blocks the PUT, not DOM disabled state.
+    // (Uses germ-count-1-1 instead of the brief's germ-count-2-1 -- both are
+    // slot-1 inputs, rep 1 vs rep 2; either exercises the same gate.)
     fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '6' } });
     await new Promise((resolve) => { setTimeout(resolve, 4000); });
     expect(putMock).not.toHaveBeenCalled();
