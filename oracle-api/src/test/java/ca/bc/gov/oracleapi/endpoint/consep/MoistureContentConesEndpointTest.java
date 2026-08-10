@@ -131,6 +131,7 @@ class MoistureContentConesEndpointTest {
             "Comment for this content",
             LocalDateTime.parse("2013-08-01T00:00:00"),
             LocalDateTime.parse("2013-08-01T00:00:00"),
+            LocalDateTime.parse("2013-08-01T00:00:00"),
             "MCM",
             replicatesList
         ));
@@ -236,7 +237,8 @@ class MoistureContentConesEndpointTest {
         "STD",
         LocalDateTime.parse("2013-08-01T00:00:00"),
         LocalDateTime.parse("2013-08-01T00:00:00"),
-        "New comment"
+        "New comment",
+        LocalDateTime.parse("2013-08-01T00:00:00")
     );
 
     ActivityEntity activityEntity = new ActivityEntity();
@@ -275,7 +277,8 @@ class MoistureContentConesEndpointTest {
         "TST",
         LocalDateTime.parse("2013-08-01T00:00:00"),
         LocalDateTime.parse("2013-08-01T00:00:00"),
-        "Not found comment"
+        "Not found comment",
+        LocalDateTime.parse("2013-08-01T00:00:00")
     );
 
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity entry not found"))
@@ -295,6 +298,7 @@ class MoistureContentConesEndpointTest {
   void updateMccActivity_shouldReturnInvalid() throws Exception {
     BigDecimal riaKey = new BigDecimal(1234567890);
     ActivityFormDto activityFormDto = new ActivityFormDto(
+        null,
         null,
         null,
         null,
@@ -470,7 +474,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI","ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     // Mock service behavior
@@ -586,7 +590,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI","ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     when(moistureContentService.getMoistureConeContentData(riaKey))
@@ -615,7 +619,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI","ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     when(moistureContentService.getMoistureConeContentData(riaKey))
@@ -644,7 +648,7 @@ class MoistureContentConesEndpointTest {
         1, "Sample", "STATUS", new BigDecimal("50.0"), 1,
         "REQ123", "SL123", null, "A",
         "PLI", "ACT", "TST", "Comment",
-        LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
+        LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), "MCM", Collections.emptyList()
     );
 
     when(moistureContentService.getMoistureConeContentData(riaKey))
@@ -665,5 +669,30 @@ class MoistureContentConesEndpointTest {
         .andExpect(result -> assertEquals(
             "400 BAD_REQUEST \"Invalid activity data\"",
             result.getResolvedException().getMessage()));
+  }
+
+  @Test
+  @DisplayName("PATCH activity returns 409 on optimistic lock conflict")
+  void updateActivityField_conflict_returns409() throws Exception {
+    BigDecimal riaKey = new BigDecimal(1234567890);
+    ActivityFormDto activityFormDto = new ActivityFormDto(
+        "STD",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-09-01T00:00:00"),
+        "Comment",
+        LocalDateTime.parse("2013-09-01T00:00:00")
+    );
+
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT,
+            "Activity was modified by another user; reload and retry"))
+        .when(activityService).updateActivityField(any(), any());
+
+    mockMvc
+        .perform(patch("/api/moisture-content-cone/{riaKey}", riaKey)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(activityFormDto)))
+        .andExpect(status().isConflict());
   }
 }
