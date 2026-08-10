@@ -37,6 +37,39 @@ export type MoistureContentType = {
   }
 };
 
+export type PurityContentType = {
+  pc: {
+    title: string,
+    commentPlaceholder: string,
+    testComment: string,
+    invalidDateErrorMsg: string,
+    impurityBtn: string,
+    maxImpuritiesErrorMsg: string
+  },
+  table: {
+    title: string,
+    column1: string,
+    column2: string,
+    column3: string,
+    column4: string,
+    column5: string,
+    column6: string,
+    column7: string,
+    checkedBox: string,
+    unCheckedBox: string,
+    emptyTableMsg: string
+  }
+};
+
+export type FavouriteActivitiesType = {
+  fa: {
+    title: string;
+    subtitle: string;
+    favouriteActivitiesBtn: string;
+  };
+  table: Record<string, string>;
+};
+
 export type ReplicateType = {
   riaKey: number;
   replicateNumber: number;

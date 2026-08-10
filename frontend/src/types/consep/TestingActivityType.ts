@@ -34,6 +34,7 @@ export type ActivityRecordType = {
   riaComment?: string;
   actualBeginDateTime?: string;
   actualEndDateTime?: string;
+  updateTimestamp?: string;
 };
 
 export type TestingActivityType = ActivityRecordType & {

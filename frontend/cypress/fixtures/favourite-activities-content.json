@@ -1,0 +1,30 @@
+{
+  "fa": {
+    "title": "You don’t have any favourites to show yet!",
+    "subtitle": "You can favourite your activities by clicking on 'Add favourite activity' or by clicking on the heart icon on each page.",
+    "favouriteActivitiesBtn": "Add favourite activity"
+  },
+  "table": {
+    "row1": "Actual germination count",
+    "row2": "Calculate crop average",
+    "row3": "Cancelled requests report",
+    "row4": "Cone and seed processing report",
+    "row5": "Cone and seed shipment receipt",
+    "row6": "Create germination tray",
+    "row7": "CSP request",
+    "row8": "Do not start list",
+    "row9": "Family lot",
+    "row10": "Family lot summary report",
+    "row11": "Germination species average",
+    "row12": "Germ count predictions",
+    "row13": "Identify available long-term location",
+    "row14": "In-house inventory",
+    "row15": "Inventory location report",
+    "row16": "Kiln programs",
+    "row17": "Maintain client location",
+    "row18": "Maintain germination tray screen",
+    "row19": "Maintain local contacts",
+    "row20": "Maintain standard activities",
+    "row21": "Maintain stat holidays"
+  }
+}
