@@ -306,4 +306,17 @@ class GermCountEndpointTest {
             .content(VALID_BODY))
         .andExpect(status().isUnauthorized());
   }
+
+  @Test
+  @WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
+  void upsert_returns403_whenUserDoesNotHaveRequiredRole() throws Exception {
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(VALID_BODY))
+        .andExpect(status().isForbidden());
+
+    verify(germCountService, times(0)).upsertGermCounts(any(), any(), any());
+  }
 }
