@@ -87,6 +87,23 @@ describe('GerminationContent', () => {
   // test) keeps rep-1 within the 50-seed QA limit so the first save can
   // succeed, while '999' still clearly exceeds the limit for the block
   // assertion that follows.
+  // C3: clearing a rep's "# seeds" must surface a validation error (so the
+  // row is flagged) and block autosave, because the payload would otherwise
+  // miss totalNoSeeds and the backend @NotNull would 400 the whole request.
+  it('shows an error and blocks autosave when # seeds is cleared', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '2024-11-04' } });
+    fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
+    await waitFor(() => expect(putMock).toHaveBeenCalled(), { timeout: 5000 });
+    putMock.mockClear();
+    // Clear rep 1's number of seeds.
+    fireEvent.change(screen.getByTestId('germ-seeds-1'), { target: { value: '' } });
+    expect(await screen.findByText('Number of seeds is required')).toBeInTheDocument();
+    await new Promise((resolve) => { setTimeout(resolve, 4000); });
+    expect(putMock).not.toHaveBeenCalled();
+  }, 15000);
+
   it('blocks autosave while a rep is over limit (AC3)', async () => {
     renderView();
     await screen.findByText(/Germination test result/i);
