@@ -14,6 +14,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     runs-on: ubuntu-24.04
     env:
       CYPRESS_TARGET_FOLDER: frontend/cypress/e2e/smoke-test-05
@@ -32,10 +33,56 @@ jobs:
           default_title: "[Test Case]: REPLACE WITH YOUR TEST CASE TITLE"
           update_title: true
 
+      - name: Prepare temporary feature file
+        run: |
+          mkdir -p .tmp
+          printf '%s\n' "${{ steps.feature.outputs.feature }}" > ".tmp/upt_${{ github.event.issue.number }}.feature"
+
+      - name: Validate Gherkin syntax
+        run: |
+          npm install --no-save @cucumber/gherkin @cucumber/messages
+          node <<'NODE'
+          const fs = require('fs');
+          const { Parser, AstBuilder, GherkinClassicTokenMatcher } = require('@cucumber/gherkin');
+          const { IdGenerator } = require('@cucumber/messages');
+
+          const file = `.tmp/upt_${process.env.ISSUE_NUMBER}.feature`;
+          const content = fs.readFileSync(file, 'utf8');
+          const parser = new Parser(new AstBuilder(IdGenerator.uuid()), new GherkinClassicTokenMatcher());
+
+          try {
+            parser.parse(content);
+            console.log(`Gherkin syntax valid: ${file}`);
+          } catch (error) {
+            console.error(`Invalid Gherkin syntax in ${file}`);
+            console.error(error.message);
+            process.exit(1);
+          }
+          NODE
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+
+      - name: Comment when Gherkin validation fails
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = context.issue.number;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: [
+                'The generated feature file failed Gherkin syntax validation.',
+                '',
+                'Please update the issue test scenario to use valid indentation and one step per line, then edit/relabel the issue to re-run the workflow.'
+              ].join('\n')
+            });
+
       - name: Create feature file
         run: |
           mkdir -p "${CYPRESS_TARGET_FOLDER}"
-          printf '%s\n' "${{ steps.feature.outputs.feature }}" > "${CYPRESS_TARGET_FOLDER}/upt_${{ github.event.issue.number }}.feature"
+          cp ".tmp/upt_${{ github.event.issue.number }}.feature" "${CYPRESS_TARGET_FOLDER}/upt_${{ github.event.issue.number }}.feature"
 
       - name: Commit & Push changes
         uses: Andro999b/push@c77535fe7a94645f7ceca83e48e6cc977620710e # v1.3
