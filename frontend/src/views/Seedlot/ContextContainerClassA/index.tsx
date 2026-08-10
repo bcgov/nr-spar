@@ -5,7 +5,7 @@ import {
   useNavigate, useParams, useSearchParams, useLocation
 } from 'react-router-dom';
 import {
-  useMutation, useQuery
+  useMutation, useQuery, useQueryClient
 } from '@tanstack/react-query';
 import { AxiosError, isAxiosError } from 'axios';
 import { DateTime } from 'luxon';
@@ -39,6 +39,7 @@ import { INITIAL_GEN_WORTH_VALS, INITIAL_GEO_INFO_VALS } from '../SeedlotReview/
 import { MeanGeomInfoSectionConfigType, RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { StringInputType } from '../../../types/FormInputType';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import ClassAContext, { ClassAContextType } from './context';
 import {
@@ -164,7 +165,11 @@ const ContextContainerClassA = ({ children }: props) => {
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => initEmptySteps());
 
-  const setDefaultClientAndCode = (clientNumber: string, locationCode: string) => {
+  const setDefaultClientAndCode = (
+    clientNumber: string,
+    locationCode: string,
+    defaultMethodOfPayment?: MultiOptionsObj
+  ) => {
     setAllStepData((prevData) => ({
       ...prevData,
       collectionStep: {
@@ -187,7 +192,15 @@ const ContextContainerClassA = ({ children }: props) => {
         ownerCode: {
           ...singleOwner.ownerCode,
           value: locationCode
-        }
+        },
+        ...(defaultMethodOfPayment
+          ? {
+            methodOfPayment: {
+              ...singleOwner.methodOfPayment,
+              value: defaultMethodOfPayment
+            }
+          }
+          : {})
       })),
       interimStep: {
         ...prevData.interimStep,
@@ -272,12 +285,16 @@ const ContextContainerClassA = ({ children }: props) => {
     numOfEdit.current += 1;
   };
 
+  // retry: false lets the query settle (isFetched) after a single failed attempt so the form
+  // never hangs behind the full-page loader; the field surfaces the failure and asks the user
+  // to refresh instead.
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
     queryFn: getFundingSources,
     select: (data) => getMultiOptList(data),
     staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS,
+    retry: false
   });
 
   const methodsOfPaymentQuery = useQuery({
@@ -285,7 +302,8 @@ const ContextContainerClassA = ({ children }: props) => {
     queryFn: getMethodsOfPayment,
     select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
     staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
+    gcTime: THREE_HALF_HOURS,
+    retry: false
   });
 
   const gameticMethodologyQuery = useQuery({
@@ -390,7 +408,7 @@ const ContextContainerClassA = ({ children }: props) => {
       getAllSeedlotInfoQuery.status === 'success'
       && parentTreeCatalogQuery.status === 'success'
       && fundingSourcesQuery.status === 'success'
-      && methodsOfPaymentQuery.status === 'success'
+      && methodsOfPaymentQuery.isFetched
       && gameticMethodologyQuery.status === 'success'
       && orchardQuery.status === 'success'
       && seedlotQuery.status === 'success'
@@ -403,7 +421,7 @@ const ContextContainerClassA = ({ children }: props) => {
       const hydratedState = resDataToState(
         fullFormData,
         defaultAgencyNumber,
-        methodsOfPaymentQuery.data,
+        methodsOfPaymentQuery.data ?? [],
         fundingSourcesQuery.data,
         orchardQuery.data,
         gameticMethodologyQuery.data
@@ -425,7 +443,7 @@ const ContextContainerClassA = ({ children }: props) => {
     getAllSeedlotInfoQuery.status,
     parentTreeCatalogQuery.status,
     fundingSourcesQuery.status,
-    methodsOfPaymentQuery.status,
+    methodsOfPaymentQuery.isFetched,
     gameticMethodologyQuery.status,
     orchardQuery.status,
     seedlotQuery.status,
@@ -504,10 +522,12 @@ const ContextContainerClassA = ({ children }: props) => {
     }));
     numOfEdit.current += 1;
   };
-
+  const queryClient = useQueryClient();
   const submitSeedlot = useMutation({
     mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
-    onSuccess: () => {
+    onSuccess: async () => {
+      queryClient.removeQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
       navigate({
         pathname: addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''),
         search: '?isSubmitSuccess=true'
@@ -676,19 +696,29 @@ const ContextContainerClassA = ({ children }: props) => {
         // eslint-disable-next-line no-alert
         alert(`Error retrieving form draft! ${error.message}`);
         navigate(`/seedlots/details/${seedlotNumber}`);
-      } else if (seedlotQuery.status === 'success') {
-        // set default agency and code only if the seedlot has no draft saved,
-        // meaning this is their first time opening this form
+      } else if (
+        seedlotQuery.status === 'success'
+        && methodsOfPaymentQuery.isFetched
+        && formPhase === 'loading-draft'
+      ) {
+        // First open (no draft): apply agency/location and default method of payment once.
+        // Copy/hydrate paths set ownership from tables and must not get this default.
+        const defaultPayment = methodsOfPaymentQuery.data?.find((m) => m.isDefault);
         setDefaultClientAndCode(
           seedlotQuery.data.seedlot.applicantClientNumber,
-          getDefaultLocationCode()
+          getDefaultLocationCode(),
+          defaultPayment
         );
         setFormPhase('ready');
       }
     }
   }, [
     getFormDraftQuery.status,
-    getFormDraftQuery.fetchStatus
+    getFormDraftQuery.fetchStatus,
+    seedlotQuery.status,
+    methodsOfPaymentQuery.isFetched,
+    methodsOfPaymentQuery.data,
+    formPhase
   ]);
 
   const [genWorthVals, setGenWorthVals] = useState<GenWorthValType>(() => INITIAL_GEN_WORTH_VALS);
@@ -851,7 +881,9 @@ const ContextContainerClassA = ({ children }: props) => {
         setAreaOfUseData,
         isCalculatingPt,
         setIsCalculatingPt,
-        getFormDraftQuery
+        getFormDraftQuery,
+        fundingSourcesQuery,
+        methodsOfPaymentQuery
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,

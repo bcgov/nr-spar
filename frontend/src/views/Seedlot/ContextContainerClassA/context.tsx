@@ -78,7 +78,9 @@ export type ClassAContextType = {
   setAreaOfUseData: React.Dispatch<React.SetStateAction<AreaOfUseDataType>>,
   isCalculatingPt: boolean,
   setIsCalculatingPt: Function,
-  getFormDraftQuery: UseQueryResult<SeedlotProgressPayloadType, unknown>
+  getFormDraftQuery: UseQueryResult<SeedlotProgressPayloadType, unknown>,
+  fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>,
+  methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>
 }
 
 const ClassAContext = createContext<ClassAContextType>({
@@ -130,7 +132,9 @@ const ClassAContext = createContext<ClassAContextType>({
   setAreaOfUseData: () => { },
   isCalculatingPt: false,
   setIsCalculatingPt: () => { },
-  getFormDraftQuery: {} as UseQueryResult<SeedlotProgressPayloadType, unknown>
+  getFormDraftQuery: {} as UseQueryResult<SeedlotProgressPayloadType, unknown>,
+  fundingSourcesQuery: {} as UseQueryResult<MultiOptionsObj[], unknown>,
+  methodsOfPaymentQuery: {} as UseQueryResult<MultiOptionsObj[], unknown>
 });
 
 export default ClassAContext;
