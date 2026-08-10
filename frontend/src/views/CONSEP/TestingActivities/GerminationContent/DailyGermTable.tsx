@@ -34,9 +34,21 @@ const DailyGermTable = ({
   };
 
   const handleDateChange = (slotIndex: number, value: string) => {
+    // Clearing the date (I4) must also clear that slot's rep counts: they are
+    // dropped from the payload and wiped server-side, so keeping them in state
+    // would show ghost values in the now-disabled inputs and inflate totals.
+    const cleared = value
+      ? {}
+      : {
+        rep1NoSeedsGerm: undefined,
+        rep2NoSeedsGerm: undefined,
+        rep3NoSeedsGerm: undefined,
+        rep4NoSeedsGerm: undefined
+      };
     updateSlot(slotIndex, {
       countDt: value || undefined,
-      dayNoOfTest: value ? calcDayNumber(germinatorEntry, value) : undefined
+      dayNoOfTest: value ? calcDayNumber(germinatorEntry, value) : undefined,
+      ...cleared
     });
   };
 

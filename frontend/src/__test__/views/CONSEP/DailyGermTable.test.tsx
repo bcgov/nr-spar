@@ -44,6 +44,38 @@ describe('DailyGermTable', () => {
     );
   });
 
+  // Regression for I4: clearing a date column must also clear that slot's rep
+  // counts. They are dropped from the upsert payload and wiped server-side, so
+  // leaving them in state showed ghost values in disabled inputs and counted
+  // them into rep totals.
+  it('clears rep counts when the count date is cleared', () => {
+    const slots = emptySlots();
+    slots[0] = {
+      slotIndex: 1,
+      countDt: '2024-11-04',
+      dayNoOfTest: 4,
+      rep1NoSeedsGerm: 5,
+      rep2NoSeedsGerm: 6,
+      rep3NoSeedsGerm: 7,
+      rep4NoSeedsGerm: 8
+    };
+    const props = renderTable({ slots });
+    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '' } });
+    expect(props.onSlotsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          slotIndex: 1,
+          countDt: undefined,
+          dayNoOfTest: undefined,
+          rep1NoSeedsGerm: undefined,
+          rep2NoSeedsGerm: undefined,
+          rep3NoSeedsGerm: undefined,
+          rep4NoSeedsGerm: undefined
+        })
+      ])
+    );
+  });
+
   it('shows rep total and germination percent', () => {
     const slots = emptySlots();
     slots[0] = {
