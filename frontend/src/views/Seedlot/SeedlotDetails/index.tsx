@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {
+  useContext, useEffect, useMemo, useState
+} from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   FlexGrid,
@@ -14,9 +16,7 @@ import {
 
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import {
-  SeedlotApplicantType, SeedlotDisplayType, SeedlotStatusCode, SeedlotType
-} from '../../../types/SeedlotType';
+import { SeedlotStatusCode } from '../../../types/SeedlotType';
 
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
@@ -48,19 +48,40 @@ const SeedlotDetails = () => {
   const { isTscAdmin } = useContext(AuthContext);
   const { seedlotNumber } = useParams();
   const [searchParams] = useSearchParams();
-  const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
-  const [applicantData, setApplicantData] = useState<SeedlotApplicantType>();
 
   const isSubmitSuccess = searchParams.get('isSubmitSuccess') === 'true';
 
   const statusOnSave = searchParams.get('statusOnSave') as SeedlotStatusCode | null;
 
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+
+  const vegCodeQuery = useQuery({
+    queryKey: ['vegetation-codes'],
+    queryFn: getVegCodes,
+    select: (data) => getMultiOptList(data, true, true),
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS
+  });
+
+  const seedlotQuery = useQuery({
+    queryKey: ['seedlots', seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
+    enabled: vegCodeQuery.isFetched,
+    refetchOnMount: true,
+    select: (data) => data.seedlot
+  });
+
+  const seedlotData = useMemo(
+    () => (vegCodeQuery.data && seedlotQuery.data
+      ? covertRawToDisplayObj(seedlotQuery.data, vegCodeQuery.data)
+      : undefined),
+    [seedlotQuery.data, vegCodeQuery.data]
+  );
+
   const viewOnlySeedlot: boolean = seedlotData?.seedlotStatus === 'Submitted'
     || seedlotData?.seedlotStatus === 'Expired'
     || seedlotData?.seedlotStatus === 'Complete'
     || seedlotData?.seedlotStatus === 'Approved';
-
-  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
 
   const manageOptions = [
     {
@@ -85,29 +106,6 @@ const SeedlotDetails = () => {
     }
   ];
 
-  const vegCodeQuery = useQuery({
-    queryKey: ['vegetation-codes'],
-    queryFn: getVegCodes,
-    select: (data) => getMultiOptList(data, true, true),
-    staleTime: THREE_HOURS,
-    gcTime: THREE_HALF_HOURS
-  });
-
-  const covertToDisplayObj = (seedlot?: SeedlotType) => {
-    if (vegCodeQuery.data && seedlot) {
-      const converted = covertRawToDisplayObj(seedlot, vegCodeQuery.data);
-      setSeedlotData(converted);
-    }
-  };
-
-  const seedlotQuery = useQuery({
-    queryKey: ['seedlots', seedlotNumber],
-    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
-    enabled: vegCodeQuery.isFetched,
-    refetchOnMount: true,
-    select: (data) => data.seedlot
-  });
-
   const getActBtnLabel = (): string => {
     if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
       return 'Review seedlot';
@@ -119,19 +117,11 @@ const SeedlotDetails = () => {
   };
 
   useEffect(() => {
-    if (seedlotQuery.isFetched || seedlotQuery.isFetchedAfterMount || seedlotQuery.status === 'success') {
-      covertToDisplayObj(seedlotQuery.data);
-    }
-
     if (seedlotQuery.error instanceof AxiosError && seedlotQuery.error.response?.status === 404) {
       navigate(ROUTES.FOUR_OH_FOUR);
     }
-  }, [
-    seedlotQuery.isFetched,
-    seedlotQuery.isFetchedAfterMount,
-    seedlotQuery.status,
-    seedlotQuery.error
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seedlotQuery.error]);
 
   const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
 
@@ -143,16 +133,12 @@ const SeedlotDetails = () => {
     gcTime: THREE_HALF_HOURS
   });
 
-  const covertToClientObj = () => {
-    if (seedlotQuery.data && vegCodeQuery.data && forestClientQuery.data) {
-      const converted = convertToApplicantInfoObj(
-        seedlotQuery.data,
-        vegCodeQuery.data,
-        forestClientQuery.data
-      );
-      setApplicantData(converted);
-    }
-  };
+  const applicantData = useMemo(
+    () => (seedlotQuery.data && vegCodeQuery.data && forestClientQuery.data
+      ? convertToApplicantInfoObj(seedlotQuery.data, vegCodeQuery.data, forestClientQuery.data)
+      : undefined),
+    [seedlotQuery.data, vegCodeQuery.data, forestClientQuery.data]
+  );
 
   const createBreadcrumbItems = () => {
     const crumbsList = [];
@@ -164,12 +150,6 @@ const SeedlotDetails = () => {
     }
     return crumbsList;
   };
-
-  useEffect(() => {
-    if (forestClientQuery.isFetched && seedlotQuery.isFetchedAfterMount) {
-      covertToClientObj();
-    }
-  }, [forestClientQuery.isFetched, seedlotQuery.isFetchedAfterMount, seedlotQuery.status]);
 
   return (
     <FlexGrid className="seedlot-details-page">
@@ -264,7 +244,7 @@ const SeedlotDetails = () => {
                 <ApplicantInformation
                   seedlotNumber={seedlotNumber}
                   applicant={applicantData}
-                  isFetching={forestClientQuery?.isFetching}
+                  isFetching={seedlotQuery.isFetching || forestClientQuery.isFetching}
                   hideEditButton={!isTscAdmin && viewOnlySeedlot}
                 />
                 {
