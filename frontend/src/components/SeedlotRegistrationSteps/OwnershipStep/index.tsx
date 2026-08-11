@@ -19,6 +19,7 @@ import { getSeedlotFromOracleDbBySeedlotNumber } from '../../../api-service/seed
 import TitleAccordion from '../../TitleAccordion';
 import ScrollToTop from '../../ScrollToTop';
 import SingleOwnerInfo from './SingleOwnerInfo';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import {
   StateReturnObj,
