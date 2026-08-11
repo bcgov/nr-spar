@@ -14,7 +14,6 @@ import { Add } from '@carbon/icons-react';
 
 import SeedlotRegWizardContext from '../../../contexts/SeedlotRegWizardContext';
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import { getSeedlotFromOracleDbBySeedlotNumber } from '../../../api-service/seedlotAPI';
 import TitleAccordion from '../../TitleAccordion';

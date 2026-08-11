@@ -49,7 +49,7 @@
     "@cypress/code-coverage": "^4.0.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@testing-library/dom": "^10.0.0",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.0.0",
     "@types/carbon-components-react": "^7.55.13",
