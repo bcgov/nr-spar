@@ -45,6 +45,10 @@ jobs:
             | tr '[:upper:]' '[:lower:]' \
             | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')"
           if [ -z "${slug}" ]; then slug="generated"; fi
+          # 'upt_' (4) + issue number + '_' (1) + '.feature' (8) + 1 safety margin
+          max_slug=$(( $(getconf NAME_MAX .tmp 2>/dev/null || echo 255) - ${#ISSUE_NUMBER} - 14 ))
+          slug="${slug:0:${max_slug}}"
+          slug="${slug%-}"
           file_name="upt_${ISSUE_NUMBER}_${slug}.feature"
           echo "FILE_NAME=${file_name}" >> "$GITHUB_ENV"
           printf '%s\n' "${FEATURE_CONTENT}" > ".tmp/${file_name}"
@@ -53,10 +57,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/gherkin/node_modules
-          key: gherkin-parser-${{ runner.os }}
+          key: gherkin-parser-${{ runner.os }}-29-7-0
 
       - name: Install Gherkin parser
-        run: npm install --no-save --prefix /tmp/gherkin @cucumber/gherkin @cucumber/messages
+        run: npm install --no-save --prefix /tmp/gherkin @cucumber/gherkin@29 @cucumber/messages@27
 
       - name: Validate Gherkin syntax
         id: validate_gherkin
@@ -101,11 +105,14 @@ jobs:
             });
 
       - name: Create feature file
+        if: steps.validate_gherkin.outcome == 'success'
         run: |
           mkdir -p "${CYPRESS_TARGET_FOLDER}"
           cp ".tmp/${FILE_NAME}" "${CYPRESS_TARGET_FOLDER}/${FILE_NAME}"
+          rm -rf .tmp
 
       - name: Commit & Push changes
+        if: steps.validate_gherkin.outcome == 'success'
         uses: Andro999b/push@c77535fe7a94645f7ceca83e48e6cc977620710e # v1.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -117,6 +124,7 @@ jobs:
             Closes #${{ github.event.issue.number }}
 
       - name: Create Pull Request
+        if: steps.validate_gherkin.outcome == 'success'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           branch: test/upt_${{ github.event.issue.number }}
