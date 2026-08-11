@@ -36,7 +36,24 @@ jobs:
       - name: Prepare temporary feature file
         run: |
           mkdir -p .tmp
-          printf '%s\n' "${{ steps.feature.outputs.feature }}" > ".tmp/upt_${{ github.event.issue.number }}.feature"
+          raw_title="${{ steps.feature.outputs.title }}"
+          cleaned="$(echo "${raw_title}" | sed -E 's/^\[Test Case\]:[[:space:]]*//')"
+          slug="$(echo "${cleaned}" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')"
+          if [ -z "${slug}" ]; then slug="generated"; fi
+          file_name="upt_${{ github.event.issue.number }}_${slug}.feature"
+          echo "FILE_NAME=${file_name}" >> "$GITHUB_ENV"
+          printf '%s\n' "${{ steps.feature.outputs.feature }}" > ".tmp/${file_name}"
+
+      - name: Cache gherkin parser
+        uses: actions/cache@v4
+        with:
+          path: /tmp/gherkin/node_modules
+          key: gherkin-parser-${{ runner.os }}
+
+      - name: Install Gherkin parser
+        run: npm install --no-save --prefix /tmp/gherkin @cucumber/gherkin @cucumber/messages
 
       - name: Validate Gherkin syntax
         run: |
