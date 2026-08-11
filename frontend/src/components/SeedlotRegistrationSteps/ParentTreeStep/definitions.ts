@@ -47,6 +47,16 @@ export type StrTypeRowItem = {
 export type PrimitiveRowItem = {
   rowId: string
   isMixTab: boolean
+  /**
+   * The parent tree's Oracle identity. Stamped once when the row is created, either
+   * from the live orchard catalog (new seedlot/new SMP mix entry) or from SPAR-stored
+   * contribution data (copy/historical/review of an existing seedlot). Submit and
+   * calculate payloads must read this field instead of re-resolving identity from the
+   * live catalog, so trees that later leave the orchard still work.
+   */
+  parentTreeId: number | null
+  /** Stamped alongside parentTreeId, mirrors the parent tree's tested indicator. */
+  isTested: boolean
 }
 
 export type RowItem = PrimitiveRowItem & StrTypeRowItem;
