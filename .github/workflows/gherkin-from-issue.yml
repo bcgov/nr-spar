@@ -56,14 +56,14 @@ jobs:
         run: npm install --no-save --prefix /tmp/gherkin @cucumber/gherkin @cucumber/messages
 
       - name: Validate Gherkin syntax
+        id: validate_gherkin
         run: |
-          npm install --no-save @cucumber/gherkin @cucumber/messages
           node <<'NODE'
           const fs = require('fs');
           const { Parser, AstBuilder, GherkinClassicTokenMatcher } = require('@cucumber/gherkin');
           const { IdGenerator } = require('@cucumber/messages');
 
-          const file = `.tmp/upt_${process.env.ISSUE_NUMBER}.feature`;
+          const file = `.tmp/${process.env.FILE_NAME}`;
           const content = fs.readFileSync(file, 'utf8');
           const parser = new Parser(new AstBuilder(IdGenerator.uuid()), new GherkinClassicTokenMatcher());
 
@@ -77,7 +77,8 @@ jobs:
           }
           NODE
         env:
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          FILE_NAME: ${{ env.FILE_NAME }}
+          NODE_PATH: /tmp/gherkin/node_modules
 
       - name: Comment when Gherkin validation fails
         if: failure()
@@ -99,7 +100,7 @@ jobs:
       - name: Create feature file
         run: |
           mkdir -p "${CYPRESS_TARGET_FOLDER}"
-          cp ".tmp/upt_${{ github.event.issue.number }}.feature" "${CYPRESS_TARGET_FOLDER}/upt_${{ github.event.issue.number }}.feature"
+          cp ".tmp/${FILE_NAME}" "${CYPRESS_TARGET_FOLDER}/${FILE_NAME}"
 
       - name: Commit & Push changes
         uses: Andro999b/push@c77535fe7a94645f7ceca83e48e6cc977620710e # v1.3
