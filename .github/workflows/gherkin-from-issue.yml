@@ -34,17 +34,20 @@ jobs:
           update_title: true
 
       - name: Prepare temporary feature file
+        env:
+          FEATURE_TITLE: ${{ steps.feature.outputs.title }}
+          FEATURE_CONTENT: ${{ steps.feature.outputs.feature }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           mkdir -p .tmp
-          raw_title="${{ steps.feature.outputs.title }}"
-          cleaned="$(echo "${raw_title}" | sed -E 's/^\[Test Case\]:[[:space:]]*//')"
+          cleaned="$(echo "${FEATURE_TITLE}" | sed -E 's/^\[Test Case\]:[[:space:]]*//')"
           slug="$(echo "${cleaned}" \
             | tr '[:upper:]' '[:lower:]' \
             | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')"
           if [ -z "${slug}" ]; then slug="generated"; fi
-          file_name="upt_${{ github.event.issue.number }}_${slug}.feature"
+          file_name="upt_${ISSUE_NUMBER}_${slug}.feature"
           echo "FILE_NAME=${file_name}" >> "$GITHUB_ENV"
-          printf '%s\n' "${{ steps.feature.outputs.feature }}" > ".tmp/${file_name}"
+          printf '%s\n' "${FEATURE_CONTENT}" > ".tmp/${file_name}"
 
       - name: Cache gherkin parser
         uses: actions/cache@v4
@@ -81,7 +84,7 @@ jobs:
           NODE_PATH: /tmp/gherkin/node_modules
 
       - name: Comment when Gherkin validation fails
-        if: failure()
+        if: steps.validate_gherkin.outcome == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
