@@ -733,7 +733,7 @@ export const fillCalculatedInfo = (
  */
 export const getRequiredParentTreeId = (row: RowItem): number => {
   if (row.parentTreeId === null) {
-    throw Error(`Parent tree "${row.parentTreeNumber.value}" is missing its parent tree id.`);
+    throw new Error(`Parent tree "${row.parentTreeNumber.value}" is missing its parent tree id.`);
   }
   return row.parentTreeId;
 };
