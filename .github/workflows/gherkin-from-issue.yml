@@ -54,7 +54,7 @@ jobs:
           printf '%s\n' "${FEATURE_CONTENT}" > ".tmp/${file_name}"
 
       - name: Cache gherkin parser
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: /tmp/gherkin/node_modules
           key: gherkin-parser-${{ runner.os }}-29-7-0
