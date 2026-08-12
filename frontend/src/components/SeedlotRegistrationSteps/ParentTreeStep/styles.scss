@@ -113,7 +113,7 @@
     padding-left: 2.5rem;
 
     input {
-      background: colors.$white;
+      background: var(--#{vars.$bcgov-prefix}-field-02);
     }
   }
 
@@ -267,7 +267,7 @@
     }
 
     .#{vars.$bcgov-prefix}--text-input:focus {
-      background: white;
+      background: var(--#{vars.$bcgov-prefix}-field-02);
     }
   }
 
