@@ -1000,7 +1000,7 @@ public class SeedlotService {
             continue;
           }
           weightedByTrait.merge(
-              genQual.geneticWorthCode().toLowerCase(),
+              genQual.geneticWorthCode().toLowerCase(java.util.Locale.ROOT),
               genQual.geneticQualityValue().multiply(proportion),
               BigDecimal::add);
         }
