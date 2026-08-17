@@ -68,7 +68,7 @@
     "eslint-plugin-promise": "^7.0.0",
     "fork-ts-checker-webpack-plugin": "9.1.0",
     "globals": "^17.0.0",
-    "jsdom": "^25.0.1",
+    "jsdom": "^30.0.0",
     "nyc": "^18.0.0",
     "playwright-webkit": "^1.43.0",
     "react-test-renderer": "^18.2.0",
