@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.exception.ReportGenerationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import org.springframework.http.HttpStatus;
@@ -36,5 +37,10 @@ public class RestExceptionEndpoint {
       SeedlotSubmissionValidationException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(ValidationExceptionResponse.fromSeedlotErrors(ex.getErrors()));
+  }
+
+  @ExceptionHandler(ReportGenerationException.class)
+  ResponseEntity<String> reportGeneration(ReportGenerationException ex) {
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
   }
 }

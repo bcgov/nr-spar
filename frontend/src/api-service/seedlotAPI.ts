@@ -102,6 +102,16 @@ export const getBClassSeedlotFullForm = (seedlotNumber: string) => {
   return api.get(url).then((res) => res.data as SeedlotBClassFullResponseType);
 };
 
+/**
+ * Fetches the legacy SPRR001 Class B seedlot registration report as a PDF blob.
+ * Open it with openBlankTab + openBlobInNewTab from DownloadUtils when the
+ * request is async (see that module's popup-blocker-safe pattern).
+ */
+export const downloadBclassRegistrationReport = (seedlotNumber: string) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/reports/registration`;
+  return api.get(url, { responseType: 'blob' }).then((res): Blob => res.data);
+};
+
 export const getSeedlotFromOracleDbBySeedlotNumber = (seedlotNumber: string) => {
   const url = ApiConfig.seedlotFromOracleDbBySeedlotNumber.replace('{seedlotNumber}', seedlotNumber);
   return api.get(url);

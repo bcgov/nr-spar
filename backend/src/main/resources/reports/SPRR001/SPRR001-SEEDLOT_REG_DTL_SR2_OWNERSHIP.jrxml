@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="OWNERSHIP" pageWidth="612" pageHeight="792" columnWidth="612" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="0f05606e-c997-4683-ae86-e5d7c8e19c0e">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_SEEDLOT_NUMBER" class="java.lang.String"/>
+	<parameter name="ORACLE_REF_CURSOR" class="java.sql.ResultSet" isForPrompting="false"/>
+	<parameter name="LoggedInUser" class="com.jaspersoft.jasperserver.api.metadata.user.domain.User" isForPrompting="false"/>
+	<parameter name="p_report_id" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["OWNERSHIP"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[($P{REPORT_CONTEXT} != null) ? "repo:" : "H:\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_EXT" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[($P{REPORT_CONTEXT} != null) ? ".jrxml" : ".jasper"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="clientNumber" class="java.lang.String"/>
+	<field name="clientAcronym" class="java.lang.String"/>
+	<field name="clientLocnCode" class="java.lang.String"/>
+	<field name="clientName" class="java.lang.String"/>
+	<field name="ownerPortionPct" class="java.math.BigDecimal"/>
+	<field name="reservedPct" class="java.math.BigDecimal"/>
+	<field name="surplusPct" class="java.math.BigDecimal"/>
+	<field name="fundingSource" class="java.lang.String"/>
+	<field name="sparFundSrceDesc" class="java.lang.String"/>
+	<field name="methodOfPaymentCode" class="java.lang.String"/>
+	<field name="methodOfPaymentDesc" class="java.lang.String"/>
+	<variable name="CCF0_FRM_SUPPRESS" class="java.lang.Boolean" resetType="None">
+		<variableExpression><![CDATA[//if isnull({SPR001P_OWNERSHIP.CLIENT_ACRONYM}) then false
+//else true
+
+$F{clientAcronym} != null?  true : false]]></variableExpression>
+	</variable>
+	<title>
+		<band height="45">
+			<line>
+				<reportElement uuid="21702261-4b22-47f8-a41d-d8da527157ab" x="0" y="0" width="1" height="45"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="4b384232-50ca-4202-8999-f9e053514a35" x="0" y="0" width="537" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="49881113-07a5-4e81-b50a-a886d72aff82" x="537" y="0" width="1" height="45"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="1f1b43cc-7d32-41de-ab97-aed67318fd9f" x="0" y="17" width="537" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="1bf50cf1-9144-4f95-9f8e-6509ab9d09e4" x="4" y="2" width="73" height="13" forecolor="#004000"/>
+				<textElement textAlignment="Left">
+					<font fontName="Arial" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Ownership]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a2be186e-df4c-4f01-89fd-7ddc6ef5dd04" x="392" y="20" width="132" height="25" forecolor="#000000"/>
+				<textElement textAlignment="Left">
+					<font fontName="Arial" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[
+Method of Payment]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="836b2a0a-73d3-46ec-8cc5-bc484ed07ed8" x="258" y="20" width="132" height="25" forecolor="#000000"/>
+				<textElement textAlignment="Left">
+					<font fontName="Arial" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[
+Funding Source]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1da7673f-53e9-4dac-aa4b-dbf35a6ee6a3" x="216" y="20" width="38" height="25" forecolor="#000000"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Surplus
+(%)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="394a34fe-2381-4705-ae73-469d4ac4ed33" x="168" y="20" width="44" height="25" forecolor="#000000"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Reserved
+(%)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="0e56aff6-4376-441b-8e4f-2ee2b6842515" x="98" y="20" width="68" height="25" forecolor="#000000"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Owner
+Portion (%)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f00240f7-1897-4860-9707-5c0de2f7c402" x="4" y="20" width="96" height="25" forecolor="#000000"/>
+				<textElement textAlignment="Left">
+					<font fontName="Arial" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[
+Owner Agency:]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="14" splitType="Prevent">
+			<printWhenExpression><![CDATA[//@NOT [not({@FRM_SUPPRESS})]@
+$V{CCF0_FRM_SUPPRESS} == true]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" pattern="#,##0.0;-#,##0.0" isBlankWhenNull="true">
+				<reportElement uuid="bfced20e-f740-4896-b853-f7252466fa08" x="98" y="0" width="68" height="12" forecolor="#000000"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ownerPortionPct}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0;-#,##0" isBlankWhenNull="true">
+				<reportElement uuid="02823c1a-6ac5-4f89-b61f-a771bad0db08" x="168" y="0" width="44" height="12" forecolor="#000000"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{reservedPct}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0;-#,##0" isBlankWhenNull="true">
+				<reportElement uuid="047770bd-3c39-46b7-9bcf-2ce38f594812" x="216" y="0" width="38" height="12" forecolor="#000000"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{surplusPct}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="bb71dfad-0c50-4251-8c45-58add645a451" x="258" y="0" width="132" height="12" forecolor="#000000">
+					<printWhenExpression><![CDATA[//@NOT [isnull({SPR001P_OWNERSHIP.FUNDING_SOURCE})]@
+$F{fundingSource} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sparFundSrceDesc}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="bb6d412f-6ea3-49de-b78a-c8318cc75f9f" x="392" y="0" width="132" height="12" forecolor="#000000">
+					<printWhenExpression><![CDATA[//@NOT [isnull({SPR001P_OWNERSHIP.METHOD_OF_PAYMENT_CODE})]@
+$F{methodOfPaymentCode} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{methodOfPaymentDesc}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="c84871b6-e177-4743-ba53-f8b629cc478c" x="4" y="0" width="90" height="12" forecolor="#000000"/>
+				<textElement textAlignment="Left">
+					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{clientAcronym} + "    " + $F{clientLocnCode}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="fdb814d9-9f4e-477b-b75c-a3a208ea8260" x="537" y="0" width="1" height="14"/>
+				<graphicElement>
+					<pen lineWidth="0.25"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="e3dcc24d-655a-4076-b402-8a4e8a20e0e6" x="0" y="0" width="1" height="14"/>
+				<graphicElement>
+					<pen lineWidth="0.25"/>
+				</graphicElement>
+			</line>
+		</band>
+		<band height="55" splitType="Prevent">
+			<printWhenExpression><![CDATA[//@NOT [{@FRM_SUPPRESS}]@
+
+$V{CCF0_FRM_SUPPRESS} != true]]></printWhenExpression>
+			<line>
+				<reportElement uuid="cc9e27b2-6fe0-47e1-8e27-75ada6e0ab22" x="4" y="25" width="88" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="47a600ac-5c48-40a3-8812-50cc580f53b9" x="98" y="25" width="68" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="86e748de-05f4-498c-9348-90e6db04d36d" x="169" y="25" width="42" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="14b726e8-a213-48ae-b390-f1bae33e6582" x="214" y="25" width="39" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="ca214045-6fb2-4689-a932-70362e982c12" x="258" y="25" width="131" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="3363e68c-7234-4a76-b4de-1b47b3a1b0e7" x="392" y="25" width="131" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="a4117dc1-c6db-4a79-9350-74bf46971635" x="4" y="49" width="88" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="e33c6303-0daa-4a0e-9fbe-77292732f0cd" x="98" y="49" width="68" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="fcc7ceb9-0395-4882-adbc-8af8e37cd9f5" x="169" y="49" width="42" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="c824466e-08a0-4176-a6a1-b2ef263dd59d" x="214" y="49" width="39" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="f2865103-52dd-4246-aa19-c4a4b78a29b5" x="258" y="49" width="131" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="3a7c0d24-4ead-44c4-a2ce-5fcd9c2dc3d7" x="392" y="49" width="131" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="06173ea9-8ff3-4eca-b9db-d27be56361cb" stretchType="RelativeToBandHeight" x="537" y="0" width="1" height="54"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="0a9b1265-7117-4e4c-b3c9-be09c12c67fa" stretchType="RelativeToBandHeight" x="0" y="0" width="1" height="54"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+		</band>
+	</detail>
+	<summary>
+		<band height="1">
+			<line>
+				<reportElement uuid="e75ba403-dc41-4742-a04e-a5f8e2ed5e00" x="0" y="0" width="537" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

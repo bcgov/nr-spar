@@ -67,6 +67,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionBclassMapper;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormStepMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
@@ -86,6 +87,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -139,6 +141,9 @@ class SeedlotServiceTest {
   @Mock SeedlotCollectionGeometryService seedlotCollectionGeometryService;
 
   @Mock SeedlotFormCollectionBclassMapper seedlotFormCollectionBclassMapper;
+
+  private final SeedlotFormStepMapper seedlotFormStepMapper =
+      Mappers.getMapper(SeedlotFormStepMapper.class);
 
   @Mock SaveSeedlotFormService saveSeedlotFormService;
 
@@ -200,6 +205,7 @@ class SeedlotServiceTest {
             seedlotCollectionGeometryRepository,
             seedlotCollectionGeometryService,
             seedlotFormCollectionBclassMapper,
+            seedlotFormStepMapper,
             saveSeedlotFormService);
   }
 
