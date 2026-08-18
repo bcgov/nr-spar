@@ -1,5 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
-import { HALF_SECOND, THIRTY_SECONDS, TYPE_DELAY } from '../../constants';
+import { THIRTY_SECONDS, TYPE_DELAY } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
@@ -80,7 +80,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
   it('Orchard dropdown section', () => {
     cy.get('#primary-orchard-selection')
-      .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
     cy.get(`.${prefix}--list-box--expanded`)
@@ -145,7 +144,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     // Add orchard from dropdown
     cy.get('#primary-orchard-selection')
-      .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
     cy.get('@orchardDropdown')
@@ -162,7 +160,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('have.text', regFormData.orchard.additionalOrchardLabel);
 
     cy.get('#secondary-orchard-selection')
-      .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
     cy.get('@orchardDropdown')
@@ -228,7 +225,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
   it('store first Orchard Parent Tree Number in an array', () => {
     cy.get('#primary-orchard-selection')
-      .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
     cy.get(`.${prefix}--list-box--expanded`)
@@ -293,7 +289,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   it('store second Orchard Parent Tree Number in an array', () => {
     // Enter new orchard
     cy.get('#primary-orchard-selection')
-      .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
     cy.get(`.${prefix}--list-box--expanded`)
@@ -355,7 +350,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
   it('Linkage of Step 4 and Step 5', () => {
     cy.get('#primary-orchard-selection')
-      .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
     cy.get(`.${prefix}--list-box--expanded`)
@@ -373,7 +367,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     cy.get('#secondary-orchard-selection')
-      .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
     cy.get(`.${prefix}--list-box--expanded`)
