@@ -63,12 +63,19 @@ import ca.bc.gov.backendstartapi.enums.LongitudeCodeEnum;
 import ca.bc.gov.backendstartapi.enums.parser.ConeAndPollenCountHeader;
 import ca.bc.gov.backendstartapi.enums.parser.CsvParsingHeader;
 import ca.bc.gov.backendstartapi.enums.parser.SmpMixHeader;
+import ca.bc.gov.backendstartapi.report.Sprr001MainRow;
+import ca.bc.gov.backendstartapi.report.Sprr001OwnershipRow;
 import ca.bc.gov.backendstartapi.util.ValueUtil;
 import ca.bc.gov.backendstartapi.vo.parser.ConeAndPollenCount;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /** This class holds configurations for building Cloud Native images. */
 @Configuration
@@ -153,6 +160,26 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     value = {
       HttpServletRequestRuntimeHint.class,
       ValidationRuntimeHint.class,
-      ReportRuntimeHint.class
+      NativeImageConfig.class
     })
-public class NativeImageConfig {}
+public class NativeImageConfig implements RuntimeHintsRegistrar {
+
+  @Override
+  public void registerHints(@NonNull RuntimeHints hints, @Nullable ClassLoader classLoader) {
+    hints.resources().registerPattern("reports/SPRR001/*");
+    hints
+        .reflection()
+        .registerType(
+            Sprr001MainRow.class,
+            MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+            MemberCategory.INVOKE_PUBLIC_METHODS,
+            MemberCategory.DECLARED_FIELDS);
+    hints
+        .reflection()
+        .registerType(
+            Sprr001OwnershipRow.class,
+            MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+            MemberCategory.INVOKE_PUBLIC_METHODS,
+            MemberCategory.DECLARED_FIELDS);
+  }
+}
