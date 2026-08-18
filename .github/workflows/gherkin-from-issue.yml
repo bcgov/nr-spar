@@ -89,7 +89,7 @@ jobs:
 
       - name: Comment when Gherkin validation fails
         if: steps.validate_gherkin.outcome == 'failure'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const issueNumber = context.issue.number;
