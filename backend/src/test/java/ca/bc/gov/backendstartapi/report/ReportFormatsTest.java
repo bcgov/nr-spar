@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -32,9 +33,10 @@ class ReportFormatsTest {
   @DisplayName("date and text helpers format or pass through nulls")
   void dateAndText_formatValues() {
     assertThat(ReportFormats.date((LocalDate) null)).isNull();
-    assertThat(ReportFormats.date(LocalDate.of(2024, 12, 1))).isEqualTo("2024-12-01");
+    assertThat(ReportFormats.date(LocalDate.of(2024, Month.DECEMBER, 1))).isEqualTo("2024-12-01");
     assertThat(ReportFormats.date((LocalDateTime) null)).isNull();
-    assertThat(ReportFormats.date(LocalDateTime.of(2024, 12, 1, 10, 0))).isEqualTo("2024-12-01");
+    assertThat(ReportFormats.date(LocalDateTime.of(2024, Month.DECEMBER, 1, 10, 0)))
+        .isEqualTo("2024-12-01");
     assertThat(ReportFormats.text(null)).isNull();
     assertThat(ReportFormats.text('N')).isEqualTo("N");
   }

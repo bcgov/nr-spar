@@ -142,7 +142,8 @@ class SeedlotRegistrationReportServiceTest {
     when(seedlotRepository.findById("53001")).thenReturn(Optional.of(seedlot));
     when(reportDataAssembler.assemble(seedlot))
         .thenReturn(new Sprr001ReportData(new Sprr001MainRow(), List.of()));
-    when(reportResourceService.getMainReport()).thenReturn(mock(JasperReport.class));
+    JasperReport jasperReport = mock(JasperReport.class);
+    when(reportResourceService.getMainReport()).thenReturn(jasperReport);
     when(reportResourceService.sprr001TemplateParameters()).thenReturn(new HashMap<>());
 
     try (MockedStatic<JasperFillManager> fill = mockStatic(JasperFillManager.class)) {
