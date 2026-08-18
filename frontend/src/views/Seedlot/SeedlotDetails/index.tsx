@@ -24,7 +24,7 @@ import ComboButton from '../../../components/ComboButton';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import useWindowSize from '../../../hooks/UseWindowSize';
 
-import { downloadBclassRegistrationReport, getSeedlotById } from '../../../api-service/seedlotAPI';
+import { downloadBClassRegistrationReport, getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
@@ -91,7 +91,7 @@ const SeedlotDetails = () => {
   const isBClass = isBClassSeedlot(seedlotQuery.data);
 
   const downloadReportMutation = useMutation({
-    mutationFn: () => downloadBclassRegistrationReport(seedlotNumber ?? ''),
+    mutationFn: () => downloadBClassRegistrationReport(seedlotNumber ?? ''),
     onMutate: () => ({ reportWindow: openBlankTab() }),
     onSuccess: (pdfBlob, _vars, context) => {
       openBlobInNewTab(pdfBlob, context?.reportWindow);

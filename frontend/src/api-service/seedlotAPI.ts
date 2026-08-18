@@ -107,7 +107,7 @@ export const getBClassSeedlotFullForm = (seedlotNumber: string) => {
  * Open it with openBlankTab + openBlobInNewTab from DownloadUtils when the
  * request is async (see that module's popup-blocker-safe pattern).
  */
-export const downloadBclassRegistrationReport = (seedlotNumber: string) => {
+export const downloadBClassRegistrationReport = (seedlotNumber: string) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/reports/registration`;
   return api.get(url, { responseType: 'blob' }).then((res): Blob => res.data);
 };

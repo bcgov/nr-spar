@@ -11,17 +11,18 @@ describe('DownloadUtils', () => {
     vi.useRealTimers();
   });
 
-  it('openBlankTab opens an empty tab', () => {
-    const blank = { closed: false } as Window;
+  it('openBlankTab opens an empty tab and drops window.opener', () => {
+    const blank = { closed: false, opener: {} as Window } as Window;
     const open = vi.fn().mockReturnValue(blank);
     vi.stubGlobal('open', open);
 
     expect(openBlankTab()).toBe(blank);
+    expect(blank.opener).toBeNull();
     expect(open).toHaveBeenCalledWith('', '_blank');
   });
 
   it('openBlobInNewTab navigates a prepared tab and revokes the object URL later', () => {
-    const tab = { closed: false, location: { href: '' } } as Window;
+    const tab = { closed: false, opener: {} as Window, location: { href: '' } } as Window;
     const createObjectURL = vi.fn().mockReturnValue('blob:report');
     const revokeObjectURL = vi.fn();
     const open = vi.fn();
@@ -31,6 +32,7 @@ describe('DownloadUtils', () => {
     openBlobInNewTab(new Blob(['%PDF'], { type: 'application/pdf' }), tab);
 
     expect(createObjectURL).toHaveBeenCalled();
+    expect(tab.opener).toBeNull();
     expect(tab.location.href).toBe('blob:report');
     expect(open).not.toHaveBeenCalled();
 
