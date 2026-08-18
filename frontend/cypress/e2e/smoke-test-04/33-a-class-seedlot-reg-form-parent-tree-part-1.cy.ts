@@ -57,7 +57,6 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
           cy.log('Primary input is empty');
           // Do something if the input is empty
           cy.get('#primary-orchard-selection')
-            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
             .click();
 
           cy.get(`.${prefix}--list-box--expanded`)
@@ -72,7 +71,6 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
             .click();
 
           cy.get('#secondary-orchard-selection')
-            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
             .click();
 
           cy.get(`.${prefix}--list-box--expanded`)
@@ -93,7 +91,6 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
           cy.log('Secondary input is empty');
           // Do something if the input is empty
           cy.get('#secondary-orchard-selection')
-            .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
             .click();
 
           cy.get(`.${prefix}--list-box--expanded`)
@@ -128,7 +125,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .should('have.text', regFormData.parentTree.subtitle);
 
     cy.get('.parent-tree-step-table-container')
-      .find('h4')
+      .find('h2')
       .should('have.text', regFormData.parentTree.coneTitle);
 
     cy.get('.parent-tree-step-table-container')
@@ -316,7 +313,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
           .click();
 
         cy.get('.parent-tree-step-table-container')
-          .find('h4')
+          .find('h2')
           .as('closeShowHideDropdown')
           .click();
       }
