@@ -199,11 +199,27 @@
       <groupId>net.sf.jasperreports</groupId>
       <artifactId>jasperreports</artifactId>
       <version>6.21.5</version>
+      <!--
+        Apache commons-logging conflicts with Spring's spring-jcl and initializes
+        LogFactory at GraalVM native-image build time.
+      -->
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>net.sf.jasperreports</groupId>
       <artifactId>jasperreports-fonts</artifactId>
       <version>6.21.5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- Testing -->
@@ -561,11 +577,6 @@
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>42.7.12</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-logging</groupId>
-        <artifactId>commons-logging</artifactId>
-        <version>1.2</version>
       </dependency>
       <!--
         jasperreports pulls in commons-beanutils 1.11.0 directly and 1.8.3
