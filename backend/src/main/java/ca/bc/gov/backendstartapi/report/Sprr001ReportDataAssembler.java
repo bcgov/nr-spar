@@ -348,7 +348,7 @@ public class Sprr001ReportDataAssembler {
             .distinct()
             .toList();
     if (codes.isEmpty()) {
-      return Map.of();
+      return new HashMap<>();
     }
     return methodOfPaymentRepository.findAllByMethodOfPaymentCodeIn(codes).stream()
         .filter(method -> method.getDescription() != null)
