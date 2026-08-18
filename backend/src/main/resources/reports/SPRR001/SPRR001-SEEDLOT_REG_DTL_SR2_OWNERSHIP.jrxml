@@ -5,7 +5,6 @@
 	<property name="ireport.y" value="0"/>
 	<parameter name="P_SEEDLOT_NUMBER" class="java.lang.String"/>
 	<parameter name="ORACLE_REF_CURSOR" class="java.sql.ResultSet" isForPrompting="false"/>
-	<parameter name="LoggedInUser" class="com.jaspersoft.jasperserver.api.metadata.user.domain.User" isForPrompting="false"/>
 	<parameter name="p_report_id" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["OWNERSHIP"]]></defaultValueExpression>
 	</parameter>

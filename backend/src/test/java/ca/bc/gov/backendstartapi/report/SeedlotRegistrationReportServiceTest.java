@@ -1,8 +1,13 @@
 package ca.bc.gov.backendstartapi.report;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -11,15 +16,25 @@ import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
+import ca.bc.gov.backendstartapi.exception.ReportGenerationException;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
@@ -91,5 +106,77 @@ class SeedlotRegistrationReportServiceTest {
         () -> service.generateBclassRegistrationReport("53001", "user"));
 
     verifyNoInteractions(reportDataAssembler);
+  }
+
+  @Test
+  @DisplayName("generateBclassRegistrationReport fills and exports a PDF for Class B")
+  void generate_classB_shouldExportPdf() {
+    Seedlot seedlot = classBSeedlot("53001");
+    when(seedlotRepository.findById("53001")).thenReturn(Optional.of(seedlot));
+    when(reportDataAssembler.assemble(seedlot))
+        .thenReturn(new Sprr001ReportData(new Sprr001MainRow(), List.of()));
+    JasperReport jasperReport = mock(JasperReport.class);
+    when(reportResourceService.getMainReport()).thenReturn(jasperReport);
+    when(reportResourceService.sprr001TemplateParameters()).thenReturn(new HashMap<>());
+
+    byte[] pdf = {0x25, 0x50, 0x44, 0x46};
+    JasperPrint jasperPrint = mock(JasperPrint.class);
+
+    try (MockedStatic<JasperFillManager> fill = mockStatic(JasperFillManager.class);
+        MockedStatic<JasperExportManager> export = mockStatic(JasperExportManager.class)) {
+      fill.when(
+              () ->
+                  JasperFillManager.fillReport(
+                      any(JasperReport.class), anyMap(), any(JRDataSource.class)))
+          .thenReturn(jasperPrint);
+      export.when(() -> JasperExportManager.exportReportToPdf(jasperPrint)).thenReturn(pdf);
+
+      assertArrayEquals(pdf, service.generateBclassRegistrationReport("53001", "user"));
+    }
+  }
+
+  @Test
+  @DisplayName("generateBclassRegistrationReport wraps Jasper failures")
+  void generate_jasperFailure_shouldThrowReportGenerationException() {
+    Seedlot seedlot = classBSeedlot("53001");
+    when(seedlotRepository.findById("53001")).thenReturn(Optional.of(seedlot));
+    when(reportDataAssembler.assemble(seedlot))
+        .thenReturn(new Sprr001ReportData(new Sprr001MainRow(), List.of()));
+    when(reportResourceService.getMainReport()).thenReturn(mock(JasperReport.class));
+    when(reportResourceService.sprr001TemplateParameters()).thenReturn(new HashMap<>());
+
+    try (MockedStatic<JasperFillManager> fill = mockStatic(JasperFillManager.class)) {
+      fill.when(
+              () ->
+                  JasperFillManager.fillReport(
+                      any(JasperReport.class), anyMap(), any(JRDataSource.class)))
+          .thenThrow(new JRException("compile failed"));
+
+      assertThrows(
+          ReportGenerationException.class,
+          () -> service.generateBclassRegistrationReport("53001", "user"));
+    }
+  }
+
+  @Test
+  @DisplayName("generateBclassRegistrationReport rejects seedlots without Class B")
+  void generate_missingGeneticClass_shouldFail() {
+    Seedlot seedlot = new Seedlot("53001");
+    seedlot.setApplicantClientNumber("00012797");
+    when(seedlotRepository.findById("53001")).thenReturn(Optional.of(seedlot));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> service.generateBclassRegistrationReport("53001", "user"));
+
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+  }
+
+  private Seedlot classBSeedlot(String seedlotNumber) {
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setApplicantClientNumber("00012797");
+    seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+    return seedlot;
   }
 }

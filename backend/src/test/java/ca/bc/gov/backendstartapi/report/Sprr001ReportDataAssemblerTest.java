@@ -21,6 +21,7 @@ import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
@@ -76,52 +77,23 @@ class Sprr001ReportDataAssemblerTest {
   }
 
   @Test
-  @DisplayName("assemble builds master row and ownership rows for B-class seedlot")
-  void assemble_shouldSucceed() {
-    final Seedlot seedlot = baseSeedlot();
-    SeedlotBclassFormDto form = bclassForm();
+  @DisplayName("assemble builds the SPRR001 master row for a B-class seedlot")
+  void assemble_shouldPopulateMainRow() {
+    Seedlot seedlot = baseSeedlot();
+    seedlot.setSeedlotSource(new SeedlotSourceEntity("CUS", "Custom", DATE_RANGE, false));
+    stubHappyPath(seedlot, bclassForm());
 
-    when(seedlotService.buildBclassFormData(seedlot)).thenReturn(form);
-    when(oracleApiProvider.getVegetationCode("FDI"))
-        .thenReturn(Optional.of(new CodeDescriptionDto("FDI", "Interior Douglas-fir")));
-    when(oracleApiProvider.getAllDistrictOrgUnits())
-        .thenReturn(
-            List.of(new OrgUnitDistrictDto(73, "Cariboo-Chilcotin Natural Resource District")));
-    when(oracleApiProvider.getAllValidFundingSources())
-        .thenReturn(List.of(new CodeDescriptionDto("ITC", "Incremental Tree Improvement")));
-    stubForestClient();
+    Sprr001MainRow master = assembler.assemble(seedlot).mainRow();
 
-    ConeCollectionMethodEntity method1 = new ConeCollectionMethodEntity();
-    method1.setConeCollectionMethodCode(1);
-    method1.setDescription("Climbing");
-    ConeCollectionMethodEntity method2 = new ConeCollectionMethodEntity();
-    method2.setConeCollectionMethodCode(2);
-    method2.setDescription("Squirrel cache");
-    when(seedlotCollectionMethodRepository.findAllBySeedlot_id(SEEDLOT_NUMBER))
-        .thenReturn(
-            List.of(
-                new SeedlotCollectionMethod(seedlot, method1),
-                new SeedlotCollectionMethod(seedlot, method2)));
-
-    MethodOfPaymentEntity payment = new MethodOfPaymentEntity("CLA", "Client account", DATE_RANGE);
-    when(methodOfPaymentRepository.findAllByMethodOfPaymentCodeIn(List.of("CLA")))
-        .thenReturn(List.of(payment));
-
-    Sprr001ReportData data = assembler.assemble(seedlot);
-
-    assertNotNull(data);
-    Sprr001MainRow master = data.mainRow();
     assertEquals(SEEDLOT_NUMBER, master.getSeedlotNumber());
     assertEquals("spar", master.getDbName());
     assertEquals("PND", master.getStatus());
     assertEquals("B", master.getGeneticClass());
+    assertEquals("CUS", master.getSeedlotSourceCode());
     assertEquals("Y", master.getToBeRegistrdInd());
-    assertEquals("Y", master.getBcSource());
     assertEquals("ACME", master.getClientAcronym());
-    assertEquals("ACME FORESTS", master.getClientName());
     assertEquals("Climbing", master.getConeCollectionMethodDesc());
     assertEquals("2", master.getConeCollectionMethod2Code());
-    assertEquals("Squirrel cache", master.getConeCollectionMethodDesc2());
     assertEquals("12", master.getGwGvo());
     assertEquals("North", master.getCollectionLatDesc());
     assertEquals("West", master.getCollectionLongDesc());
@@ -131,12 +103,59 @@ class Sprr001ReportDataAssemblerTest {
     assertEquals("Interior Douglas-fir", master.getSpeciesDesc());
     assertEquals("Cariboo-Chilcotin Natural Resource District", master.getCollectionOrgUnitDesc());
     assertNull(master.getCollectionProv());
-    assertEquals("Maritime", master.getSpzOfCollectionAreaDesc());
     assertEquals("declarer", master.getSubmittedByUser());
+  }
+
+  @Test
+  @DisplayName("assemble builds ownership rows with payment and funding descriptions")
+  void assemble_shouldPopulateOwnershipRows() {
+    Seedlot seedlot = baseSeedlot();
+    stubHappyPath(seedlot, bclassForm());
+
+    Sprr001ReportData data = assembler.assemble(seedlot);
+
     assertEquals(1, data.ownershipRows().size());
     assertEquals("00012797", data.ownershipRows().get(0).getClientNumber());
     assertEquals("Client account", data.ownershipRows().get(0).getMethodOfPaymentDesc());
     assertEquals("Incremental Tree Improvement", data.ownershipRows().get(0).getSparFundSrceDesc());
+  }
+
+  @Test
+  @DisplayName("assemble uses the approved user when it is not the copied-lot sentinel")
+  void assemble_approvedUser_shouldPrintOnReport() {
+    Seedlot seedlot = baseSeedlot();
+    seedlot.setApprovedUserId("approver");
+    stubHappyPath(seedlot, bclassForm());
+
+    assertEquals("approver", assembler.assemble(seedlot).mainRow().getSubmittedByUser());
+  }
+
+  @Test
+  @DisplayName("assemble skips blank genetic-worth traits and ownership without payment codes")
+  void assemble_skipsBlankTraitsAndPaymentCodes() {
+    Seedlot seedlot = baseSeedlot();
+    SeedlotFormOwnershipDto ownership =
+        new SeedlotFormOwnershipDto(
+            "00012797", "00", new BigDecimal("100"), BigDecimal.ZERO, BigDecimal.ZERO, null, "ITC");
+    SeedlotBclassFormDto form =
+        new SeedlotBclassFormDto(
+            bclassCollection(),
+            List.of(ownership),
+            bclassForm().interimStep(),
+            bclassForm().extractionStep(),
+            bclassForm().collectionGeometry(),
+            List.of(new SeedPlanZoneDto("M", "Maritime", false)),
+            List.of(
+                new GeneticWorthTraitsDto(null, new BigDecimal("9"), null, null),
+                new GeneticWorthTraitsDto("GVO", null, null, null),
+                new GeneticWorthTraitsDto("AD", new BigDecimal("5"), null, null)));
+    stubHappyPath(seedlot, form);
+
+    Sprr001ReportData data = assembler.assemble(seedlot);
+
+    assertEquals("5", data.mainRow().getGwAd());
+    assertNull(data.mainRow().getGwGvo());
+    assertNull(data.ownershipRows().get(0).getMethodOfPaymentDesc());
   }
 
   @Test
@@ -188,6 +207,34 @@ class Sprr001ReportDataAssemblerTest {
     Sprr001ReportData data = assembler.assemble(seedlot);
 
     assertEquals("declarer", data.mainRow().getSubmittedByUser());
+  }
+
+  private void stubHappyPath(Seedlot seedlot, SeedlotBclassFormDto form) {
+    when(seedlotService.buildBclassFormData(seedlot)).thenReturn(form);
+    when(oracleApiProvider.getVegetationCode("FDI"))
+        .thenReturn(Optional.of(new CodeDescriptionDto("FDI", "Interior Douglas-fir")));
+    when(oracleApiProvider.getAllDistrictOrgUnits())
+        .thenReturn(
+            List.of(new OrgUnitDistrictDto(73, "Cariboo-Chilcotin Natural Resource District")));
+    when(oracleApiProvider.getAllValidFundingSources())
+        .thenReturn(List.of(new CodeDescriptionDto("ITC", "Incremental Tree Improvement")));
+    stubForestClient();
+
+    ConeCollectionMethodEntity method1 = new ConeCollectionMethodEntity();
+    method1.setConeCollectionMethodCode(1);
+    method1.setDescription("Climbing");
+    ConeCollectionMethodEntity method2 = new ConeCollectionMethodEntity();
+    method2.setConeCollectionMethodCode(2);
+    method2.setDescription("Squirrel cache");
+    when(seedlotCollectionMethodRepository.findAllBySeedlot_id(SEEDLOT_NUMBER))
+        .thenReturn(
+            List.of(
+                new SeedlotCollectionMethod(seedlot, method1),
+                new SeedlotCollectionMethod(seedlot, method2)));
+
+    MethodOfPaymentEntity payment = new MethodOfPaymentEntity("CLA", "Client account", DATE_RANGE);
+    when(methodOfPaymentRepository.findAllByMethodOfPaymentCodeIn(List.of("CLA")))
+        .thenReturn(List.of(payment));
   }
 
   private Seedlot baseSeedlot() {

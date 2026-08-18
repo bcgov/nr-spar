@@ -330,11 +330,12 @@ public class Sprr001ReportDataAssembler {
     List<Sprr001OwnershipRow> rows = new ArrayList<>(owners.size());
     for (SeedlotFormOwnershipDto owner : owners) {
       ClientDisplay client = clients.resolve(owner.ownerClientNumber(), owner.ownerLocnCode());
+      String paymentCode = owner.methodOfPaymentCode();
       rows.add(
           ownershipRowMapper.toRow(
               owner,
               client,
-              paymentDescriptions.get(owner.methodOfPaymentCode()),
+              paymentCode == null ? null : paymentDescriptions.get(paymentCode),
               codes.fundingDesc(owner.sparFundSrceCode())));
     }
     return rows;

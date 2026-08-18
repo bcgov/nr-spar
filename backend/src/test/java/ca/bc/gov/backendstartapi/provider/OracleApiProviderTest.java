@@ -301,4 +301,27 @@ class OracleApiProviderTest {
 
     Assertions.assertTrue(oracleApiProvider.getVegetationCode("ZZZ").isEmpty());
   }
+
+  @Test
+  @DisplayName("getAllDistrictOrgUnits - error should throw")
+  void getAllDistrictOrgUnits_error_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/org-unit-districts";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    assertThrows(ResponseStatusException.class, () -> oracleApiProvider.getAllDistrictOrgUnits());
+  }
+
+  @Test
+  @DisplayName("getAllValidFundingSources - error should throw")
+  void getAllValidFundingSources_error_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/funding-sources";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    assertThrows(
+        ResponseStatusException.class, () -> oracleApiProvider.getAllValidFundingSources());
+  }
 }

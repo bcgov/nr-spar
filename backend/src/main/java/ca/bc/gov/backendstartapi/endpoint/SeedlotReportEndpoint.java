@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -77,9 +78,7 @@ public class SeedlotReportEndpoint {
     String filename = "SPRR001-" + seedlotNumber + ".pdf";
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-        .header(HttpHeaders.CACHE_CONTROL, "must-revalidate, post-check=0, pre-check=0")
-        .header(HttpHeaders.PRAGMA, "public")
-        .header(HttpHeaders.EXPIRES, "0")
+        .cacheControl(CacheControl.noStore())
         .contentType(MediaType.APPLICATION_PDF)
         .body(pdf);
   }

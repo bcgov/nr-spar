@@ -3,88 +3,94 @@ package ca.bc.gov.backendstartapi.report;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.exception.ReportGenerationException;
 import jakarta.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Getter;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperReport;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 /**
- * Extracts classpath JRXML templates to a writable directory and compiles them to {@code .jasper}
- * files so subreports and images resolve with {@code SUBREPORT_DIR}.
+ * Compiles classpath JRXML templates into memory so the fill step can pass subreports and the logo
+ * as parameters instead of writing {@code .jasper} files to disk.
  */
 @Service
 public class ReportResourceService {
 
-  private static final List<String> JRXML_FILES =
-      List.of(
-          SparReportConstants.SPRR001_MAIN_JRXML,
-          "SPRR001-SEEDLOT_REG_DTL_SR1_Comments.jrxml",
-          "SPRR001-SEEDLOT_REG_DTL_SR2_OWNERSHIP.jrxml",
-          "SPAR_HEADER.jrxml");
+  static final String PARAM_SPAR_HEADER_SUBREPORT = "SPAR_HEADER_SUBREPORT";
+  static final String PARAM_COMMENTS_SUBREPORT = "COMMENTS_SUBREPORT";
+  static final String PARAM_OWNERSHIP_SUBREPORT = "OWNERSHIP_SUBREPORT";
+  static final String PARAM_LOGO_IMAGE = "LOGO_IMAGE";
 
-  // Static assets (e.g. images) referenced via SUBREPORT_DIR that only need to be
-  // copied alongside the compiled reports, not compiled themselves.
-  private static final List<String> STATIC_FILES = List.of(SparReportConstants.SPRR001_LOGO_IMAGE);
+  private static final String COMMENTS_JRXML = "SPRR001-SEEDLOT_REG_DTL_SR1_Comments.jrxml";
+  private static final String OWNERSHIP_JRXML = "SPRR001-SEEDLOT_REG_DTL_SR2_OWNERSHIP.jrxml";
+  private static final String HEADER_JRXML = "SPAR_HEADER.jrxml";
 
-  @Getter private Path reportDirectory;
+  @Getter private JasperReport mainReport;
+  private JasperReport headerReport;
+  private JasperReport commentsReport;
+  private JasperReport ownershipReport;
+  private byte[] logoBytes = new byte[0];
 
   @PostConstruct
   void prepareReports() {
-    try {
-      reportDirectory = Files.createTempDirectory("spar-jasper-SPRR001-");
-      for (String jrxmlFile : JRXML_FILES) {
-        compileReport(jrxmlFile);
-      }
-      for (String staticFile : STATIC_FILES) {
-        copyStaticFile(staticFile);
-      }
-      SparLog.info("Jasper reports compiled to {}", reportDirectory);
-    } catch (IOException e) {
-      SparLog.error("Unable to prepare Jasper report directory", e);
-      throw new ReportGenerationException("Unable to prepare Jasper report directory", e);
-    }
+    mainReport = compileReport(SparReportConstants.SPRR001_MAIN_JRXML);
+    headerReport = compileReport(HEADER_JRXML);
+    commentsReport = compileReport(COMMENTS_JRXML);
+    ownershipReport = compileReport(OWNERSHIP_JRXML);
+    logoBytes = loadLogo();
+    SparLog.info("Jasper SPRR001 templates compiled in memory");
   }
 
-  private void compileReport(String jrxmlFile) throws IOException {
+  /**
+   * Parameters the main SPRR001 template needs for in-memory subreports and the title-band logo.
+   *
+   * @return a fresh map; the logo stream is new for each fill
+   */
+  public Map<String, Object> sprr001TemplateParameters() {
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put(PARAM_SPAR_HEADER_SUBREPORT, headerReport);
+    parameters.put(PARAM_COMMENTS_SUBREPORT, commentsReport);
+    parameters.put(PARAM_OWNERSHIP_SUBREPORT, ownershipReport);
+    parameters.put(PARAM_LOGO_IMAGE, new ByteArrayInputStream(logoBytes));
+    return parameters;
+  }
+
+  private static JasperReport compileReport(String jrxmlFile) {
     ClassPathResource resource =
         new ClassPathResource(SparReportConstants.REPORT_CLASSPATH_DIR + jrxmlFile);
-    Path targetJrxml = reportDirectory.resolve(jrxmlFile);
-    Path targetJasper =
-        reportDirectory.resolve(jrxmlFile.replace(".jrxml", ".jasper"));
-    try (InputStream inputStream = resource.getInputStream()) {
-      Files.copy(inputStream, targetJrxml, StandardCopyOption.REPLACE_EXISTING);
+    if (!resource.exists()) {
+      throw new ReportGenerationException(
+          "Jasper template not found on classpath: " + jrxmlFile, null);
     }
-    try {
-      JasperCompileManager.compileReportToFile(
-          targetJrxml.toString(), targetJasper.toString());
-    } catch (Exception e) {
+    try (InputStream inputStream = resource.getInputStream()) {
+      return JasperCompileManager.compileReport(inputStream);
+    } catch (JRException | IOException e) {
       SparLog.error("Failed to compile Jasper report: " + jrxmlFile, e);
       throw new ReportGenerationException("Failed to compile Jasper report: " + jrxmlFile, e);
     }
   }
 
-  private void copyStaticFile(String fileName) throws IOException {
+  private static byte[] loadLogo() {
     ClassPathResource resource =
-        new ClassPathResource(SparReportConstants.REPORT_CLASSPATH_DIR + fileName);
+        new ClassPathResource(
+            SparReportConstants.REPORT_CLASSPATH_DIR + SparReportConstants.SPRR001_LOGO_IMAGE);
     if (!resource.exists()) {
       SparLog.warn(
           "Static report asset {} not found on classpath; report will render without it",
-          fileName);
-      return;
+          SparReportConstants.SPRR001_LOGO_IMAGE);
+      return new byte[0];
     }
-    Path targetFile = reportDirectory.resolve(fileName);
     try (InputStream inputStream = resource.getInputStream()) {
-      Files.copy(inputStream, targetFile, StandardCopyOption.REPLACE_EXISTING);
+      return inputStream.readAllBytes();
+    } catch (IOException e) {
+      SparLog.warn("Unable to read report logo " + SparReportConstants.SPRR001_LOGO_IMAGE, e);
+      return new byte[0];
     }
-  }
-
-  public Path mainReportPath() {
-    return reportDirectory.resolve(SparReportConstants.SPRR001_MAIN_JASPER);
   }
 }

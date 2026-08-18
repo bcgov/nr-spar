@@ -6,8 +6,6 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.ReportGenerationException;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,14 +60,10 @@ public class SeedlotRegistrationReportService {
 
     Sprr001ReportData reportData = reportDataAssembler.assemble(seedlot);
 
-    Map<String, Object> parameters = new HashMap<>();
+    Map<String, Object> parameters = reportResourceService.sprr001TemplateParameters();
     parameters.put("P_SEEDLOT_NUMBER", seedlotNumber);
     parameters.put("P_USER_USERID", userId);
     parameters.put("P_ERROR_MESSAGE", "");
-    parameters.put(
-        "SUBREPORT_DIR",
-        reportResourceService.getReportDirectory().toString() + File.separator);
-    parameters.put("SUBREPORT_EXT", ".jasper");
     parameters.put(
         "SPAR_HEADER_DATASOURCE",
         new JRMapCollectionDataSource(List.of(Map.of("FLD", "1"))));
@@ -81,7 +75,7 @@ public class SeedlotRegistrationReportService {
     try {
       JasperPrint jasperPrint =
           JasperFillManager.fillReport(
-              reportResourceService.mainReportPath().toString(),
+              reportResourceService.getMainReport(),
               parameters,
               new JRBeanCollectionDataSource(List.of(reportData.mainRow())));
       return JasperExportManager.exportReportToPdf(jasperPrint);

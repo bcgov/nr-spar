@@ -9,19 +9,16 @@
 	<parameter name="P_USER_USERID" class="java.lang.String"/>
 	<parameter name="P_ERROR_MESSAGE" class="java.lang.String"/>
 	<parameter name="ORACLE_REF_CURSOR" class="java.sql.ResultSet" isForPrompting="false"/>
-	<parameter name="LoggedInUser" class="com.jaspersoft.jasperserver.api.metadata.user.domain.User" isForPrompting="false"/>
 	<parameter name="p_report_id" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["SPRR001-SEEDLOT_REG_DTL.rpt"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA[($P{REPORT_CONTEXT} != null) ? "repo:" : "U:/msargeant/projects/SPAR/SPAR_REPORTS_DIR/"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="SUBREPORT_EXT" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA[($P{REPORT_CONTEXT} != null) ? ".jrxml" : ".jrxml.jasper"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="SPAR_HEADER_DATASOURCE" class="net.sf.jasperreports.engine.JRDataSource"/>
 	<parameter name="COMMENTS_DATASOURCE" class="net.sf.jasperreports.engine.JRDataSource"/>
 	<parameter name="OWNERSHIP_SUBREPORT_DATASOURCE" class="net.sf.jasperreports.engine.JRDataSource"/>
+	<parameter name="SPAR_HEADER_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="COMMENTS_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="OWNERSHIP_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="LOGO_IMAGE" class="java.io.InputStream" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -327,12 +324,12 @@ $F{orchardComment} == null ? "DREW" : $F{orchardComment}]]></variableExpression>
 			</textField>
 			<image onErrorType="Blank">
 				<reportElement x="0" y="0" width="122" height="48" uuid="791ab7d2-bcbb-49bb-b58d-81a9627a1fbf"/>
-				<imageExpression><![CDATA[($P{SUBREPORT_DIR} + "spar_bc_logo.jpg" )]]></imageExpression>
+				<imageExpression><![CDATA[$P{LOGO_IMAGE}]]></imageExpression>
 			</image>
 			<subreport>
 				<reportElement x="105" y="3" width="330" height="24" uuid="90b46429-e653-4bd2-9797-9a9cf371743b"/>
 				<dataSourceExpression><![CDATA[$P{SPAR_HEADER_DATASOURCE}]]></dataSourceExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "SPAR_HEADER" + $P{SUBREPORT_EXT}]]></subreportExpression>
+				<subreportExpression><![CDATA[$P{SPAR_HEADER_SUBREPORT}]]></subreportExpression>
 			</subreport>
 		</band>
 	</title>
@@ -1593,7 +1590,7 @@ $F{orchardComment} != null]]></printWhenExpression>
 					<subreportParameterExpression><![CDATA[$V{CCF12_frm_ORCHARD_COMMENT}]]></subreportParameterExpression>
 				</subreportParameter>
 				<dataSourceExpression><![CDATA[$P{COMMENTS_DATASOURCE}]]></dataSourceExpression>
-				<subreportExpression><![CDATA[($P{SUBREPORT_DIR} + "SPRR001-SEEDLOT_REG_DTL_SR1_Comments" + $P{SUBREPORT_EXT})]]></subreportExpression>
+				<subreportExpression><![CDATA[$P{COMMENTS_SUBREPORT}]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="2" splitType="Prevent">
@@ -1915,7 +1912,7 @@ $F{seedlotNumber} != null]]></printWhenExpression>
 					<subreportParameterExpression><![CDATA[$F{seedlotNumber}]]></subreportParameterExpression>
 				</subreportParameter>
 				<dataSourceExpression><![CDATA[$P{OWNERSHIP_SUBREPORT_DATASOURCE}]]></dataSourceExpression>
-				<subreportExpression><![CDATA[($P{SUBREPORT_DIR} + "SPRR001-SEEDLOT_REG_DTL_SR2_OWNERSHIP" + $P{SUBREPORT_EXT})]]></subreportExpression>
+				<subreportExpression><![CDATA[$P{OWNERSHIP_SUBREPORT}]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="125" splitType="Prevent">

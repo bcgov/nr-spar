@@ -87,6 +87,34 @@ class ReportOracleCodeResolverTest {
     assertThat(resolver.fundingDesc(" ")).isNull();
   }
 
+  @Test
+  @DisplayName("a failed species lookup still prints the stored code")
+  void speciesLookupFailure_fallsBackToCode() {
+    when(oracleApiProvider.getVegetationCode("FDI"))
+        .thenThrow(new ResponseStatusException(HttpStatus.BAD_GATEWAY, "oracle down"));
+
+    assertThat(resolver.speciesDesc("FDI")).isEqualTo("FDI");
+  }
+
+  @Test
+  @DisplayName("blank oracle descriptions fall back to the stored code")
+  void blankDescription_fallsBackToCode() {
+    when(oracleApiProvider.getVegetationCode("FDI"))
+        .thenReturn(Optional.of(new CodeDescriptionDto("FDI", "  ")));
+    when(oracleApiProvider.getAllDistrictOrgUnits())
+        .thenReturn(
+            List.of(
+                new OrgUnitDistrictDto(null, "ignored"), new OrgUnitDistrictDto(73, null)));
+    when(oracleApiProvider.getAllValidFundingSources())
+        .thenReturn(
+            List.of(
+                new CodeDescriptionDto(null, "ignored"), new CodeDescriptionDto("ITC", null)));
+
+    assertThat(resolver.speciesDesc("FDI")).isEqualTo("FDI");
+    assertThat(resolver.orgUnitDesc(73)).isEqualTo("73");
+    assertThat(resolver.fundingDesc("ITC")).isEqualTo("ITC");
+  }
+
   private void stubLookups() {
     when(oracleApiProvider.getVegetationCode("FDI"))
         .thenReturn(Optional.of(new CodeDescriptionDto("FDI", "Interior Douglas-fir")));
