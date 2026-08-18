@@ -39,6 +39,12 @@ public class RestExceptionEndpoint {
         .body(ValidationExceptionResponse.fromSeedlotErrors(ex.getErrors()));
   }
 
+  /**
+   * Handle Jasper report compilation or export failures.
+   *
+   * @param ex the report generation exception
+   * @return a 500 response with the error message
+   */
   @ExceptionHandler(ReportGenerationException.class)
   ResponseEntity<String> reportGeneration(ReportGenerationException ex) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());

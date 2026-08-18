@@ -33,8 +33,8 @@
 	<field name="species" class="java.lang.String"/>
 	<field name="speciesDesc" class="java.lang.String"/>
 	<field name="geneticClass" class="java.lang.String"/>
-	<field name="classASourceCode" class="java.lang.String"/>
-	<field name="classASource" class="java.lang.String"/>
+	<field name="seedlotSourceCode" class="java.lang.String"/>
+	<field name="seedlotSource" class="java.lang.String"/>
 	<field name="superiorPrvncInd" class="java.lang.String"/>
 	<field name="bcSource" class="java.lang.String"/>
 	<field name="clientAcronym" class="java.lang.String"/>
@@ -537,7 +537,7 @@ $V{CCF2_FRM_A_or_B} == true]]></printWhenExpression>
 				<textElement>
 					<font fontName="Arial" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{classASource}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{seedlotSource}]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="0" y="0" width="1" height="30" uuid="9507edac-b2f4-46bd-acc4-0762e04fc972"/>

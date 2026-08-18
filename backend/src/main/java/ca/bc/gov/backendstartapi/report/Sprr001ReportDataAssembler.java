@@ -64,6 +64,12 @@ public class Sprr001ReportDataAssembler {
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
 
+  /**
+   * Builds the SPRR001 main and ownership beans for one seedlot.
+   *
+   * @param seedlot the seedlot to print
+   * @return filled Jasper beans for the main report and ownership subreport
+   */
   public Sprr001ReportData assemble(Seedlot seedlot) {
     SeedlotBclassFormDto form = seedlotService.buildBclassFormData(seedlot);
     ReportClientResolver clients = new ReportClientResolver(forestClientService);
@@ -106,8 +112,8 @@ public class Sprr001ReportDataAssembler {
       row.setGeneticClass(seedlot.getGeneticClass().getGeneticClassCode());
     }
     if (seedlot.getSeedlotSource() != null) {
-      row.setClassASourceCode(seedlot.getSeedlotSource().getSeedlotSourceCode());
-      row.setClassASource(seedlot.getSeedlotSource().getDescription());
+      row.setSeedlotSourceCode(seedlot.getSeedlotSource().getSeedlotSourceCode());
+      row.setSeedlotSource(seedlot.getSeedlotSource().getDescription());
     }
   }
 

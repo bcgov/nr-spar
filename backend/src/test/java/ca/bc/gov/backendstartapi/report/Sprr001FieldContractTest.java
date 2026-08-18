@@ -29,7 +29,8 @@ class Sprr001FieldContractTest {
   @DisplayName("Sprr001MainRow properties match the main template fields")
   void mainFields_shouldMatchTemplate() throws Exception {
     assertEquals(
-        declaredFields(SparReportConstants.SPRR001_MAIN_JRXML), beanProperties(Sprr001MainRow.class));
+        declaredFields(SparReportConstants.SPRR001_MAIN_JRXML),
+        beanProperties(Sprr001MainRow.class));
   }
 
   @Test

@@ -5,8 +5,9 @@ export const openBlankTab = (): Window | null => window.open('', '_blank');
 
 export const openBlobInNewTab = (blob: Blob, tab?: Window | null): void => {
   const blobUrl = URL.createObjectURL(blob);
-  if (tab && !tab.closed) {
-    tab.location.href = blobUrl;
+  const preparedTab = tab && !tab.closed ? tab : null;
+  if (preparedTab) {
+    preparedTab.location.href = blobUrl;
   } else {
     window.open(blobUrl, '_blank', 'noopener,noreferrer');
   }

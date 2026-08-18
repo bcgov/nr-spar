@@ -18,8 +18,8 @@ public class Sprr001MainRow {
   private String species;
   private String speciesDesc;
   private String geneticClass;
-  private String classASourceCode;
-  private String classASource;
+  private String seedlotSourceCode;
+  private String seedlotSource;
   private String superiorPrvncInd;
   private String bcSource;
   private String clientAcronym;
