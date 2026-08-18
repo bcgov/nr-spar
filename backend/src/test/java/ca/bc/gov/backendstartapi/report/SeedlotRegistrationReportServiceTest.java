@@ -111,7 +111,7 @@ class SeedlotRegistrationReportServiceTest {
   @Test
   @DisplayName("generateBclassRegistrationReport fills and exports a PDF for Class B")
   void generate_classB_shouldExportPdf() {
-    Seedlot seedlot = classBSeedlot("53001");
+    Seedlot seedlot = bclassSeedlot("53001");
     when(seedlotRepository.findById("53001")).thenReturn(Optional.of(seedlot));
     when(reportDataAssembler.assemble(seedlot))
         .thenReturn(new Sprr001ReportData(new Sprr001MainRow(), List.of()));
@@ -138,7 +138,7 @@ class SeedlotRegistrationReportServiceTest {
   @Test
   @DisplayName("generateBclassRegistrationReport wraps Jasper failures")
   void generate_jasperFailure_shouldThrowReportGenerationException() {
-    Seedlot seedlot = classBSeedlot("53001");
+    Seedlot seedlot = bclassSeedlot("53001");
     when(seedlotRepository.findById("53001")).thenReturn(Optional.of(seedlot));
     when(reportDataAssembler.assemble(seedlot))
         .thenReturn(new Sprr001ReportData(new Sprr001MainRow(), List.of()));
@@ -173,7 +173,7 @@ class SeedlotRegistrationReportServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
   }
 
-  private Seedlot classBSeedlot(String seedlotNumber) {
+  private Seedlot bclassSeedlot(String seedlotNumber) {
     Seedlot seedlot = new Seedlot(seedlotNumber);
     seedlot.setApplicantClientNumber("00012797");
     seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
