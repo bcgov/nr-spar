@@ -11,6 +11,24 @@ describe('DownloadUtils', () => {
     vi.useRealTimers();
   });
 
+  it('openBlankTab returns null when the browser blocks the popup', () => {
+    vi.stubGlobal('open', vi.fn().mockReturnValue(null));
+    expect(openBlankTab()).toBeNull();
+  });
+
+  it('openBlobInNewTab falls back when the prepared tab was already closed', () => {
+    const closedTab = { closed: true, opener: {} as Window, location: { href: '' } } as Window;
+    const createObjectURL = vi.fn().mockReturnValue('blob:report');
+    const revokeObjectURL = vi.fn();
+    const open = vi.fn();
+    vi.stubGlobal('URL', { createObjectURL, revokeObjectURL });
+    vi.stubGlobal('open', open);
+
+    openBlobInNewTab(new Blob(['%PDF'], { type: 'application/pdf' }), closedTab);
+
+    expect(open).toHaveBeenCalledWith('blob:report', '_blank', 'noopener,noreferrer');
+  });
+
   it('openBlankTab opens an empty tab and drops window.opener', () => {
     const blank = { closed: false, opener: {} as Window } as Window;
     const open = vi.fn().mockReturnValue(blank);

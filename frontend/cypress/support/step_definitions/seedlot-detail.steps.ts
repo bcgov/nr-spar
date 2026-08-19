@@ -1,4 +1,4 @@
-import { Given, Then } from '@badeball/cypress-cucumber-preprocessor';
+import { Given, Then, When } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
 import { CREATED_SPECIES_KEYS } from '../helpers/species-key';
 import { SeedlotRegFixtureType } from '../../definitions';
@@ -141,6 +141,101 @@ Then('I can see applicant source field match fixture', () => {
       .find('#seedlot-applicant-source')
       .should('have.value', 'Custom Seedlot');
   }
+});
+
+Given('the seedlot is treated as Class B for printing', () => {
+  cy.intercept(
+    {
+      method: 'GET',
+      url: new RegExp(`/api/seedlots/${seedlotNumber}$`)
+    },
+    (req) => {
+      req.continue((res) => {
+        if (res.body?.seedlot?.geneticClass) {
+          res.body.seedlot.geneticClass.geneticClassCode = 'B';
+        }
+      });
+    }
+  );
+  cy.reload();
+  cy.isPageTitle(`Seedlot ${seedlotNumber}`);
+});
+
+When('I print the seedlot registration report', () => {
+  cy.window().then((win) => {
+    const fakeTab = {
+      closed: false,
+      opener: win,
+      location: { href: '' },
+      close: cy.stub().as('reportTabClose')
+    };
+    cy.stub(win, 'open').as('windowOpen').returns(fakeTab);
+  });
+
+  cy.intercept(
+    {
+      method: 'GET',
+      url: new RegExp(`/api/seedlots/${seedlotNumber}/reports/registration$`)
+    },
+    {
+      statusCode: 200,
+      delay: 1500,
+      headers: { 'content-type': 'application/pdf' },
+      body: '%PDF-1.4'
+    }
+  ).as('sprr001');
+
+  cy.get('.combo-button-container')
+    .find('.combo-options')
+    .click();
+  cy.contains('Print seedlot (SPRR001)')
+    .should('be.visible')
+    .click();
+  cy.get('.combo-button-container')
+    .find('.combo-options')
+    .click();
+  cy.contains('Generating report…').should('be.visible');
+  cy.wait('@sprr001');
+});
+
+Then('the SPRR001 PDF is requested and opened in a new tab', () => {
+  cy.get('@windowOpen').should('have.been.calledWith', '', '_blank');
+});
+
+When('the SPRR001 report request fails', () => {
+  cy.window().then((win) => {
+    const fakeTab = {
+      closed: false,
+      opener: win,
+      location: { href: '' },
+      close: cy.stub().as('reportTabClose')
+    };
+    cy.stub(win, 'open').as('windowOpen').returns(fakeTab);
+  });
+
+  cy.intercept(
+    {
+      method: 'GET',
+      url: new RegExp(`/api/seedlots/${seedlotNumber}/reports/registration$`)
+    },
+    {
+      statusCode: 500,
+      body: { status: 500, detail: 'report failed' }
+    }
+  ).as('sprr001Fail');
+
+  cy.get('.combo-button-container')
+    .find('.combo-options')
+    .click();
+  cy.contains('Print seedlot (SPRR001)')
+    .should('be.visible')
+    .click();
+  cy.wait('@sprr001Fail');
+});
+
+Then('I can see a download failed toast', () => {
+  cy.contains('Download failed').should('be.visible');
+  cy.get('@reportTabClose').should('have.been.called');
 });
 
 Then('I can see registration and within BC values match fixture', () => {
