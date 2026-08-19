@@ -105,7 +105,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
           .click();
 
         cy.get('.parent-tree-step-table-container')
-          .find('h4')
+          .find('h2')
           .as('closeShowHideDropdown')
           .click();
       }
@@ -420,7 +420,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-3(Calculat
       .blur();
 
     cy.get('.parent-tree-step-table-container')
-      .find('h4')
+      .find('h2')
       .as('waitClick')
       .click({ force: true });
 
