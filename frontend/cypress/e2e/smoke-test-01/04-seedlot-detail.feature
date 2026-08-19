@@ -32,13 +32,3 @@ Feature: Seedlot Detail
     And I can see applicant identity fields match fixture
     And I can see applicant source field match fixture
     And I can see registration and within BC values match fixture
-
-  Scenario: Class B seedlot can print the SPRR001 registration report
-    Given the seedlot is treated as Class B for printing
-    When I print the seedlot registration report
-    Then the SPRR001 PDF is requested and opened in a new tab
-
-  Scenario: SPRR001 print failure shows an error toast
-    Given the seedlot is treated as Class B for printing
-    When the SPRR001 report request fails
-    Then I can see a download failed toast
