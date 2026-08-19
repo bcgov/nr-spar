@@ -467,19 +467,47 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#orchard-male-gametic')
       .should('have.value', M3GameticValue);
 
-    // Check 'x' button
-    cy.get('#orchard-female-gametic')
-      .siblings('[title="Clear selected item"]')
+    // Change radio inputs of gamete section
+    cy.get('#controlled-cross-yes')
+      .check({ force: true });
+
+    cy.get('#controlled-cross-yes')
+      .should('be.checked');
+
+    cy.get('#biotech-yes')
+      .check({ force: true });
+
+    cy.get('#biotech-yes')
+      .should('be.checked');
+
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+  });
+
+  it('Clear male gamete information', () => {
+    cy.get('#orchard-male-gametic')
+      .should('have.value', M3GameticValue);
+
+    cy.get('#orchard-male-gametic')
+      .siblings('button[title="Clear selected item"]')
       .click();
 
-    cy.get('#orchard-female-gametic')
+    cy.get('#orchard-male-gametic')
       .should('have.value', '');
 
-    cy.get('#orchard-male-gametic')
-      .siblings('[title="Clear selected item"]')
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+  });
+
+  it('Clear female gamete information', () => {
+    cy.get('#orchard-female-gametic')
+      .should('have.value', F2GameticValue);
+
+    cy.get('#orchard-female-gametic')
+      .siblings('button[title="Clear selected item"]')
       .click();
 
-    cy.get('#orchard-male-gametic')
+    cy.get('#orchard-female-gametic')
       .should('have.value', '');
 
     // Enter female and male gametic contribution methodology again
@@ -506,19 +534,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-male-gametic')
       .should('have.value', M3GameticValue);
-
-    // Change radio inputs of gamete section
-    cy.get('#controlled-cross-yes')
-      .check({ force: true });
-
-    cy.get('#controlled-cross-yes')
-      .should('be.checked');
-
-    cy.get('#biotech-yes')
-      .check({ force: true });
-
-    cy.get('#biotech-yes')
-      .should('be.checked');
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
