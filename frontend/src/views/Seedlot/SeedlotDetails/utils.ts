@@ -37,8 +37,8 @@ export const getRegistrationPath = (
 ): string => {
   const base = addParamToPath(getRegistrationRoute(seedlot), seedlotNumber);
   return step ? `${base}?step=${step}` : base;
-}
-  
+};
+
 export const getPrintSeedlotLabel = (isBClass: boolean, isPending: boolean): string => {
   if (!isBClass) {
     return 'Print seedlot';
