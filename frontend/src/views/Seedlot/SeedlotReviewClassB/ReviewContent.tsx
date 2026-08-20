@@ -186,17 +186,17 @@ const ReviewContent = () => {
   const handleSaveAndStatus = (statusOnSave: SeedlotStatusCode) => {
     if (isReadMode) {
       statusOnlyMutation.mutate(statusOnSave);
-    } else {
-      saveEdits(statusOnSave);
+      return;
     }
+    saveEdits(statusOnSave);
   };
 
   const handleCancelClick = () => {
     if (isReadMode) {
       navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''));
-    } else {
-      setIsCancelModalOpen(true);
+      return;
     }
+    setIsCancelModalOpen(true);
   };
 
   const closeCancelModal = () => {

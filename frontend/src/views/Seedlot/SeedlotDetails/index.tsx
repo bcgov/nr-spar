@@ -17,10 +17,7 @@ import {
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
-import {
-  RichSeedlotType,
-  SeedlotStatusCode
-} from '../../../types/SeedlotType';
+import { SeedlotStatusCode } from '../../../types/SeedlotType';
 
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
@@ -46,7 +43,6 @@ import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
 import FormProgress from './FormProgress';
 import TscReviewSection from './TscReviewSection';
-import BClassDetailSections from './sections/bClass';
 import {
   getPrintSeedlotLabel,
   getEditApplicantRoute,
@@ -195,14 +191,12 @@ const SeedlotDetails = () => {
   };
 
   const handlePrimaryAction = () => {
-    let route = getRegistrationRoute(seedlot);
-    if (isBClass && viewOnlySeedlot) {
-      // Submitted B-class seedlots are viewed (and reviewed/edited by
-      // TSC admins) on the B-class review screen
-      route = getReviewRoute(seedlot);
-    } else if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
-      route = getReviewRoute(seedlot);
-    }
+    // B-class view-only and TSC-admin submitted seedlots use the review screen
+    const useReviewRoute = (isBClass && viewOnlySeedlot)
+      || (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted');
+    const route = useReviewRoute
+      ? getReviewRoute(seedlot)
+      : getRegistrationRoute(seedlot);
     navigate(addParamToPath(route, seedlotNumber ?? ''));
   };
 
@@ -299,18 +293,6 @@ const SeedlotDetails = () => {
                   variant={isBClass ? 'B' : 'A'}
                   editApplicantRoute={getEditApplicantRoute(seedlot)}
                 />
-                /*{
-                  isBClass && seedlot
-                    ? (
-                      <BClassDetailSections
-                        seedlot={seedlot}
-                        richSeedlot={seedlotQuery.data as RichSeedlotType}
-                        isFetching={seedlotQuery.isFetching}
-                        showAreaOfUse={isTscAdmin}
-                      />
-                    )
-                    : null
-                }*/
                 {
                   (
                     isTscAdmin

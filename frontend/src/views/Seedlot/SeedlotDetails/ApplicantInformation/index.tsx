@@ -140,6 +140,131 @@ const ApplicantFieldsBClass = ({
   </>
 );
 
+interface ApplicantFieldsAClassProps {
+  applicant?: SeedlotApplicantType;
+  isFetching: boolean;
+}
+
+const ApplicantFieldsAClass = ({
+  applicant,
+  isFetching
+}: ApplicantFieldsAClassProps) => (
+  <>
+    <Row className="applicant-seedlot-information-row">
+      <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+        {
+          isFetching
+            ? <TextInputSkeleton />
+            : (
+              <TextInput
+                title=""
+                className="spar-display-only-input"
+                readOnly
+                id="seedlot-applicant-agency"
+                labelText="Applicant agency"
+                value={applicant?.agency ?? ''}
+              />
+            )
+        }
+      </Column>
+      <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+        {
+          isFetching
+            ? <TextInputSkeleton />
+            : (
+              <TextInput
+                title=""
+                className="spar-display-only-input"
+                readOnly
+                id="seedlot-applicant-location-code"
+                labelText="Applicant location code"
+                value={applicant?.locationCode ?? ''}
+              />
+            )
+        }
+      </Column>
+      <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+        {
+          isFetching
+            ? <TextInputSkeleton />
+            : (
+              <EmailDisplay
+                value={applicant?.email ?? ''}
+                label="Email address"
+              />
+            )
+        }
+      </Column>
+    </Row>
+    <Row className="applicant-seedlot-information-row">
+      <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+        {
+          isFetching
+            ? <TextInputSkeleton />
+            : (
+              <TextInput
+                title=""
+                className="spar-display-only-input"
+                readOnly
+                id="seedlot-applicant-species"
+                labelText="Seedlot species"
+                value={applicant?.species ?? ''}
+              />
+            )
+        }
+      </Column>
+      <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+        {
+          isFetching
+            ? <TextInputSkeleton />
+            : (
+              <TextInput
+                title=""
+                className="spar-display-only-input"
+                readOnly
+                id="seedlot-applicant-source"
+                labelText="Specify A-class source"
+                value={applicant?.source ?? ''}
+              />
+            )
+        }
+      </Column>
+      <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+        {
+          isFetching
+            ? <TextInputSkeleton />
+            : (
+              <TextInput
+                title=""
+                className="spar-display-only-input"
+                readOnly
+                id="seedlot-applicant-to-be-registered"
+                labelText="To be registered at the Tree Seed Centre?"
+                value={formatYesNo(applicant?.willRegister)}
+              />
+            )
+        }
+      </Column>
+      <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+        {
+          isFetching
+            ? <TextInputSkeleton />
+            : (
+              <TextInput
+                title=""
+                className="spar-display-only-input"
+                readOnly
+                id="seedlot-applicant-within-bc"
+                labelText="Collected from a location within B.C.?"
+                value={formatYesNo(applicant?.isBcSource)}
+              />
+            )
+        }
+      </Column>
+    </Row>
+  </>
+);
+
 interface ApplicantSeedlotInformationProps {
   seedlotNumber?: string;
   applicant?: SeedlotApplicantType;
@@ -159,6 +284,7 @@ const ApplicantInformation = ({
 }: ApplicantSeedlotInformationProps) => {
   const navigate = useNavigate();
   const isBClass = variant === 'B';
+  const showEditButton = !hideEditButton && !isBClass;
 
   return (
     <DetailSection title="Check your applicant and seedlot information">
@@ -172,126 +298,15 @@ const ApplicantInformation = ({
               />
             )
             : (
-              <>
-                <Row className="applicant-seedlot-information-row">
-                  <Column sm={4} md={4} lg={4} xlg={4} max={4}>
-                    {
-                      isFetching
-                        ? <TextInputSkeleton />
-                        : (
-                          <TextInput
-                            title=""
-                            className="spar-display-only-input"
-                            readOnly
-                            id="seedlot-applicant-agency"
-                            labelText="Applicant agency"
-                            value={applicant?.agency ?? ''}
-                          />
-                        )
-                    }
-                  </Column>
-                  <Column sm={4} md={4} lg={4} xlg={4} max={4}>
-                    {
-                      isFetching
-                        ? <TextInputSkeleton />
-                        : (
-                          <TextInput
-                            title=""
-                            className="spar-display-only-input"
-                            readOnly
-                            id="seedlot-applicant-location-code"
-                            labelText="Applicant location code"
-                            value={applicant?.locationCode ?? ''}
-                          />
-                        )
-                    }
-                  </Column>
-                  <Column sm={4} md={4} lg={4} xlg={4} max={4}>
-                    {
-                      isFetching
-                        ? <TextInputSkeleton />
-                        : (
-                          <EmailDisplay
-                            value={applicant?.email ?? ''}
-                            label="Email address"
-                          />
-                        )
-                    }
-                  </Column>
-                </Row>
-                <Row className="applicant-seedlot-information-row">
-                  <Column sm={4} md={4} lg={4} xlg={4} max={4}>
-                    {
-                      isFetching
-                        ? <TextInputSkeleton />
-                        : (
-                          <TextInput
-                            title=""
-                            className="spar-display-only-input"
-                            readOnly
-                            id="seedlot-applicant-species"
-                            labelText="Seedlot species"
-                            value={applicant?.species ?? ''}
-                          />
-                        )
-                    }
-                  </Column>
-                  <Column sm={4} md={4} lg={4} xlg={4} max={4}>
-                    {
-                      isFetching
-                        ? <TextInputSkeleton />
-                        : (
-                          <TextInput
-                            title=""
-                            className="spar-display-only-input"
-                            readOnly
-                            id="seedlot-applicant-source"
-                            labelText="Specify A-class source"
-                            value={applicant?.source ?? ''}
-                          />
-                        )
-                    }
-                  </Column>
-                  <Column sm={4} md={4} lg={4} xlg={4} max={4}>
-                    {
-                      isFetching
-                        ? <TextInputSkeleton />
-                        : (
-                          <TextInput
-                            title=""
-                            className="spar-display-only-input"
-                            readOnly
-                            id="seedlot-applicant-to-be-registered"
-                            labelText="To be registered at the Tree Seed Centre?"
-                            value={formatYesNo(applicant?.willRegister)}
-                          />
-                        )
-                    }
-                  </Column>
-                  <Column sm={4} md={4} lg={4} xlg={4} max={4}>
-                    {
-                      isFetching
-                        ? <TextInputSkeleton />
-                        : (
-                          <TextInput
-                            title=""
-                            className="spar-display-only-input"
-                            readOnly
-                            id="seedlot-applicant-within-bc"
-                            labelText="Collected from a location within B.C.?"
-                            value={formatYesNo(applicant?.isBcSource)}
-                          />
-                        )
-                    }
-                  </Column>
-                </Row>
-              </>
+              <ApplicantFieldsAClass
+                applicant={applicant}
+                isFetching={isFetching}
+              />
             )
         }
         {
-          hideEditButton || isBClass
-            ? null
-            : (
+          showEditButton
+            ? (
               <Row>
                 <Column>
                   <Button
@@ -306,6 +321,7 @@ const ApplicantInformation = ({
                 </Column>
               </Row>
             )
+            : null
         }
       </FlexGrid>
     </DetailSection>
