@@ -58,21 +58,21 @@ public class SeedlotRegistrationReportService {
           "SPRR001 is for Class B seedlots. Class A seedlots use SPRR001A.");
     }
 
-    Sprr001ReportData reportData = reportDataAssembler.assemble(seedlot);
-
-    Map<String, Object> parameters = reportResourceService.sprr001TemplateParameters();
-    parameters.put("P_SEEDLOT_NUMBER", seedlotNumber);
-    parameters.put("P_USER_USERID", userId);
-    parameters.put("P_ERROR_MESSAGE", "");
-    parameters.put(
-        "SPAR_HEADER_DATASOURCE",
-        new JRMapCollectionDataSource(List.of(Map.of("FLD", "1"))));
-    parameters.put("COMMENTS_DATASOURCE", new JREmptyDataSource(1));
-    parameters.put(
-        "OWNERSHIP_SUBREPORT_DATASOURCE",
-        new JRBeanCollectionDataSource(reportData.ownershipRows()));
-
     try {
+      Sprr001ReportData reportData = reportDataAssembler.assemble(seedlot);
+
+      Map<String, Object> parameters = reportResourceService.sprr001TemplateParameters();
+      parameters.put("P_SEEDLOT_NUMBER", seedlotNumber);
+      parameters.put("P_USER_USERID", userId);
+      parameters.put("P_ERROR_MESSAGE", "");
+      parameters.put(
+          "SPAR_HEADER_DATASOURCE",
+          new JRMapCollectionDataSource(List.of(Map.of("FLD", "1"))));
+      parameters.put("COMMENTS_DATASOURCE", new JREmptyDataSource(1));
+      parameters.put(
+          "OWNERSHIP_SUBREPORT_DATASOURCE",
+          new JRBeanCollectionDataSource(reportData.ownershipRows()));
+
       JasperPrint jasperPrint =
           JasperFillManager.fillReport(
               reportResourceService.getMainReport(),

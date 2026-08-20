@@ -160,6 +160,35 @@ class SeedlotRegistrationReportServiceTest {
   }
 
   @Test
+  @DisplayName("generateBclassRegistrationReport wraps assemble transport failures")
+  void generate_assembleFailure_shouldThrowReportGenerationException() {
+    Seedlot seedlot = bclassSeedlot("53001");
+    when(seedlotRepository.findById("53001")).thenReturn(Optional.of(seedlot));
+    when(reportDataAssembler.assemble(seedlot))
+        .thenThrow(new RuntimeException("oracle-api timeout"));
+
+    assertThrows(
+        ReportGenerationException.class,
+        () -> service.generateBclassRegistrationReport("53001", "user"));
+  }
+
+  @Test
+  @DisplayName("generateBclassRegistrationReport rethrows ResponseStatusException from assemble")
+  void generate_assembleResponseStatus_shouldRethrow() {
+    Seedlot seedlot = bclassSeedlot("53001");
+    when(seedlotRepository.findById("53001")).thenReturn(Optional.of(seedlot));
+    when(reportDataAssembler.assemble(seedlot))
+        .thenThrow(new ResponseStatusException(HttpStatus.BAD_GATEWAY, "upstream"));
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> service.generateBclassRegistrationReport("53001", "user"));
+
+    assertEquals(HttpStatus.BAD_GATEWAY, ex.getStatusCode());
+  }
+
+  @Test
   @DisplayName("generateBclassRegistrationReport rejects seedlots without Class B")
   void generate_missingGeneticClass_shouldFail() {
     Seedlot seedlot = new Seedlot("53001");

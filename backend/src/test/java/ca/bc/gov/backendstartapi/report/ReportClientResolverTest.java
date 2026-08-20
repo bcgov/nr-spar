@@ -17,10 +17,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(SpringExtension.class)
 class ReportClientResolverTest {
@@ -55,9 +54,7 @@ class ReportClientResolverTest {
             "ACME");
     when(forestClientService.fetchClient("00012797")).thenReturn(Optional.of(client));
     when(forestClientService.fetchSingleClientLocation("00012797", "00"))
-        .thenThrow(
-            HttpClientErrorException.create(
-                HttpStatus.NOT_FOUND, "Not Found", HttpHeaders.EMPTY, new byte[0], null));
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Not Found"));
 
     ClientDisplay display = resolver.resolve("00012797", "00");
 

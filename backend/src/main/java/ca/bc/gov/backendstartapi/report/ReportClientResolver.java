@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Resolves the client names, acronyms and addresses that SPAR stores only as client and location
@@ -50,9 +51,13 @@ final class ReportClientResolver {
     }
     try {
       return forestClientService.fetchSingleClientLocation(clientNumber, locationCode);
-    } catch (HttpClientErrorException.NotFound e) {
-      // The address is optional on the report; the remaining client details still print.
-      return null;
+    } catch (ResponseStatusException e) {
+      // ForestClientApiProvider wraps 4xx as ResponseStatusException. Address is optional on the
+      // report; keep the remaining client details when the location is missing.
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        return null;
+      }
+      throw e;
     }
   }
 

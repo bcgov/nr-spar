@@ -16,19 +16,6 @@ describe('DownloadUtils', () => {
     expect(openBlankTab()).toBeNull();
   });
 
-  it('openBlobInNewTab falls back when the prepared tab was already closed', () => {
-    const closedTab = { closed: true, opener: {} as Window, location: { href: '' } } as Window;
-    const createObjectURL = vi.fn().mockReturnValue('blob:report');
-    const revokeObjectURL = vi.fn();
-    const open = vi.fn();
-    vi.stubGlobal('URL', { createObjectURL, revokeObjectURL });
-    vi.stubGlobal('open', open);
-
-    openBlobInNewTab(new Blob(['%PDF'], { type: 'application/pdf' }), closedTab);
-
-    expect(open).toHaveBeenCalledWith('blob:report', '_blank', 'noopener,noreferrer');
-  });
-
   it('openBlankTab opens an empty tab and drops window.opener', () => {
     const blank = { closed: false, opener: {} as Window } as Window;
     const open = vi.fn().mockReturnValue(blank);
@@ -58,15 +45,61 @@ describe('DownloadUtils', () => {
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:report');
   });
 
-  it('openBlobInNewTab falls back to window.open when no usable tab is provided', () => {
+  it('openBlobInNewTab downloads via an anchor when no usable tab is provided', () => {
     const createObjectURL = vi.fn().mockReturnValue('blob:report');
     const revokeObjectURL = vi.fn();
     const open = vi.fn();
+    const click = vi.fn();
+    const remove = vi.fn();
+    const anchor = {
+      href: '',
+      download: '',
+      rel: '',
+      click,
+      remove
+    } as unknown as HTMLAnchorElement;
+    const createElement = vi.spyOn(document, 'createElement').mockReturnValue(anchor);
+    const appendChild = vi.spyOn(document.body, 'appendChild').mockReturnValue(anchor);
     vi.stubGlobal('URL', { createObjectURL, revokeObjectURL });
     vi.stubGlobal('open', open);
 
-    openBlobInNewTab(new Blob(['%PDF'], { type: 'application/pdf' }));
+    openBlobInNewTab(
+      new Blob(['%PDF'], { type: 'application/pdf' }),
+      null,
+      'SPRR001-53001.pdf'
+    );
 
-    expect(open).toHaveBeenCalledWith('blob:report', '_blank', 'noopener,noreferrer');
+    expect(open).not.toHaveBeenCalled();
+    expect(createElement).toHaveBeenCalledWith('a');
+    expect(anchor.href).toBe('blob:report');
+    expect(anchor.download).toBe('SPRR001-53001.pdf');
+    expect(appendChild).toHaveBeenCalledWith(anchor);
+    expect(click).toHaveBeenCalled();
+    expect(remove).toHaveBeenCalled();
+  });
+
+  it('openBlobInNewTab downloads when the prepared tab was already closed', () => {
+    const closedTab = { closed: true, opener: {} as Window, location: { href: '' } } as Window;
+    const createObjectURL = vi.fn().mockReturnValue('blob:report');
+    const revokeObjectURL = vi.fn();
+    const open = vi.fn();
+    const click = vi.fn();
+    const remove = vi.fn();
+    const anchor = {
+      href: '',
+      download: '',
+      rel: '',
+      click,
+      remove
+    } as unknown as HTMLAnchorElement;
+    vi.spyOn(document, 'createElement').mockReturnValue(anchor);
+    vi.spyOn(document.body, 'appendChild').mockReturnValue(anchor);
+    vi.stubGlobal('URL', { createObjectURL, revokeObjectURL });
+    vi.stubGlobal('open', open);
+
+    openBlobInNewTab(new Blob(['%PDF'], { type: 'application/pdf' }), closedTab);
+
+    expect(open).not.toHaveBeenCalled();
+    expect(click).toHaveBeenCalled();
   });
 });

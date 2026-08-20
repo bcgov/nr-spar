@@ -94,7 +94,11 @@ const SeedlotDetails = () => {
     mutationFn: () => downloadBClassRegistrationReport(seedlotNumber ?? ''),
     onMutate: () => ({ reportWindow: openBlankTab() }),
     onSuccess: (pdfBlob, _vars, context) => {
-      openBlobInNewTab(pdfBlob, context?.reportWindow);
+      openBlobInNewTab(
+        pdfBlob,
+        context?.reportWindow,
+        `SPRR001-${seedlotNumber ?? 'seedlot'}.pdf`
+      );
     },
     onError: (err: AxiosError, _vars, context) => {
       context?.reportWindow?.close();
