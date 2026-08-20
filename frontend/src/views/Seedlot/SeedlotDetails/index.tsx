@@ -151,8 +151,7 @@ const SeedlotDetails = () => {
     if (seedlotQuery.error instanceof AxiosError && seedlotQuery.error.response?.status === 404) {
       navigate(ROUTES.FOUR_OH_FOUR);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seedlotQuery.error]);
+  }, [seedlotQuery.error, navigate]);
 
   const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
 
