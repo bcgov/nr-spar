@@ -24,7 +24,7 @@ x-frontend: &frontend
 services:
   database:
     container_name: database
-    image: postgis/postgis:16-master
+    image: postgis/postgis:18-master
     environment:
       <<: *postgres-vars
     volumes:
@@ -86,7 +86,7 @@ services:
       CYPRESS_baseUrl: http://frontend:3000
       CYPRESS_USERNAME: LOAD-3-TEST
       CYPRESS_PASSWORD: ${CYPRESS_PASSWORD}
-    image: cypress/included:15.18.1
+    image: cypress/included:15.20.1
     profiles: ["cypress"]
     user: root
     volumes: ["./frontend:/app"]

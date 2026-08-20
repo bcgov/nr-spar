@@ -29,9 +29,15 @@ parameters:
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
-    value: 25m
+    value: 200m
   - name: MEMORY_REQUEST
-    value: 100Mi
+    value: 1Gi
+  # The JVM derives its max heap from the memory limit (-XX:MaxRAMPercentage=60
+  # in the Dockerfile), so raising this raises the heap. Keep it equal to
+  # MEMORY_REQUEST, and check the namespace quota against MAX_REPLICAS before
+  # raising it.
+  - name: MEMORY_LIMIT
+    value: 1Gi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"
@@ -133,6 +139,8 @@ objects:
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
+                limits:
+                  memory: ${MEMORY_LIMIT}
               ports:
                 - name: container-port
                   containerPort: 8090
@@ -193,15 +201,12 @@ objects:
       minReplicas: ${{MIN_REPLICAS}}
       maxReplicas: ${{MAX_REPLICAS}}
       metrics:
+        # CPU only. A JVM holds its heap rather than returning it, so a memory
+        # utilization target sits above the threshold permanently and pins the
+        # deployment at MAX_REPLICAS.
         - type: Resource
           resource:
             name: cpu
-            target:
-              type: Utilization
-              averageUtilization: 80
-        - type: Resource
-          resource:
-            name: memory
             target:
               type: Utilization
               averageUtilization: 80

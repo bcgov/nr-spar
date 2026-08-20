@@ -59,7 +59,7 @@
     }
 
     .#{vars.$bcgov-prefix}--contained-list-item__content:focus {
-      background: #E0EFFF; // Not in colors config
+      background: var(--#{vars.$bcgov-prefix}-background-selected);
       border: 0.125rem solid var(--#{vars.$bcgov-prefix}-border-interactive, colors.$blue-60);
     }
 
@@ -115,7 +115,7 @@
     }
 
     .icon-error {
-      fill: colors.$red-60;
+      fill: var(--#{vars.$bcgov-prefix}-support-error, colors.$red-60);
     }
 
     .org-item-pictogram {

@@ -2,7 +2,7 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .login-org-selection-grid {
-  background: lightgray; // temporary change for demo linear-gradient(180deg, #E0EFFF 0%, #F2EEDB 100%);
+  background: var(--#{vars.$bcgov-prefix}-background);
   height: 100vh;
   width: 100%;
   display: flex;
@@ -24,8 +24,7 @@
     flex-direction: column;
     padding: min(4.63%, 3rem) min(4.63%, 4rem);
     border-radius: 0.5rem;
-    background: #FFF;
-    /* Light Theme/Shadows/Menu */
+    background: var(--#{vars.$bcgov-prefix}-layer-01);
     box-shadow: 0rem 0.125rem 0.375rem 0rem rgba(0, 0, 0, 0.30);
     min-height: 50vh;
   }
