@@ -62,7 +62,9 @@ const ReviewContent = () => {
     richSeedlotData,
     allStepData,
     isFetchingData,
-    isFormReady
+    isFormReady,
+    fundingSourcesQuery,
+    methodsOfPaymentQuery
   } = useContext(ClassBContext);
 
   // True if in view mode, false in edit mode.
@@ -330,7 +332,11 @@ const ReviewContent = () => {
               ? <OwnershipRead />
               : (
                 <FlexGrid className="sub-section-grid">
-                  <OwnershipStep isReview />
+                  <OwnershipStep
+                    isReview
+                    fundingSourcesQuery={fundingSourcesQuery}
+                    methodsOfPaymentQuery={methodsOfPaymentQuery}
+                  />
                 </FlexGrid>
               )
           }
