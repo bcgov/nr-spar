@@ -16,12 +16,11 @@ import {
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-
+import { toast } from 'react-toastify';
 import {
   RichSeedlotType,
   SeedlotStatusCode
 } from '../../../types/SeedlotType';
-import { toast } from 'react-toastify';
 
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
@@ -101,8 +100,6 @@ const SeedlotDetails = () => {
     || seedlotData?.seedlotStatus === 'Expired'
     || seedlotData?.seedlotStatus === 'Complete'
     || seedlotData?.seedlotStatus === 'Approved';
-
-  const isBClass = isBClassSeedlot(seedlotQuery.data);
 
   const downloadReportMutation = useMutation({
     mutationFn: () => downloadBClassRegistrationReport(seedlotNumber ?? ''),
