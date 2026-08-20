@@ -86,12 +86,11 @@ Then('I can see the empty favourite section subtitle', () => {
 });
 
 When('I open the add favourite activity modal', () => {
-  cy.contains('button.consep-fav-non-content-btn', favouriteContent.fa.favouriteActivitiesBtn).click();
-  cy.get('[role="dialog"][aria-label="Add favourite activity"]').as('favouriteActivityModal');
-});
-
-When('I open the add favourite activity modal from the populated page', () => {
-  cy.get('button.consep-add-fav-btn').click();
+  cy.get(
+    'button.consep-fav-non-content-btn:visible, button.consep-add-fav-btn:visible'
+  )
+    .first()
+    .click();
   cy.get('[role="dialog"][aria-label="Add favourite activity"]').as('favouriteActivityModal');
 });
 

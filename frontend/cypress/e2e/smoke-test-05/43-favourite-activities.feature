@@ -49,7 +49,7 @@ Feature: CONSEP favourite activities page
     Given favourite activities include:
       | Actual germination count |
     When I delete favourite card "Actual germination count"
-    And I open the add favourite activity modal from the populated page
+    And I open the add favourite activity modal
     Then favourite activity row "Actual germination count" should not be selected
 
   Scenario: Maximum 12 favourite activities is enforced
