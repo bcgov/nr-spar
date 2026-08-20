@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   FlexGrid,
@@ -15,7 +15,11 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import {
-  SeedlotApplicantType, SeedlotDisplayType, SeedlotStatusCode, SeedlotType
+  RichSeedlotType,
+  SeedlotApplicantType,
+  SeedlotDisplayType,
+  SeedlotStatusCode,
+  SeedlotType
 } from '../../../types/SeedlotType';
 
 import PageTitle from '../../../components/PageTitle';
@@ -39,6 +43,13 @@ import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
 import FormProgress from './FormProgress';
 import TscReviewSection from './TscReviewSection';
+import BClassDetailSections from './sections/bClass';
+import {
+  getEditApplicantRoute,
+  getRegistrationRoute,
+  getReviewRoute,
+  isBClassSeedlot
+} from './utils';
 
 import './styles.scss';
 
@@ -62,29 +73,6 @@ const SeedlotDetails = () => {
 
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
 
-  const manageOptions = [
-    {
-      text: 'Edit seedlot applicant',
-      onClickFunction: () => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')),
-      disabled: viewOnlySeedlot
-    },
-    {
-      text: 'Print seedlot',
-      onClickFunction: () => null,
-      disabled: true
-    },
-    {
-      text: 'Duplicate seedlot',
-      onClickFunction: () => setIsCopyModalOpen(true),
-      disabled: !isTscAdmin
-    },
-    {
-      text: 'Delete seedlot',
-      onClickFunction: () => null,
-      disabled: true
-    }
-  ];
-
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
     queryFn: getVegCodes,
@@ -104,9 +92,38 @@ const SeedlotDetails = () => {
     queryKey: ['seedlots', seedlotNumber],
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
     enabled: vegCodeQuery.isFetched,
-    refetchOnMount: true,
-    select: (data) => data.seedlot
+    refetchOnMount: true
   });
+
+  const seedlot = seedlotQuery.data?.seedlot;
+  const isBClass = isBClassSeedlot(seedlot);
+
+  const manageOptions = useMemo(() => [
+    {
+      text: 'Edit seedlot applicant',
+      onClickFunction: () => navigate(
+        addParamToPath(getEditApplicantRoute(seedlot), seedlotNumber ?? '')
+      ),
+      disabled: viewOnlySeedlot || isBClass
+    },
+    {
+      text: 'Print seedlot',
+      onClickFunction: () => null,
+      disabled: true
+    },
+    {
+      text: 'Duplicate seedlot',
+      onClickFunction: () => setIsCopyModalOpen(true),
+      disabled: !isTscAdmin
+    },
+    {
+      text: 'Delete seedlot',
+      onClickFunction: () => null,
+      disabled: true
+    }
+  ], [
+    navigate, seedlot, seedlotNumber, viewOnlySeedlot, isBClass, isTscAdmin
+  ]);
 
   const getActBtnLabel = (): string => {
     if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
@@ -120,7 +137,7 @@ const SeedlotDetails = () => {
 
   useEffect(() => {
     if (seedlotQuery.isFetched || seedlotQuery.isFetchedAfterMount || seedlotQuery.status === 'success') {
-      covertToDisplayObj(seedlotQuery.data);
+      covertToDisplayObj(seedlotQuery.data?.seedlot);
     }
 
     if (seedlotQuery.error instanceof AxiosError && seedlotQuery.error.response?.status === 404) {
@@ -130,10 +147,11 @@ const SeedlotDetails = () => {
     seedlotQuery.isFetched,
     seedlotQuery.isFetchedAfterMount,
     seedlotQuery.status,
-    seedlotQuery.error
+    seedlotQuery.error,
+    seedlotQuery.data?.seedlot
   ]);
 
-  const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
+  const applicantClientNumber = seedlot?.applicantClientNumber;
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', applicantClientNumber],
@@ -144,9 +162,9 @@ const SeedlotDetails = () => {
   });
 
   const covertToClientObj = () => {
-    if (seedlotQuery.data && vegCodeQuery.data && forestClientQuery.data) {
+    if (seedlot && vegCodeQuery.data && forestClientQuery.data) {
       const converted = convertToApplicantInfoObj(
-        seedlotQuery.data,
+        seedlot,
         vegCodeQuery.data,
         forestClientQuery.data
       );
@@ -169,7 +187,19 @@ const SeedlotDetails = () => {
     if (forestClientQuery.isFetched && seedlotQuery.isFetchedAfterMount) {
       covertToClientObj();
     }
-  }, [forestClientQuery.isFetched, seedlotQuery.isFetchedAfterMount, seedlotQuery.status]);
+  }, [forestClientQuery.isFetched, seedlotQuery.isFetchedAfterMount, seedlotQuery.status, seedlot]);
+
+  const handlePrimaryAction = () => {
+    let route = getRegistrationRoute(seedlot);
+    if (isBClass && viewOnlySeedlot) {
+      // Submitted B-class seedlots are viewed (and reviewed/edited by
+      // TSC admins) on the B-class review screen
+      route = getReviewRoute(seedlot);
+    } else if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
+      route = getReviewRoute(seedlot);
+    }
+    navigate(addParamToPath(route, seedlotNumber ?? ''));
+  };
 
   return (
     <FlexGrid className="seedlot-details-page">
@@ -183,20 +213,14 @@ const SeedlotDetails = () => {
             && (
               <>
                 <PageTitle
-                  title={`Seedlot ${seedlotQuery.data?.id}`}
+                  title={`Seedlot ${seedlot?.id}`}
                   enableFavourite
                 />
                 <ComboButton
                   title={getActBtnLabel()}
                   items={manageOptions}
                   menuOptionsClass="edit-seedlot-form"
-                  titleBtnFunc={() => {
-                    let route = ROUTES.SEEDLOT_A_CLASS_REGISTRATION;
-                    if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
-                      route = ROUTES.SEEDLOT_A_CLASS_REVIEW;
-                    }
-                    navigate(addParamToPath(route, seedlotNumber ?? ''));
-                  }}
+                  titleBtnFunc={handlePrimaryAction}
                 />
               </>
             )
@@ -218,7 +242,7 @@ const SeedlotDetails = () => {
             <TabPanels>
               <TabPanel>
                 {
-                  isSubmitSuccess && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'SUB')
+                  isSubmitSuccess && (seedlot?.seedlotStatus.seedlotStatusCode === 'SUB')
                     ? (
                       <InlineNotification
                         className="seedlot-submitted-notification"
@@ -231,7 +255,7 @@ const SeedlotDetails = () => {
                     : null
                 }
                 {
-                  statusOnSave === 'APP' && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'APP')
+                  statusOnSave === 'APP' && (seedlot?.seedlotStatus.seedlotStatusCode === 'APP')
                     ? (
                       <InlineNotification
                         className="seedlot-submitted-notification"
@@ -244,7 +268,7 @@ const SeedlotDetails = () => {
                     : null
                 }
                 {
-                  statusOnSave === 'PND' && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND')
+                  statusOnSave === 'PND' && (seedlot?.seedlotStatus.seedlotStatusCode === 'PND')
                     ? (
                       <InlineNotification
                         className="seedlot-submitted-notification"
@@ -258,22 +282,42 @@ const SeedlotDetails = () => {
                 }
                 <FormProgress
                   seedlotNumber={seedlotNumber}
-                  seedlotStatusCode={seedlotQuery.data?.seedlotStatus.seedlotStatusCode}
+                  seedlotStatusCode={seedlot?.seedlotStatus.seedlotStatusCode}
                   getSeedlotQueryStatus={seedlotQuery.status}
+                  isBClass={isBClass}
                 />
                 <ApplicantInformation
                   seedlotNumber={seedlotNumber}
                   applicant={applicantData}
                   isFetching={forestClientQuery?.isFetching}
                   hideEditButton={!isTscAdmin && viewOnlySeedlot}
+                  variant={isBClass ? 'B' : 'A'}
+                  editApplicantRoute={getEditApplicantRoute(seedlot)}
                 />
+                {/*{
+                  isBClass && seedlot
+                    ? (
+                      <BClassDetailSections
+                        seedlot={seedlot}
+                        richSeedlot={seedlotQuery.data as RichSeedlotType}
+                        isFetching={seedlotQuery.isFetching}
+                        showAreaOfUse={isTscAdmin}
+                      />
+                    )
+                    : null
+                }*/}
                 {
                   (
                     isTscAdmin
                     && seedlotData?.seedlotStatus !== 'Pending'
                     && seedlotData?.seedlotStatus !== 'Incomplete'
                   )
-                    ? <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
+                    ? (
+                      <TscReviewSection
+                        seedlotNumber={seedlotNumber ?? ''}
+                        reviewRoute={getReviewRoute(seedlot)}
+                      />
+                    )
                     : null
                 }
               </TabPanel>
