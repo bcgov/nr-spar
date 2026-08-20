@@ -112,35 +112,87 @@ class ActivityServiceTest {
   }
 
   @Test
-  @DisplayName("Update activity should succeed")
+  @DisplayName("Update activity should succeed when timestamp matches")
   void updateActivity_shouldSucceed() {
-    ActivityEntity existingEntity = new ActivityEntity();
-    existingEntity.setRiaKey(riaKey);
-    existingEntity.setActualBeginDateTime(LocalDateTime.parse("2013-10-01T00:00:00"));
-    existingEntity.setActualEndDateTime(LocalDateTime.parse("2013-11-01T00:00:00"));
-    existingEntity.setTestCategoryCode("OLD");
-    existingEntity.setRiaComment("Old comment");
-
-    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(existingEntity));
-    when(activityRepository.save(any(ActivityEntity.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+    LocalDateTime expected = LocalDateTime.parse("2013-09-01T00:00:00");
 
     ActivityFormDto activityDto = new ActivityFormDto(
         "STD",
         LocalDateTime.parse("2013-08-01T00:00:00"),
         LocalDateTime.parse("2013-09-01T00:00:00"),
-        "Updated comment"
+        "Updated comment",
+        expected
     );
+
+    LocalDateTime reloadedTimestamp = LocalDateTime.parse("2099-01-01T00:00:00");
+
+    ActivityEntity reloaded = new ActivityEntity();
+    reloaded.setRiaKey(riaKey);
+    reloaded.setTestCategoryCode("STD");
+    reloaded.setActualBeginDateTime(activityDto.actualBeginDateTime());
+    reloaded.setActualEndDateTime(activityDto.actualEndDateTime());
+    reloaded.setRiaComment("Updated comment");
+    reloaded.setUpdateTimestamp(reloadedTimestamp);
+
+    when(activityRepository.updateActivityFieldWithLock(
+        eq(riaKey), any(), any(), eq("STD"), eq("Updated comment"), eq(expected)))
+        .thenReturn(1);
+    when(activityRepository.findById(riaKey)).thenReturn(Optional.of(reloaded));
 
     ActivityEntity result = activityService.updateActivityField(riaKey, activityDto);
 
-    assertEquals(activityDto.actualBeginDateTime(), result.getActualBeginDateTime());
-    assertEquals(activityDto.actualEndDateTime(), result.getActualEndDateTime());
-    assertEquals(activityDto.testCategoryCode(), result.getTestCategoryCode());
-    assertEquals(activityDto.riaComment(), result.getRiaComment());
+    assertEquals("STD", result.getTestCategoryCode());
+    assertEquals("Updated comment", result.getRiaComment());
+    assertEquals(reloadedTimestamp, result.getUpdateTimestamp());
+    verify(activityRepository, times(1)).updateActivityFieldWithLock(
+        eq(riaKey), any(), any(), eq("STD"), eq("Updated comment"), eq(expected));
+    verify(activityRepository, never()).save(any(ActivityEntity.class));
+  }
 
-    verify(activityRepository, times(1)).findById(riaKey);
-    verify(activityRepository, times(1)).save(any(ActivityEntity.class));
+  @Test
+  @DisplayName("Update activity throws 409 when timestamp is stale on an existing row")
+  void updateActivity_staleTimestamp_throwsConflict() {
+    LocalDateTime stale = LocalDateTime.parse("2013-09-01T00:00:00");
+    ActivityFormDto activityDto = new ActivityFormDto(
+        "STD",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-09-01T00:00:00"),
+        "Updated comment",
+        stale
+    );
+
+    when(activityRepository.updateActivityFieldWithLock(
+        any(), any(), any(), any(), any(), any())).thenReturn(0);
+    when(activityRepository.existsById(riaKey)).thenReturn(true);
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> activityService.updateActivityField(riaKey, activityDto));
+
+    assertEquals(HttpStatus.CONFLICT, exc.getStatusCode());
+  }
+
+  @Test
+  @DisplayName("Update activity throws 404 when the row does not exist")
+  void updateActivity_missingRow_throwsNotFound() {
+    LocalDateTime ts = LocalDateTime.parse("2013-09-01T00:00:00");
+    ActivityFormDto activityDto = new ActivityFormDto(
+        "STD",
+        LocalDateTime.parse("2013-08-01T00:00:00"),
+        LocalDateTime.parse("2013-09-01T00:00:00"),
+        "Updated comment",
+        ts
+    );
+
+    when(activityRepository.updateActivityFieldWithLock(
+        any(), any(), any(), any(), any(), any())).thenReturn(0);
+    when(activityRepository.existsById(riaKey)).thenReturn(false);
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> activityService.updateActivityField(riaKey, activityDto));
+
+    assertEquals(HttpStatus.NOT_FOUND, exc.getStatusCode());
   }
 
   @Test

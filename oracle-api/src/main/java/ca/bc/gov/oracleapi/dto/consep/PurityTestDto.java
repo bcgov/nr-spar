@@ -62,6 +62,10 @@ public record PurityTestDto(
     LocalDateTime actualEndDateTime,
     // End - Activity fields
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Schema(description = "Row update timestamp for optimistic locking", example = "2025-01-18T16:00:00")
+    LocalDateTime updateTimestamp,
+
     // Replicates fields
     @Schema(description = "Replicates information")
     List<PurityReplicateDto> replicatesList,

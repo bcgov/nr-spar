@@ -253,7 +253,10 @@ const renderTableCell = (
       </TableCell>
     );
   }
-  if (headerId !== 'isMixTab' && headerId !== 'rowId') {
+  if (
+    headerId !== 'isMixTab' && headerId !== 'rowId'
+    && headerId !== 'parentTreeId' && headerId !== 'isTested'
+  ) {
     return (
       <TableCell key={headerId} className={className} id={rowData[headerId].id}>
         {

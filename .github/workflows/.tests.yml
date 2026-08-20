@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        smoke_test_folder: [
+        test_folder: [
           smoke-test-01,
           smoke-test-02,
           smoke-test-03,
@@ -52,7 +52,7 @@ jobs:
       - if: steps.triggers.outputs.triggered == 'false'
         run: echo "No tests required/triggered!"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: steps.triggers.outputs.triggered == 'true'
 
       - name: Run Cypress CI
@@ -62,7 +62,8 @@ jobs:
           node_version: "22"
           commands: |
             npm ci
-            npx start-server-and-test start http://localhost:3000 "cypress run --browser chrome --spec cypress/e2e/{features,${{ matrix.smoke_test_folder }}}/**/*.{feature,cy.ts,cy.js}"
+              SPEC="cypress/e2e/${{ matrix.test_folder }}/**/*.{feature,cy.ts,cy.js}"
+            npx start-server-and-test start http://localhost:3000 "cypress run --browser chrome --spec $SPEC"
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
@@ -77,9 +78,10 @@ jobs:
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-04/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test-05/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
+
       - name: Upload videos
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: cypress-videos-chrome-${{ matrix.smoke_test_folder }}
+          name: cypress-videos-chrome-${{ matrix.test_folder }}
           path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/

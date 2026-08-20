@@ -737,14 +737,40 @@ public class SeedlotService {
                 null,
                 null),
             calculatedGenWorth,
-            buildMeanGeomSeedlot(seedlotInfo),
+            buildMeanGeomSeedlot(parentTreesInfo, smpMixParentTreesInfo, seedlotInfo),
             buildMeanGeomSmpMix(smpMixsData));
 
     SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
     return seedlotAclassFullInfo;
   }
 
-  private GeospatialRespondDto buildMeanGeomSeedlot(Seedlot seedlotInfo) {
+  private GeospatialRespondDto buildMeanGeomSeedlot(
+      List<SeedlotFormParentTreeSmpDto> orchardPtInfo,
+      List<SeedlotFormParentTreeSmpDto> smpMixPtInfo,
+      Seedlot seedlotInfo) {
+    // Recompute the weighted orchard mean geospatial from the stored parent tree data so the value
+    // shown on submitted/review screens matches the pre-submission calculation. If it can't be
+    // recomputed (no parent trees or missing Oracle geospatial data), fall back to the mean that
+    // was persisted on the seedlot's collection geospatial columns at submission time.
+    if (!orchardPtInfo.isEmpty()) {
+      PtValsCalReqDto ptVals =
+          new PtValsCalReqDto(
+              convertToPtVals(orchardPtInfo),
+              convertToGeoRes(smpMixPtInfo),
+              0,
+              null,
+              new SeedlotManagementBreedingValueDto());
+
+      GeospatialRespondDto recomputed = parentTreeService.calcSeedlotMeanGeospatial(ptVals);
+      if (recomputed != null) {
+        return recomputed;
+      }
+    }
+
+    return buildStoredMeanGeomSeedlot(seedlotInfo);
+  }
+
+  private GeospatialRespondDto buildStoredMeanGeomSeedlot(Seedlot seedlotInfo) {
     if (seedlotInfo.getCollectionLatitudeDeg() == null
         || seedlotInfo.getCollectionLongitudeDeg() == null) {
       return null;
@@ -1090,8 +1116,12 @@ public class SeedlotService {
                       orchardPtDto.parentTreeNumber(),
                       orchardPtDto.coneCount(),
                       orchardPtDto.pollenCount(),
-                      orchardPtDto.smpSuccessPct(),
-                      orchardPtDto.nonOrchardPollenContamPct(),
+                      // Default to 0 so the calculation stays null-safe when reconstructing the
+                      // request from stored parent tree data (these can be null in the DB).
+                      orchardPtDto.smpSuccessPct() == null ? 0 : orchardPtDto.smpSuccessPct(),
+                      orchardPtDto.nonOrchardPollenContamPct() == null
+                          ? 0
+                          : orchardPtDto.nonOrchardPollenContamPct(),
                       getGeneticTraitList(orchardPtDto.parentTreeGeneticQualities()));
               converted.add(toAdd);
             });

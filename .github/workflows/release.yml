@@ -36,7 +36,7 @@ jobs:
       tag: ${{ steps.set-version.outputs.tag }}
       version: ${{ steps.set-version.outputs.version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -57,7 +57,7 @@ jobs:
           echo "version=$VERSION_NUM" >> $GITHUB_OUTPUT
 
       - name: Conventional Changelog Update
-        uses: TriPSs/conventional-changelog-action@952b14bbc4be87e8458a6ac5926fc655608b1b19 # v6
+        uses: TriPSs/conventional-changelog-action@ee43def3241429afddab215ba89090cbf64fb45c # v6
         id: changelog
         continue-on-error: true
         with:
@@ -108,7 +108,7 @@ jobs:
           includeRefIssues: false
 
       - name: Create Release
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         if: steps.set-version.outputs.tag != ''
         continue-on-error: true
         env:

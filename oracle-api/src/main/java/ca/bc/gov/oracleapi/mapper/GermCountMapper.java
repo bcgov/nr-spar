@@ -60,7 +60,20 @@ public interface GermCountMapper {
     if (dto.slots() == null) {
       return;
     }
-    for (GermCountSlotDto s : dto.slots()) {
+    applySlots(dto.slots(), e);
+  }
+
+  /**
+   * Writes the numbered slot columns on {@code e} for each slot, keyed by its slotIndex.
+   *
+   * @param slots the slot observations to write (each slotIndex must be 1-13)
+   * @param e     the entity to populate
+   */
+  default void applySlots(List<GermCountSlotDto> slots, @MappingTarget GermCountEntity e) {
+    if (slots == null) {
+      return;
+    }
+    for (GermCountSlotDto s : slots) {
       switch (s.slotIndex()) {
         case 1  -> { e.setDailyGermSkey1(s.dailyGermSkey());  e.setCountDt1(s.countDt());  e.setDayNoOfTest1(s.dayNoOfTest());  e.setRep1NoSeedsGerm1(s.rep1NoSeedsGerm());  e.setRep2NoSeedsGerm1(s.rep2NoSeedsGerm());  e.setRep3NoSeedsGerm1(s.rep3NoSeedsGerm());  e.setRep4NoSeedsGerm1(s.rep4NoSeedsGerm());  e.setCumulativeGerm1(s.cumulativeGerm()); }
         case 2  -> { e.setDailyGermSkey2(s.dailyGermSkey());  e.setCountDt2(s.countDt());  e.setDayNoOfTest2(s.dayNoOfTest());  e.setRep1NoSeedsGerm2(s.rep1NoSeedsGerm());  e.setRep2NoSeedsGerm2(s.rep2NoSeedsGerm());  e.setRep3NoSeedsGerm2(s.rep3NoSeedsGerm());  e.setRep4NoSeedsGerm2(s.rep4NoSeedsGerm());  e.setCumulativeGerm2(s.cumulativeGerm()); }

@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.15</version>
+    <version>3.5.16</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>ca.bc.gov</groupId>
@@ -39,7 +39,7 @@
     <sonar.organization>bcgov-sonarcloud</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <oci.revision>${project.version}</oci.revision>
-    <hibernate.version>6.6.42.Final</hibernate.version>
+    <hibernate.version>6.6.53.Final</hibernate.version>
     <spring-security.version>6.5.11</spring-security.version>
     <org.mapstruct.version>1.6.3</org.mapstruct.version>
   </properties>
@@ -549,7 +549,7 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.11</version>
+        <version>42.7.12</version>
       </dependency>
       <dependency>
         <groupId>commons-logging</groupId>
