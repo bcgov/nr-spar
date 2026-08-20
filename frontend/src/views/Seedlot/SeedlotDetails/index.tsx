@@ -14,18 +14,22 @@ import {
   InlineNotification
 } from '@carbon/react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 import { SeedlotStatusCode } from '../../../types/SeedlotType';
 
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
+import ErrorToast from '../../../components/Toast/ErrorToast';
 import useWindowSize from '../../../hooks/UseWindowSize';
 
-import { getSeedlotById } from '../../../api-service/seedlotAPI';
+import { downloadBClassRegistrationReport, getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import { ErrToastOption } from '../../../config/ToastifyConfig';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils/SeedlotUtils';
+import { openBlankTab, openBlobInNewTab } from '../../../utils/DownloadUtils';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
@@ -39,6 +43,7 @@ import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
 import FormProgress from './FormProgress';
 import TscReviewSection from './TscReviewSection';
+import { getPrintSeedlotLabel, isBClassSeedlot } from './utils';
 
 import './styles.scss';
 
@@ -83,16 +88,40 @@ const SeedlotDetails = () => {
     || seedlotData?.seedlotStatus === 'Complete'
     || seedlotData?.seedlotStatus === 'Approved';
 
-  const manageOptions = [
+  const isBClass = isBClassSeedlot(seedlotQuery.data);
+
+  const downloadReportMutation = useMutation({
+    mutationFn: () => downloadBClassRegistrationReport(seedlotNumber ?? ''),
+    onMutate: () => ({ reportWindow: openBlankTab() }),
+    onSuccess: (pdfBlob, _vars, context) => {
+      openBlobInNewTab(
+        pdfBlob,
+        context?.reportWindow,
+        `SPRR001-${seedlotNumber ?? 'seedlot'}.pdf`
+      );
+    },
+    onError: (err: AxiosError, _vars, context) => {
+      context?.reportWindow?.close();
+      toast.error(
+        <ErrorToast
+          title="Download failed"
+          subtitle={`Cannot generate the SPRR001 report. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    }
+  });
+
+  const manageOptions = useMemo(() => [
     {
       text: 'Edit seedlot applicant',
       onClickFunction: () => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')),
       disabled: viewOnlySeedlot
     },
     {
-      text: 'Print seedlot',
-      onClickFunction: () => null,
-      disabled: true
+      text: getPrintSeedlotLabel(isBClass, downloadReportMutation.isPending),
+      onClickFunction: () => downloadReportMutation.mutate(),
+      disabled: !isBClass || downloadReportMutation.isPending
     },
     {
       text: 'Duplicate seedlot',
@@ -104,7 +133,9 @@ const SeedlotDetails = () => {
       onClickFunction: () => null,
       disabled: true
     }
-  ];
+  ], [
+    navigate, seedlotNumber, viewOnlySeedlot, isBClass, isTscAdmin, downloadReportMutation
+  ]);
 
   const getActBtnLabel = (): string => {
     if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {

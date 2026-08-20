@@ -37,6 +37,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
 import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionBclassMapper;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormStepMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
@@ -107,6 +108,8 @@ class SeedlotFormPutTest {
 
   @Mock SeedlotFormCollectionBclassMapper seedlotFormCollectionBclassMapper;
 
+  @Mock SeedlotFormStepMapper seedlotFormStepMapper;
+
   @Mock SaveSeedlotFormService saveSeedlotFormService;
 
   @BeforeEach
@@ -136,6 +139,7 @@ class SeedlotFormPutTest {
             seedlotCollectionGeometryRepository,
             seedlotCollectionGeometryService,
             seedlotFormCollectionBclassMapper,
+            seedlotFormStepMapper,
             saveSeedlotFormService);
   }
 
