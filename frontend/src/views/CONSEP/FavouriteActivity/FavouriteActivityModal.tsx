@@ -96,7 +96,7 @@ const FavouriteActivityModal = ({ open, setOpen }: FavouriteActivityModalProps) 
         setInitActs(consepData);
       }
     },
-    [favActQuery.isSuccess]
+    [favActQuery.data, favActQuery.isSuccess]
   );
 
   useEffect(() => {
