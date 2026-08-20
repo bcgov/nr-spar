@@ -90,6 +90,11 @@ When('I open the add favourite activity modal', () => {
   cy.get('[role="dialog"][aria-label="Add favourite activity"]').as('favouriteActivityModal');
 });
 
+When('I open the add favourite activity modal from the populated page', () => {
+  cy.get('button.consep-add-fav-btn').click();
+  cy.get('[role="dialog"][aria-label="Add favourite activity"]').as('favouriteActivityModal');
+});
+
 Then('I can see the favourite activity modal', () => {
   cy.get('@favouriteActivityModal').should('be.visible');
   cy.get('@favouriteActivityModal').contains('h2', 'Add favourite activity').should('be.visible');
@@ -128,6 +133,13 @@ When('I submit favourite activity modal', () => {
 
 Then('I should see favourite card {string}', (activityName: string) => {
   getFavouriteCardLabel(activityName).should('be.visible');
+});
+
+Then('favourite activity row {string} should not be selected', (activityName: string) => {
+  cy.get('@favouriteActivityModal')
+    .contains(`.${prefix}--data-table tbody tr`, activityName)
+    .find('input[type="checkbox"]')
+    .should('not.be.checked');
 });
 
 Then('I should not see favourite card {string}', (activityName: string) => {
