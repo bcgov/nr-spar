@@ -25,6 +25,7 @@ import BClassCollectionStep from '../../../components/SeedlotRegistrationSteps/B
 import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
 import InterimStep from '../../../components/SeedlotRegistrationSteps/InterimStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
+import OwnershipReviewRead from '../../../components/SeedlotReviewSteps/Ownership/Read';
 import {
   SeedlotBClassSubmitType, SeedlotStatusCode
 } from '../../../types/SeedlotType';
@@ -39,7 +40,6 @@ import { SaveStatusModalText } from '../SeedlotReview/constants';
 
 import ApplicantAndSeedlotRead from './read/ApplicantAndSeedlotRead';
 import CollectionRead from './read/CollectionRead';
-import OwnershipRead from './read/OwnershipRead';
 import InterimRead from './read/InterimRead';
 import ExtractionStorageRead from './read/ExtractionStorageRead';
 import AreaOfUseRead from './read/AreaOfUseRead';
@@ -48,6 +48,106 @@ import { buildBClassReviewPayload, validateBClassReviewForm } from './utils';
 type SaveMutationVars = {
   payload: SeedlotBClassSubmitType,
   statusAfterSave: SeedlotStatusCode | null
+};
+
+type ReadOrEditProps = {
+  isReadMode: boolean;
+  read: React.ReactNode;
+  edit: React.ReactNode;
+};
+
+const ReadOrEdit = ({ isReadMode, read, edit }: ReadOrEditProps) => (
+  isReadMode ? read : edit
+);
+
+type ReviewConfirmModalsProps = {
+  seedlotNumber?: string;
+  isCancelModalOpen: boolean;
+  isSaveStatusModalOpen: boolean;
+  statusToUpdateTo: SeedlotStatusCode;
+  isSaving: boolean;
+  onCloseCancelModal: () => void;
+  onCloseSaveStatusModal: () => void;
+  onDiscardChanges: () => void;
+  onSaveChanges: () => void;
+  onConfirmStatus: (status: SeedlotStatusCode) => void;
+};
+
+const ReviewConfirmModals = ({
+  seedlotNumber,
+  isCancelModalOpen,
+  isSaveStatusModalOpen,
+  statusToUpdateTo,
+  isSaving,
+  onCloseCancelModal,
+  onCloseSaveStatusModal,
+  onDiscardChanges,
+  onSaveChanges,
+  onConfirmStatus
+}: ReviewConfirmModalsProps) => {
+  const isPendingStatus = statusToUpdateTo === 'PND';
+
+  return (
+    <>
+      <Modal
+        className="cancel-confirm-modal"
+        open={isCancelModalOpen}
+        modalHeading="Seedlot review"
+        onRequestClose={onCloseCancelModal}
+        passiveModal
+      >
+        <div className="modal-content">
+          <h5 className="modal-header">
+            Any changes you made will be discarded unless saved.
+          </h5>
+          <div className="modal-button-group">
+            <Button kind="secondary" onClick={onDiscardChanges}>Discard changes</Button>
+            <Button
+              kind="primary"
+              onClick={onSaveChanges}
+              renderIcon={Save}
+            >
+              Save changes
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        className="save-and-update-confirm-modal"
+        open={isSaveStatusModalOpen}
+        modalHeading={`Review seedlot ${seedlotNumber}`}
+        onRequestClose={onCloseSaveStatusModal}
+        passiveModal
+      >
+        <div className="modal-content">
+          <div className="modal-text">
+            {
+              isPendingStatus
+                ? (
+                  <>
+                    {SaveStatusModalText.pendingHeader}
+                    {SaveStatusModalText.pendingBody}
+                  </>
+                )
+                : SaveStatusModalText.approveHeader
+            }
+          </div>
+          <div className="modal-button-group">
+            <Button kind="secondary" onClick={onCloseSaveStatusModal}>Cancel</Button>
+            <Button
+              kind="primary"
+              onClick={() => onConfirmStatus(isPendingStatus ? 'PND' : 'APP')}
+              disabled={isSaving}
+              {...(isPendingStatus ? {} : { renderIcon: Checkmark })}
+            >
+              {isPendingStatus ? 'Send back to pending' : 'Approve seedlot'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
 };
 
 const ReviewContent = () => {
@@ -74,6 +174,9 @@ const ReviewContent = () => {
   const [statusToUpdateTo, setStatusToUpdateTo] = useState<SeedlotStatusCode>('PND');
 
   const statusCode = seedlotData?.seedlotStatus.seedlotStatusCode;
+  const isApproved = statusCode === 'APP';
+  const showTscActions = isTscAdmin && statusCode === 'SUB';
+  const canEdit = isTscAdmin && (statusCode === 'SUB' || statusCode === 'APP');
 
   useEffect(() => {
     // Pending and incomplete seedlots are edited through the registration wizard
@@ -88,8 +191,6 @@ const ReviewContent = () => {
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS
   });
-
-  const canEdit = isTscAdmin && (statusCode === 'SUB' || statusCode === 'APP');
 
   const statusOnlyMutation = useMutation({
     mutationFn: (statusOnSave: SeedlotStatusCode) => (
@@ -165,7 +266,7 @@ const ReviewContent = () => {
     const payload = buildBClassReviewPayload(allStepData, richSeedlotData);
     saveEditMutation.mutate({
       payload,
-      statusAfterSave: statusAfterSave ?? (statusCode === 'APP' ? 'APP' : null)
+      statusAfterSave: statusAfterSave ?? (isApproved ? 'APP' : null)
     });
   };
 
@@ -222,6 +323,16 @@ const ReviewContent = () => {
     closeCancelModal();
   };
 
+  const handleModalSaveChanges = () => {
+    closeCancelModal();
+    handleEditSaveBtn();
+  };
+
+  const handleConfirmStatus = (status: SeedlotStatusCode) => {
+    closeSaveStatusModal();
+    handleSaveAndStatus(status);
+  };
+
   /**
    * Custom blocker function to prevent navigation with unsaved changes.
    */
@@ -274,7 +385,7 @@ const ReviewContent = () => {
       </Row>
 
       {
-        statusCode === 'APP'
+        isApproved
           ? (
             <Row>
               <InlineNotification
@@ -310,11 +421,11 @@ const ReviewContent = () => {
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <CollectionRead />
-              : <BClassCollectionStep isReview />
-          }
+          <ReadOrEdit
+            isReadMode={isReadMode}
+            read={<CollectionRead />}
+            edit={<BClassCollectionStep isReview />}
+          />
         </Column>
       </Row>
 
@@ -327,19 +438,25 @@ const ReviewContent = () => {
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <OwnershipRead />
-              : (
-                <FlexGrid className="sub-section-grid">
-                  <OwnershipStep
-                    isReview
-                    fundingSourcesQuery={fundingSourcesQuery}
-                    methodsOfPaymentQuery={methodsOfPaymentQuery}
-                  />
-                </FlexGrid>
-              )
-          }
+          <ReadOrEdit
+            isReadMode={isReadMode}
+            read={(
+              <OwnershipReviewRead
+                owners={allStepData.ownershipStep}
+                isFetchingData={isFetchingData}
+                idPrefix="b-review-owner"
+              />
+            )}
+            edit={(
+              <FlexGrid className="sub-section-grid">
+                <OwnershipStep
+                  isReview
+                  fundingSourcesQuery={fundingSourcesQuery}
+                  methodsOfPaymentQuery={methodsOfPaymentQuery}
+                />
+              </FlexGrid>
+            )}
+          />
         </Column>
       </Row>
 
@@ -352,15 +469,15 @@ const ReviewContent = () => {
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <InterimRead />
-              : (
-                <FlexGrid className="sub-section-grid">
-                  <InterimStep isReview />
-                </FlexGrid>
-              )
-          }
+          <ReadOrEdit
+            isReadMode={isReadMode}
+            read={<InterimRead />}
+            edit={(
+              <FlexGrid className="sub-section-grid">
+                <InterimStep isReview />
+              </FlexGrid>
+            )}
+          />
         </Column>
       </Row>
 
@@ -394,15 +511,15 @@ const ReviewContent = () => {
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <ExtractionStorageRead />
-              : (
-                <FlexGrid className="sub-section-grid">
-                  <ExtractionAndStorage isReview />
-                </FlexGrid>
-              )
-          }
+          <ReadOrEdit
+            isReadMode={isReadMode}
+            read={<ExtractionStorageRead />}
+            edit={(
+              <FlexGrid className="sub-section-grid">
+                <ExtractionAndStorage isReview />
+              </FlexGrid>
+            )}
+          />
         </Column>
       </Row>
 
@@ -416,7 +533,7 @@ const ReviewContent = () => {
           </Button>
         </Column>
         {
-          isTscAdmin && statusCode === 'SUB'
+          showTscActions
             ? (
               <>
                 <Column className="action-button-col" sm={4} md={4} lg={4}>
@@ -442,90 +559,18 @@ const ReviewContent = () => {
         }
       </Row>
 
-      {/* Cancel Confirm Modal */}
-
-      <Modal
-        className="cancel-confirm-modal"
-        open={isCancelModalOpen}
-        modalHeading="Seedlot review"
-        onRequestClose={closeCancelModal}
-        passiveModal
-      >
-        <div className="modal-content">
-          <h5 className="modal-header">
-            Any changes you made will be discarded unless saved.
-          </h5>
-          <div className="modal-button-group">
-            <Button kind="secondary" onClick={discardChanges}>Discard changes</Button>
-            <Button
-              kind="primary"
-              onClick={() => {
-                closeCancelModal();
-                handleEditSaveBtn();
-              }}
-              renderIcon={Save}
-            >
-              Save changes
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Save and update status confirm modal */}
-
-      <Modal
-        className="save-and-update-confirm-modal"
-        open={isSaveStatusModalOpen}
-        modalHeading={`Review seedlot ${seedlotNumber}`}
-        onRequestClose={closeSaveStatusModal}
-        passiveModal
-      >
-        <div className="modal-content">
-          {
-              statusToUpdateTo === 'PND'
-                ? (
-                  <div className="modal-text">
-                    {SaveStatusModalText.pendingHeader}
-                    {SaveStatusModalText.pendingBody}
-                  </div>
-                )
-                : (
-                  <div className="modal-text">{SaveStatusModalText.approveHeader}</div>
-                )
-            }
-          <div className="modal-button-group">
-            <Button kind="secondary" onClick={closeSaveStatusModal}>Cancel</Button>
-            {
-              statusToUpdateTo === 'PND'
-                ? (
-                  <Button
-                    kind="primary"
-                    onClick={() => {
-                      closeSaveStatusModal();
-                      handleSaveAndStatus('PND');
-                    }}
-                    disabled={isSaving}
-                  >
-                    Send back to pending
-                  </Button>
-                )
-                : (
-                  <Button
-                    kind="primary"
-                    onClick={() => {
-                      closeSaveStatusModal();
-                      handleSaveAndStatus('APP');
-                    }}
-                    renderIcon={Checkmark}
-                    disabled={isSaving}
-                  >
-                    Approve seedlot
-                  </Button>
-                )
-            }
-          </div>
-        </div>
-      </Modal>
+      <ReviewConfirmModals
+        seedlotNumber={seedlotNumber}
+        isCancelModalOpen={isCancelModalOpen}
+        isSaveStatusModalOpen={isSaveStatusModalOpen}
+        statusToUpdateTo={statusToUpdateTo}
+        isSaving={isSaving}
+        onCloseCancelModal={closeCancelModal}
+        onCloseSaveStatusModal={closeSaveStatusModal}
+        onDiscardChanges={discardChanges}
+        onSaveChanges={handleModalSaveChanges}
+        onConfirmStatus={handleConfirmStatus}
+      />
       {
         !isReadMode
         && (
