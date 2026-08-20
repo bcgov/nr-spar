@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
+import ca.bc.gov.backendstartapi.exception.ReportGenerationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import java.util.List;
@@ -32,5 +33,18 @@ class RestExceptionEndpointTest {
         resp.getBody().getFields().get(0).fieldName());
     assertEquals("bad", resp.getBody().getFields().get(0).fieldMessage());
     assertEquals("1 field(s) with validation problems!", resp.getBody().getErrorMessage());
+  }
+
+  @Test
+  void reportGeneration_returnsGeneric500() {
+    RestExceptionEndpoint endpoint = new RestExceptionEndpoint();
+    ReportGenerationException ex =
+        new ReportGenerationException(
+            "Failed to compile Jasper report: /tmp/spar-jasper-SPRR001/secret.jrxml", null);
+
+    ResponseEntity<String> resp = endpoint.reportGeneration(ex);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resp.getStatusCode());
+    assertEquals("Unable to generate the report. Please try again later.", resp.getBody());
   }
 }

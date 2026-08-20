@@ -2,7 +2,9 @@ import React, {
   useState, useRef, useContext,
   useEffect
 } from 'react';
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useQueries, useQuery, useQueryClient, UseQueryResult
+} from '@tanstack/react-query';
 import {
   Accordion,
   AccordionItem,
@@ -10,13 +12,14 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
-import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import SeedlotRegWizardContext from '../../../contexts/SeedlotRegWizardContext';
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import { getSeedlotFromOracleDbBySeedlotNumber } from '../../../api-service/seedlotAPI';
 import TitleAccordion from '../../TitleAccordion';
 import ScrollToTop from '../../ScrollToTop';
 import SingleOwnerInfo from './SingleOwnerInfo';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import {
   StateReturnObj,
@@ -36,23 +39,27 @@ import { MAX_OWNERS } from './constants';
 import './styles.scss';
 
 type OwnershipStepProps = {
-  isReview?: boolean
+  isReview?: boolean,
+  fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>,
+  methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>
 }
 
 /*
   Component
 */
-const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
+const OwnershipStep = ({
+  isReview = false,
+  fundingSourcesQuery,
+  methodsOfPaymentQuery
+}: OwnershipStepProps) => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
     defaultClientNumber: defaultAgency,
     defaultCode,
     isFormSubmitted,
-    seedlotNumber,
-    fundingSourcesQuery,
-    methodsOfPaymentQuery
-  } = useContext(ClassAContext);
+    seedlotNumber
+  } = useContext(SeedlotRegWizardContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
   const [originalSeedQty, setOriginalSeedQty] = useState<number>(0);

@@ -1,0 +1,100 @@
+meta {
+  name: Submit B-Class Seedlot
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/api/seedlots/{{seedlotNumber}}/b-class-submission
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "seedlotFormCollectionDto": {
+      "collectionClientNumber": "00012797",
+      "collectionLocnCode": "01",
+      "collectionStartDate": "2024-05-01",
+      "collectionEndDate": "2024-05-15",
+      "noOfContainers": 10,
+      "volPerContainer": 2.5,
+      "clctnVolume": 25,
+      "seedlotComment": "Collected from south slope",
+      "coneCollectionMethodCodes": [1, 2],
+      "collectionLocationDesc": "South ridge block 12",
+      "orgUnitNo": 73,
+      "collectionStandardMetInd": "Y",
+      "collectionAreaRadius": 500.0,
+      "captureMethodCode": "CLIMB",
+      "seedPlanZoneCode": "M",
+      "collectionSeedPlanZoneInd": "Y",
+      "seedCoastAreaCode": "001",
+      "collectionBgcValidatedInd": "Y",
+      "becOverrideInd": "N",
+      "numberTreesFromCode": "GT5",
+      "isLotSplitInd": "N",
+      "superiorProvenanceInd": "N",
+      "provenanceId": null,
+      "collectionLatitudeDeg": 49,
+      "collectionLatitudeMin": 30,
+      "collectionLatitudeSec": 0,
+      "collectionLongitudeDeg": 123,
+      "collectionLongitudeMin": 0,
+      "collectionLongitudeSec": 0,
+      "collectionElevation": 800,
+      "collectionElevationMin": 600,
+      "collectionElevationMax": 1000,
+      "elevationMin": 600,
+      "elevationMax": 1000,
+      "latitudeDegMin": 49,
+      "latitudeMinMin": 0,
+      "latitudeDegMax": 50,
+      "latitudeMinMax": 0,
+      "longitudeDegMin": 122,
+      "longitudeMinMin": 0,
+      "longitudeDegMax": 124,
+      "longitudeMinMax": 0,
+      "bgcZoneCode": "CDF",
+      "bgcZoneDescription": "Coastal Douglas-fir",
+      "bgcSubzoneCode": "mm",
+      "collectionGeometryGeoJson": null
+    },
+    "seedlotFormOwnershipDtoList": [
+      {
+        "ownerClientNumber": "00012797",
+        "ownerLocnCode": "01",
+        "originalPctOwned": 100,
+        "originalPctRsrvd": 100,
+        "originalPctSrpls": 5,
+        "methodOfPaymentCode": "CLA",
+        "sparFundSrceCode": "ITC"
+      }
+    ],
+    "seedlotFormInterimDto": {
+      "intermStrgClientNumber": "00012797",
+      "intermStrgLocnCode": "01",
+      "intermStrgStDate": "2024-06-01",
+      "intermStrgEndDate": "2024-06-30",
+      "intermFacilityCode": "OCV"
+    },
+    "seedlotFormExtractionDto": {
+      "extractoryClientNumber": "00012797",
+      "extractoryLocnCode": "01",
+      "extractionStDate": "2024-07-01",
+      "extractionEndDate": "2024-07-15",
+      "storageClientNumber": "00012797",
+      "storageLocnCode": "01",
+      "temporaryStrgStartDate": "2024-07-15",
+      "temporaryStrgEndDate": "2024-09-30"
+    }
+  }
+}

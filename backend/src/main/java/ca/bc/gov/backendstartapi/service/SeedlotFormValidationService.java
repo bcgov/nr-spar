@@ -2,11 +2,15 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
@@ -27,10 +31,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-/** Server-side validation for the seedlot a-class submission form. */
+/** Server-side validation for seedlot A-class and B-class submission forms. */
 @Service
 @RequiredArgsConstructor
 public class SeedlotFormValidationService {
+
+  private static final String COLLECTION_CONE_METHOD_CODES_FIELD =
+      "seedlotFormCollectionDto.coneCollectionMethodCodes";
 
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
@@ -49,14 +56,161 @@ public class SeedlotFormValidationService {
     List<SeedlotValidationError> errors = new ArrayList<>();
 
     validateOrchardStep(seedlot, form, errors);
-    validateCollectionStep(form, errors);
-    validateOwnershipStep(form, errors);
-    validateInterimStep(form, errors);
-    validateExtractionStep(form, errors);
+    validateCollectionStep(form.seedlotFormCollectionDto(), errors);
+    validateOwnershipStep(form.seedlotFormOwnershipDtoList(), errors);
+    validateInterimStep(form.seedlotFormInterimDto(), errors);
+    validateExtractionStep(form.seedlotFormExtractionDto(), errors);
 
     if (!errors.isEmpty()) {
       SparLog.info("Seedlot {} failed validation with {} error(s)", seedlot.getId(), errors.size());
       throw new SeedlotSubmissionValidationException(errors);
+    }
+  }
+
+  /**
+   * Validate a Class B submission form. Collects all errors, then throws once if any exist. Must
+   * run before any DB mutation.
+   */
+  public void validateBclassSeedlotForm(Seedlot seedlot, SeedlotFormSubmissionDtoClassB form) {
+    SparLog.info("Validating B-class submission form for seedlot {}", seedlot.getId());
+    List<SeedlotValidationError> errors = new ArrayList<>();
+
+    if (seedlot.getGeneticClass() == null
+        || !"B".equals(seedlot.getGeneticClass().getGeneticClassCode())) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotNumber", "Seedlot " + seedlot.getId() + " is not a Class B seedlot."));
+    }
+
+    validateBclassCollectionStep(seedlot, form, errors);
+    validateAouSpzStep(form.aouSpzList(), errors);
+    validateOwnershipStep(form.seedlotFormOwnershipDtoList(), errors);
+    validateInterimStep(form.seedlotFormInterimDto(), errors);
+    validateExtractionStep(form.seedlotFormExtractionDto(), errors);
+
+    if (!errors.isEmpty()) {
+      SparLog.info(
+          "B-class seedlot {} failed validation with {} error(s)", seedlot.getId(), errors.size());
+      throw new SeedlotSubmissionValidationException(errors);
+    }
+  }
+
+  private void validateBclassCollectionStep(
+      Seedlot seedlot,
+      SeedlotFormSubmissionDtoClassB form,
+      List<SeedlotValidationError> errors) {
+
+    SeedlotFormCollectionDtoClassB dto = form.seedlotFormCollectionDto();
+    if (dto == null) {
+      return;
+    }
+    validateClientLocation(
+        dto.collectionClientNumber(),
+        dto.collectionLocnCode(),
+        "seedlotFormCollectionDto.collectionClientNumber",
+        errors);
+    requireEndNotBeforeStart(
+        dto.collectionStartDate(),
+        dto.collectionEndDate(),
+        "seedlotFormCollectionDto.collectionEndDate",
+        "Collection end date must not be before the start date.",
+        errors);
+    requirePositive(dto.noOfContainers(), "seedlotFormCollectionDto.noOfContainers", errors);
+    requirePositive(dto.volPerContainer(), "seedlotFormCollectionDto.volPerContainer", errors);
+    requirePositive(dto.clctnVolume(), "seedlotFormCollectionDto.clctnVolume", errors);
+
+    validateBclassConeCollectionMethods(dto.coneCollectionMethodCodes(), errors);
+    validateBclassRequiredCollectionCodes(dto, errors);
+    validateBclassBecAndBcSourceRules(seedlot, dto, errors);
+  }
+
+  private void validateBclassConeCollectionMethods(
+      List<Integer> codes, List<SeedlotValidationError> errors) {
+    if (codes == null || codes.isEmpty()) {
+      errors.add(
+          new SeedlotValidationError(
+              COLLECTION_CONE_METHOD_CODES_FIELD,
+              "At least one cone collection method is required."));
+      return;
+    }
+    for (Integer code : codes) {
+      if (code == null || !coneCollectionMethodRepository.existsById(code)) {
+        errors.add(
+            new SeedlotValidationError(
+                COLLECTION_CONE_METHOD_CODES_FIELD,
+                "Invalid cone collection method code: " + code));
+      }
+    }
+  }
+
+  private void validateBclassRequiredCollectionCodes(
+      SeedlotFormCollectionDtoClassB dto, List<SeedlotValidationError> errors) {
+    if (dto.captureMethodCode() == null || dto.captureMethodCode().isBlank()) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.captureMethodCode",
+              "Capture method is required."));
+    }
+    if (dto.numberTreesFromCode() == null || dto.numberTreesFromCode().isBlank()) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.numberTreesFromCode",
+              "Number of trees collected from is required."));
+    }
+  }
+
+  private void validateBclassBecAndBcSourceRules(
+      Seedlot seedlot,
+      SeedlotFormCollectionDtoClassB dto,
+      List<SeedlotValidationError> errors) {
+    if (Boolean.TRUE.equals(seedlot.getSourceInBc()) && dto.orgUnitNo() == null) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.orgUnitNo",
+              "Collection district org unit is required when BC Source is selected."));
+    }
+    if ("Y".equals(dto.becOverrideInd())
+        && (dto.becOverrideComment() == null || dto.becOverrideComment().isBlank())) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.becOverrideComment",
+              "A BEC override comment is required when the override indicator is Y."));
+    }
+    if (!"Y".equals(dto.collectionBgcValidatedInd())) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.collectionBgcValidatedInd",
+              "Collection BEC must be validated (Y) before registration."));
+    }
+  }
+
+  private void validateAouSpzStep(
+      List<SeedPlanZoneDto> spzList, List<SeedlotValidationError> errors) {
+    if (spzList == null || spzList.isEmpty()) {
+      return;
+    }
+    if (spzList.size() > 8) {
+      errors.add(
+          new SeedlotValidationError("aouSpzList", "At most 8 area-of-use SPZ slots are allowed."));
+    }
+    Set<String> seenCodes = new HashSet<>();
+    for (int i = 0; i < spzList.size(); i++) {
+      SeedPlanZoneDto spz = spzList.get(i);
+      if (spz == null || spz.getCode() == null || spz.getCode().isBlank()) {
+        continue;
+      }
+      if (spz.isPrimary()) {
+        errors.add(
+            new SeedlotValidationError(
+                "aouSpzList[" + i + "].isPrimary",
+                "Class B seedlots do not use a primary SPZ slot."));
+      }
+      if (!seenCodes.add(spz.getCode())) {
+        errors.add(
+            new SeedlotValidationError(
+                "aouSpzList[" + i + "].code",
+                "Duplicate area-of-use SPZ code: " + spz.getCode()));
+      }
     }
   }
 
@@ -152,8 +306,7 @@ public class SeedlotFormValidationService {
   }
 
   private void validateCollectionStep(
-      SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    SeedlotFormCollectionDto dto = form.seedlotFormCollectionDto();
+      SeedlotFormCollectionDto dto, List<SeedlotValidationError> errors) {
     if (dto == null) {
       return;
     }
@@ -169,7 +322,7 @@ public class SeedlotFormValidationService {
         if (code == null || !coneCollectionMethodRepository.existsById(code)) {
           errors.add(
               new SeedlotValidationError(
-                  "seedlotFormCollectionDto.coneCollectionMethodCodes",
+                  COLLECTION_CONE_METHOD_CODES_FIELD,
                   "Invalid cone collection method code: " + code));
         }
       }
@@ -243,11 +396,10 @@ public class SeedlotFormValidationService {
   }
 
   private void validateOwnershipStep(
-      SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    List<SeedlotFormOwnershipDto> owners =
-        form.seedlotFormOwnershipDtoList() == null
-            ? List.<SeedlotFormOwnershipDto>of()
-            : form.seedlotFormOwnershipDtoList();
+      List<SeedlotFormOwnershipDto> owners, List<SeedlotValidationError> errors) {
+    if (owners == null) {
+      owners = List.of();
+    }
 
     BigDecimal totalOwned = BigDecimal.ZERO;
     Set<String> seenPairs = new HashSet<>();
@@ -267,6 +419,12 @@ public class SeedlotFormValidationService {
             new SeedlotValidationError(
                 base + ".methodOfPaymentCode",
                 "Invalid method of payment code: " + o.methodOfPaymentCode()));
+      }
+
+      if (o.sparFundSrceCode() == null || o.sparFundSrceCode().isBlank()) {
+        errors.add(
+            new SeedlotValidationError(
+                base + ".sparFundSrceCode", "Funding source is required."));
       }
 
       // OW5: duplicate owner client+location pair
@@ -302,8 +460,7 @@ public class SeedlotFormValidationService {
   }
 
   private void validateInterimStep(
-      SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    var dto = form.seedlotFormInterimDto();
+      SeedlotFormInterimDto dto, List<SeedlotValidationError> errors) {
     if (dto == null) {
       return;
     }
@@ -334,8 +491,7 @@ public class SeedlotFormValidationService {
   }
 
   private void validateExtractionStep(
-      SeedlotFormSubmissionDto form, List<SeedlotValidationError> errors) {
-    SeedlotFormExtractionDto dto = form.seedlotFormExtractionDto();
+      SeedlotFormExtractionDto dto, List<SeedlotValidationError> errors) {
     if (dto == null) {
       return;
     }

@@ -2,12 +2,15 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
-import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotCollectionGeometryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
@@ -16,6 +19,7 @@ import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
+import ca.bc.gov.backendstartapi.service.SeedlotCollectionGeometryService;
 import ca.bc.gov.backendstartapi.service.SeedlotCopyService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
@@ -77,6 +81,8 @@ public class SeedlotEndpoint {
   private final SeedlotCopyService seedlotCopyService;
 
   private final SaveSeedlotFormService saveSeedlotFormService;
+
+  private final SeedlotCollectionGeometryService seedlotCollectionGeometryService;
 
   private final LoggedUserService loggedUserService;
 
@@ -474,7 +480,7 @@ public class SeedlotEndpoint {
   /**
    * Saves the Seedlot reg form progress.
    *
-   * @param data A {@link SaveSeedlotFormDtoClassA} containing all the form information
+   * @param data A {@link SaveSeedlotFormDto} containing all the form information
    * @return 204 on success.
    */
   @PutMapping("{seedlotNumber}/a-class-form-progress")
@@ -510,11 +516,9 @@ public class SeedlotEndpoint {
           @PathVariable
           @NonNull
           String seedlotNumber,
-      @RequestBody SaveSeedlotFormDtoClassA data) {
+      @RequestBody SaveSeedlotFormDto data) {
 
-    RevisionCountDto revCountDto = saveSeedlotFormService.saveFormClassA(seedlotNumber, data);
-
-    return revCountDto;
+    return saveSeedlotFormService.saveForm(seedlotNumber, data);
   }
 
   /** Retrieves the saved Seedlot reg form. */
@@ -539,7 +543,7 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public SaveSeedlotFormDtoClassA getFormProgressClassA(
+  public SaveSeedlotFormDto getFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -550,27 +554,27 @@ public class SeedlotEndpoint {
           @NonNull
           String seedlotNumber) {
 
-    return saveSeedlotFormService.getFormClassA(seedlotNumber);
+    return saveSeedlotFormService.getForm(seedlotNumber);
   }
 
   /**
    * Creates a copy of an existing seedlot under a new seedlot number.
    *
    * @param seedlotNumber the source seedlot number to copy
-   * @return a {@link SeedlotStatusResponseDto} with the new seedlot number and INC status
+   * @return a {@link SeedlotStatusResponseDto} with the new seedlot number and PND status
    */
   @PostMapping("/{seedlotNumber}/copy")
   @Operation(
       summary = "Copy a seedlot to a new seedlot number",
       description =
-          "Copies an existing Class A seedlot to a new auto-assigned number in the copy band"
-              + " (62000–62998).")
+          "Copies an existing Class A or Class B seedlot to a new auto-assigned number in the"
+              + " class-specific copy band (A: 62000–62998, B: 52000–52998).")
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "201", description = "Seedlot successfully copied."),
         @ApiResponse(
             responseCode = "400",
-            description = "Copy band exhausted.",
+            description = "Copy band exhausted or unsupported genetic class.",
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(
             responseCode = "401",
@@ -631,6 +635,251 @@ public class SeedlotEndpoint {
           @PathVariable
           String seedlotNumber) {
 
-    return saveSeedlotFormService.getFormStatusClassA(seedlotNumber);
+    return saveSeedlotFormService.getFormStatus(seedlotNumber);
+  }
+
+  /**
+   * Saves the B-class Seedlot reg form progress.
+   *
+   * @param data A {@link SaveSeedlotFormDto} containing all the form information
+   * @return revision count on success.
+   */
+  @PutMapping("{seedlotNumber}/b-class-form-progress")
+  @Operation(
+      summary = "Save the progress of a b-class reg form.",
+      description =
+          "This endpoint saves the progress of a B-class registration form, it is NOT to be used"
+              + " for form submission.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successfully saved or updated."),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Data conflict while saving",
+            content = @Content(schema = @Schema()))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public RevisionCountDto saveFormProgressClassB(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot Number",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          @NonNull
+          String seedlotNumber,
+      @RequestBody SaveSeedlotFormDto data) {
+    return saveSeedlotFormService.saveForm(seedlotNumber, data);
+  }
+
+  /** Retrieves the saved B-class Seedlot reg form. */
+  @GetMapping("/{seedlotNumber}/b-class-form-progress")
+  @Operation(
+      summary = "Retrieve the progress and data of a b-class reg form.",
+      description = "This endpoint retrieves the progress of a B-class registration form")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved."),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot form progress not found",
+            content = @Content(schema = @Schema()))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public SaveSeedlotFormDto getFormProgressClassB(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot Number",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          @NonNull
+          String seedlotNumber) {
+    return saveSeedlotFormService.getForm(seedlotNumber);
+  }
+
+  /** Retrieve only the progress_status column from the B-class form progress table. */
+  @GetMapping("/{seedlotNumber}/b-class-form-progress/status")
+  @Operation(
+      summary = "Retrieve the progress status of a b-class reg form.",
+      description =
+          "This endpoint retrieves the progress status only of a B-class registration form")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved."),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot form progress not found",
+            content = @Content(schema = @Schema()))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public JsonNode getFormProgressStatusClassB(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot Number",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber) {
+    return saveSeedlotFormService.getFormStatus(seedlotNumber);
+  }
+
+  /** Returns collection area geometry for a Class B seedlot. */
+  @GetMapping("/{seedlotNumber}/collection-geometry")
+  @Operation(
+      summary = "Retrieve collection area geometry for a Class B seedlot.",
+      description = "Returns the natural-stand collection polygon and metadata when present.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved."),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot or collection geometry not found",
+            content = @Content(schema = @Schema()))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public SeedlotCollectionGeometryDto getCollectionGeometry(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot Number",
+              required = true,
+              schema = @Schema(type = "string", pattern = "\\d{5}", example = "53001"))
+          @PathVariable
+          @NonNull
+          String seedlotNumber) {
+    return seedlotCollectionGeometryService.getBySeedlotNumber(seedlotNumber);
+  }
+
+  /**
+   * Fetch the full normalized form data for a submitted B-class seedlot.
+   *
+   * @param seedlotNumber the seedlot number to fetch
+   * @return a {@link SeedlotBclassFormDto} with all form step data
+   */
+  @GetMapping("/{seedlotNumber}/b-class-full-form")
+  @Operation(
+      summary = "Fetch all B-class form fields for a submitted seedlot",
+      description =
+          "Returns the normalized collection, ownership, interim, and extraction data for a"
+              + " Class B seedlot identified by its number.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Seedlot info successfully retrieved."),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot not found",
+            content = @Content(schema = @Schema()))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public SeedlotBclassFormDto getBclassSeedlotFullForm(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot number",
+              required = true,
+              schema = @Schema(type = "string", pattern = "\\d{5}", example = "53001"))
+          @PathVariable
+          String seedlotNumber) {
+    return seedlotService.getBclassSeedlotFormInfo(seedlotNumber);
+  }
+
+  /**
+   * Submit a B-class seedlot registration, materializing the wizard draft to normalized tables.
+   *
+   * @param form the full B-class form payload
+   * @return a {@link SeedlotStatusResponseDto} with the seedlot number and new status
+   */
+  @PutMapping("/{seedlotNumber}/b-class-submission")
+  @Operation(
+      summary = "Submit a B-class seedlot registration",
+      description =
+          "Materializes the wizard draft to the normalized seedlot tables and sets the"
+              + " seedlot status to Submitted (SUB).")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successfully submitted."),
+        @ApiResponse(
+            responseCode = "400",
+            description = "One or more fields has invalid values.",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema =
+                        @Schema(
+                            oneOf = {
+                              ValidationExceptionResponse.class,
+                              DefaultSpringExceptionResponse.class
+                            }))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot not found",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Data conflict while saving",
+            content = @Content(schema = @Schema()))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public ResponseEntity<SeedlotStatusResponseDto> submitBclassSeedlotForm(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot number",
+              required = true,
+              schema = @Schema(type = "string", pattern = "\\d{5}", example = "53001"))
+          @PathVariable
+          String seedlotNumber,
+      @RequestBody @Valid SeedlotFormSubmissionDtoClassB form) {
+    long started = Instant.now().toEpochMilli();
+    boolean isTscAdmin = loggedUserService.isTscAdminLogged();
+    SeedlotStatusResponseDto result =
+        seedlotService.submitSeedlotFormClassB(seedlotNumber, form, isTscAdmin);
+    long finished = Instant.now().toEpochMilli();
+    SparLog.info("Time spent: {} ms - submit B-class seedlot form", (finished - started));
+    return ResponseEntity.status(HttpStatus.CREATED).body(result);
   }
 }

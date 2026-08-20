@@ -3,7 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
-import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
+import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
@@ -19,7 +19,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
-import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
+import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
@@ -38,14 +38,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-/** Service for copying a Class A seedlot to a new seedlot number. */
+/** Service for copying a Class A or Class B seedlot to a new seedlot number. */
 @Service
 @RequiredArgsConstructor
 public class SeedlotCopyService {
 
   private final SeedlotRepository seedlotRepository;
   private final SeedlotStatusService seedlotStatusService;
-  private final SaveSeedlotProgressRepositoryClassA saveProgressRepository;
+  private final SaveSeedlotProgressRepository saveProgressRepository;
   private final SeedlotGeneticWorthRepository geneticWorthRepository;
   private final SeedlotSeedPlanZoneRepository seedPlanZoneRepository;
   private final SeedlotParentTreeRepository parentTreeRepository;
@@ -57,12 +57,17 @@ public class SeedlotCopyService {
   private final SeedlotCollectionMethodRepository collectionMethodRepository;
 
   /**
-   * Copies a source seedlot to a new auto-assigned number in the Class A copy band (62000–62998).
-   * All child entities (orchard, collection methods, parent trees, etc.) are
-   * deep-copied to the target's normalized tables. A form draft is created with {@code allStepData
-   * = {}}; the frontend detects the empty payload and fetches the full form data directly from the
-   * target's normalized tables via {@code getAClassSeedlotFullForm}. The target seedlot starts with
-   * a status of PND (Pending) because child data is already populated at copy time.
+   * Copies a source seedlot to a new auto-assigned number in the appropriate copy band:
+   * Class A → 62000–62998, Class B → 52000–52998.
+   *
+   * <p>Matches legacy {@code copy_seedlot}: copies genetic worth, seed plan zones, and (for Class
+   * A) orchards / parent trees / SMP mix. Ownership and collection geometry are intentionally
+   * not copied. Collection methods are also copied for both classes (modern normalized equivalent
+   * of legacy seedlot cone-method columns).
+   *
+   * <p>A form draft is created with {@code allStepData = {}}; the frontend detects the empty
+   * payload and hydrates from normalized tables via the class-specific full-form endpoint. The
+   * target starts with status PND (Pending) because child data is already populated at copy time.
    *
    * @param sourceSeedlotNumber the seedlot to copy from
    * @param userId the ID of the user performing the copy
@@ -78,9 +83,13 @@ public class SeedlotCopyService {
             .findById(sourceSeedlotNumber)
             .orElseThrow(SeedlotNotFoundException::new);
 
-    String targetNumber = resolveTargetNumber();
+    boolean isClassB = isBclassSeedlot(source);
+    String targetNumber = resolveTargetNumber(isClassB);
 
-    SparLog.info("Copy Seedlot: resolved target={}", targetNumber);
+    SparLog.info(
+        "Copy Seedlot: source class={}, resolved target={}",
+        isClassB ? "B" : "A",
+        targetNumber);
 
     SeedlotStatusEntity pendingStatus =
         seedlotStatusService
@@ -95,29 +104,42 @@ public class SeedlotCopyService {
 
     SparLog.info("Copy Seedlot: target {} saved, copying child entities", targetNumber);
 
-    copyChildEntities(sourceSeedlotNumber, savedTarget, userId);
+    copyChildEntities(sourceSeedlotNumber, savedTarget, userId, isClassB);
 
     SparLog.info("Copy Seedlot: child entities copied, creating draft for {}", targetNumber);
 
-    createAndSaveDraft(savedTarget, userId);
+    createAndSaveDraft(savedTarget, userId, isClassB);
 
     SparLog.info("Copy Seedlot complete: {}", targetNumber);
     return new SeedlotStatusResponseDto(targetNumber, Constants.PENDING_SEEDLOT_STATUS);
   }
 
-  /** Auto-assigns the next available number from the Class A copy band (62000–62998). */
-  private String resolveTargetNumber() {
-    Integer maxInCopyBand =
-        seedlotRepository.findNextSeedlotNumber(
-            Constants.CLASS_A_COPY_MIN, Constants.CLASS_A_COPY_MAX);
-    int next = (maxInCopyBand == null) ? Constants.CLASS_A_COPY_MIN : maxInCopyBand + 1;
-    if (next >= Constants.CLASS_A_COPY_MAX) {
+  private boolean isBclassSeedlot(Seedlot source) {
+    if (source.getGeneticClass() == null
+        || source.getGeneticClass().getGeneticClassCode() == null) {
       throw new SeedlotFormValidationException(
-          "Copy band exhausted: all numbers "
-              + Constants.CLASS_A_COPY_MIN
-              + "–"
-              + (Constants.CLASS_A_COPY_MAX - 1)
-              + " are in use.");
+          "Source seedlot " + source.getId() + " has no genetic class.");
+    }
+    String code = source.getGeneticClass().getGeneticClassCode();
+    if ("B".equals(code)) {
+      return true;
+    }
+    if ("A".equals(code)) {
+      return false;
+    }
+    throw new SeedlotFormValidationException(
+        "Copy is only supported for genetic class A or B (found: " + code + ").");
+  }
+
+  /** Auto-assigns the next available number from the class-specific copy band. */
+  private String resolveTargetNumber(boolean isClassB) {
+    int min = isClassB ? Constants.CLASS_B_COPY_MIN : Constants.CLASS_A_COPY_MIN;
+    int max = isClassB ? Constants.CLASS_B_COPY_MAX : Constants.CLASS_A_COPY_MAX;
+    Integer maxInCopyBand = seedlotRepository.findNextSeedlotNumber(min, max);
+    int next = (maxInCopyBand == null) ? min : maxInCopyBand + 1;
+    if (next >= max) {
+      throw new SeedlotFormValidationException(
+          "Copy band exhausted: all numbers " + min + "–" + (max - 1) + " are in use.");
     }
     return String.valueOf(next);
   }
@@ -159,12 +181,19 @@ public class SeedlotCopyService {
     target.setDeclarationOfTrueInformationTimestamp(null);
   }
 
-  private void copyChildEntities(String sourceNumber, Seedlot target, String userId) {
+  private void copyChildEntities(
+      String sourceNumber, Seedlot target, String userId, boolean isClassB) {
     AuditInformation audit = new AuditInformation(userId);
     copyGeneticWorth(sourceNumber, target, audit);
     copySeedPlanZones(sourceNumber, target, audit);
-    copyOrchards(sourceNumber, target, audit);
     copyCollectionMethods(sourceNumber, target, audit);
+
+    // Legacy copy_seedlot deliberately does not copy owners or collection geometry.
+    if (isClassB) {
+      return;
+    }
+
+    copyOrchards(sourceNumber, target, audit);
     Map<Integer, SeedlotParentTree> ptMap = copyParentTrees(sourceNumber, target, audit);
     copyParentTreeGeneticQuality(sourceNumber, ptMap, audit);
     copyParentTreeSmpMix(sourceNumber, ptMap, audit);
@@ -329,25 +358,29 @@ public class SeedlotCopyService {
   }
 
   /**
-   * Creates a minimal draft entry in {@code seedlot_registration_a_class_save} with
-   * {@code allStepData = {}} (an empty map). The frontend detects the empty payload and calls
-   * {@code getAClassSeedlotFullForm} to hydrate the registration form directly from the target's
-   * normalized tables.
+   * Creates a minimal draft with {@code allStepData = {}} so the frontend can hydrate from
+   * normalized tables via the class-specific full-form endpoint.
    */
-  private void createAndSaveDraft(Seedlot target, String userId) {
+  private void createAndSaveDraft(Seedlot target, String userId, boolean isClassB) {
     Map<String, Object> stepStatus =
         Map.of("isComplete", false, "isCurrent", false, "isInvalid", false);
     Map<String, Object> progressStatus =
-        Map.of(
-            "collection", stepStatus,
-            "ownership", stepStatus,
-            "interim", stepStatus,
-            "orchard", stepStatus,
-            "parent", stepStatus,
-            "extraction", stepStatus);
+        isClassB
+            ? Map.of(
+                "collection", stepStatus,
+                "ownership", stepStatus,
+                "interim", stepStatus,
+                "extraction", stepStatus)
+            : Map.of(
+                "collection", stepStatus,
+                "ownership", stepStatus,
+                "interim", stepStatus,
+                "orchard", stepStatus,
+                "parent", stepStatus,
+                "extraction", stepStatus);
 
-    SaveSeedlotProgressEntityClassA draft =
-        new SaveSeedlotProgressEntityClassA(
+    SaveSeedlotProgressEntity draft =
+        new SaveSeedlotProgressEntity(
             target, Map.of(), progressStatus, new AuditInformation(userId));
 
     saveProgressRepository.save(draft);

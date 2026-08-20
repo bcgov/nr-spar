@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.dto;
 
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -30,4 +31,11 @@ public class SeedlotDto {
 
   @Schema(description = "Seedlot genetic worth stored values in the database")
   private List<GeneticWorthTraitsDto> calculatedValues;
+
+  @Schema(
+      description =
+          "Class B enrichments (AOU SPZ slots, role flags, collection geometry). Present only"
+              + " for Class B seedlots.")
+  @JsonProperty("bClassDetail")
+  private SeedlotBclassDetailDto bclassDetail;
 }
