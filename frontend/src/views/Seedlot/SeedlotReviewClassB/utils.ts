@@ -67,25 +67,38 @@ export const buildBClassReviewPayload = (
   const seedlot = richSeedlotData?.seedlot;
   const collectionDto = payload.seedlotFormCollectionDto;
 
+  // When a loaded seedlot is present, copy AOU and B+ provenance fields
+  // verbatim (including null) so review saves do not invent AOU bounds or
+  // downgrade superior-provenance seedlots.
+  const preservedCollectionFields = seedlot
+    ? {
+      areaOfUseComment: seedlot.areaOfUseComment ?? null,
+      elevationMin: seedlot.elevationMin,
+      elevationMax: seedlot.elevationMax,
+      latitudeDegMin: seedlot.latitudeDegMin,
+      latitudeMinMin: seedlot.latitudeMinMin,
+      latitudeSecMin: seedlot.latitudeSecMin,
+      latitudeDegMax: seedlot.latitudeDegMax,
+      latitudeMinMax: seedlot.latitudeMinMax,
+      latitudeSecMax: seedlot.latitudeSecMax,
+      longitudeDegMin: seedlot.longitudeDegMin,
+      longitudeMinMin: seedlot.longitudeMinMin,
+      longitudeSecMin: seedlot.longitudeSecMin,
+      longitudeDegMax: seedlot.longitudeDegMax,
+      longitudeMinMax: seedlot.longitudeMinMax,
+      longitudeSecMax: seedlot.longitudeSecMax,
+      superiorProvenanceInd: seedlot.superiorProvenanceInd ?? collectionDto.superiorProvenanceInd,
+      provenanceId: seedlot.provenanceId
+        ?? richSeedlotData?.bClassDetail?.provenanceId
+        ?? null
+    }
+    : {};
+
   return {
     ...payload,
     seedlotFormCollectionDto: {
       ...collectionDto,
-      areaOfUseComment: seedlot?.areaOfUseComment ?? null,
-      elevationMin: seedlot?.elevationMin ?? collectionDto.elevationMin,
-      elevationMax: seedlot?.elevationMax ?? collectionDto.elevationMax,
-      latitudeDegMin: seedlot?.latitudeDegMin ?? collectionDto.latitudeDegMin,
-      latitudeMinMin: seedlot?.latitudeMinMin ?? collectionDto.latitudeMinMin,
-      latitudeSecMin: seedlot?.latitudeSecMin ?? collectionDto.latitudeSecMin,
-      latitudeDegMax: seedlot?.latitudeDegMax ?? collectionDto.latitudeDegMax,
-      latitudeMinMax: seedlot?.latitudeMinMax ?? collectionDto.latitudeMinMax,
-      latitudeSecMax: seedlot?.latitudeSecMax ?? collectionDto.latitudeSecMax,
-      longitudeDegMin: seedlot?.longitudeDegMin ?? collectionDto.longitudeDegMin,
-      longitudeMinMin: seedlot?.longitudeMinMin ?? collectionDto.longitudeMinMin,
-      longitudeSecMin: seedlot?.longitudeSecMin ?? collectionDto.longitudeSecMin,
-      longitudeDegMax: seedlot?.longitudeDegMax ?? collectionDto.longitudeDegMax,
-      longitudeMinMax: seedlot?.longitudeMinMax ?? collectionDto.longitudeMinMax,
-      longitudeSecMax: seedlot?.longitudeSecMax ?? collectionDto.longitudeSecMax
+      ...preservedCollectionFields
     },
     aouSpzList: richSeedlotData?.bClassDetail?.aouSpzList ?? [],
     geneticWorthTraits: (richSeedlotData?.calculatedValues ?? []).map((trait) => ({

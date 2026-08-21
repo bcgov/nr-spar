@@ -60,6 +60,58 @@ describe('SeedlotReviewClassB utils test', () => {
       expect(collectionDto.longitudeSecMax).toBe(5);
     });
 
+    it('should preserve null area of use values instead of falling back to collection', () => {
+      const seedlotWithNullAou = {
+        ...richSeedlot,
+        seedlot: {
+          ...richSeedlot.seedlot,
+          elevationMin: null,
+          elevationMax: null,
+          latitudeDegMin: null,
+          latitudeMinMin: null,
+          latitudeSecMin: null,
+          latitudeDegMax: null,
+          latitudeMinMax: null,
+          latitudeSecMax: null,
+          longitudeDegMin: null,
+          longitudeMinMin: null,
+          longitudeSecMin: null,
+          longitudeDegMax: null,
+          longitudeMinMax: null,
+          longitudeSecMax: null
+        }
+      } as unknown as RichSeedlotType;
+
+      const collectionDto = buildBClassReviewPayload(
+        initEmptySteps(),
+        seedlotWithNullAou
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.elevationMin).toBeNull();
+      expect(collectionDto.elevationMax).toBeNull();
+      expect(collectionDto.latitudeDegMin).toBeNull();
+      expect(collectionDto.longitudeDegMax).toBeNull();
+    });
+
+    it('should preserve superior provenance fields from the seedlot', () => {
+      const superiorSeedlot = {
+        ...richSeedlot,
+        seedlot: {
+          ...richSeedlot.seedlot,
+          superiorProvenanceInd: 'Y',
+          provenanceId: 42
+        }
+      } as unknown as RichSeedlotType;
+
+      const collectionDto = buildBClassReviewPayload(
+        initEmptySteps(),
+        superiorSeedlot
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.superiorProvenanceInd).toBe('Y');
+      expect(collectionDto.provenanceId).toBe(42);
+    });
+
     it('should preserve genetic worth values from the seedlot', () => {
       const payload = buildBClassReviewPayload(initEmptySteps(), richSeedlot);
 

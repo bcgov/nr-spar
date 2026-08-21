@@ -6,6 +6,7 @@ import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import { SingleOwnerForm } from '../../../SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { getOwnerAgencyTitle } from '../../../SeedlotRegistrationSteps/OwnershipStep/utils';
+import { inputText } from '../../../SeedlotRegistrationSteps/OwnershipStep/constants';
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { ForestClientType } from '../../../../types/ForestClientTypes/ForestClientType';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
@@ -14,12 +15,16 @@ type OwnershipReviewReadProps = {
   owners: SingleOwnerForm[];
   isFetchingData: boolean;
   idPrefix?: string;
+  fundingSourcesFailed?: boolean;
+  methodsOfPaymentFailed?: boolean;
 };
 
 const OwnershipReviewRead = ({
   owners,
   isFetchingData,
-  idPrefix = 'owner'
+  idPrefix = 'owner',
+  fundingSourcesFailed = false,
+  methodsOfPaymentFailed = false
 }: OwnershipReviewReadProps) => {
   const qc = useQueryClient();
 
@@ -98,7 +103,11 @@ const OwnershipReviewRead = ({
                 <ReadOnlyInput
                   id={`${idPrefix}-${curOwner.id}-funding-source`}
                   label="Funding source"
-                  value={curOwner.fundingSource.value.label}
+                  value={
+                    fundingSourcesFailed
+                      ? inputText.funding.fetchError
+                      : curOwner.fundingSource.value.label
+                  }
                   showSkeleton={isFetchingData}
                 />
               </Column>
@@ -106,7 +115,11 @@ const OwnershipReviewRead = ({
                 <ReadOnlyInput
                   id={`${idPrefix}-${curOwner.id}-payment`}
                   label="Method of payment"
-                  value={curOwner.methodOfPayment.value.label}
+                  value={
+                    methodsOfPaymentFailed
+                      ? inputText.payment.fetchError
+                      : curOwner.methodOfPayment.value.label
+                  }
                   showSkeleton={isFetchingData}
                 />
               </Column>

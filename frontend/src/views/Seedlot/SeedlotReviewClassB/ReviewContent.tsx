@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {
+  useContext, useEffect, useRef, useState
+} from 'react';
 import { useNavigate, useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -47,7 +49,8 @@ import { buildBClassReviewPayload, validateBClassReviewForm } from './utils';
 
 type SaveMutationVars = {
   payload: SeedlotBClassSubmitType,
-  statusAfterSave: SeedlotStatusCode | null
+  statusAfterSave: SeedlotStatusCode | null,
+  proceedNavigation?: boolean
 };
 
 type ReadOrEditProps = {
@@ -173,6 +176,8 @@ const ReviewContent = () => {
   const [isSaveStatusModalOpen, setIsSaveStatusModalOpen] = useState(false);
   const [statusToUpdateTo, setStatusToUpdateTo] = useState<SeedlotStatusCode>('PND');
 
+  const blockerRef = useRef<ReturnType<typeof useBlocker> | null>(null);
+
   const statusCode = seedlotData?.seedlotStatus.seedlotStatusCode;
   const isApproved = statusCode === 'APP';
   const showTscActions = isTscAdmin && statusCode === 'SUB';
@@ -217,7 +222,7 @@ const ReviewContent = () => {
     mutationFn: (
       { payload }: SaveMutationVars
     ) => putBClassSeedlot(seedlotNumber ?? '', payload),
-    onError: (err: AxiosError) => {
+    onError: (err: AxiosError, variables) => {
       toast.error(
         <ErrorToast
           title="Edit seedlot failed"
@@ -225,19 +230,38 @@ const ReviewContent = () => {
         />,
         ErrToastOption
       );
+      if (variables.proceedNavigation) {
+        blockerRef.current?.reset?.();
+      }
     },
     onSuccess: async (_data, variables) => {
+      setIsReadMode(true);
       if (variables.statusAfterSave) {
+        // Clear any blocked transition so the status redirect can run
+        if (variables.proceedNavigation) {
+          blockerRef.current?.reset?.();
+        }
         statusOnlyMutation.mutate(variables.statusAfterSave);
         return;
       }
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlot-b-class-full-form', seedlotNumber] });
-      setIsReadMode(true);
+      if (variables.proceedNavigation) {
+        blockerRef.current?.proceed?.();
+      }
     }
   });
 
   const isSaving = saveEditMutation.isPending || statusOnlyMutation.isPending;
+
+  const blocker = useBlocker(!isReadMode && !isSaving);
+  blockerRef.current = blocker;
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setIsCancelModalOpen(true);
+    }
+  }, [blocker.state]);
 
   const verifyFormData = (): boolean => {
     const isValid = validateBClassReviewForm(allStepData, becCatalogueQuery.data);
@@ -259,14 +283,18 @@ const ReviewContent = () => {
    * endpoint sets the status back to submitted, so an approved seedlot
    * that is edited needs to be set back to approved.
    */
-  const saveEdits = (statusAfterSave: SeedlotStatusCode | null = null) => {
+  const saveEdits = (
+    statusAfterSave: SeedlotStatusCode | null = null,
+    proceedNavigation = false
+  ) => {
     if (!verifyFormData()) {
       return;
     }
     const payload = buildBClassReviewPayload(allStepData, richSeedlotData);
     saveEditMutation.mutate({
       payload,
-      statusAfterSave: statusAfterSave ?? (isApproved ? 'APP' : null)
+      statusAfterSave: statusAfterSave ?? (isApproved ? 'APP' : null),
+      proceedNavigation
     });
   };
 
@@ -302,6 +330,9 @@ const ReviewContent = () => {
 
   const closeCancelModal = () => {
     setIsCancelModalOpen(false);
+    if (blocker.state === 'blocked') {
+      blocker.reset();
+    }
   };
 
   const closeSaveStatusModal = () => {
@@ -317,34 +348,29 @@ const ReviewContent = () => {
    * Discard changes without saving.
    */
   const discardChanges = () => {
+    const shouldProceed = blocker.state === 'blocked';
     setIsReadMode(true);
     queryClient.refetchQueries({ queryKey: ['seedlots', seedlotNumber] });
     queryClient.refetchQueries({ queryKey: ['seedlot-b-class-full-form', seedlotNumber] });
-    closeCancelModal();
+    setIsCancelModalOpen(false);
+    if (shouldProceed) {
+      blocker.proceed();
+    }
   };
 
   const handleModalSaveChanges = () => {
-    closeCancelModal();
-    handleEditSaveBtn();
+    if (!verifyFormData()) {
+      return;
+    }
+    const proceedNavigation = blocker.state === 'blocked';
+    setIsCancelModalOpen(false);
+    saveEdits(null, proceedNavigation);
   };
 
   const handleConfirmStatus = (status: SeedlotStatusCode) => {
     closeSaveStatusModal();
     handleSaveAndStatus(status);
   };
-
-  /**
-   * Custom blocker function to prevent navigation with unsaved changes.
-   */
-  const blockerFunction = () => {
-    if (!isReadMode && !isSaving) {
-      setIsCancelModalOpen(true);
-      return true;
-    }
-    return false;
-  };
-
-  useBlocker(blockerFunction);
 
   return (
     <FlexGrid className="seedlot-review-grid">
@@ -394,7 +420,7 @@ const ReviewContent = () => {
                 hideCloseButton
                 kind="success"
                 title="Seedlot approved:"
-                subtitle="This seedlot have been reviewed and approved"
+                subtitle="This seedlot has been reviewed and approved"
               />
             </Row>
           )
@@ -445,6 +471,8 @@ const ReviewContent = () => {
                 owners={allStepData.ownershipStep}
                 isFetchingData={isFetchingData}
                 idPrefix="b-review-owner"
+                fundingSourcesFailed={fundingSourcesQuery.isError}
+                methodsOfPaymentFailed={methodsOfPaymentQuery.isError}
               />
             )}
             edit={(

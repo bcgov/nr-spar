@@ -261,7 +261,7 @@ const SeedlotDetails = () => {
                         lowContrast
                         kind="success"
                         title="Seedlot approved:"
-                        subtitle="This seedlot have been reviewed and approved"
+                        subtitle="This seedlot has been reviewed and approved"
                       />
                     )
                     : null

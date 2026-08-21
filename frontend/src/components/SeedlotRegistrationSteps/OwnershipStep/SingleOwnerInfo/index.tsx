@@ -232,14 +232,22 @@ const SingleOwnerInfo = ({
                     titleText={inputText.funding.titleText}
                     direction="top"
                     onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
-                    invalid={ownerInfo.fundingSource.isInvalid || fundingSourcesQuery.isError}
+                    invalid={
+                      fundingSourcesQuery.isError
+                        ? !readOnly
+                        : ownerInfo.fundingSource.isInvalid
+                    }
                     invalidText={
                       fundingSourcesQuery.isError
                         ? inputText.funding.fetchError
                         : inputText.funding.invalidText
                     }
+                    helperText={
+                      fundingSourcesQuery.isError && readOnly
+                        ? inputText.funding.fetchError
+                        : undefined
+                    }
                     readOnly={readOnly}
-                    disabled={fundingSourcesQuery.isError}
                   />
                 )
             }
@@ -262,14 +270,22 @@ const SingleOwnerInfo = ({
                     titleText={inputText.payment.titleText}
                     direction="top"
                     onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
-                    invalid={ownerInfo.methodOfPayment.isInvalid || methodsOfPaymentQuery.isError}
+                    invalid={
+                      methodsOfPaymentQuery.isError
+                        ? !readOnly
+                        : ownerInfo.methodOfPayment.isInvalid
+                    }
                     invalidText={
                       methodsOfPaymentQuery.isError
                         ? inputText.payment.fetchError
                         : inputText.payment.invalidText
                     }
+                    helperText={
+                      methodsOfPaymentQuery.isError && readOnly
+                        ? inputText.payment.fetchError
+                        : undefined
+                    }
                     readOnly={readOnly}
-                    disabled={methodsOfPaymentQuery.isError}
                   />
                 )
             }

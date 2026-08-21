@@ -11,7 +11,7 @@ import DetailSection from '../../../../components/DetailSection';
 import { SeedlotApplicantType } from '../../../../types/SeedlotType';
 import { addParamToPath } from '../../../../utils/PathUtils';
 import EmailDisplay from '../../../../components/EmailDisplay';
-import { formatYesNo } from '../sections/bClass/utils';
+import { formatYesNo } from '../utils';
 
 import './styles.scss';
 
