@@ -635,7 +635,12 @@ const SeedlotReviewContent = () => {
         <Column>
           {
             isReadMode
-              ? <OwnershipReviewRead />
+              ? (
+                <OwnershipReviewRead
+                  owners={allStepData.ownershipStep}
+                  isFetchingData={isFetchingData}
+                />
+              )
               : (
                 <OwnershipReviewEdit />
               )

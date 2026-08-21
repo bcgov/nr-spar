@@ -172,6 +172,8 @@ export type SeedlotType = {
   seedPlanZoneCode: string | null,
   seedCoastAreaCode: string | null,
   numberTreesFromCode: string | null,
+  becOverrideInd: string | null,
+  becOverrideComment: string | null,
 }
 
 export type SeedlotCollectionGeometryType = {
@@ -260,7 +262,7 @@ export type BClassCollectionFormSubmitType = {
   becOverrideComment: string | null,
   numberTreesFromCode: string,
   isLotSplitInd: string,
-  superiorProvenanceInd: string,
+  superiorProvenanceInd: string | null,
   provenanceId: number | null,
   collectionLatitudeDeg: number,
   collectionLatitudeMin: number,
