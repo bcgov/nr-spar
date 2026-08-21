@@ -24,6 +24,66 @@ import { inputText, DEFAULT_INDEX, agencyFieldsProps } from '../constants';
 
 import './styles.scss';
 
+type LookupComboBoxProps = {
+  id: string,
+  name: string,
+  itemsQuery: UseQueryResult<MultiOptionsObj[], unknown>,
+  selectedItem: MultiOptionsObj,
+  placeholder: string,
+  titleText: string,
+  fetchError: string,
+  invalidText: string,
+  isInvalid: boolean,
+  readOnly?: boolean,
+  onChange: (selectedOption: MultiOptionsObj) => void
+};
+
+/**
+ * Funding / payment ComboBox with loading and fetch-error states.
+ * Extracted so SingleOwnerInfo stays under Sonar cognitive-complexity limits.
+ */
+const OwnershipLookupComboBox = ({
+  id,
+  name,
+  itemsQuery,
+  selectedItem,
+  placeholder,
+  titleText,
+  fetchError,
+  invalidText,
+  isInvalid,
+  readOnly,
+  onChange
+}: LookupComboBoxProps) => {
+  if (itemsQuery.isFetching) {
+    return <DropdownSkeleton />;
+  }
+
+  const lookupFailed = itemsQuery.isError;
+
+  return (
+    <ComboBox
+      className="single-owner-combobox"
+      id={id}
+      name={name}
+      items={itemsQuery.data ?? []}
+      selectedItem={selectedItem}
+      shouldFilterItem={
+        ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+      }
+      placeholder={placeholder}
+      titleText={titleText}
+      direction="top"
+      onChange={(e: ComboBoxEvent) => onChange(e.selectedItem)}
+      // Carbon hides invalidText when readOnly; use helperText instead
+      invalid={lookupFailed ? !readOnly : isInvalid}
+      invalidText={lookupFailed ? fetchError : invalidText}
+      helperText={lookupFailed && readOnly ? fetchError : undefined}
+      readOnly={readOnly}
+    />
+  );
+};
+
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
   deleteAnOwner: Function,
@@ -215,80 +275,34 @@ const SingleOwnerInfo = ({
         </Row>
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
-            {
-              fundingSourcesQuery.isFetching
-                ? <DropdownSkeleton />
-                : (
-                  <ComboBox
-                    className="single-owner-combobox"
-                    id={ownerInfo.fundingSource.id}
-                    name="fundingSource"
-                    items={fundingSourcesQuery.data ?? []}
-                    selectedItem={ownerInfo.fundingSource.value}
-                    shouldFilterItem={
-                      ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-                    }
-                    placeholder={inputText.funding.placeholder}
-                    titleText={inputText.funding.titleText}
-                    direction="top"
-                    onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
-                    invalid={
-                      fundingSourcesQuery.isError
-                        ? !readOnly
-                        : ownerInfo.fundingSource.isInvalid
-                    }
-                    invalidText={
-                      fundingSourcesQuery.isError
-                        ? inputText.funding.fetchError
-                        : inputText.funding.invalidText
-                    }
-                    helperText={
-                      fundingSourcesQuery.isError && readOnly
-                        ? inputText.funding.fetchError
-                        : undefined
-                    }
-                    readOnly={readOnly}
-                  />
-                )
-            }
+            <OwnershipLookupComboBox
+              id={ownerInfo.fundingSource.id}
+              name="fundingSource"
+              itemsQuery={fundingSourcesQuery}
+              selectedItem={ownerInfo.fundingSource.value}
+              placeholder={inputText.funding.placeholder}
+              titleText={inputText.funding.titleText}
+              fetchError={inputText.funding.fetchError}
+              invalidText={inputText.funding.invalidText}
+              isInvalid={ownerInfo.fundingSource.isInvalid}
+              readOnly={readOnly}
+              onChange={handleFundingSource}
+            />
           </Column>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
-            {
-              methodsOfPaymentQuery.isFetching
-                ? <DropdownSkeleton />
-                : (
-                  <ComboBox
-                    className="single-owner-combobox"
-                    id={ownerInfo.methodOfPayment.id}
-                    name="methodOfPayment"
-                    items={methodsOfPaymentQuery.data ?? []}
-                    selectedItem={ownerInfo.methodOfPayment.value}
-                    shouldFilterItem={
-                      ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-                    }
-                    placeholder={inputText.payment.placeholder}
-                    titleText={inputText.payment.titleText}
-                    direction="top"
-                    onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
-                    invalid={
-                      methodsOfPaymentQuery.isError
-                        ? !readOnly
-                        : ownerInfo.methodOfPayment.isInvalid
-                    }
-                    invalidText={
-                      methodsOfPaymentQuery.isError
-                        ? inputText.payment.fetchError
-                        : inputText.payment.invalidText
-                    }
-                    helperText={
-                      methodsOfPaymentQuery.isError && readOnly
-                        ? inputText.payment.fetchError
-                        : undefined
-                    }
-                    readOnly={readOnly}
-                  />
-                )
-            }
+            <OwnershipLookupComboBox
+              id={ownerInfo.methodOfPayment.id}
+              name="methodOfPayment"
+              itemsQuery={methodsOfPaymentQuery}
+              selectedItem={ownerInfo.methodOfPayment.value}
+              placeholder={inputText.payment.placeholder}
+              titleText={inputText.payment.titleText}
+              fetchError={inputText.payment.fetchError}
+              invalidText={inputText.payment.invalidText}
+              isInvalid={ownerInfo.methodOfPayment.isInvalid}
+              readOnly={readOnly}
+              onChange={handleMethodOfPayment}
+            />
           </Column>
         </Row>
         {((!readOnly) || (readOnly && isReview)) && (

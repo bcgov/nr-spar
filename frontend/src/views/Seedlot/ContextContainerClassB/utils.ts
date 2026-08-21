@@ -245,12 +245,15 @@ export const convertBClassCollection = (
     collectionSeedPlanZoneInd: 'Y',
     seedCoastAreaCode: seedlot?.seedCoastAreaCode ?? null,
     collectionBgcValidatedInd: 'Y',
-    becOverrideInd: 'N',
-    becOverrideComment: null,
+    becOverrideInd: collectionData.sameBecUnit.value ? 'N' : 'Y',
+    becOverrideComment: collectionData.sameBecUnit.value
+      ? null
+      : (seedlot?.becOverrideComment ?? null),
     numberTreesFromCode: collectionData.numberTreesFrom.value.code,
     isLotSplitInd: 'N',
-    superiorProvenanceInd: 'N',
-    provenanceId: null,
+    // Preserve loaded values when re-saving; default for brand-new drafts
+    superiorProvenanceInd: seedlot ? seedlot.superiorProvenanceInd : 'N',
+    provenanceId: seedlot?.provenanceId ?? null,
     collectionLatitudeDeg: latDeg,
     collectionLatitudeMin: latMin,
     collectionLatitudeSec: latSec,
@@ -287,7 +290,7 @@ export const convertBClassCollection = (
     bgcZoneDescription: collectionData.becZone.value.description,
     bgcSubzoneCode: collectionData.becSubzone.value.code,
     variant: collectionData.becVariant.value.code || null,
-    becVersionId: null,
+    becVersionId: seedlot?.becVersionId ?? null,
     collectionGeometryGeoJson: null
   };
 };

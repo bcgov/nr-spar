@@ -191,9 +191,11 @@ const SeedlotDetails = () => {
   };
 
   const handlePrimaryAction = () => {
-    // B-class view-only and TSC-admin submitted seedlots use the review screen
-    const useReviewRoute = (isBClass && viewOnlySeedlot)
-      || (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted');
+    // Applicants use registration (view/edit); TSC admins use the review screen
+    const useReviewRoute = isTscAdmin && (
+      (isBClass && viewOnlySeedlot)
+      || seedlotData?.seedlotStatus === 'Submitted'
+    );
     const route = useReviewRoute
       ? getReviewRoute(seedlot)
       : getRegistrationRoute(seedlot);

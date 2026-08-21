@@ -112,6 +112,47 @@ describe('SeedlotReviewClassB utils test', () => {
       expect(collectionDto.provenanceId).toBe(42);
     });
 
+    it('should preserve null superior provenance indicator', () => {
+      const seedlotWithNullProvenance = {
+        ...richSeedlot,
+        seedlot: {
+          ...richSeedlot.seedlot,
+          superiorProvenanceInd: null,
+          provenanceId: null
+        }
+      } as unknown as RichSeedlotType;
+
+      const collectionDto = buildBClassReviewPayload(
+        initEmptySteps(),
+        seedlotWithNullProvenance
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.superiorProvenanceInd).toBeNull();
+    });
+
+    it('should preserve bec version and map sameBecUnit to override fields', () => {
+      const steps = initEmptySteps();
+      steps.collectionStep.sameBecUnit.value = false;
+
+      const seedlotWithBec = {
+        ...richSeedlot,
+        seedlot: {
+          ...richSeedlot.seedlot,
+          becVersionId: 7,
+          becOverrideComment: 'Mapped from adjacent unit'
+        }
+      } as unknown as RichSeedlotType;
+
+      const collectionDto = buildBClassReviewPayload(
+        steps,
+        seedlotWithBec
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.becVersionId).toBe(7);
+      expect(collectionDto.becOverrideInd).toBe('Y');
+      expect(collectionDto.becOverrideComment).toBe('Mapped from adjacent unit');
+    });
+
     it('should preserve genetic worth values from the seedlot', () => {
       const payload = buildBClassReviewPayload(initEmptySteps(), richSeedlot);
 

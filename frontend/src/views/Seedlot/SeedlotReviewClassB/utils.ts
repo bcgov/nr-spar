@@ -67,9 +67,9 @@ export const buildBClassReviewPayload = (
   const seedlot = richSeedlotData?.seedlot;
   const collectionDto = payload.seedlotFormCollectionDto;
 
-  // When a loaded seedlot is present, copy AOU and B+ provenance fields
+  // When a loaded seedlot is present, copy AOU and provenance fields
   // verbatim (including null) so review saves do not invent AOU bounds or
-  // downgrade superior-provenance seedlots.
+  // downgrade / normalize stored null indicators.
   const preservedCollectionFields = seedlot
     ? {
       areaOfUseComment: seedlot.areaOfUseComment ?? null,
@@ -87,10 +87,16 @@ export const buildBClassReviewPayload = (
       longitudeDegMax: seedlot.longitudeDegMax,
       longitudeMinMax: seedlot.longitudeMinMax,
       longitudeSecMax: seedlot.longitudeSecMax,
-      superiorProvenanceInd: seedlot.superiorProvenanceInd ?? collectionDto.superiorProvenanceInd,
+      superiorProvenanceInd: seedlot.superiorProvenanceInd,
       provenanceId: seedlot.provenanceId
         ?? richSeedlotData?.bClassDetail?.provenanceId
-        ?? null
+        ?? null,
+      becVersionId: seedlot.becVersionId,
+      // Form checkbox drives override; keep existing comment when override is Y
+      becOverrideInd: allStepData.collectionStep.sameBecUnit.value ? 'N' : 'Y',
+      becOverrideComment: allStepData.collectionStep.sameBecUnit.value
+        ? null
+        : (seedlot.becOverrideComment ?? null)
     }
     : {};
 
