@@ -43,7 +43,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
 
   it('Page title and subtitles', () => {
     cy.get('.parent-tree-step-table-container')
-      .find('h4')
+      .find('h2')
       .should('have.text', regFormData.parentTree.smpSuccessTitle);
 
     cy.get('.parent-tree-step-table-container')
@@ -250,7 +250,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
           .click();
 
         cy.get('.parent-tree-step-table-container')
-          .find('h4')
+          .find('h2')
           .as('closeShowHideDropdown')
           .click();
       }
