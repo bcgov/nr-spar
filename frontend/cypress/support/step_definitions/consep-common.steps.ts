@@ -46,6 +46,17 @@ const getCommentPlaceholder = (page: string): string => {
   }
 };
 
+const getInvalidDateMsg = (page: string): string => {
+  switch (page) {
+    case 'moisture content':
+      return moistureData.mc.invalidDateErrorMsg;
+    case 'purity content':
+      return purityData.pc.invalidDateErrorMsg;
+    default:
+      return '';
+  }
+};
+
 Then('the activity results table has loaded', () => {
   cy.waitForTableData('.activity-result-container');
 });
@@ -119,7 +130,7 @@ When('I set the {string} start date to {string}, expect a date validation error'
     .then(() => {
       cy.contains(
         `.${prefix}--form-requirement`,
-        moistureData.mc.invalidDateErrorMsg
+        getInvalidDateMsg(page)
       ).should('be.visible');
     });
 });
