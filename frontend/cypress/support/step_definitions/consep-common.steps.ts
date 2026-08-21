@@ -42,7 +42,7 @@ const getCommentPlaceholder = (page: string): string => {
     case 'purity content':
       return purityData.pc.commentPlaceholder;
     default:
-      return '';
+      throw new Error(`Unsupported testing page: ${page}`);
   }
 };
 
@@ -53,7 +53,7 @@ const getInvalidDateMsg = (page: string): string => {
     case 'purity content':
       return purityData.pc.invalidDateErrorMsg;
     default:
-      return '';
+      throw new Error(`Unsupported testing page: ${page}`);
   }
 };
 
