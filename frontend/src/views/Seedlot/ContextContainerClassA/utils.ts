@@ -346,6 +346,15 @@ export const initParentTreeState = (
 
             if (Object.prototype.hasOwnProperty.call(newRow, genWorthName)) {
               newRow[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
+              // The weighted columns feed the SMP mix breeding value summary and the
+              // smpBv sent on recalculation; they are only computed on user input, so
+              // restore them here or the SMP contribution reads as zero after submit.
+              const weightedName = `w_${genWorthName}` as keyof StrTypeRowItem;
+              if (Object.prototype.hasOwnProperty.call(newRow, weightedName)) {
+                newRow[weightedName].value = (
+                  singleGenWorthObj.geneticQualityValue * curSmpMix.proportion
+                ).toFixed(3);
+              }
             }
           });
           smpMixRows = Object
