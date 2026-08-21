@@ -70,6 +70,19 @@ const PurityContent = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'accept'>(COMPLETE);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [dateErrors, setDateErrors] = useState<{ startDate?: string; endDate?: string }>({});
+
+  const validateDates = (startDate: Date | null, endDate: Date | null) => {
+    const errors: { startDate?: string; endDate?: string } = {};
+
+    if (startDate && endDate && startDate > endDate) {
+      errors.startDate = fieldsConfig.startDate.invalidText;
+      errors.endDate = fieldsConfig.endDate.invalidText;
+    }
+
+    setDateErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
@@ -332,6 +345,15 @@ const PurityContent = () => {
     }
     const base = latestRecordRef.current ?? activityRecord;
     const merged = { ...base, ...record };
+    if (record.actualBeginDateTime || record.actualEndDateTime) {
+      const startDate = merged.actualBeginDateTime ? new Date(merged.actualBeginDateTime) : null;
+      const endDate = merged.actualEndDateTime ? new Date(merged.actualEndDateTime) : null;
+
+      if (!validateDates(startDate, endDate)) {
+        return;
+      }
+    }
+
     setActivityRecord(merged);
     latestRecordRef.current = merged;
     if (inFlightRef.current) {
@@ -680,6 +702,7 @@ const PurityContent = () => {
               placeholder="yyyy/mm/dd"
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
+              invalid={!!dateErrors.startDate}
               value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
@@ -711,6 +734,7 @@ const PurityContent = () => {
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
+              invalid={!!dateErrors.endDate}
               value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
