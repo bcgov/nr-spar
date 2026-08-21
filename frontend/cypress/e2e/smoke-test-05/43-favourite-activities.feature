@@ -45,6 +45,13 @@ Feature: CONSEP favourite activities page
     When I delete favourite card "Actual germination count"
     Then I should not see favourite card "Actual germination count"
 
+  Scenario: Deleted favourite activity is not selected in the add modal
+    Given favourite activities include:
+      | Actual germination count |
+    When I delete favourite card "Actual germination count"
+    And I open the add favourite activity modal
+    Then favourite activity row "Actual germination count" should not be selected
+
   Scenario: Maximum 12 favourite activities is enforced
     When I open the add favourite activity modal
     And I select the first 12 favourite activities
