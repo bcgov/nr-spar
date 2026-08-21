@@ -13,7 +13,7 @@ import {
 } from '@carbon/icons-react';
 import { Beforeunload } from 'react-beforeunload';
 
-import { getSeedlotById, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
+import { getAClassSeedlotFullForm, getSeedlotById, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
@@ -334,8 +334,16 @@ const SeedlotReviewContent = () => {
       );
     },
     onSuccess: async (_data, variables) => {
+      // The full-form query is disabled once the form is hydrated, so invalidating
+      // it never refetches; fetch it imperatively BEFORE invalidating the seedlot
+      // query, because that invalidation re-runs the hydration effect in
+      // ContextContainerClassA, which would otherwise reset the form from the
+      // stale pre-save cache.
+      await queryClient.fetchQuery({
+        queryKey: ['seedlot-full-form', seedlotNumber],
+        queryFn: () => getAClassSeedlotFullForm(seedlotNumber ?? '')
+      });
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
-      await queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
       setIsReadMode(true);
       if (variables.statusOnSave !== 'SUB') {
         navigate(`/seedlots/details/${seedlotNumber}/?statusOnSave=${variables.statusOnSave}`);
