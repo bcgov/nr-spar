@@ -64,13 +64,26 @@ describe('GerminationContent optimistic-lock conflict', () => {
     window.removeEventListener('unhandledrejection', rejectionHandler);
   });
 
+  /**
+   * Arriving at an empty count-date column fills today's date; arriving again,
+   * now that it holds one, opens the calendar. Setting a specific date is
+   * therefore two arrivals.
+   */
+  const setCountDate = (slotIndex: number, value: string) => {
+    fireEvent.click(screen.getByTestId(`germ-date-trigger-${slotIndex}`));
+    if (!screen.queryByTestId(`germ-date-${slotIndex}`)) {
+      fireEvent.click(screen.getByTestId(`germ-date-trigger-${slotIndex}`));
+    }
+    fireEvent.change(screen.getByTestId(`germ-date-${slotIndex}`), { target: { value } });
+  };
+
   it('shows the conflict banner on 409 and stops further autosaves', async () => {
     const conflictError = Object.assign(new Error('Conflict'), { response: { status: 409 } });
     putMock.mockRejectedValue(conflictError);
     renderView();
 
     await screen.findByText(/Germination test result/i);
-    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '2024-11-04' } });
+    setCountDate(1, '2024-11-04');
     fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
 
     await waitFor(
@@ -107,9 +120,9 @@ describe('GerminationContent optimistic-lock conflict', () => {
     renderView();
 
     await screen.findByText(/Germination test result/i);
-    expect(screen.getByTestId('germ-date-1')).not.toBeDisabled();
+    expect(screen.getByTestId('germ-date-trigger-1')).not.toBeDisabled();
 
-    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '2024-11-04' } });
+    setCountDate(1, '2024-11-04');
     fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
 
     await waitFor(
@@ -120,7 +133,7 @@ describe('GerminationContent optimistic-lock conflict', () => {
     fireEvent.click(screen.getByText('Reload'));
 
     // The refetched header (testCompleteInd:1) must reapply and disable inputs.
-    await waitFor(() => expect(screen.getByTestId('germ-date-1')).toBeDisabled());
+    await waitFor(() => expect(screen.getByTestId('germ-date-trigger-1')).toBeDisabled());
     // Header endpoint hit at least twice: initial mount + conflict reload.
     expect(headerMock.mock.calls.length).toBeGreaterThanOrEqual(2);
   }, 15000);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import DailyGermTable from '../../../views/CONSEP/TestingActivities/GerminationContent/DailyGermTable';
+import { DateTime } from 'luxon';
 import { GermCountSlotType, GermReplicateType } from '../../../types/consep/GerminationType';
 
 const emptySlots = (): GermCountSlotType[] => Array.from(
@@ -27,19 +28,117 @@ const renderTable = (over: Partial<React.ComponentProps<typeof DailyGermTable>> 
   return props;
 };
 
+/**
+ * Opens the calendar for a column that ALREADY holds a date — arriving at an
+ * empty one fills today instead. These are controlled-component tests, so a
+ * date filled by the first arrival never comes back as a prop; seed one.
+ */
+const openDatePicker = (slotIndex: number) => {
+  fireEvent.click(screen.getByTestId(`germ-date-trigger-${slotIndex}`));
+  return screen.getByTestId(`germ-date-${slotIndex}`);
+};
+
 describe('DailyGermTable', () => {
   it('renders 13 date columns and 4 replicate rows', () => {
     renderTable();
-    expect(screen.getAllByTestId(/^germ-date-/)).toHaveLength(13);
+    expect(screen.getAllByTestId(/^germ-date-trigger-/)).toHaveLength(13);
     expect(screen.getAllByTestId(/^germ-seeds-/)).toHaveLength(4);
   });
 
-  it('emits the day number when a count date is entered (AC1)', () => {
+  it('shows the count date over two lines and only opens a picker on demand', () => {
+    const slots = emptySlots();
+    slots[0] = { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 };
+    renderTable({ slots });
+    expect(screen.getByTestId('germ-date-trigger-1')).toHaveTextContent('2024-11-04');
+    expect(screen.queryByTestId('germ-date-1')).not.toBeInTheDocument();
+    openDatePicker(1);
+    expect(screen.getByTestId('germ-date-1')).toBeInTheDocument();
+  });
+
+  it('shows the calendar with the modal, without a second click', () => {
+    const slots = emptySlots();
+    slots[0] = { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 };
+    renderTable({ slots });
+    fireEvent.click(screen.getByTestId('germ-date-trigger-1'));
+    expect(document.querySelector('.flatpickr-calendar.inline')).toBeInTheDocument();
+  });
+
+  // Arriving at an empty column is the common case — recording a count today —
+  // so it fills today's date outright instead of asking for the calendar.
+  it('fills today on arrival at an empty column, without opening the calendar', () => {
+    const props = renderTable({ germinatorEntry: undefined });
+    fireEvent.click(screen.getByTestId('germ-date-trigger-1'));
+    const today = DateTime.now().toFormat('yyyy-MM-dd');
+    expect(props.onSlotsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ slotIndex: 1, countDt: today })
+      ])
+    );
+    expect(screen.queryByTestId('germ-date-1')).not.toBeInTheDocument();
+    expect(document.querySelector('.flatpickr-calendar')).not.toBeInTheDocument();
+  });
+
+  it('fills today when the column is reached by Tab', () => {
     const props = renderTable();
-    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '2024-11-04' } });
+    fireEvent.focus(screen.getByTestId('germ-date-trigger-2'));
+    expect(props.onSlotsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          slotIndex: 2,
+          countDt: DateTime.now().toFormat('yyyy-MM-dd')
+        })
+      ])
+    );
+    expect(screen.queryByTestId('germ-date-2')).not.toBeInTheDocument();
+  });
+
+  it('opens the calendar when the dated column is reached by Tab', () => {
+    const slots = emptySlots();
+    slots[0] = { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 };
+    const props = renderTable({ slots });
+    fireEvent.focus(screen.getByTestId('germ-date-trigger-1'));
+    expect(screen.getByTestId('germ-date-1')).toBeInTheDocument();
+    expect(props.onSlotsChange).not.toHaveBeenCalled();
+  });
+
+  // A record can carry day numbers with no germinator entry date. Recomputing
+  // from nothing used to blank the day number for good, even on changing back.
+  it('keeps day numbers when the header has no germinator entry date', () => {
+    const slots = emptySlots();
+    slots[0] = { slotIndex: 1, countDt: '2026-03-09', dayNoOfTest: 3 };
+    slots[1] = { slotIndex: 2, countDt: '2026-03-11', dayNoOfTest: 5 };
+    const props = renderTable({ slots, germinatorEntry: undefined });
+    fireEvent.change(openDatePicker(1), { target: { value: '2026-03-10' } });
+    expect(props.onSlotsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ slotIndex: 1, countDt: '2026-03-10', dayNoOfTest: 4 })
+      ])
+    );
+  });
+
+  it('emits the day number when a count date is entered (AC1)', () => {
+    const slots = emptySlots();
+    slots[0] = { slotIndex: 1, countDt: '2024-10-31', dayNoOfTest: 0 };
+    const props = renderTable({ slots });
+    fireEvent.change(openDatePicker(1), { target: { value: '2024-11-04' } });
     expect(props.onSlotsChange).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 })
+      ])
+    );
+  });
+
+  // AC2: the day number is counted for every column, not just the first, and
+  // it stays relative to the germinator entry rather than to the prior date.
+  it('emits the day number for a later count date (AC2)', () => {
+    const slots = emptySlots();
+    slots[0] = { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 };
+    slots[1] = { slotIndex: 2, countDt: '2024-11-05', dayNoOfTest: 5 };
+    const props = renderTable({ slots });
+    fireEvent.change(openDatePicker(2), { target: { value: '2024-11-07' } });
+    expect(props.onSlotsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ slotIndex: 2, countDt: '2024-11-07', dayNoOfTest: 7 })
       ])
     );
   });
@@ -60,7 +159,7 @@ describe('DailyGermTable', () => {
       rep4NoSeedsGerm: 8
     };
     const props = renderTable({ slots });
-    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '' } });
+    fireEvent.change(openDatePicker(1), { target: { value: '' } });
     expect(props.onSlotsChange).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
@@ -128,9 +227,43 @@ describe('DailyGermTable', () => {
     });
   });
 
+  // AC6: the column being worked in is highlighted, so a count is never
+  // attributed to the wrong date thirteen narrow columns across.
+  it('highlights the column being worked in (AC6)', () => {
+    const slots = emptySlots();
+    slots[0] = { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 };
+    slots[1] = { slotIndex: 2, countDt: '2024-11-07', dayNoOfTest: 7 };
+    renderTable({ slots });
+    const highlighted = () => Array.from(document.querySelectorAll('.germ-slot-active'));
+    expect(highlighted()).toHaveLength(0);
+
+    fireEvent.focus(screen.getByTestId('germ-count-1-2'));
+    // The date header, the day-number header and all four count cells.
+    expect(highlighted()).toHaveLength(6);
+    expect(screen.getByTestId('germ-date-trigger-2').closest('th'))
+      .toHaveClass('germ-slot-active');
+    expect(screen.getByTestId('germ-date-trigger-1').closest('th'))
+      .not.toHaveClass('germ-slot-active');
+
+    fireEvent.blur(screen.getByTestId('germ-count-1-2'));
+    expect(highlighted()).toHaveLength(0);
+  });
+
+  it('highlights the column whose date modal is open (AC6)', () => {
+    const slots = emptySlots();
+    slots[0] = { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 };
+    renderTable({ slots });
+    fireEvent.click(screen.getByTestId('germ-date-trigger-1'));
+    expect(document.querySelectorAll('.germ-slot-active')).toHaveLength(6);
+  });
+
   it('disables inputs when not editable', () => {
     renderTable({ isEditable: false });
-    expect(screen.getByTestId('germ-date-1')).toBeDisabled();
+    const trigger = screen.getByTestId('germ-date-trigger-1');
+    expect(trigger).toBeDisabled();
     expect(screen.getByTestId('germ-count-1-1')).toBeDisabled();
+    // A disabled trigger must not be able to summon the picker either.
+    fireEvent.click(trigger);
+    expect(screen.queryByTestId('germ-date-1')).not.toBeInTheDocument();
   });
 });

@@ -25,7 +25,9 @@ header.spar-header:not(.spar-header-expanded) + div.main-container {
 }
 
 .#{vars.$bcgov-prefix}--date-picker {
-  span {
+  // Only the span wrapping the input and its calendar icon. A bare `span` also
+  // catches an inline calendar's day cells, which have widths of their own.
+  .#{vars.$bcgov-prefix}--date-picker-input__wrapper > span {
     width: 100%;
   }
 }

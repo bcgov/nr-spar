@@ -43,6 +43,19 @@ const renderView = () => render(
   </BrowserRouter>
 );
 
+/**
+ * Arriving at an empty count-date column fills today's date; arriving again,
+ * now that it holds one, opens the calendar. Setting a specific date is
+ * therefore two arrivals.
+ */
+const setCountDate = (slotIndex: number, value: string) => {
+  fireEvent.click(screen.getByTestId(`germ-date-trigger-${slotIndex}`));
+  if (!screen.queryByTestId(`germ-date-${slotIndex}`)) {
+    fireEvent.click(screen.getByTestId(`germ-date-trigger-${slotIndex}`));
+  }
+  fireEvent.change(screen.getByTestId(`germ-date-${slotIndex}`), { target: { value } });
+};
+
 describe('GerminationContent', () => {
   beforeEach(() => {
     putMock.mockClear();
@@ -66,7 +79,7 @@ describe('GerminationContent', () => {
   it('autosaves via PUT once a count date and count exist', async () => {
     renderView();
     await screen.findByText(/Germination test result/i);
-    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '2024-11-04' } });
+    setCountDate(1, '2024-11-04');
     fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
     await waitFor(() => expect(putMock).toHaveBeenCalled(), { timeout: 5000 });
     const payload = putMock.mock.calls[0][1];
@@ -93,7 +106,7 @@ describe('GerminationContent', () => {
   it('shows an error and blocks autosave when # seeds is cleared', async () => {
     renderView();
     await screen.findByText(/Germination test result/i);
-    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '2024-11-04' } });
+    setCountDate(1, '2024-11-04');
     fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
     await waitFor(() => expect(putMock).toHaveBeenCalled(), { timeout: 5000 });
     putMock.mockClear();
@@ -107,7 +120,7 @@ describe('GerminationContent', () => {
   it('blocks autosave while a rep is over limit (AC3)', async () => {
     renderView();
     await screen.findByText(/Germination test result/i);
-    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '2024-11-04' } });
+    setCountDate(1, '2024-11-04');
     fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
     await waitFor(() => expect(putMock).toHaveBeenCalled(), { timeout: 5000 });
     putMock.mockClear();

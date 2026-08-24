@@ -217,8 +217,13 @@ public class GermCountService {
       Integer r4 = normalize(d.rep4NoSeedsGerm(), repUsed[3]);
       cumulative += zero(r1) + zero(r2) + zero(r3) + zero(r4);
 
+      // DAILY_GERM_SKEY{n} points at this day's CNS_T_DAILY_ABNORMAL row, so it is
+      // only minted when there is an abnormal row to point at. Minting one for every
+      // dated day left a dangling reference, and was the only thing that reached for
+      // the sequence -- which CONSEP does not have. An existing key is always kept:
+      // it still owns the abnormals a previous save recorded.
       BigDecimal skey = existingSkeys.get(slotIndex);
-      if (skey == null) {
+      if (skey == null && hasAnyAbnormal(d)) {
         skey = germCountRepository.nextDailyGermSkey();
       }
 
