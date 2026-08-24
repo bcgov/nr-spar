@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   getDefaultSeeds, calcDayNumber, resolveDayZero, validateCountDates, formatCountDateLines,
-  calcRepTotal, checkOverLimit, calcGermPct, buildUpsertPayload
+  calcRepTotal, checkOverLimit, calcGermPct, buildUpsertPayload, parseCountInput
 } from '../../../views/CONSEP/TestingActivities/GerminationContent/utils';
 
 describe('getDefaultSeeds', () => {
@@ -127,5 +127,25 @@ describe('buildUpsertPayload', () => {
     expect(payload.days[0].slotIndex).toBe(1);
     expect(payload.replicates).toHaveLength(1);
     expect(payload.updateTimestamp).toBe('2026-01-01T00:00:00');
+  });
+});
+
+describe('parseCountInput', () => {
+  it('parses a non-negative integer', () => {
+    expect(parseCountInput('12')).toBe(12);
+    expect(parseCountInput('0')).toBe(0);
+  });
+
+  it('treats an emptied cell as cleared', () => {
+    expect(parseCountInput('')).toBeUndefined();
+    expect(parseCountInput('   ')).toBeUndefined();
+  });
+
+  it('refuses decimals and negatives rather than truncating them', () => {
+    // parseInt would have made these 5, 0 and -1.
+    expect(parseCountInput('5.5')).toBeNull();
+    expect(parseCountInput('.5')).toBeNull();
+    expect(parseCountInput('-1')).toBeNull();
+    expect(parseCountInput('abc')).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  render, screen, waitFor
+  render, screen, waitFor, fireEvent
 } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -75,5 +75,26 @@ describe('GerminationContent hydration (no ghost autosave)', () => {
     await new Promise((resolve) => { setTimeout(resolve, 4000); });
     expect(putMock).not.toHaveBeenCalled();
     expect(screen.queryByText('Daily germination counts saved')).not.toBeInTheDocument();
+  }, 15000);
+
+  // Clearing the only count date used to be a local-only change: the autosave
+  // gate required a dated slot, so no PUT went out and the row on the server
+  // kept the date the user had just removed.
+  it('persists clearing the last count date', async () => {
+    renderView();
+    await waitFor(() => {
+      expect(screen.getByTestId('germ-count-1-1')).toHaveValue(5);
+    });
+
+    // Opening the cell that already holds a date shows the picker input.
+    fireEvent.click(screen.getByTestId('germ-date-trigger-1'));
+    fireEvent.change(await screen.findByTestId('germ-date-1'), { target: { value: '' } });
+
+    await waitFor(() => {
+      expect(putMock).toHaveBeenCalled();
+    }, { timeout: 6000 });
+    const [, payload] = putMock.mock.calls[0];
+    expect(payload.days).toEqual([]);
+    expect(payload.updateTimestamp).toBe('2026-01-01T00:00:00');
   }, 15000);
 });

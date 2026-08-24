@@ -210,16 +210,28 @@ describe('DailyGermTable', () => {
     );
   });
 
-  it('guards NaN when # seeds receives a value that does not parse to an integer', () => {
+  it.each(['.5', '5.5', '-1'])('refuses %s in # seeds instead of corrupting state', (value) => {
     const props = renderTable();
-    // '.5' survives the number-input value sanitizer (valid float) but parseInt('.5', 10) is NaN
-    fireEvent.change(screen.getByTestId('germ-seeds-1'), { target: { value: '.5' } });
+    // `type="number"` lets decimals and negatives through -- min/step are only
+    // form-validity hints -- and parseInt would turn 5.5 into 5 and pass -1 on.
+    fireEvent.change(screen.getByTestId('germ-seeds-1'), { target: { value } });
+    expect(props.onReplicatesChange).not.toHaveBeenCalled();
+  });
+
+  it.each(['5.5', '-1'])('refuses %s in a daily count instead of corrupting state', (value) => {
+    const props = renderTable();
+    fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value } });
+    expect(props.onSlotsChange).not.toHaveBeenCalled();
+  });
+
+  it('clears # seeds when the cell is emptied', () => {
+    const props = renderTable();
+    fireEvent.change(screen.getByTestId('germ-seeds-1'), { target: { value: '' } });
     expect(props.onReplicatesChange).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ replicateNumber: 1, totalNoSeeds: undefined })
       ])
     );
-    // state must never receive NaN
     (props.onReplicatesChange as ReturnType<typeof vi.fn>).mock.calls.forEach(([reps]) => {
       (reps as GermReplicateType[]).forEach((rep) => {
         expect(Number.isNaN(rep.totalNoSeeds as number)).toBe(false);

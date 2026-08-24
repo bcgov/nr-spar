@@ -47,9 +47,8 @@ const defaultReplicates = (testCategoryCd?: string): GermReplicateType[] => Arra
   })
 );
 
-const GerminationContent = () => {
+const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const navigate = useNavigate();
-  const { riaKey } = useParams();
 
   const [header, setHeader] = useState<GerminationTestHeaderType>();
   const [slots, setSlots] = useState<GermCountSlotType[]>(emptySlots());
@@ -204,7 +203,11 @@ const GerminationContent = () => {
     enabled:
       isHydrated
       && isEditable
-      && hasDatedSlot
+      // A record that already exists can be cleared back to no dates at all --
+      // the PUT sends an empty `days` list and the backend blanks every slot.
+      // A record that does not exist yet has nothing to clear, and saving one
+      // would create an empty germ-count row for a test nobody has counted.
+      && (hasDatedSlot || !!updateTimestamp)
       && replicates.length > 0
       && Object.keys(validationErrors).length === 0
       && !saveMutation.isPending
@@ -340,6 +343,19 @@ const GerminationContent = () => {
       )}
     </FlexGrid>
   );
+};
+
+/**
+ * Remounted per test: `header`, `slots`, `replicates`, the update timestamp and
+ * the hydration gate are all per-RIA state, and React Router reuses the element
+ * across a param change. Without the key, navigating between two germination
+ * tests would leave the previous test's table on screen and editable while the
+ * new queries load, and an edit in that window would autosave the old snapshot
+ * (and old lock timestamp) onto the new RIA.
+ */
+const GerminationContent = () => {
+  const { riaKey } = useParams();
+  return <GerminationTestContent key={riaKey} riaKey={riaKey} />;
 };
 
 export default GerminationContent;

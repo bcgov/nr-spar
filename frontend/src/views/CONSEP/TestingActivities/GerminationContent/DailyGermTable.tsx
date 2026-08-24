@@ -8,7 +8,7 @@ import {
 import GenericTable from '../../../../components/GenericTable';
 import {
   calcDayNumber, calcRepTotal, calcGermPct, isoToJsDate, parseCountDateInput,
-  resolveDayZero, toLocalIsoDate, REP_COUNT_KEYS
+  parseCountInput, resolveDayZero, toLocalIsoDate, REP_COUNT_KEYS
 } from './utils';
 import {
   buildTableRows, getDailyGermColumns, DailyGermHandlers, GermTableRow,
@@ -137,16 +137,18 @@ const DailyGermTable = ({
     },
     onSlotFocus: setFocusedSlot,
     onCountChange: (repNumber, slotIndex, raw) => {
-      const parsed = raw === '' ? undefined : parseInt(raw, 10);
-      updateSlot(slotIndex, {
-        [REP_COUNT_KEYS[repNumber - 1]]: Number.isNaN(parsed) ? undefined : parsed
-      });
+      const parsed = parseCountInput(raw);
+      if (parsed === null) {
+        return;
+      }
+      updateSlot(slotIndex, { [REP_COUNT_KEYS[repNumber - 1]]: parsed });
     },
     onSeedsChange: (repNumber, raw) => {
-      const parsed = raw === '' ? undefined : parseInt(raw, 10);
-      updateReplicate(repNumber, {
-        totalNoSeeds: Number.isNaN(parsed) ? undefined : parsed
-      });
+      const parsed = parseCountInput(raw);
+      if (parsed === null) {
+        return;
+      }
+      updateReplicate(repNumber, { totalNoSeeds: parsed });
     },
     onOverrideToggle: (repNumber, checked) => {
       updateReplicate(repNumber, { tolrncOvrrdeDesc: checked ? 'ok' : null });

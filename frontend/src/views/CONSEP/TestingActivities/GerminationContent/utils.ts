@@ -115,6 +115,27 @@ export const validateCountDates = (
   return errors;
 };
 
+/**
+ * Parses a seed-count cell into state. `type="number"` blanks anything it cannot
+ * represent, but `min`/`step` are form-validity hints rather than input filters,
+ * so decimals and negatives still arrive here — and `parseInt` would quietly
+ * turn `5.5` into `5` and let `-1` through to the autosave payload.
+ *
+ * Returns `undefined` for a cleared cell, `null` for input to refuse (leave
+ * state as it was), or the parsed count.
+ */
+export const parseCountInput = (raw: string): number | null | undefined => {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  const parsed = Number(trimmed);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    return null;
+  }
+  return parsed;
+};
+
 export const calcRepTotal = (
   slots: GermCountSlotType[],
   repNumber: 1 | 2 | 3 | 4

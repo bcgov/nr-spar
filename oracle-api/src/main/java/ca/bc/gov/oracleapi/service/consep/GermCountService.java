@@ -98,10 +98,13 @@ public class GermCountService {
     days.sort(Comparator.comparingInt(DayGermCountDto::slotIndex));
     validateNoDuplicateSlots(days);
     validateAscendingDates(days);
-    validateSeedTotals(days, request.replicates());
+    // Read before the timestamp guard: the guard stamps update_timestamp, so a request rejected
+    // after it would leave the client holding a stale lock value and force a spurious 409.
+    GermCountEntity existing = germCountRepository.findById(riaSkey).orElse(null);
+    validateSeedTotals(days, request.replicates(), retainedAbnormalTotals(days, existing));
 
     GermCountEntity entity;
-    if (germCountRepository.existsById(riaSkey)) {
+    if (existing != null) {
       if (request.updateTimestamp() == null) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
@@ -185,9 +188,12 @@ public class GermCountService {
    */
   List<GermCountSlotDto> buildSlotsForSave(
       List<DayGermCountDto> sortedDays, GermCountEntity entity) {
-    Map<Integer, BigDecimal> existingSkeys =
-        mapper.buildSlots(entity).stream()
-            .collect(Collectors.toMap(GermCountSlotDto::slotIndex, GermCountSlotDto::dailyGermSkey));
+    // Not Collectors.toMap: a slot present by count date alone carries a null key, which toMap
+    // rejects outright.
+    Map<Integer, BigDecimal> existingSkeys = new HashMap<>();
+    for (GermCountSlotDto s : mapper.buildSlots(entity)) {
+      existingSkeys.put(s.slotIndex(), s.dailyGermSkey());
+    }
     Map<Integer, DayGermCountDto> submitted =
         sortedDays.stream()
             .filter(d -> d.countDt() != null)
@@ -255,7 +261,7 @@ public class GermCountService {
    * Per-field null and range constraints live on the request DTOs.
    */
   private void validateSeedTotals(
-      List<DayGermCountDto> days, List<TestRepGermFormDto> replicates) {
+      List<DayGermCountDto> days, List<TestRepGermFormDto> replicates, long[] retainedAbnormal) {
     Map<Integer, Integer> totalByRep = new HashMap<>();
     for (TestRepGermFormDto r : replicates) {
       if (totalByRep.put(r.replicateNumber(), r.totalNoSeeds()) != null) {
@@ -280,7 +286,7 @@ public class GermCountService {
       if (total == null) {
         continue;
       }
-      long used = germ[n] + abn[n];
+      long used = germ[n] + abn[n] + retainedAbnormal[n];
       if (used > total) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
@@ -288,6 +294,71 @@ public class GermCountService {
                 + ") exceeds total seeds (" + total + ")");
       }
     }
+  }
+
+  /**
+   * Abnormal counts that this save keeps but the request does not carry. This screen never submits
+   * abnormals, so without them a day whose abnormals are already on file would be validated as
+   * zero and germinated counts could be raised until germinated + abnormal exceeds the replicate
+   * total. A day the request omits entirely is not counted: {@code deleteOrphanedAbnormals} drops
+   * its row. Indexed 1-4 by replicate number.
+   */
+  private long[] retainedAbnormalTotals(List<DayGermCountDto> days, GermCountEntity existing) {
+    long[] retained = new long[5];
+    if (existing == null) {
+      return retained;
+    }
+    Map<Integer, BigDecimal> existingSkeys = new HashMap<>();
+    for (GermCountSlotDto s : mapper.buildSlots(existing)) {
+      existingSkeys.put(s.slotIndex(), s.dailyGermSkey());
+    }
+    for (DayGermCountDto d : days) {
+      // A day that submits its own abnormals replaces the stored row; those are already summed.
+      if (d.countDt() == null || hasAnyAbnormal(d)) {
+        continue;
+      }
+      BigDecimal skey = existingSkeys.get(d.slotIndex());
+      if (skey == null) {
+        continue;
+      }
+      DailyAbnormalEntity row = dailyAbnormalRepository.findByDailyGermSkey(skey);
+      if (row == null) {
+        continue;
+      }
+      for (int n = 1; n <= 4; n++) {
+        retained[n] += sumPersistedAbnormal(row, n);
+      }
+    }
+    return retained;
+  }
+
+  private static long sumPersistedAbnormal(DailyAbnormalEntity e, int rep) {
+    return switch (rep) {
+      case 1 -> zero(e.getRep1NoAbnrmRe()) + zero(e.getRep1NoAbnrmSr())
+          + zero(e.getRep1NoAbnrmSh()) + zero(e.getRep1NoAbnrmRn())
+          + zero(e.getRep1NoAbnrmTh()) + zero(e.getRep1NoAbnrmTr())
+          + zero(e.getRep1NoAbnrmTw()) + zero(e.getRep1NoAbnrmCm())
+          + zero(e.getRep1NoAbnrmWeak()) + zero(e.getRep1NoAbnrmOther())
+          + zero(e.getRep1NoAbnrmPrgrm());
+      case 2 -> zero(e.getRep2NoAbnrmRe()) + zero(e.getRep2NoAbnrmSr())
+          + zero(e.getRep2NoAbnrmSh()) + zero(e.getRep2NoAbnrmRn())
+          + zero(e.getRep2NoAbnrmTh()) + zero(e.getRep2NoAbnrmTr())
+          + zero(e.getRep2NoAbnrmTw()) + zero(e.getRep2NoAbnrmCm())
+          + zero(e.getRep2NoAbnrmWeak()) + zero(e.getRep2NoAbnrmOther())
+          + zero(e.getRep2NoAbnrmPrgrm());
+      case 3 -> zero(e.getRep3NoAbnrmRe()) + zero(e.getRep3NoAbnrmSr())
+          + zero(e.getRep3NoAbnrmSh()) + zero(e.getRep3NoAbnrmRn())
+          + zero(e.getRep3NoAbnrmTh()) + zero(e.getRep3NoAbnrmTr())
+          + zero(e.getRep3NoAbnrmTw()) + zero(e.getRep3NoAbnrmCm())
+          + zero(e.getRep3NoAbnrmWeak()) + zero(e.getRep3NoAbnrmOther())
+          + zero(e.getRep3NoAbnrmPrgrm());
+      default -> zero(e.getRep4NoAbnrmRe()) + zero(e.getRep4NoAbnrmSr())
+          + zero(e.getRep4NoAbnrmSh()) + zero(e.getRep4NoAbnrmRn())
+          + zero(e.getRep4NoAbnrmTh()) + zero(e.getRep4NoAbnrmTr())
+          + zero(e.getRep4NoAbnrmTw()) + zero(e.getRep4NoAbnrmCm())
+          + zero(e.getRep4NoAbnrmWeak()) + zero(e.getRep4NoAbnrmOther())
+          + zero(e.getRep4NoAbnrmPrgrm());
+    };
   }
 
   private static long sumAbnormal(ReplicateAbnormalDto a) {

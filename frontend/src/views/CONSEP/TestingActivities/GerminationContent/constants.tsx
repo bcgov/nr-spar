@@ -234,6 +234,7 @@ const buildSlotColumn = (
             'aria-label': `Replicate ${row.original.replicateNumber} count ${slot.slotIndex}`,
             inputMode: 'numeric',
             min: 0,
+            step: 1,
             style: { textAlign: 'right' }
           },
           sx: numberFieldSx
@@ -291,6 +292,7 @@ export const getDailyGermColumns = (
         'aria-label': `Replicate ${row.original.replicateNumber} number of seeds`,
         inputMode: 'numeric',
         min: 0,
+        step: 1,
         style: { textAlign: 'right' }
       },
       sx: numberFieldSx
