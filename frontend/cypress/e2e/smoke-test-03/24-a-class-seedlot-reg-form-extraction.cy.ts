@@ -105,8 +105,13 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     cy.get('#ext-agency-number-error-msg')
       .should('have.text', regFormData.extraction.agencyValidationMsg);
 
+    // Check error msg block is visible
     cy.get('.applicant-error-notification')
       .should('be.visible');
+
+    cy.get('.applicant-error-notification')
+      .find('button[title="close notification"]')
+      .click();
 
     // Enter valid test acronym
     cy.get('#ext-agency-number')
@@ -251,8 +256,13 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     cy.get('#str-agency-number-error-msg')
       .should('have.text', regFormData.extraction.agencyValidationMsg);
 
+    // Check error msg block is visible
     cy.get('.applicant-error-notification')
       .should('be.visible');
+
+    cy.get('.applicant-error-notification')
+      .find('button[title="close notification"]')
+      .click();
 
     // Enter valid test acronym
     cy.get('#str-agency-number')

@@ -18,7 +18,7 @@ import {
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import {
   calcAverage, calcSum, generateDefaultRows,
-  populateStrInputId
+  getRequiredParentTreeId, populateStrInputId
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
@@ -46,7 +46,6 @@ import {
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
 import { GenWorthCodeEnum, SingleParentTreeGeneticObj } from '../../../types/ParentTreeGeneticQualityType';
-import { ParentTreeByVegCodeResType } from '../../../types/ParentTreeTypes';
 import { MeanGeomDataType } from '../../../types/PtCalcTypes';
 
 export type GeomDisplayValues = {
@@ -301,6 +300,11 @@ export const initParentTreeState = (
     parentTrees.forEach(
       (curParentTree) => {
         const newRow: RowItem = structuredClone(rowTemplate);
+        // Stamp identity from SPAR's stored contribution data (point-in-time), not
+        // from the live Oracle catalog, so historical/orphaned parent trees keep
+        // working even after they leave the orchard.
+        newRow.parentTreeId = curParentTree.parentTreeId;
+        newRow.isTested = curParentTree.parentTreeGeneticQualities[0]?.isParentTreeTested ?? false;
         newRow.parentTreeNumber.value = curParentTree.parentTreeNumber;
         newRow.coneCount.value = String(curParentTree.coneCount);
         newRow.pollenCount.value = String(curParentTree.pollenCount);
@@ -330,6 +334,8 @@ export const initParentTreeState = (
         (curSmpMix, index) => {
           const newRow: RowItem = structuredClone(rowTemplate);
           newRow.rowId = String(index);
+          newRow.parentTreeId = curSmpMix.parentTreeId;
+          newRow.isTested = curSmpMix.parentTreeGeneticQualities[0]?.isParentTreeTested ?? false;
           newRow.parentTreeNumber.value = curSmpMix.parentTreeNumber;
           newRow.isMixTab = true;
           newRow.proportion.value = String(curSmpMix.proportion);
@@ -340,6 +346,15 @@ export const initParentTreeState = (
 
             if (Object.prototype.hasOwnProperty.call(newRow, genWorthName)) {
               newRow[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
+              // The weighted columns feed the SMP mix breeding value summary and the
+              // smpBv sent on recalculation; they are only computed on user input, so
+              // restore them here or the SMP contribution reads as zero after submit.
+              const weightedName = `w_${genWorthName}` as keyof StrTypeRowItem;
+              if (Object.prototype.hasOwnProperty.call(newRow, weightedName)) {
+                newRow[weightedName].value = (
+                  singleGenWorthObj.geneticQualityValue * curSmpMix.proportion
+                ).toFixed(3);
+              }
             }
           });
           smpMixRows = Object
@@ -733,7 +748,7 @@ export const validateParentStep = (
     combinedData.every((row) => {
       for (let i = 0; i < rowKeys.length; i += 1) {
         const key = rowKeys[i];
-        if (key !== 'isMixTab' && key !== 'rowId') {
+        if (key !== 'isMixTab' && key !== 'rowId' && key !== 'parentTreeId' && key !== 'isTested') {
           if (row[key].isInvalid) {
             isInvalid = true;
             idToFocus = row[key].id;
@@ -944,7 +959,6 @@ export const convertOrchard = (
 };
 
 const generateParentTreeGenQualPayload = (
-  allParentTreeData: ParentTreeByVegCodeResType,
   ptRow: RowItem,
   applicableGenWorths: string[]
 ): SingleParentTreeGeneticObj[] => {
@@ -957,7 +971,7 @@ const generateParentTreeGenQualPayload = (
       geneticTypeCode: 'BV',
       geneticWorthCode: gwCode.toUpperCase() as keyof typeof GenWorthCodeEnum,
       geneticQualityValue: Number(parseFloat(gwObj.value ? gwObj.value : '0.0').toFixed(1)),
-      isParentTreeTested: allParentTreeData[ptRow.parentTreeNumber.value].testedInd,
+      isParentTreeTested: ptRow.isTested,
       isEstimated: gwObj.isEstimated
     };
     payload.push(ptGeneticObj);
@@ -975,27 +989,25 @@ export const convertParentTree = (
 
   // Each key is a parent tree number
   Object.keys(parentTreeData.tableRowData).forEach((ptNum: string) => {
+    const row = parentTreeData.tableRowData[ptNum];
     parentTreePayload.push({
       seedlotNumber,
-      parentTreeId: parentTreeData.allParentTreeData[ptNum].parentTreeId,
+      parentTreeId: getRequiredParentTreeId(row),
       parentTreeNumber: ptNum,
-      coneCount: +parentTreeData.tableRowData[ptNum].coneCount.value,
-      pollenCount: +parentTreeData.tableRowData[ptNum].pollenCount.value,
+      coneCount: +row.coneCount.value,
+      pollenCount: +row.pollenCount.value,
       smpSuccessPct:
-        (parentTreeData.tableRowData[ptNum].smpSuccessPerc.value
-          && parentTreeData.tableRowData[ptNum].smpSuccessPerc.value !== 'null')
-          ? Number(parentTreeData.tableRowData[ptNum].smpSuccessPerc.value)
+        (row.smpSuccessPerc.value && row.smpSuccessPerc.value !== 'null')
+          ? Number(row.smpSuccessPerc.value)
           : 0,
       nonOrchardPollenContamPct:
-        (parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value
-          && parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value !== 'null')
-          ? Number(parentTreeData.tableRowData[ptNum].nonOrchardPollenContam.value)
+        (row.nonOrchardPollenContam.value && row.nonOrchardPollenContam.value !== 'null')
+          ? Number(row.nonOrchardPollenContam.value)
           : 0,
-      amountOfMaterial: +parentTreeData.tableRowData[ptNum].volume.value,
-      proportion: +parentTreeData.tableRowData[ptNum].proportion.value,
+      amountOfMaterial: +row.volume.value,
+      proportion: +row.proportion.value,
       parentTreeGeneticQualities: generateParentTreeGenQualPayload(
-        parentTreeData.allParentTreeData,
-        parentTreeData.tableRowData[ptNum],
+        row,
         applicableGenWorths
       )
     });
@@ -1009,29 +1021,27 @@ export const convertSmpParentTree = (
   seedlotNumber: string,
   applicableGenWorths: string[]
 ): Array<ParentTreeFormSubmitType> => {
-  const { allParentTreeData } = parentTreeStepData;
   const smpMixPayload: Array<ParentTreeFormSubmitType> = [];
 
   if (parentTreeStepData.mixTabData) {
     Object.keys(parentTreeStepData.mixTabData).forEach((key: string) => {
       // Each key is a line in the table, so we need to get
       // the parent tree value that the user set and use it
-      const curParentTreeNum = parentTreeStepData.mixTabData[key].parentTreeNumber.value;
-      if (allParentTreeData[curParentTreeNum]) {
+      const row = parentTreeStepData.mixTabData[key];
+      const curParentTreeNum = row.parentTreeNumber.value;
+      if (curParentTreeNum && row.parentTreeId !== null) {
         smpMixPayload.push({
           seedlotNumber,
-          parentTreeId: parentTreeStepData.allParentTreeData[curParentTreeNum].parentTreeId,
+          parentTreeId: row.parentTreeId,
           parentTreeNumber: curParentTreeNum,
-          coneCount: +parentTreeStepData.mixTabData[key].coneCount.value,
-          pollenCount: +parentTreeStepData.mixTabData[key].pollenCount.value,
-          smpSuccessPct: +parentTreeStepData.mixTabData[key].smpSuccessPerc.value,
-          nonOrchardPollenContamPct: +parentTreeStepData
-            .mixTabData[key].nonOrchardPollenContam.value,
-          amountOfMaterial: +parentTreeStepData.mixTabData[key].volume.value,
-          proportion: +parentTreeStepData.mixTabData[key].proportion.value,
+          coneCount: +row.coneCount.value,
+          pollenCount: +row.pollenCount.value,
+          smpSuccessPct: +row.smpSuccessPerc.value,
+          nonOrchardPollenContamPct: +row.nonOrchardPollenContam.value,
+          amountOfMaterial: +row.volume.value,
+          proportion: +row.proportion.value,
           parentTreeGeneticQualities: generateParentTreeGenQualPayload(
-            parentTreeStepData.allParentTreeData,
-            parentTreeStepData.mixTabData[key],
+            row,
             applicableGenWorths
           )
         });

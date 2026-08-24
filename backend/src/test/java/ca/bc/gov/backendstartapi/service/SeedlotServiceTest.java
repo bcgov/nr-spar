@@ -29,6 +29,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotManagementBreedingValueDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
@@ -1078,5 +1079,94 @@ class SeedlotServiceTest {
 
     Assertions.assertNotNull(result);
     Assertions.assertNull(result.meanGeomSmpMix());
+  }
+
+  private SeedlotFormParentTreeSmpDto smpMixRow(
+      String proportion, List<ParentTreeGeneticQualityDto> genQuals) {
+    return new SeedlotFormParentTreeSmpDto(
+        "63001", 1001, "101", null, null, null, null, null, new BigDecimal(proportion), genQuals);
+  }
+
+  @Test
+  @DisplayName("SMP mix breeding values are the volume-weighted sum of each trait (#2616)")
+  void calculateSmpMixBreedingValues_weightsByProportion() {
+    // Two SMP mix rows: GVO 20 at 60% of the volume, GVO 10 at 40% -> 20*0.6 + 10*0.4 = 16
+    List<SeedlotFormParentTreeSmpDto> smpMix =
+        List.of(
+            smpMixRow(
+                "0.6", List.of(new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("20"),
+                    null, null))),
+            smpMixRow(
+                "0.4", List.of(new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("10"),
+                    null, null))));
+
+    SeedlotManagementBreedingValueDto smpBv =
+        SeedlotService.calculateSmpMixBreedingValues(smpMix);
+
+    Assertions.assertEquals(16.0, smpBv.getGvo(), 0.0001);
+    // Traits absent from the mix stay at zero rather than becoming null.
+    Assertions.assertEquals(0.0, smpBv.getAd(), 0.0001);
+    Assertions.assertEquals(0.0, smpBv.getWwd(), 0.0001);
+  }
+
+  @Test
+  @DisplayName("SMP mix breeding values accumulate per trait code independently (#2616)")
+  void calculateSmpMixBreedingValues_perTrait() {
+    List<SeedlotFormParentTreeSmpDto> smpMix =
+        List.of(
+            smpMixRow(
+                "0.5",
+                List.of(
+                    new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("20"), null, null),
+                    new ParentTreeGeneticQualityDto("BV", "DFS", new BigDecimal("8"), null, null))),
+            smpMixRow(
+                "0.5",
+                List.of(
+                    new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("30"), null, null),
+                    new ParentTreeGeneticQualityDto(
+                        "BV", "WVE", new BigDecimal("6"), null, null))));
+
+    SeedlotManagementBreedingValueDto smpBv =
+        SeedlotService.calculateSmpMixBreedingValues(smpMix);
+
+    Assertions.assertEquals(25.0, smpBv.getGvo(), 0.0001);
+    Assertions.assertEquals(4.0, smpBv.getDfs(), 0.0001);
+    Assertions.assertEquals(3.0, smpBv.getWve(), 0.0001);
+    Assertions.assertEquals(0.0, smpBv.getIws(), 0.0001);
+  }
+
+  @Test
+  @DisplayName("No SMP mix yields all-zero breeding values (#2616)")
+  void calculateSmpMixBreedingValues_noSmpMix() {
+    Assertions.assertEquals(
+        0.0, SeedlotService.calculateSmpMixBreedingValues(List.of()).getGvo(), 0.0001);
+    Assertions.assertEquals(
+        0.0, SeedlotService.calculateSmpMixBreedingValues(null).getGvo(), 0.0001);
+  }
+
+  @Test
+  @DisplayName("Rows with a null proportion or null genetic quality are skipped (#2616)")
+  void calculateSmpMixBreedingValues_skipsIncompleteRows() {
+    List<SeedlotFormParentTreeSmpDto> smpMix =
+        List.of(
+            // null proportion -> cannot be weighted, must not blow up or contribute
+            new SeedlotFormParentTreeSmpDto(
+                "63001", 1001, "101", null, null, null, null, null, null,
+                List.of(new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("99"),
+                    null, null))),
+            // null genetic quality value
+            smpMixRow("0.5", List.of(
+                new ParentTreeGeneticQualityDto("BV", "GVO", null, null, null))),
+            // null genetic worth code
+            smpMixRow("0.5", List.of(
+                new ParentTreeGeneticQualityDto("BV", null, new BigDecimal("77"), null, null))),
+            // the only usable row
+            smpMixRow("0.5", List.of(
+                new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("20"), null, null))));
+
+    SeedlotManagementBreedingValueDto smpBv =
+        Assertions.assertDoesNotThrow(() -> SeedlotService.calculateSmpMixBreedingValues(smpMix));
+
+    Assertions.assertEquals(10.0, smpBv.getGvo(), 0.0001);
   }
 }

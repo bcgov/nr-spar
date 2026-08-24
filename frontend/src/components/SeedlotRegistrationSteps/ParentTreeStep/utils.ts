@@ -241,7 +241,10 @@ export const populateStrInputId = (idPrefix: string, row: RowItem): RowItem => {
   const newRow = structuredClone(row);
   Object.keys(newRow).forEach((key) => {
     const rowKey = key as keyof RowItem;
-    if (rowKey !== 'isMixTab' && rowKey !== 'rowId') {
+    if (
+      rowKey !== 'isMixTab' && rowKey !== 'rowId'
+      && rowKey !== 'parentTreeId' && rowKey !== 'isTested'
+    ) {
       newRow[rowKey].id = `${idPrefix}-${rowKey}-value`;
     }
   });
@@ -280,6 +283,10 @@ export const processParentTreeData = (
       const parentTree = allParentTreeData[orchardPtNum];
 
       newRowData.parentTreeNumber.value = orchardPtNum;
+      // Stamp identity from the live catalog once, at creation time. This is the only
+      // place a *new* row should ever be resolved against Oracle - see ticket #2595.
+      newRowData.parentTreeId = parentTree.parentTreeId;
+      newRowData.isTested = parentTree.testedInd;
 
       const genWorthBySpu = parentTree.geneticQualitiesBySpu;
 
@@ -717,13 +724,18 @@ export const fillCalculatedInfo = (
   setIsCalculatingPt(false);
 };
 
-const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): number => {
-  const foundPtNum = Object.keys(state.allParentTreeData).find((ptNum) => ptNum === ptNumber);
-
-  if (!foundPtNum) {
-    throw Error(`Cannot find parent tree id with parent tree number: ${ptNumber}`);
+/**
+ * Every row is stamped with its parentTreeId when it's first created (from the live
+ * catalog for new rows, or from SPAR-stored data when hydrating an existing seedlot).
+ * Calculate/submit read that stamp directly rather than re-resolving it from the live
+ * Oracle catalog, so historical parent trees that are no longer in the catalog still
+ * work. See ticket #2595.
+ */
+export const getRequiredParentTreeId = (row: RowItem): number => {
+  if (row.parentTreeId === null) {
+    throw new Error(`Parent tree "${row.parentTreeNumber.value}" is missing its parent tree id.`);
   }
-  return state.allParentTreeData[foundPtNum].parentTreeId;
+  return row.parentTreeId;
 };
 
 export const generatePtValCalcPayload = (
@@ -762,7 +774,7 @@ export const generatePtValCalcPayload = (
   // a string "null" (for some reason...)
   rows.forEach((row) => {
     const newPayloadItem: OrchardParentTreeValsType = {
-      parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
+      parentTreeId: getRequiredParentTreeId(row),
       parentTreeNumber: row.parentTreeNumber.value,
       coneCount: Number(row.coneCount.value),
       pollenCount: Number(row.pollenCount.value),
@@ -790,7 +802,7 @@ export const generatePtValCalcPayload = (
   smpMixRows.forEach((row) => {
     if (row.parentTreeNumber.value) {
       payload.smpMixIdAndProps.push({
-        parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
+        parentTreeId: getRequiredParentTreeId(row),
         proportion: Number(row.proportion.value)
       });
     }

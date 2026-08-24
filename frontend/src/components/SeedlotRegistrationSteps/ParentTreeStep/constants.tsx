@@ -298,7 +298,9 @@ export const rowTemplate: RowItem = {
   w_wdu: structuredClone(gwInputTemplate),
   w_wwd: structuredClone(gwInputTemplate),
   w_wve: structuredClone(gwInputTemplate),
-  isMixTab: false
+  isMixTab: false,
+  parentTreeId: null,
+  isTested: false
 };
 
 export const headerTemplate: Array<HeaderObj> = [

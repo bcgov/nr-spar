@@ -118,11 +118,13 @@ const OrchardStep = ({
   });
 
   const setGametic = (event: ComboBoxEvent, isFemale: boolean) => {
-    const clonedState = structuredClone(state);
     const selectedItem = event.selectedItem ?? EmptyMultiOptObj;
     const gameticType: keyof OrchardForm = isFemale ? 'femaleGametic' : 'maleGametic';
-    clonedState[gameticType].value = selectedItem;
-    setStepData('orchardStep', clonedState);
+    // Keep the untouched gametic field's object reference stable; ComboBox re-syncs off prop identity
+    setStepData('orchardStep', {
+      ...state,
+      [gameticType]: { ...state[gameticType], value: selectedItem }
+    });
   };
 
   const setBooleanValue = (
@@ -489,7 +491,6 @@ const OrchardStep = ({
                   onChange={(e: ComboBoxEvent) => setGametic(e, true)}
                   readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.femaleGametic.value}
-                  initialSelectedItem={state.femaleGametic.value}
                 />
               )
           }
@@ -517,7 +518,6 @@ const OrchardStep = ({
                   onChange={(e: ComboBoxEvent) => setGametic(e, false)}
                   readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.maleGametic.value}
-                  initialSelectedItem={state.maleGametic.value}
                 />
               )
           }

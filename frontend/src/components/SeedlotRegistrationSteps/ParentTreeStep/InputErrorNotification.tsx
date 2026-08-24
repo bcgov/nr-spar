@@ -103,7 +103,10 @@ const InputErrorNotification = (
 
       allData.forEach((row) => {
         rowKeys.forEach((key) => {
-          if (row[key] && key !== 'rowId' && key !== 'isMixTab') {
+          if (
+            row[key] && key !== 'rowId' && key !== 'isMixTab'
+            && key !== 'parentTreeId' && key !== 'isTested'
+          ) {
             if (row[key].isInvalid && !invalidDataFields.includes(key)) {
               invalidDataFields.push(key);
               hasErrorInTabs = true;

@@ -48,8 +48,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
       // Get title from agencyName like 'WESTERN FOREST PRODUCTS INC.'
-      // eslint-disable-next-line prefer-destructuring
-      initialAccordionTitle = seedlotData[speciesKey].agencyName.split(' - ')[1];
+      [, initialAccordionTitle] = seedlotData[speciesKey].agencyName.split(' - ');
     });
   });
 
@@ -78,10 +77,10 @@ describe('A Class Seedlot Registration form, Ownership', () => {
             .click();
 
           // Wait for the "Changes saved!" message
-          cy.contains('Changes saved!', { timeout: 30000 }).should('be.visible');
+          cy.contains('Changes saved!', { timeout: THIRTY_SECONDS }).should('be.visible');
 
           // Optional: wait until any inline loading spinners disappear
-          cy.get('svg.bx--inline-loading__spinner', { timeout: 30000 })
+          cy.get('svg.bx--inline-loading__spinner', { timeout: THIRTY_SECONDS })
             .should('not.exist');
         }
       })
@@ -147,6 +146,10 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Check error msg block is visible
     cy.get('.applicant-error-notification')
       .should('exist');
+
+    cy.get('.applicant-error-notification')
+      .find('button[title="close notification"]')
+      .click();
 
     // Enter valid acronym
     cy.get('#ownership-agency-0')
