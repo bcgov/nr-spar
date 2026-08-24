@@ -343,6 +343,7 @@ const PurityContent = () => {
     setActivityRecord(merged);
     latestRecordRef.current = merged;
     if (!isDateRangeValid) {
+      pendingRef.current = false;
       return;
     }
     if (inFlightRef.current) {
