@@ -18,13 +18,11 @@ public record TestRepGermFormDto(
     @Schema(description = "Total number of seeds in the replicate", example = "100")
     Integer totalNoSeeds,
 
-    @Schema(description = "Final ungerminated normal seed count") Integer finalUngrmNormal,
-    @Schema(description = "Final ungerminated shrivelled seed count") Integer finalUngrmShrvl,
-    @Schema(description = "Final ungerminated empty seed count") Integer finalUngrmEmpty,
-    @Schema(description = "Final ungerminated insect-damaged seed count") Integer finalUngrmInsct,
-    @Schema(description = "Final ungerminated mechanically damaged seed count") Integer finalUngrmDamagd,
-    @Schema(description = "Final ungerminated rotten seed count") Integer finalUngrmRotten,
-    @Schema(description = "Final pre-germinated seed count") Integer finalPregerm,
+    // The final ungerminated / pre-germinated columns belong to the final-counts screen, not to
+    // daily germ counts. They are deliberately absent here: TestRepGermFormMapper leaves unmapped
+    // entity columns alone, so a germ-count save can no longer echo back a stale copy the client
+    // happened to read earlier and overwrite a newer value (the replicate row has no optimistic
+    // lock of its own).
     @Schema(description = "Indicator if the replicate is accepted", example = "1") Integer repAcceptedInd,
     @Schema(description = "Tolerance override reason") String tolrncOvrrdeDesc
 ) {}
