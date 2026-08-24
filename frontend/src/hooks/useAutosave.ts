@@ -41,8 +41,18 @@ function useAutosave<T>({
 
   // Snapshot of the last value we have saved (initialised to the first value).
   const savedRef = useRef<T>(data);
+  // Snapshot of the last value a save failed on. Only automatic scheduling
+  // honours it, so one failure cannot become a retry loop — the scheduling
+  // effect re-runs whenever `enabled` toggles, which a caller gating on its
+  // mutation's pending flag does on every attempt. An explicit flush, or
+  // leaving the page, still retries.
+  const failedRef = useRef<T | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxWaitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const hasFailedOn = (value: T) => (
+    failedRef.current !== null && isEqualRef.current(value, failedRef.current)
+  );
 
   const clearTimers = () => {
     if (debounceTimer.current) {
@@ -68,8 +78,11 @@ function useAutosave<T>({
     try {
       await onSaveRef.current(current, previous);
       savedRef.current = current;
+      failedRef.current = null;
     } catch {
-      // Keep the previous saved snapshot so the same data can be retried.
+      // Keep the previous saved snapshot so the next edit still carries this
+      // data, but remember the failure so it is not retried unchanged.
+      failedRef.current = current;
     }
   };
 
@@ -77,7 +90,7 @@ function useAutosave<T>({
   // last-saved snapshot. The maxWait timer caps how long continuous edits
   // can defer a save.
   useEffect(() => {
-    if (!enabled || isEqualRef.current(data, savedRef.current)) {
+    if (!enabled || isEqualRef.current(data, savedRef.current) || hasFailedOn(data)) {
       return;
     }
     if (debounceTimer.current) {
@@ -109,6 +122,7 @@ function useAutosave<T>({
   const markSaved = (value: T) => {
     clearTimers();
     savedRef.current = value;
+    failedRef.current = null;
   };
 
   return { flush: save, cancel: clearTimers, markSaved };

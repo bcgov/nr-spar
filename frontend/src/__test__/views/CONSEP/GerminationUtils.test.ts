@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { describe, it, expect } from 'vitest';
 import {
-  getDefaultSeeds, calcDayNumber, validateCountDates,
+  getDefaultSeeds, calcDayNumber, resolveDayZero, validateCountDates, formatCountDateLines,
   calcRepTotal, checkOverLimit, calcGermPct, buildUpsertPayload
 } from '../../../views/CONSEP/TestingActivities/GerminationContent/utils';
 
@@ -13,6 +13,13 @@ describe('getDefaultSeeds', () => {
   });
 });
 
+describe('formatCountDateLines', () => {
+  // The column is sized to the widest of these two lines, not the whole date.
+  it('splits a count date into year and month-day lines', () => {
+    expect(formatCountDateLines('2024-11-04')).toEqual(['2024-', '11-04']);
+  });
+});
+
 describe('calcDayNumber', () => {
   // Ticket AC1: into germinator 2024-10-31, first count 2024-11-04 -> day 4
   it('counts whole days from germinator entry', () => {
@@ -20,6 +27,33 @@ describe('calcDayNumber', () => {
   });
   it('returns undefined without a germinator entry date', () => {
     expect(calcDayNumber(undefined, '2024-11-04')).toBeUndefined();
+  });
+});
+
+describe('resolveDayZero', () => {
+  const slots = [
+    { slotIndex: 1, countDt: '2026-03-09', dayNoOfTest: 3 },
+    { slotIndex: 2, countDt: '2026-03-11', dayNoOfTest: 5 }
+  ];
+
+  it('prefers the germinator entry date', () => {
+    expect(resolveDayZero('2026-03-01', slots)).toBe('2026-03-01');
+  });
+
+  // Records can carry day numbers with no germinator entry date; without this
+  // fallback, editing one column blanks a day number nothing can recompute.
+  it('backs out day zero from another dated slot', () => {
+    expect(resolveDayZero(undefined, slots)).toBe('2026-03-06');
+  });
+
+  it('ignores the slot being edited', () => {
+    expect(resolveDayZero(undefined, slots, 1)).toBe('2026-03-06');
+    expect(resolveDayZero(undefined, [slots[0]], 1)).toBeUndefined();
+  });
+
+  it('returns undefined when nothing carries both a date and a day number', () => {
+    expect(resolveDayZero(undefined, [{ slotIndex: 1, countDt: '2026-03-09' }])).toBeUndefined();
+    expect(resolveDayZero(undefined, [])).toBeUndefined();
   });
 });
 

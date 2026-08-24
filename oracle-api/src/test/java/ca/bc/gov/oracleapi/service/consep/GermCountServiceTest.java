@@ -383,6 +383,62 @@ class GermCountServiceTest {
     verify(germCountRepository).save(any(GermCountEntity.class));
   }
 
+  /**
+   * DAILY_GERM_SKEY{n} points at a CNS_T_DAILY_ABNORMAL row, so a day with no abnormals
+   * must not be given one. Minting for every dated day both left dangling references and
+   * hit CONSEP.CNS_SEQ_COUNTER, a sequence CONSEP does not have -- ORA-00942 on the first
+   * newly dated column.
+   */
+  @Test
+  void upsert_dayWithoutAbnormals_doesNotMintSkey() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setUpdateTimestamp(ts);
+
+    stubChildSaves();
+    when(germCountRepository.existsById(riaSkey)).thenReturn(true);
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    List<DayGermCountDto> days =
+        List.of(dayNoAbnormals(1, LocalDate.of(2026, 4, 1), 1, 10, 12, 11, 9));
+
+    germCountService.upsertGermCounts(riaSkey, request(ts, days), "USER2");
+
+    verify(germCountRepository, never()).nextDailyGermSkey();
+    assertNull(existing.getDailyGermSkey1());
+  }
+
+  /** An existing key still owns the abnormals a previous save recorded, so it is kept. */
+  @Test
+  void upsert_dayWithoutAbnormals_keepsAnExistingSkey() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setUpdateTimestamp(ts);
+    existing.setDailyGermSkey1(new BigDecimal("777"));
+
+    stubChildSaves();
+    when(germCountRepository.existsById(riaSkey)).thenReturn(true);
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    List<DayGermCountDto> days =
+        List.of(dayNoAbnormals(1, LocalDate.of(2026, 4, 1), 1, 10, 12, 11, 9));
+
+    germCountService.upsertGermCounts(riaSkey, request(ts, days), "USER2");
+
+    verify(germCountRepository, never()).nextDailyGermSkey();
+    assertEquals(new BigDecimal("777"), existing.getDailyGermSkey1());
+  }
+
   @Test
   void upsert_update_withStaleTimestamp_throwsConflict() {
     BigDecimal riaSkey = new BigDecimal("881191");

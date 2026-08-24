@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useMemo, useRef, useState } from 'react';
+import { DatePicker, DatePickerInput, Modal } from '@carbon/react';
 
 import {
   GermCountSlotType,
   GermReplicateType
 } from '../../../../types/consep/GerminationType';
-import { calcDayNumber, calcRepTotal, calcGermPct } from './utils';
+import GenericTable from '../../../../components/GenericTable';
+import {
+  calcDayNumber, calcRepTotal, calcGermPct, isoToJsDate, parseCountDateInput,
+  resolveDayZero, toLocalIsoDate, REP_COUNT_KEYS
+} from './utils';
+import {
+  buildTableRows, getDailyGermColumns, DailyGermHandlers, GermTableRow,
+  DATE_FORMAT, DATE_PLACEHOLDER
+} from './constants';
 
 import './styles.scss';
-
-const SLOT_COUNT = 13;
-const REP_COUNT_KEYS = [
-  'rep1NoSeedsGerm', 'rep2NoSeedsGerm', 'rep3NoSeedsGerm', 'rep4NoSeedsGerm'
-] as const;
 
 type DailyGermTableProps = {
   slots: GermCountSlotType[];
@@ -27,17 +31,33 @@ const DailyGermTable = ({
   slots, replicates, germinatorEntry, isEditable,
   validationErrors, onSlotsChange, onReplicatesChange
 }: DailyGermTableProps) => {
+  // Which column's date the modal is editing, if any.
+  const [editingSlot, setEditingSlot] = useState<number | null>(null);
+  // A read-only screen has no picker to leave open.
+  const activeSlot = isEditable ? editingSlot : null;
+  const editingSlotData = slots.find((slot) => slot.slotIndex === activeSlot);
+  // AC6: which column the user is working in. The date modal counts as working
+  // in a column too, so the highlight survives picking a date.
+  const [focusedSlot, setFocusedSlot] = useState<number | null>(null);
+  const highlightedSlot = activeSlot ?? focusedSlot;
+
   const updateSlot = (slotIndex: number, patch: Partial<GermCountSlotType>) => {
     onSlotsChange(slots.map((slot) => (
       slot.slotIndex === slotIndex ? { ...slot, ...patch } : slot
     )));
   };
 
-  const handleDateChange = (slotIndex: number, value: string) => {
+  const updateReplicate = (repNumber: number, patch: Partial<GermReplicateType>) => {
+    onReplicatesChange(replicates.map((rep) => (
+      rep.replicateNumber === repNumber ? { ...rep, ...patch } : rep
+    )));
+  };
+
+  const setCountDate = (slotIndex: number, isoDate?: string) => {
     // Clearing the date (I4) must also clear that slot's rep counts: they are
     // dropped from the payload and wiped server-side, so keeping them in state
     // would show ghost values in the now-disabled inputs and inflate totals.
-    const cleared = value
+    const cleared = isoDate
       ? {}
       : {
         rep1NoSeedsGerm: undefined,
@@ -46,24 +66,102 @@ const DailyGermTable = ({
         rep4NoSeedsGerm: undefined
       };
     updateSlot(slotIndex, {
-      countDt: value || undefined,
-      dayNoOfTest: value ? calcDayNumber(germinatorEntry, value) : undefined,
+      countDt: isoDate,
+      // Day zero is taken from the other slots when the header has no
+      // germinator entry date, so editing one column does not blank a day
+      // number the record already carries.
+      dayNoOfTest: isoDate
+        ? calcDayNumber(resolveDayZero(germinatorEntry, slots, slotIndex), isoDate)
+        : undefined,
       ...cleared
     });
   };
 
-  const handleCountChange = (repNumber: number, slotIndex: number, raw: string) => {
-    const parsed = raw === '' ? undefined : parseInt(raw, 10);
-    updateSlot(slotIndex, {
-      [REP_COUNT_KEYS[repNumber - 1]]: Number.isNaN(parsed) ? undefined : parsed
-    });
+  // Arriving at a date cell fills today's date on an empty column and opens the
+  // calendar on one that already has a date.
+  const fromPointer = useRef(false);
+  // Carbon returns focus to the trigger when the modal closes, which would
+  // otherwise read as a fresh arrival and reopen it.
+  const skipNextFocus = useRef(false);
+
+  const activateDateCell = (slotIndex: number) => {
+    const slot = slots.find((s) => s.slotIndex === slotIndex);
+    if (slot?.countDt) {
+      setEditingSlot(slotIndex);
+    } else {
+      setCountDate(slotIndex, toLocalIsoDate(new Date()));
+    }
   };
 
-  const updateReplicate = (repNumber: number, patch: Partial<GermReplicateType>) => {
-    onReplicatesChange(replicates.map((rep) => (
-      rep.replicateNumber === repNumber ? { ...rep, ...patch } : rep
-    )));
+  const closeDateModal = () => {
+    skipNextFocus.current = true;
+    setEditingSlot(null);
   };
+
+  const handlers: DailyGermHandlers = {
+    // Free-text entry: only an empty field clears the date. Anything else that
+    // does not parse is a date the user is still typing, so it is ignored
+    // rather than treated as a clear.
+    onCountDateChange: (slotIndex, raw) => {
+      if (!raw.trim()) {
+        setCountDate(slotIndex, undefined);
+        return;
+      }
+      const isoDate = parseCountDateInput(raw);
+      if (isoDate) {
+        setCountDate(slotIndex, isoDate);
+      }
+    },
+    onCountDatePick: (slotIndex, date) => {
+      setCountDate(slotIndex, date ? toLocalIsoDate(date) : undefined);
+      // Picking from the calendar is a complete edit, so close the modal.
+      // Typing does not, or the field would vanish mid-entry.
+      closeDateModal();
+    },
+    onEditDateSlot: setEditingSlot,
+    onDateCellActivate: (slotIndex) => {
+      fromPointer.current = true;
+      skipNextFocus.current = false;
+      setFocusedSlot(slotIndex);
+      activateDateCell(slotIndex);
+    },
+    onDateCellFocus: (slotIndex) => {
+      setFocusedSlot(slotIndex);
+      // A pointer click focuses before it clicks; mousedown already acted.
+      if (fromPointer.current || skipNextFocus.current) {
+        fromPointer.current = false;
+        skipNextFocus.current = false;
+        return;
+      }
+      activateDateCell(slotIndex);
+    },
+    onSlotFocus: setFocusedSlot,
+    onCountChange: (repNumber, slotIndex, raw) => {
+      const parsed = raw === '' ? undefined : parseInt(raw, 10);
+      updateSlot(slotIndex, {
+        [REP_COUNT_KEYS[repNumber - 1]]: Number.isNaN(parsed) ? undefined : parsed
+      });
+    },
+    onSeedsChange: (repNumber, raw) => {
+      const parsed = raw === '' ? undefined : parseInt(raw, 10);
+      updateReplicate(repNumber, {
+        totalNoSeeds: Number.isNaN(parsed) ? undefined : parsed
+      });
+    },
+    onOverrideToggle: (repNumber, checked) => {
+      updateReplicate(repNumber, { tolrncOvrrdeDesc: checked ? 'ok' : null });
+    },
+    onAcceptToggle: (repNumber, checked) => {
+      updateReplicate(repNumber, { repAcceptedInd: checked ? 1 : 0 });
+    }
+  };
+
+  const rows = useMemo<GermTableRow[]>(
+    () => buildTableRows(slots, replicates),
+    [slots, replicates]
+  );
+
+  const columns = getDailyGermColumns(slots, isEditable, validationErrors, handlers, highlightedSlot);
 
   const errorMessages = Object.values(validationErrors).filter(Boolean);
 
@@ -77,119 +175,70 @@ const DailyGermTable = ({
           ))}
         </div>
       )}
-      <div className="daily-germ-table-scroll">
-        <table className="daily-germ-table">
-          <thead>
-            <tr>
-              <th rowSpan={2}>Rep</th>
-              {Array.from({ length: SLOT_COUNT }, (_, i) => {
-                const slot = slots[i];
-                return (
-                  <th key={`date-${slot.slotIndex}`} className={validationErrors[`slot-${slot.slotIndex}`] ? 'cell-invalid' : ''}>
-                    <input
-                      type="date"
-                      data-testid={`germ-date-${slot.slotIndex}`}
-                      aria-label={`Count date ${slot.slotIndex}`}
-                      value={slot.countDt ?? ''}
-                      disabled={!isEditable}
-                      onChange={(e) => handleDateChange(slot.slotIndex, e.target.value)}
-                    />
-                  </th>
-                );
-              })}
-              <th rowSpan={2}>Rep total</th>
-              <th rowSpan={2}># seeds</th>
-              <th rowSpan={2}>Ovr</th>
-              <th rowSpan={2}>Acc</th>
-            </tr>
-            <tr>
-              {slots.map((slot) => (
-                <th key={`day-${slot.slotIndex}`} data-testid={`germ-day-${slot.slotIndex}`}>
-                  {slot.dayNoOfTest ?? ''}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {replicates.map((rep) => {
-              const repNumber = rep.replicateNumber as 1 | 2 | 3 | 4;
-              const repTotal = calcRepTotal(slots, repNumber);
-              return (
-                <tr key={repNumber} className={validationErrors[`rep-${repNumber}`] ? 'row-invalid' : ''}>
-                  <td>{repNumber}</td>
-                  {slots.map((slot) => (
-                    <td key={`count-${repNumber}-${slot.slotIndex}`}>
-                      <input
-                        type="number"
-                        min={0}
-                        data-testid={`germ-count-${repNumber}-${slot.slotIndex}`}
-                        aria-label={`Replicate ${repNumber} count ${slot.slotIndex}`}
-                        value={slot[REP_COUNT_KEYS[repNumber - 1]] ?? ''}
-                        disabled={!isEditable || !slot.countDt}
-                        onChange={(e) => handleCountChange(repNumber, slot.slotIndex, e.target.value)}
-                      />
-                    </td>
-                  ))}
-                  <td data-testid={`germ-rep-total-${repNumber}`}>{repTotal}</td>
-                  <td>
-                    <input
-                      type="number"
-                      min={0}
-                      data-testid={`germ-seeds-${repNumber}`}
-                      aria-label={`Replicate ${repNumber} number of seeds`}
-                      value={rep.totalNoSeeds ?? ''}
-                      disabled={!isEditable}
-                      onChange={(e) => {
-                        const parsed = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                        updateReplicate(repNumber, {
-                          totalNoSeeds: Number.isNaN(parsed) ? undefined : parsed
-                        });
-                      }}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      data-testid={`germ-ovr-${repNumber}`}
-                      aria-label={`Replicate ${repNumber} tolerance override`}
-                      checked={rep.tolrncOvrrdeDesc === 'ok'}
-                      disabled={!isEditable}
-                      onChange={(e) => updateReplicate(repNumber, {
-                        tolrncOvrrdeDesc: e.target.checked ? 'ok' : null
-                      })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      data-testid={`germ-acc-${repNumber}`}
-                      aria-label={`Replicate ${repNumber} accepted`}
-                      checked={rep.repAcceptedInd === 1}
-                      disabled={!isEditable || !!validationErrors[`rep-${repNumber}`]}
-                      onChange={(e) => updateReplicate(repNumber, {
-                        repAcceptedInd: e.target.checked ? 1 : 0
-                      })}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td>Germ %</td>
-              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-              <td colSpan={SLOT_COUNT} />
-              <td colSpan={4} className="germ-pct-cells">
-                {replicates.map((rep) => (
-                  <span key={rep.replicateNumber} data-testid={`germ-pct-${rep.replicateNumber}`}>
-                    {`${calcGermPct(calcRepTotal(slots, rep.replicateNumber as 1 | 2 | 3 | 4), rep.totalNoSeeds)}%`}
-                  </span>
-                ))}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+      <div className="daily-germ-table">
+        <GenericTable
+          columns={columns}
+          data={rows}
+          isCompacted
+        />
+      </div>
+      {editingSlotData && (
+        <Modal
+          open
+          passiveModal
+          className="germ-count-date-modal"
+          modalHeading={`Count date ${editingSlotData.slotIndex}`}
+          onRequestClose={closeDateModal}
+        >
+          <DatePicker
+            datePickerType="single"
+            allowInput
+            // The modal exists to be a calendar, so render it open and in flow
+            // rather than as a dropdown the user has to summon.
+            inline
+            dateFormat={DATE_FORMAT}
+            value={editingSlotData.countDt ? [isoToJsDate(editingSlotData.countDt)] : []}
+            onChange={(dates: Array<Date>) => (
+              handlers.onCountDatePick(editingSlotData.slotIndex, dates[0])
+            )}
+          >
+            <DatePickerInput
+              id={`germ-date-input-${editingSlotData.slotIndex}`}
+              data-testid={`germ-date-${editingSlotData.slotIndex}`}
+              labelText="Count date"
+              hideLabel
+              placeholder={DATE_PLACEHOLDER}
+              autoComplete="off"
+              // Carbon focuses this on open and flatpickr opens on focus, so
+              // the calendar is already down when the modal appears.
+              data-modal-primary-focus
+              invalid={!!validationErrors[`slot-${editingSlotData.slotIndex}`]}
+              invalidText={validationErrors[`slot-${editingSlotData.slotIndex}`]}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => (
+                handlers.onCountDateChange(editingSlotData.slotIndex, e.target.value)
+              )}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                if (e.key === 'Enter') {
+                  closeDateModal();
+                }
+              }}
+            />
+          </DatePicker>
+        </Modal>
+      )}
+      <div className="replicate-total">
+        <p className="replicate-total-label">Replicate total</p>
+        <div className="replicate-total-tiles">
+          {replicates.map((rep) => (
+            <span
+              key={rep.replicateNumber}
+              className="replicate-total-tile"
+              data-testid={`germ-pct-${rep.replicateNumber}`}
+            >
+              {`${calcGermPct(calcRepTotal(slots, rep.replicateNumber as 1 | 2 | 3 | 4), rep.totalNoSeeds)}%`}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );

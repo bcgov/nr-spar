@@ -23,6 +23,7 @@ import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import StatusTag from '../../../../components/StatusTag';
 import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
+import SummaryGrid, { type SummaryColumn } from '../../../../components/CONSEP/SummaryGrid';
 
 import DailyGermTable from './DailyGermTable';
 import {
@@ -242,18 +243,20 @@ const GerminationContent = () => {
     { name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST }
   ];
 
-  const headerFields: Array<{ label: string; value?: string | number }> = [
-    { label: 'Request ID', value: header?.requestId },
-    { label: 'Activity', value: header?.activityTypeCd },
-    { label: 'Seedlot number', value: header?.seedlotNumber },
-    { label: 'Species', value: header?.vegetationState },
-    { label: 'Germ tray', value: header?.germinatorTrayId },
-    { label: 'Category', value: header?.testCategoryCd },
-    { label: 'Rank', value: header?.testRank },
-    { label: 'Germination %', value: header?.germinationPct },
-    { label: 'GV', value: header?.germinationValue },
-    { label: 'PV', value: header?.peakValueGrmPct },
-    { label: 'Germinator ID', value: header?.germinatorId }
+  const summaryColumns: SummaryColumn<GerminationTestHeaderType>[] = [
+    { key: 'requestId', label: 'Request ID', renderValue: (data) => data?.requestId ?? '-' },
+    { key: 'activity', label: 'Activity', renderValue: (data) => data?.activityTypeCd ?? '-' },
+    {
+      key: 'seedlotNumber',
+      label: 'Seedlot number',
+      renderValue: (data) => (
+        !data?.seedlotNumber || data.seedlotNumber === '00000'
+          ? data?.familyLotNumber ?? '-'
+          : data.seedlotNumber
+      )
+    },
+    { key: 'species', label: 'Species', renderValue: (data) => data?.vegetationState ?? '-' },
+    { key: 'germTray', label: 'Germ tray', renderValue: (data) => data?.germinatorTrayId ?? '-' }
   ];
 
   return (
@@ -275,6 +278,17 @@ const GerminationContent = () => {
       <Row className="consep-germination-content-breadcrumb">
         <Breadcrumbs crumbs={crumbs} />
       </Row>
+      {/* A missing test redirects to 404 (see the effect above). Any other
+          header failure — the Oracle API being unreachable, say — has to be
+          said out loud, or the screen below just renders empty. */}
+      {headerQuery.isError && (headerQuery.error as AxiosError).response?.status !== 404 && (
+        <InlineNotification
+          lowContrast
+          kind="error"
+          title="Could not load this germination test"
+          subtitle="The test details are unavailable right now. Try reloading the page."
+        />
+      )}
       {/* Title (and everything below) is gated on the header having loaded:
           the header card, table hydration and day-number calculations all
           depend on header fields (e.g. germinatorEntry), so rendering them
@@ -289,17 +303,13 @@ const GerminationContent = () => {
               {header.acceptResultInd === 1 && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
             </>
           </Row>
-          <Row className="consep-germination-content-header-card">
-            {headerFields.map((field) => (
-              <Column key={field.label} sm={2} md={2} lg={3} xlg={3}>
-                <div className="consep-germination-content-header-field">
-                  <span className="consep-germination-content-header-label">{field.label}</span>
-                  <span className="consep-germination-content-header-value">
-                    {field.value?.toString() ?? '—'}
-                  </span>
-                </div>
-              </Column>
-            ))}
+          <Row className="consep-germination-content-summary">
+            <SummaryGrid
+              item={header}
+              isFetching={headerQuery.isFetching}
+              columns={summaryColumns}
+              cellClassName="consep-germination-content-summary-cell"
+            />
           </Row>
           <Row className="consep-germination-content-comments">
             <Column>
