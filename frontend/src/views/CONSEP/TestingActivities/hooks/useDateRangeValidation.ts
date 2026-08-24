@@ -10,11 +10,11 @@ type DateRangeErrors = {
   endDate?: string;
 };
 
-const toDateOnlyTime = (date: Date) => new Date(
-  date.getFullYear(),
-  date.getMonth(),
-  date.getDate()
-).getTime();
+const toDateOnlyTime = (date: Date) => Date.UTC(
+  date.getUTCFullYear(),
+  date.getUTCMonth(),
+  date.getUTCDate()
+);
 
 export const isDateRangeOrdered = (startDate: Date | null, endDate: Date | null) => {
   if (!startDate || !endDate) {
