@@ -52,6 +52,7 @@ import {
   DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
 import useActivityConflict from '../hooks/useActivityConflict';
+import useDateRangeValidation from '../hooks/useDateRangeValidation';
 import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
 
 import './styles.scss';
@@ -70,19 +71,10 @@ const PurityContent = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'accept'>(COMPLETE);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [dateErrors, setDateErrors] = useState<{ startDate?: string; endDate?: string }>({});
-
-  const validateDates = (startDate: Date | null, endDate: Date | null) => {
-    const errors: { startDate?: string; endDate?: string } = {};
-
-    if (startDate && endDate && startDate > endDate) {
-      errors.startDate = fieldsConfig.startDate.invalidText;
-      errors.endDate = fieldsConfig.endDate.invalidText;
-    }
-
-    setDateErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+  const { dateErrors, validateDateRange } = useDateRangeValidation({
+    startDate: fieldsConfig.startDate.invalidText,
+    endDate: fieldsConfig.endDate.invalidText
+  });
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
@@ -345,17 +337,14 @@ const PurityContent = () => {
     }
     const base = latestRecordRef.current ?? activityRecord;
     const merged = { ...base, ...record };
-    if (record.actualBeginDateTime || record.actualEndDateTime) {
-      const startDate = merged.actualBeginDateTime ? new Date(merged.actualBeginDateTime) : null;
-      const endDate = merged.actualEndDateTime ? new Date(merged.actualEndDateTime) : null;
-
-      if (!validateDates(startDate, endDate)) {
-        return;
-      }
-    }
-
+    const startDate = merged.actualBeginDateTime ? new Date(merged.actualBeginDateTime) : null;
+    const endDate = merged.actualEndDateTime ? new Date(merged.actualEndDateTime) : null;
+    const isDateRangeValid = validateDateRange(startDate, endDate);
     setActivityRecord(merged);
     latestRecordRef.current = merged;
+    if (!isDateRangeValid) {
+      return;
+    }
     if (inFlightRef.current) {
       pendingRef.current = true;
       return;

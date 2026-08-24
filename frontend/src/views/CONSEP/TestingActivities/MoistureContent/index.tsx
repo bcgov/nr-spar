@@ -39,6 +39,7 @@ import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
 import { mccReplicatesChecker } from './utils';
 import useActivityConflict from '../hooks/useActivityConflict';
+import useDateRangeValidation from '../hooks/useDateRangeValidation';
 import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
 
 import {
@@ -63,21 +64,10 @@ const MoistureContent = () => {
     message: string;
   } | null>();
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [dateErrors, setDateErrors] = useState<{ startDate?: string; endDate?: string }>({});
-
-  // Validation function to check if start date is before end date
-  const validateDates = (startDate: Date | null, endDate: Date | null) => {
-    const errors: { startDate?: string; endDate?: string } = {};
-
-    if (startDate && endDate && startDate > endDate) {
-      errors.startDate = fieldsConfig.startDate.invalidText;
-      errors.endDate = fieldsConfig.endDate.invalidText;
-    }
-
-    setDateErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
+  const { dateErrors, validateDateRange } = useDateRangeValidation({
+    startDate: fieldsConfig.startDate.invalidText,
+    endDate: fieldsConfig.endDate.invalidText
+  });
   const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
   const { isConflict, markConflict, clearConflict } = useActivityConflict();
@@ -89,7 +79,6 @@ const MoistureContent = () => {
   const inFlightRef = useRef<boolean>(false);
   const pendingRef = useRef<boolean>(false);
   const latestRecordRef = useRef<ActivityRecordType | undefined>(undefined);
-
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
     queryFn: () => testingActivitiesAPI('moistureTest', 'getDataByRiaKey', { riaKey }),
@@ -225,20 +214,14 @@ const MoistureContent = () => {
     }
     const base = latestRecordRef.current ?? activityRecord;
     const merged = { ...base, ...record };
-    // Validate dates if either date is being updated
-    if (record.actualBeginDateTime || record.actualEndDateTime) {
-      const beginDateTime = merged.actualBeginDateTime;
-      const endDateTime = merged.actualEndDateTime;
-      const startDate = beginDateTime ? new Date(beginDateTime) : null;
-      const endDate = endDateTime ? new Date(endDateTime) : null;
-
-      if (!validateDates(startDate, endDate)) {
-        return; // Don't update if validation fails
-      }
-    }
-
+    const startDate = merged.actualBeginDateTime ? new Date(merged.actualBeginDateTime) : null;
+    const endDate = merged.actualEndDateTime ? new Date(merged.actualEndDateTime) : null;
+    const isDateRangeValid = validateDateRange(startDate, endDate);
     setActivityRecord(merged);
     latestRecordRef.current = merged;
+    if (!isDateRangeValid) {
+      return;
+    }
     if (inFlightRef.current) {
       pendingRef.current = true;
       return;
