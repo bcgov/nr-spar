@@ -22,7 +22,7 @@
     "@vitejs/plugin-react": "^5.1.4",
     "aws-amplify": "^6.16.2",
     "axios": "^1.13.5",
-    "bignumber.js": "^9.0.0",
+    "bignumber.js": "^11.0.0",
     "export-to-csv": "^1.4.0",
     "luxon": "^3.4.3",
     "material-react-table": "^3.2.1",
