@@ -147,7 +147,7 @@ export const initBClassCollectionStateFromDto = (
       toOption(collectionData.bgcSubzoneCode)
     ),
     becVariant: getOptionsInputObj('b-collection-bec-variant', toOption(variantCode)),
-    sameBecUnit: getBooleanInputObj('b-collection-same-bec-unit', collectionData.becOverrideInd !== 'Y')
+    sameBecUnit: getBooleanInputObj('b-collection-same-bec-unit', !collectionData.becOverrideInd)
   };
 };
 

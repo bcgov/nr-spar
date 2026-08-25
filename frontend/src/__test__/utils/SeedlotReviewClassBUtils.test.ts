@@ -98,7 +98,7 @@ describe('SeedlotReviewClassB utils test', () => {
         ...richSeedlot,
         seedlot: {
           ...richSeedlot.seedlot,
-          superiorProvenanceInd: 'Y',
+          superiorProvenanceInd: true,
           provenanceId: 42
         }
       } as unknown as RichSeedlotType;
@@ -108,7 +108,7 @@ describe('SeedlotReviewClassB utils test', () => {
         superiorSeedlot
       ).seedlotFormCollectionDto;
 
-      expect(collectionDto.superiorProvenanceInd).toBe('Y');
+      expect(collectionDto.superiorProvenanceInd).toBe(true);
       expect(collectionDto.provenanceId).toBe(42);
     });
 
@@ -149,7 +149,7 @@ describe('SeedlotReviewClassB utils test', () => {
       ).seedlotFormCollectionDto;
 
       expect(collectionDto.becVersionId).toBe(7);
-      expect(collectionDto.becOverrideInd).toBe('Y');
+      expect(collectionDto.becOverrideInd).toBe(true);
       expect(collectionDto.becOverrideComment).toBe('Mapped from adjacent unit');
     });
 

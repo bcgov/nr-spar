@@ -15,37 +15,37 @@
 -- 1. New B-class columns on spar.seedlot
 -- -----------------------------------------------------------------------------
 alter table spar.seedlot
-  add column superior_provenance_ind          varchar(1), -- drop this
-  add column org_unit_no                 integer,
-  add column collection_location_desc        varchar(30),
-  add column provenance_id               integer,
-  add column collection_standard_met_ind varchar(1),
-  add column collection_area_radius      decimal(6,1),
-  add column capture_method_code         varchar(30),
-  add column seed_plan_zone_code         varchar(3),
-  add column collection_seed_plan_zone_ind          varchar(1),
-  add column seed_coast_area_code        varchar(3),
-  add column collection_bgc_validated_ind          varchar(1),
-  add column bec_override_ind            varchar(1),
-  add column bec_override_comment        varchar(2000),
-  add column number_trees_from_code        varchar(3),
-  add column is_lot_split_ind            varchar(1);
+  add column superior_provenance_ind      boolean, -- drop this
+  add column org_unit_no                  integer,
+  add column collection_location_desc     varchar(30),
+  add column provenance_id                integer,
+  add column collection_standard_met_ind  boolean,
+  add column collection_area_radius       decimal(6,1),
+  add column capture_method_code          varchar(30),
+  add column seed_plan_zone_code          varchar(3),
+  add column collection_seed_plan_zone_ind boolean,
+  add column seed_coast_area_code         varchar(3),
+  add column collection_bgc_validated_ind boolean,
+  add column bec_override_ind             boolean,
+  add column bec_override_comment         varchar(2000),
+  add column number_trees_from_code       varchar(3),
+  add column is_lot_split_ind             boolean;
 
-comment on column spar.seedlot.superior_provenance_ind          is 'Indicates whether this is a Superior Provenance (B+) seedlot. Y=Superior Provenance, N=Standard Natural Stand.';
-comment on column spar.seedlot.org_unit_no                 is 'The district org unit responsible for the collection area. Required when bc_source_ind = Y.';
-comment on column spar.seedlot.collection_location_desc        is 'Text description of the collection location. Used when Superior Provenance = N.';
-comment on column spar.seedlot.provenance_id               is 'Oracle SUPERIOR_PROVENANCE provenance identifier (stored as integer; no Postgres FK). Required when superior_provenance_ind = Y.';
-comment on column spar.seedlot.collection_standard_met_ind is 'Whether the CFS Appendix 5 collection standard has been met. Y or N.';
-comment on column spar.seedlot.collection_area_radius      is 'The radius in km of the collection area (0.1–999.9).';
-comment on column spar.seedlot.capture_method_code         is 'The method used to capture the collection area geometry (Oracle CORP_CAPTURE_METHOD code, max 28 chars e.g. monoRestitution).';
-comment on column spar.seedlot.seed_plan_zone_code         is 'The Seed Planning Zone code for the collection site. Distinct from the AOU SPZ child table rows.';
-comment on column spar.seedlot.collection_seed_plan_zone_ind          is 'Indicator flag related to the collection Seed Planning Zone.';
-comment on column spar.seedlot.seed_coast_area_code        is 'Coastal geographic area code. Required when seed_plan_zone_code = ''M''.';
-comment on column spar.seedlot.collection_bgc_validated_ind          is 'Indicates whether the BEC zone has been validated for the collection area. Must be Y to register.';
-comment on column spar.seedlot.bec_override_ind            is 'Y if the collection polygon spans multiple BEC zones and an override has been accepted.';
-comment on column spar.seedlot.bec_override_comment        is 'Explanation comment required when bec_override_ind = Y.';
-comment on column spar.seedlot.number_trees_from_code        is 'Code indicating the number of trees the seed was collected from.';
-comment on column spar.seedlot.is_lot_split_ind            is 'Y if this seedlot was created by splitting another lot. Affects CFS validation.';
+comment on column spar.seedlot.superior_provenance_ind      is 'True when this is a Superior Provenance seedlot, false for a standard natural stand.';
+comment on column spar.seedlot.org_unit_no                  is 'The district org unit responsible for the collection area. Required when bc_source_ind is true.';
+comment on column spar.seedlot.collection_location_desc     is 'Text description of the collection location. Used when superior_provenance_ind is false.';
+comment on column spar.seedlot.provenance_id                is 'Oracle SUPERIOR_PROVENANCE provenance identifier (stored as integer; no Postgres FK). Required when superior_provenance_ind is true.';
+comment on column spar.seedlot.collection_standard_met_ind  is 'True when the CFS Appendix 5 collection standard has been met.';
+comment on column spar.seedlot.collection_area_radius       is 'The radius in km of the collection area (0.1–999.9).';
+comment on column spar.seedlot.capture_method_code          is 'The method used to capture the collection area geometry (Oracle CORP_CAPTURE_METHOD code, max 28 chars e.g. monoRestitution).';
+comment on column spar.seedlot.seed_plan_zone_code          is 'The Seed Planning Zone code for the collection site. Distinct from the AOU SPZ child table rows.';
+comment on column spar.seedlot.collection_seed_plan_zone_ind is 'Indicator flag related to the collection Seed Planning Zone.';
+comment on column spar.seedlot.seed_coast_area_code         is 'Coastal geographic area code. Required when seed_plan_zone_code = ''M''.';
+comment on column spar.seedlot.collection_bgc_validated_ind is 'True when the BEC zone has been validated for the collection area. Must be true to register.';
+comment on column spar.seedlot.bec_override_ind             is 'True when the collection polygon spans multiple BEC zones and an override has been accepted.';
+comment on column spar.seedlot.bec_override_comment         is 'Explanation comment required when bec_override_ind is true.';
+comment on column spar.seedlot.number_trees_from_code       is 'Code indicating the number of trees the seed was collected from.';
+comment on column spar.seedlot.is_lot_split_ind             is 'True when this seedlot was created by splitting another lot. Affects CFS validation.';
 
 -- -----------------------------------------------------------------------------
 -- 3. Collection area geometry table
@@ -112,21 +112,21 @@ comment on column spar.seedlot_registration_save.revision_count  is 'Optimistic 
 -- 5. Mirror B-class columns on spar.seedlot_audit
 -- -----------------------------------------------------------------------------
 alter table spar.seedlot_audit
-  add column superior_provenance_ind          varchar(1),
-  add column org_unit_no                 integer,
-  add column collection_location_desc        varchar(30),
-  add column provenance_id               integer,
-  add column collection_standard_met_ind varchar(1),
-  add column collection_area_radius      decimal(6,1),
-  add column capture_method_code         varchar(30),
-  add column seed_plan_zone_code         varchar(3),
-  add column collection_seed_plan_zone_ind          varchar(1),
-  add column seed_coast_area_code        varchar(3),
-  add column collection_bgc_validated_ind          varchar(1),
-  add column bec_override_ind            varchar(1),
-  add column bec_override_comment        varchar(2000),
-  add column number_trees_from_code        varchar(3),
-  add column is_lot_split_ind            varchar(1);
+  add column superior_provenance_ind      boolean,
+  add column org_unit_no                  integer,
+  add column collection_location_desc     varchar(30),
+  add column provenance_id                integer,
+  add column collection_standard_met_ind  boolean,
+  add column collection_area_radius       decimal(6,1),
+  add column capture_method_code          varchar(30),
+  add column seed_plan_zone_code          varchar(3),
+  add column collection_seed_plan_zone_ind boolean,
+  add column seed_coast_area_code         varchar(3),
+  add column collection_bgc_validated_ind boolean,
+  add column bec_override_ind             boolean,
+  add column bec_override_comment         varchar(2000),
+  add column number_trees_from_code       varchar(3),
+  add column is_lot_split_ind             boolean;
 
 comment on column spar.seedlot_audit.superior_provenance_ind          is 'Referring value for spar.seedlot.superior_provenance_ind column';
 comment on column spar.seedlot_audit.org_unit_no                 is 'Referring value for spar.seedlot.org_unit_no column';

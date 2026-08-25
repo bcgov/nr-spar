@@ -236,23 +236,23 @@ export const convertBClassCollection = (
     orgUnitNo: collectionData.orgUnit.value.code
       ? parseInt(collectionData.orgUnit.value.code, 10)
       : null,
-    collectionStandardMetInd: 'Y',
+    collectionStandardMetInd: true,
     collectionAreaRadius: collectionData.collectionRadius.value
       ? +collectionData.collectionRadius.value
       : null,
     captureMethodCode: collectionData.captureMethod.value.code,
     seedPlanZoneCode,
-    collectionSeedPlanZoneInd: 'Y',
+    collectionSeedPlanZoneInd: true,
     seedCoastAreaCode: seedlot?.seedCoastAreaCode ?? null,
-    collectionBgcValidatedInd: 'Y',
-    becOverrideInd: collectionData.sameBecUnit.value ? 'N' : 'Y',
+    collectionBgcValidatedInd: true,
+    becOverrideInd: !collectionData.sameBecUnit.value,
     becOverrideComment: collectionData.sameBecUnit.value
       ? null
       : (seedlot?.becOverrideComment ?? null),
     numberTreesFromCode: collectionData.numberTreesFrom.value.code,
-    isLotSplitInd: 'N',
+    isLotSplitInd: false,
     // Preserve loaded values when re-saving; default for brand-new drafts
-    superiorProvenanceInd: seedlot ? seedlot.superiorProvenanceInd : 'N',
+    superiorProvenanceInd: seedlot ? seedlot.superiorProvenanceInd : false,
     provenanceId: seedlot?.provenanceId ?? null,
     collectionLatitudeDeg: latDeg,
     collectionLatitudeMin: latMin,

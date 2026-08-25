@@ -169,18 +169,18 @@ public class SeedlotFormValidationService {
               "seedlotFormCollectionDto.orgUnitNo",
               "Collection district org unit is required when BC Source is selected."));
     }
-    if ("Y".equals(dto.becOverrideInd())
+    if (Boolean.TRUE.equals(dto.becOverrideInd())
         && (dto.becOverrideComment() == null || dto.becOverrideComment().isBlank())) {
       errors.add(
           new SeedlotValidationError(
               "seedlotFormCollectionDto.becOverrideComment",
-              "A BEC override comment is required when the override indicator is Y."));
+              "A BEC override comment is required when the BEC override is selected."));
     }
-    if (!"Y".equals(dto.collectionBgcValidatedInd())) {
+    if (!Boolean.TRUE.equals(dto.collectionBgcValidatedInd())) {
       errors.add(
           new SeedlotValidationError(
               "seedlotFormCollectionDto.collectionBgcValidatedInd",
-              "Collection BEC must be validated (Y) before registration."));
+              "Collection BEC must be validated before registration."));
     }
   }
 

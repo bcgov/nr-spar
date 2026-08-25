@@ -93,7 +93,7 @@ export const buildBClassReviewPayload = (
         ?? null,
       becVersionId: seedlot.becVersionId,
       // Form checkbox drives override; keep existing comment when override is Y
-      becOverrideInd: allStepData.collectionStep.sameBecUnit.value ? 'N' : 'Y',
+      becOverrideInd: !allStepData.collectionStep.sameBecUnit.value,
       becOverrideComment: allStepData.collectionStep.sameBecUnit.value
         ? null
         : (seedlot.becOverrideComment ?? null)

@@ -90,5 +90,5 @@ export const convertToApplicantInfoObj = (
   source: seedlot.seedlotSource?.description ?? '',
   willRegister: seedlot.intendedForCrownLand,
   isBcSource: seedlot.sourceInBc,
-  superiorProvenance: seedlot.superiorProvenanceInd === 'Y'
+  superiorProvenance: seedlot.superiorProvenanceInd ?? false
 });
