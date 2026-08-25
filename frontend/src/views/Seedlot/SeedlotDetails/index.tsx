@@ -45,7 +45,6 @@ import FormProgress from './FormProgress';
 import TscReviewSection from './TscReviewSection';
 import {
   getPrintSeedlotLabel,
-  getEditApplicantRoute,
   getRegistrationRoute,
   getReviewRoute,
   isBClassSeedlot
@@ -123,9 +122,9 @@ const SeedlotDetails = () => {
     {
       text: 'Edit seedlot applicant',
       onClickFunction: () => navigate(
-        addParamToPath(getEditApplicantRoute(seedlot), seedlotNumber ?? '')
+        addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')
       ),
-      disabled: viewOnlySeedlot || isBClass
+      disabled: viewOnlySeedlot
     },
     {
       text: getPrintSeedlotLabel(isBClass, downloadReportMutation.isPending),
@@ -143,7 +142,7 @@ const SeedlotDetails = () => {
       disabled: true
     }
   ], [
-    navigate, seedlot, seedlotNumber, viewOnlySeedlot, isBClass, isTscAdmin, downloadReportMutation
+    navigate, seedlotNumber, viewOnlySeedlot, isBClass, isTscAdmin, downloadReportMutation
   ]);
 
   const getActBtnLabel = (): string => {
@@ -293,7 +292,6 @@ const SeedlotDetails = () => {
                   isFetching={seedlotQuery.isFetching || forestClientQuery.isFetching}
                   hideEditButton={!isTscAdmin && viewOnlySeedlot}
                   variant={isBClass ? 'B' : 'A'}
-                  editApplicantRoute={getEditApplicantRoute(seedlot)}
                 />
                 {
                   (

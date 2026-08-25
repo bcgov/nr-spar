@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 import DetailSection from '../../../../components/DetailSection';
 import { SeedlotApplicantType } from '../../../../types/SeedlotType';
+import ROUTES from '../../../../routes/constants';
 import { addParamToPath } from '../../../../utils/PathUtils';
 import EmailDisplay from '../../../../components/EmailDisplay';
 import { formatYesNo } from '../utils';
@@ -120,7 +121,6 @@ interface ApplicantSeedlotInformationProps {
   isFetching: boolean;
   hideEditButton: boolean;
   variant?: 'A' | 'B';
-  editApplicantRoute: string;
 }
 
 const ApplicantInformation = ({
@@ -128,12 +128,9 @@ const ApplicantInformation = ({
   applicant,
   isFetching,
   hideEditButton,
-  variant = 'A',
-  editApplicantRoute
+  variant = 'A'
 }: ApplicantSeedlotInformationProps) => {
   const navigate = useNavigate();
-  const isBClass = variant === 'B';
-  const showEditButton = !hideEditButton && !isBClass;
   const fieldRows = getApplicantFieldRows(applicant, variant);
 
   return (
@@ -158,7 +155,7 @@ const ApplicantInformation = ({
           ))
         }
         {
-          showEditButton
+          !hideEditButton
             ? (
               <Row>
                 <Column>
@@ -167,7 +164,7 @@ const ApplicantInformation = ({
                     size="md"
                     className="section-btn"
                     renderIcon={Edit}
-                    onClick={() => navigate(addParamToPath(editApplicantRoute, seedlotNumber ?? ''))}
+                    onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? ''))}
                   >
                     Edit applicant
                   </Button>

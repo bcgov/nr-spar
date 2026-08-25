@@ -74,7 +74,7 @@ export type SeedlotType = {
     seedlotSourceCode: string,
     description: string,
     isDefault: boolean
-  },
+  } | null,
   intendedForCrownLand: boolean,
   sourceInBc: boolean,
   collectionClientNumber: string,

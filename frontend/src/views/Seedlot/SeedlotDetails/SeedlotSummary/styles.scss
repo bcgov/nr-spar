@@ -22,20 +22,16 @@
     .seedlot-summary-info-label {
       @include type.type-style('label-01');
       margin-bottom: 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+
     .info-col {
       display: flex;
       flex-direction: column;
       margin-top: 2rem;
       padding-right: 2rem;
-    }
-
-    .seedlot-summary-info-label {
-      @include type.type-style('label-01');
-      margin-bottom: 0.5rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .seedlot-summary-seedlot-status>.seedlot-summary-info-value div.#{vars.$bcgov-prefix}--tag {
@@ -44,10 +40,6 @@
 
     p.seedlot-summary-info-value {
       @include type.type-style('body-compact-01');
-    }
-
-    .info-col {
-      margin-top: 2rem;
     }
   }
 }
