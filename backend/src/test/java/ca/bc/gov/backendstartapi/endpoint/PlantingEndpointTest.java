@@ -106,6 +106,7 @@ class PlantingEndpointTest {
                 .with(csrf().asHeader())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
+        .andExpect(status().reason("Seedlot doesn't exist"))
         .andReturn();
   }
 
