@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.service.PlantingService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,50 @@ class PlantingEndpointTest {
     mockMvc
         .perform(
             get("/api/planting/request-key/{requestKey}", 500L)
+                .with(csrf().asHeader())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSpeciesBySeedlotSuccessTest")
+  void getSpeciesBySeedlotSuccessTest() throws Exception {
+    when(plantingService.getSpeciesBySeedlot("16258"))
+        .thenReturn(new SeedlotSpeciesDto(16258L, "PLI"));
+
+    mockMvc
+        .perform(
+            get("/api/planting/seedlot/{seedlotNumber}", "16258")
+                .with(csrf().asHeader())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.seedlotNumber").value(16258L))
+        .andExpect(jsonPath("$.vegetationCode").value("PLI"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSpeciesBySeedlotNotFoundTest")
+  void getSpeciesBySeedlotNotFoundTest() throws Exception {
+    when(plantingService.getSpeciesBySeedlot("99999")).thenThrow(new SeedlotNotFoundException());
+
+    mockMvc
+        .perform(
+            get("/api/planting/seedlot/{seedlotNumber}", "99999")
+                .with(csrf().asHeader())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSpeciesBySeedlotUnauthorizedTest")
+  @WithAnonymousUser
+  void getSpeciesBySeedlotUnauthorizedTest() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/planting/seedlot/{seedlotNumber}", "16258")
                 .with(csrf().asHeader())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
