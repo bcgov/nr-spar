@@ -65,7 +65,8 @@ class PlantingServiceTest {
   void getSpeciesBySeedlot_shouldThrowWhenSeedlotDoesNotExist() {
     when(seedlotRepository.findById("99999")).thenReturn(Optional.empty());
 
-    assertThrows(
-        SeedlotNotFoundException.class, () -> plantingService.getSpeciesBySeedlot("99999"));
-  }
+    SeedlotNotFoundException exc =
+        assertThrows(
+            SeedlotNotFoundException.class, () -> plantingService.getSpeciesBySeedlot("99999"));
+    assertEquals("404 NOT_FOUND \"Seedlot doesn't exist\"", exc.getMessage());
 }
