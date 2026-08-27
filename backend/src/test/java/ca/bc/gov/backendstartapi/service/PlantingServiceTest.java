@@ -69,4 +69,5 @@ class PlantingServiceTest {
         assertThrows(
             SeedlotNotFoundException.class, () -> plantingService.getSpeciesBySeedlot("99999"));
     assertEquals("404 NOT_FOUND \"Seedlot doesn't exist\"", exc.getMessage());
+  }
 }
