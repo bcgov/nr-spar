@@ -188,7 +188,7 @@ const ReviewContent = () => {
     if (statusCode === 'INC' || statusCode === 'PND') {
       navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''));
     }
-  }, [statusCode]);
+  }, [statusCode, seedlotNumber, navigate]);
 
   const becCatalogueQuery = useQuery({
     queryKey: ['bec-catalogue'],
@@ -255,7 +255,10 @@ const ReviewContent = () => {
   const isSaving = saveEditMutation.isPending || statusOnlyMutation.isPending;
 
   const blocker = useBlocker(!isReadMode && !isSaving);
-  blockerRef.current = blocker;
+
+  useEffect(() => {
+    blockerRef.current = blocker;
+  }, [blocker]);
 
   useEffect(() => {
     if (blocker.state === 'blocked') {

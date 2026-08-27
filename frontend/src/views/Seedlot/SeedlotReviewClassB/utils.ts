@@ -92,11 +92,9 @@ export const buildBClassReviewPayload = (
         ?? richSeedlotData?.bClassDetail?.provenanceId
         ?? null,
       becVersionId: seedlot.becVersionId,
-      // Form checkbox drives override; keep existing comment when override is Y
-      becOverrideInd: !allStepData.collectionStep.sameBecUnit.value,
-      becOverrideComment: allStepData.collectionStep.sameBecUnit.value
-        ? null
-        : (seedlot.becOverrideComment ?? null)
+      // Owned by the collection area map; round-tripped here so a resave preserves it.
+      becOverrideInd: seedlot.becOverrideInd ?? false,
+      becOverrideComment: seedlot.becOverrideComment ?? null
     }
     : {};
 

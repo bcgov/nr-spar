@@ -245,10 +245,9 @@ export const convertBClassCollection = (
     collectionSeedPlanZoneInd: true,
     seedCoastAreaCode: seedlot?.seedCoastAreaCode ?? null,
     collectionBgcValidatedInd: true,
-    becOverrideInd: !collectionData.sameBecUnit.value,
-    becOverrideComment: collectionData.sameBecUnit.value
-      ? null
-      : (seedlot?.becOverrideComment ?? null),
+    // Owned by the collection area map; round-tripped here so a resave preserves it.
+    becOverrideInd: seedlot?.becOverrideInd ?? false,
+    becOverrideComment: seedlot?.becOverrideComment ?? null,
     numberTreesFromCode: collectionData.numberTreesFrom.value.code,
     isLotSplitInd: false,
     // Preserve loaded values when re-saving; default for brand-new drafts

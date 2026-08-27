@@ -156,14 +156,26 @@ export const initOwnershipState = (
     ownerState.ownerAgency.value = initLoaded ? curOwner.ownerClientNumber : defaultAgencyNumber;
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
 
-    if (methodsOfPayment && methodsOfPayment.length > 0) {
-      const payment = methodsOfPayment
-        .filter((data: MultiOptionsObj) => data.code === curOwner.methodOfPaymentCode)[0];
+    // Seed the stored codes before consulting the lookups. A failed lookup would
+    // otherwise leave these blank and an autosaved draft would discard the codes.
+    ownerState.methodOfPayment.value = {
+      ...EmptyMultiOptObj,
+      code: curOwner.methodOfPaymentCode
+    };
+    ownerState.fundingSource.value = {
+      ...EmptyMultiOptObj,
+      code: curOwner.sparFundSrceCode
+    };
+
+    const payment = methodsOfPayment
+      ?.find((data: MultiOptionsObj) => data.code === curOwner.methodOfPaymentCode);
+    if (payment) {
       ownerState.methodOfPayment.value = payment;
     }
-    if (fundingSource && fundingSource.length > 0) {
-      const fundSource = fundingSource
-        .filter((data: MultiOptionsObj) => data.code === curOwner.sparFundSrceCode)[0];
+
+    const fundSource = fundingSource
+      ?.find((data: MultiOptionsObj) => data.code === curOwner.sparFundSrceCode);
+    if (fundSource) {
       ownerState.fundingSource.value = fundSource;
     }
     return ownerState;

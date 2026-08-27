@@ -130,21 +130,19 @@ describe('SeedlotReviewClassB utils test', () => {
       expect(collectionDto.superiorProvenanceInd).toBeNull();
     });
 
-    it('should preserve bec version and map sameBecUnit to override fields', () => {
-      const steps = initEmptySteps();
-      steps.collectionStep.sameBecUnit.value = false;
-
+    it('should preserve bec version and override fields from the seedlot', () => {
       const seedlotWithBec = {
         ...richSeedlot,
         seedlot: {
           ...richSeedlot.seedlot,
           becVersionId: 7,
+          becOverrideInd: true,
           becOverrideComment: 'Mapped from adjacent unit'
         }
       } as unknown as RichSeedlotType;
 
       const collectionDto = buildBClassReviewPayload(
-        steps,
+        initEmptySteps(),
         seedlotWithBec
       ).seedlotFormCollectionDto;
 
