@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalUpsertRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestUpdateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.TestRankResponseDto;
@@ -26,6 +27,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -137,6 +139,40 @@ public class GerminationTestEndpoint {
           @Positive(message = "dailyGermSkey must be a positive number")
           BigDecimal dailyGermSkey) {
     return testResultService.getDailyAbnormalCounts(dailyGermSkey);
+  }
+
+  @PutMapping("/daily-abnormals/{dailyGermSkey}")
+  @Operation(
+      summary = "Update daily abnormal germination counts by dailyGermSkey",
+      description = "Create or update replicate-level abnormal germination counts for a daily germ record.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully updated daily abnormal germination counts.",
+            content = @Content(schema = @Schema(implementation = DailyAbnormalResponseDto.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid dailyGermSkey supplied",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Daily abnormal counts not found for the given key",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "422",
+            description = "Daily abnormal counts contain invalid values",
+            content = @Content(schema = @Schema(hidden = true)))
+      })
+  @ApiAuthResponse
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  @ResponseStatus(HttpStatus.OK)
+  public DailyAbnormalResponseDto upsertDailyAbnormalCounts(
+      @PathVariable 
+          @Positive(message = "dailyGermSkey must be a positive number")
+          BigDecimal dailyGermSkey,
+      @RequestBody @Valid DailyAbnormalUpsertRequestDto request) {
+    return testResultService.upsertDailyAbnormalCounts(dailyGermSkey, request);
   }
 
   /**
