@@ -15,7 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 /** Blocks endpoints annotated with {@link RequiresSeedlotB} while the feature is turned off. */
 @Component
 @RequiredArgsConstructor
-public class SeedlotBFeatureInterceptor implements HandlerInterceptor {
+public class SeedlotBclassFeatureInterceptor implements HandlerInterceptor {
 
   private final FeatureFlagConfig featureFlagConfig;
 
@@ -26,7 +26,7 @@ public class SeedlotBFeatureInterceptor implements HandlerInterceptor {
       @NonNull Object handler)
       throws Exception {
 
-    if (featureFlagConfig.isSeedlotBEnabled()) {
+    if (featureFlagConfig.isSeedlotBclassEnabled()) {
       return true;
     }
 

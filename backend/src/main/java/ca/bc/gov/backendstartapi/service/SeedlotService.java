@@ -167,7 +167,7 @@ public class SeedlotService {
     // This endpoint serves both classes, so the toggle can't be enforced by the
     // @RequiresSeedlotB interceptor; the class is only known from the payload.
     if (Character.valueOf('B').equals(createDto.geneticClassCode())
-        && !featureFlagConfig.isSeedlotBEnabled()) {
+        && !featureFlagConfig.isSeedlotBclassEnabled()) {
       throw new FeatureDisabledException(FeatureFlagConfig.SEEDLOT_B_DISABLED_MESSAGE);
     }
 

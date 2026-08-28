@@ -34,7 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest({SeedlotEndpoint.class, SeedlotReportEndpoint.class})
 @WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 @TestPropertySource(properties = "features.seedlot-b.enabled=false")
-class SeedlotBFeatureToggleTest {
+class SeedlotBclassFeatureToggleTest {
 
   @Autowired private MockMvc mockMvc;
 
@@ -131,7 +131,7 @@ class SeedlotBFeatureToggleTest {
 
   @Test
   @DisplayName("A-class endpoints are untouched by the toggle")
-  void aClassEndpoints_areNotBlocked() throws Exception {
+  void aclassEndpointsAreNotBlocked() throws Exception {
     mockMvc
         .perform(get("/api/seedlots/{n}/a-class-form-progress", "63001").with(csrf().asHeader()))
         .andExpect(status().isOk());

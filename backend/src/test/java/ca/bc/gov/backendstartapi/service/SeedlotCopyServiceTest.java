@@ -133,7 +133,7 @@ class SeedlotCopyServiceTest {
     when(saveProgressRepository.save(any())).thenAnswer(i -> i.getArgument(0));
   }
 
-  private SeedlotCopyService buildService(boolean seedlotBEnabled) {
+  private SeedlotCopyService buildService(boolean seedlotBclassEnabled) {
     return new SeedlotCopyService(
         seedlotRepository,
         seedlotStatusService,
@@ -147,7 +147,7 @@ class SeedlotCopyServiceTest {
         smpMixGeneticQualityRepository,
         orchardRepository,
         collectionMethodRepository,
-        new FeatureFlagConfig(seedlotBEnabled));
+        new FeatureFlagConfig(seedlotBclassEnabled));
   }
 
   @BeforeEach
@@ -824,7 +824,6 @@ class SeedlotCopyServiceTest {
   @Test
   @DisplayName("A copy: unaffected when the B-class feature is disabled")
   void copyA_featureDisabled_stillSucceeds() {
-    SeedlotCopyService disabledService = buildService(false);
     when(seedlotRepository.findById(SOURCE_NUM)).thenReturn(Optional.of(buildSourceSeedlot()));
     when(seedlotRepository.findNextSeedlotNumber(
             Constants.CLASS_A_COPY_MIN, Constants.CLASS_A_COPY_MAX))
@@ -834,7 +833,7 @@ class SeedlotCopyServiceTest {
     when(seedlotRepository.save(any())).thenAnswer(i -> i.getArgument(0));
     stubChildRepos();
 
-    SeedlotStatusResponseDto result = disabledService.copySeedlot(SOURCE_NUM, USER_ID);
+    SeedlotStatusResponseDto result = buildService(false).copySeedlot(SOURCE_NUM, USER_ID);
 
     assertEquals("62000", result.seedlotNumber());
   }

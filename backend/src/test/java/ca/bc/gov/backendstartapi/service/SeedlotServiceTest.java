@@ -182,7 +182,7 @@ class SeedlotServiceTest {
         List.of(ptgqDto));
   }
 
-  private SeedlotService buildService(boolean seedlotBEnabled) {
+  private SeedlotService buildService(boolean seedlotBclassEnabled) {
     return new SeedlotService(
         seedlotRepository,
         seedlotSourceRepository,
@@ -209,7 +209,7 @@ class SeedlotServiceTest {
         seedlotFormCollectionBclassMapper,
         seedlotFormStepMapper,
         saveSeedlotFormService,
-        new FeatureFlagConfig(seedlotBEnabled));
+        new FeatureFlagConfig(seedlotBclassEnabled));
   }
 
   @BeforeEach
@@ -289,7 +289,6 @@ class SeedlotServiceTest {
   @Test
   @DisplayName("createSeedlotAClassWhenBClassFeatureDisabled")
   void createSeedlotTest_aClassFeatureDisabled_shouldSucceed() {
-    SeedlotService disabledService = buildService(false);
     when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
 
     SeedlotStatusEntity incStatusEntity =
@@ -305,7 +304,7 @@ class SeedlotServiceTest {
     GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
     when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));
 
-    Assertions.assertNotNull(disabledService.createSeedlot(createSeedlotDto()));
+    Assertions.assertNotNull(buildService(false).createSeedlot(createSeedlotDto()));
   }
 
   @Test

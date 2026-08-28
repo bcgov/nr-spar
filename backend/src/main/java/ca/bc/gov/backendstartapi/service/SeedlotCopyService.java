@@ -90,7 +90,7 @@ public class SeedlotCopyService {
 
     // The copy endpoint serves both classes, so the toggle can't be enforced by
     // the @RequiresSeedlotB interceptor; the class comes from the source seedlot.
-    if (isClassB && !featureFlagConfig.isSeedlotBEnabled()) {
+    if (isClassB && !featureFlagConfig.isSeedlotBclassEnabled()) {
       throw new FeatureDisabledException(FeatureFlagConfig.SEEDLOT_B_DISABLED_MESSAGE);
     }
 

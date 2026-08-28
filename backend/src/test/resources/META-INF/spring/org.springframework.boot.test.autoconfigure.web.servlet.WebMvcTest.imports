@@ -1,2 +1,2 @@
 ca.bc.gov.backendstartapi.config.FeatureFlagConfig
-ca.bc.gov.backendstartapi.interceptor.SeedlotBFeatureInterceptor
+ca.bc.gov.backendstartapi.interceptor.SeedlotBclassFeatureInterceptor

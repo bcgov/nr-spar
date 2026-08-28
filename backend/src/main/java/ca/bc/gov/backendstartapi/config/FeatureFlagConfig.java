@@ -19,10 +19,10 @@ public class FeatureFlagConfig {
       "B-class seedlot functionality is disabled for this environment.";
 
   /** When false, B-class seedlot registration, review and reporting are unavailable. */
-  private final boolean seedlotBEnabled;
+  private final boolean seedlotBclassEnabled;
 
   public FeatureFlagConfig(
-      @Value("${features.seedlot-b.enabled:false}") boolean seedlotBEnabled) {
-    this.seedlotBEnabled = seedlotBEnabled;
+      @Value("${features.seedlot-b.enabled:false}") boolean seedlotBclassEnabled) {
+    this.seedlotBclassEnabled = seedlotBclassEnabled;
   }
 }
