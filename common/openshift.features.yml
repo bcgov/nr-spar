@@ -1,0 +1,25 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+parameters:
+  - name: NAME
+    description: Product name
+    value: nr-spar
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
+    required: true
+  - name: SEEDLOT_B_ENABLED
+    description: >
+      Seeded from ZONE at apply time (prod=false, everything else=true).
+      After first create, the OpenShift console owns this key.
+    value: "false"
+objects:
+  # Applied with overwrite=false so console edits survive deploys. Changes only
+  # reach the pods after a rollout restart; env vars are read at container start.
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: ${NAME}-${ZONE}-features
+      labels:
+        app: ${NAME}-${ZONE}
+    data:
+      seedlot-b-enabled: ${SEEDLOT_B_ENABLED}

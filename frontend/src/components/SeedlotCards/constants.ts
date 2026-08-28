@@ -1,4 +1,5 @@
 import ROUTES from '../../routes/constants';
+import { isSeedlotBEnabled } from '../../config/features';
 
 export const cards = [
   {
@@ -27,7 +28,8 @@ export const cards = [
     emptyTitle: '',
     emptyDescription: '',
     displayForAdmin: true,
-    displayForNonAdmin: true
+    displayForNonAdmin: true,
+    featureEnabled: isSeedlotBEnabled
   },
   {
     id: '3',

@@ -17,6 +17,7 @@ import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.security.RequiresSeedlotB;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotCollectionGeometryService;
@@ -667,6 +668,7 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RequiresSeedlotB
   public RevisionCountDto saveFormProgressClassB(
       @Parameter(
               name = "seedlotNumber",
@@ -703,6 +705,7 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RequiresSeedlotB
   public SaveSeedlotFormDto getFormProgressClassB(
       @Parameter(
               name = "seedlotNumber",
@@ -739,6 +742,7 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RequiresSeedlotB
   public JsonNode getFormProgressStatusClassB(
       @Parameter(
               name = "seedlotNumber",
@@ -773,6 +777,7 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RequiresSeedlotB
   public SeedlotCollectionGeometryDto getCollectionGeometry(
       @Parameter(
               name = "seedlotNumber",
@@ -811,6 +816,7 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RequiresSeedlotB
   public SeedlotBclassFormDto getBclassSeedlotFullForm(
       @Parameter(
               name = "seedlotNumber",
@@ -864,6 +870,7 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema()))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RequiresSeedlotB
   public ResponseEntity<SeedlotStatusResponseDto> submitBclassSeedlotForm(
       @Parameter(
               name = "seedlotNumber",

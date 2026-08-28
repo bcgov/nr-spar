@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.config.Constants;
+import ca.bc.gov.backendstartapi.config.FeatureFlagConfig;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
@@ -31,6 +32,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
+import ca.bc.gov.backendstartapi.exception.FeatureDisabledException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
@@ -131,22 +133,26 @@ class SeedlotCopyServiceTest {
     when(saveProgressRepository.save(any())).thenAnswer(i -> i.getArgument(0));
   }
 
+  private SeedlotCopyService buildService(boolean seedlotBEnabled) {
+    return new SeedlotCopyService(
+        seedlotRepository,
+        seedlotStatusService,
+        saveProgressRepository,
+        geneticWorthRepository,
+        seedPlanZoneRepository,
+        parentTreeRepository,
+        parentTreeGeneticQualityRepository,
+        parentTreeSmpMixRepository,
+        smpMixRepository,
+        smpMixGeneticQualityRepository,
+        orchardRepository,
+        collectionMethodRepository,
+        new FeatureFlagConfig(seedlotBEnabled));
+  }
+
   @BeforeEach
   void setup() {
-    service =
-        new SeedlotCopyService(
-            seedlotRepository,
-            seedlotStatusService,
-            saveProgressRepository,
-            geneticWorthRepository,
-            seedPlanZoneRepository,
-            parentTreeRepository,
-            parentTreeGeneticQualityRepository,
-            parentTreeSmpMixRepository,
-            smpMixRepository,
-            smpMixGeneticQualityRepository,
-            orchardRepository,
-            collectionMethodRepository);
+    service = buildService(true);
   }
 
   // ── Auto-numbering ──────────────────────────────────────────────────────────
@@ -797,5 +803,39 @@ class SeedlotCopyServiceTest {
 
     assertThrows(
         SeedlotFormValidationException.class, () -> service.copySeedlot(SOURCE_NUM, USER_ID));
+  }
+
+  // ── B-class feature toggle ──────────────────────────────────────────────────
+
+  @Test
+  @DisplayName("B copy: rejected with 403 when the B-class feature is disabled")
+  void copyB_featureDisabled_throwsForbidden() {
+    SeedlotCopyService disabledService = buildService(false);
+    when(seedlotRepository.findById(SOURCE_B_NUM))
+        .thenReturn(Optional.of(buildSourceSeedlot(SOURCE_B_NUM, "B")));
+
+    assertThrows(
+        FeatureDisabledException.class,
+        () -> disabledService.copySeedlot(SOURCE_B_NUM, USER_ID));
+
+    verify(seedlotRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("A copy: unaffected when the B-class feature is disabled")
+  void copyA_featureDisabled_stillSucceeds() {
+    SeedlotCopyService disabledService = buildService(false);
+    when(seedlotRepository.findById(SOURCE_NUM)).thenReturn(Optional.of(buildSourceSeedlot()));
+    when(seedlotRepository.findNextSeedlotNumber(
+            Constants.CLASS_A_COPY_MIN, Constants.CLASS_A_COPY_MAX))
+        .thenReturn(null);
+    when(seedlotStatusService.findById(Constants.PENDING_SEEDLOT_STATUS))
+        .thenReturn(Optional.of(pndStatus()));
+    when(seedlotRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    stubChildRepos();
+
+    SeedlotStatusResponseDto result = disabledService.copySeedlot(SOURCE_NUM, USER_ID);
+
+    assertEquals("62000", result.seedlotNumber());
   }
 }
