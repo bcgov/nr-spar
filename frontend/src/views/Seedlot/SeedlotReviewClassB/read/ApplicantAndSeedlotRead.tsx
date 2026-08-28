@@ -2,27 +2,41 @@ import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
 
-import Divider from '../../../Divider';
-import ReadOnlyInput from '../../../ReadOnlyInput';
-import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
-import EmailDisplay from '../../../EmailDisplay';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
+import Divider from '../../../../components/Divider';
+import ReadOnlyInput from '../../../../components/ReadOnlyInput';
+import EmailDisplay from '../../../../components/EmailDisplay';
+import ClassBContext from '../../ContextContainerClassB/context';
+import getVegCodes from '../../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
+import { getMultiOptList } from '../../../../utils/MultiOptionsUtils';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 
 const ApplicantAndSeedlotRead = () => {
-  const {
-    defaultClientNumber, defaultCode, seedlotData, seedlotSpecies, isFetchingData
-  } = useContext(ClassAContext);
+  const { seedlotData, isFetchingData } = useContext(ClassBContext);
+
+  const clientNumber = seedlotData?.applicantClientNumber;
 
   const forestClientQuery = useQuery({
-    queryKey: ['forest-clients', defaultClientNumber],
-    queryFn: () => getForestClientByNumberOrAcronym(defaultClientNumber),
-    enabled: !!defaultClientNumber,
+    queryKey: ['forest-clients', clientNumber],
+    queryFn: () => getForestClientByNumberOrAcronym(clientNumber!),
+    enabled: !!clientNumber,
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS,
     select: (fc) => getForestClientLabel(fc)
   });
+
+  const vegCodeQuery = useQuery({
+    queryKey: ['vegetation-codes'],
+    queryFn: getVegCodes,
+    select: (data) => getMultiOptList(data, true, true),
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS
+  });
+
+  const speciesLabel = vegCodeQuery.data?.find(
+    (opt) => opt.code === seedlotData?.vegetationCode
+  )?.label ?? seedlotData?.vegetationCode;
 
   return (
     <FlexGrid className="sub-section-grid">
@@ -34,7 +48,7 @@ const ApplicantAndSeedlotRead = () => {
       <Row>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
-            id="applicant-and-seedlot-agency-name"
+            id="b-review-applicant-agency"
             label="Applicant agency"
             value={forestClientQuery.data}
             showSkeleton={isFetchingData || forestClientQuery.fetchStatus === 'fetching'}
@@ -42,9 +56,9 @@ const ApplicantAndSeedlotRead = () => {
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
-            id="applicant-and-seedlot-agency-loc-code"
-            label="Agency location code"
-            value={defaultCode}
+            id="b-review-applicant-loc-code"
+            label="Applicant location code"
+            value={seedlotData?.applicantLocationCode}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -66,39 +80,35 @@ const ApplicantAndSeedlotRead = () => {
         </Column>
       </Row>
       <Row>
-        <Column className="info-col">
+        <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
-            id="applicant-and-seedlot-species"
+            id="b-review-species"
             label="Seedlot species"
-            value={seedlotSpecies.label}
+            value={speciesLabel}
+            showSkeleton={isFetchingData || vegCodeQuery.isFetching}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id="b-review-superior-provenance"
+            label="Superior provenance?"
+            value={seedlotData?.superiorProvenanceInd ? 'Yes' : 'No'}
             showSkeleton={isFetchingData}
           />
         </Column>
       </Row>
       <Row>
-        <Column className="info-col">
+        <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
-            id="applicant-and-seedlot-a-class-source"
-            label="Specify A-class source"
-            value={seedlotData?.seedlotSource?.description ?? ''}
-            showSkeleton={isFetchingData}
-          />
-        </Column>
-      </Row>
-      <Row>
-        <Column className="info-col">
-          <ReadOnlyInput
-            id="applicant-and-seedlot-to-be-reg-tsc"
+            id="b-review-to-be-registered"
             label="To be registered at the Tree Seed Centre?"
             value={seedlotData?.intendedForCrownLand ? 'Yes' : 'No'}
             showSkeleton={isFetchingData}
           />
         </Column>
-      </Row>
-      <Row>
-        <Column className="info-col">
+        <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
-            id="applicant-and-seedlot-collected-within-bc"
+            id="b-review-within-bc"
             label="Collected from a location within B.C.?"
             value={seedlotData?.sourceInBc ? 'Yes' : 'No'}
             showSkeleton={isFetchingData}

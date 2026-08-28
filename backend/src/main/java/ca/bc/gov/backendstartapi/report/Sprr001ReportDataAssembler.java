@@ -99,7 +99,7 @@ public class Sprr001ReportDataAssembler {
     row.setSeedlotNumber(seedlot.getId());
     row.setToBeRegistrdInd(yesNo(seedlot.getIntendedForCrownLand()));
     row.setBcSource(yesNo(seedlot.getSourceInBc()));
-    row.setSuperiorPrvncInd(collection.superiorProvenanceInd());
+    row.setSuperiorPrvncInd(yesNo(collection.superiorProvenanceInd()));
     row.setEffectivePopSize(seedlot.getEffectivePopulationSize());
     row.setSpecies(seedlot.getVegetationCode());
     row.setSpeciesDesc(codes.speciesDesc(seedlot.getVegetationCode()));
@@ -167,7 +167,7 @@ public class Sprr001ReportDataAssembler {
     row.setCollectionOrgUnitDesc(codes.orgUnitDesc(orgUnit));
     row.setCollectionLocnDesc(collection.collectionLocationDesc());
     row.setCollectionProv(stringify(collection.provenanceId()));
-    row.setCfsAppendix(collection.collectionStandardMetInd());
+    row.setCfsAppendix(yesNo(collection.collectionStandardMetInd()));
     row.setCollectionStartDate(date(collection.collectionStartDate()));
     row.setCollectionEndDate(date(collection.collectionEndDate()));
     row.setNoOfContainers(collection.noOfContainers());
@@ -232,8 +232,8 @@ public class Sprr001ReportDataAssembler {
     row.setBgcZoneCode(collection.bgcZoneCode());
     row.setBgcSubzoneCode(collection.bgcSubzoneCode());
     row.setVariant(text(collection.variant()));
-    row.setCollectionBgcInd(collection.collectionBgcValidatedInd());
-    row.setCollectionSpzInd(collection.collectionSeedPlanZoneInd());
+    row.setCollectionBgcInd(yesNo(collection.collectionBgcValidatedInd()));
+    row.setCollectionSpzInd(yesNo(collection.collectionSeedPlanZoneInd()));
   }
 
   private static void putAreaOfUse(
@@ -382,8 +382,8 @@ public class Sprr001ReportDataAssembler {
         .collect(Collectors.joining(", "));
   }
 
-  private static BigDecimal overrideCount(String becOverrideInd) {
-    return "Y".equalsIgnoreCase(becOverrideInd) ? BigDecimal.ONE : BigDecimal.ZERO;
+  private static BigDecimal overrideCount(Boolean becOverrideInd) {
+    return Boolean.TRUE.equals(becOverrideInd) ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
   private static String geoArea(SeedlotCollectionGeometryDto geometry) {

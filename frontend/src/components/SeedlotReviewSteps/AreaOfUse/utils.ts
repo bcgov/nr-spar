@@ -33,8 +33,8 @@ export const formatLatLong = (
   minute: number | null | undefined,
   second: number | null | undefined
 ): string => {
-  // Use undefined comparison instead of `!second` since second can be 0
-  if (degree === undefined || minute === undefined || second === undefined) {
+  // Treat null/undefined as missing; allow 0 for any component
+  if (degree == null || minute == null || second == null) {
     return '';
   }
 

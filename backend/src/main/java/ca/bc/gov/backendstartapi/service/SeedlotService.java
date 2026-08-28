@@ -177,9 +177,7 @@ public class SeedlotService {
         geneticClassRepository.findById(createDto.geneticClassCode().toString());
     seedlot.setGeneticClass(classEntity.orElseThrow(GeneticClassNotFoundException::new));
 
-    Optional<SeedlotSourceEntity> seedlotSourceEntity =
-        seedlotSourceRepository.findById(createDto.seedlotSourceCode());
-    seedlot.setSeedlotSource(seedlotSourceEntity.orElseThrow(SeedlotSourceNotFoundException::new));
+    applySeedlotSource(seedlot, createDto.seedlotSourceCode());
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
@@ -302,6 +300,28 @@ public class SeedlotService {
   private boolean isBclassSeedlot(Seedlot seedlot) {
     return seedlot.getGeneticClass() != null
         && "B".equals(seedlot.getGeneticClass().getGeneticClassCode());
+  }
+
+  /**
+   * Sets the seedlot source, which qualifies the parent trees of an orchard and therefore only
+   * applies to class A. Class B seedlots are naturally collected and are left without a source,
+   * while class A seedlots must always have one.
+   *
+   * @param seedlot The seedlot being created or updated, with its genetic class already set
+   * @param seedlotSourceCode The requested source code, or null for a class B seedlot
+   */
+  private void applySeedlotSource(Seedlot seedlot, String seedlotSourceCode) {
+    if (ValueUtil.hasValue(seedlotSourceCode)) {
+      SeedlotSourceEntity seedlotSource =
+          seedlotSourceRepository
+              .findById(seedlotSourceCode)
+              .orElseThrow(SeedlotSourceNotFoundException::new);
+
+      seedlot.setSeedlotSource(seedlotSource);
+    } else if (!isBclassSeedlot(seedlot)) {
+      SparLog.info("Missing seedlot source code for class A seedlot {}", seedlot.getId());
+      throw new InvalidSeedlotRequestException();
+    }
   }
 
   private void fillAclassSeedlotDetail(SeedlotDto seedlotDto) {
@@ -816,12 +836,7 @@ public class SeedlotService {
   private void updateApplicantAndSeedlot(Seedlot seedlot, SeedlotApplicationPatchDto patchDto) {
     seedlot.setApplicantEmailAddress(patchDto.applicantEmailAddress());
 
-    SeedlotSourceEntity updatedSource =
-        seedlotSourceRepository
-            .findById(patchDto.seedlotSourceCode())
-            .orElseThrow(SeedlotSourceNotFoundException::new);
-
-    seedlot.setSeedlotSource(updatedSource);
+    applySeedlotSource(seedlot, patchDto.seedlotSourceCode());
 
     seedlot.setSourceInBc(patchDto.bcSourceInd());
 

@@ -236,21 +236,23 @@ export const convertBClassCollection = (
     orgUnitNo: collectionData.orgUnit.value.code
       ? parseInt(collectionData.orgUnit.value.code, 10)
       : null,
-    collectionStandardMetInd: 'Y',
+    collectionStandardMetInd: true,
     collectionAreaRadius: collectionData.collectionRadius.value
       ? +collectionData.collectionRadius.value
       : null,
     captureMethodCode: collectionData.captureMethod.value.code,
     seedPlanZoneCode,
-    collectionSeedPlanZoneInd: 'Y',
+    collectionSeedPlanZoneInd: true,
     seedCoastAreaCode: seedlot?.seedCoastAreaCode ?? null,
-    collectionBgcValidatedInd: 'Y',
-    becOverrideInd: 'N',
-    becOverrideComment: null,
+    collectionBgcValidatedInd: true,
+    // Owned by the collection area map; round-tripped here so a resave preserves it.
+    becOverrideInd: seedlot?.becOverrideInd ?? false,
+    becOverrideComment: seedlot?.becOverrideComment ?? null,
     numberTreesFromCode: collectionData.numberTreesFrom.value.code,
-    isLotSplitInd: 'N',
-    superiorProvenanceInd: 'N',
-    provenanceId: null,
+    isLotSplitInd: false,
+    // Preserve loaded values when re-saving; default for brand-new drafts
+    superiorProvenanceInd: seedlot ? seedlot.superiorProvenanceInd : false,
+    provenanceId: seedlot?.provenanceId ?? null,
     collectionLatitudeDeg: latDeg,
     collectionLatitudeMin: latMin,
     collectionLatitudeSec: latSec,
@@ -287,7 +289,7 @@ export const convertBClassCollection = (
     bgcZoneDescription: collectionData.becZone.value.description,
     bgcSubzoneCode: collectionData.becSubzone.value.code,
     variant: collectionData.becVariant.value.code || null,
-    becVersionId: null,
+    becVersionId: seedlot?.becVersionId ?? null,
     collectionGeometryGeoJson: null
   };
 };

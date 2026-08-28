@@ -2,13 +2,10 @@
 @use '@carbon/type';
 
 .applicant-seedlot-information {
-  height: fit-content;
-  width: auto;
-  background-color: var(--#{vars.$bcgov-prefix}-background);
-  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
-  border-radius: 8px;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 0;
+  background: none;
+  border: none;
+  margin-bottom: 0;
 
   .applicant-seedlot-information-row {
     margin-bottom: 2rem;

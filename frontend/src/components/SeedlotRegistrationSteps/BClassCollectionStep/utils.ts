@@ -74,8 +74,7 @@ export const initBClassCollectionState = (
     useLatLongForBec: getBooleanInputObj('b-collection-use-lat-long-bec', true),
     becZone: getOptionsInputObj('b-collection-bec-zone', EmptyMultiOptObj),
     becSubzone: getOptionsInputObj('b-collection-bec-subzone', EmptyMultiOptObj),
-    becVariant: getOptionsInputObj('b-collection-bec-variant', EmptyMultiOptObj),
-    sameBecUnit: getBooleanInputObj('b-collection-same-bec-unit', true)
+    becVariant: getOptionsInputObj('b-collection-bec-variant', EmptyMultiOptObj)
   };
 };
 
@@ -146,8 +145,7 @@ export const initBClassCollectionStateFromDto = (
       'b-collection-bec-subzone',
       toOption(collectionData.bgcSubzoneCode)
     ),
-    becVariant: getOptionsInputObj('b-collection-bec-variant', toOption(variantCode)),
-    sameBecUnit: getBooleanInputObj('b-collection-same-bec-unit', collectionData.becOverrideInd !== 'Y')
+    becVariant: getOptionsInputObj('b-collection-bec-variant', toOption(variantCode))
   };
 };
 

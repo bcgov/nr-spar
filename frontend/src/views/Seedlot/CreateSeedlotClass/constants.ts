@@ -63,7 +63,7 @@ export const InitialBClassSeedlotRegFormData: SeedlotRegFormType = {
   sourceCode: {
     id: '',
     isInvalid: false,
-    value: 'TPT'
+    value: ''
   },
   willBeRegistered: {
     id: 'b-class-will-be-registered',

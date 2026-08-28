@@ -39,8 +39,8 @@ public record SeedlotFormCollectionDtoClassB(
         String collectionLocationDesc,
     @Schema(description = "Ministry org unit number.", example = "73")
         Integer orgUnitNo,
-    @Schema(description = "Indicates if collection standard was met (Y/N).", example = "Y")
-        String collectionStandardMetInd,
+    @Schema(description = "Indicates if collection standard was met.", example = "true")
+        Boolean collectionStandardMetInd,
     @Schema(description = "Radius (m) of the collection area.", example = "500.0")
         BigDecimal collectionAreaRadius,
     @Schema(description = "Capture method code.", example = "CLIMB")
@@ -48,25 +48,25 @@ public record SeedlotFormCollectionDtoClassB(
     @Schema(description = "Seed plan zone code.", example = "M")
         String seedPlanZoneCode,
     @Schema(
-            description = "Indicates if collection falls within the seed plan zone (Y/N).",
-            example = "Y")
-        String collectionSeedPlanZoneInd,
+            description = "Indicates if collection falls within the seed plan zone.",
+            example = "true")
+        Boolean collectionSeedPlanZoneInd,
     @Schema(description = "Seed coast area code.", example = "001")
         String seedCoastAreaCode,
-    @Schema(description = "Indicates BEC zone has been validated (Y/N).", example = "Y")
-        String collectionBgcValidatedInd,
-    @Schema(description = "BEC override flag (Y/N).", example = "N")
-        String becOverrideInd,
+    @Schema(description = "Indicates BEC zone has been validated.", example = "true")
+        Boolean collectionBgcValidatedInd,
+    @Schema(description = "BEC override flag.", example = "false")
+        Boolean becOverrideInd,
     @Schema(description = "Comment explaining the BEC override.")
         String becOverrideComment,
     @Schema(
             description = "Code representing the number of trees the seedlot was collected from.",
             example = "GT5")
         String numberTreesFromCode,
-    @Schema(description = "Lot split indicator (Y/N).", example = "N")
-        String isLotSplitInd,
-    @Schema(description = "Superior provenance indicator (Y/N).", example = "N")
-        String superiorProvenanceInd,
+    @Schema(description = "Lot split indicator.", example = "false")
+        Boolean isLotSplitInd,
+    @Schema(description = "Superior provenance indicator.", example = "false")
+        Boolean superiorProvenanceInd,
     @Schema(description = "Provenance ID.", example = "42")
         Integer provenanceId,
     // ─── Collection coordinates (mean of the polygon) ────────────────────────
