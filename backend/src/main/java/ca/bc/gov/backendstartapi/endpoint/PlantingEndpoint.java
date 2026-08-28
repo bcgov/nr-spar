@@ -60,4 +60,36 @@ public class PlantingEndpoint {
           Long requestKey) {
     return plantingService.getSeedlotAndSpeciesByRequestKey(requestKey);
   }
+
+  /**
+   * Fetch the species (vegetation code) of a seedlot, without needing a request key.
+   *
+   * @param seedlotNumber the seedlot number to look up
+   * @return the {@link SeedlotSpeciesDto} for the seedlot
+   * @throws ResponseStatusException with 404 status when the seedlot does not exist
+   */
+  @GetMapping("/seedlot/{seedlotNumber}")
+  @Operation(
+      summary = "Fetch the species by seedlot",
+      description =
+          "Returns the species (vegetation code) derived from a seedlot that exists in SPAR."
+              + " A request key is not required.",
+      responses = {
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public SeedlotSpeciesDto getSpeciesBySeedlot(
+      @PathVariable
+          @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "The seedlot number to resolve to a species.")
+          String seedlotNumber) {
+    return plantingService.getSpeciesBySeedlot(seedlotNumber);
+  }
 }
