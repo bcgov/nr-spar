@@ -917,12 +917,18 @@ class TestResultServiceTest {
         when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(null);
         when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
                 .thenReturn(replicatesFor(riaSkey, 100));
+        DailyAbnormalEntity savedEntity = new DailyAbnormalEntity();
+        savedEntity.setDailyGermSkey(dailyGermSkey);
+        setAllAbnormalCountsToZero(savedEntity);
+        savedEntity.setRep1NoAbnrmRe(2);
+        when(dailyAbnormalRepository.save(any(DailyAbnormalEntity.class))).thenReturn(savedEntity);
 
         DailyAbnormalResponseDto result =
                 testResultService.upsertDailyAbnormalCounts(dailyGermSkey, request);
 
         assertEquals(dailyGermSkey, result.dailyGermSkey());
-        assertEquals(1, result.rep1().abnormalNumReverseEmbryo());
+        assertEquals(2, result.rep1().abnormalNumReverseEmbryo());
+        assertNull(result.rep1().totalSeeds());
         verify(dailyAbnormalRepository).save(any(DailyAbnormalEntity.class));
     }
 
@@ -941,6 +947,7 @@ class TestResultServiceTest {
         when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(entity);
         when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
                 .thenReturn(replicatesFor(riaSkey, 100));
+        when(dailyAbnormalRepository.save(entity)).thenReturn(entity);
 
         testResultService.upsertDailyAbnormalCounts(dailyGermSkey, request);
 
