@@ -490,10 +490,10 @@ public class TestResultService {
       entity.setDailyGermSkey(dailyGermSkey);
     }
 
-    applyReplicateAbnormal(entity, 1, request.rep1());
-    applyReplicateAbnormal(entity, 2, request.rep2());
-    applyReplicateAbnormal(entity, 3, request.rep3());
-    applyReplicateAbnormal(entity, 4, request.rep4());
+    applyReplicateAbnormal(entity, 1, normalizeAbnormalCounts(request.rep1()));
+    applyReplicateAbnormal(entity, 2, normalizeAbnormalCounts(request.rep2()));
+    applyReplicateAbnormal(entity, 3, normalizeAbnormalCounts(request.rep3()));
+    applyReplicateAbnormal(entity, 4, normalizeAbnormalCounts(request.rep4()));
 
     validateDailyAbnormalTotals(entity, germCount, dailyGermSkey);
     DailyAbnormalEntity savedEntity = dailyAbnormalRepository.save(entity);
@@ -501,7 +501,23 @@ public class TestResultService {
     return toDailyAbnormalResponseDto(savedEntity);
   }
 
-    private DailyAbnormalResponseDto toDailyAbnormalResponseDto(DailyAbnormalEntity entity) {
+  private ReplicateAbnormalDto normalizeAbnormalCounts(ReplicateAbnormalDto abnormal) {
+    return new ReplicateAbnormalDto(
+        nullToZero(abnormal.abnormalNumReverseEmbryo()),
+        nullToZero(abnormal.abnormalNumStuntedRadicle()),
+        nullToZero(abnormal.abnormalNumStuntedHypocotyl()),
+        nullToZero(abnormal.abnormalNumRotten()),
+        nullToZero(abnormal.abnormalNumThickenedHypocotyl()),
+        nullToZero(abnormal.abnormalNumThickenedRadicle()),
+        nullToZero(abnormal.abnormalNumTwisted()),
+        nullToZero(abnormal.abnormalNumMegametophyteCollar()),
+        nullToZero(abnormal.abnormalNumWeak()),
+        nullToZero(abnormal.abnormalNumOther()),
+        nullToZero(abnormal.abnormalNumPregermination()),
+        null);
+  }
+
+  private DailyAbnormalResponseDto toDailyAbnormalResponseDto(DailyAbnormalEntity entity) {
     return new DailyAbnormalResponseDto(
       entity.getDailyGermSkey(),
       mapReplicateAbnormal(

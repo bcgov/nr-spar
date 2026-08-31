@@ -932,6 +932,31 @@ class TestResultServiceTest {
         verify(dailyAbnormalRepository).save(any(DailyAbnormalEntity.class));
     }
 
+      @Test
+      void upsertDailyAbnormalCounts_normalizesOmittedCountsToZero() {
+        BigDecimal dailyGermSkey = new BigDecimal("12345");
+        BigDecimal riaSkey = new BigDecimal("881191");
+        ReplicateAbnormalDto partialReplicate =
+            new ReplicateAbnormalDto(3, null, null, null, null, null, null, null, null, null, null, null);
+        DailyAbnormalUpsertRequestDto request = new DailyAbnormalUpsertRequestDto(
+            partialReplicate, partialReplicate, partialReplicate, partialReplicate);
+
+        when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+            .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 0)));
+        when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(null);
+        when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+            .thenReturn(replicatesFor(riaSkey, 100));
+        when(dailyAbnormalRepository.save(any(DailyAbnormalEntity.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        DailyAbnormalResponseDto result =
+            testResultService.upsertDailyAbnormalCounts(dailyGermSkey, request);
+
+        assertEquals(3, result.rep1().abnormalNumReverseEmbryo());
+        assertEquals(0, result.rep1().abnormalNumStuntedRadicle());
+        assertEquals(0, result.rep4().abnormalNumPregermination());
+      }
+
     @Test
     void upsertDailyAbnormalCounts_replacesAllReplicateValues_whenEntityExists() {
         BigDecimal dailyGermSkey = new BigDecimal("12345");
