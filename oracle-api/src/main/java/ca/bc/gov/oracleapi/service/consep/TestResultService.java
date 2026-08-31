@@ -568,7 +568,7 @@ public class TestResultService {
         entity.getRep4NoAbnrmWeak(),
         entity.getRep4NoAbnrmOther(),
         entity.getRep4NoAbnrmPrgrm()));
-    }
+  }
 
   private void applyReplicateAbnormal(
       DailyAbnormalEntity entity, int replicateNumber, ReplicateAbnormalDto abnormal) {
