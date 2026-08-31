@@ -11,13 +11,16 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalUpsertRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.ReplicateAbnormalDto;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +44,9 @@ public class GerminationTestEndpointTest {
   
   @Autowired
   private MockMvc mockMvc;
+
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @MockBean
   private TestResultService testResultService;
@@ -127,6 +133,134 @@ public class GerminationTestEndpointTest {
         .perform(get(BASE_URL + "/{dailyGermSkey}", key))
         .andExpect(status().isUnprocessableEntity());
     verify(testResultService).getDailyAbnormalCounts(key);
+  }
+
+  @Test
+  void upsertDailyAbnormalCounts_returns200AndBody() throws Exception {
+    BigDecimal key = new BigDecimal("12345");
+    DailyAbnormalUpsertRequestDto request = validDailyAbnormalRequest();
+    DailyAbnormalResponseDto response = new DailyAbnormalResponseDto(
+        key, request.rep1(), request.rep2(), request.rep3(), request.rep4());
+    when(testResultService.upsertDailyAbnormalCounts(key, request)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            put(BASE_URL + "/{dailyGermSkey}", key)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.dailyGermSkey").value(12345))
+        .andExpect(jsonPath("$.rep1.abnormalNumReverseEmbryo").value(1))
+        .andExpect(jsonPath("$.rep4.abnormalNumPregermination").value(1));
+
+    verify(testResultService).upsertDailyAbnormalCounts(key, request);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"0", "-1"})
+  void upsertDailyAbnormalCounts_returns400_whenPathNotPositive(String badKey) throws Exception {
+    mockMvc
+        .perform(
+            put(BASE_URL + "/{dailyGermSkey}", badKey)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validDailyAbnormalRequest())))
+        .andExpect(status().isBadRequest());
+
+    verifyNoInteractions(testResultService);
+  }
+
+  @Test
+  void upsertDailyAbnormalCounts_returns400_whenAbnormalCountIsNegative() throws Exception {
+    String invalidRequest = """
+        {
+          "rep1": { "abnormalNumReverseEmbryo": -1 },
+          "rep2": {},
+          "rep3": {},
+          "rep4": {}
+        }
+        """;
+
+    mockMvc
+        .perform(
+            put(BASE_URL + "/{dailyGermSkey}", 12345)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidRequest))
+        .andExpect(status().isBadRequest());
+
+    verifyNoInteractions(testResultService);
+  }
+
+  @Test
+  @WithAnonymousUser
+  void upsertDailyAbnormalCounts_returns401_whenAnonymous() throws Exception {
+    mockMvc
+        .perform(
+            put(BASE_URL + "/{dailyGermSkey}", 12345)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validDailyAbnormalRequest())))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoInteractions(testResultService);
+  }
+
+  @Test
+  @WithMockUser(username = "SPARTest", roles = "SPAR_NON_ORACLE_USER")
+  void upsertDailyAbnormalCounts_returns403_whenUnauthorizedRole() throws Exception {
+    mockMvc
+        .perform(
+            put(BASE_URL + "/{dailyGermSkey}", 12345)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validDailyAbnormalRequest())))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(testResultService);
+  }
+
+  @Test
+  void upsertDailyAbnormalCounts_returns404_whenNotFound() throws Exception {
+    BigDecimal key = new BigDecimal("12345");
+    DailyAbnormalUpsertRequestDto request = validDailyAbnormalRequest();
+    when(testResultService.upsertDailyAbnormalCounts(key, request))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
+
+    mockMvc
+        .perform(
+            put(BASE_URL + "/{dailyGermSkey}", key)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isNotFound());
+
+    verify(testResultService).upsertDailyAbnormalCounts(key, request);
+  }
+
+  @Test
+  void upsertDailyAbnormalCounts_returns422_whenInvalidData() throws Exception {
+    BigDecimal key = new BigDecimal("12345");
+    DailyAbnormalUpsertRequestDto request = validDailyAbnormalRequest();
+    when(testResultService.upsertDailyAbnormalCounts(key, request))
+        .thenThrow(new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "invalid counts"));
+
+    mockMvc
+        .perform(
+            put(BASE_URL + "/{dailyGermSkey}", key)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isUnprocessableEntity());
+
+    verify(testResultService).upsertDailyAbnormalCounts(key, request);
+  }
+
+  private DailyAbnormalUpsertRequestDto validDailyAbnormalRequest() {
+    ReplicateAbnormalDto replicate =
+        new ReplicateAbnormalDto(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, null);
+    return new DailyAbnormalUpsertRequestDto(replicate, replicate, replicate, replicate);
   }
 
   @Test
