@@ -94,7 +94,12 @@ const fixedWidth = (
         gap: '0.25rem',
 
         '& .Mui-TableHeadCell-Content-Wrapper': {
-          order: 1
+          order: 1,
+          // MRT ellipsizes head labels on one line; the table is sized to its
+          // columns, so a label that does not fit has to wrap, not disappear.
+          whiteSpace: 'normal',
+          overflow: 'visible',
+          textOverflow: 'clip'
         },
         '& .MuiBadge-root': {
           order: 2
@@ -263,7 +268,7 @@ export const getDailyGermColumns = (
         {row.original.repTotal}
       </span>
     ),
-    ...fixedWidth(90)
+    ...fixedWidth(110)
   },
   {
     accessorKey: 'totalNoSeeds',
@@ -293,14 +298,14 @@ export const getDailyGermColumns = (
     // The replicate's germination percentage, in the table rather than on tiles
     // below it (#2682): it is read against the row it belongs to.
     id: 'germPct',
-    header: 'Rep germ %',
+    header: 'Germ %',
     enableEditing: false,
     Cell: ({ row }: { row: { original: GermTableRow } }) => (
       <span data-testid={`germ-pct-${row.original.replicateNumber}`}>
         {`${calcGermPct(row.original.repTotal, row.original.totalNoSeeds)}%`}
       </span>
     ),
-    ...fixedWidth(110)
+    ...fixedWidth(90)
   },
   {
     accessorKey: 'repAcceptedInd',
@@ -321,6 +326,6 @@ export const getDailyGermColumns = (
         )}
       />
     ),
-    ...fixedWidth(60, 'center')
+    ...fixedWidth(80, 'center')
   }
 ];
