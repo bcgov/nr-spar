@@ -1,11 +1,17 @@
 package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
+import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
+import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,11 +24,13 @@ class PlantingServiceTest {
 
   @Mock private Provider oracleApiProvider;
 
+  @Mock private SeedlotRepository seedlotRepository;
+
   private PlantingService plantingService;
 
   @BeforeEach
   void setUp() {
-    plantingService = new PlantingService(oracleApiProvider);
+    plantingService = new PlantingService(oracleApiProvider, seedlotRepository);
   }
 
   @Test
@@ -37,5 +45,29 @@ class PlantingServiceTest {
 
     assertEquals(dto, result);
     verify(oracleApiProvider).getSeedlotAndSpeciesByRequestKey(requestKey);
+  }
+
+  @Test
+  @DisplayName("getSpeciesBySeedlot_shouldDeriveSpeciesFromSeedlot")
+  void getSpeciesBySeedlot_shouldDeriveSpeciesFromSeedlot() {
+    Seedlot seedlot = mock(Seedlot.class);
+    when(seedlot.getId()).thenReturn("16258");
+    when(seedlot.getVegetationCode()).thenReturn("PLI");
+    when(seedlotRepository.findById("16258")).thenReturn(Optional.of(seedlot));
+
+    SeedlotSpeciesDto result = plantingService.getSpeciesBySeedlot("16258");
+
+    assertEquals(new SeedlotSpeciesDto(16258L, "PLI"), result);
+  }
+
+  @Test
+  @DisplayName("getSpeciesBySeedlot_shouldThrowWhenSeedlotDoesNotExist")
+  void getSpeciesBySeedlot_shouldThrowWhenSeedlotDoesNotExist() {
+    when(seedlotRepository.findById("99999")).thenReturn(Optional.empty());
+
+    SeedlotNotFoundException exc =
+        assertThrows(
+            SeedlotNotFoundException.class, () -> plantingService.getSpeciesBySeedlot("99999"));
+    assertEquals("404 NOT_FOUND \"Seedlot doesn't exist\"", exc.getMessage());
   }
 }
