@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalUpsertRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestUpdateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
@@ -463,6 +464,165 @@ public class TestResultService {
       Integer other,
       Integer prgrm) {
     return new ReplicateAbnormalDto(re, sr, sh, rn, th, tr, tw, cm, weak, other, prgrm, null);
+  }
+
+  /**
+   * Create or replace daily abnormal germination counts for a daily germ record.
+   *
+   * @param dailyGermSkey the surrogate key for the daily germ record
+   * @param request the abnormal counts for all four replicates
+   * @return the saved daily abnormal counts
+   */
+  @Transactional
+  public DailyAbnormalResponseDto upsertDailyAbnormalCounts(
+      BigDecimal dailyGermSkey, DailyAbnormalUpsertRequestDto request) {
+    GermCountEntity germCount =
+        germCountRepository
+            .findByDailyGermSkeyInAnySlot(dailyGermSkey)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Daily germ record not found for the given key"));
+
+    DailyAbnormalEntity entity = dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey);
+    if (entity == null) {
+      entity = new DailyAbnormalEntity();
+      entity.setDailyGermSkey(dailyGermSkey);
+    }
+
+    applyReplicateAbnormal(entity, 1, request.rep1());
+    applyReplicateAbnormal(entity, 2, request.rep2());
+    applyReplicateAbnormal(entity, 3, request.rep3());
+    applyReplicateAbnormal(entity, 4, request.rep4());
+
+    validateDailyAbnormalTotals(entity, germCount, dailyGermSkey);
+    dailyAbnormalRepository.save(entity);
+
+    return new DailyAbnormalResponseDto(
+        entity.getDailyGermSkey(), request.rep1(), request.rep2(), request.rep3(), request.rep4());
+  }
+
+  private void applyReplicateAbnormal(
+      DailyAbnormalEntity entity, int replicateNumber, ReplicateAbnormalDto abnormal) {
+    switch (replicateNumber) {
+      case 1 -> {
+        entity.setRep1NoAbnrmRe(abnormal.abnormalNumReverseEmbryo());
+        entity.setRep1NoAbnrmSr(abnormal.abnormalNumStuntedRadicle());
+        entity.setRep1NoAbnrmSh(abnormal.abnormalNumStuntedHypocotyl());
+        entity.setRep1NoAbnrmRn(abnormal.abnormalNumRotten());
+        entity.setRep1NoAbnrmTh(abnormal.abnormalNumThickenedHypocotyl());
+        entity.setRep1NoAbnrmTr(abnormal.abnormalNumThickenedRadicle());
+        entity.setRep1NoAbnrmTw(abnormal.abnormalNumTwisted());
+        entity.setRep1NoAbnrmCm(abnormal.abnormalNumMegametophyteCollar());
+        entity.setRep1NoAbnrmWeak(abnormal.abnormalNumWeak());
+        entity.setRep1NoAbnrmOther(abnormal.abnormalNumOther());
+        entity.setRep1NoAbnrmPrgrm(abnormal.abnormalNumPregermination());
+      }
+      case 2 -> {
+        entity.setRep2NoAbnrmRe(abnormal.abnormalNumReverseEmbryo());
+        entity.setRep2NoAbnrmSr(abnormal.abnormalNumStuntedRadicle());
+        entity.setRep2NoAbnrmSh(abnormal.abnormalNumStuntedHypocotyl());
+        entity.setRep2NoAbnrmRn(abnormal.abnormalNumRotten());
+        entity.setRep2NoAbnrmTh(abnormal.abnormalNumThickenedHypocotyl());
+        entity.setRep2NoAbnrmTr(abnormal.abnormalNumThickenedRadicle());
+        entity.setRep2NoAbnrmTw(abnormal.abnormalNumTwisted());
+        entity.setRep2NoAbnrmCm(abnormal.abnormalNumMegametophyteCollar());
+        entity.setRep2NoAbnrmWeak(abnormal.abnormalNumWeak());
+        entity.setRep2NoAbnrmOther(abnormal.abnormalNumOther());
+        entity.setRep2NoAbnrmPrgrm(abnormal.abnormalNumPregermination());
+      }
+      case 3 -> {
+        entity.setRep3NoAbnrmRe(abnormal.abnormalNumReverseEmbryo());
+        entity.setRep3NoAbnrmSr(abnormal.abnormalNumStuntedRadicle());
+        entity.setRep3NoAbnrmSh(abnormal.abnormalNumStuntedHypocotyl());
+        entity.setRep3NoAbnrmRn(abnormal.abnormalNumRotten());
+        entity.setRep3NoAbnrmTh(abnormal.abnormalNumThickenedHypocotyl());
+        entity.setRep3NoAbnrmTr(abnormal.abnormalNumThickenedRadicle());
+        entity.setRep3NoAbnrmTw(abnormal.abnormalNumTwisted());
+        entity.setRep3NoAbnrmCm(abnormal.abnormalNumMegametophyteCollar());
+        entity.setRep3NoAbnrmWeak(abnormal.abnormalNumWeak());
+        entity.setRep3NoAbnrmOther(abnormal.abnormalNumOther());
+        entity.setRep3NoAbnrmPrgrm(abnormal.abnormalNumPregermination());
+      }
+      case 4 -> {
+        entity.setRep4NoAbnrmRe(abnormal.abnormalNumReverseEmbryo());
+        entity.setRep4NoAbnrmSr(abnormal.abnormalNumStuntedRadicle());
+        entity.setRep4NoAbnrmSh(abnormal.abnormalNumStuntedHypocotyl());
+        entity.setRep4NoAbnrmRn(abnormal.abnormalNumRotten());
+        entity.setRep4NoAbnrmTh(abnormal.abnormalNumThickenedHypocotyl());
+        entity.setRep4NoAbnrmTr(abnormal.abnormalNumThickenedRadicle());
+        entity.setRep4NoAbnrmTw(abnormal.abnormalNumTwisted());
+        entity.setRep4NoAbnrmCm(abnormal.abnormalNumMegametophyteCollar());
+        entity.setRep4NoAbnrmWeak(abnormal.abnormalNumWeak());
+        entity.setRep4NoAbnrmOther(abnormal.abnormalNumOther());
+        entity.setRep4NoAbnrmPrgrm(abnormal.abnormalNumPregermination());
+      }
+      default -> throw new IllegalArgumentException("replicateNumber must be 1..4");
+    }
+  }
+
+  private void validateDailyAbnormalTotals(
+      DailyAbnormalEntity entity, GermCountEntity germCount, BigDecimal dailyGermSkey) {
+    int matchedSlot = findMatchedDailyGermSlot(germCount, dailyGermSkey);
+    if (matchedSlot == -1) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Daily germ record not found for the given key");
+    }
+
+    List<TestRepGermEntity> replicateRows =
+        testRepGermRepository.findByRiaKeyOrderByReplicateNumber(germCount.getRiaSkey());
+    Map<Integer, Integer> totalSeedsByRep =
+        replicateRows.stream()
+            .collect(
+                Collectors.toMap(
+                    row -> row.getId().getReplicateNumber(),
+                    row -> nullToZero(row.getTotalNoSeeds()),
+                    (first, ignored) -> first));
+
+    if (!totalSeedsByRep.keySet().containsAll(List.of(1, 2, 3, 4))) {
+      throw new ResponseStatusException(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          "Unable to validate replicate totals: missing replicate seed totals");
+    }
+
+    ReplicateAbnormalDto rep1 = mapReplicateAbnormal(
+        entity.getRep1NoAbnrmRe(), entity.getRep1NoAbnrmSr(), entity.getRep1NoAbnrmSh(),
+        entity.getRep1NoAbnrmRn(), entity.getRep1NoAbnrmTh(), entity.getRep1NoAbnrmTr(),
+        entity.getRep1NoAbnrmTw(), entity.getRep1NoAbnrmCm(), entity.getRep1NoAbnrmWeak(),
+        entity.getRep1NoAbnrmOther(), entity.getRep1NoAbnrmPrgrm());
+    ReplicateAbnormalDto rep2 = mapReplicateAbnormal(
+        entity.getRep2NoAbnrmRe(), entity.getRep2NoAbnrmSr(), entity.getRep2NoAbnrmSh(),
+        entity.getRep2NoAbnrmRn(), entity.getRep2NoAbnrmTh(), entity.getRep2NoAbnrmTr(),
+        entity.getRep2NoAbnrmTw(), entity.getRep2NoAbnrmCm(), entity.getRep2NoAbnrmWeak(),
+        entity.getRep2NoAbnrmOther(), entity.getRep2NoAbnrmPrgrm());
+    ReplicateAbnormalDto rep3 = mapReplicateAbnormal(
+        entity.getRep3NoAbnrmRe(), entity.getRep3NoAbnrmSr(), entity.getRep3NoAbnrmSh(),
+        entity.getRep3NoAbnrmRn(), entity.getRep3NoAbnrmTh(), entity.getRep3NoAbnrmTr(),
+        entity.getRep3NoAbnrmTw(), entity.getRep3NoAbnrmCm(), entity.getRep3NoAbnrmWeak(),
+        entity.getRep3NoAbnrmOther(), entity.getRep3NoAbnrmPrgrm());
+    ReplicateAbnormalDto rep4 = mapReplicateAbnormal(
+        entity.getRep4NoAbnrmRe(), entity.getRep4NoAbnrmSr(), entity.getRep4NoAbnrmSh(),
+        entity.getRep4NoAbnrmRn(), entity.getRep4NoAbnrmTh(), entity.getRep4NoAbnrmTr(),
+        entity.getRep4NoAbnrmTw(), entity.getRep4NoAbnrmCm(), entity.getRep4NoAbnrmWeak(),
+        entity.getRep4NoAbnrmOther(), entity.getRep4NoAbnrmPrgrm());
+
+    validateNonNegativeAbnormalCounts(rep1, "rep1");
+    validateNonNegativeAbnormalCounts(rep2, "rep2");
+    validateNonNegativeAbnormalCounts(rep3, "rep3");
+    validateNonNegativeAbnormalCounts(rep4, "rep4");
+
+    validateReplicateTotals(
+        "rep1", rep1, totalSeedsByRep.get(1),
+        sumGerminatedCountsForReplicateUpToSlot(germCount, 1, matchedSlot));
+    validateReplicateTotals(
+        "rep2", rep2, totalSeedsByRep.get(2),
+        sumGerminatedCountsForReplicateUpToSlot(germCount, 2, matchedSlot));
+    validateReplicateTotals(
+        "rep3", rep3, totalSeedsByRep.get(3),
+        sumGerminatedCountsForReplicateUpToSlot(germCount, 3, matchedSlot));
+    validateReplicateTotals(
+        "rep4", rep4, totalSeedsByRep.get(4),
+        sumGerminatedCountsForReplicateUpToSlot(germCount, 4, matchedSlot));
   }
 
   /**
