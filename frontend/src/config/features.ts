@@ -12,5 +12,3 @@ import { env } from '../env';
 const isEnabled = (value: unknown): boolean => String(value ?? '').toLowerCase() === 'true';
 
 export const isSeedlotBEnabled = (): boolean => isEnabled(env.VITE_SEEDLOT_B_ENABLED);
-
-export default { isSeedlotBEnabled };
