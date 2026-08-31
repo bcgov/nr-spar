@@ -16,6 +16,14 @@
   }
 
   .daily-germ-table {
+    // Columns are pinned to fixed widths, and a full-width table hands the
+    // leftover space out as cell padding -- which reads as a gap between the
+    // count columns. Sizing to content keeps them tight and leaves the slack
+    // at the end of the table, as the design has it.
+    table.MuiTable-root {
+      width: auto;
+    }
+
     // The ungrouped columns (Rep, Rep total, ...) render their label in the
     // second header row with an empty placeholder above. Dropping the divider
     // between the two makes the pair read as a single row-spanning header.
@@ -30,7 +38,8 @@
       @include type.font-family('sans');
       display: flex;
       flex-direction: column;
-      align-items: center;
+      // Right-aligned to match the day number and the counts below it.
+      align-items: flex-end;
       width: 100%;
       padding: 0.125rem 0;
       border: 1px solid transparent;
@@ -59,33 +68,6 @@
     th.germ-slot-active,
     td.germ-slot-active {
       background-color: var(--#{vars.$bcgov-prefix}-layer-active-01, #c6c6c8);
-    }
-  }
-
-  .replicate-total {
-    margin-top: 1.5rem;
-
-    .replicate-total-label {
-      @include type.type-style('label-01');
-      color: var(--#{vars.$bcgov-prefix}-text-secondary, #525252);
-      margin-bottom: 0.5rem;
-    }
-
-    .replicate-total-tiles {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .replicate-total-tile {
-      @include type.type-style('body-compact-01');
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 3.5rem;
-      height: 2.5rem;
-      padding: 0 0.75rem;
-      background-color: var(--#{vars.$bcgov-prefix}-layer-01, #f4f4f4);
-      border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #c6c6c6);
     }
   }
 }

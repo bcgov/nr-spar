@@ -200,14 +200,34 @@ describe('DailyGermTable', () => {
     expect(screen.getByText(/exceeds number of seeds/i)).toBeInTheDocument();
   });
 
-  it('maps Ovr checkbox to tolrncOvrrdeDesc ok/null', () => {
-    const props = renderTable();
-    fireEvent.click(screen.getByTestId('germ-ovr-3'));
-    expect(props.onReplicatesChange).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({ replicateNumber: 3, tolrncOvrrdeDesc: 'ok' })
-      ])
+  // #2682-1: the tolerance override tick boxes were never used and are gone.
+  it('has no override column', () => {
+    renderTable();
+    expect(screen.queryByTestId('germ-ovr-1')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ovr')).not.toBeInTheDocument();
+  });
+
+  // #2682-4: a number input steps its value on the arrow keys and the scroll
+  // wheel, which was changing counts by accident.
+  it('does not render count cells as number spinners', () => {
+    renderTable();
+    expect(screen.getByTestId('germ-count-1-1')).toHaveAttribute('type', 'text');
+    expect(screen.getByTestId('germ-seeds-1')).toHaveAttribute('type', 'text');
+  });
+
+  // #2682-2: chronology enforced in the calendar, not just by the error below
+  // the table -- the days up to the previous column's date are unselectable.
+  it('disables days before the previous count date in the picker', () => {
+    const slots = emptySlots();
+    slots[0] = { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 };
+    slots[1] = { slotIndex: 2, countDt: '2024-11-07', dayNoOfTest: 7 };
+    renderTable({ slots });
+    openDatePicker(2);
+    const day = (label: string) => document.querySelector(
+      `.flatpickr-calendar.inline .flatpickr-day[aria-label$="${label}"]`
     );
+    expect(day('November 4, 2024')).toHaveClass('flatpickr-disabled');
+    expect(day('November 5, 2024')).not.toHaveClass('flatpickr-disabled');
   });
 
   it.each(['.5', '5.5', '-1'])('refuses %s in # seeds instead of corrupting state', (value) => {

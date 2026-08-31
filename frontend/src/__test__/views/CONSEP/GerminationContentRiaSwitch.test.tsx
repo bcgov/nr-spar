@@ -56,7 +56,7 @@ describe('GerminationContent riaKey switch', () => {
     const { rerender } = renderView();
 
     await waitFor(() => {
-      expect(screen.getByTestId('germ-count-1-1')).toHaveValue(7);
+      expect(screen.getByTestId('germ-count-1-1')).toHaveValue('7');
     });
 
     // Navigating to another germination test reuses the same route element.
@@ -75,7 +75,7 @@ describe('GerminationContent riaKey switch', () => {
 
     expect(screen.queryByDisplayValue('7')).not.toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByTestId('germ-count-1-1')).toHaveValue(3);
+      expect(screen.getByTestId('germ-count-1-1')).toHaveValue('3');
     });
   });
 });

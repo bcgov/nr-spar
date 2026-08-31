@@ -100,6 +100,33 @@ export const resolveDayZero = (
   return dayZero.isValid ? dayZero.toFormat(ISO_DATE) : undefined;
 };
 
+/** The count-date picker's own format, for its `minDate`/`maxDate` bounds. */
+const PICKER_DATE = 'yyyy/MM/dd';
+
+const shiftDate = (isoDate: string | undefined, days: number): string | undefined => {
+  if (!isoDate) {
+    return undefined;
+  }
+  const shifted = DateTime.fromFormat(isoDate, ISO_DATE).plus({ days });
+  return shifted.isValid ? shifted.toFormat(PICKER_DATE) : undefined;
+};
+
+/**
+ * Bounds for a slot's date picker: a count date has to fall strictly between
+ * the dates of the nearest dated slots either side of it. `validateCountDates`
+ * still checks the same rule -- the free-text input bypasses the calendar --
+ * but disabling those days is what stops the error being reachable by picking.
+ */
+export const getSlotDateBounds = (
+  slots: GermCountSlotType[],
+  slotIndex: number
+): { minDate?: string; maxDate?: string } => {
+  const dated = slots.filter((slot) => slot.countDt && slot.slotIndex !== slotIndex);
+  const previous = dated.filter((slot) => slot.slotIndex < slotIndex).pop()?.countDt;
+  const next = dated.find((slot) => slot.slotIndex > slotIndex)?.countDt;
+  return { minDate: shiftDate(previous, 1), maxDate: shiftDate(next, -1) };
+};
+
 export const validateCountDates = (
   slots: GermCountSlotType[]
 ): Record<string, string> => {
