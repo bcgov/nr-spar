@@ -141,6 +141,16 @@ public class GerminationTestEndpoint {
     return testResultService.getDailyAbnormalCounts(dailyGermSkey);
   }
 
+    /**
+     * Create or update daily abnormal germination counts by daily germ key.
+     *
+     * <p>Stores abnormal counts for all four replicates. A valid daily germ key without an existing
+     * abnormal-count row creates one; otherwise, the existing row is replaced.
+     *
+     * @param dailyGermSkey the surrogate key of the daily germ record
+     * @param request the abnormal counts for all four replicates
+     * @return the saved abnormal germination counts
+     */
   @PutMapping("/daily-abnormals/{dailyGermSkey}")
   @Operation(
       summary = "Update daily abnormal germination counts by dailyGermSkey",
