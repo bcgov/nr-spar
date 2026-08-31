@@ -7,7 +7,7 @@ import {
 } from '../../../../types/consep/GerminationType';
 import GenericTable from '../../../../components/GenericTable';
 import {
-  calcDayNumber, calcRepTotal, calcGermPct, isoToJsDate, parseCountDateInput,
+  calcDayNumber, getSlotDateBounds, isoToJsDate, parseCountDateInput,
   parseCountInput, resolveDayZero, toLocalIsoDate, REP_COUNT_KEYS
 } from './utils';
 import {
@@ -150,9 +150,6 @@ const DailyGermTable = ({
       }
       updateReplicate(repNumber, { totalNoSeeds: parsed });
     },
-    onOverrideToggle: (repNumber, checked) => {
-      updateReplicate(repNumber, { tolrncOvrrdeDesc: checked ? 'ok' : null });
-    },
     onAcceptToggle: (repNumber, checked) => {
       updateReplicate(repNumber, { repAcceptedInd: checked ? 1 : 0 });
     }
@@ -195,6 +192,10 @@ const DailyGermTable = ({
           <DatePicker
             datePickerType="single"
             allowInput
+            // Chronological order enforced in the calendar itself: the days
+            // before the previous column's date, and after the next one's, are
+            // not selectable rather than merely flagged after the fact.
+            {...getSlotDateBounds(slots, editingSlotData.slotIndex)}
             // The modal exists to be a calendar, so render it open and in flow
             // rather than as a dropdown the user has to summon.
             inline
@@ -228,20 +229,6 @@ const DailyGermTable = ({
           </DatePicker>
         </Modal>
       )}
-      <div className="replicate-total">
-        <p className="replicate-total-label">Replicate total</p>
-        <div className="replicate-total-tiles">
-          {replicates.map((rep) => (
-            <span
-              key={rep.replicateNumber}
-              className="replicate-total-tile"
-              data-testid={`germ-pct-${rep.replicateNumber}`}
-            >
-              {`${calcGermPct(calcRepTotal(slots, rep.replicateNumber as 1 | 2 | 3 | 4), rep.totalNoSeeds)}%`}
-            </span>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };

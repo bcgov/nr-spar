@@ -69,7 +69,7 @@ describe('GerminationContent hydration (no ghost autosave)', () => {
     await screen.findByText(/Germination test result/i);
     // Confirm the hydrated data actually rendered.
     await waitFor(() => {
-      expect(screen.getByTestId('germ-count-1-1')).toHaveValue(5);
+      expect(screen.getByTestId('germ-count-1-1')).toHaveValue('5');
     });
     // Wait well past debounce (800ms) and maxWait (3000ms).
     await new Promise((resolve) => { setTimeout(resolve, 4000); });
@@ -83,7 +83,7 @@ describe('GerminationContent hydration (no ghost autosave)', () => {
   it('persists clearing the last count date', async () => {
     renderView();
     await waitFor(() => {
-      expect(screen.getByTestId('germ-count-1-1')).toHaveValue(5);
+      expect(screen.getByTestId('germ-count-1-1')).toHaveValue('5');
     });
 
     // Opening the cell that already holds a date shows the picker input.

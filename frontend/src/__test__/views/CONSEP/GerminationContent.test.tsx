@@ -72,7 +72,7 @@ describe('GerminationContent', () => {
     renderView();
     await screen.findByText(/Germination test result/i);
     await waitFor(() => {
-      expect(screen.getByTestId('germ-seeds-1')).toHaveValue(50);
+      expect(screen.getByTestId('germ-seeds-1')).toHaveValue('50');
     });
   });
 

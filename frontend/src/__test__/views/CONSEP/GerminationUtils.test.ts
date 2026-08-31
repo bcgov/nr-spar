@@ -2,7 +2,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   getDefaultSeeds, calcDayNumber, resolveDayZero, validateCountDates, formatCountDateLines,
-  calcRepTotal, checkOverLimit, calcGermPct, buildUpsertPayload, parseCountInput
+  calcRepTotal, checkOverLimit, calcGermPct, buildUpsertPayload, parseCountInput,
+  getSlotDateBounds
 } from '../../../views/CONSEP/TestingActivities/GerminationContent/utils';
 
 describe('getDefaultSeeds', () => {
@@ -147,5 +148,42 @@ describe('parseCountInput', () => {
     expect(parseCountInput('.5')).toBeNull();
     expect(parseCountInput('-1')).toBeNull();
     expect(parseCountInput('abc')).toBeNull();
+  });
+});
+
+describe('getSlotDateBounds', () => {
+  const slots = [
+    { slotIndex: 1, countDt: '2024-11-04' },
+    { slotIndex: 2 },
+    { slotIndex: 3, countDt: '2024-11-07' },
+    { slotIndex: 4 }
+  ];
+
+  // The bounds are exclusive: validateCountDates wants each date strictly
+  // after the one before it, so the picker has to stop a day short either way.
+  it('bounds a slot by the nearest dated slots either side of it', () => {
+    expect(getSlotDateBounds(slots, 2)).toEqual({
+      minDate: '2024/11/05',
+      maxDate: '2024/11/06'
+    });
+  });
+
+  it('leaves the open end unbounded', () => {
+    expect(getSlotDateBounds(slots, 1)).toEqual({
+      minDate: undefined,
+      maxDate: '2024/11/06'
+    });
+    expect(getSlotDateBounds(slots, 4)).toEqual({
+      minDate: '2024/11/08',
+      maxDate: undefined
+    });
+  });
+
+  // Editing a dated slot must not bound it by its own date.
+  it('ignores the slot being edited', () => {
+    expect(getSlotDateBounds(slots, 3)).toEqual({
+      minDate: '2024/11/05',
+      maxDate: undefined
+    });
   });
 });

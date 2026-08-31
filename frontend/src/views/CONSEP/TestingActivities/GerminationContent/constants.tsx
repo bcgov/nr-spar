@@ -7,7 +7,7 @@ import {
   GermReplicateType
 } from '../../../../types/consep/GerminationType';
 import {
-  calcRepTotal, formatCountDateLines, REP_COUNT_KEYS
+  calcGermPct, calcRepTotal, formatCountDateLines, REP_COUNT_KEYS
 } from './utils';
 
 export const SLOT_COUNT = 13;
@@ -28,7 +28,6 @@ export type GermTableRow = {
   replicateNumber: number;
   totalNoSeeds?: number;
   repAcceptedInd?: number;
-  tolrncOvrrdeDesc?: string | null;
   repTotal: number;
   /** Daily counts, keyed `slot1`..`slot13`. */
   [key: string]: number | string | null | undefined;
@@ -43,7 +42,6 @@ export const buildTableRows = (
     replicateNumber: rep.replicateNumber,
     totalNoSeeds: rep.totalNoSeeds,
     repAcceptedInd: rep.repAcceptedInd,
-    tolrncOvrrdeDesc: rep.tolrncOvrrdeDesc,
     repTotal: calcRepTotal(slots, repNumber)
   };
   slots.forEach((slot) => {
@@ -65,7 +63,6 @@ export type DailyGermHandlers = {
   onSlotFocus: (slotIndex: number | null) => void;
   onCountChange: (replicateNumber: number, slotIndex: number, raw: string) => void;
   onSeedsChange: (replicateNumber: number, raw: string) => void;
-  onOverrideToggle: (replicateNumber: number, checked: boolean) => void;
   onAcceptToggle: (replicateNumber: number, checked: boolean) => void;
 };
 
@@ -125,7 +122,7 @@ const fixedWidth = (
  * in a centred modal, so the picker never has to fit in the column.
  */
 const SLOT_COLUMN_WIDTH = 56;
-const SLOT_COLUMN_PADDING = '0.25rem';
+const SLOT_COLUMN_PADDING = '0.125rem';
 
 const numberFieldSx = {
   // Without this the field keeps a text input's intrinsic 20-character width,
@@ -138,13 +135,6 @@ const numberFieldSx = {
   '& input': {
     width: '100%',
     minWidth: 0
-  },
-  '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
-    WebkitAppearance: 'none',
-    margin: 0
-  },
-  '& input[type=number]': {
-    MozAppearance: 'textfield'
   }
 };
 
@@ -215,7 +205,10 @@ const buildSlotColumn = (
           <span data-testid={`germ-day-${slot.slotIndex}`}>{slot.dayNoOfTest ?? ''}</span>
         ),
         muiEditTextFieldProps: ({ row }: { row: { original: GermTableRow } }) => ({
-          type: 'number',
+          // Deliberately not `type="number"`: its arrow-key and scroll-wheel
+          // stepping changed counts by accident (#2682). `parseCountInput` is
+          // what rejects non-integers, not the input type.
+          type: 'text',
           value: row.original[slotKey(slot.slotIndex)] ?? '',
           // A count only makes sense once its column has a date, and clearing
           // the date wipes the counts server-side.
@@ -233,8 +226,6 @@ const buildSlotColumn = (
             'data-testid': `germ-count-${row.original.replicateNumber}-${slot.slotIndex}`,
             'aria-label': `Replicate ${row.original.replicateNumber} count ${slot.slotIndex}`,
             inputMode: 'numeric',
-            min: 0,
-            step: 1,
             style: { textAlign: 'right' }
           },
           sx: numberFieldSx
@@ -278,7 +269,8 @@ export const getDailyGermColumns = (
     accessorKey: 'totalNoSeeds',
     header: '# seeds',
     muiEditTextFieldProps: ({ row }: { row: { original: GermTableRow } }) => ({
-      type: 'number',
+      // See the count cells above: no spinner, so no accidental stepping.
+      type: 'text',
       value: row.original.totalNoSeeds ?? '',
       disabled: !isEditable,
       error: !!validationErrors[`rep-${row.original.replicateNumber}`],
@@ -291,8 +283,6 @@ export const getDailyGermColumns = (
         'data-testid': `germ-seeds-${row.original.replicateNumber}`,
         'aria-label': `Replicate ${row.original.replicateNumber} number of seeds`,
         inputMode: 'numeric',
-        min: 0,
-        step: 1,
         style: { textAlign: 'right' }
       },
       sx: numberFieldSx
@@ -300,25 +290,17 @@ export const getDailyGermColumns = (
     ...fixedWidth(100)
   },
   {
-    accessorKey: 'tolrncOvrrdeDesc',
-    header: 'Ovr',
+    // The replicate's germination percentage, in the table rather than on tiles
+    // below it (#2682): it is read against the row it belongs to.
+    id: 'germPct',
+    header: 'Rep germ %',
     enableEditing: false,
     Cell: ({ row }: { row: { original: GermTableRow } }) => (
-      <Checkbox
-        size="small"
-        checked={row.original.tolrncOvrrdeDesc === 'ok'}
-        disabled={!isEditable}
-        inputProps={{
-          'data-testid': `germ-ovr-${row.original.replicateNumber}`,
-          'aria-label': `Replicate ${row.original.replicateNumber} tolerance override`
-        } as React.InputHTMLAttributes<HTMLInputElement>}
-        onChange={(e) => handlers.onOverrideToggle(
-          row.original.replicateNumber,
-          e.target.checked
-        )}
-      />
+      <span data-testid={`germ-pct-${row.original.replicateNumber}`}>
+        {`${calcGermPct(row.original.repTotal, row.original.totalNoSeeds)}%`}
+      </span>
     ),
-    ...fixedWidth(60, 'center')
+    ...fixedWidth(110)
   },
   {
     accessorKey: 'repAcceptedInd',
