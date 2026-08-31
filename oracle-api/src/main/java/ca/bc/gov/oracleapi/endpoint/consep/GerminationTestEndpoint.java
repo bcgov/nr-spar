@@ -167,7 +167,7 @@ public class GerminationTestEndpoint {
             content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(
             responseCode = "404",
-            description = "Daily abnormal counts not found for the given key",
+            description = "Daily germ record not found for the given key",
             content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(
             responseCode = "422",
