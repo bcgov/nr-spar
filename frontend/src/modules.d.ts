@@ -4,29 +4,6 @@ declare module '@carbon/pictograms-react';
 
 declare module 'leaflet.control.layers.tree';
 
-declare module 'leaflet' {
-  namespace Control {
-    namespace Layers {
-      interface TreeObject {
-        label: string;
-        layer?: Layer;
-        children?: TreeObject[];
-        selectAllCheckbox?: boolean | string;
-      }
-    }
-  }
-
-  namespace control {
-    namespace layers {
-      function tree(
-        baseTree: Control.Layers.TreeObject,
-        overlayTree?: Control.Layers.TreeObject,
-        options?: Control.LayersOptions & Record<string, unknown>
-      ): Control.Layers;
-    }
-  }
-}
-
 declare module '@mapbox/shp-write' {
   import type { FeatureCollection } from 'geojson';
 

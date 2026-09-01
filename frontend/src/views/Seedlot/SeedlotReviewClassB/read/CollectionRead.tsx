@@ -314,16 +314,6 @@ const CollectionRead = () => {
           />
         </Column>
       </Row>
-      <Row>
-        <Column className="info-col" sm={4} md={8} lg={8}>
-          <ReadOnlyInput
-            id="b-review-same-bec-unit"
-            label="Collection is all from within the same BEC unit?"
-            value={state.sameBecUnit.value ? 'Yes' : 'No'}
-            showSkeleton={isFetchingData}
-          />
-        </Column>
-      </Row>
     </FlexGrid>
   );
 };

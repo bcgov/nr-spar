@@ -16,8 +16,8 @@ export const formatYesNo = (value: boolean | undefined): string => {
 };
 
 export const isSuperiorProvenanceSeedlot = (seedlot?: SeedlotType): boolean => (
-    seedlot?.superiorProvenanceInd === 'Y'
-    || seedlot?.geneticClass?.geneticClassCode === 'B+'
+  seedlot?.superiorProvenanceInd === true
+  || seedlot?.geneticClass?.geneticClassCode === 'B+'
 );
 
 export const getRegistrationRoute = (seedlot?: SeedlotType): string => (
@@ -37,18 +37,19 @@ export const getPrintSeedlotLabel = (isBClass: boolean, isPending: boolean): str
     return 'Print seedlot';
   }
   return isPending ? 'Generating report…' : 'Print seedlot (SPRR001)';
+};
 
-  export const getEditApplicantRoute = (seedlot?: SeedlotType): string => (
-      isBClassSeedlot(seedlot)
-          ? ROUTES.SEEDLOTS_B_CLASS_CREATION
-          : ROUTES.SEEDLOT_A_CLASS_EDIT
-  );
+export const getEditApplicantRoute = (seedlot?: SeedlotType): string => (
+  isBClassSeedlot(seedlot)
+    ? ROUTES.SEEDLOTS_B_CLASS_CREATION
+    : ROUTES.SEEDLOT_A_CLASS_EDIT
+);
 
-  export const getRegistrationPath = (
-      seedlotNumber: string,
-      seedlot?: SeedlotType,
-      step?: number
-  ): string => {
-    const base = addParamToPath(getRegistrationRoute(seedlot), seedlotNumber);
-    return step ? `${base}?step=${step}` : base;
+export const getRegistrationPath = (
+  seedlotNumber: string,
+  seedlot?: SeedlotType,
+  step?: number
+): string => {
+  const base = addParamToPath(getRegistrationRoute(seedlot), seedlotNumber);
+  return step ? `${base}?step=${step}` : base;
 };
