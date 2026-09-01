@@ -1,0 +1,52 @@
+// The outer wrapper stretches to fill its parent — the parent is
+// `.seedlot-map-workspace` in the map-first overlay layout, which
+// positions this div absolutely. Keeping `height: 100%` here means
+// the element also renders correctly in component tests that mount
+// `<LeafletMap>` in isolation against an auto-height parent, as long
+// as the test container provides its own dimensions.
+.leaflet-map {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  :global(.leaflet-container) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.cwm-markup-point-icon {
+  width: 25px;
+  height: 25px;
+}
+
+.cwm-markup-point-icon__star {
+  display: block;
+  width: 25px;
+  height: 25px;
+  background: #f44336;
+  clip-path: polygon(
+    50% 0%,
+    61% 34%,
+    98% 35%,
+    68% 56%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 56%,
+    2% 35%,
+    39% 34%
+  );
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 35%));
+}
+
+.cwm-markup-point-popup {
+  min-width: 180px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+
+  strong {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+}

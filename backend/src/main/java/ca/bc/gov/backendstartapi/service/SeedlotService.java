@@ -365,7 +365,7 @@ public class SeedlotService {
 
   private SeedlotCollectionGeometryDto loadCollectionGeometryOrNull(String seedlotNumber) {
     return seedlotCollectionGeometryRepository
-        .findById(seedlotNumber)
+        .findBySeedlotNumber(seedlotNumber)
         .map(this::toCollectionGeometryDto)
         .orElse(null);
   }
@@ -1398,7 +1398,8 @@ public class SeedlotService {
     saveBclassAouSpzList(seedlot, form.aouSpzList(), canDelete);
     saveBclassGeneticWorth(seedlot, form.geneticWorthTraits());
 
-    // Collection geometry (optional polygon)
+    // Collection geometry (optional polygon). Null/blank GeoJSON deletes any
+    // existing PostGIS row; this runs in the same transaction as deleteForm below.
     String userId = loggedUserService.getLoggedUserId();
     seedlotCollectionGeometryService.saveOrUpdate(
         seedlot, col.collectionGeometryGeoJson(), userId);

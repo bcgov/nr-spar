@@ -1,0 +1,86 @@
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+
+.help-modal-body {
+  display: flex;
+  gap: 1.5rem;
+  max-height: 70vh;
+
+  // Sticky left-side topic nav; click to jump.
+  .help-modal-nav {
+    flex: 0 0 200px;
+    border-right: 1px solid colors.$gray-20;
+    padding-right: 1rem;
+    overflow-y: auto;
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    a {
+      display: block;
+      padding: 0.25rem 0;
+      color: #0f62fe;
+      text-decoration: none;
+      font-size: 0.875rem;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .help-modal-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .help-modal-topic {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid colors.$gray-20;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &__title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: colors.$gray-100;
+    }
+
+    &__body {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: colors.$gray-100;
+
+      p {
+        margin-bottom: 0.75rem;
+      }
+
+      ul {
+        margin-bottom: 0.75rem;
+        padding-left: 1.25rem;
+      }
+
+      li {
+        margin-bottom: 0.25rem;
+      }
+
+      code {
+        background: colors.$gray-10;
+        padding: 0.0625rem 0.25rem;
+        border-radius: 0.125rem;
+        font-family: 'BC Sans Mono', 'SF Mono', 'Menlo', monospace;
+        font-size: 0.8125rem;
+      }
+    }
+  }
+}

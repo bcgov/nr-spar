@@ -1119,7 +1119,8 @@ class SeedlotServiceTest {
         mock(SeedlotFormCollectionDtoClassB.class);
 
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
-    when(seedlotCollectionGeometryRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(seedlotNumber))
+        .thenReturn(Optional.empty());
     when(seedlotCollectionMethodService.getAllSeedlotCollectionMethodsBySeedlot(seedlotNumber))
         .thenReturn(List.of(1));
     when(seedlotFormCollectionBclassMapper.toDto(seedlot, null, List.of(1)))
@@ -1156,7 +1157,8 @@ class SeedlotServiceTest {
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
     doNothing().when(loggedUserService).verifySeedlotAccessPrivilege(anyString());
     when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
-    when(seedlotCollectionGeometryRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(seedlotNumber))
+        .thenReturn(Optional.empty());
     when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(List.of());
 
     SeedlotDto dto = seedlotService.getSingleSeedlotInfo(seedlotNumber);

@@ -40,7 +40,7 @@ public class SeedlotCollectionGeometryService {
 
     SeedlotCollectionGeometry geometry =
         seedlotCollectionGeometryRepository
-            .findById(seedlotNumber)
+            .findBySeedlotNumber(seedlotNumber)
             .orElseThrow(SeedlotCollectionGeometryNotFoundException::new);
 
     SparLog.info("Collection geometry found for seedlot {}", seedlotNumber);
@@ -58,17 +58,33 @@ public class SeedlotCollectionGeometryService {
   /**
    * Persists or updates the collection polygon for a B-class seedlot.
    *
-   * <p>If no geometry was provided (null GeoJSON) this is a no-op so callers do not need to guard.
+   * <p>If no geometry was provided (null or blank GeoJSON, or GeoJSON with no geometry), any
+   * existing {@code seedlot_collection_geometry} row for the seedlot is deleted. Callers such as
+   * {@code submitSeedlotFormClassB} invoke this inside the same transaction that deletes the wizard
+   * draft, so clearing the polygon and removing the draft stay atomic.
+   *
+   * <p>Accepts WGS-84 (SRID 4326) GeoJSON as produced by the Leaflet map — a bare geometry, a
+   * {@code Feature}, or a {@code FeatureCollection} (see {@link GeometryUtil#fromGeoJson}). Area and
+   * perimeter are measured on the spheroid via PostGIS {@code geography} (true m² / m) rather than
+   * planar JTS, which would be meaningless in degrees.
    *
    * @param seedlot the owning seedlot entity
-   * @param geoJson GeoJSON string (SRID 3005) for the polygon; null means no-op
+   * @param geoJson WGS-84 (SRID 4326) GeoJSON for the polygon; null/blank clears any stored geometry
    * @param userId audit user ID
    */
   @Transactional
   public void saveOrUpdate(@NonNull Seedlot seedlot, String geoJson, @NonNull String userId) {
     Geometry geometry = GeometryUtil.fromGeoJson(geoJson);
     if (geometry == null) {
-      SparLog.info("No collection geometry provided for seedlot {}; skipping.", seedlot.getId());
+      seedlotCollectionGeometryRepository
+          .findBySeedlotNumber(seedlot.getId())
+          .ifPresent(
+              existing -> {
+                seedlotCollectionGeometryRepository.delete(existing);
+                SparLog.info(
+                    "Collection geometry deleted for seedlot {} (no GeoJSON provided).",
+                    seedlot.getId());
+              });
       return;
     }
 
@@ -76,21 +92,32 @@ public class SeedlotCollectionGeometryService {
 
     SeedlotCollectionGeometry entity =
         seedlotCollectionGeometryRepository
-            .findById(seedlot.getId())
-            .orElseGet(() -> {
-              SeedlotCollectionGeometry fresh = new SeedlotCollectionGeometry(seedlot.getId());
-              fresh.setSeedlot(seedlot);
-              return fresh;
-            });
+            .findBySeedlotNumber(seedlot.getId())
+            .orElseGet(() -> new SeedlotCollectionGeometry(seedlot.getId()));
 
     entity.setGeometry(geometry);
     entity.setFeatureClassSkey(Constants.FEATURE_CLASS_SKEY_COLL_AREA);
-    entity.setFeatureArea(BigDecimal.valueOf(geometry.getArea()).setScale(2, RoundingMode.HALF_UP));
+
+    String bareGeoJson = GeometryUtil.toGeoJson(geometry);
+    if (bareGeoJson == null) {
+      throw new IllegalStateException("Failed to serialize collection geometry for measurement");
+    }
+    SeedlotCollectionGeometryRepository.GeometryMeasurement measurement =
+        seedlotCollectionGeometryRepository.measureGeography(bareGeoJson);
+    entity.setFeatureArea(toScaledDecimal(measurement == null ? null : measurement.getArea()));
     entity.setFeaturePerimeter(
-        BigDecimal.valueOf(geometry.getLength()).setScale(2, RoundingMode.HALF_UP));
+        toScaledDecimal(measurement == null ? null : measurement.getPerimeter()));
+
     entity.setObservationDate(LocalDateTime.now());
     entity.setAuditInformation(new AuditInformation(userId));
     seedlotCollectionGeometryRepository.save(entity);
     SparLog.info("Collection geometry saved for seedlot {}", seedlot.getId());
+  }
+
+  private static BigDecimal toScaledDecimal(Double value) {
+    if (value == null) {
+      return null;
+    }
+    return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP);
   }
 }

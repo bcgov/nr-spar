@@ -16,6 +16,7 @@ import SeedlotReview from '../views/Seedlot/SeedlotReview';
 import SeedlotReviewClassB from '../views/Seedlot/SeedlotReviewClassB';
 import SeedlotRegFormClassA from '../views/Seedlot/SeedlotRegFormClassA';
 import SeedlotRegFormClassB from '../views/Seedlot/SeedlotRegFormClassB';
+import SeedlotMap from '../views/Seedlot/SeedlotMap';
 import ReviewSeedlots from '../views/Seedlot/ReviewSeedlots';
 import FourOhThree from '../views/ErrorViews/FourOhThree';
 import FavouriteActivities from '../views/CONSEP/FavouriteActivity';
@@ -86,6 +87,12 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.SEEDLOT_B_CLASS_REGISTRATION,
     element: (
       <SeedlotRegFormClassB />
+    )
+  },
+  {
+    path: ROUTES.SEEDLOT_MAP,
+    element: (
+      <SeedlotMap />
     )
   },
   {

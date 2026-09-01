@@ -20,5 +20,6 @@ export type BClassCollectionForm = CollectionForm & {
   becZone: OptionsInputType,
   becSubzone: OptionsInputType,
   becVariant: OptionsInputType,
-  sameBecUnit: BooleanInputType
+  sameBecUnit: BooleanInputType,
+  collectionGeometry: StringInputType
 };
