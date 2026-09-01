@@ -38,8 +38,7 @@ export const fieldsConfig = {
     zoneLabel: 'BEC zone',
     subzoneLabel: 'Subzone',
     variantLabel: 'Variant',
-    becSearchLink: 'If you don\'t remember the BEC information you can go to BEC search',
-    sameBecUnitCheckbox: 'Yes, the collection is all from within the same BEC unit'
+    becSearchLink: 'If you don\'t remember the BEC information you can go to BEC search'
   },
   collectorSection: {
     title: 'Collector agency',

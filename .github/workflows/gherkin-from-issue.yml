@@ -14,6 +14,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     runs-on: ubuntu-24.04
     env:
       CYPRESS_TARGET_FOLDER: frontend/cypress/e2e/smoke-test-05
@@ -32,12 +33,86 @@ jobs:
           default_title: "[Test Case]: REPLACE WITH YOUR TEST CASE TITLE"
           update_title: true
 
+      - name: Prepare temporary feature file
+        env:
+          FEATURE_TITLE: ${{ steps.feature.outputs.title }}
+          FEATURE_CONTENT: ${{ steps.feature.outputs.feature }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          mkdir -p .tmp
+          cleaned="$(echo "${FEATURE_TITLE}" | sed -E 's/^\[Test Case\]:[[:space:]]*//')"
+          slug="$(echo "${cleaned}" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')"
+          if [ -z "${slug}" ]; then slug="generated"; fi
+          # 'upt_' (4) + issue number + '_' (1) + '.feature' (8) + 1 safety margin
+          max_slug=$(( $(getconf NAME_MAX .tmp 2>/dev/null || echo 255) - ${#ISSUE_NUMBER} - 14 ))
+          slug="${slug:0:${max_slug}}"
+          slug="${slug%-}"
+          file_name="upt_${ISSUE_NUMBER}_${slug}.feature"
+          echo "FILE_NAME=${file_name}" >> "$GITHUB_ENV"
+          printf '%s\n' "${FEATURE_CONTENT}" > ".tmp/${file_name}"
+
+      - name: Cache gherkin parser
+        uses: actions/cache@v6
+        with:
+          path: /tmp/gherkin/node_modules
+          key: gherkin-parser-${{ runner.os }}-29-7-0
+
+      - name: Install Gherkin parser
+        run: npm install --no-save --prefix /tmp/gherkin @cucumber/gherkin@29 @cucumber/messages@27
+
+      - name: Validate Gherkin syntax
+        id: validate_gherkin
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const { Parser, AstBuilder, GherkinClassicTokenMatcher } = require('@cucumber/gherkin');
+          const { IdGenerator } = require('@cucumber/messages');
+
+          const file = `.tmp/${process.env.FILE_NAME}`;
+          const content = fs.readFileSync(file, 'utf8');
+          const parser = new Parser(new AstBuilder(IdGenerator.uuid()), new GherkinClassicTokenMatcher());
+
+          try {
+            parser.parse(content);
+            console.log(`Gherkin syntax valid: ${file}`);
+          } catch (error) {
+            console.error(`Invalid Gherkin syntax in ${file}`);
+            console.error(error.message);
+            process.exit(1);
+          }
+          NODE
+        env:
+          FILE_NAME: ${{ env.FILE_NAME }}
+          NODE_PATH: /tmp/gherkin/node_modules
+
+      - name: Comment when Gherkin validation fails
+        if: steps.validate_gherkin.outcome == 'failure'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const issueNumber = context.issue.number;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: [
+                'The generated feature file failed Gherkin syntax validation.',
+                '',
+                'Please update the issue test scenario to use valid indentation and one step per line, then edit/relabel the issue to re-run the workflow.'
+              ].join('\n')
+            });
+
       - name: Create feature file
+        if: steps.validate_gherkin.outcome == 'success'
         run: |
           mkdir -p "${CYPRESS_TARGET_FOLDER}"
-          printf '%s\n' "${{ steps.feature.outputs.feature }}" > "${CYPRESS_TARGET_FOLDER}/upt_${{ github.event.issue.number }}.feature"
+          cp ".tmp/${FILE_NAME}" "${CYPRESS_TARGET_FOLDER}/${FILE_NAME}"
+          rm -rf .tmp
 
       - name: Commit & Push changes
+        if: steps.validate_gherkin.outcome == 'success'
         uses: Andro999b/push@c77535fe7a94645f7ceca83e48e6cc977620710e # v1.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -49,6 +124,7 @@ jobs:
             Closes #${{ github.event.issue.number }}
 
       - name: Create Pull Request
+        if: steps.validate_gherkin.outcome == 'success'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           branch: test/upt_${{ github.event.issue.number }}

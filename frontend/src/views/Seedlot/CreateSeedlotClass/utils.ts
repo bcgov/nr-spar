@@ -11,7 +11,7 @@ export const convertToPayload = (
   applicantLocationCode: formData.locationCode.value,
   applicantEmailAddress: formData.email.value,
   vegetationCode: formData.species.value.code,
-  seedlotSourceCode: formData.sourceCode.value,
+  seedlotSourceCode: geneticClass === 'B' ? null : formData.sourceCode.value,
   toBeRegistrdInd: formData.willBeRegistered.value,
   bcSourceInd: formData.isBcSource.value,
   geneticClassCode: geneticClass

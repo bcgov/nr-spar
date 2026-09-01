@@ -311,12 +311,9 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     updateState(clonedState);
   };
 
-  const handleBooleanField = (
-    field: 'useLatLongForBec' | 'sameBecUnit',
-    checked: boolean
-  ) => {
+  const handleUseLatLongForBec = (checked: boolean) => {
     const clonedState = structuredClone(state);
-    clonedState[field].value = checked;
+    clonedState.useLatLongForBec.value = checked;
     updateState(clonedState);
   };
 
@@ -502,7 +499,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
             checked={state.useLatLongForBec.value}
             readOnly={readOnly}
             onChange={(_e: React.ChangeEvent<HTMLInputElement>, { checked }: { checked: boolean }) => {
-              handleBooleanField('useLatLongForBec', checked);
+              handleUseLatLongForBec(checked);
             }}
           />
         </Column>
@@ -572,20 +569,6 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
           </Column>
         </Row>
       ) : null}
-      <Row className="b-class-collection-row">
-        <Column sm={4} md={8} lg={16} xlg={16}>
-          <Checkbox
-            id={state.sameBecUnit.id}
-            labelText={fieldsConfig.becSection.sameBecUnitCheckbox}
-            checked={state.sameBecUnit.value}
-            readOnly={readOnly}
-            onChange={(_e: React.ChangeEvent<HTMLInputElement>, { checked }: { checked: boolean }) => {
-              handleBooleanField('sameBecUnit', checked);
-            }}
-          />
-        </Column>
-      </Row>
-
       <Row className="b-class-collection-row">
         <Column sm={4} md={8} lg={16} xlg={16}>
           <h2>{fieldsConfig.collectorSection.title}</h2>

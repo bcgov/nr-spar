@@ -87,9 +87,8 @@ export const convertToApplicantInfoObj = (
   locationCode: seedlot.applicantLocationCode,
   email: seedlot.applicantEmailAddress,
   species: getSpeciesLabelByCode(seedlot.vegetationCode, vegCodeData),
-  source: seedlot.seedlotSource.description,
+  source: seedlot.seedlotSource?.description ?? '',
   willRegister: seedlot.intendedForCrownLand,
   isBcSource: seedlot.sourceInBc,
-  superiorProvenance: seedlot.superiorProvenanceInd === 'Y'
-    || seedlot.geneticClass.geneticClassCode === 'B+'
+  superiorProvenance: seedlot.superiorProvenanceInd ?? false
 });

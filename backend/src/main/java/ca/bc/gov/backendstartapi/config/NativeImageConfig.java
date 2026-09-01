@@ -51,6 +51,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseSpuGeoDto;
+import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
 import ca.bc.gov.backendstartapi.enums.DescribedEnum;
@@ -133,6 +134,7 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     SeedlotStatusResponseDto.class,
     AreaOfUseDto.class,
     AreaOfUseSpuGeoDto.class,
+    OrgUnitDistrictDto.class,
     SpuDto.class,
     SpzDto.class,
     DescribedEnum.class,

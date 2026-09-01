@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {
+  useContext, useEffect, useRef, useState
+} from 'react';
 import { useNavigate, useBlocker } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -25,6 +27,7 @@ import BClassCollectionStep from '../../../components/SeedlotRegistrationSteps/B
 import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
 import InterimStep from '../../../components/SeedlotRegistrationSteps/InterimStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
+import OwnershipReviewRead from '../../../components/SeedlotReviewSteps/Ownership/Read';
 import {
   SeedlotBClassSubmitType, SeedlotStatusCode
 } from '../../../types/SeedlotType';
@@ -39,7 +42,6 @@ import { SaveStatusModalText } from '../SeedlotReview/constants';
 
 import ApplicantAndSeedlotRead from './read/ApplicantAndSeedlotRead';
 import CollectionRead from './read/CollectionRead';
-import OwnershipRead from './read/OwnershipRead';
 import InterimRead from './read/InterimRead';
 import ExtractionStorageRead from './read/ExtractionStorageRead';
 import AreaOfUseRead from './read/AreaOfUseRead';
@@ -47,7 +49,108 @@ import { buildBClassReviewPayload, validateBClassReviewForm } from './utils';
 
 type SaveMutationVars = {
   payload: SeedlotBClassSubmitType,
-  statusAfterSave: SeedlotStatusCode | null
+  statusAfterSave: SeedlotStatusCode | null,
+  proceedNavigation?: boolean
+};
+
+type ReadOrEditProps = {
+  isReadMode: boolean;
+  read: React.ReactNode;
+  edit: React.ReactNode;
+};
+
+const ReadOrEdit = ({ isReadMode, read, edit }: ReadOrEditProps) => (
+  isReadMode ? read : edit
+);
+
+type ReviewConfirmModalsProps = {
+  seedlotNumber?: string;
+  isCancelModalOpen: boolean;
+  isSaveStatusModalOpen: boolean;
+  statusToUpdateTo: SeedlotStatusCode;
+  isSaving: boolean;
+  onCloseCancelModal: () => void;
+  onCloseSaveStatusModal: () => void;
+  onDiscardChanges: () => void;
+  onSaveChanges: () => void;
+  onConfirmStatus: (status: SeedlotStatusCode) => void;
+};
+
+const ReviewConfirmModals = ({
+  seedlotNumber,
+  isCancelModalOpen,
+  isSaveStatusModalOpen,
+  statusToUpdateTo,
+  isSaving,
+  onCloseCancelModal,
+  onCloseSaveStatusModal,
+  onDiscardChanges,
+  onSaveChanges,
+  onConfirmStatus
+}: ReviewConfirmModalsProps) => {
+  const isPendingStatus = statusToUpdateTo === 'PND';
+
+  return (
+    <>
+      <Modal
+        className="cancel-confirm-modal"
+        open={isCancelModalOpen}
+        modalHeading="Seedlot review"
+        onRequestClose={onCloseCancelModal}
+        passiveModal
+      >
+        <div className="modal-content">
+          <h5 className="modal-header">
+            Any changes you made will be discarded unless saved.
+          </h5>
+          <div className="modal-button-group">
+            <Button kind="secondary" onClick={onDiscardChanges}>Discard changes</Button>
+            <Button
+              kind="primary"
+              onClick={onSaveChanges}
+              renderIcon={Save}
+            >
+              Save changes
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        className="save-and-update-confirm-modal"
+        open={isSaveStatusModalOpen}
+        modalHeading={`Review seedlot ${seedlotNumber}`}
+        onRequestClose={onCloseSaveStatusModal}
+        passiveModal
+      >
+        <div className="modal-content">
+          <div className="modal-text">
+            {
+              isPendingStatus
+                ? (
+                  <>
+                    {SaveStatusModalText.pendingHeader}
+                    {SaveStatusModalText.pendingBody}
+                  </>
+                )
+                : SaveStatusModalText.approveHeader
+            }
+          </div>
+          <div className="modal-button-group">
+            <Button kind="secondary" onClick={onCloseSaveStatusModal}>Cancel</Button>
+            <Button
+              kind="primary"
+              onClick={() => onConfirmStatus(isPendingStatus ? 'PND' : 'APP')}
+              disabled={isSaving}
+              {...(isPendingStatus ? {} : { renderIcon: Checkmark })}
+            >
+              {isPendingStatus ? 'Send back to pending' : 'Approve seedlot'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
 };
 
 const ReviewContent = () => {
@@ -62,7 +165,9 @@ const ReviewContent = () => {
     richSeedlotData,
     allStepData,
     isFetchingData,
-    isFormReady
+    isFormReady,
+    fundingSourcesQuery,
+    methodsOfPaymentQuery
   } = useContext(ClassBContext);
 
   // True if in view mode, false in edit mode.
@@ -71,14 +176,19 @@ const ReviewContent = () => {
   const [isSaveStatusModalOpen, setIsSaveStatusModalOpen] = useState(false);
   const [statusToUpdateTo, setStatusToUpdateTo] = useState<SeedlotStatusCode>('PND');
 
+  const blockerRef = useRef<ReturnType<typeof useBlocker> | null>(null);
+
   const statusCode = seedlotData?.seedlotStatus.seedlotStatusCode;
+  const isApproved = statusCode === 'APP';
+  const showTscActions = isTscAdmin && statusCode === 'SUB';
+  const canEdit = isTscAdmin && (statusCode === 'SUB' || statusCode === 'APP');
 
   useEffect(() => {
     // Pending and incomplete seedlots are edited through the registration wizard
     if (statusCode === 'INC' || statusCode === 'PND') {
       navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''));
     }
-  }, [statusCode]);
+  }, [statusCode, seedlotNumber, navigate]);
 
   const becCatalogueQuery = useQuery({
     queryKey: ['bec-catalogue'],
@@ -86,8 +196,6 @@ const ReviewContent = () => {
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS
   });
-
-  const canEdit = isTscAdmin && (statusCode === 'SUB' || statusCode === 'APP');
 
   const statusOnlyMutation = useMutation({
     mutationFn: (statusOnSave: SeedlotStatusCode) => (
@@ -114,7 +222,7 @@ const ReviewContent = () => {
     mutationFn: (
       { payload }: SaveMutationVars
     ) => putBClassSeedlot(seedlotNumber ?? '', payload),
-    onError: (err: AxiosError) => {
+    onError: (err: AxiosError, variables) => {
       toast.error(
         <ErrorToast
           title="Edit seedlot failed"
@@ -122,19 +230,41 @@ const ReviewContent = () => {
         />,
         ErrToastOption
       );
+      if (variables.proceedNavigation) {
+        blockerRef.current?.reset?.();
+      }
     },
     onSuccess: async (_data, variables) => {
+      setIsReadMode(true);
       if (variables.statusAfterSave) {
+        // Clear any blocked transition so the status redirect can run
+        if (variables.proceedNavigation) {
+          blockerRef.current?.reset?.();
+        }
         statusOnlyMutation.mutate(variables.statusAfterSave);
         return;
       }
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlot-b-class-full-form', seedlotNumber] });
-      setIsReadMode(true);
+      if (variables.proceedNavigation) {
+        blockerRef.current?.proceed?.();
+      }
     }
   });
 
   const isSaving = saveEditMutation.isPending || statusOnlyMutation.isPending;
+
+  const blocker = useBlocker(!isReadMode && !isSaving);
+
+  useEffect(() => {
+    blockerRef.current = blocker;
+  }, [blocker]);
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setIsCancelModalOpen(true);
+    }
+  }, [blocker.state]);
 
   const verifyFormData = (): boolean => {
     const isValid = validateBClassReviewForm(allStepData, becCatalogueQuery.data);
@@ -156,14 +286,18 @@ const ReviewContent = () => {
    * endpoint sets the status back to submitted, so an approved seedlot
    * that is edited needs to be set back to approved.
    */
-  const saveEdits = (statusAfterSave: SeedlotStatusCode | null = null) => {
+  const saveEdits = (
+    statusAfterSave: SeedlotStatusCode | null = null,
+    proceedNavigation = false
+  ) => {
     if (!verifyFormData()) {
       return;
     }
     const payload = buildBClassReviewPayload(allStepData, richSeedlotData);
     saveEditMutation.mutate({
       payload,
-      statusAfterSave: statusAfterSave ?? (statusCode === 'APP' ? 'APP' : null)
+      statusAfterSave: statusAfterSave ?? (isApproved ? 'APP' : null),
+      proceedNavigation
     });
   };
 
@@ -184,21 +318,24 @@ const ReviewContent = () => {
   const handleSaveAndStatus = (statusOnSave: SeedlotStatusCode) => {
     if (isReadMode) {
       statusOnlyMutation.mutate(statusOnSave);
-    } else {
-      saveEdits(statusOnSave);
+      return;
     }
+    saveEdits(statusOnSave);
   };
 
   const handleCancelClick = () => {
     if (isReadMode) {
       navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''));
-    } else {
-      setIsCancelModalOpen(true);
+      return;
     }
+    setIsCancelModalOpen(true);
   };
 
   const closeCancelModal = () => {
     setIsCancelModalOpen(false);
+    if (blocker.state === 'blocked') {
+      blocker.reset();
+    }
   };
 
   const closeSaveStatusModal = () => {
@@ -214,24 +351,29 @@ const ReviewContent = () => {
    * Discard changes without saving.
    */
   const discardChanges = () => {
+    const shouldProceed = blocker.state === 'blocked';
     setIsReadMode(true);
     queryClient.refetchQueries({ queryKey: ['seedlots', seedlotNumber] });
     queryClient.refetchQueries({ queryKey: ['seedlot-b-class-full-form', seedlotNumber] });
-    closeCancelModal();
-  };
-
-  /**
-   * Custom blocker function to prevent navigation with unsaved changes.
-   */
-  const blockerFunction = () => {
-    if (!isReadMode && !isSaving) {
-      setIsCancelModalOpen(true);
-      return true;
+    setIsCancelModalOpen(false);
+    if (shouldProceed) {
+      blocker.proceed();
     }
-    return false;
   };
 
-  useBlocker(blockerFunction);
+  const handleModalSaveChanges = () => {
+    if (!verifyFormData()) {
+      return;
+    }
+    const proceedNavigation = blocker.state === 'blocked';
+    setIsCancelModalOpen(false);
+    saveEdits(null, proceedNavigation);
+  };
+
+  const handleConfirmStatus = (status: SeedlotStatusCode) => {
+    closeSaveStatusModal();
+    handleSaveAndStatus(status);
+  };
 
   return (
     <FlexGrid className="seedlot-review-grid">
@@ -272,7 +414,7 @@ const ReviewContent = () => {
       </Row>
 
       {
-        statusCode === 'APP'
+        isApproved
           ? (
             <Row>
               <InlineNotification
@@ -281,7 +423,7 @@ const ReviewContent = () => {
                 hideCloseButton
                 kind="success"
                 title="Seedlot approved:"
-                subtitle="This seedlot have been reviewed and approved"
+                subtitle="This seedlot has been reviewed and approved"
               />
             </Row>
           )
@@ -308,11 +450,11 @@ const ReviewContent = () => {
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <CollectionRead />
-              : <BClassCollectionStep isReview />
-          }
+          <ReadOrEdit
+            isReadMode={isReadMode}
+            read={<CollectionRead />}
+            edit={<BClassCollectionStep isReview />}
+          />
         </Column>
       </Row>
 
@@ -325,15 +467,27 @@ const ReviewContent = () => {
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <OwnershipRead />
-              : (
-                <FlexGrid className="sub-section-grid">
-                  <OwnershipStep isReview />
-                </FlexGrid>
-              )
-          }
+          <ReadOrEdit
+            isReadMode={isReadMode}
+            read={(
+              <OwnershipReviewRead
+                owners={allStepData.ownershipStep}
+                isFetchingData={isFetchingData}
+                idPrefix="b-review-owner"
+                fundingSourcesFailed={fundingSourcesQuery.isError}
+                methodsOfPaymentFailed={methodsOfPaymentQuery.isError}
+              />
+            )}
+            edit={(
+              <FlexGrid className="sub-section-grid">
+                <OwnershipStep
+                  isReview
+                  fundingSourcesQuery={fundingSourcesQuery}
+                  methodsOfPaymentQuery={methodsOfPaymentQuery}
+                />
+              </FlexGrid>
+            )}
+          />
         </Column>
       </Row>
 
@@ -346,15 +500,15 @@ const ReviewContent = () => {
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <InterimRead />
-              : (
-                <FlexGrid className="sub-section-grid">
-                  <InterimStep isReview />
-                </FlexGrid>
-              )
-          }
+          <ReadOrEdit
+            isReadMode={isReadMode}
+            read={<InterimRead />}
+            edit={(
+              <FlexGrid className="sub-section-grid">
+                <InterimStep isReview />
+              </FlexGrid>
+            )}
+          />
         </Column>
       </Row>
 
@@ -388,15 +542,15 @@ const ReviewContent = () => {
       </Row>
       <Row className="section-row">
         <Column>
-          {
-            isReadMode
-              ? <ExtractionStorageRead />
-              : (
-                <FlexGrid className="sub-section-grid">
-                  <ExtractionAndStorage isReview />
-                </FlexGrid>
-              )
-          }
+          <ReadOrEdit
+            isReadMode={isReadMode}
+            read={<ExtractionStorageRead />}
+            edit={(
+              <FlexGrid className="sub-section-grid">
+                <ExtractionAndStorage isReview />
+              </FlexGrid>
+            )}
+          />
         </Column>
       </Row>
 
@@ -410,7 +564,7 @@ const ReviewContent = () => {
           </Button>
         </Column>
         {
-          isTscAdmin && statusCode === 'SUB'
+          showTscActions
             ? (
               <>
                 <Column className="action-button-col" sm={4} md={4} lg={4}>
@@ -436,90 +590,18 @@ const ReviewContent = () => {
         }
       </Row>
 
-      {/* Cancel Confirm Modal */}
-
-      <Modal
-        className="cancel-confirm-modal"
-        open={isCancelModalOpen}
-        modalHeading="Seedlot review"
-        onRequestClose={closeCancelModal}
-        passiveModal
-      >
-        <div className="modal-content">
-          <h5 className="modal-header">
-            Any changes you made will be discarded unless saved.
-          </h5>
-          <div className="modal-button-group">
-            <Button kind="secondary" onClick={discardChanges}>Discard changes</Button>
-            <Button
-              kind="primary"
-              onClick={() => {
-                closeCancelModal();
-                handleEditSaveBtn();
-              }}
-              renderIcon={Save}
-            >
-              Save changes
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Save and update status confirm modal */}
-
-      <Modal
-        className="save-and-update-confirm-modal"
-        open={isSaveStatusModalOpen}
-        modalHeading={`Review seedlot ${seedlotNumber}`}
-        onRequestClose={closeSaveStatusModal}
-        passiveModal
-      >
-        <div className="modal-content">
-          {
-              statusToUpdateTo === 'PND'
-                ? (
-                  <div className="modal-text">
-                    {SaveStatusModalText.pendingHeader}
-                    {SaveStatusModalText.pendingBody}
-                  </div>
-                )
-                : (
-                  <div className="modal-text">{SaveStatusModalText.approveHeader}</div>
-                )
-            }
-          <div className="modal-button-group">
-            <Button kind="secondary" onClick={closeSaveStatusModal}>Cancel</Button>
-            {
-              statusToUpdateTo === 'PND'
-                ? (
-                  <Button
-                    kind="primary"
-                    onClick={() => {
-                      closeSaveStatusModal();
-                      handleSaveAndStatus('PND');
-                    }}
-                    disabled={isSaving}
-                  >
-                    Send back to pending
-                  </Button>
-                )
-                : (
-                  <Button
-                    kind="primary"
-                    onClick={() => {
-                      closeSaveStatusModal();
-                      handleSaveAndStatus('APP');
-                    }}
-                    renderIcon={Checkmark}
-                    disabled={isSaving}
-                  >
-                    Approve seedlot
-                  </Button>
-                )
-            }
-          </div>
-        </div>
-      </Modal>
+      <ReviewConfirmModals
+        seedlotNumber={seedlotNumber}
+        isCancelModalOpen={isCancelModalOpen}
+        isSaveStatusModalOpen={isSaveStatusModalOpen}
+        statusToUpdateTo={statusToUpdateTo}
+        isSaving={isSaving}
+        onCloseCancelModal={closeCancelModal}
+        onCloseSaveStatusModal={closeSaveStatusModal}
+        onDiscardChanges={discardChanges}
+        onSaveChanges={handleModalSaveChanges}
+        onConfirmStatus={handleConfirmStatus}
+      />
       {
         !isReadMode
         && (

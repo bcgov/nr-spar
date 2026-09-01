@@ -36,8 +36,8 @@ const InterimRead = () => {
 
   const getFacilityTypeLabel = (interimType: string | null) => {
     if (facilityTypesQuery.data && interimType) {
-      const selectedType = facilityTypesQuery.data.filter((type) => type.code === interimType);
-      return selectedType[0]?.label ?? '';
+      const selectedType = facilityTypesQuery.data.find((type) => type.code === interimType);
+      return selectedType?.label ?? '';
     }
     return '';
   };

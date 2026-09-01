@@ -60,6 +60,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionBclassMapper;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormStepMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
@@ -144,6 +145,8 @@ public class SeedlotService {
 
   private final SeedlotFormCollectionBclassMapper seedlotFormCollectionBclassMapper;
 
+  private final SeedlotFormStepMapper seedlotFormStepMapper;
+
   private final SaveSeedlotFormService saveSeedlotFormService;
 
   /**
@@ -174,9 +177,7 @@ public class SeedlotService {
         geneticClassRepository.findById(createDto.geneticClassCode().toString());
     seedlot.setGeneticClass(classEntity.orElseThrow(GeneticClassNotFoundException::new));
 
-    Optional<SeedlotSourceEntity> seedlotSourceEntity =
-        seedlotSourceRepository.findById(createDto.seedlotSourceCode());
-    seedlot.setSeedlotSource(seedlotSourceEntity.orElseThrow(SeedlotSourceNotFoundException::new));
+    applySeedlotSource(seedlot, createDto.seedlotSourceCode());
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
@@ -301,6 +302,28 @@ public class SeedlotService {
         && "B".equals(seedlot.getGeneticClass().getGeneticClassCode());
   }
 
+  /**
+   * Sets the seedlot source, which qualifies the parent trees of an orchard and therefore only
+   * applies to class A. Class B seedlots are naturally collected and are left without a source,
+   * while class A seedlots must always have one.
+   *
+   * @param seedlot The seedlot being created or updated, with its genetic class already set
+   * @param seedlotSourceCode The requested source code, or null for a class B seedlot
+   */
+  private void applySeedlotSource(Seedlot seedlot, String seedlotSourceCode) {
+    if (ValueUtil.hasValue(seedlotSourceCode)) {
+      SeedlotSourceEntity seedlotSource =
+          seedlotSourceRepository
+              .findById(seedlotSourceCode)
+              .orElseThrow(SeedlotSourceNotFoundException::new);
+
+      seedlot.setSeedlotSource(seedlotSource);
+    } else if (!isBclassSeedlot(seedlot)) {
+      SparLog.info("Missing seedlot source code for class A seedlot {}", seedlot.getId());
+      throw new InvalidSeedlotRequestException();
+    }
+  }
+
   private void fillAclassSeedlotDetail(SeedlotDto seedlotDto) {
     String seedlotNumber = seedlotDto.getSeedlot().getId();
     fillPrimarySpu(seedlotDto);
@@ -360,6 +383,16 @@ public class SeedlotService {
             spz ->
                 new SeedPlanZoneDto(
                     spz.getSpzCode(), spz.getSpzDescription(), spz.getIsPrimary()))
+        .toList();
+  }
+
+  private List<SeedlotFormOwnershipDto> loadOwnershipStep(String seedlotNumber) {
+    return seedlotOwnerQuantityService.findAllBySeedlot(seedlotNumber).stream()
+        .filter(
+            owner ->
+                owner.getOriginalPercentageOwned() != null
+                    && owner.getOriginalPercentageOwned().compareTo(BigDecimal.ZERO) > 0)
+        .map(seedlotFormStepMapper::toOwnershipDto)
         .toList();
   }
 
@@ -645,34 +678,9 @@ public class SeedlotService {
             seedlotInfo.getComment(),
             seedlotCollectionList);
 
-    List<SeedlotFormOwnershipDto> ownershipStep =
-        seedlotOwnerQuantityService.findAllBySeedlot(seedlotInfo.getId()).stream()
-            .filter(
-                owner ->
-                    owner.getOriginalPercentageOwned() != null
-                        && owner.getOriginalPercentageOwned().compareTo(BigDecimal.ZERO) > 0)
-            .map(
-                owner ->
-                    new SeedlotFormOwnershipDto(
-                        owner.getOwnerClientNumber(),
-                        owner.getOwnerLocationCode(),
-                        owner.getOriginalPercentageOwned(),
-                        owner.getOriginalPercentageReserved(),
-                        owner.getOriginalPercentageSurplus(),
-                        owner.getMethodOfPayment() != null
-                            ? owner.getMethodOfPayment().getMethodOfPaymentCode()
-                            : null,
-                        owner.getFundingSourceCode()))
-            .collect(Collectors.toList());
+    List<SeedlotFormOwnershipDto> ownershipStep = loadOwnershipStep(seedlotInfo.getId());
 
-    SeedlotFormInterimDto interimStep =
-        new SeedlotFormInterimDto(
-            seedlotInfo.getInterimStorageClientNumber(),
-            seedlotInfo.getInterimStorageLocationCode(),
-            seedlotInfo.getInterimStorageStartDate(),
-            seedlotInfo.getInterimStorageEndDate(),
-            seedlotInfo.getInterimStorageOtherFacilityDesc(),
-            seedlotInfo.getInterimStorageFacilityCode());
+    SeedlotFormInterimDto interimStep = seedlotFormStepMapper.toInterimDto(seedlotInfo);
 
     List<SeedlotOrchard> seedlotOrchards =
         seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotInfo.getId());
@@ -706,16 +714,7 @@ public class SeedlotService {
             seedlotInfo.getPollenContaminantBreedingValue(),
             seedlotInfo.getPollenContaminationMethodCode());
 
-    SeedlotFormExtractionDto extractionStep =
-        new SeedlotFormExtractionDto(
-            seedlotInfo.getExtractionClientNumber(),
-            seedlotInfo.getExtractionLocationCode(),
-            seedlotInfo.getExtractionStartDate(),
-            seedlotInfo.getExtractionEndDate(),
-            seedlotInfo.getStorageClientNumber(),
-            seedlotInfo.getStorageLocationCode(),
-            seedlotInfo.getTemporaryStorageStartDate(),
-            seedlotInfo.getTemporaryStorageEndDate());
+    SeedlotFormExtractionDto extractionStep = seedlotFormStepMapper.toExtractionDto(seedlotInfo);
 
     SeedlotFormSmpParentOutsideDto smpParentOutsideDto =
         new SeedlotFormSmpParentOutsideDto(seedlotInfo.getParentsOutsideTheOrchardUsedInSmp());
@@ -837,12 +836,7 @@ public class SeedlotService {
   private void updateApplicantAndSeedlot(Seedlot seedlot, SeedlotApplicationPatchDto patchDto) {
     seedlot.setApplicantEmailAddress(patchDto.applicantEmailAddress());
 
-    SeedlotSourceEntity updatedSource =
-        seedlotSourceRepository
-            .findById(patchDto.seedlotSourceCode())
-            .orElseThrow(SeedlotSourceNotFoundException::new);
-
-    seedlot.setSeedlotSource(updatedSource);
+    applySeedlotSource(seedlot, patchDto.seedlotSourceCode());
 
     seedlot.setSourceInBc(patchDto.bcSourceInd());
 
@@ -1287,12 +1281,23 @@ public class SeedlotService {
    * @return a {@link SeedlotBclassFormDto} with all form step data
    */
   public SeedlotBclassFormDto getBclassSeedlotFormInfo(@NonNull String seedlotNumber) {
-    SparLog.info("Retrieving complete B-class form info for seedlot {}", seedlotNumber);
-
     Seedlot seedlot =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
     loggedUserService.verifySeedlotAccessPrivilege(seedlot.getApplicantClientNumber());
+    return buildBclassFormData(seedlot);
+  }
+
+  /**
+   * Builds B-class form data from an already-loaded seedlot. Caller is responsible for access
+   * checks.
+   *
+   * @param seedlot the seedlot entity
+   * @return a {@link SeedlotBclassFormDto} with all form step data
+   */
+  public SeedlotBclassFormDto buildBclassFormData(@NonNull Seedlot seedlot) {
+    SparLog.info("Retrieving complete B-class form info for seedlot {}", seedlot.getId());
+    String seedlotNumber = seedlot.getId();
 
     SeedlotCollectionGeometryDto geometryDto = loadCollectionGeometryOrNull(seedlotNumber);
 
@@ -1305,43 +1310,11 @@ public class SeedlotService {
             geometryDto != null ? geometryDto.geometryGeoJson() : null,
             coneCollectionMethodCodes);
 
-    List<SeedlotFormOwnershipDto> ownershipStep =
-        seedlotOwnerQuantityService.findAllBySeedlot(seedlot.getId()).stream()
-            .filter(
-                owner ->
-                    owner.getOriginalPercentageOwned() != null
-                        && owner.getOriginalPercentageOwned().compareTo(BigDecimal.ZERO) > 0)
-            .map(
-                owner ->
-                    new SeedlotFormOwnershipDto(
-                        owner.getOwnerClientNumber(),
-                        owner.getOwnerLocationCode(),
-                        owner.getOriginalPercentageOwned(),
-                        owner.getOriginalPercentageReserved(),
-                        owner.getOriginalPercentageSurplus(),
-                        owner.getMethodOfPayment().getMethodOfPaymentCode(),
-                        owner.getFundingSourceCode()))
-            .toList();
+    List<SeedlotFormOwnershipDto> ownershipStep = loadOwnershipStep(seedlot.getId());
 
-    SeedlotFormInterimDto interimStep =
-        new SeedlotFormInterimDto(
-            seedlot.getInterimStorageClientNumber(),
-            seedlot.getInterimStorageLocationCode(),
-            seedlot.getInterimStorageStartDate(),
-            seedlot.getInterimStorageEndDate(),
-            seedlot.getInterimStorageOtherFacilityDesc(),
-            seedlot.getInterimStorageFacilityCode());
+    SeedlotFormInterimDto interimStep = seedlotFormStepMapper.toInterimDto(seedlot);
 
-    SeedlotFormExtractionDto extractionStep =
-        new SeedlotFormExtractionDto(
-            seedlot.getExtractionClientNumber(),
-            seedlot.getExtractionLocationCode(),
-            seedlot.getExtractionStartDate(),
-            seedlot.getExtractionEndDate(),
-            seedlot.getStorageClientNumber(),
-            seedlot.getStorageLocationCode(),
-            seedlot.getTemporaryStorageStartDate(),
-            seedlot.getTemporaryStorageEndDate());
+    SeedlotFormExtractionDto extractionStep = seedlotFormStepMapper.toExtractionDto(seedlot);
 
     List<SeedPlanZoneDto> aouSpzList = loadBclassAouSpzList(seedlotNumber);
     List<GeneticWorthTraitsDto> geneticWorthTraits = loadGeneticWorthTraits(seedlotNumber);

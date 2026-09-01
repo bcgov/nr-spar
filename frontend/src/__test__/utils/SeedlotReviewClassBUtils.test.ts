@@ -60,6 +60,97 @@ describe('SeedlotReviewClassB utils test', () => {
       expect(collectionDto.longitudeSecMax).toBe(5);
     });
 
+    it('should preserve null area of use values instead of falling back to collection', () => {
+      const seedlotWithNullAou = {
+        ...richSeedlot,
+        seedlot: {
+          ...richSeedlot.seedlot,
+          elevationMin: null,
+          elevationMax: null,
+          latitudeDegMin: null,
+          latitudeMinMin: null,
+          latitudeSecMin: null,
+          latitudeDegMax: null,
+          latitudeMinMax: null,
+          latitudeSecMax: null,
+          longitudeDegMin: null,
+          longitudeMinMin: null,
+          longitudeSecMin: null,
+          longitudeDegMax: null,
+          longitudeMinMax: null,
+          longitudeSecMax: null
+        }
+      } as unknown as RichSeedlotType;
+
+      const collectionDto = buildBClassReviewPayload(
+        initEmptySteps(),
+        seedlotWithNullAou
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.elevationMin).toBeNull();
+      expect(collectionDto.elevationMax).toBeNull();
+      expect(collectionDto.latitudeDegMin).toBeNull();
+      expect(collectionDto.longitudeDegMax).toBeNull();
+    });
+
+    it('should preserve superior provenance fields from the seedlot', () => {
+      const superiorSeedlot = {
+        ...richSeedlot,
+        seedlot: {
+          ...richSeedlot.seedlot,
+          superiorProvenanceInd: true,
+          provenanceId: 42
+        }
+      } as unknown as RichSeedlotType;
+
+      const collectionDto = buildBClassReviewPayload(
+        initEmptySteps(),
+        superiorSeedlot
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.superiorProvenanceInd).toBe(true);
+      expect(collectionDto.provenanceId).toBe(42);
+    });
+
+    it('should preserve null superior provenance indicator', () => {
+      const seedlotWithNullProvenance = {
+        ...richSeedlot,
+        seedlot: {
+          ...richSeedlot.seedlot,
+          superiorProvenanceInd: null,
+          provenanceId: null
+        }
+      } as unknown as RichSeedlotType;
+
+      const collectionDto = buildBClassReviewPayload(
+        initEmptySteps(),
+        seedlotWithNullProvenance
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.superiorProvenanceInd).toBeNull();
+    });
+
+    it('should preserve bec version and override fields from the seedlot', () => {
+      const seedlotWithBec = {
+        ...richSeedlot,
+        seedlot: {
+          ...richSeedlot.seedlot,
+          becVersionId: 7,
+          becOverrideInd: true,
+          becOverrideComment: 'Mapped from adjacent unit'
+        }
+      } as unknown as RichSeedlotType;
+
+      const collectionDto = buildBClassReviewPayload(
+        initEmptySteps(),
+        seedlotWithBec
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.becVersionId).toBe(7);
+      expect(collectionDto.becOverrideInd).toBe(true);
+      expect(collectionDto.becOverrideComment).toBe('Mapped from adjacent unit');
+    });
+
     it('should preserve genetic worth values from the seedlot', () => {
       const payload = buildBClassReviewPayload(initEmptySteps(), richSeedlot);
 

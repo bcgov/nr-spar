@@ -196,7 +196,7 @@ const OwnershipStep = ({
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
-                  readOnly={isFormSubmitted || originalSeedQty > 0}
+                  readOnly={(isFormSubmitted && !isReview) || originalSeedQty > 0}
                   isReview={isReview}
                 />
               </AccordionItem>

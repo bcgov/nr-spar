@@ -58,7 +58,7 @@ const ExtractionStorageRead = () => {
         </Column>
       </Row>
       {
-        state.extraction.startDate.value && state.extraction.endDate.value
+        state.extraction.startDate.value || state.extraction.endDate.value
           ? (
             <Row>
               <Column className="info-col" sm={4} md={4} lg={4}>
@@ -108,7 +108,7 @@ const ExtractionStorageRead = () => {
         </Column>
       </Row>
       {
-        state.seedStorage.startDate.value && state.seedStorage.endDate.value
+        state.seedStorage.startDate.value || state.seedStorage.endDate.value
           ? (
             <Row>
               <Column className="info-col" sm={4} md={4} lg={4}>

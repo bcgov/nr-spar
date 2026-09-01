@@ -142,8 +142,10 @@ export const useBClassFormLoader = ({
     retry: false
   });
 
+  // Settled (success or error) so a failed lookup does not leave the form
+  // stuck loading; OwnershipStep already surfaces fetch errors on the dropdowns.
   const ownershipLookupsReady = !needsFullForm
-    || (fundingSourcesQuery.isSuccess && methodsOfPaymentQuery.isSuccess);
+    || (fundingSourcesQuery.isFetched && methodsOfPaymentQuery.isFetched);
 
   useEffect(() => {
     hydrationKeyRef.current = null;

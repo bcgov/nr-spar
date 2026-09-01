@@ -60,6 +60,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
+import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
@@ -67,6 +68,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionBclassMapper;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormStepMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
@@ -86,6 +88,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -139,6 +143,9 @@ class SeedlotServiceTest {
   @Mock SeedlotCollectionGeometryService seedlotCollectionGeometryService;
 
   @Mock SeedlotFormCollectionBclassMapper seedlotFormCollectionBclassMapper;
+
+  private final SeedlotFormStepMapper seedlotFormStepMapper =
+      Mappers.getMapper(SeedlotFormStepMapper.class);
 
   @Mock SaveSeedlotFormService saveSeedlotFormService;
 
@@ -200,6 +207,7 @@ class SeedlotServiceTest {
             seedlotCollectionGeometryRepository,
             seedlotCollectionGeometryService,
             seedlotFormCollectionBclassMapper,
+            seedlotFormStepMapper,
             saveSeedlotFormService);
   }
 
@@ -239,10 +247,6 @@ class SeedlotServiceTest {
         new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
     when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
 
-    SeedlotSourceEntity sourceEntity =
-        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE, null);
-    when(seedlotSourceRepository.findById("TPT")).thenReturn(Optional.of(sourceEntity));
-
     GeneticClassEntity classEntity = new GeneticClassEntity("B", "B class seedlot", DATE_RANGE);
     when(geneticClassRepository.findById("B")).thenReturn(Optional.of(classEntity));
 
@@ -250,11 +254,41 @@ class SeedlotServiceTest {
 
     SeedlotCreateDto createDtoB =
         new SeedlotCreateDto(
-            "00012797", "01", "user.lastname@domain.com", "FDI", "TPT", true, true, 'B');
+            "00012797", "01", "user.lastname@domain.com", "FDI", null, true, true, 'B');
 
     SeedlotStatusResponseDto response = seedlotService.createSeedlot(createDtoB);
     Assertions.assertNotNull(response);
     Assertions.assertEquals("53001", response.seedlotNumber());
+
+    ArgumentCaptor<Seedlot> savedSeedlot = ArgumentCaptor.forClass(Seedlot.class);
+    verify(seedlotRepository).save(savedSeedlot.capture());
+    Assertions.assertNull(savedSeedlot.getValue().getSeedlotSource());
+    verify(seedlotSourceRepository, never()).findById(any());
+  }
+
+  @Test
+  @DisplayName("createSeedlotAClassWithoutSeedlotSourceCode")
+  void createSeedlotTest_nullSourceClassA_shouldThrowException() {
+    when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
+
+    String incStatusCode = "INC";
+
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
+
+    GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
+    when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));
+
+    SeedlotCreateDto createDtoNoSource =
+        new SeedlotCreateDto(
+            "00012797", "01", "user.lastname@domain.com", "FDI", null, true, true, 'A');
+
+    Assertions.assertThrows(
+        InvalidSeedlotRequestException.class,
+        () -> seedlotService.createSeedlot(createDtoNoSource));
+
+    verify(seedlotRepository, never()).save(any());
   }
 
   @Test
@@ -756,6 +790,50 @@ class SeedlotServiceTest {
   }
 
   @Test
+  @DisplayName("Patch applicant info with a null source on a class B seedlot should succeed")
+  void patchApplicantInfo_nullSourceClassB_shouldSucceed() {
+    String seedlotNumber = "123456";
+    SeedlotSourceEntity existingSource =
+        new SeedlotSourceEntity("TPT", "tested parent trees", DATE_RANGE, true);
+
+    Seedlot testSeedlot = new Seedlot(seedlotNumber);
+    testSeedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+    testSeedlot.setSeedlotSource(existingSource);
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", null, true, false, 0);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(testSeedlot));
+    when(seedlotRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+
+    Seedlot patchedSeedlot = seedlotService.patchApplicantInfo(seedlotNumber, testDto);
+
+    assertEquals(testDto.applicantEmailAddress(), patchedSeedlot.getApplicantEmailAddress());
+    assertEquals("TPT", patchedSeedlot.getSeedlotSource().getSeedlotSourceCode());
+    verify(seedlotSourceRepository, never()).findById(any());
+  }
+
+  @Test
+  @DisplayName("Patch applicant info with a null source on a class A seedlot should fail")
+  void patchApplicantInfo_nullSourceClassA_shouldFail() {
+    String seedlotNumber = "123456";
+
+    Seedlot testSeedlot = new Seedlot(seedlotNumber);
+    testSeedlot.setGeneticClass(new GeneticClassEntity("A", "A class", DATE_RANGE));
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", null, true, false, 0);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(testSeedlot));
+
+    Assertions.assertThrows(
+        InvalidSeedlotRequestException.class,
+        () -> seedlotService.patchApplicantInfo(seedlotNumber, testDto));
+
+    verify(seedlotRepository, never()).save(any());
+  }
+
+  @Test
   @DisplayName("Update seedlot with form tsc admin happy path should succeed")
   void updateSeedlotWithForm_tscAdmin_happyPath_shouldSucceed() {
     String statusOnSuccess = "SUB";
@@ -1192,18 +1270,18 @@ class SeedlotServiceTest {
             List.of(1),
             "South ridge",
             73,
-            "Y",
+            true,
             new BigDecimal("500"),
             "CLIMB",
             "M",
-            "Y",
+            true,
             "001",
-            "Y",
-            "N",
+            true,
+            false,
             null,
             "GT5",
-            "N",
-            "N",
+            false,
+            false,
             null,
             49,
             30,

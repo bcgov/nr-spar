@@ -38,7 +38,6 @@ describe('A Class Seedlot Registration form, Parent Tree Calculations Part 1', (
       .click();
 
     cy.get('#primary-orchard-selection')
-      .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
     // Select primary orchard
