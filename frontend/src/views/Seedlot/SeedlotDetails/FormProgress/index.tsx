@@ -73,11 +73,11 @@ interface ClassFormProgressProps<T> {
 }
 
 export const ClassFormProgress = <T,>({
-                                        seedlotNumber,
-                                        seedlotStatusCode,
-                                        getSeedlotQueryStatus,
-                                        config
-                                      }: ClassFormProgressProps<T>) => {
+  seedlotNumber,
+  seedlotStatusCode,
+  getSeedlotQueryStatus,
+  config
+}: ClassFormProgressProps<T>) => {
   const navigate = useNavigate();
   const {
     queryKey,
@@ -131,42 +131,42 @@ export const ClassFormProgress = <T,>({
       }
     }
     return (
-        <ProgressBar
-            progressStatus={progressStatus}
-            interactFunction={(e: number) => {
-              navigate(`${registrationPath}?step=${e + 1}`);
-            }}
-        />
+      <ProgressBar
+        progressStatus={progressStatus}
+        interactFunction={(e: number) => {
+          navigate(`${registrationPath}?step=${e + 1}`);
+        }}
+      />
     );
   };
 
   const isViewOnly = seedlotStatusCode === 'SUB'
-      || seedlotStatusCode === 'EXP'
-      || seedlotStatusCode === 'COM'
-      || seedlotStatusCode === 'APP';
+    || seedlotStatusCode === 'EXP'
+    || seedlotStatusCode === 'COM'
+    || seedlotStatusCode === 'APP';
 
   return (
-      <DetailSection title="See where you are in the registration process">
-        <Row>
-          <Column className="steps-box">
-            {renderProgress()}
-          </Column>
-        </Row>
-        <Row>
-          <Column>
-            <Button
-                kind="tertiary"
-                size="md"
-                className="section-btn"
-                renderIcon={Edit}
-                onClick={() => navigate(registrationPath)}
-                disabled={getSeedlotQueryStatus === 'pending'}
-            >
-              {isViewOnly ? 'View your seedlot' : 'Edit seedlot form'}
-            </Button>
-          </Column>
-        </Row>
-      </DetailSection>
+    <DetailSection title="See where you are in the registration process">
+      <Row>
+        <Column className="steps-box">
+          {renderProgress()}
+        </Column>
+      </Row>
+      <Row>
+        <Column>
+          <Button
+            kind="tertiary"
+            size="md"
+            className="section-btn"
+            renderIcon={Edit}
+            onClick={() => navigate(registrationPath)}
+            disabled={getSeedlotQueryStatus === 'pending'}
+          >
+            {isViewOnly ? 'View your seedlot' : 'Edit seedlot form'}
+          </Button>
+        </Column>
+      </Row>
+    </DetailSection>
   );
 };
 
@@ -178,12 +178,12 @@ interface FormProgressProps {
 }
 
 const FormProgress = ({
-                        isBClass = false,
-                        ...props
-                      }: FormProgressProps) => (
-    isBClass
-        ? <ClassFormProgress {...props} config={bClassFormProgressConfig} />
-        : <ClassFormProgress {...props} config={aClassFormProgressConfig} />
+  isBClass = false,
+  ...props
+}: FormProgressProps) => (
+  isBClass
+    ? <ClassFormProgress {...props} config={bClassFormProgressConfig} />
+    : <ClassFormProgress {...props} config={aClassFormProgressConfig} />
 );
 
 export default FormProgress;
