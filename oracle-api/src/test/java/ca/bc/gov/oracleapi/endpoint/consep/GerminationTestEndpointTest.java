@@ -175,6 +175,7 @@ public class GerminationTestEndpointTest {
   void upsertDailyAbnormalCounts_returns400_whenAbnormalCountIsNegative() throws Exception {
     String invalidRequest = """
         {
+          "updateTimestamp": "2026-05-01T10:00:00",
           "rep1": { "abnormalNumReverseEmbryo": -1 },
           "rep2": {},
           "rep3": {},
@@ -257,10 +258,51 @@ public class GerminationTestEndpointTest {
     verify(testResultService).upsertDailyAbnormalCounts(key, request);
   }
 
+  @Test
+  void upsertDailyAbnormalCounts_returns400_whenUpdateTimestampMissing() throws Exception {
+    String requestWithoutTimestamp = """
+        {
+          "rep1": {},
+          "rep2": {},
+          "rep3": {},
+          "rep4": {}
+        }
+        """;
+
+    mockMvc
+        .perform(
+            put(BASE_URL + "/{dailyGermSkey}", 12345)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestWithoutTimestamp))
+        .andExpect(status().isBadRequest());
+
+    verifyNoInteractions(testResultService);
+  }
+
+  @Test
+  void upsertDailyAbnormalCounts_returns409_whenParentGermCountWasModified() throws Exception {
+    BigDecimal key = new BigDecimal("12345");
+    DailyAbnormalUpsertRequestDto request = validDailyAbnormalRequest();
+    when(testResultService.upsertDailyAbnormalCounts(key, request))
+        .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "stale"));
+
+    mockMvc
+        .perform(
+            put(BASE_URL + "/{dailyGermSkey}", key)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isConflict());
+
+    verify(testResultService).upsertDailyAbnormalCounts(key, request);
+  }
+
   private DailyAbnormalUpsertRequestDto validDailyAbnormalRequest() {
     ReplicateAbnormalDto replicate =
         new ReplicateAbnormalDto(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, null);
-    return new DailyAbnormalUpsertRequestDto(replicate, replicate, replicate, replicate);
+    return new DailyAbnormalUpsertRequestDto(
+        LocalDateTime.parse("2026-05-01T10:00:00"), replicate, replicate, replicate, replicate);
   }
 
   @Test
