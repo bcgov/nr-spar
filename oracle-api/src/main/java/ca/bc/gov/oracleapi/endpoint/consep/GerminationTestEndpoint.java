@@ -127,6 +127,10 @@ public class GerminationTestEndpoint {
             description = "Daily abnormal counts not found for the given key",
             content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(
+            responseCode = "409",
+            description = "Parent germ count was modified by another user",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
             responseCode = "422",
             description = "Daily abnormal counts contain invalid values",
             content = @Content(schema = @Schema(hidden = true)))
