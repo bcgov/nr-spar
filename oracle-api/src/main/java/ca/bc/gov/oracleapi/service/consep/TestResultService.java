@@ -485,6 +485,18 @@ public class TestResultService {
                     new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Daily germ record not found for the given key"));
 
+            if (request.updateTimestamp() == null) {
+              throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "updateTimestamp is required to update daily abnormals");
+            }
+
+            int touchedRows =
+              germCountRepository.touchIfTimestampMatches(germCount.getRiaSkey(), request.updateTimestamp());
+            if (touchedRows == 0) {
+              throw new ResponseStatusException(
+                HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
+            }
+
     DailyAbnormalEntity entity = dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey);
     if (entity == null) {
       entity = new DailyAbnormalEntity();
@@ -520,56 +532,56 @@ public class TestResultService {
 
   private DailyAbnormalResponseDto toDailyAbnormalResponseDto(DailyAbnormalEntity entity) {
     return new DailyAbnormalResponseDto(
-      entity.getDailyGermSkey(),
-      mapReplicateAbnormal(
-        entity.getRep1NoAbnrmRe(),
-        entity.getRep1NoAbnrmSr(),
-        entity.getRep1NoAbnrmSh(),
-        entity.getRep1NoAbnrmRn(),
-        entity.getRep1NoAbnrmTh(),
-        entity.getRep1NoAbnrmTr(),
-        entity.getRep1NoAbnrmTw(),
-        entity.getRep1NoAbnrmCm(),
-        entity.getRep1NoAbnrmWeak(),
-        entity.getRep1NoAbnrmOther(),
-        entity.getRep1NoAbnrmPrgrm()),
-      mapReplicateAbnormal(
-        entity.getRep2NoAbnrmRe(),
-        entity.getRep2NoAbnrmSr(),
-        entity.getRep2NoAbnrmSh(),
-        entity.getRep2NoAbnrmRn(),
-        entity.getRep2NoAbnrmTh(),
-        entity.getRep2NoAbnrmTr(),
-        entity.getRep2NoAbnrmTw(),
-        entity.getRep2NoAbnrmCm(),
-        entity.getRep2NoAbnrmWeak(),
-        entity.getRep2NoAbnrmOther(),
-        entity.getRep2NoAbnrmPrgrm()),
-      mapReplicateAbnormal(
-        entity.getRep3NoAbnrmRe(),
-        entity.getRep3NoAbnrmSr(),
-        entity.getRep3NoAbnrmSh(),
-        entity.getRep3NoAbnrmRn(),
-        entity.getRep3NoAbnrmTh(),
-        entity.getRep3NoAbnrmTr(),
-        entity.getRep3NoAbnrmTw(),
-        entity.getRep3NoAbnrmCm(),
-        entity.getRep3NoAbnrmWeak(),
-        entity.getRep3NoAbnrmOther(),
-        entity.getRep3NoAbnrmPrgrm()),
-      mapReplicateAbnormal(
-        entity.getRep4NoAbnrmRe(),
-        entity.getRep4NoAbnrmSr(),
-        entity.getRep4NoAbnrmSh(),
-        entity.getRep4NoAbnrmRn(),
-        entity.getRep4NoAbnrmTh(),
-        entity.getRep4NoAbnrmTr(),
-        entity.getRep4NoAbnrmTw(),
-        entity.getRep4NoAbnrmCm(),
-        entity.getRep4NoAbnrmWeak(),
-        entity.getRep4NoAbnrmOther(),
-        entity.getRep4NoAbnrmPrgrm()));
-    }
+        entity.getDailyGermSkey(),
+        mapReplicateAbnormal(
+            entity.getRep1NoAbnrmRe(),
+            entity.getRep1NoAbnrmSr(),
+            entity.getRep1NoAbnrmSh(),
+            entity.getRep1NoAbnrmRn(),
+            entity.getRep1NoAbnrmTh(),
+            entity.getRep1NoAbnrmTr(),
+            entity.getRep1NoAbnrmTw(),
+            entity.getRep1NoAbnrmCm(),
+            entity.getRep1NoAbnrmWeak(),
+            entity.getRep1NoAbnrmOther(),
+            entity.getRep1NoAbnrmPrgrm()),
+        mapReplicateAbnormal(
+            entity.getRep2NoAbnrmRe(),
+            entity.getRep2NoAbnrmSr(),
+            entity.getRep2NoAbnrmSh(),
+            entity.getRep2NoAbnrmRn(),
+            entity.getRep2NoAbnrmTh(),
+            entity.getRep2NoAbnrmTr(),
+            entity.getRep2NoAbnrmTw(),
+            entity.getRep2NoAbnrmCm(),
+            entity.getRep2NoAbnrmWeak(),
+            entity.getRep2NoAbnrmOther(),
+            entity.getRep2NoAbnrmPrgrm()),
+        mapReplicateAbnormal(
+            entity.getRep3NoAbnrmRe(),
+            entity.getRep3NoAbnrmSr(),
+            entity.getRep3NoAbnrmSh(),
+            entity.getRep3NoAbnrmRn(),
+            entity.getRep3NoAbnrmTh(),
+            entity.getRep3NoAbnrmTr(),
+            entity.getRep3NoAbnrmTw(),
+            entity.getRep3NoAbnrmCm(),
+            entity.getRep3NoAbnrmWeak(),
+            entity.getRep3NoAbnrmOther(),
+            entity.getRep3NoAbnrmPrgrm()),
+        mapReplicateAbnormal(
+            entity.getRep4NoAbnrmRe(),
+            entity.getRep4NoAbnrmSr(),
+            entity.getRep4NoAbnrmSh(),
+            entity.getRep4NoAbnrmRn(),
+            entity.getRep4NoAbnrmTh(),
+            entity.getRep4NoAbnrmTr(),
+            entity.getRep4NoAbnrmTw(),
+            entity.getRep4NoAbnrmCm(),
+            entity.getRep4NoAbnrmWeak(),
+            entity.getRep4NoAbnrmOther(),
+            entity.getRep4NoAbnrmPrgrm()));
+  }
 
   private void applyReplicateAbnormal(
       DailyAbnormalEntity entity, int replicateNumber, ReplicateAbnormalDto abnormal) {
