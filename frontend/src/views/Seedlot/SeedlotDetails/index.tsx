@@ -17,10 +17,7 @@ import {
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
-import {
-  RichSeedlotType,
-  SeedlotStatusCode
-} from '../../../types/SeedlotType';
+import { SeedlotStatusCode } from '../../../types/SeedlotType';
 
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
@@ -126,7 +123,7 @@ const SeedlotDetails = () => {
     {
       text: 'Edit seedlot applicant',
       onClickFunction: () => navigate(
-        addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')
+        addParamToPath(getEditApplicantRoute(seedlot), seedlotNumber ?? '')
       ),
       disabled: viewOnlySeedlot
     },
@@ -146,7 +143,7 @@ const SeedlotDetails = () => {
       disabled: true
     }
   ], [
-    navigate, seedlotNumber, viewOnlySeedlot, isBClass, isTscAdmin, downloadReportMutation
+    navigate, seedlot, seedlotNumber, viewOnlySeedlot, isBClass, isTscAdmin, downloadReportMutation
   ]);
 
   const getActBtnLabel = (): string => {

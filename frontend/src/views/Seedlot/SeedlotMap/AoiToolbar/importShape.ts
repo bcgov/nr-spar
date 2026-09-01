@@ -128,10 +128,12 @@ const assertZipArchiveSafe = (zip: JSZip): void => {
 
   let uncompressedTotal = 0;
   entries.forEach((entry) => {
-    const data = (entry as JSZip.JSZipObject & {
+    // JSZip stores uncompressed size on a private field, not the public type.
+    /* eslint-disable no-underscore-dangle */
+    const size = (entry as JSZip.JSZipObject & {
       _data?: { uncompressedSize?: number }
-    })._data;
-    const size = data?.uncompressedSize ?? 0;
+    })._data?.uncompressedSize ?? 0;
+    /* eslint-enable no-underscore-dangle */
     uncompressedTotal += size;
     if (uncompressedTotal > MAX_ZIP_UNCOMPRESSED_BYTES) {
       throw new Error(
