@@ -1037,6 +1037,42 @@ class TestResultServiceTest {
         verify(dailyAbnormalRepository, never()).save(any());
     }
 
+    @Test
+    void upsertDailyAbnormalCounts_throws422_whenAllDaysAbnormalCapacityIsExceeded() {
+        BigDecimal day1Skey = new BigDecimal("12345");
+        BigDecimal day2Skey = new BigDecimal("12346");
+        BigDecimal riaSkey = new BigDecimal("881191");
+        GermCountEntity germCount = new GermCountEntity();
+        germCount.setRiaSkey(riaSkey);
+        germCount.setDailyGermSkey1(day1Skey);
+        germCount.setDailyGermSkey2(day2Skey);
+        germCount.setRep1NoSeedsGerm1(10);
+        germCount.setRep1NoSeedsGerm2(10);
+
+        DailyAbnormalEntity day1Abnormal = new DailyAbnormalEntity();
+        day1Abnormal.setDailyGermSkey(day1Skey);
+        setAllAbnormalCountsToZero(day1Abnormal);
+        day1Abnormal.setRep1NoAbnrmRe(50);
+
+        when(germCountRepository.findByDailyGermSkeyInAnySlot(day2Skey))
+                .thenReturn(Optional.of(germCount));
+        when(dailyAbnormalRepository.findByDailyGermSkey(day2Skey)).thenReturn(null);
+        when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
+                .thenReturn(replicatesFor(riaSkey, 100));
+        when(dailyAbnormalRepository.findAllById(any())).thenReturn(List.of(day1Abnormal));
+
+        ResponseStatusException exception =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () ->
+                                testResultService.upsertDailyAbnormalCounts(
+                                        day2Skey, dailyAbnormalRequestWithRep1ReverseEmbryo(50)));
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertTrue(exception.getReason().contains("rep1"));
+        verify(dailyAbnormalRepository, never()).save(any());
+    }
+
     private GermCountEntity germCountForDailyKey(
             BigDecimal riaSkey, BigDecimal dailyGermSkey, int germinatedCount) {
         GermCountEntity germCount = new GermCountEntity();
@@ -1062,6 +1098,14 @@ class TestResultServiceTest {
                 new ReplicateAbnormalDto(
                         count, count, count, count, count, count, count, count, count, count, count, null);
         return new DailyAbnormalUpsertRequestDto(replicate, replicate, replicate, replicate);
+    }
+
+    private DailyAbnormalUpsertRequestDto dailyAbnormalRequestWithRep1ReverseEmbryo(int count) {
+        ReplicateAbnormalDto rep1 =
+                new ReplicateAbnormalDto(count, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
+        ReplicateAbnormalDto emptyReplicate =
+                new ReplicateAbnormalDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
+        return new DailyAbnormalUpsertRequestDto(rep1, emptyReplicate, emptyReplicate, emptyReplicate);
     }
 
   @Test
