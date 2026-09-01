@@ -8,7 +8,7 @@ import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 
 import { useSparMap } from '../../../../contexts/SparMapContext';
 import type { AoiPolygon } from '../../../../types/SparMapTypes';
-import { fetchCollectionAreaBySeedlotNumber } from '../../../../api-service/collectionAreaApi';
+import { getCollectionGeometry } from '../../../../api-service/seedlotAPI';
 import { validatePolygons } from '../AoiToolbar/aoiValidation';
 import { LEGACY_AOI_STYLE } from './styles';
 
@@ -53,6 +53,28 @@ const featureToAoiPolygons = (
       properties: {},
       geometry: { type: 'Polygon', coordinates }
     }));
+  }
+  return [];
+};
+
+/**
+ * Wizard drafts store a Feature; SPAR GET returns a bare Polygon/MultiPolygon
+ * from GeometryUtil.toGeoJson. Accept both so re-edit after submit still works.
+ */
+const geoJsonToAoiPolygons = (raw: string): AoiPolygon[] => {
+  const parsed = JSON.parse(raw) as Feature<Polygon | MultiPolygon> | Polygon | MultiPolygon;
+  if (!parsed || typeof parsed !== 'object' || !('type' in parsed)) {
+    return [];
+  }
+  if (parsed.type === 'Feature') {
+    return featureToAoiPolygons(parsed);
+  }
+  if (parsed.type === 'Polygon' || parsed.type === 'MultiPolygon') {
+    return featureToAoiPolygons({
+      type: 'Feature',
+      properties: {},
+      geometry: parsed
+    });
   }
   return [];
 };
@@ -353,7 +375,7 @@ const AoiDrawLayer = () => {
     // Add a set of AOI polygons to the map as Geoman-editable layers and
     // sync them into context. Only seeds when the map is still empty so an
     // in-progress draw is never clobbered. Shared by the draft-state and
-    // WFS-fetch preload paths below.
+    // SPAR collection-geometry preload paths below.
     const seedPolygons = (polygons: AoiPolygon[]) => {
       if (polygons.length === 0) return;
       const existing = (map.pm?.getGeomanLayers?.() ?? []) as unknown[];
@@ -381,12 +403,10 @@ const AoiDrawLayer = () => {
       }
     };
 
-    // Pre-load the collection-area polygon on map open. The registration
-    // wizard hands the in-progress draft geometry in via router state
-    // (`initialAoiGeoJson`) because it is submission-only and not yet in the
-    // database. When there is no draft geometry, fall back to the legacy
-    // `SEED_SEEDLOT_COLLECTION_SVW` WFS lookup by seedlot number. The
-    // ref-gated single-shot guard avoids re-seeding on every effect re-run.
+    // Pre-load the collection-area polygon on map open. Draft geometry comes
+    // from wizard router state; submitted geometry comes from SPAR PostGIS
+    // (GET /collection-geometry). Do not read DataBC — SPAR is the store.
+    let preloadCancelled = false;
     if (!preloadedRef.current) {
       preloadedRef.current = true;
       const initialGeoJson = (
@@ -395,26 +415,28 @@ const AoiDrawLayer = () => {
 
       if (initialGeoJson) {
         try {
-          const feature = JSON.parse(initialGeoJson) as Feature<Polygon | MultiPolygon>;
-          seedPolygons(featureToAoiPolygons(feature));
+          seedPolygons(geoJsonToAoiPolygons(initialGeoJson));
         } catch {
           // Malformed draft geometry — leave the map empty for a redraw.
         }
       } else if (seedlotNumber) {
-        let cancelled = false;
-        fetchCollectionAreaBySeedlotNumber(seedlotNumber)
-          .then((polygons) => {
-            if (!cancelled) seedPolygons(polygons);
+        getCollectionGeometry(seedlotNumber)
+          .then((dto) => {
+            if (preloadCancelled || !dto?.geometryGeoJson) return;
+            try {
+              seedPolygons(geoJsonToAoiPolygons(dto.geometryGeoJson));
+            } catch {
+              // Malformed stored geometry — leave the map empty for a redraw.
+            }
           })
           .catch(() => {
             // Fail silent — the map is still usable; the user can redraw.
           });
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-underscore-dangle
-        const _cancel = () => { cancelled = true; };
       }
     }
 
     return () => {
+      preloadCancelled = true;
       map.off('pm:create', handleCreate);
       map.off('pm:edit', handleEdit);
       map.off('pm:remove', handleRemove);

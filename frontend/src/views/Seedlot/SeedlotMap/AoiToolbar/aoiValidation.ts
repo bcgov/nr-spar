@@ -1,4 +1,4 @@
-import         booleanValid from '@turf/boolean-valid';
+import booleanValid from '@turf/boolean-valid';
 import type { Feature, MultiPolygon } from 'geojson';
 
 import { fetchBecZonesIntersecting } from '../../../../api-service/becZonesApi';

@@ -60,16 +60,17 @@ public class SeedlotCollectionGeometryService {
    *
    * <p>If no geometry was provided (null or blank GeoJSON, or GeoJSON with no geometry), any
    * existing {@code seedlot_collection_geometry} row for the seedlot is deleted. Callers such as
-   * {@code submitSeedlotFormClassB} invoke this inside the same transaction that deletes the wizard
-   * draft, so clearing the polygon and removing the draft stay atomic.
+   * {@code submitSeedlotFormClassB} invoke this inside the same transaction that deletes the
+   * wizard draft, so clearing the polygon and removing the draft stay atomic.
    *
    * <p>Accepts WGS-84 (SRID 4326) GeoJSON as produced by the Leaflet map — a bare geometry, a
-   * {@code Feature}, or a {@code FeatureCollection} (see {@link GeometryUtil#fromGeoJson}). Area and
-   * perimeter are measured on the spheroid via PostGIS {@code geography} (true m² / m) rather than
-   * planar JTS, which would be meaningless in degrees.
+   * {@code Feature}, or a {@code FeatureCollection} (see {@link GeometryUtil#fromGeoJson}). Area
+   * and perimeter are measured on the spheroid via PostGIS {@code geography} (true m² / m) rather
+   * than planar JTS, which would be meaningless in degrees.
    *
    * @param seedlot the owning seedlot entity
-   * @param geoJson WGS-84 (SRID 4326) GeoJSON for the polygon; null/blank clears any stored geometry
+   * @param geoJson WGS-84 (SRID 4326) GeoJSON for the polygon; null/blank clears any stored
+   *     geometry
    * @param userId audit user ID
    */
   @Transactional

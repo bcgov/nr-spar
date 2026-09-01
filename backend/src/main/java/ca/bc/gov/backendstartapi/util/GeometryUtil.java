@@ -42,8 +42,8 @@ public final class GeometryUtil {
    * deserializer only understands bare geometries, so we unwrap first.
    *
    * @param geoJson GeoJSON string; may be {@code null}.
-   * @return the parsed JTS geometry with SRID 4326, or {@code null} when the input is null/blank or
-   *     carries no geometry.
+   * @return the parsed JTS geometry with SRID 4326, or {@code null} when the input is null/blank
+   *     or carries no geometry.
    * @throws IllegalArgumentException if the GeoJSON is malformed.
    */
   @Nullable

@@ -18,10 +18,10 @@ public interface SeedlotCollectionGeometryRepository
    * Geodesic area / perimeter of a WGS-84 geometry, computed by PostGIS.
    *
    * <p>The geometry is stored in SRID 4326 (WGS-84) so planar JTS {@code getArea()} /
-   * {@code getLength()} would return meaningless degree-based numbers. Casting to {@code geography}
-   * makes PostGIS measure on the spheroid, yielding true metres (perimeter) and square metres
-   * (area) without needing a Java reprojection library. {@code ST_GeomFromGeoJSON} expects a bare
-   * geometry, so callers must pass geometry-only GeoJSON (not a {@code Feature}).
+   * {@code getLength()} would return meaningless degree-based numbers. Casting to {@code
+   * geography} makes PostGIS measure on the spheroid, yielding true metres (perimeter) and square
+   * metres (area) without needing a Java reprojection library. {@code ST_GeomFromGeoJSON} expects
+   * a bare geometry, so callers must pass geometry-only GeoJSON (not a {@code Feature}).
    */
   @Query(
       value =
