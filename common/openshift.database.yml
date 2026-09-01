@@ -77,6 +77,9 @@ parameters:
   - name: "JOB_BACKOFF_LIMIT"
     description: "The number of attempts to try for a successful job outcome"
     value: "0"
+  - name: "JOB_TTL_SECONDS"
+    description: "Seconds a finished job is retained before the TTL controller deletes it"
+    value: "604800"
   - description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Backup Volume Capacity
     name: DB_BACKUP_PVC_SIZE
@@ -235,6 +238,13 @@ objects:
             cronjob: ${NAME}-${ZONE}
         spec:
           backoffLimit: ${{JOB_BACKOFF_LIMIT}}
+          # Most backup jobs are created by the Nightly workflow with
+          # `oc create job --from=cronjob`, which sets an ownerReference without
+          # `controller: true`. The CronJob controller's history GC skips those, so
+          # successfulJobsHistoryLimit / failedJobsHistoryLimit never apply to them
+          # and finished jobs accumulate forever. The TTL controller is not
+          # owner-aware, so it does clean them up.
+          ttlSecondsAfterFinished: ${{JOB_TTL_SECONDS}}
           template:
             metadata:
               labels:
