@@ -914,6 +914,7 @@ class TestResultServiceTest {
 
         when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
                 .thenReturn(Optional.of(germCount));
+        when(germCountRepository.touchIfTimestampMatches(riaSkey, TST_TS)).thenReturn(1);
         when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(null);
         when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
                 .thenReturn(replicatesFor(riaSkey, 100));
@@ -939,10 +940,11 @@ class TestResultServiceTest {
         ReplicateAbnormalDto partialReplicate =
             new ReplicateAbnormalDto(3, null, null, null, null, null, null, null, null, null, null, null);
         DailyAbnormalUpsertRequestDto request = new DailyAbnormalUpsertRequestDto(
-            partialReplicate, partialReplicate, partialReplicate, partialReplicate);
+            TST_TS, partialReplicate, partialReplicate, partialReplicate, partialReplicate);
 
         when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
             .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 0)));
+        when(germCountRepository.touchIfTimestampMatches(riaSkey, TST_TS)).thenReturn(1);
         when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(null);
         when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
             .thenReturn(replicatesFor(riaSkey, 100));
@@ -969,6 +971,7 @@ class TestResultServiceTest {
 
         when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
                 .thenReturn(Optional.of(germCount));
+        when(germCountRepository.touchIfTimestampMatches(riaSkey, TST_TS)).thenReturn(1);
         when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(entity);
         when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
                 .thenReturn(replicatesFor(riaSkey, 100));
@@ -995,8 +998,48 @@ class TestResultServiceTest {
                         () -> testResultService.upsertDailyAbnormalCounts(dailyGermSkey, dailyAbnormalRequest(0)));
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+                verify(germCountRepository, never()).touchIfTimestampMatches(any(), any());
         verify(dailyAbnormalRepository, never()).save(any());
     }
+
+                @Test
+                void upsertDailyAbnormalCounts_throws400_whenUpdateTimestampMissing() {
+                BigDecimal dailyGermSkey = new BigDecimal("12345");
+                BigDecimal riaSkey = new BigDecimal("881191");
+                ReplicateAbnormalDto replicate =
+                    new ReplicateAbnormalDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
+                DailyAbnormalUpsertRequestDto request =
+                    new DailyAbnormalUpsertRequestDto(null, replicate, replicate, replicate, replicate);
+                when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+                    .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 0)));
+
+                ResponseStatusException exception =
+                    assertThrows(
+                        ResponseStatusException.class,
+                        () -> testResultService.upsertDailyAbnormalCounts(dailyGermSkey, request));
+
+                assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+                verify(germCountRepository, never()).touchIfTimestampMatches(any(), any());
+                verify(dailyAbnormalRepository, never()).save(any());
+                }
+
+                @Test
+                void upsertDailyAbnormalCounts_throws409_whenParentGermCountTimestampIsStale() {
+                BigDecimal dailyGermSkey = new BigDecimal("12345");
+                BigDecimal riaSkey = new BigDecimal("881191");
+                when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+                    .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 0)));
+                when(germCountRepository.touchIfTimestampMatches(riaSkey, TST_TS)).thenReturn(0);
+
+                ResponseStatusException exception =
+                    assertThrows(
+                        ResponseStatusException.class,
+                        () -> testResultService.upsertDailyAbnormalCounts(dailyGermSkey, dailyAbnormalRequest(0)));
+
+                assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+                verify(dailyAbnormalRepository, never()).findByDailyGermSkey(any());
+                verify(dailyAbnormalRepository, never()).save(any());
+                }
 
     @Test
     void upsertDailyAbnormalCounts_throws422_whenReplicateTotalsAreMissing() {
@@ -1004,6 +1047,7 @@ class TestResultServiceTest {
         BigDecimal riaSkey = new BigDecimal("881191");
         when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
                 .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 0)));
+        when(germCountRepository.touchIfTimestampMatches(riaSkey, TST_TS)).thenReturn(1);
         when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(null);
         when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
                 .thenReturn(List.of(makeReplicate(riaSkey, 1, 100), makeReplicate(riaSkey, 2, 100)));
@@ -1023,6 +1067,7 @@ class TestResultServiceTest {
         BigDecimal riaSkey = new BigDecimal("881191");
         when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
                 .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 90)));
+        when(germCountRepository.touchIfTimestampMatches(riaSkey, TST_TS)).thenReturn(1);
         when(dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey)).thenReturn(null);
         when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
                 .thenReturn(replicatesFor(riaSkey, 100));
@@ -1056,6 +1101,7 @@ class TestResultServiceTest {
 
         when(germCountRepository.findByDailyGermSkeyInAnySlot(day2Skey))
                 .thenReturn(Optional.of(germCount));
+        when(germCountRepository.touchIfTimestampMatches(riaSkey, TST_TS)).thenReturn(1);
         when(dailyAbnormalRepository.findByDailyGermSkey(day2Skey)).thenReturn(null);
         when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey))
                 .thenReturn(replicatesFor(riaSkey, 100));
@@ -1097,7 +1143,7 @@ class TestResultServiceTest {
         ReplicateAbnormalDto replicate =
                 new ReplicateAbnormalDto(
                         count, count, count, count, count, count, count, count, count, count, count, null);
-        return new DailyAbnormalUpsertRequestDto(replicate, replicate, replicate, replicate);
+        return new DailyAbnormalUpsertRequestDto(TST_TS, replicate, replicate, replicate, replicate);
     }
 
     private DailyAbnormalUpsertRequestDto dailyAbnormalRequestWithRep1ReverseEmbryo(int count) {
@@ -1105,7 +1151,8 @@ class TestResultServiceTest {
                 new ReplicateAbnormalDto(count, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
         ReplicateAbnormalDto emptyReplicate =
                 new ReplicateAbnormalDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
-        return new DailyAbnormalUpsertRequestDto(rep1, emptyReplicate, emptyReplicate, emptyReplicate);
+        return new DailyAbnormalUpsertRequestDto(
+            TST_TS, rep1, emptyReplicate, emptyReplicate, emptyReplicate);
     }
 
   @Test
