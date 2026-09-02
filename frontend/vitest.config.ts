@@ -12,7 +12,9 @@ export default defineConfig({
     css: false,
     coverage: {
       provider: 'v8',
-      reporter: ['lcov', 'cobertura', 'html']
+      reporter: ['lcov', 'cobertura', 'html'],
+      // Some legacy suites fail; still emit lcov so Sonar sees unit-test coverage.
+      reportOnFailure: true
     }
   }
 });

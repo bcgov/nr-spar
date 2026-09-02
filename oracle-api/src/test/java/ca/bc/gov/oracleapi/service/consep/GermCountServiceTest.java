@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -243,8 +244,8 @@ class GermCountServiceTest {
     DailyAbnormalEntity stored = new DailyAbnormalEntity();
     stored.setDailyGermSkey(new BigDecimal("2001"));
     stored.setRep1NoAbnrmRe(15);
-    when(dailyAbnormalRepository.findByDailyGermSkey(new BigDecimal("2001")))
-        .thenReturn(stored);
+    when(dailyAbnormalRepository.findAllById(Set.of(new BigDecimal("2001"))))
+        .thenReturn(List.of(stored));
 
     // 90 germinated + the 15 abnormal already on file = 105 > 100.
     List<DayGermCountDto> days =

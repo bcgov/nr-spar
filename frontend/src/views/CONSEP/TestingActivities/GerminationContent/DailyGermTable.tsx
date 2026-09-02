@@ -162,15 +162,15 @@ const DailyGermTable = ({
 
   const columns = getDailyGermColumns(slots, isEditable, validationErrors, handlers, highlightedSlot);
 
-  const errorMessages = Object.values(validationErrors).filter(Boolean);
+  const errorEntries = Object.entries(validationErrors).filter(([, message]) => Boolean(message));
 
   return (
     <div className="daily-germ-table-container">
       <h3>Daily germination</h3>
-      {errorMessages.length > 0 && (
+      {errorEntries.length > 0 && (
         <div className="daily-germ-errors" role="alert">
-          {errorMessages.map((message, idx) => (
-            <p key={`${idx}-${message}`}>{message}</p>
+          {errorEntries.map(([errorKey, message]) => (
+            <p key={errorKey}>{message}</p>
           ))}
         </div>
       )}

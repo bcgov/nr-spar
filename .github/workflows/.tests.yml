@@ -62,12 +62,14 @@ jobs:
           node_version: "22"
           commands: |
             npm ci
+            # Unit-test coverage for Sonar; legacy failures don't block (suite was never in CI)
+            npm run coverage || true
               SPEC="cypress/e2e/${{ matrix.test_folder }}/**/*.{feature,cy.ts,cy.js}"
             npx start-server-and-test start http://localhost:3000 "cypress run --browser chrome --spec $SPEC"
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=cypress-coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=cypress-coverage/lcov.info,coverage/lcov.info
             -Dsonar.projectKey=nr-spar_frontend
             -Dsonar.sources=src/
             -Dsonar.exclusions=src/__test__/**/*
