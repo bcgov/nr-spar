@@ -125,6 +125,16 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     if (!germCountQuery.isFetched) {
       return;
     }
+
+    const status = (germCountQuery.error as AxiosError | undefined)?.response?.status;
+    if (germCountQuery.isError && status !== 404) {
+      setAlert({
+        isSuccess: false,
+        message: 'Could not load germination counts. Try reloading the page.'
+      });
+      return;
+    }
+
     const nextSlots = emptySlots();
     if (germCountQuery.data) {
       germCountQuery.data.slots.forEach((slot) => {
@@ -139,7 +149,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       setIsHydrated(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [germCountQuery.isFetched, germCountQuery.data]);
+  }, [germCountQuery.isFetched, germCountQuery.data, germCountQuery.isError, germCountQuery.error]);
 
   // Hydrate replicates: API rows or category defaults (AC4). Same
   // set-state-then-markSaved discipline as the slots effect.
