@@ -312,8 +312,25 @@ public class GermCountService {
     for (GermCountSlotDto s : mapper.buildSlots(existing)) {
       existingSkeys.put(s.slotIndex(), s.dailyGermSkey());
     }
+
+    Set<BigDecimal> skeysToFetch = new HashSet<>();
     for (DayGermCountDto d : days) {
       // A day that submits its own abnormals replaces the stored row; those are already summed.
+      if (d.countDt() == null || hasAnyAbnormal(d)) {
+        continue;
+      }
+      BigDecimal skey = existingSkeys.get(d.slotIndex());
+      if (skey != null) {
+        skeysToFetch.add(skey);
+      }
+    }
+
+    Map<BigDecimal, DailyAbnormalEntity> rowsBySkey = new HashMap<>();
+    for (DailyAbnormalEntity e : dailyAbnormalRepository.findAllById(skeysToFetch)) {
+      rowsBySkey.put(e.getDailyGermSkey(), e);
+    }
+
+    for (DayGermCountDto d : days) {
       if (d.countDt() == null || hasAnyAbnormal(d)) {
         continue;
       }
@@ -321,7 +338,7 @@ public class GermCountService {
       if (skey == null) {
         continue;
       }
-      DailyAbnormalEntity row = dailyAbnormalRepository.findByDailyGermSkey(skey);
+      DailyAbnormalEntity row = rowsBySkey.get(skey);
       if (row == null) {
         continue;
       }
