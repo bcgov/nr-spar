@@ -1002,44 +1002,44 @@ class TestResultServiceTest {
         verify(dailyAbnormalRepository, never()).save(any());
     }
 
-                @Test
-                void upsertDailyAbnormalCounts_throws400_whenUpdateTimestampMissing() {
-                BigDecimal dailyGermSkey = new BigDecimal("12345");
-                BigDecimal riaSkey = new BigDecimal("881191");
-                ReplicateAbnormalDto replicate =
-                    new ReplicateAbnormalDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
-                DailyAbnormalUpsertRequestDto request =
-                    new DailyAbnormalUpsertRequestDto(null, replicate, replicate, replicate, replicate);
-                when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
-                    .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 0)));
+    @Test
+    void upsertDailyAbnormalCounts_throws400_whenUpdateTimestampMissing() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    BigDecimal riaSkey = new BigDecimal("881191");
+    ReplicateAbnormalDto replicate =
+        new ReplicateAbnormalDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
+    DailyAbnormalUpsertRequestDto request =
+        new DailyAbnormalUpsertRequestDto(null, replicate, replicate, replicate, replicate);
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 0)));
 
-                ResponseStatusException exception =
-                    assertThrows(
-                        ResponseStatusException.class,
-                        () -> testResultService.upsertDailyAbnormalCounts(dailyGermSkey, request));
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.upsertDailyAbnormalCounts(dailyGermSkey, request));
 
-                assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-                verify(germCountRepository, never()).touchIfTimestampMatches(any(), any());
-                verify(dailyAbnormalRepository, never()).save(any());
-                }
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    verify(germCountRepository, never()).touchIfTimestampMatches(any(), any());
+    verify(dailyAbnormalRepository, never()).save(any());
+    }
 
-                @Test
-                void upsertDailyAbnormalCounts_throws409_whenParentGermCountTimestampIsStale() {
-                BigDecimal dailyGermSkey = new BigDecimal("12345");
-                BigDecimal riaSkey = new BigDecimal("881191");
-                when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
-                    .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 0)));
-                when(germCountRepository.touchIfTimestampMatches(riaSkey, TST_TS)).thenReturn(0);
+    @Test
+    void upsertDailyAbnormalCounts_throws409_whenParentGermCountTimestampIsStale() {
+    BigDecimal dailyGermSkey = new BigDecimal("12345");
+    BigDecimal riaSkey = new BigDecimal("881191");
+    when(germCountRepository.findByDailyGermSkeyInAnySlot(dailyGermSkey))
+        .thenReturn(Optional.of(germCountForDailyKey(riaSkey, dailyGermSkey, 0)));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, TST_TS)).thenReturn(0);
 
-                ResponseStatusException exception =
-                    assertThrows(
-                        ResponseStatusException.class,
-                        () -> testResultService.upsertDailyAbnormalCounts(dailyGermSkey, dailyAbnormalRequest(0)));
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> testResultService.upsertDailyAbnormalCounts(dailyGermSkey, dailyAbnormalRequest(0)));
 
-                assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
-                verify(dailyAbnormalRepository, never()).findByDailyGermSkey(any());
-                verify(dailyAbnormalRepository, never()).save(any());
-                }
+    assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+    verify(dailyAbnormalRepository, never()).findByDailyGermSkey(any());
+    verify(dailyAbnormalRepository, never()).save(any());
+    }
 
     @Test
     void upsertDailyAbnormalCounts_throws422_whenReplicateTotalsAreMissing() {
