@@ -681,22 +681,22 @@ public class TestResultService {
         "rep1",
         abnormalTotalForReplicate(abnormalRows, 1),
         totalSeedsByRep.get(1),
-        sumGerminatedCountsForReplicateUpToSlot(germCount, 1, 13));
+        sumGerminatedCountsForReplicate(germCount, 1));
     validateReplicateTotals(
         "rep2",
         abnormalTotalForReplicate(abnormalRows, 2),
         totalSeedsByRep.get(2),
-        sumGerminatedCountsForReplicateUpToSlot(germCount, 2, 13));
+        sumGerminatedCountsForReplicate(germCount, 2));
     validateReplicateTotals(
         "rep3",
         abnormalTotalForReplicate(abnormalRows, 3),
         totalSeedsByRep.get(3),
-        sumGerminatedCountsForReplicateUpToSlot(germCount, 3, 13));
+        sumGerminatedCountsForReplicate(germCount, 3));
     validateReplicateTotals(
         "rep4",
         abnormalTotalForReplicate(abnormalRows, 4),
         totalSeedsByRep.get(4),
-        sumGerminatedCountsForReplicateUpToSlot(germCount, 4, 13));
+        sumGerminatedCountsForReplicate(germCount, 4));
   }
 
   private List<BigDecimal> dailyGermSkeys(GermCountEntity germCount) {
@@ -915,6 +915,9 @@ private int abnormalTotalForReplicate(List<DailyAbnormalEntity> abnormalRows, in
           GermCountEntity::getRep4NoSeedsGerm12,
           GermCountEntity::getRep4NoSeedsGerm13);
 
+  // All four replicate getter lists must stay the same length as this.
+  private static final int MAX_GERM_SLOTS = REP1_GERM_GETTERS.size();
+
   private int findMatchedDailyGermSlot(GermCountEntity gc, BigDecimal dailyGermSkey) {
     if (dailyGermSkey == null) {
       return -1;
@@ -945,10 +948,15 @@ private int abnormalTotalForReplicate(List<DailyAbnormalEntity> abnormalRows, in
     return -1;
   }
 
+  // Sums a replicate's germinated counts across every slot in the test.
+  private int sumGerminatedCountsForReplicate(GermCountEntity gc, int replicateNo) {
+    return sumGerminatedCountsForReplicateUpToSlot(gc, replicateNo, MAX_GERM_SLOTS);
+  }
+
   private int sumGerminatedCountsForReplicateUpToSlot(
       GermCountEntity gc, int replicateNo, int slotInclusive) {
-    if (slotInclusive < 1 || slotInclusive > 13) {
-      throw new IllegalArgumentException("slotInclusive must be 1..13");
+    if (slotInclusive < 1 || slotInclusive > MAX_GERM_SLOTS) {
+      throw new IllegalArgumentException("slotInclusive must be 1.." + MAX_GERM_SLOTS);
     }
 
     List<Function<GermCountEntity, Integer>> getters =
