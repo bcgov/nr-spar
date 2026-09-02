@@ -127,10 +127,6 @@ public class GerminationTestEndpoint {
             description = "Daily abnormal counts not found for the given key",
             content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(
-            responseCode = "409",
-            description = "Parent germ count was modified by another user",
-            content = @Content(schema = @Schema(hidden = true))),
-        @ApiResponse(
             responseCode = "422",
             description = "Daily abnormal counts contain invalid values",
             content = @Content(schema = @Schema(hidden = true)))
@@ -145,16 +141,16 @@ public class GerminationTestEndpoint {
     return testResultService.getDailyAbnormalCounts(dailyGermSkey);
   }
 
-    /**
-     * Create or update daily abnormal germination counts by daily germ key.
-     *
-     * <p>Stores abnormal counts for all four replicates. A valid daily germ key without an existing
-     * abnormal-count row creates one; otherwise, the existing row is replaced.
-     *
-     * @param dailyGermSkey the surrogate key of the daily germ record
-     * @param request the abnormal counts for all four replicates
-     * @return the saved abnormal germination counts
-     */
+  /**
+   * Create or update daily abnormal germination counts by daily germ key.
+   *
+   * <p>Stores abnormal counts for all four replicates. A valid daily germ key without an existing
+   * abnormal-count row creates one; otherwise, the existing row is replaced.
+   *
+   * @param dailyGermSkey the surrogate key of the daily germ record
+   * @param request the abnormal counts for all four replicates
+   * @return the saved abnormal germination counts
+   */
   @PutMapping("/daily-abnormals/{dailyGermSkey}")
   @Operation(
       summary = "Update daily abnormal germination counts by dailyGermSkey",
@@ -171,7 +167,11 @@ public class GerminationTestEndpoint {
             content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(
             responseCode = "404",
-            description = "Daily abnormal counts not found for the given key",
+            description = "Daily germ record not found for the given key",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Parent germ count was modified by another user",
             content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(
             responseCode = "422",
