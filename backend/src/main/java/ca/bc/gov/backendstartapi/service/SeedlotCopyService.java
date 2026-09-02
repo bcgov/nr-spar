@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.Constants;
+import ca.bc.gov.backendstartapi.config.FeatureFlagConfig;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntity;
@@ -16,6 +17,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
+import ca.bc.gov.backendstartapi.exception.FeatureDisabledException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
@@ -55,6 +57,7 @@ public class SeedlotCopyService {
   private final SmpMixGeneticQualityRepository smpMixGeneticQualityRepository;
   private final SeedlotOrchardRepository orchardRepository;
   private final SeedlotCollectionMethodRepository collectionMethodRepository;
+  private final FeatureFlagConfig featureFlagConfig;
 
   /**
    * Copies a source seedlot to a new auto-assigned number in the appropriate copy band:
@@ -84,6 +87,13 @@ public class SeedlotCopyService {
             .orElseThrow(SeedlotNotFoundException::new);
 
     boolean isClassB = isBclassSeedlot(source);
+
+    // The copy endpoint serves both classes, so the toggle can't be enforced by
+    // the @RequiresSeedlotB interceptor; the class comes from the source seedlot.
+    if (isClassB && !featureFlagConfig.isSeedlotBclassEnabled()) {
+      throw new FeatureDisabledException(FeatureFlagConfig.SEEDLOT_B_DISABLED_MESSAGE);
+    }
+
     String targetNumber = resolveTargetNumber(isClassB);
 
     SparLog.info(

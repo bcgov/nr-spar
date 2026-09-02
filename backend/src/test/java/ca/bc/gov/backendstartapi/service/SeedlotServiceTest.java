@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.config.FeatureFlagConfig;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
@@ -59,6 +60,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
+import ca.bc.gov.backendstartapi.exception.FeatureDisabledException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
@@ -180,35 +182,39 @@ class SeedlotServiceTest {
         List.of(ptgqDto));
   }
 
+  private SeedlotService buildService(boolean seedlotBclassEnabled) {
+    return new SeedlotService(
+        seedlotRepository,
+        seedlotSourceRepository,
+        geneticClassRepository,
+        loggedUserService,
+        seedlotCollectionMethodService,
+        seedlotOwnerQuantityService,
+        seedlotOrchardService,
+        seedlotParentTreeService,
+        seedlotParentTreeGeneticQualityService,
+        seedlotGeneticWorthService,
+        smpMixService,
+        smpMixGeneticQualityService,
+        seedlotParentTreeSmpMixService,
+        seedlotStatusService,
+        orchardService,
+        seedlotSeedPlanZoneRepository,
+        parentTreeService,
+        tscAdminService,
+        oracleApiProvider,
+        seedlotFormValidationService,
+        seedlotCollectionGeometryRepository,
+        seedlotCollectionGeometryService,
+        seedlotFormCollectionBclassMapper,
+        seedlotFormStepMapper,
+        saveSeedlotFormService,
+        new FeatureFlagConfig(seedlotBclassEnabled));
+  }
+
   @BeforeEach
   void setup() {
-    seedlotService =
-        new SeedlotService(
-            seedlotRepository,
-            seedlotSourceRepository,
-            geneticClassRepository,
-            loggedUserService,
-            seedlotCollectionMethodService,
-            seedlotOwnerQuantityService,
-            seedlotOrchardService,
-            seedlotParentTreeService,
-            seedlotParentTreeGeneticQualityService,
-            seedlotGeneticWorthService,
-            smpMixService,
-            smpMixGeneticQualityService,
-            seedlotParentTreeSmpMixService,
-            seedlotStatusService,
-            orchardService,
-            seedlotSeedPlanZoneRepository,
-            parentTreeService,
-            tscAdminService,
-            oracleApiProvider,
-            seedlotFormValidationService,
-            seedlotCollectionGeometryRepository,
-            seedlotCollectionGeometryService,
-            seedlotFormCollectionBclassMapper,
-            seedlotFormStepMapper,
-            saveSeedlotFormService);
+    seedlotService = buildService(true);
   }
 
   @Test
@@ -264,6 +270,41 @@ class SeedlotServiceTest {
     verify(seedlotRepository).save(savedSeedlot.capture());
     Assertions.assertNull(savedSeedlot.getValue().getSeedlotSource());
     verify(seedlotSourceRepository, never()).findById(any());
+  }
+
+  @Test
+  @DisplayName("createSeedlotBClassWhenFeatureDisabled")
+  void createSeedlotTest_bClassFeatureDisabled_shouldThrowForbidden() {
+    SeedlotService disabledService = buildService(false);
+    SeedlotCreateDto createDtoB =
+        new SeedlotCreateDto(
+            "00012797", "01", "user.lastname@domain.com", "FDI", null, true, true, 'B');
+
+    Assertions.assertThrows(
+        FeatureDisabledException.class, () -> disabledService.createSeedlot(createDtoB));
+
+    verify(seedlotRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("createSeedlotAClassWhenBClassFeatureDisabled")
+  void createSeedlotTest_aClassFeatureDisabled_shouldSucceed() {
+    when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
+
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity("INC", "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById("INC")).thenReturn(Optional.of(incStatusEntity));
+
+    SeedlotSourceEntity sourceEntity =
+        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE, null);
+    when(seedlotSourceRepository.findById("TPT")).thenReturn(Optional.of(sourceEntity));
+
+    when(loggedUserService.getLoggedUserId()).thenReturn("imaveryhappyuserid@idir");
+
+    GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
+    when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));
+
+    Assertions.assertNotNull(buildService(false).createSeedlot(createSeedlotDto()));
   }
 
   @Test

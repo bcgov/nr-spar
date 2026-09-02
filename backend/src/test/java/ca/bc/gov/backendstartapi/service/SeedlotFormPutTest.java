@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.config.FeatureFlagConfig;
 import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
@@ -140,7 +141,8 @@ class SeedlotFormPutTest {
             seedlotCollectionGeometryService,
             seedlotFormCollectionBclassMapper,
             seedlotFormStepMapper,
-            saveSeedlotFormService);
+            saveSeedlotFormService,
+            new FeatureFlagConfig(true));
   }
 
   private SeedlotService seedlotService;

@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.Constants;
+import ca.bc.gov.backendstartapi.config.FeatureFlagConfig;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
@@ -49,6 +50,7 @@ import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionGeometry;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
+import ca.bc.gov.backendstartapi.exception.FeatureDisabledException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
@@ -149,6 +151,8 @@ public class SeedlotService {
 
   private final SaveSeedlotFormService saveSeedlotFormService;
 
+  private final FeatureFlagConfig featureFlagConfig;
+
   /**
    * Creates a Seedlot in the database.
    *
@@ -159,6 +163,13 @@ public class SeedlotService {
   @Transactional
   public SeedlotStatusResponseDto createSeedlot(SeedlotCreateDto createDto) {
     SparLog.info("Create Seedlot started.");
+
+    // This endpoint serves both classes, so the toggle can't be enforced by the
+    // @RequiresSeedlotB interceptor; the class is only known from the payload.
+    if (Character.valueOf('B').equals(createDto.geneticClassCode())
+        && !featureFlagConfig.isSeedlotBclassEnabled()) {
+      throw new FeatureDisabledException(FeatureFlagConfig.SEEDLOT_B_DISABLED_MESSAGE);
+    }
 
     Seedlot seedlot = new Seedlot(nextSeedlotNumber(createDto.geneticClassCode()));
 
