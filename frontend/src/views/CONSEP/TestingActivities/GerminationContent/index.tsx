@@ -168,6 +168,13 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const hasDatedSlot = slots.some((slot) => slot.countDt);
   const isEditable = header?.testCompleteInd !== 1 && !isConflict;
 
+  const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (alertTimerRef.current) {
+      clearTimeout(alertTimerRef.current);
+    }
+  }, []);
+
   const saveMutation = useMutation({
     mutationFn: (data: { slots: GermCountSlotType[]; replicates: GermReplicateType[] }) => (
       putGermCounts(
@@ -178,7 +185,10 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     onSuccess: (response) => {
       setUpdateTimestamp(response.updateTimestamp);
       setAlert({ isSuccess: true, message: 'Daily germination counts saved' });
-      setTimeout(() => setAlert(null), 3000);
+      if (alertTimerRef.current) {
+        clearTimeout(alertTimerRef.current);
+      }
+      alertTimerRef.current = setTimeout(() => setAlert(null), 3000);
     },
     onError: (error) => {
       if ((error as AxiosError).response?.status === 409) {
