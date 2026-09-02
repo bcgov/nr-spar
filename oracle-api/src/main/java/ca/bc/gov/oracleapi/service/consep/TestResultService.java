@@ -728,24 +728,11 @@ public class TestResultService {
     }
   }
 
-  private int abnormalTotalForReplicate(List<DailyAbnormalEntity> abnormalRows, int replicateNo) {
-    return abnormalRows.stream()
-        .map(this::abnormalForReplicate)
-        .mapToInt(replicates -> sumAbnormalCounts(replicates.get(replicateNo)))
-        .sum();
-  }
-
-  private Map<Integer, ReplicateAbnormalDto> abnormalForReplicate(DailyAbnormalEntity abnormal) {
-    return Map.of(
-        1,
-        abnormalForReplicate(abnormal, 1),
-        2,
-        abnormalForReplicate(abnormal, 2),
-        3,
-        abnormalForReplicate(abnormal, 3),
-        4,
-        abnormalForReplicate(abnormal, 4));
-  }
+private int abnormalTotalForReplicate(List<DailyAbnormalEntity> abnormalRows, int replicateNo) {
+  return abnormalRows.stream()
+      .mapToInt(abnormal -> sumAbnormalCounts(abnormalForReplicate(abnormal, replicateNo)))
+      .sum();
+}
 
   private ReplicateAbnormalDto abnormalForReplicate(
       DailyAbnormalEntity abnormal, int replicateNumber) {
