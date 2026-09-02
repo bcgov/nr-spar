@@ -407,7 +407,11 @@ public class GerminationTestEndpointTest {
         0, // intrmdtCleanrInd
         "TSC", // requestTypeSt
         LocalDateTime.parse("2026-05-01T10:00:00"), // testResultUpdateTimestamp
-        LocalDateTime.parse("2026-05-01T11:00:00") // riaUpdateTimestamp
+        LocalDateTime.parse("2026-05-01T11:00:00"), // riaUpdateTimestamp
+        "TST20170140", // requestId
+        "64132", // seedlotNumber
+        null, // familyLotNumber
+        "SX" // vegetationState
     );
   }
 }

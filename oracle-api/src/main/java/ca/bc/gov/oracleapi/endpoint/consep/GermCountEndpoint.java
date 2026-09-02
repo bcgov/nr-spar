@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +33,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class GermCountEndpoint {
 
   private final GermCountService germCountService;
+
+  /** CNS_T_GERM_COUNT's audit columns are VARCHAR2(30); a Cognito `sub` is 36 characters. */
+  private static final int AUDIT_USERID_MAX = 30;
+
+  /**
+   * The audit user id to stamp on the record. Prefers the IDIR/BCeID username over the token
+   * subject: it fits the column and means something to whoever reads the audit trail later.
+   */
+  private static String auditUserId(Principal principal) {
+    if (principal == null) {
+      return null;
+    }
+    String userId = principal instanceof JwtAuthenticationToken jwtToken
+        ? jwtToken.getToken().getClaimAsString("custom:idp_username")
+        : null;
+    if (userId == null || userId.isBlank()) {
+      userId = principal.getName();
+    }
+    return userId.length() > AUDIT_USERID_MAX ? userId.substring(0, AUDIT_USERID_MAX) : userId;
+  }
 
   /**
    * Retrieves the daily germination count record for a given RIA_SKEY.
@@ -75,7 +96,6 @@ public class GermCountEndpoint {
       @PathVariable BigDecimal riaSkey,
       @Valid @RequestBody GermCountUpsertRequestDto request,
       Principal principal) {
-    return germCountService.upsertGermCounts(
-        riaSkey, request, principal == null ? null : principal.getName());
+    return germCountService.upsertGermCounts(riaSkey, request, auditUserId(principal));
   }
 }

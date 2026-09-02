@@ -159,7 +159,11 @@ public class TestResultService {
           dto.intrmdtCleanrInd(),
           dto.requestTypeSt(),
           dto.testResultUpdateTimestamp(),
-          dto.riaUpdateTimestamp());
+          dto.riaUpdateTimestamp(),
+          dto.requestId(),
+          dto.seedlotNumber(),
+          dto.familyLotNumber(),
+          dto.vegetationState());
 
     } catch (IncorrectResultSizeDataAccessException ex) {
       SparLog.error("Data integrity issue: multiple rows found for RIA_SKEY {}", riaKey, ex);

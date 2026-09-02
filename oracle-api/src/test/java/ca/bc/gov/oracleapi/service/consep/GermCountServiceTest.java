@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -200,8 +201,15 @@ class GermCountServiceTest {
         zeroAbnormal(), zeroAbnormal(), zeroAbnormal(), zeroAbnormal());
   }
 
+  /** A day whose four rep abnormal DTOs are all absent — what this UI sends. */
+  private static DayGermCountDto dayNoAbnormals(int slot, LocalDate dt, int dayNo,
+      Integer r1, Integer r2, Integer r3, Integer r4) {
+    return new DayGermCountDto(slot, dt, dayNo, r1, r2, r3, r4,
+        null, null, null, null);
+  }
+
   private static TestRepGermFormDto rep(int n, int total) {
-    return new TestRepGermFormDto(n, total, 0, 0, 0, 0, 0, 0, 0, 1, null);
+    return new TestRepGermFormDto(n, total, 1, null);
   }
 
   private static GermCountUpsertRequestDto request(
@@ -219,10 +227,66 @@ class GermCountServiceTest {
   }
 
   @Test
+  void upsert_countsAbnormalsAlreadyOnFile_whenRequestOmitsThem() {
+    // This screen never submits abnormals. Validating only what the request
+    // carries treated a day whose abnormals are already stored as zero, so
+    // germinated counts could be raised until germinated + abnormal blew past
+    // the replicate total.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
+
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setCountDt1(LocalDate.of(2026, 4, 1));
+    existing.setDailyGermSkey1(new BigDecimal("2001"));
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+
+    DailyAbnormalEntity stored = new DailyAbnormalEntity();
+    stored.setDailyGermSkey(new BigDecimal("2001"));
+    stored.setRep1NoAbnrmRe(15);
+    when(dailyAbnormalRepository.findAllById(Set.of(new BigDecimal("2001"))))
+        .thenReturn(List.of(stored));
+
+    // 90 germinated + the 15 abnormal already on file = 105 > 100.
+    List<DayGermCountDto> days =
+        List.of(dayNoAbnormals(1, LocalDate.of(2026, 4, 1), 1, 90, 0, 0, 0));
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> germCountService.upsertGermCounts(riaSkey, request(ts, days), "USER2"));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    verify(germCountRepository, never()).save(any());
+  }
+
+  @Test
+  void upsert_ignoresAbnormalsOfSlotsTheRequestDrops() {
+    // A slot the request omits has its abnormal row deleted by this save, so it
+    // must not hold the new counts hostage.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
+    stubChildSaves();
+
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setCountDt1(LocalDate.of(2026, 4, 1));
+    existing.setDailyGermSkey1(new BigDecimal("2001"));
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    List<DayGermCountDto> days =
+        List.of(dayNoAbnormals(2, LocalDate.of(2026, 4, 3), 3, 90, 0, 0, 0));
+
+    germCountService.upsertGermCounts(riaSkey, request(ts, days), "USER2");
+
+    verify(germCountRepository).save(any(GermCountEntity.class));
+  }
+
+  @Test
   void upsert_insertsNewRow_generatesSkeyOnlyForDatedDays_andComputesCumulative() {
     BigDecimal riaSkey = new BigDecimal("881191");
     stubChildSaves();
-    when(germCountRepository.existsById(riaSkey)).thenReturn(false);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.empty());
     when(germCountRepository.nextDailyGermSkey())
         .thenReturn(new BigDecimal("2001"), new BigDecimal("2002"));
     when(germCountRepository.save(any(GermCountEntity.class)))
@@ -270,7 +334,7 @@ class GermCountServiceTest {
     existing.setCumulativeGerm3(new BigDecimal("60"));
 
     stubChildSaves();
-    when(germCountRepository.existsById(riaSkey)).thenReturn(true);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
     when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
     when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
     when(germCountRepository.save(any(GermCountEntity.class)))
@@ -318,7 +382,7 @@ class GermCountServiceTest {
     existing.setCountDt2(LocalDate.of(2026, 4, 2));
 
     stubChildSaves();
-    when(germCountRepository.existsById(riaSkey)).thenReturn(true);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
     when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
     when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
     when(germCountRepository.nextDailyGermSkey()).thenReturn(new BigDecimal("4001"));
@@ -361,7 +425,7 @@ class GermCountServiceTest {
     existing.setUpdateTimestamp(ts);
 
     stubChildSaves();
-    when(germCountRepository.existsById(riaSkey)).thenReturn(true);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
     when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
     when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
     when(germCountRepository.nextDailyGermSkey()).thenReturn(new BigDecimal("2001"));
@@ -376,11 +440,67 @@ class GermCountServiceTest {
     verify(germCountRepository).save(any(GermCountEntity.class));
   }
 
+  /**
+   * DAILY_GERM_SKEY{n} points at a CNS_T_DAILY_ABNORMAL row, so a day with no abnormals
+   * must not be given one. Minting for every dated day both left dangling references and
+   * hit CONSEP.CNS_SEQ_COUNTER, a sequence CONSEP does not have -- ORA-00942 on the first
+   * newly dated column.
+   */
+  @Test
+  void upsert_dayWithoutAbnormals_doesNotMintSkey() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setUpdateTimestamp(ts);
+
+    stubChildSaves();
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    List<DayGermCountDto> days =
+        List.of(dayNoAbnormals(1, LocalDate.of(2026, 4, 1), 1, 10, 12, 11, 9));
+
+    germCountService.upsertGermCounts(riaSkey, request(ts, days), "USER2");
+
+    verify(germCountRepository, never()).nextDailyGermSkey();
+    assertNull(existing.getDailyGermSkey1());
+  }
+
+  /** An existing key still owns the abnormals a previous save recorded, so it is kept. */
+  @Test
+  void upsert_dayWithoutAbnormals_keepsAnExistingSkey() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setUpdateTimestamp(ts);
+    existing.setDailyGermSkey1(new BigDecimal("777"));
+
+    stubChildSaves();
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    List<DayGermCountDto> days =
+        List.of(dayNoAbnormals(1, LocalDate.of(2026, 4, 1), 1, 10, 12, 11, 9));
+
+    germCountService.upsertGermCounts(riaSkey, request(ts, days), "USER2");
+
+    verify(germCountRepository, never()).nextDailyGermSkey();
+    assertEquals(new BigDecimal("777"), existing.getDailyGermSkey1());
+  }
+
   @Test
   void upsert_update_withStaleTimestamp_throwsConflict() {
     BigDecimal riaSkey = new BigDecimal("881191");
     LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
-    when(germCountRepository.existsById(riaSkey)).thenReturn(true);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
     when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(0);
 
     List<DayGermCountDto> days = List.of(day(1, LocalDate.of(2026, 4, 1), 1, 1, 1, 1, 1));
@@ -394,7 +514,7 @@ class GermCountServiceTest {
   @Test
   void upsert_update_missingTimestamp_throwsBadRequest() {
     BigDecimal riaSkey = new BigDecimal("881191");
-    when(germCountRepository.existsById(riaSkey)).thenReturn(true);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
     List<DayGermCountDto> days = List.of(day(1, LocalDate.of(2026, 4, 1), 1, 1, 1, 1, 1));
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
@@ -418,7 +538,7 @@ class GermCountServiceTest {
   void upsert_persistsAbnormalsForDatedDays_andReplicates() {
     BigDecimal riaSkey = new BigDecimal("881191");
     stubChildSaves();
-    when(germCountRepository.existsById(riaSkey)).thenReturn(false);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.empty());
     when(germCountRepository.nextDailyGermSkey()).thenReturn(new BigDecimal("2001"));
     when(germCountRepository.save(any(GermCountEntity.class)))
         .thenAnswer(inv -> inv.getArgument(0));
@@ -457,10 +577,72 @@ class GermCountServiceTest {
   }
 
   @Test
+  void upsert_dayWithoutAbnormalDtos_doesNotWriteAbnormalRow() {
+    // C2: every save from this UI carries no abnormal DTOs. The service must
+    // then leave existing abnormal rows untouched rather than upserting an
+    // all-null DailyAbnormalEntity that NULLs them out. With the only dated
+    // day carrying no abnormals, no abnormal row is written at all.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);
+
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setUpdateTimestamp(ts);
+    existing.setDailyGermSkey1(new BigDecimal("3001"));
+    existing.setCountDt1(LocalDate.of(2026, 4, 1));
+    existing.setRep1NoSeedsGerm1(10);
+    existing.setCumulativeGerm1(new BigDecimal("10"));
+
+    stubChildSaves();
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, ts)).thenReturn(1);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    // Resend slot 1 (same dated day) with no abnormal DTOs.
+    List<DayGermCountDto> days =
+        List.of(dayNoAbnormals(1, LocalDate.of(2026, 4, 1), 1, 10, 0, 0, 0));
+
+    germCountService.upsertGermCounts(riaSkey, request(ts, days), "USER1");
+
+    // No abnormal row is upserted for the abnormal-less day, so the existing
+    // row (skey 3001) is left as-is. deleteOrphanedAbnormals also must not
+    // remove it — slot 1 is still referenced.
+    verify(dailyAbnormalRepository, never()).saveAll(any());
+    verify(dailyAbnormalRepository, never()).deleteAllById(any());
+  }
+
+  @Test
+  void upsert_mixedDays_writesAbnormalRowOnlyForDayThatHasThem() {
+    // A day WITH abnormal DTOs still writes; a sibling day WITHOUT them is
+    // skipped. Guards against the fix over-reaching.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    stubChildSaves();
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.empty());
+    when(germCountRepository.nextDailyGermSkey())
+        .thenReturn(new BigDecimal("2001"), new BigDecimal("2002"));
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+
+    List<DayGermCountDto> days = new ArrayList<>();
+    days.add(day(1, LocalDate.of(2026, 4, 1), 1, 10, 12, 11, 9));       // has abnormals
+    days.add(dayNoAbnormals(2, LocalDate.of(2026, 4, 3), 2, 5, 6, 7, 8)); // none
+
+    germCountService.upsertGermCounts(riaSkey, request(null, days), "USER1");
+
+    ArgumentCaptor<List<DailyAbnormalEntity>> abCaptor = ArgumentCaptor.forClass(List.class);
+    verify(dailyAbnormalRepository).saveAll(abCaptor.capture());
+    // Only slot 1 (skey 2001) gets an abnormal row; slot 2 is skipped.
+    assertEquals(1, abCaptor.getValue().size());
+    assertEquals(new BigDecimal("2001"), abCaptor.getValue().get(0).getDailyGermSkey());
+  }
+
+  @Test
   void upsert_seedTotalExactlyEqual_passes() {
     BigDecimal riaSkey = new BigDecimal("881191");
     stubChildSaves();
-    when(germCountRepository.existsById(riaSkey)).thenReturn(false);
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.empty());
     when(germCountRepository.nextDailyGermSkey()).thenReturn(new BigDecimal("2001"));
     when(germCountRepository.save(any(GermCountEntity.class)))
         .thenAnswer(inv -> inv.getArgument(0));

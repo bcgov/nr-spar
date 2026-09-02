@@ -128,6 +128,39 @@ class GermCountMapperTest {
   }
 
   @Test
+  @DisplayName("toDto keeps a dated slot that has no abnormal row, so no key")
+  void toDto_datedSlotWithoutSkey_isStillReturned() {
+    // DAILY_GERM_SKEY is only minted for a day that has abnormals to point at,
+    // so a plain day saved through the germination screen has none. Keying
+    // presence off it dropped that day from every later read.
+    GermCountEntity entity = new GermCountEntity();
+    entity.setRiaSkey(new BigDecimal("300"));
+    entity.setCountDt2(LocalDate.of(2026, 4, 2));
+    entity.setDayNoOfTest2(2);
+    entity.setRep1NoSeedsGerm2(7);
+
+    GermCountDto dto = mapper.toDto(entity);
+
+    assertThat(dto.slots()).hasSize(1);
+    assertEquals(2, dto.slots().get(0).slotIndex());
+    assertNull(dto.slots().get(0).dailyGermSkey());
+    assertEquals(7, dto.slots().get(0).rep1NoSeedsGerm());
+  }
+
+  @Test
+  @DisplayName("toDto still returns a legacy slot that carries a key but no date")
+  void toDto_slotWithSkeyButNoDate_isStillReturned() {
+    GermCountEntity entity = new GermCountEntity();
+    entity.setRiaSkey(new BigDecimal("301"));
+    entity.setDailyGermSkey3(new BigDecimal("9001"));
+
+    GermCountDto dto = mapper.toDto(entity);
+
+    assertThat(dto.slots()).hasSize(1);
+    assertEquals(3, dto.slots().get(0).slotIndex());
+  }
+
+  @Test
   @DisplayName("toDto maps slot fields correctly for each of the 13 slots")
   void toDto_allSlotsPopulated_slotFieldsAreCorrect() {
     GermCountEntity entity = fullEntity();
