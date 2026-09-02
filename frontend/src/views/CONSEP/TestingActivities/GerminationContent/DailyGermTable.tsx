@@ -169,8 +169,8 @@ const DailyGermTable = ({
       <h3>Daily germination</h3>
       {errorMessages.length > 0 && (
         <div className="daily-germ-errors" role="alert">
-          {errorMessages.map((message) => (
-            <p key={message}>{message}</p>
+          {errorMessages.map((message, idx) => (
+            <p key={`${idx}-${message}`}>{message}</p>
           ))}
         </div>
       )}
