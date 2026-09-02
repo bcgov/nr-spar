@@ -491,8 +491,8 @@ public class TestResultService {
     }
 
     int touchedRows =
-      germCountRepository.touchIfTimestampMatches(
-        germCount.getRiaSkey(), request.updateTimestamp());
+        germCountRepository.touchIfTimestampMatches(
+            germCount.getRiaSkey(), request.updateTimestamp());
     if (touchedRows == 0) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
@@ -728,11 +728,11 @@ public class TestResultService {
     }
   }
 
-private int abnormalTotalForReplicate(List<DailyAbnormalEntity> abnormalRows, int replicateNo) {
-  return abnormalRows.stream()
-      .mapToInt(abnormal -> sumAbnormalCounts(abnormalForReplicate(abnormal, replicateNo)))
-      .sum();
-}
+  private int abnormalTotalForReplicate(List<DailyAbnormalEntity> abnormalRows, int replicateNo) {
+    return abnormalRows.stream()
+        .mapToInt(abnormal -> sumAbnormalCounts(abnormalForReplicate(abnormal, replicateNo)))
+        .sum();
+  }
 
   private ReplicateAbnormalDto abnormalForReplicate(
       DailyAbnormalEntity abnormal, int replicateNumber) {
@@ -829,8 +829,8 @@ private int abnormalTotalForReplicate(List<DailyAbnormalEntity> abnormalRows, in
                         HttpStatus.UNPROCESSABLE_ENTITY,
                         "Unable to validate replicate totals: germination counts not found"));
 
-              validateDailyAbnormalTotals(entity, germCount, dailyGermSkey);
-              return toDailyAbnormalResponseDto(entity);
+    validateDailyAbnormalTotals(entity, germCount, dailyGermSkey);
+    return toDailyAbnormalResponseDto(entity);
   }
 
   private int nullToZero(Integer value) {
