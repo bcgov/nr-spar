@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalUpsertRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestUpdateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
@@ -26,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -466,6 +468,332 @@ public class TestResultService {
   }
 
   /**
+   * Create or replace daily abnormal germination counts for a daily germ record.
+   *
+   * @param dailyGermSkey the surrogate key for the daily germ record
+   * @param request the abnormal counts for all four replicates
+   * @return the saved daily abnormal counts
+   */
+  @Transactional
+  public DailyAbnormalResponseDto upsertDailyAbnormalCounts(
+      BigDecimal dailyGermSkey, DailyAbnormalUpsertRequestDto request) {
+    GermCountEntity germCount =
+        germCountRepository
+            .findByDailyGermSkeyInAnySlot(dailyGermSkey)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Daily germ record not found for the given key"));
+
+    if (request.updateTimestamp() == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "updateTimestamp is required to update daily abnormals");
+    }
+
+    int touchedRows =
+        germCountRepository.touchIfTimestampMatches(
+            germCount.getRiaSkey(), request.updateTimestamp());
+    if (touchedRows == 0) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
+    }
+
+    DailyAbnormalEntity entity = dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey);
+    if (entity == null) {
+      entity = new DailyAbnormalEntity();
+      entity.setDailyGermSkey(dailyGermSkey);
+    }
+
+    applyReplicateAbnormal(entity, 1, normalizeAbnormalCounts(request.rep1()));
+    applyReplicateAbnormal(entity, 2, normalizeAbnormalCounts(request.rep2()));
+    applyReplicateAbnormal(entity, 3, normalizeAbnormalCounts(request.rep3()));
+    applyReplicateAbnormal(entity, 4, normalizeAbnormalCounts(request.rep4()));
+
+    validateDailyAbnormalTotals(entity, germCount, dailyGermSkey);
+    DailyAbnormalEntity savedEntity = dailyAbnormalRepository.save(entity);
+
+    return toDailyAbnormalResponseDto(savedEntity);
+  }
+
+  private ReplicateAbnormalDto normalizeAbnormalCounts(ReplicateAbnormalDto abnormal) {
+    return new ReplicateAbnormalDto(
+        nullToZero(abnormal.abnormalNumReverseEmbryo()),
+        nullToZero(abnormal.abnormalNumStuntedRadicle()),
+        nullToZero(abnormal.abnormalNumStuntedHypocotyl()),
+        nullToZero(abnormal.abnormalNumRotten()),
+        nullToZero(abnormal.abnormalNumThickenedHypocotyl()),
+        nullToZero(abnormal.abnormalNumThickenedRadicle()),
+        nullToZero(abnormal.abnormalNumTwisted()),
+        nullToZero(abnormal.abnormalNumMegametophyteCollar()),
+        nullToZero(abnormal.abnormalNumWeak()),
+        nullToZero(abnormal.abnormalNumOther()),
+        nullToZero(abnormal.abnormalNumPregermination()),
+        null);
+  }
+
+  private DailyAbnormalResponseDto toDailyAbnormalResponseDto(DailyAbnormalEntity entity) {
+    return new DailyAbnormalResponseDto(
+        entity.getDailyGermSkey(),
+        mapReplicateAbnormal(
+            entity.getRep1NoAbnrmRe(),
+            entity.getRep1NoAbnrmSr(),
+            entity.getRep1NoAbnrmSh(),
+            entity.getRep1NoAbnrmRn(),
+            entity.getRep1NoAbnrmTh(),
+            entity.getRep1NoAbnrmTr(),
+            entity.getRep1NoAbnrmTw(),
+            entity.getRep1NoAbnrmCm(),
+            entity.getRep1NoAbnrmWeak(),
+            entity.getRep1NoAbnrmOther(),
+            entity.getRep1NoAbnrmPrgrm()),
+        mapReplicateAbnormal(
+            entity.getRep2NoAbnrmRe(),
+            entity.getRep2NoAbnrmSr(),
+            entity.getRep2NoAbnrmSh(),
+            entity.getRep2NoAbnrmRn(),
+            entity.getRep2NoAbnrmTh(),
+            entity.getRep2NoAbnrmTr(),
+            entity.getRep2NoAbnrmTw(),
+            entity.getRep2NoAbnrmCm(),
+            entity.getRep2NoAbnrmWeak(),
+            entity.getRep2NoAbnrmOther(),
+            entity.getRep2NoAbnrmPrgrm()),
+        mapReplicateAbnormal(
+            entity.getRep3NoAbnrmRe(),
+            entity.getRep3NoAbnrmSr(),
+            entity.getRep3NoAbnrmSh(),
+            entity.getRep3NoAbnrmRn(),
+            entity.getRep3NoAbnrmTh(),
+            entity.getRep3NoAbnrmTr(),
+            entity.getRep3NoAbnrmTw(),
+            entity.getRep3NoAbnrmCm(),
+            entity.getRep3NoAbnrmWeak(),
+            entity.getRep3NoAbnrmOther(),
+            entity.getRep3NoAbnrmPrgrm()),
+        mapReplicateAbnormal(
+            entity.getRep4NoAbnrmRe(),
+            entity.getRep4NoAbnrmSr(),
+            entity.getRep4NoAbnrmSh(),
+            entity.getRep4NoAbnrmRn(),
+            entity.getRep4NoAbnrmTh(),
+            entity.getRep4NoAbnrmTr(),
+            entity.getRep4NoAbnrmTw(),
+            entity.getRep4NoAbnrmCm(),
+            entity.getRep4NoAbnrmWeak(),
+            entity.getRep4NoAbnrmOther(),
+            entity.getRep4NoAbnrmPrgrm()));
+  }
+
+  private void applyReplicateAbnormal(
+      DailyAbnormalEntity entity, int replicateNumber, ReplicateAbnormalDto abnormal) {
+    switch (replicateNumber) {
+      case 1 -> {
+        entity.setRep1NoAbnrmRe(abnormal.abnormalNumReverseEmbryo());
+        entity.setRep1NoAbnrmSr(abnormal.abnormalNumStuntedRadicle());
+        entity.setRep1NoAbnrmSh(abnormal.abnormalNumStuntedHypocotyl());
+        entity.setRep1NoAbnrmRn(abnormal.abnormalNumRotten());
+        entity.setRep1NoAbnrmTh(abnormal.abnormalNumThickenedHypocotyl());
+        entity.setRep1NoAbnrmTr(abnormal.abnormalNumThickenedRadicle());
+        entity.setRep1NoAbnrmTw(abnormal.abnormalNumTwisted());
+        entity.setRep1NoAbnrmCm(abnormal.abnormalNumMegametophyteCollar());
+        entity.setRep1NoAbnrmWeak(abnormal.abnormalNumWeak());
+        entity.setRep1NoAbnrmOther(abnormal.abnormalNumOther());
+        entity.setRep1NoAbnrmPrgrm(abnormal.abnormalNumPregermination());
+      }
+      case 2 -> {
+        entity.setRep2NoAbnrmRe(abnormal.abnormalNumReverseEmbryo());
+        entity.setRep2NoAbnrmSr(abnormal.abnormalNumStuntedRadicle());
+        entity.setRep2NoAbnrmSh(abnormal.abnormalNumStuntedHypocotyl());
+        entity.setRep2NoAbnrmRn(abnormal.abnormalNumRotten());
+        entity.setRep2NoAbnrmTh(abnormal.abnormalNumThickenedHypocotyl());
+        entity.setRep2NoAbnrmTr(abnormal.abnormalNumThickenedRadicle());
+        entity.setRep2NoAbnrmTw(abnormal.abnormalNumTwisted());
+        entity.setRep2NoAbnrmCm(abnormal.abnormalNumMegametophyteCollar());
+        entity.setRep2NoAbnrmWeak(abnormal.abnormalNumWeak());
+        entity.setRep2NoAbnrmOther(abnormal.abnormalNumOther());
+        entity.setRep2NoAbnrmPrgrm(abnormal.abnormalNumPregermination());
+      }
+      case 3 -> {
+        entity.setRep3NoAbnrmRe(abnormal.abnormalNumReverseEmbryo());
+        entity.setRep3NoAbnrmSr(abnormal.abnormalNumStuntedRadicle());
+        entity.setRep3NoAbnrmSh(abnormal.abnormalNumStuntedHypocotyl());
+        entity.setRep3NoAbnrmRn(abnormal.abnormalNumRotten());
+        entity.setRep3NoAbnrmTh(abnormal.abnormalNumThickenedHypocotyl());
+        entity.setRep3NoAbnrmTr(abnormal.abnormalNumThickenedRadicle());
+        entity.setRep3NoAbnrmTw(abnormal.abnormalNumTwisted());
+        entity.setRep3NoAbnrmCm(abnormal.abnormalNumMegametophyteCollar());
+        entity.setRep3NoAbnrmWeak(abnormal.abnormalNumWeak());
+        entity.setRep3NoAbnrmOther(abnormal.abnormalNumOther());
+        entity.setRep3NoAbnrmPrgrm(abnormal.abnormalNumPregermination());
+      }
+      case 4 -> {
+        entity.setRep4NoAbnrmRe(abnormal.abnormalNumReverseEmbryo());
+        entity.setRep4NoAbnrmSr(abnormal.abnormalNumStuntedRadicle());
+        entity.setRep4NoAbnrmSh(abnormal.abnormalNumStuntedHypocotyl());
+        entity.setRep4NoAbnrmRn(abnormal.abnormalNumRotten());
+        entity.setRep4NoAbnrmTh(abnormal.abnormalNumThickenedHypocotyl());
+        entity.setRep4NoAbnrmTr(abnormal.abnormalNumThickenedRadicle());
+        entity.setRep4NoAbnrmTw(abnormal.abnormalNumTwisted());
+        entity.setRep4NoAbnrmCm(abnormal.abnormalNumMegametophyteCollar());
+        entity.setRep4NoAbnrmWeak(abnormal.abnormalNumWeak());
+        entity.setRep4NoAbnrmOther(abnormal.abnormalNumOther());
+        entity.setRep4NoAbnrmPrgrm(abnormal.abnormalNumPregermination());
+      }
+      default -> throw new IllegalArgumentException("replicateNumber must be 1..4");
+    }
+  }
+
+  private void validateDailyAbnormalTotals(
+      DailyAbnormalEntity entity, GermCountEntity germCount, BigDecimal dailyGermSkey) {
+    if (findMatchedDailyGermSlot(germCount, dailyGermSkey) == -1) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Daily germ record not found for the given key");
+    }
+
+    List<TestRepGermEntity> replicateRows =
+        testRepGermRepository.findByRiaKeyOrderByReplicateNumber(germCount.getRiaSkey());
+    Map<Integer, Integer> totalSeedsByRep =
+        replicateRows.stream()
+            .collect(
+                Collectors.toMap(
+                    row -> row.getId().getReplicateNumber(),
+                    row -> nullToZero(row.getTotalNoSeeds()),
+                    (first, ignored) -> first));
+
+    if (!totalSeedsByRep.keySet().containsAll(List.of(1, 2, 3, 4))) {
+      throw new ResponseStatusException(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          "Unable to validate replicate totals: missing replicate seed totals");
+    }
+
+    List<DailyAbnormalEntity> abnormalRows = new ArrayList<>();
+    dailyAbnormalRepository.findAllById(dailyGermSkeys(germCount))
+        .forEach(
+            abnormal -> {
+              if (abnormal.getDailyGermSkey().compareTo(dailyGermSkey) != 0) {
+                abnormalRows.add(abnormal);
+              }
+            });
+    abnormalRows.add(entity);
+    validateNonNegativeAbnormalRows(abnormalRows);
+
+    validateReplicateTotals(
+        "rep1",
+        abnormalTotalForReplicate(abnormalRows, 1),
+        totalSeedsByRep.get(1),
+        sumGerminatedCountsForReplicate(germCount, 1));
+    validateReplicateTotals(
+        "rep2",
+        abnormalTotalForReplicate(abnormalRows, 2),
+        totalSeedsByRep.get(2),
+        sumGerminatedCountsForReplicate(germCount, 2));
+    validateReplicateTotals(
+        "rep3",
+        abnormalTotalForReplicate(abnormalRows, 3),
+        totalSeedsByRep.get(3),
+        sumGerminatedCountsForReplicate(germCount, 3));
+    validateReplicateTotals(
+        "rep4",
+        abnormalTotalForReplicate(abnormalRows, 4),
+        totalSeedsByRep.get(4),
+        sumGerminatedCountsForReplicate(germCount, 4));
+  }
+
+  private List<BigDecimal> dailyGermSkeys(GermCountEntity germCount) {
+    return Arrays.asList(
+            germCount.getDailyGermSkey1(),
+            germCount.getDailyGermSkey2(),
+            germCount.getDailyGermSkey3(),
+            germCount.getDailyGermSkey4(),
+            germCount.getDailyGermSkey5(),
+            germCount.getDailyGermSkey6(),
+            germCount.getDailyGermSkey7(),
+            germCount.getDailyGermSkey8(),
+            germCount.getDailyGermSkey9(),
+            germCount.getDailyGermSkey10(),
+            germCount.getDailyGermSkey11(),
+            germCount.getDailyGermSkey12(),
+            germCount.getDailyGermSkey13())
+        .stream()
+        .filter(skey -> skey != null)
+        .toList();
+  }
+
+  private void validateNonNegativeAbnormalRows(List<DailyAbnormalEntity> abnormalRows) {
+    for (DailyAbnormalEntity abnormal : abnormalRows) {
+      validateNonNegativeAbnormalCounts(abnormalForReplicate(abnormal, 1), "rep1");
+      validateNonNegativeAbnormalCounts(abnormalForReplicate(abnormal, 2), "rep2");
+      validateNonNegativeAbnormalCounts(abnormalForReplicate(abnormal, 3), "rep3");
+      validateNonNegativeAbnormalCounts(abnormalForReplicate(abnormal, 4), "rep4");
+    }
+  }
+
+  private int abnormalTotalForReplicate(List<DailyAbnormalEntity> abnormalRows, int replicateNo) {
+    return abnormalRows.stream()
+        .mapToInt(abnormal -> sumAbnormalCounts(abnormalForReplicate(abnormal, replicateNo)))
+        .sum();
+  }
+
+  private ReplicateAbnormalDto abnormalForReplicate(
+      DailyAbnormalEntity abnormal, int replicateNumber) {
+    return switch (replicateNumber) {
+      case 1 ->
+          mapReplicateAbnormal(
+              abnormal.getRep1NoAbnrmRe(),
+              abnormal.getRep1NoAbnrmSr(),
+              abnormal.getRep1NoAbnrmSh(),
+              abnormal.getRep1NoAbnrmRn(),
+              abnormal.getRep1NoAbnrmTh(),
+              abnormal.getRep1NoAbnrmTr(),
+              abnormal.getRep1NoAbnrmTw(),
+              abnormal.getRep1NoAbnrmCm(),
+              abnormal.getRep1NoAbnrmWeak(),
+              abnormal.getRep1NoAbnrmOther(),
+              abnormal.getRep1NoAbnrmPrgrm());
+      case 2 ->
+          mapReplicateAbnormal(
+              abnormal.getRep2NoAbnrmRe(),
+              abnormal.getRep2NoAbnrmSr(),
+              abnormal.getRep2NoAbnrmSh(),
+              abnormal.getRep2NoAbnrmRn(),
+              abnormal.getRep2NoAbnrmTh(),
+              abnormal.getRep2NoAbnrmTr(),
+              abnormal.getRep2NoAbnrmTw(),
+              abnormal.getRep2NoAbnrmCm(),
+              abnormal.getRep2NoAbnrmWeak(),
+              abnormal.getRep2NoAbnrmOther(),
+              abnormal.getRep2NoAbnrmPrgrm());
+      case 3 ->
+          mapReplicateAbnormal(
+              abnormal.getRep3NoAbnrmRe(),
+              abnormal.getRep3NoAbnrmSr(),
+              abnormal.getRep3NoAbnrmSh(),
+              abnormal.getRep3NoAbnrmRn(),
+              abnormal.getRep3NoAbnrmTh(),
+              abnormal.getRep3NoAbnrmTr(),
+              abnormal.getRep3NoAbnrmTw(),
+              abnormal.getRep3NoAbnrmCm(),
+              abnormal.getRep3NoAbnrmWeak(),
+              abnormal.getRep3NoAbnrmOther(),
+              abnormal.getRep3NoAbnrmPrgrm());
+      case 4 ->
+          mapReplicateAbnormal(
+              abnormal.getRep4NoAbnrmRe(),
+              abnormal.getRep4NoAbnrmSr(),
+              abnormal.getRep4NoAbnrmSh(),
+              abnormal.getRep4NoAbnrmRn(),
+              abnormal.getRep4NoAbnrmTh(),
+              abnormal.getRep4NoAbnrmTr(),
+              abnormal.getRep4NoAbnrmTw(),
+              abnormal.getRep4NoAbnrmCm(),
+              abnormal.getRep4NoAbnrmWeak(),
+              abnormal.getRep4NoAbnrmOther(),
+              abnormal.getRep4NoAbnrmPrgrm());
+      default -> throw new IllegalArgumentException("replicateNumber must be 1..4");
+    };
+  }
+
+  /**
    * Retrieve daily abnormal germination counts for a daily germ record. Looks up the daily abnormal
    * data by daily germ key, maps replicate abnormal counts into response DTOs, validates that
    * abnormal counts are not negative, and validates that the combined germinated and abnormal
@@ -501,117 +829,8 @@ public class TestResultService {
                         HttpStatus.UNPROCESSABLE_ENTITY,
                         "Unable to validate replicate totals: germination counts not found"));
 
-    List<TestRepGermEntity> replicateRows =
-        testRepGermRepository.findByRiaKeyOrderByReplicateNumber(germCount.getRiaSkey());
-
-    Map<Integer, Integer> totalSeedsByRep =
-        replicateRows.stream()
-            .collect(
-                Collectors.toMap(
-                    r -> r.getId().getReplicateNumber(),
-                    r -> nullToZero(r.getTotalNoSeeds()),
-                    (a, b) -> a));
-
-    if (!totalSeedsByRep.keySet().containsAll(List.of(1, 2, 3, 4))) {
-      throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY,
-          "Unable to validate replicate totals: missing replicate seed totals");
-    }
-
-    // Map entity fields into rep1, rep2, rep3, rep4 DTOs
-    ReplicateAbnormalDto rep1 =
-        mapReplicateAbnormal(
-            entity.getRep1NoAbnrmRe(),
-            entity.getRep1NoAbnrmSr(),
-            entity.getRep1NoAbnrmSh(),
-            entity.getRep1NoAbnrmRn(),
-            entity.getRep1NoAbnrmTh(),
-            entity.getRep1NoAbnrmTr(),
-            entity.getRep1NoAbnrmTw(),
-            entity.getRep1NoAbnrmCm(),
-            entity.getRep1NoAbnrmWeak(),
-            entity.getRep1NoAbnrmOther(),
-            entity.getRep1NoAbnrmPrgrm());
-    ReplicateAbnormalDto rep2 =
-        mapReplicateAbnormal(
-            entity.getRep2NoAbnrmRe(),
-            entity.getRep2NoAbnrmSr(),
-            entity.getRep2NoAbnrmSh(),
-            entity.getRep2NoAbnrmRn(),
-            entity.getRep2NoAbnrmTh(),
-            entity.getRep2NoAbnrmTr(),
-            entity.getRep2NoAbnrmTw(),
-            entity.getRep2NoAbnrmCm(),
-            entity.getRep2NoAbnrmWeak(),
-            entity.getRep2NoAbnrmOther(),
-            entity.getRep2NoAbnrmPrgrm());
-    ReplicateAbnormalDto rep3 =
-        mapReplicateAbnormal(
-            entity.getRep3NoAbnrmRe(),
-            entity.getRep3NoAbnrmSr(),
-            entity.getRep3NoAbnrmSh(),
-            entity.getRep3NoAbnrmRn(),
-            entity.getRep3NoAbnrmTh(),
-            entity.getRep3NoAbnrmTr(),
-            entity.getRep3NoAbnrmTw(),
-            entity.getRep3NoAbnrmCm(),
-            entity.getRep3NoAbnrmWeak(),
-            entity.getRep3NoAbnrmOther(),
-            entity.getRep3NoAbnrmPrgrm());
-    ReplicateAbnormalDto rep4 =
-        mapReplicateAbnormal(
-            entity.getRep4NoAbnrmRe(),
-            entity.getRep4NoAbnrmSr(),
-            entity.getRep4NoAbnrmSh(),
-            entity.getRep4NoAbnrmRn(),
-            entity.getRep4NoAbnrmTh(),
-            entity.getRep4NoAbnrmTr(),
-            entity.getRep4NoAbnrmTw(),
-            entity.getRep4NoAbnrmCm(),
-            entity.getRep4NoAbnrmWeak(),
-            entity.getRep4NoAbnrmOther(),
-            entity.getRep4NoAbnrmPrgrm());
-
-    // Existing non-negative checks
-    validateNonNegativeAbnormalCounts(rep1, "rep1");
-    validateNonNegativeAbnormalCounts(rep2, "rep2");
-    validateNonNegativeAbnormalCounts(rep3, "rep3");
-    validateNonNegativeAbnormalCounts(rep4, "rep4");
-
-    // New cross-checks
-    int matchedSlot = findMatchedDailyGermSlot(germCount, dailyGermSkey);
-
-    if (matchedSlot == -1) {
-      throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY,
-          "Unable to validate replicate totals: daily germ key not found in germination slots");
-    }
-
-    validateReplicateTotals(
-        "rep1",
-        rep1,
-        totalSeedsByRep.get(1),
-        sumGerminatedCountsForReplicateUpToSlot(germCount, 1, matchedSlot));
-    validateReplicateTotals(
-        "rep2",
-        rep2,
-        totalSeedsByRep.get(2),
-        sumGerminatedCountsForReplicateUpToSlot(germCount, 2, matchedSlot));
-    validateReplicateTotals(
-        "rep3",
-        rep3,
-        totalSeedsByRep.get(3),
-        sumGerminatedCountsForReplicateUpToSlot(germCount, 3, matchedSlot));
-    validateReplicateTotals(
-        "rep4",
-        rep4,
-        totalSeedsByRep.get(4),
-        sumGerminatedCountsForReplicateUpToSlot(germCount, 4, matchedSlot));
-
-    DailyAbnormalResponseDto response =
-        new DailyAbnormalResponseDto(entity.getDailyGermSkey(), rep1, rep2, rep3, rep4);
-
-    return response;
+    validateDailyAbnormalTotals(entity, germCount, dailyGermSkey);
+    return toDailyAbnormalResponseDto(entity);
   }
 
   private int nullToZero(Integer value) {
@@ -696,6 +915,9 @@ public class TestResultService {
           GermCountEntity::getRep4NoSeedsGerm12,
           GermCountEntity::getRep4NoSeedsGerm13);
 
+  // All four replicate getter lists must stay the same length as this.
+  private static final int MAX_GERM_SLOTS = REP1_GERM_GETTERS.size();
+
   private int findMatchedDailyGermSlot(GermCountEntity gc, BigDecimal dailyGermSkey) {
     if (dailyGermSkey == null) {
       return -1;
@@ -726,10 +948,15 @@ public class TestResultService {
     return -1;
   }
 
+  // Sums a replicate's germinated counts across every slot in the test.
+  private int sumGerminatedCountsForReplicate(GermCountEntity gc, int replicateNo) {
+    return sumGerminatedCountsForReplicateUpToSlot(gc, replicateNo, MAX_GERM_SLOTS);
+  }
+
   private int sumGerminatedCountsForReplicateUpToSlot(
       GermCountEntity gc, int replicateNo, int slotInclusive) {
-    if (slotInclusive < 1 || slotInclusive > 13) {
-      throw new IllegalArgumentException("slotInclusive must be 1..13");
+    if (slotInclusive < 1 || slotInclusive > MAX_GERM_SLOTS) {
+      throw new IllegalArgumentException("slotInclusive must be 1.." + MAX_GERM_SLOTS);
     }
 
     List<Function<GermCountEntity, Integer>> getters =
@@ -744,9 +971,7 @@ public class TestResultService {
   }
 
   private void validateReplicateTotals(
-      String repName, ReplicateAbnormalDto abnormal, int totalSeeds, int germinatedTotal) {
-
-    int abnormalTotal = sumAbnormalCounts(abnormal);
+      String repName, int abnormalTotal, int totalSeeds, int germinatedTotal) {
 
     if (germinatedTotal > totalSeeds) {
       throw new ResponseStatusException(
