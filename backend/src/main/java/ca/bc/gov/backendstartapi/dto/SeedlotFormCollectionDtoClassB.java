@@ -140,6 +140,6 @@ public record SeedlotFormCollectionDtoClassB(
     // ─── Collection polygon (optional, written to seedlot_collection_geometry) ─
     @Schema(
             description =
-                "GeoJSON polygon (SRID 3005) representing the collection area; null if no"
+                "GeoJSON polygon (SRID 4326) representing the collection area; null if no"
                     + " polygon captured.")
         String collectionGeometryGeoJson) {}

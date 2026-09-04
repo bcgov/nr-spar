@@ -72,7 +72,8 @@ class SeedlotCollectionGeometryServiceTest {
     seedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(seedlot));
-    when(seedlotCollectionGeometryRepository.findById(any())).thenReturn(Optional.empty());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(any()))
+        .thenReturn(Optional.empty());
 
     assertThrows(
         SeedlotCollectionGeometryNotFoundException.class,
@@ -101,7 +102,8 @@ class SeedlotCollectionGeometryServiceTest {
     geometry.setFeatureClassSkey(42);
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(seedlot));
-    when(seedlotCollectionGeometryRepository.findById(any())).thenReturn(Optional.of(geometry));
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(any()))
+        .thenReturn(Optional.of(geometry));
 
     var dto = seedlotCollectionGeometryService.getBySeedlotNumber(SEEDLOT_NUMBER);
 
@@ -113,22 +115,46 @@ class SeedlotCollectionGeometryServiceTest {
   }
 
   @Test
-  @DisplayName("saveOrUpdate with null GeoJSON is a no-op")
-  void saveOrUpdate_nullGeoJson_shouldSkip() {
+  @DisplayName("saveOrUpdate with null GeoJSON deletes existing row")
+  void saveOrUpdate_nullGeoJson_shouldDeleteExisting() {
     Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+    SeedlotCollectionGeometry existing = new SeedlotCollectionGeometry(SEEDLOT_NUMBER);
+
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
+        .thenReturn(Optional.of(existing));
 
     seedlotCollectionGeometryService.saveOrUpdate(seedlot, null, "user@idir");
 
+    verify(seedlotCollectionGeometryRepository).delete(existing);
     verify(seedlotCollectionGeometryRepository, never()).save(any());
   }
 
   @Test
-  @DisplayName("saveOrUpdate with blank GeoJSON is a no-op")
-  void saveOrUpdate_blankGeoJson_shouldSkip() {
+  @DisplayName("saveOrUpdate with blank GeoJSON deletes existing row")
+  void saveOrUpdate_blankGeoJson_shouldDeleteExisting() {
     Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+    SeedlotCollectionGeometry existing = new SeedlotCollectionGeometry(SEEDLOT_NUMBER);
+
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
+        .thenReturn(Optional.of(existing));
 
     seedlotCollectionGeometryService.saveOrUpdate(seedlot, "   ", "user@idir");
 
+    verify(seedlotCollectionGeometryRepository).delete(existing);
+    verify(seedlotCollectionGeometryRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("saveOrUpdate with null GeoJSON is a no-op when no row exists")
+  void saveOrUpdate_nullGeoJson_noExisting_shouldNoOp() {
+    Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
+        .thenReturn(Optional.empty());
+
+    seedlotCollectionGeometryService.saveOrUpdate(seedlot, null, "user@idir");
+
+    verify(seedlotCollectionGeometryRepository, never()).delete(any());
     verify(seedlotCollectionGeometryRepository, never()).save(any());
   }
 
@@ -148,7 +174,8 @@ class SeedlotCollectionGeometryServiceTest {
             });
     String geoJson = GeometryUtil.toGeoJson(polygon);
 
-    when(seedlotCollectionGeometryRepository.findById(SEEDLOT_NUMBER)).thenReturn(Optional.empty());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
+        .thenReturn(Optional.empty());
     when(seedlotCollectionGeometryRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
     seedlotCollectionGeometryService.saveOrUpdate(seedlot, geoJson, "user@idir");
@@ -169,7 +196,6 @@ class SeedlotCollectionGeometryServiceTest {
   void saveOrUpdate_updatesExistingGeometry() {
     Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
     SeedlotCollectionGeometry existing = new SeedlotCollectionGeometry(SEEDLOT_NUMBER);
-    existing.setSeedlot(seedlot);
     GeometryFactory geometryFactory = new GeometryFactory();
     Polygon polygon =
         geometryFactory.createPolygon(
@@ -182,7 +208,7 @@ class SeedlotCollectionGeometryServiceTest {
             });
     String geoJson = GeometryUtil.toGeoJson(polygon);
 
-    when(seedlotCollectionGeometryRepository.findById(SEEDLOT_NUMBER))
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
         .thenReturn(Optional.of(existing));
     when(seedlotCollectionGeometryRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 

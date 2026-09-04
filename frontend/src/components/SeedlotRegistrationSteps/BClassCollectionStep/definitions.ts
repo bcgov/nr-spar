@@ -19,5 +19,6 @@ export type BClassCollectionForm = CollectionForm & {
   useLatLongForBec: BooleanInputType,
   becZone: OptionsInputType,
   becSubzone: OptionsInputType,
-  becVariant: OptionsInputType
+  becVariant: OptionsInputType,
+  collectionGeometry: StringInputType
 };

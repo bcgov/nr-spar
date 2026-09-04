@@ -10,6 +10,7 @@ const ROUTES = {
   SEEDLOT_DETAILS: '/seedlots/details/:seedlotNumber',
   SEEDLOT_A_CLASS_REGISTRATION: '/seedlots/a-class-registration/:seedlotNumber',
   SEEDLOT_B_CLASS_REGISTRATION: '/seedlots/b-class-registration/:seedlotNumber',
+  SEEDLOT_MAP: '/seedlots/map/:seedlotNumber',
   SEEDLOT_A_CLASS_EDIT: '/seedlots/edit-a-class-application/:seedlotNumber',
   SEEDLOT_A_CLASS_REVIEW: '/seedlots/a-class/review/:seedlotNumber',
   SEEDLOT_B_CLASS_REVIEW: '/seedlots/b-class/review/:seedlotNumber',

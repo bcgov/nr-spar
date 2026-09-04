@@ -290,7 +290,7 @@ export const convertBClassCollection = (
     bgcSubzoneCode: collectionData.becSubzone.value.code,
     variant: collectionData.becVariant.value.code || null,
     becVersionId: seedlot?.becVersionId ?? null,
-    collectionGeometryGeoJson: null
+    collectionGeometryGeoJson: collectionData.collectionGeometry.value || null
   };
 };
 

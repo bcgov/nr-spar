@@ -1,4 +1,7 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, {
+  useContext, useEffect, useMemo, useRef, useState
+} from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
@@ -16,9 +19,11 @@ import {
   RadioButtonGroup,
   RadioButton,
   Button,
+  Tag,
   DropdownSkeleton,
   RadioButtonSkeleton
 } from '@carbon/react';
+import { Location } from '@carbon/icons-react';
 import validator from 'validator';
 
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -39,6 +44,9 @@ import Subtitle from '../../Subtitle';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
 import ScrollToTop from '../../ScrollToTop';
 import ClassBContext from '../../../views/Seedlot/ContextContainerClassB/context';
+import ROUTES from '../../../routes/constants';
+import { addParamToPath } from '../../../utils/PathUtils';
+import type { CollectionAreaResult } from '../../../types/SparMapTypes';
 
 import {
   DATE_FORMAT, agencyFieldsProps, fieldsConfig
@@ -50,6 +58,7 @@ import {
   isBecVariantRequired,
   isNumNotInRange
 } from './utils';
+import { applyCollectionAreaResult } from './mapIntegration';
 
 import './styles.scss';
 
@@ -63,10 +72,14 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     setStepData,
     defaultClientNumber,
     defaultCode,
-    isFormSubmitted
+    isFormSubmitted,
+    seedlotNumber
   } = useContext(ClassBContext);
 
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const setClientAndCode = (
     agency: StringInputType,
@@ -236,6 +249,57 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     updateState(clonedState);
   };
 
+  // Always apply map results against the latest form snapshot — not the
+  // render that first saw `location.state` — so edits aren't overwritten.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const pendingMapResultRef = useRef<CollectionAreaResult | null>(null);
+
+  // Consume collection-area values from SeedMap via router state. Clear the
+  // router payload immediately, but hold the result until the BEC catalogue
+  // is ready when labels are needed (otherwise zone codes stick without names).
+  useEffect(() => {
+    const fromRouter = (location.state as { collectionAreaResult?: CollectionAreaResult } | null)
+      ?.collectionAreaResult;
+    if (fromRouter) {
+      pendingMapResultRef.current = fromRouter;
+      navigate('.', { replace: true, state: null });
+    }
+
+    const pending = pendingMapResultRef.current;
+    if (!pending) {
+      return;
+    }
+
+    const needsCatalogue = Boolean(pending.becVariant || pending.becZones.length > 0);
+    if (needsCatalogue && becCatalogueQuery.isLoading && !becCatalogueQuery.data) {
+      return;
+    }
+
+    setStepData(
+      'collectionStep',
+      applyCollectionAreaResult(stateRef.current, pending, becCatalogueQuery.data)
+    );
+    pendingMapResultRef.current = null;
+  }, [
+    location.state,
+    becCatalogueQuery.data,
+    becCatalogueQuery.isLoading,
+    navigate,
+    setStepData
+  ]);
+
+  const launchCollectionAreaMap = () => {
+    const returnTo = `${addParamToPath(ROUTES.SEEDLOT_B_CLASS_REGISTRATION, seedlotNumber ?? '')}?step=1`;
+    const mapPath = `${addParamToPath(ROUTES.SEEDLOT_MAP, seedlotNumber ?? '')}?theme=COLAREA&returnTo=${encodeURIComponent(returnTo)}`;
+    navigate(
+      mapPath,
+      state.collectionGeometry.value
+        ? { state: { initialAoiGeoJson: state.collectionGeometry.value } }
+        : undefined
+    );
+  };
+
   const readOnly = isFormSubmitted && !isReview;
 
   const handleDmsChange = (
@@ -304,6 +368,28 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
           {isReview ? null : <Subtitle text={fieldsConfig.latLongSection.subtitle} />}
         </Column>
       </Row>
+      {isReview ? null : (
+        <Row className="b-class-collection-row b-class-collection-map-row">
+          <Column sm={4} md={8} lg={16} xlg={16}>
+            <Button
+              kind="tertiary"
+              size="md"
+              renderIcon={Location}
+              onClick={launchCollectionAreaMap}
+              disabled={readOnly || !seedlotNumber}
+            >
+              {state.collectionGeometry.value
+                ? 'Edit collection area on SeedMap'
+                : 'Define collection area on SeedMap'}
+            </Button>
+            {state.collectionGeometry.value ? (
+              <Tag type="green" className="collection-area-defined-tag">
+                Collection area defined
+              </Tag>
+            ) : null}
+          </Column>
+        </Row>
+      )}
       <Row>
         <Column sm={4} md={8} lg={16} xlg={16}>
           <p className="bx--label">{fieldsConfig.latLongSection.latLabel}</p>
