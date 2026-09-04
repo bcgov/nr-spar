@@ -3,6 +3,8 @@ import type {
 } from 'geojson';
 
 import { wgs84ToBcAlbers } from '../legacy_translated/SPR_SPATIAL_UTILS';
+import { cqlQuoted, isCqlSafeIdentifier } from '../utils/CqlUtils';
+import { buildOpenmapsProxyUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsProxy';
 
 /**
  * Attributes carried on each feature returned by the BEC layer WFS.
@@ -24,22 +26,22 @@ export interface BecZoneProperties {
 }
 
 /**
- * Public DataBC WFS endpoint that serves the BEC Biogeoclimatic polygon
- * layer. Anonymous access; no auth header is attached (we deliberately
- * bypass the backend axios wrapper, same as `geocoderApi.ts`). CORS is
- * proven in this codebase by the existing `useWfsGetFeature` hook that
- * the Identify tool relies on.
- */
-export const OPENMAPS_WFS_URL = 'https://openmaps.gov.bc.ca/geo/pub/ows';
-
-/**
  * DataBC layer name for the full-resolution BEC polygon feature type.
  * Matches the layer the Identify tool queries at `shared-constants/spar-map.ts`
- * and `BecIdentifyLayer`.
+ * and `BecIdentifyLayer`. JSON fetches go through the SPAR OpenMaps proxy.
  */
 export const BEC_QUERY_LAYER = 'WHSE_FOREST_VEGETATION.BEC_BIOGEOCLIMATIC_POLY';
 
 const BEC_WFS_TIMEOUT_MS = 15000;
+
+/**
+ * Tomcat's default max-http-request-header-size is 8 KiB. A CQL_FILTER
+ * carrying a large WKT MultiPolygon will be rejected by the container
+ * *before* our allowlist runs, and the user sees a generic "unable to
+ * validate" message. Stay well under that so the failure is ours and
+ * the message is honest.
+ */
+const MAX_CQL_CHARS = 6000;
 
 /**
  * Shape of one feature as returned by the WFS GeoJSON response. Only the
@@ -71,6 +73,12 @@ const distinctZonesFromFeatureCollection = (json: WfsFeatureCollection): string[
 };
 
 const fetchBecZonesByCqlFilter = async (cqlFilter: string): Promise<string[]> => {
+  if (cqlFilter.length > MAX_CQL_CHARS) {
+    throw new Error(
+      'The collection area is too detailed to validate. '
+      + 'Simplify the polygon (fewer vertices) and try again.'
+    );
+  }
   const params = new URLSearchParams({
     service: 'WFS',
     version: '2.0.0',
@@ -84,25 +92,17 @@ const fetchBecZonesByCqlFilter = async (cqlFilter: string): Promise<string[]> =>
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), BEC_WFS_TIMEOUT_MS);
 
-  let res: Response;
   try {
-    res = await fetch(`${OPENMAPS_WFS_URL}?${params.toString()}`, {
-      signal: controller.signal
-    });
+    const json = await getOpenmapsJson<WfsFeatureCollection>(params, controller.signal);
+    return distinctZonesFromFeatureCollection(json);
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
+    if (isOpenmapsAbort(error)) {
       throw new Error(`WFS GetFeature timed out after ${BEC_WFS_TIMEOUT_MS / 1000} seconds`);
     }
     throw error;
   } finally {
     clearTimeout(timeoutId);
   }
-
-  if (!res.ok) {
-    throw new Error(`WFS GetFeature failed: ${res.status}`);
-  }
-
-  return distinctZonesFromFeatureCollection((await res.json()) as WfsFeatureCollection);
 };
 
 /**
@@ -261,19 +261,24 @@ const fetchBecZonesForInteriorSamples = async (geometry: MultiPolygon): Promise<
  * fetch wrapper so unit tests can assert the URL/CQL composition
  * without going to the network.
  */
-export const buildBecZoneByMapLabelUrl = (mapLabel: string): string => {
-  const escaped = mapLabel.replace(/'/g, "''");
-  const params = new URLSearchParams({
+export const buildBecZoneByMapLabelParams = (mapLabel: string): URLSearchParams => {
+  if (!isCqlSafeIdentifier(mapLabel)) {
+    throw new Error('Invalid BEC map label');
+  }
+  return new URLSearchParams({
     service: 'WFS',
     version: '2.0.0',
     request: 'GetFeature',
     typeNames: `pub:${BEC_QUERY_LAYER}`,
     outputFormat: 'application/json',
     srsName: 'EPSG:4326',
-    CQL_FILTER: `MAP_LABEL='${escaped}'`
+    CQL_FILTER: `MAP_LABEL=${cqlQuoted(mapLabel)}`
   });
-  return `${OPENMAPS_WFS_URL}?${params.toString()}`;
 };
+
+export const buildBecZoneByMapLabelUrl = (mapLabel: string): string => (
+  buildOpenmapsProxyUrl(buildBecZoneByMapLabelParams(mapLabel))
+);
 
 /**
  * Fetch a single BEC zone polygon by its `MAP_LABEL` for the AOUCBST
@@ -292,30 +297,27 @@ export const buildBecZoneByMapLabelUrl = (mapLabel: string): string => {
 export const fetchBecZoneByMapLabel = async (
   mapLabel: string
 ): Promise<Feature<Polygon | MultiPolygon, BecZoneProperties> | null> => {
-  if (!mapLabel) return null;
+  if (!mapLabel || !isCqlSafeIdentifier(mapLabel)) return null;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), BEC_WFS_TIMEOUT_MS);
 
-  let res: Response;
+  let fc: FeatureCollection;
   try {
-    res = await fetch(buildBecZoneByMapLabelUrl(mapLabel), {
-      signal: controller.signal
-    });
+    fc = await getOpenmapsJson<FeatureCollection>(
+      buildBecZoneByMapLabelParams(mapLabel),
+      controller.signal
+    );
   } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') {
+    if (isOpenmapsAbort(err)) {
       throw new Error(
         `BEC WFS lookup timed out after ${BEC_WFS_TIMEOUT_MS / 1000} seconds`
       );
     }
-    throw err;
+    return null;
   } finally {
     clearTimeout(timer);
   }
-
-  if (!res.ok) return null;
-
-  const fc = (await res.json()) as FeatureCollection;
   const first = fc.features?.[0];
   if (!first || !first.geometry) return null;
   const geomType = (first.geometry as { type?: string }).type;
@@ -387,13 +389,11 @@ export const fetchBecVariantAt = async (centroid: Position): Promise<BecVariant 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), BEC_VARIANT_TIMEOUT_MS);
   try {
-    const res = await fetch(`${OPENMAPS_WFS_URL}?${params.toString()}`, {
-      signal: controller.signal
-    });
-    if (!res.ok) {
-      return null;
-    }
-    return becVariantFromFeatureCollection(await res.json());
+    const json = await getOpenmapsJson<{ features?: Array<{ properties?: Record<string, unknown> }> }>(
+      params,
+      controller.signal
+    );
+    return becVariantFromFeatureCollection(json);
   } catch {
     return null;
   } finally {

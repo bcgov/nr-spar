@@ -1,5 +1,6 @@
 import type { SparMapThemeProfile } from '../../types/SparMapTypes';
 import { themeOverlaysWithDefaults } from '../legacy-spar-layers';
+import { BC_GOV_BASEMAP } from './bcGovBasemap';
 
 /**
  * aoua — Area of Use, Class A seedlot visualization. Replicates the legacy
@@ -9,13 +10,7 @@ import { themeOverlaysWithDefaults } from '../legacy-spar-layers';
  */
 export const aouaProfile: SparMapThemeProfile = {
   theme: 'aoua',
-  basemap: {
-    id: 'osm',
-    label: 'OpenStreetMap',
-    urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
-  },
+  basemap: BC_GOV_BASEMAP,
   overlays: themeOverlaysWithDefaults(),
   defaultExtent: [
     [48.3, -139.0],

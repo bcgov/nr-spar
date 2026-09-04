@@ -8,6 +8,7 @@ import 'leaflet.control.layers.tree/L.Control.Layers.Tree.css';
 
 import type { SparMapTheme, SparMapOverlayLayer } from '../../../../types/SparMapTypes';
 import { getThemeProfile } from '../../../../config/leaflet-themes';
+import { BC_GOV_BASEMAP } from '../../../../config/leaflet-themes/bcGovBasemap';
 import {
   LEGACY_PANEL_GROUPS,
   type LegacyPanelGroup
@@ -137,15 +138,12 @@ interface BaseLayerDef {
 
 const BASE_LAYERS: readonly BaseLayerDef[] = [
   {
-    name: 'BC Gov Base Map',
+    name: BC_GOV_BASEMAP.label,
     defaultChecked: true,
-    build: () => L.tileLayer(
-      'https://maps.gov.bc.ca/arcserver/rest/services/Province/web_mercator_cache/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: '&copy; <a href="https://www2.gov.bc.ca/">Government of British Columbia</a>',
-        maxZoom: 17
-      }
-    )
+    build: () => L.tileLayer(BC_GOV_BASEMAP.urlTemplate, {
+      attribution: BC_GOV_BASEMAP.attribution,
+      maxZoom: BC_GOV_BASEMAP.maxZoom
+    })
   },
   {
     name: 'BC Gov Roads',
@@ -176,13 +174,6 @@ const BASE_LAYERS: readonly BaseLayerDef[] = [
         maxZoom: 19
       }
     )
-  },
-  {
-    name: 'OpenStreetMap',
-    build: () => L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
-    })
   }
 ];
 

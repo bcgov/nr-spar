@@ -20,12 +20,13 @@ export interface PrintMapOptions {
 }
 
 /**
- * Escape a string for safe inclusion in HTML text content. Defensive
- * because overlay labels come from the layer registry which is project-
- * controlled, but better safe than sorry — the print window is
- * generated via document.write so unescaped content would be parsed.
+ * Escape a string for safe inclusion in HTML text or a quoted attribute.
+ * The print window is built with `document.write`, so EVERY interpolated
+ * value has to come through here — including ones that look trustworthy.
+ * `seedlotNumber` in particular is a URL path param and is fully
+ * attacker-controlled via a crafted link.
  */
-const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (ch) => {
+export const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (ch) => {
   switch (ch) {
     case '&': return '&amp;';
     case '<': return '&lt;';
@@ -35,6 +36,22 @@ const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (ch) => {
     default: return ch;
   }
 });
+
+/**
+ * CSS colours are interpolated into a `style="..."` attribute below, so a
+ * value containing a quote would break out of the attribute. `legendApi`
+ * already constrains these at the parse boundary; this is the second half
+ * of that guarantee, kept here so the template is safe on its own terms
+ * rather than by trusting its caller.
+ *
+ * Accepts hex (`#rgb` / `#rrggbb` / `#rrggbbaa`), the CSS named colours
+ * GeoServer emits, and `rgb()` / `rgba()`. Anything else falls back.
+ */
+const CSS_COLOR = /^(#[0-9a-f]{3,8}|[a-z]+|rgba?\([\d\s.,%]+\))$/i;
+
+export const safeCssColor = (value: string | null, fallback: string): string => (
+  value !== null && CSS_COLOR.test(value) ? value : fallback
+);
 
 /**
  * Inline swatch style for one print-legend rule. Mirrors the on-screen
@@ -47,12 +64,12 @@ const printSwatchStyle = (swatch: LegendSwatch): string => {
   if (swatch.geometry === 'line') {
     const width = Math.max(2, Math.round(swatch.strokeWidth));
     return 'display:inline-block;width:16px;height:0;flex:0 0 auto;'
-      + `border-top:${width}px solid ${swatch.stroke ?? '#161616'};`;
+      + `border-top:${width}px solid ${safeCssColor(swatch.stroke, '#161616')};`;
   }
   const radius = swatch.geometry === 'point' ? '50%' : '2px';
   return 'display:inline-block;width:12px;height:12px;flex:0 0 auto;box-sizing:border-box;'
-    + `border:1px solid ${swatch.stroke ?? '#888888'};`
-    + `background:${swatch.fill ?? 'transparent'};border-radius:${radius};`;
+    + `border:1px solid ${safeCssColor(swatch.stroke, '#888888')};`
+    + `background:${safeCssColor(swatch.fill, 'transparent')};border-radius:${radius};`;
 };
 
 /**
@@ -100,37 +117,52 @@ export const buildPrintLegendHtml = (legendData: LegendOverlayData[]): string =>
 export const printMap = async (options: PrintMapOptions): Promise<void> => {
   const { seedlotNumber, notes, legendData } = options;
   const mapEl = document.querySelector('.leaflet-container') as HTMLElement | null;
-  if (!mapEl) return;
+  if (!mapEl) {
+    throw new Error('The map is not ready yet. Wait for it to finish loading, then try again.');
+  }
+
+  // Escape once, up front. `seedlotNumber` is a URL path param, so every
+  // interpolation of it below is attacker-reachable via a crafted link.
+  const safeSeedlot = escapeHtml(seedlotNumber);
+
+  // Temporarily hide toolbar chrome that shouldn't appear in print.
+  const hideSelectors = '.leaflet-control-layers, .leaflet-pm-toolbar';
+  const hidden: HTMLElement[] = [];
+  mapEl.querySelectorAll(hideSelectors).forEach((el) => {
+    const htmlEl = el as HTMLElement;
+    if (htmlEl.style.display !== 'none') {
+      hidden.push(htmlEl);
+      htmlEl.style.setProperty('display', 'none', 'important');
+    }
+  });
+
+  const popups = mapEl.querySelectorAll(
+    '.leaflet-popup-content-wrapper, .leaflet-popup-tip'
+  );
+  const savedStyles: { el: HTMLElement; shadow: string; bg: string }[] = [];
+  popups.forEach((el) => {
+    const htmlEl = el as HTMLElement;
+    savedStyles.push({
+      el: htmlEl,
+      shadow: htmlEl.style.boxShadow,
+      bg: htmlEl.style.background
+    });
+    htmlEl.style.boxShadow = 'none';
+    htmlEl.style.background = '#ffffff';
+  });
+
+  let dataUrl: string;
   try {
-    // Temporarily hide toolbar chrome that shouldn't appear in print.
-    const hideSelectors = '.leaflet-control-layers, .leaflet-pm-toolbar';
-    const hidden: HTMLElement[] = [];
-    mapEl.querySelectorAll(hideSelectors).forEach((el) => {
-      const htmlEl = el as HTMLElement;
-      if (htmlEl.style.display !== 'none') {
-        hidden.push(htmlEl);
-        htmlEl.style.setProperty('display', 'none', 'important');
-      }
-    });
-
-    const popups = mapEl.querySelectorAll(
-      '.leaflet-popup-content-wrapper, .leaflet-popup-tip'
-    );
-    const savedStyles: { el: HTMLElement; shadow: string; bg: string }[] = [];
-    popups.forEach((el) => {
-      const htmlEl = el as HTMLElement;
-      savedStyles.push({
-        el: htmlEl,
-        shadow: htmlEl.style.boxShadow,
-        bg: htmlEl.style.background
-      });
-      htmlEl.style.boxShadow = 'none';
-      htmlEl.style.background = '#ffffff';
-    });
-
     const canvas = await html2canvas(mapEl, {
       useCORS: true,
-      allowTaint: true,
+      // MUST stay false. With `allowTaint: true`, html2canvas draws
+      // cross-origin tiles that failed the CORS fetch, which taints the
+      // canvas and makes `toDataURL` below throw a SecurityError — the
+      // whole print then fails silently. Leaving it false means a tile
+      // server that doesn't send Access-Control-Allow-Origin (GeoServer
+      // at openmaps.gov.bc.ca does not, by default) is simply omitted
+      // from the capture and the rest of the map still prints.
+      allowTaint: false,
       logging: false,
       scale: 1,
       width: mapEl.clientWidth,
@@ -138,40 +170,45 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
       scrollX: 0,
       scrollY: -window.scrollY
     });
-
+    dataUrl = canvas.toDataURL('image/png');
+  } finally {
+    // Restore the hidden chrome even when the capture throws — otherwise
+    // the layers control and Geoman toolbar stay `display: none` for the
+    // rest of the session.
     hidden.forEach((el) => el.style.removeProperty('display'));
     savedStyles.forEach((saved) => {
       const { el, shadow, bg } = saved;
       el.style.boxShadow = shadow;
       el.style.background = bg;
     });
+  }
 
-    const dataUrl = canvas.toDataURL('image/png');
+  // Capture the scale text from Leaflet's bottom-left scale control so
+  // the print includes the same "100 km / 50 mi" indication the
+  // operator was looking at when they hit print.
+  const scaleControl = document.querySelector('.leaflet-control-scale-line');
+  const scaleText = scaleControl ? scaleControl.textContent : '';
 
-    // Capture the scale text from Leaflet's bottom-left scale control so
-    // the print includes the same "100 km / 50 mi" indication the
-    // operator was looking at when they hit print.
-    const scaleControl = document.querySelector('.leaflet-control-scale-line');
-    const scaleText = scaleControl ? scaleControl.textContent : '';
+  // Dynamic text-based legend for whatever is currently on the map. Empty
+  // string when nothing is in view, which drops the legend column below.
+  const legendHtml = buildPrintLegendHtml(legendData ?? []);
 
-    // Dynamic text-based legend for whatever is currently on the map. Empty
-    // string when nothing is in view, which drops the legend column below.
-    const legendHtml = buildPrintLegendHtml(legendData ?? []);
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    throw new Error('The print window was blocked. Allow pop-ups for this site and try again.');
+  }
+  const dateStr = new Date().toLocaleDateString();
+  const disclaimer = (
+    'This map is a user-generated static output from the SPAR '
+    + 'Seed Map application and is for general reference only. Data '
+    + 'layers may not be accurate, current, or otherwise reliable. '
+    + 'NOT TO BE USED FOR NAVIGATION.'
+  );
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    const dateStr = new Date().toLocaleDateString();
-    const disclaimer = (
-      'This map is a user-generated static output from the SPAR '
-      + 'Seed Map application and is for general reference only. Data '
-      + 'layers may not be accurate, current, or otherwise reliable. '
-      + 'NOT TO BE USED FOR NAVIGATION.'
-    );
-
-    printWindow.document.write(`<!DOCTYPE html>
+  printWindow.document.write(`<!DOCTYPE html>
 <html>
 <head>
-  <title>SPAR Seed Map - ${seedlotNumber}</title>
+  <title>SPAR Seed Map - ${safeSeedlot}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     @page { size: landscape; margin: 1cm; }
@@ -222,12 +259,12 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
     <div class="print-header">
       <span class="print-header__wordmark">Government of British Columbia</span>
       <span class="print-header__title">SPAR Seed Map</span>
-      <span class="print-header__seedlot">Seedlot ${seedlotNumber}</span>
+      <span class="print-header__seedlot">Seedlot ${safeSeedlot}</span>
       <span class="print-header__date">${dateStr}</span>
     </div>
     <div class="print-body">
       <div class="print-map">
-        <img src="${dataUrl}" alt="Map snapshot for seedlot ${seedlotNumber}" />
+        <img src="${dataUrl}" alt="Map snapshot for seedlot ${safeSeedlot}" />
       </div>
       ${legendHtml ? `<aside class="print-legend"><div class="print-legend__heading">Legend</div>${legendHtml}</aside>` : ''}
     </div>
@@ -243,13 +280,9 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
   </div>
 </body>
 </html>`);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      printWindow.print();
-      printWindow.close();
-    };
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('Map print capture failed', err);
-  }
+  printWindow.document.close();
+  printWindow.onload = () => {
+    printWindow.print();
+    printWindow.close();
+  };
 };

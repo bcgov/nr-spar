@@ -1,3 +1,4 @@
+import { cqlIntegerInList } from '../../../../utils/CqlUtils';
 import { SPZ_HIGHLIGHT_SLD_BODY } from './sld';
 
 /**
@@ -26,7 +27,7 @@ export interface SpzHighlightWmsOptions {
 export const buildSpzHighlightWmsOptions = (
   ids: number[]
 ): SpzHighlightWmsOptions => {
-  const inList = ids.join(',');
+  const inList = cqlIntegerInList(ids);
   return {
     layers: SPZ_LAYER_NAME,
     format: 'image/png',

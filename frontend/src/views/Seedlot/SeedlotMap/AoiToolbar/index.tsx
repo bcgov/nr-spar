@@ -483,7 +483,18 @@ const AoiToolbar = ({
    * `<MapToolbar>` can share the same flow without duplicating the
    * html2canvas dance.
    */
-  const onPrint = () => printMap({ seedlotNumber, theme, legendData });
+  const onPrint = async () => {
+    setValidation(null);
+    try {
+      await printMap({ seedlotNumber, theme, legendData });
+    } catch (err) {
+      setValidation({
+        kind: 'error',
+        title: 'Could not print the map',
+        subtitle: err instanceof Error ? err.message : 'Map print capture failed.'
+      });
+    }
+  };
 
   /**
    * Toggle fullscreen on the seedlot map workspace. We fullscreen the

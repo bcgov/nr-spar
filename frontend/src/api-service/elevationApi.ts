@@ -18,8 +18,7 @@ import type {
 } from 'geojson';
 
 import { wgs84ToBcAlbers } from '../legacy_translated/SPR_SPATIAL_UTILS';
-
-export const OPENMAPS_WFS_URL = 'https://openmaps.gov.bc.ca/geo/pub/ows';
+import { buildOpenmapsProxyUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsProxy';
 
 /** TRIM contour line layer — dense elevation data with ELEVATION (m). */
 export const CONTOUR_LINES_LAYER = 'pub:WHSE_BASEMAPPING.TRIM_CONTOUR_LINES';
@@ -86,22 +85,24 @@ export const polygonFeatureToBcAlbersWkt = (
  * response stays small. Exposed for unit testing the URL composition
  * without firing a network call.
  */
+export const buildElevationWfsParams = (
+  typeName: string,
+  bcAlbersWkt: string
+): URLSearchParams => new URLSearchParams({
+  service: 'WFS',
+  version: '2.0.0',
+  request: 'GetFeature',
+  typeNames: typeName,
+  outputFormat: 'application/json',
+  propertyName: 'ELEVATION',
+  count: String(MAX_FEATURES),
+  CQL_FILTER: `INTERSECTS(GEOMETRY,${bcAlbersWkt})`
+});
+
 export const buildElevationWfsUrl = (
   typeName: string,
   bcAlbersWkt: string
-): string => {
-  const params = new URLSearchParams({
-    service: 'WFS',
-    version: '2.0.0',
-    request: 'GetFeature',
-    typeNames: typeName,
-    outputFormat: 'application/json',
-    propertyName: 'ELEVATION',
-    count: String(MAX_FEATURES),
-    CQL_FILTER: `INTERSECTS(GEOMETRY,${bcAlbersWkt})`
-  });
-  return `${OPENMAPS_WFS_URL}?${params.toString()}`;
-};
+): string => buildOpenmapsProxyUrl(buildElevationWfsParams(typeName, bcAlbersWkt));
 
 interface WfsElevationFeature {
   properties?: { ELEVATION?: unknown };
@@ -128,23 +129,22 @@ const fetchElevationsFromLayer = async (
 ): Promise<number[]> => {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), WFS_TIMEOUT_MS);
-  let res: Response;
   try {
-    res = await fetch(buildElevationWfsUrl(typeName, bcAlbersWkt), {
-      signal: controller.signal
-    });
+    const json = await getOpenmapsJson<WfsElevationCollection>(
+      buildElevationWfsParams(typeName, bcAlbersWkt),
+      controller.signal
+    );
+    return extractElevations(json);
   } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') {
+    if (isOpenmapsAbort(err)) {
       throw new Error(
         `Elevation WFS timed out after ${WFS_TIMEOUT_MS / 1000} seconds`
       );
     }
-    throw err;
+    return [];
   } finally {
     clearTimeout(timer);
   }
-  if (!res.ok) return [];
-  return extractElevations((await res.json()) as WfsElevationCollection);
 };
 
 /**

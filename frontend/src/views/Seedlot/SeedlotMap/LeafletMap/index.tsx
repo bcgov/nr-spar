@@ -220,7 +220,7 @@ const LeafletMap = ({ theme }: LeafletMapProps) => {
           It uses `leaflet.control.layers.tree` to render the legacy CWM
           accordion structure — grouped categories (Elevation, BEC Zones,
           Active Seedlots, etc.) with parent-checkbox-toggles-all-children
-          and collapse/expand chevrons. Mounts the 6 basemaps + all
+          and collapse/expand chevrons. Mounts the 4 basemaps + all
           registry overlays imperatively; default-visible overlays are
           added to the map at mount. Exposes the underlying
           `L.Control.Layers` via ref so `CatalogLayers` can keep

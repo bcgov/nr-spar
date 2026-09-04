@@ -1,5 +1,6 @@
 import type { SparMapThemeProfile } from '../../types/SparMapTypes';
 import { themeOverlaysOnlyOn } from '../legacy-spar-layers';
+import { BC_GOV_BASEMAP } from './bcGovBasemap';
 
 /**
  * COLAREA — the Collection Area polygon-drawing theme. Used when a user is
@@ -18,13 +19,7 @@ import { themeOverlaysOnlyOn } from '../legacy-spar-layers';
  */
 export const colareaProfile: SparMapThemeProfile = {
   theme: 'COLAREA',
-  basemap: {
-    id: 'osm',
-    label: 'OpenStreetMap',
-    urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
-  },
+  basemap: BC_GOV_BASEMAP,
   overlays: themeOverlaysOnlyOn([
     'elevation_contours_250k',
     'elevation_contours',

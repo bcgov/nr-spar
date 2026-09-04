@@ -1,3 +1,4 @@
+import { cqlQuoted, isCqlSafeIdentifier } from '../../../../utils/CqlUtils';
 import { buildPointHighlightSldBody } from './sld';
 
 /**
@@ -19,8 +20,6 @@ export interface PointHighlightWmsOptions {
   sld_body: string;
 }
 
-const escapeCql = (val: string): string => val.replace(/'/g, "''");
-
 const filterColumn = (kind: PointHighlightKind): string => (kind === 'seedlot' ? 'SEEDLOT_NUMBER' : 'VEG_LOT_ID');
 
 const layerName = (kind: PointHighlightKind): string => (kind === 'seedlot' ? SEEDLOT_POINT_LAYER : VEGLOT_POINT_LAYER);
@@ -34,12 +33,15 @@ export const buildPointHighlightWmsOptions = (
   kind: PointHighlightKind,
   value: string
 ): PointHighlightWmsOptions => {
+  if (!isCqlSafeIdentifier(value)) {
+    throw new Error('Invalid seedlot or veglot identifier for the highlight overlay');
+  }
   const layer = layerName(kind);
   return {
     layers: layer,
     format: 'image/png',
     transparent: true,
-    cql_filter: `${filterColumn(kind)} = '${escapeCql(value)}'`,
+    cql_filter: `${filterColumn(kind)} = ${cqlQuoted(value)}`,
     sld_body: buildPointHighlightSldBody(layer)
   };
 };

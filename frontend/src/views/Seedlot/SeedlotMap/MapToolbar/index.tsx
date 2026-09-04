@@ -1,4 +1,5 @@
 import React, { useEffect, useState, type FormEvent } from 'react';
+import { InlineNotification } from '@carbon/react';
 import {
   Information,
   Ruler,
@@ -103,6 +104,7 @@ const MapToolbar = ({
   const [pinLat, setPinLat] = useState('');
   const [pinLng, setPinLng] = useState('');
   const [pinError, setPinError] = useState<string | null>(null);
+  const [printError, setPrintError] = useState<string | null>(null);
 
   // Toggle the `identify-active` class on the Leaflet container so the
   // cursor changes to `help` regardless of theme. `<BecIdentifyLayer>`
@@ -183,8 +185,13 @@ const MapToolbar = ({
     onToggleBookmarks();
   };
 
-  const onPrintClick = () => {
-    printMap({ seedlotNumber, theme, legendData });
+  const onPrintClick = async () => {
+    setPrintError(null);
+    try {
+      await printMap({ seedlotNumber, theme, legendData });
+    } catch (err) {
+      setPrintError(err instanceof Error ? err.message : 'Could not print the map.');
+    }
   };
 
   // The Measure button now always opens the Measurement Tools panel —
@@ -345,6 +352,16 @@ const MapToolbar = ({
             </button>
           </div>
         </form>
+      )}
+      {printError && (
+        <InlineNotification
+          kind="error"
+          title="Could not print the map"
+          subtitle={printError}
+          lowContrast
+          onCloseButtonClick={() => setPrintError(null)}
+          data-testid="toolbar-print-error"
+        />
       )}
     </div>
   );

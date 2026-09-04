@@ -19,29 +19,41 @@
 
 	header {
 		X-Frame-Options "SAMEORIGIN"
-		X-XSS-Protection "1;mode=block"
-		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
 		X-Content-Type-Options "nosniff"
-		Strict-Transport-Security "max-age=31536000"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Referrer-Policy "same-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self)"
 		Content-Security-Policy "
 			base-uri 'self';
-			connect-src 'self' https://*.gov.bc.ca {$VITE_AWS_DOMAIN} {$VITE_SERVER_URL} https://cognito-idp.ca-central-1.amazonaws.com/ https://*.execute-api.ca-central-1.amazonaws.com;
+			connect-src 'self' https://geocoder.api.gov.bc.ca {$VITE_AWS_DOMAIN} {$VITE_SERVER_URL} {$VITE_ORACLE_SERVER_URL} https://cognito-idp.ca-central-1.amazonaws.com/ https://*.execute-api.ca-central-1.amazonaws.com;
 			default-src 'self';
 			font-src 'self' https://1.www.s81c.com/;
-			frame-src 'self' https://*.gov.bc.ca; img-src 'self';
+			form-action 'self';
+			frame-ancestors 'self';
+			frame-src 'self';
+			img-src 'self' data: blob: https://openmaps.gov.bc.ca https://maps.gov.bc.ca https://server.arcgisonline.com;
 			manifest-src 'self';
 			media-src 'self';
 			object-src 'none';
-			script-src 'unsafe-inline' 'report-sample' 'self' https://*.auth.ca-central-1.amazoncognito.com/ https://*.cloudfront.net;
+			script-src 'report-sample' 'self' https://*.auth.ca-central-1.amazoncognito.com/ https://*.cloudfront.net;
 			style-src 'report-sample' 'self' 'unsafe-inline';
 			worker-src 'none';
 		"
-		Referrer-Policy "same-origin"
 	}
 
+	# Runtime config. Values are interpolated from deploy-time env vars into a
+	# JSON string. Those values must never contain a double quote or backslash
+	# — there is no escaping here, and this script runs on every page.
 	handle /env.js {
 		header Content-Type "text/javascript"
+		header Cache-Control "no-store, no-cache, must-revalidate"
 		respond `window.config = {"VITE_NRSPARWEBAPP_VERSION":"{$VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}","VITE_USER_POOLS_ID":"{$VITE_USER_POOLS_ID}","VITE_USER_POOLS_WEB_CLIENT_ID":"{$VITE_USER_POOLS_WEB_CLIENT_ID}","VITE_ZONE":"{$VITE_ZONE}"};`
+	}
+
+	# Vite fingerprints /assets/* filenames, so they are safe to cache forever.
+	handle /assets/* {
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
 	}
 
 	# SPA fallback only for browser navigations (Accept: text/html).
@@ -51,12 +63,14 @@
 	# /index.html and serve it as text/html.
 	@html header Accept *text/html*
 	handle @html {
+		header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
 		try_files {path} /index.html
 		file_server
 	}
 
 	# Everything else (assets, etc.) served normally; genuine 404 if missing.
 	handle {
+		header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
 		file_server
 	}
 }

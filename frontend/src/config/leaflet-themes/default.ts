@@ -1,5 +1,6 @@
 import type { SparMapThemeProfile } from '../../types/SparMapTypes';
 import { themeOverlaysOnlyOn } from '../legacy-spar-layers';
+import { BC_GOV_BASEMAP } from './bcGovBasemap';
 
 /**
  * default — fallback profile for unknown themes. Matches the legacy
@@ -10,13 +11,7 @@ import { themeOverlaysOnlyOn } from '../legacy-spar-layers';
  */
 export const defaultProfile: SparMapThemeProfile = {
   theme: 'default',
-  basemap: {
-    id: 'osm',
-    label: 'OpenStreetMap',
-    urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
-  },
+  basemap: BC_GOV_BASEMAP,
   overlays: themeOverlaysOnlyOn([
     'bec_subzones_250k',
     'bec_subzones_250k_outline',

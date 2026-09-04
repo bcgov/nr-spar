@@ -1,3 +1,4 @@
+import { cqlQuotedInList, filterCqlSafeIdentifiers } from '../../../../utils/CqlUtils';
 import { NOT_SUITABLE_SLD_BODY, SUITABLE_SLD_BODY } from './sld';
 
 export const BEC_WMS_URL = 'https://openmaps.gov.bc.ca/geo/pub/wms';
@@ -12,8 +13,6 @@ export interface BecHighlightWmsOptions {
   cql_filter: string;
   sld_body: string;
 }
-
-const escapeCql = (code: string): string => code.replace(/'/g, "''");
 
 const filterColumn = (shape: BecZoneShape): string => (shape === 'zone' ? 'ZONE' : 'MAP_LABEL');
 
@@ -31,7 +30,11 @@ export const buildBecHighlightWmsOptions = (
   shape: BecZoneShape,
   isNotSuit: boolean
 ): BecHighlightWmsOptions => {
-  const inList = codes.map((c) => `'${escapeCql(c)}'`).join(',');
+  const safeCodes = filterCqlSafeIdentifiers(codes);
+  if (safeCodes.length === 0) {
+    throw new Error('No valid BEC codes for the highlight overlay');
+  }
+  const inList = cqlQuotedInList(safeCodes);
   return {
     layers: BEC_LAYER_NAME,
     format: 'image/png',

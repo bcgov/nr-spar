@@ -1,5 +1,6 @@
 import type { SparMapThemeProfile } from '../../types/SparMapTypes';
 import { themeOverlaysOnlyOn } from '../legacy-spar-layers';
+import { BC_GOV_BASEMAP } from './bcGovBasemap';
 
 /**
  * AOUCBST — Climate-Based Seed Transfer Area of Use. Matches the legacy
@@ -11,13 +12,7 @@ import { themeOverlaysOnlyOn } from '../legacy-spar-layers';
  */
 export const aoucbstProfile: SparMapThemeProfile = {
   theme: 'AOUCBST',
-  basemap: {
-    id: 'osm',
-    label: 'OpenStreetMap',
-    urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
-  },
+  basemap: BC_GOV_BASEMAP,
   overlays: themeOverlaysOnlyOn([
     'active_seedlots',
     'active_veglots',

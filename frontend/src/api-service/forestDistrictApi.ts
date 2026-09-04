@@ -1,8 +1,8 @@
 import type { Position } from 'geojson';
 
 import { wgs84ToBcAlbers } from '../legacy_translated/SPR_SPATIAL_UTILS';
+import { buildOpenmapsProxyUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsProxy';
 
-export const OPENMAPS_WFS_URL = 'https://openmaps.gov.bc.ca/geo/pub/ows';
 export const FOREST_DISTRICT_LAYER = 'WHSE_ADMIN_BOUNDARIES.ADM_NR_DISTRICTS_SPG';
 const WFS_TIMEOUT_MS = 15000;
 
@@ -18,11 +18,11 @@ export const districtNameFromFeatureCollection = (
   return typeof name === 'string' && name.length > 0 ? name : null;
 };
 
-/** WFS GetFeature URL for the NR district intersecting the given WGS84 point. */
-export const buildForestDistrictUrl = (centroid: Position): string => {
+/** WFS GetFeature params for the NR district intersecting the given WGS84 point. */
+export const buildForestDistrictParams = (centroid: Position): URLSearchParams => {
   const [lng, lat] = centroid;
   const [easting, northing] = wgs84ToBcAlbers([lng, lat]);
-  const params = new URLSearchParams({
+  return new URLSearchParams({
     service: 'WFS',
     version: '2.0.0',
     request: 'GetFeature',
@@ -32,20 +32,26 @@ export const buildForestDistrictUrl = (centroid: Position): string => {
     count: '1',
     CQL_FILTER: `INTERSECTS(SHAPE,POINT(${easting} ${northing}))`
   });
-  return `${OPENMAPS_WFS_URL}?${params.toString()}`;
 };
+
+export const buildForestDistrictUrl = (centroid: Position): string => (
+  buildOpenmapsProxyUrl(buildForestDistrictParams(centroid))
+);
 
 /** Fetch the NR forest-district name for a centroid; fail-soft to null. */
 export const fetchForestDistrict = async (centroid: Position): Promise<string | null> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), WFS_TIMEOUT_MS);
   try {
-    const res = await fetch(buildForestDistrictUrl(centroid), { signal: controller.signal });
-    if (!res.ok) {
+    const json = await getOpenmapsJson<DistrictFeatureCollection>(
+      buildForestDistrictParams(centroid),
+      controller.signal
+    );
+    return districtNameFromFeatureCollection(json);
+  } catch (err) {
+    if (isOpenmapsAbort(err)) {
       return null;
     }
-    return districtNameFromFeatureCollection(await res.json());
-  } catch {
     return null;
   } finally {
     clearTimeout(timeoutId);

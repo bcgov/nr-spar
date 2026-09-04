@@ -1,6 +1,8 @@
 import proj4 from 'proj4';
 import type { LatLngBoundsExpression, LatLngTuple } from 'leaflet';
 
+import { isCqlSafeIdentifier } from '../utils/CqlUtils';
+
 // BC Albers (EPSG:3005) — the standard projected CRS for British Columbia.
 const BC_ALBERS = '+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs';
 
@@ -54,13 +56,15 @@ export const parseBecZoneParam = (str: string): { codes: string[]; notSuit: stri
   const codes: string[] = [];
   const notSuit: string[] = [];
   raw.forEach((item) => {
-    if (item.endsWith('_')) {
-      const code = item.slice(0, -1);
-      codes.push(code);
-      notSuit.push(code);
-    } else {
-      codes.push(item);
-    }
+    const trimmed = item.trim();
+    if (!trimmed) return;
+    const flagged = trimmed.endsWith('_');
+    const code = flagged ? trimmed.slice(0, -1) : trimmed;
+    // Drop anything that isn't a BEC-shaped identifier so a crafted
+    // `beczone=` URL cannot reach the CQL IN-list.
+    if (!isCqlSafeIdentifier(code)) return;
+    codes.push(code);
+    if (flagged) notSuit.push(code);
   });
   return { codes, notSuit };
 };
@@ -70,4 +74,7 @@ export const parseBecZoneParam = (str: string): { codes: string[]; notSuit: stri
  * zone+subzone+variant value emitted by CbstAltAction / SuitableSeedlotVeglotCbstAction
  * in the legacy JSP app. Distinct from the lowercase `beczone` comma-list.
  */
-export const parseBecZoneCamelCaseParam = (str: string): { code: string } => ({ code: str });
+export const parseBecZoneCamelCaseParam = (str: string): { code: string } => {
+  const trimmed = str.trim();
+  return { code: isCqlSafeIdentifier(trimmed) ? trimmed : '' };
+};

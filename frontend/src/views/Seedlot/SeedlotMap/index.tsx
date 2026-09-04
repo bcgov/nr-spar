@@ -11,6 +11,7 @@ import {
   parseBecZoneCamelCaseParam,
   parseExtentParam
 } from '../../../legacy_translated/SPR_SPATIAL_UTILS';
+import { isCqlSafeIdentifier } from '../../../utils/CqlUtils';
 
 import LeafletMap from './LeafletMap';
 import AoiToolbar from './AoiToolbar';
@@ -119,7 +120,7 @@ export const SeedlotMapBody = () => {
       setBecZonesRef.current(codes, notSuit, 'zone');
     } else if (becZoneCamel) {
       const { code } = parseBecZoneCamelCaseParam(becZoneCamel);
-      setBecZonesRef.current([code], [], 'mapLabel');
+      setBecZonesRef.current(code ? [code] : [], [], 'mapLabel');
     } else {
       setBecZonesRef.current([], [], 'zone');
     }
@@ -156,7 +157,10 @@ export const SeedlotMapBody = () => {
   useEffect(() => {
     const seedlotQ = searchParams.get('seedlot');
     const veglotQ = searchParams.get('veglot');
-    setHighlightPointRef.current(seedlotQ, veglotQ);
+    setHighlightPointRef.current(
+      seedlotQ && isCqlSafeIdentifier(seedlotQ) ? seedlotQ : null,
+      veglotQ && isCqlSafeIdentifier(veglotQ) ? veglotQ : null
+    );
   }, [searchParams]);
 
   // Parse `spzid=1284,1342` CSV — drop blanks/non-integers rather than
@@ -182,10 +186,12 @@ export const SeedlotMapBody = () => {
   // them yet. Leaving the wiring here so future work can pick them up
   // without re-touching the URL parser.
   useEffect(() => {
-    setSpzCodeRef.current(searchParams.get('spz'));
+    const spz = searchParams.get('spz');
+    setSpzCodeRef.current(spz && isCqlSafeIdentifier(spz) ? spz : null);
   }, [searchParams]);
   useEffect(() => {
-    setSpeciesCodeRef.current(searchParams.get('species'));
+    const species = searchParams.get('species');
+    setSpeciesCodeRef.current(species && isCqlSafeIdentifier(species) ? species : null);
   }, [searchParams]);
 
   return (

@@ -1,5 +1,6 @@
 import type { SparMapThemeProfile } from '../../types/SparMapTypes';
 import { themeOverlaysWithDefaults } from '../legacy-spar-layers';
+import { BC_GOV_BASEMAP } from './bcGovBasemap';
 
 /**
  * collection — the Seedlot Collection source viewer. Matches the legacy
@@ -9,13 +10,7 @@ import { themeOverlaysWithDefaults } from '../legacy-spar-layers';
  */
 export const collectionProfile: SparMapThemeProfile = {
   theme: 'collection',
-  basemap: {
-    id: 'osm',
-    label: 'OpenStreetMap',
-    urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
-  },
+  basemap: BC_GOV_BASEMAP,
   overlays: themeOverlaysWithDefaults(
     [],
     ['expired_seedlots', 'expired_veglots', 'bec_250k', 'bec_20k']

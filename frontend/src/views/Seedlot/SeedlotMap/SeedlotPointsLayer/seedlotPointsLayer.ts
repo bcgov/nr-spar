@@ -36,6 +36,41 @@ const WEB_MERCATOR_SCALE_ZOOM_0 = 559082264.0287178;
 const FETCH_DEBOUNCE_MS = 300;
 
 /**
+ * Build the marker popup as a DOM node rather than an HTML string.
+ *
+ * `L.Popup.setContent` assigns a string argument via `innerHTML`, so any
+ * feature attribute interpolated into a template literal would be parsed
+ * as markup. These values come from the DataBC WFS response, which we do
+ * not control end-to-end. Using `textContent` makes injection structurally
+ * impossible instead of relying on an escape helper being remembered at
+ * every call site — and matches how `<BecIdentifyLayer>` renders the same
+ * attributes through JSX.
+ */
+const buildPointPopup = (p: SeedlotPoint, labelText: string): HTMLElement => {
+  const root = document.createElement('div');
+  root.className = 'seedlot-point-popup';
+
+  const addRow = (child: Node): void => {
+    const row = document.createElement('div');
+    row.appendChild(child);
+    root.appendChild(row);
+  };
+
+  const title = document.createElement('strong');
+  title.textContent = `${labelText} ${p.lotNumber}`;
+  addRow(title);
+
+  const addText = (text: string): void => addRow(document.createTextNode(text));
+
+  if (p.vegetationCode) addText(`Species: ${p.vegetationCode}`);
+  if (p.bcgZone) addText(`BEC: ${p.bcgZone}`);
+  if (p.activeIndicator) {
+    addText(`Status: ${p.activeIndicator === 'YES' ? 'Active' : 'Expired'}`);
+  }
+  return root;
+};
+
+/**
  * Custom Leaflet layer that fetches seedlot/veglot point features from
  * the DataBC WFS for the current viewport and renders them as
  * per-species coloured circle markers. Replaces the legacy SPAR
@@ -179,23 +214,9 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
         fillOpacity: 0.85,
         interactive: true
       });
-      marker.bindPopup(this.popupHtml(p, labelText));
+      marker.bindPopup(buildPointPopup(p, labelText));
       this.addLayer(marker);
     });
     this.setRenderedSpecies([...species]);
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private popupHtml(p: SeedlotPoint, labelText: string): string {
-    const rows: string[] = [];
-    rows.push(`<strong>${labelText} ${p.lotNumber}</strong>`);
-    if (p.vegetationCode) rows.push(`Species: ${p.vegetationCode}`);
-    if (p.bcgZone) rows.push(`BEC: ${p.bcgZone}`);
-    if (p.activeIndicator) {
-      rows.push(`Status: ${p.activeIndicator === 'YES' ? 'Active' : 'Expired'}`);
-    }
-    return `<div class="seedlot-point-popup">${rows
-      .map((r) => `<div>${r}</div>`)
-      .join('')}</div>`;
   }
 }

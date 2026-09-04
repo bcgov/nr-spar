@@ -21,6 +21,10 @@ import type { AoiPolygon } from '../../../../types/SparMapTypes';
 export const MAX_IMPORT_FILE_BYTES = 10 * 1024 * 1024; // 10 MiB on disk
 export const MAX_ZIP_UNCOMPRESSED_BYTES = 40 * 1024 * 1024; // 40 MiB inflated
 export const MAX_ZIP_ENTRY_COUNT = 200;
+/** Collection areas are a handful of polygons; more than this is a bad file. */
+export const MAX_IMPORT_FEATURES = 50;
+/** Caps WKT size so BEC validation stays under Tomcat's 8 KiB header limit. */
+export const MAX_IMPORT_VERTICES = 2000;
 
 /** Extensions the import picker and detector accept. */
 export const ACCEPTED_IMPORT_FILE_EXTENSIONS = [
@@ -132,8 +136,14 @@ const assertZipArchiveSafe = (zip: JSZip): void => {
     /* eslint-disable no-underscore-dangle */
     const size = (entry as JSZip.JSZipObject & {
       _data?: { uncompressedSize?: number }
-    })._data?.uncompressedSize ?? 0;
+    })._data?.uncompressedSize;
     /* eslint-enable no-underscore-dangle */
+    if (typeof size !== 'number' || size < 0) {
+      throw new Error(
+        'Archive listing is missing file sizes; refusing to unpack. '
+        + 'Re-export the shapefile/KMZ and try again.'
+      );
+    }
     uncompressedTotal += size;
     if (uncompressedTotal > MAX_ZIP_UNCOMPRESSED_BYTES) {
       throw new Error(
@@ -404,6 +414,26 @@ export const importShapeFile = async (file: File): Promise<ImportResult> => {
         `Unsupported file type: ${file.name}. `
         + `Accepted: ${ACCEPTED_IMPORT_FILE_EXTENSIONS.join(', ')}`
       );
+  }
+
+  if (normalized.polygons.length > MAX_IMPORT_FEATURES) {
+    throw new Error(
+      `File has too many polygons (${normalized.polygons.length}). `
+      + `Maximum is ${MAX_IMPORT_FEATURES}.`
+    );
+  }
+  const vertexCount = normalized.polygons.reduce(
+    (sum, poly) => sum + poly.geometry.coordinates.reduce(
+      (ringSum, ring) => ringSum + ring.length,
+      0
+    ),
+    0
+  );
+  if (vertexCount > MAX_IMPORT_VERTICES) {
+    throw new Error(
+      `Polygons have too many vertices (${vertexCount}). `
+      + `Maximum is ${MAX_IMPORT_VERTICES}. Simplify the file and try again.`
+    );
   }
 
   // Translate skipped-geometry descriptors into user-facing warnings.

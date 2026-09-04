@@ -12,7 +12,8 @@
 
 import type { Feature, FeatureCollection, Point } from 'geojson';
 
-export const OPENMAPS_WFS_URL = 'https://openmaps.gov.bc.ca/geo/pub/ows';
+import { cqlQuoted, isCqlSafeIdentifier } from '../utils/CqlUtils';
+import { buildOpenmapsProxyUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsProxy';
 
 /** Layer typeName for active+expired seedlot point features. */
 export const SEEDLOT_POINT_LAYER = 'pub:WHSE_FOREST_VEGETATION.SEED_SEEDLOT_POINT_MVW';
@@ -107,14 +108,12 @@ const featureToPoint = (feature: Feature<Point, WfsProperties>): SeedlotPoint | 
  * 2.0 rejects requests that pass `bbox` and `cql_filter` as separate
  * params ("mutually exclusive"), so we encode everything via CQL.
  */
-const escapeCql = (value: string): string => value.replace(/'/g, "''");
-
-export const buildSeedlotPointsWfsUrl = (
+export const buildSeedlotPointsWfsParams = (
   typeName: string,
   bounds: LngLatBoundsTuple,
   activeOnly: 'YES' | 'NO' | null = null,
   speciesCode: string | null = null
-): string => {
+): URLSearchParams => {
   // GeoServer CQL BBOX takes `minX, minY, maxX, maxY` regardless of the
   // EPSG axis-order convention — so the order is always
   // `west, south, east, north` for EPSG:4326. Passing south/west by
@@ -125,10 +124,10 @@ export const buildSeedlotPointsWfsUrl = (
   if (activeOnly !== null) {
     cqlClauses.push(`ACTIVE_IND='${activeOnly}'`);
   }
-  if (speciesCode && speciesCode.trim().length > 0) {
-    cqlClauses.push(`VEGETATION_CODE='${escapeCql(speciesCode.trim().toUpperCase())}'`);
+  if (speciesCode && isCqlSafeIdentifier(speciesCode.trim())) {
+    cqlClauses.push(`VEGETATION_CODE=${cqlQuoted(speciesCode.trim().toUpperCase())}`);
   }
-  const params = new URLSearchParams({
+  return new URLSearchParams({
     service: 'WFS',
     version: '2.0.0',
     request: 'GetFeature',
@@ -138,8 +137,16 @@ export const buildSeedlotPointsWfsUrl = (
     count: String(MAX_FEATURES),
     CQL_FILTER: cqlClauses.join(' AND ')
   });
-  return `${OPENMAPS_WFS_URL}?${params.toString()}`;
 };
+
+export const buildSeedlotPointsWfsUrl = (
+  typeName: string,
+  bounds: LngLatBoundsTuple,
+  activeOnly: 'YES' | 'NO' | null = null,
+  speciesCode: string | null = null
+): string => buildOpenmapsProxyUrl(
+  buildSeedlotPointsWfsParams(typeName, bounds, activeOnly, speciesCode)
+);
 
 /**
  * Fetch seedlot/veglot point features for the supplied bbox. Returns
@@ -156,26 +163,22 @@ export const fetchSeedlotPoints = async (
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), WFS_TIMEOUT_MS);
 
-  let res: Response;
+  let fc: FeatureCollection<Point, WfsProperties>;
   try {
-    res = await fetch(
-      buildSeedlotPointsWfsUrl(typeName, bounds, activeOnly, speciesCode),
-      { signal: controller.signal }
+    fc = await getOpenmapsJson<FeatureCollection<Point, WfsProperties>>(
+      buildSeedlotPointsWfsParams(typeName, bounds, activeOnly, speciesCode),
+      controller.signal
     );
   } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') {
+    if (isOpenmapsAbort(err)) {
       throw new Error(
         `WFS seedlot-points fetch timed out after ${WFS_TIMEOUT_MS / 1000} seconds`
       );
     }
-    throw err;
+    return [];
   } finally {
     clearTimeout(timer);
   }
-
-  if (!res.ok) return [];
-
-  const fc = (await res.json()) as FeatureCollection<Point, WfsProperties>;
   const points: SeedlotPoint[] = [];
   (fc.features ?? []).forEach((feature) => {
     const p = featureToPoint(feature);

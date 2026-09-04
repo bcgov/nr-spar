@@ -1,10 +1,14 @@
 /**
- * Hard-coded WFS/WMS endpoints shared by all SPAR map themes.
+ * Hard-coded WMS tile endpoint shared by all SPAR map themes. JSON
+ * (WFS / GetLegendGraphic) goes through the authenticated SPAR proxy
+ * in `api-service/openmapsProxy.ts` — OpenMaps does not send CORS
+ * headers for SPAR OpenShift origins.
  *
  * Per-environment GeoServer hosts (geo.nrs.gov.bc.ca for PROD,
  * t1geo.nrs.gov.bc.ca for DEV/TEST) are referenced from the per-theme
  * profile configs in `frontend/src/config/leaflet-themes/`.
  */
+export const OPENMAPS_WMS_URL = 'https://openmaps.gov.bc.ca/geo/pub/wms';
 export const OPENMAPS_WFS_URL = 'https://openmaps.gov.bc.ca/geo/pub/ows';
 
 export const BEC_QUERY_LAYER = 'WHSE_FOREST_VEGETATION.BEC_BIOGEOCLIMATIC_POLY';

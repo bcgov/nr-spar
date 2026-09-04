@@ -1,4 +1,5 @@
 import { wgs84ToBcAlbers } from '../legacy_translated/SPR_SPATIAL_UTILS';
+import { buildOpenmapsProxyUrl, getOpenmapsJson } from './openmapsProxy';
 
 /**
  * The minimum a caller needs to request a legend: the WMS endpoint, the
@@ -90,9 +91,24 @@ const toNumber = (value: unknown, fallback: number): number => {
   return Number.isFinite(n) ? n : fallback;
 };
 
-const toColor = (value: unknown): string | null => (
+/** Non-empty trimmed string, or null. Used for human-readable labels. */
+const toTrimmedString = (value: unknown): string | null => (
   typeof value === 'string' && value.trim() !== '' ? value.trim() : null
 );
+
+/**
+ * GeoServer colours end up in a `style="..."` attribute in the print
+ * window, which is assembled as an HTML string. Constrain them to real
+ * colour syntax here, at the parse boundary, so a malformed or hostile
+ * upstream legend can't break out of the attribute. Anything unrecognised
+ * becomes null and the renderer falls back to its default swatch colour.
+ */
+const CSS_COLOR = /^(#[0-9a-f]{3,8}|[a-z]+|rgba?\([\d\s.,%]+\))$/i;
+
+const toColor = (value: unknown): string | null => {
+  const trimmed = toTrimmedString(value);
+  return trimmed !== null && CSS_COLOR.test(trimmed) ? trimmed : null;
+};
 
 /**
  * Reduce one GeoServer symbolizer to a swatch. Returns null for symbolizer
@@ -145,7 +161,7 @@ const ruleToLegendRule = (rule: GsRule): LegendRule | null => {
     if (swatch) break;
   }
   if (!swatch) return null;
-  const label = toColor(rule.title) ?? toColor(rule.name) ?? 'Other';
+  const label = toTrimmedString(rule.title) ?? toTrimmedString(rule.name) ?? 'Other';
   return { label, swatch };
 };
 
@@ -210,10 +226,10 @@ export const wgs84BoundsToBcAlbersBbox = (
  * only the style rules that match features inside that extent — the
  * "only symbols on the map" behavior.
  */
-export const buildLegendJsonUrl = (
+export const buildLegendJsonParams = (
   layer: WmsLayerRef,
   bboxBcAlbers?: string
-): string => {
+): URLSearchParams => {
   const layerName = (layer.layers ?? '').split(',')[0]?.trim() ?? '';
   const params = new URLSearchParams({
     service: 'WMS',
@@ -232,9 +248,13 @@ export const buildLegendJsonUrl = (
     params.set('height', '400');
     params.set('bbox', bboxBcAlbers);
   }
-  const separator = layer.url.includes('?') ? '&' : '?';
-  return `${layer.url}${separator}${params.toString()}`;
+  return params;
 };
+
+export const buildLegendJsonUrl = (
+  layer: WmsLayerRef,
+  bboxBcAlbers?: string
+): string => buildOpenmapsProxyUrl(buildLegendJsonParams(layer, bboxBcAlbers));
 
 /**
  * Fetch + parse the legend rules for one overlay. Rejects on a non-2xx
@@ -246,10 +266,9 @@ export const fetchOverlayLegend = async (
   bboxBcAlbers?: string,
   signal?: AbortSignal
 ): Promise<ParsedLegend> => {
-  const res = await fetch(buildLegendJsonUrl(layer, bboxBcAlbers), { signal });
-  if (!res.ok) {
-    throw new Error(`GetLegendGraphic failed: ${res.status}`);
-  }
-  const json = (await res.json()) as GsLegendResponse;
+  const json = await getOpenmapsJson<GsLegendResponse>(
+    buildLegendJsonParams(layer, bboxBcAlbers),
+    signal
+  );
   return parseLegend(json);
 };
