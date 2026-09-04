@@ -102,7 +102,6 @@ const BrowserRoutes: Array<RouteObject> = [
     )
   },
   {
-  {
     path: ROUTES.SEEDLOT_MAP,
     element: (
       <SeedlotMap />
