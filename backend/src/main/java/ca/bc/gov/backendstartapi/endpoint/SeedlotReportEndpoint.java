@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.report.SeedlotRegistrationReportService;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.security.RequiresSeedlotB;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -61,6 +62,7 @@ public class SeedlotReportEndpoint {
         @ApiResponse(responseCode = "404", description = "Seedlot not found")
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  @RequiresSeedlotB
   public ResponseEntity<byte[]> downloadBclassRegistrationReport(
       @Parameter(
               name = "seedlotNumber",

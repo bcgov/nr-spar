@@ -18,6 +18,7 @@ x-frontend: &frontend
     VITE_USER_POOLS_ID: ca-central-1_UpeAqsYt4
     VITE_USER_POOLS_WEB_CLIENT_ID: 3lhqndjq897v4menht7hp1u1s2
     VITE_ZONE: TEST
+    VITE_SEEDLOT_B_ENABLED: ${VITE_SEEDLOT_B_ENABLED:-true}
   healthcheck:
     test: timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/3000'
 
@@ -46,6 +47,7 @@ services:
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       POSTGRES_HOST: database
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_UpeAqsYt4"
+      SEEDLOT_B_ENABLED: ${SEEDLOT_B_ENABLED:-true}
       <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.16-eclipse-temurin-17

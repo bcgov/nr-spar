@@ -3,6 +3,7 @@ import { Navigate, RouteObject } from 'react-router-dom';
 
 import ROUTES from './constants';
 import { getStoredPath } from '../utils/PathUtils';
+import { isSeedlotBEnabled } from '../config/features';
 
 import Dashboard from '../views/Dashboard/dashboard';
 import SeedlotDashboard from '../views/Seedlot/SeedlotDashboard';
@@ -24,6 +25,29 @@ import MoistureContent from '../views/CONSEP/TestingActivities/MoistureContent';
 import PurityContent from '../views/CONSEP/TestingActivities/PurityContent';
 import TestSearch from '../views/CONSEP/TestingActivities/TestSearch';
 import MaintainGermTray from '../views/CONSEP/TestingActivities/GerminatorTray/MaintainGermTray';
+
+// Dropped rather than redirected so an unmatched path yields the app's normal
+// "route not found" behaviour when B-class is turned off.
+const bClassRoutes: Array<RouteObject> = [
+  {
+    path: ROUTES.SEEDLOTS_B_CLASS_CREATION,
+    element: (
+      <CreateBClass />
+    )
+  },
+  {
+    path: ROUTES.SEEDLOT_B_CLASS_REGISTRATION,
+    element: (
+      <SeedlotRegFormClassB />
+    )
+  },
+  {
+    path: ROUTES.SEEDLOT_B_CLASS_REVIEW,
+    element: (
+      <SeedlotReviewClassB />
+    )
+  }
+];
 
 const BrowserRoutes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
@@ -60,12 +84,6 @@ const BrowserRoutes: Array<RouteObject> = [
     )
   },
   {
-    path: ROUTES.SEEDLOTS_B_CLASS_CREATION,
-    element: (
-      <CreateBClass />
-    )
-  },
-  {
     path: ROUTES.SEEDLOT_CREATION_SUCCESS,
     element: (
       <SeedlotCreatedFeedback />
@@ -84,11 +102,6 @@ const BrowserRoutes: Array<RouteObject> = [
     )
   },
   {
-    path: ROUTES.SEEDLOT_B_CLASS_REGISTRATION,
-    element: (
-      <SeedlotRegFormClassB />
-    )
-  },
   {
     path: ROUTES.SEEDLOT_MAP,
     element: (
@@ -111,12 +124,6 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.SEEDLOT_A_CLASS_REVIEW,
     element: (
       <SeedlotReview />
-    )
-  },
-  {
-    path: ROUTES.SEEDLOT_B_CLASS_REVIEW,
-    element: (
-      <SeedlotReviewClassB />
     )
   },
   {
@@ -160,7 +167,8 @@ const BrowserRoutes: Array<RouteObject> = [
     element: (
       <MaintainGermTray />
     )
-  }
+  },
+  ...(isSeedlotBEnabled() ? bClassRoutes : [])
 ];
 
 export default BrowserRoutes;

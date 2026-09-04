@@ -133,6 +133,11 @@ objects:
                   value: ${DB_POOL_MAX_LIFETIME}
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
+                - name: SEEDLOT_B_ENABLED
+                  valueFrom:
+                    configMapKeyRef:
+                      name: ${NAME}-${ZONE}-features
+                      key: seedlot-b-enabled
                 - name: RANDOM_EXPRESSION
                   value: ${RANDOM_EXPRESSION}
               resources:

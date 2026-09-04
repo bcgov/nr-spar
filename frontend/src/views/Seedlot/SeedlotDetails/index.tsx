@@ -27,6 +27,7 @@ import useWindowSize from '../../../hooks/UseWindowSize';
 import { downloadBClassRegistrationReport, getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
+import { isSeedlotBEnabled } from '../../../config/features';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils/SeedlotUtils';
 import { openBlankTab, openBlobInNewTab } from '../../../utils/DownloadUtils';
@@ -84,6 +85,9 @@ const SeedlotDetails = () => {
 
   const seedlot = seedlotQuery.data?.seedlot;
   const isBClass = isBClassSeedlot(seedlot);
+  // Existing B-class seedlots stay readable when the feature is off, but every
+  // action leads into a B-class flow the backend now rejects, so they're hidden.
+  const isBClassDisabled = isBClass && !isSeedlotBEnabled();
 
   const seedlotData = useMemo(
     () => (vegCodeQuery.data && seedlot
@@ -217,12 +221,18 @@ const SeedlotDetails = () => {
                   title={`Seedlot ${seedlot?.id}`}
                   enableFavourite
                 />
-                <ComboButton
-                  title={getActBtnLabel()}
-                  items={manageOptions}
-                  menuOptionsClass="edit-seedlot-form"
-                  titleBtnFunc={handlePrimaryAction}
-                />
+                {
+                  isBClassDisabled
+                    ? null
+                    : (
+                      <ComboButton
+                        title={getActBtnLabel()}
+                        items={manageOptions}
+                        menuOptionsClass="edit-seedlot-form"
+                        titleBtnFunc={handlePrimaryAction}
+                      />
+                    )
+                }
               </>
             )
           }
@@ -242,6 +252,20 @@ const SeedlotDetails = () => {
             </TabList>
             <TabPanels>
               <TabPanel>
+                {
+                  isBClassDisabled
+                    ? (
+                      <InlineNotification
+                        className="seedlot-submitted-notification"
+                        lowContrast
+                        hideCloseButton
+                        kind="info"
+                        title="B-class seedlots are unavailable:"
+                        subtitle="Registration, review and reporting for B-class seedlots are currently turned off. This seedlot's details are read-only."
+                      />
+                    )
+                    : null
+                }
                 {
                   isSubmitSuccess && (seedlot?.seedlotStatus.seedlotStatusCode === 'SUB')
                     ? (
@@ -281,22 +305,29 @@ const SeedlotDetails = () => {
                     )
                     : null
                 }
-                <FormProgress
-                  seedlotNumber={seedlotNumber}
-                  seedlotStatusCode={seedlot?.seedlotStatus.seedlotStatusCode}
-                  getSeedlotQueryStatus={seedlotQuery.status}
-                  isBClass={isBClass}
-                />
+                {
+                  isBClassDisabled
+                    ? null
+                    : (
+                      <FormProgress
+                        seedlotNumber={seedlotNumber}
+                        seedlotStatusCode={seedlot?.seedlotStatus.seedlotStatusCode}
+                        getSeedlotQueryStatus={seedlotQuery.status}
+                        isBClass={isBClass}
+                      />
+                    )
+                }
                 <ApplicantInformation
                   seedlotNumber={seedlotNumber}
                   applicant={applicantData}
                   isFetching={seedlotQuery.isFetching || forestClientQuery.isFetching}
-                  hideEditButton={!isTscAdmin && viewOnlySeedlot}
+                  hideEditButton={isBClassDisabled || (!isTscAdmin && viewOnlySeedlot)}
                   variant={isBClass ? 'B' : 'A'}
                 />
                 {
                   (
-                    isTscAdmin
+                    !isBClassDisabled
+                    && isTscAdmin
                     && seedlotData?.seedlotStatus !== 'Pending'
                     && seedlotData?.seedlotStatus !== 'Incomplete'
                   )
