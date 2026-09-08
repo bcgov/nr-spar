@@ -756,6 +756,42 @@ class ActivityServiceTest {
     );
   }
 
+  /* ------------------------ Validate Duplicate Germination Test ----------------------------------------*/
+
+  @Test
+  @DisplayName("validateDuplicateGerminationTest should return invalid when an exact match exists")
+  void validateDuplicateGerminationTest_shouldReturnInvalidWhenExactMatchExists() {
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 10, 9, 0, 0);
+    LocalDateTime end = LocalDateTime.of(2026, 5, 10, 12, 0, 0);
+
+    when(activityRepository.existsDuplicateGerminationTest("00098", "G11", begin, end))
+        .thenReturn(true);
+
+    var result = activityService.validateDuplicateGerminationTest("00098", "G11", begin, end);
+
+    assertFalse(result.valid());
+    assertEquals(
+        "A germination test already exists for this seedlot and activity date range.",
+        result.message());
+    verify(activityRepository, times(1)).existsDuplicateGerminationTest("00098", "G11", begin, end);
+  }
+
+  @Test
+  @DisplayName("validateDuplicateGerminationTest should return valid when no exact match exists")
+  void validateDuplicateGerminationTest_shouldReturnValidWhenNoExactMatchExists() {
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 10, 9, 0, 0);
+    LocalDateTime end = LocalDateTime.of(2026, 5, 10, 12, 0, 0);
+
+    when(activityRepository.existsDuplicateGerminationTest("00098", "G11", begin, end))
+        .thenReturn(false);
+
+    var result = activityService.validateDuplicateGerminationTest("00098", "G11", begin, end);
+
+    assertTrue(result.valid());
+    assertEquals("", result.message());
+    verify(activityRepository, times(1)).existsDuplicateGerminationTest("00098", "G11", begin, end);
+  }
+
   /* ----------------------- Get Germination Test Types ----------------------------*/
   @Test
   void getGerminationTestTypes_shouldReturnMappedDtos_whenActivitiesExist() {
