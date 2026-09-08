@@ -47,6 +47,24 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("familyLotNumber") String familyLotNumber
   );
 
+  @Query(
+      """
+      SELECT CASE
+              WHEN COUNT(a) > 0 THEN true
+              ELSE false
+              END
+      FROM ActivityEntity a
+      WHERE a.seedlotNumber = :seedlotNumber
+      AND a.standardActivityId = :standardActivityId
+      AND a.actualBeginDateTime = :actualBeginDateTime
+      AND a.actualEndDateTime = :actualEndDateTime
+      """)
+  boolean existsDuplicateGerminationTest(
+      @Param("seedlotNumber") String seedlotNumber,
+      @Param("standardActivityId") String standardActivityId,
+      @Param("actualBeginDateTime") LocalDateTime actualBeginDateTime,
+      @Param("actualEndDateTime") LocalDateTime actualEndDateTime);
+
   @Modifying
   @Transactional
   @Query("""
