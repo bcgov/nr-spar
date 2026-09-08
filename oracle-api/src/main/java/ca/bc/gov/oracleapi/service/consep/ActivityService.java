@@ -450,7 +450,7 @@ public class ActivityService {
 
     if (duplicateExists) {
       return new GerminationTestDuplicateValidationResponseDto(
-          false, "A germination test already exists for this seedlot and activity date range.");
+          false, "A germination test already exists for this seedlot, activity ID, and begin/end datetime.");
     }
 
     return new GerminationTestDuplicateValidationResponseDto(true, "");
