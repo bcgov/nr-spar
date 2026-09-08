@@ -438,6 +438,16 @@ public class ActivityService {
         activityRepository.existsDuplicateGerminationTest(
             seedlotNumber, standardActivityId, actualBeginDateTime, actualEndDateTime);
 
+    if (seedlotNumber == null
+        || seedlotNumber.isBlank()
+        || standardActivityId == null
+        || standardActivityId.isBlank()
+        || actualBeginDateTime == null
+        || actualEndDateTime == null) {
+      return new GerminationTestDuplicateValidationResponseDto(
+          false, "Seedlot, standard activity, and actual begin/end timestamps are required.");
+    }
+
     if (duplicateExists) {
       return new GerminationTestDuplicateValidationResponseDto(
           false, "A germination test already exists for this seedlot and activity date range.");
