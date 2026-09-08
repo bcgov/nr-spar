@@ -5,6 +5,7 @@ import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestDuplicateValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
@@ -412,5 +413,36 @@ public class ActivityService {
     return standardActivityRepository.findGerminationTestActivities().stream()
         .map(this::toStandardActivityDto)
         .toList();
+  }
+
+  /**
+   * Validates whether a copied germination test would create a duplicate based on an exact match of
+   * seedlot number, standard activity ID, actual begin datetime, and actual end datetime.
+   *
+   * <p>This method is used for copy-result validation before inserting a new germination test. The
+   * validation succeeds only when no existing record matches all four values exactly.
+   *
+   * @param seedlotNumber the seedlot number to check
+   * @param standardActivityId the standard activity identifier for the germination test
+   * @param actualBeginDateTime the actual test start timestamp
+   * @param actualEndDateTime the actual test end timestamp
+   * @return a validation result where {@code valid} is {@code false} when a duplicate already
+   *     exists, and {@code true} when no matching record is found
+   */
+  public GerminationTestDuplicateValidationResponseDto validateDuplicateGerminationTest(
+      String seedlotNumber,
+      String standardActivityId,
+      LocalDateTime actualBeginDateTime,
+      LocalDateTime actualEndDateTime) {
+    boolean duplicateExists =
+        activityRepository.existsDuplicateGerminationTest(
+            seedlotNumber, standardActivityId, actualBeginDateTime, actualEndDateTime);
+
+    if (duplicateExists) {
+      return new GerminationTestDuplicateValidationResponseDto(
+          false, "A germination test already exists for this seedlot and activity date range.");
+    }
+
+    return new GerminationTestDuplicateValidationResponseDto(true, "");
   }
 }
