@@ -771,7 +771,7 @@ class ActivityServiceTest {
 
     assertFalse(result.valid());
     assertEquals(
-        "A germination test already exists for this seedlot and activity date range.",
+        "A germination test already exists for this seedlot, activity ID, and begin/end datetime.",
         result.message());
     verify(activityRepository, times(1)).existsDuplicateGerminationTest("00098", "G11", begin, end);
   }
