@@ -434,9 +434,6 @@ public class ActivityService {
       String standardActivityId,
       LocalDateTime actualBeginDateTime,
       LocalDateTime actualEndDateTime) {
-    boolean duplicateExists =
-        activityRepository.existsDuplicateGerminationTest(
-            seedlotNumber, standardActivityId, actualBeginDateTime, actualEndDateTime);
 
     if (seedlotNumber == null
         || seedlotNumber.isBlank()
@@ -448,9 +445,15 @@ public class ActivityService {
           false, "Seedlot, standard activity, and actual begin/end timestamps are required.");
     }
 
+    boolean duplicateExists =
+        activityRepository.existsDuplicateGerminationTest(
+            seedlotNumber, standardActivityId, actualBeginDateTime, actualEndDateTime);
+
     if (duplicateExists) {
       return new GerminationTestDuplicateValidationResponseDto(
-          false, "A germination test already exists for this seedlot, activity ID, and begin/end datetime.");
+          false,
+          "A germination test already exists for this seedlot, activity ID, and begin/end"
+              + " datetime.");
     }
 
     return new GerminationTestDuplicateValidationResponseDto(true, "");
