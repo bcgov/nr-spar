@@ -792,6 +792,39 @@ class ActivityServiceTest {
     verify(activityRepository, times(1)).existsDuplicateGerminationTest("00098", "G11", begin, end);
   }
 
+  @Test
+  @DisplayName(
+      "validateDuplicateGerminationTest should return invalid and skip the DB call"
+          + " when seedlotNumber is null")
+  void validateDuplicateGerminationTest_shouldReturnInvalidWhenSeedlotNumberIsNull() {
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 10, 9, 0, 0);
+    LocalDateTime end = LocalDateTime.of(2026, 5, 10, 12, 0, 0);
+
+    var result = activityService.validateDuplicateGerminationTest(null, "G11", begin, end);
+
+    assertFalse(result.valid());
+    assertEquals(
+        "Seedlot, standard activity, and actual begin/end timestamps are required.",
+        result.message());
+    verify(activityRepository, never()).existsDuplicateGerminationTest(any(), any(), any(), any());
+  }
+
+  @Test
+  @DisplayName(
+      "validateDuplicateGerminationTest should return invalid and skip the DB call"
+          + " when actualEndDateTime is null")
+  void validateDuplicateGerminationTest_shouldReturnInvalidWhenActualEndDateTimeIsNull() {
+    LocalDateTime begin = LocalDateTime.of(2026, 5, 10, 9, 0, 0);
+
+    var result = activityService.validateDuplicateGerminationTest("00098", "G11", begin, null);
+
+    assertFalse(result.valid());
+    assertEquals(
+        "Seedlot, standard activity, and actual begin/end timestamps are required.",
+        result.message());
+    verify(activityRepository, never()).existsDuplicateGerminationTest(any(), any(), any(), any());
+  }
+
   /* ----------------------- Get Germination Test Types ----------------------------*/
   @Test
   void getGerminationTestTypes_shouldReturnMappedDtos_whenActivitiesExist() {
