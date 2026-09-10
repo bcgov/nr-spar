@@ -771,7 +771,7 @@ class ActivityServiceTest {
 
     assertFalse(result.valid());
     assertEquals(
-        "A germination test already exists for this seedlot, activity ID, and begin/end datetime.",
+        "A germination test already exists for this seedlot number, standard activity ID, and begin/end datetime.",
         result.message());
     verify(activityRepository, times(1)).existsDuplicateGerminationTest("00098", "G11", begin, end);
   }
@@ -804,7 +804,7 @@ class ActivityServiceTest {
 
     assertFalse(result.valid());
     assertEquals(
-        "Seedlot, standard activity, and actual begin/end timestamps are required.",
+        "Seedlot number, standard activity ID, and actual begin/end timestamps are required.",
         result.message());
     verify(activityRepository, never()).existsDuplicateGerminationTest(any(), any(), any(), any());
   }
@@ -820,7 +820,7 @@ class ActivityServiceTest {
 
     assertFalse(result.valid());
     assertEquals(
-        "Seedlot, standard activity, and actual begin/end timestamps are required.",
+        "Seedlot number, standard activity ID, and actual begin/end timestamps are required.",
         result.message());
     verify(activityRepository, never()).existsDuplicateGerminationTest(any(), any(), any(), any());
   }

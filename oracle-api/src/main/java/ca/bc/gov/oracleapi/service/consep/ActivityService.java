@@ -442,7 +442,8 @@ public class ActivityService {
         || actualBeginDateTime == null
         || actualEndDateTime == null) {
       return new GerminationTestDuplicateValidationResponseDto(
-          false, "Seedlot, standard activity, and actual begin/end timestamps are required.");
+          false,
+          "Seedlot number, standard activity ID, and actual begin/end timestamps are required.");
     }
 
     boolean duplicateExists =
@@ -452,8 +453,8 @@ public class ActivityService {
     if (duplicateExists) {
       return new GerminationTestDuplicateValidationResponseDto(
           false,
-          "A germination test already exists for this seedlot, activity ID, and begin/end"
-              + " datetime.");
+          "A germination test already exists for this seedlot number, standard activity ID,"
+              + " and begin/end datetime.");
     }
 
     return new GerminationTestDuplicateValidationResponseDto(true, "");
