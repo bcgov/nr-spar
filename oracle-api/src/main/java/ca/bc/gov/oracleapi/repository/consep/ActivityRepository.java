@@ -49,15 +49,14 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
 
   @Query(
       """
-      SELECT CASE
-              WHEN COUNT(a) > 0 THEN true
-              ELSE false
-              END
-      FROM ActivityEntity a
-      WHERE a.seedlotNumber = :seedlotNumber
-      AND a.standardActivityId = :standardActivityId
-      AND a.actualBeginDateTime = :actualBeginDateTime
-      AND a.actualEndDateTime = :actualEndDateTime
+      SELECT CASE WHEN EXISTS (
+          SELECT 1
+          FROM ActivityEntity a
+          WHERE a.seedlotNumber = :seedlotNumber
+            AND a.standardActivityId = :standardActivityId
+            AND a.actualBeginDateTime = :actualBeginDateTime
+            AND a.actualEndDateTime = :actualEndDateTime
+        ) THEN true ELSE false END
       """)
   boolean existsDuplicateGerminationTest(
       @Param("seedlotNumber") String seedlotNumber,
