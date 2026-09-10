@@ -85,8 +85,8 @@ export interface GsLegendResponse {
 }
 
 const toNumber = (value: unknown, fallback: number): number => {
-  let n = NaN;
-  if (typeof value === 'string') n = parseFloat(value);
+  let n = Number.NaN;
+  if (typeof value === 'string') n = Number.parseFloat(value);
   else if (typeof value === 'number') n = value;
   return Number.isFinite(n) ? n : fallback;
 };
@@ -156,8 +156,8 @@ const symbolizerToSwatch = (sym: GsSymbolizer): LegendSwatch | null => {
 const ruleToLegendRule = (rule: GsRule): LegendRule | null => {
   const symbolizers = Array.isArray(rule.symbolizers) ? rule.symbolizers : [];
   let swatch: LegendSwatch | null = null;
-  for (let i = 0; i < symbolizers.length; i += 1) {
-    swatch = symbolizerToSwatch(symbolizers[i]);
+  for (const symbolizer of symbolizers) {
+    swatch = symbolizerToSwatch(symbolizer);
     if (swatch) break;
   }
   if (!swatch) return null;
@@ -172,8 +172,8 @@ export interface ParsedLegend {
 }
 
 const firstNonEmptyTitle = (legends: GsLegend[]): string | null => {
-  for (let i = 0; i < legends.length; i += 1) {
-    const title = legends[i]?.title;
+  for (const legend of legends) {
+    const title = legend?.title;
     if (typeof title === 'string' && title.trim() !== '') return title.trim();
   }
   return null;

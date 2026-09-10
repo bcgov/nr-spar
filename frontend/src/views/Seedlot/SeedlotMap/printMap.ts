@@ -205,7 +205,7 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
     + 'NOT TO BE USED FOR NAVIGATION.'
   );
 
-  printWindow.document.write(`<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html>
 <head>
   <title>SPAR Seed Map - ${safeSeedlot}</title>
@@ -279,10 +279,12 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
     </div>
   </div>
 </body>
-</html>`);
-  printWindow.document.close();
+</html>`;
+  const printUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
   printWindow.onload = () => {
+    URL.revokeObjectURL(printUrl);
     printWindow.print();
     printWindow.close();
   };
+  printWindow.location.replace(printUrl);
 };

@@ -23,6 +23,54 @@ const nullableToString = (value: number | null | undefined): string => (
   value != null ? String(value) : ''
 );
 
+const uniqueByCode = (
+  rows: BecCatalogueItem[],
+  key: (row: BecCatalogueItem) => string
+): BecCatalogueItem[] => {
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    const code = key(row);
+    if (seen.has(code)) return false;
+    seen.add(code);
+    return true;
+  });
+};
+
+export const getBecZoneItems = (
+  catalogue: BecCatalogueItem[] | undefined
+): MultiOptionsObj[] => {
+  if (!catalogue) return [];
+  return uniqueByCode(catalogue, (row) => row.becZoneCode).map((row) => ({
+    code: row.becZoneCode,
+    description: row.becZoneName,
+    label: `${row.becZoneCode} - ${row.becZoneName}`
+  }));
+};
+
+export const getBecSubzoneItems = (
+  catalogue: BecCatalogueItem[] | undefined,
+  zoneCode: string
+): MultiOptionsObj[] => {
+  if (!catalogue || !zoneCode) return [];
+  return uniqueByCode(
+    catalogue.filter((row) => row.becZoneCode === zoneCode),
+    (row) => row.becSubzoneCode
+  ).map((row) => ({
+    code: row.becSubzoneCode,
+    description: row.becSubzoneName,
+    label: `${row.becSubzoneCode} - ${row.becSubzoneName}`
+  }));
+};
+
+export const becVariantPlaceholder = (
+  subzoneCode: string,
+  variantCount: number
+): string => {
+  if (!subzoneCode) return 'Choose subzone first';
+  if (variantCount > 0) return 'Choose variant';
+  return 'None';
+};
+
 export const getBecVariantItems = (
   catalogue: BecCatalogueItem[] | undefined,
   zoneCode: string,

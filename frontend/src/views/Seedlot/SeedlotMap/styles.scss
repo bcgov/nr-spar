@@ -413,9 +413,21 @@
     &:nth-child(even) td { background: colors.$white; }
     // Legacy `#f4f400` yellow on hover/select (cwmSparmap.jsp:236).
     &:hover td,
-    &:focus-visible td,
+    &:focus-within td,
     &--selected td { background: #f4f400; }
     &--selected td { font-weight: 600; }
+  }
+  .bec-zone-panel__row-btn {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
   }
 }
 
@@ -970,6 +982,7 @@
 .leaflet-control-zoom-in,
 .leaflet-control-zoom-out {
   color: var(--#{vars.$bcgov-prefix}-button-primary) !important;
+  transform: rotate(-90deg);
 }
 
 .leaflet-bar a:hover {
@@ -1005,11 +1018,6 @@
 .leaflet-control-zoom {
   transform: rotate(90deg);
   transform-origin: center;
-}
-
-.leaflet-control-zoom-in,
-.leaflet-control-zoom-out {
-  transform: rotate(-90deg);
 }
 
 // ── Print-only header ──────────────────────────────────────────────

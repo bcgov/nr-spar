@@ -558,8 +558,11 @@ const AoiToolbar = ({
       // context. Calling addAoi for each one in parallel would race
       // with the rebuild inside the map control callback.
       addImportedLayersToMap(result.polygons);
-      const subtitle = `${result.polygons.length} polygon${result.polygons.length === 1 ? '' : 's'} imported from ${file.name}${
-        result.warnings.length > 0 ? `. ${result.warnings.join('; ')}` : '.'}`;
+      const plural = result.polygons.length === 1 ? '' : 's';
+      const warningSuffix = result.warnings.length > 0
+        ? `. ${result.warnings.join('; ')}`
+        : '.';
+      const subtitle = `${result.polygons.length} polygon${plural} imported from ${file.name}${warningSuffix}`;
       setImportStatus({
         kind: result.warnings.length > 0 ? 'warning' : 'success',
         title: result.warnings.length > 0 ? 'Imported with warnings' : 'Import successful',
@@ -950,8 +953,7 @@ const AoiToolbar = ({
               <p>
                 To leave without saving, click
                 {' '}
-                <strong>Cancel</strong>
-                .
+                <strong>Cancel.</strong>
               </p>
             </div>
           )}

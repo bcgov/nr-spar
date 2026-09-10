@@ -36,6 +36,45 @@ const toGeomanLayers = (layers: unknown[]): GeomanLayerLike[] => (
   layers as unknown as GeomanLayerLike[]
 );
 
+/** GeoJSON rings are [lng, lat]; Leaflet wants LatLng. */
+const polygonFromAoi = (poly: AoiPolygon): L.Polygon | null => {
+  try {
+    const latlngs = poly.geometry.coordinates.map(
+      (ring) => ring.map(([lng, lat]) => L.latLng(lat, lng))
+    );
+    return L.polygon(latlngs, LEGACY_AOI_STYLE);
+  } catch {
+    return null;
+  }
+};
+
+const addPolygonsToMap = (
+  map: L.Map,
+  polygons: AoiPolygon[],
+  setAois: (aois: AoiPolygon[]) => void,
+  rebuildFromMap: () => AoiPolygon[]
+): L.Polygon[] => {
+  const created: L.Polygon[] = [];
+  polygons.forEach((poly) => {
+    const leafletPoly = polygonFromAoi(poly);
+    if (leafletPoly) {
+      leafletPoly.addTo(map);
+      created.push(leafletPoly);
+    }
+  });
+  setAois(rebuildFromMap());
+  return created;
+};
+
+const fitToLayers = (map: L.Map, layers: L.Polygon[]) => {
+  if (layers.length === 0) return;
+  try {
+    map.fitBounds(L.featureGroup(layers).getBounds().pad(0.1));
+  } catch {
+    // getBounds() can throw for empty/degenerate geometries.
+  }
+};
+
 /**
  * Split a GeoJSON Polygon/MultiPolygon Feature into single-polygon AOI
  * features. Used to seed the map from the wizard draft geometry handed in
@@ -273,8 +312,8 @@ const AoiDrawLayer = () => {
       removeLastMapLayer: () => {
         const rawLayers = (map.pm?.getGeomanLayers?.() ?? []) as unknown[];
         const layers = toGeomanLayers(rawLayers);
-        if (layers.length === 0) return;
-        const last = layers[layers.length - 1];
+        const last = layers.at(-1);
+        if (!last) return;
         try {
           last.remove();
         } catch {
@@ -332,43 +371,8 @@ const AoiDrawLayer = () => {
       // box in geoman-free v2.
       addImportedLayersToMap: (polygons: AoiPolygon[]) => {
         if (polygons.length === 0) return;
-
-        const createdLayers: L.Polygon[] = [];
-        polygons.forEach((poly) => {
-          try {
-            // GeoJSON coords are [lng, lat]; Leaflet expects [lat, lng].
-            // A Polygon has outer ring + optional holes; map each ring
-            // and hand the array of arrays to L.polygon().
-            const latlngs = poly.geometry.coordinates.map(
-              (ring) => ring.map(([lng, lat]) => L.latLng(lat, lng))
-            );
-            const leafletPoly = L.polygon(latlngs, LEGACY_AOI_STYLE);
-            leafletPoly.addTo(map);
-            createdLayers.push(leafletPoly);
-          } catch {
-            // Skip polygons with bad coordinate shapes; the warning
-            // is already surfaced by importShape.ts.
-          }
-        });
-
-        // Sync context state with the freshly-rebuilt layer list so
-        // Validate / Submit / Clear All all see the imported polygons
-        // alongside anything drawn manually. This mirrors what
-        // handleEdit does after a Geoman edit event.
-        setAois(rebuildFromMap());
-
-        // Fit bounds to the new layers so the user isn't left staring
-        // at the previous extent after importing shapes from a
-        // different region.
-        if (createdLayers.length > 0) {
-          const group = L.featureGroup(createdLayers);
-          try {
-            map.fitBounds(group.getBounds().pad(0.1));
-          } catch {
-            // getBounds() can throw for empty/degenerate inputs; the
-            // map will stay at its previous extent which is fine.
-          }
-        }
+        const created = addPolygonsToMap(map, polygons, setAois, rebuildFromMap);
+        fitToLayers(map, created);
       }
     });
 
@@ -380,27 +384,8 @@ const AoiDrawLayer = () => {
       if (polygons.length === 0) return;
       const existing = (map.pm?.getGeomanLayers?.() ?? []) as unknown[];
       if (existing.length > 0) return;
-      const createdLayers: L.Polygon[] = [];
-      polygons.forEach((poly) => {
-        try {
-          const latlngs = poly.geometry.coordinates.map(
-            (ring) => ring.map(([lng, lat]) => L.latLng(lat, lng))
-          );
-          const leafletPoly = L.polygon(latlngs, LEGACY_AOI_STYLE);
-          leafletPoly.addTo(map);
-          createdLayers.push(leafletPoly);
-        } catch {
-          // Skip degenerate polygons rather than crash the preload.
-        }
-      });
-      setAois(rebuildFromMap());
-      if (createdLayers.length > 0) {
-        try {
-          map.fitBounds(L.featureGroup(createdLayers).getBounds().pad(0.1));
-        } catch {
-          // getBounds() can throw on degenerate inputs; leave the extent.
-        }
-      }
+      const created = addPolygonsToMap(map, polygons, setAois, rebuildFromMap);
+      fitToLayers(map, created);
     };
 
     // Pre-load the collection-area polygon on map open. Draft geometry comes

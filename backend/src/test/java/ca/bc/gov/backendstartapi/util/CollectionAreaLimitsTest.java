@@ -40,11 +40,12 @@ class CollectionAreaLimitsTest {
   @DisplayName("rejects a degree-scale polygon that exceeds 8 km radius")
   void hugePolygonIsRejected() {
     Polygon huge = polygon(-123.0, 49.0, -122.0, 50.0);
+    String hugeGeoJson = GeometryUtil.toGeoJson(huge);
     assertTrue(
         CollectionAreaLimits.maxExtentMeters(huge) > CollectionAreaLimits.MAX_EXTENT_METERS);
     assertThrows(
         ResponseStatusException.class,
-        () -> CollectionAreaLimits.assertAcceptable(huge, GeometryUtil.toGeoJson(huge)));
+        () -> CollectionAreaLimits.assertAcceptable(huge, hugeGeoJson));
   }
 
   @Test

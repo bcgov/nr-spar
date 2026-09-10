@@ -101,21 +101,8 @@ const radiusKmFromHectares = (hectares: number): string => {
   return String(Math.round((radiusM / 1000) * 10) / 10);
 };
 
-/**
- * Merge the derived SeedMap collection-area values into the B-class
- * collection form state. Populates coordinates, elevation, radius, BEC
- * unit, and stashes the raw GeoJSON for submission. Fields the map can't
- * derive (e.g. dates, containers) are left untouched.
- */
-export const applyCollectionAreaResult = (
-  state: BClassCollectionForm,
-  result: CollectionAreaResult,
-  becCatalogue: BecCatalogueItem[] | undefined
-): BClassCollectionForm => {
-  const next = structuredClone(state);
-
-  next.collectionGeometry.value = result.geoJson;
-
+/* eslint-disable no-param-reassign -- helpers mutate a structuredClone of form state */
+const applyLatLong = (next: BClassCollectionForm, result: CollectionAreaResult): void => {
   if (result.meanLat != null) {
     const latDms = decimalToDms(result.meanLat);
     next.latDeg.value = latDms.deg;
@@ -134,7 +121,9 @@ export const applyCollectionAreaResult = (
     next.longMin.isInvalid = false;
     next.longSec.isInvalid = false;
   }
+};
 
+const applyElevation = (next: BClassCollectionForm, result: CollectionAreaResult): void => {
   if (result.elevationMinM != null) {
     next.elevationMin.value = String(result.elevationMinM);
   }
@@ -146,12 +135,13 @@ export const applyCollectionAreaResult = (
       Math.round((result.elevationMinM + result.elevationMaxM) / 2)
     );
   }
+};
 
-  const radius = radiusKmFromHectares(result.areaHectares);
-  if (radius) {
-    next.collectionRadius.value = radius;
-  }
-
+const applyBec = (
+  next: BClassCollectionForm,
+  result: CollectionAreaResult,
+  becCatalogue: BecCatalogueItem[] | undefined
+): void => {
   if (result.becVariant) {
     const { zone, subzone, variant } = result.becVariant;
     if (zone) {
@@ -164,15 +154,41 @@ export const applyCollectionAreaResult = (
     }
     if (zone && subzone && variant) {
       next.becVariant.value = findVariant(becCatalogue, zone, subzone, variant);
-      next.becVariant.isInvalid = false;
     } else {
       next.becVariant.value = EmptyMultiOptObj;
-      next.becVariant.isInvalid = false;
     }
-  } else if (result.becZones.length === 1) {
+    next.becVariant.isInvalid = false;
+    return;
+  }
+  if (result.becZones.length === 1) {
     next.becZone.value = findZone(becCatalogue, result.becZones[0]);
     next.becZone.isInvalid = false;
   }
+};
+
+/**
+ * Merge the derived SeedMap collection-area values into the B-class
+ * collection form state. Populates coordinates, elevation, radius, BEC
+ * unit, and stashes the raw GeoJSON for submission. Fields the map can't
+ * derive (e.g. dates, containers) are left untouched.
+ */
+export const applyCollectionAreaResult = (
+  state: BClassCollectionForm,
+  result: CollectionAreaResult,
+  becCatalogue: BecCatalogueItem[] | undefined
+): BClassCollectionForm => {
+  const next = structuredClone(state);
+
+  next.collectionGeometry.value = result.geoJson;
+  applyLatLong(next, result);
+  applyElevation(next, result);
+
+  const radius = radiusKmFromHectares(result.areaHectares);
+  if (radius) {
+    next.collectionRadius.value = radius;
+  }
+
+  applyBec(next, result, becCatalogue);
 
   // The map derives BEC from the drawn geometry, so drive the lat/long
   // auto-BEC checkbox off and let the derived unit stand.

@@ -53,8 +53,8 @@ const buildTimestamp = (): string => {
   const now = new Date();
   return now
     .toISOString()
-    .replace(/:/g, '-')
-    .replace(/\..+$/, 'Z');
+    .replaceAll(':', '-')
+    .replace(/\.\d+Z$/, 'Z');
 };
 
 /**
@@ -70,7 +70,7 @@ const buildFeatureCollection = (
   const features: Feature[] = aois.map((aoi, idx) => ({
     type: 'Feature',
     properties: {
-      ...(aoi.properties ?? {}),
+      ...aoi.properties,
       polygonIndex: idx + 1,
       name: `SPAR AOI ${seedlotNumber} - polygon ${idx + 1}`,
       seedlotNumber

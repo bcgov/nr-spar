@@ -59,7 +59,7 @@ export const searchLocation = async (
 
   const json = (await res.json()) as FeatureCollection<Point>;
   return (json.features ?? [])
-    .filter((f) => f.geometry && f.geometry.type === 'Point')
+    .filter((f) => f.geometry?.type === 'Point')
     .map((f) => {
       const [lng, lat] = (f.geometry as Point).coordinates;
       return {

@@ -151,56 +151,75 @@ interface PopupContent {
   rows: Array<{ label: string; value: string }>;
 }
 
+const pushRow = (
+  rows: Array<{ label: string; value: string }>,
+  label: string,
+  value: string | number | null | undefined
+): void => {
+  if (value !== undefined && value !== null && value !== '') {
+    rows.push({ label, value: String(value) });
+  }
+};
+
+const seedlotPopup = (p: SeedlotFeatureProperties): PopupContent => {
+  const rows: Array<{ label: string; value: string }> = [];
+  pushRow(rows, 'Seedlot', p.SEEDLOT_NUMBER);
+  pushRow(rows, 'Species', p.VEGETATION_CODE);
+  pushRow(rows, 'BEC', p.BEC_ZONE);
+  if (p.ACTIVE_IND) {
+    rows.push({ label: 'Status', value: p.ACTIVE_IND === 'YES' ? 'Active' : 'Expired' });
+  }
+  pushRow(rows, 'Collection elev', p.COLLECTION_ELEVATION);
+  pushRow(rows, 'Use elev', p.USE_ELEVATION);
+  return { title: `Seedlot ${p.SEEDLOT_NUMBER ?? ''}`.trim(), rows };
+};
+
+const veglotPopup = (p: VeglotFeatureProperties): PopupContent => {
+  const rows: Array<{ label: string; value: string }> = [];
+  pushRow(rows, 'Veg Lot', p.VEG_LOT_ID);
+  pushRow(rows, 'Species', p.VEGETATION_CODE);
+  pushRow(rows, 'BEC', p.BEC_ZONE);
+  if (p.ACTIVE_IND) {
+    rows.push({ label: 'Status', value: p.ACTIVE_IND === 'YES' ? 'Active' : 'Expired' });
+  }
+  return { title: `Veg Lot ${p.VEG_LOT_ID ?? ''}`.trim(), rows };
+};
+
+const spzPopup = (p: SpzFeatureProperties): PopupContent => {
+  const rows: Array<{ label: string; value: string }> = [];
+  pushRow(rows, 'Code', p.SEED_PLAN_ZONE_CODE);
+  pushRow(rows, 'ID', p.SEED_PLAN_ZONE_ID);
+  pushRow(rows, 'Species', p.VEGETATION_CODE);
+  pushRow(rows, 'Class', p.GENETIC_CLASS_CODE);
+  return { title: 'Seed Plan Zone', rows };
+};
+
+const becPopup = (p: BecFeatureProperties): PopupContent => {
+  const rows: Array<{ label: string; value: string }> = [];
+  pushRow(rows, 'Label', p.MAP_LABEL);
+  pushRow(rows, 'BGC label', p.BGC_LABEL);
+  pushRow(rows, 'Zone', p.ZONE);
+  pushRow(rows, 'Subzone', p.SUBZONE);
+  pushRow(rows, 'Variant', p.VARIANT);
+  pushRow(rows, 'Subzone name', p.SUBZONE_NAME);
+  pushRow(rows, 'Variant name', p.VARIANT_NAME);
+  pushRow(rows, 'Natural disturbance', p.NATURAL_DISTURBANCE_NAME);
+  pushRow(rows, 'Area', formatArea(p.FEATURE_AREA_SQM));
+  return { title: p.ZONE_NAME ?? 'BEC Zone', rows };
+};
+
 const buildPopup = (identified: Identified): PopupContent => {
   const props = identified.feature.properties ?? {};
   switch (identified.kind) {
-    case 'seedlot': {
-      const p = props as SeedlotFeatureProperties;
-      const rows: Array<{ label: string; value: string }> = [];
-      if (p.SEEDLOT_NUMBER) rows.push({ label: 'Seedlot', value: String(p.SEEDLOT_NUMBER) });
-      if (p.VEGETATION_CODE) rows.push({ label: 'Species', value: p.VEGETATION_CODE });
-      if (p.BEC_ZONE) rows.push({ label: 'BEC', value: p.BEC_ZONE });
-      if (p.ACTIVE_IND) rows.push({ label: 'Status', value: p.ACTIVE_IND === 'YES' ? 'Active' : 'Expired' });
-      if (p.COLLECTION_ELEVATION) rows.push({ label: 'Collection elev', value: p.COLLECTION_ELEVATION });
-      if (p.USE_ELEVATION) rows.push({ label: 'Use elev', value: p.USE_ELEVATION });
-      return { title: `Seedlot ${p.SEEDLOT_NUMBER ?? ''}`.trim(), rows };
-    }
-    case 'veglot': {
-      const p = props as VeglotFeatureProperties;
-      const rows: Array<{ label: string; value: string }> = [];
-      if (p.VEG_LOT_ID) rows.push({ label: 'Veg Lot', value: String(p.VEG_LOT_ID) });
-      if (p.VEGETATION_CODE) rows.push({ label: 'Species', value: p.VEGETATION_CODE });
-      if (p.BEC_ZONE) rows.push({ label: 'BEC', value: p.BEC_ZONE });
-      if (p.ACTIVE_IND) rows.push({ label: 'Status', value: p.ACTIVE_IND === 'YES' ? 'Active' : 'Expired' });
-      return { title: `Veg Lot ${p.VEG_LOT_ID ?? ''}`.trim(), rows };
-    }
-    case 'spz': {
-      const p = props as SpzFeatureProperties;
-      const rows: Array<{ label: string; value: string }> = [];
-      if (p.SEED_PLAN_ZONE_CODE) rows.push({ label: 'Code', value: p.SEED_PLAN_ZONE_CODE });
-      if (p.SEED_PLAN_ZONE_ID) rows.push({ label: 'ID', value: String(p.SEED_PLAN_ZONE_ID) });
-      if (p.VEGETATION_CODE) rows.push({ label: 'Species', value: p.VEGETATION_CODE });
-      if (p.GENETIC_CLASS_CODE) rows.push({ label: 'Class', value: p.GENETIC_CLASS_CODE });
-      return { title: 'Seed Plan Zone', rows };
-    }
+    case 'seedlot':
+      return seedlotPopup(props as SeedlotFeatureProperties);
+    case 'veglot':
+      return veglotPopup(props as VeglotFeatureProperties);
+    case 'spz':
+      return spzPopup(props as SpzFeatureProperties);
     case 'bec':
-    default: {
-      const p = props as BecFeatureProperties;
-      const rows: Array<{ label: string; value: string }> = [];
-      if (p.MAP_LABEL) rows.push({ label: 'Label', value: p.MAP_LABEL });
-      if (p.BGC_LABEL) rows.push({ label: 'BGC label', value: p.BGC_LABEL });
-      if (p.ZONE) rows.push({ label: 'Zone', value: p.ZONE });
-      if (p.SUBZONE) rows.push({ label: 'Subzone', value: p.SUBZONE });
-      if (p.VARIANT) rows.push({ label: 'Variant', value: String(p.VARIANT) });
-      if (p.SUBZONE_NAME) rows.push({ label: 'Subzone name', value: p.SUBZONE_NAME });
-      if (p.VARIANT_NAME) rows.push({ label: 'Variant name', value: p.VARIANT_NAME });
-      if (p.NATURAL_DISTURBANCE_NAME) {
-        rows.push({ label: 'Natural disturbance', value: p.NATURAL_DISTURBANCE_NAME });
-      }
-      const area = formatArea(p.FEATURE_AREA_SQM);
-      if (area) rows.push({ label: 'Area', value: area });
-      return { title: p.ZONE_NAME ?? 'BEC Zone', rows };
-    }
+    default:
+      return becPopup(props as BecFeatureProperties);
   }
 };
 

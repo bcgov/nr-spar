@@ -321,7 +321,6 @@ export const SeedlotMapBody = () => {
         {legendOpen && (
           <div
             className="map-overlay map-overlay--side-panel-right"
-            role="region"
             aria-label="Map legend"
           >
             <div className="map-overlay__header">
@@ -351,7 +350,6 @@ export const SeedlotMapBody = () => {
         {bookmarksOpen && (
           <div
             className="map-overlay map-overlay--side-panel-left"
-            role="region"
             aria-label="Map bookmarks"
           >
             <div className="map-overlay__header">
@@ -380,7 +378,6 @@ export const SeedlotMapBody = () => {
         {measureToolsOpen && (
           <div
             className="map-overlay map-overlay--side-panel-left map-overlay--side-panel-left-2"
-            role="region"
             aria-label="Measurement tools"
           >
             <div className="map-overlay__header">

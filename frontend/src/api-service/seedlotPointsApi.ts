@@ -51,11 +51,13 @@ export interface LngLatBoundsTuple {
  * One seedlot/veglot point flattened from the WFS GeoJSON envelope into
  * the shape the renderer actually consumes.
  */
+export type ActiveIndicator = 'YES' | 'NO' | null;
+
 export interface SeedlotPoint {
   lotNumber: string;
   vegetationCode: string;
   bcgZone: string | null;
-  activeIndicator: 'YES' | 'NO' | null;
+  activeIndicator: ActiveIndicator;
   lat: number;
   lng: number;
 }
@@ -69,14 +71,20 @@ interface WfsProperties {
   [key: string]: unknown;
 }
 
+const propertyToString = (value: unknown): string => {
+  if (typeof value === 'string' && value.length > 0) return value;
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return '';
+};
+
 const numberPropertyToString = (
   props: WfsProperties,
   keys: Array<keyof WfsProperties>
 ): string => {
   const match = keys
     .map((key) => props[key])
-    .find((v) => v !== undefined && v !== null && String(v).length > 0);
-  return match !== undefined ? String(match) : '';
+    .find((v) => propertyToString(v).length > 0);
+  return match !== undefined ? propertyToString(match) : '';
 };
 
 const featureToPoint = (feature: Feature<Point, WfsProperties>): SeedlotPoint | null => {

@@ -89,7 +89,7 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
 
   private inFlight = false;
 
-  private wfsOptions: SeedlotPointsLayerOptions;
+  private readonly wfsOptions: SeedlotPointsLayerOptions;
 
   // Distinct VEGETATION_CODEs currently rendered, surfaced to the dynamic
   // legend's "Species" key (the markers are coloured by species).

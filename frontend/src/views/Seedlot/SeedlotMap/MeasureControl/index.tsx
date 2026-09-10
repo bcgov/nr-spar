@@ -43,7 +43,9 @@ const MeasureControl = () => {
     _setMapControls
   } = useSparMap();
 
-  const [, setPoints] = useState<L.LatLng[]>([]);
+  // Value is unused; setPoints is called with functional updates only.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_points, setPoints] = useState<L.LatLng[]>([]);
   const layerGroupRef = useRef<L.LayerGroup>(L.layerGroup());
 
   // Cache the current mode in a ref so the click handlers (which close
@@ -101,7 +103,8 @@ const MeasureControl = () => {
       if (pts.length === 0) return;
 
       if (mode === 'point') {
-        const pt = pts[pts.length - 1];
+        const pt = pts.at(-1);
+        if (!pt) return;
         const marker = L.circleMarker(pt, {
           radius: 6,
           color: '#0f62fe',
@@ -241,7 +244,9 @@ const MeasureControl = () => {
       // A double-click fires two 'click' events first, both at the finish
       // point — drop the duplicate vertex they added before finishing.
       let pts = prev;
-      if (pts.length >= 2 && pts[pts.length - 1].equals(pts[pts.length - 2], 1e-6)) {
+      const last = pts.at(-1);
+      const prev = pts.at(-2);
+      if (pts.length >= 2 && last && prev && last.equals(prev, 1e-6)) {
         pts = pts.slice(0, -1);
       }
       if (pts.length >= 2) renderMeasurement(pts, mode, true);

@@ -224,7 +224,7 @@ const IDENTIFY_LAYER_IDS = new Set<string>([
  * `IDENTIFY_LAYER_IDS` (every identifiable layer carries a legend), plus the
  * BEC layers (already in the identify set, retained here for clarity).
  */
-const LEGEND_LAYER_IDS = new Set<string>([...IDENTIFY_LAYER_IDS]);
+const LEGEND_LAYER_IDS = new Set<string>(IDENTIFY_LAYER_IDS);
 LEGEND_LAYER_IDS.add('bec_subzones_250k_outline');
 LEGEND_LAYER_IDS.add('bec_subzones_250k_labels');
 

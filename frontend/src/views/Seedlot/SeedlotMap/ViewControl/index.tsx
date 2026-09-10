@@ -81,8 +81,7 @@ const ViewControl = ({ initialBounds }: ViewControlProps) => {
       const snap = snapshot();
       const last = historyRef.current[indexRef.current];
       if (
-        last
-        && last.zoom === snap.zoom
+        last?.zoom === snap.zoom
         && last.center[0] === snap.center[0]
         && last.center[1] === snap.center[1]
       ) {

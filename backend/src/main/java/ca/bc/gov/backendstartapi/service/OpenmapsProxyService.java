@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -36,9 +37,28 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class OpenmapsProxyService {
 
-  static final String OPENMAPS_BASE_URL = "https://openmaps.gov.bc.ca";
-  static final String WFS_PATH = "/geo/pub/ows";
-  static final String WMS_PATH = "/geo/pub/wms";
+  private static final String PARAM_SERVICE = "service";
+  private static final String PARAM_VERSION = "version";
+  private static final String PARAM_REQUEST = "request";
+  private static final String PARAM_TYPENAMES = "typenames";
+  private static final String PARAM_TYPENAME = "typename";
+  private static final String PARAM_LAYER = "layer";
+  private static final String PARAM_LAYERS = "layers";
+  private static final String PARAM_OUTPUTFORMAT = "outputformat";
+  private static final String PARAM_FORMAT = "format";
+  private static final String PARAM_SRSNAME = "srsname";
+  private static final String PARAM_SRS = "srs";
+  private static final String PARAM_CRS = "crs";
+  private static final String PARAM_COUNT = "count";
+  private static final String PARAM_MAXFEATURES = "maxfeatures";
+  private static final String PARAM_CQL_FILTER = "cql_filter";
+  private static final String PARAM_PROPERTYNAME = "propertyname";
+  private static final String PARAM_STYLE = "style";
+  private static final String PARAM_STYLES = "styles";
+  private static final String PARAM_LEGEND_OPTIONS = "legend_options";
+  private static final String PARAM_WIDTH = "width";
+  private static final String PARAM_HEIGHT = "height";
+  private static final String PARAM_BBOX = "bbox";
 
   private static final int MAX_FEATURES = 5000;
   /**
@@ -64,31 +84,32 @@ public class OpenmapsProxyService {
 
   private static final Set<String> ALLOWED_PARAMS =
       Set.of(
-          "service",
-          "version",
-          "request",
-          "typenames",
-          "typename",
-          "layer",
-          "layers",
-          "outputformat",
-          "format",
-          "srsname",
-          "srs",
-          "crs",
-          "count",
-          "maxfeatures",
-          "cql_filter",
-          "propertyname",
-          "style",
-          "styles",
-          "legend_options",
-          "width",
-          "height",
-          "bbox");
+          PARAM_SERVICE,
+          PARAM_VERSION,
+          PARAM_REQUEST,
+          PARAM_TYPENAMES,
+          PARAM_TYPENAME,
+          PARAM_LAYER,
+          PARAM_LAYERS,
+          PARAM_OUTPUTFORMAT,
+          PARAM_FORMAT,
+          PARAM_SRSNAME,
+          PARAM_SRS,
+          PARAM_CRS,
+          PARAM_COUNT,
+          PARAM_MAXFEATURES,
+          PARAM_CQL_FILTER,
+          PARAM_PROPERTYNAME,
+          PARAM_STYLE,
+          PARAM_STYLES,
+          PARAM_LEGEND_OPTIONS,
+          PARAM_WIDTH,
+          PARAM_HEIGHT,
+          PARAM_BBOX);
 
-  private static final Pattern LAYER_NAME =
-      Pattern.compile("^(pub:)?[A-Z][A-Z0-9_]*(\\.[A-Z][A-Z0-9_]*)+$", Pattern.CASE_INSENSITIVE);
+  /** One BCGW name segment ({@code WHSE_FOREST_VEGETATION}, {@code SEED_SEEDLOT_POINT_MVW}). */
+  private static final Pattern LAYER_PART =
+      Pattern.compile("^[A-Z][A-Z0-9_]*$", Pattern.CASE_INSENSITIVE);
   private static final Pattern PROPERTY_NAME = Pattern.compile("^[A-Za-z0-9_,]+$");
   private static final Pattern STYLE = Pattern.compile("^[A-Za-z0-9_,-]+$");
   private static final Pattern SRS = Pattern.compile("^EPSG:\\d+$", Pattern.CASE_INSENSITIVE);
@@ -105,38 +126,52 @@ public class OpenmapsProxyService {
   private static final Pattern CQL_SAFE = Pattern.compile("[A-Za-z0-9_,.'()=: \\-+\\[\\]]+");
 
   private final RestTemplate restTemplate;
+  private final String openmapsBaseUrl;
+  private final String wfsPath;
+  private final String wmsPath;
 
   @Autowired
-  OpenmapsProxyService(RestTemplateBuilder templateBuilder) {
+  OpenmapsProxyService(
+      RestTemplateBuilder templateBuilder,
+      @Value("${openmaps.base-url}") String openmapsBaseUrl,
+      @Value("${openmaps.wfs-path}") String wfsPath,
+      @Value("${openmaps.wms-path}") String wmsPath) {
     this(
         templateBuilder
             .connectTimeout(Duration.ofSeconds(5))
             .readTimeout(Duration.ofSeconds(25))
-            .build());
+            .build(),
+        openmapsBaseUrl,
+        wfsPath,
+        wmsPath);
   }
 
-  OpenmapsProxyService(RestTemplate restTemplate) {
+  OpenmapsProxyService(
+      RestTemplate restTemplate, String openmapsBaseUrl, String wfsPath, String wmsPath) {
     this.restTemplate = restTemplate;
+    this.openmapsBaseUrl = openmapsBaseUrl;
+    this.wfsPath = wfsPath;
+    this.wmsPath = wmsPath;
   }
 
   /**
-   * Validate the caller query, forward it to the hard-coded OpenMaps host, and return the JSON
+   * Validate the caller query, forward it to the configured OpenMaps host, and return the JSON
    * body. Never forwards the SPAR Authorization header.
    */
   public String forward(MultiValueMap<String, String> rawQuery) {
     Map<String, String> query = flattenAndNormalize(rawQuery);
     rejectUnknownParams(query);
 
-    String service = required(query, "service").toUpperCase(Locale.ROOT);
-    String request = required(query, "request");
-    validateVersion(query.get("version"));
+    String service = required(query, PARAM_SERVICE).toUpperCase(Locale.ROOT);
+    String request = required(query, PARAM_REQUEST);
+    validateVersion(query.get(PARAM_VERSION));
 
     String path;
     if ("WFS".equals(service) && equalsIgnoreCase(request, "GetFeature")) {
-      path = WFS_PATH;
+      path = wfsPath;
       validateWfs(query);
     } else if ("WMS".equals(service) && equalsIgnoreCase(request, "GetLegendGraphic")) {
-      path = WMS_PATH;
+      path = wmsPath;
       validateWmsLegend(query);
     } else {
       throw new OpenmapsProxyException(
@@ -170,43 +205,43 @@ public class OpenmapsProxyService {
     MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
     query.forEach((key, value) -> params.add(canonicalParamName(key), value));
     URI uri =
-        UriComponentsBuilder.fromUriString(OPENMAPS_BASE_URL)
+        UriComponentsBuilder.fromUriString(openmapsBaseUrl)
             .path(path)
             .queryParams(params)
             .encode()
             .build()
             .toUri();
-    if (!OPENMAPS_BASE_URL.equals(uri.getScheme() + "://" + uri.getHost())
+    if (!openmapsBaseUrl.equals(uri.getScheme() + "://" + uri.getHost())
         || uri.getPort() != -1) {
       throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Refusing to leave OpenMaps host");
     }
     return uri;
   }
 
-  private void validateWfs(Map<String, String> query) {
-    requireJsonFormat(firstPresent(query, "outputformat", "format"));
-    validateLayer(firstPresent(query, "typenames", "typename"), true);
-    validateOptional(query, "srsname", SRS, "Invalid srsName");
-    validateOptional(query, "srs", SRS, "Invalid srs");
-    validateOptional(query, "crs", SRS, "Invalid crs");
-    validateOptional(query, "propertyname", PROPERTY_NAME, "Invalid propertyName");
-    validateOptional(query, "bbox", BBOX, "Invalid bbox");
+  private static void validateWfs(Map<String, String> query) {
+    requireJsonFormat(firstPresent(query, PARAM_OUTPUTFORMAT, PARAM_FORMAT));
+    validateLayer(firstPresent(query, PARAM_TYPENAMES, PARAM_TYPENAME), true);
+    validateOptional(query, PARAM_SRSNAME, SRS, "Invalid srsName");
+    validateOptional(query, PARAM_SRS, SRS, "Invalid srs");
+    validateOptional(query, PARAM_CRS, SRS, "Invalid crs");
+    validateOptional(query, PARAM_PROPERTYNAME, PROPERTY_NAME, "Invalid propertyName");
+    validateOptional(query, PARAM_BBOX, BBOX, "Invalid bbox");
     applyDefaultCount(query);
-    validateCount(firstPresent(query, "count", "maxfeatures"));
-    validateCql(query.get("cql_filter"));
+    validateCount(firstPresent(query, PARAM_COUNT, PARAM_MAXFEATURES));
+    validateCql(query.get(PARAM_CQL_FILTER));
   }
 
-  private void validateWmsLegend(Map<String, String> query) {
-    requireJsonFormat(firstPresent(query, "format", "outputformat"));
-    validateLayer(firstPresent(query, "layer", "layers"), false);
-    validateOptional(query, "style", STYLE, "Invalid style");
-    validateOptional(query, "styles", STYLE, "Invalid styles");
-    validateOptional(query, "srs", SRS, "Invalid srs");
-    validateOptional(query, "crs", SRS, "Invalid crs");
-    validateOptional(query, "legend_options", LEGEND_OPTIONS, "Invalid LEGEND_OPTIONS");
-    validateOptional(query, "bbox", BBOX, "Invalid bbox");
-    validateDimension(query.get("width"), "width");
-    validateDimension(query.get("height"), "height");
+  private static void validateWmsLegend(Map<String, String> query) {
+    requireJsonFormat(firstPresent(query, PARAM_FORMAT, PARAM_OUTPUTFORMAT));
+    validateLayer(firstPresent(query, PARAM_LAYER, PARAM_LAYERS), false);
+    validateOptional(query, PARAM_STYLE, STYLE, "Invalid style");
+    validateOptional(query, PARAM_STYLES, STYLE, "Invalid styles");
+    validateOptional(query, PARAM_SRS, SRS, "Invalid srs");
+    validateOptional(query, PARAM_CRS, SRS, "Invalid crs");
+    validateOptional(query, PARAM_LEGEND_OPTIONS, LEGEND_OPTIONS, "Invalid LEGEND_OPTIONS");
+    validateOptional(query, PARAM_BBOX, BBOX, "Invalid bbox");
+    validateDimension(query.get(PARAM_WIDTH), PARAM_WIDTH);
+    validateDimension(query.get(PARAM_HEIGHT), PARAM_HEIGHT);
   }
 
   private static void validateLayer(String layer, boolean wfsGetFeature) {
@@ -214,7 +249,7 @@ public class OpenmapsProxyService {
       throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Layer name is required");
     }
     String first = layer.split(",")[0].trim();
-    if (!LAYER_NAME.matcher(first).matches()) {
+    if (!isAllowedLayerName(first)) {
       throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Invalid layer name");
     }
     if (layer.contains(",")) {
@@ -223,6 +258,27 @@ public class OpenmapsProxyService {
     if (wfsGetFeature && !ALLOWED_WFS_LAYERS.contains(canonicalLayerName(first))) {
       throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Layer is not allowed");
     }
+  }
+
+  /**
+   * BCGW typeNames are {@code SCHEMA.LAYER} with an optional {@code pub:} prefix.
+   * Parts are checked independently so the pattern cannot stack-overflow.
+   */
+  static boolean isAllowedLayerName(String layer) {
+    String name = layer;
+    if (name.regionMatches(true, 0, "pub:", 0, 4)) {
+      name = name.substring(4);
+    }
+    String[] parts = name.split("\\.", -1);
+    if (parts.length < 2) {
+      return false;
+    }
+    for (String part : parts) {
+      if (!LAYER_PART.matcher(part).matches()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private static String canonicalLayerName(String layer) {
@@ -251,8 +307,8 @@ public class OpenmapsProxyService {
    * it so {@link #MAX_FEATURES} is always in force.
    */
   private static void applyDefaultCount(Map<String, String> query) {
-    if (firstPresent(query, "count", "maxfeatures") == null) {
-      query.put("count", String.valueOf(MAX_FEATURES));
+    if (firstPresent(query, PARAM_COUNT, PARAM_MAXFEATURES) == null) {
+      query.put(PARAM_COUNT, String.valueOf(MAX_FEATURES));
     }
   }
 
@@ -354,14 +410,14 @@ public class OpenmapsProxyService {
   /** GeoServer accepts mixed case, but SPAR always sends the conventional names. */
   private static String canonicalParamName(String key) {
     return switch (key) {
-      case "typenames" -> "typeNames";
-      case "typename" -> "typeName";
-      case "outputformat" -> "outputFormat";
-      case "srsname" -> "srsName";
-      case "maxfeatures" -> "maxFeatures";
-      case "cql_filter" -> "CQL_FILTER";
-      case "propertyname" -> "propertyName";
-      case "legend_options" -> "LEGEND_OPTIONS";
+      case PARAM_TYPENAMES -> "typeNames";
+      case PARAM_TYPENAME -> "typeName";
+      case PARAM_OUTPUTFORMAT -> "outputFormat";
+      case PARAM_SRSNAME -> "srsName";
+      case PARAM_MAXFEATURES -> "maxFeatures";
+      case PARAM_CQL_FILTER -> "CQL_FILTER";
+      case PARAM_PROPERTYNAME -> "propertyName";
+      case PARAM_LEGEND_OPTIONS -> "LEGEND_OPTIONS";
       default -> key;
     };
   }

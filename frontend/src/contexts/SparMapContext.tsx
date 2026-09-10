@@ -10,6 +10,17 @@ import type { LatLngBoundsExpression } from 'leaflet';
 import type { AoiPolygon } from '../types/SparMapTypes';
 import type { LegendOverlayData } from '../api-service/legendApi';
 
+export type BecZoneShape = 'zone' | 'mapLabel';
+export type MeasurementMode = 'distance' | 'area' | 'point' | null;
+export type LiveAoiValidation = { ok: boolean; message: string } | null;
+export type MeasurementResult = {
+  distanceKm?: number;
+  perimeterKm?: number;
+  areaSqm?: number;
+  pointLat?: number;
+  pointLng?: number;
+} | null;
+
 export interface MarkupPointCoordinate {
   lat: number;
   lng: number;
@@ -216,8 +227,8 @@ interface SparMapContextValue {
   /** Subset of becZoneCodes that are marked "not suitable" for the species. */
   becNotSuit: string[];
   /** Whether becZoneCodes filter should target ZONE or MAP_LABEL. */
-  becZoneShape: 'zone' | 'mapLabel';
-  setBecZones: (codes: string[], notSuit: string[], shape?: 'zone' | 'mapLabel') => void;
+  becZoneShape: BecZoneShape;
+  setBecZones: (codes: string[], notSuit: string[], shape?: BecZoneShape) => void;
 
   /**
    * Bounds parsed from the legacy `extent=minX,minY,maxX,maxY` URL param
@@ -402,8 +413,8 @@ interface SparMapContextValue {
    * means "no AOI to validate" (empty list). Non-null with `ok: false`
    * surfaces an inline warning in the AOI toolbar.
    */
-  liveAoiValidation: { ok: boolean; message: string } | null;
-  setLiveAoiValidation: (result: { ok: boolean; message: string } | null) => void;
+  liveAoiValidation: LiveAoiValidation;
+  setLiveAoiValidation: (result: LiveAoiValidation) => void;
 
   /**
    * Active mode for the legacy CWM Measurement Tools panel. Mirrors the
@@ -413,8 +424,8 @@ interface SparMapContextValue {
    * stops the corresponding click flow. Null means measurement is
    * inactive.
    */
-  measurementMode: 'distance' | 'area' | 'point' | null;
-  setMeasurementMode: (mode: 'distance' | 'area' | 'point' | null) => void;
+  measurementMode: MeasurementMode;
+  setMeasurementMode: (mode: MeasurementMode) => void;
 
   /**
    * Latest measurement readouts, written by `<MeasureControl>` after
@@ -422,24 +433,8 @@ interface SparMapContextValue {
    * Distance / Perimeter / Area / Point coordinate fields. Null means
    * no measurement has been taken yet (or the user cleared it).
    */
-  measurementResult: {
-    distanceKm?: number;
-    perimeterKm?: number;
-    areaSqm?: number;
-    pointLat?: number;
-    pointLng?: number;
-  } | null;
-  setMeasurementResult: (
-    result:
-      | {
-          distanceKm?: number;
-          perimeterKm?: number;
-          areaSqm?: number;
-          pointLat?: number;
-          pointLng?: number;
-        }
-      | null
-  ) => void;
+  measurementResult: MeasurementResult;
+  setMeasurementResult: (result: MeasurementResult) => void;
 
   /**
    * Registers a partial slice of map control callbacks. Both
@@ -469,7 +464,7 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
   const [aois, setAoisState] = useState<AoiPolygon[]>([]);
   const [becZoneCodes, setBecZoneCodes] = useState<string[]>([]);
   const [becNotSuit, setBecNotSuit] = useState<string[]>([]);
-  const [becZoneShape, setBecZoneShape] = useState<'zone' | 'mapLabel'>('zone');
+  const [becZoneShape, setBecZoneShape] = useState<BecZoneShape>('zone');
   const [mapControls, setMapControlsState] = useState<MapControls>(NOOP_MAP_CONTROLS);
   const [identifyActive, setIdentifyActiveState] = useState(false);
   const [activeCatalogLayers, setActiveCatalogLayers] = useState<string[]>([]);
@@ -478,50 +473,18 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
   const setGraticuleVisible = useCallback((visible: boolean) => {
     setGraticuleVisibleState(visible);
   }, []);
-  const [liveAoiValidation, setLiveAoiValidationState] = useState<
-    { ok: boolean; message: string } | null
-  >(null);
-  const setLiveAoiValidation = useCallback(
-    (result: { ok: boolean; message: string } | null) => {
-      setLiveAoiValidationState(result);
-    },
-    []
-  );
-  const [measurementMode, setMeasurementModeState] = useState<
-    'distance' | 'area' | 'point' | null
-  >(null);
-  const setMeasurementMode = useCallback(
-    (mode: 'distance' | 'area' | 'point' | null) => {
-      setMeasurementModeState(mode);
-    },
-    []
-  );
-  const [measurementResult, setMeasurementResultState] = useState<
-    | {
-        distanceKm?: number;
-        perimeterKm?: number;
-        areaSqm?: number;
-        pointLat?: number;
-        pointLng?: number;
-      }
-    | null
-  >(null);
-  const setMeasurementResult = useCallback(
-    (
-      result:
-        | {
-            distanceKm?: number;
-            perimeterKm?: number;
-            areaSqm?: number;
-            pointLat?: number;
-            pointLng?: number;
-          }
-        | null
-    ) => {
-      setMeasurementResultState(result);
-    },
-    []
-  );
+  const [liveAoiValidation, setLiveAoiValidationState] = useState<LiveAoiValidation>(null);
+  const setLiveAoiValidation = useCallback((result: LiveAoiValidation) => {
+    setLiveAoiValidationState(result);
+  }, []);
+  const [measurementMode, setMeasurementModeState] = useState<MeasurementMode>(null);
+  const setMeasurementMode = useCallback((mode: MeasurementMode) => {
+    setMeasurementModeState(mode);
+  }, []);
+  const [measurementResult, setMeasurementResultState] = useState<MeasurementResult>(null);
+  const setMeasurementResult = useCallback((result: MeasurementResult) => {
+    setMeasurementResultState(result);
+  }, []);
   const [viewHistoryAvail, setViewHistoryAvail] = useState({
     canGoBack: false,
     canGoForward: false
@@ -576,7 +539,7 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const setBecZones = useCallback(
-    (codes: string[], notSuit: string[], shape: 'zone' | 'mapLabel' = 'zone') => {
+    (codes: string[], notSuit: string[], shape: BecZoneShape = 'zone') => {
       setBecZoneCodes(codes);
       setBecNotSuit(notSuit);
       setBecZoneShape(shape);

@@ -44,10 +44,9 @@ const BecZonePanel = () => {
   };
 
   return (
-    <div
+    <section
       className="bec-zone-panel bec-zone-panel--side"
       data-testid="bec-zone-panel"
-      role="region"
       aria-label="BEC Zone list"
     >
       <h2 className="bec-zone-panel__title">CBST Area of Use Tool</h2>
@@ -84,28 +83,24 @@ const BecZonePanel = () => {
             const isSelected = selected === code;
             const className = `bec-zone-panel__row${isSelected ? ' bec-zone-panel__row--selected' : ''}`;
             return (
-              <tr
-                key={code}
-                className={className}
-                onClick={() => handleRowClick(code)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    handleRowClick(code);
-                  }
-                }}
-                tabIndex={0}
-                role="button"
-                aria-pressed={isSelected}
-                data-testid={`bec-zone-row-${code}`}
-              >
-                <td>{display}</td>
+              <tr key={code} className={className}>
+                <td>
+                  <button
+                    type="button"
+                    className="bec-zone-panel__row-btn"
+                    onClick={() => handleRowClick(code)}
+                    aria-pressed={isSelected}
+                    data-testid={`bec-zone-row-${code}`}
+                  >
+                    {display}
+                  </button>
+                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
-    </div>
+    </section>
   );
 };
 

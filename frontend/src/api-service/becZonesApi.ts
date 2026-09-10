@@ -145,7 +145,10 @@ const pointToBcAlbersWkt = (coord: Position): string => {
   return `${easting} ${northing}`;
 };
 
-const pointsToBcAlbersMultiPointWkt = (points: Position[]): string => `MULTIPOINT(${points.map((point) => `(${pointToBcAlbersWkt(point)})`).join(', ')})`;
+const pointsToBcAlbersMultiPointWkt = (points: Position[]): string => {
+  const parts = points.map((point) => `(${pointToBcAlbersWkt(point)})`).join(', ');
+  return `MULTIPOINT(${parts})`;
+};
 
 const pointKey = (coord: Position) => {
   const [lng, lat] = coord;
@@ -319,7 +322,7 @@ export const fetchBecZoneByMapLabel = async (
     clearTimeout(timer);
   }
   const first = fc.features?.[0];
-  if (!first || !first.geometry) return null;
+  if (!first?.geometry) return null;
   const geomType = (first.geometry as { type?: string }).type;
   if (geomType !== 'Polygon' && geomType !== 'MultiPolygon') return null;
   return first as Feature<Polygon | MultiPolygon, BecZoneProperties>;

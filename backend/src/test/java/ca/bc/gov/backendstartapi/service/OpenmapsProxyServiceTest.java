@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,7 +36,9 @@ class OpenmapsProxyServiceTest {
 
   @BeforeEach
   void setup() {
-    service = new OpenmapsProxyService(restTemplate);
+    service =
+        new OpenmapsProxyService(
+            restTemplate, "https://openmaps.gov.bc.ca", "/geo/pub/ows", "/geo/pub/wms");
   }
 
   private static MultiValueMap<String, String> wfsQuery() {
@@ -189,8 +192,9 @@ class OpenmapsProxyServiceTest {
             any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
         .thenThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN));
 
+    MultiValueMap<String, String> query = wfsQuery();
     OpenmapsProxyException ex =
-        assertThrows(OpenmapsProxyException.class, () -> service.forward(wfsQuery()));
+        assertThrows(OpenmapsProxyException.class, () -> service.forward(query));
     assertEquals(HttpStatus.BAD_GATEWAY, ex.getStatusCode());
   }
 
@@ -216,5 +220,17 @@ class OpenmapsProxyServiceTest {
         assertThrows(OpenmapsProxyException.class, () -> service.forward(query));
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     assertEquals("CQL_FILTER is too long", ex.getReason());
+  }
+
+  @Test
+  @DisplayName("accepts BCGW typeNames with optional pub: prefix")
+  void allowedLayerNames() {
+    String seedlotLayer = "pub:WHSE_FOREST_VEGETATION.SEED_SEEDLOT_POINT_MVW";
+    assertTrue(OpenmapsProxyService.isAllowedLayerName(seedlotLayer));
+    assertTrue(
+        OpenmapsProxyService.isAllowedLayerName(
+            "whse_forest_vegetation.seed_seedlot_point_mvw"));
+    assertFalse(OpenmapsProxyService.isAllowedLayerName("SEED_SEEDLOT_POINT_MVW"));
+    assertFalse(OpenmapsProxyService.isAllowedLayerName("http://evil.example/x"));
   }
 }

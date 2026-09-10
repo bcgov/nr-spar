@@ -66,11 +66,12 @@ const TOPICS: HelpTopic[] = [
           within 1 km, then the
           {' '}
           <strong>BEC polygon</strong>
-          , then the
+          {', then the '}
           <strong>Seed Plan Zone</strong>
-          .
+          {'. '}
           The first match is displayed in a popup, and on drawing-enabled
           themes a
+          {' '}
           <em>Copy as AOI</em>
           {' '}
           button copies BEC / SPZ polygon

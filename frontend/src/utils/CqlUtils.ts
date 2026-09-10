@@ -7,7 +7,7 @@
  */
 
 /** Double single quotes — the ECQL string-literal escape. */
-export const escapeCqlLiteral = (value: string): string => value.replace(/'/g, "''");
+export const escapeCqlLiteral = (value: string): string => value.replaceAll("'", "''");
 
 /** Quote a value as an ECQL string literal (`'foo''bar'`). */
 export const cqlQuoted = (value: string): string => `'${escapeCqlLiteral(value)}'`;
