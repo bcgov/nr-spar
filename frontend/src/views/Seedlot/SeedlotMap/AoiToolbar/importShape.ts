@@ -11,6 +11,12 @@ import type {
 } from 'geojson';
 
 import type { AoiPolygon } from '../../../../types/SparMapTypes';
+import {
+  MAX_COLLECTION_EXTENT_KM,
+  MAX_COLLECTION_RADIUS_KM,
+  MAX_COLLECTION_VERTICES
+} from '../collectionAreaLimits';
+import { collectionExtentKm } from './aoiValidation';
 
 /**
  * Hard caps for imported shape files. Browser parsing of zip/KML/GeoJSON is
@@ -24,7 +30,7 @@ export const MAX_ZIP_ENTRY_COUNT = 200;
 /** Collection areas are a handful of polygons; more than this is a bad file. */
 export const MAX_IMPORT_FEATURES = 50;
 /** Caps WKT size so BEC validation stays under Tomcat's 8 KiB header limit. */
-export const MAX_IMPORT_VERTICES = 2000;
+export const MAX_IMPORT_VERTICES = MAX_COLLECTION_VERTICES;
 
 /** Extensions the import picker and detector accept. */
 export const ACCEPTED_IMPORT_FILE_EXTENSIONS = [
@@ -433,6 +439,13 @@ export const importShapeFile = async (file: File): Promise<ImportResult> => {
     throw new Error(
       `Polygons have too many vertices (${vertexCount}). `
       + `Maximum is ${MAX_IMPORT_VERTICES}. Simplify the file and try again.`
+    );
+  }
+  const extentKm = collectionExtentKm(normalized.polygons);
+  if (extentKm > MAX_COLLECTION_EXTENT_KM) {
+    throw new Error(
+      `Collection area cannot span more than ${MAX_COLLECTION_RADIUS_KM} km radius. `
+      + 'Shrink the polygon and try again.'
     );
   }
 

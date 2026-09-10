@@ -13,11 +13,11 @@ const squarePolygon = (lngOffset = 0): AoiPolygon => ({
   geometry: {
     type: 'Polygon',
     coordinates: [[
-      [-123 + lngOffset, 48],
-      [-122 + lngOffset, 48],
-      [-122 + lngOffset, 49],
-      [-123 + lngOffset, 49],
-      [-123 + lngOffset, 48]
+      [-123.02 + lngOffset, 49.00],
+      [-123.00 + lngOffset, 49.00],
+      [-123.00 + lngOffset, 49.01],
+      [-123.02 + lngOffset, 49.01],
+      [-123.02 + lngOffset, 49.00]
     ]]
   }
 });
@@ -51,7 +51,7 @@ describe('aoiValidation', () => {
     });
 
     it('accepts multiple valid polygons', () => {
-      const result = validatePolygons([squarePolygon(), squarePolygon(2)]);
+      const result = validatePolygons([squarePolygon(), squarePolygon(0.01)]);
       expect(result.ok).toBe(true);
       expect(result.message).toMatch(/2 polygons/);
     });
@@ -60,6 +60,26 @@ describe('aoiValidation', () => {
       const result = validatePolygons([invalidPolygon()]);
       expect(result.ok).toBe(false);
       expect(result.message).toMatch(/invalid geometry/i);
+    });
+
+    it('rejects a polygon larger than the 8 km radius', () => {
+      const huge: AoiPolygon = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [-123, 49],
+            [-122, 49],
+            [-122, 50],
+            [-123, 50],
+            [-123, 49]
+          ]]
+        }
+      };
+      const result = validatePolygons([huge]);
+      expect(result.ok).toBe(false);
+      expect(result.message).toMatch(/8 km radius/i);
     });
   });
 
@@ -76,7 +96,7 @@ describe('aoiValidation', () => {
     });
 
     it('combines multiple polygons into one MultiPolygon', () => {
-      const feature = buildMultiPolygonFeature([squarePolygon(), squarePolygon(2)]);
+      const feature = buildMultiPolygonFeature([squarePolygon(), squarePolygon(0.01)]);
       expect(feature!.geometry.coordinates).toHaveLength(2);
     });
   });

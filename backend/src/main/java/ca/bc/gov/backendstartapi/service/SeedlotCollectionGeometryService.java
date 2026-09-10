@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.util.CollectionAreaLimits;
 import ca.bc.gov.backendstartapi.util.GeometryUtil;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -88,6 +89,8 @@ public class SeedlotCollectionGeometryService {
               });
       return;
     }
+
+    CollectionAreaLimits.assertAcceptable(geometry, geoJson);
 
     SparLog.info("Saving collection geometry for seedlot {}", seedlot.getId());
 

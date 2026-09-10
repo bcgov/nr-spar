@@ -18,6 +18,7 @@ import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GameticMethodologyRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
+import ca.bc.gov.backendstartapi.util.CollectionAreaLimits;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -122,6 +123,17 @@ public class SeedlotFormValidationService {
     validateBclassConeCollectionMethods(dto.coneCollectionMethodCodes(), errors);
     validateBclassRequiredCollectionCodes(dto, errors);
     validateBclassBecAndBcSourceRules(seedlot, dto, errors);
+    if (dto.collectionAreaRadius() != null
+        && dto.collectionAreaRadius()
+                .compareTo(BigDecimal.valueOf(CollectionAreaLimits.MAX_RADIUS_KM))
+            > 0) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.collectionAreaRadius",
+              "The radius cannot be greater than "
+                  + (int) CollectionAreaLimits.MAX_RADIUS_KM
+                  + " kilometers."));
+    }
   }
 
   private void validateBclassConeCollectionMethods(

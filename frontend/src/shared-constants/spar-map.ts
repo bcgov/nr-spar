@@ -9,7 +9,6 @@
  * profile configs in `frontend/src/config/leaflet-themes/`.
  */
 export const OPENMAPS_WMS_URL = 'https://openmaps.gov.bc.ca/geo/pub/wms';
-export const OPENMAPS_WFS_URL = 'https://openmaps.gov.bc.ca/geo/pub/ows';
 
 export const BEC_QUERY_LAYER = 'WHSE_FOREST_VEGETATION.BEC_BIOGEOCLIMATIC_POLY';
 export const SPZ_QUERY_LAYER = 'WHSE_FOREST_VEGETATION.SEED_PLAN_ZONE_POLY_MVW';

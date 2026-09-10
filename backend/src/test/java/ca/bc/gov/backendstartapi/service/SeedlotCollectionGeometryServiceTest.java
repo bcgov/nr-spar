@@ -89,11 +89,11 @@ class SeedlotCollectionGeometryServiceTest {
     GeometryFactory geometryFactory = new GeometryFactory();
     Coordinate[] coordinates =
         new Coordinate[] {
-          new Coordinate(0, 0),
-          new Coordinate(1, 0),
-          new Coordinate(1, 1),
-          new Coordinate(0, 1),
-          new Coordinate(0, 0)
+          new Coordinate(-123.02, 49.00),
+          new Coordinate(-123.00, 49.00),
+          new Coordinate(-123.00, 49.01),
+          new Coordinate(-123.02, 49.01),
+          new Coordinate(-123.02, 49.00)
         };
     Polygon polygon = geometryFactory.createPolygon(coordinates);
 
@@ -166,11 +166,11 @@ class SeedlotCollectionGeometryServiceTest {
     Polygon polygon =
         geometryFactory.createPolygon(
             new Coordinate[] {
-              new Coordinate(0, 0),
-              new Coordinate(1, 0),
-              new Coordinate(1, 1),
-              new Coordinate(0, 1),
-              new Coordinate(0, 0)
+              new Coordinate(-123.02, 49.00),
+              new Coordinate(-123.00, 49.00),
+              new Coordinate(-123.00, 49.01),
+              new Coordinate(-123.02, 49.01),
+              new Coordinate(-123.02, 49.00)
             });
     String geoJson = GeometryUtil.toGeoJson(polygon);
 
@@ -200,11 +200,11 @@ class SeedlotCollectionGeometryServiceTest {
     Polygon polygon =
         geometryFactory.createPolygon(
             new Coordinate[] {
-              new Coordinate(0, 0),
-              new Coordinate(2, 0),
-              new Coordinate(2, 2),
-              new Coordinate(0, 2),
-              new Coordinate(0, 0)
+              new Coordinate(-123.03, 49.00),
+              new Coordinate(-123.01, 49.00),
+              new Coordinate(-123.01, 49.01),
+              new Coordinate(-123.03, 49.01),
+              new Coordinate(-123.03, 49.00)
             });
     String geoJson = GeometryUtil.toGeoJson(polygon);
 
@@ -219,5 +219,29 @@ class SeedlotCollectionGeometryServiceTest {
     verify(seedlotCollectionGeometryRepository).save(captor.capture());
     assertEquals(existing, captor.getValue());
     assertEquals("updater@idir", captor.getValue().getAuditInformation().getUpdateUserId());
+  }
+
+  @Test
+  @DisplayName("saveOrUpdate rejects a polygon larger than 8 km radius")
+  void saveOrUpdate_rejectsOversizedPolygon() {
+    Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+    GeometryFactory geometryFactory = new GeometryFactory();
+    Polygon polygon =
+        geometryFactory.createPolygon(
+            new Coordinate[] {
+              new Coordinate(-123.0, 49.0),
+              new Coordinate(-122.0, 49.0),
+              new Coordinate(-122.0, 50.0),
+              new Coordinate(-123.0, 50.0),
+              new Coordinate(-123.0, 49.0)
+            });
+    String geoJson = GeometryUtil.toGeoJson(polygon);
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> seedlotCollectionGeometryService.saveOrUpdate(seedlot, geoJson, "user@idir"));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    verify(seedlotCollectionGeometryRepository, never()).save(any());
   }
 }

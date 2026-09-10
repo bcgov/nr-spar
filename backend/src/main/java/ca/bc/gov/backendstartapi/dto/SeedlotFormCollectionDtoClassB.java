@@ -41,7 +41,7 @@ public record SeedlotFormCollectionDtoClassB(
         Integer orgUnitNo,
     @Schema(description = "Indicates if collection standard was met.", example = "true")
         Boolean collectionStandardMetInd,
-    @Schema(description = "Radius (m) of the collection area.", example = "500.0")
+    @Schema(description = "Radius (km) of the collection area.", example = "2.5")
         BigDecimal collectionAreaRadius,
     @Schema(description = "Capture method code.", example = "CLIMB")
         String captureMethodCode,

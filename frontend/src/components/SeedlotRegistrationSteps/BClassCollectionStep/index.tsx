@@ -648,6 +648,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
             value={state.collectionRadius.value ? Number(state.collectionRadius.value) : ''}
             readOnly={readOnly}
             min={0}
+            max={8}
             step={0.1}
             onChange={(_e: React.ChangeEvent<HTMLInputElement>, { value }: { value: number | string }) => {
               const clonedState = structuredClone(state);

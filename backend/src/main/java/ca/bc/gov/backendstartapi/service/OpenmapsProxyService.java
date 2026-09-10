@@ -41,8 +41,26 @@ public class OpenmapsProxyService {
   static final String WMS_PATH = "/geo/pub/wms";
 
   private static final int MAX_FEATURES = 5000;
-  private static final int MAX_CQL_LENGTH = 65536;
+  /**
+   * Caps CQL so the full request stays under Tomcat's default 8 KiB header
+   * limit. The map frontend already refuses BEC WKT above 6000 characters.
+   */
+  private static final int MAX_CQL_LENGTH = 6000;
   private static final int MAX_DIMENSION = 4096;
+
+  /**
+   * WFS GetFeature layers SPAR actually queries. GetLegendGraphic still
+   * uses the BCGW name pattern so catalog/theme overlays can show a legend.
+   */
+  private static final Set<String> ALLOWED_WFS_LAYERS =
+      Set.of(
+          "WHSE_FOREST_VEGETATION.BEC_BIOGEOCLIMATIC_POLY",
+          "WHSE_FOREST_VEGETATION.SEED_PLAN_ZONE_POLY_MVW",
+          "WHSE_FOREST_VEGETATION.SEED_SEEDLOT_POINT_MVW",
+          "WHSE_FOREST_VEGETATION.SEED_VEG_LOT_POINT_MVW",
+          "WHSE_ADMIN_BOUNDARIES.ADM_NR_DISTRICTS_SPG",
+          "WHSE_BASEMAPPING.TRIM_CONTOUR_LINES",
+          "WHSE_BASEMAPPING.BC_SPOT_ELEVATION_POINTS_500M");
 
   private static final Set<String> ALLOWED_PARAMS =
       Set.of(
@@ -80,10 +98,11 @@ public class OpenmapsProxyService {
   private static final Pattern LEGEND_OPTIONS = Pattern.compile("^hideEmptyRules:true$");
   /**
    * CQL_FILTER charset. Covers BBOX / INTERSECTS / CONTAINS / DWITHIN, quoted
-   * literals, numeric IN-lists, and WKT. Rejects statement separators, comments,
-   * and anything that isn't a SPAR-shaped predicate.
+   * literals including {@code 'EPSG:4326'}, numeric IN-lists, and WKT. Rejects
+   * statement separators, comments, and anything that isn't a SPAR-shaped
+   * predicate.
    */
-  private static final Pattern CQL_SAFE = Pattern.compile("[A-Za-z0-9_,.'()= \\-+\\[\\]]+");
+  private static final Pattern CQL_SAFE = Pattern.compile("[A-Za-z0-9_,.'()=: \\-+\\[\\]]+");
 
   private final RestTemplate restTemplate;
 
@@ -166,7 +185,7 @@ public class OpenmapsProxyService {
 
   private void validateWfs(Map<String, String> query) {
     requireJsonFormat(firstPresent(query, "outputformat", "format"));
-    validateLayer(firstPresent(query, "typenames", "typename"));
+    validateLayer(firstPresent(query, "typenames", "typename"), true);
     validateOptional(query, "srsname", SRS, "Invalid srsName");
     validateOptional(query, "srs", SRS, "Invalid srs");
     validateOptional(query, "crs", SRS, "Invalid crs");
@@ -179,7 +198,7 @@ public class OpenmapsProxyService {
 
   private void validateWmsLegend(Map<String, String> query) {
     requireJsonFormat(firstPresent(query, "format", "outputformat"));
-    validateLayer(firstPresent(query, "layer", "layers"));
+    validateLayer(firstPresent(query, "layer", "layers"), false);
     validateOptional(query, "style", STYLE, "Invalid style");
     validateOptional(query, "styles", STYLE, "Invalid styles");
     validateOptional(query, "srs", SRS, "Invalid srs");
@@ -190,7 +209,7 @@ public class OpenmapsProxyService {
     validateDimension(query.get("height"), "height");
   }
 
-  private static void validateLayer(String layer) {
+  private static void validateLayer(String layer, boolean wfsGetFeature) {
     if (layer == null || layer.isBlank()) {
       throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Layer name is required");
     }
@@ -201,6 +220,17 @@ public class OpenmapsProxyService {
     if (layer.contains(",")) {
       throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Only one layer is allowed");
     }
+    if (wfsGetFeature && !ALLOWED_WFS_LAYERS.contains(canonicalLayerName(first))) {
+      throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Layer is not allowed");
+    }
+  }
+
+  private static String canonicalLayerName(String layer) {
+    String trimmed = layer.trim();
+    if (trimmed.regionMatches(true, 0, "pub:", 0, 4)) {
+      trimmed = trimmed.substring(4);
+    }
+    return trimmed.toUpperCase(Locale.ROOT);
   }
 
   private static void requireJsonFormat(String format) {

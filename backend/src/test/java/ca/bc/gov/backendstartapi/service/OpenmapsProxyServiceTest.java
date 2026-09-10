@@ -189,4 +189,28 @@ class OpenmapsProxyServiceTest {
         assertThrows(OpenmapsProxyException.class, () -> service.forward(wfsQuery()));
     assertEquals(HttpStatus.BAD_GATEWAY, ex.getStatusCode());
   }
+
+  @Test
+  @DisplayName("rejects a WFS layer SPAR does not query")
+  void rejectWfsLayerOutsideAllowlist() {
+    MultiValueMap<String, String> query = wfsQuery();
+    query.set("typeNames", "pub:WHSE_FOREST_VEGETATION.VEG_COMP_LYR_R1_POLY");
+
+    OpenmapsProxyException ex =
+        assertThrows(OpenmapsProxyException.class, () -> service.forward(query));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("Layer is not allowed", ex.getReason());
+  }
+
+  @Test
+  @DisplayName("rejects a CQL_FILTER longer than the header-safe cap")
+  void rejectOverlongCql() {
+    MultiValueMap<String, String> query = wfsQuery();
+    query.set("CQL_FILTER", "A".repeat(6001));
+
+    OpenmapsProxyException ex =
+        assertThrows(OpenmapsProxyException.class, () -> service.forward(query));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals("CQL_FILTER is too long", ex.getReason());
+  }
 }

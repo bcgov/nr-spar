@@ -1,8 +1,15 @@
 import booleanValid from '@turf/boolean-valid';
+import distance from '@turf/distance';
+import { point } from '@turf/helpers';
 import type { Feature, MultiPolygon } from 'geojson';
 
 import { fetchBecZonesIntersecting } from '../../../../api-service/becZonesApi';
 import type { AoiPolygon } from '../../../../types/SparMapTypes';
+import {
+  MAX_COLLECTION_EXTENT_KM,
+  MAX_COLLECTION_RADIUS_KM,
+  MAX_COLLECTION_VERTICES
+} from '../collectionAreaLimits';
 
 export interface ValidationResult {
   ok: boolean;
@@ -48,10 +55,64 @@ export const validatePolygons = (aois: AoiPolygon[]): ValidationResult => {
         'One or more polygons have invalid geometry (self-intersecting or degenerate). Edit or redraw the affected polygon.'
     };
   }
+  const vertexCount = collectionVertexCount(aois);
+  if (vertexCount > MAX_COLLECTION_VERTICES) {
+    return {
+      ok: false,
+      message:
+        `Polygons have too many vertices (${vertexCount}). `
+        + `Maximum is ${MAX_COLLECTION_VERTICES}. Simplify and try again.`
+    };
+  }
+  const extentKm = collectionExtentKm(aois);
+  if (extentKm > MAX_COLLECTION_EXTENT_KM) {
+    return {
+      ok: false,
+      message:
+        `Collection area cannot span more than ${MAX_COLLECTION_RADIUS_KM} km radius. `
+        + 'Shrink the polygon and try again.'
+    };
+  }
   return {
     ok: true,
     message: `Validated ${aois.length} polygon${aois.length === 1 ? '' : 's'}.`
   };
+};
+
+export const collectionVertexCount = (aois: AoiPolygon[]): number => (
+  aois.reduce(
+    (sum, aoi) => sum + aoi.geometry.coordinates.reduce(
+      (ringSum, ring) => ringSum + ring.length,
+      0
+    ),
+    0
+  )
+);
+
+/** Longest geodesic side of the combined envelope, in kilometres. */
+export const collectionExtentKm = (aois: AoiPolygon[]): number => {
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+  aois.forEach((aoi) => {
+    aoi.geometry.coordinates.forEach((ring) => {
+      ring.forEach(([lng, lat]) => {
+        minLng = Math.min(minLng, lng);
+        minLat = Math.min(minLat, lat);
+        maxLng = Math.max(maxLng, lng);
+        maxLat = Math.max(maxLat, lat);
+      });
+    });
+  });
+  if (!Number.isFinite(minLng)) {
+    return 0;
+  }
+  const units = { units: 'kilometers' as const };
+  const south = distance(point([minLng, minLat]), point([maxLng, minLat]), units);
+  const north = distance(point([minLng, maxLat]), point([maxLng, maxLat]), units);
+  const height = distance(point([minLng, minLat]), point([minLng, maxLat]), units);
+  return Math.max(south, north, height);
 };
 
 /**
