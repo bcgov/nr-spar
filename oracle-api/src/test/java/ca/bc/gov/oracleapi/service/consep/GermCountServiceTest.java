@@ -523,6 +523,22 @@ class GermCountServiceTest {
   }
 
   @Test
+  void upsert_partialAbnormals_throwsBadRequest() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    // rep1 carries abnormals, reps 2-4 do not: merging this row would NULL out reps 2-4.
+    DayGermCountDto d = new DayGermCountDto(
+        1, LocalDate.of(2026, 4, 1), 1, 1, 1, 1, 1,
+        zeroAbnormal(), null, null, null);
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> germCountService.upsertGermCounts(riaSkey, request(null, List.of(d)), "USER1"));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertTrue(ex.getReason().contains("all four replicates"));
+    verify(germCountRepository, never()).save(any());
+    verify(dailyAbnormalRepository, never()).saveAll(any());
+  }
+
+  @Test
   void upsert_nonIncreasingDates_throwsBadRequest() {
     BigDecimal riaSkey = new BigDecimal("881191");
     List<DayGermCountDto> days = new ArrayList<>();

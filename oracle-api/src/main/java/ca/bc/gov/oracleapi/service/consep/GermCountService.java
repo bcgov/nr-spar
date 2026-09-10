@@ -98,6 +98,7 @@ public class GermCountService {
     days.sort(Comparator.comparingInt(DayGermCountDto::slotIndex));
     validateNoDuplicateSlots(days);
     validateAscendingDates(days);
+    validateAbnormalsAllOrNone(days);
     // Read before the timestamp guard: the guard stamps update_timestamp, so a request rejected
     // after it would leave the client holding a stale lock value and force a spurious 409.
     GermCountEntity existing = germCountRepository.findById(riaSkey).orElse(null);
@@ -153,6 +154,25 @@ public class GermCountService {
    * Rejects the same slot being submitted twice. The 1-{@value #MAX_SLOTS} range and the
    * not-null constraint are enforced by bean validation on {@link DayGermCountDto}.
    */
+  /**
+   * A day's abnormals come either for all four replicates or for none. {@code toAbnormalEntity}
+   * builds a fresh row from the DTOs it is given and {@code saveAll} merges it over the stored one,
+   * so a partial set would NULL out the replicates it omits. The dedicated
+   * {@code PUT /daily-abnormals} endpoint enforces the same all-four contract.
+   */
+  private static void validateAbnormalsAllOrNone(List<DayGermCountDto> days) {
+    for (DayGermCountDto d : days) {
+      if (hasAnyAbnormal(d)
+          && (d.rep1Abnormal() == null || d.rep2Abnormal() == null
+              || d.rep3Abnormal() == null || d.rep4Abnormal() == null)) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Abnormal counts must be supplied for all four replicates on slotIndex "
+                + d.slotIndex());
+      }
+    }
+  }
+
   private void validateNoDuplicateSlots(List<DayGermCountDto> days) {
     Set<Integer> seen = new HashSet<>();
     for (DayGermCountDto d : days) {
