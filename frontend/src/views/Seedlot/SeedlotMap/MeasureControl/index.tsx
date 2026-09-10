@@ -245,8 +245,8 @@ const MeasureControl = () => {
       // point — drop the duplicate vertex they added before finishing.
       let pts = prev;
       const last = pts.at(-1);
-      const prev = pts.at(-2);
-      if (pts.length >= 2 && last && prev && last.equals(prev, 1e-6)) {
+      const previous = pts.at(-2);
+      if (pts.length >= 2 && last && previous && last.equals(previous, 1e-6)) {
         pts = pts.slice(0, -1);
       }
       if (pts.length >= 2) renderMeasurement(pts, mode, true);
