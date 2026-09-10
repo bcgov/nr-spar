@@ -37,7 +37,7 @@ const BEC_WFS_TIMEOUT_MS = 15000;
 /**
  * Tomcat's default max-http-request-header-size is 8 KiB. A CQL_FILTER
  * carrying a large WKT MultiPolygon will be rejected by the container
- * *before* our allowlist runs, and the user sees a generic "unable to
+ * before our allowlist runs, and the user sees a generic "unable to
  * validate" message. Stay well under that so the failure is ours and
  * the message is honest.
  */

@@ -64,7 +64,11 @@ class OpenmapsProxyServiceTest {
     ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
     ArgumentCaptor<HttpEntity<?>> entityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
     verify(restTemplate)
-        .exchange(uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(), eq(String.class));
+        .exchange(
+            uriCaptor.capture(),
+            eq(HttpMethod.GET),
+            entityCaptor.capture(),
+            eq(String.class));
 
     URI uri = uriCaptor.getValue();
     assertEquals("https", uri.getScheme());

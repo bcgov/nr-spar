@@ -49,9 +49,7 @@ const BookmarksPanel = () => {
     const view = getCurrentView?.();
     if (!view || !name.trim()) return;
     const bm: Bookmark = {
-      // Date.now()+random suffix is unique enough for an in-memory
-      // list. We don't need a UUID generator dependency for this.
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      id: crypto.randomUUID(),
       name: name.trim(),
       center: view.center,
       zoom: view.zoom,

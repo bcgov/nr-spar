@@ -26,6 +26,42 @@ export type FetchBecZones = (
 
 export const buildLegacyMultiBecZoneMessage = (becZones: string[]) => `You have drawn an invalid polygon. Geometry crosses more than one BEC Zone: ${becZones.join(' ')}`;
 
+export const collectionVertexCount = (aois: AoiPolygon[]): number => (
+  aois.reduce(
+    (sum, aoi) => sum + aoi.geometry.coordinates.reduce(
+      (ringSum, ring) => ringSum + ring.length,
+      0
+    ),
+    0
+  )
+);
+
+/** Longest geodesic side of the combined envelope, in kilometres. */
+export const collectionExtentKm = (aois: AoiPolygon[]): number => {
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+  aois.forEach((aoi) => {
+    aoi.geometry.coordinates.forEach((ring) => {
+      ring.forEach(([lng, lat]) => {
+        minLng = Math.min(minLng, lng);
+        minLat = Math.min(minLat, lat);
+        maxLng = Math.max(maxLng, lng);
+        maxLat = Math.max(maxLat, lat);
+      });
+    });
+  });
+  if (!Number.isFinite(minLng)) {
+    return 0;
+  }
+  const units = { units: 'kilometers' as const };
+  const south = distance(point([minLng, minLat]), point([maxLng, minLat]), units);
+  const north = distance(point([minLng, maxLat]), point([maxLng, maxLat]), units);
+  const height = distance(point([minLng, minLat]), point([minLng, maxLat]), units);
+  return Math.max(south, north, height);
+};
+
 /**
  * Client-side validation for the multi-polygon AOI. Replaces the legacy
  * server-side `Spr01SeedlotRegAction.validatePolygons` flow which checked
@@ -77,42 +113,6 @@ export const validatePolygons = (aois: AoiPolygon[]): ValidationResult => {
     ok: true,
     message: `Validated ${aois.length} polygon${aois.length === 1 ? '' : 's'}.`
   };
-};
-
-export const collectionVertexCount = (aois: AoiPolygon[]): number => (
-  aois.reduce(
-    (sum, aoi) => sum + aoi.geometry.coordinates.reduce(
-      (ringSum, ring) => ringSum + ring.length,
-      0
-    ),
-    0
-  )
-);
-
-/** Longest geodesic side of the combined envelope, in kilometres. */
-export const collectionExtentKm = (aois: AoiPolygon[]): number => {
-  let minLng = Infinity;
-  let minLat = Infinity;
-  let maxLng = -Infinity;
-  let maxLat = -Infinity;
-  aois.forEach((aoi) => {
-    aoi.geometry.coordinates.forEach((ring) => {
-      ring.forEach(([lng, lat]) => {
-        minLng = Math.min(minLng, lng);
-        minLat = Math.min(minLat, lat);
-        maxLng = Math.max(maxLng, lng);
-        maxLat = Math.max(maxLat, lat);
-      });
-    });
-  });
-  if (!Number.isFinite(minLng)) {
-    return 0;
-  }
-  const units = { units: 'kilometers' as const };
-  const south = distance(point([minLng, minLat]), point([maxLng, minLat]), units);
-  const north = distance(point([minLng, maxLat]), point([maxLng, maxLat]), units);
-  const height = distance(point([minLng, minLat]), point([minLng, maxLat]), units);
-  return Math.max(south, north, height);
 };
 
 /**

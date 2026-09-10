@@ -31,77 +31,68 @@ export interface BcgwLayer {
 
 const OPENMAPS_WMS = 'https://openmaps.gov.bc.ca/geo/pub/wms';
 
+const overlay = (
+  id: string,
+  displayName: string,
+  description: string,
+  layerName: string
+): BcgwLayer => ({
+  id,
+  displayName,
+  description,
+  wmsUrl: OPENMAPS_WMS,
+  layerName,
+  format: 'image/png',
+  transparent: true
+});
+
 export const BCGW_CATALOG: BcgwLayer[] = [
-  {
-    id: 'pmbc-parcels',
-    displayName: 'Parcel Fabric (PMBC)',
-    description: 'BC cadastral parcel boundaries',
-    wmsUrl: OPENMAPS_WMS,
-    layerName: 'pub:WHSE_CADASTRE.PMBC_PARCEL_FABRIC_POLY_SVW',
-    format: 'image/png',
-    transparent: true
-  },
-  {
-    id: 'resource-roads',
-    displayName: 'Resource Roads',
-    description: 'Forest tenure road sections',
-    wmsUrl: OPENMAPS_WMS,
-    layerName: 'pub:WHSE_FOREST_TENURE.FTEN_ROAD_SECTION_LINES_SVW',
-    format: 'image/png',
-    transparent: true
-  },
-  {
-    id: 'cut-blocks',
-    displayName: 'Forest Tenure Cut Blocks',
-    description: 'Approved and active cut block polygons',
-    wmsUrl: OPENMAPS_WMS,
-    layerName: 'pub:WHSE_FOREST_TENURE.FTEN_CUT_BLOCK_POLY_SVW',
-    format: 'image/png',
-    transparent: true
-  },
-  {
-    id: 'vri',
-    displayName: 'Vegetation Resources Inventory',
-    description: 'VRI forest cover polygons',
-    wmsUrl: OPENMAPS_WMS,
-    layerName: 'pub:WHSE_FOREST_VEGETATION.VEG_COMP_LYR_R1_POLY',
-    format: 'image/png',
-    transparent: true
-  },
-  {
-    id: 'protected-areas',
-    displayName: 'Protected Areas',
-    description: 'Parks, ecological reserves, and protected areas',
-    wmsUrl: OPENMAPS_WMS,
-    layerName: 'pub:WHSE_TANTALIS.TA_PARK_ECORES_PA_SVW',
-    format: 'image/png',
-    transparent: true
-  },
-  {
-    id: 'watersheds',
-    displayName: 'Watersheds (Assessment)',
-    description: 'Freshwater atlas assessment watersheds',
-    wmsUrl: OPENMAPS_WMS,
-    layerName: 'pub:WHSE_BASEMAPPING.FWA_ASSESSMENT_WATERSHEDS_POLY',
-    format: 'image/png',
-    transparent: true
-  },
-  {
-    id: 'fn-treaty-lands',
-    displayName: 'First Nations Treaty Lands',
-    description: 'Treaty settlement land polygons (Treaty 8, modern treaties — limited geographic extent)',
-    wmsUrl: OPENMAPS_WMS,
-    layerName: 'pub:WHSE_LEGAL_ADMIN_BOUNDARIES.FNT_TREATY_LAND_SP',
-    format: 'image/png',
-    transparent: true
-  },
-  {
-    id: 'fn-communities',
-    displayName: 'First Nation Community Locations',
-    description: 'Point locations of First Nation communities across BC',
-    wmsUrl: OPENMAPS_WMS,
-    layerName: 'pub:WHSE_HUMAN_CULTURAL_ECONOMIC.FN_COMMUNITY_LOCATIONS_SP',
-    format: 'image/png',
-    transparent: true
-  }
+  overlay(
+    'pmbc-parcels',
+    'Parcel Fabric (PMBC)',
+    'BC cadastral parcel boundaries',
+    'pub:WHSE_CADASTRE.PMBC_PARCEL_FABRIC_POLY_SVW'
+  ),
+  overlay(
+    'resource-roads',
+    'Resource Roads',
+    'Forest tenure road sections',
+    'pub:WHSE_FOREST_TENURE.FTEN_ROAD_SECTION_LINES_SVW'
+  ),
+  overlay(
+    'cut-blocks',
+    'Forest Tenure Cut Blocks',
+    'Approved and active cut block polygons',
+    'pub:WHSE_FOREST_TENURE.FTEN_CUT_BLOCK_POLY_SVW'
+  ),
+  overlay(
+    'vri',
+    'Vegetation Resources Inventory',
+    'VRI forest cover polygons',
+    'pub:WHSE_FOREST_VEGETATION.VEG_COMP_LYR_R1_POLY'
+  ),
+  overlay(
+    'protected-areas',
+    'Protected Areas',
+    'Parks, ecological reserves, and protected areas',
+    'pub:WHSE_TANTALIS.TA_PARK_ECORES_PA_SVW'
+  ),
+  overlay(
+    'watersheds',
+    'Watersheds (Assessment)',
+    'Freshwater atlas assessment watersheds',
+    'pub:WHSE_BASEMAPPING.FWA_ASSESSMENT_WATERSHEDS_POLY'
+  ),
+  overlay(
+    'fn-treaty-lands',
+    'First Nations Treaty Lands',
+    'Treaty settlement land polygons (Treaty 8, modern treaties — limited geographic extent)',
+    'pub:WHSE_LEGAL_ADMIN_BOUNDARIES.FNT_TREATY_LAND_SP'
+  ),
+  overlay(
+    'fn-communities',
+    'First Nation Community Locations',
+    'Point locations of First Nation communities across BC',
+    'pub:WHSE_HUMAN_CULTURAL_ECONOMIC.FN_COMMUNITY_LOCATIONS_SP'
+  )
 ];

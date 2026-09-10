@@ -30,18 +30,34 @@ class CollectionAreaLimitsTest {
   @DisplayName("accepts a small collection polygon")
   void smallPolygonIsOk() {
     Polygon small = polygon(-123.02, 49.00, -123.00, 49.01);
-    assertTrue(CollectionAreaLimits.maxExtentMeters(small) < CollectionAreaLimits.MAX_EXTENT_METERS);
-    assertDoesNotThrow(() -> CollectionAreaLimits.assertAcceptable(small, GeometryUtil.toGeoJson(small)));
+    assertTrue(
+        CollectionAreaLimits.maxExtentMeters(small) < CollectionAreaLimits.MAX_EXTENT_METERS);
+    assertDoesNotThrow(
+        () -> CollectionAreaLimits.assertAcceptable(small, GeometryUtil.toGeoJson(small)));
   }
 
   @Test
   @DisplayName("rejects a degree-scale polygon that exceeds 8 km radius")
   void hugePolygonIsRejected() {
     Polygon huge = polygon(-123.0, 49.0, -122.0, 50.0);
-    assertTrue(CollectionAreaLimits.maxExtentMeters(huge) > CollectionAreaLimits.MAX_EXTENT_METERS);
+    assertTrue(
+        CollectionAreaLimits.maxExtentMeters(huge) > CollectionAreaLimits.MAX_EXTENT_METERS);
     assertThrows(
         ResponseStatusException.class,
         () -> CollectionAreaLimits.assertAcceptable(huge, GeometryUtil.toGeoJson(huge)));
+  }
+
+  @Test
+  @DisplayName("rejects a polygon with too many vertices")
+  void tooManyVerticesIsRejected() {
+    Coordinate[] coords = new Coordinate[CollectionAreaLimits.MAX_VERTICES + 2];
+    for (int i = 0; i < coords.length - 1; i++) {
+      coords[i] = new Coordinate(-123.02 + (i * 0.000001), 49.00);
+    }
+    coords[coords.length - 1] = coords[0];
+    Polygon dense = FACTORY.createPolygon(coords);
+    assertThrows(
+        ResponseStatusException.class, () -> CollectionAreaLimits.assertAcceptable(dense, "{}"));
   }
 
   @Test

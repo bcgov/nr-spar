@@ -73,11 +73,14 @@ public final class CollectionAreaLimits {
   private static double haversineMeters(double lat1, double lon1, double lat2, double lon2) {
     double phi1 = Math.toRadians(lat1);
     double phi2 = Math.toRadians(lat2);
-    double dPhi = Math.toRadians(lat2 - lat1);
-    double dLambda = Math.toRadians(lon2 - lon1);
+    double deltaPhi = Math.toRadians(lat2 - lat1);
+    double deltaLambda = Math.toRadians(lon2 - lon1);
     double a =
-        Math.sin(dPhi / 2) * Math.sin(dPhi / 2)
-            + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLambda / 2) * Math.sin(dLambda / 2);
+        Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2)
+            + Math.cos(phi1)
+                * Math.cos(phi2)
+                * Math.sin(deltaLambda / 2)
+                * Math.sin(deltaLambda / 2);
     return 2 * EARTH_RADIUS_METERS * Math.asin(Math.min(1, Math.sqrt(a)));
   }
 }

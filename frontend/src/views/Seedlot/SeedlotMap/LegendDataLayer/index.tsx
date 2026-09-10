@@ -97,7 +97,7 @@ const buildSpeciesSection = (map: LeafletMap): LegendOverlayData | null => {
   return {
     id: '__species__',
     label: 'Species',
-    rules: [...codes].sort().map((code): LegendRule => ({
+    rules: [...codes].sort((a, b) => a.localeCompare(b)).map((code): LegendRule => ({
       label: speciesLabel(code),
       swatch: {
         geometry: 'point',
