@@ -73,7 +73,13 @@ const ApiConfig = {
 
   requestSeedLotAndVegLot: `${oracleServerHost}/api/request-seedlot-and-veglot`,
 
-  germinatorTrays: `${oracleServerHost}/api/germinator-trays`
+  germinatorTrays: `${oracleServerHost}/api/germinator-trays`,
+
+  germinationTests: `${oracleServerHost}/api/germination-tests`,
+
+  germCounts: `${oracleServerHost}/api/germ-counts`,
+
+  testReplicates: `${oracleServerHost}/api/test-replicates`
 };
 
 export default ApiConfig;

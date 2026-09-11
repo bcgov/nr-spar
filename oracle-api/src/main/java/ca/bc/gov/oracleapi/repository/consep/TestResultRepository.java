@@ -197,7 +197,11 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
             a.intermediateCleaner,
             r.requestTypeSt,
             tst.updateTimestamp,
-            a.updateTimestamp
+            a.updateTimestamp,
+            a.requestId,
+            a.seedlotNumber,
+            a.familyLotNumber,
+            a.vegetationState
     )
     FROM TestResultEntity tst
     JOIN ActivityEntity a

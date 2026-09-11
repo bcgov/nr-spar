@@ -81,7 +81,7 @@ class GermCountServiceIntegrationTest {
   }
 
   private static TestRepGermFormDto rep(int n, int total) {
-    return new TestRepGermFormDto(n, total, 0, 0, 0, 0, 0, 0, 0, 1, null);
+    return new TestRepGermFormDto(n, total, 1, null);
   }
 
   @Test
