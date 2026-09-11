@@ -45,6 +45,7 @@ import ApplicantInformation from './ApplicantInformation';
 import FormProgress from './FormProgress';
 import TscReviewSection from './TscReviewSection';
 import {
+  getEditApplicantRoute,
   getPrintSeedlotLabel,
   getRegistrationRoute,
   getReviewRoute,
@@ -126,7 +127,7 @@ const SeedlotDetails = () => {
     {
       text: 'Edit seedlot applicant',
       onClickFunction: () => navigate(
-        addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')
+        addParamToPath(getEditApplicantRoute(seedlot), seedlotNumber ?? '')
       ),
       disabled: viewOnlySeedlot
     },
@@ -146,7 +147,7 @@ const SeedlotDetails = () => {
       disabled: true
     }
   ], [
-    navigate, seedlotNumber, viewOnlySeedlot, isBClass, isTscAdmin, downloadReportMutation
+    navigate, seedlot, seedlotNumber, viewOnlySeedlot, isBClass, isTscAdmin, downloadReportMutation
   ]);
 
   const getActBtnLabel = (): string => {

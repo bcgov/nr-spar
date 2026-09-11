@@ -4,15 +4,14 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,15 +27,15 @@ import org.locationtech.jts.geom.Geometry;
 public class SeedlotCollectionGeometry {
 
   @Id
-  @Column(name = "seedlot_number", length = 5)
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "id")
+  @Setter(AccessLevel.NONE)
+  private UUID id;
+
+  @Column(name = "seedlot_number", length = 5, nullable = false, unique = true)
   private String seedlotNumber;
 
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "seedlot_number")
-  private Seedlot seedlot;
-
-  @Column(name = "geometry", columnDefinition = "geometry(Geometry,3005)")
+  @Column(name = "geometry", columnDefinition = "geometry(Geometry,4326)")
   private Geometry geometry;
 
   @Column(name = "feature_class_skey")

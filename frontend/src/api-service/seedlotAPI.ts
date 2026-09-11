@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import RevisionCountDto from '../types/RevisionCountDto';
 import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
 import {
@@ -100,6 +102,31 @@ export const getBClassSeedlotProgressStatus = (seedlotNumber: string) => {
 export const getBClassSeedlotFullForm = (seedlotNumber: string) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/b-class-full-form`;
   return api.get(url).then((res) => res.data as SeedlotBClassFullResponseType);
+};
+
+export type SeedlotCollectionGeometryResponse = {
+  seedlotNumber: string;
+  geometryGeoJson: string | null;
+  featureClassSkey: number | null;
+  featureArea: number | null;
+  featurePerimeter: number | null;
+  observationDate: string | null;
+  revisionCount: number;
+};
+
+/** Submitted collection polygon from SPAR PostGIS. 404 → null (none saved yet). */
+export const getCollectionGeometry = (
+  seedlotNumber: string
+): Promise<SeedlotCollectionGeometryResponse | null> => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/collection-geometry`;
+  return api.get(url)
+    .then((res: { data: SeedlotCollectionGeometryResponse }) => res.data)
+    .catch((err: unknown) => {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        return null;
+      }
+      throw err;
+    });
 };
 
 /**
