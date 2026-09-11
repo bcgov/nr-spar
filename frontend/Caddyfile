@@ -25,7 +25,7 @@
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self)"
 		Content-Security-Policy "
 			base-uri 'self';
-			connect-src 'self' https://geocoder.api.gov.bc.ca {$VITE_AWS_DOMAIN} {$VITE_SERVER_URL} {$VITE_ORACLE_SERVER_URL} https://cognito-idp.ca-central-1.amazonaws.com/ https://*.execute-api.ca-central-1.amazonaws.com;
+			connect-src 'self' https://nr-forest-client-api-prod.api.gov.bc.ca https://geocoder.api.gov.bc.ca {$VITE_AWS_DOMAIN} {$VITE_SERVER_URL} {$VITE_ORACLE_SERVER_URL} https://cognito-idp.ca-central-1.amazonaws.com/ https://*.execute-api.ca-central-1.amazonaws.com;
 			default-src 'self';
 			font-src 'self' https://1.www.s81c.com/;
 			form-action 'self';
