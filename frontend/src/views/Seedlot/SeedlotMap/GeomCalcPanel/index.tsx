@@ -93,6 +93,15 @@ type ElevationCellState =
  */
 const polygonCacheKey = (poly: AoiPolygon): string => JSON.stringify(poly.geometry.coordinates);
 
+const fetchElevationCell = async (poly: AoiPolygon): Promise<ElevationCellState> => {
+  try {
+    const range = await fetchPolygonElevationRange(poly);
+    return range ? { status: 'ready', range } : { status: 'empty' };
+  } catch {
+    return { status: 'error' };
+  }
+};
+
 /**
  * Async fetcher that returns an elevation min/max per polygon. Caches
  * results by polygon shape so editing one polygon doesn't refetch the
@@ -129,20 +138,11 @@ const useElevationRanges = (
         const k = polygonCacheKey(poly);
         const cached = cacheRef.current.get(k);
         if (!cached || cached.status === 'loading') {
-          try {
-            // eslint-disable-next-line no-await-in-loop
-            const range = await fetchPolygonElevationRange(poly);
-            if (cancelled) return;
-            const cell: ElevationCellState = range
-              ? { status: 'ready', range }
-              : { status: 'empty' };
-            cacheRef.current.set(k, cell);
-            setState(new Map(cacheRef.current));
-          } catch {
-            if (cancelled) return;
-            cacheRef.current.set(k, { status: 'error' });
-            setState(new Map(cacheRef.current));
-          }
+          // eslint-disable-next-line no-await-in-loop
+          const cell = await fetchElevationCell(poly);
+          if (cancelled) return;
+          cacheRef.current.set(k, cell);
+          setState(new Map(cacheRef.current));
         }
       }
     };

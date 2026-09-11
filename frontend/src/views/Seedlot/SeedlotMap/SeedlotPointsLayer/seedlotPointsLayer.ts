@@ -157,7 +157,7 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
     return this.currentScaleDenominator() <= maxScale;
   }
 
-  private scheduleRefresh = (): void => {
+  private readonly scheduleRefresh = (): void => {
     if (this.fetchTimer) clearTimeout(this.fetchTimer);
     this.fetchTimer = setTimeout(() => {
       this.fetchTimer = null;
