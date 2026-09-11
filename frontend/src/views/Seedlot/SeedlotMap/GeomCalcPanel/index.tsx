@@ -122,26 +122,27 @@ const useElevationRanges = (
     setState(next);
 
     const run = async () => {
-      for (let i = 0; i < aois.length; i += 1) {
+      // Sequential by design — polite to the DataBC WFS (see hook doc).
+      // eslint-disable-next-line no-restricted-syntax
+      for (const poly of aois) {
         if (cancelled) return;
-        const poly = aois[i];
         const k = polygonCacheKey(poly);
-        // eslint-disable-next-line no-continue
-        if (cacheRef.current.has(k) && cacheRef.current.get(k)?.status !== 'loading') continue;
-        try {
-          // Sequential by design — polite to the DataBC WFS (see hook doc).
-          // eslint-disable-next-line no-await-in-loop
-          const range = await fetchPolygonElevationRange(poly);
-          if (cancelled) return;
-          const cell: ElevationCellState = range
-            ? { status: 'ready', range }
-            : { status: 'empty' };
-          cacheRef.current.set(k, cell);
-          setState(new Map(cacheRef.current));
-        } catch {
-          if (cancelled) return;
-          cacheRef.current.set(k, { status: 'error' });
-          setState(new Map(cacheRef.current));
+        const cached = cacheRef.current.get(k);
+        if (!cached || cached.status === 'loading') {
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            const range = await fetchPolygonElevationRange(poly);
+            if (cancelled) return;
+            const cell: ElevationCellState = range
+              ? { status: 'ready', range }
+              : { status: 'empty' };
+            cacheRef.current.set(k, cell);
+            setState(new Map(cacheRef.current));
+          } catch {
+            if (cancelled) return;
+            cacheRef.current.set(k, { status: 'error' });
+            setState(new Map(cacheRef.current));
+          }
         }
       }
     };

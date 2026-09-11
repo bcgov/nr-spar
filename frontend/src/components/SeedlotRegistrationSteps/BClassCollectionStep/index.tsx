@@ -269,8 +269,10 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
 
   const readOnly = isFormSubmitted && !isReview;
 
-  const handleDmsChange = (
-    field: 'latDeg' | 'latMin' | 'latSec' | 'longDeg' | 'longMin' | 'longSec',
+  const handleStringFieldChange = (
+    field:
+      | 'latDeg' | 'latMin' | 'latSec' | 'longDeg' | 'longMin' | 'longSec'
+      | 'elevationMin' | 'elevationMax' | 'elevationMean',
     value: string
   ) => {
     const clonedState = structuredClone(state);
@@ -337,15 +339,6 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     updateState(clonedState);
   };
 
-  const handleElevationChange = (
-    field: 'elevationMin' | 'elevationMax' | 'elevationMean',
-    value: string
-  ) => {
-    const clonedState = structuredClone(state);
-    clonedState[field].value = value;
-    updateState(clonedState);
-  };
-
   return (
     <FlexGrid className="b-class-collection-step">
       <ScrollToTop enabled={!isReview} />
@@ -355,7 +348,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         readOnly={readOnly}
         seedlotNumber={seedlotNumber}
         onLaunchMap={launchCollectionAreaMap}
-        onDmsChange={handleDmsChange}
+        onDmsChange={handleStringFieldChange}
       />
       <CollectionBecSection
         state={state}
@@ -383,7 +376,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         onComboSelection={handleComboSelection}
         onLocationAreaChange={handleLocationAreaChange}
         onRadiusChange={handleRadiusChange}
-        onElevationChange={handleElevationChange}
+        onElevationChange={handleStringFieldChange}
       />
       <CollectionMethodsSection
         state={state}

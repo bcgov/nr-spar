@@ -148,7 +148,7 @@ const AoiDrawLayer = () => {
   const preloadedRef = useRef(false);
 
   useEffect(() => {
-    if (!map || !map.pm) {
+    if (!map?.pm) {
       // In tests the react-leaflet mock may return a stub map without pm.
       // Nothing to do — the real map always has pm after geoman imports.
       return undefined;

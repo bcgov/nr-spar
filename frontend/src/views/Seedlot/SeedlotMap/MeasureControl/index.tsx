@@ -1,5 +1,5 @@
 import {
-  useEffect, useRef, useState, useCallback
+  useEffect, useRef, useCallback
 } from 'react';
 import { useMap, useMapEvent } from 'react-leaflet';
 import L from 'leaflet';
@@ -43,9 +43,7 @@ const MeasureControl = () => {
     _setMapControls
   } = useSparMap();
 
-  // Value is unused; setPoints is called with functional updates only.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_points, setPoints] = useState<L.LatLng[]>([]);
+  const pointsRef = useRef<L.LatLng[]>([]);
   const layerGroupRef = useRef<L.LayerGroup>(L.layerGroup());
 
   // Cache the current mode in a ref so the click handlers (which close
@@ -82,8 +80,9 @@ const MeasureControl = () => {
   const ringAreaSqm = useCallback((pts: L.LatLng[]): number => {
     if (pts.length < 3) return 0;
     const coords = pts.map((p) => [p.lng, p.lat] as [number, number]);
-    const first = coords[0];
-    const last = coords[coords.length - 1];
+    const first = coords.at(0);
+    const last = coords.at(-1);
+    if (!first || !last) return 0;
     if (first[0] !== last[0] || first[1] !== last[1]) coords.push(first);
     try {
       return area(turfPolygon([coords]));
@@ -206,7 +205,7 @@ const MeasureControl = () => {
   // (e.g. distance → area) wipes any previous measurement so the user
   // starts fresh; switching to null clears everything.
   useEffect(() => {
-    setPoints([]);
+    pointsRef.current = [];
     layerGroupRef.current.clearLayers();
     setMeasurementResult(null);
     finishedRef.current = false;
@@ -219,19 +218,17 @@ const MeasureControl = () => {
     const mode = modeRef.current;
     if (!mode) return;
     if (mode === 'point') {
-      setPoints([e.latlng]);
+      pointsRef.current = [e.latlng];
       renderMeasurement([e.latlng], 'point', true);
       return;
     }
-    setPoints((prev) => {
-      // After a double-click finish, the next click starts a fresh
-      // measurement rather than extending the locked one.
-      const base = finishedRef.current ? [] : prev;
-      finishedRef.current = false;
-      const next = [...base, e.latlng];
-      renderMeasurement(next, mode, false);
-      return next;
-    });
+    // After a double-click finish, the next click starts a fresh
+    // measurement rather than extending the locked one.
+    const base = finishedRef.current ? [] : pointsRef.current;
+    finishedRef.current = false;
+    const next = [...base, e.latlng];
+    pointsRef.current = next;
+    renderMeasurement(next, mode, false);
   });
 
   // Double-click finishes the distance / area measurement. The tool stays
@@ -240,18 +237,16 @@ const MeasureControl = () => {
     const mode = modeRef.current;
     if (!mode || mode === 'point') return;
     finishedRef.current = true;
-    setPoints((prev) => {
-      // A double-click fires two 'click' events first, both at the finish
-      // point — drop the duplicate vertex they added before finishing.
-      let pts = prev;
-      const last = pts.at(-1);
-      const previous = pts.at(-2);
-      if (pts.length >= 2 && last && previous && last.equals(previous, 1e-6)) {
-        pts = pts.slice(0, -1);
-      }
-      if (pts.length >= 2) renderMeasurement(pts, mode, true);
-      return pts;
-    });
+    // A double-click fires two 'click' events first, both at the finish
+    // point — drop the duplicate vertex they added before finishing.
+    let pts = pointsRef.current;
+    const last = pts.at(-1);
+    const previous = pts.at(-2);
+    if (pts.length >= 2 && last && previous && last.equals(previous, 1e-6)) {
+      pts = pts.slice(0, -1);
+    }
+    pointsRef.current = pts;
+    if (pts.length >= 2) renderMeasurement(pts, mode, true);
   });
 
   // Suppress the map's double-click zoom while measuring + crosshair

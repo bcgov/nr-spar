@@ -2,6 +2,7 @@ import L from 'leaflet';
 
 import {
   fetchSeedlotPoints,
+  type ActiveIndFilter,
   type SeedlotPoint
 } from '../../../../api-service/seedlotPointsApi';
 import { colorForSpecies } from './colors';
@@ -13,7 +14,7 @@ export interface SeedlotPointsLayerOptions {
   /** WFS typeName, e.g. `pub:WHSE_FOREST_VEGETATION.SEED_SEEDLOT_POINT_MVW`. */
   typeName: string;
   /** Filter on `ACTIVE_IND` — `'YES'` for active, `'NO'` for expired, `null` for both. */
-  activeOnly: 'YES' | 'NO' | null;
+  activeOnly: ActiveIndFilter;
   /** Human-readable label used in the popup ("Seedlot" or "Veg Lot"). */
   labelText: string;
   /**
@@ -89,7 +90,7 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
 
   private inFlight = false;
 
-  private wfsOptions: SeedlotPointsLayerOptions;
+  private readonly wfsOptions: SeedlotPointsLayerOptions;
 
   // Distinct VEGETATION_CODEs currently rendered, surfaced to the dynamic
   // legend's "Species" key (the markers are coloured by species).
@@ -137,7 +138,11 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
   }
 
   setLayerOptions(options: SeedlotPointsLayerOptions): void {
-    this.wfsOptions = options;
+    this.wfsOptions.typeName = options.typeName;
+    this.wfsOptions.activeOnly = options.activeOnly;
+    this.wfsOptions.labelText = options.labelText;
+    this.wfsOptions.maxScale = options.maxScale;
+    this.wfsOptions.speciesCode = options.speciesCode;
     this.scheduleRefresh();
   }
 

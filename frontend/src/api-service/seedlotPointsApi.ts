@@ -15,6 +15,9 @@ import type { Feature, FeatureCollection, Point } from 'geojson';
 import { cqlQuoted, isCqlSafeIdentifier } from '../utils/CqlUtils';
 import { buildOpenmapsProxyUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsProxy';
 
+/** Filter on `ACTIVE_IND` — `'YES'` for active, `'NO'` for expired, `null` for both. */
+export type ActiveIndFilter = 'YES' | 'NO' | null;
+
 /** Layer typeName for active+expired seedlot point features. */
 export const SEEDLOT_POINT_LAYER = 'pub:WHSE_FOREST_VEGETATION.SEED_SEEDLOT_POINT_MVW';
 
@@ -119,7 +122,7 @@ const featureToPoint = (feature: Feature<Point, WfsProperties>): SeedlotPoint | 
 export const buildSeedlotPointsWfsParams = (
   typeName: string,
   bounds: LngLatBoundsTuple,
-  activeOnly: 'YES' | 'NO' | null = null,
+  activeOnly: ActiveIndFilter = null,
   speciesCode: string | null = null
 ): URLSearchParams => {
   // GeoServer CQL BBOX takes `minX, minY, maxX, maxY` regardless of the
@@ -150,7 +153,7 @@ export const buildSeedlotPointsWfsParams = (
 export const buildSeedlotPointsWfsUrl = (
   typeName: string,
   bounds: LngLatBoundsTuple,
-  activeOnly: 'YES' | 'NO' | null = null,
+  activeOnly: ActiveIndFilter = null,
   speciesCode: string | null = null
 ): string => buildOpenmapsProxyUrl(
   buildSeedlotPointsWfsParams(typeName, bounds, activeOnly, speciesCode)
@@ -165,7 +168,7 @@ export const buildSeedlotPointsWfsUrl = (
 export const fetchSeedlotPoints = async (
   typeName: string,
   bounds: LngLatBoundsTuple,
-  activeOnly: 'YES' | 'NO' | null = null,
+  activeOnly: ActiveIndFilter = null,
   speciesCode: string | null = null
 ): Promise<SeedlotPoint[]> => {
   const controller = new AbortController();

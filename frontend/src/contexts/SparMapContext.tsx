@@ -455,36 +455,26 @@ const SparMapContext = createContext<SparMapContextValue | undefined>(undefined)
  * so child components like `<AoiDrawLayer>` can push Geoman events into
  * shared state without prop-drilling.
  *
- * All setter functions are wrapped in `useCallback` so consumers can
- * safely put them in `useEffect` dependency arrays without triggering
- * infinite re-render loops. Task 16 burned on this exact bug with the
- * single-polygon implementation — don't re-introduce it.
+ * React `setState` dispatchers are stable and are used directly where
+ * they match the context type. Composite setters (`setBecZones`,
+ * `setHighlightPoint`, `_setMapControls`, AOI list mutators) stay
+ * wrapped in `useCallback` so consumers can put them in `useEffect`
+ * dependency arrays without retriggering. Task 16 burned on this exact
+ * bug with the single-polygon implementation — don't re-introduce it.
  */
 export const SparMapProvider = ({ children }: { children: ReactNode }) => {
-  const [aois, setAoisState] = useState<AoiPolygon[]>([]);
+  const [aois, setAois] = useState<AoiPolygon[]>([]);
   const [becZoneCodes, setBecZoneCodes] = useState<string[]>([]);
   const [becNotSuit, setBecNotSuit] = useState<string[]>([]);
   const [becZoneShape, setBecZoneShape] = useState<BecZoneShape>('zone');
-  const [mapControls, setMapControlsState] = useState<MapControls>(NOOP_MAP_CONTROLS);
-  const [identifyActive, setIdentifyActiveState] = useState(false);
+  const [mapControls, setMapControls] = useState<MapControls>(NOOP_MAP_CONTROLS);
+  const [identifyActive, setIdentifyActive] = useState(false);
   const [activeCatalogLayers, setActiveCatalogLayers] = useState<string[]>([]);
   const [legendData, setLegendData] = useState<LegendOverlayData[]>([]);
-  const [graticuleVisible, setGraticuleVisibleState] = useState(false);
-  const setGraticuleVisible = useCallback((visible: boolean) => {
-    setGraticuleVisibleState(visible);
-  }, []);
-  const [liveAoiValidation, setLiveAoiValidationState] = useState<LiveAoiValidation>(null);
-  const setLiveAoiValidation = useCallback((result: LiveAoiValidation) => {
-    setLiveAoiValidationState(result);
-  }, []);
-  const [measurementMode, setMeasurementModeState] = useState<MeasurementMode>(null);
-  const setMeasurementMode = useCallback((mode: MeasurementMode) => {
-    setMeasurementModeState(mode);
-  }, []);
-  const [measurementResult, setMeasurementResultState] = useState<MeasurementResult>(null);
-  const setMeasurementResult = useCallback((result: MeasurementResult) => {
-    setMeasurementResultState(result);
-  }, []);
+  const [graticuleVisible, setGraticuleVisible] = useState(false);
+  const [liveAoiValidation, setLiveAoiValidation] = useState<LiveAoiValidation>(null);
+  const [measurementMode, setMeasurementMode] = useState<MeasurementMode>(null);
+  const [measurementResult, setMeasurementResult] = useState<MeasurementResult>(null);
   const [viewHistoryAvail, setViewHistoryAvail] = useState({
     canGoBack: false,
     canGoForward: false
@@ -496,16 +486,12 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
     },
     []
   );
-  const [extentBounds, setExtentBoundsState] = useState<LatLngBoundsExpression | null>(null);
-  const [seedlotNumber, setSeedlotNumberState] = useState<string | null>(null);
-  const [veglotNumber, setVeglotNumberState] = useState<string | null>(null);
-  const [spzIds, setSpzIdsState] = useState<number[]>([]);
-  const [spzCode, setSpzCodeState] = useState<string | null>(null);
-  const [speciesCode, setSpeciesCodeState] = useState<string | null>(null);
-
-  const setIdentifyActive = useCallback((active: boolean) => {
-    setIdentifyActiveState(active);
-  }, []);
+  const [extentBounds, setExtentBounds] = useState<LatLngBoundsExpression | null>(null);
+  const [seedlotNumber, setSeedlotNumber] = useState<string | null>(null);
+  const [veglotNumber, setVeglotNumber] = useState<string | null>(null);
+  const [spzIds, setSpzIds] = useState<number[]>([]);
+  const [spzCode, setSpzCode] = useState<string | null>(null);
+  const [speciesCode, setSpeciesCode] = useState<string | null>(null);
 
   const toggleCatalogLayer = useCallback((id: string) => {
     setActiveCatalogLayers((prev) => (
@@ -514,28 +500,24 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const addAoi = useCallback((aoi: AoiPolygon) => {
-    setAoisState((prev) => [...prev, aoi]);
+    setAois((prev) => [...prev, aoi]);
   }, []);
 
   const removeLastAoi = useCallback(() => {
-    setAoisState((prev) => (prev.length === 0 ? prev : prev.slice(0, -1)));
+    setAois((prev) => (prev.length === 0 ? prev : prev.slice(0, -1)));
   }, []);
 
   const clearAois = useCallback(() => {
-    setAoisState([]);
+    setAois([]);
   }, []);
 
   const replaceAoi = useCallback((index: number, aoi: AoiPolygon) => {
-    setAoisState((prev) => {
+    setAois((prev) => {
       if (index < 0 || index >= prev.length) return prev;
       const next = prev.slice();
       next[index] = aoi;
       return next;
     });
-  }, []);
-
-  const setAois = useCallback((next: AoiPolygon[]) => {
-    setAoisState(next);
   }, []);
 
   const setBecZones = useCallback(
@@ -547,13 +529,6 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
-  const setExtentBounds = useCallback(
-    (bounds: LatLngBoundsExpression | null) => {
-      setExtentBoundsState(bounds);
-    },
-    []
-  );
-
   // Seedlot wins when both are supplied — matches the legacy precedence
   // where the seedlot-point layer was painted on top of the veglot layer.
   // Enforced at the setter boundary so callers can pass both URL params
@@ -561,27 +536,15 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
   const setHighlightPoint = useCallback(
     (seedlot: string | null, veglot: string | null) => {
       if (seedlot) {
-        setSeedlotNumberState(seedlot);
-        setVeglotNumberState(null);
+        setSeedlotNumber(seedlot);
+        setVeglotNumber(null);
       } else {
-        setSeedlotNumberState(null);
-        setVeglotNumberState(veglot);
+        setSeedlotNumber(null);
+        setVeglotNumber(veglot);
       }
     },
     []
   );
-
-  const setSpzIds = useCallback((ids: number[]) => {
-    setSpzIdsState(ids);
-  }, []);
-
-  const setSpzCode = useCallback((code: string | null) => {
-    setSpzCodeState(code);
-  }, []);
-
-  const setSpeciesCode = useCallback((code: string | null) => {
-    setSpeciesCodeState(code);
-  }, []);
 
   // Merge partial control maps so AoiDrawLayer and MeasureControl can
   // each register their own callbacks without overwriting the other's
@@ -589,7 +552,7 @@ export const SparMapProvider = ({ children }: { children: ReactNode }) => {
   // MapControls type doc above.
   // eslint-disable-next-line no-underscore-dangle -- internal bridge setter, not public API
   const _setMapControls = useCallback((partial: Partial<MapControls>) => {
-    setMapControlsState((prev) => ({ ...prev, ...partial }));
+    setMapControls((prev) => ({ ...prev, ...partial }));
   }, []);
 
   const contextValue = useMemo<SparMapContextValue>(() => ({
