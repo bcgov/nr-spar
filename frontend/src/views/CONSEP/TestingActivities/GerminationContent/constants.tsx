@@ -227,11 +227,15 @@ const buildSlotColumn = (
           ),
           onFocus: () => handlers.onSlotFocus(slot.slotIndex),
           onBlur: () => handlers.onSlotFocus(null),
-          inputProps: {
-            'data-testid': `germ-count-${row.original.replicateNumber}-${slot.slotIndex}`,
-            'aria-label': `Replicate ${row.original.replicateNumber} count ${slot.slotIndex}`,
-            inputMode: 'numeric',
-            style: { textAlign: 'right' }
+          // MUI v9 reads the native input's attributes from slotProps.htmlInput
+          // and silently drops the old `inputProps`.
+          slotProps: {
+            htmlInput: {
+              'data-testid': `germ-count-${row.original.replicateNumber}-${slot.slotIndex}`,
+              'aria-label': `Replicate ${row.original.replicateNumber} count ${slot.slotIndex}`,
+              inputMode: 'numeric',
+              style: { textAlign: 'right' }
+            }
           },
           sx: numberFieldSx
         }),
@@ -284,11 +288,13 @@ export const getDailyGermColumns = (
         row.original.replicateNumber,
         e.currentTarget.value
       ),
-      inputProps: {
-        'data-testid': `germ-seeds-${row.original.replicateNumber}`,
-        'aria-label': `Replicate ${row.original.replicateNumber} number of seeds`,
-        inputMode: 'numeric',
-        style: { textAlign: 'right' }
+      slotProps: {
+        htmlInput: {
+          'data-testid': `germ-seeds-${row.original.replicateNumber}`,
+          'aria-label': `Replicate ${row.original.replicateNumber} number of seeds`,
+          inputMode: 'numeric',
+          style: { textAlign: 'right' }
+        }
       },
       sx: numberFieldSx
     }),
@@ -316,10 +322,12 @@ export const getDailyGermColumns = (
         size="small"
         checked={row.original.repAcceptedInd === 1}
         disabled={!isEditable || !!validationErrors[`rep-${row.original.replicateNumber}`]}
-        inputProps={{
-          'data-testid': `germ-acc-${row.original.replicateNumber}`,
-          'aria-label': `Replicate ${row.original.replicateNumber} accepted`
-        } as React.InputHTMLAttributes<HTMLInputElement>}
+        slotProps={{
+          input: {
+            'data-testid': `germ-acc-${row.original.replicateNumber}`,
+            'aria-label': `Replicate ${row.original.replicateNumber} accepted`
+          } as React.InputHTMLAttributes<HTMLInputElement>
+        }}
         onChange={(e) => handlers.onAcceptToggle(
           row.original.replicateNumber,
           e.target.checked
