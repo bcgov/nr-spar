@@ -56,14 +56,10 @@ const WFS_POINT_LAYER_CONFIG: Record<string, {
 const resolveWfsPointConfig = (
   overlayId: string
 ): { typeName: string; labelText: string } | null => {
-  // Early-return-on-match loop (acts like `break`); keep the for-of.
-  // eslint-disable-next-line no-restricted-syntax
-  for (const parent of Object.keys(WFS_POINT_LAYER_CONFIG)) {
-    if (overlayId === parent || overlayId.startsWith(`${parent}_`)) {
-      return WFS_POINT_LAYER_CONFIG[parent];
-    }
-  }
-  return null;
+  const parent = Object.keys(WFS_POINT_LAYER_CONFIG).find(
+    (key) => overlayId === key || overlayId.startsWith(`${key}_`)
+  );
+  return parent ? WFS_POINT_LAYER_CONFIG[parent] : null;
 };
 
 const OPENMAPS_WMS_TILE_OPTIONS = {

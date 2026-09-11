@@ -155,11 +155,9 @@ const symbolizerToSwatch = (sym: GsSymbolizer): LegendSwatch | null => {
 
 const ruleToLegendRule = (rule: GsRule): LegendRule | null => {
   const symbolizers = Array.isArray(rule.symbolizers) ? rule.symbolizers : [];
-  let swatch: LegendSwatch | null = null;
-  for (const symbolizer of symbolizers) {
-    swatch = symbolizerToSwatch(symbolizer);
-    if (swatch) break;
-  }
+  const swatch = symbolizers
+    .map(symbolizerToSwatch)
+    .find((item) => item !== null) ?? null;
   if (!swatch) return null;
   const label = toTrimmedString(rule.title) ?? toTrimmedString(rule.name) ?? 'Other';
   return { label, swatch };
@@ -172,11 +170,10 @@ export interface ParsedLegend {
 }
 
 const firstNonEmptyTitle = (legends: GsLegend[]): string | null => {
-  for (const legend of legends) {
-    const title = legend?.title;
-    if (typeof title === 'string' && title.trim() !== '') return title.trim();
-  }
-  return null;
+  const titled = legends.find((legend) => (
+    typeof legend?.title === 'string' && legend.title.trim() !== ''
+  ));
+  return titled?.title?.trim() ?? null;
 };
 
 /**
