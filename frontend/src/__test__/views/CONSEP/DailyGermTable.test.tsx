@@ -22,6 +22,7 @@ const renderTable = (over: Partial<React.ComponentProps<typeof DailyGermTable>> 
     validationErrors: {},
     onSlotsChange: vi.fn(),
     onReplicatesChange: vi.fn(),
+    onSlotSelect: vi.fn(),
     ...over
   };
   render(<DailyGermTable {...props} />);
@@ -147,6 +148,27 @@ describe('DailyGermTable', () => {
   // counts. They are dropped from the upsert payload and wiped server-side, so
   // leaving them in state showed ghost values in disabled inputs and counted
   // them into rep totals.
+  // Abnormals hang off the same day and are wiped server-side with it, so
+  // leaving them in state would show ghost counts in the now-disabled inputs
+  // and keep inflating the germinated + abnormal check (#2606).
+  it('clears abnormals when the count date is cleared', () => {
+    const slots = emptySlots();
+    slots[0] = {
+      slotIndex: 1,
+      countDt: '2024-11-04',
+      dayNoOfTest: 4,
+      rep1NoSeedsGerm: 5,
+      rep1Abnormal: { abnormalNumRotten: 2 },
+      rep2Abnormal: { abnormalNumWeak: 1 }
+    };
+    const props = renderTable({ slots });
+    fireEvent.change(openDatePicker(1), { target: { value: '' } });
+    const [updated] = (props.onSlotsChange as ReturnType<typeof vi.fn>).mock.calls.at(-1)!;
+    const slotOne = updated.find((s: { slotIndex: number }) => s.slotIndex === 1);
+    expect(slotOne.rep1Abnormal).toBeUndefined();
+    expect(slotOne.rep2Abnormal).toBeUndefined();
+  });
+
   it('clears rep counts when the count date is cleared', () => {
     const slots = emptySlots();
     slots[0] = {
