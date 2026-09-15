@@ -23,20 +23,30 @@ public interface GermCountMapper {
 
   default List<GermCountSlotDto> buildSlots(GermCountEntity e) {
     List<GermCountSlotDto> result = new ArrayList<>(13);
-    if (e.getDailyGermSkey1()  != null) result.add(slot(1,  e.getDailyGermSkey1(),  e.getCountDt1(),  e.getDayNoOfTest1(),  e.getRep1NoSeedsGerm1(),  e.getRep2NoSeedsGerm1(),  e.getRep3NoSeedsGerm1(),  e.getRep4NoSeedsGerm1(),  e.getCumulativeGerm1()));
-    if (e.getDailyGermSkey2()  != null) result.add(slot(2,  e.getDailyGermSkey2(),  e.getCountDt2(),  e.getDayNoOfTest2(),  e.getRep1NoSeedsGerm2(),  e.getRep2NoSeedsGerm2(),  e.getRep3NoSeedsGerm2(),  e.getRep4NoSeedsGerm2(),  e.getCumulativeGerm2()));
-    if (e.getDailyGermSkey3()  != null) result.add(slot(3,  e.getDailyGermSkey3(),  e.getCountDt3(),  e.getDayNoOfTest3(),  e.getRep1NoSeedsGerm3(),  e.getRep2NoSeedsGerm3(),  e.getRep3NoSeedsGerm3(),  e.getRep4NoSeedsGerm3(),  e.getCumulativeGerm3()));
-    if (e.getDailyGermSkey4()  != null) result.add(slot(4,  e.getDailyGermSkey4(),  e.getCountDt4(),  e.getDayNoOfTest4(),  e.getRep1NoSeedsGerm4(),  e.getRep2NoSeedsGerm4(),  e.getRep3NoSeedsGerm4(),  e.getRep4NoSeedsGerm4(),  e.getCumulativeGerm4()));
-    if (e.getDailyGermSkey5()  != null) result.add(slot(5,  e.getDailyGermSkey5(),  e.getCountDt5(),  e.getDayNoOfTest5(),  e.getRep1NoSeedsGerm5(),  e.getRep2NoSeedsGerm5(),  e.getRep3NoSeedsGerm5(),  e.getRep4NoSeedsGerm5(),  e.getCumulativeGerm5()));
-    if (e.getDailyGermSkey6()  != null) result.add(slot(6,  e.getDailyGermSkey6(),  e.getCountDt6(),  e.getDayNoOfTest6(),  e.getRep1NoSeedsGerm6(),  e.getRep2NoSeedsGerm6(),  e.getRep3NoSeedsGerm6(),  e.getRep4NoSeedsGerm6(),  e.getCumulativeGerm6()));
-    if (e.getDailyGermSkey7()  != null) result.add(slot(7,  e.getDailyGermSkey7(),  e.getCountDt7(),  e.getDayNoOfTest7(),  e.getRep1NoSeedsGerm7(),  e.getRep2NoSeedsGerm7(),  e.getRep3NoSeedsGerm7(),  e.getRep4NoSeedsGerm7(),  e.getCumulativeGerm7()));
-    if (e.getDailyGermSkey8()  != null) result.add(slot(8,  e.getDailyGermSkey8(),  e.getCountDt8(),  e.getDayNoOfTest8(),  e.getRep1NoSeedsGerm8(),  e.getRep2NoSeedsGerm8(),  e.getRep3NoSeedsGerm8(),  e.getRep4NoSeedsGerm8(),  e.getCumulativeGerm8()));
-    if (e.getDailyGermSkey9()  != null) result.add(slot(9,  e.getDailyGermSkey9(),  e.getCountDt9(),  e.getDayNoOfTest9(),  e.getRep1NoSeedsGerm9(),  e.getRep2NoSeedsGerm9(),  e.getRep3NoSeedsGerm9(),  e.getRep4NoSeedsGerm9(),  e.getCumulativeGerm9()));
-    if (e.getDailyGermSkey10() != null) result.add(slot(10, e.getDailyGermSkey10(), e.getCountDt10(), e.getDayNoOfTest10(), e.getRep1NoSeedsGerm10(), e.getRep2NoSeedsGerm10(), e.getRep3NoSeedsGerm10(), e.getRep4NoSeedsGerm10(), e.getCumulativeGerm10()));
-    if (e.getDailyGermSkey11() != null) result.add(slot(11, e.getDailyGermSkey11(), e.getCountDt11(), e.getDayNoOfTest11(), e.getRep1NoSeedsGerm11(), e.getRep2NoSeedsGerm11(), e.getRep3NoSeedsGerm11(), e.getRep4NoSeedsGerm11(), e.getCumulativeGerm11()));
-    if (e.getDailyGermSkey12() != null) result.add(slot(12, e.getDailyGermSkey12(), e.getCountDt12(), e.getDayNoOfTest12(), e.getRep1NoSeedsGerm12(), e.getRep2NoSeedsGerm12(), e.getRep3NoSeedsGerm12(), e.getRep4NoSeedsGerm12(), e.getCumulativeGerm12()));
-    if (e.getDailyGermSkey13() != null) result.add(slot(13, e.getDailyGermSkey13(), e.getCountDt13(), e.getDayNoOfTest13(), e.getRep1NoSeedsGerm13(), e.getRep2NoSeedsGerm13(), e.getRep3NoSeedsGerm13(), e.getRep4NoSeedsGerm13(), e.getCumulativeGerm13()));
+    if (isPresent(e.getCountDt1(), e.getDailyGermSkey1())) result.add(slot(1,  e.getDailyGermSkey1(),  e.getCountDt1(),  e.getDayNoOfTest1(),  e.getRep1NoSeedsGerm1(),  e.getRep2NoSeedsGerm1(),  e.getRep3NoSeedsGerm1(),  e.getRep4NoSeedsGerm1(),  e.getCumulativeGerm1()));
+    if (isPresent(e.getCountDt2(), e.getDailyGermSkey2())) result.add(slot(2,  e.getDailyGermSkey2(),  e.getCountDt2(),  e.getDayNoOfTest2(),  e.getRep1NoSeedsGerm2(),  e.getRep2NoSeedsGerm2(),  e.getRep3NoSeedsGerm2(),  e.getRep4NoSeedsGerm2(),  e.getCumulativeGerm2()));
+    if (isPresent(e.getCountDt3(), e.getDailyGermSkey3())) result.add(slot(3,  e.getDailyGermSkey3(),  e.getCountDt3(),  e.getDayNoOfTest3(),  e.getRep1NoSeedsGerm3(),  e.getRep2NoSeedsGerm3(),  e.getRep3NoSeedsGerm3(),  e.getRep4NoSeedsGerm3(),  e.getCumulativeGerm3()));
+    if (isPresent(e.getCountDt4(), e.getDailyGermSkey4())) result.add(slot(4,  e.getDailyGermSkey4(),  e.getCountDt4(),  e.getDayNoOfTest4(),  e.getRep1NoSeedsGerm4(),  e.getRep2NoSeedsGerm4(),  e.getRep3NoSeedsGerm4(),  e.getRep4NoSeedsGerm4(),  e.getCumulativeGerm4()));
+    if (isPresent(e.getCountDt5(), e.getDailyGermSkey5())) result.add(slot(5,  e.getDailyGermSkey5(),  e.getCountDt5(),  e.getDayNoOfTest5(),  e.getRep1NoSeedsGerm5(),  e.getRep2NoSeedsGerm5(),  e.getRep3NoSeedsGerm5(),  e.getRep4NoSeedsGerm5(),  e.getCumulativeGerm5()));
+    if (isPresent(e.getCountDt6(), e.getDailyGermSkey6())) result.add(slot(6,  e.getDailyGermSkey6(),  e.getCountDt6(),  e.getDayNoOfTest6(),  e.getRep1NoSeedsGerm6(),  e.getRep2NoSeedsGerm6(),  e.getRep3NoSeedsGerm6(),  e.getRep4NoSeedsGerm6(),  e.getCumulativeGerm6()));
+    if (isPresent(e.getCountDt7(), e.getDailyGermSkey7())) result.add(slot(7,  e.getDailyGermSkey7(),  e.getCountDt7(),  e.getDayNoOfTest7(),  e.getRep1NoSeedsGerm7(),  e.getRep2NoSeedsGerm7(),  e.getRep3NoSeedsGerm7(),  e.getRep4NoSeedsGerm7(),  e.getCumulativeGerm7()));
+    if (isPresent(e.getCountDt8(), e.getDailyGermSkey8())) result.add(slot(8,  e.getDailyGermSkey8(),  e.getCountDt8(),  e.getDayNoOfTest8(),  e.getRep1NoSeedsGerm8(),  e.getRep2NoSeedsGerm8(),  e.getRep3NoSeedsGerm8(),  e.getRep4NoSeedsGerm8(),  e.getCumulativeGerm8()));
+    if (isPresent(e.getCountDt9(), e.getDailyGermSkey9())) result.add(slot(9,  e.getDailyGermSkey9(),  e.getCountDt9(),  e.getDayNoOfTest9(),  e.getRep1NoSeedsGerm9(),  e.getRep2NoSeedsGerm9(),  e.getRep3NoSeedsGerm9(),  e.getRep4NoSeedsGerm9(),  e.getCumulativeGerm9()));
+    if (isPresent(e.getCountDt10(), e.getDailyGermSkey10())) result.add(slot(10, e.getDailyGermSkey10(), e.getCountDt10(), e.getDayNoOfTest10(), e.getRep1NoSeedsGerm10(), e.getRep2NoSeedsGerm10(), e.getRep3NoSeedsGerm10(), e.getRep4NoSeedsGerm10(), e.getCumulativeGerm10()));
+    if (isPresent(e.getCountDt11(), e.getDailyGermSkey11())) result.add(slot(11, e.getDailyGermSkey11(), e.getCountDt11(), e.getDayNoOfTest11(), e.getRep1NoSeedsGerm11(), e.getRep2NoSeedsGerm11(), e.getRep3NoSeedsGerm11(), e.getRep4NoSeedsGerm11(), e.getCumulativeGerm11()));
+    if (isPresent(e.getCountDt12(), e.getDailyGermSkey12())) result.add(slot(12, e.getDailyGermSkey12(), e.getCountDt12(), e.getDayNoOfTest12(), e.getRep1NoSeedsGerm12(), e.getRep2NoSeedsGerm12(), e.getRep3NoSeedsGerm12(), e.getRep4NoSeedsGerm12(), e.getCumulativeGerm12()));
+    if (isPresent(e.getCountDt13(), e.getDailyGermSkey13())) result.add(slot(13, e.getDailyGermSkey13(), e.getCountDt13(), e.getDayNoOfTest13(), e.getRep1NoSeedsGerm13(), e.getRep2NoSeedsGerm13(), e.getRep3NoSeedsGerm13(), e.getRep4NoSeedsGerm13(), e.getCumulativeGerm13()));
     return result;
+  }
+
+  /**
+   * A slot exists if it carries a count date. DAILY_GERM_SKEY{n} is only minted when the day has an
+   * abnormal row to point at, so it cannot serve as the presence marker -- a normal day saved
+   * without abnormals would disappear from the next read. A legacy row holding a key without a date
+   * still counts as present so its abnormals stay reachable.
+   */
+  private static boolean isPresent(java.time.LocalDate countDt, java.math.BigDecimal skey) {
+    return countDt != null || skey != null;
   }
 
   private static GermCountSlotDto slot(

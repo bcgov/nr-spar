@@ -126,6 +126,33 @@ describe('useAutosave', () => {
     expect(onSave).toHaveBeenCalledWith({ v: 2 }, { v: 1 });
   });
 
+  it('does not retry a failed save on its own', async () => {
+    const onSave = vi.fn().mockRejectedValue(new Error('Save failed'));
+    const { rerender } = renderHook(
+      ({ data, enabled }) => useAutosave({
+        data, onSave, enabled, delay: 800
+      }),
+      { initialProps: { data: { v: 0 }, enabled: true } }
+    );
+
+    rerender({ data: { v: 1 }, enabled: true });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    // A caller gating on its mutation's pending flag toggles `enabled` around
+    // every attempt, which re-runs the scheduling effect. That must not turn a
+    // single failure into an endless retry loop.
+    rerender({ data: { v: 1 }, enabled: false });
+    rerender({ data: { v: 1 }, enabled: true });
+    await act(async () => { vi.advanceTimersByTime(5000); });
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    // A fresh edit is a new value, so it saves again.
+    rerender({ data: { v: 2 }, enabled: true });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(onSave).toHaveBeenCalledTimes(2);
+  });
+
   it('retries a value after a failed save', async () => {
     const onSave = vi.fn()
       .mockRejectedValueOnce(new Error('Save failed'))

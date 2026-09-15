@@ -180,6 +180,18 @@ public record GerminationTestHeaderDto(
             + " echo back as riaUpdateTimestamp when updating (optimistic lock)",
         example = "2026-05-01T11:00:00"
     )
-    LocalDateTime riaUpdateTimestamp
+    LocalDateTime riaUpdateTimestamp,
+
+    @Schema(description = "Request ID", example = "TST20170140")
+    String requestId,
+
+    @Schema(description = "Seedlot number", example = "07080")
+    String seedlotNumber,
+
+    @Schema(description = "Family lot number")
+    String familyLotNumber,
+
+    @Schema(description = "Vegetation (species) code", example = "SX")
+    String vegetationState
 ) {
 }

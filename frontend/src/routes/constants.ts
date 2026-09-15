@@ -28,6 +28,7 @@ const ROUTES = {
   FAMILY_LOT_SUMMARY_REPORT: '/consep/family-lot-summary-report',
   GERMINATION_SPECIES_AVERAGE: '/consep/germination-species-average',
   GERM_COUNT_PREDICTIONS: '/consep/germ-count-predictions',
+  GERMINATION_TEST_RESULT: '/consep/germination-test/:riaKey',
   IDENTIFY_AVAILABLE_LONG_TERM_LOCATION: '/consep/identify-available-long-term-location',
   IN_HOUSE_INVENTORY: '/consep/in-house-inventory',
   INVENTORY_LOCATION_REPORT: '/consep/inventory-location-report',

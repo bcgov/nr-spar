@@ -197,10 +197,29 @@ class GermCountEndpointTest {
   }
 
   @Test
-  void upsert_returns400_whenDaysEmpty() throws Exception {
-    String badBody = """
-        {"days":[],
+  void upsert_acceptsEmptyDays_asAFullClear() throws Exception {
+    // The upsert is a full replacement, so an empty list is how the client says
+    // "no count dates left". Rejecting it left the removal of the last date
+    // unsaveable.
+    String body = """
+        {"updateTimestamp":"2026-04-05T14:30:00",
+         "days":[],
          "replicates":[{"replicateNumber":1,"totalNoSeeds":100}]}
+        """;
+    mockMvc
+        .perform(put(BASE_URL + "/881191")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body))
+        .andExpect(status().isOk());
+
+    verify(germCountService, times(1)).upsertGermCounts(any(), any(), any());
+  }
+
+  @Test
+  void upsert_returns400_whenDaysMissing() throws Exception {
+    String badBody = """
+        {"replicates":[{"replicateNumber":1,"totalNoSeeds":100}]}
         """;
     mockMvc
         .perform(put(BASE_URL + "/881191")
