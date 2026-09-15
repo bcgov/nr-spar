@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon';
-import { GermCountSlotType, GermReplicateType, GermCountUpsertPayload } from '../../../../types/consep/GerminationType';
+import {
+  GermCountSlotType, GermReplicateType, GermCountUpsertPayload, ReplicateAbnormalType
+} from '../../../../types/consep/GerminationType';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -11,6 +13,22 @@ const INPUT_DATE_FORMATS = ['yyyy/MM/dd', ISO_DATE, 'y/M/d', 'y-M-d'];
 
 export const REP_COUNT_KEYS = [
   'rep1NoSeedsGerm', 'rep2NoSeedsGerm', 'rep3NoSeedsGerm', 'rep4NoSeedsGerm'
+] as const;
+
+export const REP_ABNORMAL_KEYS = [
+  'rep1Abnormal', 'rep2Abnormal', 'rep3Abnormal', 'rep4Abnormal'
+] as const;
+
+/**
+ * The eleven abnormality categories as the API stores them. `totalSeeds` rides
+ * along in the same object and is deliberately absent here -- it is a seed
+ * count, not an abnormality, and summing it would double the replicate total.
+ */
+export const ABNORMAL_COUNT_KEYS = [
+  'abnormalNumReverseEmbryo', 'abnormalNumStuntedRadicle', 'abnormalNumStuntedHypocotyl',
+  'abnormalNumRotten', 'abnormalNumThickenedHypocotyl', 'abnormalNumThickenedRadicle',
+  'abnormalNumTwisted', 'abnormalNumMegametophyteCollar', 'abnormalNumWeak',
+  'abnormalNumOther', 'abnormalNumPregermination'
 ] as const;
 
 export const getDefaultSeeds = (testCategoryCd?: string): number => (
@@ -171,6 +189,23 @@ export const calcRepTotal = (
   0
 );
 
+/** One replicate's abnormals for one count day. */
+export const calcSlotAbnormalTotal = (
+  slot: GermCountSlotType,
+  repNumber: 1 | 2 | 3 | 4
+): number => {
+  const abnormal: ReplicateAbnormalType | undefined = slot[REP_ABNORMAL_KEYS[repNumber - 1]];
+  if (!abnormal) {
+    return 0;
+  }
+  return ABNORMAL_COUNT_KEYS.reduce((sum, key) => sum + (abnormal[key] ?? 0), 0);
+};
+
+export const calcRepAbnormalTotal = (
+  slots: GermCountSlotType[],
+  repNumber: 1 | 2 | 3 | 4
+): number => slots.reduce((sum, slot) => sum + calcSlotAbnormalTotal(slot, repNumber), 0);
+
 export const checkOverLimit = (
   slots: GermCountSlotType[],
   replicates: GermReplicateType[]
@@ -185,9 +220,15 @@ export const checkOverLimit = (
       errors[`rep-${rep.replicateNumber}`] = 'Number of seeds is required';
       return;
     }
-    const total = calcRepTotal(slots, rep.replicateNumber as 1 | 2 | 3 | 4);
+    // Both halves, because that is what the backend checks
+    // (GermCountService.validateSeedTotals sums germinated + abnormal against
+    // the replicate total). Counting only the germinated half let the user fill
+    // right up to the seed count on a test that already had abnormals on file,
+    // and the save then 400d.
+    const repNumber = rep.replicateNumber as 1 | 2 | 3 | 4;
+    const total = calcRepTotal(slots, repNumber) + calcRepAbnormalTotal(slots, repNumber);
     if (total > rep.totalNoSeeds) {
-      errors[`rep-${rep.replicateNumber}`] = `Total germinated (${total}) exceeds number of seeds (${rep.totalNoSeeds})`;
+      errors[`rep-${rep.replicateNumber}`] = `Germinated + abnormal (${total}) exceeds number of seeds (${rep.totalNoSeeds})`;
     }
   });
   return errors;
@@ -197,6 +238,27 @@ export const calcGermPct = (repTotal: number, totalSeeds?: number): number => (
   totalSeeds ? Math.round((repTotal / totalSeeds) * 100) : 0
 );
 
+/**
+ * A day's abnormals go to the API for all four replicates or for none. The
+ * backend rebuilds the whole abnormal row from what it is sent, so omitting a
+ * replicate would NULL it out; `validateAbnormalsAllOrNone` rejects a partial
+ * set outright. A day nobody has recorded abnormals against sends none at all,
+ * which is what stops the backend minting a surrogate key and writing an empty
+ * row for every dated day.
+ */
+const withAllReplicateAbnormals = <T extends GermCountSlotType>(day: T): T => {
+  if (!REP_ABNORMAL_KEYS.some((key) => day[key] !== undefined)) {
+    return day;
+  }
+  return {
+    ...day,
+    rep1Abnormal: day.rep1Abnormal ?? {},
+    rep2Abnormal: day.rep2Abnormal ?? {},
+    rep3Abnormal: day.rep3Abnormal ?? {},
+    rep4Abnormal: day.rep4Abnormal ?? {}
+  };
+};
+
 export const buildUpsertPayload = (
   slots: GermCountSlotType[],
   replicates: GermReplicateType[],
@@ -205,6 +267,7 @@ export const buildUpsertPayload = (
   updateTimestamp,
   days: slots
     .filter((slot) => slot.countDt)
+    .map(withAllReplicateAbnormals)
     .map(({ dailyGermSkey, cumulativeGerm, ...rest }) => rest),
   replicates
 });
