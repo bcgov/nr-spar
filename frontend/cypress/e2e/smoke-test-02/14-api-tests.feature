@@ -2,6 +2,7 @@ Feature: Seedlot API smoke
 
   Background:
     Given I am logged in
+    And I load the FDI seedlot number created earlier
 
   Scenario: Fetching existing seedlot details returns a successful response
     When I visit the seedlot detail page for the loaded aclass seedlot

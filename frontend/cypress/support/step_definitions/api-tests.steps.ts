@@ -1,5 +1,5 @@
 import {
-  Before, Then, When
+  Given, Then, When
 } from '@badeball/cypress-cucumber-preprocessor';
 import { SeedlotRegFixtureType } from '../../definitions';
 
@@ -7,12 +7,21 @@ let seedlotNumber: string;
 let fixtureData: SeedlotRegFixtureType = {};
 let seedlotInterception: Cypress.ObjectLike = {};
 
-Before(() => cy.fixture('aclass-seedlot').then((fData: SeedlotRegFixtureType) => {
-  fixtureData = fData;
-  return cy.task('getData', fData.fdi.species).then((sNumber) => {
-    seedlotNumber = sNumber as string;
-  });
-}));
+Given('I load the FDI seedlot number created earlier', () => {
+  cy.fixture('aclass-seedlot')
+    .then((fData: SeedlotRegFixtureType) => {
+      fixtureData = fData;
+      return cy.task('getData', fData.fdi.species).then((sNumber) => {
+        seedlotNumber = sNumber as string;
+
+        if (!seedlotNumber) {
+          throw new Error(
+            'Missing FDI seedlot number. Run 12-create-a-class-seedlot-fdi.feature before 14-api-tests.feature in the same Cypress run.'
+          );
+        }
+      });
+    })
+});
 
 When('I visit the seedlot detail page for the loaded aclass seedlot', () => {
   cy.log(`Visiting seedlot detail page for seedlot number: ${seedlotNumber}`);
