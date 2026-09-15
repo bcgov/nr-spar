@@ -70,7 +70,7 @@ export type DailyGermHandlers = {
 // `table-layout: auto`, where the browser's column algorithm reads `width` and
 // all but ignores `max-width`, and MRT writes `width` from `size` (defaulting
 // to 180) over anything set through `sx`.
-const fixedWidth = (
+export const fixedWidth = (
   size: number,
   alignment: 'left' | 'right' | 'center' = 'right',
   paddingX?: string
@@ -129,7 +129,7 @@ const fixedWidth = (
 const SLOT_COLUMN_WIDTH = 56;
 const SLOT_COLUMN_PADDING = '0.125rem';
 
-const numberFieldSx = {
+export const numberFieldSx = {
   // Without this the field keeps a text input's intrinsic 20-character width,
   // which is what the auto table layout sizes the column to.
   width: '100%',
