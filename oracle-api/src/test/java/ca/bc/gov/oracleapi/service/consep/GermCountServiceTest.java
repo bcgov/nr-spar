@@ -142,6 +142,39 @@ class GermCountServiceTest {
   }
 
   @Test
+  void getGermCounts_fillsSlotAbnormals_fromTheRowsItsSkeysOwn() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+
+    GermCountEntity entity = new GermCountEntity();
+    entity.setRiaSkey(riaSkey);
+    // Slot 1 owns an abnormal row; slot 2 is dated but never had one.
+    entity.setDailyGermSkey1(new BigDecimal("1001"));
+    entity.setCountDt1(LocalDate.of(2026, 4, 1));
+    entity.setRep1NoSeedsGerm1(10);
+    entity.setCountDt2(LocalDate.of(2026, 4, 2));
+
+    DailyAbnormalEntity row = new DailyAbnormalEntity();
+    row.setDailyGermSkey(new BigDecimal("1001"));
+    row.setRep1NoAbnrmRe(3);
+    row.setRep4NoAbnrmPrgrm(7);
+
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(entity));
+    when(dailyAbnormalRepository.findAllById(Set.of(new BigDecimal("1001"))))
+        .thenReturn(List.of(row));
+
+    GermCountDto dto = germCountService.getGermCounts(riaSkey);
+
+    GermCountSlotDto slot1 = dto.slots().get(0);
+    assertEquals(3, slot1.rep1Abnormal().abnormalNumReverseEmbryo());
+    assertNull(slot1.rep1Abnormal().abnormalNumStuntedRadicle());
+    assertEquals(7, slot1.rep4Abnormal().abnormalNumPregermination());
+
+    // A dated slot with no abnormal row of its own carries no abnormals, so the
+    // screen can tell "none recorded" from "recorded as zero".
+    assertNull(dto.slots().get(1).rep1Abnormal());
+  }
+
+  @Test
   void getGermCounts_shouldReturnEmptySlotList_whenAllSlotsAreNull() {
     BigDecimal riaSkey = new BigDecimal("100001");
 
