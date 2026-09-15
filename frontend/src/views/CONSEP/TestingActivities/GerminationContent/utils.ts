@@ -247,7 +247,7 @@ export const calcGermPct = (repTotal: number, totalSeeds?: number): number => (
  * row for every dated day.
  */
 const withAllReplicateAbnormals = <T extends GermCountSlotType>(day: T): T => {
-  if (!REP_ABNORMAL_KEYS.some((key) => day[key] !== undefined)) {
+  if (!REP_ABNORMAL_KEYS.some((key) => day[key] !== undefined && day[key] !== null)) {
     return day;
   }
   return {
