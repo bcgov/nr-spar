@@ -58,7 +58,7 @@
     "@types/react-test-renderer": "^19.0.0",
     "@vitest/coverage-v8": "^4.1.8",
     "concurrently": "^10.0.0",
-    "cypress": "^15.10.0",
+    "cypress": "^16.0.0",
     "cypress-split": "^1.24.28",
     "esbuild": "^0.28.1",
     "eslint": "^9.0.0",
