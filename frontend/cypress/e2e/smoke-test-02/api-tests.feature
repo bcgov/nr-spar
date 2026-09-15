@@ -2,7 +2,6 @@ Feature: Seedlot API smoke
 
   Background:
     Given I am logged in
-    And the aclass seedlot fixture is loaded
 
   Scenario: Fetching existing seedlot details returns a successful response
     When I visit the seedlot detail page for the loaded aclass seedlot
