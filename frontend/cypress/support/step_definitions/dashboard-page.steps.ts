@@ -47,12 +47,19 @@ Then('I should see the dashboard favourite card {string}', (cardTitle: string) =
     });
 });
 
-// Navigates to the given card's page and favourites it, then returns to the dashboard.
 Given('the dashboard has a favourite card {string}', (cardTitle: string) => {
-  cy.navigateTo(cardTitle);
-  cy.url().should('contains', '/seedlots');
-  favouriteCurrentPage();
-  cy.navigateTo(NavigationLabels.Dashboard);
+  // Check if seedlot card is appearing at favourites activities
+  cy.get('.favourite-activities-cards')
+    .should('exist')
+    .within(() => {
+      cy.contains('.fav-card-content .fav-card-title-large', cardTitle)
+        .should('be.visible')
+        .click();
+    });
+});
+
+Then('I can navigate to that page {string}', (cardTitle: string) => {
+  cy.isPageTitle(cardTitle);
 });
 
 When('I highlight the dashboard favourite card {string}', (cardTitle: string) => {

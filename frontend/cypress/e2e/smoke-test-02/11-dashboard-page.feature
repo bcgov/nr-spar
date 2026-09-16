@@ -18,6 +18,10 @@ Feature: Dashboard page
     And I visit "/dashboard"
     Then I should see the dashboard favourite card "Seedlots"
 
+  Scenario: User can navigate to the favourite card
+    Given the dashboard has a favourite card "Seedlots"
+    Then I can navigate to that page "Seedlot"
+
   Scenario: User can highlight a dashboard favourite card
     When I highlight the dashboard favourite card "Seedlots"
     Then the dashboard favourite card "Seedlots" should be highlighted
