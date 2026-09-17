@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import {
   getDefaultSeeds, calcDayNumber, resolveDayZero, validateCountDates, formatCountDateLines,
   calcRepTotal, checkOverLimit, calcGermPct, buildUpsertPayload, parseCountInput,
-  getSlotDateBounds
+  getSlotDateBounds, calcSlotAbnormalTotal, calcRepAbnormalTotal
 } from '../../../views/CONSEP/TestingActivities/GerminationContent/utils';
 
 describe('getDefaultSeeds', () => {
@@ -87,7 +87,7 @@ describe('rep totals and over-limit', () => {
       { replicateNumber: 2, totalNoSeeds: 100 }
     ] as any;
     const errors = checkOverLimit(slots, reps);
-    expect(errors['rep-1']).toBe('Total germinated (110) exceeds number of seeds (100)');
+    expect(errors['rep-1']).toBe('Germinated + abnormal (110) exceeds number of seeds (100)');
     expect(errors['rep-2']).toBeUndefined();
   });
 
@@ -102,6 +102,73 @@ describe('rep totals and over-limit', () => {
     const errors = checkOverLimit(slots, reps);
     expect(errors['rep-1']).toBe('Number of seeds is required');
     expect(errors['rep-2']).toBeUndefined();
+  });
+});
+
+describe('calcSlotAbnormalTotal', () => {
+  it('sums one replicate\'s eleven categories for one day', () => {
+    const slot = {
+      slotIndex: 1,
+      rep1Abnormal: { abnormalNumReverseEmbryo: 3, abnormalNumWeak: 2 }
+    } as any;
+    expect(calcSlotAbnormalTotal(slot, 1)).toBe(5);
+  });
+
+  it('is zero for a day with no abnormals recorded', () => {
+    expect(calcSlotAbnormalTotal({ slotIndex: 1 } as any, 1)).toBe(0);
+  });
+
+  // totalSeeds rides along in the API shape but is not an abnormality.
+  it('excludes totalSeeds from the sum', () => {
+    const slot = {
+      slotIndex: 1,
+      rep1Abnormal: { abnormalNumReverseEmbryo: 3, totalSeeds: 100 }
+    } as any;
+    expect(calcSlotAbnormalTotal(slot, 1)).toBe(3);
+  });
+});
+
+describe('calcRepAbnormalTotal', () => {
+  it('sums a replicate\'s abnormals across every day', () => {
+    const slots = [
+      { slotIndex: 1, rep2Abnormal: { abnormalNumRotten: 4 } },
+      { slotIndex: 2, rep2Abnormal: { abnormalNumTwisted: 1, abnormalNumOther: 2 } },
+      { slotIndex: 3 }
+    ] as any;
+    expect(calcRepAbnormalTotal(slots, 2)).toBe(7);
+    expect(calcRepAbnormalTotal(slots, 1)).toBe(0);
+  });
+});
+
+describe('checkOverLimit with abnormals', () => {
+  // The backend validates germinated + abnormal against the replicate total
+  // (GermCountService.validateSeedTotals). Counting only the germinated half
+  // here let the user fill up to the seed count and then took a 400 on save.
+  it('counts abnormals against the seed total, as the backend does', () => {
+    const slots = [
+      {
+        slotIndex: 1,
+        countDt: '2024-11-04',
+        rep1NoSeedsGerm: 98,
+        rep1Abnormal: { abnormalNumRotten: 5 }
+      }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    expect(checkOverLimit(slots, reps)['rep-1'])
+      .toBe('Germinated + abnormal (103) exceeds number of seeds (100)');
+  });
+
+  it('stays quiet when germinated plus abnormal fits', () => {
+    const slots = [
+      {
+        slotIndex: 1,
+        countDt: '2024-11-04',
+        rep1NoSeedsGerm: 90,
+        rep1Abnormal: { abnormalNumRotten: 5 }
+      }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    expect(checkOverLimit(slots, reps)['rep-1']).toBeUndefined();
   });
 });
 
@@ -128,6 +195,34 @@ describe('buildUpsertPayload', () => {
     expect(payload.days[0].slotIndex).toBe(1);
     expect(payload.replicates).toHaveLength(1);
     expect(payload.updateTimestamp).toBe('2026-01-01T00:00:00');
+  });
+
+  // GermCountService.validateAbnormalsAllOrNone 400s on a partial set: it
+  // rebuilds the whole row, so an omitted replicate would be NULLed out.
+  it('sends all four replicates once any abnormal is recorded for a day', () => {
+    const slots = [
+      {
+        slotIndex: 1,
+        countDt: '2024-11-04',
+        rep2Abnormal: { abnormalNumWeak: 1 }
+      }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    const payload = buildUpsertPayload(slots, reps);
+    expect(payload.days[0].rep2Abnormal).toEqual({ abnormalNumWeak: 1 });
+    expect(payload.days[0].rep1Abnormal).toEqual({});
+    expect(payload.days[0].rep3Abnormal).toEqual({});
+    expect(payload.days[0].rep4Abnormal).toEqual({});
+  });
+
+  // A day that carries no abnormals must send none: the backend only writes a
+  // row -- and only mints a DAILY_GERM_SKEY -- for a day that does.
+  it('sends no abnormal fields for a day that has none', () => {
+    const slots = [{ slotIndex: 1, countDt: '2024-11-04', rep1NoSeedsGerm: 5 }] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    const payload = buildUpsertPayload(slots, reps);
+    expect(payload.days[0].rep1Abnormal).toBeUndefined();
+    expect(payload.days[0].rep4Abnormal).toBeUndefined();
   });
 });
 
