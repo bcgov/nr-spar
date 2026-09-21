@@ -29,7 +29,7 @@ import DailyGermTable from './DailyGermTable';
 import AbnormalsTable from './AbnormalsTable';
 import {
   getDefaultSeeds, validateCountDates, checkOverLimit, buildUpsertPayload,
-  parseCountInput, REP_ABNORMAL_KEYS
+  parseCountInput, ABNORMAL_MAX, REP_ABNORMAL_KEYS
 } from './utils';
 
 import './styles.scss';
@@ -194,7 +194,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     field: string,
     raw: string
   ) => {
-    const parsed = parseCountInput(raw);
+    const parsed = parseCountInput(raw, ABNORMAL_MAX);
     if (parsed === null || !activeSlot) {
       return;
     }

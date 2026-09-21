@@ -172,6 +172,35 @@ describe('checkOverLimit with abnormals', () => {
   });
 });
 
+describe('checkOverLimit and undated slots', () => {
+  // buildUpsertPayload drops undated slots and the backend skips them too, so an
+  // abnormal count stranded on one -- a legacy row whose DAILY_GERM_SKEY has no
+  // count date -- must not push the replicate over its limit and jam autosave on
+  // a value the save would have discarded.
+  it('ignores abnormals stranded on a slot with no count date', () => {
+    const slots = [
+      { slotIndex: 1, countDt: '2024-11-04', rep1NoSeedsGerm: 90 },
+      { slotIndex: 2, dailyGermSkey: 77, rep1Abnormal: { abnormalNumRotten: 50 } }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    expect(checkOverLimit(slots, reps)['rep-1']).toBeUndefined();
+  });
+});
+
+describe('parseCountInput upper bound', () => {
+  // Every abnormal column is @Max(999) on the backend. Letting 1000 into state
+  // means the whole germ-count PUT comes back 400 -- taking the day's valid
+  // count edits with it -- instead of the keystroke simply being refused.
+  it('refuses a value above the given maximum', () => {
+    expect(parseCountInput('1000', 999)).toBeNull();
+    expect(parseCountInput('999', 999)).toBe(999);
+  });
+
+  it('has no maximum when none is given', () => {
+    expect(parseCountInput('1000')).toBe(1000);
+  });
+});
+
 describe('calcGermPct', () => {
   it('rounds the percentage and handles missing seeds', () => {
     expect(calcGermPct(45, 100)).toBe(45);
@@ -213,6 +242,28 @@ describe('buildUpsertPayload', () => {
     expect(payload.days[0].rep1Abnormal).toEqual({});
     expect(payload.days[0].rep3Abnormal).toEqual({});
     expect(payload.days[0].rep4Abnormal).toEqual({});
+  });
+
+  // The API serializes an absent abnormal row as null, not as a missing key, so
+  // a presence check that only looks for undefined would expand every dated day
+  // into four empty DTOs -- minting a surrogate key and writing an empty row for
+  // each of them.
+  it('sends no abnormal fields for a day whose abnormals came back null', () => {
+    const slots = [
+      {
+        slotIndex: 1,
+        countDt: '2024-11-04',
+        rep1NoSeedsGerm: 5,
+        rep1Abnormal: null,
+        rep2Abnormal: null,
+        rep3Abnormal: null,
+        rep4Abnormal: null
+      }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    const payload = buildUpsertPayload(slots, reps);
+    expect(payload.days[0].rep1Abnormal).toBeNull();
+    expect(payload.days[0].rep2Abnormal).toBeNull();
   });
 
   // A day that carries no abnormals must send none: the backend only writes a

@@ -138,6 +138,22 @@ describe('Abnormal seedlings table (#2606)', () => {
     expect(dayTwo.rep1Abnormal).toBeUndefined();
   });
 
+  // Every abnormal column is @Max(999) on the API, so a larger value would 400
+  // the whole germ-count save rather than just this cell.
+  it('refuses an abnormal count above 999', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    await waitFor(() => {
+      expect(screen.getByTestId('abnormal-1-re')).toHaveValue('3');
+    });
+
+    fireEvent.change(screen.getByTestId('abnormal-1-re'), { target: { value: '1000' } });
+    expect(screen.getByTestId('abnormal-1-re')).toHaveValue('3');
+
+    fireEvent.change(screen.getByTestId('abnormal-1-re'), { target: { value: '999' } });
+    expect(screen.getByTestId('abnormal-1-re')).toHaveValue('999');
+  });
+
   // The over-limit rule now covers both halves, matching the backend.
   it('flags a replicate whose germinated plus abnormal exceeds its seeds', async () => {
     renderView();

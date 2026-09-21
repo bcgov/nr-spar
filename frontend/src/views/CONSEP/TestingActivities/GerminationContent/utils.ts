@@ -31,6 +31,9 @@ export const ABNORMAL_COUNT_KEYS = [
   'abnormalNumOther', 'abnormalNumPregermination'
 ] as const;
 
+/** Every abnormal column is `@Max(999)` on the API. */
+export const ABNORMAL_MAX = 999;
+
 export const getDefaultSeeds = (testCategoryCd?: string): number => (
   testCategoryCd === 'QA' ? 50 : 100
 );
@@ -168,14 +171,25 @@ export const validateCountDates = (
  *
  * Returns `undefined` for a cleared cell, `null` for input to refuse (leave
  * state as it was), or the parsed count.
+ *
+ * `max` refuses anything above a column's own ceiling. Abnormal counts have one
+ * (`ABNORMAL_MAX`); letting a larger value through would 400 the whole
+ * germ-count save on bean validation, taking that day's valid count edits with
+ * it, rather than simply declining the keystroke.
  */
-export const parseCountInput = (raw: string): number | null | undefined => {
+export const parseCountInput = (
+  raw: string,
+  max?: number
+): number | null | undefined => {
   const trimmed = raw.trim();
   if (!trimmed) {
     return undefined;
   }
   const parsed = Number(trimmed);
   if (!Number.isInteger(parsed) || parsed < 0) {
+    return null;
+  }
+  if (max !== undefined && parsed > max) {
     return null;
   }
   return parsed;
@@ -211,6 +225,11 @@ export const checkOverLimit = (
   replicates: GermReplicateType[]
 ): Record<string, string> => {
   const errors: Record<string, string> = {};
+  // Only dated slots reach the API: buildUpsertPayload drops the rest and the
+  // backend clears them. Counting an undated slot here -- a legacy row whose
+  // DAILY_GERM_SKEY outlived its count date still hydrates with its abnormals --
+  // would jam autosave on a total the save itself would have discarded.
+  const datedSlots = slots.filter((slot) => slot.countDt);
   replicates.forEach((rep) => {
     // A cleared "# seeds" cell (undefined) must block autosave: the backend
     // rejects a payload missing totalNoSeeds with a @NotNull 400 that discards
@@ -226,7 +245,8 @@ export const checkOverLimit = (
     // right up to the seed count on a test that already had abnormals on file,
     // and the save then 400d.
     const repNumber = rep.replicateNumber as 1 | 2 | 3 | 4;
-    const total = calcRepTotal(slots, repNumber) + calcRepAbnormalTotal(slots, repNumber);
+    const total =
+      calcRepTotal(datedSlots, repNumber) + calcRepAbnormalTotal(datedSlots, repNumber);
     if (total > rep.totalNoSeeds) {
       errors[`rep-${rep.replicateNumber}`] = `Germinated + abnormal (${total}) exceeds number of seeds (${rep.totalNoSeeds})`;
     }
