@@ -92,6 +92,10 @@ When('I select male gametic contribution method {string}', (method: string) => {
     .click();
 });
 
+When('I save the seedlot registration progress', () => {
+  cy.saveSeedlotRegFormProgress();
+});
+
 // Upload CSV file
 When('I upload parent tree CSV file {string}', (fileName: string) => {
   // Wait for the table to load
