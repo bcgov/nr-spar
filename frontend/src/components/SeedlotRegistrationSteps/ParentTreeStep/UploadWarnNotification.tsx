@@ -10,12 +10,12 @@ import { MAX_VISIBLE_PT_NUMBERS, pageText } from './constants';
 const UploadWarnNotification = (
   { invalidPTNumbers, setInvalidPTNumbers }: UploadWarnNotifProps
 ) => {
-  const [subtitle, setSubtitle] = useState<JSX.Element | string>('');
+  const [subtitle, setSubtitle] = useState<React.JSX.Element | string>('');
   const [showLess, setShowLess] = useState(true);
 
   const configSubtitle = () => {
     if (invalidPTNumbers.length > 0) {
-      let subtitlePartTwo: JSX.Element | string = 'Invalid Parent tree numbers: ';
+      let subtitlePartTwo: React.JSX.Element | string = 'Invalid Parent tree numbers: ';
       if (invalidPTNumbers.length === 1) {
         subtitlePartTwo += `${invalidPTNumbers[0]}.`;
       } else if (invalidPTNumbers.length <= MAX_VISIBLE_PT_NUMBERS || !showLess) {

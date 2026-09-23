@@ -41,7 +41,7 @@ type Props<T extends Record<string, any>> = {
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
   initialState?: any;
-  tableBodyRef?: React.RefObject<HTMLTableSectionElement>;
+  tableBodyRef?: React.RefObject<HTMLTableSectionElement | null>;
   renderToolbarInternalActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   renderTopToolbarCustomActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   hideToolbar?: boolean;
