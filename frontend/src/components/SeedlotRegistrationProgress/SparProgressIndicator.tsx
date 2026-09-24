@@ -25,7 +25,7 @@ function SparProgressIndicator({
   onChange,
   spaceEqually,
   vertical
-}: SparProgressIndicatorProps): JSX.Element {
+}: SparProgressIndicatorProps): React.JSX.Element {
   const [currentIndex, setCurrentIndex] = useState(controlledIndex);
   const [prevControlledIndex, setPrevControlledIndex] = useState(controlledIndex);
 
