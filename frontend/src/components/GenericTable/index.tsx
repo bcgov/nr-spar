@@ -113,6 +113,18 @@ const GenericTable = <T extends Record<string, any>>({
             padding: 0
           }
         }
+      },
+      MuiInput: {
+        styleOverrides: {
+          // MRT drops the underline of table-mode edit cells through
+          // `InputProps.disableUnderline`, which MUI v9's TextField no longer reads.
+          // Scoped to body cells so column filter inputs keep theirs.
+          root: {
+            '.MuiTableCell-body &::before, .MuiTableCell-body &::after': {
+              display: 'none'
+            }
+          }
+        }
       }
     }
   }), [isDark]);
