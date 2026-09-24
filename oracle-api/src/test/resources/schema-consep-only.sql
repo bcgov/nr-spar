@@ -1,1 +1,19 @@
 CREATE SCHEMA IF NOT EXISTS CONSEP;
+
+-- Hibernate's create-drop only builds tables it has an entity for. These three are read by the
+-- request-seedlot validation query but are not mapped, so the tests declare them here.
+CREATE TABLE IF NOT EXISTS CONSEP.CNS_T_ORG_UNIT (
+  ORG_UNIT_NO    NUMBER(10)   NOT NULL,
+  ORG_UNIT_CODE  VARCHAR2(10)
+);
+
+CREATE TABLE IF NOT EXISTS CONSEP.CNS_T_REQUEST_SEEDLOT (
+  REQUEST_SKEY   NUMBER(10)   NOT NULL,
+  ITEM_ID        VARCHAR2(2)  NOT NULL,
+  SEEDLOT_NUMBER VARCHAR2(5)
+);
+
+CREATE TABLE IF NOT EXISTS CONSEP.CNS_T_SEEDLOT (
+  SEEDLOT_NUMBER VARCHAR2(5)  NOT NULL,
+  VEGETATION_ST  VARCHAR2(8)
+);
