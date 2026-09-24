@@ -14,14 +14,15 @@
   margin: 1rem 2rem 1.2rem;
   justify-content: flex-start;
   gap: 0.5rem;
-}
 
-.info-col {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 0.5rem;
+  // Scoped: a bare .info-col leaked into every Seedlot screen that uses the same class (#2726)
+  .info-col {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+  }
 }
 
 .activity-summary-info-label {
