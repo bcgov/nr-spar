@@ -2,7 +2,8 @@ import { Given, Then, When } from '@badeball/cypress-cucumber-preprocessor';
 import { THREE_SECONDS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 
-// Shared variables for parent tree calculations state
+// Shared state for parent tree calculations
+// Populated and consumed within the same scenario via prerequisite steps
 let seedlotNum: string;
 let totalParentTrees: number = 0;
 let totalConeCount: number = 0;
