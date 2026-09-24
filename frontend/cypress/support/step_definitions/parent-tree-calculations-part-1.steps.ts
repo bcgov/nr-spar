@@ -159,6 +159,8 @@ When('I calculate parent tree metrics', () => {
     .contains('Calculate metrics')
     .click();
 
+  // Calculation is async with no loading indicator; fixed wait is necessary
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(THREE_SECONDS);
 });
 
