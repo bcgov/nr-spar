@@ -6,7 +6,7 @@ let seedlotNumber: string;
 Given('I open the configured applicant seedlot detail page', () => {
   cy.get('@aClassSeedlotData').then((data: unknown) => {
     const fixtureData = data as SeedlotRegFixtureType;
-    const speciesKey = Object.keys(fixtureData)[5];
+    const speciesKey = 'fdi';
 
     if (!speciesKey) {
       throw new Error('The configured applicant seedlot fixture entry was not found');
