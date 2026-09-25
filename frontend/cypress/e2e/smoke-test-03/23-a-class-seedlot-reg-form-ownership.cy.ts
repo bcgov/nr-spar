@@ -329,9 +329,9 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-funding-source-0')
       .should('have.value', fundingSource);
 
-    // Default method of Payment
+    // Method of payment starts blank
     cy.get('#ownership-method-payment-0')
-      .should('have.value', 'ITC - Invoice to Client Address');
+      .should('have.value', '');
 
     // Check 'x' button
     cy.get('.single-owner-combobox')
@@ -351,6 +351,18 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('#ownership-funding-source-0')
       .should('have.value', fundingSource);
+
+    cy.get('#ownership-method-payment-0').click();
+
+    const initialMethodOfPayment = 'ITC - Invoice to Client Address';
+
+    cy.get(`.${prefix}--list-box__menu-item__option`)
+      .contains(initialMethodOfPayment)
+      .scrollIntoView()
+      .click();
+
+    cy.get('#ownership-method-payment-0')
+      .should('have.value', initialMethodOfPayment);
 
     cy.get('.single-owner-combobox')
       .eq(1)

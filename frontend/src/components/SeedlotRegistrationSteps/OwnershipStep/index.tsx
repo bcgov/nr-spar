@@ -100,7 +100,7 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     if (state.length >= MAX_OWNERS) {
       return;
     }
-    const newOwnerArr = insertOwnerForm(state, methodsOfPaymentQuery.data ?? []);
+    const newOwnerArr = insertOwnerForm(state);
     const portionsInvalid = !arePortionsValid(newOwnerArr);
     setPortionsValid(newOwnerArr, portionsInvalid);
   };
