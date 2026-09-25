@@ -674,7 +674,9 @@ const ContextContainerClassA = ({ children }: props) => {
       // to hydrate the form from the target's normalized tables instead of the draft column.
       const draftKeys = Object.keys(getFormDraftQuery.data.allStepData ?? {});
       if (draftKeys.length === 0) {
-        setFormPhase('hydrating-from-tables');
+        if (formPhase === 'loading-draft') {
+          setFormPhase('hydrating-from-tables');
+        }
       } else {
         setAllStepData(getFormDraftQuery.data.allStepData);
         setFormPhase('ready');
