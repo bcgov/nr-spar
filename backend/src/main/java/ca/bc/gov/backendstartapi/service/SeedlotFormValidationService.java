@@ -283,11 +283,12 @@ public class SeedlotFormValidationService {
       BigDecimal owned = nz(o.originalPctOwned());
       BigDecimal rsrvd = nz(o.originalPctRsrvd());
       BigDecimal srpls = nz(o.originalPctSrpls());
-      if (rsrvd.add(srpls).compareTo(owned) > 0) {
+      BigDecimal reservedSurplusTotal = rsrvd.add(srpls);
+      if (reservedSurplusTotal.compareTo(new BigDecimal("100")) > 0) {
         errors.add(
             new SeedlotValidationError(
                 base + ".originalPctRsrvd",
-                "Reserved + surplus percentage cannot exceed the owned percentage."));
+                "Reserved + surplus percentage must equal 100, was " + reservedSurplusTotal + "."));
       }
       totalOwned = totalOwned.add(owned);
     }
