@@ -31,7 +31,31 @@ public record GermCountSlotDto(
     @Schema(description = "Replicate 4 seeds germinated", example = "9")
     Integer rep4NoSeedsGerm,
 
+    @Schema(description = "Replicate 1 abnormals for this day; null when none were recorded")
+    ReplicateAbnormalDto rep1Abnormal,
+    @Schema(description = "Replicate 2 abnormals for this day; null when none were recorded")
+    ReplicateAbnormalDto rep2Abnormal,
+    @Schema(description = "Replicate 3 abnormals for this day; null when none were recorded")
+    ReplicateAbnormalDto rep3Abnormal,
+    @Schema(description = "Replicate 4 abnormals for this day; null when none were recorded")
+    ReplicateAbnormalDto rep4Abnormal,
     @Schema(description = "Cumulative germination percentage", example = "0.4200")
     BigDecimal cumulativeGerm
+) {
 
-) {}
+  /** A slot with no abnormals recorded against it. */
+  public GermCountSlotDto(
+      int slotIndex,
+      BigDecimal dailyGermSkey,
+      LocalDate countDt,
+      Integer dayNoOfTest,
+      Integer rep1NoSeedsGerm,
+      Integer rep2NoSeedsGerm,
+      Integer rep3NoSeedsGerm,
+      Integer rep4NoSeedsGerm,
+      BigDecimal cumulativeGerm) {
+    this(slotIndex, dailyGermSkey, countDt, dayNoOfTest,
+        rep1NoSeedsGerm, rep2NoSeedsGerm, rep3NoSeedsGerm, rep4NoSeedsGerm,
+        null, null, null, null, cumulativeGerm);
+  }
+}

@@ -56,6 +56,8 @@ public interface GermCountMapper {
       Integer day,
       Integer r1, Integer r2, Integer r3, Integer r4,
       java.math.BigDecimal cum) {
+    // Abnormals are not reachable from GermCountEntity -- they live in their own
+    // table, keyed by this slot's DAILY_GERM_SKEY. GermCountService fills them in.
     return new GermCountSlotDto(idx, skey, dt, day, r1, r2, r3, r4, cum);
   }
 

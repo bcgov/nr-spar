@@ -25,11 +25,17 @@ type DailyGermTableProps = {
   validationErrors: Record<string, string>;
   onSlotsChange: (slots: GermCountSlotType[]) => void;
   onReplicatesChange: (replicates: GermReplicateType[]) => void;
+  /**
+   * The count day the user has moved into (#2606). Unlike the AC6 highlight
+   * this is sticky -- it never goes back to "none" on blur, because the
+   * abnormals table below has to keep showing a day while it is being typed in.
+   */
+  onSlotSelect: (slotIndex: number) => void;
 };
 
 const DailyGermTable = ({
   slots, replicates, germinatorEntry, isEditable,
-  validationErrors, onSlotsChange, onReplicatesChange
+  validationErrors, onSlotsChange, onReplicatesChange, onSlotSelect
 }: DailyGermTableProps) => {
   // Which column's date the modal is editing, if any.
   const [editingSlot, setEditingSlot] = useState<number | null>(null);
@@ -40,6 +46,13 @@ const DailyGermTable = ({
   // in a column too, so the highlight survives picking a date.
   const [focusedSlot, setFocusedSlot] = useState<number | null>(null);
   const highlightedSlot = activeSlot ?? focusedSlot;
+
+  const enterSlot = (slotIndex: number | null) => {
+    setFocusedSlot(slotIndex);
+    if (slotIndex !== null) {
+      onSlotSelect(slotIndex);
+    }
+  };
 
   const updateSlot = (slotIndex: number, patch: Partial<GermCountSlotType>) => {
     onSlotsChange(slots.map((slot) => (
@@ -63,7 +76,11 @@ const DailyGermTable = ({
         rep1NoSeedsGerm: undefined,
         rep2NoSeedsGerm: undefined,
         rep3NoSeedsGerm: undefined,
-        rep4NoSeedsGerm: undefined
+        rep4NoSeedsGerm: undefined,
+        rep1Abnormal: undefined,
+        rep2Abnormal: undefined,
+        rep3Abnormal: undefined,
+        rep4Abnormal: undefined
       };
     updateSlot(slotIndex, {
       countDt: isoDate,
@@ -122,11 +139,11 @@ const DailyGermTable = ({
     onDateCellActivate: (slotIndex) => {
       fromPointer.current = true;
       skipNextFocus.current = false;
-      setFocusedSlot(slotIndex);
+      enterSlot(slotIndex);
       activateDateCell(slotIndex);
     },
     onDateCellFocus: (slotIndex) => {
-      setFocusedSlot(slotIndex);
+      enterSlot(slotIndex);
       // A pointer click focuses before it clicks; mousedown already acted.
       if (fromPointer.current || skipNextFocus.current) {
         fromPointer.current = false;
@@ -135,7 +152,7 @@ const DailyGermTable = ({
       }
       activateDateCell(slotIndex);
     },
-    onSlotFocus: setFocusedSlot,
+    onSlotFocus: enterSlot,
     onCountChange: (repNumber, slotIndex, raw) => {
       const parsed = parseCountInput(raw);
       if (parsed === null) {
