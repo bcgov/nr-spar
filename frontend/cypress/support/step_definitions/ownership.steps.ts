@@ -4,32 +4,22 @@ import {
   Then
 } from '@badeball/cypress-cucumber-preprocessor';
 
-import { SeedlotRegFixtureType } from '../../definitions';
+import {
+  AClassRegFormFixtureType,
+  SeedlotRegFixtureType
+} from '../../definitions';
 import prefix from '../../../src/styles/classPrefix';
 import {
   HALF_SECOND,
   TYPE_DELAY,
   THIRTY_SECONDS
 } from '../../constants';
-
-type AClassRegFormFixtureType = {
-  ownership: {
-    title: string;
-    subtitle: string;
-    accordionTitle: string;
-    accordionSubtitle: string;
-    ownerAgencyError: string;
-    ownerAgencyValidationError: string;
-    locationCodeError: string;
-    ownerPortionSumError: string;
-    ownerPortionAboveLimitError: string;
-    ownerPortionBelowLimitError: string;
-    ownerPortionDecimalError: string;
-    reservedAboveLimitError: string;
-    reservedBelowLimitError: string;
-    reservedDecimalError: string;
-  };
-};
+import {
+  applySelectedClient,
+  openClientSearchModal,
+  searchClientByAcronym,
+  selectFirstClientSearchResult
+} from '../helpers/client-search';
 
 let seedlotFixtureData: SeedlotRegFixtureType = {};
 let regFormFixtureData: AClassRegFormFixtureType;
@@ -56,7 +46,7 @@ const getPliSeedlotData = () => {
 };
 
 const getOwnershipAccordionItems = () => cy.get(`ul.${prefix}--accordion`)
-    .find(`li.${prefix}--accordion__item`);
+  .find(`li.${prefix}--accordion__item`);
 
 const selectComboboxOption = (option: string) => {
   cy.get(`.${prefix}--list-box__menu-item__option`)
@@ -261,29 +251,11 @@ Then(
 );
 
 When('I open the Ownership client search modal', () => {
-  cy.get('.agency-information-section')
-    .find('button.client-search-toggle-btn')
-    .click();
+  openClientSearchModal('#ownership-agency-0');
 });
 
 When('I search for the Ownership client by acronym', () => {
-  cy.get('#client-search-dropdown')
-    .find(`button.${prefix}--list-box__field`)
-    .click();
-
-  cy.get('#client-search-dropdown')
-    .find('li')
-    .contains('Acronym')
-    .click();
-
-  cy.get('#client-search-input')
-    .clear()
-    .type(testPopupAcronym, { delay: TYPE_DELAY })
-    .blur();
-
-  cy.get('button.client-search-button')
-    .contains('Search')
-    .click();
+  searchClientByAcronym(testPopupAcronym, TYPE_DELAY);
 });
 
 Then('Ownership client search results should be displayed', () => {
@@ -291,25 +263,13 @@ Then('Ownership client search results should be displayed', () => {
 });
 
 When('I select the first Ownership client search result', () => {
-  cy.get(`table.${prefix}--data-table tbody tr`)
-    .eq(0)
-    .find('td:nth-child(1)')
-    .find(`input.${prefix}--radio-button`)
-    .check({ force: true });
-
-  cy.get(`table.${prefix}--data-table tbody tr`)
-    .eq(0)
-    .find('td[id*="locationCode"]')
-    .invoke('text')
-    .then((locationCode) => {
-      selectedClientLocationCode = locationCode.trim();
-    });
+  selectFirstClientSearchResult().then((locationCode) => {
+    selectedClientLocationCode = locationCode;
+  });
 });
 
 When('I apply the selected Ownership client', () => {
-  cy.get(`button.${prefix}--btn--primary`)
-    .contains('Apply selected client')
-    .click();
+  applySelectedClient();
 });
 
 Then('the selected client should populate the Ownership agency fields', () => {

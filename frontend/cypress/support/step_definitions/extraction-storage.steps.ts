@@ -6,22 +6,16 @@ import {
 
 import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
-import { SeedlotRegFixtureType } from '../../definitions';
-
-type AClassRegFormFixtureType = {
-  extraction: {
-    extrationTitle: string;
-    extrationSubtitle: string;
-    storageTitle: string;
-    storageSubtitle: string;
-    extractionCheckboxText: string;
-    storageCheckboxText: string;
-    agencyErrorMsg: string;
-    agencyValidationMsg: string;
-    locationErrorMsg: string;
-    invalidDateErrorMsg: string;
-  };
-};
+import {
+  AClassRegFormFixtureType,
+  SeedlotRegFixtureType
+} from '../../definitions';
+import {
+  applySelectedClient,
+  openClientSearchModal as openAgencyClientSearchModal,
+  searchClientByAcronym,
+  selectFirstClientSearchResult
+} from '../helpers/client-search';
 
 type AgencySection = 'extraction' | 'storage';
 
@@ -54,8 +48,7 @@ const getAgencySelectors = (section: AgencySection) => {
       location: '#ext-location-code',
       locationError: '#ext-location-code-error-msg',
       locationSuccess: '#ext-location-code-loading-status-tooltip',
-      clientSearchSection: '.agency-information-section',
-      clientSearchSectionIndex: 0
+      clientSearchSection: '#ext-agency-number'
     };
   }
 
@@ -67,69 +60,13 @@ const getAgencySelectors = (section: AgencySection) => {
     location: '#str-location-code',
     locationError: '#str-location-code-error-msg',
     locationSuccess: '#str-location-code-loading-status-tooltip',
-    clientSearchSection: '.agency-information-section',
-    clientSearchSectionIndex: undefined
+    clientSearchSection: '#str-agency-number'
   };
 };
 
 const openClientSearchModal = (section: AgencySection) => {
-  const selectors = getAgencySelectors(section);
-
-  if (selectors.clientSearchSectionIndex !== undefined) {
-    cy.get(selectors.clientSearchSection)
-      .eq(selectors.clientSearchSectionIndex)
-      .find('button.client-search-toggle-btn')
-      .click();
-
-    return;
-  }
-
-  cy.get(selectors.clientSearchSection)
-    .find('button.client-search-toggle-btn')
-    .click();
-};
-
-const searchClientByAcronym = () => {
-  cy.get('#client-search-dropdown')
-    .find(`button.${prefix}--list-box__field`)
-    .click();
-
-  cy.get('#client-search-dropdown')
-    .find('li')
-    .contains('Acronym')
-    .click();
-
-  cy.get('#client-search-input')
-    .clear()
-    .type(testPopupAcronym)
-    .blur();
-
-  cy.get('button.client-search-button')
-    .contains('Search')
-    .focus()
-    .click();
-};
-
-const selectFirstClientResult = () => {
-  cy.get(`table.${prefix}--data-table tbody tr`)
-    .eq(0)
-    .find('td:nth-child(1)')
-    .find(`input.${prefix}--radio-button`)
-    .check({ force: true });
-
-  cy.get(`table.${prefix}--data-table tbody tr`)
-    .eq(0)
-    .find('td[id*="locationCode"]')
-    .invoke('text')
-    .then((locationCode) => {
-      selectedClientLocationCode = locationCode.trim();
-    });
-};
-
-const applySelectedClient = (force = false) => {
-  cy.get(`button.${prefix}--btn--primary`)
-    .contains('Apply selected client')
-    .click({ force });
+  const { clientSearchSection } = getAgencySelectors(section);
+  openAgencyClientSearchModal(clientSearchSection);
 };
 
 const enterAgencyValue = (
@@ -352,7 +289,7 @@ When('I open the Extraction client search modal', () => {
 });
 
 When('I search for the Extraction client by acronym', () => {
-  searchClientByAcronym();
+  searchClientByAcronym(testPopupAcronym);
 });
 
 Then('Extraction client search results should be displayed', () => {
@@ -361,7 +298,9 @@ Then('Extraction client search results should be displayed', () => {
 });
 
 When('I select the first Extraction client search result', () => {
-  selectFirstClientResult();
+  selectFirstClientSearchResult().then((locationCode) => {
+    selectedClientLocationCode = locationCode;
+  });
 });
 
 When('I apply the selected Extraction client', () => {
@@ -488,7 +427,7 @@ When('I open the Storage client search modal', () => {
 });
 
 When('I search for the Storage client by acronym', () => {
-  searchClientByAcronym();
+  searchClientByAcronym(testPopupAcronym);
 });
 
 Then('Storage client search results should be displayed', () => {
@@ -497,7 +436,9 @@ Then('Storage client search results should be displayed', () => {
 });
 
 When('I select the first Storage client search result', () => {
-  selectFirstClientResult();
+  selectFirstClientSearchResult().then((locationCode) => {
+    selectedClientLocationCode = locationCode;
+  });
 });
 
 When('I apply the selected Storage client', () => {

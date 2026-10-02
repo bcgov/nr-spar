@@ -6,29 +6,16 @@ import {
 
 import { HALF_SECOND, TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
-import { SeedlotRegFixtureType } from '../../definitions';
-
-type AClassRegFormFixtureType = {
-  collector: {
-    agencyTitle: string;
-    agencySubtitle: string;
-    informationTitle: string;
-    informationSubtitle: string;
-    checkboxText: string;
-    acronymErrorMsg: string;
-    locationErrorMsg: string;
-    invalidDateErrorMsg: string;
-    numOfContainerErrorMsg: string;
-    volOfConesErrorMsg: string;
-  };
-  interimStorage: {
-    title: string;
-    subtitle: string;
-    acronymErrorMsg: string;
-    locationErrorMsg: string;
-    invalidDateErrorMsg: string;
-  };
-};
+import {
+  AClassRegFormFixtureType,
+  SeedlotRegFixtureType
+} from '../../definitions';
+import {
+  applySelectedClient,
+  openClientSearchModal,
+  searchClientByAcronym,
+  selectFirstClientSearchResult
+} from '../helpers/client-search';
 
 let seedlotFixtureData: SeedlotRegFixtureType = {};
 let regFormFixtureData: AClassRegFormFixtureType;
@@ -55,54 +42,6 @@ const openInterimStorageStep = () => {
 
   cy.get('.interim-title-row h2')
     .should('have.text', regFormFixtureData.interimStorage.title);
-};
-
-const openClientSearchModal = () => {
-  cy.get('.agency-information-section')
-    .find('button.client-search-toggle-btn')
-    .click();
-};
-
-const searchClientByAcronym = () => {
-  cy.get('#client-search-dropdown')
-    .find(`button.${prefix}--list-box__field`)
-    .click();
-
-  cy.get('#client-search-dropdown')
-    .find('li')
-    .contains('Acronym')
-    .click();
-
-  cy.get('#client-search-input')
-    .clear()
-    .type(testPopupAcronym)
-    .blur();
-
-  cy.get('button.client-search-button')
-    .contains('Search')
-    .click();
-};
-
-const selectFirstClientSearchResult = () => {
-  cy.get(`table.${prefix}--data-table tbody tr`)
-    .eq(0)
-    .find('td:nth-child(1)')
-    .find(`input.${prefix}--radio-button`)
-    .check({ force: true });
-
-  cy.get(`table.${prefix}--data-table tbody tr`)
-    .eq(0)
-    .find('td[id*="locationCode"]')
-    .invoke('text')
-    .then((locationCode) => {
-      selectedClientLocationCode = locationCode.trim();
-    });
-};
-
-const applySelectedClient = () => {
-  cy.get(`button.${prefix}--btn--primary`)
-    .contains('Apply selected client')
-    .click();
 };
 
 Given('I open the PLI A Class seedlot registration form', () => {
@@ -245,15 +184,17 @@ When('I enter Collection location code {string}', (locationCode: string) => {
 });
 
 When('I open the Collection client search modal', () => {
-  openClientSearchModal();
+  openClientSearchModal('#collection-collector-agency');
 });
 
 When('I search for the Collection client by acronym', () => {
-  searchClientByAcronym();
+  searchClientByAcronym(testPopupAcronym);
 });
 
 When('I select the first client search result', () => {
-  selectFirstClientSearchResult();
+  selectFirstClientSearchResult().then((locationCode) => {
+    selectedClientLocationCode = locationCode;
+  });
 });
 
 When('I apply the selected Collection client', () => {
@@ -502,11 +443,11 @@ Then(
 );
 
 When('I open the Interim storage client search modal', () => {
-  openClientSearchModal();
+  openClientSearchModal('#interim-agency');
 });
 
 When('I search for the Interim storage client by acronym', () => {
-  searchClientByAcronym();
+  searchClientByAcronym(testPopupAcronym);
 });
 
 When('I apply the selected Interim storage client', () => {
