@@ -118,3 +118,35 @@
     position: static;
   }
 }
+
+.abnormals-table-container {
+  width: 100%;
+  margin-top: 2rem;
+
+  h3 {
+    @include type.type-style('heading-03');
+    margin-bottom: 1rem;
+  }
+
+  // The count day the table belongs to, beside the heading rather than above
+  // it: the counts are meaningless without the date they were taken on.
+  .abnormals-table-day {
+    @include type.type-style('body-compact-01');
+    color: var(--#{vars.$bcgov-prefix}-text-secondary, #525252);
+  }
+
+  .abnormals-table-empty {
+    @include type.type-style('body-compact-01');
+    color: var(--#{vars.$bcgov-prefix}-text-secondary, #525252);
+    margin-bottom: 1rem;
+  }
+
+  .abnormals-table {
+    // Same reasoning as the daily germination table: fixed column widths plus a
+    // full-width table hands the slack out as cell padding, which reads as gaps
+    // between the eleven category columns.
+    table.MuiTable-root {
+      width: auto;
+    }
+  }
+}

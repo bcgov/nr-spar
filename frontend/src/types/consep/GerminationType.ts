@@ -1,5 +1,26 @@
 /** Types for the CONSEP germination test result screen (issue #2514). */
 
+/**
+ * One replicate's abnormal seedling counts for one count day (issue #2606).
+ * Field names mirror the API; the screen's column order and short labels live
+ * in `GerminationContent/abnormalConstants`.
+ */
+export type ReplicateAbnormalType = {
+  abnormalNumReverseEmbryo?: number;
+  abnormalNumStuntedRadicle?: number;
+  abnormalNumStuntedHypocotyl?: number;
+  abnormalNumRotten?: number;
+  abnormalNumThickenedHypocotyl?: number;
+  abnormalNumThickenedRadicle?: number;
+  abnormalNumTwisted?: number;
+  abnormalNumMegametophyteCollar?: number;
+  abnormalNumWeak?: number;
+  abnormalNumOther?: number;
+  abnormalNumPregermination?: number;
+  /** Carried by the API shape but not an abnormality category; never summed. */
+  totalSeeds?: number;
+};
+
 export type GermCountSlotType = {
   slotIndex: number; // 1-13
   dailyGermSkey?: number;
@@ -9,6 +30,13 @@ export type GermCountSlotType = {
   rep2NoSeedsGerm?: number;
   rep3NoSeedsGerm?: number;
   rep4NoSeedsGerm?: number;
+  // Undefined means "no abnormals recorded for this day", which the backend
+  // distinguishes from "recorded as zero": it only writes an abnormal row, and
+  // only mints a DAILY_GERM_SKEY, for a day that carries them.
+  rep1Abnormal?: ReplicateAbnormalType;
+  rep2Abnormal?: ReplicateAbnormalType;
+  rep3Abnormal?: ReplicateAbnormalType;
+  rep4Abnormal?: ReplicateAbnormalType;
   cumulativeGerm?: number;
 };
 

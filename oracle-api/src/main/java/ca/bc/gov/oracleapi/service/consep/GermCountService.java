@@ -74,7 +74,73 @@ public class GermCountService {
 
     SparLog.info("Germ count data found for RIA_SKEY: {}", riaSkey);
 
-    return mapper.toDto(entity);
+    return withAbnormals(mapper.toDto(entity));
+  }
+
+  /**
+   * Fills each slot's abnormal counts in from CNS_T_DAILY_ABNORMAL. The germ-count row only
+   * carries DAILY_GERM_SKEY{n} pointers, so the mapper cannot reach them; without this the
+   * screen would have to fetch every day separately, and could not check germinated + abnormal
+   * against the replicate total the way {@link #validateSeedTotals} does on save.
+   *
+   * <p>A slot whose key owns no row keeps null abnormals, which reads as "none recorded" rather
+   * than "recorded as zero".
+   */
+  private GermCountDto withAbnormals(GermCountDto dto) {
+    Set<BigDecimal> skeys = dto.slots().stream()
+        .map(GermCountSlotDto::dailyGermSkey)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+    if (skeys.isEmpty()) {
+      return dto;
+    }
+
+    Map<BigDecimal, DailyAbnormalEntity> rowsBySkey = new HashMap<>();
+    for (DailyAbnormalEntity e : dailyAbnormalRepository.findAllById(skeys)) {
+      rowsBySkey.put(e.getDailyGermSkey(), e);
+    }
+
+    List<GermCountSlotDto> slots = dto.slots().stream()
+        .map(slot -> {
+          DailyAbnormalEntity row = rowsBySkey.get(slot.dailyGermSkey());
+          if (row == null) {
+            return slot;
+          }
+          return new GermCountSlotDto(
+              slot.slotIndex(), slot.dailyGermSkey(), slot.countDt(), slot.dayNoOfTest(),
+              slot.rep1NoSeedsGerm(), slot.rep2NoSeedsGerm(),
+              slot.rep3NoSeedsGerm(), slot.rep4NoSeedsGerm(),
+              toAbnormalDto(row, 1), toAbnormalDto(row, 2),
+              toAbnormalDto(row, 3), toAbnormalDto(row, 4),
+              slot.cumulativeGerm());
+        })
+        .toList();
+
+    return new GermCountDto(
+        dto.riaSkey(), slots, dto.entryUserid(), dto.entryTimestamp(),
+        dto.updateUserid(), dto.updateTimestamp());
+  }
+
+  /** One replicate's eleven abnormal columns, read off the flat stored row. */
+  private static ReplicateAbnormalDto toAbnormalDto(DailyAbnormalEntity e, int rep) {
+    return switch (rep) {
+      case 1 -> new ReplicateAbnormalDto(
+          e.getRep1NoAbnrmRe(), e.getRep1NoAbnrmSr(), e.getRep1NoAbnrmSh(), e.getRep1NoAbnrmRn(),
+          e.getRep1NoAbnrmTh(), e.getRep1NoAbnrmTr(), e.getRep1NoAbnrmTw(), e.getRep1NoAbnrmCm(),
+          e.getRep1NoAbnrmWeak(), e.getRep1NoAbnrmOther(), e.getRep1NoAbnrmPrgrm(), null);
+      case 2 -> new ReplicateAbnormalDto(
+          e.getRep2NoAbnrmRe(), e.getRep2NoAbnrmSr(), e.getRep2NoAbnrmSh(), e.getRep2NoAbnrmRn(),
+          e.getRep2NoAbnrmTh(), e.getRep2NoAbnrmTr(), e.getRep2NoAbnrmTw(), e.getRep2NoAbnrmCm(),
+          e.getRep2NoAbnrmWeak(), e.getRep2NoAbnrmOther(), e.getRep2NoAbnrmPrgrm(), null);
+      case 3 -> new ReplicateAbnormalDto(
+          e.getRep3NoAbnrmRe(), e.getRep3NoAbnrmSr(), e.getRep3NoAbnrmSh(), e.getRep3NoAbnrmRn(),
+          e.getRep3NoAbnrmTh(), e.getRep3NoAbnrmTr(), e.getRep3NoAbnrmTw(), e.getRep3NoAbnrmCm(),
+          e.getRep3NoAbnrmWeak(), e.getRep3NoAbnrmOther(), e.getRep3NoAbnrmPrgrm(), null);
+      default -> new ReplicateAbnormalDto(
+          e.getRep4NoAbnrmRe(), e.getRep4NoAbnrmSr(), e.getRep4NoAbnrmSh(), e.getRep4NoAbnrmRn(),
+          e.getRep4NoAbnrmTh(), e.getRep4NoAbnrmTr(), e.getRep4NoAbnrmTw(), e.getRep4NoAbnrmCm(),
+          e.getRep4NoAbnrmWeak(), e.getRep4NoAbnrmOther(), e.getRep4NoAbnrmPrgrm(), null);
+    };
   }
 
   /**
