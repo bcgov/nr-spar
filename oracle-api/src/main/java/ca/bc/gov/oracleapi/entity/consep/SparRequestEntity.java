@@ -26,4 +26,19 @@ public class SparRequestEntity {
 
   @Column(name = "REQUEST_TYPE_ST", length = 3)
   private String requestTypeSt;
+
+  // The four below are what the request item is assembled from: SRQ requests use the sowing year
+  // and the org unit's code, everything else uses the request year. See
+  // SparRequestRepository.findBySeedlotNumberAndRequestId.
+  @Column(name = "SOWING_YR", precision = 4, scale = 0)
+  private Integer sowingYr;
+
+  @Column(name = "REQUEST_YR", precision = 4, scale = 0)
+  private Integer requestYr;
+
+  @Column(name = "REQUEST_SEQUENCE", precision = 10, scale = 0)
+  private Integer requestSequence;
+
+  @Column(name = "ORG_UNIT_NO", precision = 10, scale = 0)
+  private Long orgUnitNo;
 }

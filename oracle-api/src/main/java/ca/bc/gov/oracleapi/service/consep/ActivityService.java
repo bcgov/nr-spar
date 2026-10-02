@@ -6,10 +6,12 @@ import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestDuplicateValidationResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.RequestSeedlotValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.entity.projection.RequestSeedlotProj;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.SparRequestRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
@@ -23,6 +25,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
@@ -458,5 +461,48 @@ public class ActivityService {
     }
 
     return new GerminationTestDuplicateValidationResponseDto(true, "");
+  }
+
+  /**
+   * Resolves a seedlot number and request ID to the request-seedlot row they identify, for the
+   * Copy Results screen, and checks that the seedlot is the same species as the one in context.
+   *
+   * <p>A resolved row is returned whether or not the pair is usable, so a caller that rejects it
+   * on species can show which species it actually found.
+   *
+   * @param seedlotNumber the seedlot being copied to
+   * @param requestId the request item (aka request ID) being copied to
+   * @param fromVegetationSt species of the seedlot in context, which the target must match
+   * @return the validation result, carrying the resolved row when one was found
+   */
+  public RequestSeedlotValidationResponseDto validateRequestSeedlot(
+      String seedlotNumber, String requestId, String fromVegetationSt) {
+
+    if (seedlotNumber == null || seedlotNumber.isBlank()
+        || requestId == null || requestId.isBlank()
+        || fromVegetationSt == null || fromVegetationSt.isBlank()) {
+      return RequestSeedlotValidationResponseDto.invalid(
+          "Seedlot number, request ID, and the seedlot in context are required.");
+    }
+
+    Optional<RequestSeedlotProj> found =
+        sparRequestRepository.findBySeedlotNumberAndRequestId(seedlotNumber, requestId);
+
+    if (found.isEmpty()) {
+      return RequestSeedlotValidationResponseDto.invalid(
+          "No request item found for this seedlot number and request ID.");
+    }
+
+    RequestSeedlotProj row = found.get();
+    boolean sameSpecies = fromVegetationSt.equals(row.getVegetationSt());
+
+    return new RequestSeedlotValidationResponseDto(
+        sameSpecies,
+        sameSpecies ? "" : "To Seedlot must be the same species as the seedlot in context.",
+        row.getRequestItem(),
+        row.getRequestSkey(),
+        row.getItemId(),
+        row.getSeedlotNumber(),
+        row.getVegetationSt());
   }
 }

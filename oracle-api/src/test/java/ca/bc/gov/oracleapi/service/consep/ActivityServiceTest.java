@@ -22,6 +22,7 @@ import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.entity.projection.RequestSeedlotProj;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.SparRequestRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
@@ -754,6 +755,98 @@ class ActivityServiceTest {
         "Exactly one of seedlotNumber or familyLotNumber must be provided",
         ex.getReason()
     );
+  }
+
+  /* ------------------------ Validate Request Seedlot ---------------------------------------------------*/
+
+  private RequestSeedlotProj requestSeedlotProj(
+      String requestItem, String requestSkey, String itemId,
+      String seedlotNumber, String vegetationSt) {
+    return new RequestSeedlotProj() {
+      @Override
+      public String getRequestItem() {
+        return requestItem;
+      }
+
+      @Override
+      public BigDecimal getRequestSkey() {
+        return new BigDecimal(requestSkey);
+      }
+
+      @Override
+      public String getItemId() {
+        return itemId;
+      }
+
+      @Override
+      public String getSeedlotNumber() {
+        return seedlotNumber;
+      }
+
+      @Override
+      public String getVegetationSt() {
+        return vegetationSt;
+      }
+    };
+  }
+
+  @Test
+  @DisplayName("validateRequestSeedlot should return the resolved row when the pair is valid")
+  void validateRequestSeedlot_shouldReturnValidWithTheResolvedRow() {
+    when(sparRequestRepository.findBySeedlotNumberAndRequestId("00098", "TST20260001A"))
+        .thenReturn(Optional.of(
+            requestSeedlotProj("TST20260001A", "12345", "A", "00098", "SX")));
+
+    var result = activityService.validateRequestSeedlot("00098", "TST20260001A", "SX");
+
+    assertTrue(result.valid());
+    assertEquals("", result.message());
+    assertEquals("TST20260001A", result.requestItem());
+    assertEquals(new BigDecimal("12345"), result.requestSkey());
+    assertEquals("A", result.itemId());
+    assertEquals("SX", result.vegetationSt());
+  }
+
+  @Test
+  @DisplayName("validateRequestSeedlot should return invalid when no request seedlot row matches")
+  void validateRequestSeedlot_shouldReturnInvalidWhenNoRowMatches() {
+    when(sparRequestRepository.findBySeedlotNumberAndRequestId("00098", "TST20269999A"))
+        .thenReturn(Optional.empty());
+
+    var result = activityService.validateRequestSeedlot("00098", "TST20269999A", "SX");
+
+    assertFalse(result.valid());
+    assertEquals(
+        "No request item found for this seedlot number and request ID.", result.message());
+    assertNull(result.requestItem());
+  }
+
+  // Business rule: the seedlot being copied to has to be the same species as the one in context.
+  // The row is still returned so the caller can say which species it actually found.
+  @Test
+  @DisplayName("validateRequestSeedlot should return invalid, with the row, on a species mismatch")
+  void validateRequestSeedlot_shouldReturnInvalidOnSpeciesMismatch() {
+    when(sparRequestRepository.findBySeedlotNumberAndRequestId("00099", "TST20260001A"))
+        .thenReturn(Optional.of(
+            requestSeedlotProj("TST20260001A", "12345", "A", "00099", "PLI")));
+
+    var result = activityService.validateRequestSeedlot("00099", "TST20260001A", "SX");
+
+    assertFalse(result.valid());
+    assertEquals(
+        "To Seedlot must be the same species as the seedlot in context.", result.message());
+    assertEquals("PLI", result.vegetationSt());
+  }
+
+  @Test
+  @DisplayName("validateRequestSeedlot should return invalid and skip the DB call on blank input")
+  void validateRequestSeedlot_shouldReturnInvalidOnBlankInput() {
+    var result = activityService.validateRequestSeedlot("  ", "TST20260001A", "SX");
+
+    assertFalse(result.valid());
+    assertEquals(
+        "Seedlot number, request ID, and the seedlot in context are required.", result.message());
+    verify(sparRequestRepository, never()).findBySeedlotNumberAndRequestId(any(), any());
   }
 
   /* ------------------------ Validate Duplicate Germination Test ----------------------------------------*/
