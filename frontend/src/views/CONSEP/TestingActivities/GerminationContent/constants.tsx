@@ -19,10 +19,28 @@ export const DATE_PLACEHOLDER = 'yyyy/mm/dd';
 /** Accessor key for a slot's count on a flattened replicate row. */
 export const slotKey = (slotIndex: number) => `slot${slotIndex}`;
 
-/** DOM id of a count input, so Enter can move focus down a date column (#2681). */
+/**
+ * DOM ids for the keyboard entry chain (#2681): date, then the four counts down
+ * that column, then the abnormals table.
+ */
+export const dateTriggerId = (slotIndex: number) => `germ-date-trigger-${slotIndex}`;
 export const countInputId = (replicateNumber: number, slotIndex: number) => (
   `germ-count-input-${replicateNumber}-${slotIndex}`
 );
+export const abnormalInputId = (replicateNumber: number, code: string) => (
+  `abnormal-input-${replicateNumber}-${code}`
+);
+
+/**
+ * Focus after the current event finishes. MRT blurs a column's edit input
+ * right after our Enter handler returns -- and it keeps one ref per column,
+ * not per cell, so what it blurs is the bottom row's input (replicate 4),
+ * wherever focus actually is. It also lets a cell enabled by this same event
+ * (a date just filled) render enabled before it is focused.
+ */
+export const focusLater = (id: string) => {
+  setTimeout(() => document.getElementById(id)?.focus());
+};
 
 /**
  * One replicate, flattened so material-react-table can address each daily
@@ -192,6 +210,7 @@ const buildSlotColumn = (
     Header: () => (
       <button
         type="button"
+        id={dateTriggerId(slot.slotIndex)}
         className="germ-count-date-trigger"
         data-testid={`germ-date-trigger-${slot.slotIndex}`}
         disabled={!isEditable}

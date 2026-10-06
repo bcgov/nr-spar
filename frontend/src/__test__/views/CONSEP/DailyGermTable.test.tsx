@@ -333,36 +333,6 @@ describe('DailyGermTable', () => {
     const count = (rep: number) => screen.getByTestId(`germ-count-${rep}-1`);
     const pressEnter = (el: HTMLElement) => fireEvent.keyDown(el, { key: 'Enter' });
 
-    it('moves from a dated column\'s date to replicate 1, without the calendar', async () => {
-      const props = renderTable({ slots: datedSlots() });
-      pressEnter(screen.getByTestId('germ-date-trigger-1'));
-      await waitFor(() => expect(count(1)).toHaveFocus());
-      expect(screen.queryByTestId('germ-date-1')).not.toBeInTheDocument();
-      expect(props.onSlotsChange).not.toHaveBeenCalled();
-    });
-
-    it('stays on an undated column\'s date, whose counts are disabled', () => {
-      const props = renderTable();
-      const trigger = screen.getByTestId('germ-date-trigger-1');
-      pressEnter(trigger);
-      expect(document.activeElement).not.toBe(count(1));
-      expect(props.onSlotsChange).not.toHaveBeenCalled();
-    });
-
-    it('advances through replicates 1-4 of the same column and stops at 4', async () => {
-      renderTable({ slots: datedSlots() });
-      count(1).focus();
-      for (const rep of [2, 3, 4]) {
-        pressEnter(count(rep - 1));
-        // eslint-disable-next-line no-await-in-loop
-        await waitFor(() => expect(count(rep)).toHaveFocus());
-      }
-      pressEnter(count(4));
-      // MRT blurs replicate 4 on any Enter in the column; it must come back.
-      await new Promise((resolve) => { setTimeout(resolve); });
-      expect(count(4)).toHaveFocus();
-    });
-
     const tableProps = (validationErrors: Record<string, string>) => ({
       slots: datedSlots(),
       replicates: defaultReps(),
@@ -373,6 +343,60 @@ describe('DailyGermTable', () => {
       onReplicatesChange: vi.fn(),
       onSlotSelect: vi.fn()
     });
+
+    it('moves from a dated column\'s date to replicate 1, without the calendar', async () => {
+      const props = renderTable({ slots: datedSlots() });
+      pressEnter(screen.getByTestId('germ-date-trigger-1'));
+      await waitFor(() => expect(count(1)).toHaveFocus());
+      expect(screen.queryByTestId('germ-date-1')).not.toBeInTheDocument();
+      expect(props.onSlotsChange).not.toHaveBeenCalled();
+    });
+
+    it('fills today on Enter at an empty column\'s date', () => {
+      const props = renderTable();
+      pressEnter(screen.getByTestId('germ-date-trigger-1'));
+      expect(props.onSlotsChange).toHaveBeenCalledWith(expect.arrayContaining([
+        expect.objectContaining({ slotIndex: 1, countDt: DateTime.now().toFormat('yyyy-MM-dd') })
+      ]));
+    });
+
+    it('focuses the next empty date once loaded, without filling it', async () => {
+      const props = renderTable({ slots: datedSlots(), isHydrated: true });
+      await waitFor(() => expect(screen.getByTestId('germ-date-trigger-2')).toHaveFocus());
+      expect(props.onSlotsChange).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('germ-date-2')).not.toBeInTheDocument();
+    });
+
+    it('writes 0 when Enter passes an empty count, and leaves a typed one alone', () => {
+      const slots = datedSlots();
+      slots[0] = { ...slots[0], rep2NoSeedsGerm: 4 };
+      const props = renderTable({ slots });
+      pressEnter(count(1));
+      expect(props.onSlotsChange).toHaveBeenCalledWith(expect.arrayContaining([
+        expect.objectContaining({ slotIndex: 1, rep1NoSeedsGerm: 0 })
+      ]));
+      props.onSlotsChange.mockClear();
+      pressEnter(count(2));
+      expect(props.onSlotsChange).not.toHaveBeenCalled();
+    });
+
+    it('advances through replicates 1-4, then on to the abnormals table', async () => {
+      render(
+        <>
+          <DailyGermTable {...tableProps({})} firstAbnormalCode="re" />
+          <input id="abnormal-input-1-re" data-testid="abnormal-1-re" />
+        </>
+      );
+      count(1).focus();
+      for (const rep of [2, 3, 4]) {
+        pressEnter(count(rep - 1));
+        // eslint-disable-next-line no-await-in-loop
+        await waitFor(() => expect(count(rep)).toHaveFocus());
+      }
+      pressEnter(count(4));
+      await waitFor(() => expect(screen.getByTestId('abnormal-1-re')).toHaveFocus());
+    });
+
 
     it('holds focus on a count whose edit put its replicate over the limit', async () => {
       const { rerender } = render(<DailyGermTable {...tableProps({})} />);

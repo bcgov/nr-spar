@@ -13,6 +13,7 @@ import ROUTES from '../../../../routes/constants';
 import {
   getGerminationTestHeader, getGermCounts, getTestReplicates, putGermCounts
 } from '../../../../api-service/consep/germinationTestAPI';
+import { getGerminatorTrayContents } from '../../../../api-service/consep/germinatorTrayAPI';
 import {
   GermCountSlotType, GermReplicateType, GerminationTestHeaderType
 } from '../../../../types/consep/GerminationType';
@@ -26,7 +27,7 @@ import ConflictNotification from '../../../../components/CONSEP/ConflictNotifica
 import SummaryGrid, { type SummaryColumn } from '../../../../components/CONSEP/SummaryGrid';
 
 import DailyGermTable from './DailyGermTable';
-import AbnormalsTable from './AbnormalsTable';
+import AbnormalsTable, { ABNORMAL_CATEGORIES } from './AbnormalsTable';
 import {
   getDefaultSeeds, validateCountDates, checkOverLimit, buildUpsertPayload,
   parseCountInput, ABNORMAL_MAX, REP_ABNORMAL_KEYS
@@ -213,6 +214,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     }
   }, []);
 
+  // Read after an awaited flush, where the mutation object in this render's
+  // closure would still report the state from before the save.
+  const lastSaveFailed = useRef(false);
   const saveMutation = useMutation({
     mutationFn: (data: { slots: GermCountSlotType[]; replicates: GermReplicateType[] }) => (
       putGermCounts(
@@ -221,6 +225,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       )
     ),
     onSuccess: (response) => {
+      lastSaveFailed.current = false;
       setUpdateTimestamp(response.updateTimestamp);
       setAlert({ isSuccess: true, message: 'Daily germination counts saved' });
       if (alertTimerRef.current) {
@@ -229,6 +234,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       alertTimerRef.current = setTimeout(() => setAlert(null), 3000);
     },
     onError: (error) => {
+      lastSaveFailed.current = true;
       if ((error as AxiosError).response?.status === 409) {
         markConflict();
         return;
@@ -245,7 +251,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     [slots, replicates]
   );
 
-  const { markSaved } = useAutosave({
+  const { markSaved, flush } = useAutosave({
     data: autosaveData,
     onSave: async (data) => { await saveMutation.mutateAsync(data); },
     enabled:
@@ -272,6 +278,60 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   // the ref is current before the hydration effects below fire this commit.
   // eslint-disable-next-line react-hooks/refs
   markSavedRef.current = markSaved;
+
+  // Alt+Y: on to the next test on the same germinator tray (#2681), in the
+  // tray's own order (seedlot, then request). Whatever was just typed is saved
+  // first; anything that cannot be saved keeps the user here, because leaving
+  // would drop it.
+  const goToNextTrayTest = async () => {
+    const trayId = header?.germinatorTrayId;
+    if (!trayId) {
+      return;
+    }
+    if (isConflict || Object.keys(validationErrors).length > 0) {
+      setAlert({ isSuccess: false, message: 'Fix the errors on this test before moving to the next one.' });
+      return;
+    }
+    // ponytail: a save already in flight disables flush, so edits made since
+    // would be lost on leaving. Ignoring the key until it settles is the cheap
+    // guard; queue the jump behind the save if users trip over it.
+    if (saveMutation.isPending) {
+      return;
+    }
+    try {
+      await flush();
+      if (lastSaveFailed.current) {
+        return;
+      }
+      const tests = await getGerminatorTrayContents(trayId);
+      const current = tests.findIndex((test) => String(test.riaSkey) === riaKey);
+      const next = current === -1 ? undefined : tests[current + 1];
+      if (!next?.riaSkey) {
+        setAlert({ isSuccess: true, message: 'This is the last test on the tray.' });
+        return;
+      }
+      navigate(ROUTES.GERMINATION_TEST_RESULT.replace(':riaKey', String(next.riaSkey)));
+    } catch (error) {
+      setAlert({
+        isSuccess: false,
+        message: `Could not load the tray's tests: ${(error as AxiosError).message}`
+      });
+    }
+  };
+  const goToNextTrayTestRef = useRef(goToNextTrayTest);
+  // eslint-disable-next-line react-hooks/refs
+  goToNextTrayTestRef.current = goToNextTrayTest;
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      // `code`, not `key`: on a Mac Alt+Y types "¥".
+      if (e.altKey && e.code === 'KeyY') {
+        e.preventDefault();
+        goToNextTrayTestRef.current();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const handleReloadOnConflict = async () => {
     // Refetch the header too (I5): germinatorEntry drives day-number calc and
@@ -383,6 +443,8 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
                 onSlotsChange={setSlots}
                 onReplicatesChange={setReplicates}
                 onSlotSelect={setSelectedSlot}
+                isHydrated={isHydrated}
+                firstAbnormalCode={ABNORMAL_CATEGORIES[0].code}
               />
             </Column>
           </Row>
