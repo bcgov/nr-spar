@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.RequestSeedlotValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
@@ -105,6 +106,36 @@ public class ActivityEndpoint {
       @RequestParam(required = false) String familyLotNumber
   ) {
     return activityService.validateAddGermTest(activityTypeCd, seedlotNumber, familyLotNumber);
+  }
+
+  /**
+   * Validates that a seedlot number and request ID identify a real request-seedlot row that the
+   * Copy Results screen can target, and that the seedlot is the same species as the one in
+   * context.
+   *
+   * <p>Always 200: an unusable pair is a normal answer to this question, reported as
+   * {@code valid: false} with the reason, not as an error.
+   *
+   * @param seedlotNumber the seedlot being copied to
+   * @param requestId the request item (aka request ID) being copied to
+   * @param fromVegetationSt species of the seedlot in context, which the target must match
+   * @return the validation result, carrying the resolved row when one was found
+   */
+  @GetMapping("/validate-request-seedlot")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully validated the seedlot number and request ID pair.",
+      content = @Content(
+          schema = @Schema(implementation = RequestSeedlotValidationResponseDto.class))
+  )
+  @ApiAuthResponse
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public RequestSeedlotValidationResponseDto validateRequestSeedlot(
+      @RequestParam String seedlotNumber,
+      @RequestParam String requestId,
+      @RequestParam String fromVegetationSt
+  ) {
+    return activityService.validateRequestSeedlot(seedlotNumber, requestId, fromVegetationSt);
   }
 
   /**
