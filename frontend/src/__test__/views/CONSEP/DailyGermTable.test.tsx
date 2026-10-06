@@ -1,5 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import {
+  render, screen, fireEvent, waitFor
+} from '@testing-library/react';
 import DailyGermTable from '../../../views/CONSEP/TestingActivities/GerminationContent/DailyGermTable';
 import { DateTime } from 'luxon';
 import { GermCountSlotType, GermReplicateType } from '../../../types/consep/GerminationType';
@@ -319,5 +321,73 @@ describe('DailyGermTable', () => {
     // A disabled trigger must not be able to summon the picker either.
     fireEvent.click(trigger);
     expect(screen.queryByTestId('germ-date-1')).not.toBeInTheDocument();
+  });
+
+  // #2681: keyboard entry runs down a date column, not along a replicate row.
+  describe('Enter-key entry', () => {
+    const datedSlots = () => {
+      const slots = emptySlots();
+      slots[0] = { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 };
+      return slots;
+    };
+    const count = (rep: number) => screen.getByTestId(`germ-count-${rep}-1`);
+    const pressEnter = (el: HTMLElement) => fireEvent.keyDown(el, { key: 'Enter' });
+
+    it('moves from a dated column\'s date to replicate 1, without the calendar', async () => {
+      const props = renderTable({ slots: datedSlots() });
+      pressEnter(screen.getByTestId('germ-date-trigger-1'));
+      await waitFor(() => expect(count(1)).toHaveFocus());
+      expect(screen.queryByTestId('germ-date-1')).not.toBeInTheDocument();
+      expect(props.onSlotsChange).not.toHaveBeenCalled();
+    });
+
+    it('stays on an undated column\'s date, whose counts are disabled', () => {
+      const props = renderTable();
+      const trigger = screen.getByTestId('germ-date-trigger-1');
+      pressEnter(trigger);
+      expect(document.activeElement).not.toBe(count(1));
+      expect(props.onSlotsChange).not.toHaveBeenCalled();
+    });
+
+    it('advances through replicates 1-4 of the same column and stops at 4', async () => {
+      renderTable({ slots: datedSlots() });
+      count(1).focus();
+      for (const rep of [2, 3, 4]) {
+        pressEnter(count(rep - 1));
+        // eslint-disable-next-line no-await-in-loop
+        await waitFor(() => expect(count(rep)).toHaveFocus());
+      }
+      pressEnter(count(4));
+      // MRT blurs replicate 4 on any Enter in the column; it must come back.
+      await new Promise((resolve) => { setTimeout(resolve); });
+      expect(count(4)).toHaveFocus();
+    });
+
+    const tableProps = (validationErrors: Record<string, string>) => ({
+      slots: datedSlots(),
+      replicates: defaultReps(),
+      germinatorEntry: '2024-10-31',
+      isEditable: true,
+      validationErrors,
+      onSlotsChange: vi.fn(),
+      onReplicatesChange: vi.fn(),
+      onSlotSelect: vi.fn()
+    });
+
+    it('holds focus on a count whose edit put its replicate over the limit', async () => {
+      const { rerender } = render(<DailyGermTable {...tableProps({})} />);
+      count(2).focus();
+      rerender(<DailyGermTable {...tableProps({ 'rep-2': 'over' })} />);
+      pressEnter(count(2));
+      await new Promise((resolve) => { setTimeout(resolve); });
+      expect(count(2)).toHaveFocus();
+    });
+
+    it('lets Enter leave a replicate that was already over the limit on arrival', async () => {
+      render(<DailyGermTable {...tableProps({ 'rep-2': 'over' })} />);
+      count(2).focus();
+      pressEnter(count(2));
+      await waitFor(() => expect(count(3)).toHaveFocus());
+    });
   });
 });

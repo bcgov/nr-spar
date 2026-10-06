@@ -11,8 +11,8 @@ import {
   parseCountInput, resolveDayZero, toLocalIsoDate, REP_COUNT_KEYS
 } from './utils';
 import {
-  buildTableRows, getDailyGermColumns, DailyGermHandlers, GermTableRow,
-  DATE_FORMAT, DATE_PLACEHOLDER
+  buildTableRows, countInputId, getDailyGermColumns, DailyGermHandlers, GermTableRow,
+  DATE_FORMAT, DATE_PLACEHOLDER, REP_COUNT
 } from './constants';
 
 import './styles.scss';
@@ -110,6 +110,20 @@ const DailyGermTable = ({
     }
   };
 
+  // Keyboard entry runs down a date column -- one date, then its four
+  // replicates -- across the grain of a table whose rows are replicates (#2681).
+  //
+  // Deferred because MRT blurs the column's edit input right after our Enter
+  // handler returns -- and it keeps one ref per column, not per cell, so what it
+  // blurs is the bottom row's input (replicate 4), wherever focus actually is.
+  const focusCount = (repNumber: number, slotIndex: number) => {
+    setTimeout(() => document.getElementById(countInputId(repNumber, slotIndex))?.focus());
+  };
+  // Enter holds focus on a count whose edit put its replicate over the limit,
+  // but a replicate that was already invalid on arrival (say # seeds was
+  // lowered on an old record) must not trap the user in the cell.
+  const invalidOnArrival = useRef(false);
+
   const closeDateModal = () => {
     skipNextFocus.current = true;
     setEditingSlot(null);
@@ -153,6 +167,24 @@ const DailyGermTable = ({
       activateDateCell(slotIndex);
     },
     onSlotFocus: enterSlot,
+    onDateCellEnter: (slotIndex) => {
+      // An undated column's counts are disabled, so there is nowhere to go.
+      if (slots.find((s) => s.slotIndex === slotIndex)?.countDt) {
+        focusCount(1, slotIndex);
+      }
+    },
+    onCountFocus: (repNumber, slotIndex) => {
+      invalidOnArrival.current = !!validationErrors[`rep-${repNumber}`];
+      enterSlot(slotIndex);
+    },
+    onCountEnter: (repNumber, slotIndex) => {
+      const holds = !!validationErrors[`rep-${repNumber}`] && !invalidOnArrival.current;
+      // ponytail: Enter stops at replicate 4 until Bendix says where it goes
+      // next (the next empty date would auto-fill today on focus).
+      const next = holds || repNumber === REP_COUNT ? repNumber : repNumber + 1;
+      // Staying put is a refocus too: MRT's blur may have just taken it away.
+      focusCount(next, slotIndex);
+    },
     onCountChange: (repNumber, slotIndex, raw) => {
       const parsed = parseCountInput(raw);
       if (parsed === null) {

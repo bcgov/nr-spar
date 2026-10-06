@@ -19,6 +19,11 @@ export const DATE_PLACEHOLDER = 'yyyy/mm/dd';
 /** Accessor key for a slot's count on a flattened replicate row. */
 export const slotKey = (slotIndex: number) => `slot${slotIndex}`;
 
+/** DOM id of a count input, so Enter can move focus down a date column (#2681). */
+export const countInputId = (replicateNumber: number, slotIndex: number) => (
+  `germ-count-input-${replicateNumber}-${slotIndex}`
+);
+
 /**
  * One replicate, flattened so material-react-table can address each daily
  * count by `accessorKey`. Counts live per-slot in the API shape, but the table
@@ -61,6 +66,11 @@ export type DailyGermHandlers = {
   onDateCellFocus: (slotIndex: number) => void;
   /** The column the user is working in, for the AC6 highlight; `null` clears it. */
   onSlotFocus: (slotIndex: number | null) => void;
+  /** Enter on a date cell: on to replicate 1 of that column (#2681). */
+  onDateCellEnter: (slotIndex: number) => void;
+  onCountFocus: (replicateNumber: number, slotIndex: number) => void;
+  /** Enter on a count: on to the next replicate of the same column (#2681). */
+  onCountEnter: (replicateNumber: number, slotIndex: number) => void;
   onCountChange: (replicateNumber: number, slotIndex: number, raw: string) => void;
   onSeedsChange: (replicateNumber: number, raw: string) => void;
   onAcceptToggle: (replicateNumber: number, checked: boolean) => void;
@@ -195,6 +205,14 @@ const buildSlotColumn = (
           }
         }}
         onFocus={() => handlers.onDateCellFocus(slot.slotIndex)}
+        // Enter moves on to the counts; Space still opens the calendar. Without
+        // preventDefault the button would also fire its click and reopen it.
+        onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handlers.onDateCellEnter(slot.slotIndex);
+          }
+        }}
         onBlur={() => handlers.onSlotFocus(null)}
       >
         {slot.countDt
@@ -225,12 +243,19 @@ const buildSlotColumn = (
             slot.slotIndex,
             e.currentTarget.value
           ),
-          onFocus: () => handlers.onSlotFocus(slot.slotIndex),
+          onFocus: () => handlers.onCountFocus(row.original.replicateNumber, slot.slotIndex),
           onBlur: () => handlers.onSlotFocus(null),
+          onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handlers.onCountEnter(row.original.replicateNumber, slot.slotIndex);
+            }
+          },
           // MUI v9 reads the native input's attributes from slotProps.htmlInput
           // and silently drops the old `inputProps`.
           slotProps: {
             htmlInput: {
+              id: countInputId(row.original.replicateNumber, slot.slotIndex),
               'data-testid': `germ-count-${row.original.replicateNumber}-${slot.slotIndex}`,
               'aria-label': `Replicate ${row.original.replicateNumber} count ${slot.slotIndex}`,
               inputMode: 'numeric',
