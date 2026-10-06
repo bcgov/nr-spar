@@ -1,3 +1,4 @@
+import React from 'react';
 import { SeedlotDisplayType } from '../../types/SeedlotType';
 
 export interface TableProps {
@@ -15,7 +16,7 @@ export interface SeedlotDataTableProps {
   isSortable: boolean,
   showSearch: boolean,
   showPagination: boolean,
-  tablePagination: JSX.Element,
+  tablePagination: React.JSX.Element,
   isTscAdmin?: boolean
 }
 

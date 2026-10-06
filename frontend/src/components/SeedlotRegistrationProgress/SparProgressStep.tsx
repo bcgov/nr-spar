@@ -34,7 +34,7 @@ const SparProgressStep = ({
   label,
   onClick,
   secondaryLabel
-}: SparProgressStepProps): JSX.Element => {
+}: SparProgressStepProps): React.JSX.Element => {
   const getClassName = (): string => {
     const classNames: Array<string> = [`${prefix}--progress-step`];
     classNames.push(current ? `${prefix}--progress-step--current` : '');

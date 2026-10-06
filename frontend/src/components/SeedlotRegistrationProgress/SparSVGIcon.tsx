@@ -21,7 +21,7 @@ const SparSVGIcon = ({
   description,
   invalid,
   svgPrefix
-}: SparSVGIconProps): JSX.Element => {
+}: SparSVGIconProps): React.JSX.Element => {
   if (invalid) {
     return (
       <Warning className={`${svgPrefix}--progress__warning`}>

@@ -41,7 +41,7 @@ type Props<T extends Record<string, any>> = {
   renderRowActions?: (props: { row: any; table: any }) => React.ReactNode;
   onRowClick?: (row: T) => void;
   initialState?: any;
-  tableBodyRef?: React.RefObject<HTMLTableSectionElement>;
+  tableBodyRef?: React.RefObject<HTMLTableSectionElement | null>;
   renderToolbarInternalActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   renderTopToolbarCustomActions?: (props: { table: MRT_TableInstance<any> }) => React.ReactNode;
   hideToolbar?: boolean;
@@ -111,6 +111,18 @@ const GenericTable = <T extends Record<string, any>>({
           },
           input: {
             padding: 0
+          }
+        }
+      },
+      MuiInput: {
+        styleOverrides: {
+          // MRT drops the underline of table-mode edit cells through
+          // `InputProps.disableUnderline`, which MUI v9's TextField no longer reads.
+          // Scoped to body cells so column filter inputs keep theirs.
+          root: {
+            '.MuiTableCell-body &::before, .MuiTableCell-body &::after': {
+              display: 'none'
+            }
           }
         }
       }

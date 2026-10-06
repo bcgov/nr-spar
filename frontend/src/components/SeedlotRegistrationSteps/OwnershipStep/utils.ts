@@ -1,5 +1,4 @@
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { emptyOwnershipStep } from '../../../views/Seedlot/ContextContainerClassA/constants';
 import { inputText, createOwnerTemplate } from './constants';
 
@@ -18,16 +17,10 @@ const getNextId = (currentArray: Array<SingleOwnerForm>): number => {
   return max + 1;
 };
 
-export const insertOwnerForm = (
-  ownershipArray: Array<SingleOwnerForm>,
-  methodsOfPayment: MultiOptionsObj[]
-) => {
+export const insertOwnerForm = (ownershipArray: Array<SingleOwnerForm>) => {
   const clonedArray = structuredClone(ownershipArray);
   const newId = getNextId(ownershipArray);
   const newOwnerForm = createOwnerTemplate(newId, emptyOwnershipStep[0]);
-
-  const defaultPayment = methodsOfPayment.filter((method) => method.isDefault)[0] ?? null;
-  newOwnerForm.methodOfPayment.value = defaultPayment;
 
   clonedArray.push(newOwnerForm);
 

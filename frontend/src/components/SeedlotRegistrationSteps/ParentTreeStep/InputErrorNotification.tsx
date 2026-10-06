@@ -9,7 +9,7 @@ const InputErrorNotification = (
 ) => {
   const [hasError, setHasError] = useState(false);
   const [title, setTitle] = useState('');
-  const [subtitle, setSubtitle] = useState<string | JSX.Element | null>(null);
+  const [subtitle, setSubtitle] = useState<string | React.JSX.Element | null>(null);
 
   useEffect(() => {
     const getHeaderName = (field: keyof StrTypeRowItem): string => {
@@ -48,8 +48,8 @@ const InputErrorNotification = (
 
     const generateSubTitle = (
       invalidFields: (keyof StrTypeRowItem)[]
-    ): string | JSX.Element => {
-      let generatedSubTitle: string | JSX.Element = '';
+    ): string | React.JSX.Element => {
+      let generatedSubTitle: string | React.JSX.Element = '';
       const prefix = 'One or more of the ';
       const suffix = ' values are invalid.';
 

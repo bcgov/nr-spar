@@ -26,8 +26,10 @@ import ConflictNotification from '../../../../components/CONSEP/ConflictNotifica
 import SummaryGrid, { type SummaryColumn } from '../../../../components/CONSEP/SummaryGrid';
 
 import DailyGermTable from './DailyGermTable';
+import AbnormalsTable from './AbnormalsTable';
 import {
-  getDefaultSeeds, validateCountDates, checkOverLimit, buildUpsertPayload
+  getDefaultSeeds, validateCountDates, checkOverLimit, buildUpsertPayload,
+  parseCountInput, ABNORMAL_MAX, REP_ABNORMAL_KEYS
 } from './utils';
 
 import './styles.scss';
@@ -61,6 +63,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   // were a real edit. Held in state so autosave re-evaluates its `enabled`
   // gate when it flips true.
   const [isHydrated, setIsHydrated] = useState(false);
+  // The count day the abnormals table is showing (#2606). Sticky: set by moving
+  // into a column of the germinants table, never cleared on the way out.
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const { isConflict, markConflict, clearConflict } = useActivityConflict();
 
   // Latest slots/replicates mirrored into refs so a hydration effect can hand
@@ -177,6 +182,29 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
 
   const hasDatedSlot = slots.some((slot) => slot.countDt);
   const isEditable = header?.testCompleteInd !== 1 && !isConflict;
+
+  // Falls back to the first dated day, which covers both "nothing selected yet"
+  // (AC2: the screen opens showing a day's abnormals) and "the selected day's
+  // date was just cleared", where the slot it points at no longer holds counts.
+  const activeSlot = slots.find((slot) => slot.slotIndex === selectedSlot && slot.countDt)
+    ?? slots.find((slot) => slot.countDt);
+
+  const handleAbnormalChange = (
+    repNumber: number,
+    field: string,
+    raw: string
+  ) => {
+    const parsed = parseCountInput(raw, ABNORMAL_MAX);
+    if (parsed === null || !activeSlot) {
+      return;
+    }
+    const repKey = REP_ABNORMAL_KEYS[repNumber - 1];
+    setSlots(slots.map((slot) => (
+      slot.slotIndex === activeSlot.slotIndex
+        ? { ...slot, [repKey]: { ...slot[repKey], [field]: parsed } }
+        : slot
+    )));
+  };
 
   const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => {
@@ -354,11 +382,23 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
                 validationErrors={validationErrors}
                 onSlotsChange={setSlots}
                 onReplicatesChange={setReplicates}
+                onSlotSelect={setSelectedSlot}
               />
             </Column>
           </Row>
-          {/* Abnormals table (#2606) and legacy action buttons (Final/Rank/Curve/...)
-              are out of scope for #2514 — placeholders intentionally omitted. */}
+          <Row className="consep-germination-content-table">
+            <Column>
+              <AbnormalsTable
+                slot={activeSlot}
+                replicates={replicates}
+                isEditable={isEditable}
+                validationErrors={validationErrors}
+                onAbnormalChange={handleAbnormalChange}
+              />
+            </Column>
+          </Row>
+          {/* Legacy action buttons (Final/Rank/Curve/Copy results/...) are still
+              out of scope — placeholders intentionally omitted. */}
         </>
       )}
     </FlexGrid>
