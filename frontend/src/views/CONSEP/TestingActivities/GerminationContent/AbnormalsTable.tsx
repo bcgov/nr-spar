@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { MRT_ColumnDef } from 'material-react-table';
 
 import {
@@ -8,7 +8,9 @@ import {
 } from '../../../../types/consep/GerminationType';
 import GenericTable from '../../../../components/GenericTable';
 import { calcSlotAbnormalTotal, REP_ABNORMAL_KEYS } from './utils';
-import { fixedWidth, numberFieldSx } from './constants';
+import {
+  abnormalInputId, fixedWidth, focusLater, numberFieldSx, REP_COUNT
+} from './constants';
 
 import './styles.scss';
 
@@ -72,11 +74,17 @@ const buildRows = (
 const CATEGORY_WIDTH = 58;
 const CATEGORY_PADDING = '0.125rem';
 
+type EnterHandlers = {
+  onFocus: (replicateNumber: number) => void;
+  onEnter: (replicateNumber: number, categoryIndex: number) => void;
+};
+
 const buildColumns = (
   isEditable: boolean,
   hasSlot: boolean,
   validationErrors: Record<string, string>,
-  onAbnormalChange: AbnormalsTableProps['onAbnormalChange']
+  onAbnormalChange: AbnormalsTableProps['onAbnormalChange'],
+  enter: EnterHandlers
 ): MRT_ColumnDef<AbnormalTableRow>[] => [
   {
     accessorKey: 'replicateNumber',
@@ -84,7 +92,7 @@ const buildColumns = (
     enableEditing: false,
     ...fixedWidth(60, 'left')
   },
-  ...ABNORMAL_CATEGORIES.map(({ code, field, title }) => ({
+  ...ABNORMAL_CATEGORIES.map(({ code, field, title }, categoryIndex) => ({
     accessorKey: code,
     header: code.toUpperCase(),
     Header: () => <span title={title}>{code.toUpperCase()}</span>,
@@ -104,8 +112,16 @@ const buildColumns = (
         field,
         e.currentTarget.value
       ),
+      onFocus: () => enter.onFocus(row.original.replicateNumber),
+      onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          enter.onEnter(row.original.replicateNumber, categoryIndex);
+        }
+      },
       slotProps: {
         htmlInput: {
+          id: abnormalInputId(row.original.replicateNumber, code),
           'data-testid': `abnormal-${row.original.replicateNumber}-${code}`,
           'aria-label': `Replicate ${row.original.replicateNumber} ${title}`,
           inputMode: 'numeric',
@@ -138,7 +154,30 @@ const AbnormalsTable = ({
   slot, replicates, isEditable, validationErrors, onAbnormalChange
 }: AbnormalsTableProps) => {
   const rows = useMemo(() => buildRows(slot, replicates), [slot, replicates]);
-  const columns = buildColumns(isEditable, !!slot, validationErrors, onAbnormalChange);
+
+  // Enter carries on from the germinants table (#2681), one replicate at a
+  // time across its categories -- the native Tab order -- and stops on the
+  // last cell. Unlike a germ count, an empty abnormal stays empty: a zero would
+  // write an abnormal row for every day entered. Same over-limit hold as there.
+  const invalidOnArrival = useRef(false);
+  const enter: EnterHandlers = {
+    onFocus: (repNumber) => {
+      invalidOnArrival.current = !!validationErrors[`rep-${repNumber}`];
+    },
+    onEnter: (repNumber, categoryIndex) => {
+      const holds = !!validationErrors[`rep-${repNumber}`] && !invalidOnArrival.current;
+      const isLastCategory = categoryIndex === ABNORMAL_CATEGORIES.length - 1;
+      let target = { repNumber, categoryIndex };
+      if (!holds && !isLastCategory) {
+        target = { repNumber, categoryIndex: categoryIndex + 1 };
+      } else if (!holds && repNumber < REP_COUNT) {
+        target = { repNumber: repNumber + 1, categoryIndex: 0 };
+      }
+      // Refocus even when staying: MRT's Enter blur may have taken it away.
+      focusLater(abnormalInputId(target.repNumber, ABNORMAL_CATEGORIES[target.categoryIndex].code));
+    }
+  };
+  const columns = buildColumns(isEditable, !!slot, validationErrors, onAbnormalChange, enter);
 
   return (
     <div className="abnormals-table-container">

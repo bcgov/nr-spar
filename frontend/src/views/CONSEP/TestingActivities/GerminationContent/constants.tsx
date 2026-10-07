@@ -20,6 +20,29 @@ export const DATE_PLACEHOLDER = 'yyyy/mm/dd';
 export const slotKey = (slotIndex: number) => `slot${slotIndex}`;
 
 /**
+ * DOM ids for the keyboard entry chain (#2681): date, then the four counts down
+ * that column, then the abnormals table.
+ */
+export const dateTriggerId = (slotIndex: number) => `germ-date-trigger-${slotIndex}`;
+export const countInputId = (replicateNumber: number, slotIndex: number) => (
+  `germ-count-input-${replicateNumber}-${slotIndex}`
+);
+export const abnormalInputId = (replicateNumber: number, code: string) => (
+  `abnormal-input-${replicateNumber}-${code}`
+);
+
+/**
+ * Focus after the current event finishes. MRT blurs a column's edit input
+ * right after our Enter handler returns -- and it keeps one ref per column,
+ * not per cell, so what it blurs is the bottom row's input (replicate 4),
+ * wherever focus actually is. It also lets a cell enabled by this same event
+ * (a date just filled) render enabled before it is focused.
+ */
+export const focusLater = (id: string) => {
+  setTimeout(() => document.getElementById(id)?.focus());
+};
+
+/**
  * One replicate, flattened so material-react-table can address each daily
  * count by `accessorKey`. Counts live per-slot in the API shape, but the table
  * renders one row per replicate.
@@ -61,6 +84,11 @@ export type DailyGermHandlers = {
   onDateCellFocus: (slotIndex: number) => void;
   /** The column the user is working in, for the AC6 highlight; `null` clears it. */
   onSlotFocus: (slotIndex: number | null) => void;
+  /** Enter on a date cell: on to replicate 1 of that column (#2681). */
+  onDateCellEnter: (slotIndex: number) => void;
+  onCountFocus: (replicateNumber: number, slotIndex: number) => void;
+  /** Enter on a count: on to the next replicate of the same column (#2681). */
+  onCountEnter: (replicateNumber: number, slotIndex: number) => void;
   onCountChange: (replicateNumber: number, slotIndex: number, raw: string) => void;
   onSeedsChange: (replicateNumber: number, raw: string) => void;
   onAcceptToggle: (replicateNumber: number, checked: boolean) => void;
@@ -182,6 +210,7 @@ const buildSlotColumn = (
     Header: () => (
       <button
         type="button"
+        id={dateTriggerId(slot.slotIndex)}
         className="germ-count-date-trigger"
         data-testid={`germ-date-trigger-${slot.slotIndex}`}
         disabled={!isEditable}
@@ -195,6 +224,14 @@ const buildSlotColumn = (
           }
         }}
         onFocus={() => handlers.onDateCellFocus(slot.slotIndex)}
+        // Enter moves on to the counts; Space still opens the calendar. Without
+        // preventDefault the button would also fire its click and reopen it.
+        onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handlers.onDateCellEnter(slot.slotIndex);
+          }
+        }}
         onBlur={() => handlers.onSlotFocus(null)}
       >
         {slot.countDt
@@ -225,12 +262,19 @@ const buildSlotColumn = (
             slot.slotIndex,
             e.currentTarget.value
           ),
-          onFocus: () => handlers.onSlotFocus(slot.slotIndex),
+          onFocus: () => handlers.onCountFocus(row.original.replicateNumber, slot.slotIndex),
           onBlur: () => handlers.onSlotFocus(null),
+          onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handlers.onCountEnter(row.original.replicateNumber, slot.slotIndex);
+            }
+          },
           // MUI v9 reads the native input's attributes from slotProps.htmlInput
           // and silently drops the old `inputProps`.
           slotProps: {
             htmlInput: {
+              id: countInputId(row.original.replicateNumber, slot.slotIndex),
               'data-testid': `germ-count-${row.original.replicateNumber}-${slot.slotIndex}`,
               'aria-label': `Replicate ${row.original.replicateNumber} count ${slot.slotIndex}`,
               inputMode: 'numeric',
