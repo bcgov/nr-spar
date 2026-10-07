@@ -11,14 +11,12 @@ import ca.bc.gov.oracleapi.dto.consep.GerminationTestDuplicateValidationResponse
 import ca.bc.gov.oracleapi.dto.consep.RequestSeedlotValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.DailyAbnormalEntity;
 import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.projection.RequestSeedlotProj;
 import ca.bc.gov.oracleapi.mapper.GermCountMapper;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
-import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
 import ca.bc.gov.oracleapi.repository.consep.SparRequestRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
@@ -51,7 +49,6 @@ public class ActivityService {
   private final TestRegimeRepository testRegimeRepository;
   private final SparRequestRepository sparRequestRepository;
   private final GermCountRepository germCountRepository;
-  private final DailyAbnormalRepository dailyAbnormalRepository;
   private final GermCountMapper germCountMapper;
 
   /** What the legacy CNSL25 screen stamped as the updater of a copied germ count. */
@@ -528,9 +525,9 @@ public class ActivityService {
    * the same species, and must not already have this test with the same actual begin/end.
    *
    * <p>The copy is a new, standard, not-yet-accepted test: category {@code STD}, every result
-   * indicator cleared. Each daily count that carries a {@code DAILY_GERM_SKEY} gets a fresh key
-   * and its own copy of the abnormal row behind it -- sharing the source's keys would let an edit
-   * or delete of one test's abnormals land on the other.
+   * indicator cleared. Each daily count that carries a {@code DAILY_GERM_SKEY} gets a fresh key:
+   * sharing the source's keys would let an edit or delete of one test's abnormals land on the
+   * other. Abnormals themselves are not copied -- the business no longer uses them.
    *
    * @param sourceRiaKey the germination test being copied
    * @param target the seedlot and request being copied to
@@ -634,7 +631,7 @@ public class ActivityService {
     List<GermCountSlotDto> slots = germCountMapper.buildSlots(source).stream()
         .filter(s -> s.dailyGermSkey() != null)
         .map(s -> new GermCountSlotDto(
-            s.slotIndex(), copyAbnormals(s.dailyGermSkey()), s.countDt(), s.dayNoOfTest(),
+            s.slotIndex(), germCountRepository.nextDailyGermSkey(), s.countDt(), s.dayNoOfTest(),
             s.rep1NoSeedsGerm(), s.rep2NoSeedsGerm(), s.rep3NoSeedsGerm(), s.rep4NoSeedsGerm(),
             s.cumulativeGerm()))
         .toList();
@@ -643,17 +640,5 @@ public class ActivityService {
     copy.setUpdateUserid(COPY_UPDATE_USERID);
     copy.setUpdateTimestamp(now);
     germCountRepository.save(copy);
-  }
-
-  /** Mints a new daily germ key and copies the abnormal row behind the old one, if any. */
-  private BigDecimal copyAbnormals(BigDecimal sourceDailyGermSkey) {
-    BigDecimal newSkey = germCountRepository.nextDailyGermSkey();
-    dailyAbnormalRepository.findById(sourceDailyGermSkey).ifPresent(abnormal -> {
-      DailyAbnormalEntity copy = new DailyAbnormalEntity();
-      BeanUtils.copyProperties(abnormal, copy);
-      copy.setDailyGermSkey(newSkey);
-      dailyAbnormalRepository.save(copy);
-    });
-    return newSkey;
   }
 }

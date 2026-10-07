@@ -27,8 +27,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Copy Results against a real database: the new daily germ keys come from a sequence and the
- * abnormal rows are separate rows, so sharing or losing them only shows up in actual writes.
+ * Copy Results against a real database: the new daily germ keys come from a sequence, so whether
+ * the copy shares the source's keys only shows up in actual writes.
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -174,7 +174,7 @@ class CopyGerminationTestResultsTest {
   }
 
   @Test
-  void givesTheCopyItsOwnDailyGermKeysAndAbnormalRows() {
+  void givesTheCopyItsOwnDailyGermKeysWithoutCopyingAbnormals() {
     BigDecimal key = BigDecimal.valueOf(copyTo("00099", "TST20260001B").riaSkey());
 
     GermCountEntity counts = em.find(GermCountEntity.class, key);
@@ -186,11 +186,10 @@ class CopyGerminationTestResultsTest {
     assertThat(counts.getEntryUserid()).isEqualTo("IDIR\\RROBB");
     assertThat(counts.getUpdateUserid()).isEqualTo(ActivityService.COPY_UPDATE_USERID);
 
-    DailyAbnormalEntity copied = em.find(DailyAbnormalEntity.class, newSkey);
-    assertThat(copied.getRep1NoAbnrmRe()).isEqualTo(3);
-    assertThat(copied.getRep4NoAbnrmOther()).isEqualTo(1);
+    // Abnormals are not copied (Ron: no longer used); the new key points at nothing.
+    assertThat(em.find(DailyAbnormalEntity.class, newSkey)).isNull();
 
-    // The source still owns its row; nothing points the two tests at the same abnormals.
+    // The source keeps its key and its row; nothing points the two tests at the same abnormals.
     assertThat(em.find(GermCountEntity.class, sourceRiaKey).getDailyGermSkey1())
         .isEqualByComparingTo(SOURCE_SKEY);
     assertThat(em.find(DailyAbnormalEntity.class, SOURCE_SKEY).getRep1NoAbnrmRe()).isEqualTo(3);
