@@ -58,7 +58,7 @@ import {
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
   addNewMixRow, calcMixTabInfoItems, fillMixTable,
   getParentTreesForSelectedOrchards,
-  areOrchardsValid
+  areOrchardsValid, backfillParentTreeIds
 } from './utils';
 import EditGenWorth from './EditGenWorth';
 
@@ -197,6 +197,13 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFormSubmitted, allParentTreeQuery.status, allParentTreeQuery.data]);
+
+  useEffect(() => {
+    if (allParentTreeQuery.status !== 'success' || !allParentTreeQuery.data) return;
+    const backfilled = backfillParentTreeIds(state, allParentTreeQuery.data);
+    if (backfilled) setStepData('parentTreeStep', backfilled);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.tableRowData, state.mixTabData, allParentTreeQuery.status, allParentTreeQuery.data]);
 
   // Effects 'SMP mix' tab
   useEffect(
