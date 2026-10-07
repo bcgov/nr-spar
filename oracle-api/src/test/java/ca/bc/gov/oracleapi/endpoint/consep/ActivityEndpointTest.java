@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.CopyGerminationTestResultsDto;
 import ca.bc.gov.oracleapi.dto.consep.RequestSeedlotValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
@@ -352,6 +353,51 @@ class ActivityEndpointTest {
         .andExpect(jsonPath("$.message")
             .value("No request item found for this seedlot number and request ID."))
         .andExpect(jsonPath("$.requestItem").isEmpty());
+  }
+
+  /* ----------------------- Copy Germination Test Results -----------------------*/
+  @Test
+  void copyGerminationTestResults_shouldReturnTheNewActivity() throws Exception {
+    CopyGerminationTestResultsDto target =
+        new CopyGerminationTestResultsDto("00099", "TST20260001B");
+    when(activityService.copyGerminationTestResults(new BigDecimal("777"), target))
+        .thenReturn(createdActivityDto);
+
+    mockMvc.perform(post("/api/activities/777/copy-results")
+            .with(csrf())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(target)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.reqId").value(createdActivityDto.reqId()));
+
+    verify(activityService, times(1))
+        .copyGerminationTestResults(new BigDecimal("777"), target);
+  }
+
+  @Test
+  void copyGerminationTestResults_shouldRejectAMissingTarget() throws Exception {
+    mockMvc.perform(post("/api/activities/777/copy-results")
+            .with(csrf())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(
+                new CopyGerminationTestResultsDto("", "TST20260001B"))))
+        .andExpect(status().isBadRequest());
+
+    verify(activityService, times(0)).copyGerminationTestResults(any(), any());
+  }
+
+  @Test
+  void copyGerminationTestResults_shouldPassTheConflictThrough() throws Exception {
+    CopyGerminationTestResultsDto target =
+        new CopyGerminationTestResultsDto("00099", "TST20260001B");
+    when(activityService.copyGerminationTestResults(new BigDecimal("777"), target))
+        .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "already exists"));
+
+    mockMvc.perform(post("/api/activities/777/copy-results")
+            .with(csrf())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(target)))
+        .andExpect(status().isConflict());
   }
 
   /* ----------------------- Validate Adding Germ Test ----------------------------*/
