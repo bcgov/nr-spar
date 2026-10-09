@@ -20,6 +20,9 @@ Feature: A Class Seedlot Registration form, Step 4 Orchard
 
   Scenario: Change primary orchard confirmation modal
     When I select primary orchard "219 - VERNON - S - PRD"
+    And I go to the "Parent tree and SMP" step from the progress bar
+    Then the parent tree table should be loaded
+    When I go to the "Orchard" step from the progress bar
     And I clear the primary orchard
     Then the "Change orchard" modal should be visible
     And the "Change orchard" modal heading should be "Are you sure you want to change the orchard? If yes, then you will lose the parent tree and SMP information in Step 5"
@@ -33,6 +36,9 @@ Feature: A Class Seedlot Registration form, Step 4 Orchard
     And I add an additional orchard
     Then the secondary orchard label should be "Select a secondary orchard"
     When I select secondary orchard "222 - VERNON - S - PRD"
+    And I go to the "Parent tree and SMP" step from the progress bar
+    Then the parent tree table should be loaded
+    When I go to the "Orchard" step from the progress bar
     And I delete the secondary orchard
     Then the "Delete orchard" modal should be visible
     And the "Delete orchard" modal heading should be "Are you sure you want to delete the additional orchard? If yes, then you will lose the parent tree and SMP information in Step 5"
