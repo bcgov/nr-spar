@@ -1,6 +1,6 @@
 import { Given, Then, When } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
-import { THIRTY_SECONDS, TYPE_DELAY } from '../../constants';
+import { TYPE_DELAY } from '../../constants';
 
 const PARENT_TREE_COUNT = 6;
 const storedParentTrees = new Set<string>();
@@ -121,20 +121,19 @@ Then('the secondary orchard should not exist', () => {
 // Progress bar navigation and parent tree linkage
 When('I go to the {string} step from the progress bar', (stepName: string) => {
   const isParentTree = stepName === 'Parent tree and SMP';
-  if (isParentTree) {
-    cy.intercept('GET', '**/api/parent-trees/vegetation-codes/*').as('parentTreesUnderVegCode');
-  }
-
   cy.get('.seedlot-registration-progress')
     .find(`button.${prefix}--progress-step-button`)
     .contains(stepName)
     .click();
 
   if (isParentTree) {
-    cy.wait('@parentTreesUnderVegCode', { timeout: THIRTY_SECONDS })
-      .its('response.statusCode')
-      .should('equal', 200);
-    cy.get('#parentTreeNumber');
+    cy.get('.parent-tree-step-table-container-col table tbody tr')
+      .first()
+      .find('td')
+      .first()
+      .should(($cell) => {
+        expect($cell.text().trim()).to.match(/^\d+$/);
+      });
   }
 });
 
