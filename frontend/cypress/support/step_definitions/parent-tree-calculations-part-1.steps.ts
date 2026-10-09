@@ -71,26 +71,24 @@ When('I select primary orchard {string}', (orchardName: string) => {
     .click();
 });
 
-When('I select female gametic contribution method {string}', (method: string) => {
-  cy.get('#orchard-female-gametic')
-    .siblings()
+// The "Clear selected item" sibling also exists once a value is selected, so target the toggle only
+const selectGameticMethod = (inputId: string, method: string) => {
+  cy.get(inputId)
+    .siblings('button[title="Open"]')
     .click();
 
   cy.get(`.${prefix}--list-box--expanded`)
     .find('ul li')
     .contains(method)
     .click();
+};
+
+When('I select female gametic contribution method {string}', (method: string) => {
+  selectGameticMethod('#orchard-female-gametic', method);
 });
 
 When('I select male gametic contribution method {string}', (method: string) => {
-  cy.get('#orchard-male-gametic')
-    .siblings()
-    .click();
-
-  cy.get(`.${prefix}--list-box--expanded`)
-    .find('ul li')
-    .contains(method)
-    .click();
+  selectGameticMethod('#orchard-male-gametic', method);
 });
 
 When('I save the seedlot registration progress', () => {
