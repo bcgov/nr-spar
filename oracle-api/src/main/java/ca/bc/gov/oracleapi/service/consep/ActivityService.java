@@ -558,6 +558,12 @@ public class ActivityService {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "The test being copied has no actual begin and end dates.");
     }
+    // Checked here too: validateDuplicateGerminationTest reports a missing ID as invalid,
+    // which the caller below would otherwise turn into a 409 "already exists".
+    if (source.getStandardActivityId() == null || source.getStandardActivityId().isBlank()) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "The test being copied has no standard activity.");
+    }
 
     RequestSeedlotValidationResponseDto pair = validateRequestSeedlot(
         target.seedlotNumber(), target.requestId(), source.getVegetationState());

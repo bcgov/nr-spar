@@ -205,6 +205,18 @@ class CopyGerminationTestResultsTest {
   }
 
   @Test
+  void rejectsASourceWithoutAStandardActivityAsBadRequestNotConflict() {
+    em.find(ActivityEntity.class, sourceRiaKey).setStandardActivityId(null);
+    em.flush();
+
+    assertThatThrownBy(() -> copyTo("00099", "TST20260001B"))
+        .isInstanceOfSatisfying(ResponseStatusException.class, e -> {
+          assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+          assertThat(e.getReason()).contains("no standard activity");
+        });
+  }
+
+  @Test
   void rejectsATargetSeedlotOfAnotherSpecies() {
     assertThatThrownBy(() -> copyTo("00100", "TST20260001C"))
         .isInstanceOfSatisfying(ResponseStatusException.class, e -> {
