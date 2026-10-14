@@ -97,6 +97,25 @@ describe('Germination keyboard entry (#2681)', () => {
     await waitFor(() => expect(screen.getByTestId('abnormal-2-re')).toHaveFocus());
   });
 
+  it('titles the page with the seedlot number', async () => {
+    renderView();
+    expect(await screen.findByText('Germination test result (07080)')).toBeInTheDocument();
+  });
+
+  it('moves between replicates of the same abnormal category with the arrow keys', async () => {
+    renderView();
+    const sth2 = await screen.findByTestId('abnormal-2-sth');
+    fireEvent.keyDown(sth2, { key: 'ArrowDown' });
+    await waitFor(() => expect(screen.getByTestId('abnormal-3-sth')).toHaveFocus());
+    fireEvent.keyDown(screen.getByTestId('abnormal-3-sth'), { key: 'ArrowUp' });
+    await waitFor(() => expect(sth2).toHaveFocus());
+    // The edges stay put.
+    fireEvent.keyDown(screen.getByTestId('abnormal-1-sth'), { key: 'ArrowUp' });
+    fireEvent.keyDown(screen.getByTestId('abnormal-4-sth'), { key: 'ArrowDown' });
+    await new Promise((r) => { setTimeout(r); });
+    expect(sth2).toHaveFocus();
+  });
+
   it('Alt+Y saves, then opens the next test on the tray', async () => {
     trayMock.mockResolvedValue([{ riaSkey: 100 }, { riaSkey: 123 }, { riaSkey: 456 }]);
     renderView();

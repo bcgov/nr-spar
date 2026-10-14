@@ -77,6 +77,8 @@ const CATEGORY_PADDING = '0.125rem';
 type EnterHandlers = {
   onFocus: (replicateNumber: number) => void;
   onEnter: (replicateNumber: number, categoryIndex: number) => void;
+  /** Up/Down: same category on the previous/next replicate. */
+  onArrow: (replicateNumber: number, code: string, step: -1 | 1) => void;
 };
 
 const buildColumns = (
@@ -117,6 +119,9 @@ const buildColumns = (
         if (e.key === 'Enter') {
           e.preventDefault();
           enter.onEnter(row.original.replicateNumber, categoryIndex);
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          enter.onArrow(row.original.replicateNumber, code, e.key === 'ArrowUp' ? -1 : 1);
         }
       },
       slotProps: {
@@ -175,6 +180,12 @@ const AbnormalsTable = ({
       }
       // Refocus even when staying: MRT's Enter blur may have taken it away.
       focusLater(abnormalInputId(target.repNumber, ABNORMAL_CATEGORIES[target.categoryIndex].code));
+    },
+    onArrow: (repNumber, code, step) => {
+      const target = repNumber + step;
+      if (target >= 1 && target <= REP_COUNT) {
+        focusLater(abnormalInputId(target, code));
+      }
     }
   };
   const columns = buildColumns(isEditable, !!slot, validationErrors, onAbnormalChange, enter);

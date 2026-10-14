@@ -187,7 +187,8 @@ const buildSlotColumn = (
   // in doubt thirteen narrow columns across.
   const isHighlighted = highlightedSlot === slot.slotIndex;
   const activeClass = isHighlighted ? 'germ-slot-active' : undefined;
-  const slotWidth = fixedWidth(SLOT_COLUMN_WIDTH, 'right', SLOT_COLUMN_PADDING);
+  // Left-aligned so the counts sit under their date (user feedback on #2768).
+  const slotWidth = fixedWidth(SLOT_COLUMN_WIDTH, 'left', SLOT_COLUMN_PADDING);
 
   return {
     id: `slot-group-${slot.slotIndex}`,
@@ -278,7 +279,7 @@ const buildSlotColumn = (
               'data-testid': `germ-count-${row.original.replicateNumber}-${slot.slotIndex}`,
               'aria-label': `Replicate ${row.original.replicateNumber} count ${slot.slotIndex}`,
               inputMode: 'numeric',
-              style: { textAlign: 'right' }
+              style: { textAlign: 'left' }
             }
           },
           sx: numberFieldSx

@@ -50,6 +50,13 @@ const defaultReplicates = (testCategoryCd?: string): GermReplicateType[] => Arra
   })
 );
 
+// A family lot test carries the placeholder seedlot 00000.
+const lotNumber = (data?: GerminationTestHeaderType) => (
+  !data?.seedlotNumber || data.seedlotNumber === '00000'
+    ? data?.familyLotNumber ?? '-'
+    : data.seedlotNumber
+);
+
 const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const navigate = useNavigate();
 
@@ -360,11 +367,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     {
       key: 'seedlotNumber',
       label: 'Seedlot number',
-      renderValue: (data) => (
-        !data?.seedlotNumber || data.seedlotNumber === '00000'
-          ? data?.familyLotNumber ?? '-'
-          : data.seedlotNumber
-      )
+      renderValue: lotNumber
     },
     { key: 'species', label: 'Species', renderValue: (data) => data?.vegetationState ?? '-' },
     { key: 'germTray', label: 'Germ tray', renderValue: (data) => data?.germinatorTrayId ?? '-' }
@@ -408,7 +411,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       {header && (
         <>
           <Row className="consep-germination-content-title">
-            <PageTitle title={`Germination test result (${header.activityTypeCd ?? ''})`} />
+            <PageTitle title={`Germination test result (${lotNumber(header)})`} />
             <>
               {header.testCompleteInd === 1 && <StatusTag type="Completed" renderIcon={CheckmarkFilled} />}
               {header.acceptResultInd === 1 && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
