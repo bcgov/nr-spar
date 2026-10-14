@@ -7,6 +7,7 @@ import { rowTemplate } from '../../components/SeedlotRegistrationSteps/ParentTre
 import { RowItem } from '../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { ParentTreeStepDataObj } from '../../views/Seedlot/ContextContainerClassA/definitions';
 import { ParentTreeByVegCodeResType } from '../../types/ParentTreeTypes';
+import { getSeedlotSubmitErrDescription } from '../../views/Seedlot/ContextContainerClassA/utils';
 
 const row = (ptNumber: string, parentTreeId?: number | null): RowItem => {
   const r: RowItem = structuredClone(rowTemplate);
@@ -54,5 +55,13 @@ describe('getRequiredParentTreeId', () => {
     expect(() => getRequiredParentTreeId(row('37'))).toThrow('"37"');
     expect(() => getRequiredParentTreeId(row('37', null))).toThrow('"37"');
     expect(getRequiredParentTreeId(row('37', 1037))).toBe(1037);
+  });
+});
+
+describe('getSeedlotSubmitErrDescription', () => {
+  it('shows a payload validation error without a bogus error code', () => {
+    const err = new Error('Parent tree "37" is missing its parent tree id.');
+    expect(getSeedlotSubmitErrDescription(err as never).description)
+      .toBe('Parent tree "37" is missing its parent tree id.');
   });
 });

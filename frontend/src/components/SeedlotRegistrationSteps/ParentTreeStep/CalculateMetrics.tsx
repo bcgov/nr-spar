@@ -2,10 +2,13 @@ import React, { useContext } from 'react';
 import { Row, Button, Loading } from '@carbon/react';
 import { Calculator } from '@carbon/icons-react';
 import { useMutation } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import { PtValsCalcReqPayload } from '../../../types/PtCalcTypes';
 import postForCalculation from '../../../api-service/parentTreeAPI';
+import ErrorToast from '../../Toast/ErrorToast';
+import { ErrToastOption } from '../../../config/ToastifyConfig';
 import {
   fillCalculatedInfo,
   generatePtValCalcPayload,
@@ -48,7 +51,16 @@ const CalculateMetrics = ({
   }
 
   const calculateGenWorthQuery = useMutation({
-    mutationFn: (data: PtValsCalcReqPayload) => postForCalculation(data),
+    // Build the payload inside mutationFn so a validation throw (e.g. a row with no
+    // parentTreeId) lands in onError instead of escaping the click handler.
+    mutationFn: (buildPayload: () => PtValsCalcReqPayload) => postForCalculation(buildPayload()),
+    onError: (err: Error) => {
+      setIsCalculatingPt(false);
+      toast.error(
+        <ErrorToast title="Calculate metrics failed" subtitle={err.message} />,
+        ErrToastOption
+      );
+    },
     onSuccess: (res) => fillCalculatedInfo(
       res.data,
       genWorthInfoItems,
@@ -81,7 +93,7 @@ const CalculateMetrics = ({
         onClick={() => {
           setIsCalculatingPt(true);
           calculateGenWorthQuery.mutate(
-            generatePtValCalcPayload(
+            () => generatePtValCalcPayload(
               state,
               seedlotSpecies,
               getParentTreesForSelectedOrchards(

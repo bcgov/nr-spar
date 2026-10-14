@@ -1082,11 +1082,14 @@ export const getSeedlotSubmitErrDescription = (err: AxiosError): ErrorDescriptio
         title: 'Network error!',
         description: 'System is facing network issues at the moment. Please check your internet connection and retry. (Error code 503)'
       };
-    default:
+    default: {
+      // A payload validation Error has no status/code.
+      const code = err.response?.status ?? err.code;
       return {
         title: 'Unknown failure!',
-        description: `${err.message} (Error code ${err.response?.status ?? err.code})`
+        description: code ? `${err.message} (Error code ${code})` : err.message
       };
+    }
   }
 };
 
