@@ -137,6 +137,23 @@ describe('Germination keyboard entry (#2681)', () => {
     expect(navigateMock).not.toHaveBeenCalled();
   });
 
+  it('Alt+Y leaves after a failed edit is reverted, without saving again', async () => {
+    trayMock.mockResolvedValue([{ riaSkey: 123 }, { riaSkey: 456 }]);
+    putMock.mockRejectedValueOnce(new Error('boom'));
+    renderView();
+    const input = await screen.findByTestId('germ-count-1-1');
+    fireEvent.change(input, { target: { value: '5' } });
+    altY();
+    expect(await screen.findByText(/Failed to save germination counts/)).toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
+    const putCalls = putMock.mock.calls.length;
+    // Back to the last saved snapshot: nothing left to save, so the jump must go through.
+    fireEvent.change(input, { target: { value: '' } });
+    altY();
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith('/consep/germination-test/456'));
+    expect(putMock).toHaveBeenCalledTimes(putCalls);
+  });
+
   it('Alt+Y will not leave a test whose counts cannot be saved', async () => {
     trayMock.mockResolvedValue([{ riaSkey: 123 }, { riaSkey: 456 }]);
     renderView();

@@ -306,6 +306,11 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       return;
     }
     try {
+      // Clear the marker first: flush() skips the mutation when nothing differs
+      // from the last saved snapshot (e.g. the user reverted a failed edit), and
+      // a stale `true` would then block the jump with nothing left to save. A
+      // real retry failure sets it again inside onError before flush resolves.
+      lastSaveFailed.current = false;
       await flush();
       if (lastSaveFailed.current) {
         return;
