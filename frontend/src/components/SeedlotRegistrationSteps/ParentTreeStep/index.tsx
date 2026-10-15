@@ -58,7 +58,7 @@ import {
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
   addNewMixRow, calcMixTabInfoItems, fillMixTable,
   getParentTreesForSelectedOrchards,
-  areOrchardsValid, backfillParentTreeIds
+  areOrchardsValid, backfillParentTreeIds, hasUnresolvedParentTreeIds
 } from './utils';
 import EditGenWorth from './EditGenWorth';
 
@@ -179,6 +179,11 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     staleTime: THREE_HOURS, // will not refetch for 3 hours
     gcTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
+
+  // Keep Calculate disabled until the catalog is here and the pre-#2638 backfill has
+  // stamped every row the payload needs, otherwise a click surfaces a confusing
+  // "missing its parent tree id" error that resolves itself a second later.
+  const hasUnresolvedIds = !allParentTreeQuery.isFetched || hasUnresolvedParentTreeIds(state);
 
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -350,7 +355,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
             description="Recalculate values based on newly provided cone and pollen count data, overriding current entries"
           />
           <CalculateMetrics
-            disableOptions={disableOptions}
+            disableOptions={disableOptions || hasUnresolvedIds}
             setShowInfoSections={setShowInfoSections}
             isReview
           />
@@ -367,7 +372,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     const calculateButton = !isFormSubmitted
       ? (
         <CalculateMetrics
-          disableOptions={disableOptions}
+          disableOptions={disableOptions || hasUnresolvedIds}
           setShowInfoSections={setShowInfoSections}
         />
       )

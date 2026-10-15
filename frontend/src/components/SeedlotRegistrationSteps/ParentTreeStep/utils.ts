@@ -769,6 +769,18 @@ export const backfillParentTreeIds = (
   return changed ? { ...state, tableRowData, mixTabData } : null;
 };
 
+/**
+ * True while any row the calc/submit payload would send still has no parentTreeId
+ * (a legacy draft before backfill lands). Mirrors generatePtValCalcPayload: every
+ * main-table row needs an id, a mix row only once it names a parent tree.
+ */
+export const hasUnresolvedParentTreeIds = (state: ParentTreeStepDataObj): boolean => (
+  Object.values(state.tableRowData).some((row) => row.parentTreeId == null)
+  || Object.values(state.mixTabData).some(
+    (row) => !!row.parentTreeNumber.value && row.parentTreeId == null
+  )
+);
+
 export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
   seedlotSpecies: MultiOptionsObj,

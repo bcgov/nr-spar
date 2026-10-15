@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  backfillParentTreeIds, getRequiredParentTreeId
+  backfillParentTreeIds, getRequiredParentTreeId, hasUnresolvedParentTreeIds
 } from '../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { rowTemplate } from '../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { RowItem } from '../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
@@ -47,6 +47,20 @@ describe('backfillParentTreeIds', () => {
   it('returns null when nothing can be filled, so the effect does not loop', () => {
     expect(backfillParentTreeIds(stateWith({ 37: row('37', 1037) }), catalog)).toBeNull();
     expect(backfillParentTreeIds(stateWith({ 99: row('99') }), catalog)).toBeNull();
+  });
+});
+
+describe('hasUnresolvedParentTreeIds', () => {
+  it('is true while a main-table row has no id', () => {
+    expect(hasUnresolvedParentTreeIds(stateWith({ 37: row('37') }))).toBe(true);
+    expect(hasUnresolvedParentTreeIds(stateWith({ 37: row('37', null) }))).toBe(true);
+  });
+
+  it('ignores empty mix rows but not a named mix row without an id', () => {
+    const filled = { 37: row('37', 1037) };
+    expect(hasUnresolvedParentTreeIds(stateWith(filled, { 0: row('', null) }))).toBe(false);
+    expect(hasUnresolvedParentTreeIds(stateWith(filled, { 0: row('38', null) }))).toBe(true);
+    expect(hasUnresolvedParentTreeIds(stateWith(filled, { 0: row('38', 1038) }))).toBe(false);
   });
 });
 
