@@ -1,6 +1,6 @@
 import { Given, Then, When } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
-import { TYPE_DELAY } from '../../constants';
+import { HALF_SECOND, TYPE_DELAY } from '../../constants';
 
 const PARENT_TREE_COUNT = 6;
 const storedParentTrees = new Set<string>();
@@ -215,6 +215,8 @@ Then('the pollen error should be {string}', (text: string) => {
 
 // Step completion
 Then('the {string} progress step should be marked complete', (stepName: string) => {
+  cy.wait(HALF_SECOND);
+
   cy.contains(`.${prefix}--progress-step-button`, stepName)
     .find(`.${prefix}--assistive-text`)
     .should('contain.text', 'Complete');
