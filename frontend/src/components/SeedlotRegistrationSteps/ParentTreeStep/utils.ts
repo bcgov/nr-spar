@@ -286,7 +286,7 @@ export const processParentTreeData = (
       // Stamp identity from the live catalog once, at creation time. This is the only
       // place a *new* row should ever be resolved against Oracle - see ticket #2595.
       newRowData.parentTreeId = parentTree.parentTreeId;
-      newRowData.isTested = parentTree.testedInd;
+      newRowData.isTested = parentTree.testedInd ?? false;
 
       const genWorthBySpu = parentTree.geneticQualitiesBySpu;
 
