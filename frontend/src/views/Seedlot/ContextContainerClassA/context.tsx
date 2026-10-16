@@ -49,7 +49,7 @@ export type ClassAContextType = {
   progressStatus: ProgressIndicatorConfig,
   cleanParentTables: Function,
   submitSeedlot: UseMutationResult<
-    AxiosResponse<any, any>, unknown, SeedlotAClassSubmitType, unknown
+    AxiosResponse<any, any>, unknown, () => SeedlotAClassSubmitType, unknown
   >,
   getSeedlotPayload: (
     allStepData: AllStepData,
@@ -106,7 +106,7 @@ const ClassAContext = createContext<ClassAContextType>({
   progressStatus: {} as ProgressIndicatorConfig,
   cleanParentTables: () => { },
   submitSeedlot: {} as UseMutationResult<
-    AxiosResponse<any, any>, unknown, SeedlotAClassSubmitType, unknown
+    AxiosResponse<any, any>, unknown, () => SeedlotAClassSubmitType, unknown
   >,
   getSeedlotPayload: () => ({} as SeedlotAClassSubmitType),
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => { },
