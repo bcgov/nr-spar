@@ -84,7 +84,10 @@ When('I collapse parent tree accordion {int}', (index: number) => {
 });
 
 When('I enter {string} in parent tree field {string}', (value: string, field: string) => {
-  cy.get(`#212-${field}-value-input`).clear().type(value, { delay: TYPE_DELAY }).blur();
+  const selector = `#212-${field}-value-input`;
+  cy.get(selector).clear();
+  cy.get(selector).type(value, { delay: TYPE_DELAY });
+  cy.get(selector).blur();
 });
 
 Then('the parent tree validation message should be {string}', (message: string) => {
