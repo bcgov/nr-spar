@@ -123,6 +123,8 @@ Feature: A Class Seedlot Registration form, Step 4 Orchard
 
   Scenario: Orchard step is marked complete
     When I select primary orchard "219 - VERNON - S - PRD"
+    And I select female gametic contribution method "F2 - Measured Cone Volume"
+    And I select male gametic contribution method "M3 - Pollen Volume Estimate by 100% Survey"
     And I choose "yes" for pollen contaminant
     And I enter pollen breeding percentage "5"
     And I save the seedlot registration progress
