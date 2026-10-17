@@ -26,4 +26,3 @@ HEALTHCHECK CMD timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/8090'
 
 # Startup
 ENTRYPOINT ["/app/nr-spar-backend", "-Dspring.profiles.active=prod"]
-

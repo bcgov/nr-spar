@@ -26,4 +26,3 @@ RUN caddy fmt --overwrite /etc/caddy/Caddyfile
 EXPOSE 3000
 HEALTHCHECK CMD curl -f http://localhost:3000
 USER 1001
-
