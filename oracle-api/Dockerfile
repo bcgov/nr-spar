@@ -30,3 +30,4 @@ HEALTHCHECK CMD curl -f http://localhost:8091/actuator/health | grep '"status":"
 
 # Start
 ENTRYPOINT ["/app/nr-spar-oracle-api", "-Dspring.profiles.active=prod"]
+
