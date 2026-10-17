@@ -28,16 +28,19 @@ When('I delete SMP mix row {string}', (row: string) => {
 
 When('I open the SMP mix table options', () => {
   cy.get('#parentTreeNumber').scrollIntoView();
-  mixTableOptions().click();
+  mixTableOptions().click({ force: true });
 });
 
 When('I download the SMP mix template', () => {
-  cy.get('ul.parent-tree-table-option-menu').find('li').contains('Download table template').click();
+  cy.get('ul.parent-tree-table-option-menu')
+    .find('li')
+    .contains('Download table template').click();
   cy.readFile(`${Cypress.config('downloadsFolder')}/SMP_Mix_Volume_template.csv`);
 });
 
 When('I cancel cleaning the SMP mix table', () => {
-  mixTableOptions().click();
+  cy.get('#parentTreeNumber').scrollIntoView();
+  mixTableOptions().click({ force: true });
   cy.get('ul.parent-tree-table-option-menu').find('li').contains('Clean table data').click();
   cleanTableModal()
     .should('be.visible')
@@ -48,8 +51,12 @@ When('I cancel cleaning the SMP mix table', () => {
 });
 
 When('I clean the SMP mix table', () => {
-  mixTableOptions().click();
-  cy.get('ul.parent-tree-table-option-menu').find('li').contains('Clean table data').click();
+  cy.get('#parentTreeNumber').scrollIntoView();
+  mixTableOptions().click({ force: true });
+  cy.get('ul.parent-tree-table-option-menu')
+    .find('li')
+    .contains('Clean table data')
+    .click();
   cleanTableModal().find('button').contains('Clean table data').click();
 });
 
@@ -59,14 +66,20 @@ Then('SMP mix volumes in rows {string} and {string} should be empty', (first: st
 });
 
 When('I cancel the SMP mix CSV upload', () => {
-  cy.get('button.upload-button').click();
+  cy.get('button.upload-button')
+    .scrollIntoView()
+    .click({ force: true });
   registrationModal().should('be.visible');
-  cy.get('button').contains('Cancel').click();
+  cy.get('button')
+    .contains('Cancel')
+    .click();
   registrationModal().should('not.be.visible');
 });
 
 When('I import SMP mix CSV file {string}', (fileName: string) => {
-  cy.get('button.upload-button').click();
+  cy.get('button.upload-button')
+    .scrollIntoView()
+    .click({ force: true });
   registrationModal().should('be.visible');
   cy.get(`.${prefix}--file`)
     .find(`input.${prefix}--file-input`)

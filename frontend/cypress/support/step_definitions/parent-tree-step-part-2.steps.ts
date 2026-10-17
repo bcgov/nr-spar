@@ -110,19 +110,26 @@ Then('the SMP success and pollen contamination values for parent trees {string} 
 });
 
 When('I cancel the SMP success CSV upload', () => {
-  cy.get('button.upload-button').click();
+  cy.get('button.upload-button')
+    .scrollIntoView()
+    .click({ force: true });
   registrationModal().should('be.visible');
-  cy.get('button').contains('Cancel').click();
+  cy.get('button')
+    .contains('Cancel').click();
   registrationModal().should('not.be.visible');
 });
 
 When('I import SMP success CSV file {string}', (fileName: string) => {
-  cy.get('button.upload-button').click();
+  cy.get('button.upload-button')
+    .scrollIntoView()
+    .click({ force: true });
   registrationModal().should('be.visible');
   cy.get(`.${prefix}--file`)
     .find(`input.${prefix}--file-input`)
     .selectFile(`cypress/fixtures/${fileName}`, { force: true });
-  cy.get('button').contains('Import file and continue').click();
+  cy.get('button')
+    .contains('Import file and continue')
+    .click();
 });
 
 Then('parent tree {string} should have SMP success {string} and pollen contamination {string}', (number: string, success: string, pollen: string) => {
