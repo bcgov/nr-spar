@@ -10,8 +10,8 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 2
 		And I open the "SMP success on parent" tab
 
 	Scenario: SMP success table heading
-		Then the SMP success table heading should be "SMP success on parent"
-		And the SMP success table subtitle should be "Enter the SMP success estimate for the orchard's seedlot"
+		Then the parent tree table heading should be "SMP success on parent"
+		And the parent tree table subtitle should be "Enter the SMP success estimate for the orchard's seedlot"
 
 	Scenario: Shared default values are off by default
 		Then the shared SMP default label should be "Enter the same SMP success on parent or non-orchard pollen contaminant to all parent trees"
@@ -22,7 +22,7 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 2
 	Scenario Outline: Reject invalid shared SMP defaults
 		When I enable shared SMP defaults
 		And I enter "<value>" into the shared "<field>" default
-		Then the shared SMP default error should be "<message>"
+		Then the parent tree validation message should be "<message>"
 
 		Examples:
 			| field          | value | message                                     |
@@ -37,7 +37,7 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 2
 		When I enable shared SMP defaults
 		And I set the shared "smp-success" default to "5"
 		And I set the shared "pollen-contam" default to "2"
-		Then the shared SMP default error should be cleared
+		Then the parent tree validation message should be cleared
 		And the first five parent trees should have SMP success "5" and pollen contamination "2"
 		When I set parent tree "212" SMP success and pollen contamination to "0"
 		Then parent tree "212" should have SMP success "0" and pollen contamination "0"
@@ -53,13 +53,13 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 2
 		Then parent tree column "gvo" should be visible
 
 	Scenario: Clean the SMP success table and import a CSV file
-		When I open the SMP success table options
-		And I download the SMP success table template
-		And I cancel cleaning the SMP success table
-		And I clean the SMP success table
+		When I open parent tree table options
+		And I download the parent tree table template as "Seedlot_composition_template.csv"
+		And I cancel cleaning the parent tree table
+		And I clean the parent tree table
 		Then the SMP success and pollen contamination values for parent trees "212" and "219" should be empty
-		When I cancel the SMP success CSV upload
-		And I import SMP success CSV file "Seedlot_composition_template_02.csv"
+		When I cancel the parent tree CSV upload
+		And I import parent tree CSV file "Seedlot_composition_template_02.csv"
 		Then parent tree "212" should have SMP success "1" and pollen contamination "46"
 		And parent tree "219" should have SMP success "2" and pollen contamination "22"
 

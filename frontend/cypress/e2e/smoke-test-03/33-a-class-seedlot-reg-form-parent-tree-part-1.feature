@@ -15,8 +15,8 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 1
 	Scenario: Page title and cone and pollen section headings
 		Then the parent tree page title should be "Cone and pollen count and SMP data"
 		And the parent tree page subtitle should be "Enter cone and pollen count (*required), SMP success on parent and SMP mix information"
-		And the cone and pollen table heading should be "Cone and pollen count"
-		And the cone and pollen table subtitle should be "Enter the cone and pollen count estimate for the orchard's seedlot (*required)"
+		And the parent tree table heading should be "Cone and pollen count"
+		And the parent tree table subtitle should be "Enter the cone and pollen count estimate for the orchard's seedlot (*required)"
 
 	Scenario: Download templates and collapse each accordion
 		Then the parent tree accordion should be visible
@@ -52,7 +52,7 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 1
 		And I enter "1" in parent tree field "pollenCount"
 		Then the parent tree validation message should be cleared
 		When I clear the cone and pollen count fields for parent tree "212"
-		Then the parent tree validation message should not be visible
+		Then the parent tree validation message should be cleared
 		And I save the seedlot registration progress
 
 	Scenario Outline: Show parent tree columns
@@ -69,7 +69,7 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 1
 
 	Scenario: Clean the count table and import the CSV template
 		When I open parent tree table options
-		And I download the parent tree table template
+		And I download the parent tree table template as "Seedlot_composition_template.csv"
 		And I enter sample values into cone and pollen counts
 		And I cancel cleaning the parent tree table
 		And I clean the parent tree table

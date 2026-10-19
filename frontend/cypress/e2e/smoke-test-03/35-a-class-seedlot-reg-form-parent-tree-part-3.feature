@@ -10,8 +10,8 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 3
 		And I open the "Calculation of SMP mix" tab
 
 	Scenario: Calculation of SMP mix title and subtitle
-		Then the SMP mix table heading should be "Calculation of SMP mix"
-		And the SMP mix table subtitle should be "Enter the estimative volume of SMP mix used for each clone"
+		Then the parent tree table heading should be "Calculation of SMP mix"
+		And the parent tree table subtitle should be "Enter the estimative volume of SMP mix used for each clone"
 
 	Scenario: Add and delete rows
 		Then the SMP mix table should contain "20 items"
@@ -33,35 +33,35 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 3
 		Then parent tree column "gvo" should be visible
 
 	Scenario: Download, clean, and import SMP mix data
-		When I open the SMP mix table options
-		And I download the SMP mix template
-		And I cancel cleaning the SMP mix table
-		And I clean the SMP mix table
+		When I open parent tree table options
+		And I download the parent tree table template as "SMP_Mix_Volume_template.csv"
+		And I cancel cleaning the parent tree table
+		And I clean the parent tree table
 		Then SMP mix volumes in rows "0" and "1" should be empty
-		When I cancel the SMP mix CSV upload
-		And I import SMP mix CSV file "Seedlot_composition_template_03.csv"
+		When I cancel the parent tree CSV upload
+		And I import parent tree CSV file "Seedlot_composition_template_03.csv"
 		Then SMP mix row "0" should contain parent tree "212" with volume "4"
 		And SMP mix row "1" should contain parent tree "222" with volume "7"
 		And I save the seedlot registration progress
 
 	Scenario: Reject invalid and duplicate parent tree numbers
-		When I clean the SMP mix table
+		When I clean the parent tree table
 		And I enter "5" in SMP mix field "parentTreeNumber" at row 0
-		Then the SMP mix validation error should be "Invalid parent tree number entries"
+		Then the parent tree validation message should be "Invalid parent tree number entries"
 		When I enter "212" in SMP mix field "parentTreeNumber" at row 0
-		Then the SMP mix validation error should be cleared
+		Then the parent tree validation message should be cleared
 		When I enter "212" in SMP mix field "parentTreeNumber" at row 1
-		Then the SMP mix validation error should be "Invalid parent tree number entries"
+		Then the parent tree validation message should be "Invalid parent tree number entries"
 		When I enter "222" in SMP mix field "parentTreeNumber" at row 1
-		Then the SMP mix validation error should be cleared
+		Then the parent tree validation message should be cleared
 		And I save the seedlot registration progress
 
 	Scenario Outline: Reject invalid SMP mix volumes
-		When I clean the SMP mix table
+		When I clean the parent tree table
 		And I enter "<value>" in SMP mix field "volume" at row 0
-		Then the SMP mix validation error should be "Invalid volume (ml) entries"
+		Then the parent tree validation message should be "Invalid volume (ml) entries"
 		When I enter "0" in SMP mix field "volume" at row 0
-		Then the SMP mix validation error should be cleared
+		Then the parent tree validation message should be cleared
 		And I save the seedlot registration progress
 
 		Examples:
@@ -71,7 +71,7 @@ Feature: A Class Seedlot Registration form, Parent Tree and SMP part 3
 			| 1000000 |
 
 	Scenario: Calculate SMP mix proportions
-		When I clean the SMP mix table
+		When I clean the parent tree table
 		And I enter "1" in SMP mix field "volume" at row 0
 		Then SMP mix row "0" should have proportion "1.0000"
 		When I enter "1" in SMP mix field "volume" at row 1
