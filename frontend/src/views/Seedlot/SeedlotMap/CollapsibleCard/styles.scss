@@ -1,0 +1,56 @@
+@use '@carbon/type';
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+
+// Floating overlay card used on top of the Leaflet map. The wrapper in
+// `SeedlotMap/styles.scss` positions the card inside `.seedlot-map-workspace`
+// — this file only defines the card's own visual chrome.
+.collapsible-card {
+  background: colors.$white;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.12);
+  border: 1px solid colors.$gray-20;
+  overflow: hidden;
+
+  &__header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0.625rem;
+    background: colors.$white;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    min-height: 2rem;
+
+    &:hover {
+      background: colors.$gray-10;
+    }
+
+    &:focus-visible {
+      outline: 2px solid colors.$blue-60;
+      outline-offset: -2px;
+    }
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
+    }
+  }
+
+  &__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: colors.$gray-100;
+    line-height: 1.2;
+  }
+
+  &__body {
+    padding: 0.5rem 0.625rem 0.625rem;
+    border-top: 1px solid colors.$gray-20;
+    max-height: 260px;
+    overflow-y: auto;
+    font-size: 0.75rem;
+  }
+}
