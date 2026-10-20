@@ -6,7 +6,7 @@
 
   h3 {
     @include type.type-style('heading-03');
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .daily-germ-errors p {
@@ -38,8 +38,8 @@
       @include type.font-family('sans');
       display: flex;
       flex-direction: column;
-      // Right-aligned to match the day number and the counts below it.
-      align-items: flex-end;
+      // Left-aligned to match the day number and the counts below it.
+      align-items: flex-start;
       width: 100%;
       padding: 0.125rem 0;
       border: 1px solid transparent;
@@ -73,10 +73,17 @@
 }
 
 .consep-germination-content {
-  padding: 2rem;
+  // Kept tight: the page still has to fit the result figures above the tables
+  // and the action buttons below them.
+  padding: 1rem 2rem 2rem;
 
   .consep-germination-content-summary {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  // A slimmer banner than SummaryGrid's default.
+  .activity-summary {
+    margin: 0.5rem 1rem;
   }
 
   // SummaryGrid defaults to a label-beside-value row; the germination summary
@@ -86,10 +93,15 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
+
+    // SummaryGrid centres the value; here it lines up under its label.
+    .activity-summary-info-value {
+      align-self: flex-start;
+    }
   }
 
   .consep-germination-content-table {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
   }
 }
 
@@ -121,11 +133,10 @@
 
 .abnormals-table-container {
   width: 100%;
-  margin-top: 2rem;
 
   h3 {
     @include type.type-style('heading-03');
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   // The count day the table belongs to, beside the heading rather than above
