@@ -538,7 +538,12 @@ public class ActivityService {
   @Transactional
   public ActivitySearchResponseDto copyGerminationTestResults(
       BigDecimal sourceRiaKey, CopyGerminationTestResultsDto target) {
-    ActivityEntity source = activityRepository.findById(sourceRiaKey)
+    // Locking the source serializes concurrent copies of this test: the second waits for the
+    // first to commit, then its duplicate check sees the first copy and returns 409.
+    // ponytail: copies of *different* source tests that happen to share the same standard
+    // activity and begin/end onto one target are not serialized; a unique constraint on the
+    // CONSEP table would be needed for that.
+    ActivityEntity source = activityRepository.findByIdForUpdate(sourceRiaKey)
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND, "No activity found for RIA_SKEY: " + sourceRiaKey));
     TestResultEntity sourceResult = testResultRepository.findById(sourceRiaKey)
