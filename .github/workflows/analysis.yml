@@ -18,7 +18,7 @@ permissions: {}
 jobs:
   lint:
     name: Typescript lint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: bcgov/action-test-and-analyse@8f699e3fd3fadd9a6adf6f4b1f2638ef7ecfefb9 # v2.0.0
         with:
@@ -31,7 +31,7 @@ jobs:
   tests-backend:
     name: Backend Java CI
     if: (! github.event.pull_request.draft)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: bcgov/action-test-and-analyse-java@7c7309721cae054b3e837c723afa4efb4b1a256d # v1.1.0
         with:
@@ -49,7 +49,7 @@ jobs:
   tests-oracle-api:
     name: Oracle API Java CI
     if: (! github.event.pull_request.draft)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: bcgov/action-test-and-analyse-java@7c7309721cae054b3e837c723afa4efb4b1a256d # v1.1.0
         with:
@@ -69,7 +69,7 @@ jobs:
     if: (! github.event.pull_request.draft)
     permissions:
       security-events: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - name: Run Trivy vulnerability scanner in repo mode
@@ -96,7 +96,7 @@ jobs:
     name: Analysis Results
     needs: [lint, tests-backend, tests-oracle-api, trivy]
     if: always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 1
     steps:
       - uses: bcgov/actions/workflow-results@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
