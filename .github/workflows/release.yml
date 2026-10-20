@@ -19,7 +19,7 @@ jobs:
     name: Set Variables
     outputs:
       pr: ${{ steps.pr.outputs.pr }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 1
     steps:
       # Get PR number for the last merged PR
@@ -28,7 +28,7 @@ jobs:
         uses: bcgov/action-get-pr@28b0adf8e4d40720d41f9c87356ce24b0a4bd6af # v0.3.1
 
   semantic-release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [vars]
     permissions:
       contents: write
@@ -145,7 +145,7 @@ jobs:
     needs: [vars, deploys-prod]
     permissions:
       packages: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         package: [backend, frontend, oracle-api]
