@@ -502,7 +502,10 @@ const ContextContainerClassA = ({ children }: props) => {
   };
   const queryClient = useQueryClient();
   const submitSeedlot = useMutation({
-    mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
+    // Payload is built here so a validation throw surfaces as submitSeedlot.error.
+    mutationFn: (buildPayload: () => SeedlotAClassSubmitType) => (
+      putAClassSeedlot(seedlotNumber ?? '', buildPayload())
+    ),
     onSuccess: async () => {
       queryClient.removeQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });

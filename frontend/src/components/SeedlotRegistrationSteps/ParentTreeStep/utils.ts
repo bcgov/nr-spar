@@ -286,7 +286,7 @@ export const processParentTreeData = (
       // Stamp identity from the live catalog once, at creation time. This is the only
       // place a *new* row should ever be resolved against Oracle - see ticket #2595.
       newRowData.parentTreeId = parentTree.parentTreeId;
-      newRowData.isTested = parentTree.testedInd;
+      newRowData.isTested = parentTree.testedInd ?? false;
 
       const genWorthBySpu = parentTree.geneticQualitiesBySpu;
 
@@ -732,11 +732,54 @@ export const fillCalculatedInfo = (
  * work. See ticket #2595.
  */
 export const getRequiredParentTreeId = (row: RowItem): number => {
-  if (row.parentTreeId === null) {
+  // `== null` also catches rows where the key is absent: JSON.stringify drops undefined,
+  // so the backend would receive null and fail with a 500.
+  if (row.parentTreeId == null) {
     throw new Error(`Parent tree "${row.parentTreeNumber.value}" is missing its parent tree id.`);
   }
   return row.parentTreeId;
 };
+
+/**
+ * Drafts saved before the parentTreeId stamp existed (#2638) hydrate rows with no
+ * parentTreeId at all, and the table is never rebuilt once it has rows. Fill only the
+ * missing ids from the catalog; stamped rows are left alone.
+ * Returns null when there is nothing to fill.
+ */
+export const backfillParentTreeIds = (
+  state: ParentTreeStepDataObj,
+  allParentTreeData: ParentTreeByVegCodeResType
+): ParentTreeStepDataObj | null => {
+  let changed = false;
+  const fill = (rows: RowDataDictType): RowDataDictType => {
+    const filled: RowDataDictType = {};
+    Object.entries(rows).forEach(([key, row]) => {
+      const catalogId = allParentTreeData[row.parentTreeNumber.value]?.parentTreeId;
+      if (row.parentTreeId == null && catalogId != null) {
+        filled[key] = { ...row, parentTreeId: catalogId };
+        changed = true;
+      } else {
+        filled[key] = row;
+      }
+    });
+    return filled;
+  };
+  const tableRowData = fill(state.tableRowData);
+  const mixTabData = fill(state.mixTabData);
+  return changed ? { ...state, tableRowData, mixTabData } : null;
+};
+
+/**
+ * True while any row the calc/submit payload would send still has no parentTreeId
+ * (a legacy draft before backfill lands). Mirrors generatePtValCalcPayload: every
+ * main-table row needs an id, a mix row only once it names a parent tree.
+ */
+export const hasUnresolvedParentTreeIds = (state: ParentTreeStepDataObj): boolean => (
+  Object.values(state.tableRowData).some((row) => row.parentTreeId == null)
+  || Object.values(state.mixTabData).some(
+    (row) => !!row.parentTreeNumber.value && row.parentTreeId == null
+  )
+);
 
 export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
