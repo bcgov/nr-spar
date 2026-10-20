@@ -25,11 +25,11 @@ jobs:
       fail-fast: false
       matrix:
         test_folder: [
+          smoke-test-00,
           smoke-test-01,
           smoke-test-02,
           smoke-test-03,
-          smoke-test-04,
-          smoke-test-05
+          smoke-test-04
         ]
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
@@ -73,7 +73,7 @@ jobs:
             -Dsonar.projectKey=nr-spar_frontend
             -Dsonar.sources=src/
             -Dsonar.exclusions=src/__test__/**/*,src/mock-server/**/*
-            -Dsonar.test.inclusions=cypress/e2e/smoke-test-01/**/*,cypress/e2e/smoke-test-02/**/*,cypress/e2e/smoke-test-03/**/*,cypress/e2e/smoke-test-04/**/*,cypress/e2e/smoke-test-05/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test-00/**/*,cypress/e2e/smoke-test-01/**/*,cypress/e2e/smoke-test-02/**/*,cypress/e2e/smoke-test-03/**/*,cypress/e2e/smoke-test-04/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
 
       - name: Upload videos
