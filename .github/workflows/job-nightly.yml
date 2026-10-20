@@ -15,7 +15,7 @@ jobs:
     environment: test
     name: Database Backup (TEST)
     continue-on-error: true # Tests still run after; failures surfaced by results job
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
@@ -29,7 +29,7 @@ jobs:
     environment: prod
     name: Database Backup (PROD)
     continue-on-error: false
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
@@ -46,7 +46,7 @@ jobs:
       # https://tecadmin.net/getting-yesterdays-date-in-bash/
       DATE: "4 days ago"
       TYPE: "deployments"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: redhat-actions/openshift-tools-installer@37eb3cfb20ac2df6f0511ffa71cd917e4d49cabf # v3
@@ -76,7 +76,7 @@ jobs:
     needs: [tests]
     permissions:
       issues: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
@@ -100,7 +100,7 @@ jobs:
     name: Results
     needs: [db-bk-test, db-bk-prod, age-out-prs, tests, zap_scan]
     if: always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 1
     steps:
       - uses: bcgov/actions/workflow-results@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
