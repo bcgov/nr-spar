@@ -1,6 +1,5 @@
 import React, {
-  useState, useRef, useContext,
-  useEffect
+  useState, useRef, useContext
 } from 'react';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -55,7 +54,6 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
   } = useContext(ClassAContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
-  const [originalSeedQty, setOriginalSeedQty] = useState<number>(0);
 
   const refControl = useRef<any>({});
 
@@ -115,11 +113,11 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
     }))
   });
 
-  useEffect(() => {
-    if (getSeedlotBySeedlotNumberQuery.status === 'success') {
-      setOriginalSeedQty(getSeedlotBySeedlotNumberQuery.data.data.originalSeedQty);
-    }
-  }, [getSeedlotBySeedlotNumberQuery.status, getSeedlotBySeedlotNumberQuery.fetchStatus]);
+  const originalSeedQty = getSeedlotBySeedlotNumberQuery.data?.data?.originalSeedQty ?? 0;
+  // The query is disabled off the review screen, so only wait for it there.
+  // A disabled query never becomes successful and would lock the wizard.
+  const seedQtyPending = isReview && !getSeedlotBySeedlotNumberQuery.isSuccess;
+  const ownershipLocked = seedQtyPending || originalSeedQty > 0;
 
   const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
 
@@ -189,7 +187,7 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
-                  readOnly={isFormSubmitted || originalSeedQty > 0}
+                  readOnly={(isFormSubmitted && !isReview) || ownershipLocked}
                   isReview={isReview}
                 />
               </AccordionItem>
@@ -205,7 +203,7 @@ const OwnershipStep = ({ isReview = false }: OwnershipStepProps) => {
                 className="owner-add-btn"
                 renderIcon={Add}
                 onClick={addAnOwner}
-                disabled={originalSeedQty > 0}
+                disabled={ownershipLocked}
               >
                 Add owner
               </Button>
