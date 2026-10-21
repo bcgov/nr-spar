@@ -1,6 +1,5 @@
 import React, {
-  useState, useRef, useContext,
-  useEffect
+  useState, useRef, useContext
 } from 'react';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
