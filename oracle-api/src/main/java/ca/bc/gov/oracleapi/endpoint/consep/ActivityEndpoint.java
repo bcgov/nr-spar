@@ -3,6 +3,7 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.CopyGerminationTestResultsDto;
 import ca.bc.gov.oracleapi.dto.consep.RequestSeedlotValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
@@ -15,11 +16,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -156,5 +159,34 @@ public class ActivityEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<StandardActivityDto> getGerminationTestTypes() {
     return activityService.getGerminationTestTypes();
+  }
+
+  /**
+   * Copies a germination test's results to a new germination test for another seedlot/request.
+   *
+   * @param riaKey the germination test being copied
+   * @param target the seedlot and request being copied to
+   * @return the new activity
+   */
+  @PostMapping("/{riaKey}/copy-results")
+  @ResponseStatus(HttpStatus.CREATED)
+  @ApiResponse(
+      responseCode = "201",
+      description = "Successfully copied the germination test results.",
+      content = @Content(schema = @Schema(implementation = ActivitySearchResponseDto.class))
+  )
+  @ApiResponse(
+      responseCode = "400",
+      description = "The test cannot be copied, or the target is not a usable request seedlot."
+  )
+  @ApiResponse(responseCode = "404", description = "The test being copied does not exist.")
+  @ApiResponse(responseCode = "409", description = "The target already has this test.")
+  @ApiAuthResponse
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public ActivitySearchResponseDto copyGerminationTestResults(
+      @PathVariable BigDecimal riaKey,
+      @Valid @RequestBody CopyGerminationTestResultsDto target
+  ) {
+    return activityService.copyGerminationTestResults(riaKey, target);
   }
 }
