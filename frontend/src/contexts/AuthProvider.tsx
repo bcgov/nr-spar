@@ -19,6 +19,7 @@ import AuthContext, { AuthContextData } from './AuthContext';
 import { MINISTRY_OF_FOREST_ID, SPAR_REDIRECT_PATH, TSC_ADMIN_ROLE } from '../shared-constants/shared-constants';
 import { TWO_MINUTE } from '../config/TimeUnits';
 import ROUTES from '../routes/constants';
+import { buildFederatedLogoutUrl } from '../aws-exports';
 
 interface Props {
   children: React.ReactNode;
@@ -234,6 +235,17 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const signOut = (): void => {
+    const chainUrl = buildFederatedLogoutUrl(provider);
+    if (chainUrl) {
+      // Amplify keeps its tokens in localStorage, so clearing it signs the app out locally; the
+      // chain ends Siteminder, Keycloak and Cognito. No state reset: the page is unloading.
+      if (intervalInstance) {
+        clearInterval(intervalInstance);
+      }
+      localStorage.clear();
+      window.location.assign(chainUrl);
+      return;
+    }
     awsSignOut()
       .then(() => {
         setSelectedClientRoles(null);
