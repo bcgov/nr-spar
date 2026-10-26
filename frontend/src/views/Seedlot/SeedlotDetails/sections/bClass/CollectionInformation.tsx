@@ -34,7 +34,7 @@ const CollectionInformation = ({
   const clientNumber = seedlot.collectionClientNumber;
 
   const agencyQuery = useQuery({
-    queryKey: ['forest-clients', 'collection', clientNumber],
+    queryKey: ['forest-clients', clientNumber],
     queryFn: () => getForestClientByNumberOrAcronym(clientNumber),
     enabled: !!clientNumber,
     select: (fc) => getForestClientLabel(fc)

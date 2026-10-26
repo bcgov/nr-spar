@@ -27,7 +27,12 @@ import { getSeedlotSubmitErrDescription } from '../ContextContainerClassA/utils'
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getSeedlotBreadcrumbs } from '../../../utils/BreadcrumbUtils';
 import ROUTES from '../../../routes/constants';
-import { completeProgressConfig, smartSaveText } from '../ContextContainerClassB/constants';
+import { completeProgressConfig, smartSaveText, stepMap } from '../ContextContainerClassB/constants';
+import {
+  getStepSubmitErrDescription,
+  groupSubmitFieldErrorsByStep,
+  withSubmitFieldErrors
+} from '../ContextContainerClassB/utils';
 
 import './styles.scss';
 
@@ -65,6 +70,13 @@ const RegPage = () => {
     || !seedlotData
     || (seedlotData.seedlotStatus.seedlotStatusCode !== 'PND'
     && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC');
+
+  const submitError = submitSeedlot.isError ? (submitSeedlot.error as AxiosError) : null;
+  const submitFieldErrors = groupSubmitFieldErrorsByStep(submitError);
+  let submitErrDescription = submitError ? getSeedlotSubmitErrDescription(submitError) : null;
+  if (submitFieldErrors) {
+    submitErrDescription = getStepSubmitErrDescription(submitFieldErrors, stepMap[formStep]);
+  }
 
   return (
     <div className="seedlot-registration-page">
@@ -129,7 +141,7 @@ const RegPage = () => {
                   progressStatus={
                 seedlotData.seedlotStatus.seedlotStatusCode === 'PND'
                 || seedlotData.seedlotStatus.seedlotStatusCode === 'INC'
-                  ? progressStatus
+                  ? withSubmitFieldErrors(progressStatus, submitFieldErrors)
                   : completeProgressConfig
               }
                   interactFunction={(e: number) => {
@@ -143,20 +155,15 @@ const RegPage = () => {
           </Column>
         </Row>
         {
-          submitSeedlot.isError
+          submitErrDescription
             ? (
               <Row>
                 <Column>
                   <InlineNotification
                     lowContrast
                     kind="error"
-                    title={
-                      getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError)).title
-                    }
-                    subtitle={
-                      getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError))
-                        .description
-                    }
+                    title={submitErrDescription.title}
+                    subtitle={submitErrDescription.description}
                   />
                 </Column>
               </Row>

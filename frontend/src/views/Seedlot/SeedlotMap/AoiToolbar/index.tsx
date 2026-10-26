@@ -1,5 +1,5 @@
 import React, { useRef, useState, type FormEvent } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { IconButton, InlineNotification, ActionableNotification } from '@carbon/react';
 import {
   Draw,
@@ -48,6 +48,7 @@ import ExportMenu from './ExportMenu';
 import { LoadingMask } from './LoadingMask';
 import LayerCatalogModal from '../LayerCatalogModal';
 import HelpModal from '../HelpModal';
+import RemoveCollectionAreaModal from '../../../../components/SeedlotRegistrationSteps/BClassCollectionStep/RemoveCollectionAreaModal';
 
 /**
  * Native `<input accept>` list. Extensions plus common MIME types so
@@ -175,6 +176,7 @@ const AoiToolbar = ({
     legendData
   } = useSparMap();
   const navigate = useNavigate();
+  const location = useLocation();
   // When the map is launched from a form with `returnTo`, Submit hands the
   // collection-area summary back via router state for draft persistence.
   const [searchParams] = useSearchParams();
@@ -216,6 +218,18 @@ const AoiToolbar = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const hasAoi = aois.length > 0;
+  // `returnTo` only signals a wizard launch; never navigate to its value.
+  const cameFromRegistration = searchParams.has('returnTo');
+  const openedWithSavedArea = Boolean(
+    (location.state as { initialAoiGeoJson?: string } | null)?.initialAoiGeoJson
+  );
+  const canRemoveSavedArea = !hasAoi && cameFromRegistration && openedWithSavedArea;
+  const [isRemoveAreaOpen, setIsRemoveAreaOpen] = useState(false);
+
+  const returnToRegistration = (state: unknown) => navigate(
+    `${addParamToPath(ROUTES.SEEDLOT_B_CLASS_REGISTRATION, seedlotNumber)}?step=1`,
+    { state }
+  );
 
   // Exiting identify mode when the user switches to a drawing/edit/measure
   // tool keeps the mode mental model simple: only one tool active at a
@@ -390,6 +404,15 @@ const AoiToolbar = ({
       } else {
         highlightBecZones([]);
       }
+    } catch (error) {
+      highlightBecZones([]);
+      setValidation({
+        kind: 'error',
+        title: 'Validation failed',
+        subtitle: error instanceof Error
+          ? error.message
+          : 'Unable to validate the polygon. Try again.'
+      });
     } finally {
       setIsValidating(false);
     }
@@ -428,9 +451,6 @@ const AoiToolbar = ({
 
     // Standalone map (no registration return path): validate only. Geometry is
     // persisted on B-class form submission via axios PUT .../b-class-submission.
-    // `returnTo` in the query string is only a signal that we were launched
-    // from the wizard — never navigate to its value (open redirect risk).
-    const cameFromRegistration = searchParams.has('returnTo');
     if (!cameFromRegistration) {
       setValidation({
         kind: 'success',
@@ -460,21 +480,15 @@ const AoiToolbar = ({
     } finally {
       setIsValidating(false);
     }
-    // Same path the wizard builds when launching SeedMap — not the query param.
-    navigate(
-      `${addParamToPath(ROUTES.SEEDLOT_B_CLASS_REGISTRATION, seedlotNumber)}?step=1`,
-      {
-        state: {
-          collectionAreaResult: result,
-          collectionAreaSummary: {
-            polygonCount: aois.length,
-            areaHectares: result.areaHectares,
-            becZones: becCheck.becZones,
-            savedAt: new Date().toISOString()
-          }
-        }
+    returnToRegistration({
+      collectionAreaResult: result,
+      collectionAreaSummary: {
+        polygonCount: aois.length,
+        areaHectares: result.areaHectares,
+        becZones: becCheck.becZones,
+        savedAt: new Date().toISOString()
       }
-    );
+    });
   };
 
   /**
@@ -720,11 +734,13 @@ const AoiToolbar = ({
               <CheckmarkFilled />
             </IconButton>
             <IconButton
-              label="Apply collection area to registration form"
+              label={canRemoveSavedArea
+                ? 'Remove collection area from registration form'
+                : 'Apply collection area to registration form'}
               align="bottom"
               kind="ghost"
-              onClick={onSubmit}
-              disabled={!hasAoi || isValidating}
+              onClick={canRemoveSavedArea ? () => setIsRemoveAreaOpen(true) : onSubmit}
+              disabled={(!hasAoi && !canRemoveSavedArea) || isValidating}
               data-testid="aoi-submit"
             >
               <Save />
@@ -1129,6 +1145,14 @@ const AoiToolbar = ({
         onClose={() => setCatalogOpen(false)}
       />
       <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <RemoveCollectionAreaModal
+        open={isRemoveAreaOpen}
+        onClose={() => setIsRemoveAreaOpen(false)}
+        onConfirm={() => {
+          setIsRemoveAreaOpen(false);
+          returnToRegistration({ collectionAreaCleared: true });
+        }}
+      />
       {/*
         Loading mask — legacy aoi_panel parity while validate / derive is in flight.
       */}

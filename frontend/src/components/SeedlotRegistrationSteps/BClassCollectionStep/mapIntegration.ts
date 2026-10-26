@@ -3,6 +3,7 @@ import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import type { CollectionAreaResult } from '../../../types/SparMapTypes';
 import { BecCatalogueItem } from '../../../api-service/becCatalogueAPI';
 import { BClassCollectionForm } from './definitions';
+import { initBClassCollectionState } from './utils';
 
 interface Dms {
   deg: string;
@@ -87,20 +88,6 @@ const findVariant = (
   };
 };
 
-/**
- * Approximate a circular collection radius (km) from the polygon area.
- * The form's radius is a coarse operator aid, so an equivalent-area
- * circle is a reasonable auto-fill the operator can override.
- */
-const radiusKmFromHectares = (hectares: number): string => {
-  if (!hectares || hectares <= 0) {
-    return '';
-  }
-  const areaSqm = hectares * 10000;
-  const radiusM = Math.sqrt(areaSqm / Math.PI);
-  return String(Math.round((radiusM / 1000) * 10) / 10);
-};
-
 /* eslint-disable no-param-reassign -- helpers mutate a structuredClone of form state */
 const applyLatLong = (next: BClassCollectionForm, result: CollectionAreaResult): void => {
   if (result.meanLat != null) {
@@ -183,9 +170,11 @@ export const applyCollectionAreaResult = (
   applyLatLong(next, result);
   applyElevation(next, result);
 
-  const radius = radiusKmFromHectares(result.areaHectares);
-  if (radius) {
-    next.collectionRadius.value = radius;
+  // Already measured as half the longest distance across the area, and already
+  // validated against the form's maximum, so it transfers as-is.
+  if (result.radiusKm > 0) {
+    next.collectionRadius.value = String(result.radiusKm);
+    next.collectionRadius.isInvalid = false;
   }
 
   applyBec(next, result, becCatalogue);
@@ -195,4 +184,32 @@ export const applyCollectionAreaResult = (
   next.useLatLongForBec.value = false;
 
   return next;
+};
+
+/**
+ * Remove the collection area and every value it fills in, returning those
+ * fields to their initial state. Fields the map never touches are kept.
+ */
+export const clearCollectionAreaResult = (
+  state: BClassCollectionForm
+): BClassCollectionForm => {
+  const empty = initBClassCollectionState('');
+  return {
+    ...structuredClone(state),
+    collectionGeometry: empty.collectionGeometry,
+    latDeg: empty.latDeg,
+    latMin: empty.latMin,
+    latSec: empty.latSec,
+    longDeg: empty.longDeg,
+    longMin: empty.longMin,
+    longSec: empty.longSec,
+    elevationMin: empty.elevationMin,
+    elevationMax: empty.elevationMax,
+    elevationMean: empty.elevationMean,
+    collectionRadius: empty.collectionRadius,
+    becZone: empty.becZone,
+    becSubzone: empty.becSubzone,
+    becVariant: empty.becVariant,
+    useLatLongForBec: empty.useLatLongForBec
+  };
 };

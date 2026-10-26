@@ -1,6 +1,6 @@
 import { kml } from '@tmcw/togeojson';
 import JSZip from 'jszip';
-import shp, { parseZip } from 'shpjs';
+import { parseZip } from 'shpjs';
 import type {
   Feature,
   FeatureCollection,
@@ -12,11 +12,10 @@ import type {
 
 import type { AoiPolygon } from '../../../../types/SparMapTypes';
 import {
-  MAX_COLLECTION_EXTENT_KM,
   MAX_COLLECTION_RADIUS_KM,
   MAX_COLLECTION_VERTICES
 } from '../collectionAreaLimits';
-import { collectionExtentKm } from './aoiValidation';
+import { collectionRadiusKm } from './aoiValidation';
 
 /**
  * Hard caps for imported shape files. Browser parsing of zip/KML/GeoJSON is
@@ -29,7 +28,7 @@ export const MAX_ZIP_UNCOMPRESSED_BYTES = 40 * 1024 * 1024; // 40 MiB inflated
 export const MAX_ZIP_ENTRY_COUNT = 200;
 /** Collection areas are a handful of polygons; more than this is a bad file. */
 export const MAX_IMPORT_FEATURES = 50;
-/** Caps WKT size so BEC validation stays under Tomcat's 8 KiB header limit. */
+/** Same complexity bound the drawing tools and the backend enforce. */
 export const MAX_IMPORT_VERTICES = MAX_COLLECTION_VERTICES;
 
 /** Extensions the import picker and detector accept. */
@@ -38,8 +37,7 @@ export const ACCEPTED_IMPORT_FILE_EXTENSIONS = [
   '.kmz',
   '.geojson',
   '.json',
-  '.zip',
-  '.shp'
+  '.zip'
 ] as const;
 
 /**
@@ -69,7 +67,7 @@ const UTF8_BOM_STRIP = /^\uFEFF/;
  * hand us `application/octet-stream` even for KML files — so we fall
  * back to the file extension whenever the MIME is ambiguous.
  */
-export type ImportKind = 'kml' | 'kmz' | 'shp-zip' | 'shp' | 'geojson' | 'unknown';
+export type ImportKind = 'kml' | 'kmz' | 'shp-zip' | 'geojson' | 'unknown';
 
 export const detectImportKind = (file: File): ImportKind => {
   const name = file.name.toLowerCase();
@@ -88,9 +86,6 @@ export const detectImportKind = (file: File): ImportKind => {
     || mime === 'application/json'
   ) {
     return 'geojson';
-  }
-  if (name.endsWith('.shp')) {
-    return 'shp';
   }
   if (name.endsWith('.zip') || mime === 'application/zip' || mime === 'application/x-zip-compressed') {
     return 'shp-zip';
@@ -344,26 +339,16 @@ const extractKmlFromKmz = async (file: File): Promise<string> => {
 };
 
 /**
- * Parse an ESRI shapefile. shpjs can consume either a zipped collection
- * (with sidecar .shp/.shx/.dbf files) via `parseZip` or a single .shp
- * buffer via the default export. Both return a FeatureCollection or an
- * array of them — `normalizeAny` flattens that.
+ * Parse a zipped ESRI shapefile (sidecar .shp/.shx/.dbf files). shpjs
+ * `parseZip` needs the full archive — a bare `.shp` is not accepted
+ * because it is useless without the sidecars.
  */
-const parseShapefileZip = async (
-  file: File
-): Promise<ReturnType<typeof shp>> => {
+const parseShapefileZip = async (file: File) => {
   const buffer = await file.arrayBuffer();
   // Validate archive bounds before handing the buffer to shpjs.
   const zip = await JSZip.loadAsync(buffer);
   assertZipArchiveSafe(zip);
   return parseZip(buffer);
-};
-
-const parseShapefileBare = async (
-  file: File
-): Promise<ReturnType<typeof shp>> => {
-  const buffer = await file.arrayBuffer();
-  return shp(buffer);
 };
 
 /**
@@ -407,11 +392,6 @@ export const importShapeFile = async (file: File): Promise<ImportResult> => {
       normalized = normalizeAny(parsed, 'shapefile');
       break;
     }
-    case 'shp': {
-      const parsed = await parseShapefileBare(file);
-      normalized = normalizeAny(parsed, 'shapefile');
-      break;
-    }
     case 'unknown':
     default:
       // assertImportFileAllowed already rejects unknown kinds; keep a
@@ -441,11 +421,11 @@ export const importShapeFile = async (file: File): Promise<ImportResult> => {
       + `Maximum is ${MAX_IMPORT_VERTICES}. Simplify the file and try again.`
     );
   }
-  const extentKm = collectionExtentKm(normalized.polygons);
-  if (extentKm > MAX_COLLECTION_EXTENT_KM) {
+  const radiusKm = collectionRadiusKm(normalized.polygons);
+  if (radiusKm > MAX_COLLECTION_RADIUS_KM) {
     throw new Error(
-      `Collection area cannot span more than ${MAX_COLLECTION_RADIUS_KM} km radius. `
-      + 'Shrink the polygon and try again.'
+      `Collection area cannot span more than ${MAX_COLLECTION_RADIUS_KM} km radius `
+      + `(this one is ${radiusKm.toFixed(1)} km). Shrink the polygon and try again.`
     );
   }
 

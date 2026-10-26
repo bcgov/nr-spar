@@ -120,12 +120,22 @@ export interface CollectionAreaResult {
   geoJson: string;
   polygonCount: number;
   areaHectares: number;
+  /**
+   * Half the longest distance across the collection area, in kilometres,
+   * rounded to the 0.1 km the form records.
+   */
+  radiusKm: number;
   /** Mean latitude of all polygon vertices (decimal degrees, WGS84). */
   meanLat: number | null;
   /** Mean longitude of all polygon vertices (decimal degrees, WGS84). */
   meanLng: number | null;
   elevationMinM: number | null;
   elevationMaxM: number | null;
+  /**
+   * Set when the elevation lookup failed, as opposed to finding no data, so
+   * the form can say why the elevation fields were not filled in.
+   */
+  elevationError: string | null;
   /** Distinct BEC zone codes the polygon intersects. */
   becZones: string[];
   /** BEC attributes sampled at the polygon centroid, if available. */

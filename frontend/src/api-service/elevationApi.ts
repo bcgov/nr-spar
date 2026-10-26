@@ -141,18 +141,39 @@ const fetchElevationsFromLayer = async (
         `Elevation WFS timed out after ${WFS_TIMEOUT_MS / 1000} seconds`
       );
     }
-    return [];
+    throw err;
   } finally {
     clearTimeout(timer);
   }
 };
 
+/** Keep a caught rejection as an `Error` so it can be rethrown later. */
+const asError = (err: unknown): Error => (
+  err instanceof Error ? err : new Error(String(err))
+);
+
+const rangeFrom = (
+  elevations: number[],
+  source: ElevationRange['source']
+): ElevationRange => ({
+  minM: Math.min(...elevations),
+  maxM: Math.max(...elevations),
+  source,
+  sampleCount: elevations.length
+});
+
 /**
  * Compute the elevation min/max across an AOI polygon. Queries TRIM
  * contour lines first (dense, ~20 m intervals); if no contours
  * intersect (small or flat polygons) falls back to BC spot elevation
- * points. Returns `null` when neither source has any features in the
- * AOI — UI layers should treat that as "no data" not "error".
+ * points.
+ *
+ * Returns `null` only when a layer answered successfully and had no
+ * features in the AOI — that is genuine "no data". A failed query is
+ * rethrown so callers can tell "nothing here" apart from "we could not
+ * ask", instead of both surfacing as an empty elevation band. The spot
+ * fallback is still attempted when the contour query fails, so a
+ * transient outage on one layer does not lose the other.
  *
  * Note: the contour layer is high-resolution and a province-wide query
  * over a large polygon could return thousands of features; the
@@ -164,25 +185,31 @@ export const fetchPolygonElevationRange = async (
 ): Promise<ElevationRange | null> => {
   const wkt = polygonFeatureToBcAlbersWkt(feature);
 
-  const contourElevs = await fetchElevationsFromLayer(CONTOUR_LINES_LAYER, wkt);
-  if (contourElevs.length > 0) {
-    return {
-      minM: Math.min(...contourElevs),
-      maxM: Math.max(...contourElevs),
-      source: 'contours',
-      sampleCount: contourElevs.length
-    };
+  let contourError: Error | null = null;
+  try {
+    const contourElevs = await fetchElevationsFromLayer(CONTOUR_LINES_LAYER, wkt);
+    if (contourElevs.length > 0) {
+      return rangeFrom(contourElevs, 'contours');
+    }
+  } catch (err) {
+    contourError = asError(err);
   }
 
-  const spotElevs = await fetchElevationsFromLayer(SPOT_ELEVATION_LAYER, wkt);
+  let spotElevs: number[];
+  try {
+    spotElevs = await fetchElevationsFromLayer(SPOT_ELEVATION_LAYER, wkt);
+  } catch (err) {
+    // Both layers failed — surface the first failure, not a blank range.
+    throw contourError ?? asError(err);
+  }
   if (spotElevs.length > 0) {
-    return {
-      minM: Math.min(...spotElevs),
-      maxM: Math.max(...spotElevs),
-      source: 'spot-points',
-      sampleCount: spotElevs.length
-    };
+    return rangeFrom(spotElevs, 'spot-points');
   }
 
+  // Spot points were empty, but we never got an answer from contours, so
+  // we cannot honestly claim the AOI has no elevation data.
+  if (contourError !== null) {
+    throw contourError;
+  }
   return null;
 };

@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-import api from './api';
 import ApiConfig from './ApiConfig';
 
 /**
@@ -23,15 +22,20 @@ export const buildOpenmapsProxyUrl = (params: URLSearchParams): string => (
 );
 
 /**
- * GET /api/openmaps with the caller's JWT. Throws on abort so callers can
- * surface a timeout; axios non-2xx errors are rethrown as-is.
+ * POST /api/openmaps with the caller's JWT, sending the OpenMaps parameters as
+ * a form-encoded body. This is still a read — the body is used because a
+ * collection-area `CQL_FILTER` carries the polygon as WKT and outgrows any URL
+ * length limit (ours and DataBC's) well before it outgrows the vertex cap.
+ *
+ * Throws on abort so callers can surface a timeout; axios non-2xx errors are
+ * rethrown as-is.
  */
 export const getOpenmapsJson = async <T>(
   params: URLSearchParams,
   signal?: AbortSignal
 ): Promise<T> => {
-  const { data } = await api.get(OPENMAPS_PROXY_URL, {
-    params: Object.fromEntries(params.entries()),
+  const { data } = await axios.post(OPENMAPS_PROXY_URL, params.toString(), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     signal
   });
   return data as T;

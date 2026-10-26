@@ -35,15 +35,6 @@ export const BEC_QUERY_LAYER = 'WHSE_FOREST_VEGETATION.BEC_BIOGEOCLIMATIC_POLY';
 const BEC_WFS_TIMEOUT_MS = 15000;
 
 /**
- * Tomcat's default max-http-request-header-size is 8 KiB. A CQL_FILTER
- * carrying a large WKT MultiPolygon will be rejected by the container
- * before our allowlist runs, and the user sees a generic "unable to
- * validate" message. Stay well under that so the failure is ours and
- * the message is honest.
- */
-const MAX_CQL_CHARS = 6000;
-
-/**
  * Shape of one feature as returned by the WFS GeoJSON response. Only the
  * `ZONE` property is required — any additional attributes are tolerated
  * but ignored because the caller only needs zone codes.
@@ -73,12 +64,6 @@ const distinctZonesFromFeatureCollection = (json: WfsFeatureCollection): string[
 };
 
 const fetchBecZonesByCqlFilter = async (cqlFilter: string): Promise<string[]> => {
-  if (cqlFilter.length > MAX_CQL_CHARS) {
-    throw new Error(
-      'The collection area is too detailed to validate. '
-      + 'Simplify the polygon (fewer vertices) and try again.'
-    );
-  }
   const params = new URLSearchParams({
     service: 'WFS',
     version: '2.0.0',

@@ -5,9 +5,32 @@ export interface MeanLatLng {
   lng: number;
 }
 
-/** Mean of every vertex across all polygons/rings — the area's mean lat/long. */
+/**
+ * Vertices used for the mean, excluding each ring's closing duplicate.
+ * GeoJSON rings repeat the first point as the last; counting it would
+ * drag the mean toward whichever corner happens to start the ring.
+ */
+const uniqueRingVertices = (feature: Feature<MultiPolygon>): Array<[number, number]> => {
+  const out: Array<[number, number]> = [];
+  feature.geometry.coordinates.forEach((polygon) => {
+    polygon.forEach((ring) => {
+      if (ring.length === 0) {
+        return;
+      }
+      const last = ring.length - 1;
+      const closed = ring.length > 1
+        && ring[0][0] === ring[last][0]
+        && ring[0][1] === ring[last][1];
+      const verts = (closed ? ring.slice(0, last) : ring) as Array<[number, number]>;
+      out.push(...verts);
+    });
+  });
+  return out;
+};
+
+/** Mean of every unique vertex across all polygons/rings — the area's mean lat/long. */
 export const meanLatLng = (feature: Feature<MultiPolygon>): MeanLatLng | null => {
-  const coords = feature.geometry.coordinates.flat(2) as Array<[number, number]>;
+  const coords = uniqueRingVertices(feature);
   if (coords.length === 0) {
     return null;
   }

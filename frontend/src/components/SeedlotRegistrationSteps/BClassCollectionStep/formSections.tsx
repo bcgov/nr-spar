@@ -14,11 +14,12 @@ import {
   RadioButtonGroup,
   RadioButton,
   Button,
-  Tag,
+  Tooltip,
   DropdownSkeleton,
-  RadioButtonSkeleton
+  RadioButtonSkeleton,
+  InlineNotification
 } from '@carbon/react';
-import { Location } from '@carbon/icons-react';
+import { CheckmarkFilled, Location, TrashCan } from '@carbon/icons-react';
 
 import { now } from '../../../utils/DateUtils';
 import { FilterObj, filterInput } from '../../../utils/FilterUtils';
@@ -73,6 +74,7 @@ interface SharedSectionProps {
 interface LatLongSectionProps extends SharedSectionProps {
   seedlotNumber?: string;
   onLaunchMap: () => void;
+  onRemoveCollectionArea: () => void;
   onDmsChange: (
     field: 'latDeg' | 'latMin' | 'latSec' | 'longDeg' | 'longMin' | 'longSec',
     value: string
@@ -85,6 +87,7 @@ export const CollectionLatLongSection = ({
   readOnly,
   seedlotNumber,
   onLaunchMap,
+  onRemoveCollectionArea,
   onDmsChange
 }: LatLongSectionProps) => {
   const mapButtonLabel = state.collectionGeometry.value
@@ -101,7 +104,7 @@ export const CollectionLatLongSection = ({
       </Row>
       {isReview ? null : (
         <Row className="b-class-collection-row b-class-collection-map-row">
-          <Column sm={4} md={8} lg={16} xlg={16}>
+          <Column sm={4} md={8} lg={16} xlg={16} className="collection-map-launch">
             <Button
               kind="tertiary"
               size="md"
@@ -112,9 +115,24 @@ export const CollectionLatLongSection = ({
               {mapButtonLabel}
             </Button>
             {state.collectionGeometry.value ? (
-              <Tag type="green" className="collection-area-defined-tag">
-                Collection area defined
-              </Tag>
+              <Tooltip label="Collection area defined" align="right" className="collection-area-defined">
+                <button type="button" className="collection-area-defined-trigger" aria-label="Collection area defined">
+                  <CheckmarkFilled size={20} />
+                </button>
+              </Tooltip>
+            ) : null}
+            {state.collectionGeometry.value ? (
+              <Button
+                kind="ghost"
+                size="md"
+                hasIconOnly
+                renderIcon={TrashCan}
+                iconDescription="Remove collection area"
+                tooltipPosition="right"
+                className="collection-area-remove"
+                onClick={onRemoveCollectionArea}
+                disabled={readOnly}
+              />
             ) : null}
           </Column>
         </Row>
@@ -328,6 +346,8 @@ interface LocationSectionProps extends SharedSectionProps {
   onLocationAreaChange: (value: string) => void;
   onRadiusChange: (value: number | string) => void;
   onElevationChange: (field: 'elevationMin' | 'elevationMax' | 'elevationMean', value: string) => void;
+  elevationWarning?: string | null;
+  onDismissElevationWarning?: () => void;
 }
 
 export const CollectionLocationSection = ({
@@ -342,7 +362,9 @@ export const CollectionLocationSection = ({
   onComboSelection,
   onLocationAreaChange,
   onRadiusChange,
-  onElevationChange
+  onElevationChange,
+  elevationWarning,
+  onDismissElevationWarning
 }: LocationSectionProps) => (
   <>
     <Row className="b-class-collection-row">
@@ -460,6 +482,19 @@ export const CollectionLocationSection = ({
         />
       </Column>
     </Row>
+    {elevationWarning ? (
+      <Row className="b-class-collection-row elevation-warning-row">
+        <Column sm={4} md={8} lg={15} xlg={12}>
+          <InlineNotification
+            lowContrast
+            kind="warning"
+            title="Elevation lookup failed."
+            subtitle={elevationWarning}
+            onCloseButtonClick={() => onDismissElevationWarning?.()}
+          />
+        </Column>
+      </Row>
+    ) : null}
     <ReviewHelperText isReview={isReview} text={fieldsConfig.elevation.helperText} />
   </>
 );

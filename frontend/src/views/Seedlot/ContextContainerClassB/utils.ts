@@ -1,4 +1,7 @@
+import { AxiosError } from 'axios';
 import { BecCatalogueItem } from '../../../api-service/becCatalogueAPI';
+import ExceptionResponse from '../../../types/ExceptionResponse';
+import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import { BClassCollectionForm } from '../../../components/SeedlotRegistrationSteps/BClassCollectionStep/definitions';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
@@ -340,4 +343,107 @@ export const resDataToState = (
       fullFormData.extractionStep?.storageClientNumber === tscAgencyObj.code
     )
   };
+};
+
+export type BClassStepName = keyof BClassProgressIndicatorConfig;
+
+export type BClassSubmitFieldErrors = Record<BClassStepName | 'other', string[]>;
+
+const submitFieldStepPrefixes: Array<[string, BClassStepName]> = [
+  ['seedlotFormCollectionDto', 'collection'],
+  ['seedlotFormOwnershipDtoList', 'ownership'],
+  ['seedlotFormInterimDto', 'interim'],
+  ['seedlotFormExtractionDto', 'extraction']
+];
+
+const stepForSubmitField = (fieldName: string): BClassStepName | 'other' => {
+  const match = submitFieldStepPrefixes.find(([prefix]) => (
+    fieldName === prefix
+    || fieldName.startsWith(`${prefix}.`)
+    || fieldName.startsWith(`${prefix}[`)
+  ));
+  return match ? match[1] : 'other';
+};
+
+/**
+ * Groups the field messages of a 400 submit response by the form step they
+ * belong to. Returns null when the error carries no field messages.
+ */
+export const groupSubmitFieldErrorsByStep = (
+  err: AxiosError | null | undefined
+): BClassSubmitFieldErrors | null => {
+  if (err?.response?.status !== 400) {
+    return null;
+  }
+  const fields = (err.response.data as Partial<ExceptionResponse> | undefined)?.fields;
+  if (!Array.isArray(fields)) {
+    return null;
+  }
+  const grouped: BClassSubmitFieldErrors = {
+    collection: [],
+    ownership: [],
+    interim: [],
+    extraction: [],
+    other: []
+  };
+  let found = false;
+  fields.forEach((field) => {
+    const message = field?.fieldMessage;
+    if (typeof message === 'string' && message.length > 0) {
+      grouped[stepForSubmitField(field.fieldName ?? '')].push(message);
+      found = true;
+    }
+  });
+  return found ? grouped : null;
+};
+
+const stepLabels: Record<BClassStepName, string> = {
+  collection: 'Collection information',
+  ownership: 'Ownership',
+  interim: 'Interim storage',
+  extraction: 'Extraction and storage'
+};
+
+/**
+ * Banner text for the step being viewed: that step's own messages, or a
+ * pointer to the highlighted steps when the errors are elsewhere.
+ */
+export const getStepSubmitErrDescription = (
+  fieldErrors: BClassSubmitFieldErrors,
+  currentStep: BClassStepName
+): ErrorDescriptionType => {
+  const messages = [...fieldErrors[currentStep], ...fieldErrors.other];
+  if (messages.length > 0) {
+    return {
+      title: 'Submission has invalid fields!',
+      description: `${messages.join(' ')} (Error code 400)`
+    };
+  }
+  const invalidSteps = (Object.keys(stepLabels) as BClassStepName[])
+    .filter((step) => fieldErrors[step].length > 0)
+    .map((step) => stepLabels[step]);
+  return {
+    title: 'Submission has invalid fields!',
+    description: `Fix the highlighted ${invalidSteps.length > 1 ? 'steps' : 'step'}: ${invalidSteps.join(', ')}. (Error code 400)`
+  };
+};
+
+/**
+ * Marks steps that the backend rejected as invalid, on top of the client-side
+ * validation already in the progress status.
+ */
+export const withSubmitFieldErrors = (
+  progressStatus: BClassProgressIndicatorConfig,
+  fieldErrors: BClassSubmitFieldErrors | null
+): BClassProgressIndicatorConfig => {
+  if (!fieldErrors) {
+    return progressStatus;
+  }
+  const merged = structuredClone(progressStatus);
+  (Object.keys(merged) as BClassStepName[]).forEach((step) => {
+    if (fieldErrors[step].length > 0) {
+      merged[step].isInvalid = true;
+    }
+  });
+  return merged;
 };

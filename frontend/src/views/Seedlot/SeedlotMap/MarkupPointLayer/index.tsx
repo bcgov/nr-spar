@@ -96,6 +96,7 @@ const MarkupPointLayer = () => {
         icon: cwmMarkupPointIcon,
         draggable: true,
         keyboard: true,
+        pmIgnore: true,
         title: `Draw Point ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`
       });
       marker.bindTooltip(`${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`);

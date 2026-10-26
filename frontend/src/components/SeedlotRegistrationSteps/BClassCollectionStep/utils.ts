@@ -123,7 +123,7 @@ export const initBClassCollectionState = (
     becZone: getOptionsInputObj('b-collection-bec-zone', EmptyMultiOptObj),
     becSubzone: getOptionsInputObj('b-collection-bec-subzone', EmptyMultiOptObj),
     becVariant: getOptionsInputObj('b-collection-bec-variant', EmptyMultiOptObj),
-      collectionGeometry: getStringInputObj('b-collection-geometry', '')
+    collectionGeometry: getStringInputObj('b-collection-geometry', '')
   };
 };
 

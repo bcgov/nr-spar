@@ -5,7 +5,7 @@ import {
   useNavigate, useParams, useSearchParams, useLocation
 } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { isAxiosError } from 'axios';
+import { AxiosResponse, isAxiosError } from 'axios';
 import { DateTime } from 'luxon';
 
 import {
@@ -15,7 +15,9 @@ import getBecCatalogue from '../../../api-service/becCatalogueAPI';
 import {
   TEN_SECONDS, FIVE_SECONDS, THREE_HOURS, THREE_HALF_HOURS
 } from '../../../config/TimeUnits';
-import { SeedlotBClassSubmitType } from '../../../types/SeedlotType';
+import {
+  SeedlotBClassProgressPayloadType, SeedlotBClassSubmitType
+} from '../../../types/SeedlotType';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import SeedlotRegWizardContext, { SeedlotRegWizardStepData } from '../../../contexts/SeedlotRegWizardContext';
@@ -75,6 +77,7 @@ const ContextContainerClassB = ({ children }: props) => {
     defaultClientNumber,
     defaultLocationCode,
     resetEditsOnHydrate,
+    markDraftSaved,
     fundingSourcesQuery,
     methodsOfPaymentQuery
   } = useBClassFormLoader({ seedlotNumber, formStep });
@@ -173,23 +176,31 @@ const ContextContainerClassB = ({ children }: props) => {
   };
 
   const saveProgress = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const updatedProgressStatus = structuredClone(updateAllStepStatus());
       (Object.keys(updatedProgressStatus) as Array<keyof BClassProgressIndicatorConfig>).forEach((key) => {
         updatedProgressStatus[key].isCurrent = false;
       });
 
-      return putBClassSeedlotProgress(
-        seedlotNumber ?? '',
-        {
-          allStepData,
-          progressStatus: updatedProgressStatus,
-          revisionCount: formDraftRevCount
-        }
-      );
+      const payload = {
+        allStepData,
+        progressStatus: updatedProgressStatus,
+        revisionCount: formDraftRevCount
+      };
+      const saved = await putBClassSeedlotProgress(seedlotNumber ?? '', payload);
+      return { ...saved, payload };
     },
     onSuccess: (data) => {
       setFormDraftRevCount(data.revisionCount);
+      // Keep the cached draft in step with the server so the refetch on the
+      // next visit doesn't re-hydrate over values applied in the meantime.
+      markDraftSaved(data.revisionCount);
+      queryClient.setQueryData<AxiosResponse<SeedlotBClassProgressPayloadType>>(
+        ['seedlots', 'b-class-form-progress', seedlotNumber ?? 'unknown'],
+        (cached) => (cached
+          ? { ...cached, data: { ...data.payload, revisionCount: data.revisionCount } }
+          : cached)
+      );
       numOfEdit.current = 0;
       setLastSaveTimestamp(DateTime.now().toISO());
       setSaveStatus('finished');

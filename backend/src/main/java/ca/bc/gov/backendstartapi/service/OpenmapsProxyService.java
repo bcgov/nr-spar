@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.exception.OpenmapsProxyException;
+import ca.bc.gov.backendstartapi.util.CollectionAreaLimits;
 import java.net.URI;
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -61,11 +62,23 @@ public class OpenmapsProxyService {
   private static final String PARAM_BBOX = "bbox";
 
   private static final int MAX_FEATURES = 5000;
+
   /**
-   * Caps CQL so the full request stays under Tomcat's default 8 KiB header
-   * limit. The map frontend already refuses BEC WKT above 6000 characters.
+   * Worst-case cost of one collection-area vertex inside a WKT filter: two
+   * unrounded BC Albers ordinates, their space, and the {@code ", "} separator.
    */
-  private static final int MAX_CQL_LENGTH = 6000;
+  private static final int CQL_CHARS_PER_VERTEX = 45;
+
+  /**
+   * CQL_FILTER ceiling, derived from the collection-area vertex cap so the two
+   * limits cannot drift apart. WFS queries are POSTed upstream, so this is a
+   * bound on how much work we are willing to ask OpenMaps to do — not a
+   * transport limit. It must stay above what {@code MAX_VERTICES} can produce,
+   * otherwise a polygon we accept for storage could not be BEC-validated.
+   */
+  private static final int MAX_CQL_LENGTH =
+      (CollectionAreaLimits.MAX_VERTICES * CQL_CHARS_PER_VERTEX) + 1_000;
+
   private static final int MAX_DIMENSION = 4096;
 
   /**
@@ -127,6 +140,7 @@ public class OpenmapsProxyService {
 
   private final RestTemplate restTemplate;
   private final String openmapsBaseUrl;
+  private final URI openmapsBaseUri;
   private final String wfsPath;
   private final String wmsPath;
 
@@ -149,7 +163,8 @@ public class OpenmapsProxyService {
   OpenmapsProxyService(
       RestTemplate restTemplate, String openmapsBaseUrl, String wfsPath, String wmsPath) {
     this.restTemplate = restTemplate;
-    this.openmapsBaseUrl = openmapsBaseUrl;
+    this.openmapsBaseUrl = stripTrailingSlash(openmapsBaseUrl);
+    this.openmapsBaseUri = URI.create(this.openmapsBaseUrl);
     this.wfsPath = wfsPath;
     this.wmsPath = wmsPath;
   }
@@ -167,27 +182,28 @@ public class OpenmapsProxyService {
     validateVersion(query.get(PARAM_VERSION));
 
     String path;
+    boolean wfsGetFeature;
     if ("WFS".equals(service) && equalsIgnoreCase(request, "GetFeature")) {
       path = wfsPath;
+      wfsGetFeature = true;
       validateWfs(query);
     } else if ("WMS".equals(service) && equalsIgnoreCase(request, "GetLegendGraphic")) {
       path = wmsPath;
+      wfsGetFeature = false;
       validateWmsLegend(query);
     } else {
       throw new OpenmapsProxyException(
           HttpStatus.BAD_REQUEST, "Only WFS GetFeature and WMS GetLegendGraphic are allowed");
     }
 
-    URI uri = buildOpenmapsUri(path, query);
     SparLog.info("OpenMaps proxy {} {}", service, request);
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-    HttpEntity<Void> entity = new HttpEntity<>(headers);
-
     try {
+      // GetFeature carries the collection-area WKT, which routinely exceeds any
+      // URL length limit, so it goes upstream as a form-encoded POST. Legend
+      // requests are small and stay on GET.
       ResponseEntity<String> response =
-          restTemplate.exchange(uri, HttpMethod.GET, entity, String.class);
+          wfsGetFeature ? postUpstream(path, query) : getUpstream(path, query);
       if (response.getBody() == null) {
         throw new OpenmapsProxyException(HttpStatus.BAD_GATEWAY, "OpenMaps returned an empty body");
       }
@@ -201,9 +217,45 @@ public class OpenmapsProxyService {
     }
   }
 
-  URI buildOpenmapsUri(String path, Map<String, String> query) {
+  private ResponseEntity<String> getUpstream(String path, Map<String, String> query) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+    return restTemplate.exchange(
+        buildOpenmapsUri(path, query), HttpMethod.GET, new HttpEntity<>(headers), String.class);
+  }
+
+  private ResponseEntity<String> postUpstream(String path, Map<String, String> query) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    return restTemplate.exchange(
+        buildOpenmapsUri(path),
+        HttpMethod.POST,
+        new HttpEntity<>(canonicalParams(query), headers),
+        String.class);
+  }
+
+  /**
+   * Target URI with no query string, for the POST form binding. Origin-checked
+   * exactly like the GET variant so neither path can leave the OpenMaps host.
+   */
+  URI buildOpenmapsUri(String path) {
+    URI uri =
+        UriComponentsBuilder.fromUriString(openmapsBaseUrl).path(path).encode().build().toUri();
+    if (!sameOpenmapsOrigin(openmapsBaseUri, uri)) {
+      throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Refusing to leave OpenMaps host");
+    }
+    return uri;
+  }
+
+  private static MultiValueMap<String, String> canonicalParams(Map<String, String> query) {
     MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
     query.forEach((key, value) -> params.add(canonicalParamName(key), value));
+    return params;
+  }
+
+  URI buildOpenmapsUri(String path, Map<String, String> query) {
+    MultiValueMap<String, String> params = canonicalParams(query);
     URI uri =
         UriComponentsBuilder.fromUriString(openmapsBaseUrl)
             .path(path)
@@ -211,11 +263,47 @@ public class OpenmapsProxyService {
             .encode()
             .build()
             .toUri();
-    if (!openmapsBaseUrl.equals(uri.getScheme() + "://" + uri.getHost())
-        || uri.getPort() != -1) {
+    if (!sameOpenmapsOrigin(openmapsBaseUri, uri)) {
       throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Refusing to leave OpenMaps host");
     }
     return uri;
+  }
+
+  private static String stripTrailingSlash(String value) {
+    String trimmed = value.trim();
+    while (trimmed.endsWith("/")) {
+      trimmed = trimmed.substring(0, trimmed.length() - 1);
+    }
+    return trimmed;
+  }
+
+  /**
+   * Compare scheme + host + effective port so a trailing slash or explicit
+   * default port in {@code openmaps.base-url} cannot 400 every proxy call.
+   */
+  static boolean sameOpenmapsOrigin(URI configured, URI built) {
+    if (configured.getScheme() == null
+        || configured.getHost() == null
+        || built.getScheme() == null
+        || built.getHost() == null) {
+      return false;
+    }
+    return configured.getScheme().equalsIgnoreCase(built.getScheme())
+        && configured.getHost().equalsIgnoreCase(built.getHost())
+        && effectivePort(configured) == effectivePort(built);
+  }
+
+  private static int effectivePort(URI uri) {
+    if (uri.getPort() != -1) {
+      return uri.getPort();
+    }
+    if ("https".equalsIgnoreCase(uri.getScheme())) {
+      return 443;
+    }
+    if ("http".equalsIgnoreCase(uri.getScheme())) {
+      return 80;
+    }
+    return -1;
   }
 
   private static void validateWfs(Map<String, String> query) {

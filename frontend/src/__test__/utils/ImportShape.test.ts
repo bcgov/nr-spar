@@ -29,7 +29,7 @@ describe('importShape', () => {
       ['aoi.geojson', 'application/geo+json', 'geojson'],
       ['aoi.json', 'application/json', 'geojson'],
       ['shapes.zip', 'application/zip', 'shp-zip'],
-      ['parcel.shp', '', 'shp'],
+      ['parcel.shp', '', 'unknown'],
       ['notes.txt', 'text/plain', 'unknown']
     ] as const)('detects %s as %s', (name, mime, kind) => {
       expect(detectImportKind(makeFile(name, '{}', mime))).toBe(kind);
@@ -53,6 +53,11 @@ describe('importShape', () => {
       expect(() => assertImportFileAllowed(
         makeFile('ok.geojson', '{}', 'application/geo+json')
       )).not.toThrow();
+    });
+
+    it('rejects a bare .shp (sidecars required — import a zip instead)', () => {
+      expect(() => assertImportFileAllowed(makeFile('parcel.shp', 'not-a-zip')))
+        .toThrow(/Unsupported file type/i);
     });
   });
 

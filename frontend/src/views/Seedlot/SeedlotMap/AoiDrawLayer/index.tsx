@@ -382,8 +382,7 @@ const AoiDrawLayer = () => {
     // SPAR collection-geometry preload paths below.
     const seedPolygons = (polygons: AoiPolygon[]) => {
       if (polygons.length === 0) return;
-      const existing = (map.pm?.getGeomanLayers?.() ?? []) as unknown[];
-      if (existing.length > 0) return;
+      if (rebuildFromMap().length > 0) return;
       const created = addPolygonsToMap(map, polygons, setAois, rebuildFromMap);
       fitToLayers(map, created);
     };
@@ -391,27 +390,33 @@ const AoiDrawLayer = () => {
     // Pre-load the collection-area polygon on map open. Draft geometry comes
     // from wizard router state; submitted geometry comes from SPAR PostGIS
     // (GET /collection-geometry). Do not read DataBC — SPAR is the store.
+    // Mark preloaded only once the geometry is applied, so a fetch cancelled
+    // by an effect re-run (StrictMode, dependency change) is retried.
     let preloadCancelled = false;
     if (!preloadedRef.current) {
-      preloadedRef.current = true;
       const initialGeoJson = (
         location.state as { initialAoiGeoJson?: string } | null
       )?.initialAoiGeoJson;
 
       if (initialGeoJson) {
+        preloadedRef.current = true;
         try {
           seedPolygons(geoJsonToAoiPolygons(initialGeoJson));
-        } catch {
-          // Malformed draft geometry — leave the map empty for a redraw.
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn('AoiDrawLayer: could not load draft collection area', err);
         }
       } else if (seedlotNumber) {
         getCollectionGeometry(seedlotNumber)
           .then((dto) => {
-            if (preloadCancelled || !dto?.geometryGeoJson) return;
+            if (preloadCancelled) return;
+            preloadedRef.current = true;
+            if (!dto?.geometryGeoJson) return;
             try {
               seedPolygons(geoJsonToAoiPolygons(dto.geometryGeoJson));
-            } catch {
-              // Malformed stored geometry — leave the map empty for a redraw.
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.warn('AoiDrawLayer: could not load saved collection area', err);
             }
           })
           .catch(() => {

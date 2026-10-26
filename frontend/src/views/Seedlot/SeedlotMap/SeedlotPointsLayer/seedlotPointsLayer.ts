@@ -217,7 +217,8 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
         weight: 1,
         fillColor: color,
         fillOpacity: 0.85,
-        interactive: true
+        interactive: true,
+        pmIgnore: true
       });
       marker.bindPopup(buildPointPopup(p, labelText));
       this.addLayer(marker);

@@ -1,6 +1,9 @@
 import type { Feature, MultiPolygon } from 'geojson';
 
-import { deriveCollectionAreaResult } from '../../views/Seedlot/SeedlotMap/collectionAreaResult';
+import {
+  ELEVATION_LOOKUP_FAILED_MESSAGE,
+  deriveCollectionAreaResult
+} from '../../views/Seedlot/SeedlotMap/collectionAreaResult';
 
 vi.mock('../../api-service/becZonesApi', () => ({
   fetchBecVariantAt: vi.fn()
@@ -50,6 +53,9 @@ describe('deriveCollectionAreaResult', () => {
     expect(result.polygonCount).toBe(1);
     expect(result.becZones).toEqual(['CWH']);
     expect(result.areaHectares).toBeGreaterThan(0);
+    // 0.1 deg lng at 48N is ~7.4 km, 0.1 deg lat ~11.1 km, so the diagonal is
+    // ~13.4 km and half of that ~6.7 km.
+    expect(result.radiusKm).toBeCloseTo(6.7, 1);
     expect(result.meanLat).not.toBeNull();
     expect(result.meanLng).not.toBeNull();
     expect(result.meanLat!).toBeGreaterThan(48);
@@ -58,6 +64,7 @@ describe('deriveCollectionAreaResult', () => {
     expect(result.meanLng!).toBeGreaterThan(-124);
     expect(result.elevationMinM).toBe(110);
     expect(result.elevationMaxM).toBe(300);
+    expect(result.elevationError).toBeNull();
     expect(result.becVariant?.zone).toBe('CWH');
     expect(JSON.parse(result.geoJson).geometry.type).toBe('MultiPolygon');
   });
@@ -71,7 +78,18 @@ describe('deriveCollectionAreaResult', () => {
     expect(result.polygonCount).toBe(2);
     expect(result.elevationMinM).toBeNull();
     expect(result.elevationMaxM).toBeNull();
+    expect(result.elevationError).toBe(ELEVATION_LOOKUP_FAILED_MESSAGE);
     expect(result.becVariant).toBeNull();
     expect(result.meanLat).not.toBeNull();
+  });
+
+  it('reports no error when elevation answered with no data', async () => {
+    vi.mocked(fetchPolygonElevationRange).mockResolvedValue(null);
+    vi.mocked(fetchBecVariantAt).mockResolvedValue(null);
+
+    const result = await deriveCollectionAreaResult(squareFeature(), ['CWH'], 1);
+
+    expect(result.elevationMinM).toBeNull();
+    expect(result.elevationError).toBeNull();
   });
 });

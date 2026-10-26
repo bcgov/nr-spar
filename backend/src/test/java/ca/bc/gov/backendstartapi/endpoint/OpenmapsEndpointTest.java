@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,5 +64,30 @@ class OpenmapsEndpointTest {
                 .with(csrf().asHeader())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("proxies a form-encoded POST so a large CQL_FILTER is not capped by the URL")
+  void proxyPostSuccess() throws Exception {
+    when(openmapsProxyService.forward(any(MultiValueMap.class)))
+        .thenReturn("{\"type\":\"FeatureCollection\",\"features\":[]}");
+
+    // Bigger than any URL would carry, which is the reason this route exists.
+    String cql = "INTERSECTS(GEOMETRY,POLYGON((" + "1200000.5 460000.5, ".repeat(3000) + ")))";
+
+    mockMvc
+        .perform(
+            post("/api/openmaps")
+                .param("service", "WFS")
+                .param("version", "2.0.0")
+                .param("request", "GetFeature")
+                .param("typeNames", "WHSE_FOREST_VEGETATION.BEC_BIOGEOCLIMATIC_POLY")
+                .param("outputFormat", "application/json")
+                .param("CQL_FILTER", cql)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().json("{\"type\":\"FeatureCollection\",\"features\":[]}"));
   }
 }

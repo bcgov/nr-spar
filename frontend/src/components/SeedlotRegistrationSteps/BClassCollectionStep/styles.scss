@@ -30,6 +30,40 @@
     }
   }
 
+  .collection-map-launch {
+    display: flex;
+    align-items: center;
+  }
+
+  .collection-area-defined {
+    display: flex;
+    margin-left: 1rem;
+  }
+
+  .collection-area-defined-trigger {
+    display: flex;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: default;
+
+    svg {
+      fill: var(--#{vars.$bcgov-prefix}-support-success);
+    }
+  }
+
+  .collection-area-remove {
+    margin-left: 0.5rem;
+
+    svg {
+      fill: var(--#{vars.$bcgov-prefix}-support-error);
+    }
+  }
+
+  .elevation-warning-row {
+    margin-top: 1rem;
+  }
+
   .bec-search-link {
     margin-top: 0.5rem;
   }

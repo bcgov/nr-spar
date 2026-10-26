@@ -1,6 +1,5 @@
 @use '@carbon/type';
-@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
-@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use './mapTheme' as theme;
 
 // Map-first workspace layout mirroring bcgov/nr-silva's OpeningsMap.
 // `.seedlot-map-page` owns the viewport: a thin header bar on top, a
@@ -18,19 +17,19 @@
   height: calc(100vh - 7rem);
   max-height: calc(100vh - 7rem);
   overflow: hidden;
-  background: colors.$white;
+  background: theme.$surface;
 
   .seedlot-map-header {
     // Tighter header so more height is reclaimed for the map itself.
     // The title uses heading-02 (13-14px/600) instead of heading-04
     // (20px/400) — still readable, much less chrome.
     padding: 0.375rem 1rem;
-    background: colors.$white;
-    border-bottom: 1px solid colors.$gray-20;
+    background: theme.$surface;
+    border-bottom: 1px solid theme.$border;
 
     .seedlot-map-title {
       @include type.type-style('heading-02');
-      color: colors.$gray-100;
+      color: theme.$text;
       margin: 0;
     }
   }
@@ -53,10 +52,11 @@
     .map-overlay {
       position: absolute;
       z-index: 1000;
-      background: colors.$white;
+      background: theme.$surface;
+      color: theme.$text;
       border-radius: 0.5rem;
       box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.18);
-      border: 1px solid colors.$gray-20;
+      border: 1px solid theme.$border;
 
       &--top-center {
         top: 1rem;
@@ -146,7 +146,7 @@
       &__instructions {
         margin: 0 0 0.5rem;
         font-size: 0.75rem;
-        color: colors.$gray-70;
+        color: theme.$text-secondary;
       }
 
       &__buttons {
@@ -159,25 +159,26 @@
       &__btn {
         padding: 0.375rem 0.5rem;
         font-size: 0.8125rem;
-        background: colors.$white;
-        border: 1px solid colors.$gray-30;
+        background: theme.$surface;
+        color: theme.$text;
+        border: 1px solid theme.$border;
         border-radius: 2px;
         cursor: pointer;
         text-align: left;
 
-        &:hover { background: colors.$gray-10; }
+        &:hover { background: theme.$surface-hover; }
 
         &--active {
-          background: colors.$blue-20;
-          border-color: colors.$blue-50;
-          color: colors.$blue-70;
+          background: theme.$highlight;
+          border-color: theme.$border-interactive;
+          color: theme.$link;
           font-weight: 600;
         }
 
         &--clear {
           margin-top: 0.25rem;
-          color: colors.$red-70;
-          border-color: colors.$gray-30;
+          color: theme.$text-error;
+          border-color: theme.$border;
         }
       }
 
@@ -188,16 +189,16 @@
         row-gap: 0.25rem;
         margin: 0;
         padding: 0.5rem 0 0;
-        border-top: 1px solid colors.$gray-20;
+        border-top: 1px solid theme.$border;
         font-size: 0.8125rem;
 
         dt {
-          color: colors.$gray-70;
+          color: theme.$text-secondary;
           font-weight: 600;
         }
         dd {
           margin: 0;
-          color: colors.$gray-100;
+          color: theme.$text;
           font-variant-numeric: tabular-nums;
         }
       }
@@ -209,11 +210,11 @@
       align-items: center;
       justify-content: space-between;
       padding: 0.375rem 0.75rem;
-      border-bottom: 1px solid colors.$gray-20;
-      background: colors.$gray-10;
+      border-bottom: 1px solid theme.$border;
+      background: theme.$surface-alt;
       font-weight: 600;
       font-size: 0.875rem;
-      color: colors.$gray-100;
+      color: theme.$text;
       flex: 0 0 auto;
     }
 
@@ -222,10 +223,10 @@
       border: 0;
       padding: 0.125rem;
       cursor: pointer;
-      color: colors.$gray-70;
+      color: theme.$text-secondary;
       display: flex;
       align-items: center;
-      &:hover { color: colors.$gray-100; }
+      &:hover { color: theme.$text; }
     }
 
     .map-overlay__body {
@@ -259,22 +260,22 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: colors.$white;
-      border: 2px solid rgba(0, 0, 0, 0.2);
+      background: theme.$surface;
+      border: 2px solid theme.$border-strong;
       border-radius: 4px;
       cursor: pointer;
       padding: 0;
-      color: colors.$gray-100;
+      color: theme.$text;
       box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 
       &:hover {
-        background: colors.$gray-10;
+        background: theme.$surface-hover;
       }
 
       &.is-active {
-        background: colors.$blue-20;
-        color: colors.$blue-70;
-        border-color: colors.$blue-50;
+        background: theme.$highlight;
+        color: theme.$link;
+        border-color: theme.$border-interactive;
       }
 
       &--legend {
@@ -308,8 +309,8 @@
         right: 0;
         width: 320px;
         max-height: 70vh;
-        background: colors.$white;
-        border: 2px solid rgba(0, 0, 0, 0.2);
+        background: theme.$surface;
+        border: 2px solid theme.$border-strong;
         border-radius: 4px;
         padding: 0.5rem 0.75rem;
         overflow-y: auto;
@@ -328,8 +329,8 @@
 
   .seedlot-map-bec-zones {
     padding: 1rem 1.5rem;
-    background: colors.$white;
-    border-top: 1px solid colors.$gray-20;
+    background: theme.$surface;
+    border-top: 1px solid theme.$border;
     max-height: 240px;
     overflow-y: auto;
   }
@@ -340,7 +341,7 @@
 .aoi-loading-mask {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.7);
+  background: theme.translucent(theme.$background, 70%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -350,7 +351,7 @@
 
   .aoi-loading-mask__message {
     font-size: 1rem;
-    color: colors.$gray-100;
+    color: theme.$text;
   }
 }
 
@@ -368,8 +369,9 @@
   width: 300px;
   max-height: calc(100% - 9rem);
   overflow-y: auto;
-  background: colors.$white;
-  border: 1px solid colors.$gray-20;
+  background: theme.$surface;
+  color: theme.$text;
+  border: 1px solid theme.$border;
   border-radius: 4px;
   padding: 1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
@@ -383,11 +385,11 @@
   .bec-zone-panel__subtitle {
     font-size: 0.875rem;
     margin: 0 0 0.5rem;
-    color: colors.$gray-70;
+    color: theme.$text-secondary;
   }
   .bec-zone-panel__hint {
     font-size: 0.75rem;
-    color: colors.$gray-60;
+    color: theme.$text-secondary;
     font-style: italic;
     margin: 0 0 0.75rem;
   }
@@ -401,20 +403,23 @@
     th {
       text-align: left;
       padding: 0.25rem 0.5rem;
-      background: colors.$gray-10;
-      border-bottom: 1px solid colors.$gray-20;
+      background: theme.$surface-alt;
+      border-bottom: 1px solid theme.$border;
     }
     td { padding: 0.25rem 0.5rem; }
   }
   .bec-zone-panel__row {
     cursor: pointer;
     outline: none;
-    &:nth-child(odd)  td { background: colors.$gray-10; }
-    &:nth-child(even) td { background: colors.$white; }
+    &:nth-child(odd)  td { background: theme.$surface-alt; }
+    &:nth-child(even) td { background: theme.$surface; }
     // Legacy `#f4f400` yellow on hover/select (cwmSparmap.jsp:236).
     &:hover td,
     &:focus-within td,
-    &--selected td { background: #f4f400; }
+    &--selected td {
+      background: #f4f400;
+      color: #161616;
+    }
     &--selected td { font-weight: 600; }
   }
   .bec-zone-panel__row-btn {
@@ -465,8 +470,8 @@
     display: inline-flex;
     flex-direction: column;
     width: fit-content;
-    background: colors.$white;
-    border: 2px solid var(--#{vars.$bcgov-prefix}-button-primary);
+    background: theme.$surface;
+    border: 2px solid theme.token('button-primary');
     border-radius: 0.25rem;
     box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.18);
     // Note: NO `overflow: hidden` here — Carbon's IconButton renders its
@@ -493,23 +498,23 @@
       padding: 0;
       border: none;
       border-radius: 0;
-      background: colors.$white;
-      color: var(--#{vars.$bcgov-prefix}-button-primary);
+      background: theme.$surface;
+      color: theme.token('button-primary');
       display: flex;
       align-items: center;
       justify-content: center;
 
       svg {
-        fill: var(--#{vars.$bcgov-prefix}-button-primary);
+        fill: theme.token('button-primary');
         width: 18px;
         height: 18px;
       }
 
       &:hover:not(:disabled) {
-        background: var(--#{vars.$bcgov-prefix}-button-primary);
+        background: theme.token('button-primary');
 
         svg {
-          fill: colors.$white;
+          fill: theme.$text-on-color;
         }
       }
 
@@ -521,7 +526,7 @@
 
       // Carbon focus ring keeps accessibility intact
       &:focus-visible {
-        outline: 2px solid var(--#{vars.$bcgov-prefix}-button-primary);
+        outline: 2px solid theme.token('button-primary');
         outline-offset: -2px;
       }
     }
@@ -529,7 +534,7 @@
     // Separator between buttons in the vertical stack — drawn on every
     // popover-container after the first.
     .cds--popover-container + .cds--popover-container .cds--icon-button {
-      border-top: 1px solid colors.$gray-20;
+      border-top: 1px solid theme.$border;
     }
 
     // Round the corners of the first and last button so the strip reads
@@ -550,7 +555,7 @@
 
       .cds--popover-container + .cds--popover-container .cds--icon-button {
         border-top: none;
-        border-left: 1px solid colors.$gray-20;
+        border-left: 1px solid theme.$border;
       }
 
       .cds--popover-container:first-child .cds--icon-button {
@@ -571,7 +576,7 @@
   // readable. Sits below the strip in the same overlay slot.
   .cds--inline-notification {
     max-width: 280px;
-    background: colors.$white;
+    background: theme.$surface;
     box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.18);
   }
 }
@@ -603,8 +608,8 @@
   display: inline-flex;
   flex-direction: column;
   width: fit-content;
-  background: colors.$white;
-  border: 2px solid rgba(0, 0, 0, 0.2);
+  background: theme.$surface;
+  border: 2px solid theme.$border-strong;
   border-radius: 4px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
   // Override the default Leaflet-bar `<a>` background ruleset that ships
@@ -617,9 +622,9 @@
     height: 30px;
     padding: 0;
     border: none;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid theme.$border;
     background: transparent;
-    color: #161616;
+    color: theme.$text;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -636,11 +641,11 @@
     }
 
     &:hover:not(:disabled) {
-      background: #f4f4f4;
+      background: theme.$surface-hover;
     }
 
     &:focus-visible {
-      outline: 2px solid #0f62fe;
+      outline: 2px solid theme.$focus;
       outline-offset: -2px;
     }
 
@@ -651,10 +656,10 @@
     }
 
     &--active {
-      background: #e0e0e0;
+      background: theme.$surface-selected;
 
       &:hover:not(:disabled) {
-        background: #d0d0d0;
+        background: theme.$surface-hover;
       }
     }
   }
@@ -663,11 +668,11 @@
 .coordinate-pin-panel {
   width: 248px;
   padding: 0.75rem;
-  background: colors.$white;
-  border: 1px solid colors.$gray-30;
+  background: theme.$surface;
+  border: 1px solid theme.$border;
   border-radius: 4px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28);
-  color: colors.$gray-100;
+  color: theme.$text;
 
   &__field {
     display: flex;
@@ -681,8 +686,10 @@
       width: 100%;
       height: 2rem;
       padding: 0 0.5rem;
-      border: 1px solid colors.$gray-40;
+      border: 1px solid theme.$border-strong;
       border-radius: 2px;
+      background: theme.token('field-01');
+      color: theme.$text;
       font-size: 0.875rem;
       font-weight: 400;
     }
@@ -690,7 +697,7 @@
 
   &__error {
     margin-bottom: 0.5rem;
-    color: #da1e28;
+    color: theme.$text-error;
     font-size: 0.75rem;
     line-height: 1.25;
   }
@@ -702,16 +709,17 @@
     button {
       min-height: 2rem;
       padding: 0 0.75rem;
-      border: 1px solid colors.$gray-40;
+      border: 1px solid theme.$border-strong;
       border-radius: 2px;
-      background: colors.$white;
+      background: theme.$surface;
+      color: theme.$text;
       cursor: pointer;
       font-size: 0.75rem;
 
       &:first-child {
-        background: #0f62fe;
-        border-color: #0f62fe;
-        color: colors.$white;
+        background: theme.$primary;
+        border-color: theme.$primary;
+        color: theme.$text-on-color;
       }
 
       &:hover {
@@ -733,7 +741,7 @@
 
   &__item {
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid colors.$gray-20;
+    border-bottom: 1px solid theme.$border;
 
     &:last-child {
       padding-bottom: 0;
@@ -759,7 +767,7 @@
     line-height: 1.5;
 
     dt {
-      color: colors.$gray-70;
+      color: theme.$text-secondary;
     }
 
     dd {
@@ -772,7 +780,7 @@
   &__totals {
     margin-top: 0.75rem;
     padding-top: 0.5rem;
-    border-top: 1px solid colors.$gray-30;
+    border-top: 1px solid theme.$border;
     font-weight: 600;
   }
 
@@ -783,7 +791,7 @@
     font-family: 'BC Sans Mono', 'SF Mono', 'Menlo', monospace;
     font-size: 0.7rem;
     line-height: 1.4;
-    color: colors.$gray-100;
+    color: theme.$text;
     max-height: 12rem;
     overflow-y: auto;
   }
@@ -823,18 +831,18 @@
   .search-control__hint {
     margin-top: 0.5rem;
     font-size: 0.75rem;
-    color: colors.$gray-75;
+    color: theme.$text-secondary;
   }
 
   .search-control__error {
     margin-top: 0.5rem;
     font-size: 0.75rem;
-    color: #da1e28;
+    color: theme.$text-error;
   }
 
   .search-control__score {
     font-size: 0.75rem;
-    color: colors.$gray-75;
+    color: theme.$text-secondary;
   }
 }
 
@@ -848,7 +856,7 @@
   .bookmarks-panel__note {
     margin-bottom: 0.75rem;
     font-size: 0.75rem;
-    color: colors.$gray-75;
+    color: theme.$text-secondary;
     font-style: italic;
   }
 
@@ -865,14 +873,14 @@
 // When the user toggles Identify on, the button inverts (primary bg /
 // white icon) so the mode state is obvious at a glance.
 .aoi-toolbar__strip .cds--icon-button.aoi-toolbar__icon-btn--active {
-  background: var(--#{vars.$bcgov-prefix}-button-primary) !important;
+  background: theme.token('button-primary') !important;
 
   svg {
-    fill: colors.$white !important;
+    fill: theme.$text-on-color !important;
   }
 
   &:hover:not(:disabled) {
-    background: var(--#{vars.$bcgov-prefix}-button-primary) !important;
+    background: theme.token('button-primary') !important;
     filter: brightness(0.85);
   }
 }
@@ -896,7 +904,7 @@
 }
 
 .bec-identify-popup {
-  color: colors.$gray-100;
+  color: theme.$text;
   // Guarantees a minimum content width so the 2-column row layout always
   // has enough room for the key column + value column, no matter how
   // narrow Leaflet's computed popup width ends up.
@@ -905,15 +913,15 @@
   &__copy-btn {
     margin-top: 0.5rem;
     padding: 0.25rem 0.75rem;
-    background: #0f62fe;
-    color: colors.$white;
+    background: theme.$primary;
+    color: theme.$text-on-color;
     border: none;
     border-radius: 0.125rem;
     font-size: 0.75rem;
     cursor: pointer;
 
     &:hover {
-      background: #0353e9;
+      background: theme.token('button-primary-hover');
     }
   }
 
@@ -921,8 +929,8 @@
     @include type.type-style('heading-02');
     margin: 0 0 0.5rem;
     padding-bottom: 0.375rem;
-    border-bottom: 1px solid colors.$gray-20;
-    color: colors.$gray-100;
+    border-bottom: 1px solid theme.$border;
+    color: theme.$text;
   }
 
   &__list {
@@ -942,7 +950,7 @@
     dt {
       flex: 0 0 95px;
       font-weight: 600;
-      color: colors.$gray-70;
+      color: theme.$text-secondary;
       margin: 0;
       white-space: nowrap;
     }
@@ -950,7 +958,7 @@
     dd {
       flex: 1 1 auto;
       margin: 0;
-      color: colors.$gray-100;
+      color: theme.$text;
       overflow-wrap: anywhere;
     }
   }
@@ -961,9 +969,9 @@
 // selectors live at the top level.
 .spar-measure-vertex-tooltip,
 .spar-measure-summary-tooltip {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #0f62fe;
-  color: #161616;
+  background: theme.translucent(theme.$surface, 92%);
+  border: 1px solid theme.$primary;
+  color: theme.$text;
   font-size: 0.75rem;
   padding: 2px 6px;
   border-radius: 2px;
@@ -975,19 +983,56 @@
 // the BC Gov design system rather than Leaflet's default gray chrome.
 .leaflet-control-zoom,
 .leaflet-control-layers {
-  border: 2px solid var(--#{vars.$bcgov-prefix}-button-primary) !important;
+  border: 2px solid theme.token('button-primary') !important;
   border-radius: 0.25rem !important;
 }
 
 .leaflet-control-zoom-in,
 .leaflet-control-zoom-out {
-  color: var(--#{vars.$bcgov-prefix}-button-primary) !important;
+  color: theme.token('button-primary') !important;
   transform: rotate(-90deg);
 }
 
+// Leaflet's own chrome (zoom buttons, layers list, popups, attribution)
+// ships with hard-coded white backgrounds — route it through the theme.
+.leaflet-bar a,
+.leaflet-control-layers,
+.leaflet-control-layers-expanded .leaflet-control-layers-list,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background-color: theme.$surface;
+  color: theme.$text;
+}
+
+.leaflet-bar a {
+  border-bottom-color: theme.$border;
+}
+
+.leaflet-control-layers-separator {
+  border-top-color: theme.$border;
+}
+
+.leaflet-container .leaflet-control-attribution {
+  background: theme.translucent(theme.$surface, 80%);
+  color: theme.$text-secondary;
+
+  a {
+    color: theme.$link;
+  }
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: theme.$text-secondary;
+}
+
+// Leaflet's layers toggle is a dark PNG; invert it on the dark theme.
+[data-carbon-theme='g100'] .leaflet-control-layers-toggle {
+  filter: invert(1);
+}
+
 .leaflet-bar a:hover {
-  color: var(--#{vars.$bcgov-prefix}-button-tertiary) !important;
-  background-color: var(--#{vars.$bcgov-prefix}-button-primary) !important;
+  color: theme.token('button-tertiary') !important;
+  background-color: theme.token('button-primary') !important;
 }
 
 // Align the bottom-left zoom control with the AOI tools strip at the

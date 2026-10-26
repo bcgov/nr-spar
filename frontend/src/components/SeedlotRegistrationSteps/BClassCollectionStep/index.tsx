@@ -33,7 +33,8 @@ import {
   isBecVariantRequired,
   isNumNotInRange
 } from './utils';
-import { applyCollectionAreaResult } from './mapIntegration';
+import { applyCollectionAreaResult, clearCollectionAreaResult } from './mapIntegration';
+import RemoveCollectionAreaModal from './RemoveCollectionAreaModal';
 import {
   CollectionBecSection,
   CollectionLatLongSection,
@@ -58,6 +59,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
   } = useContext(ClassBContext);
 
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
+  const [elevationWarning, setElevationWarning] = useState<string | null>(null);
+  const [isRemoveAreaOpen, setIsRemoveAreaOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -221,14 +224,30 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
   const stateRef = useRef(state);
   stateRef.current = state;
   const pendingMapResultRef = useRef<CollectionAreaResult | null>(null);
+  const consumedRouterStateRef = useRef<unknown>(null);
 
   // Consume collection-area values from SeedMap via router state. Clear the
   // router payload immediately, but hold the result until the BEC catalogue
   // is ready when labels are needed (otherwise zone codes stick without names).
+  // The router clears state in a transition, so this effect can re-run with the
+  // same state still present; consume each state object only once.
   useEffect(() => {
-    const fromRouter = (location.state as { collectionAreaResult?: CollectionAreaResult } | null)
-      ?.collectionAreaResult;
-    if (fromRouter) {
+    const routerState = location.state as {
+      collectionAreaResult?: CollectionAreaResult;
+      collectionAreaCleared?: boolean;
+    } | null;
+    if (routerState?.collectionAreaCleared && location.state !== consumedRouterStateRef.current) {
+      consumedRouterStateRef.current = location.state;
+      navigate('.', { replace: true, state: null });
+      pendingMapResultRef.current = null;
+      setStepData('collectionStep', clearCollectionAreaResult(stateRef.current));
+      setElevationWarning(null);
+      return;
+    }
+
+    const fromRouter = routerState?.collectionAreaResult;
+    if (fromRouter && location.state !== consumedRouterStateRef.current) {
+      consumedRouterStateRef.current = location.state;
       pendingMapResultRef.current = fromRouter;
       navigate('.', { replace: true, state: null });
     }
@@ -247,6 +266,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
       'collectionStep',
       applyCollectionAreaResult(stateRef.current, pending, becCatalogueQuery.data)
     );
+    setElevationWarning(pending.elevationError);
     pendingMapResultRef.current = null;
   }, [
     location.state,
@@ -348,7 +368,17 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         readOnly={readOnly}
         seedlotNumber={seedlotNumber}
         onLaunchMap={launchCollectionAreaMap}
+        onRemoveCollectionArea={() => setIsRemoveAreaOpen(true)}
         onDmsChange={handleStringFieldChange}
+      />
+      <RemoveCollectionAreaModal
+        open={isRemoveAreaOpen}
+        onClose={() => setIsRemoveAreaOpen(false)}
+        onConfirm={() => {
+          updateState(clearCollectionAreaResult(state));
+          setElevationWarning(null);
+          setIsRemoveAreaOpen(false);
+        }}
       />
       <CollectionBecSection
         state={state}
@@ -377,6 +407,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         onLocationAreaChange={handleLocationAreaChange}
         onRadiusChange={handleRadiusChange}
         onElevationChange={handleStringFieldChange}
+        elevationWarning={elevationWarning}
+        onDismissElevationWarning={() => setElevationWarning(null)}
       />
       <CollectionMethodsSection
         state={state}

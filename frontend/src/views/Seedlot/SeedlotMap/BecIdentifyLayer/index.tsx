@@ -352,6 +352,7 @@ const BecIdentifyLayer = ({ layerTypeName }: BecIdentifyLayerProps) => {
         key={`${clickedPoint.lat},${clickedPoint.lng},${identified.kind}`}
         data={{ type: 'FeatureCollection', features: [identified.feature] } as Parameters<typeof GeoJSON>[0]['data']}
         style={highlightStyle}
+        pmIgnore
       />
       <Popup
         position={clickedPoint}

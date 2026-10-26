@@ -109,7 +109,8 @@ const MeasureControl = () => {
           color: '#0f62fe',
           weight: 2,
           fillColor: '#ffffff',
-          fillOpacity: 1
+          fillOpacity: 1,
+          pmIgnore: true
         });
         marker.bindTooltip(
           `${pt.lat.toFixed(5)}, ${pt.lng.toFixed(5)}`,
@@ -125,7 +126,8 @@ const MeasureControl = () => {
         const polyline = L.polyline(pts, {
           color: '#0f62fe',
           weight: 3,
-          dashArray: '6 6'
+          dashArray: '6 6',
+          pmIgnore: true
         });
         group.addLayer(polyline);
       }
@@ -138,7 +140,8 @@ const MeasureControl = () => {
             weight: 2,
             dashArray: '6 6',
             fillColor: '#0f62fe',
-            fillOpacity: 0.15
+            fillOpacity: 0.15,
+            pmIgnore: true
           });
           group.addLayer(poly);
         } catch {
@@ -153,7 +156,8 @@ const MeasureControl = () => {
           color: '#0f62fe',
           weight: 2,
           fillColor: '#ffffff',
-          fillOpacity: 1
+          fillOpacity: 1,
+          pmIgnore: true
         });
         const cumKm = cumulativeDistanceKm(pts.slice(0, idx + 1));
         marker.bindTooltip(formatDistanceKm(cumKm), {

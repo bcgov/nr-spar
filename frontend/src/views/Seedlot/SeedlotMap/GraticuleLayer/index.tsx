@@ -77,6 +77,7 @@ const GraticuleLayer = () => {
         opacity: 0.85,
         dashArray: '4 4',
         interactive: false,
+        pmIgnore: true,
         // Force SVG rendering so the lines are visible on top of the
         // basemap regardless of the MapContainer's `preferCanvas`
         // setting. With canvas, faint thin lines blend into terrain

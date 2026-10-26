@@ -2,6 +2,7 @@ import type { BecCatalogueItem } from '../../api-service/becCatalogueAPI';
 import type { CollectionAreaResult } from '../../types/SparMapTypes';
 import {
   applyCollectionAreaResult,
+  clearCollectionAreaResult,
   decimalToDms
 } from '../../components/SeedlotRegistrationSteps/BClassCollectionStep/mapIntegration';
 import { initBClassCollectionState } from '../../components/SeedlotRegistrationSteps/BClassCollectionStep/utils';
@@ -29,10 +30,12 @@ const baseResult = (overrides: Partial<CollectionAreaResult> = {}): CollectionAr
   geoJson: '{"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[]},"properties":{}}',
   polygonCount: 1,
   areaHectares: 12.56,
+  radiusKm: 2.3,
   meanLat: 48.5,
   meanLng: -123.25,
   elevationMinM: 100,
   elevationMaxM: 300,
+  elevationError: null,
   becZones: ['CWH'],
   becVariant: {
     mapLabel: 'CWHxm1',
@@ -85,7 +88,8 @@ describe('mapIntegration', () => {
       expect(next.elevationMin.value).toBe('100');
       expect(next.elevationMax.value).toBe('300');
       expect(next.elevationMean.value).toBe('200');
-      expect(next.collectionRadius.value).toBeTruthy();
+      expect(next.collectionRadius.value).toBe('2.3');
+      expect(next.collectionRadius.isInvalid).toBe(false);
       expect(next.becZone.value.code).toBe('CWH');
       expect(next.becZone.value.description).toBe('Coastal Western Hemlock');
       expect(next.becSubzone.value.code).toBe('xm');
@@ -115,6 +119,52 @@ describe('mapIntegration', () => {
       expect(next.becZone.value.code).toBe('CWH');
       expect(next.becZone.value.label).toBe('CWH');
       expect(next.becSubzone.value.code).toBe('xm');
+    });
+
+    it('leaves the radius alone when the map could not measure one', () => {
+      const state = initBClassCollectionState('00012797', '01');
+      const before = state.collectionRadius.value;
+      const next = applyCollectionAreaResult(state, baseResult({ radiusKm: 0 }), catalogue);
+
+      expect(next.collectionRadius.value).toBe(before);
+    });
+
+    it('transfers the measured radius without re-deriving it from area', () => {
+      const state = initBClassCollectionState('00012797', '01');
+      // Area and radius disagree deliberately: a long narrow area is small but
+      // reaches far. The form must record the reach, not the equivalent circle.
+      const next = applyCollectionAreaResult(
+        state,
+        baseResult({ areaHectares: 3.1, radiusKm: 7.4 }),
+        catalogue
+      );
+
+      expect(next.collectionRadius.value).toBe('7.4');
+      expect(next.collectionRadius.isInvalid).toBe(false);
+    });
+  });
+
+  describe('clearCollectionAreaResult', () => {
+    it('clears the area and every value it filled in, keeping other fields', () => {
+      const state = initBClassCollectionState('00012797', '01');
+      state.comments.value = 'leave me alone';
+      const applied = applyCollectionAreaResult(state, baseResult(), catalogue);
+
+      const next = clearCollectionAreaResult(applied);
+
+      expect(next.collectionGeometry.value).toBe('');
+      expect(next.latDeg.value).toBe('');
+      expect(next.longSec.value).toBe('');
+      expect(next.elevationMin.value).toBe('');
+      expect(next.elevationMax.value).toBe('');
+      expect(next.elevationMean.value).toBe('');
+      expect(next.collectionRadius.value).toBe('');
+      expect(next.becZone.value.code).toBe('');
+      expect(next.becSubzone.value.code).toBe('');
+      expect(next.becVariant.value.code).toBe('');
+      expect(next.useLatLongForBec.value).toBe(true);
+      expect(next.comments.value).toBe('leave me alone');
+      expect(next.collectorAgency.value).toBe('00012797');
     });
   });
 });
