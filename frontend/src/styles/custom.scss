@@ -447,6 +447,12 @@ label.#{vars.$bcgov-prefix}--label--disabled {
 
 .#{vars.$bcgov-prefix}--loading-overlay {
   z-index: 10000;
+
+  // Carbon >= 1.115 wraps the spinner in a programmatically focused
+  // role="dialog" tabindex="-1" div; hide the browser's default focus ring.
+  > [role='dialog']:focus {
+    outline: none;
+  }
 }
 
 label.#{vars.$bcgov-prefix}--label {

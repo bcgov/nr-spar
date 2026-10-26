@@ -25,6 +25,7 @@ import MoistureContent from '../views/CONSEP/TestingActivities/MoistureContent';
 import PurityContent from '../views/CONSEP/TestingActivities/PurityContent';
 import TestSearch from '../views/CONSEP/TestingActivities/TestSearch';
 import MaintainGermTray from '../views/CONSEP/TestingActivities/GerminatorTray/MaintainGermTray';
+import GerminationContent from '../views/CONSEP/TestingActivities/GerminationContent';
 
 // Dropped rather than redirected so an unmatched path yields the app's normal
 // "route not found" behaviour when B-class is turned off.
@@ -153,6 +154,12 @@ const BrowserRoutes: Array<RouteObject> = [
     path: ROUTES.MANUAL_PURITY_CONTENT,
     element: (
       <PurityContent />
+    )
+  },
+  {
+    path: ROUTES.GERMINATION_TEST_RESULT,
+    element: (
+      <GerminationContent />
     )
   },
   {

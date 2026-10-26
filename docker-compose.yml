@@ -50,7 +50,7 @@ services:
       SEEDLOT_B_ENABLED: ${SEEDLOT_B_ENABLED:-true}
       <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
-    image: maven:3.9.16-eclipse-temurin-17
+    image: maven:3.10.0-eclipse-temurin-17
     entrypoint: sh -c './encora-cert.sh'
     working_dir: /app
     volumes:
@@ -88,7 +88,7 @@ services:
       CYPRESS_baseUrl: http://frontend:3000
       CYPRESS_USERNAME: LOAD-3-TEST
       CYPRESS_PASSWORD: ${CYPRESS_PASSWORD}
-    image: cypress/included:15.20.1
+    image: cypress/included:16.2.0
     profiles: ["cypress"]
     user: root
     volumes: ["./frontend:/app"]
@@ -108,7 +108,7 @@ services:
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_UpeAqsYt4"
     profiles: ["oracle-api"]
     network_mode: host
-    image: maven:3.9.16-eclipse-temurin-17
+    image: maven:3.10.0-eclipse-temurin-17
     entrypoint: sh -c './startup.sh && mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5006"'
     working_dir: /app
     volumes: ["./oracle-api:/app"]

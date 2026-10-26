@@ -86,7 +86,11 @@ Then('I can see the empty favourite section subtitle', () => {
 });
 
 When('I open the add favourite activity modal', () => {
-  cy.contains('button.consep-fav-non-content-btn', favouriteContent.fa.favouriteActivitiesBtn).click();
+  cy.get(
+    'button.consep-fav-non-content-btn:visible, button.consep-add-fav-btn:visible'
+  )
+    .first()
+    .click();
   cy.get('[role="dialog"][aria-label="Add favourite activity"]').as('favouriteActivityModal');
 });
 
@@ -128,6 +132,13 @@ When('I submit favourite activity modal', () => {
 
 Then('I should see favourite card {string}', (activityName: string) => {
   getFavouriteCardLabel(activityName).should('be.visible');
+});
+
+Then('favourite activity row {string} should not be selected', (activityName: string) => {
+  cy.get('@favouriteActivityModal')
+    .contains(`.${prefix}--data-table tbody tr`, activityName)
+    .find('input[type="checkbox"]')
+    .should('not.be.checked');
 });
 
 Then('I should not see favourite card {string}', (activityName: string) => {

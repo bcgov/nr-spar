@@ -3,6 +3,8 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.CopyGerminationTestResultsDto;
+import ca.bc.gov.oracleapi.dto.consep.RequestSeedlotValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
@@ -14,11 +16,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -108,6 +112,36 @@ public class ActivityEndpoint {
   }
 
   /**
+   * Validates that a seedlot number and request ID identify a real request-seedlot row that the
+   * Copy Results screen can target, and that the seedlot is the same species as the one in
+   * context.
+   *
+   * <p>Always 200: an unusable pair is a normal answer to this question, reported as
+   * {@code valid: false} with the reason, not as an error.
+   *
+   * @param seedlotNumber the seedlot being copied to
+   * @param requestId the request item (aka request ID) being copied to
+   * @param fromVegetationSt species of the seedlot in context, which the target must match
+   * @return the validation result, carrying the resolved row when one was found
+   */
+  @GetMapping("/validate-request-seedlot")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully validated the seedlot number and request ID pair.",
+      content = @Content(
+          schema = @Schema(implementation = RequestSeedlotValidationResponseDto.class))
+  )
+  @ApiAuthResponse
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public RequestSeedlotValidationResponseDto validateRequestSeedlot(
+      @RequestParam String seedlotNumber,
+      @RequestParam String requestId,
+      @RequestParam String fromVegetationSt
+  ) {
+    return activityService.validateRequestSeedlot(seedlotNumber, requestId, fromVegetationSt);
+  }
+
+  /**
    * Retrieves all standard activities that correspond to a germination test type, ordered by
    * activity description for use in a dropdown.
    *
@@ -125,5 +159,34 @@ public class ActivityEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<StandardActivityDto> getGerminationTestTypes() {
     return activityService.getGerminationTestTypes();
+  }
+
+  /**
+   * Copies a germination test's results to a new germination test for another seedlot/request.
+   *
+   * @param riaKey the germination test being copied
+   * @param target the seedlot and request being copied to
+   * @return the new activity
+   */
+  @PostMapping("/{riaKey}/copy-results")
+  @ResponseStatus(HttpStatus.CREATED)
+  @ApiResponse(
+      responseCode = "201",
+      description = "Successfully copied the germination test results.",
+      content = @Content(schema = @Schema(implementation = ActivitySearchResponseDto.class))
+  )
+  @ApiResponse(
+      responseCode = "400",
+      description = "The test cannot be copied, or the target is not a usable request seedlot."
+  )
+  @ApiResponse(responseCode = "404", description = "The test being copied does not exist.")
+  @ApiResponse(responseCode = "409", description = "The target already has this test.")
+  @ApiAuthResponse
+  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
+  public ActivitySearchResponseDto copyGerminationTestResults(
+      @PathVariable BigDecimal riaKey,
+      @Valid @RequestBody CopyGerminationTestResultsDto target
+  ) {
+    return activityService.copyGerminationTestResults(riaKey, target);
   }
 }

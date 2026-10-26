@@ -19,7 +19,7 @@ jobs:
     name: Set Variables
     outputs:
       pr: ${{ steps.pr.outputs.pr }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 1
     steps:
       # Get PR number for the last merged PR
@@ -28,7 +28,7 @@ jobs:
         uses: bcgov/action-get-pr@28b0adf8e4d40720d41f9c87356ce24b0a4bd6af # v0.3.1
 
   semantic-release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [vars]
     permissions:
       contents: write
@@ -108,7 +108,7 @@ jobs:
           includeRefIssues: false
 
       - name: Create Release
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         if: steps.set-version.outputs.tag != ''
         continue-on-error: true
         env:
@@ -145,7 +145,7 @@ jobs:
     needs: [vars, deploys-prod]
     permissions:
       packages: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         package: [backend, frontend, oracle-api]

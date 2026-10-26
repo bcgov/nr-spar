@@ -38,7 +38,7 @@ type AdvancedFiltersProps = {
   setValidateSearch: React.Dispatch<React.SetStateAction<ActivitySearchValidation>>;
   alignTo: { top: number; left: number; width: number };
   onClose: () => void;
-  anchorRef: React.RefObject<HTMLElement>;
+  anchorRef: React.RefObject<HTMLElement | null>;
   onSaveCriteria: () => void;
   isSavingCriteria: boolean;
 };

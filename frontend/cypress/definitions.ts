@@ -13,6 +13,56 @@ export type SeedlotRegFixtureType = {
   [species: string]: SeedlotRegType
 };
 
+export type AClassRegFormFixtureType = {
+  collector: {
+    agencyTitle: string;
+    agencySubtitle: string;
+    informationTitle: string;
+    informationSubtitle: string;
+    checkboxText: string;
+    acronymErrorMsg: string;
+    locationErrorMsg: string;
+    invalidDateErrorMsg: string;
+    numOfContainerErrorMsg: string;
+    volOfConesErrorMsg: string;
+  };
+  interimStorage: {
+    title: string;
+    subtitle: string;
+    acronymErrorMsg: string;
+    locationErrorMsg: string;
+    invalidDateErrorMsg: string;
+  };
+  ownership: {
+    title: string;
+    subtitle: string;
+    accordionTitle: string;
+    accordionSubtitle: string;
+    ownerAgencyError: string;
+    ownerAgencyValidationError: string;
+    locationCodeError: string;
+    ownerPortionSumError: string;
+    ownerPortionAboveLimitError: string;
+    ownerPortionBelowLimitError: string;
+    ownerPortionDecimalError: string;
+    reservedAboveLimitError: string;
+    reservedBelowLimitError: string;
+    reservedDecimalError: string;
+  };
+  extraction: {
+    extrationTitle: string;
+    extrationSubtitle: string;
+    storageTitle: string;
+    storageSubtitle: string;
+    extractionCheckboxText: string;
+    storageCheckboxText: string;
+    agencyErrorMsg: string;
+    agencyValidationMsg: string;
+    locationErrorMsg: string;
+    invalidDateErrorMsg: string;
+  };
+};
+
 export type MoistureContentType = {
   mc: {
     title: string,

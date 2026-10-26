@@ -39,8 +39,6 @@ import { INITIAL_GEN_WORTH_VALS, INITIAL_GEO_INFO_VALS } from '../SeedlotReview/
 import { MeanGeomInfoSectionConfigType, RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { StringInputType } from '../../../types/FormInputType';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
-
 import ClassAContext, { ClassAContextType } from './context';
 import SeedlotRegWizardContext, { SeedlotRegWizardStepData } from '../../../contexts/SeedlotRegWizardContext';
 import {
@@ -168,8 +166,7 @@ const ContextContainerClassA = ({ children }: props) => {
 
   const setDefaultClientAndCode = (
     clientNumber: string,
-    locationCode: string,
-    defaultMethodOfPayment?: MultiOptionsObj
+    locationCode: string
   ) => {
     setAllStepData((prevData) => ({
       ...prevData,
@@ -184,25 +181,6 @@ const ContextContainerClassA = ({ children }: props) => {
           value: locationCode
         }
       },
-      ownershipStep: prevData.ownershipStep.map((singleOwner) => ({
-        ...singleOwner,
-        ownerAgency: {
-          ...singleOwner.ownerAgency,
-          value: clientNumber
-        },
-        ownerCode: {
-          ...singleOwner.ownerCode,
-          value: locationCode
-        },
-        ...(defaultMethodOfPayment
-          ? {
-            methodOfPayment: {
-              ...singleOwner.methodOfPayment,
-              value: defaultMethodOfPayment
-            }
-          }
-          : {})
-      })),
       interimStep: {
         ...prevData.interimStep,
         agencyName: {
@@ -525,7 +503,10 @@ const ContextContainerClassA = ({ children }: props) => {
   };
   const queryClient = useQueryClient();
   const submitSeedlot = useMutation({
-    mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
+    // Payload is built here so a validation throw surfaces as submitSeedlot.error.
+    mutationFn: (buildPayload: () => SeedlotAClassSubmitType) => (
+      putAClassSeedlot(seedlotNumber ?? '', buildPayload())
+    ),
     onSuccess: async () => {
       queryClient.removeQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
@@ -675,7 +656,9 @@ const ContextContainerClassA = ({ children }: props) => {
       // to hydrate the form from the target's normalized tables instead of the draft column.
       const draftKeys = Object.keys(getFormDraftQuery.data.allStepData ?? {});
       if (draftKeys.length === 0) {
-        setFormPhase('hydrating-from-tables');
+        if (formPhase === 'loading-draft') {
+          setFormPhase('hydrating-from-tables');
+        }
       } else {
         setAllStepData(getFormDraftQuery.data.allStepData);
         setFormPhase('ready');
@@ -699,16 +682,13 @@ const ContextContainerClassA = ({ children }: props) => {
         navigate(`/seedlots/details/${seedlotNumber}`);
       } else if (
         seedlotQuery.status === 'success'
-        && methodsOfPaymentQuery.isFetched
         && formPhase === 'loading-draft'
       ) {
-        // First open (no draft): apply agency/location and default method of payment once.
-        // Copy/hydrate paths set ownership from tables and must not get this default.
-        const defaultPayment = methodsOfPaymentQuery.data?.find((m) => m.isDefault);
+        // First open (no draft): apply agency/location to collection and interim once.
+        // Ownership must start blank (no owner agency, no method of payment).
         setDefaultClientAndCode(
           seedlotQuery.data.seedlot.applicantClientNumber,
-          getDefaultLocationCode(),
-          defaultPayment
+          getDefaultLocationCode()
         );
         setFormPhase('ready');
       }
@@ -717,8 +697,6 @@ const ContextContainerClassA = ({ children }: props) => {
     getFormDraftQuery.status,
     getFormDraftQuery.fetchStatus,
     seedlotQuery.status,
-    methodsOfPaymentQuery.isFetched,
-    methodsOfPaymentQuery.data,
     formPhase
   ]);
 

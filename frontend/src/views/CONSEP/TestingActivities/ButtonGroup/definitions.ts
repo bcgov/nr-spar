@@ -1,8 +1,10 @@
+import React from 'react';
+
 export type ButtonObjType = {
   id: string
   kind: string
   size: string
-  icon: JSX.Element
+  icon: React.JSX.Element
   text: string
   action?: () => void
   disabled?: boolean

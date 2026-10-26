@@ -92,11 +92,14 @@ public class SeedlotParentTreeGeneticQualityService {
                 seedlotGenQltyDto.geneticQualityValue(),
                 loggedUserService.createAuditCurrentUser());
 
-        sptgq.setQualityValueEstimated(seedlotGenQltyDto.isEstimated());
+        // Flags may be absent from the payload; treat missing values as false
+        boolean isEstimated = Boolean.TRUE.equals(seedlotGenQltyDto.isEstimated());
+        boolean isTested = Boolean.TRUE.equals(seedlotGenQltyDto.isParentTreeTested());
+
+        sptgq.setQualityValueEstimated(isEstimated);
 
         // untested_ind = True if estimated = True and pt.tested_ind = False
-        sptgq.setParentTreeUntested(
-            !seedlotGenQltyDto.isParentTreeTested() && seedlotGenQltyDto.isEstimated());
+        sptgq.setParentTreeUntested(!isTested && isEstimated);
 
         seedlotPtToInsert.add(sptgq);
       }

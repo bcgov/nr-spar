@@ -16,6 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.CopyGerminationTestResultsDto;
+import ca.bc.gov.oracleapi.dto.consep.RequestSeedlotValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -308,6 +310,94 @@ class ActivityEndpointTest {
         .andExpect(jsonPath("$[1].activityDescription").value(dto2.activityDescription()));
 
     verify(activityService, times(1)).getStandardActivityIds(true, true);
+  }
+
+  /* ----------------------- Validate Request Seedlot ------------------------------*/
+  @Test
+  void validateRequestSeedlot_shouldReturnTheResolvedRow_whenThePairIsValid() throws Exception {
+    RequestSeedlotValidationResponseDto serviceResponse =
+        new RequestSeedlotValidationResponseDto(
+            true, "", "TST20260001A", new BigDecimal("12345"), "A", "00098", "SX");
+
+    when(activityService.validateRequestSeedlot("00098", "TST20260001A", "SX"))
+        .thenReturn(serviceResponse);
+
+    mockMvc.perform(get("/api/activities/validate-request-seedlot")
+            .param("seedlotNumber", "00098")
+            .param("requestId", "TST20260001A")
+            .param("fromVegetationSt", "SX")
+            .with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.valid").value(true))
+        .andExpect(jsonPath("$.requestItem").value("TST20260001A"))
+        .andExpect(jsonPath("$.requestSkey").value(12345))
+        .andExpect(jsonPath("$.itemId").value("A"))
+        .andExpect(jsonPath("$.vegetationSt").value("SX"));
+
+    verify(activityService, times(1)).validateRequestSeedlot("00098", "TST20260001A", "SX");
+  }
+
+  @Test
+  void validateRequestSeedlot_shouldReturnTheRejection_whenThePairIsNotValid() throws Exception {
+    when(activityService.validateRequestSeedlot("00098", "TST20269999A", "SX"))
+        .thenReturn(RequestSeedlotValidationResponseDto.invalid(
+            "No request item found for this seedlot number and request ID."));
+
+    mockMvc.perform(get("/api/activities/validate-request-seedlot")
+            .param("seedlotNumber", "00098")
+            .param("requestId", "TST20269999A")
+            .param("fromVegetationSt", "SX")
+            .with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.valid").value(false))
+        .andExpect(jsonPath("$.message")
+            .value("No request item found for this seedlot number and request ID."))
+        .andExpect(jsonPath("$.requestItem").isEmpty());
+  }
+
+  /* ----------------------- Copy Germination Test Results -----------------------*/
+  @Test
+  void copyGerminationTestResults_shouldReturnTheNewActivity() throws Exception {
+    CopyGerminationTestResultsDto target =
+        new CopyGerminationTestResultsDto("00099", "TST20260001B");
+    when(activityService.copyGerminationTestResults(new BigDecimal("777"), target))
+        .thenReturn(createdActivityDto);
+
+    mockMvc.perform(post("/api/activities/777/copy-results")
+            .with(csrf())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(target)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.reqId").value(createdActivityDto.reqId()));
+
+    verify(activityService, times(1))
+        .copyGerminationTestResults(new BigDecimal("777"), target);
+  }
+
+  @Test
+  void copyGerminationTestResults_shouldRejectAMissingTarget() throws Exception {
+    mockMvc.perform(post("/api/activities/777/copy-results")
+            .with(csrf())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(
+                new CopyGerminationTestResultsDto("", "TST20260001B"))))
+        .andExpect(status().isBadRequest());
+
+    verify(activityService, times(0)).copyGerminationTestResults(any(), any());
+  }
+
+  @Test
+  void copyGerminationTestResults_shouldPassTheConflictThrough() throws Exception {
+    CopyGerminationTestResultsDto target =
+        new CopyGerminationTestResultsDto("00099", "TST20260001B");
+    when(activityService.copyGerminationTestResults(new BigDecimal("777"), target))
+        .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "already exists"));
+
+    mockMvc.perform(post("/api/activities/777/copy-results")
+            .with(csrf())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(target)))
+        .andExpect(status().isConflict());
   }
 
   /* ----------------------- Validate Adding Germ Test ----------------------------*/

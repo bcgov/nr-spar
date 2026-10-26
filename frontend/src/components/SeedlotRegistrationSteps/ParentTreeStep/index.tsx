@@ -58,7 +58,7 @@ import {
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
   addNewMixRow, calcMixTabInfoItems, fillMixTable,
   getParentTreesForSelectedOrchards,
-  areOrchardsValid
+  areOrchardsValid, backfillParentTreeIds, hasUnresolvedParentTreeIds
 } from './utils';
 import EditGenWorth from './EditGenWorth';
 
@@ -180,6 +180,11 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     gcTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
+  // Keep Calculate disabled until the catalog is here and the pre-#2638 backfill has
+  // stamped every row the payload needs, otherwise a click surfaces a confusing
+  // "missing its parent tree id" error that resolves itself a second later.
+  const hasUnresolvedIds = !allParentTreeQuery.isFetched || hasUnresolvedParentTreeIds(state);
+
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -197,6 +202,13 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFormSubmitted, allParentTreeQuery.status, allParentTreeQuery.data]);
+
+  useEffect(() => {
+    if (allParentTreeQuery.status !== 'success' || !allParentTreeQuery.data) return;
+    const backfilled = backfillParentTreeIds(state, allParentTreeQuery.data);
+    if (backfilled) setStepData('parentTreeStep', backfilled);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.tableRowData, state.mixTabData, allParentTreeQuery.status, allParentTreeQuery.data]);
 
   // Effects 'SMP mix' tab
   useEffect(
@@ -343,7 +355,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
             description="Recalculate values based on newly provided cone and pollen count data, overriding current entries"
           />
           <CalculateMetrics
-            disableOptions={disableOptions}
+            disableOptions={disableOptions || hasUnresolvedIds}
             setShowInfoSections={setShowInfoSections}
             isReview
           />
@@ -360,7 +372,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     const calculateButton = !isFormSubmitted
       ? (
         <CalculateMetrics
-          disableOptions={disableOptions}
+          disableOptions={disableOptions || hasUnresolvedIds}
           setShowInfoSections={setShowInfoSections}
         />
       )
