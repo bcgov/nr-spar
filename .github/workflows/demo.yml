@@ -34,10 +34,6 @@ jobs:
           commands: |
             # Set Up Routing
 
-            # Login
-            oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-            oc project ${{ vars.oc_namespace }} #Safeguard!
-
             # Delete and replace route
             oc delete route/${{ env.REPO }}-${{ env.DEST }} --ignore-not-found=true
             oc create route edge ${{ env.REPO }}-${{ env.DEST }} \
