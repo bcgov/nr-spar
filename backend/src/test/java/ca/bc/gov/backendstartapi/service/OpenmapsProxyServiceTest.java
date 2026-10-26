@@ -338,7 +338,8 @@ class OpenmapsProxyServiceTest {
     assertEquals("{\"type\":\"FeatureCollection\",\"features\":[]}", body);
     ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
     verify(restTemplate)
-        .exchange(uriCaptor.capture(), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class));
+        .exchange(
+            uriCaptor.capture(), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class));
     assertEquals("openmaps.gov.bc.ca", uriCaptor.getValue().getHost());
     // The trailing slash must not survive into the path as "//geo/pub/ows".
     assertEquals("/geo/pub/ows", uriCaptor.getValue().getPath());

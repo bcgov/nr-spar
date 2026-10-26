@@ -1232,7 +1232,8 @@ class SeedlotFormValidationServiceTest {
     SeedlotFormSubmissionDtoClassB form =
         bclassFormWithGeometry(
             "{\"type\":\"Polygon\",\"coordinates\":"
-                + "[[[-123.02,49.0],[-123.0,49.0],[-123.0,49.01],[-123.02,49.01],[-123.02,49.0]]]}");
+                + "[[[-123.02,49.0],[-123.0,49.0],[-123.0,49.01],"
+                + "[-123.02,49.01],[-123.02,49.0]]]}");
 
     Assertions.assertDoesNotThrow(
         () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));

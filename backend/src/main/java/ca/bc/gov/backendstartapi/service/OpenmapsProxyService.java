@@ -235,6 +235,12 @@ public class OpenmapsProxyService {
         String.class);
   }
 
+  private static MultiValueMap<String, String> canonicalParams(Map<String, String> query) {
+    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+    query.forEach((key, value) -> params.add(canonicalParamName(key), value));
+    return params;
+  }
+
   /**
    * Target URI with no query string, for the POST form binding. Origin-checked
    * exactly like the GET variant so neither path can leave the OpenMaps host.
@@ -246,12 +252,6 @@ public class OpenmapsProxyService {
       throw new OpenmapsProxyException(HttpStatus.BAD_REQUEST, "Refusing to leave OpenMaps host");
     }
     return uri;
-  }
-
-  private static MultiValueMap<String, String> canonicalParams(Map<String, String> query) {
-    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-    query.forEach((key, value) -> params.add(canonicalParamName(key), value));
-    return params;
   }
 
   URI buildOpenmapsUri(String path, Map<String, String> query) {
