@@ -1,0 +1,335 @@
+/* eslint-disable no-undef */
+import { describe, it, expect } from 'vitest';
+import {
+  getDefaultSeeds, calcDayNumber, resolveDayZero, validateCountDates, formatCountDateLines,
+  calcRepTotal, checkOverLimit, calcGermPct, buildUpsertPayload, parseCountInput,
+  getSlotDateBounds, calcSlotAbnormalTotal, calcRepAbnormalTotal
+} from '../../../views/CONSEP/TestingActivities/GerminationContent/utils';
+
+describe('getDefaultSeeds', () => {
+  it('returns 50 for QA and 100 otherwise', () => {
+    expect(getDefaultSeeds('QA')).toBe(50);
+    expect(getDefaultSeeds('STD')).toBe(100);
+    expect(getDefaultSeeds(undefined)).toBe(100);
+  });
+});
+
+describe('formatCountDateLines', () => {
+  // The column is sized to the widest of these two lines, not the whole date.
+  it('splits a count date into year and month-day lines', () => {
+    expect(formatCountDateLines('2024-11-04')).toEqual(['2024-', '11-04']);
+  });
+});
+
+describe('calcDayNumber', () => {
+  // Ticket AC1: into germinator 2024-10-31, first count 2024-11-04 -> day 4
+  it('counts whole days from germinator entry', () => {
+    expect(calcDayNumber('2024-10-31', '2024-11-04')).toBe(4);
+  });
+  it('returns undefined without a germinator entry date', () => {
+    expect(calcDayNumber(undefined, '2024-11-04')).toBeUndefined();
+  });
+});
+
+describe('resolveDayZero', () => {
+  const slots = [
+    { slotIndex: 1, countDt: '2026-03-09', dayNoOfTest: 3 },
+    { slotIndex: 2, countDt: '2026-03-11', dayNoOfTest: 5 }
+  ];
+
+  it('prefers the germinator entry date', () => {
+    expect(resolveDayZero('2026-03-01', slots)).toBe('2026-03-01');
+  });
+
+  // Records can carry day numbers with no germinator entry date; without this
+  // fallback, editing one column blanks a day number nothing can recompute.
+  it('backs out day zero from another dated slot', () => {
+    expect(resolveDayZero(undefined, slots)).toBe('2026-03-06');
+  });
+
+  it('ignores the slot being edited', () => {
+    expect(resolveDayZero(undefined, slots, 1)).toBe('2026-03-06');
+    expect(resolveDayZero(undefined, [slots[0]], 1)).toBeUndefined();
+  });
+
+  it('returns undefined when nothing carries both a date and a day number', () => {
+    expect(resolveDayZero(undefined, [{ slotIndex: 1, countDt: '2026-03-09' }])).toBeUndefined();
+    expect(resolveDayZero(undefined, [])).toBeUndefined();
+  });
+});
+
+describe('validateCountDates', () => {
+  it('flags a count date not after the previous one', () => {
+    const slots = [
+      { slotIndex: 1, countDt: '2024-11-04' },
+      { slotIndex: 2, countDt: '2024-11-04' }
+    ];
+    const errors = validateCountDates(slots as any);
+    expect(errors['slot-2']).toBe('Count date must be after the previous count date');
+    expect(errors['slot-1']).toBeUndefined();
+  });
+});
+
+describe('rep totals and over-limit', () => {
+  const slots = [
+    { slotIndex: 1, countDt: '2024-11-04', rep1NoSeedsGerm: 60, rep2NoSeedsGerm: 10 },
+    { slotIndex: 2, countDt: '2024-11-05', rep1NoSeedsGerm: 50, rep2NoSeedsGerm: 20 }
+  ] as any;
+
+  it('sums one replicate across slots', () => {
+    expect(calcRepTotal(slots, 1)).toBe(110);
+    expect(calcRepTotal(slots, 2)).toBe(30);
+  });
+
+  it('flags replicates whose total exceeds their seeds', () => {
+    const reps = [
+      { replicateNumber: 1, totalNoSeeds: 100 },
+      { replicateNumber: 2, totalNoSeeds: 100 }
+    ] as any;
+    const errors = checkOverLimit(slots, reps);
+    expect(errors['rep-1']).toBe('Germinated + abnormal (110) exceeds number of seeds (100)');
+    expect(errors['rep-2']).toBeUndefined();
+  });
+
+  // C3: a cleared "# seeds" cell leaves totalNoSeeds undefined. The backend
+  // rejects the whole payload with a @NotNull 400, so autosave must be blocked
+  // client-side with a rep-scoped error.
+  it('flags a replicate whose number of seeds is missing', () => {
+    const reps = [
+      { replicateNumber: 1, totalNoSeeds: undefined },
+      { replicateNumber: 2, totalNoSeeds: 100 }
+    ] as any;
+    const errors = checkOverLimit(slots, reps);
+    expect(errors['rep-1']).toBe('Number of seeds is required');
+    expect(errors['rep-2']).toBeUndefined();
+  });
+});
+
+describe('calcSlotAbnormalTotal', () => {
+  it('sums one replicate\'s eleven categories for one day', () => {
+    const slot = {
+      slotIndex: 1,
+      rep1Abnormal: { abnormalNumReverseEmbryo: 3, abnormalNumWeak: 2 }
+    } as any;
+    expect(calcSlotAbnormalTotal(slot, 1)).toBe(5);
+  });
+
+  it('is zero for a day with no abnormals recorded', () => {
+    expect(calcSlotAbnormalTotal({ slotIndex: 1 } as any, 1)).toBe(0);
+  });
+
+  // totalSeeds rides along in the API shape but is not an abnormality.
+  it('excludes totalSeeds from the sum', () => {
+    const slot = {
+      slotIndex: 1,
+      rep1Abnormal: { abnormalNumReverseEmbryo: 3, totalSeeds: 100 }
+    } as any;
+    expect(calcSlotAbnormalTotal(slot, 1)).toBe(3);
+  });
+});
+
+describe('calcRepAbnormalTotal', () => {
+  it('sums a replicate\'s abnormals across every day', () => {
+    const slots = [
+      { slotIndex: 1, rep2Abnormal: { abnormalNumRotten: 4 } },
+      { slotIndex: 2, rep2Abnormal: { abnormalNumTwisted: 1, abnormalNumOther: 2 } },
+      { slotIndex: 3 }
+    ] as any;
+    expect(calcRepAbnormalTotal(slots, 2)).toBe(7);
+    expect(calcRepAbnormalTotal(slots, 1)).toBe(0);
+  });
+});
+
+describe('checkOverLimit with abnormals', () => {
+  // The backend validates germinated + abnormal against the replicate total
+  // (GermCountService.validateSeedTotals). Counting only the germinated half
+  // here let the user fill up to the seed count and then took a 400 on save.
+  it('counts abnormals against the seed total, as the backend does', () => {
+    const slots = [
+      {
+        slotIndex: 1,
+        countDt: '2024-11-04',
+        rep1NoSeedsGerm: 98,
+        rep1Abnormal: { abnormalNumRotten: 5 }
+      }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    expect(checkOverLimit(slots, reps)['rep-1'])
+      .toBe('Germinated + abnormal (103) exceeds number of seeds (100)');
+  });
+
+  it('stays quiet when germinated plus abnormal fits', () => {
+    const slots = [
+      {
+        slotIndex: 1,
+        countDt: '2024-11-04',
+        rep1NoSeedsGerm: 90,
+        rep1Abnormal: { abnormalNumRotten: 5 }
+      }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    expect(checkOverLimit(slots, reps)['rep-1']).toBeUndefined();
+  });
+});
+
+describe('checkOverLimit and undated slots', () => {
+  // buildUpsertPayload drops undated slots and the backend skips them too, so an
+  // abnormal count stranded on one -- a legacy row whose DAILY_GERM_SKEY has no
+  // count date -- must not push the replicate over its limit and jam autosave on
+  // a value the save would have discarded.
+  it('ignores abnormals stranded on a slot with no count date', () => {
+    const slots = [
+      { slotIndex: 1, countDt: '2024-11-04', rep1NoSeedsGerm: 90 },
+      { slotIndex: 2, dailyGermSkey: 77, rep1Abnormal: { abnormalNumRotten: 50 } }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    expect(checkOverLimit(slots, reps)['rep-1']).toBeUndefined();
+  });
+});
+
+describe('parseCountInput upper bound', () => {
+  // Every abnormal column is @Max(999) on the backend. Letting 1000 into state
+  // means the whole germ-count PUT comes back 400 -- taking the day's valid
+  // count edits with it -- instead of the keystroke simply being refused.
+  it('refuses a value above the given maximum', () => {
+    expect(parseCountInput('1000', 999)).toBeNull();
+    expect(parseCountInput('999', 999)).toBe(999);
+  });
+
+  it('has no maximum when none is given', () => {
+    expect(parseCountInput('1000')).toBe(1000);
+  });
+});
+
+describe('calcGermPct', () => {
+  it('rounds the percentage and handles missing seeds', () => {
+    expect(calcGermPct(45, 100)).toBe(45);
+    expect(calcGermPct(45, undefined)).toBe(0);
+  });
+});
+
+describe('buildUpsertPayload', () => {
+  it('keeps only dated slots and strips derived fields', () => {
+    const slots = [
+      {
+        slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4, rep1NoSeedsGerm: 5,
+        dailyGermSkey: 99, cumulativeGerm: 1.5
+      },
+      { slotIndex: 2 }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    const payload = buildUpsertPayload(slots, reps, '2026-01-01T00:00:00');
+    expect(payload.days).toHaveLength(1);
+    expect(payload.days[0]).not.toHaveProperty('dailyGermSkey');
+    expect(payload.days[0].slotIndex).toBe(1);
+    expect(payload.replicates).toHaveLength(1);
+    expect(payload.updateTimestamp).toBe('2026-01-01T00:00:00');
+  });
+
+  // GermCountService.validateAbnormalsAllOrNone 400s on a partial set: it
+  // rebuilds the whole row, so an omitted replicate would be NULLed out.
+  it('sends all four replicates once any abnormal is recorded for a day', () => {
+    const slots = [
+      {
+        slotIndex: 1,
+        countDt: '2024-11-04',
+        rep2Abnormal: { abnormalNumWeak: 1 }
+      }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    const payload = buildUpsertPayload(slots, reps);
+    expect(payload.days[0].rep2Abnormal).toEqual({ abnormalNumWeak: 1 });
+    expect(payload.days[0].rep1Abnormal).toEqual({});
+    expect(payload.days[0].rep3Abnormal).toEqual({});
+    expect(payload.days[0].rep4Abnormal).toEqual({});
+  });
+
+  // The API serializes an absent abnormal row as null, not as a missing key, so
+  // a presence check that only looks for undefined would expand every dated day
+  // into four empty DTOs -- minting a surrogate key and writing an empty row for
+  // each of them.
+  it('sends no abnormal fields for a day whose abnormals came back null', () => {
+    const slots = [
+      {
+        slotIndex: 1,
+        countDt: '2024-11-04',
+        rep1NoSeedsGerm: 5,
+        rep1Abnormal: null,
+        rep2Abnormal: null,
+        rep3Abnormal: null,
+        rep4Abnormal: null
+      }
+    ] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    const payload = buildUpsertPayload(slots, reps);
+    expect(payload.days[0].rep1Abnormal).toBeNull();
+    expect(payload.days[0].rep2Abnormal).toBeNull();
+  });
+
+  // A day that carries no abnormals must send none: the backend only writes a
+  // row -- and only mints a DAILY_GERM_SKEY -- for a day that does.
+  it('sends no abnormal fields for a day that has none', () => {
+    const slots = [{ slotIndex: 1, countDt: '2024-11-04', rep1NoSeedsGerm: 5 }] as any;
+    const reps = [{ replicateNumber: 1, totalNoSeeds: 100 }] as any;
+    const payload = buildUpsertPayload(slots, reps);
+    expect(payload.days[0].rep1Abnormal).toBeUndefined();
+    expect(payload.days[0].rep4Abnormal).toBeUndefined();
+  });
+});
+
+describe('parseCountInput', () => {
+  it('parses a non-negative integer', () => {
+    expect(parseCountInput('12')).toBe(12);
+    expect(parseCountInput('0')).toBe(0);
+  });
+
+  it('treats an emptied cell as cleared', () => {
+    expect(parseCountInput('')).toBeUndefined();
+    expect(parseCountInput('   ')).toBeUndefined();
+  });
+
+  it('refuses decimals and negatives rather than truncating them', () => {
+    // parseInt would have made these 5, 0 and -1.
+    expect(parseCountInput('5.5')).toBeNull();
+    expect(parseCountInput('.5')).toBeNull();
+    expect(parseCountInput('-1')).toBeNull();
+    expect(parseCountInput('abc')).toBeNull();
+  });
+});
+
+describe('getSlotDateBounds', () => {
+  const slots = [
+    { slotIndex: 1, countDt: '2024-11-04' },
+    { slotIndex: 2 },
+    { slotIndex: 3, countDt: '2024-11-07' },
+    { slotIndex: 4 }
+  ];
+
+  // The bounds are exclusive: validateCountDates wants each date strictly
+  // after the one before it, so the picker has to stop a day short either way.
+  it('bounds a slot by the nearest dated slots either side of it', () => {
+    expect(getSlotDateBounds(slots, 2)).toEqual({
+      minDate: '2024/11/05',
+      maxDate: '2024/11/06'
+    });
+  });
+
+  it('leaves the open end unbounded', () => {
+    expect(getSlotDateBounds(slots, 1)).toEqual({
+      minDate: undefined,
+      maxDate: '2024/11/06'
+    });
+    expect(getSlotDateBounds(slots, 4)).toEqual({
+      minDate: '2024/11/08',
+      maxDate: undefined
+    });
+  });
+
+  // Editing a dated slot must not bound it by its own date.
+  it('ignores the slot being edited', () => {
+    expect(getSlotDateBounds(slots, 3)).toEqual({
+      minDate: '2024/11/05',
+      maxDate: undefined
+    });
+  });
+});

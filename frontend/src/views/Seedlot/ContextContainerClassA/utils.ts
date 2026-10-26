@@ -358,6 +358,15 @@ export const initParentTreeState = (
 
             if (Object.prototype.hasOwnProperty.call(newRow, genWorthName)) {
               newRow[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
+              // The weighted columns feed the SMP mix breeding value summary and the
+              // smpBv sent on recalculation; they are only computed on user input, so
+              // restore them here or the SMP contribution reads as zero after submit.
+              const weightedName = `w_${genWorthName}` as keyof StrTypeRowItem;
+              if (Object.prototype.hasOwnProperty.call(newRow, weightedName)) {
+                newRow[weightedName].value = (
+                  singleGenWorthObj.geneticQualityValue * curSmpMix.proportion
+                ).toFixed(3);
+              }
             }
           });
           smpMixRows = Object
@@ -1085,11 +1094,14 @@ export const getSeedlotSubmitErrDescription = (err: AxiosError): ErrorDescriptio
         title: 'Network error!',
         description: 'System is facing network issues at the moment. Please check your internet connection and retry. (Error code 503)'
       };
-    default:
+    default: {
+      // A payload validation Error has no status/code.
+      const code = err.response?.status ?? err.code;
       return {
         title: 'Unknown failure!',
-        description: `${err.message} (Error code ${err.response?.status ?? err.code})`
+        description: code ? `${err.message} (Error code ${code})` : err.message
       };
+    }
   }
 };
 

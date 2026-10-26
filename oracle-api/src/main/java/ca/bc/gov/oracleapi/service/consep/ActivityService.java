@@ -5,11 +5,19 @@ import ca.bc.gov.oracleapi.dto.consep.ActivityCreateDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.AddGermTestValidationResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.CopyGerminationTestResultsDto;
+import ca.bc.gov.oracleapi.dto.consep.GermCountSlotDto;
+import ca.bc.gov.oracleapi.dto.consep.GerminationTestDuplicateValidationResponseDto;
+import ca.bc.gov.oracleapi.dto.consep.RequestSeedlotValidationResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.StandardActivityDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.entity.projection.RequestSeedlotProj;
+import ca.bc.gov.oracleapi.mapper.GermCountMapper;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
+import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
 import ca.bc.gov.oracleapi.repository.consep.SparRequestRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestRegimeRepository;
@@ -22,7 +30,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -38,6 +48,11 @@ public class ActivityService {
   private final StandardActivityRepository standardActivityRepository;
   private final TestRegimeRepository testRegimeRepository;
   private final SparRequestRepository sparRequestRepository;
+  private final GermCountRepository germCountRepository;
+  private final GermCountMapper germCountMapper;
+
+  /** What the legacy CNSL25 screen stamped as the updater of a copied germ count. */
+  static final String COPY_UPDATE_USERID = "CONSEP CNSL25 Copy Data";
 
   private StandardActivityDto toStandardActivityDto(StandardActivityEntity a) {
     return new StandardActivityDto(
@@ -412,5 +427,229 @@ public class ActivityService {
     return standardActivityRepository.findGerminationTestActivities().stream()
         .map(this::toStandardActivityDto)
         .toList();
+  }
+
+  /**
+   * Validates whether a copied germination test would create a duplicate based on an exact match of
+   * seedlot number, standard activity ID, actual begin datetime, and actual end datetime.
+   *
+   * <p>This method is used for copy-result validation before inserting a new germination test. The
+   * validation succeeds only when no existing record matches all four values exactly.
+   *
+   * @param seedlotNumber the seedlot number to check
+   * @param standardActivityId the standard activity identifier for the germination test
+   * @param actualBeginDateTime the actual test start timestamp
+   * @param actualEndDateTime the actual test end timestamp
+   * @return a validation result where {@code valid} is {@code false} when a duplicate already
+   *     exists, and {@code true} when no matching record is found
+   */
+  public GerminationTestDuplicateValidationResponseDto validateDuplicateGerminationTest(
+      String seedlotNumber,
+      String standardActivityId,
+      LocalDateTime actualBeginDateTime,
+      LocalDateTime actualEndDateTime) {
+
+    if (seedlotNumber == null
+        || seedlotNumber.isBlank()
+        || standardActivityId == null
+        || standardActivityId.isBlank()
+        || actualBeginDateTime == null
+        || actualEndDateTime == null) {
+      return new GerminationTestDuplicateValidationResponseDto(
+          false,
+          "Seedlot number, standard activity ID, and actual begin/end timestamps are required.");
+    }
+
+    boolean duplicateExists =
+        activityRepository.existsDuplicateGerminationTest(
+            seedlotNumber, standardActivityId, actualBeginDateTime, actualEndDateTime);
+
+    if (duplicateExists) {
+      return new GerminationTestDuplicateValidationResponseDto(
+          false,
+          "A germination test already exists for this seedlot number, standard activity ID,"
+              + " and begin/end datetime.");
+    }
+
+    return new GerminationTestDuplicateValidationResponseDto(true, "");
+  }
+
+  /**
+   * Resolves a seedlot number and request ID to the request-seedlot row they identify, for the
+   * Copy Results screen, and checks that the seedlot is the same species as the one in context.
+   *
+   * <p>A resolved row is returned whether or not the pair is usable, so a caller that rejects it
+   * on species can show which species it actually found.
+   *
+   * @param seedlotNumber the seedlot being copied to
+   * @param requestId the request item (aka request ID) being copied to
+   * @param fromVegetationSt species of the seedlot in context, which the target must match
+   * @return the validation result, carrying the resolved row when one was found
+   */
+  public RequestSeedlotValidationResponseDto validateRequestSeedlot(
+      String seedlotNumber, String requestId, String fromVegetationSt) {
+
+    if (seedlotNumber == null || seedlotNumber.isBlank()
+        || requestId == null || requestId.isBlank()
+        || fromVegetationSt == null || fromVegetationSt.isBlank()) {
+      return RequestSeedlotValidationResponseDto.invalid(
+          "Seedlot number, request ID, and the seedlot in context are required.");
+    }
+
+    Optional<RequestSeedlotProj> found =
+        sparRequestRepository.findBySeedlotNumberAndRequestId(seedlotNumber, requestId);
+
+    if (found.isEmpty()) {
+      return RequestSeedlotValidationResponseDto.invalid(
+          "No request item found for this seedlot number and request ID.");
+    }
+
+    RequestSeedlotProj row = found.get();
+    boolean sameSpecies = fromVegetationSt.equals(row.getVegetationSt());
+
+    return new RequestSeedlotValidationResponseDto(
+        sameSpecies,
+        sameSpecies ? "" : "To Seedlot must be the same species as the seedlot in context.",
+        row.getRequestItem(),
+        row.getRequestSkey(),
+        row.getItemId(),
+        row.getSeedlotNumber(),
+        row.getVegetationSt());
+  }
+
+  /**
+   * Copies a germination test's results to a new germination test for another seedlot/request,
+   * for the Copy Results screen.
+   *
+   * <p>Both checks the screen runs are repeated here: the target must be a request-seedlot row of
+   * the same species, and must not already have this test with the same actual begin/end.
+   *
+   * <p>The copy is a new, standard, not-yet-accepted test: category {@code STD}, every result
+   * indicator cleared. Each daily count that carries a {@code DAILY_GERM_SKEY} gets a fresh key:
+   * sharing the source's keys would let an edit or delete of one test's abnormals land on the
+   * other. Abnormals themselves are not copied -- the business no longer uses them.
+   *
+   * @param sourceRiaKey the germination test being copied
+   * @param target the seedlot and request being copied to
+   * @return the new activity
+   * @throws ResponseStatusException 404 if the source test is absent, 400 if it cannot be copied
+   *     or the target is not a usable request seedlot, 409 if the target already has the test
+   */
+  @Transactional
+  public ActivitySearchResponseDto copyGerminationTestResults(
+      BigDecimal sourceRiaKey, CopyGerminationTestResultsDto target) {
+    // Locking the source serializes concurrent copies of this test: the second waits for the
+    // first to commit, then its duplicate check sees the first copy and returns 409.
+    // ponytail: copies of *different* source tests that happen to share the same standard
+    // activity and begin/end onto one target are not serialized; a unique constraint on the
+    // CONSEP table would be needed for that.
+    ActivityEntity source = activityRepository.findByIdForUpdate(sourceRiaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No activity found for RIA_SKEY: " + sourceRiaKey));
+    TestResultEntity sourceResult = testResultRepository.findById(sourceRiaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No test result found for RIA_SKEY: " + sourceRiaKey));
+
+    if (!testRegimeRepository.findAllGermTestActivityTypeCodes()
+        .contains(source.getActivityTypeCode())) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Only germination test results can be copied.");
+    }
+    if (source.getSeedlotNumber() == null || source.getSeedlotNumber().isBlank()) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Only a seedlot's test results can be copied.");
+    }
+    if (source.getActualBeginDateTime() == null || source.getActualEndDateTime() == null) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "The test being copied has no actual begin and end dates.");
+    }
+    // Checked here too: validateDuplicateGerminationTest reports a missing ID as invalid,
+    // which the caller below would otherwise turn into a 409 "already exists".
+    if (source.getStandardActivityId() == null || source.getStandardActivityId().isBlank()) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "The test being copied has no standard activity.");
+    }
+
+    RequestSeedlotValidationResponseDto pair = validateRequestSeedlot(
+        target.seedlotNumber(), target.requestId(), source.getVegetationState());
+    if (!pair.valid()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, pair.message());
+    }
+    GerminationTestDuplicateValidationResponseDto duplicate = validateDuplicateGerminationTest(
+        pair.seedlotNumber(), source.getStandardActivityId(),
+        source.getActualBeginDateTime(), source.getActualEndDateTime());
+    if (!duplicate.valid()) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, duplicate.message());
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    String requestItem = pair.requestItem();
+
+    ActivityEntity copy = new ActivityEntity();
+    copy.setRequestSkey(pair.requestSkey());
+    copy.setItemId(pair.itemId());
+    copy.setRequestId(requestItem.substring(0, Math.min(11, requestItem.length())));
+    copy.setSeedlotNumber(pair.seedlotNumber());
+    copy.setVegetationState(pair.vegetationSt());
+    copy.setActivityTypeCode(source.getActivityTypeCode());
+    copy.setStandardActivityId(source.getStandardActivityId());
+    copy.setTestCategoryCode("STD");
+    copy.setSignificantStatusIndicator(0);
+    copy.setActivityDuration(source.getActivityDuration());
+    copy.setActivityTimeUnit(source.getActivityTimeUnit());
+    copy.setProcessCommitIndicator(0);
+    copy.setProcessResultIndicator(0);
+    copy.setTestResultIndicator(-1);
+    copy.setActualBeginDateTime(source.getActualBeginDateTime());
+    copy.setActualEndDateTime(source.getActualEndDateTime());
+    copy.setUpdateTimestamp(now);
+    copy.setRiaComment("Test results copied from Seedlot " + source.getSeedlotNumber());
+    ActivityEntity saved = activityRepository.save(copy);
+    BigDecimal copyRiaKey = saved.getRiaKey();
+
+    TestResultEntity result = new TestResultEntity();
+    result.setRiaKey(copyRiaKey);
+    result.setTestCategory("STD");
+    result.setStandardTest(-1);
+    result.setAcceptResult(0);
+    result.setTestCompleteInd(0);
+    result.setOriginalTest(0);
+    result.setCurrentTest(0);
+    result.setActivityType(sourceResult.getActivityType());
+    result.setGerminationPct(sourceResult.getGerminationPct());
+    result.setGerminationValue(sourceResult.getGerminationValue());
+    result.setPeakValueGrmPct(sourceResult.getPeakValueGrmPct());
+    result.setPeakValueNoDays(sourceResult.getPeakValueNoDays());
+    result.setMoisturePct(BigDecimal.ZERO);
+    result.setWeightPer100(BigDecimal.ZERO);
+    result.setSeedsPerGram(0);
+    result.setPurityPct(BigDecimal.ZERO);
+    result.setOtherTestResult(BigDecimal.ZERO);
+    result.setReSampleInd(0);
+    result.setUpdateTimestamp(now);
+    testResultRepository.save(result);
+
+    germCountRepository.findById(sourceRiaKey)
+        .ifPresent(counts -> copyGermCounts(counts, copyRiaKey, now));
+
+    SparLog.info("Copied germination test {} to {}", sourceRiaKey, copyRiaKey);
+    return mapActivityEntityToSearchResponseDto(saved, true);
+  }
+
+  private void copyGermCounts(GermCountEntity source, BigDecimal riaKey, LocalDateTime now) {
+    GermCountEntity copy = new GermCountEntity();
+    BeanUtils.copyProperties(source, copy);
+    List<GermCountSlotDto> slots = germCountMapper.buildSlots(source).stream()
+        .filter(s -> s.dailyGermSkey() != null)
+        .map(s -> new GermCountSlotDto(
+            s.slotIndex(), germCountRepository.nextDailyGermSkey(), s.countDt(), s.dayNoOfTest(),
+            s.rep1NoSeedsGerm(), s.rep2NoSeedsGerm(), s.rep3NoSeedsGerm(), s.rep4NoSeedsGerm(),
+            s.cumulativeGerm()))
+        .toList();
+    germCountMapper.applySlots(slots, copy);
+    copy.setRiaSkey(riaKey);
+    copy.setUpdateUserid(COPY_UPDATE_USERID);
+    copy.setUpdateTimestamp(now);
+    germCountRepository.save(copy);
   }
 }

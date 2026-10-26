@@ -52,7 +52,7 @@ export const populateRowData = (
   // This is a new SMP mix row being populated from a user-typed/uploaded parent tree
   // number, so resolving identity from the live catalog is correct here.
   newRowData.parentTreeId = parentTree.parentTreeId;
-  newRowData.isTested = parentTree.testedInd;
+  newRowData.isTested = parentTree.testedInd ?? false;
 
   const genWorthBySpu = parentTree.geneticQualitiesBySpu;
 

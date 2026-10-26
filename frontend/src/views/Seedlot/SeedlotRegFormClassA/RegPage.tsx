@@ -262,7 +262,7 @@ const RegPage = () => {
                       disableBtn={disableSubmit}
                       submitFn={() => {
                         submitSeedlot.mutate(
-                          getSeedlotPayload(
+                          () => getSeedlotPayload(
                             allStepData,
                             seedlotNumber,
                             seedlotSpecies.code,

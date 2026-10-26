@@ -23,7 +23,7 @@ type ActivityResultProp = {
   hideActions?: boolean,
   setAlert: (isSuccess: boolean, message: string) => void
   updateReplicates: (replicatesList: ReplicateType[]) => void
-  tableBodyRef: React.RefObject<HTMLTableSectionElement>
+  tableBodyRef: React.RefObject<HTMLTableSectionElement | null>
 }
 
 const useReplicates = (

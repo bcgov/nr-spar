@@ -4,8 +4,11 @@ import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import jakarta.persistence.LockModeType;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
  * This interface enables the activity entity from consep to be retrieved from the database.
  */
 public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDecimal> {
+  /**
+   * Reads an activity with a row lock held until the transaction ends ({@code SELECT ... FOR
+   * UPDATE}), so concurrent copies of the same test run one after the other.
+   */
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT a FROM ActivityEntity a WHERE a.riaKey = :riaKey")
+  Optional<ActivityEntity> findByIdForUpdate(@Param("riaKey") BigDecimal riaKey);
+
   @Modifying
   @Transactional
   @Query(
@@ -46,6 +57,23 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("seedlotNumber") String seedlotNumber,
       @Param("familyLotNumber") String familyLotNumber
   );
+
+  @Query(
+      """
+      SELECT CASE WHEN EXISTS (
+          SELECT 1
+          FROM ActivityEntity a
+          WHERE a.seedlotNumber = :seedlotNumber
+            AND a.standardActivityId = :standardActivityId
+            AND a.actualBeginDateTime = :actualBeginDateTime
+            AND a.actualEndDateTime = :actualEndDateTime
+        ) THEN true ELSE false END
+      """)
+  boolean existsDuplicateGerminationTest(
+      @Param("seedlotNumber") String seedlotNumber,
+      @Param("standardActivityId") String standardActivityId,
+      @Param("actualBeginDateTime") LocalDateTime actualBeginDateTime,
+      @Param("actualEndDateTime") LocalDateTime actualEndDateTime);
 
   @Modifying
   @Transactional

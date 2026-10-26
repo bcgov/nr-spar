@@ -1,6 +1,5 @@
 import React, {
-  useState, useRef, useContext,
-  useEffect
+  useState, useRef, useContext
 } from 'react';
 import {
   useQueries, useQuery, useQueryClient, UseQueryResult
@@ -62,7 +61,6 @@ const OwnershipStep = ({
   } = useContext(SeedlotRegWizardContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
-  const [originalSeedQty, setOriginalSeedQty] = useState<number>(0);
 
   const refControl = useRef<any>({});
 
@@ -107,7 +105,7 @@ const OwnershipStep = ({
     if (state.length >= MAX_OWNERS) {
       return;
     }
-    const newOwnerArr = insertOwnerForm(state, methodsOfPaymentQuery.data ?? []);
+    const newOwnerArr = insertOwnerForm(state);
     const portionsInvalid = !arePortionsValid(newOwnerArr);
     setPortionsValid(newOwnerArr, portionsInvalid);
   };
@@ -122,11 +120,11 @@ const OwnershipStep = ({
     }))
   });
 
-  useEffect(() => {
-    if (getSeedlotBySeedlotNumberQuery.status === 'success') {
-      setOriginalSeedQty(getSeedlotBySeedlotNumberQuery.data.data.originalSeedQty);
-    }
-  }, [getSeedlotBySeedlotNumberQuery.status, getSeedlotBySeedlotNumberQuery.fetchStatus]);
+  const originalSeedQty = getSeedlotBySeedlotNumberQuery.data?.data?.originalSeedQty ?? 0;
+  // The query is disabled off the review screen, so only wait for it there.
+  // A disabled query never becomes successful and would lock the wizard.
+  const seedQtyPending = isReview && !getSeedlotBySeedlotNumberQuery.isSuccess;
+  const ownershipLocked = seedQtyPending || originalSeedQty > 0;
 
   const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
 
@@ -196,7 +194,7 @@ const OwnershipStep = ({
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
-                  readOnly={(isFormSubmitted && !isReview) || originalSeedQty > 0}
+                  readOnly={(isFormSubmitted && !isReview) || ownershipLocked}
                   isReview={isReview}
                 />
               </AccordionItem>
@@ -212,7 +210,7 @@ const OwnershipStep = ({
                 className="owner-add-btn"
                 renderIcon={Add}
                 onClick={addAnOwner}
-                disabled={originalSeedQty > 0}
+                disabled={ownershipLocked}
               >
                 Add owner
               </Button>

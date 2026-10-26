@@ -42,7 +42,18 @@ const getCommentPlaceholder = (page: string): string => {
     case 'purity content':
       return purityData.pc.commentPlaceholder;
     default:
-      return '';
+      throw new Error(`Unsupported testing page: ${page}`);
+  }
+};
+
+const getInvalidDateMsg = (page: string): string => {
+  switch (page) {
+    case 'moisture content':
+      return moistureData.mc.invalidDateErrorMsg;
+    case 'purity content':
+      return purityData.pc.invalidDateErrorMsg;
+    default:
+      throw new Error(`Unsupported testing page: ${page}`);
   }
 };
 
@@ -119,7 +130,7 @@ When('I set the {string} start date to {string}, expect a date validation error'
     .then(() => {
       cy.contains(
         `.${prefix}--form-requirement`,
-        moistureData.mc.invalidDateErrorMsg
+        getInvalidDateMsg(page)
       ).should('be.visible');
     });
 });

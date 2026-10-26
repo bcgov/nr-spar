@@ -1,0 +1,163 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.daily-germ-table-container {
+  width: 100%;
+
+  h3 {
+    @include type.type-style('heading-03');
+    margin-bottom: 0.5rem;
+  }
+
+  .daily-germ-errors p {
+    @include type.type-style('label-01');
+    color: var(--#{vars.$bcgov-prefix}-text-error, #da1e28);
+    margin-bottom: 0.25rem;
+  }
+
+  .daily-germ-table {
+    // Columns are pinned to fixed widths, and a full-width table hands the
+    // leftover space out as cell padding -- which reads as a gap between the
+    // count columns. Sizing to content keeps them tight and leaves the slack
+    // at the end of the table, as the design has it.
+    table.MuiTable-root {
+      width: auto;
+    }
+
+    // The ungrouped columns (Rep, Rep total, ...) render their label in the
+    // second header row with an empty placeholder above. Dropping the divider
+    // between the two makes the pair read as a single row-spanning header.
+    thead tr:first-of-type th:not(.germ-count-date-head) {
+      border-bottom: none;
+    }
+
+    // Resting state of a count-date header: the date over two lines, which is
+    // what lets the column be sized to `yyyy-` instead of the whole date.
+    .germ-count-date-trigger {
+      @include type.type-style('label-01');
+      @include type.font-family('sans');
+      display: flex;
+      flex-direction: column;
+      // Left-aligned to match the day number and the counts below it.
+      align-items: flex-start;
+      width: 100%;
+      padding: 0.125rem 0;
+      border: 1px solid transparent;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+
+      &:hover:not(:disabled) {
+        border-color: var(--#{vars.$bcgov-prefix}-border-strong-01, #8d8d8d);
+      }
+
+      &:disabled {
+        cursor: default;
+      }
+    }
+
+    .germ-count-date-empty {
+      color: var(--#{vars.$bcgov-prefix}-text-placeholder, #a8a8a8);
+    }
+
+    // AC6: the column being worked in, highlighted from its date down through
+    // its four counts. GenericTable paints row and header backgrounds on the
+    // <tr>, so a background on the cell is all it takes to sit on top.
+    // `layer-active-01` is gray-30, a step darker than the header's gray-20, so
+    // the highlight reads on the header cells as well as the striped body rows.
+    th.germ-slot-active,
+    td.germ-slot-active {
+      background-color: var(--#{vars.$bcgov-prefix}-layer-active-01, #c6c6c8);
+    }
+  }
+}
+
+.consep-germination-content {
+  // Kept tight: the page still has to fit the result figures above the tables
+  // and the action buttons below them.
+  padding: 1rem 2rem 2rem;
+
+  .consep-germination-content-summary {
+    margin-bottom: 1rem;
+  }
+
+  // A slimmer banner than SummaryGrid's default.
+  .activity-summary {
+    margin: 0.5rem 1rem;
+  }
+
+  // SummaryGrid defaults to a label-beside-value row; the germination summary
+  // card stacks them instead.
+  .consep-germination-content-summary-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+
+    // SummaryGrid centres the value; here it lines up under its label.
+    .activity-summary-info-value {
+      align-self: flex-start;
+    }
+  }
+
+  .consep-germination-content-table {
+    margin-top: 1rem;
+  }
+}
+
+// The count-date modal is nothing but a calendar, so it sizes itself to one.
+.germ-count-date-modal {
+  .#{vars.$bcgov-prefix}--modal-container {
+    // Carbon sizes modals as a percentage of the viewport; this one wants to be
+    // exactly as wide as the calendar it holds.
+    inline-size: fit-content;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-content {
+    // Carbon reserves room for a footer this passive modal does not have.
+    padding-block-end: 1rem;
+  }
+
+  // The calendar is always open, so the button that would open it is noise —
+  // and it renders inline after the calendar, on top of the last week's dates.
+  .#{vars.$bcgov-prefix}--date-picker__icon {
+    display: none;
+  }
+
+  // In flow, so the modal grows around the calendar instead of leaving it
+  // hanging out of the bottom.
+  .flatpickr-calendar.inline {
+    position: static;
+  }
+}
+
+.abnormals-table-container {
+  width: 100%;
+
+  h3 {
+    @include type.type-style('heading-03');
+    margin-bottom: 0.5rem;
+  }
+
+  // The count day the table belongs to, beside the heading rather than above
+  // it: the counts are meaningless without the date they were taken on.
+  .abnormals-table-day {
+    @include type.type-style('body-compact-01');
+    color: var(--#{vars.$bcgov-prefix}-text-secondary, #525252);
+  }
+
+  .abnormals-table-empty {
+    @include type.type-style('body-compact-01');
+    color: var(--#{vars.$bcgov-prefix}-text-secondary, #525252);
+    margin-bottom: 1rem;
+  }
+
+  .abnormals-table {
+    // Same reasoning as the daily germination table: fixed column widths plus a
+    // full-width table hands the slack out as cell padding, which reads as gaps
+    // between the eleven category columns.
+    table.MuiTable-root {
+      width: auto;
+    }
+  }
+}
