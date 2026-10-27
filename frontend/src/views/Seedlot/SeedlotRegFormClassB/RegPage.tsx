@@ -26,6 +26,7 @@ import ClassBContext from '../ContextContainerClassB/context';
 import { getSeedlotSubmitErrDescription } from '../ContextContainerClassA/utils';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getSeedlotBreadcrumbs } from '../../../utils/BreadcrumbUtils';
+import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import ROUTES from '../../../routes/constants';
 import { completeProgressConfig, smartSaveText, stepMap } from '../ContextContainerClassB/constants';
 import {
@@ -37,6 +38,37 @@ import {
 import './styles.scss';
 
 const isEditableStatus = (statusCode?: string) => statusCode === 'PND' || statusCode === 'INC';
+
+const getSubmitErrDescription = (
+  submitError: AxiosError | null,
+  submitFieldErrors: ReturnType<typeof groupSubmitFieldErrorsByStep>,
+  formStep: number
+): ErrorDescriptionType | null => {
+  if (submitFieldErrors) {
+    return getStepSubmitErrDescription(submitFieldErrors, stepMap[formStep]);
+  }
+  return submitError ? getSeedlotSubmitErrDescription(submitError) : null;
+};
+
+const SubmitErrorNotification = (
+  { errDescription }: { errDescription: ErrorDescriptionType | null }
+) => {
+  if (!errDescription) {
+    return null;
+  }
+  return (
+    <Row>
+      <Column>
+        <InlineNotification
+          lowContrast
+          kind="error"
+          title={errDescription.title}
+          subtitle={errDescription.description}
+        />
+      </Column>
+    </Row>
+  );
+};
 
 type SaveErrorNotificationProps = {
   saveStatus: string;
@@ -136,10 +168,7 @@ const RegPage = () => {
 
   const submitError = submitSeedlot.isError ? (submitSeedlot.error as AxiosError) : null;
   const submitFieldErrors = groupSubmitFieldErrorsByStep(submitError);
-  let submitErrDescription = submitError ? getSeedlotSubmitErrDescription(submitError) : null;
-  if (submitFieldErrors) {
-    submitErrDescription = getStepSubmitErrDescription(submitFieldErrors, stepMap[formStep]);
-  }
+  const submitErrDescription = getSubmitErrDescription(submitError, submitFieldErrors, formStep);
 
   return (
     <div className="seedlot-registration-page">
@@ -216,22 +245,7 @@ const RegPage = () => {
           }
           </Column>
         </Row>
-        {
-          submitErrDescription
-            ? (
-              <Row>
-                <Column>
-                  <InlineNotification
-                    lowContrast
-                    kind="error"
-                    title={submitErrDescription.title}
-                    subtitle={submitErrDescription.description}
-                  />
-                </Column>
-              </Row>
-            )
-            : null
-        }
+        <SubmitErrorNotification errDescription={submitErrDescription} />
         {
           saveStatus === 'conflict' || saveStatus === 'error'
             ? (

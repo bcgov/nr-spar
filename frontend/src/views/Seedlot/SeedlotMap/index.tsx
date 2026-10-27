@@ -196,16 +196,6 @@ export const SeedlotMapBody = () => {
 
   return (
     <div className="seedlot-map-page" data-testid="seedlot-map-page">
-      {/* Print-only header — hidden on screen, visible when window.print() fires. */}
-      <div className="print-header" data-testid="print-header">
-        <span className="print-header__wordmark">Government of British Columbia</span>
-        <span className="print-header__seedlot">
-          Seedlot
-          {seedlotNumber}
-        </span>
-        <span className="print-header__date">{new Date().toLocaleDateString()}</span>
-      </div>
-
       <div className="seedlot-map-header">
         <h1 className="seedlot-map-title">
           Seed Map
