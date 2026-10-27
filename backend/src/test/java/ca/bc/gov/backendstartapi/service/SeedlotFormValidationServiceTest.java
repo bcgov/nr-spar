@@ -1250,11 +1250,12 @@ class SeedlotFormValidationServiceTest {
         bclassFormWithGeometry(
             "{\"type\":\"Polygon\",\"coordinates\":"
                 + "[[[-123,49],[-122,49],[-122,50],[-123,50],[-123,49]]]}");
+    var bclassSeedlot = validBclassSeedlot();
 
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(bclassSeedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream()
             .anyMatch(
@@ -1271,11 +1272,12 @@ class SeedlotFormValidationServiceTest {
     stubValidMethodOfPayment();
 
     SeedlotFormSubmissionDtoClassB form = bclassFormWithGeometry("{not json");
+    var bclassSeedlot = validBclassSeedlot();
 
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(bclassSeedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream()
             .anyMatch(

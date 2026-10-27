@@ -287,8 +287,9 @@ class OpenmapsProxyServiceTest {
             any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class)))
         .thenReturn(ResponseEntity.ok().build());
 
+    var query = wfsQuery();
     OpenmapsProxyException ex =
-        assertThrows(OpenmapsProxyException.class, () -> service.forward(wfsQuery()));
+        assertThrows(OpenmapsProxyException.class, () -> service.forward(query));
     assertEquals(HttpStatus.BAD_GATEWAY, ex.getStatusCode());
     assertEquals("OpenMaps returned an empty body", ex.getReason());
   }
@@ -300,8 +301,9 @@ class OpenmapsProxyServiceTest {
             any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class)))
         .thenThrow(new ResourceAccessException("Read timed out"));
 
+    var query = wfsQuery();
     OpenmapsProxyException ex =
-        assertThrows(OpenmapsProxyException.class, () -> service.forward(wfsQuery()));
+        assertThrows(OpenmapsProxyException.class, () -> service.forward(query));
     assertEquals(HttpStatus.GATEWAY_TIMEOUT, ex.getStatusCode());
     assertEquals("OpenMaps request timed out", ex.getReason());
   }

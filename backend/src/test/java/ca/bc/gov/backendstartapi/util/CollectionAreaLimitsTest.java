@@ -168,9 +168,10 @@ class CollectionAreaLimitsTest {
     final Polygon rejected = overCap;
     assertDoesNotThrow(
         () -> CollectionAreaLimits.assertAcceptable(accepted, GeometryUtil.toGeoJson(accepted)));
+    final String rejectedJson = GeometryUtil.toGeoJson(rejected);
     assertThrows(
         ResponseStatusException.class,
-        () -> CollectionAreaLimits.assertAcceptable(rejected, GeometryUtil.toGeoJson(rejected)));
+        () -> CollectionAreaLimits.assertAcceptable(rejected, rejectedJson));
   }
 
   private static Polygon densePolygon(int numPoints) {
