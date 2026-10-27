@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type FormEvent } from 'react';
+import React, { useEffect, useState, type SubmitEvent } from 'react';
 import { InlineNotification } from '@carbon/react';
 import {
   Information,
@@ -155,7 +155,7 @@ const MapToolbar = ({
     setPinPanelOpen(false);
   };
 
-  const onDropCoordinatePoint = (event: FormEvent<HTMLFormElement>) => {
+  const onDropCoordinatePoint = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const lat = parseCoordinate(pinLat);
     const lng = parseCoordinate(pinLng);

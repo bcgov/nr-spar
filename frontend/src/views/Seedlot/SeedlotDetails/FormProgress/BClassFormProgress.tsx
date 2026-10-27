@@ -90,7 +90,8 @@ const BClassFormProgress = (
       <SeedlotRegistrationProgressClassB
         progressStatus={progressStatus}
         interactFunction={(e: number) => {
-          navigate(`${addParamToPath(ROUTES.SEEDLOT_B_CLASS_REGISTRATION, seedlotNumber ?? '')}?step=${e + 1}`);
+          Promise.resolve(navigate(`${addParamToPath(ROUTES.SEEDLOT_B_CLASS_REGISTRATION, seedlotNumber ?? '')}?step=${e + 1}`))
+            .catch(() => undefined);
         }}
       />
     );

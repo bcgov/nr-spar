@@ -238,7 +238,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     } | null;
     if (routerState?.collectionAreaCleared && location.state !== consumedRouterStateRef.current) {
       consumedRouterStateRef.current = location.state;
-      navigate('.', { replace: true, state: null });
+      Promise.resolve(navigate('.', { replace: true, state: null })).catch(() => undefined);
       pendingMapResultRef.current = null;
       setStepData('collectionStep', clearCollectionAreaResult(stateRef.current));
       setElevationWarning(null);
@@ -249,7 +249,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     if (fromRouter && location.state !== consumedRouterStateRef.current) {
       consumedRouterStateRef.current = location.state;
       pendingMapResultRef.current = fromRouter;
-      navigate('.', { replace: true, state: null });
+      Promise.resolve(navigate('.', { replace: true, state: null })).catch(() => undefined);
     }
 
     const pending = pendingMapResultRef.current;
@@ -279,12 +279,12 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
   const launchCollectionAreaMap = () => {
     const returnTo = `${addParamToPath(ROUTES.SEEDLOT_B_CLASS_REGISTRATION, seedlotNumber ?? '')}?step=1`;
     const mapPath = `${addParamToPath(ROUTES.SEEDLOT_MAP, seedlotNumber ?? '')}?theme=COLAREA&returnTo=${encodeURIComponent(returnTo)}`;
-    navigate(
+    Promise.resolve(navigate(
       mapPath,
       state.collectionGeometry.value
         ? { state: { initialAoiGeoJson: state.collectionGeometry.value } }
         : undefined
-    );
+    )).catch(() => undefined);
   };
 
   const readOnly = isFormSubmitted && !isReview;

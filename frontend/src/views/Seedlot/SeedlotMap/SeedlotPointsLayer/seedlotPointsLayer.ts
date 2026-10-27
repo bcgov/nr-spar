@@ -161,7 +161,7 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
     if (this.fetchTimer) clearTimeout(this.fetchTimer);
     this.fetchTimer = setTimeout(() => {
       this.fetchTimer = null;
-      this.refresh();
+      this.refresh().catch(() => undefined);
     }, FETCH_DEBOUNCE_MS);
   };
 

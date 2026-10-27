@@ -197,7 +197,7 @@ const LegendDataLayer = () => {
           // never shows an empty layer section.
           .filter((overlayData) => overlayData.rules.length > 0);
         publishCombined(wmsData);
-      });
+      }).catch(() => undefined);
     };
 
     const debouncedRefresh = () => {

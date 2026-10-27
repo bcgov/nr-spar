@@ -464,6 +464,10 @@
     gap: 0.5rem;
     min-width: 0;
     animation: aoi-toolbar-slide-out 120ms ease-out;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
   }
 
   &__strip {
@@ -873,14 +877,14 @@
 // When the user toggles Identify on, the button inverts (primary bg /
 // white icon) so the mode state is obvious at a glance.
 .aoi-toolbar__strip .cds--icon-button.aoi-toolbar__icon-btn--active {
-  background: theme.token('button-primary') !important;
+  background: theme.token('button-primary');
 
   svg {
-    fill: theme.$text-on-color !important;
+    fill: theme.$text-on-color;
   }
 
   &:hover:not(:disabled) {
-    background: theme.token('button-primary') !important;
+    background: theme.token('button-primary');
     filter: brightness(0.85);
   }
 }
@@ -981,15 +985,15 @@
 // Theme Leaflet controls with BC Gov tokens — borrowed from nr-silva's
 // OpeningsMap/styles.scss so the zoom + layers controls read as part of
 // the BC Gov design system rather than Leaflet's default gray chrome.
-.leaflet-control-zoom,
-.leaflet-control-layers {
-  border: 2px solid theme.token('button-primary') !important;
-  border-radius: 0.25rem !important;
+.leaflet-container .leaflet-control-zoom.leaflet-control,
+.leaflet-container .leaflet-control-layers.leaflet-control {
+  border: 2px solid theme.token('button-primary');
+  border-radius: 0.25rem;
 }
 
-.leaflet-control-zoom-in,
-.leaflet-control-zoom-out {
-  color: theme.token('button-primary') !important;
+.leaflet-container .leaflet-bar a.leaflet-control-zoom-in,
+.leaflet-container .leaflet-bar a.leaflet-control-zoom-out {
+  color: theme.token('button-primary');
   transform: rotate(-90deg);
 }
 
@@ -1030,9 +1034,11 @@
   filter: invert(1);
 }
 
-.leaflet-bar a:hover {
-  color: theme.token('button-tertiary') !important;
-  background-color: theme.token('button-primary') !important;
+.leaflet-container .leaflet-bar a.leaflet-control-zoom-in:hover,
+.leaflet-container .leaflet-bar a.leaflet-control-zoom-out:hover,
+.leaflet-container .leaflet-bar a:hover {
+  color: theme.token('button-tertiary');
+  background-color: theme.token('button-primary');
 }
 
 // Align the bottom-left zoom control with the AOI tools strip at the

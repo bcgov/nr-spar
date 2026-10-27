@@ -40,7 +40,7 @@ const BecZonePanel = () => {
 
   const handleRowClick = (code: string) => {
     setSelected(code);
-    zoomToBecZone?.(code);
+    zoomToBecZone?.(code).catch(() => undefined);
   };
 
   return (

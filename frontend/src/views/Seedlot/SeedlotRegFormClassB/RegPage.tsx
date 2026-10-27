@@ -36,6 +36,72 @@ import {
 
 import './styles.scss';
 
+const isEditableStatus = (statusCode?: string) => statusCode === 'PND' || statusCode === 'INC';
+
+type SaveErrorNotificationProps = {
+  saveStatus: string;
+  reloadFormDraft: () => void;
+  handleSaveBtn: () => void;
+};
+
+const SaveErrorNotification = (
+  { saveStatus, reloadFormDraft, handleSaveBtn }: SaveErrorNotificationProps
+) => {
+  if (saveStatus === 'conflict') {
+    return (
+      <ActionableNotification
+        className="save-conflict-actionable-notification"
+        lowContrast
+        kind="error"
+        title={`${smartSaveText.conflictTitle}`}
+        subtitle={smartSaveText.conflictSuggestion}
+        actionButtonLabel={smartSaveText.reload}
+        onActionButtonClick={reloadFormDraft}
+      />
+    );
+  }
+  return (
+    <ActionableNotification
+      className="save-error-actionable-notification"
+      lowContrast
+      kind="error"
+      title={`${smartSaveText.error}:\u00A0`}
+      subtitle={smartSaveText.suggestion}
+      actionButtonLabel={smartSaveText.idle}
+      onActionButtonClick={handleSaveBtn}
+    />
+  );
+};
+
+type BackOrCancelButtonProps = {
+  isFirstStep: boolean;
+  onBack: () => void;
+  onCancel: () => void;
+};
+
+const BackOrCancelButton = ({ isFirstStep, onBack, onCancel }: BackOrCancelButtonProps) => (
+  <Button
+    kind="secondary"
+    size="lg"
+    className="form-action-btn"
+    onClick={isFirstStep ? onCancel : onBack}
+  >
+    {isFirstStep ? 'Cancel' : 'Back'}
+  </Button>
+);
+
+const NextButton = ({ onClick }: { onClick: () => void }) => (
+  <Button
+    kind="primary"
+    size="lg"
+    className="form-action-btn"
+    onClick={onClick}
+    renderIcon={ArrowRight}
+  >
+    Next
+  </Button>
+);
+
 const RegPage = () => {
   const navigate = useNavigate();
   const {
@@ -65,11 +131,8 @@ const RegPage = () => {
 
   const { isTscAdmin } = useContext(AuthContext);
 
-  const disableSubmit = !allStepCompleted
-    || saveStatus === 'conflict'
-    || !seedlotData
-    || (seedlotData.seedlotStatus.seedlotStatusCode !== 'PND'
-    && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC');
+  const isEditable = isEditableStatus(seedlotData?.seedlotStatus.seedlotStatusCode);
+  const disableSubmit = !allStepCompleted || saveStatus === 'conflict' || !isEditable;
 
   const submitError = submitSeedlot.isError ? (submitSeedlot.error as AxiosError) : null;
   const submitFieldErrors = groupSubmitFieldErrorsByStep(submitError);
@@ -139,8 +202,7 @@ const RegPage = () => {
               ? (
                 <SeedlotRegistrationProgressClassB
                   progressStatus={
-                seedlotData.seedlotStatus.seedlotStatusCode === 'PND'
-                || seedlotData.seedlotStatus.seedlotStatusCode === 'INC'
+                isEditable
                   ? withSubmitFieldErrors(progressStatus, submitFieldErrors)
                   : completeProgressConfig
               }
@@ -175,14 +237,10 @@ const RegPage = () => {
             ? (
               <Row>
                 <Column>
-                  <ActionableNotification
-                    className={saveStatus === 'conflict' ? 'save-conflict-actionable-notification' : 'save-error-actionable-notification'}
-                    lowContrast
-                    kind="error"
-                    title={saveStatus === 'conflict' ? `${smartSaveText.conflictTitle}` : `${smartSaveText.error}:\u00A0`}
-                    subtitle={saveStatus === 'conflict' ? smartSaveText.conflictSuggestion : smartSaveText.suggestion}
-                    actionButtonLabel={saveStatus === 'conflict' ? smartSaveText.reload : smartSaveText.idle}
-                    onActionButtonClick={saveStatus === 'conflict' ? reloadFormDraft : handleSaveBtn}
+                  <SaveErrorNotification
+                    saveStatus={saveStatus}
+                    reloadFormDraft={reloadFormDraft}
+                    handleSaveBtn={handleSaveBtn}
                   />
                 </Column>
               </Row>
@@ -216,29 +274,14 @@ const RegPage = () => {
           }
           <Grid narrow>
             <Column sm={4} md={3} lg={3} xlg={4}>
-              {
-                formStep !== 0
-                  ? (
-                    <Button
-                      kind="secondary"
-                      size="lg"
-                      className="form-action-btn"
-                      onClick={() => setStep(-1)}
-                    >
-                      Back
-                    </Button>
-                  )
-                  : (
-                    <Button
-                      kind="secondary"
-                      size="lg"
-                      className="form-action-btn"
-                      onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''))}
-                    >
-                      Cancel
-                    </Button>
-                  )
-              }
+              <BackOrCancelButton
+                isFirstStep={formStep === 0}
+                onBack={() => setStep(-1)}
+                onCancel={() => {
+                  Promise.resolve(navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? '')))
+                    .catch(() => undefined);
+                }}
+              />
             </Column>
             {
               isFormIncomplete
@@ -260,17 +303,7 @@ const RegPage = () => {
             <Column sm={4} md={3} lg={3} xlg={4}>
               {
                 formStep !== 3
-                  ? (
-                    <Button
-                      kind="primary"
-                      size="lg"
-                      className="form-action-btn"
-                      onClick={() => setStep(1)}
-                      renderIcon={ArrowRight}
-                    >
-                      Next
-                    </Button>
-                  )
+                  ? <NextButton onClick={() => setStep(1)} />
                   : (
                     <SubmitModal
                       btnText="Submit Registration"

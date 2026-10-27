@@ -1,4 +1,4 @@
-import React, { useRef, useState, type FormEvent } from 'react';
+import React, { useRef, useState, type SubmitEvent } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { IconButton, InlineNotification, ActionableNotification } from '@carbon/react';
 import {
@@ -226,10 +226,12 @@ const AoiToolbar = ({
   const canRemoveSavedArea = !hasAoi && cameFromRegistration && openedWithSavedArea;
   const [isRemoveAreaOpen, setIsRemoveAreaOpen] = useState(false);
 
-  const returnToRegistration = (state: unknown) => navigate(
-    `${addParamToPath(ROUTES.SEEDLOT_B_CLASS_REGISTRATION, seedlotNumber)}?step=1`,
-    { state }
-  );
+  const returnToRegistration = (state: unknown) => {
+    Promise.resolve(navigate(
+      `${addParamToPath(ROUTES.SEEDLOT_B_CLASS_REGISTRATION, seedlotNumber)}?step=1`,
+      { state }
+    )).catch(() => undefined);
+  };
 
   // Exiting identify mode when the user switches to a drawing/edit/measure
   // tool keeps the mode mental model simple: only one tool active at a
@@ -329,7 +331,7 @@ const AoiToolbar = ({
     setPinPanelOpen(false);
   };
 
-  const onDropCoordinatePoint = (event: FormEvent<HTMLFormElement>) => {
+  const onDropCoordinatePoint = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const lat = parseCoordinate(pinLat);
     const lng = parseCoordinate(pinLng);
@@ -521,12 +523,12 @@ const AoiToolbar = ({
    */
   const onToggleFullscreen = () => {
     if (document.fullscreenElement) {
-      document.exitFullscreen?.();
+      document.exitFullscreen?.().catch(() => undefined);
       return;
     }
     const target = (document.querySelector('.seedlot-map-workspace')
       ?? document.querySelector('.leaflet-container')) as HTMLElement | null;
-    target?.requestFullscreen?.();
+    target?.requestFullscreen?.().catch(() => undefined);
   };
 
   /**
@@ -594,7 +596,7 @@ const AoiToolbar = ({
   const onFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      handleImport(file);
+      handleImport(file).catch(() => undefined);
     }
   };
 

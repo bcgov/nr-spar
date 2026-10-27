@@ -146,7 +146,7 @@ const useElevationRanges = (
         }
       }
     };
-    run();
+    run().catch(() => undefined);
     return () => {
       cancelled = true;
     };
