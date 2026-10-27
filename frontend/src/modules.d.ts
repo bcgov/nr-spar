@@ -4,6 +4,22 @@ declare module '@carbon/pictograms-react';
 
 declare module 'leaflet.control.layers.tree';
 
+declare module 'shpjs' {
+  import type { FeatureCollection } from 'geojson';
+
+  export type FeatureCollectionWithFilename = FeatureCollection & { fileName?: string };
+
+  export function parseZip(
+    buffer: ArrayBuffer | Uint8Array,
+    whiteList?: string[]
+  ): Promise<FeatureCollectionWithFilename | FeatureCollectionWithFilename[]>;
+
+  const shp: (
+    input: string | ArrayBuffer | Record<string, ArrayBuffer>
+  ) => Promise<FeatureCollectionWithFilename | FeatureCollectionWithFilename[]>;
+  export default shp;
+}
+
 declare module '@mapbox/shp-write' {
   import type { FeatureCollection } from 'geojson';
 
