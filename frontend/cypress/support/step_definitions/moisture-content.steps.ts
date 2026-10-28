@@ -113,8 +113,12 @@ When('I enter valid {string} in the last moisture row {string} field', (value: s
     `.activity-result-container tbody tr:last-child input[name="${fieldNames[field]}"]`,
     value,
     '@PATCH_moisture_replicates',
-    ({ body }) => (body as Array<Record<string, unknown>>)
-      .some((replicate) => String(replicate[fieldNames[field]]) === value)
+    ({ body }) => {
+      const replicates = body as Array<Record<string, unknown>>;
+      const lastReplicate = replicates[replicates.length - 1];
+      return lastReplicate !== undefined
+        && String(lastReplicate[fieldNames[field]]) === value;
+    }
   );
 });
 
