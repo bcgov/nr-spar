@@ -186,7 +186,10 @@ export function mockPurityContentApi() {
 export function mockGerminationApi(conflictFirstSave = false) {
   const riaKey = '79082';
   const updateTimestamp = '2026-10-26T00:00:00.000Z';
-  let savedDays: Array<Record<string, unknown>> = [];
+  // Seeded with a dated day so the only edit in a scenario is the count itself.
+  let savedDays: Array<Record<string, unknown>> = [
+    { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 }
+  ];
   let shouldConflict = conflictFirstSave;
 
   cy.intercept('GET', `**/api/germination-tests/${riaKey}`, {
