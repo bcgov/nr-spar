@@ -126,14 +126,29 @@ Then('the activity summary should match the seedlot replicate info', () => {
   });
 });
 
+const isSameLocalDay = (iso: string | undefined, dateValue: string) => {
+  if (!iso) {
+    return false;
+  }
+  const [year, month, day] = dateValue.split('/').map(Number);
+  const expectedDate = [year, String(month).padStart(2, '0'), String(day).padStart(2, '0')].join('-');
+  return iso.slice(0, 10) === expectedDate;
+};
+
 When('I set the {string} start date to {string}', (page: string, dateValue: string) => (
   cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue)
-    .then(() => waitForAutosave(CONSEP_PAGE_IDS[page].saveAlias))
+    .then(() => waitForAutosave(
+      CONSEP_PAGE_IDS[page].saveAlias,
+      ({ body }) => isSameLocalDay(body.actualBeginDateTime, dateValue)
+    ))
 ));
 
 When('I set the {string} end date to {string}', (page: string, dateValue: string) => (
   cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].endDate, dateValue)
-    .then(() => waitForAutosave(CONSEP_PAGE_IDS[page].saveAlias))
+    .then(() => waitForAutosave(
+      CONSEP_PAGE_IDS[page].saveAlias,
+      ({ body }) => isSameLocalDay(body.actualEndDateTime, dateValue)
+    ))
 ));
 
 When('I set the {string} start date to {string}, expect a date validation error', (page: string, dateValue: string) => {
@@ -152,7 +167,10 @@ When('I select the {string} page category {string}', (page: string, category: st
 
   cy.contains(`.${prefix}--list-box__menu-item__option`, category)
     .click()
-    .then(() => waitForAutosave(CONSEP_PAGE_IDS[page].saveAlias));
+    .then(() => waitForAutosave(
+      CONSEP_PAGE_IDS[page].saveAlias,
+      ({ body }) => body.testCategoryCode === category
+    ));
 });
 
 Then('the {string} page category should be {string}', (page: string, category: string) => {
@@ -169,6 +187,7 @@ When('I enter the {string} page comment', (page: string) => typeAndWaitForAutosa
   CONSEP_PAGE_IDS[page].comments,
   moistureData.mc.testComment,
   CONSEP_PAGE_IDS[page].saveAlias,
+  ({ body }) => JSON.stringify(body).includes(moistureData.mc.testComment),
   TYPE_DELAY
 ));
 
