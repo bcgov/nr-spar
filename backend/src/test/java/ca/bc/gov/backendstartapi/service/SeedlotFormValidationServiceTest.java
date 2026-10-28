@@ -1100,6 +1100,10 @@ class SeedlotFormValidationServiceTest {
   }
 
   private SeedlotFormCollectionDtoClassB validBclassCollection() {
+    return bclassCollectionWithGeometry(null);
+  }
+
+  private SeedlotFormCollectionDtoClassB bclassCollectionWithGeometry(String geoJson) {
     return new SeedlotFormCollectionDtoClassB(
         "00012797",
         "00",
@@ -1113,7 +1117,7 @@ class SeedlotFormValidationServiceTest {
         "South ridge",
         73,
         true,
-        new BigDecimal("500"),
+        new BigDecimal("2.5"),
         "CLIMB",
         "M",
         true,
@@ -1156,7 +1160,18 @@ class SeedlotFormValidationServiceTest {
         "mm",
         '1',
         12,
-        null);
+        geoJson);
+  }
+
+  private SeedlotFormSubmissionDtoClassB bclassFormWithGeometry(String geoJson) {
+    SeedlotFormSubmissionDtoClassB base = validBclassForm();
+    return new SeedlotFormSubmissionDtoClassB(
+        bclassCollectionWithGeometry(geoJson),
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormExtractionDto(),
+        base.aouSpzList(),
+        List.of());
   }
 
   private SeedlotFormSubmissionDtoClassB validBclassForm() {
@@ -1208,6 +1223,70 @@ class SeedlotFormValidationServiceTest {
   }
 
   @Test
+  @DisplayName("B-class: a collection geometry within the limits passes")
+  void validateBclassSeedlotForm_acceptableGeometry_shouldPass() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormSubmissionDtoClassB form =
+        bclassFormWithGeometry(
+            "{\"type\":\"Polygon\",\"coordinates\":"
+                + "[[[-123.02,49.0],[-123.0,49.0],[-123.0,49.01],"
+                + "[-123.02,49.01],[-123.02,49.0]]]}");
+
+    Assertions.assertDoesNotThrow(
+        () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+  }
+
+  @Test
+  @DisplayName("B-class: oversized collection geometry is a field error, not a bare 400")
+  void validateBclassSeedlotForm_oversizedGeometry_isFieldError() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormSubmissionDtoClassB form =
+        bclassFormWithGeometry(
+            "{\"type\":\"Polygon\",\"coordinates\":"
+                + "[[[-123,49],[-122,49],[-122,50],[-123,50],[-123,49]]]}");
+    var bclassSeedlot = validBclassSeedlot();
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(bclassSeedlot, form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId().equals("seedlotFormCollectionDto.collectionGeometryGeoJson")
+                        && e.message().contains("8 km radius")));
+  }
+
+  @Test
+  @DisplayName("B-class: unreadable collection geometry is a field error")
+  void validateBclassSeedlotForm_malformedGeometry_isFieldError() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormSubmissionDtoClassB form = bclassFormWithGeometry("{not json");
+    var bclassSeedlot = validBclassSeedlot();
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(bclassSeedlot, form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(
+                e ->
+                    e.fieldId().equals("seedlotFormCollectionDto.collectionGeometryGeoJson")
+                        && e.message().contains("could not be read")));
+  }
+
+  @Test
   @DisplayName("B-class: non-B genetic class is rejected")
   void validateBclassSeedlotForm_notBclass_isRejected() {
     stubValidForestClient();
@@ -1244,7 +1323,7 @@ class SeedlotFormValidationServiceTest {
             "South ridge",
             73,
             true,
-            new BigDecimal("500"),
+            new BigDecimal("2.5"),
             "CLIMB",
             "M",
             true,
@@ -1349,7 +1428,7 @@ class SeedlotFormValidationServiceTest {
             "South ridge",
             null,
             true,
-            new BigDecimal("500"),
+            new BigDecimal("2.5"),
             "CLIMB",
             "M",
             true,
@@ -1432,7 +1511,7 @@ class SeedlotFormValidationServiceTest {
             "South ridge",
             73,
             true,
-            new BigDecimal("500"),
+            new BigDecimal("2.5"),
             "CLIMB",
             "M",
             true,
@@ -1515,7 +1594,7 @@ class SeedlotFormValidationServiceTest {
             "South ridge",
             73,
             true,
-            new BigDecimal("500"),
+            new BigDecimal("2.5"),
             "CLIMB",
             "M",
             true,
@@ -1677,7 +1756,7 @@ class SeedlotFormValidationServiceTest {
             "South ridge",
             73,
             true,
-            new BigDecimal("500"),
+            new BigDecimal("2.5"),
             "  ",
             "M",
             true,

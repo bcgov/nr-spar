@@ -20,6 +20,7 @@ import ca.bc.gov.backendstartapi.security.UserInfo;
 import ca.bc.gov.backendstartapi.util.GeometryUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +45,21 @@ class SeedlotCollectionGeometryServiceTest {
   private SeedlotCollectionGeometryService seedlotCollectionGeometryService;
 
   private static final String SEEDLOT_NUMBER = "53001";
+
+  private static SeedlotCollectionGeometryRepository.GeometryMeasurement measurement(
+      Double area, Double perimeter) {
+    return new SeedlotCollectionGeometryRepository.GeometryMeasurement() {
+      @Override
+      public Double getArea() {
+        return area;
+      }
+
+      @Override
+      public Double getPerimeter() {
+        return perimeter;
+      }
+    };
+  }
 
   @BeforeEach
   void setup() {
@@ -72,7 +88,8 @@ class SeedlotCollectionGeometryServiceTest {
     seedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(seedlot));
-    when(seedlotCollectionGeometryRepository.findById(any())).thenReturn(Optional.empty());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(any()))
+        .thenReturn(Optional.empty());
 
     assertThrows(
         SeedlotCollectionGeometryNotFoundException.class,
@@ -88,11 +105,11 @@ class SeedlotCollectionGeometryServiceTest {
     GeometryFactory geometryFactory = new GeometryFactory();
     Coordinate[] coordinates =
         new Coordinate[] {
-          new Coordinate(0, 0),
-          new Coordinate(1, 0),
-          new Coordinate(1, 1),
-          new Coordinate(0, 1),
-          new Coordinate(0, 0)
+          new Coordinate(-123.02, 49.00),
+          new Coordinate(-123.00, 49.00),
+          new Coordinate(-123.00, 49.01),
+          new Coordinate(-123.02, 49.01),
+          new Coordinate(-123.02, 49.00)
         };
     Polygon polygon = geometryFactory.createPolygon(coordinates);
 
@@ -101,7 +118,8 @@ class SeedlotCollectionGeometryServiceTest {
     geometry.setFeatureClassSkey(42);
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(seedlot));
-    when(seedlotCollectionGeometryRepository.findById(any())).thenReturn(Optional.of(geometry));
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(any()))
+        .thenReturn(Optional.of(geometry));
 
     var dto = seedlotCollectionGeometryService.getBySeedlotNumber(SEEDLOT_NUMBER);
 
@@ -113,43 +131,70 @@ class SeedlotCollectionGeometryServiceTest {
   }
 
   @Test
-  @DisplayName("saveOrUpdate with null GeoJSON is a no-op")
-  void saveOrUpdate_nullGeoJson_shouldSkip() {
+  @DisplayName("saveOrUpdate with null GeoJSON deletes existing row")
+  void saveOrUpdate_nullGeoJson_shouldDeleteExisting() {
     Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+    SeedlotCollectionGeometry existing = new SeedlotCollectionGeometry(SEEDLOT_NUMBER);
+
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
+        .thenReturn(Optional.of(existing));
 
     seedlotCollectionGeometryService.saveOrUpdate(seedlot, null, "user@idir");
 
+    verify(seedlotCollectionGeometryRepository).delete(existing);
     verify(seedlotCollectionGeometryRepository, never()).save(any());
   }
 
   @Test
-  @DisplayName("saveOrUpdate with blank GeoJSON is a no-op")
-  void saveOrUpdate_blankGeoJson_shouldSkip() {
+  @DisplayName("saveOrUpdate with blank GeoJSON deletes existing row")
+  void saveOrUpdate_blankGeoJson_shouldDeleteExisting() {
     Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+    SeedlotCollectionGeometry existing = new SeedlotCollectionGeometry(SEEDLOT_NUMBER);
+
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
+        .thenReturn(Optional.of(existing));
 
     seedlotCollectionGeometryService.saveOrUpdate(seedlot, "   ", "user@idir");
 
+    verify(seedlotCollectionGeometryRepository).delete(existing);
+    verify(seedlotCollectionGeometryRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("saveOrUpdate with null GeoJSON is a no-op when no row exists")
+  void saveOrUpdate_nullGeoJson_noExisting_shouldNoOp() {
+    Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
+        .thenReturn(Optional.empty());
+
+    seedlotCollectionGeometryService.saveOrUpdate(seedlot, null, "user@idir");
+
+    verify(seedlotCollectionGeometryRepository, never()).delete(any());
     verify(seedlotCollectionGeometryRepository, never()).save(any());
   }
 
   @Test
   @DisplayName("saveOrUpdate creates geometry row when none exists")
   void saveOrUpdate_createsNewGeometry() {
-    Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+    final Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
     GeometryFactory geometryFactory = new GeometryFactory();
     Polygon polygon =
         geometryFactory.createPolygon(
             new Coordinate[] {
-              new Coordinate(0, 0),
-              new Coordinate(1, 0),
-              new Coordinate(1, 1),
-              new Coordinate(0, 1),
-              new Coordinate(0, 0)
+              new Coordinate(-123.02, 49.00),
+              new Coordinate(-123.00, 49.00),
+              new Coordinate(-123.00, 49.01),
+              new Coordinate(-123.02, 49.01),
+              new Coordinate(-123.02, 49.00)
             });
-    String geoJson = GeometryUtil.toGeoJson(polygon);
+    final String geoJson = GeometryUtil.toGeoJson(polygon);
 
-    when(seedlotCollectionGeometryRepository.findById(SEEDLOT_NUMBER)).thenReturn(Optional.empty());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
+        .thenReturn(Optional.empty());
     when(seedlotCollectionGeometryRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    when(seedlotCollectionGeometryRepository.measureGeography(any()))
+        .thenReturn(measurement(1234.56, 200.4));
 
     seedlotCollectionGeometryService.saveOrUpdate(seedlot, geoJson, "user@idir");
 
@@ -161,30 +206,33 @@ class SeedlotCollectionGeometryServiceTest {
     assertEquals(Constants.FEATURE_CLASS_SKEY_COLL_AREA, saved.getFeatureClassSkey());
     assertNotNull(saved.getGeometry());
     assertNotNull(saved.getObservationDate());
+    assertEquals(0, saved.getFeatureArea().compareTo(new BigDecimal("1234.56")));
+    assertEquals(0, saved.getFeaturePerimeter().compareTo(new BigDecimal("200.40")));
     assertEquals("user@idir", saved.getAuditInformation().getEntryUserId());
   }
 
   @Test
   @DisplayName("saveOrUpdate updates existing geometry row")
   void saveOrUpdate_updatesExistingGeometry() {
-    Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+    final Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
     SeedlotCollectionGeometry existing = new SeedlotCollectionGeometry(SEEDLOT_NUMBER);
-    existing.setSeedlot(seedlot);
     GeometryFactory geometryFactory = new GeometryFactory();
     Polygon polygon =
         geometryFactory.createPolygon(
             new Coordinate[] {
-              new Coordinate(0, 0),
-              new Coordinate(2, 0),
-              new Coordinate(2, 2),
-              new Coordinate(0, 2),
-              new Coordinate(0, 0)
+              new Coordinate(-123.03, 49.00),
+              new Coordinate(-123.01, 49.00),
+              new Coordinate(-123.01, 49.01),
+              new Coordinate(-123.03, 49.01),
+              new Coordinate(-123.03, 49.00)
             });
-    String geoJson = GeometryUtil.toGeoJson(polygon);
+    final String geoJson = GeometryUtil.toGeoJson(polygon);
 
-    when(seedlotCollectionGeometryRepository.findById(SEEDLOT_NUMBER))
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(SEEDLOT_NUMBER))
         .thenReturn(Optional.of(existing));
     when(seedlotCollectionGeometryRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    when(seedlotCollectionGeometryRepository.measureGeography(any()))
+        .thenReturn(measurement(10.0, 8.0));
 
     seedlotCollectionGeometryService.saveOrUpdate(seedlot, geoJson, "updater@idir");
 
@@ -193,5 +241,29 @@ class SeedlotCollectionGeometryServiceTest {
     verify(seedlotCollectionGeometryRepository).save(captor.capture());
     assertEquals(existing, captor.getValue());
     assertEquals("updater@idir", captor.getValue().getAuditInformation().getUpdateUserId());
+  }
+
+  @Test
+  @DisplayName("saveOrUpdate rejects a polygon larger than 8 km radius")
+  void saveOrUpdate_rejectsOversizedPolygon() {
+    Seedlot seedlot = new Seedlot(SEEDLOT_NUMBER);
+    GeometryFactory geometryFactory = new GeometryFactory();
+    Polygon polygon =
+        geometryFactory.createPolygon(
+            new Coordinate[] {
+              new Coordinate(-123.0, 49.0),
+              new Coordinate(-122.0, 49.0),
+              new Coordinate(-122.0, 50.0),
+              new Coordinate(-123.0, 50.0),
+              new Coordinate(-123.0, 49.0)
+            });
+    String geoJson = GeometryUtil.toGeoJson(polygon);
+
+    ResponseStatusException ex =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> seedlotCollectionGeometryService.saveOrUpdate(seedlot, geoJson, "user@idir"));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    verify(seedlotCollectionGeometryRepository, never()).save(any());
   }
 }

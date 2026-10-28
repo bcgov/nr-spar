@@ -1,4 +1,7 @@
+import { AxiosError } from 'axios';
 import { BecCatalogueItem } from '../../../api-service/becCatalogueAPI';
+import ExceptionResponse from '../../../types/ExceptionResponse';
+import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import { BClassCollectionForm } from '../../../components/SeedlotRegistrationSteps/BClassCollectionStep/definitions';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
@@ -290,7 +293,7 @@ export const convertBClassCollection = (
     bgcSubzoneCode: collectionData.becSubzone.value.code,
     variant: collectionData.becVariant.value.code || null,
     becVersionId: seedlot?.becVersionId ?? null,
-    collectionGeometryGeoJson: null
+    collectionGeometryGeoJson: collectionData.collectionGeometry.value || null
   };
 };
 
@@ -339,5 +342,81 @@ export const resDataToState = (
       fullFormData.extractionStep?.extractoryClientNumber === tscAgencyObj.code,
       fullFormData.extractionStep?.storageClientNumber === tscAgencyObj.code
     )
+  };
+};
+
+export type BClassStepName = keyof BClassProgressIndicatorConfig;
+
+export type BClassSubmitFieldErrors = Record<BClassStepName | 'other', string[]>;
+
+const submitFieldStepPrefixes: Array<[string, BClassStepName]> = [
+  ['seedlotFormCollectionDto', 'collection'],
+  ['seedlotFormOwnershipDtoList', 'ownership'],
+  ['seedlotFormInterimDto', 'interim'],
+  ['seedlotFormExtractionDto', 'extraction']
+];
+
+const stepForSubmitField = (fieldName: string): BClassStepName | 'other' => {
+  const match = submitFieldStepPrefixes.find(([prefix]) => (
+    fieldName === prefix
+    || fieldName.startsWith(`${prefix}.`)
+    || fieldName.startsWith(`${prefix}[`)
+  ));
+  return match ? match[1] : 'other';
+};
+
+/**
+ * Groups the field messages of a 400 submit response by the form step they
+ * belong to. Returns null when the error carries no field messages.
+ */
+export const groupSubmitFieldErrorsByStep = (
+  err: AxiosError | null | undefined
+): BClassSubmitFieldErrors | null => {
+  if (err?.response?.status !== 400) {
+    return null;
+  }
+  const fields = (err.response.data as Partial<ExceptionResponse> | undefined)?.fields;
+  if (!Array.isArray(fields)) {
+    return null;
+  }
+  const grouped: BClassSubmitFieldErrors = {
+    collection: [],
+    ownership: [],
+    interim: [],
+    extraction: [],
+    other: []
+  };
+  let found = false;
+  fields.forEach((field) => {
+    const message = field?.fieldMessage;
+    if (typeof message === 'string' && message.length > 0) {
+      grouped[stepForSubmitField(field.fieldName ?? '')].push(message);
+      found = true;
+    }
+  });
+  return found ? grouped : null;
+};
+
+const stepLabels: Record<BClassStepName, string> = {
+  collection: 'Collection information',
+  ownership: 'Ownership',
+  interim: 'Interim storage',
+  extraction: 'Extraction and storage'
+};
+
+/**
+ * Banner text listing every rejected field message, prefixed with the step it
+ * belongs to so the user knows where to go regardless of the step being viewed.
+ */
+export const getBClassSubmitErrDescription = (
+  fieldErrors: BClassSubmitFieldErrors
+): ErrorDescriptionType => {
+  const stepMessages = (Object.keys(stepLabels) as BClassStepName[])
+    .filter((step) => fieldErrors[step].length > 0)
+    .map((step) => `${stepLabels[step]}: ${fieldErrors[step].join(' ')}`);
+  const messages = [...stepMessages, ...fieldErrors.other];
+  return {
+    title: 'Submission has invalid fields!',
+    description: `${messages.join(' ')} (Error code 400)`
   };
 };

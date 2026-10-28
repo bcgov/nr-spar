@@ -18,6 +18,8 @@ import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GameticMethodologyRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
+import ca.bc.gov.backendstartapi.util.CollectionAreaLimits;
+import ca.bc.gov.backendstartapi.util.GeometryUtil;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Geometry;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -38,6 +41,9 @@ public class SeedlotFormValidationService {
 
   private static final String COLLECTION_CONE_METHOD_CODES_FIELD =
       "seedlotFormCollectionDto.coneCollectionMethodCodes";
+
+  private static final String COLLECTION_GEOMETRY_FIELD =
+      "seedlotFormCollectionDto.collectionGeometryGeoJson";
 
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
@@ -122,6 +128,46 @@ public class SeedlotFormValidationService {
     validateBclassConeCollectionMethods(dto.coneCollectionMethodCodes(), errors);
     validateBclassRequiredCollectionCodes(dto, errors);
     validateBclassBecAndBcSourceRules(seedlot, dto, errors);
+    if (dto.collectionAreaRadius() != null
+        && dto.collectionAreaRadius()
+                .compareTo(BigDecimal.valueOf(CollectionAreaLimits.MAX_RADIUS_KM))
+            > 0) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.collectionAreaRadius",
+              "The radius cannot be greater than "
+                  + (int) CollectionAreaLimits.MAX_RADIUS_KM
+                  + " kilometers."));
+    }
+    validateBclassCollectionGeometry(dto.collectionGeometryGeoJson(), errors);
+  }
+
+  /**
+   * Check the drawn collection area against the same limits {@link
+   * ca.bc.gov.backendstartapi.service.SeedlotCollectionGeometryService} enforces on save, but as
+   * collected field errors rather than a bare 400. Without this the geometry is the one part of the
+   * form whose rejection the frontend cannot attach to a field.
+   */
+  private void validateBclassCollectionGeometry(
+      String geoJson, List<SeedlotValidationError> errors) {
+    if (geoJson == null || geoJson.isBlank()) {
+      return;
+    }
+    Geometry geometry;
+    try {
+      geometry = GeometryUtil.fromGeoJson(geoJson);
+    } catch (IllegalArgumentException e) {
+      errors.add(
+          new SeedlotValidationError(
+              COLLECTION_GEOMETRY_FIELD, "The collection area geometry could not be read."));
+      return;
+    }
+    if (geometry == null) {
+      return;
+    }
+    for (String message : CollectionAreaLimits.violations(geometry, geoJson)) {
+      errors.add(new SeedlotValidationError(COLLECTION_GEOMETRY_FIELD, message));
+    }
   }
 
   private void validateBclassConeCollectionMethods(

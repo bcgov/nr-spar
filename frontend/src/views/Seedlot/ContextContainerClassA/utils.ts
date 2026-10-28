@@ -30,6 +30,7 @@ import {
 } from '../../../types/SeedlotType';
 import { localDateToUtcFormat, utcToIsoSlashStyle } from '../../../utils/DateUtils';
 import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
+import ExceptionResponse from '../../../types/ExceptionResponse';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getOptionsInputObj } from '../../../utils/FormInputUtils';
@@ -1077,7 +1078,24 @@ export const convertExtraction = (
   temporaryStrgEndDate: localDateToUtcFormat(extractionData.seedStorage.endDate.value)
 });
 
+const validationFieldMessages = (err: AxiosError): string[] => {
+  const fields = (err.response?.data as Partial<ExceptionResponse> | undefined)?.fields;
+  if (!Array.isArray(fields)) {
+    return [];
+  }
+  return fields
+    .map((field) => field?.fieldMessage)
+    .filter((message): message is string => typeof message === 'string' && message.length > 0);
+};
+
 export const getSeedlotSubmitErrDescription = (err: AxiosError): ErrorDescriptionType => {
+  const fieldMessages = validationFieldMessages(err);
+  if (err.response?.status === 400 && fieldMessages.length > 0) {
+    return {
+      title: 'Submission has invalid fields!',
+      description: `${fieldMessages.join(' ')} (Error code 400)`
+    };
+  }
   switch (err.response?.status) {
     case 401:
       return {

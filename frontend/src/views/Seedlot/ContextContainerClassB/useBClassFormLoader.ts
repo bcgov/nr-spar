@@ -61,6 +61,7 @@ type UseBClassFormLoaderResult = {
   defaultClientNumber: string;
   defaultLocationCode: string;
   resetEditsOnHydrate: () => void;
+  markDraftSaved: (revisionCount: number) => void;
   fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>;
   methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>;
 };
@@ -319,6 +320,11 @@ export const useBClassFormLoader = ({
     hydrationKeyRef.current = null;
   };
 
+  // A draft this form just saved is already in state; don't re-hydrate from it.
+  const markDraftSaved = (revisionCount: number) => {
+    hydrationKeyRef.current = `draft:${seedlotNumber}:${revisionCount}`;
+  };
+
   return {
     seedlotQuery,
     getFormDraftQuery,
@@ -337,6 +343,7 @@ export const useBClassFormLoader = ({
     defaultClientNumber,
     defaultLocationCode,
     resetEditsOnHydrate,
+    markDraftSaved,
     fundingSourcesQuery,
     methodsOfPaymentQuery
   };

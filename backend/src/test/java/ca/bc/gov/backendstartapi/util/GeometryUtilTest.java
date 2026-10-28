@@ -56,4 +56,43 @@ class GeometryUtilTest {
   void fromGeoJson_invalid_throws() {
     assertThrows(IllegalArgumentException.class, () -> GeometryUtil.fromGeoJson("{not-json"));
   }
+
+  @Test
+  @DisplayName("fromGeoJson unwraps a Feature")
+  void fromGeoJson_feature_unwrapsGeometry() {
+    String feature =
+        "{\"type\":\"Feature\",\"properties\":{},\"geometry\":"
+            + "{\"type\":\"Polygon\",\"coordinates\":"
+            + "[[[0,0],[1,0],[1,1],[0,1],[0,0]]]}}";
+    Geometry parsed = GeometryUtil.fromGeoJson(feature);
+    assertNotNull(parsed);
+    assertEquals("Polygon", parsed.getGeometryType());
+    assertEquals(GeometryUtil.WGS84_SRID, parsed.getSRID());
+  }
+
+  @Test
+  @DisplayName("fromGeoJson unwraps the first FeatureCollection feature")
+  void fromGeoJson_featureCollection_unwrapsFirstGeometry() {
+    String collection =
+        "{\"type\":\"FeatureCollection\",\"features\":["
+            + "{\"type\":\"Feature\",\"properties\":{},\"geometry\":"
+            + "{\"type\":\"Polygon\",\"coordinates\":"
+            + "[[[0,0],[1,0],[1,1],[0,1],[0,0]]]}}]}";
+    Geometry parsed = GeometryUtil.fromGeoJson(collection);
+    assertNotNull(parsed);
+    assertEquals("Polygon", parsed.getGeometryType());
+  }
+
+  @Test
+  @DisplayName("fromGeoJson returns null for an empty FeatureCollection")
+  void fromGeoJson_emptyFeatureCollection_returnsNull() {
+    assertNull(GeometryUtil.fromGeoJson("{\"type\":\"FeatureCollection\",\"features\":[]}"));
+  }
+
+  @Test
+  @DisplayName("fromGeoJson returns null when a Feature has no geometry")
+  void fromGeoJson_featureWithoutGeometry_returnsNull() {
+    assertNull(
+        GeometryUtil.fromGeoJson("{\"type\":\"Feature\",\"properties\":{},\"geometry\":null}"));
+  }
 }

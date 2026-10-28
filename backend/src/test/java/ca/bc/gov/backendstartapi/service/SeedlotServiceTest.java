@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -1238,7 +1240,8 @@ class SeedlotServiceTest {
         mock(SeedlotFormCollectionDtoClassB.class);
 
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
-    when(seedlotCollectionGeometryRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(seedlotNumber))
+        .thenReturn(Optional.empty());
     when(seedlotCollectionMethodService.getAllSeedlotCollectionMethodsBySeedlot(seedlotNumber))
         .thenReturn(List.of(1));
     when(seedlotFormCollectionBclassMapper.toDto(seedlot, null, List.of(1)))
@@ -1275,7 +1278,8 @@ class SeedlotServiceTest {
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
     doNothing().when(loggedUserService).verifySeedlotAccessPrivilege(anyString());
     when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
-    when(seedlotCollectionGeometryRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(seedlotNumber))
+        .thenReturn(Optional.empty());
     when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(List.of());
 
     SeedlotDto dto = seedlotService.getSingleSeedlotInfo(seedlotNumber);
@@ -1287,9 +1291,12 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("submitSeedlotFormClassB pending seedlot succeeds")
+  @DisplayName("submitSeedlotFormClassB pending seedlot succeeds and saves its collection polygon")
   void submitSeedlotFormClassB_pending_shouldSucceed() {
     String seedlotNumber = "53001";
+    String geoJson =
+        "{\"type\":\"MultiPolygon\",\"coordinates\":"
+            + "[[[[-123.02,49.0],[-123.0,49.0],[-123.0,49.01],[-123.02,49.01],[-123.02,49.0]]]]}";
     Seedlot seedlot = new Seedlot(seedlotNumber);
     SeedlotStatusEntity pending =
         new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
@@ -1353,7 +1360,7 @@ class SeedlotServiceTest {
             "mm",
             '1',
             12,
-            null);
+            geoJson);
     SeedlotFormOwnershipDto ownership =
         new SeedlotFormOwnershipDto(
             "00012797",
@@ -1418,6 +1425,7 @@ class SeedlotServiceTest {
     Assertions.assertEquals(seedlotNumber, response.seedlotNumber());
     Assertions.assertEquals("SUB", response.seedlotStatusCode());
     verify(saveSeedlotFormService).deleteForm(seedlotNumber);
-    verify(seedlotCollectionGeometryService).saveOrUpdate(any(), any(), anyString());
+    verify(seedlotCollectionGeometryService)
+        .saveOrUpdate(same(seedlot), eq(geoJson), eq("user@idir"));
   }
 }
