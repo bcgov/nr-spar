@@ -45,6 +45,7 @@ Feature: CONSEP manual purity content screen
   Scenario: Update date fields
     When I set the "purity content" start date to "2025/06/10"
     And I set the "purity content" end date to "2025/06/11"
+    Then the "purity content" auto save sends the end date "2025/06/11"
 
   Scenario: Setting start date after end date shows validation error
     When I set the "purity content" end date to "2025/06/11"
@@ -58,3 +59,4 @@ Feature: CONSEP manual purity content screen
     Then the "purity content" comment input should have placeholder
     When I enter the "purity content" page comment
     Then the "purity content" page comment should be visible
+    And the "purity content" auto save sends the comment

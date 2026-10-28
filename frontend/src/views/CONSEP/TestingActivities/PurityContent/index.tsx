@@ -30,7 +30,7 @@ import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
 import StatusTag from '../../../../components/StatusTag';
 
 import {
-  ActivityRecordType, TestingActivityType, ActivitySummaryType, ReplicateType
+  ActivityRecordType, TestingActivityType, ActivitySummaryType
 } from '../../../../types/consep/TestingActivityType';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
@@ -51,7 +51,7 @@ import { impuritiesPerReplicate, purityReplicatesChecker } from './utils';
 import {
   DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
-import useActivityConflict from '../hooks/useActivityConflict';
+import useTestAutosave from '../hooks/useTestAutosave';
 import useDateRangeValidation from '../hooks/useDateRangeValidation';
 import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
 
@@ -63,9 +63,7 @@ const PurityContent = () => {
 
   const [testActivity, setTestActivity] = useState<TestingActivityType>();
   const [seedlotNumber, setSeedlotNumber] = useState<string>('');
-  const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [activitySummary, setActivitySummary] = useState<ActivitySummaryType>();
-  const [replicates, setReplicates] = useState<ReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
   const [impurities, setImpurities] = useState<ImpurityDisplayType>({});
   const [isModalOpen, setModalOpen] = useState(false);
@@ -78,12 +76,10 @@ const PurityContent = () => {
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
-  // Serialize autosaves to avoid sending a stale optimistic-lock timestamp.
-  const inFlightRef = useRef<boolean>(false);
-  const pendingRef = useRef<boolean>(false);
-  const latestRecordRef = useRef<ActivityRecordType | undefined>(undefined);
-
-  const { isConflict, markConflict, clearConflict } = useActivityConflict();
+  const {
+    activityRecord, setActivityRecord, replicates, setReplicates, setReplicatesBlocked,
+    hydrate, isConflict, clearConflict
+  } = useTestAutosave('purityTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
@@ -127,47 +123,6 @@ const PurityContent = () => {
       setAlert({
         isSuccess: false,
         message: `Failed to update activity record: ${error.message}`
-      });
-    }
-  });
-
-  const updateActivityRecordMutation = useMutation({
-    mutationFn: (record?: ActivityRecordType) => testingActivitiesAPI(
-      'purityTest',
-      'updateActivityRecord',
-      { riaKey, record }
-    ),
-    onSuccess: (response) => {
-      const newTimestamp = response?.data?.updateTimestamp;
-      if (newTimestamp) {
-        latestRecordRef.current = latestRecordRef.current
-          ? { ...latestRecordRef.current, updateTimestamp: newTimestamp }
-          : latestRecordRef.current;
-        setActivityRecord((prev) => (prev ? { ...prev, updateTimestamp: newTimestamp } : prev));
-      }
-      inFlightRef.current = false;
-      if (pendingRef.current) {
-        pendingRef.current = false;
-        if (latestRecordRef.current) {
-          inFlightRef.current = true;
-          updateActivityRecordMutation.mutate(latestRecordRef.current);
-        }
-      }
-      setAlert({ isSuccess: true, message: 'Activity record updated successfully' });
-      setTimeout(() => {
-        setAlert(null);
-      }, 3000);
-    },
-    onError: (error) => {
-      inFlightRef.current = false;
-      pendingRef.current = false;
-      if ((error as AxiosError).response?.status === 409) {
-        markConflict();
-        return;
-      }
-      setAlert({
-        isSuccess: false,
-        message: `Failed to update activity record: ${(error as AxiosError).message}`
       });
     }
   });
@@ -266,15 +221,6 @@ const PurityContent = () => {
     } else if (testActivityQuery.data) {
       setTestActivity(testActivityQuery.data);
       setSeedlotNumber(testActivityQuery.data.seedlotNumber);
-      const activityRecordData = {
-        testCategoryCode: testActivityQuery.data.testCategoryCode,
-        riaComment: testActivityQuery.data.riaComment,
-        actualBeginDateTime: testActivityQuery.data.actualBeginDateTime,
-        actualEndDateTime: testActivityQuery.data.actualEndDateTime,
-        updateTimestamp: testActivityQuery.data.updateTimestamp
-      };
-      setActivityRecord(activityRecordData);
-      latestRecordRef.current = activityRecordData;
       if (testActivityQuery.data.debrisList) {
         setImpurities(impuritiesPerReplicate(testActivityQuery.data.debrisList));
       }
@@ -296,17 +242,23 @@ const PurityContent = () => {
     }
   }, [testActivity]);
 
-  // Hydrate from query cache only; local setTestActivity must not reset table replicates
+  // Hydrate from query cache only (initial load and Reload); local setTestActivity must not
+  // reset the activity record or the table replicates.
   useEffect(() => {
     const { data } = testActivityQuery;
     if (!data) {
       return;
     }
-    if (data.replicatesList && data.replicatesList.length > 0) {
-      setReplicates(data.replicatesList);
-    } else {
-      setReplicates(initReplicatesList(riaKey ?? '', 2));
-    }
+    hydrate(
+      {
+        testCategoryCode: data.testCategoryCode,
+        riaComment: data.riaComment,
+        actualBeginDateTime: data.actualBeginDateTime,
+        actualEndDateTime: data.actualEndDateTime,
+        updateTimestamp: data.updateTimestamp
+      },
+      data.replicatesList?.length ? data.replicatesList : initReplicatesList(riaKey ?? '', 2)
+    );
   }, [testActivityQuery.data, riaKey]);
 
   const handleAlert = (isSuccess: boolean, message: string) => {
@@ -326,31 +278,14 @@ const PurityContent = () => {
     }
   };
 
-  const doSave = (record: ActivityRecordType) => {
-    inFlightRef.current = true;
-    updateActivityRecordMutation.mutate(record);
-  };
-
+  // Saving is left to useTestAutosave; this only merges the edit and flags bad ranges.
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
-    if (isConflict) {
-      return;
-    }
-    const base = latestRecordRef.current ?? activityRecord;
-    const merged = { ...base, ...record };
-    const startDate = merged.actualBeginDateTime ? new Date(merged.actualBeginDateTime) : null;
-    const endDate = merged.actualEndDateTime ? new Date(merged.actualEndDateTime) : null;
-    const isDateRangeValid = validateDateRange(startDate, endDate);
-    setActivityRecord(merged);
-    latestRecordRef.current = merged;
-    if (!isDateRangeValid) {
-      pendingRef.current = false;
-      return;
-    }
-    if (inFlightRef.current) {
-      pendingRef.current = true;
-      return;
-    }
-    doSave(merged);
+    const merged = { ...activityRecord, ...record };
+    validateDateRange(
+      merged.actualBeginDateTime ? new Date(merged.actualBeginDateTime) : null,
+      merged.actualEndDateTime ? new Date(merged.actualEndDateTime) : null
+    );
+    setActivityRecord((prev) => ({ ...prev, ...record }));
   };
 
   const createBreadcrumbItems = () => {
@@ -668,6 +603,7 @@ const PurityContent = () => {
           updateReplicates={setReplicates}
           setAlert={handleAlert}
           tableBodyRef={tableBodyRef}
+          onSaveBlockedChange={setReplicatesBlocked}
           hideActions
         />
       </Row>
@@ -677,13 +613,11 @@ const PurityContent = () => {
             datePickerType="single"
             allowInput
             dateFormat={DATE_FORMAT}
-            onChange={(e: Array<Date>, strDates: string[]) => {
-              const date = e[0] || new Date(strDates[0]);
-              if (date) {
-                handleUpdateActivityRecord({
-                  actualBeginDateTime: date.toISOString()
-                });
-              }
+            value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
+            // Only flatpickr's parsed Date reaches state; typing partial text saves nothing,
+            // and clearing the field hands back no date (saved as null).
+            onChange={([date]: Array<Date>) => {
+              handleUpdateActivityRecord({ actualBeginDateTime: date?.toISOString() });
             }}
           >
             <DatePickerInput
@@ -693,14 +627,8 @@ const PurityContent = () => {
               labelText={fieldsConfig.startDate.labelText}
               invalidText={fieldsConfig.startDate.invalidText}
               invalid={!!dateErrors.startDate}
-              value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
               size="md"
               autoComplete="off"
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                handleUpdateActivityRecord({
-                  actualBeginDateTime: new Date(e.target.value).toISOString()
-                });
-              }}
             />
           </DatePicker>
         </Column>
@@ -709,13 +637,11 @@ const PurityContent = () => {
             datePickerType="single"
             allowInput
             dateFormat="Y/m/d"
-            onChange={(e: Array<Date>, strDates: string[]) => {
-              const date = e[0] || new Date(strDates[0]);
-              if (date) {
-                handleUpdateActivityRecord({
-                  actualEndDateTime: date.toISOString()
-                });
-              }
+            value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
+            // Only flatpickr's parsed Date reaches state; typing partial text saves nothing,
+            // and clearing the field hands back no date (saved as null).
+            onChange={([date]: Array<Date>) => {
+              handleUpdateActivityRecord({ actualEndDateTime: date?.toISOString() });
             }}
           >
             <DatePickerInput
@@ -725,14 +651,8 @@ const PurityContent = () => {
               labelText={fieldsConfig.endDate.labelText}
               invalidText={fieldsConfig.endDate.invalidText}
               invalid={!!dateErrors.endDate}
-              value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
               size="md"
               autoComplete="off"
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                handleUpdateActivityRecord({
-                  actualEndDateTime: new Date(e.target.value).toISOString()
-                });
-              }}
             />
           </DatePicker>
         </Column>

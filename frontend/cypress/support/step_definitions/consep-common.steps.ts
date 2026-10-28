@@ -18,6 +18,32 @@ before(() => {
   });
 });
 
+const AUTOSAVE_ALIASES: Record<string, string> = {
+  'moisture content': '@PUT_moisture_autosave',
+  'purity content': '@PUT_purity_autosave'
+};
+
+type AutosaveBody = { activity: Record<string, string | undefined>; replicates: unknown[] };
+
+// Auto save coalesces edits (800 ms debounce, 3 s max wait), so a slow typist can produce
+// an earlier PUT with partial text; wait until one carries the expected value.
+const waitForAutosave = (
+  page: string,
+  matches: (body: AutosaveBody) => boolean,
+  remaining = 10
+): void => {
+  cy.wait(AUTOSAVE_ALIASES[page]).then(({ request }) => {
+    const body = request.body as AutosaveBody;
+    expect(body.replicates, 'replicates go out in the same PUT').to.be.an('array');
+    if (!matches(body)) {
+      expect(remaining, 'no auto save PUT carried the expected value').to.be.greaterThan(1);
+      waitForAutosave(page, matches, remaining - 1);
+    }
+  });
+};
+
+const localDay = (iso?: string) => (iso ? new Date(iso).toLocaleDateString('en-CA') : undefined);
+
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 const CONSEP_PAGE_IDS: Record<string, { startDate: string; endDate: string; comments: string; category: string }> = {
@@ -163,4 +189,13 @@ When('I enter the {string} page comment', (page: string) => {
 Then('the {string} page comment should be visible', (page: string) => {
   cy.get(CONSEP_PAGE_IDS[page].comments)
     .should('have.value', moistureData.mc.testComment);
+});
+
+Then('the {string} auto save sends the comment', (page: string) => {
+  waitForAutosave(page, ({ activity }) => activity.riaComment === moistureData.mc.testComment);
+});
+
+Then('the {string} auto save sends the end date {string}', (page: string, dateValue: string) => {
+  const expected = dateValue.replaceAll('/', '-');
+  waitForAutosave(page, ({ activity }) => localDay(activity.actualEndDateTime) === expected);
 });

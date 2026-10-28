@@ -10,7 +10,6 @@ import GenericTable from '../../../../components/GenericTable';
 import { ReplicateType, TestingTypes } from '../../../../types/consep/TestingActivityType';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
 import { getMccColumns, getPurityColumns, TABLE_TITLE } from './constants';
-import useAutosave from '../../../../hooks/useAutosave';
 
 import './styles.scss';
 
@@ -23,6 +22,9 @@ type ActivityResultProp = {
   hideActions?: boolean,
   setAlert: (isSuccess: boolean, message: string) => void
   updateReplicates: (replicatesList: ReplicateType[]) => void
+  // The page auto saves the replicates. It must hold off while a cell is invalid, and
+  // while a delete is in flight (a queued save would re-create the deleted row).
+  onSaveBlockedChange: (isBlocked: boolean) => void
   tableBodyRef: React.RefObject<HTMLTableSectionElement | null>
 }
 
@@ -37,56 +39,26 @@ const useReplicates = (
   const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
   const [showDeleteNotification, setShowDeleteNotification] = useState(false);
 
-  const isDeletingRef = useRef(false);
-
-  const updateReplicateListMutation = useMutation({
-    mutationFn: (replicates: ReplicateType[]) => testingActivitiesAPI(
-      replicateType,
-      'updateMultipleReplicates',
-      { riaKey, replicates }
-    ),
-    onError: (error) => {
-      setAlert(false, `Failed to update replicates: ${(error as AxiosError).message}`);
-    }
-  });
-
-  const { markSaved } = useAutosave<ReplicateType[]>({
-    data: replicatesList,
-    onSave: (list) => updateReplicateListMutation.mutateAsync(list),
-    enabled:
-      !Object.values(validationErrors).some(Boolean)
-      && !updateReplicateListMutation.isPending
-      && !isDeletingRef.current
-  });
-
   const deleteReplicateMutation = useMutation({
     mutationFn: (replicateNumber: number) => testingActivitiesAPI(
       replicateType,
       'deleteSingleReplicate',
       { riaKey, replicateNumber }
     ),
-    onMutate: () => {
-      isDeletingRef.current = true;
-    },
     onSuccess: (data) => {
       setAlert(true, 'Replicate deleted successfully');
       const updatedList = data.data.replicatesList;
       setReplicatesList(updatedList);
       updateReplicates(updatedList);
-      markSaved(updatedList);
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicate: ${(error as AxiosError).message}`);
-    },
-    onSettled: () => {
-      isDeletingRef.current = false;
     }
   });
 
   const syncWithInitialData = (data: ReplicateType[]) => {
     setIsLoading(true);
     setReplicatesList(data);
-    markSaved(data);
     setIsLoading(false);
   };
 
@@ -99,15 +71,13 @@ const useReplicates = (
     showDeleteNotification,
     setShowDeleteNotification,
     deleteReplicateMutation,
-    isDeletingRef,
-    syncWithInitialData,
-    markSaved
+    syncWithInitialData
   };
 };
 
 const ActivityResult = ({
   replicatesData, replicateType, riaKey, initValidationErrors,
-  isEditable, hideActions = false, updateReplicates, setAlert, tableBodyRef
+  isEditable, hideActions = false, updateReplicates, setAlert, tableBodyRef, onSaveBlockedChange
 }: ActivityResultProp) => {
   const {
     replicatesList,
@@ -118,9 +88,7 @@ const ActivityResult = ({
     showDeleteNotification,
     setShowDeleteNotification,
     deleteReplicateMutation,
-    isDeletingRef,
-    syncWithInitialData,
-    markSaved
+    syncWithInitialData
   } = useReplicates(riaKey, replicateType, updateReplicates, setAlert);
 
   const replicatesListRef = useRef(replicatesList);
@@ -132,22 +100,22 @@ const ActivityResult = ({
       'deleteMultipleReplicates',
       { riaKey, replicateNumbers }
     ),
-    onMutate: () => {
-      isDeletingRef.current = true;
-    },
     onSuccess: () => {
       setAlert(true, 'Replicates deleted successfully');
       setReplicatesList([]);
       updateReplicates([]);
-      markSaved([]);
     },
     onError: (error) => {
       setAlert(false, `Failed to delete replicates: ${(error as AxiosError).message}`);
-    },
-    onSettled: () => {
-      isDeletingRef.current = false;
     }
   });
+
+  const isSaveBlocked = deleteReplicateMutation.isPending
+    || deleteReplicatesMutation.isPending
+    || Object.values(validationErrors).some(Boolean);
+  useEffect(() => {
+    onSaveBlockedChange(isSaveBlocked);
+  }, [isSaveBlocked]);
 
   // Hydrate when props differ from local (query/refetch). Skip parent echo of updateReplicates.
   useEffect(() => {
