@@ -18,21 +18,6 @@ Then('the germination result screen has loaded', () => {
   cy.contains('h1', 'Germination test result').should('be.visible');
 });
 
-// Clicking an empty date column fills today's date; a dated one opens the modal.
-When('I set germination count day {int} to today', (slotIndex: number) => {
-  cy.getByDataTest(`germ-date-trigger-${slotIndex}`).click();
-  cy.getByDataTest(`germ-count-1-${slotIndex}`).should('not.be.disabled');
-});
-
-When('I ensure germination count day {int} has a date', (slotIndex: number) => {
-  cy.getByDataTest(`germ-count-1-${slotIndex}`).then(($input) => {
-    if ($input.is(':disabled')) {
-      cy.getByDataTest(`germ-date-trigger-${slotIndex}`).click();
-      cy.getByDataTest(`germ-count-1-${slotIndex}`).should('not.be.disabled');
-    }
-  });
-});
-
 When('I enter {string} for germination replicate {int} on day {int} and wait for auto-save', (
   value: string,
   replicateNumber: number,
@@ -40,7 +25,10 @@ When('I enter {string} for germination replicate {int} on day {int} and wait for
 ) => typeAndWaitForAutosave(
   `[data-testid="germ-count-${replicateNumber}-${slotIndex}"]`,
   value,
-  '@PUT_germ_counts'
+  '@PUT_germ_counts',
+  ({ body }) => (body.days as Array<Record<string, unknown>>).some((day) => (
+    day.slotIndex === slotIndex && day[`rep${replicateNumber}NoSeedsGerm`] === Number(value)
+  ))
 ));
 
 When('I enter {string} for germination replicate {int} on day {int} and wait for conflict', (
@@ -73,6 +61,11 @@ When('I reload the germination result page', () => {
 
 Then('the germination conflict banner is visible', () => {
   cy.contains('Conflict detected').should('be.visible');
+});
+
+Then('the germination count and date controls are disabled', () => {
+  cy.getByDataTest('germ-count-1-1').should('be.disabled');
+  cy.getByDataTest('germ-date-trigger-1').should('be.disabled');
 });
 
 Then('no additional germination save is sent before Reload', () => {
