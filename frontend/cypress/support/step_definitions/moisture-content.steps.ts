@@ -2,6 +2,7 @@ import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import { mockMoistureContentApi } from '../mockApiConsep';
 import { MoistureContentType, SeedlotReplicateInfoType } from '../../definitions';
 import { loadFixtureAndAlias } from '../helpers/fixture-loader';
+import { typeAndWaitForAutosave } from '../helpers/autosave';
 
 let mcData: MoistureContentType;
 
@@ -98,6 +99,21 @@ When('I enter {string} in the last moisture row container and dry weight field',
     .find('input[name="containerAndDryWeight"]')
     .clear()
     .type(value);
+});
+
+When('I enter valid {string} in the last moisture row {string} field', (value: string, field: string) => {
+  const fieldNames: Record<string, string> = {
+    'container id': 'containerId',
+    'container weight': 'containerWeight',
+    'fresh seed': 'freshSeed',
+    'container and dry weight': 'containerAndDryWeight'
+  };
+
+  typeAndWaitForAutosave(
+    `.activity-result-container tbody tr:last-child input[name="${fieldNames[field]}"]`,
+    value,
+    '@PATCH_moisture_replicates'
+  );
 });
 
 Then('the last moisture row should show the container and dry weight validation error', () => {
