@@ -112,7 +112,9 @@ When('I enter valid {string} in the last moisture row {string} field', (value: s
   typeAndWaitForAutosave(
     `.activity-result-container tbody tr:last-child input[name="${fieldNames[field]}"]`,
     value,
-    '@PATCH_moisture_replicates'
+    '@PATCH_moisture_replicates',
+    ({ body }) => (body as Array<Record<string, unknown>>)
+      .some((replicate) => String(replicate[fieldNames[field]]) === value)
   );
 });
 
