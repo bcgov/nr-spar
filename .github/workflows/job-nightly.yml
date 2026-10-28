@@ -49,18 +49,15 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
-      - uses: redhat-actions/openshift-tools-installer@37eb3cfb20ac2df6f0511ffa71cd917e4d49cabf # v3
+      - uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
         with:
-          oc: "4"
-      - run: |
-          # Login to OpenShift
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }} # Safeguard!
-
-          oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
-            grep -v workspace | \
-            awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
-            xargs --no-run-if-empty oc delete ${{ env.TYPE }}
+          oc_namespace: ${{ vars.oc_namespace }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          commands: |
+            oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
+              awk '!/workspace/ && $2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
+              xargs --no-run-if-empty oc delete ${{ env.TYPE }}
 
   tests:
     name: Tests
@@ -103,6 +100,6 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 1
     steps:
-      - uses: bcgov/actions/workflow-results@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
+      - uses: bcgov/actions/workflow-results@122a9b1c6c082b1b1f18c300020fbdc417b6b0b2 # v0.10.0
         with:
           needs: ${{ toJson(needs) }}
