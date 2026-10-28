@@ -59,7 +59,14 @@ When('I select impurity type {string} for replicate {string} rank {string}', (
       .click();
   });
 
-  waitForAutosave('@PATCH_impurity');
+  waitForAutosave(
+    '@PATCH_impurity',
+    ({ body }) => (body as Array<Record<string, unknown>>).some((item) => (
+      item.replicateNumber === Number(replicateNumber)
+      && item.debrisRank === Number(rank)
+      && item.debrisTypeCode === impurityType
+    ))
+  );
 
   cy.get('.consep-impurity-title')
     .find('h4')
@@ -90,7 +97,10 @@ When('I delete impurity row with rank {string} for replicate {string}', (
   getImpurityRowAt(replicateNumber, rank)
     .find('.consep-impurity-content-remove button')
     .click()
-    .then(() => waitForAutosave('@DELETE_impurity'));
+    .then(() => waitForAutosave(
+      '@DELETE_impurity',
+      ({ url }) => url.includes(`/${replicateNumber}/${rank}`)
+    ));
 });
 
 Then('impurity at index {string} for replicate {string} should have rank {string}', (
