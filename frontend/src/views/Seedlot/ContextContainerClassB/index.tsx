@@ -297,7 +297,6 @@ const ContextContainerClassB = ({ children }: props) => {
     },
     retry: 0
   });
-
   const contextData: ClassBContextType = useMemo(
     () => ({
       seedlotData: seedlotQuery.data?.seedlot,

@@ -28,11 +28,10 @@ import { addParamToPath } from '../../../utils/PathUtils';
 import { getSeedlotBreadcrumbs } from '../../../utils/BreadcrumbUtils';
 import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import ROUTES from '../../../routes/constants';
-import { completeProgressConfig, smartSaveText, stepMap } from '../ContextContainerClassB/constants';
+import { completeProgressConfig, smartSaveText } from '../ContextContainerClassB/constants';
 import {
-  getStepSubmitErrDescription,
-  groupSubmitFieldErrorsByStep,
-  withSubmitFieldErrors
+  getBClassSubmitErrDescription,
+  groupSubmitFieldErrorsByStep
 } from '../ContextContainerClassB/utils';
 
 import './styles.scss';
@@ -40,12 +39,11 @@ import './styles.scss';
 const isEditableStatus = (statusCode?: string) => statusCode === 'PND' || statusCode === 'INC';
 
 const getSubmitErrDescription = (
-  submitError: AxiosError | null,
-  submitFieldErrors: ReturnType<typeof groupSubmitFieldErrorsByStep>,
-  formStep: number
+  submitError: AxiosError | null
 ): ErrorDescriptionType | null => {
+  const submitFieldErrors = groupSubmitFieldErrorsByStep(submitError);
   if (submitFieldErrors) {
-    return getStepSubmitErrDescription(submitFieldErrors, stepMap[formStep]);
+    return getBClassSubmitErrDescription(submitFieldErrors);
   }
   return submitError ? getSeedlotSubmitErrDescription(submitError) : null;
 };
@@ -167,8 +165,7 @@ const RegPage = () => {
   const disableSubmit = !allStepCompleted || saveStatus === 'conflict' || !isEditable;
 
   const submitError = submitSeedlot.isError ? (submitSeedlot.error as AxiosError) : null;
-  const submitFieldErrors = groupSubmitFieldErrorsByStep(submitError);
-  const submitErrDescription = getSubmitErrDescription(submitError, submitFieldErrors, formStep);
+  const submitErrDescription = getSubmitErrDescription(submitError);
 
   return (
     <div className="seedlot-registration-page">
@@ -232,7 +229,7 @@ const RegPage = () => {
                 <SeedlotRegistrationProgressClassB
                   progressStatus={
                 isEditable
-                  ? withSubmitFieldErrors(progressStatus, submitFieldErrors)
+                  ? progressStatus
                   : completeProgressConfig
               }
                   interactFunction={(e: number) => {

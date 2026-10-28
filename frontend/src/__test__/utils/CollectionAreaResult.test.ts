@@ -2,8 +2,13 @@ import type { Feature, MultiPolygon } from 'geojson';
 
 import {
   ELEVATION_LOOKUP_FAILED_MESSAGE,
-  deriveCollectionAreaResult
+  deriveCollectionAreaResult,
+  serializeCollectionArea
 } from '../../views/Seedlot/SeedlotMap/collectionAreaResult';
+import { MAX_COLLECTION_VERTICES } from '../../views/Seedlot/SeedlotMap/collectionAreaLimits';
+
+/** Mirrors backend `CollectionAreaLimits.MAX_GEOJSON_CHARS`. */
+const BACKEND_MAX_GEOJSON_CHARS = 64_000;
 
 vi.mock('../../api-service/becZonesApi', () => ({
   fetchBecVariantAt: vi.fn()
@@ -91,5 +96,35 @@ describe('deriveCollectionAreaResult', () => {
 
     expect(result.elevationMinM).toBeNull();
     expect(result.elevationError).toBeNull();
+  });
+});
+
+describe('serializeCollectionArea', () => {
+  it('rounds coordinates to 6 decimals', () => {
+    const feature = squareFeature();
+    feature.geometry.coordinates[0][0][0] = [-123.12345678901234, 48.98765432109876];
+
+    const parsed = JSON.parse(serializeCollectionArea(feature));
+
+    expect(parsed.geometry.coordinates[0][0][0]).toEqual([-123.123457, 48.987654]);
+  });
+
+  it('keeps a full-precision polygon at the vertex cap under the backend size cap', () => {
+    const ring = Array.from({ length: MAX_COLLECTION_VERTICES - 1 }, (_, i) => {
+      const angle = (2 * Math.PI * i) / (MAX_COLLECTION_VERTICES - 1);
+      return [
+        -123.123456789012345 + (0.05 * Math.cos(angle)),
+        48.123456789012345 + (0.05 * Math.sin(angle))
+      ];
+    });
+    ring.push(ring[0]);
+    const feature: Feature<MultiPolygon> = {
+      type: 'Feature',
+      properties: {},
+      geometry: { type: 'MultiPolygon', coordinates: [[ring]] }
+    };
+
+    expect(JSON.stringify(feature).length).toBeGreaterThan(BACKEND_MAX_GEOJSON_CHARS);
+    expect(serializeCollectionArea(feature).length).toBeLessThan(BACKEND_MAX_GEOJSON_CHARS);
   });
 });

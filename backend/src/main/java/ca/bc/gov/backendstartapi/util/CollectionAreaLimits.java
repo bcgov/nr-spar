@@ -35,7 +35,10 @@ public final class CollectionAreaLimits {
    */
   public static final int MAX_VERTICES = 2000;
 
-  /** Well under Tomcat's 8 KiB header; plenty for an 8 km polygon. */
+  /**
+   * Cheap payload-size guard on the raw GeoJSON. The frontend rounds coordinates to 6
+   * decimals before submitting, which keeps a polygon at {@link #MAX_VERTICES} well under this.
+   */
   public static final int MAX_GEOJSON_CHARS = 64_000;
 
   private static final double EARTH_RADIUS_METERS = 6_371_000;

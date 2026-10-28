@@ -405,45 +405,18 @@ const stepLabels: Record<BClassStepName, string> = {
 };
 
 /**
- * Banner text for the step being viewed: that step's own messages, or a
- * pointer to the highlighted steps when the errors are elsewhere.
+ * Banner text listing every rejected field message, prefixed with the step it
+ * belongs to so the user knows where to go regardless of the step being viewed.
  */
-export const getStepSubmitErrDescription = (
-  fieldErrors: BClassSubmitFieldErrors,
-  currentStep: BClassStepName
+export const getBClassSubmitErrDescription = (
+  fieldErrors: BClassSubmitFieldErrors
 ): ErrorDescriptionType => {
-  const messages = [...fieldErrors[currentStep], ...fieldErrors.other];
-  if (messages.length > 0) {
-    return {
-      title: 'Submission has invalid fields!',
-      description: `${messages.join(' ')} (Error code 400)`
-    };
-  }
-  const invalidSteps = (Object.keys(stepLabels) as BClassStepName[])
+  const stepMessages = (Object.keys(stepLabels) as BClassStepName[])
     .filter((step) => fieldErrors[step].length > 0)
-    .map((step) => stepLabels[step]);
+    .map((step) => `${stepLabels[step]}: ${fieldErrors[step].join(' ')}`);
+  const messages = [...stepMessages, ...fieldErrors.other];
   return {
     title: 'Submission has invalid fields!',
-    description: `Fix the highlighted ${invalidSteps.length > 1 ? 'steps' : 'step'}: ${invalidSteps.join(', ')}. (Error code 400)`
+    description: `${messages.join(' ')} (Error code 400)`
   };
-};
-
-/**
- * Marks steps that the backend rejected as invalid, on top of the client-side
- * validation already in the progress status.
- */
-export const withSubmitFieldErrors = (
-  progressStatus: BClassProgressIndicatorConfig,
-  fieldErrors: BClassSubmitFieldErrors | null
-): BClassProgressIndicatorConfig => {
-  if (!fieldErrors) {
-    return progressStatus;
-  }
-  const merged = structuredClone(progressStatus);
-  (Object.keys(merged) as BClassStepName[]).forEach((step) => {
-    if (fieldErrors[step].length > 0) {
-      merged[step].isInvalid = true;
-    }
-  });
-  return merged;
 };

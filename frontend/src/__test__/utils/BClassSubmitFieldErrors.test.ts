@@ -1,11 +1,9 @@
 import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
 
 import {
-  getStepSubmitErrDescription,
-  groupSubmitFieldErrorsByStep,
-  withSubmitFieldErrors
+  getBClassSubmitErrDescription,
+  groupSubmitFieldErrorsByStep
 } from '../../views/Seedlot/ContextContainerClassB/utils';
-import { initialProgressConfig } from '../../views/Seedlot/ContextContainerClassB/constants';
 
 const axiosErrorWith = (status: number, data: unknown): AxiosError => {
   const config = { headers: new AxiosHeaders() };
@@ -50,36 +48,20 @@ describe('groupSubmitFieldErrorsByStep', () => {
   });
 });
 
-describe('getStepSubmitErrDescription', () => {
-  const grouped = groupSubmitFieldErrorsByStep(validationError([
-    { fieldName: 'seedlotFormCollectionDto.collectionGeometryGeoJson', fieldMessage: 'Too big.' },
-    { fieldName: 'seedlotFormInterimDto.intermStrgEndDate', fieldMessage: 'Bad date.' }
-  ]))!;
-
-  it('shows only the current step messages', () => {
-    const result = getStepSubmitErrDescription(grouped, 'collection');
-
-    expect(result.description).toBe('Too big. (Error code 400)');
-  });
-
-  it('points to the highlighted steps when the current step is clean', () => {
-    const result = getStepSubmitErrDescription(grouped, 'extraction');
-
-    expect(result.description).toContain('Collection information, Interim storage');
-    expect(result.description).not.toContain('Too big.');
-  });
-});
-
-describe('withSubmitFieldErrors', () => {
-  it('marks steps with server errors invalid without touching the others', () => {
+describe('getBClassSubmitErrDescription', () => {
+  it('lists every message under its step name, then the unassigned ones', () => {
     const grouped = groupSubmitFieldErrorsByStep(validationError([
+      { fieldName: 'seedlotFormInterimDto.intermStrgEndDate', fieldMessage: 'Bad date.' },
+      { fieldName: 'aouSpzList[0].code', fieldMessage: 'Bad SPZ.' },
+      { fieldName: 'seedlotFormCollectionDto.collectionGeometryGeoJson', fieldMessage: 'Too big.' },
       { fieldName: 'seedlotFormCollectionDto.orgUnitNo', fieldMessage: 'Required.' }
-    ]));
+    ]))!;
 
-    const merged = withSubmitFieldErrors(initialProgressConfig, grouped);
+    const result = getBClassSubmitErrDescription(grouped);
 
-    expect(merged.collection.isInvalid).toBe(true);
-    expect(merged.ownership.isInvalid).toBe(false);
-    expect(initialProgressConfig.collection.isInvalid).toBe(false);
+    expect(result.title).toBe('Submission has invalid fields!');
+    expect(result.description).toBe(
+      'Collection information: Too big. Required. Interim storage: Bad date. Bad SPZ. (Error code 400)'
+    );
   });
 });

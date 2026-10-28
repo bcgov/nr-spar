@@ -154,39 +154,6 @@ const applyBec = (
 };
 
 /**
- * Merge the derived SeedMap collection-area values into the B-class
- * collection form state. Populates coordinates, elevation, radius, BEC
- * unit, and stashes the raw GeoJSON for submission. Fields the map can't
- * derive (e.g. dates, containers) are left untouched.
- */
-export const applyCollectionAreaResult = (
-  state: BClassCollectionForm,
-  result: CollectionAreaResult,
-  becCatalogue: BecCatalogueItem[] | undefined
-): BClassCollectionForm => {
-  const next = structuredClone(state);
-
-  next.collectionGeometry.value = result.geoJson;
-  applyLatLong(next, result);
-  applyElevation(next, result);
-
-  // Already measured as half the longest distance across the area, and already
-  // validated against the form's maximum, so it transfers as-is.
-  if (result.radiusKm > 0) {
-    next.collectionRadius.value = String(result.radiusKm);
-    next.collectionRadius.isInvalid = false;
-  }
-
-  applyBec(next, result, becCatalogue);
-
-  // The map derives BEC from the drawn geometry, so drive the lat/long
-  // auto-BEC checkbox off and let the derived unit stand.
-  next.useLatLongForBec.value = false;
-
-  return next;
-};
-
-/**
  * Remove the collection area and every value it fills in, returning those
  * fields to their initial state. Fields the map never touches are kept.
  */
@@ -212,4 +179,40 @@ export const clearCollectionAreaResult = (
     becVariant: empty.becVariant,
     useLatLongForBec: empty.useLatLongForBec
   };
+};
+
+/**
+ * Merge the derived SeedMap collection-area values into the B-class
+ * collection form state. Populates coordinates, elevation, radius, BEC
+ * unit, and stashes the raw GeoJSON for submission. Fields the map can't
+ * derive (e.g. dates, containers) are left untouched.
+ *
+ * Every map-filled field is cleared first, so a lookup that fails for this
+ * area leaves the field empty rather than holding the previous area's value.
+ */
+export const applyCollectionAreaResult = (
+  state: BClassCollectionForm,
+  result: CollectionAreaResult,
+  becCatalogue: BecCatalogueItem[] | undefined
+): BClassCollectionForm => {
+  const next = clearCollectionAreaResult(state);
+
+  next.collectionGeometry.value = result.geoJson;
+  applyLatLong(next, result);
+  applyElevation(next, result);
+
+  // Already measured as half the longest distance across the area, and already
+  // validated against the form's maximum, so it transfers as-is.
+  if (result.radiusKm > 0) {
+    next.collectionRadius.value = String(result.radiusKm);
+    next.collectionRadius.isInvalid = false;
+  }
+
+  applyBec(next, result, becCatalogue);
+
+  // The map derives BEC from the drawn geometry, so drive the lat/long
+  // auto-BEC checkbox off and let the derived unit stand.
+  next.useLatLongForBec.value = false;
+
+  return next;
 };

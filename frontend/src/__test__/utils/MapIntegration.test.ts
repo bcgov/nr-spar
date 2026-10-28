@@ -121,12 +121,44 @@ describe('mapIntegration', () => {
       expect(next.becSubzone.value.code).toBe('xm');
     });
 
-    it('leaves the radius alone when the map could not measure one', () => {
+    it('leaves the radius empty when the map could not measure one', () => {
       const state = initBClassCollectionState('00012797', '01');
-      const before = state.collectionRadius.value;
-      const next = applyCollectionAreaResult(state, baseResult({ radiusKm: 0 }), catalogue);
+      const applied = applyCollectionAreaResult(state, baseResult(), catalogue);
+      const next = applyCollectionAreaResult(applied, baseResult({ radiusKm: 0 }), catalogue);
 
-      expect(next.collectionRadius.value).toBe(before);
+      expect(next.collectionRadius.value).toBe('');
+    });
+
+    it('does not keep the previous area\'s elevation when the new lookup fails', () => {
+      const state = initBClassCollectionState('00012797', '01');
+      const applied = applyCollectionAreaResult(state, baseResult(), catalogue);
+      const next = applyCollectionAreaResult(
+        applied,
+        baseResult({
+          elevationMinM: null,
+          elevationMaxM: null,
+          elevationError: 'Please enter it manually.'
+        }),
+        catalogue
+      );
+
+      expect(next.elevationMin.value).toBe('');
+      expect(next.elevationMax.value).toBe('');
+      expect(next.elevationMean.value).toBe('');
+    });
+
+    it('does not keep the previous area\'s subzone when only the zone is derived', () => {
+      const state = initBClassCollectionState('00012797', '01');
+      const applied = applyCollectionAreaResult(state, baseResult(), catalogue);
+      const next = applyCollectionAreaResult(
+        applied,
+        baseResult({ becVariant: null, becZones: ['IDF'] }),
+        catalogue
+      );
+
+      expect(next.becZone.value.code).toBe('IDF');
+      expect(next.becSubzone.value.code).toBe('');
+      expect(next.becVariant.value.code).toBe('');
     });
 
     it('transfers the measured radius without re-deriving it from area', () => {
