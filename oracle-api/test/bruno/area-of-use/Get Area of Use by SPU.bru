@@ -1,0 +1,19 @@
+meta {
+  name: Get Area of Use by SPU
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/area-of-use/spu/{{spuId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token:
+}

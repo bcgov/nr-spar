@@ -1,0 +1,19 @@
+meta {
+  name: Get B-Class Registration Report (SPRR001)
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/seedlots/{{seedlotNumber}}/reports/registration
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Accept: application/pdf
+}

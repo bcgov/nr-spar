@@ -1,0 +1,22 @@
+@use '@carbon/type';
+
+.b-class-detail-section {
+  .section-subtitle {
+    @include type.type-style('body-01');
+    color: var(--cds-text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  .sub-section-title-col {
+    @include type.type-style('heading-02');
+    margin-bottom: 0.5rem;
+  }
+
+  .info-col {
+    padding-top: 1.5rem;
+  }
+
+  .section-action-row {
+    margin-top: 1.5rem;
+  }
+}

@@ -1,0 +1,32 @@
+meta {
+  name: Create B-Class Seedlot
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/seedlots
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "applicantClientNumber": "00012797",
+    "applicantLocationCode": "01",
+    "applicantEmailAddress": "user@example.com",
+    "vegetationCode": "FDC",
+    "seedlotSourceCode": "TPT",
+    "toBeRegistrdInd": true,
+    "bcSourceInd": true,
+    "geneticClassCode": "B"
+  }
+}

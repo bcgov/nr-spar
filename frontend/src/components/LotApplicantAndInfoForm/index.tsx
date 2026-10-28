@@ -18,6 +18,7 @@ import { getForestClientByNumberOrAcronym } from '../../api-service/forestClient
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 
 import SeedlotInformation from './SeedlotInformation';
+import SeedlotInformationBClass from './SeedlotInformationBClass';
 import { FormProps } from './definitions';
 import {
   vegLotAgency,
@@ -34,9 +35,11 @@ const LotApplicantAndInfoForm = ({
   isSeedlot,
   isEdit,
   isReview,
+  geneticClass = 'A',
   seedlotFormData,
   setSeedlotFormData
 }: FormProps) => {
+  const isBClass = geneticClass === 'B';
   const { selectedClientRoles } = useContext(AuthContext);
 
   const defaultApplicantAgencyQuery = useQuery(
@@ -88,6 +91,17 @@ const LotApplicantAndInfoForm = ({
     }
   };
 
+  const seedlotInfoProps = seedlotFormData && setSeedlotFormData
+    ? {
+      seedlotFormData,
+      setSeedlotFormData,
+      isEdit,
+      isReview
+    }
+    : null;
+
+  const ResolvedSeedlotInfoSection = isBClass ? SeedlotInformationBClass : SeedlotInformation;
+
   return (
     <FlexGrid className="applicant-information-form">
       <Row className="section-title">
@@ -136,7 +150,7 @@ const LotApplicantAndInfoForm = ({
         </Column>
       </Row>
       {
-        isSeedlot && seedlotFormData && setSeedlotFormData
+        isSeedlot && seedlotInfoProps
           ? (
             <>
               {
@@ -144,12 +158,7 @@ const LotApplicantAndInfoForm = ({
                   ? <Divider />
                   : null
               }
-              <SeedlotInformation
-                seedlotFormData={seedlotFormData}
-                setSeedlotFormData={setSeedlotFormData}
-                isEdit={isEdit}
-                isReview={isReview}
-              />
+              <ResolvedSeedlotInfoSection {...seedlotInfoProps} />
             </>
           )
           : null // The false case is reserved for vegLog

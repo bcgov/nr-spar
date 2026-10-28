@@ -4,6 +4,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -62,9 +63,14 @@ class ValueUtilTest {
     Assertions.assertFalse(ValueUtil.isValueEqual(Integer.valueOf(0), 0));
     Assertions.assertFalse(ValueUtil.isValueEqual(Character.valueOf('A'), Character.valueOf(' ')));
     Assertions.assertFalse(ValueUtil.isValueEqual(' ', Character.valueOf(' ')));
-    Assertions.assertFalse(ValueUtil.isValueEqual(LocalDateTime.now(), LocalDateTime.now()));
     Assertions.assertFalse(
-        ValueUtil.isValueEqual(LocalDateTime.now(), LocalDateTime.now().minusSeconds(1L)));
+        ValueUtil.isValueEqual(
+            LocalDateTime.of(2024, Month.JANUARY, 1, 12, 0, 0),
+            LocalDateTime.of(2024, Month.JANUARY, 1, 12, 0, 1)));
+    Assertions.assertFalse(
+        ValueUtil.isValueEqual(
+            LocalDateTime.of(2024, Month.JANUARY, 1, 12, 0, 0),
+            LocalDateTime.of(2024, Month.JANUARY, 1, 12, 0, 0).minusSeconds(1L)));
     Assertions.assertFalse(ValueUtil.isValueEqual(LocalDate.now(), LocalDate.now().minusDays(1L)));
     Assertions.assertFalse(ValueUtil.isValueEqual(Long.valueOf(1L), Long.valueOf(0L)));
     Assertions.assertFalse(ValueUtil.isValueEqual(Double.valueOf(1D), Double.valueOf(0D)));

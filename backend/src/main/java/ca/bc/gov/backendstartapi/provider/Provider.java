@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.provider;
 
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
@@ -7,6 +8,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +65,18 @@ public interface Provider {
 
   default SeedlotSpeciesDto getSeedlotAndSpeciesByRequestKey(Long requestKey) {
     return null;
+  }
+
+  default Optional<CodeDescriptionDto> getVegetationCode(String code) {
+    return Optional.empty();
+  }
+
+  default List<OrgUnitDistrictDto> getAllDistrictOrgUnits() {
+    return List.of();
+  }
+
+  default List<CodeDescriptionDto> getAllValidFundingSources() {
+    return List.of();
   }
 
   // Common methods

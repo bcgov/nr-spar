@@ -1,0 +1,70 @@
+@use '@carbon/type';
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.b-class-collection-step {
+  padding: 0;
+
+  .b-class-collection-row {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      @include type.type-style('heading-03');
+    }
+
+    .#{vars.$bcgov-prefix}--date-picker--single {
+      width: 100%;
+
+      .#{vars.$bcgov-prefix}--date-picker-container,
+      .#{vars.$bcgov-prefix}--date-picker__input {
+        width: 100%;
+      }
+    }
+
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  }
+
+  .collection-map-launch {
+    display: flex;
+    align-items: center;
+  }
+
+  .collection-area-defined {
+    display: flex;
+    margin-left: 1rem;
+  }
+
+  .collection-area-defined-trigger {
+    display: flex;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: default;
+
+    svg {
+      fill: var(--#{vars.$bcgov-prefix}-support-success);
+    }
+  }
+
+  .collection-area-remove {
+    margin-left: 0.5rem;
+
+    svg {
+      fill: var(--#{vars.$bcgov-prefix}-support-error);
+    }
+  }
+
+  .elevation-warning-row {
+    margin-top: 1rem;
+  }
+
+  .bec-search-link {
+    margin-top: 0.5rem;
+  }
+}

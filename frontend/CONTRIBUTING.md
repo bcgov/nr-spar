@@ -60,6 +60,7 @@ Remember of setting up the required environment variables. You can create a `.en
 ```
 VITE_USER_POOLS_ID=<pools-id>
 VITE_USER_POOLS_WEB_CLIENT_ID=<pools-web-client-id>
+VITE_SEEDLOT_B_ENABLED=true
 ```
 
 And if you want to run Cypress, please add:

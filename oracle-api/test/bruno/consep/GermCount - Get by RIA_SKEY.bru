@@ -1,0 +1,15 @@
+meta {
+  name: Get Germ Counts by RIA_SKEY
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/germ-counts/{{riaSkey}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  riaSkey: 46142
+}

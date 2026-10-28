@@ -2,12 +2,14 @@ package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
@@ -289,5 +291,80 @@ public class OracleApiProvider implements Provider {
     }
 
     return Optional.empty();
+  }
+
+  @Override
+  public Optional<CodeDescriptionDto> getVegetationCode(String code) {
+    String oracleApiUrl = String.format("%s/api/vegetation-codes/{code}", rootUri);
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "getVegetationCode", oracleApiUrl);
+    try {
+      ResponseEntity<CodeDescriptionDto> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              CodeDescriptionDto.class,
+              createParamsMap("code", code));
+      SparLog.info("GET vegetation code from Oracle - Success response!");
+      return Optional.ofNullable(response.getBody());
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET vegetation code from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+    }
+    return Optional.empty();
+  }
+
+  @Override
+  public List<OrgUnitDistrictDto> getAllDistrictOrgUnits() {
+    String oracleApiUrl = String.format("%s/api/org-unit-districts", rootUri);
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "getAllDistrictOrgUnits", oracleApiUrl);
+    try {
+      ResponseEntity<List<OrgUnitDistrictDto>> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<>() {
+              });
+      List<OrgUnitDistrictDto> list = response.getBody();
+      int size = list == null ? 0 : list.size();
+      SparLog.info("GET district org units from Oracle - Success response with size: {}!", size);
+      return list == null ? List.of() : list;
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET district org units from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    }
+  }
+
+  @Override
+  public List<CodeDescriptionDto> getAllValidFundingSources() {
+    String oracleApiUrl = String.format("%s/api/funding-sources", rootUri);
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "getAllValidFundingSources", oracleApiUrl);
+    try {
+      ResponseEntity<List<CodeDescriptionDto>> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<>() {
+              });
+      List<CodeDescriptionDto> list = response.getBody();
+      int size = list == null ? 0 : list.size();
+      SparLog.info("GET funding sources from Oracle - Success response with size: {}!", size);
+      return list == null ? List.of() : list;
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET funding sources from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    }
   }
 }

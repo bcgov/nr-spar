@@ -25,7 +25,7 @@ export type SeedlotRegPayloadType = {
   applicantLocationCode: string;
   applicantEmailAddress: string;
   vegetationCode: string;
-  seedlotSourceCode: string;
+  seedlotSourceCode: string | null;
   toBeRegistrdInd: boolean;
   bcSourceInd: boolean;
   geneticClassCode: 'A' | 'B';
@@ -33,7 +33,7 @@ export type SeedlotRegPayloadType = {
 
 export type SeedlotPatchPayloadType = {
   applicantEmailAddress: string;
-  seedlotSourceCode: string;
+  seedlotSourceCode: string | null;
   toBeRegistrdInd: boolean;
   bcSourceInd: boolean;
   revisionCount: number | undefined;
