@@ -131,8 +131,11 @@ const isSameLocalDay = (iso: string | undefined, dateValue: string) => {
     return false;
   }
   const [year, month, day] = dateValue.split('/').map(Number);
-  const expectedDate = [year, String(month).padStart(2, '0'), String(day).padStart(2, '0')].join('-');
-  return iso.slice(0, 10) === expectedDate;
+  const savedDate = new Date(iso);
+  return !Number.isNaN(savedDate.getTime())
+    && savedDate.getFullYear() === year
+    && savedDate.getMonth() === month - 1
+    && savedDate.getDate() === day;
 };
 
 When('I set the {string} start date to {string}', (page: string, dateValue: string) => (
