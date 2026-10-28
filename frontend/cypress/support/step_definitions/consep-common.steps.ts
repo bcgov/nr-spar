@@ -1,6 +1,8 @@
 import { Then, When, DataTable } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
-import { MoistureContentType, PurityContentType } from '../../definitions';
+import {
+  ActivityRecordSaveRequest, MoistureContentType, PurityContentType, SeedlotReplicateInfoType
+} from '../../definitions';
 import { TYPE_DELAY } from '../../constants';
 import { typeAndWaitForAutosave, waitForAutosave, RouteAlias } from '../helpers/autosave';
 
@@ -91,7 +93,7 @@ Then('the activity results table should show these columns:', (dataTable: DataTa
 });
 
 Then('the activity summary should match the seedlot replicate info', () => {
-  cy.get('@seedlotData').then((seedlotData: any) => {
+  cy.get('@seedlotData').then((seedlotData: SeedlotReplicateInfoType) => {
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(0)
@@ -142,7 +144,7 @@ When('I set the {string} start date to {string}', (page: string, dateValue: stri
   cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue)
     .then(() => waitForAutosave(
       CONSEP_PAGE_IDS[page].saveAlias,
-      ({ body }) => isSameLocalDay(body.actualBeginDateTime, dateValue)
+      ({ body }) => isSameLocalDay((body as ActivityRecordSaveRequest).actualBeginDateTime, dateValue)
     ))
 ));
 
@@ -150,7 +152,7 @@ When('I set the {string} end date to {string}', (page: string, dateValue: string
   cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].endDate, dateValue)
     .then(() => waitForAutosave(
       CONSEP_PAGE_IDS[page].saveAlias,
-      ({ body }) => isSameLocalDay(body.actualEndDateTime, dateValue)
+      ({ body }) => isSameLocalDay((body as ActivityRecordSaveRequest).actualEndDateTime, dateValue)
     ))
 ));
 
@@ -172,7 +174,7 @@ When('I select the {string} page category {string}', (page: string, category: st
     .click()
     .then(() => waitForAutosave(
       CONSEP_PAGE_IDS[page].saveAlias,
-      ({ body }) => body.testCategoryCode === category
+      ({ body }) => (body as ActivityRecordSaveRequest).testCategoryCode === category
     ));
 });
 

@@ -2,6 +2,7 @@ import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import { mockGerminationApi } from '../mockApiConsep';
 import { typeAndWaitForAutosave } from '../helpers/autosave';
 import { ONE_SECOND } from '../../constants';
+import { GerminationCountDaySaveRequest, GerminationCountSaveRequest } from '../../definitions';
 
 Given('germination API responses are mocked', () => {
   mockGerminationApi();
@@ -26,9 +27,13 @@ When('I enter {string} for germination replicate {int} on day {int} and wait for
   `[data-testid="germ-count-${replicateNumber}-${slotIndex}"]`,
   value,
   '@PUT_germ_counts',
-  ({ body }) => (body.days as Array<Record<string, unknown>>).some((day) => (
-    day.slotIndex === slotIndex && day[`rep${replicateNumber}NoSeedsGerm`] === Number(value)
-  ))
+  ({ body }) => {
+    const payload = body as GerminationCountSaveRequest;
+    const countField = `rep${replicateNumber}NoSeedsGerm` as keyof GerminationCountDaySaveRequest;
+    return payload.days.some((day) => (
+      day.slotIndex === slotIndex && day[countField] === Number(value)
+    ));
+  }
 ));
 
 When('I enter {string} for germination replicate {int} on day {int} and wait for conflict', (

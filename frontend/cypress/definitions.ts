@@ -152,3 +152,37 @@ export type SeedlotReplicateInfoType = {
   standardActivityType: string,
   replicatesList: ReplicateType[]
 };
+
+export type ActivityRecordSaveRequest = {
+  testCategoryCode?: string;
+  riaComment?: string;
+  actualBeginDateTime?: string;
+  actualEndDateTime?: string;
+  updateTimestamp?: string;
+};
+
+export type GerminationCountDaySaveRequest = {
+  slotIndex: number;
+  countDt?: string;
+  dayNoOfTest?: number;
+  rep1NoSeedsGerm?: number;
+  rep2NoSeedsGerm?: number;
+  rep3NoSeedsGerm?: number;
+  rep4NoSeedsGerm?: number;
+};
+
+export type GerminationCountSaveRequest = {
+  days: GerminationCountDaySaveRequest[];
+  replicates: Array<{
+    replicateNumber: number;
+    totalNoSeeds?: number;
+    repAcceptedInd?: number;
+    tolrncOvrrdeDesc?: string | null;
+  }>;
+};
+
+export type PurityImpuritySaveRequest = {
+  replicateNumber: number;
+  debrisRank: number;
+  debrisTypeCode: string;
+};

@@ -1,7 +1,9 @@
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
 import { mockPurityContentApi } from '../mockApiConsep';
-import { PurityContentType, SeedlotReplicateInfoType } from '../../definitions';
+import {
+  PurityContentType, PurityImpuritySaveRequest, SeedlotReplicateInfoType
+} from '../../definitions';
 import { loadFixtureAndAlias } from '../helpers/fixture-loader';
 import { getImpurityRowAt, getPurityReplicateSection } from '../helpers/purity-helper';
 import { waitForAutosave } from '../helpers/autosave';
@@ -61,7 +63,7 @@ When('I select impurity type {string} for replicate {string} rank {string}', (
 
   waitForAutosave(
     '@PATCH_impurity',
-    ({ body }) => (body as Array<Record<string, unknown>>).some((item) => (
+    ({ body }) => (body as PurityImpuritySaveRequest[]).some((item) => (
       item.replicateNumber === Number(replicateNumber)
       && item.debrisRank === Number(rank)
       && item.debrisTypeCode === impurityType
