@@ -62,25 +62,31 @@ When('I go back to the orchard selection step', () => {
 });
 
 When('I select primary orchard {string}', (orchardName: string) => {
-  cy.get('#primary-orchard-selection')
-    .click();
-
-  cy.get(`.${prefix}--list-box--expanded`)
-    .find('ul li')
-    .contains(orchardName)
-    .click();
+  cy.get('#primary-orchard-selection').then(($input) => {
+    if ($input.val() !== orchardName) {
+      cy.wrap($input).click();
+      cy.get(`.${prefix}--list-box--expanded`)
+        .find('ul li')
+        .contains(orchardName)
+        .click();
+    }
+  });
 });
 
 // The "Clear selected item" sibling also exists once a value is selected, so target the toggle only
 const selectGameticMethod = (inputId: string, method: string) => {
-  cy.get(inputId)
-    .siblings('button[title="Open"]')
-    .click();
+  cy.get(inputId).then(($input) => {
+    if ($input.val() !== method) {
+      cy.wrap($input).siblings('button[title="Open"]').click();
 
-  cy.get(`.${prefix}--list-box--expanded`)
-    .find('ul li')
-    .contains(method)
-    .click();
+      cy.get(`.${prefix}--list-box--expanded`)
+        .find('ul li')
+        .contains(method)
+        .click();
+    }
+  });
+
+  cy.get(inputId).should('have.value', method);
 };
 
 When('I select female gametic contribution method {string}', (method: string) => {
