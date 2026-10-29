@@ -1,7 +1,6 @@
 import type { Feature, MultiPolygon } from 'geojson';
 
 import {
-  ELEVATION_LOOKUP_FAILED_MESSAGE,
   deriveCollectionAreaResult,
   serializeCollectionArea
 } from '../../views/Seedlot/SeedlotMap/collectionAreaResult';
@@ -69,7 +68,7 @@ describe('deriveCollectionAreaResult', () => {
     expect(result.meanLng!).toBeGreaterThan(-124);
     expect(result.elevationMinM).toBe(110);
     expect(result.elevationMaxM).toBe(300);
-    expect(result.elevationError).toBeNull();
+    expect(result.elevationLookupFailed).toBe(false);
     expect(result.becVariant?.zone).toBe('CWH');
     expect(JSON.parse(result.geoJson).geometry.type).toBe('MultiPolygon');
   });
@@ -83,7 +82,7 @@ describe('deriveCollectionAreaResult', () => {
     expect(result.polygonCount).toBe(2);
     expect(result.elevationMinM).toBeNull();
     expect(result.elevationMaxM).toBeNull();
-    expect(result.elevationError).toBe(ELEVATION_LOOKUP_FAILED_MESSAGE);
+    expect(result.elevationLookupFailed).toBe(true);
     expect(result.becVariant).toBeNull();
     expect(result.meanLat).not.toBeNull();
   });
@@ -95,7 +94,7 @@ describe('deriveCollectionAreaResult', () => {
     const result = await deriveCollectionAreaResult(squareFeature(), ['CWH'], 1);
 
     expect(result.elevationMinM).toBeNull();
-    expect(result.elevationError).toBeNull();
+    expect(result.elevationLookupFailed).toBe(false);
   });
 });
 

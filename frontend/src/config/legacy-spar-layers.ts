@@ -163,10 +163,12 @@ const buildWmsSpeciesRows = (
   singleTile: true
 }));
 
-const BEC_LAYER_OPACITY = 0.8;
-const BEC_2M_MIN_SCALE = 396000;
-const BEC_250K_MIN_SCALE = 80000;
-const BEC_20K_MIN_SCALE = 8000;
+const BEC_LAYER_OPACITY = 0.2;
+// Must match the MinScaleDenominator each layer advertises in the DataBC
+// WMS GetCapabilities; outside those bounds GeoServer returns blank images.
+const BEC_2M_MIN_SCALE = 500000;
+const BEC_250K_MIN_SCALE = 100000;
+const BEC_20K_MIN_SCALE = 10000;
 
 // Leaflet/Web Mercator scale denominator at zoom 0. Used to translate
 // legacy CWM min_scale/max_scale values into Leaflet's minZoom/maxZoom.
@@ -293,6 +295,7 @@ const BASE_SPAR_LAYERS: LegacySparLayer[] = [
     displayName: 'Seed Plan Zones - Natural Stand',
     layerName: 'WHSE_FOREST_VEGETATION.SEED_PLAN_ZONE_POLY_MVW',
     styles: '4459',
+    opacity: 0.2,
     maxScale: 4752000,
     singleTile: true
   },

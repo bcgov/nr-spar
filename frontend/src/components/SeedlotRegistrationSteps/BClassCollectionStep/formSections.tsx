@@ -346,7 +346,7 @@ interface LocationSectionProps extends SharedSectionProps {
   onLocationAreaChange: (value: string) => void;
   onRadiusChange: (value: number | string) => void;
   onElevationChange: (field: 'elevationMin' | 'elevationMax' | 'elevationMean', value: string) => void;
-  elevationWarning?: string | null;
+  showElevationWarning?: boolean;
   onDismissElevationWarning?: () => void;
 }
 
@@ -363,7 +363,7 @@ export const CollectionLocationSection = ({
   onLocationAreaChange,
   onRadiusChange,
   onElevationChange,
-  elevationWarning,
+  showElevationWarning,
   onDismissElevationWarning
 }: LocationSectionProps) => (
   <>
@@ -482,14 +482,13 @@ export const CollectionLocationSection = ({
         />
       </Column>
     </Row>
-    {elevationWarning ? (
+    {showElevationWarning ? (
       <Row className="b-class-collection-row elevation-warning-row">
         <Column sm={4} md={8} lg={15} xlg={12}>
           <InlineNotification
             lowContrast
             kind="warning"
-            title="Elevation lookup failed."
-            subtitle={elevationWarning}
+            title="Elevation failed to auto-fill. Please load polygon in map again or enter manually."
             onCloseButtonClick={() => onDismissElevationWarning?.()}
           />
         </Column>

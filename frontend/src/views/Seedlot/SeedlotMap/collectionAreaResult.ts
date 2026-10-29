@@ -7,8 +7,6 @@ import { meanLatLng } from '../../../components/SeedlotRegistrationSteps/Collect
 import type { CollectionAreaResult } from '../../../types/SparMapTypes';
 import { featureRadiusKm } from './AoiToolbar/aoiValidation';
 
-export const ELEVATION_LOOKUP_FAILED_MESSAGE = 'Please enter it manually.';
-
 /**
  * Leaflet hands back full double precision (~17 digits). Six decimals is
  * ~0.1 m, and keeps a polygon at the vertex cap under the backend's
@@ -38,7 +36,7 @@ export const serializeCollectionArea = (feature: Feature<MultiPolygon>): string 
  * collection-area polygon. Elevation and BEC variant are fetched from
  * DataBC; both fail soft so a transient WFS outage never blocks handing the
  * geometry back to the form. A failed elevation lookup is reported through
- * `elevationError` rather than looking the same as "no elevation data".
+ * `elevationLookupFailed` rather than looking the same as "no elevation data".
  *
  * `becZones` is passed in by the caller because the AOI submit flow has
  * already computed the intersecting zones for its single-zone validation
@@ -52,10 +50,10 @@ export const deriveCollectionAreaResult = async (
   const mean = meanLatLng(feature);
   const centroid = mean ? [mean.lng, mean.lat] : null;
 
-  let elevationError: string | null = null;
+  let elevationLookupFailed = false;
   const [elevation, becVariant] = await Promise.all([
     fetchPolygonElevationRange(feature).catch(() => {
-      elevationError = ELEVATION_LOOKUP_FAILED_MESSAGE;
+      elevationLookupFailed = true;
       return null;
     }),
     centroid
@@ -72,7 +70,7 @@ export const deriveCollectionAreaResult = async (
     meanLng: mean ? mean.lng : null,
     elevationMinM: elevation ? Math.round(elevation.minM) : null,
     elevationMaxM: elevation ? Math.round(elevation.maxM) : null,
-    elevationError,
+    elevationLookupFailed,
     becZones,
     becVariant
   };

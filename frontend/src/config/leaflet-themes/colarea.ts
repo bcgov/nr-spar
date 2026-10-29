@@ -33,6 +33,7 @@ export const colareaProfile: SparMapThemeProfile = {
     // legacy per-species WMS visual without the 24-layer socket cost.
     'active_seedlots',
     'active_veglots',
+    'bec_2m',
     'bec_subzones_250k',
     'bec_subzones_250k_outline',
     'bec_subzones_250k_labels',
