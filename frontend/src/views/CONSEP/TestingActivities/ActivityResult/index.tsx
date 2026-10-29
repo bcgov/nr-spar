@@ -155,6 +155,7 @@ const ActivityResult = ({
     {
       label: 'Accept all',
       icon: <Icons.CheckboxChecked size={15} />,
+      invisible: hideActions,
       action: () => {
         const next = replicatesList.map((r) => ({ ...r, replicateAccInd: 1 }));
         setReplicatesList(next);

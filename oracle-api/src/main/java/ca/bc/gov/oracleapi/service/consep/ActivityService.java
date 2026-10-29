@@ -66,6 +66,27 @@ public class ActivityService {
   }
 
   /**
+   * Refuses edits to a test that is completed or accepted (#2784): after that, dates,
+   * category, comment and results are all read-only. Any non-zero indicator counts, since
+   * SPAR writes 1 and legacy CONSEP wrote -1.
+   *
+   * @throws ResponseStatusException 409, so the client reloads and shows the locked test
+   */
+  public void assertTestEditable(@NonNull BigDecimal riaKey) {
+    testResultRepository.findById(riaKey).ifPresent(test -> {
+      if (isSet(test.getTestCompleteInd()) || isSet(test.getAcceptResult())) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "This test is completed and can no longer be edited");
+      }
+    });
+  }
+
+  private static boolean isSet(Integer indicator) {
+    return indicator != null && indicator != 0;
+  }
+
+  /**
    * Update activity table with optimistic locking (issue #2516).
    *
    * @param riaKey the identifier key

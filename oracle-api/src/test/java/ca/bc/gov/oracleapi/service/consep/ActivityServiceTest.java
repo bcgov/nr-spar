@@ -36,6 +36,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -972,5 +974,28 @@ class ActivityServiceTest {
 
     assertThat(result).isEmpty();
     verify(standardActivityRepository, times(1)).findGerminationTestActivities();
+  }
+
+  @ParameterizedTest(name = "complete={0}, accepted={1} is locked")
+  @CsvSource({"1,0", "-1,0", "0,1", "1,1"})
+  void assertTestEditable_completedOrAccepted_throws409(int complete, int accepted) {
+    TestResultEntity test = new TestResultEntity();
+    test.setTestCompleteInd(complete);
+    test.setAcceptResult(accepted);
+    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(test));
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> activityService.assertTestEditable(riaKey));
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+  }
+
+  @Test
+  void assertTestEditable_openTest_passes() {
+    TestResultEntity test = new TestResultEntity();
+    test.setTestCompleteInd(0);
+    test.setAcceptResult(0);
+    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(test));
+
+    assertDoesNotThrow(() -> activityService.assertTestEditable(riaKey));
   }
 }
