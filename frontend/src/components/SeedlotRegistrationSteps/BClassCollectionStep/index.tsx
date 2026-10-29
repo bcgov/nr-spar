@@ -59,7 +59,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
   } = useContext(ClassBContext);
 
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
-  const [elevationWarning, setElevationWarning] = useState<string | null>(null);
+  const [showElevationWarning, setShowElevationWarning] = useState(false);
   const [isRemoveAreaOpen, setIsRemoveAreaOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -241,7 +241,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
       Promise.resolve(navigate('.', { replace: true, state: null })).catch(() => undefined);
       pendingMapResultRef.current = null;
       setStepData('collectionStep', clearCollectionAreaResult(stateRef.current));
-      setElevationWarning(null);
+      setShowElevationWarning(false);
       return;
     }
 
@@ -266,7 +266,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
       'collectionStep',
       applyCollectionAreaResult(stateRef.current, pending, becCatalogueQuery.data)
     );
-    setElevationWarning(pending.elevationError);
+    setShowElevationWarning(pending.elevationLookupFailed);
     pendingMapResultRef.current = null;
   }, [
     location.state,
@@ -376,7 +376,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         onClose={() => setIsRemoveAreaOpen(false)}
         onConfirm={() => {
           updateState(clearCollectionAreaResult(state));
-          setElevationWarning(null);
+          setShowElevationWarning(false);
           setIsRemoveAreaOpen(false);
         }}
       />
@@ -407,8 +407,8 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         onLocationAreaChange={handleLocationAreaChange}
         onRadiusChange={handleRadiusChange}
         onElevationChange={handleStringFieldChange}
-        elevationWarning={elevationWarning}
-        onDismissElevationWarning={() => setElevationWarning(null)}
+        showElevationWarning={showElevationWarning}
+        onDismissElevationWarning={() => setShowElevationWarning(false)}
       />
       <CollectionMethodsSection
         state={state}

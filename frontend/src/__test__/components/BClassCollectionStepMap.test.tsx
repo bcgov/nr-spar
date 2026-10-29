@@ -12,7 +12,8 @@ import { BClassCollectionForm } from '../../components/SeedlotRegistrationSteps/
 import ClassBContext, { ClassBContextType } from '../../views/Seedlot/ContextContainerClassB/context';
 import { BClassAllStepData } from '../../views/Seedlot/ContextContainerClassB/definitions';
 import type { CollectionAreaResult } from '../../types/SparMapTypes';
-import { ELEVATION_LOOKUP_FAILED_MESSAGE } from '../../views/Seedlot/SeedlotMap/collectionAreaResult';
+
+const ELEVATION_WARNING = /Elevation failed to auto-fill/;
 
 vi.mock('../../api-service/coneCollectionMethodAPI', () => ({ default: vi.fn().mockResolvedValue([]) }));
 vi.mock('../../api-service/captureMethodsAPI', () => ({ default: vi.fn().mockResolvedValue([]) }));
@@ -33,7 +34,7 @@ const result: CollectionAreaResult = {
   meanLng: -123.25,
   elevationMinM: null,
   elevationMaxM: null,
-  elevationError: ELEVATION_LOOKUP_FAILED_MESSAGE,
+  elevationLookupFailed: true,
   becZones: [],
   becVariant: null
 };
@@ -41,7 +42,7 @@ const result: CollectionAreaResult = {
 const withCollectionArea = (): BClassCollectionForm => applyCollectionAreaResult(
   initBClassCollectionState('', ''),
   {
-    ...result, elevationMinM: 100, elevationMaxM: 300, elevationError: null
+    ...result, elevationMinM: 100, elevationMaxM: 300, elevationLookupFailed: false
   },
   undefined
 );
@@ -100,10 +101,10 @@ describe('BClassCollectionStep collection area', () => {
   it('shows the elevation warning from the map result and hides it when closed', async () => {
     renderStep(initBClassCollectionState('', ''), { collectionAreaResult: result });
 
-    expect(await screen.findByText(ELEVATION_LOOKUP_FAILED_MESSAGE)).toBeInTheDocument();
+    expect(await screen.findByText(ELEVATION_WARNING)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /close notification/i }));
     await waitFor(() => {
-      expect(screen.queryByText(ELEVATION_LOOKUP_FAILED_MESSAGE)).not.toBeInTheDocument();
+      expect(screen.queryByText(ELEVATION_WARNING)).not.toBeInTheDocument();
     });
   });
 
