@@ -1,7 +1,10 @@
 import { Then, When, DataTable } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
-import { MoistureContentType, PurityContentType } from '../../definitions';
+import {
+  ActivityRecordSaveRequest, MoistureContentType, PurityContentType, SeedlotReplicateInfoType
+} from '../../definitions';
 import { TYPE_DELAY } from '../../constants';
+import { typeAndWaitForAutosave, waitForAutosave, RouteAlias } from '../helpers/autosave';
 
 let moistureData: MoistureContentType;
 let purityData: PurityContentType;
@@ -20,18 +23,26 @@ before(() => {
 
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
-const CONSEP_PAGE_IDS: Record<string, { startDate: string; endDate: string; comments: string; category: string }> = {
+const CONSEP_PAGE_IDS: Record<string, {
+  startDate: string;
+  endDate: string;
+  comments: string;
+  category: string;
+  saveAlias: RouteAlias;
+}> = {
   'moisture content': {
     startDate: '#moisture-content-start-date-picker',
     endDate: '#moisture-content-end-date-picker',
     comments: '#moisture-content-comments',
-    category: '#moisture-content-category'
+    category: '#moisture-content-category',
+    saveAlias: '@PATCH_moisture_activity_record'
   },
   'purity content': {
     startDate: '#purity-content-start-date-picker',
     endDate: '#purity-content-end-date-picker',
     comments: '#purity-content-comments',
-    category: '#purity-content-category'
+    category: '#purity-content-category',
+    saveAlias: '@PATCH_purity_activity_record'
   }
 };
 
@@ -82,7 +93,7 @@ Then('the activity results table should show these columns:', (dataTable: DataTa
 });
 
 Then('the activity summary should match the seedlot replicate info', () => {
-  cy.get('@seedlotData').then((seedlotData: any) => {
+  cy.get('@seedlotData').then((seedlotData: SeedlotReplicateInfoType) => {
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(0)
@@ -117,13 +128,33 @@ Then('the activity summary should match the seedlot replicate info', () => {
   });
 });
 
-When('I set the {string} start date to {string}', (page: string, dateValue: string) => {
-  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue);
-});
+const isSameLocalDay = (iso: string | undefined, dateValue: string) => {
+  if (!iso) {
+    return false;
+  }
+  const [year, month, day] = dateValue.split('/').map(Number);
+  const savedDate = new Date(iso);
+  return !Number.isNaN(savedDate.getTime())
+    && savedDate.getFullYear() === year
+    && savedDate.getMonth() === month - 1
+    && savedDate.getDate() === day;
+};
 
-When('I set the {string} end date to {string}', (page: string, dateValue: string) => {
-  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].endDate, dateValue);
-});
+When('I set the {string} start date to {string}', (page: string, dateValue: string) => (
+  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue)
+    .then(() => waitForAutosave(
+      CONSEP_PAGE_IDS[page].saveAlias,
+      ({ body }) => isSameLocalDay((body as ActivityRecordSaveRequest).actualBeginDateTime, dateValue)
+    ))
+));
+
+When('I set the {string} end date to {string}', (page: string, dateValue: string) => (
+  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].endDate, dateValue)
+    .then(() => waitForAutosave(
+      CONSEP_PAGE_IDS[page].saveAlias,
+      ({ body }) => isSameLocalDay((body as ActivityRecordSaveRequest).actualEndDateTime, dateValue)
+    ))
+));
 
 When('I set the {string} start date to {string}, expect a date validation error', (page: string, dateValue: string) => {
   cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue)
@@ -140,7 +171,11 @@ When('I select the {string} page category {string}', (page: string, category: st
     .click();
 
   cy.contains(`.${prefix}--list-box__menu-item__option`, category)
-    .click();
+    .click()
+    .then(() => waitForAutosave(
+      CONSEP_PAGE_IDS[page].saveAlias,
+      ({ body }) => (body as ActivityRecordSaveRequest).testCategoryCode === category
+    ));
 });
 
 Then('the {string} page category should be {string}', (page: string, category: string) => {
@@ -153,12 +188,13 @@ Then('the {string} comment input should have placeholder', (page: string) => {
     .should('have.attr', 'placeholder', getCommentPlaceholder(page));
 });
 
-When('I enter the {string} page comment', (page: string) => {
-  cy.get(CONSEP_PAGE_IDS[page].comments)
-    .clear()
-    .type(moistureData.mc.testComment, { delay: TYPE_DELAY })
-    .blur();
-});
+When('I enter the {string} page comment', (page: string) => typeAndWaitForAutosave(
+  CONSEP_PAGE_IDS[page].comments,
+  moistureData.mc.testComment,
+  CONSEP_PAGE_IDS[page].saveAlias,
+  ({ body }) => JSON.stringify(body).includes(moistureData.mc.testComment),
+  TYPE_DELAY
+));
 
 Then('the {string} page comment should be visible', (page: string) => {
   cy.get(CONSEP_PAGE_IDS[page].comments)

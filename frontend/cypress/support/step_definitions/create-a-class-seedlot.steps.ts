@@ -18,8 +18,8 @@ const getRegData = (speciesKey: string) => {
 };
 
 When('I start a-class seedlot registration', () => {
-  cy.get('@aClassSeedlotData').then((data: any) => {
-    fixtureData = data as SeedlotRegFixtureType;
+  cy.get('@aClassSeedlotData').then((data: SeedlotRegFixtureType) => {
+    fixtureData = data;
   });
 
   cy.get(SeedlotRegistrationSelectors.SeedlotActivitiesCardTitle)

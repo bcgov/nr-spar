@@ -1,7 +1,16 @@
+import {
+  GerminationCountDaySaveRequest,
+  GerminationCountSaveRequest,
+  PurityImpuritySaveRequest
+} from '../definitions';
+
+type PurityImpurityMockRequest = PurityImpuritySaveRequest & { debrisSeqNumber?: number };
+
 /**
  * Sets up Cypress intercepts for moisture content cone and forest client APIs
  * with predefined fixture responses for testing purposes.
  */
+
 export function mockMoistureContentApi() {
   cy.intercept(
     { method: 'GET', url: '**/api/moisture-content-cone/514330' },
@@ -22,6 +31,16 @@ export function mockMoistureContentApi() {
     { method: 'DELETE', url: '**/api/moisture-content-cone/514330/*' },
     { statusCode: 200, fixture: 'moisture-seedlot-replicate-info.json' }
   ).as('DELETE_replicate');
+
+  cy.intercept(
+    { method: 'PATCH', url: '**/api/moisture-content-cone/replicate/514330' },
+    { statusCode: 200, body: {} }
+  ).as('PATCH_moisture_replicates');
+
+  cy.intercept(
+    { method: 'PATCH', url: '**/api/moisture-content-cone/514330' },
+    { statusCode: 200, body: { updateTimestamp: '2026-07-29T00:00:00.000Z' } }
+  ).as('PATCH_moisture_activity_record');
 }
 
 export type FavouriteMockItem = {
@@ -112,8 +131,8 @@ export function mockPurityContentApi() {
   cy.intercept(
     { method: 'PATCH', url: `**/api/purity-tests/debris/${riaKey}*` },
     (req) => {
-      const body = Array.isArray(req.body) ? req.body : [];
-      const response = body.map((item: any, idx: number) => ({
+      const body = Array.isArray(req.body) ? req.body as PurityImpurityMockRequest[] : [];
+      const response = body.map((item, idx) => ({
         riaKey: Number(riaKey),
         replicateNumber: Number(item.replicateNumber ?? 1),
         debrisSeqNumber: item.debrisSeqNumber ?? 5889500 + idx,
@@ -129,7 +148,7 @@ export function mockPurityContentApi() {
   ).as('PATCH_impurity');
 
   cy.intercept(
-    { method: 'DELETE', url: `**/api/purity-tests/debris/${riaKey}*` },
+    { method: 'DELETE', url: `**/api/purity-tests/debris/${riaKey}/**` },
     {
       statusCode: 200,
       body: [
@@ -167,4 +186,67 @@ export function mockPurityContentApi() {
       }
     }
   ).as('PATCH_purity_activity_record');
+  cy.intercept(
+    { method: 'PATCH', url: `**/api/purity-tests/replicate/${riaKey}` },
+    { statusCode: 200, body: {} }
+  ).as('PATCH_purity_replicates');
+}
+
+export function mockGerminationApi(conflictFirstSave = false) {
+  const riaKey = '79082';
+  const updateTimestamp = '2026-10-26T00:00:00.000Z';
+  // Seeded with a dated day so the only edit in a scenario is the count itself.
+  let savedDays: GerminationCountDaySaveRequest[] = [
+    { slotIndex: 1, countDt: '2024-11-04', dayNoOfTest: 4 }
+  ];
+  let shouldConflict = conflictFirstSave;
+
+  cy.intercept('GET', `**/api/germination-tests/${riaKey}`, {
+    statusCode: 200,
+    body: {
+      riaSkey: Number(riaKey),
+      activityTypeCd: 'G10',
+      testCategoryCd: 'QA',
+      testCompleteInd: 0,
+      acceptResultInd: 0,
+      germinatorEntry: '2024-10-31',
+      requestId: 'TST20170140',
+      seedlotNumber: '07080',
+      vegetationState: 'SX'
+    }
+  }).as('GET_germination_header');
+
+  cy.intercept('GET', `**/api/germ-counts/${riaKey}`, (req) => {
+    req.reply({
+      statusCode: 200,
+      body: {
+        riaSkey: Number(riaKey),
+        slots: savedDays,
+        updateTimestamp: savedDays.length > 0 ? updateTimestamp : undefined
+      }
+    });
+  }).as('GET_germ_counts');
+
+  cy.intercept('GET', `**/api/test-replicates/${riaKey}`, {
+    statusCode: 200,
+    body: []
+  }).as('GET_germ_replicates');
+
+  cy.intercept('PUT', `**/api/germ-counts/${riaKey}`, (req) => {
+    if (shouldConflict) {
+      shouldConflict = false;
+      req.reply({ statusCode: 409, body: { message: 'Conflict' } });
+      return;
+    }
+
+    savedDays = (req.body as GerminationCountSaveRequest).days;
+    req.reply({
+      statusCode: 200,
+      body: {
+        riaSkey: Number(riaKey),
+        slots: savedDays,
+        updateTimestamp
+      }
+    });
+  }).as('PUT_germ_counts');
 }
