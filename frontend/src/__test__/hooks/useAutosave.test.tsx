@@ -1,8 +1,10 @@
+import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import {
   describe, it, expect, vi, beforeEach, afterEach
 } from 'vitest';
 import useAutosave from '../../hooks/useAutosave';
+import AuthContext, { AuthContextData } from '../../contexts/AuthContext';
 
 describe('useAutosave', () => {
   beforeEach(() => {
@@ -170,5 +172,66 @@ describe('useAutosave', () => {
     await act(async () => { await result.current.flush(); });
     expect(onSave).toHaveBeenCalledTimes(2);
     expect(onSave).toHaveBeenLastCalledWith({ v: 1 }, { v: 0 });
+  });
+
+  it('records what onSaved derives from the response as saved', async () => {
+    const onSave = vi.fn().mockResolvedValue({ ts: 't2' });
+    const onSaved = vi.fn((result: { ts: string }, sent: { v: number; ts: string }) => (
+      { ...sent, ts: result.ts }
+    ));
+    const { rerender } = renderHook(
+      ({ data }) => useAutosave({
+        data, onSave, onSaved, delay: 800
+      }),
+      { initialProps: { data: { v: 0, ts: 't1' } } }
+    );
+
+    rerender({ data: { v: 1, ts: 't1' } });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(onSaved).toHaveBeenCalledWith({ ts: 't2' }, { v: 1, ts: 't1' });
+
+    // The caller writes the new timestamp into its state: nothing left to save.
+    rerender({ data: { v: 1, ts: 't2' } });
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    // The next edit goes out against the written-back value.
+    rerender({ data: { v: 2, ts: 't2' } });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(onSave).toHaveBeenLastCalledWith({ v: 2, ts: 't2' }, { v: 1, ts: 't2' });
+  });
+
+  it('neither schedules nor flushes while in conflict', () => {
+    const onSave = vi.fn();
+    const { rerender, unmount } = renderHook(
+      ({ data, conflict }) => useAutosave({
+        data, onSave, conflict, delay: 800
+      }),
+      { initialProps: { data: { v: 0 }, conflict: true } }
+    );
+
+    rerender({ data: { v: 1 }, conflict: true });
+    act(() => { vi.advanceTimersByTime(1000); });
+    act(() => { window.dispatchEvent(new Event('pagehide')); });
+    act(() => { unmount(); });
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('does not flush on unmount after sign-out', () => {
+    const onSave = vi.fn();
+    let signed = true;
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AuthContext.Provider value={{ signed } as AuthContextData}>{children}</AuthContext.Provider>
+    );
+    const { rerender, unmount } = renderHook(
+      ({ data }) => useAutosave({ data, onSave, delay: 800 }),
+      { initialProps: { data: { v: 0 } }, wrapper }
+    );
+
+    rerender({ data: { v: 1 } });
+    signed = false;
+    rerender({ data: { v: 1 } });
+    act(() => { unmount(); });
+    expect(onSave).not.toHaveBeenCalled();
   });
 });

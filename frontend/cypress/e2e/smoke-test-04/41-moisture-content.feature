@@ -52,6 +52,7 @@ Feature: CONSEP manual moisture content activity summary
   Scenario: Moisture content start and end dates can be set
     When I set the "moisture content" start date to "2025/06/10"
     And I set the "moisture content" end date to "2025/06/11"
+    Then the "moisture content" auto save sends the end date "2025/06/11"
 
   Scenario: Setting start date after end date shows validation error
     When I set the "moisture content" end date to "2025/06/11"
@@ -65,3 +66,4 @@ Feature: CONSEP manual moisture content activity summary
     Then the "moisture content" comment input should have placeholder
     When I enter the "moisture content" page comment
     Then the "moisture content" page comment should be visible
+    And the "moisture content" auto save sends the comment

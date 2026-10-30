@@ -1,12 +1,26 @@
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
+import AuthContext from '../contexts/AuthContext';
 
 const DEFAULT_DELAY = 800;
 const DEFAULT_MAX_WAIT = 3000;
 
-export type UseAutosaveOptions<T> = {
+export type UseAutosaveOptions<T, R = unknown> = {
   data: T;
-  onSave: (data: T, previous: T | undefined) => void | Promise<void>;
+  onSave: (data: T, previous: T | undefined) => R | Promise<R>;
+  /**
+   * Called after a successful save with the response and the value that was sent. Returns
+   * what the server now holds (typically `sent` with the new `updateTimestamp`), which the
+   * hook records as saved; the caller writes the same change into its own state.
+   */
+  onSaved?: (result: R, sent: T) => T;
+  /**
+   * Caller-side gate: `hydrated && editable && valid && !pending`. The hook adds
+   * `!conflict` (below) and "still signed in" (AuthContext) itself. All of them block
+   * both scheduling and the pagehide/unmount flush.
+   */
   enabled?: boolean;
+  /** True while the page shows a 409 conflict; nothing is saved until it is cleared. */
+  conflict?: boolean;
   delay?: number;
   maxWait?: number;
   isEqual?: (a: T, b: T) => boolean;
@@ -20,14 +34,21 @@ export type UseAutosaveResult<T> = {
 
 const defaultIsEqual = <T>(a: T, b: T): boolean => JSON.stringify(a) === JSON.stringify(b);
 
-function useAutosave<T>({
+function useAutosave<T, R = unknown>({
   data,
   onSave,
+  onSaved,
   enabled = true,
+  conflict = false,
   delay = DEFAULT_DELAY,
   maxWait = DEFAULT_MAX_WAIT,
   isEqual = defaultIsEqual
-}: UseAutosaveOptions<T>): UseAutosaveResult<T> {
+}: UseAutosaveOptions<T, R>): UseAutosaveResult<T> {
+  // After sign-out the token is gone: a pagehide/unmount flush would 401. `signed` is
+  // undefined outside an AuthProvider (unit tests), which counts as signed in.
+  const { signed } = useContext(AuthContext);
+  const canSave = enabled && !conflict && signed !== false;
+
   // Latest values held in refs so timer callbacks and event listeners always
   // read current values without needing to re-subscribe.
   const dataRef = useRef(data);
@@ -36,8 +57,10 @@ function useAutosave<T>({
   onSaveRef.current = onSave;
   const isEqualRef = useRef(isEqual);
   isEqualRef.current = isEqual;
-  const enabledRef = useRef(enabled);
-  enabledRef.current = enabled;
+  const onSavedRef = useRef(onSaved);
+  onSavedRef.current = onSaved;
+  const enabledRef = useRef(canSave);
+  enabledRef.current = canSave;
 
   // Snapshot of the last value we have saved (initialised to the first value).
   const savedRef = useRef<T>(data);
@@ -76,8 +99,8 @@ function useAutosave<T>({
       return;
     }
     try {
-      await onSaveRef.current(current, previous);
-      savedRef.current = current;
+      const result = await onSaveRef.current(current, previous);
+      savedRef.current = onSavedRef.current ? onSavedRef.current(result, current) : current;
       failedRef.current = null;
     } catch {
       // Keep the previous saved snapshot so the next edit still carries this
@@ -90,7 +113,7 @@ function useAutosave<T>({
   // last-saved snapshot. The maxWait timer caps how long continuous edits
   // can defer a save.
   useEffect(() => {
-    if (!enabled || isEqualRef.current(data, savedRef.current) || hasFailedOn(data)) {
+    if (!canSave || isEqualRef.current(data, savedRef.current) || hasFailedOn(data)) {
       return;
     }
     if (debounceTimer.current) {
@@ -100,7 +123,7 @@ function useAutosave<T>({
     if (!maxWaitTimer.current) {
       maxWaitTimer.current = setTimeout(save, maxWait);
     }
-  }, [data, enabled, delay, maxWait]);
+  }, [data, canSave, delay, maxWait]);
 
   // Flush pending changes on page hide and on unmount.
   useEffect(() => {

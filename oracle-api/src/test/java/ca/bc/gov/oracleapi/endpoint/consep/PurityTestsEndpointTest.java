@@ -11,18 +11,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityAutosaveFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
-import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.PurityTestService;
 import ca.bc.gov.oracleapi.service.consep.TestResultService;
@@ -46,6 +46,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -222,168 +223,82 @@ class PurityTestsEndpointTest {
         .andExpect(status().isNotFound());
   }
 
+  private static final BigDecimal RIA_KEY = new BigDecimal(1234567890);
+  private static final LocalDateTime TS = LocalDateTime.parse("2013-08-01T00:00:00");
+
+  private static ActivityFormDto activity(String comment, LocalDateTime updateTimestamp) {
+    return new ActivityFormDto("STD", TS, TS, comment, updateTimestamp);
+  }
+
+  private ResultActions putAutosave(PurityAutosaveFormDto dto) throws Exception {
+    return mockMvc.perform(put("/api/purity-tests/{riaKey}", RIA_KEY)
+        .with(csrf().asHeader())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(dto)));
+  }
+
   @Test
-  @DisplayName("Update Purity - Activity data should succeed")
-  void updatePurityActivity_shouldSucceed() throws Exception {
-    BigDecimal riaKey = new BigDecimal(1234567890);
+  @DisplayName("PUT autosave saves the activity and replicates and returns the activity")
+  void autosave_shouldSucceed() throws Exception {
+    PurityAutosaveFormDto dto = new PurityAutosaveFormDto(activity("New comment", TS), List.of(
+        new PurityReplicateFormDto(1, new BigDecimal("1.1"), new BigDecimal("2.2"),
+        new BigDecimal("3.3"), 1, null)));
+    ActivityEntity saved = new ActivityEntity();
+    saved.setRiaKey(RIA_KEY);
+    saved.setRiaComment("New comment");
+    saved.setUpdateTimestamp(LocalDateTime.parse("2013-08-02T00:00:00"));
+    when(purityTestService.autosave(RIA_KEY, dto)).thenReturn(saved);
 
-    ActivityFormDto activityFormDto = new ActivityFormDto(
-        "STD",
-        LocalDateTime.parse("2013-08-01T00:00:00"),
-        LocalDateTime.parse("2013-08-01T00:00:00"),
-        "New comment",
-        LocalDateTime.parse("2013-08-01T00:00:00")
-    );
-
-    ActivityEntity activityEntity = new ActivityEntity();
-
-    activityEntity.setRiaKey(riaKey);
-    activityEntity.setActualBeginDateTime(activityFormDto.actualBeginDateTime());
-    activityEntity.setActualEndDateTime(activityFormDto.actualEndDateTime());
-    activityEntity.setTestCategoryCode(activityFormDto.testCategoryCode());
-    activityEntity.setRiaComment(activityFormDto.riaComment());
-
-    when(activityService.updateActivityField(riaKey, activityFormDto))
-        .thenReturn(activityEntity);
-
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-
-    mockMvc
-        .perform(patch("/api/purity-tests/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .header("Content-Type", "application/json")
-            .accept(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(activityFormDto)))
+    putAutosave(dto)
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.actualBeginDateTime")
-            .value(activityFormDto.actualBeginDateTime().format(formatter)))
-        .andExpect(jsonPath("$.actualEndDateTime")
-            .value(activityFormDto.actualEndDateTime().format(formatter)))
-        .andExpect(jsonPath("$.testCategoryCode").value(activityFormDto.testCategoryCode()))
-        .andExpect(jsonPath("$.riaComment").value(activityFormDto.riaComment()));
+        .andExpect(jsonPath("$.riaComment").value("New comment"))
+        .andExpect(jsonPath("$.updateTimestamp").value("2013-08-02T00:00:00"));
   }
 
   @Test
-  @DisplayName("Update Purity - Activity data should return 404 when activity not found")
-  void updatePurityActivity_shouldReturnNotFound() throws Exception {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    ActivityFormDto activityFormDto = new ActivityFormDto(
-        "TST",
-        LocalDateTime.parse("2013-08-01T00:00:00"),
-        LocalDateTime.parse("2013-08-01T00:00:00"),
-        "Not found comment",
-        LocalDateTime.parse("2013-08-01T00:00:00")
-    );
+  @DisplayName("PUT autosave accepts a partial activity record (dates and category unset)")
+  void autosave_partialRecord_isAccepted() throws Exception {
+    PurityAutosaveFormDto dto = new PurityAutosaveFormDto(
+        new ActivityFormDto(null, null, null, null, TS), List.of());
+    when(purityTestService.autosave(RIA_KEY, dto)).thenReturn(new ActivityEntity());
 
-    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity entry not found"))
-        .when(activityService).updateActivityField(riaKey, activityFormDto);
-
-    mockMvc
-        .perform(patch("/api/purity-tests/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(activityFormDto)))
-        .andExpect(status().isNotFound());
+    putAutosave(dto).andExpect(status().isOk());
   }
 
   @Test
-  @DisplayName("Update Purity - Activity data should return 400 for invalid values")
-  void updatePurityActivity_shouldReturnInvalid() throws Exception {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    ActivityFormDto activityFormDto = new ActivityFormDto(
-        null,
-        null,
-        null,
-        null,
-        null
-    );
+  @DisplayName("PUT autosave returns 409 on optimistic lock conflict")
+  void autosave_conflict_returns409() throws Exception {
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT,
+            "Activity was modified by another user; reload and retry"))
+        .when(purityTestService).autosave(any(), any());
 
-    mockMvc
-        .perform(patch("/api/purity-tests/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(activityFormDto)))
+    putAutosave(new PurityAutosaveFormDto(activity("c", TS), List.of()))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  @DisplayName("PUT autosave returns 400 without the updateTimestamp it locks on")
+  void autosave_missingTimestamp_returns400() throws Exception {
+    putAutosave(new PurityAutosaveFormDto(activity("c", null), List.of()))
         .andExpect(status().isBadRequest());
   }
 
   @Test
-  @DisplayName("PATCH /replicate/{riaKey} - should update multiple replicate entities")
-  @WithMockUser
-  void updateReplicateField_shouldReturnUpdatedReplicates() throws Exception {
-    BigDecimal riaKey = new BigDecimal("1234567890");
-
-    PurityReplicateFormDto form1 = new PurityReplicateFormDto(
-        1, new BigDecimal("1.1"), new BigDecimal("2.2"),
-        new BigDecimal("3.3"), 0, "Override 1"
-    );
-
-    PurityReplicateEntity entity1 = new PurityReplicateEntity();
-    entity1.setId(new ReplicateId(riaKey, 1));
-    entity1.setPureSeedWeight(form1.pureSeedWeight());
-    entity1.setOtherSeedWeight(form1.otherSeedWeight());
-    entity1.setInertMttrWeight(form1.inertMttrWeight());
-    entity1.setReplicateAccInd(form1.replicateAccInd());
-    entity1.setOverrideReason(form1.overrideReason());
-
-    PurityReplicateFormDto form2 = new PurityReplicateFormDto(
-        2, new BigDecimal("5.5"), new BigDecimal("6.6"),
-        new BigDecimal("7.7"), 1, "Override 2"
-    );
-
-    PurityReplicateEntity entity2 = new PurityReplicateEntity();
-    entity2.setId(new ReplicateId(riaKey, 2));
-    entity2.setPureSeedWeight(form2.pureSeedWeight());
-    entity2.setOtherSeedWeight(form2.otherSeedWeight());
-    entity2.setInertMttrWeight(form2.inertMttrWeight());
-    entity2.setReplicateAccInd(form2.replicateAccInd());
-    entity2.setOverrideReason(form2.overrideReason());
-
-
-    List<PurityReplicateFormDto> formList = List.of(form1, form2);
-    List<PurityReplicateEntity> entityList = List.of(entity1, entity2);
-
-    when(purityTestService.updateReplicateField(eq(riaKey), eq(formList)))
-        .thenReturn(entityList);
-
-    mockMvc.perform(patch("/api/purity-tests/replicate/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(formList)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].pureSeedWeight").value(form1.pureSeedWeight()))
-        .andExpect(jsonPath("$[0].otherSeedWeight").value(form1.otherSeedWeight()))
-        .andExpect(jsonPath("$[0].inertMttrWeight").value(form1.inertMttrWeight()))
-        .andExpect(jsonPath("$[0].replicateAccInd").value(form1.replicateAccInd()))
-        .andExpect(jsonPath("$[0].overrideReason").value(form1.overrideReason()))
-
-        .andExpect(jsonPath("$[1].pureSeedWeight").value(form2.pureSeedWeight()))
-        .andExpect(jsonPath("$[1].otherSeedWeight").value(form2.otherSeedWeight()))
-        .andExpect(jsonPath("$[1].inertMttrWeight").value(form2.inertMttrWeight()))
-        .andExpect(jsonPath("$[1].replicateAccInd").value(form2.replicateAccInd()))
-        .andExpect(jsonPath("$[1].overrideReason").value(form2.overrideReason()));
+  @DisplayName("PUT autosave returns 400 when the comment exceeds the column")
+  void autosave_commentTooLong_returns400() throws Exception {
+    putAutosave(new PurityAutosaveFormDto(activity("x".repeat(2001), TS), List.of()))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  @DisplayName("PATCH /replicate/{riaKey} - should return 400 for invalid request body")
-  @WithMockUser
-  void updateReplicateField_shouldReturn400WhenInvalidRequest() throws Exception {
-    BigDecimal riaKey = new BigDecimal("1234567890");
-
-    PurityReplicateFormDto invalidForm = new PurityReplicateFormDto(
-        null, new BigDecimal("1.1"), new BigDecimal("2.2"),
-        new BigDecimal("3.3"), 0, null
-    );
-
-    mockMvc.perform(patch("/api/purity-tests/replicate/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(List.of(invalidForm))))
+  @DisplayName("PUT autosave returns 400 when a replicate has no replicateNumber")
+  void autosave_missingReplicateNumber_returns400() throws Exception {
+    putAutosave(new PurityAutosaveFormDto(activity("c", TS), List.of(
+        new PurityReplicateFormDto(null, null, null, null, 0, null))))
         .andExpect(status().isBadRequest());
   }
+
 
   void validatePurityTestData_Success() throws Exception {
     BigDecimal riaKey = BigDecimal.valueOf(123);
@@ -583,30 +498,5 @@ class PurityTestsEndpointTest {
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
-  }
-
-  @Test
-  @DisplayName("PATCH activity returns 409 on optimistic lock conflict")
-  void updateActivityField_conflict_returns409() throws Exception {
-    BigDecimal riaKey = new BigDecimal(1234567890);
-    ActivityFormDto activityFormDto = new ActivityFormDto(
-        "STD",
-        LocalDateTime.parse("2013-08-01T00:00:00"),
-        LocalDateTime.parse("2013-09-01T00:00:00"),
-        "Comment",
-        LocalDateTime.parse("2013-09-01T00:00:00")
-    );
-
-    doThrow(new ResponseStatusException(HttpStatus.CONFLICT,
-            "Activity was modified by another user; reload and retry"))
-        .when(activityService).updateActivityField(any(), any());
-
-    mockMvc
-        .perform(patch("/api/purity-tests/{riaKey}", riaKey)
-            .with(csrf().asHeader())
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(activityFormDto)))
-        .andExpect(status().isConflict());
   }
 }

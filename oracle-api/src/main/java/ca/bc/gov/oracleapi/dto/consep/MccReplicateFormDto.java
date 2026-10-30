@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.dto.consep;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 /**
@@ -11,7 +12,7 @@ import java.math.BigDecimal;
 @Schema(description = "JSON object with the values to be updated in the Replicate table")
 public record MccReplicateFormDto(
     @NotNull Integer replicateNumber,
-    String containerId,
+    @Size(max = 4) String containerId,
     BigDecimal containerWeight,
     BigDecimal freshSeed,
     BigDecimal containerAndDryWeight,

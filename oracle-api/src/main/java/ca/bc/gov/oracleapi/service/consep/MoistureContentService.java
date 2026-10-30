@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.MccAutosaveFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
@@ -37,6 +38,8 @@ public class MoistureContentService {
   private final TestResultRepository testResultRepository;
 
   private final MccReplicatesRepository replicateRepository;
+
+  private final ActivityService activityService;
 
   // The maximum number of replicates is 8 and the entries are sequencial,
   // so we can use a fixed list to fetch the data for the replicates.
@@ -167,6 +170,20 @@ public class MoistureContentService {
     SparLog.info("Updated {} replicates for riaKey: {}", savedReplicates.size(), riaKey);
 
     return savedReplicates;
+  }
+
+  /**
+   * Auto save: the activity record and the replicates in one transaction, locked on the
+   * activity's updateTimestamp (the replicate tables have no timestamp column of their own).
+   *
+   * @return the activity, carrying the new updateTimestamp
+   * @throws ResponseStatusException 409 if the activity changed since it was read, 404 if absent
+   */
+  @Transactional
+  public ActivityEntity autosave(@NonNull BigDecimal riaKey, @NonNull MccAutosaveFormDto dto) {
+    ActivityEntity activity = activityService.updateActivityField(riaKey, dto.activity());
+    updateReplicateField(riaKey, dto.replicates());
+    return activity;
   }
 
   /**
