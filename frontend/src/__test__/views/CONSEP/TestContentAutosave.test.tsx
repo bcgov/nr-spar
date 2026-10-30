@@ -36,6 +36,7 @@ vi.mock('../../../api-service/consep/testCodesAPI', () => ({
 }));
 
 const autosaveMock = vi.fn();
+let testOverrides: Record<string, number> = {};
 vi.mock('../../../api-service/consep/testingActivitiesAPI', () => ({
   default: (_t: string, fn: string, params: any) => {
     if (fn === 'getDataByRiaKey') {
@@ -48,7 +49,8 @@ vi.mock('../../../api-service/consep/testingActivitiesAPI', () => ({
         updateTimestamp: '2025-01-18T16:00:00',
         seedlotNumber: '64132',
         replicatesList: [{ riaKey: 123, replicateNumber: 1, replicateAccInd: 1 }],
-        debrisList: []
+        debrisList: [],
+        ...testOverrides
       });
     }
     if (fn === 'autosave') {
@@ -103,6 +105,7 @@ describe.each([
 
   beforeEach(() => {
     autosaveMock.mockReset();
+    testOverrides = {};
     autosaveMock.mockImplementation(() => saved('2025-02-01T00:00:00'));
     // mutateAsync rejections are handled by useAutosave, but may surface for a
     // microtask as "unhandledrejection" first.
@@ -225,5 +228,22 @@ describe.each([
 
     fireEvent.click(screen.getByRole('button', { name: /Reload/i }));
     await waitFor(() => expect(screen.queryByText('Conflict detected')).not.toBeInTheDocument());
+  });
+
+  // -1 is how legacy CONSEP stored "completed"; SPAR stores 1.
+  it.each([
+    ['completed (legacy -1)', { testCompleteInd: -1, acceptResult: 0 }],
+    ['completed and accepted', { testCompleteInd: 1, acceptResult: 1 }]
+  ])('locks a %s test: inputs disabled, nothing saves', async (_label, flags) => {
+    testOverrides = flags;
+    const { comments, startDate } = await renderPage();
+    expect(comments).toBeDisabled();
+    expect(startDate).toBeDisabled();
+    expect(screen.getByRole('combobox', { name: /category/i })).toBeDisabled();
+
+    fireEvent.change(comments, { target: { value: 'late edit' } });
+    fireEvent.click(screen.getByRole('button', { name: 'edit replicate' }));
+    await wait(AFTER_DEBOUNCE);
+    expect(autosaveMock).not.toHaveBeenCalled();
   });
 });

@@ -69,10 +69,21 @@ const PurityContent = () => {
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
+  // Any non-zero indicator counts: SPAR writes 1, legacy CONSEP wrote -1. Once completed
+  // or accepted, nothing on the page is editable (#2784).
+  const isCompleted = !!testActivity?.testCompleteInd;
+  const isAccepted = !!testActivity?.acceptResult;
+  const isLocked = isCompleted || isAccepted;
+
   const {
     activityRecord, updateActivityRecord, replicates, setReplicates, setReplicatesBlocked,
     hydrate, isDateRangeValid, isConflict, clearConflict
-  } = useTestAutosave('purityTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
+  } = useTestAutosave(
+    'purityTest',
+    riaKey,
+    !isLocked,
+    (message) => setAlert({ isSuccess: false, message })
+  );
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
@@ -341,7 +352,7 @@ const PurityContent = () => {
       kind: 'tertiary',
       size: 'lg',
       icon: Checkmark,
-      disabled: testActivity?.testCompleteInd === 1,
+      disabled: isLocked,
       action: handleCompleteTestModal
     },
     {
@@ -350,7 +361,7 @@ const PurityContent = () => {
       kind: 'tertiary',
       size: 'lg',
       icon: CheckmarkOutline,
-      disabled: testActivity?.acceptResult === 1 || testActivity?.testCompleteInd !== 1,
+      disabled: isAccepted || !isCompleted,
       action: handleAcceptTestModal
     },
     {
@@ -398,7 +409,7 @@ const PurityContent = () => {
               : ''
           }
           value={impurity.debrisCategory}
-          disabled={isImpurityCodesPending || isImpurityCodesError}
+          disabled={isLocked || isImpurityCodesPending || isImpurityCodesError}
           onChange={(e: ComboBoxEvent) => {
             const { selectedItem } = e;
             if (!selectedItem) {
@@ -429,6 +440,7 @@ const PurityContent = () => {
           )}
           renderIcon={TrashCan}
           iconDescription="Remove impurity"
+          disabled={isLocked}
         />
       </Column>
     </Row>
@@ -477,6 +489,7 @@ const PurityContent = () => {
                     size="md"
                     kind="tertiary"
                     renderIcon={Add}
+                    disabled={isLocked}
                     onClick={() => addImpurity(replicateNumber)}
                   >
                     {fieldsConfig.impuritySection.buttonText}
@@ -549,14 +562,14 @@ const PurityContent = () => {
         />
         <>
           {
-            testActivity?.testCompleteInd === 1
+            isCompleted
               ? (
                 <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
               )
               : null
           }
           {
-            testActivity?.acceptResult === 1
+            isAccepted
               ? (
                 <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
               )
@@ -575,7 +588,7 @@ const PurityContent = () => {
           replicateType="purityTest"
           replicatesData={replicates}
           riaKey={Number(riaKey)}
-          isEditable={testActivity?.testCompleteInd !== 1}
+          isEditable={!isLocked}
           initValidationErrors={validationErrors}
           updateReplicates={setReplicates}
           setAlert={handleAlert}
@@ -591,6 +604,7 @@ const PurityContent = () => {
             config={fieldsConfig.startDate}
             value={activityRecord?.actualBeginDateTime}
             invalid={!isDateRangeValid}
+            disabled={isLocked}
             onChange={(value) => updateActivityRecord({ actualBeginDateTime: value })}
           />
         </Column>
@@ -600,12 +614,14 @@ const PurityContent = () => {
             config={fieldsConfig.endDate}
             value={activityRecord?.actualEndDateTime}
             invalid={!isDateRangeValid}
+            disabled={isLocked}
             onChange={(value) => updateActivityRecord({ actualEndDateTime: value })}
           />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
           <ComboBox
             className="category-combobox"
+            disabled={isLocked}
             id="purity-content-category"
             name="category"
             items={fieldsConfig.category.options}
@@ -643,6 +659,7 @@ const PurityContent = () => {
             rows={1}
             maxCount={500}
             enableCounter
+            disabled={isLocked}
             value={activityRecord?.riaComment || ''}
             onChange={(e: { target: { value: string } }) => {
               updateActivityRecord({
