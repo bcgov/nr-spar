@@ -38,6 +38,17 @@ export const utcToIsoSlashStyle = (utcDate: string | null | undefined): string =
 };
 
 /**
+ * Convert a picked calendar day (e.g. 2023/10/26) to the UTC timestamp of its start in
+ * Vancouver, the inverse of utcToIsoSlashStyle. Using the browser's zone instead would shift
+ * the day for anyone outside Pacific time.
+ */
+export const localDateToUtcDateTime = (localDate: string): string | undefined => (
+  localDate
+    ? luxon.fromFormat(localDate, 'yyyy/MM/dd', { zone: DEFAULT_LOCAL_TIMEZONE }).toUTC().toISO()!
+    : undefined
+);
+
+/**
  * Convert local date to UTC date.
  */
 export const localDateToUtcFormat = (localDate: string): string | null => {

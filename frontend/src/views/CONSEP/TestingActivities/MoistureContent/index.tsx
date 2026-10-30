@@ -27,7 +27,7 @@ import testingActivitiesAPI from '../../../../api-service/consep/testingActiviti
 import {
   TestingActivityType, ActivityRecordType, ActivitySummaryType
 } from '../../../../types/consep/TestingActivityType';
-import { utcToIsoSlashStyle } from '../../../../utils/DateUtils';
+import { localDateToUtcDateTime, utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
@@ -400,10 +400,10 @@ const MoistureContent = () => {
             allowInput
             dateFormat={DATE_FORMAT}
             value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
-            // Only flatpickr's parsed Date reaches state; typing partial text saves nothing,
-            // and clearing the field hands back no date (saved as null).
-            onChange={([date]: Array<Date>) => {
-              handleUpdateActivityRecord({ actualBeginDateTime: date?.toISOString() });
+            // flatpickr only calls this with a fully parsed date, so typing partial text saves
+            // nothing; clearing the field passes '' (saved as null).
+            onChange={(_dates: Array<Date>, picked: string) => {
+              handleUpdateActivityRecord({ actualBeginDateTime: localDateToUtcDateTime(picked) });
             }}
           >
             <DatePickerInput
@@ -424,10 +424,10 @@ const MoistureContent = () => {
             allowInput
             dateFormat="Y/m/d"
             value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
-            // Only flatpickr's parsed Date reaches state; typing partial text saves nothing,
-            // and clearing the field hands back no date (saved as null).
-            onChange={([date]: Array<Date>) => {
-              handleUpdateActivityRecord({ actualEndDateTime: date?.toISOString() });
+            // flatpickr only calls this with a fully parsed date, so typing partial text saves
+            // nothing; clearing the field passes '' (saved as null).
+            onChange={(_dates: Array<Date>, picked: string) => {
+              handleUpdateActivityRecord({ actualEndDateTime: localDateToUtcDateTime(picked) });
             }}
           >
             <DatePickerInput

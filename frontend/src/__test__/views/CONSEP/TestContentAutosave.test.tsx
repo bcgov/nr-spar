@@ -157,8 +157,10 @@ describe.each([
     fireEvent.blur(startDate);
     await wait(AFTER_DEBOUNCE);
     expect(autosaveMock).toHaveBeenCalledTimes(1);
-    const { actualBeginDateTime } = autosaveMock.mock.calls[0][0].payload.activity;
-    expect(new Date(actualBeginDateTime).getDate()).toBe(10);
+    // The picked day is a Vancouver day whatever the browser's zone (CI runs in UTC).
+    expect(autosaveMock.mock.calls[0][0].payload.activity.actualBeginDateTime)
+      .toBe('2025-01-10T08:00:00.000Z');
+    expect(startDate).toHaveValue('2025/01/10');
   });
 
   it('saves a cleared date as null', async () => {
