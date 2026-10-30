@@ -28,7 +28,7 @@ import ActivitySummary from '../../../../components/CONSEP/ActivitySummary';
 import StatusTag from '../../../../components/StatusTag';
 
 import {
-  ActivityRecordType, TestingActivityType, ActivitySummaryType
+  TestingActivityType, ActivitySummaryType
 } from '../../../../types/consep/TestingActivityType';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
@@ -70,7 +70,7 @@ const PurityContent = () => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
   const {
-    activityRecord, setActivityRecord, replicates, setReplicates, setReplicatesBlocked,
+    activityRecord, updateActivityRecord, replicates, setReplicates, setReplicatesBlocked,
     hydrate, isDateRangeValid, isConflict, clearConflict
   } = useTestAutosave('purityTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
 
@@ -243,13 +243,7 @@ const PurityContent = () => {
       return;
     }
     hydrate(
-      {
-        testCategoryCode: data.testCategoryCode,
-        riaComment: data.riaComment,
-        actualBeginDateTime: data.actualBeginDateTime,
-        actualEndDateTime: data.actualEndDateTime,
-        updateTimestamp: data.updateTimestamp
-      },
+      data,
       data.replicatesList?.length ? data.replicatesList : initReplicatesList(riaKey ?? '', 2)
     );
   }, [testActivityQuery.data, riaKey]);
@@ -269,11 +263,6 @@ const PurityContent = () => {
     if (result.status === 'success') {
       clearConflict();
     }
-  };
-
-  // Saving and range checking are left to useTestAutosave; this only merges the edit.
-  const handleUpdateActivityRecord = (record: ActivityRecordType) => {
-    setActivityRecord((prev) => ({ ...prev, ...record }));
   };
 
   const createBreadcrumbItems = () => {
@@ -602,7 +591,7 @@ const PurityContent = () => {
             config={fieldsConfig.startDate}
             value={activityRecord?.actualBeginDateTime}
             invalid={!isDateRangeValid}
-            onChange={(value) => handleUpdateActivityRecord({ actualBeginDateTime: value })}
+            onChange={(value) => updateActivityRecord({ actualBeginDateTime: value })}
           />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
@@ -611,7 +600,7 @@ const PurityContent = () => {
             config={fieldsConfig.endDate}
             value={activityRecord?.actualEndDateTime}
             invalid={!isDateRangeValid}
-            onChange={(value) => handleUpdateActivityRecord({ actualEndDateTime: value })}
+            onChange={(value) => updateActivityRecord({ actualEndDateTime: value })}
           />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
@@ -627,7 +616,7 @@ const PurityContent = () => {
               activityRecord?.testCategoryCode ?? 'QA'
             }
             onChange={(e: { selectedItem: string }) => {
-              handleUpdateActivityRecord({
+              updateActivityRecord({
                 testCategoryCode: e.selectedItem
               });
             }}
@@ -656,7 +645,7 @@ const PurityContent = () => {
             enableCounter
             value={activityRecord?.riaComment || ''}
             onChange={(e: { target: { value: string } }) => {
-              handleUpdateActivityRecord({
+              updateActivityRecord({
                 riaComment: e.target.value
               });
             }}

@@ -72,15 +72,26 @@ const useTestAutosave = (
   });
 
   // Load server state as already saved: hydration never PUTs.
-  const hydrate = (record: ActivityRecordType, replicatesList: ReplicateType[]) => {
+  const hydrate = (server: ActivityRecordType, replicatesList: ReplicateType[]) => {
+    const record: ActivityRecordType = {
+      testCategoryCode: server.testCategoryCode,
+      riaComment: server.riaComment,
+      actualBeginDateTime: server.actualBeginDateTime,
+      actualEndDateTime: server.actualEndDateTime,
+      updateTimestamp: server.updateTimestamp
+    };
     setActivityRecord(record);
     setReplicates(replicatesList);
     markSaved({ activityRecord: record, replicates: replicatesList });
   };
 
+  const updateActivityRecord = (edit: ActivityRecordType) => {
+    setActivityRecord((prev) => ({ ...prev, ...edit }));
+  };
+
   return {
     activityRecord,
-    setActivityRecord,
+    updateActivityRecord,
     replicates,
     setReplicates,
     setReplicatesBlocked,

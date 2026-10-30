@@ -23,7 +23,7 @@ import ROUTES from '../../../../routes/constants';
 import { calculateAverage } from '../../../../api-service/moistureContentAPI';
 import testingActivitiesAPI from '../../../../api-service/consep/testingActivitiesAPI';
 import {
-  TestingActivityType, ActivityRecordType, ActivitySummaryType
+  TestingActivityType, ActivitySummaryType
 } from '../../../../types/consep/TestingActivityType';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 
@@ -62,7 +62,7 @@ const MoistureContent = () => {
   const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
   const {
-    activityRecord, setActivityRecord, replicates, setReplicates, setReplicatesBlocked,
+    activityRecord, updateActivityRecord, replicates, setReplicates, setReplicatesBlocked,
     hydrate, isDateRangeValid, isConflict, clearConflict
   } = useTestAutosave('moistureTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
 
@@ -123,13 +123,7 @@ const MoistureContent = () => {
       replicatesList = initReplicatesList(riaKey ?? '', variation.defaultNumberOfRows ?? 1);
     }
     hydrate(
-      {
-        testCategoryCode: data.testCategoryCode,
-        riaComment: data.riaComment,
-        actualBeginDateTime: data.actualBeginDateTime,
-        actualEndDateTime: data.actualEndDateTime,
-        updateTimestamp: data.updateTimestamp
-      },
+      data,
       replicatesList
     );
   }, [testActivityQuery.data, riaKey]);
@@ -149,11 +143,6 @@ const MoistureContent = () => {
     if (result.status === 'success') {
       clearConflict();
     }
-  };
-
-  // Saving and range checking are left to useTestAutosave; this only merges the edit.
-  const handleUpdateActivityRecord = (record: ActivityRecordType) => {
-    setActivityRecord((prev) => ({ ...prev, ...record }));
   };
 
   const validateTest = useMutation({
@@ -388,7 +377,7 @@ const MoistureContent = () => {
             config={fieldsConfig.startDate}
             value={activityRecord?.actualBeginDateTime}
             invalid={!isDateRangeValid}
-            onChange={(value) => handleUpdateActivityRecord({ actualBeginDateTime: value })}
+            onChange={(value) => updateActivityRecord({ actualBeginDateTime: value })}
           />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
@@ -397,7 +386,7 @@ const MoistureContent = () => {
             config={fieldsConfig.endDate}
             value={activityRecord?.actualEndDateTime}
             invalid={!isDateRangeValid}
-            onChange={(value) => handleUpdateActivityRecord({ actualEndDateTime: value })}
+            onChange={(value) => updateActivityRecord({ actualEndDateTime: value })}
           />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
@@ -413,7 +402,7 @@ const MoistureContent = () => {
               activityRecord?.testCategoryCode ?? mcVariation.defaultCategory
             }
             onChange={(e: { selectedItem: string }) => {
-              handleUpdateActivityRecord({
+              updateActivityRecord({
                 testCategoryCode: e.selectedItem
               });
             }}
@@ -431,7 +420,7 @@ const MoistureContent = () => {
             enableCounter
             value={activityRecord?.riaComment || ''}
             onChange={(e: { target: { value: string } }) => {
-              handleUpdateActivityRecord({
+              updateActivityRecord({
                 riaComment: e.target.value
               });
             }}
