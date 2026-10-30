@@ -6,8 +6,6 @@ import {
   FlexGrid,
   Row,
   Column,
-  DatePicker,
-  DatePickerInput,
   TextArea,
   ComboBox,
   InlineNotification
@@ -27,7 +25,6 @@ import testingActivitiesAPI from '../../../../api-service/consep/testingActiviti
 import {
   TestingActivityType, ActivityRecordType, ActivitySummaryType
 } from '../../../../types/consep/TestingActivityType';
-import { localDateToUtcDateTime, utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
@@ -37,13 +34,14 @@ import StatusTag from '../../../../components/StatusTag';
 
 import ButtonGroup from '../ButtonGroup';
 import ActivityResult from '../ActivityResult';
+import ActivityDateField from '../ActivityDateField';
 import { mccReplicatesChecker } from './utils';
 import useTestAutosave from '../hooks/useTestAutosave';
 import useDateRangeValidation from '../hooks/useDateRangeValidation';
 import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
 
 import {
-  DATE_FORMAT, fieldsConfig, mccVariations
+  fieldsConfig, mccVariations
 } from './constants';
 
 import './styles.scss';
@@ -395,52 +393,22 @@ const MoistureContent = () => {
       </Row>
       <Row className="consep-moisture-content-form">
         <Column sm={2} md={2} lg={5} xlg={5}>
-          <DatePicker
-            datePickerType="single"
-            allowInput
-            dateFormat={DATE_FORMAT}
-            value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
-            // flatpickr only calls this with a fully parsed date, so typing partial text saves
-            // nothing; clearing the field passes '' (saved as null).
-            onChange={(_dates: Array<Date>, picked: string) => {
-              handleUpdateActivityRecord({ actualBeginDateTime: localDateToUtcDateTime(picked) });
-            }}
-          >
-            <DatePickerInput
-              id="moisture-content-start-date-picker"
-              name={fieldsConfig.startDate.name}
-              placeholder="yyyy/mm/dd"
-              labelText={fieldsConfig.startDate.labelText}
-              invalidText={fieldsConfig.startDate.invalidText}
-              invalid={!!dateErrors.startDate}
-              size="md"
-              autoComplete="off"
-            />
-          </DatePicker>
+          <ActivityDateField
+            id="moisture-content-start-date-picker"
+            config={fieldsConfig.startDate}
+            value={activityRecord?.actualBeginDateTime}
+            invalid={!!dateErrors.startDate}
+            onChange={(value) => handleUpdateActivityRecord({ actualBeginDateTime: value })}
+          />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
-          <DatePicker
-            datePickerType="single"
-            allowInput
-            dateFormat="Y/m/d"
-            value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
-            // flatpickr only calls this with a fully parsed date, so typing partial text saves
-            // nothing; clearing the field passes '' (saved as null).
-            onChange={(_dates: Array<Date>, picked: string) => {
-              handleUpdateActivityRecord({ actualEndDateTime: localDateToUtcDateTime(picked) });
-            }}
-          >
-            <DatePickerInput
-              id="moisture-content-end-date-picker"
-              name={fieldsConfig.endDate.name}
-              placeholder={fieldsConfig.endDate.placeholder}
-              labelText={fieldsConfig.endDate.labelText}
-              invalidText={fieldsConfig.endDate.invalidText}
-              invalid={!!dateErrors.endDate}
-              size="md"
-              autoComplete="off"
-            />
-          </DatePicker>
+          <ActivityDateField
+            id="moisture-content-end-date-picker"
+            config={fieldsConfig.endDate}
+            value={activityRecord?.actualEndDateTime}
+            invalid={!!dateErrors.endDate}
+            onChange={(value) => handleUpdateActivityRecord({ actualEndDateTime: value })}
+          />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
           <ComboBox

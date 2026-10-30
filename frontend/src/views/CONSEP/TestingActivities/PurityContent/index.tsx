@@ -6,8 +6,6 @@ import {
   FlexGrid,
   Row,
   Column,
-  DatePicker,
-  DatePickerInput,
   TextArea,
   ComboBox,
   Button,
@@ -37,11 +35,11 @@ import testingActivitiesAPI from '../../../../api-service/consep/testingActiviti
 import { getCodesByActivity } from '../../../../api-service/consep/testCodesAPI';
 import { deleteImpurity, patchImpurities } from '../../../../api-service/consep/impuritiesAPI';
 import { initReplicatesList } from '../../../../utils/TestActivitiesUtils';
-import { localDateToUtcDateTime, utcToIsoSlashStyle } from '../../../../utils/DateUtils';
 import ROUTES from '../../../../routes/constants';
 import { calculateAverage } from '../../../../api-service/moistureContentAPI';
 
 import ActivityResult from '../ActivityResult';
+import ActivityDateField from '../ActivityDateField';
 import ButtonGroup from '../ButtonGroup';
 import {
   ImpurityDisplayType, ImpurityPayload,
@@ -49,7 +47,7 @@ import {
 } from './definitions';
 import { impuritiesPerReplicate, purityReplicatesChecker } from './utils';
 import {
-  DATE_FORMAT, fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
+  fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
 import useTestAutosave from '../hooks/useTestAutosave';
 import useDateRangeValidation from '../hooks/useDateRangeValidation';
@@ -609,52 +607,22 @@ const PurityContent = () => {
       </Row>
       <Row className="consep-purity-content-date-picker">
         <Column sm={2} md={2} lg={5} xlg={5}>
-          <DatePicker
-            datePickerType="single"
-            allowInput
-            dateFormat={DATE_FORMAT}
-            value={utcToIsoSlashStyle(activityRecord?.actualBeginDateTime)}
-            // flatpickr only calls this with a fully parsed date, so typing partial text saves
-            // nothing; clearing the field passes '' (saved as null).
-            onChange={(_dates: Array<Date>, picked: string) => {
-              handleUpdateActivityRecord({ actualBeginDateTime: localDateToUtcDateTime(picked) });
-            }}
-          >
-            <DatePickerInput
-              id="purity-content-start-date-picker"
-              name={fieldsConfig.startDate.name}
-              placeholder="yyyy/mm/dd"
-              labelText={fieldsConfig.startDate.labelText}
-              invalidText={fieldsConfig.startDate.invalidText}
-              invalid={!!dateErrors.startDate}
-              size="md"
-              autoComplete="off"
-            />
-          </DatePicker>
+          <ActivityDateField
+            id="purity-content-start-date-picker"
+            config={fieldsConfig.startDate}
+            value={activityRecord?.actualBeginDateTime}
+            invalid={!!dateErrors.startDate}
+            onChange={(value) => handleUpdateActivityRecord({ actualBeginDateTime: value })}
+          />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
-          <DatePicker
-            datePickerType="single"
-            allowInput
-            dateFormat="Y/m/d"
-            value={utcToIsoSlashStyle(activityRecord?.actualEndDateTime)}
-            // flatpickr only calls this with a fully parsed date, so typing partial text saves
-            // nothing; clearing the field passes '' (saved as null).
-            onChange={(_dates: Array<Date>, picked: string) => {
-              handleUpdateActivityRecord({ actualEndDateTime: localDateToUtcDateTime(picked) });
-            }}
-          >
-            <DatePickerInput
-              id="purity-content-end-date-picker"
-              name={fieldsConfig.endDate.name}
-              placeholder={fieldsConfig.endDate.placeholder}
-              labelText={fieldsConfig.endDate.labelText}
-              invalidText={fieldsConfig.endDate.invalidText}
-              invalid={!!dateErrors.endDate}
-              size="md"
-              autoComplete="off"
-            />
-          </DatePicker>
+          <ActivityDateField
+            id="purity-content-end-date-picker"
+            config={fieldsConfig.endDate}
+            value={activityRecord?.actualEndDateTime}
+            invalid={!!dateErrors.endDate}
+            onChange={(value) => handleUpdateActivityRecord({ actualEndDateTime: value })}
+          />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
           <ComboBox
