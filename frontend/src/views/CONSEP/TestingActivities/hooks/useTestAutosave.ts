@@ -8,7 +8,7 @@ import {
   ActivityRecordType, ReplicateType, TestingTypes
 } from '../../../../types/consep/TestingActivityType';
 import useActivityConflict from './useActivityConflict';
-import { isDateRangeOrdered } from './useDateRangeValidation';
+import { isDateRangeOrdered } from './dateRange';
 
 type Snapshot = { activityRecord: ActivityRecordType; replicates: ReplicateType[] };
 
@@ -44,6 +44,13 @@ const useTestAutosave = (
     }
   });
 
+  // Derived from state, not checked in the change handler, so the error shown and the
+  // save gate always agree with the dates on screen.
+  const isDateRangeValid = isDateRangeOrdered(
+    toDate(activityRecord?.actualBeginDateTime),
+    toDate(activityRecord?.actualEndDateTime)
+  );
+
   const data = useMemo<Snapshot>(
     () => ({ activityRecord: activityRecord ?? {}, replicates }),
     [activityRecord, replicates]
@@ -60,10 +67,7 @@ const useTestAutosave = (
     enabled: !!activityRecord
       && !saveMutation.isPending
       && !isReplicatesBlocked
-      && isDateRangeOrdered(
-        toDate(activityRecord.actualBeginDateTime),
-        toDate(activityRecord.actualEndDateTime)
-      ),
+      && isDateRangeValid,
     conflict: isConflict
   });
 
@@ -81,6 +85,7 @@ const useTestAutosave = (
     setReplicates,
     setReplicatesBlocked,
     hydrate,
+    isDateRangeValid,
     isConflict,
     clearConflict
   };

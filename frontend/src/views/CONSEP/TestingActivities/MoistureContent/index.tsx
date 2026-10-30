@@ -37,7 +37,6 @@ import ActivityResult from '../ActivityResult';
 import ActivityDateField from '../ActivityDateField';
 import { mccReplicatesChecker } from './utils';
 import useTestAutosave from '../hooks/useTestAutosave';
-import useDateRangeValidation from '../hooks/useDateRangeValidation';
 import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
 
 import {
@@ -60,15 +59,11 @@ const MoistureContent = () => {
     message: string;
   } | null>();
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const { dateErrors, validateDateRange } = useDateRangeValidation({
-    startDate: fieldsConfig.startDate.invalidText,
-    endDate: fieldsConfig.endDate.invalidText
-  });
   const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
   const {
     activityRecord, setActivityRecord, replicates, setReplicates, setReplicatesBlocked,
-    hydrate, isConflict, clearConflict
+    hydrate, isDateRangeValid, isConflict, clearConflict
   } = useTestAutosave('moistureTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
 
   // Reference to the table body for extracting MC Values
@@ -156,13 +151,8 @@ const MoistureContent = () => {
     }
   };
 
-  // Saving is left to useTestAutosave; this only merges the edit and flags bad ranges.
+  // Saving and range checking are left to useTestAutosave; this only merges the edit.
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
-    const merged = { ...activityRecord, ...record };
-    validateDateRange(
-      merged.actualBeginDateTime ? new Date(merged.actualBeginDateTime) : null,
-      merged.actualEndDateTime ? new Date(merged.actualEndDateTime) : null
-    );
     setActivityRecord((prev) => ({ ...prev, ...record }));
   };
 
@@ -397,7 +387,7 @@ const MoistureContent = () => {
             id="moisture-content-start-date-picker"
             config={fieldsConfig.startDate}
             value={activityRecord?.actualBeginDateTime}
-            invalid={!!dateErrors.startDate}
+            invalid={!isDateRangeValid}
             onChange={(value) => handleUpdateActivityRecord({ actualBeginDateTime: value })}
           />
         </Column>
@@ -406,7 +396,7 @@ const MoistureContent = () => {
             id="moisture-content-end-date-picker"
             config={fieldsConfig.endDate}
             value={activityRecord?.actualEndDateTime}
-            invalid={!!dateErrors.endDate}
+            invalid={!isDateRangeValid}
             onChange={(value) => handleUpdateActivityRecord({ actualEndDateTime: value })}
           />
         </Column>

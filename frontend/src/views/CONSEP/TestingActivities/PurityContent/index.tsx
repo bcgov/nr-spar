@@ -50,7 +50,6 @@ import {
   fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
 import useTestAutosave from '../hooks/useTestAutosave';
-import useDateRangeValidation from '../hooks/useDateRangeValidation';
 import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
 
 import './styles.scss';
@@ -67,16 +66,12 @@ const PurityContent = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'accept'>(COMPLETE);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const { dateErrors, validateDateRange } = useDateRangeValidation({
-    startDate: fieldsConfig.startDate.invalidText,
-    endDate: fieldsConfig.endDate.invalidText
-  });
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
   const {
     activityRecord, setActivityRecord, replicates, setReplicates, setReplicatesBlocked,
-    hydrate, isConflict, clearConflict
+    hydrate, isDateRangeValid, isConflict, clearConflict
   } = useTestAutosave('purityTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
 
   const testActivityQuery = useQuery({
@@ -276,13 +271,8 @@ const PurityContent = () => {
     }
   };
 
-  // Saving is left to useTestAutosave; this only merges the edit and flags bad ranges.
+  // Saving and range checking are left to useTestAutosave; this only merges the edit.
   const handleUpdateActivityRecord = (record: ActivityRecordType) => {
-    const merged = { ...activityRecord, ...record };
-    validateDateRange(
-      merged.actualBeginDateTime ? new Date(merged.actualBeginDateTime) : null,
-      merged.actualEndDateTime ? new Date(merged.actualEndDateTime) : null
-    );
     setActivityRecord((prev) => ({ ...prev, ...record }));
   };
 
@@ -611,7 +601,7 @@ const PurityContent = () => {
             id="purity-content-start-date-picker"
             config={fieldsConfig.startDate}
             value={activityRecord?.actualBeginDateTime}
-            invalid={!!dateErrors.startDate}
+            invalid={!isDateRangeValid}
             onChange={(value) => handleUpdateActivityRecord({ actualBeginDateTime: value })}
           />
         </Column>
@@ -620,7 +610,7 @@ const PurityContent = () => {
             id="purity-content-end-date-picker"
             config={fieldsConfig.endDate}
             value={activityRecord?.actualEndDateTime}
-            invalid={!!dateErrors.endDate}
+            invalid={!isDateRangeValid}
             onChange={(value) => handleUpdateActivityRecord({ actualEndDateTime: value })}
           />
         </Column>

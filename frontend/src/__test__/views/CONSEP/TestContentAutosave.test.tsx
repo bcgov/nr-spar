@@ -163,6 +163,20 @@ describe.each([
     expect(startDate).toHaveValue('2025/01/10');
   });
 
+  it('flags a start date after the end date and does not save it', async () => {
+    // Same order as the Cypress scenario: end date first, then a start date after it.
+    const { startDate } = await renderPage();
+    const endDate = screen.getByLabelText(/End date/i);
+    act(() => { (endDate as any)._flatpickr.setDate('2025/01/10', true, 'Y/m/d'); });
+    await wait(AFTER_DEBOUNCE);
+    expect(autosaveMock).toHaveBeenCalledTimes(1);
+
+    act(() => { (startDate as any)._flatpickr.setDate('2025/01/15', true, 'Y/m/d'); });
+    expect(await screen.findAllByText('Please enter a valid date')).toHaveLength(2);
+    await wait(AFTER_DEBOUNCE);
+    expect(autosaveMock).toHaveBeenCalledTimes(1);
+  });
+
   it('saves a cleared date as null', async () => {
     const { startDate } = await renderPage();
     fireEvent.change(startDate, { target: { value: '' } });
