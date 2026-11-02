@@ -1,0 +1,110 @@
+package ca.bc.gov.oracleapi.service.consep;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Legacy CONSEP germination calculations (issue #2756), verified against stored legacy results.
+ *
+ * <p>Each replicate's daily count becomes a percentage of its seeds; a day's average is the sum of
+ * those percentages over the replicates counted that day; cumulative germination is the running
+ * sum of the daily averages. Peak value is the largest cumulative % / test day (earliest day wins
+ * a tie), MDG is final cumulative % / final test day, and GV = MDG x peak value. Integer outputs
+ * use MS Access {@code CInt} rounding, i.e. half-to-even.
+ */
+final class GerminationMetrics {
+
+  /** Scale for intermediate divisions; outputs are rounded only at the end. */
+  private static final int SCALE = 12;
+
+  private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
+
+  /** Integer results for the test result row. */
+  record Result(int germinationPct, int germinationValue, int peakValueGrmPct,
+      int peakValueNoDays) {}
+
+  private GerminationMetrics() {}
+
+  /**
+   * Running cumulative germination %, one entry per day.
+   *
+   * @param countsPerDay per day, the four replicate counts (null = not counted that day)
+   * @param totalSeeds the four replicates' seed totals (null or 0 = replicate not in use)
+   * @param accepted the four replicates' accept flags; rejected replicates are left out
+   * @return cumulative % per day, unrounded
+   */
+  static List<BigDecimal> cumulativePercents(
+      List<Integer[]> countsPerDay, Integer[] totalSeeds, boolean[] accepted) {
+    List<BigDecimal> out = new ArrayList<>(countsPerDay.size());
+    BigDecimal cumulative = BigDecimal.ZERO;
+    for (Integer[] counts : countsPerDay) {
+      cumulative = cumulative.add(dayAverage(counts, totalSeeds, accepted));
+      out.add(cumulative);
+    }
+    return out;
+  }
+
+  /**
+   * One day's average germination %: each counted, accepted replicate's count as a % of its
+   * seeds, summed and divided by how many replicates were counted. Zero when none were.
+   */
+  static BigDecimal dayAverage(Integer[] counts, Integer[] totalSeeds, boolean[] accepted) {
+    BigDecimal sum = BigDecimal.ZERO;
+    int reps = 0;
+    for (int r = 0; r < 4; r++) {
+      if (!accepted[r] || totalSeeds[r] == null || totalSeeds[r] <= 0 || counts[r] == null) {
+        continue;
+      }
+      sum = sum.add(BigDecimal.valueOf(counts[r]).multiply(HUNDRED)
+          .divide(BigDecimal.valueOf(totalSeeds[r]), SCALE, RoundingMode.HALF_EVEN));
+      reps++;
+    }
+    return reps == 0
+        ? BigDecimal.ZERO
+        : sum.divide(BigDecimal.valueOf(reps), SCALE, RoundingMode.HALF_EVEN);
+  }
+
+  /**
+   * Germination %, GV and peak value from the cumulative series.
+   *
+   * @param dayNumbers test day number per day (count date minus germinator entry)
+   * @param cumulative cumulative % per day, from {@link #cumulativePercents}
+   * @return the integer results, or null when there is no day with a positive day number
+   */
+  static Result calculate(List<Integer> dayNumbers, List<BigDecimal> cumulative) {
+    BigDecimal peak = null;
+    int peakDay = 0;
+    BigDecimal peakCumulative = BigDecimal.ZERO;
+    int lastDay = 0;
+    BigDecimal finalCumulative = BigDecimal.ZERO;
+    for (int i = 0; i < dayNumbers.size(); i++) {
+      Integer day = dayNumbers.get(i);
+      if (day == null || day <= 0) {
+        continue;
+      }
+      BigDecimal value = cumulative.get(i)
+          .divide(BigDecimal.valueOf(day), SCALE, RoundingMode.HALF_EVEN);
+      if (peak == null || value.compareTo(peak) > 0) {
+        peak = value;
+        peakDay = day;
+        peakCumulative = cumulative.get(i);
+      }
+      lastDay = day;
+      finalCumulative = cumulative.get(i);
+    }
+    if (peak == null) {
+      return null;
+    }
+    BigDecimal mdg = finalCumulative.divide(
+        BigDecimal.valueOf(lastDay), SCALE, RoundingMode.HALF_EVEN);
+    return new Result(
+        cint(finalCumulative), cint(mdg.multiply(peak)), cint(peakCumulative), peakDay);
+  }
+
+  /** MS Access CInt: round half to even. */
+  static int cint(BigDecimal value) {
+    return value.setScale(0, RoundingMode.HALF_EVEN).intValueExact();
+  }
+}

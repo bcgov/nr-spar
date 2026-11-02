@@ -19,6 +19,7 @@ import ca.bc.gov.oracleapi.repository.consep.TestRepGermRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -200,7 +201,7 @@ public class GermCountService {
     }
 
     Set<BigDecimal> skeysBefore = referencedSkeys(entity);
-    List<GermCountSlotDto> slots = buildSlotsForSave(days, entity);
+    List<GermCountSlotDto> slots = buildSlotsForSave(days, request.replicates(), entity);
     mapper.applySlots(slots, entity);
     entity.setUpdateUserid(requestUserId);
     entity = germCountRepository.save(entity);
@@ -272,11 +273,12 @@ public class GermCountService {
    * is a true full replacement: a slot the request omits, or submits without a count date, is
    * emitted blank so its columns are cleared. Dated days keep their existing DAILY_GERM_SKEY or
    * get a freshly sequenced one (AC2), get rep null-to-zero applied for used replicates, and
-   * carry the running cumulative germination (AC4). Undated slots contribute nothing to the
+   * carry the running cumulative germination % (AC4, #2756). Undated slots contribute nothing to the
    * running total.
    */
   List<GermCountSlotDto> buildSlotsForSave(
-      List<DayGermCountDto> sortedDays, GermCountEntity entity) {
+      List<DayGermCountDto> sortedDays, List<TestRepGermFormDto> replicates,
+      GermCountEntity entity) {
     // Not Collectors.toMap: a slot present by count date alone carries a null key, which toMap
     // rejects outright.
     Map<Integer, BigDecimal> existingSkeys = new HashMap<>();
@@ -296,8 +298,17 @@ public class GermCountService {
       if (d.rep4NoSeedsGerm() != null) repUsed[3] = true;
     }
 
+    Integer[] totalSeeds = new Integer[4];
+    boolean[] accepted = new boolean[4];
+    for (TestRepGermFormDto r : replicates) {
+      totalSeeds[r.replicateNumber() - 1] = r.totalNoSeeds();
+      // Legacy stores true as -1; the screen sends 1. Only an explicit 0 rejects a replicate.
+      accepted[r.replicateNumber() - 1] =
+          r.repAcceptedInd() == null || r.repAcceptedInd() != 0;
+    }
+
     List<GermCountSlotDto> slots = new ArrayList<>(MAX_SLOTS);
-    long cumulative = 0;
+    BigDecimal cumulative = BigDecimal.ZERO;
     // Slots are walked in index order; validateAscendingDates guarantees that tracks date order.
     for (int slotIndex = 1; slotIndex <= MAX_SLOTS; slotIndex++) {
       DayGermCountDto d = submitted.get(slotIndex);
@@ -310,7 +321,8 @@ public class GermCountService {
       Integer r2 = normalize(d.rep2NoSeedsGerm(), repUsed[1]);
       Integer r3 = normalize(d.rep3NoSeedsGerm(), repUsed[2]);
       Integer r4 = normalize(d.rep4NoSeedsGerm(), repUsed[3]);
-      cumulative += zero(r1) + zero(r2) + zero(r3) + zero(r4);
+      cumulative = cumulative.add(
+          GerminationMetrics.dayAverage(new Integer[] {r1, r2, r3, r4}, totalSeeds, accepted));
 
       // DAILY_GERM_SKEY{n} points at this day's CNS_T_DAILY_ABNORMAL row, so it is
       // only minted when there is an abnormal row to point at. Minting one for every
@@ -324,7 +336,7 @@ public class GermCountService {
 
       slots.add(new GermCountSlotDto(
           slotIndex, skey, d.countDt(), d.dayNoOfTest(),
-          r1, r2, r3, r4, BigDecimal.valueOf(cumulative)));
+          r1, r2, r3, r4, cumulative.setScale(4, RoundingMode.HALF_EVEN)));
     }
     return slots;
   }
