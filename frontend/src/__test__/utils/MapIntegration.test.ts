@@ -35,7 +35,7 @@ const baseResult = (overrides: Partial<CollectionAreaResult> = {}): CollectionAr
   meanLng: -123.25,
   elevationMinM: 100,
   elevationMaxM: 300,
-  elevationError: null,
+  elevationLookupFailed: false,
   becZones: ['CWH'],
   becVariant: {
     mapLabel: 'CWHxm1',
@@ -137,7 +137,7 @@ describe('mapIntegration', () => {
         baseResult({
           elevationMinM: null,
           elevationMaxM: null,
-          elevationError: 'Please enter it manually.'
+          elevationLookupFailed: true
         }),
         catalogue
       );

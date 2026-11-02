@@ -132,10 +132,10 @@ export interface CollectionAreaResult {
   elevationMinM: number | null;
   elevationMaxM: number | null;
   /**
-   * Set when the elevation lookup failed, as opposed to finding no data, so
+   * True when the elevation lookup failed, as opposed to finding no data, so
    * the form can say why the elevation fields were not filled in.
    */
-  elevationError: string | null;
+  elevationLookupFailed: boolean;
   /** Distinct BEC zone codes the polygon intersects. */
   becZones: string[];
   /** BEC attributes sampled at the polygon centroid, if available. */
