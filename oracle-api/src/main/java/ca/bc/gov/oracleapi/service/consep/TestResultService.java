@@ -35,9 +35,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -1274,13 +1276,21 @@ public class TestResultService {
           "Cannot accept a test that has not been marked as complete");
     }
 
+    LocalDate earliestCount = earliestCountDate(storedTest.getRiaKey());
     boolean beginRequired = accept || complete
         || (dto.riaComment() != null && !dto.riaComment().isBlank())
-        || dto.actualEndDateTime() != null;
+        || dto.actualEndDateTime() != null
+        || earliestCount != null;
     if (beginRequired && dto.actualBeginDateTime() == null) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Begin date is mandatory when the test is accepted or complete,"
-              + " or a comment or test end is provided");
+              + " a comment or test end is provided, or germination counts are entered");
+    }
+
+    if (dto.actualBeginDateTime() != null && earliestCount != null
+        && dto.actualBeginDateTime().toLocalDate().isAfter(earliestCount)) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Begin date cannot be after the first germination count date");
     }
 
     if (dto.actualBeginDateTime() != null && effectiveEnd != null
@@ -1307,6 +1317,19 @@ public class TestResultService {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Category cannot be updated once the test is complete");
     }
+  }
+
+  /** Earliest daily germination count date on file for the test, or null if none. */
+  private LocalDate earliestCountDate(BigDecimal riaKey) {
+    return germCountRepository.findById(riaKey)
+        .flatMap(e -> Stream.of(
+                e.getCountDt1(), e.getCountDt2(), e.getCountDt3(), e.getCountDt4(),
+                e.getCountDt5(), e.getCountDt6(), e.getCountDt7(), e.getCountDt8(),
+                e.getCountDt9(), e.getCountDt10(), e.getCountDt11(), e.getCountDt12(),
+                e.getCountDt13())
+            .filter(Objects::nonNull)
+            .min(Comparator.naturalOrder()))
+        .orElse(null);
   }
 
   /**

@@ -1504,6 +1504,65 @@ class TestResultServiceTest {
         .thenReturn(Optional.of(headerDto()));
   }
 
+  private void storeCountDates(LocalDate... dates) {
+    GermCountEntity counts = new GermCountEntity();
+    counts.setRiaSkey(RIA_KEY);
+    // Slot 1 left empty on purpose: the earliest date is not always in slot 1.
+    if (dates.length > 0) {
+      counts.setCountDt2(dates[0]);
+    }
+    if (dates.length > 1) {
+      counts.setCountDt3(dates[1]);
+    }
+    when(germCountRepository.findById(RIA_KEY)).thenReturn(Optional.of(counts));
+  }
+
+  @Test
+  void updateGerminationTest_countsEnteredWithoutBeginDate_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+    storeCountDates(LocalDate.of(2026, 5, 4));
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY, updateDto(false, false, null, null, null)));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_beginAfterFirstCountDate_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+    storeCountDates(LocalDate.of(2026, 5, 4), LocalDate.of(2026, 5, 6));
+
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(
+            RIA_KEY, updateDto(false, false, LocalDateTime.of(2026, 5, 5, 8, 0), null, null)));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+    assertTrue(exc.getReason().contains("first germination count date"));
+  }
+
+  @Test
+  void updateGerminationTest_beginOnFirstCountDate_isAccepted() {
+    mockHappyPathRepos();
+    storeCountDates(LocalDate.of(2026, 5, 4), LocalDate.of(2026, 5, 6));
+
+    testResultService.updateGerminationTest(
+        RIA_KEY, updateDto(false, false, LocalDateTime.of(2026, 5, 4, 9, 0), null, null));
+
+    verify(testResultRepository).updateGerminationTestHeader(
+        eq(RIA_KEY), eq(0), eq(0), isNull(), eq(0), eq(0),
+        eq("A"), eq(LocalDate.of(2026, 4, 30)), eq("STD"), eq(TST_TS));
+  }
+
   @Test
   void updateGerminationTest_notAccepted_writesZeroFlagsAndNullRank() {
     mockHappyPathRepos();
