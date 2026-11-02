@@ -1,4 +1,6 @@
-import { useContext, useEffect, useRef } from 'react';
+import {
+  useContext, useEffect, useRef, useState
+} from 'react';
 import AuthContext from '../contexts/AuthContext';
 
 const DEFAULT_DELAY = 800;
@@ -27,7 +29,14 @@ export type UseAutosaveOptions<T, R = unknown> = {
   isEqual?: (a: T, b: T) => boolean;
 };
 
+/** What SaveStatus shows. `savedAt` is the last successful save, kept through failures. */
+export type AutosaveStatus = {
+  state: 'idle' | 'saving' | 'saved' | 'failed' | 'conflict';
+  savedAt?: Date;
+};
+
 export type UseAutosaveResult<T> = {
+  status: AutosaveStatus;
   /** Saves now; resolves true once the latest data is saved (see `save`). */
   flush: () => Promise<boolean>;
   cancel: () => void;
@@ -97,6 +106,7 @@ function useAutosave<T, R = unknown>({
   // on unmount, or explicit) waits for it, then sends the newest data against the
   // snapshot it left behind, so callers need not gate on their own pending flag.
   const inFlightRef = useRef<Promise<boolean> | null>(null);
+  const [status, setStatus] = useState<AutosaveStatus>({ state: 'idle' });
 
   // Resolves true once the latest data is saved (or nothing needed saving), false if
   // saving is gated off or the save failed.
@@ -115,15 +125,18 @@ function useAutosave<T, R = unknown>({
       return false;
     }
     const attempt = (async () => {
+      setStatus((prev) => ({ ...prev, state: 'saving' }));
       try {
         const result = await onSaveRef.current(current, previous);
         savedRef.current = onSavedRef.current ? onSavedRef.current(result, current) : current;
         failedRef.current = null;
+        setStatus({ state: 'saved', savedAt: new Date() });
         return true;
       } catch {
         // Keep the previous saved snapshot so the next edit still carries this
         // data, but remember the failure so it is not retried unchanged.
         failedRef.current = current;
+        setStatus((prev) => ({ ...prev, state: 'failed' }));
         return false;
       } finally {
         inFlightRef.current = null;
@@ -172,7 +185,13 @@ function useAutosave<T, R = unknown>({
     failedRef.current = null;
   };
 
-  return { flush: save, cancel: clearTimers, markSaved };
+  return {
+    // A conflict outranks whatever the last attempt did: nothing saves until Reload.
+    status: conflict ? { ...status, state: 'conflict' } : status,
+    flush: save,
+    cancel: clearTimers,
+    markSaved
+  };
 }
 
 export default useAutosave;

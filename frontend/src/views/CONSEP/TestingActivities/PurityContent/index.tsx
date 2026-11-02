@@ -50,7 +50,7 @@ import {
   fieldsConfig, actionModalOptions, COMPLETE, ACCEPT
 } from './constants';
 import useTestAutosave from '../hooks/useTestAutosave';
-import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
+import SaveStatus from '../../../../components/CONSEP/SaveStatus';
 
 import './styles.scss';
 
@@ -71,8 +71,8 @@ const PurityContent = () => {
 
   const {
     activityRecord, updateActivityRecord, replicates, setReplicates, setReplicatesBlocked,
-    hydrate, saveNow, isDateRangeValid, isConflict, clearConflict
-  } = useTestAutosave('purityTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
+    hydrate, saveNow, saveStatus, isDateRangeValid, clearConflict
+  } = useTestAutosave('purityTest', riaKey);
 
   const testActivityQuery = useQuery({
     queryKey: ['riaKey', riaKey],
@@ -492,12 +492,6 @@ const PurityContent = () => {
 
   return (
     <FlexGrid className="consep-purity-content">
-      {isConflict && (
-        <ConflictNotification
-          className="consep-purity-content-conflict"
-          onReload={handleReloadOnConflict}
-        />
-      )}
       {
         alert?.message
         && (
@@ -567,6 +561,7 @@ const PurityContent = () => {
               : null
           }
         </>
+        <SaveStatus status={saveStatus} onRetry={saveNow} onReload={handleReloadOnConflict} />
       </Row>
       <Row className="consep-purity-content-activity-summary">
         <ActivitySummary

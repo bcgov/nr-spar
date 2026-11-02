@@ -32,7 +32,7 @@ import {
 import { getGermTrayColumns, getGermTrayTestsColumns } from './constants';
 import { GermTrayColumn } from './definitions';
 import useAutosave from '../../../../../hooks/useAutosave';
-import ConflictNotification from '../../../../../components/CONSEP/ConflictNotification';
+import SaveStatus from '../../../../../components/CONSEP/SaveStatus';
 import useActivityConflict from '../../hooks/useActivityConflict';
 import './styles.scss';
 
@@ -170,15 +170,11 @@ const MaintainGermTray = () => {
     }: {
       germinatorTrayId: number;
       germinatorId: string;
-    }) => assignGerminatorId(germinatorTrayId, germinatorId),
-    onError: (error: any) => {
-      const message = error.response?.data?.message || error.message || 'Assign germinator id API request failed';
-      setAlert({ status: 'error', message });
-    },
-    onSuccess: () => { setAlert(null); }
+    }) => assignGerminatorId(germinatorTrayId, germinatorId)
+    // Failures show as SaveStatus "Not saved", not as a toast.
   });
 
-  useAutosave<GermTrayColumn[]>({
+  const { status: saveStatus, flush } = useAutosave<GermTrayColumn[]>({
     data: trays,
     enabled: !assignMutation.isPending,
     conflict: isConflict,
@@ -304,12 +300,8 @@ const MaintainGermTray = () => {
       </Row>
       <Row className="consep-maintain-germ-tray-title">
         <PageTitle title="Maintain germ tray" />
+        <SaveStatus status={saveStatus} onRetry={flush} onReload={handleReloadOnConflict} />
       </Row>
-      {isConflict && (
-        <Row className="consep-maintain-germ-tray-alert">
-          <ConflictNotification onReload={handleReloadOnConflict} />
-        </Row>
-      )}
       {(alert?.message || trayContentsErrorMessage) && (
         <Row className="consep-maintain-germ-tray-alert">
           <InlineNotification

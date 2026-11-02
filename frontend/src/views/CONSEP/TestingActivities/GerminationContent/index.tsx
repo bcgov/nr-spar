@@ -23,7 +23,7 @@ import useActivityConflict from '../hooks/useActivityConflict';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import StatusTag from '../../../../components/StatusTag';
-import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
+import SaveStatus from '../../../../components/CONSEP/SaveStatus';
 import SummaryGrid, { type SummaryColumn } from '../../../../components/CONSEP/SummaryGrid';
 
 import DailyGermTable from './DailyGermTable';
@@ -214,13 +214,6 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     )));
   };
 
-  const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => {
-    if (alertTimerRef.current) {
-      clearTimeout(alertTimerRef.current);
-    }
-  }, []);
-
   // Read after an awaited flush, where the mutation object in this render's
   // closure would still report the state from before the save.
   const lastSaveFailed = useRef(false);
@@ -234,22 +227,13 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     onSuccess: (response) => {
       lastSaveFailed.current = false;
       setUpdateTimestamp(response.updateTimestamp);
-      setAlert({ isSuccess: true, message: 'Daily germination counts saved' });
-      if (alertTimerRef.current) {
-        clearTimeout(alertTimerRef.current);
-      }
-      alertTimerRef.current = setTimeout(() => setAlert(null), 3000);
     },
     onError: (error) => {
       lastSaveFailed.current = true;
+      // Other failures show as SaveStatus "Not saved", not as a toast.
       if ((error as AxiosError).response?.status === 409) {
         markConflict();
-        return;
       }
-      setAlert({
-        isSuccess: false,
-        message: `Failed to save germination counts: ${(error as AxiosError).message}`
-      });
     }
   });
 
@@ -258,7 +242,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     [slots, replicates]
   );
 
-  const { markSaved, flush } = useAutosave({
+  const { markSaved, flush, status: saveStatus } = useAutosave({
     data: autosaveData,
     onSave: async (data) => { await saveMutation.mutateAsync(data); },
     enabled:
@@ -271,7 +255,8 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       && (hasDatedSlot || !!updateTimestamp)
       && replicates.length > 0
       && Object.keys(validationErrors).length === 0
-      && !saveMutation.isPending
+      && !saveMutation.isPending,
+    conflict: isConflict
   });
 
   // Keep the ref the hydration effects call pointing at the latest markSaved.
@@ -380,12 +365,6 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
 
   return (
     <FlexGrid className="consep-germination-content">
-      {isConflict && (
-        <ConflictNotification
-          className="consep-germination-content-conflict"
-          onReload={handleReloadOnConflict}
-        />
-      )}
       {alert?.message && (
         <InlineNotification
           lowContrast
@@ -421,6 +400,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               {header.testCompleteInd === 1 && <StatusTag type="Completed" renderIcon={CheckmarkFilled} />}
               {header.acceptResultInd === 1 && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
             </>
+            <SaveStatus status={saveStatus} onRetry={flush} onReload={handleReloadOnConflict} />
           </Row>
           <Row className="consep-germination-content-summary">
             <SummaryGrid

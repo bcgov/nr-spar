@@ -37,7 +37,7 @@ import ActivityResult from '../ActivityResult';
 import ActivityDateField from '../ActivityDateField';
 import { mccReplicatesChecker } from './utils';
 import useTestAutosave from '../hooks/useTestAutosave';
-import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
+import SaveStatus from '../../../../components/CONSEP/SaveStatus';
 
 import {
   fieldsConfig, mccVariations
@@ -63,8 +63,8 @@ const MoistureContent = () => {
 
   const {
     activityRecord, updateActivityRecord, replicates, setReplicates, setReplicatesBlocked,
-    hydrate, saveNow, isDateRangeValid, isConflict, clearConflict
-  } = useTestAutosave('moistureTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
+    hydrate, saveNow, saveStatus, isDateRangeValid, clearConflict
+  } = useTestAutosave('moistureTest', riaKey);
 
   // Reference to the table body for extracting MC Values
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
@@ -310,12 +310,6 @@ const MoistureContent = () => {
 
   return (
     <FlexGrid className="consep-moisture-content">
-      {isConflict && (
-        <ConflictNotification
-          className="consep-moisture-content-conflict"
-          onReload={handleReloadOnConflict}
-        />
-      )}
       {alert?.message
         && (
         <InlineNotification
@@ -354,6 +348,7 @@ const MoistureContent = () => {
               : null
           }
         </>
+        <SaveStatus status={saveStatus} onRetry={saveNow} onReload={handleReloadOnConflict} />
       </Row>
       <Row className="consep-moisture-content-activity-summary">
         <ActivitySummary
