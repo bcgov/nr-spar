@@ -56,16 +56,23 @@ const useTestAutosave = (
     [activityRecord, replicates]
   );
 
-  const { markSaved } = useAutosave<Snapshot, AxiosResponse>({
+  const { markSaved, flush } = useAutosave<Snapshot, AxiosResponse>({
     data,
-    onSave: (snapshot) => saveMutation.mutateAsync(snapshot),
+    // Lock on the timestamp of the last saved snapshot, not the one in the edited data: a
+    // save queued behind another (or flushed on unmount) must carry the newer timestamp.
+    onSave: (snapshot, previous) => saveMutation.mutateAsync({
+      ...snapshot,
+      activityRecord: {
+        ...snapshot.activityRecord,
+        updateTimestamp: previous?.activityRecord.updateTimestamp
+      }
+    }),
     onSaved: (response, sent) => {
       const { updateTimestamp } = response.data;
       setActivityRecord((prev) => ({ ...prev, updateTimestamp }));
       return { ...sent, activityRecord: { ...sent.activityRecord, updateTimestamp } };
     },
     enabled: !!activityRecord
-      && !saveMutation.isPending
       && !isReplicatesBlocked
       && isDateRangeValid,
     conflict: isConflict
@@ -96,6 +103,9 @@ const useTestAutosave = (
     setReplicates,
     setReplicatesBlocked,
     hydrate,
+    // Await before an action that reads the saved record (Complete test): true once
+    // every edit, including one queued behind an in-flight save, is saved.
+    saveNow: flush,
     isDateRangeValid,
     isConflict,
     clearConflict

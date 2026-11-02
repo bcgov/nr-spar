@@ -217,11 +217,15 @@ describe('useAutosave', () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
-  it('does not flush on unmount after sign-out', () => {
+  it('does not flush on unmount after sign-out, even when the page never re-renders', () => {
+    // Sign-out swaps the router in the same render that flips `signed`, so the page
+    // unmounts with its last (signed-in) props; only the provider's live check knows.
     const onSave = vi.fn();
-    let signed = true;
+    let live = true;
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <AuthContext.Provider value={{ signed } as AuthContextData}>{children}</AuthContext.Provider>
+      <AuthContext.Provider value={{ signed: true, isSignedIn: () => live } as AuthContextData}>
+        {children}
+      </AuthContext.Provider>
     );
     const { rerender, unmount } = renderHook(
       ({ data }) => useAutosave({ data, onSave, delay: 800 }),
@@ -229,9 +233,58 @@ describe('useAutosave', () => {
     );
 
     rerender({ data: { v: 1 } });
-    signed = false;
-    rerender({ data: { v: 1 } });
+    live = false;
     act(() => { unmount(); });
     expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('flush reports whether the latest data is saved', async () => {
+    const onSave = vi.fn()
+      .mockRejectedValueOnce(new Error('Save failed'))
+      .mockResolvedValue(undefined);
+    const { result, rerender } = renderHook(
+      ({ data, enabled }) => useAutosave({
+        data, onSave, enabled, delay: 800
+      }),
+      { initialProps: { data: { v: 0 }, enabled: true } }
+    );
+
+    await act(async () => { expect(await result.current.flush()).toBe(true); });
+    expect(onSave).not.toHaveBeenCalled();
+
+    rerender({ data: { v: 1 }, enabled: false });
+    await act(async () => { expect(await result.current.flush()).toBe(false); });
+
+    rerender({ data: { v: 1 }, enabled: true });
+    await act(async () => { expect(await result.current.flush()).toBe(false); });
+    await act(async () => { expect(await result.current.flush()).toBe(true); });
+  });
+
+  it('runs one save at a time and sends a queued edit against the written-back value', async () => {
+    let finishFirst: (v: { ts: string }) => void = () => {};
+    const onSave = vi.fn()
+      .mockImplementationOnce(() => new Promise((r) => { finishFirst = r; }))
+      .mockResolvedValue({ ts: 't3' });
+    const onSaved = (res: { ts: string }, sent: { v: number; ts: string }) => ({ ...sent, ts: res.ts });
+    const { result, rerender, unmount } = renderHook(
+      ({ data }) => useAutosave({
+        data, onSave, onSaved, delay: 800
+      }),
+      { initialProps: { data: { v: 0, ts: 't1' } } }
+    );
+
+    rerender({ data: { v: 1, ts: 't1' } });
+    let first: Promise<boolean> = Promise.resolve(false);
+    act(() => { first = result.current.flush(); });
+
+    // Edited while the first save is in flight, then the page is left.
+    rerender({ data: { v: 2, ts: 't1' } });
+    act(() => { unmount(); });
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    await act(async () => { finishFirst({ ts: 't2' }); await first; });
+    await act(async () => { await Promise.resolve(); });
+    expect(onSave).toHaveBeenCalledTimes(2);
+    expect(onSave).toHaveBeenLastCalledWith({ v: 2, ts: 't1' }, { v: 1, ts: 't2' });
   });
 });

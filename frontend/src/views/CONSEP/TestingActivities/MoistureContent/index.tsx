@@ -63,7 +63,7 @@ const MoistureContent = () => {
 
   const {
     activityRecord, updateActivityRecord, replicates, setReplicates, setReplicatesBlocked,
-    hydrate, isDateRangeValid, isConflict, clearConflict
+    hydrate, saveNow, isDateRangeValid, isConflict, clearConflict
   } = useTestAutosave('moistureTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
 
   // Reference to the table body for extracting MC Values
@@ -93,7 +93,8 @@ const MoistureContent = () => {
       setSeedlotNumber(testActivityQuery.data.seedlotNumber);
       setMCType(testActivityQuery.data.standardActivityType);
     }
-  }, [testActivityQuery.status, testActivityQuery.isFetched]);
+  // `data` too: a Reload after a conflict keeps the status but brings new test state.
+  }, [testActivityQuery.status, testActivityQuery.isFetched, testActivityQuery.data]);
 
   useEffect(() => {
     if (testActivity) {
@@ -268,12 +269,15 @@ const MoistureContent = () => {
       size: 'lg',
       icon: Checkmark,
       disabled: testActivity?.testCompleteInd === 1,
-      action: () => {
+      action: async () => {
         const errors = mccReplicatesChecker(replicates);
         if (Object.keys(errors).length > 0) {
           setValidationErrors(errors);
-        } else {
+        } else if (await saveNow()) {
+          // Completion validates what is stored, so pending edits must land first.
           validateTest.mutate();
+        } else {
+          setAlert({ isSuccess: false, message: 'Your latest changes could not be saved. Fix them, then complete the test.' });
         }
       }
     },

@@ -71,7 +71,7 @@ const PurityContent = () => {
 
   const {
     activityRecord, updateActivityRecord, replicates, setReplicates, setReplicatesBlocked,
-    hydrate, isDateRangeValid, isConflict, clearConflict
+    hydrate, saveNow, isDateRangeValid, isConflict, clearConflict
   } = useTestAutosave('purityTest', riaKey, (message) => setAlert({ isSuccess: false, message }));
 
   const testActivityQuery = useQuery({
@@ -218,7 +218,8 @@ const PurityContent = () => {
         setImpurities(impuritiesPerReplicate(testActivityQuery.data.debrisList));
       }
     }
-  }, [testActivityQuery.status, testActivityQuery.isFetched]);
+  // `data` too: a Reload after a conflict keeps the status but brings new test state.
+  }, [testActivityQuery.status, testActivityQuery.isFetched, testActivityQuery.data]);
 
   useEffect(() => {
     if (testActivity) {
@@ -519,19 +520,22 @@ const PurityContent = () => {
         onRequestClose={() => {
           setModalOpen(false);
         }}
-        onRequestSubmit={() => {
+        onRequestSubmit={async () => {
+          setModalOpen(false);
           if (modalType === COMPLETE) {
             const errors = purityReplicatesChecker(replicates);
 
             if (Object.keys(errors).length > 0) {
               setValidationErrors(errors);
-            } else {
+            } else if (await saveNow()) {
+              // Completion validates what is stored, so pending edits must land first.
               validateTest.mutate();
+            } else {
+              setAlert({ isSuccess: false, message: 'Your latest changes could not be saved. Fix them, then complete the test.' });
             }
           } else if (modalType === ACCEPT) {
             acceptTest.mutate();
           }
-          setModalOpen(false);
         }}
         size="sm"
         danger

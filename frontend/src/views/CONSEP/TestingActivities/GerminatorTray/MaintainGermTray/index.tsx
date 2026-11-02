@@ -145,7 +145,9 @@ const MaintainGermTray = () => {
   });
 
   const handleReloadOnConflict = async () => {
-    await queryClient.invalidateQueries({ queryKey: ['germinatorTrayContents'] });
+    // 'all': deleting a tray reads its contents from cache even when that tray is not the
+    // selected (active) one, so inactive entries need fresh timestamps too.
+    await queryClient.invalidateQueries({ queryKey: ['germinatorTrayContents'], refetchType: 'all' });
     clearConflict();
   };
 
