@@ -982,7 +982,7 @@ class ActivityServiceTest {
     TestResultEntity test = new TestResultEntity();
     test.setTestCompleteInd(complete);
     test.setAcceptResult(accepted);
-    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(test));
+    when(testResultRepository.findByIdForUpdate(riaKey)).thenReturn(Optional.of(test));
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> activityService.assertTestEditable(riaKey));
@@ -994,7 +994,7 @@ class ActivityServiceTest {
     TestResultEntity test = new TestResultEntity();
     test.setTestCompleteInd(0);
     test.setAcceptResult(0);
-    when(testResultRepository.findById(riaKey)).thenReturn(Optional.of(test));
+    when(testResultRepository.findByIdForUpdate(riaKey)).thenReturn(Optional.of(test));
 
     assertDoesNotThrow(() -> activityService.assertTestEditable(riaKey));
   }

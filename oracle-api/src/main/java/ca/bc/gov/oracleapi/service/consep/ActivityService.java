@@ -70,10 +70,14 @@ public class ActivityService {
    * category, comment and results are all read-only. Any non-zero indicator counts, since
    * SPAR writes 1 and legacy CONSEP wrote -1.
    *
+   * <p>The flags are read under a row lock held until the caller commits, so this must run
+   * inside the caller's write transaction.
+   *
    * @throws ResponseStatusException 409, so the client reloads and shows the locked test
    */
+  @Transactional(Transactional.TxType.MANDATORY)
   public void assertTestEditable(@NonNull BigDecimal riaKey) {
-    testResultRepository.findById(riaKey).ifPresent(test -> {
+    testResultRepository.findByIdForUpdate(riaKey).ifPresent(test -> {
       if (isSet(test.getTestCompleteInd()) || isSet(test.getAcceptResult())) {
         throw new ResponseStatusException(
             HttpStatus.CONFLICT,

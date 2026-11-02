@@ -14,7 +14,8 @@ export type UseAutosaveOptions<T, R = unknown> = {
    */
   onSaved?: (result: R, sent: T) => T;
   /**
-   * Caller-side gate: `hydrated && editable && valid && !pending`. The hook adds
+   * Caller-side gate: `hydrated && editable && valid`. Saves are serialized by the hook,
+   * so there is no need to add the caller's pending flag. The hook adds
    * `!conflict` (below) and "still signed in" (AuthContext) itself. All of them block
    * both scheduling and the pagehide/unmount flush.
    */
@@ -27,7 +28,8 @@ export type UseAutosaveOptions<T, R = unknown> = {
 };
 
 export type UseAutosaveResult<T> = {
-  flush: () => Promise<void>;
+  /** Saves now; resolves true once the latest data is saved (see `save`). */
+  flush: () => Promise<boolean>;
   cancel: () => void;
   markSaved: (value: T) => void;
 };
@@ -44,10 +46,13 @@ function useAutosave<T, R = unknown>({
   maxWait = DEFAULT_MAX_WAIT,
   isEqual = defaultIsEqual
 }: UseAutosaveOptions<T, R>): UseAutosaveResult<T> {
-  // After sign-out the token is gone: a pagehide/unmount flush would 401. `signed` is
-  // undefined outside an AuthProvider (unit tests), which counts as signed in.
-  const { signed } = useContext(AuthContext);
-  const canSave = enabled && !conflict && signed !== false;
+  // After sign-out the token is gone: a pagehide/unmount flush would 401. Sign-out can
+  // unmount the page in the same render, so ask the provider live at save time.
+  // Outside an AuthProvider (unit tests) there is no isSignedIn: counts as signed in.
+  const { isSignedIn } = useContext(AuthContext);
+  const isSignedInRef = useRef(isSignedIn);
+  isSignedInRef.current = isSignedIn;
+  const canSave = enabled && !conflict;
 
   // Latest values held in refs so timer callbacks and event listeners always
   // read current values without needing to re-subscribe.
@@ -88,25 +93,44 @@ function useAutosave<T, R = unknown>({
     }
   };
 
-  const save = async () => {
+  // The save in flight, if any. Saves run one at a time: a later one (debounced, flushed
+  // on unmount, or explicit) waits for it, then sends the newest data against the
+  // snapshot it left behind, so callers need not gate on their own pending flag.
+  const inFlightRef = useRef<Promise<boolean> | null>(null);
+
+  // Resolves true once the latest data is saved (or nothing needed saving), false if
+  // saving is gated off or the save failed.
+  const save = async (): Promise<boolean> => {
     clearTimers();
-    if (!enabledRef.current) {
-      return;
+    while (inFlightRef.current) {
+      // eslint-disable-next-line no-await-in-loop
+      await inFlightRef.current;
     }
     const { current } = dataRef;
     const previous = savedRef.current;
     if (isEqualRef.current(current, previous)) {
-      return;
+      return true;
     }
-    try {
-      const result = await onSaveRef.current(current, previous);
-      savedRef.current = onSavedRef.current ? onSavedRef.current(result, current) : current;
-      failedRef.current = null;
-    } catch {
-      // Keep the previous saved snapshot so the next edit still carries this
-      // data, but remember the failure so it is not retried unchanged.
-      failedRef.current = current;
+    if (!enabledRef.current || isSignedInRef.current?.() === false) {
+      return false;
     }
+    const attempt = (async () => {
+      try {
+        const result = await onSaveRef.current(current, previous);
+        savedRef.current = onSavedRef.current ? onSavedRef.current(result, current) : current;
+        failedRef.current = null;
+        return true;
+      } catch {
+        // Keep the previous saved snapshot so the next edit still carries this
+        // data, but remember the failure so it is not retried unchanged.
+        failedRef.current = current;
+        return false;
+      } finally {
+        inFlightRef.current = null;
+      }
+    })();
+    inFlightRef.current = attempt;
+    return attempt;
   };
 
   // Schedule a debounced save whenever data changes and differs from the

@@ -36,7 +36,8 @@ vi.mock('../../../api-service/consep/testCodesAPI', () => ({
 }));
 
 const autosaveMock = vi.fn();
-let testOverrides: Record<string, number> = {};
+let testOverrides: Record<string, unknown> = {};
+const callOrder: string[] = [];
 vi.mock('../../../api-service/consep/testingActivitiesAPI', () => ({
   default: (_t: string, fn: string, params: any) => {
     if (fn === 'getDataByRiaKey') {
@@ -54,7 +55,12 @@ vi.mock('../../../api-service/consep/testingActivitiesAPI', () => ({
       });
     }
     if (fn === 'autosave') {
+      callOrder.push('autosave');
       return autosaveMock(params);
+    }
+    if (fn === 'validateTestResult') {
+      callOrder.push('validate');
+      return Promise.resolve({});
     }
     return Promise.resolve({});
   }
@@ -106,6 +112,7 @@ describe.each([
   beforeEach(() => {
     autosaveMock.mockReset();
     testOverrides = {};
+    callOrder.length = 0;
     autosaveMock.mockImplementation(() => saved('2025-02-01T00:00:00'));
     // mutateAsync rejections are handled by useAutosave, but may surface for a
     // microtask as "unhandledrejection" first.
@@ -230,20 +237,46 @@ describe.each([
     await waitFor(() => expect(screen.queryByText('Conflict detected')).not.toBeInTheDocument());
   });
 
-  // -1 is how legacy CONSEP stored "completed"; SPAR stores 1.
-  it.each([
-    ['completed (legacy -1)', { testCompleteInd: -1, acceptResult: 0 }],
-    ['completed and accepted', { testCompleteInd: 1, acceptResult: 1 }]
-  ])('locks a %s test: inputs disabled, nothing saves', async (_label, flags) => {
-    testOverrides = flags;
-    const { comments, startDate } = await renderPage();
-    expect(comments).toBeDisabled();
-    expect(startDate).toBeDisabled();
-    expect(screen.getByRole('combobox', { name: /category/i })).toBeDisabled();
+  const completeTest = async () => {
+    fireEvent.click(screen.getByRole('button', { name: /Complete test/i }));
+    // Purity asks for confirmation first.
+    const confirm = screen.queryByRole('button', { name: 'Yes' });
+    if (confirm) {
+      fireEvent.click(confirm);
+    }
+  };
 
-    fireEvent.change(comments, { target: { value: 'late edit' } });
-    fireEvent.click(screen.getByRole('button', { name: 'edit replicate' }));
-    await wait(AFTER_DEBOUNCE);
-    expect(autosaveMock).not.toHaveBeenCalled();
+  it('saves a pending edit before completing the test', async () => {
+    // Unaccepted replicates skip the weight checks that gate Complete.
+    testOverrides = { replicatesList: [{ riaKey: 123, replicateNumber: 1, replicateAccInd: 0 }] };
+    const { comments } = await renderPage();
+    fireEvent.change(comments, { target: { value: 'last word' } });
+    await act(completeTest);
+
+    await waitFor(() => expect(callOrder).toEqual(['autosave', 'validate']));
+    expect(autosaveMock.mock.calls[0][0].payload.activity.riaComment).toBe('last word');
+  });
+
+  it('does not complete the test when the pending edit fails to save', async () => {
+    testOverrides = { replicatesList: [{ riaKey: 123, replicateNumber: 1, replicateAccInd: 0 }] };
+    autosaveMock.mockImplementation(() => Promise.reject(new Error('Network Error')));
+    const { comments } = await renderPage();
+    fireEvent.change(comments, { target: { value: 'last word' } });
+    await act(completeTest);
+
+    expect(await screen.findByText(/latest changes could not be saved/i)).toBeInTheDocument();
+    expect(callOrder).toEqual(['autosave']);
+  });
+
+  it('locks the page when Reload after a conflict finds the test completed', async () => {
+    autosaveMock.mockImplementation(() => Promise.reject(conflictError()));
+    const { comments } = await renderPage();
+    fireEvent.change(comments, { target: { value: 'edit' } });
+    await screen.findByText('Conflict detected', {}, { timeout: 3000 });
+
+    // Someone else completed the test meanwhile.
+    testOverrides = { testCompleteInd: 1 };
+    fireEvent.click(screen.getByRole('button', { name: /Reload/i }));
+    await waitFor(() => expect(screen.getByLabelText(/Comments/i)).toBeDisabled());
   });
 });

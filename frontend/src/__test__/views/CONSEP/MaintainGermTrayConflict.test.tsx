@@ -75,4 +75,16 @@ describe('MaintainGermTray conflict', () => {
     fireEvent.click(screen.getByRole('button', { name: /Reload/i }));
     await waitFor(() => expect(screen.queryByText('Conflict detected')).not.toBeInTheDocument());
   });
+
+  it('Reload refreshes the cached contents of a tray that is not selected', async () => {
+    renderPage();
+    act(() => { deleteTray(tray); });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete germ tray' }));
+    await screen.findByText('Conflict detected');
+    const fetched = getContents.mock.calls.length;
+
+    fireEvent.click(screen.getByRole('button', { name: /Reload/i }));
+    // Retrying the delete reads this cache, so it must not keep the stale timestamps.
+    await waitFor(() => expect(getContents.mock.calls.length).toBeGreaterThan(fetched));
+  });
 });
