@@ -30,6 +30,12 @@ const calcMock = vi.fn().mockResolvedValue({
   peakValueGrmPct: 78,
   peakValueNoDays: 7
 });
+const patchMock = vi.fn((_riaKey: string, payload: Record<string, unknown>) => Promise.resolve({
+  riaSkey: 123,
+  activityTypeCd: 'G10',
+  testCategoryCd: 'QA',
+  actualBeginDtTm: payload.actualBeginDateTime
+}));
 vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
   getGerminationTestHeader: vi.fn().mockResolvedValue({
     riaSkey: 123,
@@ -49,7 +55,10 @@ vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
   getTestReplicates: () => Promise.resolve([]),
   putGermCounts: (...args: unknown[]) => putMock(...args),
   calculateGerminationMetrics: (...args: unknown[]) => calcMock(...args),
-  updateRepAccepted: (...args: unknown[]) => acceptMock(...args)
+  updateRepAccepted: (...args: unknown[]) => acceptMock(...args),
+  patchGerminationTest: (riaKey: string, payload: Record<string, unknown>) => (
+    patchMock(riaKey, payload)
+  )
 }));
 
 vi.mock('../../../api-service/consep/searchTestingActivitiesAPI', () => ({
@@ -91,6 +100,7 @@ const setCountDate = (slotIndex: number, value: string) => {
 describe('GerminationContent', () => {
   beforeEach(() => {
     putMock.mockClear();
+    patchMock.mockClear();
     calcMock.mockClear();
     acceptMock.mockClear();
   });
@@ -164,6 +174,34 @@ describe('GerminationContent', () => {
 
     expect(await screen.findByTestId('germ-acc-2')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Calc' })).toBeDisabled();
+  });
+
+  it('shows the tray-derived dates read-only and saves an edited begin date via PATCH', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    expect(screen.getByLabelText('Into germinator')).toHaveValue('2024/10/31');
+    expect(screen.getByLabelText('Into germinator')).toHaveAttribute('readonly');
+
+    fireEvent.change(screen.getByLabelText('Begin date'), { target: { value: '2024/10/30' } });
+
+    await waitFor(() => expect(patchMock).toHaveBeenCalledTimes(1), { timeout: 5000 });
+    expect(patchMock.mock.calls[0][0]).toBe('123');
+    expect(patchMock.mock.calls[0][1]).toMatchObject({
+      testCategoryCode: 'QA',
+      acceptResultInd: false,
+      testCompleteInd: false,
+      actualBeginDateTime: '2024-10-30T00:00:00'
+    });
+  });
+
+  it('does not save an invalid date, and shows why', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    fireEvent.change(screen.getByLabelText('Withdrawal'), { target: { value: '2999/01/01' } });
+
+    expect(await screen.findByText('Withdrawal date cannot be in the future')).toBeInTheDocument();
+    await new Promise((resolve) => { setTimeout(resolve, 1200); });
+    expect(patchMock).not.toHaveBeenCalled();
   });
 
   it('renders title and header card from the header API', async () => {

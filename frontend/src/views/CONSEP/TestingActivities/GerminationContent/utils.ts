@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import {
-  GermCountSlotType, GermReplicateType, GermCountUpsertPayload, ReplicateAbnormalType
+  GermCountSlotType, GermReplicateType, GermCountUpsertPayload, ReplicateAbnormalType,
+  GerminationTestHeaderType, GerminationTestUpdatePayload
 } from '../../../../types/consep/GerminationType';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -165,10 +166,14 @@ export const getSlotDateBounds = (
 };
 
 export const validateCountDates = (
-  slots: GermCountSlotType[]
+  slots: GermCountSlotType[],
+  beginDate?: string
 ): Record<string, string> => {
   const errors: Record<string, string> = {};
   const dated = slots.filter((s) => s.countDt);
+  if (beginDate && dated[0]?.countDt && dated[0].countDt < beginDate) {
+    errors[`slot-${dated[0].slotIndex}`] = 'Count date cannot be before the test begin date';
+  }
   for (let i = 1; i < dated.length; i += 1) {
     const currentDt = dated[i].countDt;
     const previousDt = dated[i - 1].countDt;
@@ -312,3 +317,74 @@ export const buildUpsertPayload = (
 export const formatPeakValue = (pct?: number | null, days?: number | null): string => (
   pct === undefined || pct === null || !days ? '' : `${pct}/${days}`
 );
+
+/** The three dates the Activities section edits, as calendar-only ISO strings. */
+export type ActivityDatesType = {
+  seedWithdrawalDate?: string;
+  beginDate?: string;
+  endDate?: string;
+};
+
+export const activityDatesFromHeader = (header: GerminationTestHeaderType): ActivityDatesType => ({
+  seedWithdrawalDate: header.seedWithdrawalDate,
+  beginDate: header.actualBeginDtTm?.slice(0, 10),
+  endDate: header.actualEndDtTm?.slice(0, 10)
+});
+
+/**
+ * Field errors for the Activities dates, mirroring what the PATCH enforces so
+ * the user sees them at the field instead of as a 422 after the fact. Dates
+ * compare as ISO strings, which order the same way the calendar does.
+ */
+export const validateActivityDates = (
+  dates: ActivityDatesType,
+  firstCountDt: string | undefined,
+  today: string
+): Partial<Record<keyof ActivityDatesType, string>> => {
+  const errors: Partial<Record<keyof ActivityDatesType, string>> = {};
+  if (dates.seedWithdrawalDate && dates.seedWithdrawalDate > today) {
+    errors.seedWithdrawalDate = 'Withdrawal date cannot be in the future';
+  }
+  if (dates.beginDate && dates.beginDate > today) {
+    errors.beginDate = 'Begin date cannot be in the future';
+  } else if (dates.beginDate && firstCountDt && dates.beginDate > firstCountDt) {
+    errors.beginDate = 'Begin date cannot be after the first count date';
+  } else if (!dates.beginDate && firstCountDt) {
+    errors.beginDate = 'Begin date is required once germination counts are entered';
+  }
+  if (dates.endDate && dates.beginDate && dates.endDate <= dates.beginDate) {
+    errors.endDate = 'Test end must be after the begin date';
+  }
+  return errors;
+};
+
+const isSet = (ind?: number) => ind !== undefined && ind !== null && ind !== 0;
+
+/** Keeps the stored time of day when only the date is changed. */
+const withTime = (isoDate: string | undefined, stored: string | undefined) => {
+  if (!isoDate) {
+    return undefined;
+  }
+  return `${isoDate}T${stored?.slice(11, 19) || '00:00:00'}`;
+};
+
+/**
+ * The PATCH replaces the whole header, so every field this screen does not
+ * edit is sent back exactly as it was read.
+ */
+export const buildHeaderUpdate = (
+  header: GerminationTestHeaderType,
+  dates: ActivityDatesType
+): GerminationTestUpdatePayload => ({
+  testCategoryCode: header.testCategoryCd ?? '',
+  acceptResultInd: isSet(header.acceptResultInd),
+  testCompleteInd: isSet(header.testCompleteInd),
+  germinatorId: header.germinatorId,
+  seedWithdrawalDate: dates.seedWithdrawalDate,
+  actualBeginDateTime: withTime(dates.beginDate, header.actualBeginDtTm),
+  actualEndDateTime: withTime(dates.endDate, header.actualEndDtTm),
+  riaComment: header.riaComment,
+  commentIsCritical: isSet(header.intrmdtCleanrInd),
+  testResultUpdateTimestamp: header.testResultUpdateTimestamp,
+  riaUpdateTimestamp: header.riaUpdateTimestamp
+});

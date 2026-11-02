@@ -12,7 +12,7 @@ import { Calculator, CheckmarkFilled, Time } from '@carbon/icons-react';
 import ROUTES from '../../../../routes/constants';
 import {
   calculateGerminationMetrics, getGerminationTestHeader, getGermCounts, getTestReplicates,
-  putGermCounts, updateRepAccepted
+  patchGerminationTest, putGermCounts, updateRepAccepted
 } from '../../../../api-service/consep/germinationTestAPI';
 import { getGerminatorTrayContents } from '../../../../api-service/consep/germinatorTrayAPI';
 import {
@@ -29,11 +29,14 @@ import SummaryGrid, { type SummaryColumn } from '../../../../components/CONSEP/S
 import TestHistory from '../TestSearch/ToolbarControls/TestHistory';
 import ButtonGroup from '../ButtonGroup';
 
+import ActivityDates from './ActivityDates';
 import DailyGermTable from './DailyGermTable';
 import AbnormalsTable, { ABNORMAL_CATEGORIES } from './AbnormalsTable';
 import {
   getDefaultSeeds, validateCountDates, checkOverLimit, buildUpsertPayload,
-  parseCountInput, formatPeakValue, withDayNumbers, ABNORMAL_MAX, REP_ABNORMAL_KEYS
+  parseCountInput, formatPeakValue, withDayNumbers, ABNORMAL_MAX, REP_ABNORMAL_KEYS,
+  ActivityDatesType, activityDatesFromHeader, buildHeaderUpdate, toLocalIsoDate,
+  validateActivityDates
 } from './utils';
 
 import './styles.scss';
@@ -88,6 +91,8 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   // into a column of the germinants table, never cleared on the way out.
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const { isConflict, markConflict, clearConflict } = useActivityConflict();
+  const [activityDates, setActivityDates] = useState<ActivityDatesType>({});
+  const markDatesSavedRef = useRef<(v: ActivityDatesType) => void>(() => {});
 
   // Latest slots/replicates mirrored into refs so a hydration effect can hand
   // useAutosave a combined { slots, replicates } snapshot as already-saved,
@@ -135,6 +140,11 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       navigate(ROUTES.FOUR_OH_FOUR);
     } else if (headerQuery.data) {
       setHeader(headerQuery.data);
+      // Only a read rehydrates the dates: a PATCH response must not clobber
+      // whatever was typed while it was in flight.
+      const dates = activityDatesFromHeader(headerQuery.data);
+      setActivityDates(dates);
+      markDatesSavedRef.current(dates);
     }
     // headerQuery.data is included so a conflict-reload refetch (I5) that
     // returns a changed header — e.g. testCompleteInd flipping to 1 — actually
@@ -207,9 +217,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   }, [replicatesQuery.isFetched, replicatesQuery.data, headerLoaded, headerCategory, headerDayZero]);
 
   const validationErrors = useMemo(() => ({
-    ...validateCountDates(slots),
+    ...validateCountDates(slots, activityDates.beginDate),
     ...checkOverLimit(slots, replicates)
-  }), [slots, replicates]);
+  }), [slots, replicates, activityDates.beginDate]);
 
   // Any non-zero indicator counts: legacy CONSEP and updateGerminationTest both write -1
   // (#2841, same rule as #2784).
@@ -405,6 +415,47 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     }
   };
 
+  const firstCountDt = slots.find((slot) => slot.countDt)?.countDt;
+  const activityDateErrors = validateActivityDates(
+    activityDates,
+    firstCountDt,
+    toLocalIsoDate(new Date())
+  );
+
+  const headerMutation = useMutation({
+    mutationFn: (dates: ActivityDatesType) => (
+      patchGerminationTest(riaKey ?? '', buildHeaderUpdate(header!, dates))
+    ),
+    onSuccess: (response) => {
+      // Carries the new update timestamps the next PATCH must lock on.
+      setHeader(response);
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      if (axiosError.response?.status === 409) {
+        markConflict();
+        return;
+      }
+      setAlert({
+        isSuccess: false,
+        message: `Failed to save dates: ${axiosError.response?.data?.message ?? axiosError.message}`
+      });
+    }
+  });
+
+  const { markSaved: markDatesSaved } = useAutosave({
+    data: activityDates,
+    onSave: async (dates) => { await headerMutation.mutateAsync(dates); },
+    enabled:
+      !!header
+      && isEditable
+      && Object.keys(activityDateErrors).length === 0
+      && !headerMutation.isPending
+  });
+  // Same latest-ref pattern as markSavedRef above, for the header effect.
+  // eslint-disable-next-line react-hooks/refs
+  markDatesSavedRef.current = markDatesSaved;
+
   const crumbs = [
     { name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES },
     { name: 'Testing activities search', path: ROUTES.TESTING_REQUESTS_REPORT },
@@ -550,6 +601,15 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               </div>
             </Column>
           </Row>
+          <ActivityDates
+            header={header}
+            dates={activityDates}
+            errors={activityDateErrors}
+            isEditable={isEditable}
+            onChange={(field, isoDate) => (
+              setActivityDates((prev) => ({ ...prev, [field]: isoDate }))
+            )}
+          />
           <Row className="consep-germination-content-table">
             <Column>
               <DailyGermTable

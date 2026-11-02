@@ -67,10 +67,16 @@ export type GerminationTestHeaderType = {
   germinationValue?: number;
   peakValueGrmPct?: number;
   peakValueNoDays?: number;
-  seedWithdrawalDate?: string;
+  seedWithdrawalDate?: string; // 'YYYY-MM-DD'
+  // Set by the germinator tray workflow; shown read-only on this screen.
+  soakEndDate?: string; // 'YYYY-MM-DDTHH:mm:ss'
+  drybackStartDate?: string; // 'YYYY-MM-DD'
+  warmStratStartDate?: string; // 'YYYY-MM-DD'
+  stratStartDt?: string; // 'YYYY-MM-DD'
   germinatorEntry?: string; // 'YYYY-MM-DD'
   // Day numbers count from here (#2756): germinator entry for QA, begin + soak + strat otherwise.
   dayZero?: string; // 'YYYY-MM-DD'
+  intrmdtCleanrInd?: number;
   germinatorTrayId?: number;
   germinatorId?: string;
   testResultUpdateTimestamp?: string;
@@ -85,4 +91,19 @@ export type GermCountUpsertPayload = {
   updateTimestamp?: string;
   days: Array<Omit<GermCountSlotType, 'dailyGermSkey' | 'cumulativeGerm'>>;
   replicates: GermReplicateType[];
+};
+
+/** PATCH /api/germination-tests/{riaKey}: the full header + activity, not a delta. */
+export type GerminationTestUpdatePayload = {
+  testCategoryCode: string;
+  acceptResultInd: boolean;
+  testCompleteInd: boolean;
+  germinatorId?: string;
+  seedWithdrawalDate?: string; // 'YYYY-MM-DD'
+  actualBeginDateTime?: string; // 'YYYY-MM-DDTHH:mm:ss'
+  actualEndDateTime?: string; // 'YYYY-MM-DDTHH:mm:ss'
+  riaComment?: string;
+  commentIsCritical: boolean;
+  testResultUpdateTimestamp?: string;
+  riaUpdateTimestamp?: string;
 };

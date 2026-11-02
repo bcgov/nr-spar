@@ -140,6 +140,39 @@
   .consep-germination-content-table {
     margin: 2rem -1rem 0;
   }
+
+  // The Activities grid (#2788): two rows under one set of date columns, sized
+  // to its content like the daily germination table below it.
+  .consep-germination-content-activity-dates {
+    margin-top: 1rem;
+
+    .germ-activity-table {
+      border-collapse: collapse;
+
+      th,
+      td {
+        padding: 0.25rem;
+        vertical-align: middle;
+      }
+
+      thead th {
+        @include type.type-style('label-01');
+        text-align: start;
+        background-color: var(--#{vars.$bcgov-prefix}-layer-accent-01, #e0e0e0);
+      }
+
+      tbody th {
+        @include type.type-style('label-01');
+        text-align: start;
+        font-weight: normal;
+        white-space: nowrap;
+      }
+
+      td {
+        min-inline-size: 7.5rem;
+      }
+    }
+  }
 }
 
 .consep-germination-content-alert {

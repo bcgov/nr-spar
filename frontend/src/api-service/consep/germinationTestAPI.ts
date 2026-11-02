@@ -4,6 +4,7 @@ import {
   GermCountDataType,
   GermCountUpsertPayload,
   GerminationTestHeaderType,
+  GerminationTestUpdatePayload,
   GermReplicateType
 } from '../../types/consep/GerminationType';
 
@@ -18,6 +19,13 @@ export const calculateGerminationMetrics = (
   riaKey: string
 ): Promise<GerminationTestHeaderType> => api
   .post(`${ApiConfig.germinationTests}/${riaKey}/calculate`, null)
+  .then((res) => res.data);
+
+export const patchGerminationTest = (
+  riaKey: string,
+  payload: GerminationTestUpdatePayload
+): Promise<GerminationTestHeaderType> => api
+  .patch(`${ApiConfig.germinationTests}/${riaKey}`, payload)
   .then((res) => res.data);
 
 export const getGermCounts = (
