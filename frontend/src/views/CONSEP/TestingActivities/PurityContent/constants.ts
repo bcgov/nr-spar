@@ -1,5 +1,3 @@
-export const DATE_FORMAT = 'Y/m/d';
-
 export const fieldsConfig = {
   titleSection: {
     title: 'Purity for lot'

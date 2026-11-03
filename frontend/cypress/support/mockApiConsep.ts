@@ -33,14 +33,9 @@ export function mockMoistureContentApi() {
   ).as('DELETE_replicate');
 
   cy.intercept(
-    { method: 'PATCH', url: '**/api/moisture-content-cone/replicate/514330' },
-    { statusCode: 200, body: {} }
-  ).as('PATCH_moisture_replicates');
-
-  cy.intercept(
-    { method: 'PATCH', url: '**/api/moisture-content-cone/514330' },
+    { method: 'PUT', url: '**/api/moisture-content-cone/514330' },
     { statusCode: 200, body: { updateTimestamp: '2026-07-29T00:00:00.000Z' } }
-  ).as('PATCH_moisture_activity_record');
+  ).as('PUT_moisture_autosave');
 }
 
 export type FavouriteMockItem = {
@@ -178,18 +173,14 @@ export function mockPurityContentApi() {
   ).as('DELETE_impurity');
 
   cy.intercept(
-    { method: 'PATCH', url: `**/api/purity-tests/${riaKey}*` },
+    { method: 'PUT', url: `**/api/purity-tests/${riaKey}` },
     {
       statusCode: 200,
       body: {
         updateTimestamp: '2026-07-29T00:00:00.000Z'
       }
     }
-  ).as('PATCH_purity_activity_record');
-  cy.intercept(
-    { method: 'PATCH', url: `**/api/purity-tests/replicate/${riaKey}` },
-    { statusCode: 200, body: {} }
-  ).as('PATCH_purity_replicates');
+  ).as('PUT_purity_autosave');
 }
 
 export function mockGerminationApi(conflictFirstSave = false) {

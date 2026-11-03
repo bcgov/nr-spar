@@ -1,6 +1,8 @@
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import { mockMoistureContentApi } from '../mockApiConsep';
-import { MoistureContentType, ReplicateType, SeedlotReplicateInfoType } from '../../definitions';
+import {
+  MoistureContentType, ReplicateType, SeedlotReplicateInfoType, TestAutosaveRequest
+} from '../../definitions';
 import { loadFixtureAndAlias } from '../helpers/fixture-loader';
 import { typeAndWaitForAutosave } from '../helpers/autosave';
 
@@ -117,9 +119,9 @@ When('I enter valid {string} in the last moisture row {string} field', (value: s
   typeAndWaitForAutosave(
     `.activity-result-container tbody tr:last-child input[name="${fieldName}"]`,
     value,
-    '@PATCH_moisture_replicates',
+    '@PUT_moisture_autosave',
     ({ body }) => {
-      const replicates = body as ReplicateType[];
+      const { replicates } = body as TestAutosaveRequest<ReplicateType>;
       const lastReplicate = replicates[replicates.length - 1];
       return lastReplicate !== undefined
         && String(lastReplicate[fieldName]) === value;

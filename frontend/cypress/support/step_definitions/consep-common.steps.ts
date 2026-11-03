@@ -1,7 +1,7 @@
 import { Then, When, DataTable } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
 import {
-  ActivityRecordSaveRequest, MoistureContentType, PurityContentType, SeedlotReplicateInfoType
+  MoistureContentType, PurityContentType, SeedlotReplicateInfoType, TestAutosaveRequest
 } from '../../definitions';
 import { TYPE_DELAY } from '../../constants';
 import { typeAndWaitForAutosave, waitForAutosave, RouteAlias } from '../helpers/autosave';
@@ -35,14 +35,14 @@ const CONSEP_PAGE_IDS: Record<string, {
     endDate: '#moisture-content-end-date-picker',
     comments: '#moisture-content-comments',
     category: '#moisture-content-category',
-    saveAlias: '@PATCH_moisture_activity_record'
+    saveAlias: '@PUT_moisture_autosave'
   },
   'purity content': {
     startDate: '#purity-content-start-date-picker',
     endDate: '#purity-content-end-date-picker',
     comments: '#purity-content-comments',
     category: '#purity-content-category',
-    saveAlias: '@PATCH_purity_activity_record'
+    saveAlias: '@PUT_purity_autosave'
   }
 };
 
@@ -144,7 +144,7 @@ When('I set the {string} start date to {string}', (page: string, dateValue: stri
   cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue)
     .then(() => waitForAutosave(
       CONSEP_PAGE_IDS[page].saveAlias,
-      ({ body }) => isSameLocalDay((body as ActivityRecordSaveRequest).actualBeginDateTime, dateValue)
+      ({ body }) => isSameLocalDay((body as TestAutosaveRequest).activity.actualBeginDateTime, dateValue)
     ))
 ));
 
@@ -152,7 +152,7 @@ When('I set the {string} end date to {string}', (page: string, dateValue: string
   cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].endDate, dateValue)
     .then(() => waitForAutosave(
       CONSEP_PAGE_IDS[page].saveAlias,
-      ({ body }) => isSameLocalDay((body as ActivityRecordSaveRequest).actualEndDateTime, dateValue)
+      ({ body }) => isSameLocalDay((body as TestAutosaveRequest).activity.actualEndDateTime, dateValue)
     ))
 ));
 
@@ -174,7 +174,7 @@ When('I select the {string} page category {string}', (page: string, category: st
     .click()
     .then(() => waitForAutosave(
       CONSEP_PAGE_IDS[page].saveAlias,
-      ({ body }) => (body as ActivityRecordSaveRequest).testCategoryCode === category
+      ({ body }) => (body as TestAutosaveRequest).activity.testCategoryCode === category
     ));
 });
 

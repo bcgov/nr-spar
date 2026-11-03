@@ -1,13 +1,11 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityAutosaveFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
-import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.PurityReplicateEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.PurityTestService;
@@ -29,6 +27,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -102,74 +101,38 @@ public class PurityTestsEndpoint {
   }
 
   /**
-   * Updates purity replicate entities.
+   * Auto save the activity record and the replicates together, under the activity's
+   * optimistic lock.
    *
-   * @param riaKey The identifier for the test activities related data.
-   * @param replicateFormDtos A list of {@link PurityReplicateFormDto} containing the new values.
-   * @return the {@link PurityReplicateEntity} updated
+   * @param riaKey The identifier for the purity test data.
+   * @param dto The activity record (with the updateTimestamp the client read) and replicates.
+   * @return the {@link ActivityEntity} updated, carrying the new updateTimestamp
    */
-  @PatchMapping(
-      value = "replicate/{riaKey}",
-      consumes = "application/json",
-      produces = "application/json")
+  @PutMapping(value = "/{riaKey}", consumes = "application/json", produces = "application/json")
   @Operation(
-      summary = "Update the fields of a replicate entity",
-      description = "Updates a replicate."
+      summary = "Auto save the activity record and replicates",
+      description = "Updates the activity fields and upserts the replicates in one transaction."
   )
   @ApiResponses(
       value = {
-          @ApiResponse(responseCode = "200", description = "Field successfully updated"),
-          @ApiResponse(responseCode = "400", description = "Invalid object"),
-          @ApiResponse(responseCode = "404", description = "Replicate not found")
-      })
-  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public List<PurityReplicateEntity> updateReplicateField(
-      @Parameter(
-          name = "riaKey",
-          in = ParameterIn.PATH,
-          description = "Identification key for test activity data",
-          required = true)
-      @PathVariable
-      BigDecimal riaKey,
-      @Valid
-      @RequestBody
-      List<PurityReplicateFormDto> replicateFormDtos) {
-
-    return purityTestService.updateReplicateField(riaKey, replicateFormDtos);
-  }
-
-  /**
-   * Updates an activity record.
-   *
-   * @param riaKey The identifier for the activity-related data.
-   * @param activityFormDto An object containing the new values.
-   * @return the {@link ActivityEntity} updated
-   */
-  @PatchMapping(value = "/{riaKey}", consumes = "application/json", produces = "application/json")
-  @Operation(
-      summary = "Update an activity record",
-      description = "Given the new values, updates an activity entry."
-  )
-  @ApiResponses(
-      value = {
-          @ApiResponse(responseCode = "200", description = "Field successfully updated"),
+          @ApiResponse(responseCode = "200", description = "Successfully saved"),
           @ApiResponse(responseCode = "400", description = "Invalid object"),
           @ApiResponse(responseCode = "404", description = "Activity entry not found"),
           @ApiResponse(responseCode = "409",
               description = "Activity was modified by another user (stale update timestamp)")
       })
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public ActivityEntity updateActivityField(
+  public ActivityEntity autosave(
       @Parameter(
-        name = "riaKey",
-        in = ParameterIn.PATH,
-        description = "Identification key for activity data",
-        required = true)
+          name = "riaKey",
+          in = ParameterIn.PATH,
+          description = "Identification key for purity test data",
+          required = true)
       @PathVariable
       BigDecimal riaKey,
       @Valid
-      @RequestBody ActivityFormDto activityFormDto) {
-    return activityService.updateActivityField(riaKey, activityFormDto);
+      @RequestBody PurityAutosaveFormDto dto) {
+    return purityTestService.autosave(riaKey, dto);
   }
 
   /**

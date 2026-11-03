@@ -161,6 +161,12 @@ export type ActivityRecordSaveRequest = {
   updateTimestamp?: string;
 };
 
+// Moisture/Purity auto save: one PUT carries the activity record and the replicates.
+export type TestAutosaveRequest<R = Record<string, unknown>> = {
+  activity: ActivityRecordSaveRequest;
+  replicates: R[];
+};
+
 export type GerminationCountDaySaveRequest = {
   slotIndex: number;
   countDt?: string;

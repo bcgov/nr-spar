@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityAutosaveFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
@@ -47,6 +48,8 @@ public class PurityTestService {
   private final PurityReplicateRepository replicateRepository;
 
   private final PurityDebrisRepository debrisRepository;
+
+  private final ActivityService activityService;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -177,6 +180,22 @@ public class PurityTestService {
   }
 
   /**
+   * Auto save: the activity record and the replicates in one transaction, locked on the
+   * activity's updateTimestamp (the replicate tables have no timestamp column of their own).
+   *
+   * @return the activity, carrying the new updateTimestamp
+   * @throws ResponseStatusException 409 if the test is completed/accepted or the activity
+   *     changed since it was read, 404 if absent
+   */
+  @Transactional
+  public ActivityEntity autosave(@NonNull BigDecimal riaKey, @NonNull PurityAutosaveFormDto dto) {
+    activityService.assertTestEditable(riaKey);
+    ActivityEntity activity = activityService.updateActivityField(riaKey, dto.activity());
+    updateReplicateField(riaKey, dto.replicates());
+    return activity;
+  }
+
+  /**
    * This function updates the purity debris, either by changing the existing ones
    * or adding new debris requested by the user.
    *
@@ -188,6 +207,7 @@ public class PurityTestService {
       @NonNull BigDecimal riaKey,
       @NonNull List<PurityDebrisFormDto> debrisFormDtos
   ) {
+    activityService.assertTestEditable(riaKey);
     SparLog.info("Updating purity debris with the riaKey: {}", riaKey);
 
     List<PurityDebrisEntity> debrisToSave = new ArrayList<>();
@@ -370,6 +390,7 @@ public class PurityTestService {
       @NonNull Integer replicateNumber,
       @NonNull Integer debrisRank
   ) {
+    activityService.assertTestEditable(riaKey);
     SparLog.info("Deleting single debris with the "
         + "riaKey: {}, replicateNumber: {} and rank: {}", riaKey, replicateNumber, debrisRank);
 
