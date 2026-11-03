@@ -316,4 +316,29 @@ describe('useAutosave', () => {
     rerender({ data: { v: 2 }, conflict: true });
     expect(result.current.status.state).toBe('conflict');
   });
+
+  it('stops reporting a failure once the data is back to what is saved', async () => {
+    const onSave = vi.fn().mockRejectedValue(new Error('Save failed'));
+    const { result, rerender } = renderHook(
+      ({ data }) => useAutosave({ data, onSave, delay: 800 }),
+      { initialProps: { data: { v: 0 } } }
+    );
+
+    rerender({ data: { v: 1 } });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(result.current.status.state).toBe('failed');
+
+    // Reverted to the saved value.
+    rerender({ data: { v: 0 } });
+    expect(result.current.status.state).toBe('idle');
+
+    rerender({ data: { v: 2 } });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(result.current.status.state).toBe('failed');
+
+    // Replaced by server data, as Reload does.
+    act(() => { result.current.markSaved({ v: 9 }); });
+    rerender({ data: { v: 9 } });
+    expect(result.current.status.state).toBe('idle');
+  });
 });

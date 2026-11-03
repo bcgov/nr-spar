@@ -185,9 +185,20 @@ function useAutosave<T, R = unknown>({
     failedRef.current = null;
   };
 
-  return {
+  // A failure stops mattering once the data is back to what is saved: the edit was
+  // reverted, or Reload replaced it (markSaved). Derived, so there is nothing to reset.
+  // eslint-disable-next-line react-hooks/refs
+  const recovered = status.state === 'failed' && isEqual(data, savedRef.current);
+  let shownStatus = status;
+  if (conflict) {
     // A conflict outranks whatever the last attempt did: nothing saves until Reload.
-    status: conflict ? { ...status, state: 'conflict' } : status,
+    shownStatus = { ...status, state: 'conflict' };
+  } else if (recovered) {
+    shownStatus = { ...status, state: status.savedAt ? 'saved' : 'idle' };
+  }
+
+  return {
+    status: shownStatus,
     flush: save,
     cancel: clearTimers,
     markSaved
