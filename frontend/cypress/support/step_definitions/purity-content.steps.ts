@@ -1,9 +1,12 @@
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
 import { mockPurityContentApi } from '../mockApiConsep';
-import { PurityContentType, SeedlotReplicateInfoType } from '../../definitions';
+import {
+  PurityContentType, PurityImpuritySaveRequest, SeedlotReplicateInfoType
+} from '../../definitions';
 import { loadFixtureAndAlias } from '../helpers/fixture-loader';
 import { getImpurityRowAt, getPurityReplicateSection } from '../helpers/purity-helper';
+import { waitForAutosave } from '../helpers/autosave';
 
 let purityData: PurityContentType;
 
@@ -58,7 +61,14 @@ When('I select impurity type {string} for replicate {string} rank {string}', (
       .click();
   });
 
-  cy.wait('@PATCH_impurity');
+  waitForAutosave(
+    '@PATCH_impurity',
+    ({ body }) => (body as PurityImpuritySaveRequest[]).some((item) => (
+      item.replicateNumber === Number(replicateNumber)
+      && item.debrisRank === Number(rank)
+      && item.debrisTypeCode === impurityType
+    ))
+  );
 
   cy.get('.consep-impurity-title')
     .find('h4')
@@ -88,7 +98,11 @@ When('I delete impurity row with rank {string} for replicate {string}', (
 ) => {
   getImpurityRowAt(replicateNumber, rank)
     .find('.consep-impurity-content-remove button')
-    .click();
+    .click()
+    .then(() => waitForAutosave(
+      '@DELETE_impurity',
+      ({ url }) => url.includes(`/${replicateNumber}/${rank}`)
+    ));
 });
 
 Then('impurity at index {string} for replicate {string} should have rank {string}', (

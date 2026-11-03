@@ -1,7 +1,10 @@
 import { Then, When, DataTable } from '@badeball/cypress-cucumber-preprocessor';
 import prefix from '../../../src/styles/classPrefix';
-import { MoistureContentType, PurityContentType } from '../../definitions';
+import {
+  MoistureContentType, PurityContentType, SeedlotReplicateInfoType, TestAutosaveRequest
+} from '../../definitions';
 import { TYPE_DELAY } from '../../constants';
+import { typeAndWaitForAutosave, waitForAutosave, RouteAlias } from '../helpers/autosave';
 
 let moistureData: MoistureContentType;
 let purityData: PurityContentType;
@@ -18,46 +21,28 @@ before(() => {
   });
 });
 
-const AUTOSAVE_ALIASES: Record<string, string> = {
-  'moisture content': '@PUT_moisture_autosave',
-  'purity content': '@PUT_purity_autosave'
-};
-
-type AutosaveBody = { activity: Record<string, string | undefined>; replicates: unknown[] };
-
-// Auto save coalesces edits (800 ms debounce, 3 s max wait), so a slow typist can produce
-// an earlier PUT with partial text; wait until one carries the expected value.
-const waitForAutosave = (
-  page: string,
-  matches: (body: AutosaveBody) => boolean,
-  remaining = 10
-): void => {
-  cy.wait(AUTOSAVE_ALIASES[page]).then(({ request }) => {
-    const body = request.body as AutosaveBody;
-    expect(body.replicates, 'replicates go out in the same PUT').to.be.an('array');
-    if (!matches(body)) {
-      expect(remaining, 'no auto save PUT carried the expected value').to.be.greaterThan(1);
-      waitForAutosave(page, matches, remaining - 1);
-    }
-  });
-};
-
-const localDay = (iso?: string) => (iso ? new Date(iso).toLocaleDateString('en-CA') : undefined);
-
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
-const CONSEP_PAGE_IDS: Record<string, { startDate: string; endDate: string; comments: string; category: string }> = {
+const CONSEP_PAGE_IDS: Record<string, {
+  startDate: string;
+  endDate: string;
+  comments: string;
+  category: string;
+  saveAlias: RouteAlias;
+}> = {
   'moisture content': {
     startDate: '#moisture-content-start-date-picker',
     endDate: '#moisture-content-end-date-picker',
     comments: '#moisture-content-comments',
-    category: '#moisture-content-category'
+    category: '#moisture-content-category',
+    saveAlias: '@PUT_moisture_autosave'
   },
   'purity content': {
     startDate: '#purity-content-start-date-picker',
     endDate: '#purity-content-end-date-picker',
     comments: '#purity-content-comments',
-    category: '#purity-content-category'
+    category: '#purity-content-category',
+    saveAlias: '@PUT_purity_autosave'
   }
 };
 
@@ -108,7 +93,7 @@ Then('the activity results table should show these columns:', (dataTable: DataTa
 });
 
 Then('the activity summary should match the seedlot replicate info', () => {
-  cy.get('@seedlotData').then((seedlotData: any) => {
+  cy.get('@seedlotData').then((seedlotData: SeedlotReplicateInfoType) => {
     cy.get('.activity-summary')
       .find('.activity-summary-info-value')
       .eq(0)
@@ -143,13 +128,33 @@ Then('the activity summary should match the seedlot replicate info', () => {
   });
 });
 
-When('I set the {string} start date to {string}', (page: string, dateValue: string) => {
-  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue);
-});
+const isSameLocalDay = (iso: string | undefined, dateValue: string) => {
+  if (!iso) {
+    return false;
+  }
+  const [year, month, day] = dateValue.split('/').map(Number);
+  const savedDate = new Date(iso);
+  return !Number.isNaN(savedDate.getTime())
+    && savedDate.getFullYear() === year
+    && savedDate.getMonth() === month - 1
+    && savedDate.getDate() === day;
+};
 
-When('I set the {string} end date to {string}', (page: string, dateValue: string) => {
-  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].endDate, dateValue);
-});
+When('I set the {string} start date to {string}', (page: string, dateValue: string) => (
+  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue)
+    .then(() => waitForAutosave(
+      CONSEP_PAGE_IDS[page].saveAlias,
+      ({ body }) => isSameLocalDay((body as TestAutosaveRequest).activity.actualBeginDateTime, dateValue)
+    ))
+));
+
+When('I set the {string} end date to {string}', (page: string, dateValue: string) => (
+  cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].endDate, dateValue)
+    .then(() => waitForAutosave(
+      CONSEP_PAGE_IDS[page].saveAlias,
+      ({ body }) => isSameLocalDay((body as TestAutosaveRequest).activity.actualEndDateTime, dateValue)
+    ))
+));
 
 When('I set the {string} start date to {string}, expect a date validation error', (page: string, dateValue: string) => {
   cy.setFlatpickrDate(CONSEP_PAGE_IDS[page].startDate, dateValue)
@@ -166,7 +171,11 @@ When('I select the {string} page category {string}', (page: string, category: st
     .click();
 
   cy.contains(`.${prefix}--list-box__menu-item__option`, category)
-    .click();
+    .click()
+    .then(() => waitForAutosave(
+      CONSEP_PAGE_IDS[page].saveAlias,
+      ({ body }) => (body as TestAutosaveRequest).activity.testCategoryCode === category
+    ));
 });
 
 Then('the {string} page category should be {string}', (page: string, category: string) => {
@@ -179,23 +188,15 @@ Then('the {string} comment input should have placeholder', (page: string) => {
     .should('have.attr', 'placeholder', getCommentPlaceholder(page));
 });
 
-When('I enter the {string} page comment', (page: string) => {
-  cy.get(CONSEP_PAGE_IDS[page].comments)
-    .clear()
-    .type(moistureData.mc.testComment, { delay: TYPE_DELAY })
-    .blur();
-});
+When('I enter the {string} page comment', (page: string) => typeAndWaitForAutosave(
+  CONSEP_PAGE_IDS[page].comments,
+  moistureData.mc.testComment,
+  CONSEP_PAGE_IDS[page].saveAlias,
+  ({ body }) => JSON.stringify(body).includes(moistureData.mc.testComment),
+  TYPE_DELAY
+));
 
 Then('the {string} page comment should be visible', (page: string) => {
   cy.get(CONSEP_PAGE_IDS[page].comments)
     .should('have.value', moistureData.mc.testComment);
-});
-
-Then('the {string} auto save sends the comment', (page: string) => {
-  waitForAutosave(page, ({ activity }) => activity.riaComment === moistureData.mc.testComment);
-});
-
-Then('the {string} auto save sends the end date {string}', (page: string, dateValue: string) => {
-  const expected = dateValue.replaceAll('/', '-');
-  waitForAutosave(page, ({ activity }) => localDay(activity.actualEndDateTime) === expected);
 });
