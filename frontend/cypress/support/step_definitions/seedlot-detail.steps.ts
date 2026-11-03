@@ -8,13 +8,13 @@ let seedlotNumber: string;
 let speciesKey: string;
 
 Given('I open a seedlot detail page for a saved seedlot number', () => {
-  cy.get('@aClassSeedlotData').then((fData: any) => {
-    fixtureData = fData as SeedlotRegFixtureType;
+  cy.get('@aClassSeedlotData').then((fixture: SeedlotRegFixtureType) => {
+    fixtureData = fixture;
 
     // Pick a random species to test
       const speciesKeys = CREATED_SPECIES_KEYS;
       speciesKey = speciesKeys[Math.floor(Math.random() * (speciesKeys.length))];
-      cy.task('getData', fData[speciesKey].species).then((sNumber) => {
+      cy.task('getData', fixture[speciesKey].species).then((sNumber) => {
         seedlotNumber = sNumber as string;
         cy.visit(`/seedlots/details/${seedlotNumber}`);
         cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
