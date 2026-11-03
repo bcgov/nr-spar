@@ -287,4 +287,58 @@ describe('useAutosave', () => {
     expect(onSave).toHaveBeenCalledTimes(2);
     expect(onSave).toHaveBeenLastCalledWith({ v: 2, ts: 't1' }, { v: 1, ts: 't2' });
   });
+
+  it('reports saving, saved and failed, with conflict taking precedence', async () => {
+    let finish: () => void = () => {};
+    const onSave = vi.fn()
+      .mockImplementationOnce(() => new Promise<void>((r) => { finish = r; }))
+      .mockRejectedValueOnce(new Error('Save failed'));
+    const { result, rerender } = renderHook(
+      ({ data, conflict }) => useAutosave({
+        data, onSave, conflict, delay: 800
+      }),
+      { initialProps: { data: { v: 0 }, conflict: false } }
+    );
+    expect(result.current.status.state).toBe('idle');
+
+    rerender({ data: { v: 1 }, conflict: false });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(result.current.status.state).toBe('saving');
+    await act(async () => { finish(); });
+    expect(result.current.status.state).toBe('saved');
+    const { savedAt } = result.current.status;
+    expect(savedAt).toBeInstanceOf(Date);
+
+    rerender({ data: { v: 2 }, conflict: false });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(result.current.status).toEqual({ state: 'failed', savedAt });
+
+    rerender({ data: { v: 2 }, conflict: true });
+    expect(result.current.status.state).toBe('conflict');
+  });
+
+  it('stops reporting a failure once the data is back to what is saved', async () => {
+    const onSave = vi.fn().mockRejectedValue(new Error('Save failed'));
+    const { result, rerender } = renderHook(
+      ({ data }) => useAutosave({ data, onSave, delay: 800 }),
+      { initialProps: { data: { v: 0 } } }
+    );
+
+    rerender({ data: { v: 1 } });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(result.current.status.state).toBe('failed');
+
+    // Reverted to the saved value.
+    rerender({ data: { v: 0 } });
+    expect(result.current.status.state).toBe('idle');
+
+    rerender({ data: { v: 2 } });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(result.current.status.state).toBe('failed');
+
+    // Replaced by server data, as Reload does.
+    act(() => { result.current.markSaved({ v: 9 }); });
+    rerender({ data: { v: 9 } });
+    expect(result.current.status.state).toBe('idle');
+  });
 });

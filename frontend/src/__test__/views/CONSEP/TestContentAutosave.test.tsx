@@ -233,8 +233,12 @@ describe.each([
     await wait(AFTER_DEBOUNCE);
     expect(autosaveMock).not.toHaveBeenCalled();
 
+    // A 409 means someone else saved: Reload brings their newer record.
+    testOverrides = { updateTimestamp: '2025-03-01T00:00:00' };
     fireEvent.click(screen.getByRole('button', { name: /Reload/i }));
     await waitFor(() => expect(screen.queryByText('Conflict detected')).not.toBeInTheDocument());
+    // The 409 was a failed attempt too; after Reload nothing is unsaved.
+    expect(screen.queryByText(/Not saved/)).not.toBeInTheDocument();
   });
 
   const completeTest = async () => {
@@ -266,6 +270,27 @@ describe.each([
 
     expect(await screen.findByText(/latest changes could not be saved/i)).toBeInTheDocument();
     expect(callOrder).toEqual(['autosave']);
+  });
+
+  it('shows Saved after a save and Not saved (no error toast) after a failure', async () => {
+    const { comments } = await renderPage();
+    fireEvent.change(comments, { target: { value: 'one' } });
+    expect(await screen.findByText('Saved just now', {}, { timeout: 3000 })).toBeInTheDocument();
+
+    autosaveMock.mockImplementation(() => Promise.reject(new Error('Network Error')));
+    fireEvent.change(comments, { target: { value: 'two' } });
+    expect(await screen.findByText(/Not saved/, {}, { timeout: 3000 })).toBeInTheDocument();
+    expect(screen.queryByText('Error')).not.toBeInTheDocument();
+  });
+
+  it('clears Not saved when the failed edit is reverted', async () => {
+    autosaveMock.mockImplementation(() => Promise.reject(new Error('Network Error')));
+    const { comments } = await renderPage();
+    fireEvent.change(comments, { target: { value: 'oops' } });
+    expect(await screen.findByText(/Not saved/, {}, { timeout: 3000 })).toBeInTheDocument();
+
+    fireEvent.change(comments, { target: { value: '' } });
+    await waitFor(() => expect(screen.queryByText(/Not saved/)).not.toBeInTheDocument());
   });
 
   it('locks the page when Reload after a conflict finds the test completed', async () => {

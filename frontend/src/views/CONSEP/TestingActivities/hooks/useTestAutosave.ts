@@ -22,8 +22,7 @@ const useTestAutosave = (
   testType: TestingTypes,
   riaKey: string | undefined,
   // False once the test is completed or accepted (#2784): nothing on the page saves.
-  isEditable: boolean,
-  onError: (message: string) => void
+  isEditable: boolean
 ) => {
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [replicates, setReplicates] = useState<ReplicateType[]>([]);
@@ -37,12 +36,11 @@ const useTestAutosave = (
       'autosave',
       { riaKey, payload: { activity: snapshot.activityRecord, replicates: snapshot.replicates } }
     ),
+    // Other failures show as SaveStatus "Not saved", not as a toast.
     onError: (error) => {
       if ((error as AxiosError).response?.status === 409) {
         markConflict();
-        return;
       }
-      onError(`Failed to save: ${(error as AxiosError).message}`);
     }
   });
 
@@ -58,7 +56,7 @@ const useTestAutosave = (
     [activityRecord, replicates]
   );
 
-  const { markSaved, flush } = useAutosave<Snapshot, AxiosResponse>({
+  const { markSaved, flush, status } = useAutosave<Snapshot, AxiosResponse>({
     data,
     // Lock on the timestamp of the last saved snapshot, not the one in the edited data: a
     // save queued behind another (or flushed on unmount) must carry the newer timestamp.
@@ -109,6 +107,7 @@ const useTestAutosave = (
     // Await before an action that reads the saved record (Complete test): true once
     // every edit, including one queued behind an in-flight save, is saved.
     saveNow: flush,
+    saveStatus: status,
     isDateRangeValid,
     isConflict,
     clearConflict
