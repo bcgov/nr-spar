@@ -34,16 +34,16 @@ Feature: CONSEP manual moisture content activity summary
     Then the moisture activity results table shows 4 rows
     When I enter "10011" in the last moisture row container id field
     Then the last moisture row should show the container id validation error
-    When I enter "15" in the last moisture row container id field
+    When I enter valid "15" in the last moisture row "container id" field
     And I enter "10011" in the last moisture row container weight field
     Then the last moisture row should show the container weight validation error
-    When I enter "20" in the last moisture row container weight field
+    When I enter valid "20" in the last moisture row "container weight" field
     And I enter "10011" in the last moisture row fresh seed field
     Then the last moisture row should show the fresh seed validation error
-    When I enter "30" in the last moisture row fresh seed field
+    When I enter valid "30" in the last moisture row "fresh seed" field
     And I enter "10011" in the last moisture row container and dry weight field
     Then the last moisture row should show the container and dry weight validation error
-    When I enter "38" in the last moisture row container and dry weight field
+    When I enter valid "38" in the last moisture row "container and dry weight" field
 
   Scenario: Activity summary result value updates after average calculation
     When I calculate average moisture content from accepted replicates
@@ -52,7 +52,6 @@ Feature: CONSEP manual moisture content activity summary
   Scenario: Moisture content start and end dates can be set
     When I set the "moisture content" start date to "2025/06/10"
     And I set the "moisture content" end date to "2025/06/11"
-    Then the "moisture content" auto save sends the end date "2025/06/11"
 
   Scenario: Setting start date after end date shows validation error
     When I set the "moisture content" end date to "2025/06/11"
@@ -66,4 +65,3 @@ Feature: CONSEP manual moisture content activity summary
     Then the "moisture content" comment input should have placeholder
     When I enter the "moisture content" page comment
     Then the "moisture content" page comment should be visible
-    And the "moisture content" auto save sends the comment

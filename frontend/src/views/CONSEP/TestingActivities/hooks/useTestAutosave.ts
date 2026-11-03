@@ -20,7 +20,9 @@ const toDate = (value?: string) => (value ? new Date(value) : null);
  */
 const useTestAutosave = (
   testType: TestingTypes,
-  riaKey: string | undefined
+  riaKey: string | undefined,
+  // False once the test is completed or accepted (#2784): nothing on the page saves.
+  isEditable: boolean
 ) => {
   const [activityRecord, setActivityRecord] = useState<ActivityRecordType>();
   const [replicates, setReplicates] = useState<ReplicateType[]>([]);
@@ -71,6 +73,7 @@ const useTestAutosave = (
       return { ...sent, activityRecord: { ...sent.activityRecord, updateTimestamp } };
     },
     enabled: !!activityRecord
+      && isEditable
       && !isReplicatesBlocked
       && isDateRangeValid,
     conflict: isConflict

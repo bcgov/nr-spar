@@ -61,10 +61,16 @@ const MoistureContent = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const mcVariation = mccVariations[mcType as keyof typeof mccVariations];
 
+  // Any non-zero indicator counts: SPAR writes 1, legacy CONSEP wrote -1. Once completed
+  // or accepted, nothing on the page is editable (#2784).
+  const isCompleted = !!testActivity?.testCompleteInd;
+  const isAccepted = !!testActivity?.acceptResult;
+  const isLocked = isCompleted || isAccepted;
+
   const {
     activityRecord, updateActivityRecord, replicates, setReplicates, setReplicatesBlocked,
     hydrate, saveNow, saveStatus, isDateRangeValid, clearConflict
-  } = useTestAutosave('moistureTest', riaKey);
+  } = useTestAutosave('moistureTest', riaKey, !isLocked);
 
   // Reference to the table body for extracting MC Values
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
@@ -268,7 +274,7 @@ const MoistureContent = () => {
       kind: 'tertiary',
       size: 'lg',
       icon: Checkmark,
-      disabled: testActivity?.testCompleteInd === 1,
+      disabled: isLocked,
       action: async () => {
         const errors = mccReplicatesChecker(replicates);
         if (Object.keys(errors).length > 0) {
@@ -287,7 +293,7 @@ const MoistureContent = () => {
       kind: 'tertiary',
       size: 'lg',
       icon: CheckmarkOutline,
-      disabled: testActivity?.acceptResult === 1 || testActivity?.testCompleteInd !== 1,
+      disabled: isAccepted || !isCompleted,
       action: () => acceptTest.mutate()
     },
     {
@@ -334,14 +340,14 @@ const MoistureContent = () => {
         />
         <>
           {
-            testActivity?.testCompleteInd === 1
+            isCompleted
               ? (
                 <StatusTag type="Completed" renderIcon={CheckmarkFilled} />
               )
               : null
           }
           {
-            testActivity?.acceptResult === 1
+            isAccepted
               ? (
                 <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />
               )
@@ -361,7 +367,7 @@ const MoistureContent = () => {
           replicatesData={replicates}
           replicateType="moistureTest"
           riaKey={activityRiaKey}
-          isEditable={testActivity?.testCompleteInd !== 1}
+          isEditable={!isLocked}
           initValidationErrors={validationErrors}
           updateReplicates={setReplicates}
           setAlert={handleAlert}
@@ -376,6 +382,7 @@ const MoistureContent = () => {
             config={fieldsConfig.startDate}
             value={activityRecord?.actualBeginDateTime}
             invalid={!isDateRangeValid}
+            disabled={isLocked}
             onChange={(value) => updateActivityRecord({ actualBeginDateTime: value })}
           />
         </Column>
@@ -385,12 +392,14 @@ const MoistureContent = () => {
             config={fieldsConfig.endDate}
             value={activityRecord?.actualEndDateTime}
             invalid={!isDateRangeValid}
+            disabled={isLocked}
             onChange={(value) => updateActivityRecord({ actualEndDateTime: value })}
           />
         </Column>
         <Column sm={2} md={2} lg={5} xlg={5}>
           <ComboBox
             className="category-combobox"
+            disabled={isLocked}
             id="moisture-content-category"
             name="category"
             items={fieldsConfig.category.options as Array<string>}
@@ -417,6 +426,7 @@ const MoistureContent = () => {
             rows={2}
             maxCount={500}
             enableCounter
+            disabled={isLocked}
             value={activityRecord?.riaComment || ''}
             onChange={(e: { target: { value: string } }) => {
               updateActivityRecord({

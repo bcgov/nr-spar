@@ -26,8 +26,7 @@ When('I view the seedlot species table', () => {
 });
 
 Then('all seedlot species should exist in the seedlot table', () => {
-  cy.get('@aClassSeedlotData').then((fixtureData: any) => {
-    const tableData: SeedlotRegFixtureType = fixtureData;
+  cy.get('@aClassSeedlotData').then((tableData: SeedlotRegFixtureType) => {
     const keys = Object.keys(tableData).filter((k) => k !== 'fdi');
 
     Cypress._.times(keys.length, (i) => {
