@@ -8,6 +8,7 @@ type ActivityDateFieldProps = {
   config: { name: string; labelText: string; invalidText: string; placeholder?: string };
   value?: string;
   invalid: boolean;
+  disabled?: boolean;
   onChange: (value: string | undefined) => void;
 };
 
@@ -15,7 +16,7 @@ type ActivityDateFieldProps = {
  * Start/end date of a testing activity. Shows and saves the day in Vancouver time.
  */
 const ActivityDateField = ({
-  id, config, value, invalid, onChange
+  id, config, value, invalid, disabled, onChange
 }: ActivityDateFieldProps) => (
   <DatePicker
     datePickerType="single"
@@ -35,6 +36,7 @@ const ActivityDateField = ({
       invalid={invalid}
       size="md"
       autoComplete="off"
+      disabled={disabled}
     />
   </DatePicker>
 );

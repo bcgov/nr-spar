@@ -11,6 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
@@ -485,5 +486,32 @@ class PurityTestServiceTest {
 
     assertThrows(ResponseStatusException.class, () -> purityTestService.autosave(riaKey, dto));
     verify(replicateRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("autosave - a completed test writes nothing")
+  void autosave_completedTest_writesNothing() {
+    PurityAutosaveFormDto dto = new PurityAutosaveFormDto(new ActivityFormDto(
+        "STD", null, null, "comment", LocalDateTime.parse("2013-08-01T00:00:00")),
+        List.of(new PurityReplicateFormDto(1, null, null, null, 1, null)));
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaKey);
+
+    assertThrows(ResponseStatusException.class, () -> purityTestService.autosave(riaKey, dto));
+    verify(activityService, never()).updateActivityField(any(), any());
+    verify(replicateRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("debris - a completed test writes nothing")
+  void debris_completedTest_writesNothing() {
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaKey);
+
+    assertThrows(ResponseStatusException.class,
+        () -> purityTestService.updateDebris(riaKey, List.of()));
+    assertThrows(ResponseStatusException.class,
+        () -> purityTestService.deletePurityDebris(riaKey, 1, 1));
+    verify(debrisRepository, never()).saveAll(anyList());
   }
 }

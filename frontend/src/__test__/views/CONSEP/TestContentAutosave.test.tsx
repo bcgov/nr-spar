@@ -267,4 +267,16 @@ describe.each([
     expect(await screen.findByText(/latest changes could not be saved/i)).toBeInTheDocument();
     expect(callOrder).toEqual(['autosave']);
   });
+
+  it('locks the page when Reload after a conflict finds the test completed', async () => {
+    autosaveMock.mockImplementation(() => Promise.reject(conflictError()));
+    const { comments } = await renderPage();
+    fireEvent.change(comments, { target: { value: 'edit' } });
+    await screen.findByText('Conflict detected', {}, { timeout: 3000 });
+
+    // Someone else completed the test meanwhile.
+    testOverrides = { testCompleteInd: 1 };
+    fireEvent.click(screen.getByRole('button', { name: /Reload/i }));
+    await waitFor(() => expect(screen.getByLabelText(/Comments/i)).toBeDisabled());
+  });
 });
