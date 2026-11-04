@@ -153,6 +153,22 @@ const applyBec = (
   }
 };
 
+const applySpz = (
+  next: BClassCollectionForm,
+  result: CollectionAreaResult,
+  isBcSource: boolean
+): void => {
+  const spzCode = result.spzCode ?? null;
+  if (!isBcSource || !spzCode || spzCode === next.seedPlanZone.value.code) {
+    return;
+  }
+  next.seedPlanZone.value = { code: spzCode, description: '', label: spzCode };
+  next.seedPlanZone.isInvalid = false;
+  // The geographic area belongs to the previous zone.
+  next.seedCoastArea.value = EmptyMultiOptObj;
+  next.seedCoastArea.isInvalid = false;
+};
+
 /**
  * Remove the collection area and every value it fills in, returning those
  * fields to their initial state. Fields the map never touches are kept.
@@ -184,16 +200,19 @@ export const clearCollectionAreaResult = (
 /**
  * Merge the derived SeedMap collection-area values into the B-class
  * collection form state. Populates coordinates, elevation, radius, BEC
- * unit, and stashes the raw GeoJSON for submission. Fields the map can't
- * derive (e.g. dates, containers) are left untouched.
+ * unit, seed planning zone, and stashes the raw GeoJSON for submission.
+ * Fields the map can't derive (e.g. dates, containers) are left untouched.
  *
  * Every map-filled field is cleared first, so a lookup that fails for this
  * area leaves the field empty rather than holding the previous area's value.
+ * The seed planning zone is the exception: the user can pick it without the
+ * map, so it is only replaced when the map finds a different zone.
  */
 export const applyCollectionAreaResult = (
   state: BClassCollectionForm,
   result: CollectionAreaResult,
-  becCatalogue: BecCatalogueItem[] | undefined
+  becCatalogue: BecCatalogueItem[] | undefined,
+  isBcSource = false
 ): BClassCollectionForm => {
   const next = clearCollectionAreaResult(state);
 
@@ -209,6 +228,7 @@ export const applyCollectionAreaResult = (
   }
 
   applyBec(next, result, becCatalogue);
+  applySpz(next, result, isBcSource);
 
   // The map derives BEC from the drawn geometry, so drive the lat/long
   // auto-BEC checkbox off and let the derived unit stand.

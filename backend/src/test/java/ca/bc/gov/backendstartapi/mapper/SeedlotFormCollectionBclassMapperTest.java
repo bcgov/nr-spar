@@ -44,6 +44,8 @@ class SeedlotFormCollectionBclassMapperTest {
     assertThat(dto.collectionElevationMin()).isEqualTo(600);
     assertThat(dto.collectionElevationMax()).isEqualTo(1000);
     assertThat(dto.collectionGeometryGeoJson()).isEqualTo(geoJson);
+    assertThat(dto.seedPlanZoneCode()).isEqualTo("M");
+    assertThat(dto.seedCoastAreaCode()).isEqualTo("001");
   }
 
   @Test
@@ -69,6 +71,8 @@ class SeedlotFormCollectionBclassMapperTest {
     assertThat(seedlot.getCollectionElevationMin()).isEqualTo(600);
     assertThat(seedlot.getCollectionElevationMax()).isEqualTo(1000);
     assertThat(seedlot.getAreaOfUseComment()).isEqualTo("South-facing slope");
+    assertThat(seedlot.getSeedPlanZoneCode()).isEqualTo("M");
+    assertThat(seedlot.getSeedCoastAreaCode()).isEqualTo("001");
   }
 
   @Test
@@ -161,6 +165,8 @@ class SeedlotFormCollectionBclassMapperTest {
     seedlot.setCollectionElevationMax(1000);
     seedlot.setBgcZoneCode("CDF");
     seedlot.setAreaOfUseComment("South-facing slope");
+    seedlot.setSeedPlanZoneCode("M");
+    seedlot.setSeedCoastAreaCode("001");
     return seedlot;
   }
 

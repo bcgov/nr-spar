@@ -12,7 +12,10 @@ import getCaptureMethods from '../../../api-service/captureMethodsAPI';
 import getNumberTreesCollected from '../../../api-service/numberTreesCollectedAPI';
 import getOrgUnitDistricts from '../../../api-service/orgUnitDistrictsAPI';
 import getBecCatalogue from '../../../api-service/becCatalogueAPI';
+import { getSpzByVegCodeList } from '../../../api-service/areaOfUseAPI';
+import getSeedCoastAreas from '../../../api-service/seedCoastAreaAPI';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
+import { spzListToMultiObj } from '../../SeedlotReviewSteps/AreaOfUse/utils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { StringInputType } from '../../../types/FormInputType';
@@ -31,6 +34,7 @@ import {
   getBecVariantItems,
   getBecZoneItems,
   isBecVariantRequired,
+  isCoastAreaRequired,
   isNumNotInRange
 } from './utils';
 import { applyCollectionAreaResult, clearCollectionAreaResult } from './mapIntegration';
@@ -39,7 +43,8 @@ import {
   CollectionBecSection,
   CollectionLatLongSection,
   CollectionLocationSection,
-  CollectionMethodsSection
+  CollectionMethodsSection,
+  CollectionSpzSection
 } from './formSections';
 
 import './styles.scss';
@@ -55,11 +60,16 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     defaultClientNumber,
     defaultCode,
     isFormSubmitted,
-    seedlotNumber
+    seedlotNumber,
+    seedlotData
   } = useContext(ClassBContext);
+
+  const vegCode = seedlotData?.vegetationCode;
+  const isBcSource = seedlotData?.sourceInBc ?? false;
 
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
   const [showElevationWarning, setShowElevationWarning] = useState(false);
+  const [spzSpanCodes, setSpzSpanCodes] = useState<string[]>([]);
   const [isRemoveAreaOpen, setIsRemoveAreaOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -120,6 +130,26 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
   const becCatalogueQuery = useQuery({
     queryKey: ['bec-catalogue'],
     queryFn: getBecCatalogue,
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS
+  });
+
+  const spzListQuery = useQuery({
+    queryKey: ['area-of-use', 'spz-list', 'vegetation-code', vegCode, 'B'],
+    queryFn: () => getSpzByVegCodeList(vegCode!, 'B'),
+    enabled: !!vegCode && isBcSource,
+    select: (data) => spzListToMultiObj(data),
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS
+  });
+
+  const showCoastArea = isBcSource && isCoastAreaRequired(state.seedPlanZone.value.code);
+
+  const coastAreaQuery = useQuery({
+    queryKey: ['seed-coast-areas'],
+    queryFn: getSeedCoastAreas,
+    enabled: showCoastArea,
+    select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS
   });
@@ -242,6 +272,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
       pendingMapResultRef.current = null;
       setStepData('collectionStep', clearCollectionAreaResult(stateRef.current));
       setShowElevationWarning(false);
+      setSpzSpanCodes([]);
       return;
     }
 
@@ -261,17 +292,24 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     if (needsCatalogue && becCatalogueQuery.isLoading && !becCatalogueQuery.data) {
       return;
     }
+    // Whether the zone applies depends on the seedlot's B.C. source flag.
+    if (pending.spzCode && !seedlotData) {
+      return;
+    }
 
     setStepData(
       'collectionStep',
-      applyCollectionAreaResult(stateRef.current, pending, becCatalogueQuery.data)
+      applyCollectionAreaResult(stateRef.current, pending, becCatalogueQuery.data, isBcSource)
     );
     setShowElevationWarning(pending.elevationLookupFailed);
+    setSpzSpanCodes(isBcSource && (pending.spzCodes?.length ?? 0) > 1 ? pending.spzCodes : []);
     pendingMapResultRef.current = null;
   }, [
     location.state,
     becCatalogueQuery.data,
     becCatalogueQuery.isLoading,
+    seedlotData,
+    isBcSource,
     navigate,
     setStepData
   ]);
@@ -347,6 +385,27 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
     updateState(clonedState);
   };
 
+  const handleSpzSelection = (
+    field: 'seedPlanZone' | 'seedCoastArea',
+    selected: MultiOptionsObj | null | undefined
+  ) => {
+    const clonedState = structuredClone(state);
+
+    // Carbon ComboBox can fire onChange(null) on unmount or item refresh; keep the saved code.
+    if (!selected?.code && clonedState[field].value.code) {
+      return;
+    }
+
+    clonedState[field].value = selected ?? EmptyMultiOptObj;
+    clonedState[field].isInvalid = false;
+
+    if (field === 'seedPlanZone' && !isCoastAreaRequired(selected?.code ?? '')) {
+      clonedState.seedCoastArea.value = EmptyMultiOptObj;
+      clonedState.seedCoastArea.isInvalid = false;
+    }
+    updateState(clonedState);
+  };
+
   const handleLocationAreaChange = (value: string) => {
     const clonedState = structuredClone(state);
     clonedState.locationArea.value = value;
@@ -377,6 +436,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         onConfirm={() => {
           updateState(clearCollectionAreaResult(state));
           setShowElevationWarning(false);
+          setSpzSpanCodes([]);
           setIsRemoveAreaOpen(false);
         }}
       />
@@ -393,6 +453,20 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
         catalogueFetching={becCatalogueQuery.isFetching}
         onUseLatLongForBec={handleUseLatLongForBec}
         onComboSelection={handleComboSelection}
+      />
+      <CollectionSpzSection
+        state={state}
+        isReview={isReview}
+        readOnly={readOnly}
+        isBcSource={isBcSource}
+        spzItems={spzListQuery.data ?? []}
+        spzFetching={spzListQuery.isFetching}
+        coastAreaItems={coastAreaQuery.data ?? []}
+        coastAreaFetching={coastAreaQuery.isFetching}
+        showCoastArea={showCoastArea}
+        onSpzSelection={handleSpzSelection}
+        spzSpanCodes={spzSpanCodes}
+        onDismissSpzSpanWarning={() => setSpzSpanCodes([])}
       />
       <CollectionLocationSection
         state={state}

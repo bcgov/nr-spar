@@ -1,5 +1,6 @@
 import React, { useRef, useState, type SubmitEvent } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { IconButton, InlineNotification, ActionableNotification } from '@carbon/react';
 import {
   Draw,
@@ -33,6 +34,7 @@ import {
 } from '@carbon/icons-react';
 
 import { useSparMap } from '../../../../contexts/SparMapContext';
+import { getSeedlotById } from '../../../../api-service/seedlotAPI';
 import ROUTES from '../../../../routes/constants';
 import { addParamToPath } from '../../../../utils/PathUtils';
 import {
@@ -220,6 +222,15 @@ const AoiToolbar = ({
   const hasAoi = aois.length > 0;
   // `returnTo` only signals a wizard launch; never navigate to its value.
   const cameFromRegistration = searchParams.has('returnTo');
+  // Same key as the registration form, so this is normally a cache hit.
+  // Kept off the map URL because `species=` also toggles species layers.
+  const seedlotQuery = useQuery({
+    queryKey: ['seedlots', seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber),
+    enabled: cameFromRegistration && !!seedlotNumber,
+    refetchOnWindowFocus: false
+  });
+  const seedlotVegCode = seedlotQuery.data?.seedlot.vegetationCode ?? null;
   const openedWithSavedArea = Boolean(
     (location.state as { initialAoiGeoJson?: string } | null)?.initialAoiGeoJson
   );
@@ -471,7 +482,12 @@ const AoiToolbar = ({
     setIsValidating(true);
     let result;
     try {
-      result = await deriveCollectionAreaResult(feature, becCheck.becZones, aois.length);
+      result = await deriveCollectionAreaResult(
+        feature,
+        becCheck.becZones,
+        aois.length,
+        seedlotVegCode
+      );
     } catch (err) {
       setValidation({
         kind: 'error',

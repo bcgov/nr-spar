@@ -3,6 +3,8 @@ import { fieldsConfig as aClassFieldsConfig, agencyFieldsProps as aClassAgencyFi
 
 export const DATE_FORMAT = 'Y/m/d';
 
+export const MARITIME_SPZ_CODE = 'M';
+
 export const agencyFieldsProps: ClientAndCodeInputTextType = {
   ...aClassAgencyFields,
   useDefaultCheckbox: {
@@ -77,6 +79,19 @@ export const fieldsConfig = {
   },
   numberTreesFrom: {
     legendText: 'Number of trees collected from'
+  },
+  seedPlanZone: {
+    labelText: 'Seed planning zone of collection area',
+    placeholder: 'Choose seed planning zone',
+    helperText: 'The seed planning zone where the cones were collected',
+    notBcSourceHelperText: 'Only applies to seedlots collected in B.C.',
+    invalidText: 'Please choose a seed planning zone'
+  },
+  seedCoastArea: {
+    labelText: 'Geographic area',
+    placeholder: 'Choose geographic area',
+    helperText: 'Required when the seed planning zone is M',
+    invalidText: 'Please choose a geographic area'
   },
   ...aClassFieldsConfig
 };

@@ -267,7 +267,11 @@ const ReviewContent = () => {
   }, [blocker.state]);
 
   const verifyFormData = (): boolean => {
-    const isValid = validateBClassReviewForm(allStepData, becCatalogueQuery.data);
+    const isValid = validateBClassReviewForm(
+      allStepData,
+      becCatalogueQuery.data,
+      seedlotData?.sourceInBc ?? false
+    );
     if (!isValid) {
       toast.error(
         <ErrorToast

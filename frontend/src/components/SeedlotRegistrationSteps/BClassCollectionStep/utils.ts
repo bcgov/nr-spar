@@ -7,6 +7,7 @@ import { emptyCollectionStep } from '@/views/Seedlot/ContextContainerClassA/cons
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BClassCollectionForm } from './definitions';
 import { calcVolume, isNumNotInRange } from '../CollectionStep/utils';
+import { MARITIME_SPZ_CODE } from './constants';
 
 const toOption = (code: string | null | undefined, description = ''): MultiOptionsObj => {
   if (!code) {
@@ -123,7 +124,9 @@ export const initBClassCollectionState = (
     becZone: getOptionsInputObj('b-collection-bec-zone', EmptyMultiOptObj),
     becSubzone: getOptionsInputObj('b-collection-bec-subzone', EmptyMultiOptObj),
     becVariant: getOptionsInputObj('b-collection-bec-variant', EmptyMultiOptObj),
-    collectionGeometry: getStringInputObj('b-collection-geometry', '')
+    collectionGeometry: getStringInputObj('b-collection-geometry', ''),
+    seedPlanZone: getOptionsInputObj('b-collection-seed-plan-zone', EmptyMultiOptObj),
+    seedCoastArea: getOptionsInputObj('b-collection-seed-coast-area', EmptyMultiOptObj)
   };
 };
 
@@ -198,8 +201,34 @@ export const initBClassCollectionStateFromDto = (
     collectionGeometry: getStringInputObj(
       'b-collection-geometry',
       collectionData.collectionGeometryGeoJson ?? ''
+    ),
+    seedPlanZone: getOptionsInputObj(
+      'b-collection-seed-plan-zone',
+      toOption(collectionData.seedPlanZoneCode)
+    ),
+    seedCoastArea: getOptionsInputObj(
+      'b-collection-seed-coast-area',
+      collectionData.seedPlanZoneCode === MARITIME_SPZ_CODE
+        ? toOption(collectionData.seedCoastAreaCode)
+        : EmptyMultiOptObj
     )
   };
+};
+
+export const isCoastAreaRequired = (spzCode: string): boolean => spzCode === MARITIME_SPZ_CODE;
+
+const isCollectionSpzComplete = (
+  collectionData: BClassCollectionForm,
+  isBcSource: boolean
+): boolean => {
+  if (!isBcSource) {
+    return true;
+  }
+  const spzCode = collectionData.seedPlanZone.value.code;
+  if (!spzCode) {
+    return false;
+  }
+  return !(isCoastAreaRequired(spzCode) && !collectionData.seedCoastArea.value.code);
 };
 
 export { calcVolume, isNumNotInRange };
@@ -225,8 +254,12 @@ export const validateBClassCollectionStep = (
 
 export const verifyBClassCollectionStepCompleteness = (
   collectionData: BClassCollectionForm,
-  becCatalogue?: BecCatalogueItem[]
+  becCatalogue?: BecCatalogueItem[],
+  isBcSource = false
 ): boolean => {
+  if (!isCollectionSpzComplete(collectionData, isBcSource)) {
+    return false;
+  }
   if (!collectionData.collectorAgency.value
     || !collectionData.locationCode.value
     || !collectionData.startDate.value

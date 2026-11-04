@@ -10,6 +10,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,10 @@ public interface Provider {
 
   default Optional<AreaOfUseDto> getAreaOfUseData(Integer spuId) {
     return Optional.empty();
+  }
+
+  default List<SpzDto> getSpzListByVegCode(String vegCode, String geneticClass) {
+    return List.of();
   }
 
   default Optional<OrchardDto> findOrchardById(String orchardId) {

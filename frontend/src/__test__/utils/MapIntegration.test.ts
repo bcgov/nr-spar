@@ -43,6 +43,8 @@ const baseResult = (overrides: Partial<CollectionAreaResult> = {}): CollectionAr
     subzone: 'xm',
     variant: '1'
   },
+  spzCode: 'M',
+  spzCodes: ['M'],
   ...overrides
 });
 
@@ -173,6 +175,66 @@ describe('mapIntegration', () => {
 
       expect(next.collectionRadius.value).toBe('7.4');
       expect(next.collectionRadius.isInvalid).toBe(false);
+    });
+
+    it('fills the seed planning zone for a B.C.-source lot', () => {
+      const state = initBClassCollectionState('00012797', '01');
+      state.seedPlanZone.isInvalid = true;
+
+      const next = applyCollectionAreaResult(state, baseResult(), catalogue, true);
+
+      expect(next.seedPlanZone.value.code).toBe('M');
+      expect(next.seedPlanZone.isInvalid).toBe(false);
+    });
+
+    it('does not fill the seed planning zone for a lot not collected in B.C.', () => {
+      const state = initBClassCollectionState('00012797', '01');
+
+      const next = applyCollectionAreaResult(state, baseResult(), catalogue, false);
+
+      expect(next.seedPlanZone.value.code).toBe('');
+    });
+
+    it('keeps the chosen zone and geographic area when the map finds no zone', () => {
+      const state = initBClassCollectionState('00012797', '01');
+      state.seedPlanZone.value = { code: 'M', description: '', label: 'M' };
+      state.seedCoastArea.value = { code: 'VI', description: '', label: 'VI' };
+
+      const next = applyCollectionAreaResult(
+        state,
+        baseResult({ spzCode: null, spzCodes: [] }),
+        catalogue,
+        true
+      );
+
+      expect(next.seedPlanZone.value.code).toBe('M');
+      expect(next.seedCoastArea.value.code).toBe('VI');
+    });
+
+    it('keeps the geographic area when the map finds the same zone', () => {
+      const state = initBClassCollectionState('00012797', '01');
+      state.seedPlanZone.value = { code: 'M', description: '', label: 'M' };
+      state.seedCoastArea.value = { code: 'VI', description: '', label: 'VI' };
+
+      const next = applyCollectionAreaResult(state, baseResult(), catalogue, true);
+
+      expect(next.seedCoastArea.value.code).toBe('VI');
+    });
+
+    it('clears the geographic area when the map finds a different zone', () => {
+      const state = initBClassCollectionState('00012797', '01');
+      state.seedPlanZone.value = { code: 'M', description: '', label: 'M' };
+      state.seedCoastArea.value = { code: 'VI', description: '', label: 'VI' };
+
+      const next = applyCollectionAreaResult(
+        state,
+        baseResult({ spzCode: 'SM', spzCodes: ['SM'] }),
+        catalogue,
+        true
+      );
+
+      expect(next.seedPlanZone.value.code).toBe('SM');
+      expect(next.seedCoastArea.value.code).toBe('');
     });
   });
 

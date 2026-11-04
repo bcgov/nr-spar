@@ -90,6 +90,7 @@ const ContextContainerClassB = ({ children }: props) => {
   });
 
   const becCatalogue = becCatalogueQuery.data;
+  const isBcSource = seedlotQuery.data?.seedlot.sourceInBc ?? false;
 
   const [allStepCompleted, setAllStepCompleted] = useState<boolean>(false);
   const [lastSaveTimestamp, setLastSaveTimestamp] = useState<string>(() => DateTime.now().toISO());
@@ -120,7 +121,7 @@ const ContextContainerClassB = ({ children }: props) => {
         };
         setProgressStatus((prevStatus) => ({
           ...prevStatus,
-          interim: updateStepStatus('interim', prevStatus.interim, newData, becCatalogue)
+          interim: updateStepStatus('interim', prevStatus.interim, newData, becCatalogue, isBcSource)
         }));
       }
 
@@ -135,16 +136,16 @@ const ContextContainerClassB = ({ children }: props) => {
     const prevStepName = stepMap[prevStepNum];
 
     if (currentStepName !== 'collection' && prevStepName === 'collection') {
-      clonedStatus.collection = updateStepStatus('collection', clonedStatus.collection, allStepData, becCatalogue);
+      clonedStatus.collection = updateStepStatus('collection', clonedStatus.collection, allStepData, becCatalogue, isBcSource);
     }
     if (currentStepName !== 'ownership' && prevStepName === 'ownership') {
-      clonedStatus.ownership = updateStepStatus('ownership', clonedStatus.ownership, allStepData, becCatalogue);
+      clonedStatus.ownership = updateStepStatus('ownership', clonedStatus.ownership, allStepData, becCatalogue, isBcSource);
     }
     if (currentStepName !== 'interim' && prevStepName === 'interim') {
-      clonedStatus.interim = updateStepStatus('interim', clonedStatus.interim, allStepData, becCatalogue);
+      clonedStatus.interim = updateStepStatus('interim', clonedStatus.interim, allStepData, becCatalogue, isBcSource);
     }
     if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
-      clonedStatus.extraction = updateStepStatus('extraction', clonedStatus.extraction, allStepData, becCatalogue);
+      clonedStatus.extraction = updateStepStatus('extraction', clonedStatus.extraction, allStepData, becCatalogue, isBcSource);
     }
 
     (Object.keys(clonedStatus) as Array<keyof BClassProgressIndicatorConfig>).forEach((stepName) => {
@@ -168,7 +169,7 @@ const ContextContainerClassB = ({ children }: props) => {
     (Object.keys(clonedStatus) as Array<keyof BClassProgressIndicatorConfig>).forEach((stepName) => {
       if (stepName !== 'extraction'
         || (stepName === 'extraction' && clonedStatus.extraction.isCurrent)) {
-        clonedStatus[stepName] = updateStepStatus(stepName, clonedStatus[stepName], allStepData, becCatalogue);
+        clonedStatus[stepName] = updateStepStatus(stepName, clonedStatus[stepName], allStepData, becCatalogue, isBcSource);
       }
     });
     setProgressStatus(clonedStatus);
@@ -278,10 +279,11 @@ const ContextContainerClassB = ({ children }: props) => {
       progressStatus,
       allStepData,
       verifyExtractionStepCompleteness(allStepData.extractionStorageStep),
-      becCatalogue
+      becCatalogue,
+      isBcSource
     );
     setAllStepCompleted(completionStatus);
-  }, [progressStatus, allStepData, formStep, becCatalogue]);
+  }, [progressStatus, allStepData, formStep, becCatalogue, isBcSource]);
 
   const submitSeedlot = useMutation({
     mutationFn: (payload: SeedlotBClassSubmitType) => putBClassSeedlot(seedlotNumber ?? '', payload),

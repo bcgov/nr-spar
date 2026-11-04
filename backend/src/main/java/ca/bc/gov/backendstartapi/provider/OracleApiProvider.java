@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
@@ -244,6 +245,43 @@ public class OracleApiProvider implements Provider {
     }
 
     return Optional.empty();
+  }
+
+  /**
+   * Find the seed plan zones of a genetic class that apply to a species.
+   *
+   * @param vegCode the seedlot species
+   * @param geneticClass the genetic class code, 'A' or 'B'
+   * @return A {@link List} of {@link SpzDto}
+   */
+  @Override
+  public List<SpzDto> getSpzListByVegCode(String vegCode, String geneticClass) {
+    String oracleApiUrl =
+        String.format(
+            "%s/api/area-of-use/spz-list/vegetation-code/{vegCode}?geneticClass={geneticClass}",
+            rootUri);
+
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "getSpzListByVegCode", oracleApiUrl);
+
+    try {
+      ResponseEntity<List<SpzDto>> spzResult =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<List<SpzDto>>() {},
+              createParamsMap("vegCode", vegCode, "geneticClass", geneticClass));
+      List<SpzDto> list = spzResult.getBody();
+      int size = list == null ? 0 : list.size();
+      SparLog.info("GET spz list by vegCode from Oracle - Success response with size: {}!", size);
+      return list == null ? List.of() : list;
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET spz list by vegCode from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    }
   }
 
   @Override
