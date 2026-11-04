@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -55,6 +56,9 @@ class GermCountServiceTest {
 
   @Mock
   private TestRepGermRepository testRepGermRepository;
+
+  @Mock
+  private ActivityService activityService;
 
   @Spy
   private GermCountMapper mapper = Mappers.getMapper(GermCountMapper.class);
@@ -709,4 +713,15 @@ class GermCountServiceTest {
     verify(germCountRepository).save(any());
   }
 
+  @Test
+  void upsert_completedTest_returns409AndWritesNothing() {
+    BigDecimal riaSkey = new BigDecimal("881191");
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaSkey);
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> germCountService.upsertGermCounts(riaSkey, request(null, new ArrayList<>()), "USER1"));
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    verify(germCountRepository, never()).save(any(GermCountEntity.class));
+  }
 }

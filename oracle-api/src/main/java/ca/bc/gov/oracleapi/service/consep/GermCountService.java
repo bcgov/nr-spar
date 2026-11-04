@@ -49,6 +49,7 @@ public class GermCountService {
   private final TestRepGermFormMapper testRepGermFormMapper;
   private final DailyAbnormalRepository dailyAbnormalRepository;
   private final TestRepGermRepository testRepGermRepository;
+  private final ActivityService activityService;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -160,6 +161,8 @@ public class GermCountService {
   @Transactional
   public GermCountDto upsertGermCounts(
       BigDecimal riaSkey, GermCountUpsertRequestDto request, String requestUserId) {
+    // A completed or accepted test is read-only (#2841, same rule as #2784).
+    activityService.assertTestEditable(riaSkey);
     List<DayGermCountDto> days = new ArrayList<>(request.days());
     days.sort(Comparator.comparingInt(DayGermCountDto::slotIndex));
     validateNoDuplicateSlots(days);

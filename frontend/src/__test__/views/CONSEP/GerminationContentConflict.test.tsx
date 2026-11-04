@@ -137,4 +137,45 @@ describe('GerminationContent optimistic-lock conflict', () => {
     // Header endpoint hit at least twice: initial mount + conflict reload.
     expect(headerMock.mock.calls.length).toBeGreaterThanOrEqual(2);
   }, 15000);
+
+  // #2841: legacy CONSEP, and updateGerminationTest itself, store "completed" as -1.
+  it.each([
+    ['completed (-1)', { testCompleteInd: -1, acceptResultInd: 0 }],
+    ['completed and accepted (-1)', { testCompleteInd: -1, acceptResultInd: -1 }]
+  ])('treats a %s test as read-only and does not save it', async (_label, flags) => {
+    headerMock.mockResolvedValue({ ...baseHeader, ...flags });
+    renderView();
+
+    await screen.findByText(/Germination test result/i);
+    expect(screen.getByText('Completed')).toBeInTheDocument();
+    expect(screen.getByTestId('germ-date-trigger-1')).toBeDisabled();
+
+    // jsdom still fires onChange on a disabled input, so this proves the save gate.
+    fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
+    await new Promise((resolve) => { setTimeout(resolve, 1200); });
+    expect(putMock).not.toHaveBeenCalled();
+  });
+
+  // #2841: an edit made while a PUT is in flight used to be dropped on leaving the page.
+  it('sends an edit made during an in-flight save after it, with the new timestamp', async () => {
+    let finishFirst: (value: unknown) => void = () => {};
+    putMock
+      .mockImplementationOnce(() => new Promise((resolve) => { finishFirst = resolve; }))
+      .mockResolvedValue({ updateTimestamp: '2026-01-03T00:00:00' });
+    const { unmount } = renderView();
+
+    await screen.findByText(/Germination test result/i);
+    setCountDate(1, '2024-11-04');
+    fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
+    await waitFor(() => expect(putMock).toHaveBeenCalledTimes(1), { timeout: 3000 });
+
+    fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '6' } });
+    unmount();
+    finishFirst({ updateTimestamp: '2026-01-02T00:00:00' });
+
+    await waitFor(() => expect(putMock).toHaveBeenCalledTimes(2));
+    const payload = putMock.mock.calls[1][1];
+    expect(payload.updateTimestamp).toBe('2026-01-02T00:00:00');
+    expect(payload.days[0].rep1NoSeedsGerm).toBe(6);
+  }, 10000);
 });
