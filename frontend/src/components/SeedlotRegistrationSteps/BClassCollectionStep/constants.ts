@@ -39,8 +39,7 @@ export const fieldsConfig = {
     useLatLongCheckbox: 'Use collection latitude and longitude to BEC information',
     zoneLabel: 'BEC zone',
     subzoneLabel: 'Subzone',
-    variantLabel: 'Variant',
-    becSearchLink: 'If you don\'t remember the BEC information you can go to BEC search'
+    variantLabel: 'Variant'
   },
   collectorSection: {
     title: 'Collector agency',

@@ -14,10 +14,16 @@ import {
   validateBClassCollectionStep,
   verifyBClassCollectionStepCompleteness
 } from '../../components/SeedlotRegistrationSteps/BClassCollectionStep/utils';
+import { initialProgressConfig } from '../../views/Seedlot/ContextContainerClassB/constants';
 import {
+  checkAllStepsCompletion,
   convertBClassCollection,
+  hydrateFromDraftPayload,
+  mergeDraftCollectionStep,
+  updateStepStatus,
   withSeedlotSpzFallback
 } from '../../views/Seedlot/ContextContainerClassB/utils';
+import { BClassAllStepData } from '../../views/Seedlot/ContextContainerClassB/definitions';
 
 const catalogue: BecCatalogueItem[] = [
   {
@@ -259,6 +265,43 @@ describe('BClassCollectionStep utils', () => {
       const seedlot = { sourceInBc: false, seedPlanZoneCode: 'M', seedCoastAreaCode: '002' } as unknown as SeedlotType;
       const form = withSeedlotSpzFallback(initBClassCollectionState('', ''), seedlot);
       expect(form.seedPlanZone.value.code).toBe('');
+    });
+
+    it('keeps the collection step incomplete until a BC lot has a zone', () => {
+      const steps = { collectionStep: withSpz(null, null) } as BClassAllStepData;
+      const incomplete = updateStepStatus(
+        'collection',
+        initialProgressConfig.collection,
+        steps,
+        catalogue,
+        true
+      );
+      expect(incomplete.isComplete).toBe(false);
+      expect(checkAllStepsCompletion(initialProgressConfig, steps, true, catalogue, true)).toBe(false);
+
+      const complete = updateStepStatus(
+        'collection',
+        initialProgressConfig.collection,
+        steps,
+        catalogue,
+        false
+      );
+      expect(complete.isComplete).toBe(true);
+    });
+
+    it('fills an empty draft from the seedlot when the draft is loaded', () => {
+      const seedlot = { sourceInBc: true, seedPlanZoneCode: 'SM', seedCoastAreaCode: null } as unknown as SeedlotType;
+      const merged = mergeDraftCollectionStep(undefined, '00012797', '00', seedlot);
+      expect(merged.seedPlanZone.value.code).toBe('SM');
+
+      const hydrated = hydrateFromDraftPayload(
+        { allStepData: {}, revisionCount: 3 },
+        '00012797',
+        '00',
+        seedlot
+      );
+      expect(hydrated.revisionCount).toBe(3);
+      expect(hydrated.allStepData.collectionStep.seedPlanZone.value.code).toBe('SM');
     });
   });
 });

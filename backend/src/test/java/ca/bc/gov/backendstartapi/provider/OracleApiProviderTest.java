@@ -10,6 +10,7 @@ import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
@@ -323,5 +324,51 @@ class OracleApiProviderTest {
 
     assertThrows(
         ResponseStatusException.class, () -> oracleApiProvider.getAllValidFundingSources());
+  }
+
+  @Test
+  @DisplayName("getSpzListByVegCode returns the class list for the species")
+  void getSpzListByVegCode_shouldReturnZones() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/area-of-use/spz-list/vegetation-code/FDC?geneticClass=B";
+    String json =
+        """
+        [ { "code": "M", "description": "Maritime", "isPrimary": null } ]
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    List<SpzDto> zones = oracleApiProvider.getSpzListByVegCode("FDC", "B");
+
+    Assertions.assertEquals(1, zones.size());
+    Assertions.assertEquals("M", zones.get(0).getCode());
+    Assertions.assertEquals("Maritime", zones.get(0).getDescription());
+  }
+
+  @Test
+  @DisplayName("getSpzListByVegCode treats an empty body as no zones")
+  void getSpzListByVegCode_nullBody_shouldReturnEmpty() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/area-of-use/spz-list/vegetation-code/FDC?geneticClass=B";
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+    Assertions.assertTrue(oracleApiProvider.getSpzListByVegCode("FDC", "B").isEmpty());
+  }
+
+  @Test
+  @DisplayName("getSpzListByVegCode rethrows a client error")
+  void getSpzListByVegCode_clientError_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/area-of-use/spz-list/vegetation-code/FDC?geneticClass=Z";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.BAD_REQUEST));
+
+    assertThrows(
+        ResponseStatusException.class, () -> oracleApiProvider.getSpzListByVegCode("FDC", "Z"));
   }
 }

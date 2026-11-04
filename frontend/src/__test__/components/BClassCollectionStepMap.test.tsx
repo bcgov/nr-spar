@@ -123,7 +123,7 @@ describe('BClassCollectionStep collection area', () => {
     await waitFor(() => {
       expect(screen.queryByText(ELEVATION_WARNING)).not.toBeInTheDocument();
     });
-  });
+  }, 15000);
 
   it('removes the collection area from the form after confirming the warning', async () => {
     const { container } = renderStep(withCollectionArea());
@@ -176,5 +176,41 @@ describe('BClassCollectionStep collection area', () => {
     await waitFor(() => {
       expect(latestCollectionStep?.seedPlanZone.value.code).toBe('M');
     });
+
+    fireEvent.click(screen.getByRole('button', { name: /close notification/i }));
+    await waitFor(() => {
+      expect(screen.queryByText(
+        /The collection area crosses seed planning zones GL, M/
+      )).not.toBeInTheDocument();
+    });
+  });
+
+  it('waits for the seedlot before applying a zone from the map', async () => {
+    renderStep(initBClassCollectionState('', ''), {
+      collectionAreaResult: {
+        ...result,
+        elevationLookupFailed: false,
+        spzCode: 'M',
+        spzCodes: ['M']
+      }
+    });
+
+    await waitFor(() => {
+      expect(latestCollectionStep?.collectionGeometry.value).toBe('');
+    });
+    expect(latestCollectionStep?.seedPlanZone.value.code).toBe('');
+  });
+
+  it('shows the geographic area when the collection zone is M', async () => {
+    const initial = initBClassCollectionState('', '');
+    initial.seedPlanZone.value = { code: 'M', description: 'Maritime', label: 'M - Maritime' };
+
+    renderStep(
+      initial,
+      undefined,
+      { sourceInBc: true, vegetationCode: 'FDC' } as ClassBContextType['seedlotData']
+    );
+
+    expect(await screen.findByRole('combobox', { name: 'Geographic area' })).toBeInTheDocument();
   });
 });

@@ -63,7 +63,36 @@ describe('seedPlanZoneSpatialApi', () => {
 
   it('does not query with an unsafe species code', async () => {
     await expect(fetchClassBSpzAt([-123.7, 48.78], "FDC' OR 1=1")).resolves.toBeNull();
+    await expect(fetchClassBSpzCodesIntersecting({
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'MultiPolygon',
+        coordinates: [[[[-123.1, 48.1], [-123.0, 48.1], [-123.0, 48.2], [-123.1, 48.1]]]]
+      }
+    }, "FDC' OR 1=1")).resolves.toEqual([]);
 
     expect(getOpenmapsJson).not.toHaveBeenCalled();
+  });
+
+  it('returns null when the point lookup finds no zone', async () => {
+    vi.mocked(getOpenmapsJson).mockResolvedValue({
+      features: [{ properties: { SEED_PLAN_ZONE_CODE: 12 } }, { properties: {} }]
+    });
+
+    await expect(fetchClassBSpzAt([-123.7, 48.78], 'FDC')).resolves.toBeNull();
+  });
+
+  it('returns no zones when the area lookup fails', async () => {
+    vi.mocked(getOpenmapsJson).mockRejectedValue(new Error('timeout'));
+
+    await expect(fetchClassBSpzCodesIntersecting({
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'MultiPolygon',
+        coordinates: [[[[-123.1, 48.1], [-123.0, 48.1], [-123.0, 48.2], [-123.1, 48.1]]]]
+      }
+    }, 'FDC')).resolves.toEqual([]);
   });
 });

@@ -231,6 +231,9 @@ const AoiToolbar = ({
     refetchOnWindowFocus: false
   });
   const seedlotVegCode = seedlotQuery.data?.seedlot.vegetationCode ?? null;
+  // The zone lookup needs the species. Hold Apply until this fetch settles so a
+  // cold map load does not send the form a polygon with no zone.
+  const waitingForSeedlotSpecies = cameFromRegistration && !!seedlotNumber && seedlotQuery.isLoading;
   const openedWithSavedArea = Boolean(
     (location.state as { initialAoiGeoJson?: string } | null)?.initialAoiGeoJson
   );
@@ -461,6 +464,10 @@ const AoiToolbar = ({
       return;
     }
     highlightBecZones([]);
+
+    if (waitingForSeedlotSpecies) {
+      return;
+    }
 
     // Standalone map (no registration return path): validate only. Geometry is
     // persisted on B-class form submission via axios PUT .../b-class-submission.
@@ -758,7 +765,7 @@ const AoiToolbar = ({
               align="bottom"
               kind="ghost"
               onClick={canRemoveSavedArea ? () => setIsRemoveAreaOpen(true) : onSubmit}
-              disabled={(!hasAoi && !canRemoveSavedArea) || isValidating}
+              disabled={(!hasAoi && !canRemoveSavedArea) || isValidating || waitingForSeedlotSpecies}
               data-testid="aoi-submit"
             >
               <Save />
