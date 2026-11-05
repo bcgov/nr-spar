@@ -823,7 +823,7 @@ const TestSearch = () => {
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   handleGermTrayIdChange(e);
                 }}
-                value={searchParams.germinatorTrayId}
+                value={searchParams.germinatorTrayId ?? ''}
                 invalid={validateSearch.germinatorTray.error}
                 invalidText={validateSearch.germinatorTray.errorMessage}
               />
