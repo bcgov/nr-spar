@@ -3,12 +3,14 @@ package ca.bc.gov.oracleapi.repository.consep;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import jakarta.persistence.LockModeType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
  * This interface enables the test result entity from consep to be retrieved from the database.
  */
 public interface TestResultRepository extends JpaRepository<TestResultEntity, BigDecimal> {
+
+  /**
+   * Reads a test result under a row lock (SELECT ... FOR UPDATE) held until the caller's
+   * transaction ends, so an edit guarded on its flags cannot interleave with completion
+   * or acceptance, which update this row (#2784).
+   */
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT t FROM TestResultEntity t WHERE t.riaKey = :riaKey")
+  Optional<TestResultEntity> findByIdForUpdate(@Param("riaKey") BigDecimal riaKey);
   //Query to update the test result entity as completed
   @Modifying
   @Transactional

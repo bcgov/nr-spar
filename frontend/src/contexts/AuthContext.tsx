@@ -13,6 +13,8 @@ export interface AuthContextData {
   provider: string;
   setClientRoles: (clientRoles: UserClientRolesType, reload?: boolean) => void;
   isTscAdmin: boolean;
+  // Live sign-in state for code that runs during unmount (see AuthProvider).
+  isSignedIn?: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
