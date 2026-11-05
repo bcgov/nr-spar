@@ -1,5 +1,7 @@
 import { BecCatalogueItem } from '../../api-service/becCatalogueAPI';
-import { BClassCollectionFormSubmitType } from '../../types/SeedlotType';
+import {
+  BClassCollectionFormSubmitType, RichSeedlotType, SeedlotType
+} from '../../types/SeedlotType';
 import {
   becVariantPlaceholder,
   getBecSubzoneItems,
@@ -8,9 +10,20 @@ import {
   initBClassCollectionState,
   initBClassCollectionStateFromDto,
   isBecVariantRequired,
+  isCoastAreaRequired,
   validateBClassCollectionStep,
   verifyBClassCollectionStepCompleteness
 } from '../../components/SeedlotRegistrationSteps/BClassCollectionStep/utils';
+import { initialProgressConfig } from '../../views/Seedlot/ContextContainerClassB/constants';
+import {
+  checkAllStepsCompletion,
+  convertBClassCollection,
+  hydrateFromDraftPayload,
+  mergeDraftCollectionStep,
+  updateStepStatus,
+  withSeedlotSpzFallback
+} from '../../views/Seedlot/ContextContainerClassB/utils';
+import { BClassAllStepData } from '../../views/Seedlot/ContextContainerClassB/definitions';
 
 const catalogue: BecCatalogueItem[] = [
   {
@@ -169,6 +182,126 @@ describe('BClassCollectionStep utils', () => {
       const form = initBClassCollectionStateFromDto('00012797', { ...dto, bgcSubzoneCode: 'dm' } as unknown as BClassCollectionFormSubmitType);
       form.becVariant.isInvalid = true;
       expect(validateBClassCollectionStep(form, catalogue)).toBe(false);
+    });
+  });
+
+  describe('collection seed planning zone', () => {
+    const withSpz = (seedPlanZoneCode: string | null, seedCoastAreaCode: string | null) => (
+      initBClassCollectionStateFromDto('00012797', {
+        ...dto, seedPlanZoneCode, seedCoastAreaCode
+      } as unknown as BClassCollectionFormSubmitType)
+    );
+
+    it('prefills the zone and geographic area from the saved collection', () => {
+      const form = withSpz('M', '001');
+      expect(form.seedPlanZone.value.code).toBe('M');
+      expect(form.seedCoastArea.value.code).toBe('001');
+    });
+
+    it('drops a stale geographic area when the zone is not M', () => {
+      expect(withSpz('SM', '001').seedCoastArea.value.code).toBe('');
+    });
+
+    it('requires a zone only for BC-source lots', () => {
+      const form = withSpz(null, null);
+      expect(verifyBClassCollectionStepCompleteness(form, catalogue, true)).toBe(false);
+      expect(verifyBClassCollectionStepCompleteness(form, catalogue, false)).toBe(true);
+    });
+
+    it('requires a geographic area when the zone is M', () => {
+      expect(verifyBClassCollectionStepCompleteness(withSpz('M', null), catalogue, true)).toBe(false);
+      expect(verifyBClassCollectionStepCompleteness(withSpz('M', '001'), catalogue, true)).toBe(true);
+      expect(verifyBClassCollectionStepCompleteness(withSpz('SM', null), catalogue, true)).toBe(true);
+    });
+
+    it('only treats M as needing a geographic area', () => {
+      expect(isCoastAreaRequired('M')).toBe(true);
+      expect(isCoastAreaRequired('SM')).toBe(false);
+      expect(isCoastAreaRequired('')).toBe(false);
+    });
+
+    it('submits the chosen zone and geographic area, not a fallback', () => {
+      const richSeedlot = {
+        seedlot: { seedPlanZoneCode: 'GL', seedCoastAreaCode: null },
+        primarySpz: { code: 'GL', description: 'Georgia Lowlands', isPrimary: true },
+        primarySpu: { seedPlanZoneCode: 'GL' }
+      } as unknown as RichSeedlotType;
+
+      const maritime = convertBClassCollection(withSpz('M', '001'), richSeedlot);
+      expect(maritime.seedPlanZoneCode).toBe('M');
+      expect(maritime.seedCoastAreaCode).toBe('001');
+
+      const empty = convertBClassCollection(withSpz(null, null), richSeedlot);
+      expect(empty.seedPlanZoneCode).toBeNull();
+      expect(empty.seedCoastAreaCode).toBeNull();
+    });
+
+    it('fills an empty draft zone from the seedlot', () => {
+      const seedlot = { seedPlanZoneCode: 'M', seedCoastAreaCode: '002' } as unknown as SeedlotType;
+      const form = withSeedlotSpzFallback(initBClassCollectionState('', ''), seedlot);
+      expect(form.seedPlanZone.value.code).toBe('M');
+      expect(form.seedCoastArea.value.code).toBe('002');
+    });
+
+    it('keeps a zone the user already chose over the seedlot value', () => {
+      const seedlot = { seedPlanZoneCode: 'M', seedCoastAreaCode: '002' } as unknown as SeedlotType;
+      const form = withSeedlotSpzFallback(withSpz('SM', null), seedlot);
+      expect(form.seedPlanZone.value.code).toBe('SM');
+      expect(form.seedCoastArea.value.code).toBe('');
+    });
+
+    it('ignores a stale zone on non-BC lots', () => {
+      expect(verifyBClassCollectionStepCompleteness(withSpz('M', null), catalogue, false)).toBe(true);
+    });
+
+    it('does not submit a zone or geographic area for non-BC lots', () => {
+      const richSeedlot = { seedlot: { sourceInBc: false } } as unknown as RichSeedlotType;
+      const payload = convertBClassCollection(withSpz('M', '001'), richSeedlot);
+      expect(payload.seedPlanZoneCode).toBeNull();
+      expect(payload.seedCoastAreaCode).toBeNull();
+    });
+
+    it('does not fill the zone from the seedlot for non-BC lots', () => {
+      const seedlot = { sourceInBc: false, seedPlanZoneCode: 'M', seedCoastAreaCode: '002' } as unknown as SeedlotType;
+      const form = withSeedlotSpzFallback(initBClassCollectionState('', ''), seedlot);
+      expect(form.seedPlanZone.value.code).toBe('');
+    });
+
+    it('keeps the collection step incomplete until a BC lot has a zone', () => {
+      const steps = { collectionStep: withSpz(null, null) } as BClassAllStepData;
+      const incomplete = updateStepStatus(
+        'collection',
+        initialProgressConfig.collection,
+        steps,
+        catalogue,
+        true
+      );
+      expect(incomplete.isComplete).toBe(false);
+      expect(checkAllStepsCompletion(initialProgressConfig, steps, true, catalogue, true)).toBe(false);
+
+      const complete = updateStepStatus(
+        'collection',
+        initialProgressConfig.collection,
+        steps,
+        catalogue,
+        false
+      );
+      expect(complete.isComplete).toBe(true);
+    });
+
+    it('fills an empty draft from the seedlot when the draft is loaded', () => {
+      const seedlot = { sourceInBc: true, seedPlanZoneCode: 'SM', seedCoastAreaCode: null } as unknown as SeedlotType;
+      const merged = mergeDraftCollectionStep(undefined, '00012797', '00', seedlot);
+      expect(merged.seedPlanZone.value.code).toBe('SM');
+
+      const hydrated = hydrateFromDraftPayload(
+        { allStepData: {}, revisionCount: 3 },
+        '00012797',
+        '00',
+        seedlot
+      );
+      expect(hydrated.revisionCount).toBe(3);
+      expect(hydrated.allStepData.collectionStep.seedPlanZone.value.code).toBe('SM');
     });
   });
 });

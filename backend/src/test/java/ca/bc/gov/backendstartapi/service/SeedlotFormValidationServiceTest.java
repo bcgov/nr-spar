@@ -12,6 +12,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -63,6 +64,10 @@ class SeedlotFormValidationServiceTest {
             gameticMethodologyRepository,
             coneCollectionMethodRepository,
             methodOfPaymentRepository);
+    lenient()
+        .when(oracleApiProvider.getSpzListByVegCode("FDC", "B"))
+        .thenReturn(
+            List.of(new SpzDto("M", "Maritime", null), new SpzDto("SM", "Submaritime", null)));
   }
 
   // ----- helpers -----------------------------------------------------------
@@ -1104,6 +1109,11 @@ class SeedlotFormValidationServiceTest {
   }
 
   private SeedlotFormCollectionDtoClassB bclassCollectionWithGeometry(String geoJson) {
+    return bclassCollection("M", "001", geoJson);
+  }
+
+  private SeedlotFormCollectionDtoClassB bclassCollection(
+      String seedPlanZoneCode, String seedCoastAreaCode, String geoJson) {
     return new SeedlotFormCollectionDtoClassB(
         "00012797",
         "00",
@@ -1119,9 +1129,9 @@ class SeedlotFormValidationServiceTest {
         true,
         new BigDecimal("2.5"),
         "CLIMB",
-        "M",
+        seedPlanZoneCode,
         true,
-        "001",
+        seedCoastAreaCode,
         true,
         false,
         null,
@@ -1161,6 +1171,18 @@ class SeedlotFormValidationServiceTest {
         '1',
         12,
         geoJson);
+  }
+
+  private SeedlotFormSubmissionDtoClassB bclassFormWithCollection(
+      SeedlotFormCollectionDtoClassB collection) {
+    SeedlotFormSubmissionDtoClassB base = validBclassForm();
+    return new SeedlotFormSubmissionDtoClassB(
+        collection,
+        base.seedlotFormOwnershipDtoList(),
+        base.seedlotFormInterimDto(),
+        base.seedlotFormExtractionDto(),
+        base.aouSpzList(),
+        List.of());
   }
 
   private SeedlotFormSubmissionDtoClassB bclassFormWithGeometry(String geoJson) {
@@ -1816,5 +1838,106 @@ class SeedlotFormValidationServiceTest {
     Assertions.assertTrue(
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.captureMethodCode")));
+  }
+
+  @Test
+  @DisplayName("B-class: BC-source lot without a collection SPZ is rejected")
+  void validateBclassSeedlotForm_bcSourceMissingSpz_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormSubmissionDtoClassB form =
+        bclassFormWithCollection(bclassCollection(null, null, null));
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.seedPlanZoneCode")));
+  }
+
+  @Test
+  @DisplayName("B-class: non-BC-source lot without a collection SPZ passes")
+  void validateBclassSeedlotForm_nonBcSourceMissingSpz_shouldPass() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validBclassSeedlot();
+    seedlot.setSourceInBc(false);
+    SeedlotFormSubmissionDtoClassB form =
+        bclassFormWithCollection(bclassCollection(null, null, null));
+
+    Assertions.assertDoesNotThrow(() -> service.validateBclassSeedlotForm(seedlot, form));
+  }
+
+  @Test
+  @DisplayName("B-class: SPZ M without a geographic area is rejected")
+  void validateBclassSeedlotForm_maritimeMissingCoastArea_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormSubmissionDtoClassB form =
+        bclassFormWithCollection(bclassCollection("M", " ", null));
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.seedCoastAreaCode")));
+  }
+
+  @Test
+  @DisplayName("B-class: non-maritime SPZ does not need a geographic area")
+  void validateBclassSeedlotForm_nonMaritimeWithoutCoastArea_shouldPass() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormSubmissionDtoClassB form =
+        bclassFormWithCollection(bclassCollection("SM", null, null));
+
+    Assertions.assertDoesNotThrow(
+        () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+  }
+
+  @Test
+  @DisplayName("B-class: SPZ that is not a class B zone for the species is rejected")
+  void validateBclassSeedlotForm_spzNotValidForSpecies_isRejected() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    SeedlotFormSubmissionDtoClassB form =
+        bclassFormWithCollection(bclassCollection("GL", null, null));
+
+    SeedlotSubmissionValidationException ex =
+        Assertions.assertThrows(
+            SeedlotSubmissionValidationException.class,
+            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+    Assertions.assertTrue(
+        ex.getErrors().stream()
+            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.seedPlanZoneCode")));
+  }
+
+  @Test
+  @DisplayName("B-class: SPZ already saved on the seedlot is not rechecked against the list")
+  void validateBclassSeedlotForm_savedSpzNoLongerListed_shouldPass() {
+    stubValidForestClient();
+    stubValidConeMethods();
+    stubValidMethodOfPayment();
+
+    Seedlot seedlot = validBclassSeedlot();
+    seedlot.setSeedPlanZoneCode("GL");
+    SeedlotFormSubmissionDtoClassB form =
+        bclassFormWithCollection(bclassCollection("GL", null, null));
+
+    Assertions.assertDoesNotThrow(() -> service.validateBclassSeedlotForm(seedlot, form));
   }
 }

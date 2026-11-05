@@ -323,18 +323,109 @@ export const CollectionBecSection = ({
           )}
         </Column>
       </Row>
-      {isReview ? null : (
-        <Row className="b-class-collection-row">
-          <Column sm={4} md={8} lg={16} xlg={16}>
-            <Button kind="ghost" className="bec-search-link">
-              {fieldsConfig.becSection.becSearchLink}
-            </Button>
-          </Column>
-        </Row>
-      )}
     </>
   );
 };
+
+type SpzField = 'seedPlanZone' | 'seedCoastArea';
+
+interface SpzSectionProps extends SharedSectionProps {
+  isBcSource: boolean;
+  spzItems: MultiOptionsObj[];
+  spzFetching: boolean;
+  coastAreaItems: MultiOptionsObj[];
+  coastAreaFetching: boolean;
+  showCoastArea: boolean;
+  onSpzSelection: (field: SpzField, selected: MultiOptionsObj | null | undefined) => void;
+  spzSpanCodes?: string[];
+  onDismissSpzSpanWarning?: () => void;
+}
+
+const findSelected = (items: MultiOptionsObj[], current: MultiOptionsObj) => (
+  current.code
+    ? items.find((item) => item.code === current.code) ?? current
+    : null
+);
+
+export const CollectionSpzSection = ({
+  state,
+  isReview,
+  readOnly,
+  isBcSource,
+  spzItems,
+  spzFetching,
+  coastAreaItems,
+  coastAreaFetching,
+  showCoastArea,
+  onSpzSelection,
+  spzSpanCodes = [],
+  onDismissSpzSpanWarning
+}: SpzSectionProps) => (
+  <>
+    <Row className="b-class-collection-row">
+      <Column sm={4} md={4} lg={8} xlg={6}>
+        {spzFetching ? <DropdownSkeleton /> : (
+          <ComboBox
+            id={state.seedPlanZone.id}
+            titleText={fieldsConfig.seedPlanZone.labelText}
+            placeholder={fieldsConfig.seedPlanZone.placeholder}
+            helperText={reviewHelper(
+              isReview,
+              isBcSource
+                ? fieldsConfig.seedPlanZone.helperText
+                : fieldsConfig.seedPlanZone.notBcSourceHelperText
+            )}
+            items={spzItems}
+            itemToString={itemLabel}
+            selectedItem={isBcSource ? findSelected(spzItems, state.seedPlanZone.value) : null}
+            readOnly={readOnly || !isBcSource}
+            invalid={state.seedPlanZone.isInvalid}
+            invalidText={fieldsConfig.seedPlanZone.invalidText}
+            shouldFilterItem={comboFilter}
+            onChange={(e: ComboBoxEvent) => onSpzSelection('seedPlanZone', e.selectedItem)}
+          />
+        )}
+      </Column>
+      {showCoastArea ? (
+        <Column sm={4} md={4} lg={8} xlg={6}>
+          {coastAreaFetching ? <DropdownSkeleton /> : (
+            <ComboBox
+              id={state.seedCoastArea.id}
+              titleText={fieldsConfig.seedCoastArea.labelText}
+              placeholder={fieldsConfig.seedCoastArea.placeholder}
+              helperText={reviewHelper(isReview, fieldsConfig.seedCoastArea.helperText)}
+              items={coastAreaItems}
+              itemToString={itemLabel}
+              selectedItem={findSelected(coastAreaItems, state.seedCoastArea.value)}
+              readOnly={readOnly}
+              invalid={state.seedCoastArea.isInvalid}
+              invalidText={fieldsConfig.seedCoastArea.invalidText}
+              shouldFilterItem={comboFilter}
+              onChange={(e: ComboBoxEvent) => onSpzSelection('seedCoastArea', e.selectedItem)}
+            />
+          )}
+        </Column>
+      ) : null}
+    </Row>
+    {spzSpanCodes.length > 1 ? (
+      <Row className="b-class-collection-row">
+        <Column sm={4} md={8} lg={15} xlg={12}>
+          <InlineNotification
+            lowContrast
+            kind="warning"
+            title={`The collection area crosses seed planning zones ${spzSpanCodes.join(', ')}.`}
+            subtitle={
+              state.seedPlanZone.value.code
+                ? `Zone ${state.seedPlanZone.value.code} was filled in from the centre of the area. Check it is correct.`
+                : 'Select the zone where most of the seed was collected.'
+            }
+            onCloseButtonClick={() => onDismissSpzSpanWarning?.()}
+          />
+        </Column>
+      </Row>
+    ) : null}
+  </>
+);
 
 interface LocationSectionProps extends SharedSectionProps {
   defaultClientNumber: string;

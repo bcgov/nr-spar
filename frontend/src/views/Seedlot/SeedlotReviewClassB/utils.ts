@@ -24,14 +24,15 @@ import { getBClassSeedlotPayload } from '../ContextContainerClassB/utils';
  */
 export const validateBClassReviewForm = (
   allStepData: BClassAllStepData,
-  becCatalogue?: BecCatalogueItem[]
+  becCatalogue?: BecCatalogueItem[],
+  isBcSource = false
 ): boolean => {
   const {
     collectionStep, ownershipStep, interimStep, extractionStorageStep
   } = allStepData;
 
   if (validateBClassCollectionStep(collectionStep, becCatalogue)
-    || !verifyBClassCollectionStepCompleteness(collectionStep, becCatalogue)) {
+    || !verifyBClassCollectionStepCompleteness(collectionStep, becCatalogue, isBcSource)) {
     return false;
   }
 

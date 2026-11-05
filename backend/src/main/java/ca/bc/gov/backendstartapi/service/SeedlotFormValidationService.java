@@ -45,6 +45,8 @@ public class SeedlotFormValidationService {
   private static final String COLLECTION_GEOMETRY_FIELD =
       "seedlotFormCollectionDto.collectionGeometryGeoJson";
 
+  private static final String MARITIME_SPZ = "M";
+
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
   private final OrchardService orchardService;
@@ -128,6 +130,7 @@ public class SeedlotFormValidationService {
     validateBclassConeCollectionMethods(dto.coneCollectionMethodCodes(), errors);
     validateBclassRequiredCollectionCodes(dto, errors);
     validateBclassBecAndBcSourceRules(seedlot, dto, errors);
+    validateBclassCollectionSpz(seedlot, dto, errors);
     if (dto.collectionAreaRadius() != null
         && dto.collectionAreaRadius()
                 .compareTo(BigDecimal.valueOf(CollectionAreaLimits.MAX_RADIUS_KM))
@@ -227,6 +230,56 @@ public class SeedlotFormValidationService {
           new SeedlotValidationError(
               "seedlotFormCollectionDto.collectionBgcValidatedInd",
               "Collection BEC must be validated before registration."));
+    }
+  }
+
+  /**
+   * The collection SPZ (where the cones were picked) drives the AOU transfer-limit lookup, so a
+   * BC-source lot must have one, and the maritime zone must also carry its geographic area.
+   */
+  private void validateBclassCollectionSpz(
+      Seedlot seedlot,
+      SeedlotFormCollectionDtoClassB dto,
+      List<SeedlotValidationError> errors) {
+    String spz = dto.seedPlanZoneCode();
+    boolean hasSpz = spz != null && !spz.isBlank();
+    if (Boolean.TRUE.equals(seedlot.getSourceInBc()) && !hasSpz) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.seedPlanZoneCode",
+              "Seed planning zone of the collection area is required when BC Source is"
+                  + " selected."));
+    }
+    if (hasSpz && !spz.equals(seedlot.getSeedPlanZoneCode())) {
+      validateBclassSpzForSpecies(seedlot.getVegetationCode(), spz, errors);
+    }
+    if (hasSpz
+        && MARITIME_SPZ.equals(spz)
+        && (dto.seedCoastAreaCode() == null || dto.seedCoastAreaCode().isBlank())) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.seedCoastAreaCode",
+              "Geographic area is required when the seed planning zone is M."));
+    }
+  }
+
+  /**
+   * A newly chosen zone must be a current class B zone for the species. The zone already saved on
+   * the seedlot is exempt so a lot whose zone has since expired can still be resubmitted.
+   */
+  private void validateBclassSpzForSpecies(
+      String vegCode, String spz, List<SeedlotValidationError> errors) {
+    if (vegCode == null) {
+      return;
+    }
+    boolean isValidForSpecies =
+        oracleApiProvider.getSpzListByVegCode(vegCode, "B").stream()
+            .anyMatch(validSpz -> spz.equals(validSpz.getCode()));
+    if (!isValidForSpecies) {
+      errors.add(
+          new SeedlotValidationError(
+              "seedlotFormCollectionDto.seedPlanZoneCode",
+              "Seed planning zone " + spz + " is not valid for species " + vegCode + "."));
     }
   }
 

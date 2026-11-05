@@ -17,8 +17,17 @@ vi.mock('../../api-service/elevationApi', () => ({
   fetchPolygonElevationRange: vi.fn()
 }));
 
+vi.mock('../../api-service/seedPlanZoneSpatialApi', () => ({
+  fetchClassBSpzAt: vi.fn(),
+  fetchClassBSpzCodesIntersecting: vi.fn()
+}));
+
 const { fetchBecVariantAt } = await import('../../api-service/becZonesApi');
 const { fetchPolygonElevationRange } = await import('../../api-service/elevationApi');
+const {
+  fetchClassBSpzAt,
+  fetchClassBSpzCodesIntersecting
+} = await import('../../api-service/seedPlanZoneSpatialApi');
 
 const squareFeature = (): Feature<MultiPolygon> => ({
   type: 'Feature',
@@ -41,6 +50,8 @@ describe('deriveCollectionAreaResult', () => {
   beforeEach(() => {
     vi.mocked(fetchBecVariantAt).mockReset();
     vi.mocked(fetchPolygonElevationRange).mockReset();
+    vi.mocked(fetchClassBSpzAt).mockReset();
+    vi.mocked(fetchClassBSpzCodesIntersecting).mockReset();
   });
 
   it('derives area, mean lat/lng, elevation, and BEC variant', async () => {
@@ -95,6 +106,34 @@ describe('deriveCollectionAreaResult', () => {
 
     expect(result.elevationMinM).toBeNull();
     expect(result.elevationLookupFailed).toBe(false);
+  });
+
+  it('looks up the seed planning zone for the seedlot species', async () => {
+    vi.mocked(fetchPolygonElevationRange).mockResolvedValue(null);
+    vi.mocked(fetchBecVariantAt).mockResolvedValue(null);
+    vi.mocked(fetchClassBSpzAt).mockResolvedValue('M');
+    vi.mocked(fetchClassBSpzCodesIntersecting).mockResolvedValue(['M', 'SM']);
+
+    const result = await deriveCollectionAreaResult(squareFeature(), ['CWH'], 1, 'FDC');
+
+    expect(fetchClassBSpzAt).toHaveBeenCalledWith(
+      [expect.closeTo(-123.05, 2), expect.closeTo(48.15, 2)],
+      'FDC'
+    );
+    expect(result.spzCode).toBe('M');
+    expect(result.spzCodes).toEqual(['M', 'SM']);
+  });
+
+  it('skips the seed planning zone lookup without a species', async () => {
+    vi.mocked(fetchPolygonElevationRange).mockResolvedValue(null);
+    vi.mocked(fetchBecVariantAt).mockResolvedValue(null);
+
+    const result = await deriveCollectionAreaResult(squareFeature(), ['CWH'], 1);
+
+    expect(fetchClassBSpzAt).not.toHaveBeenCalled();
+    expect(fetchClassBSpzCodesIntersecting).not.toHaveBeenCalled();
+    expect(result.spzCode).toBeNull();
+    expect(result.spzCodes).toEqual([]);
   });
 });
 

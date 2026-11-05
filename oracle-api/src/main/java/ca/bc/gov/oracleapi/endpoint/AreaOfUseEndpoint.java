@@ -15,10 +15,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /** This class exposes funding sources resources API. */
 @RestController
@@ -67,11 +70,25 @@ public class AreaOfUseEndpoint {
               in = ParameterIn.PATH,
               description = "The vegetation code.",
               required = true)
-          String vegCode) {
+          String vegCode,
+      @RequestParam(name = "geneticClass", defaultValue = "A")
+          @Parameter(
+              name = "geneticClass",
+              in = ParameterIn.QUERY,
+              description = "The genetic class code, A or B.",
+              example = "B")
+          String geneticClass) {
 
-    SparLog.info("Received request to fetch all SPZs for vegetation code: {}", vegCode);
+    String classCode = geneticClass.toUpperCase();
+    if (!"A".equals(classCode) && !"B".equals(classCode)) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "geneticClass must be A or B");
+    }
 
-    return areaOfUseService.getSpzByVegCode(vegCode.toUpperCase());
+    SparLog.info(
+        "Received request to fetch all class {} SPZs for vegetation code: {}", classCode, vegCode);
+
+    return areaOfUseService.getSpzByVegCode(vegCode.toUpperCase(), classCode.charAt(0));
   }
 
   /**

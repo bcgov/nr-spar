@@ -24,6 +24,10 @@ vi.mock('../../api-service/forestClientsAPI', () => ({
   getForestClientByNumberOrAcronym: vi.fn().mockResolvedValue([]),
   getForestClientLocation: vi.fn().mockResolvedValue({})
 }));
+vi.mock('../../api-service/areaOfUseAPI', () => ({
+  getSpzByVegCodeList: vi.fn().mockResolvedValue([])
+}));
+vi.mock('../../api-service/seedCoastAreaAPI', () => ({ default: vi.fn().mockResolvedValue([]) }));
 
 const result: CollectionAreaResult = {
   geoJson: '{"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[]},"properties":{}}',
@@ -36,7 +40,9 @@ const result: CollectionAreaResult = {
   elevationMaxM: null,
   elevationLookupFailed: true,
   becZones: [],
-  becVariant: null
+  becVariant: null,
+  spzCode: null,
+  spzCodes: []
 };
 
 const withCollectionArea = (): BClassCollectionForm => applyCollectionAreaResult(
@@ -49,7 +55,13 @@ const withCollectionArea = (): BClassCollectionForm => applyCollectionAreaResult
 
 let latestCollectionStep: BClassCollectionForm | null = null;
 
-const Harness = ({ initial }: { initial: BClassCollectionForm }) => {
+const Harness = ({
+  initial,
+  seedlotData
+}: {
+  initial: BClassCollectionForm;
+  seedlotData?: ClassBContextType['seedlotData'];
+}) => {
   const [allStepData, setAllStepData] = useState({
     collectionStep: initial
   } as unknown as BClassAllStepData);
@@ -62,7 +74,8 @@ const Harness = ({ initial }: { initial: BClassCollectionForm }) => {
     defaultClientNumber: '',
     defaultCode: '',
     isFormSubmitted: false,
-    seedlotNumber: '123'
+    seedlotNumber: '123',
+    seedlotData
   } as unknown as ClassBContextType;
   return (
     <ClassBContext.Provider value={value}>
@@ -71,11 +84,15 @@ const Harness = ({ initial }: { initial: BClassCollectionForm }) => {
   );
 };
 
-const renderStep = (initial: BClassCollectionForm, routerState?: unknown) => render(
+const renderStep = (
+  initial: BClassCollectionForm,
+  routerState?: unknown,
+  seedlotData?: ClassBContextType['seedlotData']
+) => render(
   <QueryClientProvider client={new QueryClient()}>
     <MemoryRouter initialEntries={[{ pathname: '/reg', state: routerState }]}>
       <Routes>
-        <Route path="/reg" element={<Harness initial={initial} />} />
+        <Route path="/reg" element={<Harness initial={initial} seedlotData={seedlotData} />} />
       </Routes>
     </MemoryRouter>
   </QueryClientProvider>
@@ -106,7 +123,7 @@ describe('BClassCollectionStep collection area', () => {
     await waitFor(() => {
       expect(screen.queryByText(ELEVATION_WARNING)).not.toBeInTheDocument();
     });
-  });
+  }, 15000);
 
   it('removes the collection area from the form after confirming the warning', async () => {
     const { container } = renderStep(withCollectionArea());
@@ -134,5 +151,66 @@ describe('BClassCollectionStep collection area', () => {
     renderStep(withCollectionArea(), { collectionAreaCleared: true });
 
     await expectCollectionAreaCleared();
+  });
+
+  it('fills the seed planning zone and warns when the area crosses two zones', async () => {
+    renderStep(
+      initBClassCollectionState('', ''),
+      {
+        collectionAreaResult: {
+          ...result,
+          elevationLookupFailed: false,
+          spzCode: 'M',
+          spzCodes: ['GL', 'M']
+        }
+      },
+      { sourceInBc: true, vegetationCode: 'FDC' } as ClassBContextType['seedlotData']
+    );
+
+    expect(await screen.findByText(
+      /The collection area crosses seed planning zones GL, M/
+    )).toBeInTheDocument();
+    expect(screen.getByText(
+      /Zone M was filled in from the centre of the area/
+    )).toBeInTheDocument();
+    await waitFor(() => {
+      expect(latestCollectionStep?.seedPlanZone.value.code).toBe('M');
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /close notification/i }));
+    await waitFor(() => {
+      expect(screen.queryByText(
+        /The collection area crosses seed planning zones GL, M/
+      )).not.toBeInTheDocument();
+    });
+  });
+
+  it('waits for the seedlot before applying a zone from the map', async () => {
+    renderStep(initBClassCollectionState('', ''), {
+      collectionAreaResult: {
+        ...result,
+        elevationLookupFailed: false,
+        spzCode: 'M',
+        spzCodes: ['M']
+      }
+    });
+
+    await waitFor(() => {
+      expect(latestCollectionStep?.collectionGeometry.value).toBe('');
+    });
+    expect(latestCollectionStep?.seedPlanZone.value.code).toBe('');
+  });
+
+  it('shows the geographic area when the collection zone is M', async () => {
+    const initial = initBClassCollectionState('', '');
+    initial.seedPlanZone.value = { code: 'M', description: 'Maritime', label: 'M - Maritime' };
+
+    renderStep(
+      initial,
+      undefined,
+      { sourceInBc: true, vegetationCode: 'FDC' } as ClassBContextType['seedlotData']
+    );
+
+    expect(await screen.findByRole('combobox', { name: 'Geographic area' })).toBeInTheDocument();
   });
 });

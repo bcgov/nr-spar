@@ -3,6 +3,10 @@ import type { Feature, MultiPolygon } from 'geojson';
 
 import { fetchBecVariantAt } from '../../../api-service/becZonesApi';
 import { fetchPolygonElevationRange } from '../../../api-service/elevationApi';
+import {
+  fetchClassBSpzAt,
+  fetchClassBSpzCodesIntersecting
+} from '../../../api-service/seedPlanZoneSpatialApi';
 import { meanLatLng } from '../../../components/SeedlotRegistrationSteps/CollectionStep/collectionAreaDerivations';
 import type { CollectionAreaResult } from '../../../types/SparMapTypes';
 import { featureRadiusKm } from './AoiToolbar/aoiValidation';
@@ -41,24 +45,34 @@ export const serializeCollectionArea = (feature: Feature<MultiPolygon>): string 
  * `becZones` is passed in by the caller because the AOI submit flow has
  * already computed the intersecting zones for its single-zone validation
  * check — re-deriving here would double the WFS round-trips.
+ *
+ * The seed planning zone lookups need the seedlot species, so they are
+ * skipped when `vegCode` is not known.
  */
 export const deriveCollectionAreaResult = async (
   feature: Feature<MultiPolygon>,
   becZones: string[],
-  polygonCount: number
+  polygonCount: number,
+  vegCode?: string | null
 ): Promise<CollectionAreaResult> => {
   const mean = meanLatLng(feature);
   const centroid = mean ? [mean.lng, mean.lat] : null;
 
   let elevationLookupFailed = false;
-  const [elevation, becVariant] = await Promise.all([
+  const [elevation, becVariant, spzCode, spzCodes] = await Promise.all([
     fetchPolygonElevationRange(feature).catch(() => {
       elevationLookupFailed = true;
       return null;
     }),
     centroid
       ? fetchBecVariantAt(centroid).catch(() => null)
-      : Promise.resolve(null)
+      : Promise.resolve(null),
+    centroid && vegCode
+      ? fetchClassBSpzAt(centroid, vegCode)
+      : Promise.resolve(null),
+    vegCode
+      ? fetchClassBSpzCodesIntersecting(feature, vegCode)
+      : Promise.resolve([])
   ]);
 
   return {
@@ -72,6 +86,8 @@ export const deriveCollectionAreaResult = async (
     elevationMaxM: elevation ? Math.round(elevation.maxM) : null,
     elevationLookupFailed,
     becZones,
-    becVariant
+    becVariant,
+    spzCode: spzCode && spzCodes.includes(spzCode) ? spzCode : null,
+    spzCodes
   };
 };

@@ -8,14 +8,18 @@ import {
   validateBClassCollectionStep,
   verifyBClassCollectionStepCompleteness,
   initBClassCollectionState,
-  initBClassCollectionStateFromDto
+  initBClassCollectionStateFromDto,
+  isCoastAreaRequired
 } from '../../../components/SeedlotRegistrationSteps/BClassCollectionStep/utils';
 import {
   BClassCollectionFormSubmitType,
   RichSeedlotType,
   SeedlotBClassFullFormType,
-  SeedlotBClassSubmitType
+  SeedlotBClassSubmitType,
+  SeedlotType
 } from '../../../types/SeedlotType';
+import { getOptionsInputObj } from '../../../utils/FormInputUtils';
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { localDateToUtcFormat } from '../../../utils/DateUtils';
 import {
   convertExtraction,
@@ -77,7 +81,8 @@ export const updateStepStatus = (
   stepName: keyof BClassProgressIndicatorConfig,
   stepStatusObj: BClassProgressIndicatorConfig[keyof BClassProgressIndicatorConfig],
   allStepData: BClassAllStepData,
-  becCatalogue?: BecCatalogueItem[]
+  becCatalogue?: BecCatalogueItem[],
+  isBcSource = false
 ) => {
   const stepStatus = { ...stepStatusObj };
 
@@ -86,7 +91,8 @@ export const updateStepStatus = (
     if (!stepStatus.isInvalid) {
       stepStatus.isComplete = verifyBClassCollectionStepCompleteness(
         allStepData.collectionStep,
-        becCatalogue
+        becCatalogue,
+        isBcSource
       );
     }
   }
@@ -116,13 +122,18 @@ export const checkAllStepsCompletion = (
   status: BClassProgressIndicatorConfig,
   allStepData: BClassAllStepData,
   isExtractionStepComplete: boolean,
-  becCatalogue?: BecCatalogueItem[]
+  becCatalogue?: BecCatalogueItem[],
+  isBcSource = false
 ) => {
   if (!isExtractionStepComplete) {
     return false;
   }
 
-  if (!verifyBClassCollectionStepCompleteness(allStepData.collectionStep, becCatalogue)) {
+  if (!verifyBClassCollectionStepCompleteness(
+    allStepData.collectionStep,
+    becCatalogue,
+    isBcSource
+  )) {
     return false;
   }
   if (!verifyOwnershipStepCompleteness(allStepData.ownershipStep)) {
@@ -137,19 +148,51 @@ export const checkAllStepsCompletion = (
   ));
 };
 
+const toCodeOption = (code: string | null | undefined) => (
+  code ? { code, description: '', label: code } : EmptyMultiOptObj
+);
+
+/**
+ * Drafts saved before the collection SPZ fields existed have no value for
+ * them; fall back to what is already stored on the seedlot.
+ */
+export const withSeedlotSpzFallback = (
+  collection: BClassCollectionForm,
+  seedlot?: SeedlotType
+): BClassCollectionForm => {
+  if (
+    !seedlot?.seedPlanZoneCode
+    || seedlot.sourceInBc === false
+    || collection.seedPlanZone.value.code
+  ) {
+    return collection;
+  }
+  return {
+    ...collection,
+    seedPlanZone: getOptionsInputObj(
+      collection.seedPlanZone.id,
+      toCodeOption(seedlot.seedPlanZoneCode)
+    ),
+    seedCoastArea: getOptionsInputObj(
+      collection.seedCoastArea.id,
+      isCoastAreaRequired(seedlot.seedPlanZoneCode)
+        ? toCodeOption(seedlot.seedCoastAreaCode)
+        : EmptyMultiOptObj
+    )
+  };
+};
+
 export const mergeDraftCollectionStep = (
   draftCollection: Partial<BClassCollectionForm> | undefined,
   defaultAgencyNumber: string,
-  defaultLocCode: string
+  defaultLocCode: string,
+  seedlot?: SeedlotType
 ): BClassCollectionForm => {
   const empty = initBClassCollectionState(defaultAgencyNumber, defaultLocCode);
-  if (!draftCollection) {
-    return empty;
-  }
-  return {
-    ...empty,
-    ...draftCollection
-  };
+  return withSeedlotSpzFallback(
+    draftCollection ? { ...empty, ...draftCollection } : empty,
+    seedlot
+  );
 };
 
 export const isDraftAllStepDataEmpty = (
@@ -182,7 +225,8 @@ export const applyApplicantDefaultsToSteps = (
 export const hydrateFromDraftPayload = (
   draft: { allStepData: Record<string, unknown>; revisionCount: number },
   defaultAgency: string,
-  defaultLoc: string
+  defaultLoc: string,
+  seedlot?: SeedlotType
 ): { allStepData: BClassAllStepData; revisionCount: number } => {
   const draftStepData = draft.allStepData as Partial<BClassAllStepData>;
   return {
@@ -190,7 +234,8 @@ export const hydrateFromDraftPayload = (
       collectionStep: mergeDraftCollectionStep(
         draftStepData.collectionStep,
         defaultAgency,
-        defaultLoc
+        defaultLoc,
+        seedlot
       ),
       ownershipStep: draftStepData.ownershipStep
         ?? initEmptySteps(defaultAgency, defaultLoc).ownershipStep,
@@ -219,10 +264,13 @@ export const convertBClassCollection = (
   const longMin = parseCoord(collectionData.longMin.value);
   const longSec = parseCoord(collectionData.longSec.value);
   const seedlot = richSeedlotData?.seedlot;
-  const seedPlanZoneCode = seedlot?.seedPlanZoneCode
-    ?? richSeedlotData?.primarySpz?.code
-    ?? richSeedlotData?.primarySpu?.seedPlanZoneCode
-    ?? null;
+  const isSpzApplicable = seedlot?.sourceInBc !== false;
+  const seedPlanZoneCode = isSpzApplicable
+    ? (collectionData.seedPlanZone.value.code || null)
+    : null;
+  const seedCoastAreaCode = seedPlanZoneCode && isCoastAreaRequired(seedPlanZoneCode)
+    ? (collectionData.seedCoastArea.value.code || null)
+    : null;
 
   return {
     collectionClientNumber: collectionData.collectorAgency.value,
@@ -246,7 +294,7 @@ export const convertBClassCollection = (
     captureMethodCode: collectionData.captureMethod.value.code,
     seedPlanZoneCode,
     collectionSeedPlanZoneInd: true,
-    seedCoastAreaCode: seedlot?.seedCoastAreaCode ?? null,
+    seedCoastAreaCode,
     collectionBgcValidatedInd: true,
     // Owned by the collection area map; round-tripped here so a resave preserves it.
     becOverrideInd: seedlot?.becOverrideInd ?? false,

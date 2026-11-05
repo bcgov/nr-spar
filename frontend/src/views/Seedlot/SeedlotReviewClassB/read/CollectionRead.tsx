@@ -14,13 +14,21 @@ import getOrgUnitDistricts from '../../../../api-service/orgUnitDistrictsAPI';
 import { getMultiOptList } from '../../../../utils/MultiOptionsUtils';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { formatCollectionMethods } from '../../../../components/SeedlotReviewSteps/Collection/utils';
+import { getSpzByVegCodeList } from '../../../../api-service/areaOfUseAPI';
+import getSeedCoastAreas from '../../../../api-service/seedCoastAreaAPI';
+import { spzListToMultiObj } from '../../../../components/SeedlotReviewSteps/AreaOfUse/utils';
+import { isCoastAreaRequired } from '../../../../components/SeedlotRegistrationSteps/BClassCollectionStep/utils';
 
 import { formatDms } from '../utils';
 
 const CollectionRead = () => {
   const {
-    allStepData: { collectionStep: state }, isFetchingData
+    allStepData: { collectionStep: state }, isFetchingData, seedlotData
   } = useContext(ClassBContext);
+
+  const vegCode = seedlotData?.vegetationCode;
+  const spzCode = seedlotData?.sourceInBc === false ? '' : state.seedPlanZone.value.code;
+  const showCoastArea = isCoastAreaRequired(spzCode);
 
   const clientNumber = state.collectorAgency.value;
 
@@ -62,6 +70,30 @@ const CollectionRead = () => {
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS
   });
+
+  const spzListQuery = useQuery({
+    queryKey: ['area-of-use', 'spz-list', 'vegetation-code', vegCode, 'B'],
+    queryFn: () => getSpzByVegCodeList(vegCode!, 'B'),
+    enabled: !!vegCode && !!spzCode,
+    select: (data) => spzListToMultiObj(data),
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS
+  });
+
+  const coastAreaQuery = useQuery({
+    queryKey: ['seed-coast-areas'],
+    queryFn: getSeedCoastAreas,
+    enabled: showCoastArea,
+    select: (data) => getMultiOptList(data, true, true),
+    staleTime: THREE_HOURS,
+    gcTime: THREE_HALF_HOURS
+  });
+
+  const spzLabel = spzListQuery.data?.find((opt) => opt.code === spzCode)?.label ?? spzCode;
+
+  const coastAreaLabel = coastAreaQuery.data?.find(
+    (opt) => opt.code === state.seedCoastArea.value.code
+  )?.label ?? state.seedCoastArea.value.code;
 
   const orgUnitLabel = (() => {
     const { code } = state.orgUnit.value;
@@ -313,6 +345,26 @@ const CollectionRead = () => {
             showSkeleton={isFetchingData}
           />
         </Column>
+      </Row>
+      <Row>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id="b-review-seed-plan-zone"
+            label="Seed planning zone of collection area"
+            value={spzLabel}
+            showSkeleton={isFetchingData || spzListQuery.isFetching}
+          />
+        </Column>
+        {showCoastArea ? (
+          <Column className="info-col" sm={4} md={4} lg={4}>
+            <ReadOnlyInput
+              id="b-review-seed-coast-area"
+              label="Geographic area"
+              value={coastAreaLabel}
+              showSkeleton={isFetchingData || coastAreaQuery.isFetching}
+            />
+          </Column>
+        ) : null}
       </Row>
     </FlexGrid>
   );

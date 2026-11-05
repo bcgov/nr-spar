@@ -145,6 +145,10 @@ export interface CollectionAreaResult {
     subzone: string | null;
     variant: string | null;
   } | null;
+  /** Class B seed planning zone at the polygon centroid for the seedlot species, if found. */
+  spzCode: string | null;
+  /** Distinct class B seed planning zones the polygon touches for the seedlot species. */
+  spzCodes: string[];
 }
 
 /** Result of a WMS GetFeatureInfo / WFS identify against the BEC layer. */

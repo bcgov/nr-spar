@@ -114,7 +114,7 @@ const ringToBcAlbersWkt = (ring: Position[]): string => {
  * polygon becomes a parenthesised group of rings; all polygons are
  * concatenated inside the outer `MULTIPOLYGON(...)` envelope.
  */
-const multiPolygonToBcAlbersWkt = (geometry: MultiPolygon): string => {
+export const multiPolygonToBcAlbersWkt = (geometry: MultiPolygon): string => {
   const polygonWkts = geometry.coordinates.map((polygon) => {
     const ringWkts = polygon.map(ringToBcAlbersWkt);
     return `(${ringWkts.join(', ')})`;
@@ -124,7 +124,7 @@ const multiPolygonToBcAlbersWkt = (geometry: MultiPolygon): string => {
 
 const becCql = (predicate: BecCqlPredicate, wkt: string) => `${predicate}(GEOMETRY,${wkt})`;
 
-const pointToBcAlbersWkt = (coord: Position): string => {
+export const pointToBcAlbersWkt = (coord: Position): string => {
   const [lng, lat] = coord;
   const [easting, northing] = wgs84ToBcAlbers([lng, lat]);
   return `${easting} ${northing}`;

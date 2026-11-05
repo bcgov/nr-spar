@@ -26,7 +26,8 @@ import {
   initEmptySteps,
   initProgressBar,
   isDraftAllStepDataEmpty,
-  resDataToState
+  resDataToState,
+  withSeedlotSpzFallback
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
 
@@ -226,7 +227,8 @@ export const useBClassFormLoader = ({
       const hydrated = hydrateFromDraftPayload(
         getFormDraftQuery.data,
         defaultClientNumber,
-        defaultLocationCode
+        defaultLocationCode,
+        seedlotQuery.data?.seedlot
       );
       nextStepData = hydrated.allStepData;
       nextRevCount = hydrated.revisionCount;
@@ -242,11 +244,18 @@ export const useBClassFormLoader = ({
     } else if (editable && draftNotFound) {
       hydrationKey = `new:${seedlotNumber}:${defaultClientNumber}:${defaultLocationCode}`;
       source = 'empty';
-      nextStepData = applyApplicantDefaultsToSteps(
+      const emptySteps = applyApplicantDefaultsToSteps(
         initEmptySteps(defaultClientNumber, defaultLocationCode),
         defaultClientNumber,
         defaultLocationCode
       );
+      nextStepData = {
+        ...emptySteps,
+        collectionStep: withSeedlotSpzFallback(
+          emptySteps.collectionStep,
+          seedlotQuery.data?.seedlot
+        )
+      };
       savedProgress = undefined;
     } else if (needsFullForm && fullFormQuery.isFetching) {
       setLoadState({ status: 'loading' });
@@ -302,6 +311,7 @@ export const useBClassFormLoader = ({
     ownershipLookupsReady,
     defaultClientNumber,
     defaultLocationCode,
+    seedlotQuery.data,
     seedlotNumber,
     formStep,
     navigate
