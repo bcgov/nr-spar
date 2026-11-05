@@ -87,7 +87,7 @@ export const deriveCollectionAreaResult = async (
     elevationLookupFailed,
     becZones,
     becVariant,
-    spzCode,
+    spzCode: spzCode && spzCodes.includes(spzCode) ? spzCode : null,
     spzCodes
   };
 };
