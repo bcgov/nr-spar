@@ -64,7 +64,8 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const [slots, setSlots] = useState<GermCountSlotType[]>(emptySlots());
   const [replicates, setReplicates] = useState<GermReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
-  const [updateTimestamp, setUpdateTimestampState] = useState<string | undefined>(undefined);
+  // Only the re-render matters: it lets useAutosave re-check isSavable when a record appears.
+  const [, setUpdateTimestampState] = useState<string | undefined>(undefined);
   // The lock value the next PUT sends. Kept in a ref as well as state: a save queued behind
   // an in-flight one (useAutosave serializes them) runs before React re-renders, and must
   // already carry the timestamp the first save returned (#2841).
@@ -196,7 +197,6 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     ...checkOverLimit(slots, replicates)
   }), [slots, replicates]);
 
-  const hasDatedSlot = slots.some((slot) => slot.countDt);
   // Any non-zero indicator counts: legacy CONSEP and updateGerminationTest both write -1
   // (#2841, same rule as #2784).
   const isCompleted = !!header?.testCompleteInd;
@@ -255,14 +255,16 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     enabled:
       isHydrated
       && isEditable
-      // A record that already exists can be cleared back to no dates at all --
-      // the PUT sends an empty `days` list and the backend blanks every slot.
-      // A record that does not exist yet has nothing to clear, and saving one
-      // would create an empty germ-count row for a test nobody has counted.
-      && (hasDatedSlot || !!updateTimestamp)
       && replicates.length > 0
       && Object.keys(validationErrors).length === 0,
-    conflict: isConflict
+    conflict: isConflict,
+    // A record that already exists can be cleared back to no dates at all --
+    // the PUT sends an empty `days` list and the backend blanks every slot.
+    // A record that does not exist yet has nothing to clear, and saving one
+    // would create an empty germ-count row for a test nobody has counted.
+    // Checked live (the ref, not state): clearing the last date while the PUT
+    // that creates the record is in flight, then leaving, must still send it.
+    isSavable: (data) => data.slots.some((slot) => slot.countDt) || !!updateTimestampRef.current
   });
 
   // Keep the ref the hydration effects call pointing at the latest markSaved.

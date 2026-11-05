@@ -12,11 +12,13 @@ vi.mock('../../../components/PageTitle', () => ({
 
 const putMock = vi.fn();
 const headerMock = vi.fn();
+const countsMock = vi.fn();
+const noCounts = () => Promise.reject(
+  Object.assign(new Error('Not found'), { response: { status: 404 } })
+);
 vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
   getGerminationTestHeader: (...args: unknown[]) => headerMock(...args),
-  getGermCounts: () => Promise.reject(
-    Object.assign(new Error('Not found'), { response: { status: 404 } })
-  ),
+  getGermCounts: () => countsMock(),
   getTestReplicates: () => Promise.resolve([]),
   putGermCounts: (...args: unknown[]) => putMock(...args)
 }));
@@ -53,6 +55,8 @@ describe('GerminationContent optimistic-lock conflict', () => {
     putMock.mockReset();
     headerMock.mockReset();
     headerMock.mockResolvedValue({ ...baseHeader });
+    countsMock.mockReset();
+    countsMock.mockImplementation(noCounts);
     // TanStack Query's mutate() applies .catch(noop) but the rejected Promise
     // from the mutationFn may still surface as an "unhandledRejection" for a
     // microtask before the catch is registered. Suppress it here.
@@ -139,21 +143,44 @@ describe('GerminationContent optimistic-lock conflict', () => {
   }, 15000);
 
   // #2841: legacy CONSEP, and updateGerminationTest itself, store "completed" as -1.
+  // A dated count record is on file, so without the read-only gate the edit below
+  // would save: it is that gate, not the "nothing dated yet" rule, that stops it.
   it.each([
     ['completed (-1)', { testCompleteInd: -1, acceptResultInd: 0 }],
+    ['accepted only (-1)', { testCompleteInd: 0, acceptResultInd: -1 }],
     ['completed and accepted (-1)', { testCompleteInd: -1, acceptResultInd: -1 }]
   ])('treats a %s test as read-only and does not save it', async (_label, flags) => {
     headerMock.mockResolvedValue({ ...baseHeader, ...flags });
+    countsMock.mockResolvedValue({
+      riaSkey: 123,
+      slots: [{ slotIndex: 1, countDt: '2024-11-04', rep1NoSeedsGerm: 1 }],
+      updateTimestamp: '2026-01-01T00:00:00'
+    });
     renderView();
 
     await screen.findByText(/Germination test result/i);
-    expect(screen.getByText('Completed')).toBeInTheDocument();
+    expect(screen.queryByText('Completed') !== null).toBe(!!flags.testCompleteInd);
+    expect(screen.queryByText('Accepted') !== null).toBe(!!flags.acceptResultInd);
     expect(screen.getByTestId('germ-date-trigger-1')).toBeDisabled();
 
     // jsdom still fires onChange on a disabled input, so this proves the save gate.
     fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
     await new Promise((resolve) => { setTimeout(resolve, 1200); });
     expect(putMock).not.toHaveBeenCalled();
+  });
+
+  it('saves the same edit on an open test (control for the read-only cases)', async () => {
+    putMock.mockResolvedValue({ updateTimestamp: '2026-01-02T00:00:00' });
+    countsMock.mockResolvedValue({
+      riaSkey: 123,
+      slots: [{ slotIndex: 1, countDt: '2024-11-04', rep1NoSeedsGerm: 1 }],
+      updateTimestamp: '2026-01-01T00:00:00'
+    });
+    renderView();
+
+    await screen.findByText(/Germination test result/i);
+    fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
+    await waitFor(() => expect(putMock).toHaveBeenCalledTimes(1), { timeout: 3000 });
   });
 
   // #2841: an edit made while a PUT is in flight used to be dropped on leaving the page.
@@ -177,5 +204,29 @@ describe('GerminationContent optimistic-lock conflict', () => {
     const payload = putMock.mock.calls[1][1];
     expect(payload.updateTimestamp).toBe('2026-01-02T00:00:00');
     expect(payload.days[0].rep1NoSeedsGerm).toBe(6);
+  }, 10000);
+
+  // #2841 review: on a test with no count record yet, clearing the only date while the
+  // PUT that creates the record is in flight, then leaving, must still send the clear.
+  it('sends a date cleared during the first save after it, once the record exists', async () => {
+    let finishFirst: (value: unknown) => void = () => {};
+    putMock
+      .mockImplementationOnce(() => new Promise((resolve) => { finishFirst = resolve; }))
+      .mockResolvedValue({ updateTimestamp: '2026-01-03T00:00:00' });
+    const { unmount } = renderView();
+
+    await screen.findByText(/Germination test result/i);
+    setCountDate(1, '2024-11-04');
+    fireEvent.change(screen.getByTestId('germ-count-1-1'), { target: { value: '5' } });
+    await waitFor(() => expect(putMock).toHaveBeenCalledTimes(1), { timeout: 3000 });
+
+    fireEvent.change(screen.getByTestId('germ-date-1'), { target: { value: '' } });
+    unmount();
+    finishFirst({ updateTimestamp: '2026-01-02T00:00:00' });
+
+    await waitFor(() => expect(putMock).toHaveBeenCalledTimes(2));
+    const payload = putMock.mock.calls[1][1];
+    expect(payload.updateTimestamp).toBe('2026-01-02T00:00:00');
+    expect(payload.days).toEqual([]);
   }, 10000);
 });
