@@ -709,6 +709,7 @@ const TestSearch = () => {
 
   const firstLotError = validateSearch.lotNumbers.find((lot) => lot.error);
   const hasFilterTags = primaryFilterTags.length > 0 || advancedFilterTags.length > 0;
+  const hasSearchCriteria = Object.keys(searchParams).length > 0;
 
   const handleClearFilters = () => {
     markUserEdited();
@@ -954,18 +955,22 @@ const TestSearch = () => {
                   {tag.value}
                 </Tag>
               ))}
-              {(hasFilterTags || !showFilterTags) && (
+              {(hasSearchCriteria || !showFilterTags) && (
                 <span className="filter-tags-actions">
-                  <Button kind="ghost" size="sm" onClick={handleClearFilters}>
-                    Clear filters
-                  </Button>
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    onClick={() => setShowFilterTags((prev) => !prev)}
-                  >
-                    {showFilterTags ? 'Hide filters' : 'Show filters'}
-                  </Button>
+                  {hasSearchCriteria && (
+                    <Button kind="ghost" size="sm" onClick={handleClearFilters}>
+                      Clear filters
+                    </Button>
+                  )}
+                  {(hasFilterTags || !showFilterTags) && (
+                    <Button
+                      kind="ghost"
+                      size="sm"
+                      onClick={() => setShowFilterTags((prev) => !prev)}
+                    >
+                      {showFilterTags ? 'Hide filters' : 'Show filters'}
+                    </Button>
+                  )}
                 </span>
               )}
             </Column>
