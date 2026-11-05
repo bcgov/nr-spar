@@ -54,15 +54,22 @@ const AdvancedFilters = ({
   const validationErrors = hasValidationErrors(validateSearch);
 
   useEffect(() => {
+    const dismissPopup = () => {
+      if (popupRef.current?.contains(document.activeElement)) {
+        anchorRef.current?.focus();
+      }
+      onClose();
+    };
+
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (popupRef.current?.contains(target) || anchorRef.current?.contains(target)) return;
       // Datepicker calendars and combobox menus render in portals outside the popup
       if (target.closest('.flatpickr-calendar, .cds--list-box__menu')) return;
-      onClose();
+      dismissPopup();
     };
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') dismissPopup();
     };
 
     document.addEventListener('click', handleClickOutside);
