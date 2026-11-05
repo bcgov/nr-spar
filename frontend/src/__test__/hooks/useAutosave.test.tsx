@@ -341,4 +341,24 @@ describe('useAutosave', () => {
     rerender({ data: { v: 9 } });
     expect(result.current.status.state).toBe('idle');
   });
+
+  it('checks isSavable when the save runs, not only at the last render', () => {
+    const onSave = vi.fn();
+    const live = { ok: false };
+    const { rerender, unmount } = renderHook(
+      ({ data }) => useAutosave({
+        data, onSave, isSavable: () => live.ok, delay: 800
+      }),
+      { initialProps: { data: { v: 0 } } }
+    );
+
+    rerender({ data: { v: 1 } });
+    act(() => { vi.advanceTimersByTime(1000); });
+    expect(onSave).not.toHaveBeenCalled();
+
+    // Becomes savable without a render (e.g. a ref a finished save updated).
+    live.ok = true;
+    act(() => { unmount(); });
+    expect(onSave).toHaveBeenCalledWith({ v: 1 }, { v: 0 });
+  });
 });

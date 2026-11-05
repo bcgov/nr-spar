@@ -19,6 +19,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -72,7 +73,9 @@ class GermCountServiceIntegrationTest {
     TestRepGermFormMapper repFormMapper = Mappers.getMapper(TestRepGermFormMapper.class);
     germCountService = new GermCountService(
         germCountRepository, mapper, repFormMapper,
-        dailyAbnormalRepository, testRepGermRepository);
+        dailyAbnormalRepository, testRepGermRepository,
+        // The completed-test guard is not what this test is about.
+        Mockito.mock(ActivityService.class));
     ReflectionTestUtils.setField(germCountService, "entityManager", entityManager);
   }
 
