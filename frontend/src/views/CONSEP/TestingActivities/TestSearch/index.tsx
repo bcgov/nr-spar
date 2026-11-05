@@ -127,6 +127,13 @@ const TestSearch = () => {
     { testTypes: 0, activityIds: 0 }
   );
 
+  const [showFilters, setShowFilters] = useState(true);
+
+  const toggleFilters = () => {
+    setShowFilters((visible) => !visible);
+    setOpenAdvSearch(false);
+  };
+
   useEffect(() => {
     // Refocus input after state updates to reopen calendar picker with the correct month
     if (pendingDatePickerFocus) {
@@ -139,7 +146,7 @@ const TestSearch = () => {
       }
     }
   }, [searchParams.seedWithdrawalStartDate,
-    searchParams.seedWithdrawalEndDate,
+  searchParams.seedWithdrawalEndDate,
     pendingDatePickerFocus]);
 
   const resetAlert = () => {
@@ -770,151 +777,169 @@ const TestSearch = () => {
             }
           }}
         >
-          <Row className="consep-test-search-filters">
-            <Column className="filters-row">
-              <TextInput
-                id="lot-input"
-                className="lot-input"
-                labelText="Lot #"
-                placeholder="Up to 5 lots, separated by comma"
-                autoComplete="off"
-                value={lotInput}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  handleLotInputChange(e.target.value);
-                }}
-                invalid={firstLotError?.error}
-                invalidText={firstLotError?.errorMessage}
-              />
-              <FilterableMultiSelect
-                key={`test-type-${multiSelectResetKeys.testTypes}`}
-                id="test-type-input"
-                className="test-type-input"
-                titleText="Test type"
-                items={testTypeItems}
-                initialSelectedItems={testTypeItems.filter(
-                  (item: { id: string }) => searchParams.testTypes?.includes(item.id)
-                )}
-                itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
-                onChange={(event: { selectedItems: Array<{ id: string }> }) => {
-                  handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
-                }}
-                selectionFeedback="top-after-reopen"
-              />
-              <FilterableMultiSelect
-                key={`activity-type-${multiSelectResetKeys.activityIds}`}
-                id="activity-type-input"
-                className="activity-type-input"
-                titleText="Choose activity"
-                items={activityIdItems}
-                initialSelectedItems={activityIdItems.filter(
-                  (item: { id: string }) => searchParams.activityIds?.includes(item.id)
-                )}
-                itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
-                onChange={(event: { selectedItems: Array<{ id: string }> }) => {
-                  handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
-                }}
-                selectionFeedback="top-after-reopen"
-              />
-              <TextInput
-                id="germ-tray-input"
-                className="germ-tray-input"
-                labelText="Germ tray ID"
-                type="number"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  handleGermTrayIdChange(e);
-                }}
-                value={searchParams.germinatorTrayId ?? ''}
-                invalid={validateSearch.germinatorTray.error}
-                invalidText={validateSearch.germinatorTray.errorMessage}
-              />
-              <DatePicker
-                datePickerType="single"
-                className="withdrawal-date-input"
-                dateFormat={DATE_FORMAT}
-                onChange={(dates: Date[]) => {
-                  handleWithdrawalDateChange(dates, 'start');
-                }}
-                minDate={dateField.minStartDate}
-                maxDate={dateField.todayDate}
-                value={
-                  searchParams.seedWithdrawalStartDate
-                    && searchParams.seedWithdrawalStartDate
-                    !== dateField.minStartDate.toISOString().slice(0, 10)
-                    ? toDate(searchParams.seedWithdrawalStartDate)
-                    : undefined
-                }
-                style={{ minWidth: '9rem' }}
+          <Row className="filter-toggle-row">
+            <Column>
+              <Button
+                type="button"
+                kind="ghost"
+                size="sm"
+                aria-expanded={showFilters}
+                aria-controls="testing-activity-filters"
+                hidden={!showFilters}
+                onClick={toggleFilters}
               >
-                <DatePickerInput
-                  id="withdrawal-start-date-input"
-                  labelText="Withdrawal start"
-                  autoComplete="off"
-                  placeholder={dateField.placeholderText}
-                  helperText={dateField.helperText}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'start')}
-                />
-              </DatePicker>
-              <DatePicker
-                datePickerType="single"
-                className="withdrawal-date-input"
-                dateFormat={DATE_FORMAT}
-                onChange={(dates: Date[]) => {
-                  handleWithdrawalDateChange(dates, 'end');
-                }}
-                minDate={searchParams.seedWithdrawalStartDate || dateField.minStartDate}
-                maxDate={dateField.maxEndDate}
-                value={
-                  searchParams.seedWithdrawalEndDate
-                    !== dateField.maxEndDate.toISOString().slice(0, 10)
-                    ? toDate(searchParams.seedWithdrawalEndDate)
-                    : undefined
-                }
-                style={{ minWidth: '9rem' }}
-              >
-                <DatePickerInput
-                  id="withdrawal-end-date-input"
-                  labelText="Withdrawal end"
-                  autoComplete="off"
-                  placeholder={dateField.placeholderText}
-                  helperText={dateField.helperText}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'end')}
-                />
-              </DatePicker>
-              <div className="filters-row-buttons">
-                <Button
-                  ref={advSearchRef}
-                  size="md"
-                  kind="tertiary"
-                  renderIcon={Filter}
-                  aria-expanded={openAdvSearch}
-                  onClick={toggleAdvSearch}
-                >
-                  More filters
-                </Button>
-                <Button
-                  type="submit"
-                  renderIcon={Search}
-                  iconDescription="Search activity"
-                  size="md"
-                  disabled={hasValidationErrors(validateSearch)}
-                >
-                  Search activity
-                </Button>
-              </div>
+                {showFilters ? 'Hide filters' : 'Show filters'}
+              </Button>
             </Column>
-            {openAdvSearch && (
-              <AdvancedFilters
-                searchParams={searchParams}
-                setSearchParams={setUserEditedSearchParams}
-                validateSearch={validateSearch}
-                setValidateSearch={setValidateSearch}
-                onClose={() => setOpenAdvSearch(false)}
-                anchorRef={advSearchRef}
-                onSaveCriteria={handleSaveCriteria}
-                isSavingCriteria={saveCriteriaMutation.isPending}
-              />
-            )}
           </Row>
+
+          {showFilters && (
+            <Row id="testing-activity-filters" className="consep-test-search-filters">
+              <Column className="filters-row">
+                <TextInput
+                  id="lot-input"
+                  className="lot-input"
+                  labelText="Lot #"
+                  placeholder="Up to 5 lots, separated by comma"
+                  autoComplete="off"
+                  value={lotInput}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleLotInputChange(e.target.value);
+                  }}
+                  invalid={firstLotError?.error}
+                  invalidText={firstLotError?.errorMessage}
+                />
+                <FilterableMultiSelect
+                  key={`test-type-${multiSelectResetKeys.testTypes}`}
+                  id="test-type-input"
+                  className="test-type-input"
+                  titleText="Test type"
+                  items={testTypeItems}
+                  initialSelectedItems={testTypeItems.filter(
+                    (item: { id: string }) => searchParams.testTypes?.includes(item.id)
+                  )}
+                  itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+                  onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                    handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
+                  }}
+                  selectionFeedback="top-after-reopen"
+                />
+                <FilterableMultiSelect
+                  key={`activity-type-${multiSelectResetKeys.activityIds}`}
+                  id="activity-type-input"
+                  className="activity-type-input"
+                  titleText="Choose activity"
+                  items={activityIdItems}
+                  initialSelectedItems={activityIdItems.filter(
+                    (item: { id: string }) => searchParams.activityIds?.includes(item.id)
+                  )}
+                  itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+                  onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                    handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
+                  }}
+                  selectionFeedback="top-after-reopen"
+                />
+                <TextInput
+                  id="germ-tray-input"
+                  className="germ-tray-input"
+                  labelText="Germ tray ID"
+                  type="number"
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleGermTrayIdChange(e);
+                  }}
+                  value={searchParams.germinatorTrayId ?? ''}
+                  invalid={validateSearch.germinatorTray.error}
+                  invalidText={validateSearch.germinatorTray.errorMessage}
+                />
+                <DatePicker
+                  datePickerType="single"
+                  className="withdrawal-date-input"
+                  dateFormat={DATE_FORMAT}
+                  onChange={(dates: Date[]) => {
+                    handleWithdrawalDateChange(dates, 'start');
+                  }}
+                  minDate={dateField.minStartDate}
+                  maxDate={dateField.todayDate}
+                  value={
+                    searchParams.seedWithdrawalStartDate
+                      && searchParams.seedWithdrawalStartDate
+                      !== dateField.minStartDate.toISOString().slice(0, 10)
+                      ? toDate(searchParams.seedWithdrawalStartDate)
+                      : undefined
+                  }
+                  style={{ minWidth: '9rem' }}
+                >
+                  <DatePickerInput
+                    id="withdrawal-start-date-input"
+                    labelText="Withdrawal start"
+                    autoComplete="off"
+                    placeholder={dateField.placeholderText}
+                    helperText={dateField.helperText}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'start')}
+                  />
+                </DatePicker>
+                <DatePicker
+                  datePickerType="single"
+                  className="withdrawal-date-input"
+                  dateFormat={DATE_FORMAT}
+                  onChange={(dates: Date[]) => {
+                    handleWithdrawalDateChange(dates, 'end');
+                  }}
+                  minDate={searchParams.seedWithdrawalStartDate || dateField.minStartDate}
+                  maxDate={dateField.maxEndDate}
+                  value={
+                    searchParams.seedWithdrawalEndDate
+                      !== dateField.maxEndDate.toISOString().slice(0, 10)
+                      ? toDate(searchParams.seedWithdrawalEndDate)
+                      : undefined
+                  }
+                  style={{ minWidth: '9rem' }}
+                >
+                  <DatePickerInput
+                    id="withdrawal-end-date-input"
+                    labelText="Withdrawal end"
+                    autoComplete="off"
+                    placeholder={dateField.placeholderText}
+                    helperText={dateField.helperText}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'end')}
+                  />
+                </DatePicker>
+                <div className="filters-row-buttons">
+                  <Button
+                    ref={advSearchRef}
+                    size="md"
+                    kind="tertiary"
+                    renderIcon={Filter}
+                    aria-expanded={openAdvSearch}
+                    onClick={toggleAdvSearch}
+                  >
+                    More filters
+                  </Button>
+                  <Button
+                    type="submit"
+                    renderIcon={Search}
+                    iconDescription="Search activity"
+                    size="md"
+                    disabled={hasValidationErrors(validateSearch)}
+                  >
+                    Search activity
+                  </Button>
+                </div>
+              </Column>
+              {openAdvSearch && (
+                <AdvancedFilters
+                  searchParams={searchParams}
+                  setSearchParams={setUserEditedSearchParams}
+                  validateSearch={validateSearch}
+                  setValidateSearch={setValidateSearch}
+                  onClose={() => setOpenAdvSearch(false)}
+                  anchorRef={advSearchRef}
+                  onSaveCriteria={handleSaveCriteria}
+                  isSavingCriteria={saveCriteriaMutation.isPending}
+                />
+              )}
+            </Row>
+          )}
           <Row className="consep-test-search-advanced-filter-tags">
             <Column>
               {showFilterTags && primaryFilterTags.map((tag) => (
