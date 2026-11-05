@@ -265,6 +265,7 @@ public class MoistureContentService {
       @NonNull BigDecimal riaKey,
       @NonNull List<Integer> replicateNumbers
   ) {
+    activityService.assertTestEditable(riaKey);
     SparLog.info("Deleting replicates with the riaKey: {} and replicateNumbers: {}",
         riaKey, replicateNumbers);
 
@@ -293,6 +294,7 @@ public class MoistureContentService {
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber
   ) {
+    activityService.assertTestEditable(riaKey);
     SparLog.info("Deleting a replicate tables with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
 

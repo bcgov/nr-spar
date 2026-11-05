@@ -24,6 +24,13 @@ export type UseAutosaveOptions<T, R = unknown> = {
   enabled?: boolean;
   /** True while the page shows a 409 conflict; nothing is saved until it is cleared. */
   conflict?: boolean;
+  /**
+   * A data-dependent gate checked when a save actually runs, not only at the last render.
+   * Use it for a condition that can change without a render, e.g. one that reads a ref a
+   * save in flight updates: a save queued behind it, or flushed on unmount, sees the new
+   * value (#2841).
+   */
+  isSavable?: (data: T) => boolean;
   delay?: number;
   maxWait?: number;
   isEqual?: (a: T, b: T) => boolean;
@@ -51,6 +58,7 @@ function useAutosave<T, R = unknown>({
   onSaved,
   enabled = true,
   conflict = false,
+  isSavable,
   delay = DEFAULT_DELAY,
   maxWait = DEFAULT_MAX_WAIT,
   isEqual = defaultIsEqual
@@ -62,6 +70,12 @@ function useAutosave<T, R = unknown>({
   const isSignedInRef = useRef(isSignedIn);
   isSignedInRef.current = isSignedIn;
   const canSave = enabled && !conflict;
+  const isSavableRef = useRef(isSavable);
+  isSavableRef.current = isSavable;
+  const isSavableNow = (value: T) => !isSavableRef.current || isSavableRef.current(value);
+  // Also evaluated per render, so a change in it (re)schedules a save.
+  // eslint-disable-next-line react-hooks/refs
+  const savable = isSavableNow(data);
 
   // Latest values held in refs so timer callbacks and event listeners always
   // read current values without needing to re-subscribe.
@@ -121,7 +135,7 @@ function useAutosave<T, R = unknown>({
     if (isEqualRef.current(current, previous)) {
       return true;
     }
-    if (!enabledRef.current || isSignedInRef.current?.() === false) {
+    if (!enabledRef.current || !isSavableNow(current) || isSignedInRef.current?.() === false) {
       return false;
     }
     const attempt = (async () => {
@@ -150,7 +164,7 @@ function useAutosave<T, R = unknown>({
   // last-saved snapshot. The maxWait timer caps how long continuous edits
   // can defer a save.
   useEffect(() => {
-    if (!canSave || isEqualRef.current(data, savedRef.current) || hasFailedOn(data)) {
+    if (!canSave || !savable || isEqualRef.current(data, savedRef.current) || hasFailedOn(data)) {
       return;
     }
     if (debounceTimer.current) {
@@ -160,7 +174,7 @@ function useAutosave<T, R = unknown>({
     if (!maxWaitTimer.current) {
       maxWaitTimer.current = setTimeout(save, maxWait);
     }
-  }, [data, canSave, delay, maxWait]);
+  }, [data, canSave, savable, delay, maxWait]);
 
   // Flush pending changes on page hide and on unmount.
   useEffect(() => {
