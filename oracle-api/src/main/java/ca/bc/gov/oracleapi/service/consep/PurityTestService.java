@@ -331,6 +331,7 @@ public class PurityTestService {
       @NonNull BigDecimal riaKey,
       @NonNull List<Integer> replicateNumbers
   ) {
+    activityService.assertTestEditable(riaKey);
     SparLog.info("Deleting purity replicates with the riaKey: {} and replicateNumbers: {}",
         riaKey, replicateNumbers);
 
@@ -359,6 +360,7 @@ public class PurityTestService {
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber
   ) {
+    activityService.assertTestEditable(riaKey);
     SparLog.info("Deleting single purity replicate with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
 

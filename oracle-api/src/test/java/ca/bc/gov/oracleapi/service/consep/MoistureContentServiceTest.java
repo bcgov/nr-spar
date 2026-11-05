@@ -640,4 +640,19 @@ class MoistureContentServiceTest {
     verify(activityService, never()).updateActivityField(any(), any());
     verify(replicateRepository, never()).saveAll(anyList());
   }
+
+  @Test
+  @DisplayName("delete replicates - a completed test deletes nothing (#2842)")
+  void deleteReplicates_completedTest_deletesNothing() {
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaKey);
+
+    // 409 specifically: without the guard these throw 404 (no replicate found) instead.
+    assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+        () -> moistureContentService.deleteMccReplicates(riaKey, List.of(1, 2))).getStatusCode());
+    assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+        () -> moistureContentService.deleteMccReplicate(riaKey, 1)).getStatusCode());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumbers(any(), any());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
+  }
 }

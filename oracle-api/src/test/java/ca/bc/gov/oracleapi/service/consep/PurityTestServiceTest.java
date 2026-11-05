@@ -514,4 +514,19 @@ class PurityTestServiceTest {
         () -> purityTestService.deletePurityDebris(riaKey, 1, 1));
     verify(debrisRepository, never()).saveAll(anyList());
   }
+
+  @Test
+  @DisplayName("delete replicates - a completed test deletes nothing (#2842)")
+  void deleteReplicates_completedTest_deletesNothing() {
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaKey);
+
+    // 409 specifically: without the guard these throw 404 (no replicate found) instead.
+    assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+        () -> purityTestService.deletePurityReplicates(riaKey, List.of(1, 2))).getStatusCode());
+    assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+        () -> purityTestService.deleteSinglePurityReplicate(riaKey, 1)).getStatusCode());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumbers(any(), any());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
+  }
 }
