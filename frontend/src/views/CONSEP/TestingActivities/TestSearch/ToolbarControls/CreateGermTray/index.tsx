@@ -10,11 +10,10 @@ import './styles.scss';
 
 const CreateGermTray = (
   {
-    table,
+    selectedRows,
     onClose
   }: CreateGermTrayProps
 ) => {
-  const selectedRows = table.getSelectedRowModel()?.rows.map((row) => row.original) ?? [];
   const [options, setOptions] = useState<GermTrayOptions>({
     printDishLabels: false,
     printGerminationTrayLabels: false,
