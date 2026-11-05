@@ -64,8 +64,8 @@ const TestHistory = ({ selectedRows }: TestHistoryProps) => {
   });
 
   useEffect(() => {
-    fetchHistory({ page: 0, size: paginationInfo.pageSize });
-  }, [fetchHistory, paginationInfo.pageSize]);
+    fetchHistory({ page: 0, size: 10 });
+  }, [fetchHistory]);
 
   const handlePageChange = (pageIndex: number, pageSize: number) => {
     fetchHistory({ page: pageIndex, size: pageSize });
