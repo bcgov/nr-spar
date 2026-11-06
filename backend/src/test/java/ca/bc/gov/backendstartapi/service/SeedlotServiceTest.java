@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -13,15 +15,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.config.FeatureFlagConfig;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassDetailDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
@@ -29,7 +36,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSmpParentOutsideDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotManagementBreedingValueDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
@@ -55,6 +62,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
+import ca.bc.gov.backendstartapi.exception.FeatureDisabledException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
@@ -63,8 +71,11 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionBclassMapper;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormStepMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -72,6 +83,7 @@ import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -80,6 +92,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -128,9 +142,18 @@ class SeedlotServiceTest {
 
   @Mock SeedlotFormValidationService seedlotFormValidationService;
 
-  private SeedlotService seedlotService;
+  @Mock SeedlotCollectionGeometryRepository seedlotCollectionGeometryRepository;
 
-  private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
+  @Mock SeedlotCollectionGeometryService seedlotCollectionGeometryService;
+
+  @Mock SeedlotFormCollectionBclassMapper seedlotFormCollectionBclassMapper;
+
+  private final SeedlotFormStepMapper seedlotFormStepMapper =
+      Mappers.getMapper(SeedlotFormStepMapper.class);
+
+  @Mock SaveSeedlotFormService saveSeedlotFormService;
+
+  private SeedlotService seedlotService;
 
   private static final String SEEDLOT_NOT_FOUND_STR = "404 NOT_FOUND \"Seedlot doesn't exist\"";
 
@@ -161,30 +184,39 @@ class SeedlotServiceTest {
         List.of(ptgqDto));
   }
 
+  private SeedlotService buildService(boolean seedlotBclassEnabled) {
+    return new SeedlotService(
+        seedlotRepository,
+        seedlotSourceRepository,
+        geneticClassRepository,
+        loggedUserService,
+        seedlotCollectionMethodService,
+        seedlotOwnerQuantityService,
+        seedlotOrchardService,
+        seedlotParentTreeService,
+        seedlotParentTreeGeneticQualityService,
+        seedlotGeneticWorthService,
+        smpMixService,
+        smpMixGeneticQualityService,
+        seedlotParentTreeSmpMixService,
+        seedlotStatusService,
+        orchardService,
+        seedlotSeedPlanZoneRepository,
+        parentTreeService,
+        tscAdminService,
+        oracleApiProvider,
+        seedlotFormValidationService,
+        seedlotCollectionGeometryRepository,
+        seedlotCollectionGeometryService,
+        seedlotFormCollectionBclassMapper,
+        seedlotFormStepMapper,
+        saveSeedlotFormService,
+        new FeatureFlagConfig(seedlotBclassEnabled));
+  }
+
   @BeforeEach
   void setup() {
-    seedlotService =
-        new SeedlotService(
-            seedlotRepository,
-            seedlotSourceRepository,
-            geneticClassRepository,
-            loggedUserService,
-            seedlotCollectionMethodService,
-            seedlotOwnerQuantityService,
-            seedlotOrchardService,
-            seedlotParentTreeService,
-            seedlotParentTreeGeneticQualityService,
-            seedlotGeneticWorthService,
-            smpMixService,
-            smpMixGeneticQualityService,
-            seedlotParentTreeSmpMixService,
-            seedlotStatusService,
-            orchardService,
-            seedlotSeedPlanZoneRepository,
-            parentTreeService,
-            tscAdminService,
-            oracleApiProvider,
-            seedlotFormValidationService);
+    seedlotService = buildService(true);
   }
 
   @Test
@@ -215,19 +247,91 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("testCreateSeedlotBClassNotImplementedYet")
-  void createSeedlotTest_bClassSeedlot_shouldThrowException() {
-    // B class - not implemented yet
+  @DisplayName("createSeedlotBClassTest")
+  void createSeedlotTest_bClassSeedlot_shouldSucceed() {
+    when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(53000);
+    String incStatusCode = "INC";
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
+
+    GeneticClassEntity classEntity = new GeneticClassEntity("B", "B class seedlot", DATE_RANGE);
+    when(geneticClassRepository.findById("B")).thenReturn(Optional.of(classEntity));
+
+    when(loggedUserService.getLoggedUserId()).thenReturn("testuser@idir");
+
     SeedlotCreateDto createDtoB =
         new SeedlotCreateDto(
-            "00012797", "01", "user.lastname@domain.com", "FDI", "TPT", true, true, 'B');
+            "00012797", "01", "user.lastname@domain.com", "FDI", null, true, true, 'B');
 
-    Exception excBclass =
-        Assertions.assertThrows(
-            InvalidSeedlotRequestException.class,
-            () -> seedlotService.createSeedlot(createDtoB));
+    SeedlotStatusResponseDto response = seedlotService.createSeedlot(createDtoB);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals("53001", response.seedlotNumber());
 
-    Assertions.assertEquals(BAD_REQUEST_STR, excBclass.getMessage());
+    ArgumentCaptor<Seedlot> savedSeedlot = ArgumentCaptor.forClass(Seedlot.class);
+    verify(seedlotRepository).save(savedSeedlot.capture());
+    Assertions.assertNull(savedSeedlot.getValue().getSeedlotSource());
+    verify(seedlotSourceRepository, never()).findById(any());
+  }
+
+  @Test
+  @DisplayName("createSeedlotBClassWhenFeatureDisabled")
+  void createSeedlotTest_bClassFeatureDisabled_shouldThrowForbidden() {
+    SeedlotService disabledService = buildService(false);
+    SeedlotCreateDto createDtoB =
+        new SeedlotCreateDto(
+            "00012797", "01", "user.lastname@domain.com", "FDI", null, true, true, 'B');
+
+    Assertions.assertThrows(
+        FeatureDisabledException.class, () -> disabledService.createSeedlot(createDtoB));
+
+    verify(seedlotRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("createSeedlotAClassWhenBClassFeatureDisabled")
+  void createSeedlotTest_aClassFeatureDisabled_shouldSucceed() {
+    when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
+
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity("INC", "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById("INC")).thenReturn(Optional.of(incStatusEntity));
+
+    SeedlotSourceEntity sourceEntity =
+        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE, null);
+    when(seedlotSourceRepository.findById("TPT")).thenReturn(Optional.of(sourceEntity));
+
+    when(loggedUserService.getLoggedUserId()).thenReturn("imaveryhappyuserid@idir");
+
+    GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
+    when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));
+
+    Assertions.assertNotNull(buildService(false).createSeedlot(createSeedlotDto()));
+  }
+
+  @Test
+  @DisplayName("createSeedlotAClassWithoutSeedlotSourceCode")
+  void createSeedlotTest_nullSourceClassA_shouldThrowException() {
+    when(seedlotRepository.findNextSeedlotNumber(anyInt(), anyInt())).thenReturn(63000);
+
+    String incStatusCode = "INC";
+
+    SeedlotStatusEntity incStatusEntity =
+        new SeedlotStatusEntity(incStatusCode, "Incomplete", DATE_RANGE);
+    when(seedlotStatusService.findById(incStatusCode)).thenReturn(Optional.of(incStatusEntity));
+
+    GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
+    when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));
+
+    SeedlotCreateDto createDtoNoSource =
+        new SeedlotCreateDto(
+            "00012797", "01", "user.lastname@domain.com", "FDI", null, true, true, 'A');
+
+    Assertions.assertThrows(
+        InvalidSeedlotRequestException.class,
+        () -> seedlotService.createSeedlot(createDtoNoSource));
+
+    verify(seedlotRepository, never()).save(any());
   }
 
   @Test
@@ -729,6 +833,50 @@ class SeedlotServiceTest {
   }
 
   @Test
+  @DisplayName("Patch applicant info with a null source on a class B seedlot should succeed")
+  void patchApplicantInfo_nullSourceClassB_shouldSucceed() {
+    String seedlotNumber = "123456";
+    SeedlotSourceEntity existingSource =
+        new SeedlotSourceEntity("TPT", "tested parent trees", DATE_RANGE, true);
+
+    Seedlot testSeedlot = new Seedlot(seedlotNumber);
+    testSeedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+    testSeedlot.setSeedlotSource(existingSource);
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", null, true, false, 0);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(testSeedlot));
+    when(seedlotRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+
+    Seedlot patchedSeedlot = seedlotService.patchApplicantInfo(seedlotNumber, testDto);
+
+    assertEquals(testDto.applicantEmailAddress(), patchedSeedlot.getApplicantEmailAddress());
+    assertEquals("TPT", patchedSeedlot.getSeedlotSource().getSeedlotSourceCode());
+    verify(seedlotSourceRepository, never()).findById(any());
+  }
+
+  @Test
+  @DisplayName("Patch applicant info with a null source on a class A seedlot should fail")
+  void patchApplicantInfo_nullSourceClassA_shouldFail() {
+    String seedlotNumber = "123456";
+
+    Seedlot testSeedlot = new Seedlot(seedlotNumber);
+    testSeedlot.setGeneticClass(new GeneticClassEntity("A", "A class", DATE_RANGE));
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", null, true, false, 0);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(testSeedlot));
+
+    Assertions.assertThrows(
+        InvalidSeedlotRequestException.class,
+        () -> seedlotService.patchApplicantInfo(seedlotNumber, testDto));
+
+    verify(seedlotRepository, never()).save(any());
+  }
+
+  @Test
   @DisplayName("Update seedlot with form tsc admin happy path should succeed")
   void updateSeedlotWithForm_tscAdmin_happyPath_shouldSucceed() {
     String statusOnSuccess = "SUB";
@@ -1081,92 +1229,203 @@ class SeedlotServiceTest {
     Assertions.assertNull(result.meanGeomSmpMix());
   }
 
-  private SeedlotFormParentTreeSmpDto smpMixRow(
-      String proportion, List<ParentTreeGeneticQualityDto> genQuals) {
-    return new SeedlotFormParentTreeSmpDto(
-        "63001", 1001, "101", null, null, null, null, null, new BigDecimal(proportion), genQuals);
+  @Test
+  @DisplayName("getBclassSeedlotFormInfo succeeds with empty child data")
+  void getBclassSeedlotFormInfo_shouldSucceed() {
+    String seedlotNumber = "53001";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
+
+    SeedlotFormCollectionDtoClassB collectionDto =
+        mock(SeedlotFormCollectionDtoClassB.class);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(seedlotNumber))
+        .thenReturn(Optional.empty());
+    when(seedlotCollectionMethodService.getAllSeedlotCollectionMethodsBySeedlot(seedlotNumber))
+        .thenReturn(List.of(1));
+    when(seedlotFormCollectionBclassMapper.toDto(seedlot, null, List.of(1)))
+        .thenReturn(collectionDto);
+    when(seedlotOwnerQuantityService.findAllBySeedlot(seedlotNumber)).thenReturn(List.of());
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(List.of());
+
+    SeedlotBclassFormDto result = seedlotService.getBclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(collectionDto, result.collectionStep());
+    Assertions.assertTrue(result.ownershipStep().isEmpty());
+    Assertions.assertNull(result.collectionGeometry());
   }
 
   @Test
-  @DisplayName("SMP mix breeding values are the volume-weighted sum of each trait (#2616)")
-  void calculateSmpMixBreedingValues_weightsByProportion() {
-    // Two SMP mix rows: GVO 20 at 60% of the volume, GVO 10 at 40% -> 20*0.6 + 10*0.4 = 16
-    List<SeedlotFormParentTreeSmpDto> smpMix =
-        List.of(
-            smpMixRow(
-                "0.6", List.of(new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("20"),
-                    null, null))),
-            smpMixRow(
-                "0.4", List.of(new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("10"),
-                    null, null))));
-
-    SeedlotManagementBreedingValueDto smpBv =
-        SeedlotService.calculateSmpMixBreedingValues(smpMix);
-
-    Assertions.assertEquals(16.0, smpBv.getGvo(), 0.0001);
-    // Traits absent from the mix stay at zero rather than becoming null.
-    Assertions.assertEquals(0.0, smpBv.getAd(), 0.0001);
-    Assertions.assertEquals(0.0, smpBv.getWwd(), 0.0001);
+  @DisplayName("getBclassSeedlotFormInfo missing seedlot throws")
+  void getBclassSeedlotFormInfo_notFound_shouldThrow() {
+    when(seedlotRepository.findById("53099")).thenReturn(Optional.empty());
+    Assertions.assertThrows(
+        SeedlotNotFoundException.class, () -> seedlotService.getBclassSeedlotFormInfo("53099"));
   }
 
   @Test
-  @DisplayName("SMP mix breeding values accumulate per trait code independently (#2616)")
-  void calculateSmpMixBreedingValues_perTrait() {
-    List<SeedlotFormParentTreeSmpDto> smpMix =
-        List.of(
-            smpMixRow(
-                "0.5",
-                List.of(
-                    new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("20"), null, null),
-                    new ParentTreeGeneticQualityDto("BV", "DFS", new BigDecimal("8"), null, null))),
-            smpMixRow(
-                "0.5",
-                List.of(
-                    new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("30"), null, null),
-                    new ParentTreeGeneticQualityDto(
-                        "BV", "WVE", new BigDecimal("6"), null, null))));
+  @DisplayName("getSingleSeedlotInfo for B-class fills bclassDetail")
+  void getSingleSeedlotInfo_bclass_fillsDetail() {
+    String seedlotNumber = "53001";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
+    seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+    seedlot.setProvenanceId(42);
 
-    SeedlotManagementBreedingValueDto smpBv =
-        SeedlotService.calculateSmpMixBreedingValues(smpMix);
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    doNothing().when(loggedUserService).verifySeedlotAccessPrivilege(anyString());
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(seedlotNumber))
+        .thenReturn(Optional.empty());
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(List.of());
 
-    Assertions.assertEquals(25.0, smpBv.getGvo(), 0.0001);
-    Assertions.assertEquals(4.0, smpBv.getDfs(), 0.0001);
-    Assertions.assertEquals(3.0, smpBv.getWve(), 0.0001);
-    Assertions.assertEquals(0.0, smpBv.getIws(), 0.0001);
+    SeedlotDto dto = seedlotService.getSingleSeedlotInfo(seedlotNumber);
+
+    Assertions.assertNotNull(dto.getBclassDetail());
+    SeedlotBclassDetailDto detail = dto.getBclassDetail();
+    Assertions.assertEquals(42, detail.provenanceId());
+    Assertions.assertTrue(detail.aouSpzList().isEmpty());
   }
 
   @Test
-  @DisplayName("No SMP mix yields all-zero breeding values (#2616)")
-  void calculateSmpMixBreedingValues_noSmpMix() {
-    Assertions.assertEquals(
-        0.0, SeedlotService.calculateSmpMixBreedingValues(List.of()).getGvo(), 0.0001);
-    Assertions.assertEquals(
-        0.0, SeedlotService.calculateSmpMixBreedingValues(null).getGvo(), 0.0001);
-  }
+  @DisplayName("submitSeedlotFormClassB pending seedlot succeeds and saves its collection polygon")
+  void submitSeedlotFormClassB_pending_shouldSucceed() {
+    String seedlotNumber = "53001";
+    String geoJson =
+        "{\"type\":\"MultiPolygon\",\"coordinates\":"
+            + "[[[[-123.02,49.0],[-123.0,49.0],[-123.0,49.01],[-123.02,49.01],[-123.02,49.0]]]]}";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    SeedlotStatusEntity pending =
+        new SeedlotStatusEntity("PND", "Pending", DATE_RANGE);
+    seedlot.setSeedlotStatus(pending);
+    seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
 
-  @Test
-  @DisplayName("Rows with a null proportion or null genetic quality are skipped (#2616)")
-  void calculateSmpMixBreedingValues_skipsIncompleteRows() {
-    List<SeedlotFormParentTreeSmpDto> smpMix =
-        List.of(
-            // null proportion -> cannot be weighted, must not blow up or contribute
-            new SeedlotFormParentTreeSmpDto(
-                "63001", 1001, "101", null, null, null, null, null, null,
-                List.of(new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("99"),
-                    null, null))),
-            // null genetic quality value
-            smpMixRow("0.5", List.of(
-                new ParentTreeGeneticQualityDto("BV", "GVO", null, null, null))),
-            // null genetic worth code
-            smpMixRow("0.5", List.of(
-                new ParentTreeGeneticQualityDto("BV", null, new BigDecimal("77"), null, null))),
-            // the only usable row
-            smpMixRow("0.5", List.of(
-                new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("20"), null, null))));
+    SeedlotFormCollectionDtoClassB collection =
+        new SeedlotFormCollectionDtoClassB(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.SEPTEMBER, 1),
+            LocalDate.of(2024, Month.SEPTEMBER, 30),
+            new BigDecimal("2"),
+            new BigDecimal("4"),
+            new BigDecimal("8"),
+            "comment",
+            List.of(1),
+            "South ridge",
+            73,
+            true,
+            new BigDecimal("500"),
+            "CLIMB",
+            "M",
+            true,
+            "001",
+            true,
+            false,
+            null,
+            "GT5",
+            false,
+            false,
+            null,
+            49,
+            30,
+            0,
+            123,
+            0,
+            0,
+            800,
+            600,
+            1000,
+            600,
+            1000,
+            49,
+            0,
+            50,
+            0,
+            122,
+            0,
+            124,
+            0,
+            0,
+            0,
+            0,
+            0,
+            null,
+            'N',
+            'W',
+            "CDF",
+            "Coastal Douglas-fir",
+            "mm",
+            '1',
+            12,
+            geoJson);
+    SeedlotFormOwnershipDto ownership =
+        new SeedlotFormOwnershipDto(
+            "00012797",
+            "00",
+            new BigDecimal("100"),
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            "CLA",
+            "ITC");
+    SeedlotFormInterimDto interim =
+        new SeedlotFormInterimDto(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.OCTOBER, 1),
+            LocalDate.of(2024, Month.OCTOBER, 31),
+            null,
+            "OCV");
+    SeedlotFormExtractionDto extraction =
+        new SeedlotFormExtractionDto(
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.NOVEMBER, 1),
+            LocalDate.of(2024, Month.NOVEMBER, 30),
+            "00012797",
+            "00",
+            LocalDate.of(2024, Month.DECEMBER, 1),
+            LocalDate.of(2024, Month.DECEMBER, 31));
+    SeedlotFormSubmissionDtoClassB form =
+        new SeedlotFormSubmissionDtoClassB(
+            collection,
+            List.of(ownership),
+            interim,
+            extraction,
+            List.of(new SeedPlanZoneDto("M", "Maritime", false)),
+            List.of(new GeneticWorthTraitsDto("GVO", new BigDecimal("12"), null, null)));
 
-    SeedlotManagementBreedingValueDto smpBv =
-        Assertions.assertDoesNotThrow(() -> SeedlotService.calculateSmpMixBreedingValues(smpMix));
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    doNothing().when(seedlotFormValidationService).validateBclassSeedlotForm(any(), any());
+    doNothing().when(seedlotFormCollectionBclassMapper).applyToSeedlot(any(), any());
+    doNothing()
+        .when(seedlotCollectionMethodService)
+        .saveConeCollectionMethods(any(), any(), anyBoolean());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), anyBoolean()))
+        .thenReturn(List.of());
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
+    when(geneticClassRepository.findById("B"))
+        .thenReturn(Optional.of(new GeneticClassEntity("B", "B class", DATE_RANGE)));
+    when(loggedUserService.createAuditCurrentUser()).thenReturn(new AuditInformation("user"));
+    when(seedlotSeedPlanZoneRepository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
+    when(seedlotGeneticWorthService.saveSeedlotGenWorth(any(), any())).thenReturn(List.of());
+    when(loggedUserService.getLoggedUserId()).thenReturn("user@idir");
+    doNothing().when(seedlotCollectionGeometryService).saveOrUpdate(any(), any(), anyString());
+    final SeedlotStatusEntity submitted =
+        new SeedlotStatusEntity("SUB", "Submitted", DATE_RANGE);
+    when(seedlotStatusService.getValidSeedlotStatus("SUB")).thenReturn(Optional.of(submitted));
+    when(seedlotRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    doNothing().when(saveSeedlotFormService).deleteForm(seedlotNumber);
 
-    Assertions.assertEquals(10.0, smpBv.getGvo(), 0.0001);
+    SeedlotStatusResponseDto response =
+        seedlotService.submitSeedlotFormClassB(seedlotNumber, form, false);
+
+    Assertions.assertEquals(seedlotNumber, response.seedlotNumber());
+    Assertions.assertEquals("SUB", response.seedlotStatusCode());
+    verify(saveSeedlotFormService).deleteForm(seedlotNumber);
+    verify(seedlotCollectionGeometryService)
+        .saveOrUpdate(same(seedlot), eq(geoJson), eq("user@idir"));
   }
 }

@@ -34,6 +34,8 @@ const ApiConfig = {
 
   seedlots: `${serverHost}/api/seedlots`,
 
+  openmaps: `${serverHost}/api/openmaps`,
+
   orchardsVegCode: `${serverHost}/api/orchards/vegetation-codes`,
 
   tscAdmin: `${serverHost}/api/tsc-admin`,
@@ -52,6 +54,16 @@ const ApiConfig = {
   fundingSource: `${oracleServerHost}/api/funding-sources`,
 
   facilityTypes: `${oracleServerHost}/api/facility-types`,
+
+  numberTreesCollected: `${oracleServerHost}/api/number-trees-collected`,
+
+  captureMethods: `${oracleServerHost}/api/capture-methods`,
+
+  becCatalogue: `${oracleServerHost}/api/bec-catalogue`,
+
+  orgUnitDistricts: `${oracleServerHost}/api/org-unit-districts`,
+
+  seedCoastAreas: `${oracleServerHost}/api/seed-coast-areas`,
 
   oracleOrchards: `${oracleServerHost}/api/orchards`,
 

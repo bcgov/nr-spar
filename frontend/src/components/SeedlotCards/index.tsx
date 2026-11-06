@@ -9,6 +9,9 @@ const SeedlotCards = () => {
   const { isTscAdmin } = useContext(AuthContext);
 
   const shouldDisplayCard = (card: any) => {
+    if (card.featureEnabled && !card.featureEnabled()) {
+      return false;
+    }
     let display = card.displayForNonAdmin;
     if (isTscAdmin && display === true) {
       display = true;

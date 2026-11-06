@@ -1,0 +1,19 @@
+meta {
+  name: Get Seed Coast Areas
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/seed-coast-areas
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token:
+}

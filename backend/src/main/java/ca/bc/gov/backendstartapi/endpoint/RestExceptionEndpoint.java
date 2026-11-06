@@ -1,5 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.exception.ReportGenerationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import org.springframework.http.HttpStatus;
@@ -36,5 +38,18 @@ public class RestExceptionEndpoint {
       SeedlotSubmissionValidationException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(ValidationExceptionResponse.fromSeedlotErrors(ex.getErrors()));
+  }
+
+  /**
+   * Handle Jasper report compilation or export failures.
+   *
+   * @param ex the report generation exception
+   * @return a 500 response with a generic error message
+   */
+  @ExceptionHandler(ReportGenerationException.class)
+  ResponseEntity<String> reportGeneration(ReportGenerationException ex) {
+    SparLog.error("Report generation failed", ex);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body("Unable to generate the report. Please try again later.");
   }
 }

@@ -105,8 +105,7 @@ Then('I can see seedlot summary approved at field', () => {
 });
 
 Then('I can see applicant and seedlot information title', () => {
-  cy.get('.applicant-seedlot-information-title')
-    .should('have.text', 'Check your applicant and seedlot information');
+  cy.contains('p.title-text', 'Check your applicant and seedlot information');
 });
 
 Then('I can see applicant identity fields match fixture', () => {

@@ -14,18 +14,23 @@ import {
   InlineNotification
 } from '@carbon/react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 import { SeedlotStatusCode } from '../../../types/SeedlotType';
 
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
+import ErrorToast from '../../../components/Toast/ErrorToast';
 import useWindowSize from '../../../hooks/UseWindowSize';
 
-import { getSeedlotById } from '../../../api-service/seedlotAPI';
+import { downloadBClassRegistrationReport, getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import { ErrToastOption } from '../../../config/ToastifyConfig';
+import { isSeedlotBEnabled } from '../../../config/features';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils/SeedlotUtils';
+import { openBlankTab, openBlobInNewTab } from '../../../utils/DownloadUtils';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
@@ -39,6 +44,13 @@ import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
 import FormProgress from './FormProgress';
 import TscReviewSection from './TscReviewSection';
+import {
+  getEditApplicantRoute,
+  getPrintSeedlotLabel,
+  getRegistrationRoute,
+  getReviewRoute,
+  isBClassSeedlot
+} from './utils';
 
 import './styles.scss';
 
@@ -63,19 +75,25 @@ const SeedlotDetails = () => {
     gcTime: THREE_HALF_HOURS
   });
 
+  // No `select` — keep full RichSeedlotType for B-class sections
   const seedlotQuery = useQuery({
     queryKey: ['seedlots', seedlotNumber],
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
     enabled: vegCodeQuery.isFetched,
-    refetchOnMount: true,
-    select: (data) => data.seedlot
+    refetchOnMount: true
   });
 
+  const seedlot = seedlotQuery.data?.seedlot;
+  const isBClass = isBClassSeedlot(seedlot);
+  // Existing B-class seedlots stay readable when the feature is off, but every
+  // action leads into a B-class flow the backend now rejects, so they're hidden.
+  const isBClassDisabled = isBClass && !isSeedlotBEnabled();
+
   const seedlotData = useMemo(
-    () => (vegCodeQuery.data && seedlotQuery.data
-      ? covertRawToDisplayObj(seedlotQuery.data, vegCodeQuery.data)
+    () => (vegCodeQuery.data && seedlot
+      ? covertRawToDisplayObj(seedlot, vegCodeQuery.data)
       : undefined),
-    [seedlotQuery.data, vegCodeQuery.data]
+    [seedlot, vegCodeQuery.data]
   );
 
   const viewOnlySeedlot: boolean = seedlotData?.seedlotStatus === 'Submitted'
@@ -83,16 +101,40 @@ const SeedlotDetails = () => {
     || seedlotData?.seedlotStatus === 'Complete'
     || seedlotData?.seedlotStatus === 'Approved';
 
-  const manageOptions = [
+  const downloadReportMutation = useMutation({
+    mutationFn: () => downloadBClassRegistrationReport(seedlotNumber ?? ''),
+    onMutate: () => ({ reportWindow: openBlankTab() }),
+    onSuccess: (pdfBlob, _vars, context) => {
+      openBlobInNewTab(
+        pdfBlob,
+        context?.reportWindow,
+        `SPRR001-${seedlotNumber ?? 'seedlot'}.pdf`
+      );
+    },
+    onError: (err: AxiosError, _vars, context) => {
+      context?.reportWindow?.close();
+      toast.error(
+        <ErrorToast
+          title="Download failed"
+          subtitle={`Cannot generate the SPRR001 report. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    }
+  });
+
+  const manageOptions = useMemo(() => [
     {
       text: 'Edit seedlot applicant',
-      onClickFunction: () => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')),
+      onClickFunction: () => navigate(
+        addParamToPath(getEditApplicantRoute(seedlot), seedlotNumber ?? '')
+      ),
       disabled: viewOnlySeedlot
     },
     {
-      text: 'Print seedlot',
-      onClickFunction: () => null,
-      disabled: true
+      text: getPrintSeedlotLabel(isBClass, downloadReportMutation.isPending),
+      onClickFunction: () => downloadReportMutation.mutate(),
+      disabled: !isBClass || downloadReportMutation.isPending
     },
     {
       text: 'Duplicate seedlot',
@@ -104,7 +146,9 @@ const SeedlotDetails = () => {
       onClickFunction: () => null,
       disabled: true
     }
-  ];
+  ], [
+    navigate, seedlot, seedlotNumber, viewOnlySeedlot, isBClass, isTscAdmin, downloadReportMutation
+  ]);
 
   const getActBtnLabel = (): string => {
     if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
@@ -122,7 +166,7 @@ const SeedlotDetails = () => {
     }
   }, [seedlotQuery.error, navigate]);
 
-  const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
+  const applicantClientNumber = seedlot?.applicantClientNumber;
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', applicantClientNumber],
@@ -133,10 +177,10 @@ const SeedlotDetails = () => {
   });
 
   const applicantData = useMemo(
-    () => (seedlotQuery.data && vegCodeQuery.data && forestClientQuery.data
-      ? convertToApplicantInfoObj(seedlotQuery.data, vegCodeQuery.data, forestClientQuery.data)
+    () => (seedlot && vegCodeQuery.data && forestClientQuery.data
+      ? convertToApplicantInfoObj(seedlot, vegCodeQuery.data, forestClientQuery.data)
       : undefined),
-    [seedlotQuery.data, vegCodeQuery.data, forestClientQuery.data]
+    [seedlot, vegCodeQuery.data, forestClientQuery.data]
   );
 
   const createBreadcrumbItems = () => {
@@ -148,6 +192,18 @@ const SeedlotDetails = () => {
       crumbsList.push({ name: 'My seedlots', path: ROUTES.MY_SEEDLOTS });
     }
     return crumbsList;
+  };
+
+  const handlePrimaryAction = () => {
+    // Applicants use registration (view/edit); TSC admins use the review screen
+    const useReviewRoute = isTscAdmin && (
+      (isBClass && viewOnlySeedlot)
+      || seedlotData?.seedlotStatus === 'Submitted'
+    );
+    const route = useReviewRoute
+      ? getReviewRoute(seedlot)
+      : getRegistrationRoute(seedlot);
+    navigate(addParamToPath(route, seedlotNumber ?? ''));
   };
 
   return (
@@ -162,21 +218,21 @@ const SeedlotDetails = () => {
             && (
               <>
                 <PageTitle
-                  title={`Seedlot ${seedlotQuery.data?.id}`}
+                  title={`Seedlot ${seedlot?.id}`}
                   enableFavourite
                 />
-                <ComboButton
-                  title={getActBtnLabel()}
-                  items={manageOptions}
-                  menuOptionsClass="edit-seedlot-form"
-                  titleBtnFunc={() => {
-                    let route = ROUTES.SEEDLOT_A_CLASS_REGISTRATION;
-                    if (isTscAdmin && seedlotData?.seedlotStatus === 'Submitted') {
-                      route = ROUTES.SEEDLOT_A_CLASS_REVIEW;
-                    }
-                    navigate(addParamToPath(route, seedlotNumber ?? ''));
-                  }}
-                />
+                {
+                  isBClassDisabled
+                    ? null
+                    : (
+                      <ComboButton
+                        title={getActBtnLabel()}
+                        items={manageOptions}
+                        menuOptionsClass="edit-seedlot-form"
+                        titleBtnFunc={handlePrimaryAction}
+                      />
+                    )
+                }
               </>
             )
           }
@@ -197,7 +253,21 @@ const SeedlotDetails = () => {
             <TabPanels>
               <TabPanel>
                 {
-                  isSubmitSuccess && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'SUB')
+                  isBClassDisabled
+                    ? (
+                      <InlineNotification
+                        className="seedlot-submitted-notification"
+                        lowContrast
+                        hideCloseButton
+                        kind="info"
+                        title="B-class seedlots are unavailable:"
+                        subtitle="Registration, review and reporting for B-class seedlots are currently turned off. This seedlot's details are read-only."
+                      />
+                    )
+                    : null
+                }
+                {
+                  isSubmitSuccess && (seedlot?.seedlotStatus.seedlotStatusCode === 'SUB')
                     ? (
                       <InlineNotification
                         className="seedlot-submitted-notification"
@@ -210,20 +280,20 @@ const SeedlotDetails = () => {
                     : null
                 }
                 {
-                  statusOnSave === 'APP' && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'APP')
+                  statusOnSave === 'APP' && (seedlot?.seedlotStatus.seedlotStatusCode === 'APP')
                     ? (
                       <InlineNotification
                         className="seedlot-submitted-notification"
                         lowContrast
                         kind="success"
                         title="Seedlot approved:"
-                        subtitle="This seedlot have been reviewed and approved"
+                        subtitle="This seedlot has been reviewed and approved"
                       />
                     )
                     : null
                 }
                 {
-                  statusOnSave === 'PND' && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND')
+                  statusOnSave === 'PND' && (seedlot?.seedlotStatus.seedlotStatusCode === 'PND')
                     ? (
                       <InlineNotification
                         className="seedlot-submitted-notification"
@@ -235,24 +305,38 @@ const SeedlotDetails = () => {
                     )
                     : null
                 }
-                <FormProgress
-                  seedlotNumber={seedlotNumber}
-                  seedlotStatusCode={seedlotQuery.data?.seedlotStatus.seedlotStatusCode}
-                  getSeedlotQueryStatus={seedlotQuery.status}
-                />
+                {
+                  isBClassDisabled
+                    ? null
+                    : (
+                      <FormProgress
+                        seedlotNumber={seedlotNumber}
+                        seedlotStatusCode={seedlot?.seedlotStatus.seedlotStatusCode}
+                        getSeedlotQueryStatus={seedlotQuery.status}
+                        isBClass={isBClass}
+                      />
+                    )
+                }
                 <ApplicantInformation
                   seedlotNumber={seedlotNumber}
                   applicant={applicantData}
                   isFetching={seedlotQuery.isFetching || forestClientQuery.isFetching}
-                  hideEditButton={!isTscAdmin && viewOnlySeedlot}
+                  hideEditButton={isBClassDisabled || (!isTscAdmin && viewOnlySeedlot)}
+                  variant={isBClass ? 'B' : 'A'}
                 />
                 {
                   (
-                    isTscAdmin
+                    !isBClassDisabled
+                    && isTscAdmin
                     && seedlotData?.seedlotStatus !== 'Pending'
                     && seedlotData?.seedlotStatus !== 'Incomplete'
                   )
-                    ? <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
+                    ? (
+                      <TscReviewSection
+                        seedlotNumber={seedlotNumber ?? ''}
+                        reviewRoute={getReviewRoute(seedlot)}
+                      />
+                    )
                     : null
                 }
               </TabPanel>

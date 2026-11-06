@@ -59,16 +59,28 @@ public class SeedlotCollectionMethodService {
     }
     seedlot.setComment(formStep1.seedlotComment());
 
+    saveConeCollectionMethods(seedlot, formStep1.coneCollectionMethodCodes(), canDelete);
+  }
+
+  /**
+   * Persists cone collection method codes for a seedlot without updating other collection fields.
+   *
+   * @param seedlot the seedlot to update
+   * @param coneCollectionMethodCodes collection method codes from the form
+   * @param canDelete whether existing rows may be replaced
+   */
+  public void saveConeCollectionMethods(
+      Seedlot seedlot, List<Integer> coneCollectionMethodCodes, boolean canDelete) {
+    List<Integer> methods =
+        coneCollectionMethodCodes != null ? coneCollectionMethodCodes : List.of();
+
     SparLog.info(
-        "Received {} collection method(s) for seedlot number {}",
-        formStep1.coneCollectionMethodCodes().size(),
-        seedlot.getId());
+        "Received {} collection method(s) for seedlot number {}", methods.size(), seedlot.getId());
 
     List<SeedlotCollectionMethod> seedlotCollectionList =
         seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());
 
-    boolean allEqual = 
-        areExistingEqualsNewOnes(seedlotCollectionList, formStep1.coneCollectionMethodCodes());
+    boolean allEqual = areExistingEqualsNewOnes(seedlotCollectionList, methods);
 
     if (allEqual) {
       SparLog.info("Do not need to touch seedlot cone collection methods, they are the same");
@@ -88,7 +100,7 @@ public class SeedlotCollectionMethodService {
       throw new SeedlotConflictDataException(seedlot.getId());
     }
 
-    addSeedlotCollectionMethod(seedlot, formStep1.coneCollectionMethodCodes());
+    addSeedlotCollectionMethod(seedlot, methods);
   }
 
   private boolean areExistingEqualsNewOnes(

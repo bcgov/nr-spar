@@ -125,6 +125,7 @@ export default [
       'react-hooks/refs': 'warn',
       'react-hooks/immutability': 'warn',
       'react-hooks/rules-of-hooks': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
 
       'prefer-object-has-own': 'off',
       'import-x/no-cycle': 'warn',
