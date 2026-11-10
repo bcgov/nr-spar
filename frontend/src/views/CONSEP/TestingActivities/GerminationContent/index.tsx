@@ -5,9 +5,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-  FlexGrid, Row, Column, InlineNotification, TextInput
+  FlexGrid, Row, Column, InlineNotification, TextInput, Button, Modal
 } from '@carbon/react';
-import { CheckmarkFilled } from '@carbon/icons-react';
+import { CheckmarkFilled, Time } from '@carbon/icons-react';
 
 import ROUTES from '../../../../routes/constants';
 import {
@@ -25,6 +25,7 @@ import PageTitle from '../../../../components/PageTitle';
 import StatusTag from '../../../../components/StatusTag';
 import SaveStatus from '../../../../components/CONSEP/SaveStatus';
 import SummaryGrid, { type SummaryColumn } from '../../../../components/CONSEP/SummaryGrid';
+import TestHistory from '../TestSearch/ToolbarControls/TestHistory';
 
 import DailyGermTable from './DailyGermTable';
 import AbnormalsTable, { ABNORMAL_CATEGORIES } from './AbnormalsTable';
@@ -61,6 +62,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const navigate = useNavigate();
 
   const [header, setHeader] = useState<GerminationTestHeaderType>();
+  const [showTestHistory, setShowTestHistory] = useState(false);
   const [slots, setSlots] = useState<GermCountSlotType[]>(emptySlots());
   const [replicates, setReplicates] = useState<GermReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
@@ -393,8 +395,32 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
           interact with the table before day numbers can be computed. */}
       {header && (
         <>
+          <Modal
+            className="concep-test-history-modal"
+            open={showTestHistory}
+            passiveModal
+            size="lg"
+            modalHeading={`${!header.seedlotNumber || header.seedlotNumber === '00000' ? 'Familylot' : 'Seedlot'} ${lotNumber(header)}: Test history`}
+            onRequestClose={() => setShowTestHistory(false)}
+            selectorsFloatingMenus={['.MuiPopover-root', '.MuiPaper-root']}
+          >
+            {showTestHistory && (
+              <TestHistory
+                lotNumbers={[lotNumber(header)]}
+                testTypes={[header.activityTypeCd]}
+              />
+            )}
+          </Modal>
           <Row className="consep-germination-content-title">
             <PageTitle title={`Germination test result (${lotNumber(header)})`} />
+            <Button
+              kind="tertiary"
+              size="sm"
+              renderIcon={Time}
+              onClick={() => setShowTestHistory(true)}
+            >
+              Test history
+            </Button>
             <>
               {isCompleted && <StatusTag type="Completed" renderIcon={CheckmarkFilled} />}
               {isAccepted && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
