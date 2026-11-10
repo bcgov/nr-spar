@@ -34,16 +34,16 @@ Feature: CONSEP manual moisture content activity summary
     Then the moisture activity results table shows 4 rows
     When I enter "10011" in the last moisture row container id field
     Then the last moisture row should show the container id validation error
-    When I enter "15" in the last moisture row container id field
+    When I enter valid "15" in the last moisture row "container id" field
     And I enter "10011" in the last moisture row container weight field
     Then the last moisture row should show the container weight validation error
-    When I enter "20" in the last moisture row container weight field
+    When I enter valid "20" in the last moisture row "container weight" field
     And I enter "10011" in the last moisture row fresh seed field
     Then the last moisture row should show the fresh seed validation error
-    When I enter "30" in the last moisture row fresh seed field
+    When I enter valid "30" in the last moisture row "fresh seed" field
     And I enter "10011" in the last moisture row container and dry weight field
     Then the last moisture row should show the container and dry weight validation error
-    When I enter "38" in the last moisture row container and dry weight field
+    When I enter valid "38" in the last moisture row "container and dry weight" field
 
   Scenario: Activity summary result value updates after average calculation
     When I calculate average moisture content from accepted replicates

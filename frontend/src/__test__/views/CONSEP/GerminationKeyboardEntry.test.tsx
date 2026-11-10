@@ -144,7 +144,7 @@ describe('Germination keyboard entry (#2681)', () => {
     const input = await screen.findByTestId('germ-count-1-1');
     fireEvent.change(input, { target: { value: '5' } });
     altY();
-    expect(await screen.findByText(/Failed to save germination counts/)).toBeInTheDocument();
+    expect(await screen.findByText(/Not saved/)).toBeInTheDocument();
     expect(navigateMock).not.toHaveBeenCalled();
     const putCalls = putMock.mock.calls.length;
     // Back to the last saved snapshot: nothing left to save, so the jump must go through.

@@ -1,11 +1,9 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
-import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.MccAutosaveFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
-import ca.bc.gov.oracleapi.entity.consep.MccReplicateEntity;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
@@ -26,8 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -102,28 +100,28 @@ public class MoistureContentConesEndpoint {
   }
 
   /**
-   * Updates replicate entities.
+   * Auto save the activity record and the replicates together, under the activity's
+   * optimistic lock.
    *
-   * @param riaKey The identifier for the MCC-related data.
-   * @param replicateFormDtos A list of {@link MccReplicateFormDto} containing the new values.
-   * @return the {@link MccReplicateEntity} updated
+   * @param riaKey The identifier for the MCC data.
+   * @param dto The activity record (with the updateTimestamp the client read) and replicates.
+   * @return the {@link ActivityEntity} updated, carrying the new updateTimestamp
    */
-  @PatchMapping(
-      value = "replicate/{riaKey}",
-      consumes = "application/json",
-      produces = "application/json")
+  @PutMapping(value = "/{riaKey}", consumes = "application/json", produces = "application/json")
   @Operation(
-      summary = "Update the fields of a replicate entity",
-      description = "Updates a replicate."
+      summary = "Auto save the activity record and replicates",
+      description = "Updates the activity fields and upserts the replicates in one transaction."
   )
   @ApiResponses(
       value = {
-          @ApiResponse(responseCode = "200", description = "Field successfully updated"),
+          @ApiResponse(responseCode = "200", description = "Successfully saved"),
           @ApiResponse(responseCode = "400", description = "Invalid object"),
-          @ApiResponse(responseCode = "404", description = "Replicate not found")
+          @ApiResponse(responseCode = "404", description = "Activity entry not found"),
+          @ApiResponse(responseCode = "409",
+              description = "Activity was modified by another user (stale update timestamp)")
       })
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public List<MccReplicateEntity> updateReplicateField(
+  public ActivityEntity autosave(
       @Parameter(
           name = "riaKey",
           in = ParameterIn.PATH,
@@ -132,42 +130,8 @@ public class MoistureContentConesEndpoint {
       @PathVariable
       BigDecimal riaKey,
       @Valid
-      @RequestBody
-      List<MccReplicateFormDto> replicateFormDtos) {
-    return moistureContentService.updateReplicateField(riaKey, replicateFormDtos);
-  }
-
-  /**
-   * Updates an activity record.
-   *
-   * @param riaKey The identifier for the activity-related data.
-   * @param activityFormDto An object containing the new values.
-   * @return the {@link ActivityEntity} updated
-   */
-  @PatchMapping(value = "/{riaKey}", consumes = "application/json", produces = "application/json")
-  @Operation(
-      summary = "Update an activity record",
-      description = "Given the new values, updates an activity entry."
-  )
-  @ApiResponses(
-      value = {
-          @ApiResponse(responseCode = "200", description = "Field successfully updated"),
-          @ApiResponse(responseCode = "400", description = "Invalid object"),
-          @ApiResponse(responseCode = "404", description = "Activity entry not found"),
-          @ApiResponse(responseCode = "409",
-              description = "Activity was modified by another user (stale update timestamp)")
-      })
-  @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
-  public ActivityEntity updateActivityField(
-      @Parameter(
-        name = "riaKey",
-        in = ParameterIn.PATH,
-        description = "Identification key for activity data",
-        required = true)
-      @PathVariable BigDecimal riaKey,
-      @Valid
-      @RequestBody ActivityFormDto activityFormDto) {
-    return activityService.updateActivityField(riaKey, activityFormDto);
+      @RequestBody MccAutosaveFormDto dto) {
+    return moistureContentService.autosave(riaKey, dto);
   }
 
   /**

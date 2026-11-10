@@ -23,7 +23,7 @@ import useActivityConflict from '../hooks/useActivityConflict';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
 import StatusTag from '../../../../components/StatusTag';
-import ConflictNotification from '../../../../components/CONSEP/ConflictNotification';
+import SaveStatus from '../../../../components/CONSEP/SaveStatus';
 import SummaryGrid, { type SummaryColumn } from '../../../../components/CONSEP/SummaryGrid';
 
 import DailyGermTable from './DailyGermTable';
@@ -64,7 +64,16 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const [slots, setSlots] = useState<GermCountSlotType[]>(emptySlots());
   const [replicates, setReplicates] = useState<GermReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
-  const [updateTimestamp, setUpdateTimestamp] = useState<string | undefined>(undefined);
+  // Only the re-render matters: it lets useAutosave re-check isSavable when a record appears.
+  const [, setUpdateTimestampState] = useState<string | undefined>(undefined);
+  // The lock value the next PUT sends. Kept in a ref as well as state: a save queued behind
+  // an in-flight one (useAutosave serializes them) runs before React re-renders, and must
+  // already carry the timestamp the first save returned (#2841).
+  const updateTimestampRef = useRef<string | undefined>(undefined);
+  const setUpdateTimestamp = (value: string | undefined) => {
+    updateTimestampRef.current = value;
+    setUpdateTimestampState(value);
+  };
   // Hydration completes once both the germ-count query (200 or 404) and the
   // replicates query have settled — until then autosave must stay disabled,
   // otherwise the pre-hydration empty/default state would be saved as if it
@@ -188,8 +197,11 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     ...checkOverLimit(slots, replicates)
   }), [slots, replicates]);
 
-  const hasDatedSlot = slots.some((slot) => slot.countDt);
-  const isEditable = header?.testCompleteInd !== 1 && !isConflict;
+  // Any non-zero indicator counts: legacy CONSEP and updateGerminationTest both write -1
+  // (#2841, same rule as #2784).
+  const isCompleted = !!header?.testCompleteInd;
+  const isAccepted = !!header?.acceptResultInd;
+  const isEditable = !isCompleted && !isAccepted && !isConflict;
 
   // Falls back to the first dated day, which covers both "nothing selected yet"
   // (AC2: the screen opens showing a day's abnormals) and "the selected day's
@@ -214,42 +226,21 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     )));
   };
 
-  const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => {
-    if (alertTimerRef.current) {
-      clearTimeout(alertTimerRef.current);
-    }
-  }, []);
-
-  // Read after an awaited flush, where the mutation object in this render's
-  // closure would still report the state from before the save.
-  const lastSaveFailed = useRef(false);
   const saveMutation = useMutation({
     mutationFn: (data: { slots: GermCountSlotType[]; replicates: GermReplicateType[] }) => (
       putGermCounts(
         riaKey ?? '',
-        buildUpsertPayload(data.slots, data.replicates, updateTimestamp)
+        buildUpsertPayload(data.slots, data.replicates, updateTimestampRef.current)
       )
     ),
     onSuccess: (response) => {
-      lastSaveFailed.current = false;
       setUpdateTimestamp(response.updateTimestamp);
-      setAlert({ isSuccess: true, message: 'Daily germination counts saved' });
-      if (alertTimerRef.current) {
-        clearTimeout(alertTimerRef.current);
-      }
-      alertTimerRef.current = setTimeout(() => setAlert(null), 3000);
     },
     onError: (error) => {
-      lastSaveFailed.current = true;
+      // Other failures show as SaveStatus "Not saved", not as a toast.
       if ((error as AxiosError).response?.status === 409) {
         markConflict();
-        return;
       }
-      setAlert({
-        isSuccess: false,
-        message: `Failed to save germination counts: ${(error as AxiosError).message}`
-      });
     }
   });
 
@@ -258,20 +249,22 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     [slots, replicates]
   );
 
-  const { markSaved, flush } = useAutosave({
+  const { markSaved, flush, status: saveStatus } = useAutosave({
     data: autosaveData,
     onSave: async (data) => { await saveMutation.mutateAsync(data); },
     enabled:
       isHydrated
       && isEditable
-      // A record that already exists can be cleared back to no dates at all --
-      // the PUT sends an empty `days` list and the backend blanks every slot.
-      // A record that does not exist yet has nothing to clear, and saving one
-      // would create an empty germ-count row for a test nobody has counted.
-      && (hasDatedSlot || !!updateTimestamp)
       && replicates.length > 0
-      && Object.keys(validationErrors).length === 0
-      && !saveMutation.isPending
+      && Object.keys(validationErrors).length === 0,
+    conflict: isConflict,
+    // A record that already exists can be cleared back to no dates at all --
+    // the PUT sends an empty `days` list and the backend blanks every slot.
+    // A record that does not exist yet has nothing to clear, and saving one
+    // would create an empty germ-count row for a test nobody has counted.
+    // Checked live (the ref, not state): clearing the last date while the PUT
+    // that creates the record is in flight, then leaving, must still send it.
+    isSavable: (data) => data.slots.some((slot) => slot.countDt) || !!updateTimestampRef.current
   });
 
   // Keep the ref the hydration effects call pointing at the latest markSaved.
@@ -299,20 +292,11 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       setAlert({ isSuccess: false, message: 'Fix the errors on this test before moving to the next one.' });
       return;
     }
-    // ponytail: a save already in flight disables flush, so edits made since
-    // would be lost on leaving. Ignoring the key until it settles is the cheap
-    // guard; queue the jump behind the save if users trip over it.
-    if (saveMutation.isPending) {
-      return;
-    }
     try {
-      // Clear the marker first: flush() skips the mutation when nothing differs
-      // from the last saved snapshot (e.g. the user reverted a failed edit), and
-      // a stale `true` would then block the jump with nothing left to save. A
-      // real retry failure sets it again inside onError before flush resolves.
-      lastSaveFailed.current = false;
-      await flush();
-      if (lastSaveFailed.current) {
+      // flush waits for a save in flight, then saves what is left; false means it
+      // could not be saved, and leaving would drop it.
+      if (!(await flush())) {
+        setAlert({ isSuccess: false, message: 'Your latest changes are not saved. Fix them before moving to the next test.' });
         return;
       }
       const tests = await getGerminatorTrayContents(trayId);
@@ -380,12 +364,6 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
 
   return (
     <FlexGrid className="consep-germination-content">
-      {isConflict && (
-        <ConflictNotification
-          className="consep-germination-content-conflict"
-          onReload={handleReloadOnConflict}
-        />
-      )}
       {alert?.message && (
         <InlineNotification
           lowContrast
@@ -418,9 +396,10 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
           <Row className="consep-germination-content-title">
             <PageTitle title={`Germination test result (${lotNumber(header)})`} />
             <>
-              {header.testCompleteInd === 1 && <StatusTag type="Completed" renderIcon={CheckmarkFilled} />}
-              {header.acceptResultInd === 1 && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
+              {isCompleted && <StatusTag type="Completed" renderIcon={CheckmarkFilled} />}
+              {isAccepted && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
             </>
+            <SaveStatus status={saveStatus} onRetry={flush} onReload={handleReloadOnConflict} />
           </Row>
           <Row className="consep-germination-content-summary">
             <SummaryGrid

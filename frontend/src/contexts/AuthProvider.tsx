@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 import React, {
+  useCallback,
   useMemo,
+  useRef,
   useState
 } from 'react';
 import {
@@ -130,7 +132,17 @@ const clientIdLocalStorageKey = 'selected-client-id';
 const clientNameLocalStorageKey = 'selected-client-name';
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Props) => {
-  const [signed, setSigned] = useState<boolean>(false);
+  const [signedState, setSignedState] = useState<boolean>(false);
+  const signed = signedState;
+  // Mirrors `signed` synchronously. Sign-out swaps the router in the same render that
+  // flips `signed`, so pages unmount without ever seeing false; their unmount auto save
+  // reads this instead.
+  const signedRef = useRef(false);
+  const setSigned = (value: boolean) => {
+    signedRef.current = value;
+    setSignedState(value);
+  };
+  const isSignedIn = useCallback(() => signedRef.current, []);
   const [user, setUser] = useState<FamUser | null>(null);
   const [provider, setProvider] = useState<string>('');
   const [intervalInstance, setIntervalInstance] = useState<NodeJS.Timeout | null>(null);
@@ -282,7 +294,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     provider,
     selectedClientRoles,
     setClientRoles,
-    isTscAdmin
+    isTscAdmin,
+    isSignedIn
   }), [
     signed, user, isCurrentAuthUser, signIn, signOut,
     provider, selectedClientRoles, isTscAdmin
