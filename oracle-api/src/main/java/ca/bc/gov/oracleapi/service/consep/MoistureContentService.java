@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.MccAutosaveFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
@@ -37,6 +38,8 @@ public class MoistureContentService {
   private final TestResultRepository testResultRepository;
 
   private final MccReplicatesRepository replicateRepository;
+
+  private final ActivityService activityService;
 
   // The maximum number of replicates is 8 and the entries are sequencial,
   // so we can use a fixed list to fetch the data for the replicates.
@@ -170,6 +173,22 @@ public class MoistureContentService {
   }
 
   /**
+   * Auto save: the activity record and the replicates in one transaction, locked on the
+   * activity's updateTimestamp (the replicate tables have no timestamp column of their own).
+   *
+   * @return the activity, carrying the new updateTimestamp
+   * @throws ResponseStatusException 409 if the test is completed/accepted or the activity
+   *     changed since it was read, 404 if absent
+   */
+  @Transactional
+  public ActivityEntity autosave(@NonNull BigDecimal riaKey, @NonNull MccAutosaveFormDto dto) {
+    activityService.assertTestEditable(riaKey);
+    ActivityEntity activity = activityService.updateActivityField(riaKey, dto.activity());
+    updateReplicateField(riaKey, dto.replicates());
+    return activity;
+  }
+
+  /**
    * This function validates the data to be submitted for MCC.
    * Throws exception if validation fails
    *
@@ -246,6 +265,7 @@ public class MoistureContentService {
       @NonNull BigDecimal riaKey,
       @NonNull List<Integer> replicateNumbers
   ) {
+    activityService.assertTestEditable(riaKey);
     SparLog.info("Deleting replicates with the riaKey: {} and replicateNumbers: {}",
         riaKey, replicateNumbers);
 
@@ -274,6 +294,7 @@ public class MoistureContentService {
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber
   ) {
+    activityService.assertTestEditable(riaKey);
     SparLog.info("Deleting a replicate tables with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
 

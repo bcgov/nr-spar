@@ -74,7 +74,7 @@ describe('GerminationContent hydration (no ghost autosave)', () => {
     // Wait well past debounce (800ms) and maxWait (3000ms).
     await new Promise((resolve) => { setTimeout(resolve, 4000); });
     expect(putMock).not.toHaveBeenCalled();
-    expect(screen.queryByText('Daily germination counts saved')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Saved/)).not.toBeInTheDocument();
   }, 15000);
 
   // Clearing the only count date used to be a local-only change: the autosave

@@ -14,8 +14,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.MccAutosaveFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MccReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
@@ -43,6 +46,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -59,6 +63,9 @@ class MoistureContentServiceTest {
 
   @Mock
   private MccReplicatesRepository replicateRepository;
+
+  @Mock
+  private ActivityService activityService;
 
   @Autowired
   @InjectMocks
@@ -590,5 +597,62 @@ class MoistureContentServiceTest {
     assertThrows(IllegalArgumentException.class, () -> {
       moistureContentService.calculateAverage(riaKey, null);
     });
+  }
+
+  @Test
+  @DisplayName("autosave - updates the activity under its lock, then the replicates")
+  void autosave_updatesActivityThenReplicates() {
+    ActivityFormDto activity = new ActivityFormDto(
+        "STD", null, null, "comment", LocalDateTime.parse("2013-08-01T00:00:00"));
+    MccAutosaveFormDto dto = new MccAutosaveFormDto(activity, List.of(new MccReplicateFormDto(1, "A1", null, null, null, null, 1, null, null)));
+    ActivityEntity updated = new ActivityEntity();
+    when(activityService.updateActivityField(riaKey, activity)).thenReturn(updated);
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, List.of(1)))
+        .thenReturn(List.of());
+
+    assertEquals(updated, moistureContentService.autosave(riaKey, dto));
+    verify(replicateRepository).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("autosave - a lock conflict writes no replicates")
+  void autosave_conflict_writesNoReplicates() {
+    ActivityFormDto activity = new ActivityFormDto(
+        "STD", null, null, "comment", LocalDateTime.parse("2013-08-01T00:00:00"));
+    MccAutosaveFormDto dto = new MccAutosaveFormDto(activity, List.of(new MccReplicateFormDto(1, "A1", null, null, null, null, 1, null, null)));
+    when(activityService.updateActivityField(riaKey, activity))
+        .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "stale"));
+
+    assertThrows(ResponseStatusException.class, () -> moistureContentService.autosave(riaKey, dto));
+    verify(replicateRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("autosave - a completed test writes nothing")
+  void autosave_completedTest_writesNothing() {
+    MccAutosaveFormDto dto = new MccAutosaveFormDto(new ActivityFormDto(
+        "STD", null, null, "comment", LocalDateTime.parse("2013-08-01T00:00:00")),
+        List.of(new MccReplicateFormDto(1, "A1", null, null, null, null, 1, null, null)));
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaKey);
+
+    assertThrows(ResponseStatusException.class, () -> moistureContentService.autosave(riaKey, dto));
+    verify(activityService, never()).updateActivityField(any(), any());
+    verify(replicateRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("delete replicates - a completed test deletes nothing (#2842)")
+  void deleteReplicates_completedTest_deletesNothing() {
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaKey);
+
+    // 409 specifically: without the guard these throw 404 (no replicate found) instead.
+    assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+        () -> moistureContentService.deleteMccReplicates(riaKey, List.of(1, 2))).getStatusCode());
+    assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+        () -> moistureContentService.deleteMccReplicate(riaKey, 1)).getStatusCode());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumbers(any(), any());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
   }
 }

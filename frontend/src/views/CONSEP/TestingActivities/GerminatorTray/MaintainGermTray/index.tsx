@@ -32,6 +32,8 @@ import {
 import { getGermTrayColumns, getGermTrayTestsColumns } from './constants';
 import { GermTrayColumn } from './definitions';
 import useAutosave from '../../../../../hooks/useAutosave';
+import SaveStatus from '../../../../../components/CONSEP/SaveStatus';
+import useActivityConflict from '../../hooks/useActivityConflict';
 import './styles.scss';
 
 const BREAD_CRUMB_ITEMS = [{ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES }];
@@ -54,6 +56,8 @@ const MaintainGermTray = () => {
   const [selectedTrayId, setSelectedTrayId] = useState<number | null>(null);
   const [pendingDeleteTray, setPendingDeleteTray] = useState<GermTrayColumn | null>(null);
   const [pendingDeleteTest, setPendingDeleteTest] = useState<GermTrayTestType | null>(null);
+  // A 409 here means a test's activity changed under us (stale updateTimestamp).
+  const { isConflict, markConflict, clearConflict } = useActivityConflict();
 
   const trayContentsQuery = useQuery({
     queryKey: ['germinatorTrayContents', selectedTrayId],
@@ -89,6 +93,10 @@ const MaintainGermTray = () => {
       }
     },
     onError: (error: any) => {
+      if (error?.response?.status === 409) {
+        markConflict();
+        return;
+      }
       const message = error?.response?.data?.message || error?.message || 'Failed to remove test from tray';
       setAlert({ status: 'error', message });
     }
@@ -127,10 +135,21 @@ const MaintainGermTray = () => {
       }
     },
     onError: (error: any) => {
+      if (error?.response?.status === 409) {
+        markConflict();
+        return;
+      }
       const message = error?.response?.data?.message || error?.message || 'Failed to delete tray';
       setAlert({ status: 'error', message });
     }
   });
+
+  const handleReloadOnConflict = async () => {
+    // 'all': deleting a tray reads its contents from cache even when that tray is not the
+    // selected (active) one, so inactive entries need fresh timestamps too.
+    await queryClient.invalidateQueries({ queryKey: ['germinatorTrayContents'], refetchType: 'all' });
+    clearConflict();
+  };
 
   const handleConfirmDeleteTray = useCallback(() => {
     if (!pendingDeleteTray) return;
@@ -151,17 +170,14 @@ const MaintainGermTray = () => {
     }: {
       germinatorTrayId: number;
       germinatorId: string;
-    }) => assignGerminatorId(germinatorTrayId, germinatorId),
-    onError: (error: any) => {
-      const message = error.response?.data?.message || error.message || 'Assign germinator id API request failed';
-      setAlert({ status: 'error', message });
-    },
-    onSuccess: () => { setAlert(null); }
+    }) => assignGerminatorId(germinatorTrayId, germinatorId)
+    // Failures show as SaveStatus "Not saved", not as a toast.
   });
 
-  useAutosave<GermTrayColumn[]>({
+  const { status: saveStatus, flush } = useAutosave<GermTrayColumn[]>({
     data: trays,
     enabled: !assignMutation.isPending,
+    conflict: isConflict,
     onSave: async (curr, prev) => {
       const prevMap = new Map(
         (prev ?? []).map((tray) => [tray.germinatorTrayId, tray.germinatorId])
@@ -284,6 +300,7 @@ const MaintainGermTray = () => {
       </Row>
       <Row className="consep-maintain-germ-tray-title">
         <PageTitle title="Maintain germ tray" />
+        <SaveStatus status={saveStatus} onRetry={flush} onReload={handleReloadOnConflict} />
       </Row>
       {(alert?.message || trayContentsErrorMessage) && (
         <Row className="consep-maintain-germ-tray-alert">

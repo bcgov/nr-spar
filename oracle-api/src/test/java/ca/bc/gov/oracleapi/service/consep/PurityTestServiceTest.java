@@ -11,10 +11,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateDto;
+import ca.bc.gov.oracleapi.dto.consep.ActivityFormDto;
+import ca.bc.gov.oracleapi.dto.consep.PurityAutosaveFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityReplicateFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
@@ -44,6 +47,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -60,6 +64,9 @@ class PurityTestServiceTest {
 
   @Mock
   private PurityReplicateRepository replicateRepository;
+
+  @Mock
+  private ActivityService activityService;
 
   @Mock
   private PurityDebrisRepository debrisRepository;
@@ -451,5 +458,75 @@ class PurityTestServiceTest {
 
     assertThrows(InvalidTestActivityKeyException.class, () ->
         purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank));
+  }
+
+  @Test
+  @DisplayName("autosave - updates the activity under its lock, then the replicates")
+  void autosave_updatesActivityThenReplicates() {
+    ActivityFormDto activity = new ActivityFormDto(
+        "STD", null, null, "comment", LocalDateTime.parse("2013-08-01T00:00:00"));
+    PurityAutosaveFormDto dto = new PurityAutosaveFormDto(activity, List.of(new PurityReplicateFormDto(1, null, null, null, 1, null)));
+    ActivityEntity updated = new ActivityEntity();
+    when(activityService.updateActivityField(riaKey, activity)).thenReturn(updated);
+    when(replicateRepository.findByRiaKeyAndReplicateNumbers(riaKey, List.of(1)))
+        .thenReturn(List.of());
+
+    assertEquals(updated, purityTestService.autosave(riaKey, dto));
+    verify(replicateRepository).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("autosave - a lock conflict writes no replicates")
+  void autosave_conflict_writesNoReplicates() {
+    ActivityFormDto activity = new ActivityFormDto(
+        "STD", null, null, "comment", LocalDateTime.parse("2013-08-01T00:00:00"));
+    PurityAutosaveFormDto dto = new PurityAutosaveFormDto(activity, List.of(new PurityReplicateFormDto(1, null, null, null, 1, null)));
+    when(activityService.updateActivityField(riaKey, activity))
+        .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "stale"));
+
+    assertThrows(ResponseStatusException.class, () -> purityTestService.autosave(riaKey, dto));
+    verify(replicateRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("autosave - a completed test writes nothing")
+  void autosave_completedTest_writesNothing() {
+    PurityAutosaveFormDto dto = new PurityAutosaveFormDto(new ActivityFormDto(
+        "STD", null, null, "comment", LocalDateTime.parse("2013-08-01T00:00:00")),
+        List.of(new PurityReplicateFormDto(1, null, null, null, 1, null)));
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaKey);
+
+    assertThrows(ResponseStatusException.class, () -> purityTestService.autosave(riaKey, dto));
+    verify(activityService, never()).updateActivityField(any(), any());
+    verify(replicateRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("debris - a completed test writes nothing")
+  void debris_completedTest_writesNothing() {
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaKey);
+
+    assertThrows(ResponseStatusException.class,
+        () -> purityTestService.updateDebris(riaKey, List.of()));
+    assertThrows(ResponseStatusException.class,
+        () -> purityTestService.deletePurityDebris(riaKey, 1, 1));
+    verify(debrisRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("delete replicates - a completed test deletes nothing (#2842)")
+  void deleteReplicates_completedTest_deletesNothing() {
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "completed"))
+        .when(activityService).assertTestEditable(riaKey);
+
+    // 409 specifically: without the guard these throw 404 (no replicate found) instead.
+    assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+        () -> purityTestService.deletePurityReplicates(riaKey, List.of(1, 2))).getStatusCode());
+    assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+        () -> purityTestService.deleteSinglePurityReplicate(riaKey, 1)).getStatusCode());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumbers(any(), any());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
   }
 }

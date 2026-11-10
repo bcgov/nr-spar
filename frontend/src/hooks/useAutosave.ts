@@ -1,33 +1,82 @@
-import { useEffect, useRef } from 'react';
+import {
+  useContext, useEffect, useRef, useState
+} from 'react';
+import AuthContext from '../contexts/AuthContext';
 
 const DEFAULT_DELAY = 800;
 const DEFAULT_MAX_WAIT = 3000;
 
-export type UseAutosaveOptions<T> = {
+export type UseAutosaveOptions<T, R = unknown> = {
   data: T;
-  onSave: (data: T, previous: T | undefined) => void | Promise<void>;
+  onSave: (data: T, previous: T | undefined) => R | Promise<R>;
+  /**
+   * Called after a successful save with the response and the value that was sent. Returns
+   * what the server now holds (typically `sent` with the new `updateTimestamp`), which the
+   * hook records as saved; the caller writes the same change into its own state.
+   */
+  onSaved?: (result: R, sent: T) => T;
+  /**
+   * Caller-side gate: `hydrated && editable && valid`. Saves are serialized by the hook,
+   * so there is no need to add the caller's pending flag. The hook adds
+   * `!conflict` (below) and "still signed in" (AuthContext) itself. All of them block
+   * both scheduling and the pagehide/unmount flush.
+   */
   enabled?: boolean;
+  /** True while the page shows a 409 conflict; nothing is saved until it is cleared. */
+  conflict?: boolean;
+  /**
+   * A data-dependent gate checked when a save actually runs, not only at the last render.
+   * Use it for a condition that can change without a render, e.g. one that reads a ref a
+   * save in flight updates: a save queued behind it, or flushed on unmount, sees the new
+   * value (#2841).
+   */
+  isSavable?: (data: T) => boolean;
   delay?: number;
   maxWait?: number;
   isEqual?: (a: T, b: T) => boolean;
 };
 
+/** What SaveStatus shows. `savedAt` is the last successful save, kept through failures. */
+export type AutosaveStatus = {
+  state: 'idle' | 'saving' | 'saved' | 'failed' | 'conflict';
+  savedAt?: Date;
+};
+
 export type UseAutosaveResult<T> = {
-  flush: () => Promise<void>;
+  status: AutosaveStatus;
+  /** Saves now; resolves true once the latest data is saved (see `save`). */
+  flush: () => Promise<boolean>;
   cancel: () => void;
   markSaved: (value: T) => void;
 };
 
 const defaultIsEqual = <T>(a: T, b: T): boolean => JSON.stringify(a) === JSON.stringify(b);
 
-function useAutosave<T>({
+function useAutosave<T, R = unknown>({
   data,
   onSave,
+  onSaved,
   enabled = true,
+  conflict = false,
+  isSavable,
   delay = DEFAULT_DELAY,
   maxWait = DEFAULT_MAX_WAIT,
   isEqual = defaultIsEqual
-}: UseAutosaveOptions<T>): UseAutosaveResult<T> {
+}: UseAutosaveOptions<T, R>): UseAutosaveResult<T> {
+  // After sign-out the token is gone: a pagehide/unmount flush would 401. Sign-out can
+  // unmount the page in the same render, so ask the provider live at save time.
+  // Outside an AuthProvider (unit tests) there is no isSignedIn: counts as signed in.
+  const { isSignedIn } = useContext(AuthContext);
+  const isSignedInRef = useRef(isSignedIn);
+  isSignedInRef.current = isSignedIn;
+  const canSave = enabled && !conflict;
+  const isSavableRef = useRef(isSavable);
+  isSavableRef.current = isSavable;
+  const isSavableNow = (value: T) => !isSavableRef.current || isSavableRef.current(value);
+  // Also evaluated per render, so a change in it (re)schedules a save.
+  // eslint-disable-next-line react-hooks/refs
+  const savable = isSavableNow(data);
+
   // Latest values held in refs so timer callbacks and event listeners always
   // read current values without needing to re-subscribe.
   const dataRef = useRef(data);
@@ -36,8 +85,10 @@ function useAutosave<T>({
   onSaveRef.current = onSave;
   const isEqualRef = useRef(isEqual);
   isEqualRef.current = isEqual;
-  const enabledRef = useRef(enabled);
-  enabledRef.current = enabled;
+  const onSavedRef = useRef(onSaved);
+  onSavedRef.current = onSaved;
+  const enabledRef = useRef(canSave);
+  enabledRef.current = canSave;
 
   // Snapshot of the last value we have saved (initialised to the first value).
   const savedRef = useRef<T>(data);
@@ -65,32 +116,55 @@ function useAutosave<T>({
     }
   };
 
-  const save = async () => {
+  // The save in flight, if any. Saves run one at a time: a later one (debounced, flushed
+  // on unmount, or explicit) waits for it, then sends the newest data against the
+  // snapshot it left behind, so callers need not gate on their own pending flag.
+  const inFlightRef = useRef<Promise<boolean> | null>(null);
+  const [status, setStatus] = useState<AutosaveStatus>({ state: 'idle' });
+
+  // Resolves true once the latest data is saved (or nothing needed saving), false if
+  // saving is gated off or the save failed.
+  const save = async (): Promise<boolean> => {
     clearTimers();
-    if (!enabledRef.current) {
-      return;
+    while (inFlightRef.current) {
+      // eslint-disable-next-line no-await-in-loop
+      await inFlightRef.current;
     }
     const { current } = dataRef;
     const previous = savedRef.current;
     if (isEqualRef.current(current, previous)) {
-      return;
+      return true;
     }
-    try {
-      await onSaveRef.current(current, previous);
-      savedRef.current = current;
-      failedRef.current = null;
-    } catch {
-      // Keep the previous saved snapshot so the next edit still carries this
-      // data, but remember the failure so it is not retried unchanged.
-      failedRef.current = current;
+    if (!enabledRef.current || !isSavableNow(current) || isSignedInRef.current?.() === false) {
+      return false;
     }
+    const attempt = (async () => {
+      setStatus((prev) => ({ ...prev, state: 'saving' }));
+      try {
+        const result = await onSaveRef.current(current, previous);
+        savedRef.current = onSavedRef.current ? onSavedRef.current(result, current) : current;
+        failedRef.current = null;
+        setStatus({ state: 'saved', savedAt: new Date() });
+        return true;
+      } catch {
+        // Keep the previous saved snapshot so the next edit still carries this
+        // data, but remember the failure so it is not retried unchanged.
+        failedRef.current = current;
+        setStatus((prev) => ({ ...prev, state: 'failed' }));
+        return false;
+      } finally {
+        inFlightRef.current = null;
+      }
+    })();
+    inFlightRef.current = attempt;
+    return attempt;
   };
 
   // Schedule a debounced save whenever data changes and differs from the
   // last-saved snapshot. The maxWait timer caps how long continuous edits
   // can defer a save.
   useEffect(() => {
-    if (!enabled || isEqualRef.current(data, savedRef.current) || hasFailedOn(data)) {
+    if (!canSave || !savable || isEqualRef.current(data, savedRef.current) || hasFailedOn(data)) {
       return;
     }
     if (debounceTimer.current) {
@@ -100,7 +174,7 @@ function useAutosave<T>({
     if (!maxWaitTimer.current) {
       maxWaitTimer.current = setTimeout(save, maxWait);
     }
-  }, [data, enabled, delay, maxWait]);
+  }, [data, canSave, savable, delay, maxWait]);
 
   // Flush pending changes on page hide and on unmount.
   useEffect(() => {
@@ -125,7 +199,24 @@ function useAutosave<T>({
     failedRef.current = null;
   };
 
-  return { flush: save, cancel: clearTimers, markSaved };
+  // A failure stops mattering once the data is back to what is saved: the edit was
+  // reverted, or Reload replaced it (markSaved). Derived, so there is nothing to reset.
+  // eslint-disable-next-line react-hooks/refs
+  const recovered = status.state === 'failed' && isEqual(data, savedRef.current);
+  let shownStatus = status;
+  if (conflict) {
+    // A conflict outranks whatever the last attempt did: nothing saves until Reload.
+    shownStatus = { ...status, state: 'conflict' };
+  } else if (recovered) {
+    shownStatus = { ...status, state: status.savedAt ? 'saved' : 'idle' };
+  }
+
+  return {
+    status: shownStatus,
+    flush: save,
+    cancel: clearTimers,
+    markSaved
+  };
 }
 
 export default useAutosave;
