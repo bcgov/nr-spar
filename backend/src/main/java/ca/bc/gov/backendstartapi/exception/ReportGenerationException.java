@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.exception;
 
-/** Thrown when a Jasper report cannot be compiled or exported. */
+/** Thrown when a report cannot be rendered. */
 public class ReportGenerationException extends RuntimeException {
 
   public ReportGenerationException(String message, Throwable cause) {

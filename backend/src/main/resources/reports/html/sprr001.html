@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPRR001 Seedlot Registration Report, HTML/Thymeleaf version of
+  reports/SPRR001/SPRR001-SEEDLOT_REG_DTL.jrxml.
+
+  Layout notes for anyone porting another Jasper report:
+  - Each Jasper band becomes one <table class="frm"> on a 12-column grid. The JRXML's vertical lines
+    sit at 1/4, 1/3, 1/2, 2/3 and 3/4 of the 536pt width, so colspans of 3, 4 and 6 reproduce them.
+  - Jasper's 0.25pt <line> elements become collapsed table borders.
+  - printWhenExpression becomes th:if; all formatting is done in Sprr001HtmlModel (m.*).
+  - Raw fields come from m.row (Sprr001MainRow), exactly as the Jasper $F{...} fields did.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="'SPRR001 ' + ${m.seedlotNumber}">SPRR001</title>
+  <style>
+    /*
+      Jasper prints its title band (logo, title, user, date, page X of Y) on page 1 only, and the
+      "Seedlot Number" pageHeader band on every page. CSS paged media does the same with :first and
+      two running elements. Jasper margins: 36pt sides, 15pt top/bottom; the top margin here also
+      holds the running header.
+    */
+    @page {
+      size: letter;
+      margin: 48pt 36pt 24pt 36pt;
+      @top-center { content: element(seedlotBar); vertical-align: bottom; }
+    }
+    @page :first {
+      margin-top: 112pt;
+      @top-center { content: element(titleBand); vertical-align: bottom; }
+    }
+
+    body { font-family: 'Liberation Sans', sans-serif; font-size: 9pt; margin: 0; }
+
+    /* ---- Running headers ---- */
+    .header { position: running(titleBand); width: 540pt; padding-bottom: 4pt; }
+    .seedlot-bar-running { position: running(seedlotBar); width: 540pt; padding-bottom: 4pt; }
+    .header table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .header td { vertical-align: top; padding: 0; }
+    .logo { width: 122pt; height: 48pt; }
+    .ministry { text-align: center; font-weight: bold; font-size: 10pt; }
+    .title { text-align: center; font-weight: bold; font-size: 10pt; padding-top: 10pt; }
+    .meta { text-align: right; font-size: 8pt; line-height: 11pt; }
+    .pagenum::before { content: counter(page); }
+    .pagecount::before { content: counter(pages); }
+    .seedlot-bar {
+      border-top: 0.25pt solid #000; border-bottom: 0.25pt solid #000;
+      text-align: right; font-weight: bold; font-size: 11pt; padding: 4pt 0; margin-top: 6pt;
+    }
+
+    /* ---- Form sections ---- */
+    /*
+      Vertical rhythm copied from the JRXML so the page breathes like the Jasper version:
+      - field rows are 30pt: label box at y=4 (12pt tall), value box at y=16 (12pt tall)
+      - section headings are 18pt
+      - sections are separated by the 2-4pt spacer bands Jasper used (margin-top: 3pt);
+        "joined" sections continue the box above with no gap, as Jasper's adjacent bands did
+      - a few rows are taller in Jasper; the h-* classes reproduce those band heights
+      Row heights are minimums: content that wraps still grows the row.
+    */
+    table.frm {
+      width: 100%; border-collapse: collapse; table-layout: fixed;
+      page-break-inside: avoid; /* Jasper splitType="Prevent" */
+      margin-top: 3pt;
+    }
+    table.frm.joined { margin-top: -0.25pt; }
+    table.frm td, table.frm th { border: 0.25pt solid #000; vertical-align: top; }
+    table.frm td { height: 24pt; padding: 4pt 4pt 2pt 4pt; } /* 4 + 24 + 2 = 30pt */
+    table.frm th {
+      text-align: left; font-size: 10pt; font-weight: bold; color: #004000;
+      height: 12pt; line-height: 12pt; padding: 3pt 4pt; /* 18pt */
+    }
+    .lbl { font-weight: bold; display: block; line-height: 12pt; }
+    /* pre-wrap: Jasper keeps runs of spaces (agency names are joined with double spaces); HTML collapses them. */
+    .val { display: block; padding-left: 3pt; line-height: 12pt; min-height: 12pt; white-space: pre-wrap; }
+    tr.h31 td { height: 25pt; }
+    tr.h40 td { height: 34pt; }
+    tr.h48 td { height: 42pt; }
+    tr.h50 td { height: 44pt; }
+    tr.h55 td { height: 49pt; }
+    .comment { font-size: 10pt; line-height: 13pt; }
+    .note { float: right; font-size: 8pt; font-weight: bold; font-style: italic; }
+    .hint { font-style: italic; }
+
+    /* "Area of Use" values are calculated by SPAR and shaded, as in Jasper (#C0C0C0). */
+    table.shaded td, table.shaded th { background-color: #C0C0C0; }
+
+    /* Genetic worth: label/value pairs in two rows of six, no inner borders. */
+    table.gw { width: 100%; border-collapse: collapse; margin-top: 2pt; }
+    table.gw td { border: none; height: 14pt; padding: 0 2pt; font-size: 9pt; line-height: 12pt; }
+    table.gw td.code { font-weight: bold; text-align: right; width: 8%; }
+
+    /* Ownership: own column widths taken from the subreport (536pt total). */
+    /* Ownership subreport: 25pt column-label band, 14pt detail rows. */
+    table.own td { border-top: none; border-bottom: none; height: 12pt; padding: 1pt 4pt 1pt 4pt; line-height: 12pt; }
+    table.own tr.heading th { border-bottom: 0.25pt solid #000; }
+    table.own tr.cols td { font-weight: bold; height: 25pt; padding-top: 3pt; vertical-align: bottom; }
+    table.own tr:last-child td { border-bottom: 0.25pt solid #000; padding-bottom: 6pt; }
+    table.own td + td { border-left: none; }
+    table.own td { border-right: none; }
+    table.own td:last-child { border-right: 0.25pt solid #000; }
+    table.own .num { text-align: right; }
+    .blank { border-bottom: 0.25pt solid #000; height: 18pt; }
+
+    .checkbox {
+      display: inline-block; width: 8pt; height: 8pt; border: 0.75pt solid #000;
+      text-align: center; font-size: 7pt; line-height: 8pt; font-weight: bold;
+    }
+    .declaration td { height: 28pt; }
+  </style>
+</head>
+<body th:with="r=${m.row}">
+
+<!-- ======================= Running headers (title on page 1, seedlot bar after) ======================= -->
+<div class="header">
+  <table>
+    <colgroup><col style="width: 122pt"/><col/><col style="width: 120pt"/></colgroup>
+    <tr>
+      <td rowspan="2">
+        <img class="logo" th:if="${!#strings.isEmpty(m.logoDataUri)}" th:src="${m.logoDataUri}" alt="BC Government logo"/>
+      </td>
+      <td class="ministry">Ministry of Forests, Lands, and Natural Resource Operations</td>
+      <td class="meta" rowspan="2">
+        <div>SPRR001</div>
+        <div th:text="${m.userId}">USERID</div>
+        <div th:text="${r.dbName}">DB</div>
+        <div th:text="${m.printedAt}">2026-01-01 00:00:00 AM</div>
+        <div>Page <span class="pagenum"></span> of <span class="pagecount"></span></div>
+      </td>
+    </tr>
+    <tr><td class="title">Seedlot Registration Report</td></tr>
+  </table>
+  <div class="seedlot-bar" th:text="'Seedlot Number: ' + ${m.seedlotNumber}">Seedlot Number: 00000</div>
+</div>
+<div class="seedlot-bar-running">
+  <div class="seedlot-bar" th:text="'Seedlot Number: ' + ${m.seedlotNumber}">Seedlot Number: 00000</div>
+</div>
+
+<!-- ======================= General Lot Information ======================= -->
+<table class="frm">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr><th colspan="12">General Lot Information</th></tr>
+  <tr>
+    <td colspan="6"><span class="lbl">To Be Registered:</span><span class="val" th:text="${r.toBeRegistrdInd}"></span></td>
+    <td colspan="6"><span class="lbl">Status:</span><span class="val" th:text="${r.statusDesc}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Species:</span><span class="val" th:text="${r.speciesDesc}"></span></td>
+    <td colspan="6"><span class="lbl">Genetic Class:</span><span class="val" th:text="${r.geneticClass}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Superior Provenance:</span><span class="val" th:text="${r.superiorPrvncInd}"></span></td>
+    <td colspan="6"><span class="lbl">BC Source:</span><span class="val" th:text="${r.bcSource}"></span></td>
+  </tr>
+  <tr th:if="${m.classA}">
+    <td colspan="12"><span class="lbl">Class A Source:</span><span class="val" th:text="${r.seedlotSource}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Applicant Information ======================= -->
+<table class="frm joined">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr><th colspan="12">Applicant Information</th></tr>
+  <tr>
+    <td colspan="12"><span class="lbl">Applicant Agency:</span><span class="val" th:text="${m.applicantAgency}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Applicant Address:</span><span class="val" th:text="${r.applicantsAddress}"></span></td>
+    <td colspan="6"><span class="lbl">Applicant's Email Address:</span><span class="val" th:text="${r.applicantEmailAddress}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Collection: Class A (parent tree) ======================= -->
+<table class="frm" th:if="${m.classA}">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr><th colspan="12">Collection From Parent Tree</th></tr>
+  <tr>
+    <td colspan="6">
+      <span class="lbl">Orchard ID:</span><span class="val" th:text="${r.orchardId}"></span>
+      <span class="lbl">Effective Population Size:</span><span class="val" th:text="${m.effectivePopSize}"></span>
+    </td>
+    <td colspan="6"><span class="lbl">Orchard Address:</span><span class="val" th:text="${r.orchardAddress}"></span></td>
+  </tr>
+  <tr><td colspan="12"><span class="lbl">Primary Seed Planning Unit:</span></td></tr>
+  <tr>
+    <td colspan="4"><span class="lbl">Mean Elevation of Parent Trees (m):</span><span class="val" th:text="${m.meanElevation}"></span></td>
+    <td colspan="4"><span class="lbl">Mean Latitude of Parent Trees:</span><span class="val" th:text="${m.collectionLatitude}"></span></td>
+    <td colspan="4"><span class="lbl">Mean Longitude of Parent Trees:</span><span class="val" th:text="${m.collectionLongitude}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Collection: Class B (natural stand) ======================= -->
+<table class="frm" th:unless="${m.classA}">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr><th colspan="12">Collection From a Natural Stand</th></tr>
+  <tr>
+    <td colspan="12"><span class="lbl">Collection Org Unit:</span><span class="val" th:text="${r.collectionOrgUnitDesc}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Location:</span><span class="val" th:text="${r.collectionLocnDesc}"></span></td>
+    <td colspan="6"><span class="lbl">Collection Provenance:</span><span class="val" th:text="${r.collectionProv}"></span></td>
+  </tr>
+  <tr class="h50">
+    <td colspan="4">
+      <span class="lbl">CFS Appendix 5 Criteria Met (Y/N):</span>
+      <span class="val"><span class="hint">if applicable</span>    <span th:text="${r.cfsAppendix}"></span></span>
+    </td>
+    <td colspan="8">
+      <span class="lbl">Genetic Worth:</span>
+      <table class="gw">
+        <tr>
+          <td class="code">Ad:</td><td th:text="${r.gwAd}"></td>
+          <td class="code">Dfs:</td><td th:text="${r.gwDfs}"></td>
+          <td class="code">Dfu:</td><td th:text="${r.gwDfu}"></td>
+          <td class="code">Dfw:</td><td th:text="${r.gwDfw}"></td>
+          <td class="code">Dsb:</td><td th:text="${r.gwDsb}"></td>
+          <td class="code">Dsc:</td><td th:text="${r.gwDsc}"></td>
+        </tr>
+        <tr>
+          <td class="code">Dsg:</td><td th:text="${r.gwDsg}"></td>
+          <td class="code">Gvo:</td><td th:text="${r.gwGvo}"></td>
+          <td class="code">Iws:</td><td th:text="${r.gwIws}"></td>
+          <td class="code">Wdu:</td><td th:text="${r.gwWdu}"></td>
+          <td class="code">Wve:</td><td th:text="${r.gwWve}"></td>
+          <td class="code">Wwd:</td><td th:text="${r.gwWwd}"></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4"><span class="lbl">Collection Latitude(Mean):</span><span class="val" th:text="' (Deg/Min/Sec) ' + ${m.collectionLatitude}"></span></td>
+    <td colspan="4"><span class="lbl">Collection Longitude(Mean):</span><span class="val" th:text="' (Deg/Min/Sec) ' + ${m.collectionLongitude}"></span></td>
+    <td colspan="4"><span class="lbl">Collection Elevation (Mean / Min / Max):</span><span class="val" th:text="${m.elevationMeanMinMax}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Radius of Collection Area (km):</span><span class="val" th:text="${m.radiusOfCollectionArea}"></span></td>
+    <td colspan="6"><span class="lbl">Capture Method:</span><span class="val" th:text="${r.captureMethod}"></span></td>
+  </tr>
+  <tr class="h48">
+    <td colspan="3"><span class="lbl">SPZ of Collection Area:</span><span class="val" th:text="${r.spzOfCollectionAreaDesc}"></span></td>
+    <td colspan="3"><span class="lbl">Geographic Area (if SPZ=M):</span><span class="val" th:text="${r.geoArea}"></span></td>
+    <td colspan="6"><span class="lbl">Is the Collection all from within the same SPZ? (Y/N):</span><span class="val" th:text="${r.collectionSpzInd}"></span></td>
+  </tr>
+  <tr class="h50">
+    <td colspan="6"><span class="lbl">Source BEC Zone/Subzone/Variant:</span><span class="val" th:text="${m.becZoneSubzoneVariant}"></span></td>
+    <td colspan="6"><span class="lbl">Is the Collection all from within the same BEC Zone? (Y/N):</span><span class="val" th:text="${r.collectionBgcInd}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Collection details (both classes) ======================= -->
+<table class="frm joined">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr>
+    <td colspan="6"><span class="lbl">Collection Method(s):</span><span class="val" th:text="${r.coneCollectionMethodDesc}"></span></td>
+    <td colspan="3"><span class="lbl">Collection Start Date:</span><span class="val" th:text="${r.collectionStartDate}"></span></td>
+    <td colspan="3"><span class="lbl">Collection End Date:</span><span class="val" th:text="${r.collectionEndDate}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="3"><span class="lbl">No. of Containers:</span><span class="val" th:text="${m.noOfContainers}"></span></td>
+    <td colspan="3"><span class="lbl">Volume Per Container (HI):</span><span class="val" th:text="${m.volPerContainer}"></span></td>
+    <td colspan="3"><span class="lbl">Volume of Cones (HI):</span><span class="val" th:text="${m.clctnVolume}"></span></td>
+    <td colspan="3"><span class="lbl">No. Trees Collected From:</span><span class="val" th:text="${m.treesCollectedFrom}"></span></td>
+  </tr>
+</table>
+
+<!-- Jasper's comments subreport (SR1) collapses to this one cell; empty comments leave a taller blank box. -->
+<table class="frm">
+  <tr th:class="${r.orchardComment == null} ? 'h55' : 'h40'">
+    <td><span class="lbl">Comments:</span><span class="val comment" th:text="${r.orchardComment}"></span></td>
+  </tr>
+</table>
+
+<table class="frm">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr class="h50">
+    <td colspan="6"><span class="lbl">Cone Collector Agency:</span><span class="val" th:text="${m.coneCollectorAgency}"></span></td>
+    <td colspan="6"><span class="lbl">Collector Address:</span><span class="val" th:text="${r.collectorAddress}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Area of Use (shaded: calculated by SPAR) ======================= -->
+<table class="frm shaded">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr><th colspan="12">Area of Use <span class="note">shaded area calculated by SPAR</span></th></tr>
+  <tr class="h48">
+    <td colspan="12"><span class="lbl">Seed Planning Zone(s):</span><span class="val" th:text="${r.spz}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Minimum Elevation (m):</span><span class="val" th:text="${m.minElevation}"></span></td>
+    <td colspan="6"><span class="lbl">Maximum Elevation (m):</span><span class="val" th:text="${m.maxElevation}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="3"><span class="lbl">Minimum Latitude:</span><span class="val" th:text="${m.minLatitude}"></span></td>
+    <td colspan="3"><span class="lbl">Maximum Latitude:</span><span class="val" th:text="${m.maxLatitude}"></span></td>
+    <td colspan="3"><span class="lbl">Minimum Longitude:</span><span class="val" th:text="${m.minLongitude}"></span></td>
+    <td colspan="3"><span class="lbl">Maximum Longitude:</span><span class="val" th:text="${m.maxLongitude}"></span></td>
+  </tr>
+  <tr class="h31">
+    <td colspan="12"><span class="lbl">Area Of Use Comment:</span><span class="val" th:text="${r.ownershipComment}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Ownership (Jasper subreport SR2, now a fragment) ======================= -->
+<table th:replace="~{sprr001-ownership :: ownership(${m.ownershipLines})}"></table>
+
+<!-- ======================= Interim Cone Storage ======================= -->
+<table class="frm">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr><th colspan="12">Interim Cone Storage</th></tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Interim Agency:</span><span class="val" th:text="${m.interimAgency}"></span></td>
+    <td colspan="6"><span class="lbl">Storage Location:</span><span class="val" th:text="${r.storageLocation}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Storage Facility Type:</span><span class="val" th:text="${m.storageFacilityType}"></span></td>
+    <td colspan="3"><span class="lbl">Interim Storage From Date:</span><span class="val" th:text="${r.intermStrgStDate}"></span></td>
+    <td colspan="3"><span class="lbl">Interim Storage To Date:</span><span class="val" th:text="${r.intermStrgEndDate}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Extraction ======================= -->
+<table class="frm">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr><th colspan="12">Extraction</th></tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Extractory Agency:</span><span class="val" th:text="${m.extractoryAgency}"></span></td>
+    <td colspan="3"><span class="lbl">Extraction Start Date:</span><span class="val" th:text="${r.extractionStDate}"></span></td>
+    <td colspan="3"><span class="lbl">Extraction End Date:</span><span class="val" th:text="${r.extractionEndDate}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Temporary Seed Storage ======================= -->
+<table class="frm">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr><th colspan="12">Temporary Seed Storage</th></tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Seed Storage Agency:</span><span class="val" th:text="${m.seedStorageAgency}"></span></td>
+    <td colspan="3"><span class="lbl">Storage From Date:</span><span class="val" th:text="${r.temporaryStorageStartDate}"></span></td>
+    <td colspan="3"><span class="lbl">Storage To Date:</span><span class="val" th:text="${r.temporaryStorageEndDate}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Audit History ======================= -->
+<table class="frm">
+  <colgroup><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/><col/></colgroup>
+  <tr><th colspan="12">Audit History</th></tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Created By User:</span><span class="val" th:text="${r.createdByUser}"></span></td>
+    <td colspan="6"><span class="lbl">Created Date:</span><span class="val" th:text="${r.createdDate}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Last Updated By User:</span><span class="val" th:text="${r.lastUpdatedByUser}"></span></td>
+    <td colspan="6"><span class="lbl">Last Updated Date:</span><span class="val" th:text="${r.lastUpdatedDate}"></span></td>
+  </tr>
+  <tr>
+    <td colspan="6"><span class="lbl">Submitted By User:</span><span class="val" th:text="${r.submittedByUser}"></span></td>
+    <td colspan="6"><span class="lbl">Submitted Date:</span><span class="val" th:text="${r.submittedByDate}"></span></td>
+  </tr>
+</table>
+
+<!-- ======================= Declaration ======================= -->
+<table class="frm declaration">
+  <colgroup><col style="width: 40pt"/><col/></colgroup>
+  <tr><th colspan="2">Declaration</th></tr>
+  <tr>
+    <td style="border-right: none; text-align: center; vertical-align: middle;">
+      <!-- Jasper used DejaVu Sans for U+2610/U+2611; a CSS box needs no extra font. -->
+      <span class="checkbox" th:text="${m.declared} ? 'X' : ''"></span>
+    </td>
+    <td style="border-left: none; padding: 4pt 30pt 6pt 6pt;">I hereby declare that the information provided in this application is true and correct, and that I am the owner of the lot or have been authorized by the owner(s) of the lot to submit this application.</td>
+  </tr>
+</table>
+
+</body>
+</html>

@@ -130,7 +130,7 @@ export const getCollectionGeometry = (
 };
 
 /**
- * Fetches the legacy SPRR001 Class B seedlot registration report as a PDF blob.
+ * Fetches the SPRR001 Class B seedlot registration report as a PDF blob.
  * Open it with openBlankTab + openBlobInNewTab from DownloadUtils when the
  * request is async (see that module's popup-blocker-safe pattern).
  */
