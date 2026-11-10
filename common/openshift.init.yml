@@ -39,9 +39,6 @@ parameters:
   - name: "S3_USER"
     description: "The S3 user to use for backup"
     required: true
-  - name: VITE_USER_POOLS_WEB_CLIENT_ID
-    description: Cognito user pools web client ID
-    required: true
 objects:
   - apiVersion: v1
     kind: Secret
@@ -85,14 +82,6 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       forest-client-api-key: ${FORESTCLIENTAPI_KEY}
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${NAME}-${ZONE}-frontend
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      vite-user-pools-web-client-id: ${VITE_USER_POOLS_WEB_CLIENT_ID}
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:

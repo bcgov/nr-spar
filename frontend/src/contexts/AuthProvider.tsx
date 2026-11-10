@@ -5,20 +5,15 @@ import React, {
   useRef,
   useState
 } from 'react';
-import {
-  signInWithRedirect,
-  signOut as awsSignOut,
-  fetchAuthSession,
-  decodeJWT
-} from 'aws-amplify/auth';
-import type { AuthSession } from 'aws-amplify/auth';
+import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import axios from 'axios';
 import { UserClientRolesType } from '../types/UserRoleType';
 import { env } from '../env';
 import FamUser from '../types/FamUser';
 import LoginProviders from '../types/LoginProviders';
 import AuthContext, { AuthContextData } from './AuthContext';
-import { MINISTRY_OF_FOREST_ID, SPAR_REDIRECT_PATH, TSC_ADMIN_ROLE } from '../shared-constants/shared-constants';
+import { SPAR_REDIRECT_PATH, TSC_ADMIN_ROLE } from '../shared-constants/shared-constants';
+import { parseToken } from '../utils/FamTokenUtils';
 import { TWO_MINUTE } from '../config/TimeUnits';
 import ROUTES from '../routes/constants';
 
@@ -26,106 +21,33 @@ interface Props {
   children: React.ReactNode;
 }
 
-const findFindAndLastName = (displayName: string, provider: string): Array<string> => {
-  let splitString = ', ';
-  if (!displayName.includes(splitString)) {
-    splitString = ' ';
+// The CSS integration's client id is the same in dev, test and prod; only the issuer differs.
+const KEYCLOAK_CLIENT_ID = 'spar-seed-planning-and-registry-application-6734';
+const DEV_ISSUER = 'https://dev.loginproxy.gov.bc.ca/auth/realms/standard';
+const AUTH_CALLBACK_PATH = '/authCallback';
+
+// Redirect URIs are derived from the origin so one image serves PR previews, test and prod.
+// Tokens live in localStorage, like Amplify's did, so a new tab is already signed in.
+const userManager = new UserManager({
+  authority: env.VITE_KEYCLOAK_ISSUER || DEV_ISSUER,
+  client_id: KEYCLOAK_CLIENT_ID,
+  redirect_uri: `${window.location.origin}${AUTH_CALLBACK_PATH}`,
+  post_logout_redirect_uri: `${window.location.origin}/`,
+  response_type: 'code',
+  scope: 'openid',
+  userStore: new WebStorageStateStore({ store: window.localStorage })
+});
+
+// The authorization code is single-use and React StrictMode runs effects twice in dev,
+// so every caller shares one exchange.
+let callbackExchange: Promise<unknown> | null = null;
+const completeSignInCallback = (): Promise<unknown> => {
+  if (window.location.pathname !== AUTH_CALLBACK_PATH) {
+    return Promise.resolve();
   }
-  const parts = displayName.split(splitString);
-  let firstName = parts[0];
-  let lastName = parts[1];
-
-  if (parts.length > 2) {
-    lastName = `${lastName} ${parts[2]}`;
-  }
-
-  if (provider === LoginProviders.IDIR) {
-    firstName = parts[1].split(' ')[0].trim();
-    lastName = parts[0].includes(' ') ? parts[0].split(' ')[1] : parts[0];
-  }
-
-  return [firstName, lastName];
-};
-
-const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] => {
-  const separator = '_';
-
-  const cognitoGroups: string[] = accessToken['cognito:groups'];
-  if (!cognitoGroups) {
-    return [];
-  }
-
-  const parsedClientRoles: UserClientRolesType[] = [];
-
-  cognitoGroups.forEach((cognitoRole) => {
-    if (!cognitoRole.includes(separator)) {
-      throw new Error(`Invalid role format with string: ${cognitoRole}`);
-    }
-    const lastUnderscoreIndex = cognitoRole.lastIndexOf(separator);
-    let role = cognitoRole.substring(0, lastUnderscoreIndex);
-    let clientId = cognitoRole.substring(lastUnderscoreIndex + 1);
-
-    // If the last substring after an underscore is not a number then it's a concrete role,
-    // we need to manually assign it a MoF client id for now.
-    if (Number.isNaN(Number(clientId))) {
-      clientId = MINISTRY_OF_FOREST_ID;
-      role = cognitoRole;
-    }
-
-    // Check if a client id already exist in parsed client role
-    const found = parsedClientRoles.find((clientRoles) => clientRoles.clientId === clientId);
-
-    if (found) {
-      const idx = parsedClientRoles.findIndex((clientRoles) => clientRoles.clientId === clientId);
-      parsedClientRoles[idx].roles.push(role);
-    } else {
-      parsedClientRoles.push({
-        clientId,
-        roles: [role]
-      });
-    }
-  });
-
-  return parsedClientRoles;
-};
-
-/**
- * Parses a CognitoUserSession into a JS object. For a deeper understanding
- * you can take a look on the attribute mapping reference at:
- * https://github.com/bcgov/nr-forests-access-management/wiki/OIDC-Attribute-Mapping
- *
- * @param {AuthSession} session CognitoUserSession to be parsed.
- * @returns {FamUser} The FamUser object
- */
-const parseToken = (session: AuthSession): FamUser => {
-  const accessToken = session.tokens?.accessToken;
-  const idToken = session.tokens?.idToken;
-  if (!accessToken || !idToken) {
-    throw new Error('The user is not authenticated');
-  }
-
-  const decodedIdToken: Record<string, any> = decodeJWT(idToken.toString()).payload;
-  const decodedAccessToken: Record<string, any> = decodeJWT(accessToken.toString()).payload;
-  // Extract the first name and last name from the displayName and remove unwanted part
-  const displayName = decodedIdToken['custom:idp_display_name'] as string;
-  const idpProvider = (decodedIdToken['custom:idp_name'] as string).toUpperCase();
-  const idpUsername = (decodedIdToken['custom:idp_username'] as string).toUpperCase();
-  const [firstName, lastName] = findFindAndLastName(displayName, idpProvider);
-
-  const famUser: FamUser = {
-    displayName: decodedIdToken['custom:idp_display_name'], // E.g: 'de Campos, Ricardo WLRS:EX'
-    email: decodedIdToken.email,
-    lastName,
-    firstName,
-    providerUsername: idpUsername, // E.g: RDECAMPO
-    name: `${firstName} ${lastName}`,
-    clientRoles: parseRole(decodedAccessToken),
-    provider: decodedIdToken['custom:idp_name'].toLocaleUpperCase(),
-    jwtToken: idToken.toString(),
-    userId: `${idpProvider}@${idpUsername}` // E.g: 'IDIR@GROOT'
-  };
-
-  return famUser;
+  callbackExchange ??= userManager.signinRedirectCallback()
+    .finally(() => window.history.replaceState(null, '', ROUTES.ROOT));
+  return callbackExchange;
 };
 
 const clientIdLocalStorageKey = 'selected-client-id';
@@ -163,8 +85,16 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
 
   const fetchFamCurrentSession = async (pathname: string): Promise<FamUser | null> => {
     try {
-      const session: AuthSession = await fetchAuthSession({ forceRefresh: true });
-      const famUser = parseToken(session);
+      await completeSignInCallback();
+      if (!await userManager.getUser()) {
+        throw new Error('The user is not authenticated');
+      }
+      // Always refresh, like Amplify's forceRefresh: a fresh token carries revoked roles.
+      const oidcUser = await userManager.signinSilent();
+      if (!oidcUser) {
+        throw new Error('The user session could not be refreshed');
+      }
+      const famUser = parseToken(oidcUser.access_token);
       // Check if selected role still exists on user profile
       if (selectedClientRoles) {
         const foundFamClientRoles = famUser.clientRoles.find((famClientRole) => (
@@ -188,7 +118,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       console.warn(e);
       // Clear stored client id and name
       localStorage.clear();
-      localStorage.setItem(SPAR_REDIRECT_PATH, pathname);
+      if (pathname !== AUTH_CALLBACK_PATH) {
+        localStorage.setItem(SPAR_REDIRECT_PATH, pathname);
+      }
       setSelectedClientRoles(null);
       setUser(null);
       setSigned(false);
@@ -236,30 +168,33 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const signIn = (signInProvider: LoginProviders): void => {
-    const appEnv = env.VITE_ZONE ?? 'DEV';
-
-    signInWithRedirect({
-      provider: {
-        custom: `${(appEnv).toLocaleUpperCase()}-${String(signInProvider)}`
-      }
-    });
+    // IDIR goes through IDIR-MFA, whose Keycloak alias is azureidir.
+    const idpHint = signInProvider === LoginProviders.IDIR ? 'azureidir' : 'bceidbusiness';
+    userManager.signinRedirect({ extraQueryParams: { kc_idp_hint: idpHint } })
+      .catch((err) => console.warn(err));
   };
 
-  const signOut = (): void => {
-    awsSignOut()
-      .then(() => {
-        setSelectedClientRoles(null);
-        setSigned(false);
-        setUser(null);
-        setProvider('');
-        setIsTscAdmin(false);
-        if (intervalInstance) {
-          console.log('stopping refresh token');
-          clearInterval(intervalInstance);
-          setIntervalInstance(null);
-        }
-        localStorage.clear();
-      }).catch((err) => console.warn(err));
+  const signOut = async (): Promise<void> => {
+    setSelectedClientRoles(null);
+    setSigned(false);
+    setUser(null);
+    setProvider('');
+    setIsTscAdmin(false);
+    if (intervalInstance) {
+      console.log('stopping refresh token');
+      clearInterval(intervalInstance);
+      setIntervalInstance(null);
+    }
+    // Keycloak needs the id token to end the realm session; clearing it first would leave
+    // the session alive and the next sign-in would skip the prompt.
+    const oidcUser = await userManager.getUser();
+    localStorage.clear();
+    try {
+      await userManager.signoutRedirect({ id_token_hint: oidcUser?.id_token });
+    } catch (err) {
+      console.warn(err);
+      window.location.href = ROUTES.ROOT;
+    }
   };
 
   const refreshTokenPvt = async () => {

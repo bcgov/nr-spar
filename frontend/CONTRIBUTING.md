@@ -55,12 +55,8 @@ can be checked and you can use `npm run lint --fix` to fix small issues.
 Now that your environment is all set up, we can run the application.
 To do that, first you need to install required dependencies.
 
-Remember of setting up the required environment variables. You can create a `.env` file containing:
-
-```
-VITE_USER_POOLS_ID=<pools-id>
-VITE_USER_POOLS_WEB_CLIENT_ID=<pools-web-client-id>
-```
+Login works locally without extra configuration: the app signs in against the BC Gov SSO
+dev realm by default. To use another realm, set `VITE_KEYCLOAK_ISSUER` in a `.env` file.
 
 And if you want to run Cypress, please add:
 ```

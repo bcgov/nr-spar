@@ -25,14 +25,14 @@
 		Strict-Transport-Security "max-age=31536000"
 		Content-Security-Policy "
 			base-uri 'self';
-			connect-src 'self' https://*.gov.bc.ca {$VITE_AWS_DOMAIN} {$VITE_SERVER_URL} https://cognito-idp.ca-central-1.amazonaws.com/ https://*.execute-api.ca-central-1.amazonaws.com;
+			connect-src 'self' https://*.gov.bc.ca {$VITE_SERVER_URL};
 			default-src 'self';
 			font-src 'self' https://1.www.s81c.com/;
 			frame-src 'self' https://*.gov.bc.ca; img-src 'self';
 			manifest-src 'self';
 			media-src 'self';
 			object-src 'none';
-			script-src 'unsafe-inline' 'report-sample' 'self' https://*.auth.ca-central-1.amazoncognito.com/ https://*.cloudfront.net;
+			script-src 'unsafe-inline' 'report-sample' 'self' https://*.cloudfront.net;
 			style-src 'report-sample' 'self' 'unsafe-inline';
 			worker-src 'none';
 		"
@@ -41,7 +41,7 @@
 
 	handle /env.js {
 		header Content-Type "text/javascript"
-		respond `window.config = {"VITE_NRSPARWEBAPP_VERSION":"{$VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}","VITE_USER_POOLS_ID":"{$VITE_USER_POOLS_ID}","VITE_USER_POOLS_WEB_CLIENT_ID":"{$VITE_USER_POOLS_WEB_CLIENT_ID}","VITE_ZONE":"{$VITE_ZONE}"};`
+		respond `window.config = {"VITE_NRSPARWEBAPP_VERSION":"{$VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}","VITE_KEYCLOAK_ISSUER":"{$VITE_KEYCLOAK_ISSUER}","VITE_ZONE":"{$VITE_ZONE}"};`
 	}
 
 	# SPA fallback only for browser navigations (Accept: text/html).

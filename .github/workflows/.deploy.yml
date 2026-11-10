@@ -54,20 +54,10 @@ jobs:
     name: Deploy (init)
     environment: ${{ inputs.environment }}
     outputs:
-      fam-modded-zone: ${{ steps.fam-modded-zone.outputs.fam-modded-zone }}
       keycloak-issuer: ${{ steps.keycloak.outputs.keycloak-issuer }}
       triggered: ${{ steps.trigger.outputs.triggered }}
     runs-on: ubuntu-26.04
     steps:
-      - name: FAM routing
-        id: fam-modded-zone
-        run: |
-          if [ ${{ github.event_name }} == 'pull_request' ]; then
-            echo "fam-modded-zone=$(( ${{ inputs.target }} % 50 ))" >> $GITHUB_OUTPUT
-          else
-            echo "fam-modded-zone=${{ inputs.target }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Keycloak issuer
         id: keycloak
         run: |
@@ -99,7 +89,6 @@ jobs:
             -p S3_ENDPOINT='${{ vars.S3_ENDPOINT }}'
             -p S3_USER='${{ vars.S3_USER }}'
             -p S3_PASSWORD='${{ secrets.S3_PASSWORD }}'
-            -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ secrets.VITE_USER_POOLS_WEB_CLIENT_ID }}
           triggers: ${{ inputs.triggers }}
 
       - name: Database
@@ -129,9 +118,8 @@ jobs:
             parameters: -p KEYCLOAK_ISSUER_URI=${{ needs.init.outputs.keycloak-issuer }}
           - name: frontend
             parameters:
-              -p FAM_MODDED_ZONE=${{ needs.init.outputs.fam-modded-zone }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target }}
-              -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
+              -p VITE_KEYCLOAK_ISSUER=${{ needs.init.outputs.keycloak-issuer }}
           - name: oracle-api
             parameters: -p KEYCLOAK_ISSUER_URI=${{ needs.init.outputs.keycloak-issuer }}
     steps:
