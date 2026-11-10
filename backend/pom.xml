@@ -195,25 +195,23 @@
       <artifactId>flyway-database-postgresql</artifactId>
     </dependency>
 
+    <!--
+      HTML-to-PDF reporting (SPRR001 via Thymeleaf + OpenHTMLtoPDF), native-image friendly.
+      Plain Thymeleaf core is used instead of spring-boot-starter-thymeleaf so no MVC view
+      resolver is auto-configured on this REST API.
+    -->
     <dependency>
-      <groupId>net.sf.jasperreports</groupId>
-      <artifactId>jasperreports</artifactId>
-      <version>6.21.5</version>
+      <groupId>org.thymeleaf</groupId>
+      <artifactId>thymeleaf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.github.openhtmltopdf</groupId>
+      <artifactId>openhtmltopdf-pdfbox</artifactId>
+      <version>1.1.110</version>
       <!--
         Apache commons-logging conflicts with Spring's spring-jcl and initializes
         LogFactory at GraalVM native-image build time.
       -->
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.jasperreports</groupId>
-      <artifactId>jasperreports-fonts</artifactId>
-      <version>6.21.5</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
@@ -290,6 +288,8 @@
               <version>${org.mapstruct.version}</version>
             </path>
           </annotationProcessorPaths>
+          <source>15</source>
+          <target>15</target>
         </configuration>
       </plugin>
 
@@ -577,15 +577,6 @@
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>42.7.12</version>
-      </dependency>
-      <!--
-        jasperreports pulls in commons-beanutils 1.11.0 directly and 1.8.3
-        transitively via commons-digester. Pin to converge on 1.11.0.
-      -->
-      <dependency>
-        <groupId>commons-beanutils</groupId>
-        <artifactId>commons-beanutils</artifactId>
-        <version>1.11.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
