@@ -4,11 +4,11 @@ import {
   fetchClassBSpzCodesIntersecting
 } from '../../api-service/seedPlanZoneSpatialApi';
 
-vi.mock('../../api-service/openmapsProxy', () => ({
+vi.mock('../../api-service/openmapsClient', () => ({
   getOpenmapsJson: vi.fn()
 }));
 
-const { getOpenmapsJson } = await import('../../api-service/openmapsProxy');
+const { getOpenmapsJson } = await import('../../api-service/openmapsClient');
 
 describe('seedPlanZoneSpatialApi', () => {
   beforeEach(() => {

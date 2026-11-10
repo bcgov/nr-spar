@@ -1,14 +1,18 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router';
+import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import makeServer from '../../mock-server/server';
 import CreateBClass from '../../views/Seedlot/CreateBClass/index';
+
+vi.mock('../../api-service/forestClientsAPI', () => ({
+  getForestClientByNumberOrAcronym: vi.fn().mockResolvedValue({ data: {} })
+}));
+vi.mock('../../api-service/vegetationCodeAPI', () => ({ default: vi.fn().mockResolvedValue([]) }));
+vi.mock('../../api-service/SeedlotSourcesAPI', () => ({ default: vi.fn().mockResolvedValue([]) }));
 
 describe('Test the Create B Class component', () => {
   it('should render correctly', () => {
-    makeServer('jest-test');
-    const qc = new QueryClient();
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <BrowserRouter>
         <QueryClientProvider client={qc}>

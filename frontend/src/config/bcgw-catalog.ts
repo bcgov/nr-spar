@@ -4,7 +4,7 @@
  * Layer Catalog Modal and, when active, renders as a `WMSTileLayer`
  * overlay in the Leaflet LayersControl.
  *
- * Adding a new layer: append an entry here — no other code changes
+ * Adding a new layer: append an entry here. No other code changes
  * needed. The modal, context, and LeafletMap all read from this array.
  *
  * All layers are served from the public DataBC openmaps WMS endpoint.

@@ -1,7 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { afterEach, describe, expect, it } from 'vitest';
+import {
+  afterEach, beforeEach, describe, expect, it
+} from 'vitest';
 
 import SeedlotCards from '../../components/SeedlotCards';
 import AuthContext, { AuthContextData } from '../../contexts/AuthContext';
@@ -16,6 +18,12 @@ const renderCards = (isTscAdmin = false) => render(
 );
 
 describe('Seedlot cards', () => {
+  // Cleared before as well as after, so a developer's .env cannot switch the
+  // flag on for the "disabled" case.
+  beforeEach(() => {
+    delete env.VITE_SEEDLOT_B_ENABLED;
+  });
+
   afterEach(() => {
     delete env.VITE_SEEDLOT_B_ENABLED;
   });

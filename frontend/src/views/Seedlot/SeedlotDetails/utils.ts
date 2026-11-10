@@ -41,7 +41,7 @@ export const getPrintSeedlotLabel = (isBClass: boolean, isPending: boolean): str
 
 export const getEditApplicantRoute = (seedlot?: SeedlotType): string => (
   isBClassSeedlot(seedlot)
-    ? ROUTES.SEEDLOTS_B_CLASS_CREATION
+    ? ROUTES.SEEDLOT_B_CLASS_EDIT
     : ROUTES.SEEDLOT_A_CLASS_EDIT
 );
 

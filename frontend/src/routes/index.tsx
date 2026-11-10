@@ -47,10 +47,21 @@ const bClassRoutes: Array<RouteObject> = [
     element: (
       <SeedlotReviewClassB />
     )
+  },
+  {
+    // The applicant editor is class-aware, so B-class reuses it under its own path.
+    path: ROUTES.SEEDLOT_B_CLASS_EDIT,
+    element: (
+      <EditAClassApplication />
+    )
   }
 ];
 
-const BrowserRoutes: Array<RouteObject> = [
+/**
+ * The route table for a given B-class flag value. Exported so tests can check
+ * both states without re-importing every view.
+ */
+export const buildRoutes = (seedlotBEnabled: boolean): Array<RouteObject> => [
   // Ensures that root paths get redirected to
   // dashboard, when user is logged in
   {
@@ -174,7 +185,9 @@ const BrowserRoutes: Array<RouteObject> = [
       <MaintainGermTray />
     )
   },
-  ...(isSeedlotBEnabled() ? bClassRoutes : [])
+  ...(seedlotBEnabled ? bClassRoutes : [])
 ];
+
+const BrowserRoutes = buildRoutes(isSeedlotBEnabled());
 
 export default BrowserRoutes;

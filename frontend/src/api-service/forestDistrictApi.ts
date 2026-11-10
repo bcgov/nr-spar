@@ -1,7 +1,7 @@
 import type { Position } from 'geojson';
 
 import { wgs84ToBcAlbers } from '../legacy_translated/SPR_SPATIAL_UTILS';
-import { buildOpenmapsProxyUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsProxy';
+import { buildOpenmapsUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsClient';
 
 export const FOREST_DISTRICT_LAYER = 'WHSE_ADMIN_BOUNDARIES.ADM_NR_DISTRICTS_SPG';
 const WFS_TIMEOUT_MS = 15000;
@@ -35,7 +35,7 @@ export const buildForestDistrictParams = (centroid: Position): URLSearchParams =
 };
 
 export const buildForestDistrictUrl = (centroid: Position): string => (
-  buildOpenmapsProxyUrl(buildForestDistrictParams(centroid))
+  buildOpenmapsUrl(buildForestDistrictParams(centroid))
 );
 
 /** Fetch the NR forest-district name for a centroid; fail-soft to null. */

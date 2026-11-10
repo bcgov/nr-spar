@@ -3,7 +3,7 @@ import type { Feature, MultiPolygon, Position } from 'geojson';
 import { SPZ_QUERY_LAYER } from '../shared-constants/spar-map';
 import { cqlQuoted, isCqlSafeIdentifier } from '../utils/CqlUtils';
 import { multiPolygonToBcAlbersWkt, pointToBcAlbersWkt } from './becZonesApi';
-import { getOpenmapsJson } from './openmapsProxy';
+import { getOpenmapsJson } from './openmapsClient';
 
 const SPZ_WFS_TIMEOUT_MS = 15000;
 

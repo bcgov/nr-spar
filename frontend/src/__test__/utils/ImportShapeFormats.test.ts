@@ -69,6 +69,16 @@ describe('importShapeFile formats', () => {
       expect(result.warnings).toEqual(['Skipped or split 1 feature(s): Point']);
     });
 
+    it('keeps only a plain-text name and drops HTML-capable attributes', async () => {
+      const htmlKml = KML
+        .replace('<name>Block A</name>', `<name>  ${'B'.repeat(250)}  </name>
+      <description><![CDATA[<img src=x onerror="alert(1)">]]></description>`);
+
+      const result = await importShapeFile(textFile('block.kml', htmlKml));
+
+      expect(result.polygons[0].properties).toEqual({ name: 'B'.repeat(200) });
+    });
+
     it('reports malformed XML', async () => {
       await expect(importShapeFile(textFile('broken.kml', '<kml><Document>')))
         .rejects.toThrow(/KML XML parse error/);

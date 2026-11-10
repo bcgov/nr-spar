@@ -1,4 +1,5 @@
 import { kml } from '@tmcw/togeojson';
+import { DOMParser as XmlDomParser } from '@xmldom/xmldom';
 import JSZip from 'jszip';
 import { parseZip } from 'shpjs';
 import type {
@@ -190,15 +191,29 @@ const isMultiPolygon = (g: Geometry | null): g is MultiPolygon => g !== null && 
 
 const isGeometryCollection = (g: Geometry | null): g is GeometryCollection => g !== null && g.type === 'GeometryCollection';
 
+/** Longest imported feature name we keep; longer names are truncated. */
+const MAX_IMPORTED_NAME_LENGTH = 200;
+
+/**
+ * Keep only a plain-text `name` from the source feature. Everything else is
+ * dropped — notably KML `description`, which routinely carries HTML — so no
+ * file-supplied markup is around to reach an HTML sink if a later change
+ * surfaces imported metadata in the polygon list or a popup.
+ */
+const importedProperties = (source: Feature<Geometry>): AoiPolygon['properties'] => {
+  const name = source.properties?.name;
+  return typeof name === 'string' && name.trim() !== ''
+    ? { name: name.trim().slice(0, MAX_IMPORTED_NAME_LENGTH) }
+    : {};
+};
+
 const polygonFromFeature = (
   source: Feature<Geometry>,
   geometry: Polygon
 ): AoiPolygon => ({
   type: 'Feature',
   geometry,
-  // Preserve any user-authored metadata (name, description) so future
-  // work can surface it in the polygon list — but strip undefined.
-  properties: source.properties ?? {}
+  properties: importedProperties(source)
 });
 
 const splitMultiPolygon = (
@@ -301,21 +316,33 @@ const normalizeAny = (
  * KML 2.0 / 2.1 / 2.2 namespaces and Google Earth `gx:*` extensions
  * internally, so this wrapper only needs to feed it a DOM document.
  *
- * Throws a descriptive Error if the XML can't be parsed — DOMParser
- * doesn't throw on malformed input, instead returning a document whose
- * root is a `<parsererror>` element, so we detect that and re-throw.
+ * Parsed with `@xmldom/xmldom` rather than the browser's DOMParser: it builds
+ * a plain in-memory XML tree with no HTML handling, so file contents can
+ * never be interpreted as markup in the page.
+ *
+ * Throws a descriptive Error if the XML can't be parsed — any `error` or
+ * `fatalError` from the parser stops parsing; warnings are tolerated.
  */
 const parseKmlString = (xmlText: string): FeatureCollection<Geometry | null> => {
-  // Strip any leading UTF-8 BOM — DOMParser is usually tolerant, but
-  // XMLDocument.documentElement ends up offset by a text node on some
-  // runtimes, so normalize defensively.
+  // Strip any leading UTF-8 BOM so documentElement isn't offset by a text
+  // node; normalize defensively.
   const cleaned = xmlText.replace(UTF8_BOM_STRIP, '');
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(cleaned, 'application/xml');
-  const parserError = doc.getElementsByTagName('parsererror')[0];
-  if (parserError) {
-    const msg = parserError.textContent?.trim() ?? 'Unknown XML parse error';
+  const parser = new XmlDomParser({
+    onError: (level, msg) => {
+      if (level !== 'warning') {
+        throw new Error(msg);
+      }
+    }
+  });
+  let doc;
+  try {
+    doc = parser.parseFromString(cleaned, 'application/xml');
+  } catch (err) {
+    const msg = (err instanceof Error && err.message.trim()) || 'Unknown XML parse error';
     throw new Error(`KML XML parse error: ${msg.split('\n')[0]}`);
+  }
+  if (!doc.documentElement) {
+    throw new Error('KML XML parse error: document has no root element');
   }
   return kml(doc as unknown as Document);
 };

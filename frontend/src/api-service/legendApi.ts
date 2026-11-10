@@ -1,5 +1,5 @@
 import { wgs84ToBcAlbers } from '../legacy_translated/SPR_SPATIAL_UTILS';
-import { buildOpenmapsProxyUrl, getOpenmapsJson } from './openmapsProxy';
+import { buildOpenmapsUrl, getOpenmapsJson } from './openmapsClient';
 
 /**
  * The minimum a caller needs to request a legend: the WMS endpoint, the
@@ -251,7 +251,7 @@ export const buildLegendJsonParams = (
 export const buildLegendJsonUrl = (
   layer: WmsLayerRef,
   bboxBcAlbers?: string
-): string => buildOpenmapsProxyUrl(buildLegendJsonParams(layer, bboxBcAlbers));
+): string => buildOpenmapsUrl(buildLegendJsonParams(layer, bboxBcAlbers));
 
 /**
  * Fetch + parse the legend rules for one overlay. Rejects on a non-2xx

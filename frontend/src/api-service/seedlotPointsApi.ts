@@ -13,7 +13,7 @@
 import type { Feature, FeatureCollection, Point } from 'geojson';
 
 import { cqlQuoted, isCqlSafeIdentifier } from '../utils/CqlUtils';
-import { buildOpenmapsProxyUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsProxy';
+import { buildOpenmapsUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsClient';
 
 /** Filter on `ACTIVE_IND` — `'YES'` for active, `'NO'` for expired, `null` for both. */
 export type ActiveIndFilter = 'YES' | 'NO' | null;
@@ -155,7 +155,7 @@ export const buildSeedlotPointsWfsUrl = (
   bounds: LngLatBoundsTuple,
   activeOnly: ActiveIndFilter = null,
   speciesCode: string | null = null
-): string => buildOpenmapsProxyUrl(
+): string => buildOpenmapsUrl(
   buildSeedlotPointsWfsParams(typeName, bounds, activeOnly, speciesCode)
 );
 

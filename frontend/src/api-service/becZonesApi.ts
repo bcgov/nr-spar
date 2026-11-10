@@ -4,7 +4,7 @@ import type {
 
 import { wgs84ToBcAlbers } from '../legacy_translated/SPR_SPATIAL_UTILS';
 import { cqlQuoted, isCqlSafeIdentifier } from '../utils/CqlUtils';
-import { buildOpenmapsProxyUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsProxy';
+import { buildOpenmapsUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsClient';
 
 /**
  * Attributes carried on each feature returned by the BEC layer WFS.
@@ -28,7 +28,7 @@ export interface BecZoneProperties {
 /**
  * DataBC layer name for the full-resolution BEC polygon feature type.
  * Matches the layer the Identify tool queries at `shared-constants/spar-map.ts`
- * and `BecIdentifyLayer`. JSON fetches go through the SPAR OpenMaps proxy.
+ * and `BecIdentifyLayer`.
  */
 export const BEC_QUERY_LAYER = 'WHSE_FOREST_VEGETATION.BEC_BIOGEOCLIMATIC_POLY';
 
@@ -265,7 +265,7 @@ export const buildBecZoneByMapLabelParams = (mapLabel: string): URLSearchParams 
 };
 
 export const buildBecZoneByMapLabelUrl = (mapLabel: string): string => (
-  buildOpenmapsProxyUrl(buildBecZoneByMapLabelParams(mapLabel))
+  buildOpenmapsUrl(buildBecZoneByMapLabelParams(mapLabel))
 );
 
 /**

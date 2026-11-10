@@ -1,12 +1,12 @@
 import type { Feature, Polygon } from 'geojson';
 
-vi.mock('../../api-service/openmapsProxy', () => ({
-  buildOpenmapsProxyUrl: (params: URLSearchParams) => `/api/openmaps?${params.toString()}`,
+vi.mock('../../api-service/openmapsClient', () => ({
+  buildOpenmapsUrl: (params: URLSearchParams) => `https://openmaps.gov.bc.ca/geo/pub/wfs?${params.toString()}`,
   getOpenmapsJson: vi.fn(),
   isOpenmapsAbort: () => false
 }));
 
-const { getOpenmapsJson } = await import('../../api-service/openmapsProxy');
+const { getOpenmapsJson } = await import('../../api-service/openmapsClient');
 const {
   CONTOUR_LINES_LAYER,
   SPOT_ELEVATION_LAYER,
@@ -41,7 +41,7 @@ describe('fetchPolygonElevationRange', () => {
   });
 
   it('queries a dense polygon instead of refusing it on size', async () => {
-    // Formerly capped at ~160 vertices by the CQL URL budget; the proxy now
+    // Formerly capped at ~160 vertices by the CQL URL budget; the client now
     // POSTs the filter, so a detailed polygon is queried like any other.
     vi.mocked(getOpenmapsJson).mockResolvedValue(elevationFeatures([300, 900]));
 

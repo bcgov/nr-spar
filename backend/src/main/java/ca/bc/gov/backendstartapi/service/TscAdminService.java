@@ -103,14 +103,22 @@ public class TscAdminService {
       seedlotEntity.setApprovedTimestamp(LocalDateTime.now(Clock.systemUTC()));
     }
 
+    // Captured before the update so a repeated PND request can't wipe the draft.
+    boolean wasPending =
+        seedlotEntity.getSeedlotStatus() != null
+            && Constants.PENDING_SEEDLOT_STATUS.equals(
+                seedlotEntity.getSeedlotStatus().getSeedlotStatusCode());
+
     seedlotEntity.setSeedlotStatus(seedlotStatus.get());
 
     Seedlot seedlotSaved = seedlotRepository.saveAndFlush(seedlotEntity);
 
     // B-class submit removes the wizard draft. Sending the lot back to PND must
     // recreate an empty draft so the registration wizard can hydrate from
-    // normalized tables via GET .../b-class-full-form.
+    // normalized tables via GET .../b-class-full-form. Only on an actual
+    // transition into PND: an already-pending lot keeps its saved edits.
     if (Constants.PENDING_SEEDLOT_STATUS.equals(status)
+        && !wasPending
         && isBclassSeedlot(seedlotSaved)) {
       saveSeedlotFormService.recreateEmptyBclassDraft(seedlotSaved);
     }

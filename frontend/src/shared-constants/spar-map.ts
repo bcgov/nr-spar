@@ -1,8 +1,7 @@
 /**
  * Hard-coded WMS tile endpoint shared by all SPAR map themes. JSON
- * (WFS / GetLegendGraphic) goes through the authenticated SPAR proxy
- * in `api-service/openmapsProxy.ts` — OpenMaps does not send CORS
- * headers for SPAR OpenShift origins.
+ * (WFS / GetLegendGraphic) is fetched browser-direct by
+ * `api-service/openmapsClient.ts`.
  *
  * Per-environment GeoServer hosts (geo.nrs.gov.bc.ca for PROD,
  * t1geo.nrs.gov.bc.ca for DEV/TEST) are referenced from the per-theme

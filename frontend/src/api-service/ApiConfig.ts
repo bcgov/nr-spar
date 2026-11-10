@@ -34,8 +34,6 @@ const ApiConfig = {
 
   seedlots: `${serverHost}/api/seedlots`,
 
-  openmaps: `${serverHost}/api/openmaps`,
-
   orchardsVegCode: `${serverHost}/api/orchards/vegetation-codes`,
 
   tscAdmin: `${serverHost}/api/tsc-admin`,

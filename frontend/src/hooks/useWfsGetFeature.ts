@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { FeatureCollection } from 'geojson';
 
-import { getOpenmapsJson } from '../api-service/openmapsProxy';
+import { getOpenmapsJson } from '../api-service/openmapsClient';
 
 interface UseWfsGetFeatureParams {
   /** WFS typeName, e.g. 'WHSE_FOREST_VEGETATION.BEC_BIOGEOCLIMATIC_POLY' */
@@ -13,9 +13,8 @@ interface UseWfsGetFeatureParams {
 }
 
 /**
- * react-query wrapper for a single WFS GetFeature call. Goes through the
- * authenticated SPAR OpenMaps proxy so the browser does not hit
- * openmaps.gov.bc.ca (no CORS headers on that origin).
+ * react-query wrapper for a single WFS GetFeature call against
+ * openmaps.gov.bc.ca.
  */
 export const useWfsGetFeature = (
   { layer, cqlFilter, enabled }: UseWfsGetFeatureParams

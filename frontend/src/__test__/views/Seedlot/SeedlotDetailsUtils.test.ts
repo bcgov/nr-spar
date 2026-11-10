@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { getPrintSeedlotLabel, isBClassSeedlot } from '../../../views/Seedlot/SeedlotDetails/utils';
+import {
+  getEditApplicantRoute,
+  getPrintSeedlotLabel,
+  isBClassSeedlot
+} from '../../../views/Seedlot/SeedlotDetails/utils';
 import { SeedlotType } from '../../../types/SeedlotType';
+import ROUTES from '../../../routes/constants';
+import { addParamToPath } from '../../../utils/PathUtils';
 
 const seedlotWithClass = (geneticClassCode: string): SeedlotType => ({
   geneticClass: { geneticClassCode }
@@ -18,5 +24,13 @@ describe('SeedlotDetails print helpers', () => {
     expect(getPrintSeedlotLabel(false, true)).toBe('Print seedlot');
     expect(getPrintSeedlotLabel(true, false)).toBe('Print seedlot (SPRR001)');
     expect(getPrintSeedlotLabel(true, true)).toBe('Generating report…');
+  });
+
+  it('getEditApplicantRoute resolves to a parameterized edit path per class', () => {
+    expect(addParamToPath(getEditApplicantRoute(seedlotWithClass('A')), '63001'))
+      .toBe('/seedlots/edit-a-class-application/63001');
+    expect(addParamToPath(getEditApplicantRoute(seedlotWithClass('B')), '53001'))
+      .toBe('/seedlots/edit-b-class-application/53001');
+    expect(getEditApplicantRoute(seedlotWithClass('B'))).not.toBe(ROUTES.SEEDLOTS_B_CLASS_CREATION);
   });
 });

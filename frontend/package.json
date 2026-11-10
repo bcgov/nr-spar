@@ -36,6 +36,7 @@
     "@types/react-dom": "^19.0.0",
     "@types/validator": "^13.7.17",
     "@vitejs/plugin-react": "^6.0.0",
+    "@xmldom/xmldom": "^0.9.12",
     "aws-amplify": "^6.16.2",
     "axios": "^1.18.0",
     "bignumber.js": "^11.0.0",

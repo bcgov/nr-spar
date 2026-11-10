@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Caps collection-area polygons to the product 8 km radius rule so a hostile
- * GeoJSON payload cannot DoS SPAR or OpenMaps with province-scale WKT.
+ * GeoJSON payload cannot DoS SPAR with province-scale geometry.
  */
 public final class CollectionAreaLimits {
 
@@ -26,12 +26,9 @@ public final class CollectionAreaLimits {
   public static final double MAX_RADIUS_METERS = (MAX_RADIUS_KM * 1_000) + 100;
 
   /**
-   * Sanity bound on polygon complexity. Not a transport limit — spatial queries
-   * are POSTed to OpenMaps, so a large filter is carried fine. This exists so a
-   * single collection area cannot cost OpenMaps or PostGIS an unbounded amount
-   * of work. The frontend mirrors it in {@code collectionAreaLimits.ts}, and
-   * {@code OpenmapsProxyService.MAX_CQL_LENGTH} is derived from it so a polygon
-   * we accept for storage can always be BEC-validated.
+   * Sanity bound on polygon complexity, so a single collection area cannot cost
+   * PostGIS an unbounded amount of work. The frontend mirrors it in
+   * {@code collectionAreaLimits.ts}.
    */
   public static final int MAX_VERTICES = 2000;
 

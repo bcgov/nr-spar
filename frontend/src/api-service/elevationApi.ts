@@ -18,7 +18,7 @@ import type {
 } from 'geojson';
 
 import { wgs84ToBcAlbers } from '../legacy_translated/SPR_SPATIAL_UTILS';
-import { buildOpenmapsProxyUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsProxy';
+import { buildOpenmapsUrl, getOpenmapsJson, isOpenmapsAbort } from './openmapsClient';
 
 /** TRIM contour line layer — dense elevation data with ELEVATION (m). */
 export const CONTOUR_LINES_LAYER = 'pub:WHSE_BASEMAPPING.TRIM_CONTOUR_LINES';
@@ -102,7 +102,7 @@ export const buildElevationWfsParams = (
 export const buildElevationWfsUrl = (
   typeName: string,
   bcAlbersWkt: string
-): string => buildOpenmapsProxyUrl(buildElevationWfsParams(typeName, bcAlbersWkt));
+): string => buildOpenmapsUrl(buildElevationWfsParams(typeName, bcAlbersWkt));
 
 interface WfsElevationFeature {
   properties?: { ELEVATION?: unknown };

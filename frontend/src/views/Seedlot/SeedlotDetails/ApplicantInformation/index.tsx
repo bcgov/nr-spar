@@ -164,7 +164,10 @@ const ApplicantInformation = ({
                     size="md"
                     className="section-btn"
                     renderIcon={Edit}
-                    onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? ''))}
+                    onClick={() => navigate(addParamToPath(
+                      variant === 'B' ? ROUTES.SEEDLOT_B_CLASS_EDIT : ROUTES.SEEDLOT_A_CLASS_EDIT,
+                      seedlotNumber ?? ''
+                    ))}
                   >
                     Edit applicant
                   </Button>
