@@ -2,11 +2,20 @@ package ca.bc.gov.oracleapi.security;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-/** This class contains methods for handling JWT requests. */
+/**
+ * This class contains methods for handling JWT requests.
+ *
+ * <p>FAM grants roles through BC Gov SSO (Keycloak). A scoped grant has its scope in the role name
+ * only, e.g. {@code SPAR_NONMINISTRY_ORCHARD_FOREST_CLIENT-00012345}.
+ */
 public final class JwtSecurityUtil {
+
+  /** FAM writes scope suffixes in the order district, region, forest client. */
+  private static final List<String> scopeTypes = List.of("_FOREST_CLIENT", "_DISTRICT", "_REGION");
 
   /**
    * Gets user roles from user JWT token.
@@ -16,22 +25,42 @@ public final class JwtSecurityUtil {
    */
   public static Set<String> getUserRolesFromJwt(Jwt jwtPrincipal) {
     Set<String> roles = new HashSet<>();
-    if (jwtPrincipal.getClaims().containsKey("cognito:groups")) {
-      Object clientRolesObj = jwtPrincipal.getClaims().get("cognito:groups");
-      if (clientRolesObj instanceof List<?> list) {
-        for (Object item : list) {
-          String role = String.valueOf(item);
-          // Removes Client Number
-          if (role.length() >= 9) {
-            String clientNumber = role.substring(role.length() - 8);
-            if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
-              role = role.substring(0, role.length() - 9); // Removes dangling underscore
-            }
-          }
-          roles.add(role);
+    // CSS emits client_roles; stock Keycloak uses resource_access.<azp>.roles, so read both.
+    addRoles(roles, jwtPrincipal.getClaims().get("client_roles"));
+    if (jwtPrincipal.getClaims().get("resource_access") instanceof Map<?, ?> resourceAccess
+        && resourceAccess.get(jwtPrincipal.getClaimAsString("azp")) instanceof Map<?, ?> client) {
+      addRoles(roles, client.get("roles"));
+    }
+    return roles;
+  }
+
+  private static void addRoles(Set<String> roles, Object claim) {
+    if (claim instanceof List<?> list) {
+      for (Object item : list) {
+        String role = String.valueOf(item);
+        // FAM: roles are FAM bookkeeping (e.g. grant expiry), not permissions.
+        if (!role.startsWith("FAM:")) {
+          roles.add(stripScopes(role));
         }
       }
     }
-    return roles;
+  }
+
+  /**
+   * Strips scope suffixes from the right: the value is what follows the last {@code -}, and the
+   * text before it must end in a known scope type. Never split on underscores, region values
+   * contain them. Mirrors {@code CssRoleNaming.parse} in nr-fam.
+   */
+  private static String stripScopes(String role) {
+    int dash;
+    while ((dash = role.lastIndexOf('-')) > 0) {
+      String head = role.substring(0, dash);
+      String scope = scopeTypes.stream().filter(head::endsWith).findFirst().orElse(null);
+      if (scope == null) {
+        break;
+      }
+      role = head.substring(0, head.length() - scope.length());
+    }
+    return role;
   }
 }

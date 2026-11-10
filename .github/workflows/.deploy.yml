@@ -55,6 +55,7 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs:
       fam-modded-zone: ${{ steps.fam-modded-zone.outputs.fam-modded-zone }}
+      keycloak-issuer: ${{ steps.keycloak.outputs.keycloak-issuer }}
       triggered: ${{ steps.trigger.outputs.triggered }}
     runs-on: ubuntu-26.04
     steps:
@@ -66,6 +67,16 @@ jobs:
           else
             echo "fam-modded-zone=${{ inputs.target }}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Keycloak issuer
+        id: keycloak
+        run: |
+          case "${{ inputs.target }}" in
+            prod) host=loginproxy.gov.bc.ca ;;
+            test) host=test.loginproxy.gov.bc.ca ;;
+            *) host=dev.loginproxy.gov.bc.ca ;;
+          esac
+          echo "keycloak-issuer=https://${host}/auth/realms/standard" >> $GITHUB_OUTPUT
 
       - name: OpenShift Init
         id: trigger
@@ -115,14 +126,14 @@ jobs:
         name: [backend, frontend, oracle-api]
         include:
           - name: backend
-            parameters: -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+            parameters: -p KEYCLOAK_ISSUER_URI=${{ needs.init.outputs.keycloak-issuer }}
           - name: frontend
             parameters:
               -p FAM_MODDED_ZONE=${{ needs.init.outputs.fam-modded-zone }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
           - name: oracle-api
-            parameters: -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+            parameters: -p KEYCLOAK_ISSUER_URI=${{ needs.init.outputs.keycloak-issuer }}
     steps:
       - uses: bcgov/action-deployer-openshift@e2d60eb9cacceb89c3b97d8dcf0a2c460eea5eab # v4.2.3
         id: deploys
