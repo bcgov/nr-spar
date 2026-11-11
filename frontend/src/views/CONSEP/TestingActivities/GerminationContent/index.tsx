@@ -413,18 +413,19 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
           </Modal>
           <Row className="consep-germination-content-title">
             <PageTitle title={`Germination test result (${lotNumber(header)})`} />
+            <>
+              {isCompleted && <StatusTag type="Completed" renderIcon={CheckmarkFilled} />}
+              {isAccepted && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
+            </>
             <Button
               kind="tertiary"
-              size="sm"
+              size="lg"
+              className="consep-germination-content-test-history-btn"
               renderIcon={Time}
               onClick={() => setShowTestHistory(true)}
             >
               Test history
             </Button>
-            <>
-              {isCompleted && <StatusTag type="Completed" renderIcon={CheckmarkFilled} />}
-              {isAccepted && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
-            </>
             <SaveStatus status={saveStatus} onRetry={flush} onReload={handleReloadOnConflict} />
           </Row>
           <Row className="consep-germination-content-summary">
