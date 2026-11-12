@@ -785,7 +785,6 @@ const TestSearch = () => {
                 size="sm"
                 aria-expanded={showFilters}
                 aria-controls="testing-activity-filters"
-                hidden={!showFilters}
                 onClick={toggleFilters}
               >
                 {showFilters ? 'Hide filters' : 'Show filters'}
