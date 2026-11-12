@@ -15,21 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface GerminatorTrayRepository extends JpaRepository<GerminatorTrayEntity, Integer> {
 
   /**
-   * Delete the tray by ID. Used after detaching all tests for optimistic concurrency check.
-   *
-   * @param germinatorTrayId the tray ID to delete
-   * @return the number of rows deleted (0 or 1)
-   */
-  @Modifying
-  @Transactional
-  @Query(
-      """
-      DELETE FROM GerminatorTrayEntity t
-       WHERE t.germinatorTrayId = :germinatorTrayId
-      """)
-  int deleteByGerminatorTrayId(@Param("germinatorTrayId") Integer germinatorTrayId);
-
-  /**
    * Delete the tray by ID only if its revision count still matches (optimistic lock).
    *
    * @param germinatorTrayId the tray ID to delete

@@ -196,11 +196,25 @@ const MaintainGermTrayPage = () => {
   }, []);
 
   const deleteFromTrayMutation = useMutation({
-    mutationFn: (row: GermTrayTestType) => {
+    mutationFn: async (row: GermTrayTestType) => {
       if (row.riaSkey == null || row.updateTimestamp == null) {
-        return Promise.reject(new Error('Cannot delete: missing test data'));
+        throw new Error('Cannot delete: missing test data');
       }
-      return deleteTestFromTray(row.germinatorTrayId, row.riaSkey, row.updateTimestamp);
+      // Removing the last test deletes the tray, locked on its revision: save a germinator id
+      // edit first, as for a tray delete.
+      if (!await flush()) {
+        throw new Error('Germinator ID changes are not saved. Save them, or Reload, before removing the test.');
+      }
+      const saved = savedTraysRef.current.get(row.germinatorTrayId);
+      if (!saved) {
+        throw new Error('Cannot delete: tray not loaded');
+      }
+      return deleteTestFromTray(
+        row.germinatorTrayId,
+        row.riaSkey,
+        row.updateTimestamp,
+        saved.revisionCount
+      );
     },
     onSuccess: (_, row) => {
       setAlert(null);

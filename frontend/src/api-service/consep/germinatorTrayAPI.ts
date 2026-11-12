@@ -46,13 +46,16 @@ export const getGerminatorTrayContents = (
   return api.get(url).then((res: { data: GermTrayTestType[] }) => res.data);
 };
 
+/** `revisionCount` locks the tray delete that happens when this was the tray's last test. */
 export const deleteTestFromTray = (
   germinatorTrayId: number,
   riaSkey: number,
-  activityUpdateTimestamp: string
+  activityUpdateTimestamp: string,
+  revisionCount: number
 ): Promise<void> => {
   const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/tests/${riaSkey}`
-      + `?activityUpdateTimestamp=${encodeURIComponent(activityUpdateTimestamp)}`;
+      + `?activityUpdateTimestamp=${encodeURIComponent(activityUpdateTimestamp)}`
+      + `&revisionCount=${revisionCount}`;
 
   return api.delete(url).then(() => undefined);
 };

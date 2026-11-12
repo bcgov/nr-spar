@@ -878,17 +878,18 @@ class GerminatorTrayEndpointTest {
 
     doNothing()
         .when(germinatorTrayService)
-        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp, 4L);
 
     mockMvc
         .perform(
             delete(BASE_URL + "/" + germinatorTrayId + "/tests/" + riaSkey)
                 .with(csrf())
-                .param("activityUpdateTimestamp", timestamp))
+                .param("activityUpdateTimestamp", timestamp)
+                .param("revisionCount", "4"))
         .andExpect(status().isNoContent());
 
     verify(germinatorTrayService, times(1))
-        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp, 4L);
   }
 
   @Test
@@ -898,7 +899,19 @@ class GerminatorTrayEndpointTest {
         .perform(delete(BASE_URL + "/101/tests/881191").with(csrf()))
         .andExpect(status().isBadRequest());
 
-    verify(germinatorTrayService, times(0)).deleteTestFromTray(any(), any(), any());
+    verify(germinatorTrayService, times(0)).deleteTestFromTray(any(), any(), any(), any());
+  }
+
+  @Test
+  void deleteTestFromTray_returns400_whenRevisionCountMissing() throws Exception {
+    mockMvc
+        .perform(
+            delete(BASE_URL + "/101/tests/881191")
+                .with(csrf())
+                .param("activityUpdateTimestamp", "2025-03-12T00:00:00"))
+        .andExpect(status().isBadRequest());
+
+    verify(germinatorTrayService, times(0)).deleteTestFromTray(any(), any(), any(), any());
   }
 
   @Test
@@ -912,17 +925,18 @@ class GerminatorTrayEndpointTest {
             new ResponseStatusException(
                 HttpStatus.CONFLICT, GerminatorTrayService.RESELECT_MESSAGE))
         .when(germinatorTrayService)
-        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp, 4L);
 
     mockMvc
         .perform(
             delete(BASE_URL + "/" + germinatorTrayId + "/tests/" + riaSkey)
                 .with(csrf())
-                .param("activityUpdateTimestamp", timestamp))
+                .param("activityUpdateTimestamp", timestamp)
+                .param("revisionCount", "4"))
         .andExpect(status().isConflict());
 
     verify(germinatorTrayService, times(1))
-        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp, 4L);
   }
 
   @Test
@@ -936,17 +950,18 @@ class GerminatorTrayEndpointTest {
             new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Test not found for RIA_SKEY: " + riaSkey))
         .when(germinatorTrayService)
-        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp, 4L);
 
     mockMvc
         .perform(
             delete(BASE_URL + "/" + germinatorTrayId + "/tests/" + riaSkey)
                 .with(csrf())
-                .param("activityUpdateTimestamp", timestamp))
+                .param("activityUpdateTimestamp", timestamp)
+                .param("revisionCount", "4"))
         .andExpect(status().isNotFound());
 
     verify(germinatorTrayService, times(1))
-        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp);
+        .deleteTestFromTray(germinatorTrayId, riaSkey, expectedTimestamp, 4L);
   }
 
   @Test
@@ -959,7 +974,7 @@ class GerminatorTrayEndpointTest {
                 .param("activityUpdateTimestamp", "2025-03-12T00:00:00"))
         .andExpect(status().isUnauthorized());
 
-    verify(germinatorTrayService, times(0)).deleteTestFromTray(any(), any(), any());
+    verify(germinatorTrayService, times(0)).deleteTestFromTray(any(), any(), any(), any());
   }
 
   @Test
@@ -972,6 +987,6 @@ class GerminatorTrayEndpointTest {
                 .param("activityUpdateTimestamp", "2025-03-12T00:00:00"))
         .andExpect(status().isForbidden());
 
-    verify(germinatorTrayService, times(0)).deleteTestFromTray(any(), any(), any());
+    verify(germinatorTrayService, times(0)).deleteTestFromTray(any(), any(), any(), any());
   }
 }

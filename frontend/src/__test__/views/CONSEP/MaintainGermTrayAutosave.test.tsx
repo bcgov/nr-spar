@@ -25,24 +25,31 @@ vi.mock('../../../components/Breadcrumbs', () => ({ default: () => null }));
 type Row = { germinatorTrayId: number; activityTypeCd: string; germinatorId: string };
 let updateRow: (row: Row) => void = () => {};
 let deleteTray: (row: Row) => void = () => {};
+let deleteTest: (test: object) => void = () => {};
 vi.mock('../../../views/CONSEP/TestingActivities/GerminatorTray/MaintainGermTray/constants', () => ({
   getGermTrayColumns: (update: (row: Row) => void, onDelete: (row: Row) => void) => {
     updateRow = update;
     deleteTray = onDelete;
     return [];
   },
-  getGermTrayTestsColumns: () => []
+  getGermTrayTestsColumns: (onDelete: (test: object) => void) => {
+    deleteTest = onDelete;
+    return [];
+  }
 }));
 
 const getTrays = vi.fn();
 const assign = vi.fn();
 const deleteTrayApi = vi.fn();
+const deleteTestApi = vi.fn();
 vi.mock('../../../api-service/consep/germinatorTrayAPI', () => ({
   getGerminatorTraysByIds: (ids: number[]) => getTrays(ids),
   assignGerminatorId: (id: number, germinatorId: string, revisionCount: number) => (
     assign(id, germinatorId, revisionCount)
   ),
-  deleteTestFromTray: () => Promise.resolve(),
+  deleteTestFromTray: (id: number, riaSkey: number, timestamp: string, revisionCount: number) => (
+    deleteTestApi(id, riaSkey, timestamp, revisionCount)
+  ),
   deleteGerminatorTray: (id: number, revisionCount: number, contents: object[]) => (
     deleteTrayApi(id, revisionCount, contents)
   ),
@@ -87,6 +94,7 @@ describe('MaintainGermTray loading and auto save', () => {
     getTrays.mockReset();
     assign.mockReset();
     deleteTrayApi.mockReset();
+    deleteTestApi.mockReset();
     rejectionHandler = (event: PromiseRejectionEvent) => { event.preventDefault(); };
     window.addEventListener('unhandledrejection', rejectionHandler);
   });
@@ -303,5 +311,25 @@ describe('MaintainGermTray loading and auto save', () => {
     await waitFor(() => expect(screen.queryByText('Conflict detected')).not.toBeInTheDocument());
     await waitPastDebounce();
     expect(assign).toHaveBeenCalledTimes(1);
+  });
+
+  it('removes a test with the tray\'s latest revision count', async () => {
+    getTrays.mockResolvedValue([serverTray(1311, null, 2)]);
+    assign.mockResolvedValue({ germinatorTrayId: 1311, germinatorId: '4', revisionCount: 3 });
+    deleteTestApi.mockResolvedValue(undefined);
+    renderPage('/?trayIds=1311');
+    await screen.findByText('tray 1311:');
+
+    act(() => { updateRow(row(1311, '4')); });
+    await waitFor(() => expect(assign).toHaveBeenCalled());
+    act(() => {
+      deleteTest({
+        germinatorTrayId: 1311, riaSkey: 9, updateTimestamp: '2026-11-01T00:00:00', requestId: 'R1', seedlotNumber: '1'
+      });
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete germ test' }));
+
+    // If this was the last test, the tray delete locks on revision 3, not the 2 it loaded with.
+    await waitFor(() => expect(deleteTestApi).toHaveBeenCalledWith(1311, 9, '2026-11-01T00:00:00', 3));
   });
 });

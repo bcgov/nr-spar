@@ -149,11 +149,14 @@ public class GerminatorTrayEndpoint {
   /**
    * Removes a test from a germinator tray. The test is detached (germinator_tray_id set to null)
    * and the parent activity's update_timestamp is updated. If the tray has no tests left, the tray
-   * is deleted. Uses optimistic concurrency; if data was updated by another user, returns 409.
+   * is deleted. Uses optimistic concurrency on the activity timestamp, and on the tray revision
+   * count when the tray is deleted; if data was updated by another user, returns 409.
    *
    * @param germinatorTrayId        the tray from which to remove the test
    * @param riaSkey                 the request item activity key (RIA_SKEY) of the test to remove
    * @param activityUpdateTimestamp the current update_timestamp of the parent activity (optimistic lock)
+   * @param revisionCount           the tray revision count the caller read (optimistic lock on the
+   *                                tray delete when this was its last test)
    */
   @DeleteMapping("/{germinatorTrayId}/tests/{riaSkey}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -164,12 +167,14 @@ public class GerminatorTrayEndpoint {
   public void deleteTestFromTray(
       @PathVariable Integer germinatorTrayId,
       @PathVariable BigDecimal riaSkey,
-      @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime activityUpdateTimestamp
+      @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime activityUpdateTimestamp,
+      @RequestParam @NotNull @PositiveOrZero Long revisionCount
   ) {
     germinatorTrayService.deleteTestFromTray(
         germinatorTrayId,
         riaSkey,
-        activityUpdateTimestamp
+        activityUpdateTimestamp,
+        revisionCount
     );
   }
 

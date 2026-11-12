@@ -120,24 +120,29 @@ public class GerminatorTrayService {
 
   /**
    * Remove a test from its tray: detach test, update parent activity timestamp.
-   * If the tray has no tests left after removal, the tray is deleted.
+   * If the tray has no tests left after removal, the tray is deleted, only if its revision count
+   * still matches (so a tray another user just changed, e.g. its germinator ID, is not deleted).
    * Uses optimistic concurrency; if any DML affects 0 rows, throws and rolls back.
    *
    * @param germinatorTrayId         the tray the test is on (for validation and possible tray delete)
    * @param riaSkey                  the request item activity key of the test to remove
    * @param activityUpdateTimestamp  the current update_timestamp of the parent activity (optimistic lock)
+   * @param revisionCount            the tray revision count the caller read (optimistic lock on the
+   *                                 tray delete)
    * @throws ResponseStatusException 409 with RESELECT_MESSAGE if any update affects 0 rows
    */
   @Transactional(rollbackFor = ResponseStatusException.class)
   public void deleteTestFromTray(
       Integer germinatorTrayId,
       BigDecimal riaSkey,
-      LocalDateTime activityUpdateTimestamp
+      LocalDateTime activityUpdateTimestamp,
+      Long revisionCount
   ) {
-    if (germinatorTrayId == null || riaSkey == null || activityUpdateTimestamp == null) {
+    if (germinatorTrayId == null || riaSkey == null || activityUpdateTimestamp == null
+        || revisionCount == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Germinator tray ID, RIA key, and activity update timestamp are required");
+          "Germinator tray ID, RIA key, activity update timestamp and revision count are required");
     }
 
     SparLog.info("Removing test {} from tray {}", riaSkey, germinatorTrayId);
@@ -157,7 +162,9 @@ public class GerminatorTrayService {
 
     int remaining = testResultRepository.countByGerminatorTrayId(germinatorTrayId);
     if (remaining == 0) {
-      int deleteRows = germinatorTrayRepository.deleteByGerminatorTrayId(germinatorTrayId);
+      // 0 rows: another user changed (or deleted) the tray; roll back the detach too.
+      int deleteRows = germinatorTrayRepository.deleteByGerminatorTrayIdAndRevisionCount(
+          germinatorTrayId, revisionCount);
       if (deleteRows == 0) {
         throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
       }
