@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-import { type MRT_TableInstance } from 'material-react-table';
 import type { TestingSearchResponseType } from '../../../../../../types/consep/TestingSearchType';
 
 export interface GermTrayOptions {
@@ -10,7 +9,7 @@ export interface GermTrayOptions {
 }
 
 export interface CreateGermTrayProps {
-  table: MRT_TableInstance<TestingSearchResponseType>;
+  selectedRows: TestingSearchResponseType[];
   onClose: () => void;
 }
 
