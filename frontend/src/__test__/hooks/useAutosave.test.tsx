@@ -174,6 +174,31 @@ describe('useAutosave', () => {
     expect(onSave).toHaveBeenLastCalledWith({ v: 1 }, { v: 0 });
   });
 
+  it('records what onSaveFailed says did save, so reverting that part is saved', async () => {
+    type Rows = { a: number; b: number };
+    // `a` saves, then `b` fails: the server now holds { a: 1, b: 0 }.
+    const onSave = vi.fn()
+      .mockRejectedValueOnce(new Error('Save failed'))
+      .mockResolvedValueOnce(undefined);
+    const onSaveFailed = vi.fn((sent: Rows, previous: Rows) => ({ ...previous, a: sent.a }));
+    const { result, rerender } = renderHook(
+      ({ data }) => useAutosave<Rows>({
+        data, onSave, onSaveFailed, delay: 800
+      }),
+      { initialProps: { data: { a: 0, b: 0 } } }
+    );
+
+    rerender({ data: { a: 1, b: 1 } });
+    await act(async () => { await result.current.flush(); });
+    expect(onSaveFailed).toHaveBeenCalledWith({ a: 1, b: 1 }, { a: 0, b: 0 });
+
+    // Back to the first value: not "saved", because `a` changed on the server.
+    rerender({ data: { a: 0, b: 0 } });
+    await act(async () => { vi.advanceTimersByTime(800); });
+    expect(onSave).toHaveBeenCalledTimes(2);
+    expect(onSave).toHaveBeenLastCalledWith({ a: 0, b: 0 }, { a: 1, b: 0 });
+  });
+
   it('records what onSaved derives from the response as saved', async () => {
     const onSave = vi.fn().mockResolvedValue({ ts: 't2' });
     const onSaved = vi.fn((result: { ts: string }, sent: { v: number; ts: string }) => (
