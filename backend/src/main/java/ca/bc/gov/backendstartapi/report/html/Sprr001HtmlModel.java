@@ -29,6 +29,8 @@ public class Sprr001HtmlModel {
 
   static final String DEFAULT_STORAGE_FACILITY_TYPE = "RFR OTH CVR VEN";
   static final String DEFAULT_TREES_COLLECTED_FROM = "<10 ___  11-50 ___  50+ ___";
+  static final String DECIMAL_FORMAT = "#,##0.0;-#,##0.0";
+  static final String NUMBER_FORMAT = "#,##0;-#,##0";
 
   private static final DateTimeFormatter PRINTED_AT =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss a", Locale.US);
@@ -108,12 +110,12 @@ public class Sprr001HtmlModel {
         .classA("A".equalsIgnoreCase(r.getGeneticClass()))
         .applicantAgency(
             join(" ", r.getClientAcronym(), r.getApplicantClientLocn(), r.getClientName()))
-        .effectivePopSize(format("#,##0.0;-#,##0.0", r.getEffectivePopSize()))
+        .effectivePopSize(format(DECIMAL_FORMAT, r.getEffectivePopSize()))
         .collectionLatitude(
             dms(r.getCollectionLatDeg(), r.getCollectionLatMin(), r.getCollectionLatSec(), 2))
         .collectionLongitude(
             dms(r.getCollectionLongDeg(), r.getCollectionLongMin(), r.getCollectionLongSec(), 3))
-        .meanElevation(format("#,##0;-#,##0", r.getCollectionElevation()))
+        .meanElevation(format(NUMBER_FORMAT, r.getCollectionElevation()))
         .elevationMeanMinMax(
             Stream.of(
                     r.getCollectionElevation(),
@@ -123,7 +125,7 @@ public class Sprr001HtmlModel {
                 .collect(Collectors.joining(" / ")))
         .radiusOfCollectionArea(format("###0.00", r.getRadiusOfCollectionArea()))
         .becZoneSubzoneVariant(bec(r))
-        .noOfContainers(format("#,##0.0;-#,##0.0", r.getNoOfContainers()))
+        .noOfContainers(format(DECIMAL_FORMAT, r.getNoOfContainers()))
         .volPerContainer(format("#,###.00;-#,###.00", r.getVolPerContainer()))
         .clctnVolume(format("#,##0.00;-#,##0.00", r.getClctnVolume()))
         .treesCollectedFrom(
@@ -179,9 +181,9 @@ public class Sprr001HtmlModel {
   private static OwnershipLine ownershipLine(Sprr001OwnershipRow o) {
     return new OwnershipLine(
         join(" ", o.getClientAcronym(), o.getClientLocnCode()),
-        format("#,##0.0;-#,##0.0", o.getOwnerPortionPct()),
-        format("#,##0;-#,##0", o.getReservedPct()),
-        format("#,##0;-#,##0", o.getSurplusPct()),
+        format(DECIMAL_FORMAT, o.getOwnerPortionPct()),
+        format(NUMBER_FORMAT, o.getReservedPct()),
+        format(NUMBER_FORMAT, o.getSurplusPct()),
         o.getFundingSource() == null ? "" : Objects.toString(o.getSparFundSrceDesc(), ""),
         o.getMethodOfPaymentCode() == null ? "" : Objects.toString(o.getMethodOfPaymentDesc(), ""));
   }
