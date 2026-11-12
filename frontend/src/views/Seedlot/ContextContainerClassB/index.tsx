@@ -41,8 +41,6 @@ import {
 } from '../ContextContainerClassA/utils';
 import useBClassFormLoader from './useBClassFormLoader';
 
-import './styles.scss';
-
 type props = {
   children: React.ReactNode
 };
@@ -55,7 +53,7 @@ const ContextContainerClassB = ({ children }: props) => {
   const stepParam = searchParams.get('step');
 
   const [formStep, setFormStep] = useState<number>(() => {
-    const parsed = stepParam ? Number.parseInt(stepParam, 10) : NaN;
+    const parsed = stepParam ? Number.parseInt(stepParam, 10) : Number.NaN;
     const stepIndex = Number.isFinite(parsed) ? parsed - 1 : 0;
     return Math.min(3, Math.max(0, stepIndex));
   });
@@ -292,7 +290,7 @@ const ContextContainerClassB = ({ children }: props) => {
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
       queryClient.removeQueries({ queryKey: ['seedlots', 'b-class-form-progress', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlot-b-class-full-form', seedlotNumber] });
-      navigate({
+      void navigate({
         pathname: addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''),
         search: '?isSubmitSuccess=true'
       });

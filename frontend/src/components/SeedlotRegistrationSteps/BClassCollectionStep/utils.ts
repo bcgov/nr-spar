@@ -6,7 +6,6 @@ import { initCollectionState } from '@/views/Seedlot/ContextContainerClassA/util
 import { emptyCollectionStep } from '@/views/Seedlot/ContextContainerClassA/constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BClassCollectionForm } from './definitions';
-import { calcVolume, isNumNotInRange } from '../CollectionStep/utils';
 import { MARITIME_SPZ_CODE } from './constants';
 
 const toOption = (code: string | null | undefined, description = ''): MultiOptionsObj => {
@@ -231,7 +230,7 @@ const isCollectionSpzComplete = (
   return !(isCoastAreaRequired(spzCode) && !collectionData.seedCoastArea.value.code);
 };
 
-export { calcVolume, isNumNotInRange };
+export { calcVolume, isNumNotInRange } from '../CollectionStep/utils';
 
 export const validateBClassCollectionStep = (
   collectionData: BClassCollectionForm,

@@ -4,7 +4,7 @@ import RevisionCountDto from '../types/RevisionCountDto';
 import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
 import {
   RichSeedlotType, SeedlotAClassFullResponseType, SeedlotAClassSubmitType,
-  SeedlotBClassFullResponseType, SeedlotBClassProgressPayloadType, SeedlotBClassSubmitType,
+  SeedlotBClassFullFormType, SeedlotBClassProgressPayloadType, SeedlotBClassSubmitType,
   SeedlotCreateResponseType, SeedlotProgressPayloadType, SeedlotsReturnType
 } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
@@ -101,7 +101,7 @@ export const getBClassSeedlotProgressStatus = (seedlotNumber: string) => {
 
 export const getBClassSeedlotFullForm = (seedlotNumber: string) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/b-class-full-form`;
-  return api.get(url).then((res) => res.data as SeedlotBClassFullResponseType);
+  return api.get(url).then((res) => res.data as SeedlotBClassFullFormType);
 };
 
 export type SeedlotCollectionGeometryResponse = {

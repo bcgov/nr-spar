@@ -102,6 +102,11 @@ const LotApplicantAndInfoForm = ({
 
   const ResolvedSeedlotInfoSection = isBClass ? SeedlotInformationBClass : SeedlotInformation;
 
+  // Veglots fall back to their fixed agency inputs.
+  const seedlotInputs = isSeedlot ? seedlotFormData : undefined;
+  const clientInput = seedlotInputs?.client ?? vegLotAgency;
+  const locationCodeInput = seedlotInputs?.locationCode ?? vegLotLocationCode;
+
   return (
     <FlexGrid className="applicant-information-form">
       <Row className="section-title">
@@ -117,19 +122,10 @@ const LotApplicantAndInfoForm = ({
       <ClientAndCodeInput
         showCheckbox={false}
         checkboxId="lot-information-default-checkbox"
-        clientInput={isSeedlot && seedlotFormData ? seedlotFormData.client : vegLotAgency}
-        locationCodeInput={
-          isSeedlot && seedlotFormData
-            ? seedlotFormData.locationCode
-            : vegLotLocationCode
-        }
+        clientInput={clientInput}
+        locationCodeInput={locationCodeInput}
         textConfig={clientAndCodeInputText(isReview)}
-        setClientAndCode={
-          (
-            client: StringInputType,
-            locationCode: StringInputType
-          ) => setClientAndCode(client, locationCode)
-        }
+        setClientAndCode={setClientAndCode}
         readOnly={isEdit}
         maxInputColSize={6}
       />

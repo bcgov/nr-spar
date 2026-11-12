@@ -4,7 +4,7 @@ import React, {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { FlexGrid } from '@carbon/react';
-import validator from 'validator';
+import isDecimal from 'validator/es/lib/isDecimal';
 
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
@@ -199,7 +199,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
 
   const handleContainerNumAndVol = (isNum: boolean, value: string) => {
     const clonedState = structuredClone(state);
-    const isOverDecimal = !validator.isDecimal(value, { decimal_digits: '0,3' });
+    const isOverDecimal = !isDecimal(value, { decimal_digits: '0,3' });
     const isNotInRange = isNumNotInRange(value);
     const valType: 'numberOfContainers' | 'volumePerContainers' = isNum
       ? 'numberOfContainers'
@@ -217,7 +217,7 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
 
   const handleVolOfCones = (value: string) => {
     const clonedState = structuredClone(state);
-    const isOverDecimal = !validator.isDecimal(value, { decimal_digits: '0,3' });
+    const isOverDecimal = !isDecimal(value, { decimal_digits: '0,3' });
     clonedState.volumeOfCones.isInvalid = isOverDecimal;
     clonedState.volumeOfCones.value = value;
 

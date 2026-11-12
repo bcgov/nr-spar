@@ -186,7 +186,7 @@ const ReviewContent = () => {
   useEffect(() => {
     // Pending and incomplete seedlots are edited through the registration wizard
     if (statusCode === 'INC' || statusCode === 'PND') {
-      navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''));
+      void navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''));
     }
   }, [statusCode, seedlotNumber, navigate]);
 
@@ -214,7 +214,7 @@ const ReviewContent = () => {
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlot-b-class-full-form', seedlotNumber] });
       setIsReadMode(true);
-      navigate(`${addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? '')}?statusOnSave=${statusOnSave}`);
+      void navigate(`${addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? '')}?statusOnSave=${statusOnSave}`);
     }
   });
 
@@ -329,7 +329,7 @@ const ReviewContent = () => {
 
   const handleCancelClick = () => {
     if (isReadMode) {
-      navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''));
+      void navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''));
       return;
     }
     setIsCancelModalOpen(true);
@@ -357,8 +357,8 @@ const ReviewContent = () => {
   const discardChanges = () => {
     const shouldProceed = blocker.state === 'blocked';
     setIsReadMode(true);
-    queryClient.refetchQueries({ queryKey: ['seedlots', seedlotNumber] });
-    queryClient.refetchQueries({ queryKey: ['seedlot-b-class-full-form', seedlotNumber] });
+    void queryClient.refetchQueries({ queryKey: ['seedlots', seedlotNumber] });
+    void queryClient.refetchQueries({ queryKey: ['seedlot-b-class-full-form', seedlotNumber] });
     setIsCancelModalOpen(false);
     if (shouldProceed) {
       blocker.proceed();

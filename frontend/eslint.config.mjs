@@ -57,6 +57,9 @@ export default [
     rules: {
       'react/require-default-props': 'off',
       'linebreak-style': 'off',
+      // `void promise()` marks a deliberately un-awaited promise (e.g. navigate),
+      // which Sonar's floating-promise rule (S9383) asks for.
+      'no-void': ['error', { allowAsStatement: true }],
       'react/jsx-filename-extension': [
         'error',
         { extensions: ['.js', '.jsx', '.ts', '.tsx'] },

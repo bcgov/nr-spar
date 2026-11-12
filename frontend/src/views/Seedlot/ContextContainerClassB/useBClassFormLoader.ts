@@ -39,6 +39,167 @@ const isAxios404 = (error: unknown): boolean => (
   error instanceof AxiosError && error.response?.status === 404
 );
 
+export type LoadGate =
+  | { kind: 'loading' }
+  | { kind: 'error'; title: string; message: string }
+  | { kind: 'proceed' };
+
+type LoadGateArgs = {
+  editable: boolean;
+  draftSettled: boolean;
+  needsFullForm: boolean;
+  fullFormFetched: boolean;
+  ownershipLookupsReady: boolean;
+  draftError: unknown;
+  fullFormError: unknown;
+};
+
+/**
+ * Decides whether the form can hydrate yet, must keep loading, or failed to
+ * fetch something it needs. A 404 is not a failure: it means "no draft yet".
+ */
+export const getLoadGate = ({
+  editable,
+  draftSettled,
+  needsFullForm,
+  fullFormFetched,
+  ownershipLookupsReady,
+  draftError,
+  fullFormError
+}: LoadGateArgs): LoadGate => {
+  if ((editable && !draftSettled) || (needsFullForm && (!fullFormFetched || !ownershipLookupsReady))) {
+    return { kind: 'loading' };
+  }
+  if (draftError && !isAxios404(draftError)) {
+    return { kind: 'error', title: 'Error retrieving form draft!', message: (draftError as AxiosError).message };
+  }
+  if (fullFormError && !isAxios404(fullFormError)) {
+    return { kind: 'error', title: 'Error retrieving seedlot data!', message: (fullFormError as AxiosError).message };
+  }
+  return { kind: 'proceed' };
+};
+
+export type HydrationPlan = {
+  key: string;
+  source: 'draft' | 'tables' | 'empty';
+  stepData: BClassAllStepData;
+  revCount: number;
+  savedProgress?: BClassProgressIndicatorConfig;
+};
+
+type ResDataToStateArgs = Parameters<typeof resDataToState>;
+
+type HydrationPlanArgs = {
+  seedlotNumber: string | undefined;
+  editable: boolean;
+  isFormSubmitted: boolean;
+  draftHasData: boolean;
+  draftIsEmpty: boolean;
+  draftNotFound: boolean;
+  draftData: SeedlotBClassProgressPayloadType | undefined;
+  fullFormData: ResDataToStateArgs[0] | undefined;
+  fullFormUpdatedAt: number;
+  defaultClientNumber: string;
+  defaultLocationCode: string;
+  methodsOfPayment: ResDataToStateArgs[2];
+  fundingSources: ResDataToStateArgs[3];
+  currentRevCount: number;
+  seedlot: Parameters<typeof withSeedlotSpzFallback>[1];
+};
+
+/**
+ * Picks where the form's initial state comes from: the saved tables for a
+ * submitted seedlot, the draft when one has data, the tables when the draft is
+ * empty, or blank steps for a new seedlot. Returns null while none applies yet.
+ */
+export const getHydrationPlan = (args: HydrationPlanArgs): HydrationPlan | null => {
+  const {
+    seedlotNumber, editable, isFormSubmitted, draftHasData, draftIsEmpty, draftNotFound,
+    draftData, fullFormData, fullFormUpdatedAt, defaultClientNumber, defaultLocationCode,
+    methodsOfPayment, fundingSources, currentRevCount, seedlot
+  } = args;
+  const savedProgress = draftData?.progressStatus as BClassProgressIndicatorConfig | undefined;
+  const fromTables = (data: ResDataToStateArgs[0]) => resDataToState(
+    data,
+    defaultClientNumber,
+    methodsOfPayment,
+    fundingSources
+  );
+
+  if (isFormSubmitted && fullFormData) {
+    return {
+      key: `sub:${seedlotNumber}:${fullFormUpdatedAt}`,
+      source: 'tables',
+      stepData: fromTables(fullFormData),
+      revCount: currentRevCount
+    };
+  }
+  if (draftHasData && draftData) {
+    const hydrated = hydrateFromDraftPayload(
+      draftData,
+      defaultClientNumber,
+      defaultLocationCode,
+      seedlot
+    );
+    return {
+      key: `draft:${seedlotNumber}:${draftData.revisionCount}`,
+      source: 'draft',
+      stepData: hydrated.allStepData,
+      revCount: hydrated.revisionCount,
+      savedProgress
+    };
+  }
+  if (editable && draftIsEmpty && fullFormData) {
+    return {
+      key: `pnd-empty:${seedlotNumber}:${fullFormUpdatedAt}`,
+      source: 'tables',
+      stepData: fromTables(fullFormData),
+      revCount: currentRevCount,
+      savedProgress
+    };
+  }
+  if (editable && draftNotFound) {
+    const emptySteps = applyApplicantDefaultsToSteps(
+      initEmptySteps(defaultClientNumber, defaultLocationCode),
+      defaultClientNumber,
+      defaultLocationCode
+    );
+    return {
+      key: `new:${seedlotNumber}:${defaultClientNumber}:${defaultLocationCode}`,
+      source: 'empty',
+      stepData: {
+        ...emptySteps,
+        collectionStep: withSeedlotSpzFallback(emptySteps.collectionStep, seedlot)
+      },
+      revCount: currentRevCount
+    };
+  }
+  return null;
+};
+
+/**
+ * The progress indicator state to show after hydrating, or null to leave the
+ * current one untouched.
+ */
+export const getHydratedProgress = (
+  plan: HydrationPlan,
+  formStep: number,
+  isFormSubmitted: boolean
+): BClassProgressIndicatorConfig | null => {
+  if (plan.savedProgress) {
+    const clonedStatus = structuredClone(plan.savedProgress);
+    const currStepName = stepMap[formStep];
+    if (clonedStatus[currStepName]) {
+      clonedStatus[currStepName].isCurrent = true;
+    }
+    return clonedStatus;
+  }
+  if (plan.source === 'tables' && isFormSubmitted) {
+    return initProgressBar(formStep, initialProgressConfig);
+  }
+  return null;
+};
+
 type UseBClassFormLoaderArgs = {
   seedlotNumber: string | undefined;
   formStep: number;
@@ -155,7 +316,7 @@ export const useBClassFormLoader = ({
 
   useEffect(() => {
     if (seedlotQuery.error instanceof AxiosError && seedlotQuery.error.response?.status === 404) {
-      navigate(ROUTES.FOUR_OH_FOUR);
+      void navigate(ROUTES.FOUR_OH_FOUR);
     }
   }, [seedlotQuery.error, navigate]);
 
@@ -172,119 +333,63 @@ export const useBClassFormLoader = ({
       return;
     }
 
-    if (editable && !draftSettled) {
-      setLoadState({ status: 'loading' });
-      return;
-    }
+    const gate = getLoadGate({
+      editable,
+      draftSettled,
+      needsFullForm,
+      fullFormFetched: fullFormQuery.isFetched,
+      ownershipLookupsReady,
+      draftError: getFormDraftQuery.isError ? getFormDraftQuery.error : null,
+      fullFormError: fullFormQuery.isError ? fullFormQuery.error : null
+    });
 
-    if (needsFullForm && !fullFormQuery.isFetched) {
-      setLoadState({ status: 'loading' });
-      return;
-    }
-
-    if (needsFullForm && !ownershipLookupsReady) {
-      setLoadState({ status: 'loading' });
-      return;
-    }
-
-    if (getFormDraftQuery.isError && !isAxios404(getFormDraftQuery.error)) {
-      const error = getFormDraftQuery.error as AxiosError;
+    if (gate.kind === 'error') {
       // eslint-disable-next-line no-alert
-      alert(`Error retrieving form draft! ${error.message}`);
-      navigate(`/seedlots/details/${seedlotNumber}`);
-      setLoadState({ status: 'error', message: error.message });
+      alert(`${gate.title} ${gate.message}`);
+      void navigate(`/seedlots/details/${seedlotNumber}`);
+      setLoadState({ status: 'error', message: gate.message });
       return;
     }
 
-    if (fullFormQuery.isError && !isAxios404(fullFormQuery.error)) {
-      const error = fullFormQuery.error as AxiosError;
-      // eslint-disable-next-line no-alert
-      alert(`Error retrieving seedlot data! ${error.message}`);
-      navigate(`/seedlots/details/${seedlotNumber}`);
-      setLoadState({ status: 'error', message: error.message });
-      return;
-    }
-
-    let hydrationKey: string;
-    let source: 'draft' | 'tables' | 'empty';
-    let nextStepData: BClassAllStepData;
-    let nextRevCount = formDraftRevCount;
-    let savedProgress = getFormDraftQuery.data?.progressStatus as BClassProgressIndicatorConfig | undefined;
-
-    if (isFormSubmitted && fullFormQuery.isSuccess) {
-      hydrationKey = `sub:${seedlotNumber}:${fullFormQuery.dataUpdatedAt}`;
-      source = 'tables';
-      nextStepData = resDataToState(
-        fullFormQuery.data,
-        defaultClientNumber,
-        methodsOfPaymentQuery.data,
-        fundingSourcesQuery.data
-      );
-      savedProgress = undefined;
-    } else if (draftHasData && getFormDraftQuery.data) {
-      hydrationKey = `draft:${seedlotNumber}:${getFormDraftQuery.data.revisionCount}`;
-      source = 'draft';
-      const hydrated = hydrateFromDraftPayload(
-        getFormDraftQuery.data,
+    const plan = gate.kind === 'proceed'
+      ? getHydrationPlan({
+        seedlotNumber,
+        editable,
+        isFormSubmitted,
+        draftHasData,
+        draftIsEmpty,
+        draftNotFound,
+        draftData: getFormDraftQuery.data,
+        fullFormData: fullFormQuery.isSuccess ? fullFormQuery.data : undefined,
+        fullFormUpdatedAt: fullFormQuery.dataUpdatedAt,
         defaultClientNumber,
         defaultLocationCode,
-        seedlotQuery.data?.seedlot
-      );
-      nextStepData = hydrated.allStepData;
-      nextRevCount = hydrated.revisionCount;
-    } else if (editable && draftIsEmpty && fullFormQuery.isSuccess) {
-      hydrationKey = `pnd-empty:${seedlotNumber}:${fullFormQuery.dataUpdatedAt}`;
-      source = 'tables';
-      nextStepData = resDataToState(
-        fullFormQuery.data,
-        defaultClientNumber,
-        methodsOfPaymentQuery.data,
-        fundingSourcesQuery.data
-      );
-    } else if (editable && draftNotFound) {
-      hydrationKey = `new:${seedlotNumber}:${defaultClientNumber}:${defaultLocationCode}`;
-      source = 'empty';
-      const emptySteps = applyApplicantDefaultsToSteps(
-        initEmptySteps(defaultClientNumber, defaultLocationCode),
-        defaultClientNumber,
-        defaultLocationCode
-      );
-      nextStepData = {
-        ...emptySteps,
-        collectionStep: withSeedlotSpzFallback(
-          emptySteps.collectionStep,
-          seedlotQuery.data?.seedlot
-        )
-      };
-      savedProgress = undefined;
-    } else if (needsFullForm && fullFormQuery.isFetching) {
-      setLoadState({ status: 'loading' });
-      return;
-    } else {
+        methodsOfPayment: methodsOfPaymentQuery.data,
+        fundingSources: fundingSourcesQuery.data,
+        currentRevCount: formDraftRevCount,
+        seedlot: seedlotQuery.data?.seedlot
+      })
+      : null;
+
+    if (!plan) {
       setLoadState({ status: 'loading' });
       return;
     }
 
-    if (hydrationKeyRef.current === hydrationKey) {
+    if (hydrationKeyRef.current === plan.key) {
       return;
     }
-    hydrationKeyRef.current = hydrationKey;
+    hydrationKeyRef.current = plan.key;
 
-    setAllStepData(nextStepData);
-    setFormDraftRevCount(nextRevCount);
+    setAllStepData(plan.stepData);
+    setFormDraftRevCount(plan.revCount);
 
-    const currStepName = stepMap[formStep];
-    if (savedProgress) {
-      const clonedStatus = structuredClone(savedProgress);
-      if (clonedStatus[currStepName]) {
-        clonedStatus[currStepName].isCurrent = true;
-      }
-      setProgressStatus(clonedStatus);
-    } else if (source === 'tables' && isFormSubmitted) {
-      setProgressStatus(initProgressBar(formStep, initialProgressConfig));
+    const nextProgress = getHydratedProgress(plan, formStep, isFormSubmitted);
+    if (nextProgress) {
+      setProgressStatus(nextProgress);
     }
 
-    setLoadState({ status: 'ready', source, editable });
+    setLoadState({ status: 'ready', source: plan.source, editable });
   }, [
     seedlotReady,
     editable,
@@ -300,6 +405,7 @@ export const useBClassFormLoader = ({
     getFormDraftQuery.error,
     fullFormQuery.isSuccess,
     fullFormQuery.isError,
+    fullFormQuery.error,
     fullFormQuery.isFetching,
     fullFormQuery.isFetched,
     fullFormQuery.data,

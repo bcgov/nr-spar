@@ -109,7 +109,7 @@ const SeedlotCreatedFeedback = () => {
                       <Button
                         onClick={() => {
                           if (seedlotClass === 'A') {
-                            navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''));
+                            void navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''));
                           }
                         }}
                         size="lg"
@@ -145,9 +145,9 @@ const SeedlotCreatedFeedback = () => {
                   kind={isBClass ? 'secondary' : 'tertiary'}
                   onClick={() => {
                     if (seedlotClass === 'A') {
-                      navigate(ROUTES.SEEDLOTS_A_CLASS_CREATION);
+                      void navigate(ROUTES.SEEDLOTS_A_CLASS_CREATION);
                     } else if (seedlotClass === 'B') {
-                      navigate(ROUTES.SEEDLOTS_B_CLASS_CREATION);
+                      void navigate(ROUTES.SEEDLOTS_B_CLASS_CREATION);
                     }
                   }}
                   size="lg"

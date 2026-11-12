@@ -134,7 +134,7 @@ export const ClassFormProgress = <T,>({
       <ProgressBar
         progressStatus={progressStatus}
         interactFunction={(e: number) => {
-          navigate(`${registrationPath}?step=${e + 1}`);
+          void navigate(`${registrationPath}?step=${e + 1}`);
         }}
       />
     );

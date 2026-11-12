@@ -54,7 +54,7 @@ export const initProgressBar = (
   const cloned = structuredClone(progressConfig);
 
   Object.keys(stepMap).forEach((key: string) => {
-    const numKey = parseInt(key, 10);
+    const numKey = Number.parseInt(key, 10);
     if (numKey === currentStep) {
       cloned[stepMap[numKey]].isCurrent = true;
     }
@@ -249,7 +249,7 @@ export const hydrateFromDraftPayload = (
 };
 
 const parseCoord = (value: string): number => {
-  const parsed = parseInt(value, 10);
+  const parsed = Number.parseInt(value, 10);
   return Number.isNaN(parsed) ? 0 : parsed;
 };
 
@@ -282,10 +282,10 @@ export const convertBClassCollection = (
     clctnVolume: +collectionData.volumeOfCones.value,
     seedlotComment: collectionData.comments.value,
     coneCollectionMethodCodes: collectionData
-      .selectedCollectionCodes.value.map((code) => parseInt(code, 10)),
+      .selectedCollectionCodes.value.map((code) => Number.parseInt(code, 10)),
     collectionLocationDesc: collectionData.locationArea.value,
     orgUnitNo: collectionData.orgUnit.value.code
-      ? parseInt(collectionData.orgUnit.value.code, 10)
+      ? Number.parseInt(collectionData.orgUnit.value.code, 10)
       : null,
     collectionStandardMetInd: true,
     collectionAreaRadius: collectionData.collectionRadius.value
@@ -311,13 +311,13 @@ export const convertBClassCollection = (
     collectionLongitudeMin: longMin,
     collectionLongitudeSec: longSec,
     collectionElevation: collectionData.elevationMean.value
-      ? parseInt(collectionData.elevationMean.value, 10)
+      ? Number.parseInt(collectionData.elevationMean.value, 10)
       : null,
     collectionElevationMin: collectionData.elevationMin.value
-      ? parseInt(collectionData.elevationMin.value, 10)
+      ? Number.parseInt(collectionData.elevationMin.value, 10)
       : null,
     collectionElevationMax: collectionData.elevationMax.value
-      ? parseInt(collectionData.elevationMax.value, 10)
+      ? Number.parseInt(collectionData.elevationMax.value, 10)
       : null,
     elevationMin: seedlot?.elevationMin ?? null,
     elevationMax: seedlot?.elevationMax ?? null,

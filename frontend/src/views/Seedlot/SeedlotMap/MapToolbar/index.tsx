@@ -15,7 +15,10 @@ import { useSparMap } from '../../../../contexts/SparMapContext';
 import { printMap } from '../printMap';
 
 const parseCoordinate = (value: string) => {
-  const numeric = Number(value.trim());
+  const trimmed = value.trim();
+  // Number('') is 0, so a blank field would otherwise drop a pin at 0°, 0°.
+  if (trimmed === '') return null;
+  const numeric = Number(trimmed);
   return Number.isFinite(numeric) ? numeric : null;
 };
 

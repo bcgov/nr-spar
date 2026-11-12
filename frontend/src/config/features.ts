@@ -9,6 +9,9 @@ import { env } from '../env';
  * Only the literal string `true` enables a flag. An unset or any other value
  * leaves the feature off.
  */
-const isEnabled = (value: unknown): boolean => String(value ?? '').toLowerCase() === 'true';
+const isEnabled = (value: unknown): boolean => (
+  (typeof value === 'string' || typeof value === 'boolean')
+  && String(value).toLowerCase() === 'true'
+);
 
 export const isSeedlotBEnabled = (): boolean => isEnabled(env.VITE_SEEDLOT_B_ENABLED);

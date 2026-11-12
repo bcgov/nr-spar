@@ -436,5 +436,3 @@ export type SeedlotBClassFullFormType = {
   aouSpzList?: SeedPlanZoneDto[],
   geneticWorthTraits?: unknown[]
 };
-
-export type SeedlotBClassFullResponseType = SeedlotBClassFullFormType;
