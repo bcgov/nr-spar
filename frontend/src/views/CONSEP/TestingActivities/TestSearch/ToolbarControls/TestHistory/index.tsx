@@ -13,10 +13,11 @@ import type {
 } from '../../../../../../types/consep/TestingSearchType';
 
 type TestHistoryProps = {
-  selectedRows: TestingSearchResponseType[];
+  lotNumbers: string[];
+  testTypes?: string[];
 };
 
-const TestHistory = ({ selectedRows }: TestHistoryProps) => {
+const TestHistory = ({ lotNumbers, testTypes }: TestHistoryProps) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
@@ -36,7 +37,7 @@ const TestHistory = ({ selectedRows }: TestHistoryProps) => {
     isPending
   } = useMutation({
     mutationFn: ({ page = 0, size = 10 }: { page?: number; size?: number }) => searchTestingActivities(
-      { lotNumbers: selectedRows.map((row) => row.seedlotDisplay) },
+      { lotNumbers, testTypes },
       'actualEndDtTm',
       'asc',
       false,
