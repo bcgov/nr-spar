@@ -4,14 +4,30 @@ import ca.bc.gov.backendstartapi.config.Constants;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-/** This class contains methods for handling JWT requests. */
+/**
+ * This class contains methods for handling JWT requests.
+ *
+ * <p>FAM grants roles through BC Gov SSO (Keycloak). A scoped grant has its scope in the role name
+ * only, e.g. {@code SPAR_NONMINISTRY_ORCHARD_FOREST_CLIENT-00012345}; the bare role code is not in
+ * the token for scoped holders.
+ */
 public final class JwtSecurityUtil {
 
   private static final List<String> concreteRoles =
       List.of("SPAR_MINISTRY_ORCHARD", "SPAR_TSC_ADMIN");
+
+  private static final String FOREST_CLIENT_SCOPE = "_FOREST_CLIENT";
+
+  /** FAM writes scope suffixes in the order district, region, forest client. */
+  private static final List<String> scopeTypes =
+      List.of(FOREST_CLIENT_SCOPE, "_DISTRICT", "_REGION");
+
+  /** A role code with its forest client scope, if it has one. */
+  private record ParsedRole(String role, String clientNumber) {}
 
   /**
    * Gets user roles from user JWT token.
@@ -21,17 +37,7 @@ public final class JwtSecurityUtil {
    */
   public static Set<String> getUserRolesFromJwt(Jwt jwtPrincipal) {
     Set<String> roles = new HashSet<>();
-    getRolesWithClientIds(jwtPrincipal)
-        .forEach(
-            role -> {
-              if (role.length() >= 9) {
-                String clientNumber = role.substring(role.length() - 8);
-                if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
-                  role = role.substring(0, role.length() - 9); // Removes dangling underscore
-                }
-              }
-              roles.add(role);
-            });
+    getRawRoles(jwtPrincipal).forEach(role -> roles.add(parseRole(role).role()));
     return roles;
   }
 
@@ -45,16 +51,12 @@ public final class JwtSecurityUtil {
     List<String> clientIds = new ArrayList<>();
     boolean foundRole = false;
 
-    List<String> rolesAndClientIds = getRolesWithClientIds(jwtPrincipal);
-    for (String role : rolesAndClientIds) {
-      if (role.length() >= 9) {
-        String clientNumber = role.substring(role.length() - 8);
-        if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
-          clientIds.add(clientNumber);
-        }
+    for (String rawRole : getRawRoles(jwtPrincipal)) {
+      ParsedRole parsed = parseRole(rawRole);
+      if (parsed.clientNumber() != null && !clientIds.contains(parsed.clientNumber())) {
+        clientIds.add(parsed.clientNumber());
       }
-
-      if (concreteRoles.contains(role)) {
+      if (concreteRoles.contains(parsed.role())) {
         foundRole = true;
       }
     }
@@ -68,17 +70,47 @@ public final class JwtSecurityUtil {
     return clientIds;
   }
 
-  private static List<String> getRolesWithClientIds(Jwt jwtPrincipal) {
-    List<String> fullList = new ArrayList<>();
-    if (jwtPrincipal.getClaims().containsKey("cognito:groups")) {
-      Object clientRolesObj = jwtPrincipal.getClaims().get("cognito:groups");
-      if (clientRolesObj instanceof List<?> list) {
-        for (Object item : list) {
-          String role = String.valueOf(item);
-          fullList.add(role);
-        }
+  /**
+   * Strips scope suffixes from the right: the value is what follows the last {@code -}, and the
+   * text before it must end in a known scope type. Never split on underscores, region values
+   * contain them. Mirrors {@code CssRoleNaming.parse} in nr-fam.
+   */
+  private static ParsedRole parseRole(String name) {
+    String role = name;
+    String clientNumber = null;
+    int dash;
+    while ((dash = role.lastIndexOf('-')) > 0) {
+      String head = role.substring(0, dash);
+      String scope = scopeTypes.stream().filter(head::endsWith).findFirst().orElse(null);
+      if (scope == null) {
+        break;
       }
+      if (scope.equals(FOREST_CLIENT_SCOPE)) {
+        clientNumber = role.substring(dash + 1);
+      }
+      role = head.substring(0, head.length() - scope.length());
     }
+    return new ParsedRole(role, clientNumber);
+  }
+
+  /**
+   * CSS emits {@code client_roles}; stock Keycloak uses {@code resource_access.<azp>.roles},
+   * so read both. {@code FAM:} roles are FAM bookkeeping (e.g. grant expiry), not permissions.
+   */
+  private static List<String> getRawRoles(Jwt jwtPrincipal) {
+    List<String> fullList = new ArrayList<>();
+    addAll(fullList, jwtPrincipal.getClaims().get("client_roles"));
+    if (jwtPrincipal.getClaims().get("resource_access") instanceof Map<?, ?> resourceAccess
+        && resourceAccess.get(jwtPrincipal.getClaimAsString("azp")) instanceof Map<?, ?> client) {
+      addAll(fullList, client.get("roles"));
+    }
+    fullList.removeIf(role -> role.startsWith("FAM:"));
     return fullList;
+  }
+
+  private static void addAll(List<String> target, Object roles) {
+    if (roles instanceof List<?> list) {
+      list.forEach(item -> target.add(String.valueOf(item)));
+    }
   }
 }
