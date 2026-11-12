@@ -103,14 +103,13 @@ class SeedlotCollectionGeometryServiceTest {
     seedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
 
     GeometryFactory geometryFactory = new GeometryFactory();
-    Coordinate[] coordinates =
-        {
-          new Coordinate(-123.02, 49.00),
-          new Coordinate(-123.00, 49.00),
-          new Coordinate(-123.00, 49.01),
-          new Coordinate(-123.02, 49.01),
-          new Coordinate(-123.02, 49.00)
-        };
+    Coordinate[] coordinates = {
+      new Coordinate(-123.02, 49.00),
+      new Coordinate(-123.00, 49.00),
+      new Coordinate(-123.00, 49.01),
+      new Coordinate(-123.02, 49.01),
+      new Coordinate(-123.02, 49.00)
+    };
     Polygon polygon = geometryFactory.createPolygon(coordinates);
 
     SeedlotCollectionGeometry geometry = new SeedlotCollectionGeometry(SEEDLOT_NUMBER);
