@@ -12,8 +12,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
- * Native-image hints for Hibernate: the Hibernate Spatial logger, and arrays of entity ID types
- * that Hibernate creates reflectively (e.g. for batch and multi-ID loading).
+ * Native-image hints for Hibernate and geometry: the Hibernate Spatial logger, arrays of entity ID
+ * types that Hibernate creates reflectively (e.g. for batch and multi-ID loading), and geolatte's
+ * coordinate reference system definitions.
  */
 @Configuration
 @ImportRuntimeHints(HibernateSpatialCloudNativeConfig.class)
@@ -35,6 +36,12 @@ public class HibernateSpatialCloudNativeConfig implements RuntimeHintsRegistrar 
     // SeedlotCollectionGeometry has a UUID id; without this, startup fails building the
     // SessionFactory with "Class java.util.UUID[] is instantiated reflectively".
     hints.reflection().registerType(UUID[].class, MemberCategory.UNSAFE_ALLOCATED);
+
+    // geolatte's CrsRegistry loads its CRS definitions from this classpath file in a static
+    // initializer (reached via CoordinateReferenceSystems.WGS84, e.g. from GeometryUtil). If it
+    // is missing from the native image, the first geometry call fails with "Could not initialize
+    // class".
+    hints.resources().registerPattern("spatial_ref_sys.txt");
   }
 
   private static class RuntimeHintsException extends RuntimeException {
