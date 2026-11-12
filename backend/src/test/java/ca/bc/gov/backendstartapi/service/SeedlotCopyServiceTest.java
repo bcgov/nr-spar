@@ -468,8 +468,9 @@ class SeedlotCopyServiceTest {
   @DisplayName("copyCollectionMethods: one source row causes one save")
   void copyCollectionMethods_withData_savesEachItem() {
     SeedlotCollectionMethod cmSrc = mock(SeedlotCollectionMethod.class);
-    when(cmSrc.getConeCollectionMethod()).thenReturn(mock(
-        ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity.class));
+    ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity coneMethod =
+        mock(ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity.class);
+    when(cmSrc.getConeCollectionMethod()).thenReturn(coneMethod);
     when(cmSrc.getConeCollectionMethodOtherDescription()).thenReturn("other desc");
 
     stubCommonForFullCopy();
@@ -730,13 +731,15 @@ class SeedlotCopyServiceTest {
   @DisplayName("B copy: shares genetic worth / plan zones / collection methods with A path")
   void copyB_copiesSharedChildren() {
     SeedlotGeneticWorth gwSrc = mock(SeedlotGeneticWorth.class);
-    when(gwSrc.getGeneticWorth()).thenReturn(mock(GeneticWorthEntity.class));
+    GeneticWorthEntity geneticWorth = mock(GeneticWorthEntity.class);
+    when(gwSrc.getGeneticWorth()).thenReturn(geneticWorth);
     when(gwSrc.getGeneticQualityValue()).thenReturn(new BigDecimal("1.2"));
     when(gwSrc.getTestedParentTreeContributionPercentage()).thenReturn(new BigDecimal("10.00"));
 
     SeedlotCollectionMethod cmSrc = mock(SeedlotCollectionMethod.class);
-    when(cmSrc.getConeCollectionMethod()).thenReturn(mock(
-        ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity.class));
+    ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity coneMethod =
+        mock(ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity.class);
+    when(cmSrc.getConeCollectionMethod()).thenReturn(coneMethod);
     when(cmSrc.getConeCollectionMethodOtherDescription()).thenReturn("other");
 
     stubCommonForBclassCopy();

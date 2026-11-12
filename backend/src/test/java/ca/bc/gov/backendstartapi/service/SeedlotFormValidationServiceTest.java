@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -1398,10 +1400,11 @@ class SeedlotFormValidationServiceTest {
             List.of(),
             List.of());
 
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream()
             .anyMatch(
@@ -1417,10 +1420,11 @@ class SeedlotFormValidationServiceTest {
     lenient().when(coneCollectionMethodRepository.existsById(1)).thenReturn(false);
 
     SeedlotFormSubmissionDtoClassB form = validBclassForm();
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream()
             .anyMatch(
@@ -1503,10 +1507,11 @@ class SeedlotFormValidationServiceTest {
             List.of(),
             List.of());
 
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.orgUnitNo")));
@@ -1586,10 +1591,11 @@ class SeedlotFormValidationServiceTest {
             List.of(),
             List.of());
 
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.becOverrideComment")));
@@ -1669,10 +1675,11 @@ class SeedlotFormValidationServiceTest {
             List.of(),
             List.of());
 
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream()
             .anyMatch(
@@ -1695,10 +1702,11 @@ class SeedlotFormValidationServiceTest {
             List.of(new SeedPlanZoneDto("M", "Maritime", true)),
             List.of());
 
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream().anyMatch(e -> e.fieldId().startsWith("aouSpzList")));
   }
@@ -1723,10 +1731,11 @@ class SeedlotFormValidationServiceTest {
             spzList,
             List.of());
 
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream().anyMatch(e -> e.fieldId().equals("aouSpzList")));
   }
@@ -1749,10 +1758,11 @@ class SeedlotFormValidationServiceTest {
                 new SeedPlanZoneDto("M", "Maritime again", false)),
             List.of());
 
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream().anyMatch(e -> e.message().contains("Duplicate")));
   }
@@ -1831,32 +1841,43 @@ class SeedlotFormValidationServiceTest {
             List.of(),
             List.of());
 
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
         ex.getErrors().stream()
             .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.captureMethodCode")));
   }
 
-  @Test
-  @DisplayName("B-class: BC-source lot without a collection SPZ is rejected")
-  void validateBclassSeedlotForm_bcSourceMissingSpz_isRejected() {
+  @ParameterizedTest(name = "{3}")
+  @CsvSource(
+      nullValues = "NULL",
+      value = {
+        "NULL, NULL, seedlotFormCollectionDto.seedPlanZoneCode,"
+            + " BC-source lot without a collection SPZ",
+        "M, ' ', seedlotFormCollectionDto.seedCoastAreaCode, SPZ M without a geographic area",
+        "GL, NULL, seedlotFormCollectionDto.seedPlanZoneCode,"
+            + " SPZ that is not a class B zone for the species"
+      })
+  @DisplayName("B-class: invalid collection SPZ details are rejected")
+  void validateBclassSeedlotForm_invalidCollectionSpz_isRejected(
+      String seedPlanZoneCode, String seedCoastAreaCode, String expectedFieldId, String scenario) {
     stubValidForestClient();
     stubValidConeMethods();
     stubValidMethodOfPayment();
 
     SeedlotFormSubmissionDtoClassB form =
-        bclassFormWithCollection(bclassCollection(null, null, null));
+        bclassFormWithCollection(bclassCollection(seedPlanZoneCode, seedCoastAreaCode, null));
 
+    Seedlot seedlot = validBclassSeedlot();
     SeedlotSubmissionValidationException ex =
         Assertions.assertThrows(
             SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
+            () -> service.validateBclassSeedlotForm(seedlot, form));
     Assertions.assertTrue(
-        ex.getErrors().stream()
-            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.seedPlanZoneCode")));
+        ex.getErrors().stream().anyMatch(e -> e.fieldId().equals(expectedFieldId)), scenario);
   }
 
   @Test
@@ -1875,25 +1896,6 @@ class SeedlotFormValidationServiceTest {
   }
 
   @Test
-  @DisplayName("B-class: SPZ M without a geographic area is rejected")
-  void validateBclassSeedlotForm_maritimeMissingCoastArea_isRejected() {
-    stubValidForestClient();
-    stubValidConeMethods();
-    stubValidMethodOfPayment();
-
-    SeedlotFormSubmissionDtoClassB form =
-        bclassFormWithCollection(bclassCollection("M", " ", null));
-
-    SeedlotSubmissionValidationException ex =
-        Assertions.assertThrows(
-            SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
-    Assertions.assertTrue(
-        ex.getErrors().stream()
-            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.seedCoastAreaCode")));
-  }
-
-  @Test
   @DisplayName("B-class: non-maritime SPZ does not need a geographic area")
   void validateBclassSeedlotForm_nonMaritimeWithoutCoastArea_shouldPass() {
     stubValidForestClient();
@@ -1905,25 +1907,6 @@ class SeedlotFormValidationServiceTest {
 
     Assertions.assertDoesNotThrow(
         () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
-  }
-
-  @Test
-  @DisplayName("B-class: SPZ that is not a class B zone for the species is rejected")
-  void validateBclassSeedlotForm_spzNotValidForSpecies_isRejected() {
-    stubValidForestClient();
-    stubValidConeMethods();
-    stubValidMethodOfPayment();
-
-    SeedlotFormSubmissionDtoClassB form =
-        bclassFormWithCollection(bclassCollection("GL", null, null));
-
-    SeedlotSubmissionValidationException ex =
-        Assertions.assertThrows(
-            SeedlotSubmissionValidationException.class,
-            () -> service.validateBclassSeedlotForm(validBclassSeedlot(), form));
-    Assertions.assertTrue(
-        ex.getErrors().stream()
-            .anyMatch(e -> e.fieldId().equals("seedlotFormCollectionDto.seedPlanZoneCode")));
   }
 
   @Test

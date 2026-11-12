@@ -104,7 +104,7 @@ class SeedlotCollectionGeometryServiceTest {
 
     GeometryFactory geometryFactory = new GeometryFactory();
     Coordinate[] coordinates =
-        new Coordinate[] {
+        {
           new Coordinate(-123.02, 49.00),
           new Coordinate(-123.00, 49.00),
           new Coordinate(-123.00, 49.01),
