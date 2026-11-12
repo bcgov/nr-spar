@@ -1,6 +1,5 @@
-/* eslint-disable camelcase */
-import React, { useRef, useState, useEffect } from 'react';
-import { type MRT_TableInstance } from 'material-react-table';
+import React, { useRef, useState, useMemo } from 'react';
+import { type MRT_RowSelectionState, type MRT_TableInstance } from 'material-react-table';
 import {
   Row, Column, Button, Modal, Tooltip
 } from '@carbon/react';
@@ -40,15 +39,28 @@ const TestListTable = ({
   sorting
 }: TestListTableProp) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
-  const tableRef = useRef<MRT_TableInstance<TestingSearchResponseType> | null>(null);
+  const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
+  const [prevData, setPrevData] = useState(data);
   const [showTestHistory, setShowTestHistory] = useState(false);
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showCreateGermTray, setShowCreateGermTray] = useState(false);
 
-  useEffect(() => {
-    // Reset row selection whenever new data is set
-    tableRef.current?.resetRowSelection?.();
-  }, [data]);
+  // Reset row selection whenever new data is set
+  if (prevData !== data) {
+    setPrevData(data);
+    setRowSelection({});
+  }
+
+  const selectedRows = useMemo(
+    () => data.filter((_, index) => rowSelection[index]),
+    [data, rowSelection]
+  );
+
+  const getLotHeading = (suffix: string) => {
+    if (selectedRows.length !== 1) return `Seedlot: ${suffix}`;
+    const lot = selectedRows[0].seedlotDisplay;
+    return `${isFamilyLot(lot) ? 'Familylot' : 'Seedlot'} ${lot}: ${suffix}`;
+  };
 
   const actions = [
     {
@@ -93,8 +105,6 @@ const TestListTable = ({
   ];
 
   const getCreateGermTrayDisabledState = () => {
-    const selectedRows = tableRef.current?.getSelectedRowModel().rows ?? [];
-
     if (selectedRows.length === 0) {
       return {
         disabled: true,
@@ -106,7 +116,7 @@ const TestListTable = ({
     today.setHours(23, 59, 59, 999); // set to be end of the day
 
     const hasInvalidRow = selectedRows.some(
-      ({ original }: { original: TestingSearchResponseType }) => {
+      (original) => {
         const withdrawalDate = original.seedWithdrawalDate
           ? new Date(original.seedWithdrawalDate)
           : null;
@@ -139,17 +149,7 @@ const TestListTable = ({
         open={showTestHistory}
         passiveModal
         size="lg"
-        modalHeading={
-          tableRef.current?.getSelectedRowModel().rows?.length === 1
-            ? (() => {
-              const lot = tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay;
-              if (isFamilyLot(lot)) {
-                return `Familylot ${lot}: Test history`;
-              }
-              return `Seedlot ${lot}: Test history`;
-            })()
-            : 'Seedlot: Test history'
-        }
+        modalHeading={getLotHeading('Test history')}
         onRequestClose={() => setShowTestHistory(false)}
         selectorsFloatingMenus={[
           // specify selectors for floating menus
@@ -158,33 +158,25 @@ const TestListTable = ({
           '.MuiPaper-root'
         ]}
       >
-        {showTestHistory && tableRef.current && <TestHistory table={tableRef.current} />}
+        {showTestHistory && (
+          <TestHistory selectedRows={selectedRows} />
+        )}
       </Modal>
       <Modal
         className="concep-add-activity-modal"
         open={showAddActivity}
         passiveModal
         size="lg"
-        modalHeading={
-          tableRef.current?.getSelectedRowModel().rows?.length === 1
-            ? (() => {
-              const lot = tableRef.current.getSelectedRowModel().rows[0].original.seedlotDisplay;
-              if (isFamilyLot(lot)) {
-                return `Familylot ${lot}: Add activity`;
-              }
-              return `Seedlot ${lot}: Add activity`;
-            })()
-            : 'Seedlot: Add activity'
-        }
+        modalHeading={getLotHeading('Add activity')}
         onRequestClose={() => setShowAddActivity(false)}
         selectorsFloatingMenus={[
           '.MuiPopover-root',
           '.MuiPaper-root'
         ]}
       >
-        {showAddActivity && tableRef.current && (
+        {showAddActivity && (
           <AddActivity
-            table={tableRef.current}
+            selectedRows={selectedRows}
             closeModal={() => setShowAddActivity(false)}
             onAddActivitySuccess={onAddActivitySuccess}
           />
@@ -198,9 +190,9 @@ const TestListTable = ({
         modalHeading="Create germination tray"
         onRequestClose={() => setShowCreateGermTray(false)}
       >
-        {showCreateGermTray && tableRef.current && (
+        {showCreateGermTray && (
           <CreateGermTray
-            table={tableRef.current}
+            selectedRows={selectedRows}
             onClose={() => setShowCreateGermTray(false)}
           />
         )}
@@ -216,6 +208,8 @@ const TestListTable = ({
           rowCount={paginationInfo.totalElements}
           onPaginationChange={onPageChange}
           enableRowSelection
+          rowSelection={rowSelection}
+          onRowSelectionChange={setRowSelection}
           enableColumnPinning
           enableColumnResizing
           enableSorting
@@ -239,9 +233,7 @@ const TestListTable = ({
             <div className="concep-test-search-table-title">{`Total search result: ${paginationInfo.totalElements}`}</div>
           )}
           renderToolbarInternalActions={({ table }) => {
-            tableRef.current = table as MRT_TableInstance<TestingSearchResponseType>;
             const createTrayState = getCreateGermTrayDisabledState();
-            const selectedRows = table.getSelectedRowModel().rows;
             const isActionButtonsEnabled = selectedRows.length === 1;
             const disabledReason = selectedRows.length === 0
               ? 'Select one seedlot to view its test history or add activity.'
