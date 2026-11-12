@@ -59,7 +59,7 @@ const toColumn = (tray: GermTrayType): GermTrayColumn => ({
 /** What the server holds for a tray, as far as this page knows. */
 type SavedTray = { germinatorId: string; revisionCount: number };
 
-const MaintainGermTray = () => {
+const MaintainGermTrayPage = () => {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const trayIdsParam = searchParams.get('trayIds');
@@ -73,7 +73,7 @@ const MaintainGermTray = () => {
   const [hydrated, setHydrated] = useState(false);
   // Per tray, the germinator id and revision count last confirmed by the server. Updated as
   // each PATCH succeeds, so a save that fails part way still locks the trays it already saved
-  // on their new revision (#2856); the autosave baseline only moves when the whole save works.
+  // on their new revision (#2856), and onSaveFailed moves the autosave baseline to match.
   const savedTraysRef = useRef(new Map<number, SavedTray>());
   const [traySearch, setTraySearch] = useState('');
   const [selectedTrayId, setSelectedTrayId] = useState<number | null>(null);
@@ -86,7 +86,14 @@ const MaintainGermTray = () => {
   const traysQuery = useQuery({
     queryKey: ['germinatorTrays', trayIds],
     queryFn: () => getGerminatorTraysByIds(trayIds),
-    enabled: trayIds.length > 0
+    enabled: trayIds.length > 0,
+    // The page edits these trays, so it hydrates once from a load made by this mount, then
+    // only on an explicit Reload. Saves and deletes do not update this cache, so it is not
+    // kept across mounts (the app default is refetchOnMount: false), and there is no
+    // background refetch to ignore.
+    refetchOnMount: 'always',
+    gcTime: 0,
+    refetchOnReconnect: false
   });
 
   const traysErrorMessage = traysQuery.isError
@@ -129,6 +136,12 @@ const MaintainGermTray = () => {
     data: trays,
     enabled: hydrated,
     conflict: isConflict,
+    // After a partial failure, record the trays that did save, so the baseline matches the
+    // server: reverting such a tray is then a change, and is saved.
+    onSaveFailed: (sent) => sent.map((tray) => {
+      const saved = savedTraysRef.current.get(tray.germinatorTrayId);
+      return saved ? { ...tray, germinatorId: saved.germinatorId } : tray;
+    }),
     onSave: async (curr) => {
       // Compare with what the server holds, not with the last snapshot: after a partial
       // failure the trays that did save are not sent again.
@@ -168,13 +181,15 @@ const MaintainGermTray = () => {
     setHydrated(true);
   };
 
-  // Hydrate from the query only (first load and Reload); local edits must not reset it.
+  // Hydrate once, from the first load made by this mount (never a cached copy); after that
+  // only Reload does (handleReloadOnConflict).
+  const loaded = traysQuery.isFetchedAfterMount ? traysQuery.data : undefined;
   useEffect(() => {
-    if (traysQuery.data) {
-      hydrate(traysQuery.data);
+    if (!hydrated && loaded) {
+      hydrate(loaded);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [traysQuery.data]);
+  }, [loaded, hydrated]);
 
   const handleTrayRowClick = useCallback((row: GermTrayColumn) => {
     setSelectedTrayId(row.germinatorTrayId);
@@ -210,7 +225,10 @@ const MaintainGermTray = () => {
   const deleteTrayMutation = useMutation({
     mutationFn: async (tray: GermTrayColumn) => {
       // Save a germinator id edit first, so the delete locks on the tray's latest revision.
-      await flush();
+      // flush() resolves false (it does not throw) if that save failed or is blocked.
+      if (!await flush()) {
+        throw new Error('Germinator ID changes are not saved. Save them, or Reload, before deleting the tray.');
+      }
       const saved = savedTraysRef.current.get(tray.germinatorTrayId);
       if (!saved) {
         throw new Error('Cannot delete: tray not loaded');
@@ -257,14 +275,28 @@ const MaintainGermTray = () => {
   });
 
   const handleReloadOnConflict = async () => {
-    await Promise.all([
-      // New germinator ids and revision counts; the hydrate effect applies them.
-      trayIds.length > 0 ? traysQuery.refetch() : undefined,
-      // 'all': deleting a tray reads its contents from cache even when that tray is not the
-      // selected (active) one, so inactive entries need fresh timestamps too.
-      queryClient.invalidateQueries({ queryKey: ['germinatorTrayContents'], refetchType: 'all' })
-    ]);
-    clearConflict();
+    try {
+      const [traysResult] = await Promise.all([
+        trayIds.length > 0 ? traysQuery.refetch({ throwOnError: true }) : undefined,
+        // 'all': deleting a tray reads its contents from cache even when that tray is not the
+        // selected (active) one, so inactive entries need fresh timestamps too.
+        queryClient.invalidateQueries(
+          { queryKey: ['germinatorTrayContents'], refetchType: 'all' },
+          { throwOnError: true }
+        )
+      ]);
+      // Hydrate explicitly: an unchanged response keeps its reference, and unsaved edits
+      // must be dropped either way (SaveStatus says so).
+      if (traysResult?.data) {
+        hydrate(traysResult.data);
+      }
+      setAlert(null);
+      clearConflict();
+    } catch (error: any) {
+      // Stay in conflict: nothing saves until a Reload works.
+      const message = error?.response?.data?.message || error?.message || 'Reload failed';
+      setAlert({ status: 'error', message: `Reload failed, try again. ${message}` });
+    }
   };
 
   const handleConfirmDeleteTray = useCallback(() => {
@@ -514,6 +546,15 @@ const MaintainGermTray = () => {
       </Row>
     </FlexGrid>
   );
+};
+
+/**
+ * Another set of trays (`?trayIds=`) is another page: remount, so loading and auto save start
+ * over. The unmount flushes an unsaved edit of the previous trays.
+ */
+const MaintainGermTray = () => {
+  const [searchParams] = useSearchParams();
+  return <MaintainGermTrayPage key={searchParams.get('trayIds') ?? ''} />;
 };
 
 export default MaintainGermTray;

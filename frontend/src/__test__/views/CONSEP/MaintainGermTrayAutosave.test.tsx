@@ -65,9 +65,14 @@ const conflict = () => Promise.reject(
   Object.assign(new Error('Conflict'), { response: { status: 409, data: { message: 'Please reselect.' } } })
 );
 
-const renderPage = (url: string) => render(
+const newClient = () => new QueryClient({
+  // As the app's CustomQueryProvider: no refetch on mount or focus.
+  defaultOptions: { queries: { retry: false, refetchOnMount: false, refetchOnWindowFocus: false } }
+});
+
+const renderPage = (url: string, client = newClient()) => render(
   <MemoryRouter initialEntries={[url]}>
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <QueryClientProvider client={client}>
       <MaintainGermTray />
     </QueryClientProvider>
   </MemoryRouter>
@@ -192,5 +197,111 @@ describe('MaintainGermTray loading and auto save', () => {
 
     expect(await screen.findByText('Conflict detected')).toBeInTheDocument();
     expect(deleteTrayApi).toHaveBeenCalledWith(1311, 2, []);
+  });
+
+  /* Review of #2867 */
+
+  it('does not let a background refetch overwrite an unsaved edit', async () => {
+    getTrays
+      .mockResolvedValueOnce([serverTray(1311, null, 2)])
+      .mockResolvedValueOnce([serverTray(1311, '7', 3)]);
+    assign.mockResolvedValue({ germinatorTrayId: 1311, germinatorId: '4', revisionCount: 3 });
+    const client = newClient();
+    renderPage('/?trayIds=1311', client);
+    await screen.findByText('tray 1311:');
+
+    act(() => { updateRow(row(1311, '4')); });
+    // e.g. a reconnect: the edit stays, and still locks on the revision it was made against.
+    await act(() => client.refetchQueries({ queryKey: ['germinatorTrays'] }));
+
+    expect(screen.getByText('tray 1311: 4')).toBeInTheDocument();
+    await waitFor(() => expect(assign).toHaveBeenCalledWith(1311, '4', 2));
+  });
+
+  it('loads fresh trays when the page is opened again, not the cached ones', async () => {
+    getTrays
+      .mockResolvedValueOnce([serverTray(1311, null, 2)])
+      .mockResolvedValueOnce([serverTray(1311, '4', 3)]);
+    const client = newClient();
+    const first = renderPage('/?trayIds=1311', client);
+    await screen.findByText('tray 1311:');
+    first.unmount();
+
+    renderPage('/?trayIds=1311', client);
+
+    expect(await screen.findByText('tray 1311: 4')).toBeInTheDocument();
+    expect(getTrays).toHaveBeenCalledTimes(2);
+  });
+
+  it('saves a revert of a tray that saved before the save failed part way', async () => {
+    getTrays.mockResolvedValue([serverTray(1, null, 0), serverTray(2, null, 5)]);
+    assign
+      .mockResolvedValueOnce({ germinatorTrayId: 1, germinatorId: '1', revisionCount: 1 })
+      .mockRejectedValueOnce(new Error('Network Error'))
+      .mockResolvedValueOnce({ germinatorTrayId: 1, germinatorId: null, revisionCount: 2 });
+    renderPage('/?trayIds=1,2');
+    await screen.findByText('tray 2:');
+
+    act(() => {
+      updateRow(row(1, '1'));
+      updateRow(row(2, '2'));
+    });
+    await screen.findByRole('button', { name: 'Retry now' });
+    // Back to what the page loaded: tray 1 must be set back on the server, tray 2 never saved.
+    act(() => {
+      updateRow(row(1, ''));
+      updateRow(row(2, ''));
+    });
+
+    await waitFor(() => expect(assign).toHaveBeenCalledTimes(3));
+    expect(assign.mock.calls).toEqual([[1, '1', 0], [2, '2', 5], [1, '', 1]]);
+  });
+
+  it('does not delete a tray while its germinator id edit is not saved', async () => {
+    getTrays.mockResolvedValue([serverTray(1311, null, 2)]);
+    assign.mockRejectedValue(new Error('Network Error'));
+    renderPage('/?trayIds=1311');
+    await screen.findByText('tray 1311:');
+
+    act(() => { updateRow(row(1311, '4')); });
+    await screen.findByRole('button', { name: 'Retry now' });
+    act(() => { deleteTray(row(1311, '4')); });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete germ tray' }));
+
+    expect(await screen.findByText(/Germinator ID changes are not saved/)).toBeInTheDocument();
+    expect(deleteTrayApi).not.toHaveBeenCalled();
+    expect(screen.getByText('tray 1311: 4')).toBeInTheDocument();
+  });
+
+  it('stays in conflict when Reload fails', async () => {
+    getTrays
+      .mockResolvedValueOnce([serverTray(1311, null, 2)])
+      .mockRejectedValueOnce(new Error('Network Error'));
+    assign.mockImplementation(conflict);
+    renderPage('/?trayIds=1311');
+    await screen.findByText('tray 1311:');
+    act(() => { updateRow(row(1311, '4')); });
+    await screen.findByText('Conflict detected');
+
+    fireEvent.click(screen.getByRole('button', { name: /Reload/i }));
+
+    expect(await screen.findByText(/Reload failed/)).toBeInTheDocument();
+    expect(screen.getByText('Conflict detected')).toBeInTheDocument();
+  });
+
+  it('drops the unsaved edit on Reload even when the trays did not change', async () => {
+    getTrays.mockResolvedValue([serverTray(1311, null, 2)]);
+    assign.mockImplementation(conflict);
+    renderPage('/?trayIds=1311');
+    await screen.findByText('tray 1311:');
+    act(() => { updateRow(row(1311, '4')); });
+    await screen.findByText('Conflict detected');
+
+    fireEvent.click(screen.getByRole('button', { name: /Reload/i }));
+
+    expect(await screen.findByText('tray 1311:')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Conflict detected')).not.toBeInTheDocument());
+    await waitPastDebounce();
+    expect(assign).toHaveBeenCalledTimes(1);
   });
 });
