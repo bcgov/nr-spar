@@ -1,0 +1,73 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "\\Qorg/apache/fontbox/cmap/Identity-H\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Courier-Bold.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Courier-BoldOblique.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Courier-Oblique.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Courier.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Helvetica-Bold.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Helvetica-BoldOblique.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Helvetica-Oblique.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Helvetica.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Symbol.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Times-Bold.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Times-BoldItalic.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Times-Italic.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/Times-Roman.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/afm/ZapfDingbats.afm\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/glyphlist/glyphlist.txt\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/glyphlist/zapfdingbats.txt\\E"
+      },
+      {
+        "pattern": "\\Qorg/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf\\E"
+      },
+      {
+        "pattern": "\\Qorg/thymeleaf/thymeleaf.properties\\E"
+      },
+      {
+        "pattern": "\\Qresources/css/XhtmlNamespaceHandler.css\\E"
+      },
+      {
+        "pattern": "\\Qresources/schema/openhtmltopdf/catalog-special.xml\\E"
+      },
+      {
+        "pattern": "\\Qspatial_ref_sys.txt\\E"
+      }
+    ]
+  },
+  "bundles": []
+}
