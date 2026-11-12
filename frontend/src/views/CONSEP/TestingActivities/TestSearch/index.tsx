@@ -15,11 +15,10 @@ import {
   Button,
   TextInput,
   InlineNotification,
-  FormLabel,
   FilterableMultiSelect,
   Tag
 } from '@carbon/react';
-import { Search } from '@carbon/icons-react';
+import { Search, Filter } from '@carbon/icons-react';
 // eslint-disable-next-line import-x/no-unresolved
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 
@@ -70,9 +69,10 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true,
   filename: `Testing_Activity_Search_${new Date().toISOString().split('T')[0]}`
 });
-const LOT_INPUT_KEYS = ['lot-input-1', 'lot-input-2', 'lot-input-3', 'lot-input-4', 'lot-input-5'] as const;
+const MAX_LOT_NUMBERS = 5;
 const VALIDATION_ERROR_MESSAGE = 'Errors must be fixed before searching or saving search criteria.';
 const toDate = (value?: string) => (value ? new Date(`${value}T00:00:00`) : undefined);
+const parseLotInput = (input: string) => input.split(/[\s,]+/).filter(Boolean);
 type SaveCriteriaMutationVariables = {
   criteria: ActivitySearchRequest;
   showSuccessAlert?: boolean;
@@ -101,11 +101,13 @@ const TestSearch = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [searchParams, setSearchParams] = useState<ActivitySearchRequest>({});
   const [sorting, setSorting] = useState<Sorting[]>([]);
-  const [rawLotInput, setRawLotInput] = useState<string[]>(['', '', '', '', '']);
+  const [lotInput, setLotInput] = useState('');
   const [validateSearch, setValidateSearch] = useState<ActivitySearchValidation>(
     iniActSearchValidation
   );
   const [openAdvSearch, setOpenAdvSearch] = useState(false);
+  const advSearchRef = useRef<HTMLButtonElement>(null);
+  const [showFilterTags, setShowFilterTags] = useState(true);
   const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
     totalElements: 0,
@@ -117,11 +119,6 @@ const TestSearch = () => {
     status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
-  const [modalAnchor, setModalAnchor] = useState<{
-    top: number;
-    left: number;
-    width: number;
-  } | null>(null);
 
   // Track which date picker needs refocus after auto-filling today's date via shortcut
   const [pendingDatePickerFocus, setPendingDatePickerFocus] = useState<'start' | 'end' | null>(null);
@@ -129,6 +126,13 @@ const TestSearch = () => {
   const [multiSelectResetKeys, setMultiSelectResetKeys] = useState(
     { testTypes: 0, activityIds: 0 }
   );
+
+  const [showFilters, setShowFilters] = useState(true);
+
+  const toggleFilters = () => {
+    setShowFilters((visible) => !visible);
+    setOpenAdvSearch(false);
+  };
 
   useEffect(() => {
     // Refocus input after state updates to reopen calendar picker with the correct month
@@ -142,10 +146,8 @@ const TestSearch = () => {
       }
     }
   }, [searchParams.seedWithdrawalStartDate,
-    searchParams.seedWithdrawalEndDate,
+  searchParams.seedWithdrawalEndDate,
     pendingDatePickerFocus]);
-
-  const advSearchRef = useRef<HTMLButtonElement>(null);
 
   const resetAlert = () => {
     if (alert) {
@@ -166,16 +168,7 @@ const TestSearch = () => {
     return value.padStart(5, '0');
   };
 
-  const getPaddedLotNumbers = () => rawLotInput.reduce<string[]>(
-    (result, inputValue) => {
-      const trimmedValue = inputValue.trim();
-      if (trimmedValue) {
-        result.push(padSeedlotNumber(trimmedValue));
-      }
-      return result;
-    },
-    []
-  );
+  const getPaddedLotNumbers = () => parseLotInput(lotInput).map(padSeedlotNumber);
 
   const normalizeTestTypes = (testTypes: string[]) => testTypes.map((testType: string) => {
     const value = (testType ?? '').toLowerCase();
@@ -347,9 +340,7 @@ const TestSearch = () => {
     setSearchParams(saved);
 
     if (Array.isArray(saved.lotNumbers) && saved.lotNumbers.length > 0) {
-      const restored = ['', '', '', '', ''];
-      saved.lotNumbers.slice(0, 5).forEach((lot, i) => { restored[i] = lot; });
-      setRawLotInput(restored);
+      setLotInput(saved.lotNumbers.slice(0, MAX_LOT_NUMBERS).join(', '));
     }
     // Multi-selects are remounted in the effects below, once their option
     // lists are loaded — otherwise FilterableMultiSelect's initialSelectedItems
@@ -527,9 +518,9 @@ const TestSearch = () => {
       }
     });
 
-    return lots.map((lot) => {
-      if (!lot.trim()) {
-        return { error: false, errorMessage: '' };
+    return lots.map((lot, index) => {
+      if (index >= MAX_LOT_NUMBERS) {
+        return { error: true, errorMessage: errorMessages.lotMax };
       }
 
       const normalizedLot = normalizeLot(lot);
@@ -553,37 +544,20 @@ const TestSearch = () => {
     });
   };
 
-  const handleLotInputChange = (index: number, value: string) => {
+  const handleLotInputChange = (value: string) => {
     markUserEdited();
-    // Allow only alphanumeric characters
-    const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
+    // Allow only alphanumeric characters, separated by commas or spaces
+    const sanitizedValue = value.replace(/[^a-zA-Z0-9,\s]/g, '');
+    setLotInput(sanitizedValue);
 
-    const updatedInputs = [...rawLotInput];
-    updatedInputs[index] = sanitizedValue;
-    setRawLotInput(updatedInputs);
-
-    const lots = updatedInputs.map((val) => val.trim()).filter((val) => val.length > 0);
+    const lots = parseLotInput(sanitizedValue);
 
     setSearchParams((prev) => updateSearchParams(prev, 'lotNumbers', lots.length > 0 ? lots : null));
 
-    const validationResults = validateLotNumbers(updatedInputs);
     setValidateSearch((prev) => ({
       ...prev,
-      lotNumbers: validationResults
+      lotNumbers: validateLotNumbers(lots)
     }));
-    // Auto-tab to next input if current input is valid and has reached max length
-    const maxLength = isFamilyLot(sanitizedValue) ? 13 : 5;
-
-    if (
-      !validationResults[index].error
-      && sanitizedValue.trim().length === maxLength
-      && index < rawLotInput.length - 1
-    ) {
-      const nextInput = document.getElementById(`lot-input-${index + 1}`);
-      if (nextInput) {
-        nextInput.focus();
-      }
-    }
     resetAlert();
   };
 
@@ -740,27 +714,24 @@ const TestSearch = () => {
     ];
   });
 
-  const handleCloseAdvSearch = () => {
-    setOpenAdvSearch(false);
-    setModalAnchor(null);
+  const firstLotError = validateSearch.lotNumbers.find((lot) => lot.error);
+  const hasFilterTags = primaryFilterTags.length > 0 || advancedFilterTags.length > 0;
+  const hasSearchCriteria = Object.keys(searchParams).length > 0;
+
+  const handleClearFilters = () => {
+    markUserEdited();
+    setSearchParams({});
+    setLotInput('');
+    setShowFilterTags(true);
+    setValidateSearch(iniActSearchValidation);
+    setMultiSelectResetKeys((prev) => ({
+      testTypes: prev.testTypes + 1,
+      activityIds: prev.activityIds + 1
+    }));
+    resetAlert();
   };
 
-  const toggleAdvSearch = () => {
-    if (openAdvSearch) {
-      setOpenAdvSearch(false);
-      setModalAnchor(null);
-    } else {
-      const rect = advSearchRef.current?.getBoundingClientRect();
-      if (rect) {
-        setModalAnchor({
-          top: rect.bottom + window.scrollY,
-          left: rect.right + window.scrollX,
-          width: rect.width
-        });
-        setOpenAdvSearch(true);
-      }
-    }
-  };
+  const toggleAdvSearch = () => setOpenAdvSearch((prev) => !prev);
 
   const handleSearchClick = () => {
     if (Object.keys(searchParams).length === 0) {
@@ -774,7 +745,7 @@ const TestSearch = () => {
     const paddedLotNumbers = getPaddedLotNumbers();
 
     if (paddedLotNumbers.length > 0) {
-      setRawLotInput((prev) => prev.map((val) => (val.trim() ? padSeedlotNumber(val) : '')));
+      setLotInput(paddedLotNumbers.join(', '));
       setSearchParams((prev) => ({
         ...prev,
         lotNumbers: paddedLotNumbers.length > 0 ? paddedLotNumbers : undefined
@@ -806,141 +777,171 @@ const TestSearch = () => {
             }
           }}
         >
-          <Row className="consep-test-search-lot-numbers-filter">
-            <FormLabel className="lot-inputs-label">Lot #</FormLabel>
-            <div className="lot-inputs">
-              {rawLotInput.map((value, index) => (
-                <TextInput
-                  key={`${LOT_INPUT_KEYS[index]}`}
-                  id={`lot-input-${index}`}
-                  value={value}
-                  labelText={`Lot # ${index + 1}`}
-                  hideLabel
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    handleLotInputChange(index, e.target.value);
-                  }}
-                  invalid={validateSearch.lotNumbers[index]?.error}
-                  invalidText={validateSearch.lotNumbers[index]?.errorMessage}
-                />
-              ))}
-            </div>
-          </Row>
-          <Row className="consep-test-search-filters">
-            <Column className="filters-row">
-              <FilterableMultiSelect
-                key={`test-type-${multiSelectResetKeys.testTypes}`}
-                id="test-type-input"
-                className="test-type-input"
-                titleText="Test type"
-                items={testTypeItems}
-                initialSelectedItems={testTypeItems.filter(
-                  (item: { id: string }) => searchParams.testTypes?.includes(item.id)
-                )}
-                itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
-                onChange={(event: { selectedItems: Array<{ id: string }> }) => {
-                  handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
-                }}
-                selectionFeedback="top-after-reopen"
-              />
-              <FilterableMultiSelect
-                key={`activity-type-${multiSelectResetKeys.activityIds}`}
-                id="activity-type-input"
-                className="activity-type-input"
-                titleText="Choose activity"
-                items={activityIdItems}
-                initialSelectedItems={activityIdItems.filter(
-                  (item: { id: string }) => searchParams.activityIds?.includes(item.id)
-                )}
-                itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
-                onChange={(event: { selectedItems: Array<{ id: string }> }) => {
-                  handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
-                }}
-                selectionFeedback="top-after-reopen"
-              />
-              <TextInput
-                id="germ-tray-input"
-                className="germ-tray-input"
-                labelText="Germ tray ID"
-                type="number"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  handleGermTrayIdChange(e);
-                }}
-                value={searchParams.germinatorTrayId}
-                invalid={validateSearch.germinatorTray.error}
-                invalidText={validateSearch.germinatorTray.errorMessage}
-              />
-              <DatePicker
-                datePickerType="single"
-                className="withdrawal-date-input"
-                dateFormat={DATE_FORMAT}
-                onChange={(dates: Date[]) => {
-                  handleWithdrawalDateChange(dates, 'start');
-                }}
-                minDate={dateField.minStartDate}
-                maxDate={dateField.todayDate}
-                value={
-                  searchParams.seedWithdrawalStartDate
-                    && searchParams.seedWithdrawalStartDate
-                    !== dateField.minStartDate.toISOString().slice(0, 10)
-                    ? toDate(searchParams.seedWithdrawalStartDate)
-                    : undefined
-                }
-                style={{ minWidth: '9rem' }}
+          <Row className="filter-toggle-row">
+            <Column>
+              <Button
+                type="button"
+                kind="ghost"
+                size="sm"
+                aria-expanded={showFilters}
+                aria-controls="testing-activity-filters"
+                onClick={toggleFilters}
               >
-                <DatePickerInput
-                  id="withdrawal-start-date-input"
-                  labelText="Withdrawal start"
-                  autoComplete="off"
-                  placeholder={dateField.placeholderText}
-                  helperText={dateField.helperText}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'start')}
-                />
-              </DatePicker>
-              <DatePicker
-                datePickerType="single"
-                className="withdrawal-date-input"
-                dateFormat={DATE_FORMAT}
-                onChange={(dates: Date[]) => {
-                  handleWithdrawalDateChange(dates, 'end');
-                }}
-                minDate={searchParams.seedWithdrawalStartDate || dateField.minStartDate}
-                maxDate={dateField.maxEndDate}
-                value={
-                  searchParams.seedWithdrawalEndDate
-                    !== dateField.maxEndDate.toISOString().slice(0, 10)
-                    ? toDate(searchParams.seedWithdrawalEndDate)
-                    : undefined
-                }
-                style={{ minWidth: '9rem' }}
-              >
-                <DatePickerInput
-                  id="withdrawal-end-date-input"
-                  labelText="Withdrawal end"
-                  autoComplete="off"
-                  placeholder={dateField.placeholderText}
-                  helperText={dateField.helperText}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'end')}
-                />
-              </DatePicker>
-              <div className="filters-row-buttons">
-                <Button ref={advSearchRef} size="md" kind="tertiary" onClick={toggleAdvSearch}>
-                  Filters
-                </Button>
-                <Button
-                  type="submit"
-                  renderIcon={Search}
-                  iconDescription="Search activity"
-                  size="md"
-                  disabled={hasValidationErrors(validateSearch)}
-                >
-                  Search activity
-                </Button>
-              </div>
+                {showFilters ? 'Hide filters' : 'Show filters'}
+              </Button>
             </Column>
           </Row>
+
+          {showFilters && (
+            <Row id="testing-activity-filters" className="consep-test-search-filters">
+              <Column className="filters-row">
+                <TextInput
+                  id="lot-input"
+                  className="lot-input"
+                  labelText="Lot #"
+                  placeholder="Up to 5 lots, separated by comma"
+                  autoComplete="off"
+                  value={lotInput}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleLotInputChange(e.target.value);
+                  }}
+                  invalid={firstLotError?.error}
+                  invalidText={firstLotError?.errorMessage}
+                />
+                <FilterableMultiSelect
+                  key={`test-type-${multiSelectResetKeys.testTypes}`}
+                  id="test-type-input"
+                  className="test-type-input"
+                  titleText="Test type"
+                  items={testTypeItems}
+                  initialSelectedItems={testTypeItems.filter(
+                    (item: { id: string }) => searchParams.testTypes?.includes(item.id)
+                  )}
+                  itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+                  onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                    handleMultiSelectChanges('testTypes', event.selectedItems.map((it: { id: string }) => it.id));
+                  }}
+                  selectionFeedback="top-after-reopen"
+                />
+                <FilterableMultiSelect
+                  key={`activity-type-${multiSelectResetKeys.activityIds}`}
+                  id="activity-type-input"
+                  className="activity-type-input"
+                  titleText="Choose activity"
+                  items={activityIdItems}
+                  initialSelectedItems={activityIdItems.filter(
+                    (item: { id: string }) => searchParams.activityIds?.includes(item.id)
+                  )}
+                  itemToString={(item: { id: string; text: string } | null) => (item ? item.text : '')}
+                  onChange={(event: { selectedItems: Array<{ id: string }> }) => {
+                    handleMultiSelectChanges('activityIds', event.selectedItems.map((it: { id: string }) => it.id));
+                  }}
+                  selectionFeedback="top-after-reopen"
+                />
+                <TextInput
+                  id="germ-tray-input"
+                  className="germ-tray-input"
+                  labelText="Germ tray ID"
+                  type="number"
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleGermTrayIdChange(e);
+                  }}
+                  value={searchParams.germinatorTrayId ?? ''}
+                  invalid={validateSearch.germinatorTray.error}
+                  invalidText={validateSearch.germinatorTray.errorMessage}
+                />
+                <DatePicker
+                  datePickerType="single"
+                  className="withdrawal-date-input"
+                  dateFormat={DATE_FORMAT}
+                  onChange={(dates: Date[]) => {
+                    handleWithdrawalDateChange(dates, 'start');
+                  }}
+                  minDate={dateField.minStartDate}
+                  maxDate={dateField.todayDate}
+                  value={
+                    searchParams.seedWithdrawalStartDate
+                      && searchParams.seedWithdrawalStartDate
+                      !== dateField.minStartDate.toISOString().slice(0, 10)
+                      ? toDate(searchParams.seedWithdrawalStartDate)
+                      : undefined
+                  }
+                  style={{ minWidth: '9rem' }}
+                >
+                  <DatePickerInput
+                    id="withdrawal-start-date-input"
+                    labelText="Withdrawal start"
+                    autoComplete="off"
+                    placeholder={dateField.placeholderText}
+                    helperText={dateField.helperText}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'start')}
+                  />
+                </DatePicker>
+                <DatePicker
+                  datePickerType="single"
+                  className="withdrawal-date-input"
+                  dateFormat={DATE_FORMAT}
+                  onChange={(dates: Date[]) => {
+                    handleWithdrawalDateChange(dates, 'end');
+                  }}
+                  minDate={searchParams.seedWithdrawalStartDate || dateField.minStartDate}
+                  maxDate={dateField.maxEndDate}
+                  value={
+                    searchParams.seedWithdrawalEndDate
+                      !== dateField.maxEndDate.toISOString().slice(0, 10)
+                      ? toDate(searchParams.seedWithdrawalEndDate)
+                      : undefined
+                  }
+                  style={{ minWidth: '9rem' }}
+                >
+                  <DatePickerInput
+                    id="withdrawal-end-date-input"
+                    labelText="Withdrawal end"
+                    autoComplete="off"
+                    placeholder={dateField.placeholderText}
+                    helperText={dateField.helperText}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleDatePicker(e, 'end')}
+                  />
+                </DatePicker>
+                <div className="filters-row-buttons">
+                  <Button
+                    ref={advSearchRef}
+                    size="md"
+                    kind="tertiary"
+                    renderIcon={Filter}
+                    aria-expanded={openAdvSearch}
+                    onClick={toggleAdvSearch}
+                  >
+                    More filters
+                  </Button>
+                  <Button
+                    type="submit"
+                    renderIcon={Search}
+                    iconDescription="Search activity"
+                    size="md"
+                    disabled={hasValidationErrors(validateSearch)}
+                  >
+                    Search activity
+                  </Button>
+                </div>
+              </Column>
+              {openAdvSearch && (
+                <AdvancedFilters
+                  searchParams={searchParams}
+                  setSearchParams={setUserEditedSearchParams}
+                  validateSearch={validateSearch}
+                  setValidateSearch={setValidateSearch}
+                  onClose={() => setOpenAdvSearch(false)}
+                  anchorRef={advSearchRef}
+                  onSaveCriteria={handleSaveCriteria}
+                  isSavingCriteria={saveCriteriaMutation.isPending}
+                />
+              )}
+            </Row>
+          )}
           <Row className="consep-test-search-advanced-filter-tags">
             <Column>
-              {primaryFilterTags.map((tag) => (
+              {showFilterTags && primaryFilterTags.map((tag) => (
                 <Tag
                   key={`${tag.field}-${tag.value}`}
                   type="blue"
@@ -952,7 +953,7 @@ const TestSearch = () => {
                   {tag.value}
                 </Tag>
               ))}
-              {advancedFilterTags.map((tag) => (
+              {showFilterTags && advancedFilterTags.map((tag) => (
                 <Tag
                   key={String(tag.key)}
                   type="blue"
@@ -978,21 +979,26 @@ const TestSearch = () => {
                   {tag.value}
                 </Tag>
               ))}
+              {(hasSearchCriteria || !showFilterTags) && (
+                <span className="filter-tags-actions">
+                  {hasSearchCriteria && (
+                    <Button kind="ghost" size="sm" onClick={handleClearFilters}>
+                      Clear filters
+                    </Button>
+                  )}
+                  {(hasFilterTags || !showFilterTags) && (
+                    <Button
+                      kind="ghost"
+                      size="sm"
+                      onClick={() => setShowFilterTags((prev) => !prev)}
+                    >
+                      {showFilterTags ? 'Hide filters' : 'Show filters'}
+                    </Button>
+                  )}
+                </span>
+              )}
             </Column>
           </Row>
-          {openAdvSearch && modalAnchor && (
-            <AdvancedFilters
-              searchParams={searchParams}
-              setSearchParams={setUserEditedSearchParams}
-              validateSearch={validateSearch}
-              setValidateSearch={setValidateSearch}
-              alignTo={modalAnchor}
-              onClose={handleCloseAdvSearch}
-              anchorRef={advSearchRef}
-              onSaveCriteria={handleSaveCriteria}
-              isSavingCriteria={saveCriteriaMutation.isPending}
-            />
-          )}
         </form>
       </FlexGrid>
       <FlexGrid>

@@ -1,6 +1,5 @@
 import React, { ChangeEvent, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import ReactDOM from 'react-dom';
 import {
   FlexGrid,
   Row,
@@ -17,7 +16,6 @@ import {
 
 import ComboBoxEvent from '../../../../../types/ComboBoxEvent';
 import { capitalizeFirstLetter } from '../../../../../utils/StringUtils';
-import useWindowSize from '../../../../../hooks/UseWindowSize';
 import getVegCodes from '../../../../../api-service/vegetationCodeAPI';
 import { getMultiOptList } from '../../../../../utils/MultiOptionsUtils';
 import { getRequestTypes, getTestCategoryCodes } from '../../../../../api-service/consep/testCodesAPI';
@@ -25,7 +23,7 @@ import { getRequestTypes, getTestCategoryCodes } from '../../../../../api-servic
 import type { TestCodeType } from '../../../../../types/consep/TestingSearchType';
 import {
   advDateTypes, DATE_FORMAT, errorMessages, initialErrorValue,
-  SAFE_MARGIN, testRanks, toSelectedItemString, dateField, hasValidationErrors
+  testRanks, toSelectedItemString, dateField, hasValidationErrors
 } from '../constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../../config/TimeUnits';
 import { ActivitySearchRequest, ActivitySearchValidation } from '../definitions';
@@ -36,7 +34,6 @@ type AdvancedFiltersProps = {
   setSearchParams: React.Dispatch<React.SetStateAction<ActivitySearchRequest>>;
   validateSearch: ActivitySearchValidation;
   setValidateSearch: React.Dispatch<React.SetStateAction<ActivitySearchValidation>>;
-  alignTo: { top: number; left: number; width: number };
   onClose: () => void;
   anchorRef: React.RefObject<HTMLElement | null>;
   onSaveCriteria: () => void;
@@ -48,15 +45,40 @@ const AdvancedFilters = ({
   setSearchParams,
   validateSearch,
   setValidateSearch,
-  alignTo,
   onClose,
   anchorRef,
   onSaveCriteria,
   isSavingCriteria
 }: AdvancedFiltersProps) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const windowSize = useWindowSize();
+  const popupRef = useRef<HTMLDivElement>(null);
   const validationErrors = hasValidationErrors(validateSearch);
+
+  useEffect(() => {
+    const dismissPopup = () => {
+      if (popupRef.current?.contains(document.activeElement)) {
+        anchorRef.current?.focus();
+      }
+      onClose();
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (popupRef.current?.contains(target) || anchorRef.current?.contains(target)) return;
+      // Datepicker calendars and combobox menus render in portals outside the popup
+      if (target.closest('.flatpickr-calendar, .cds--list-box__menu')) return;
+      dismissPopup();
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') dismissPopup();
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [onClose, anchorRef]);
 
   const testCategoryQuery = useQuery({
     queryKey: ['test-category-codes'],
@@ -81,31 +103,6 @@ const AdvancedFilters = ({
     staleTime: THREE_HOURS,
     gcTime: THREE_HALF_HOURS
   });
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (modalRef.current?.contains(target)) return;
-
-      // This is necessary because the datepicker calendar and combobox options
-      // are considered "out of the modal", because they are rendered by a react portal
-      // attached to the body element, thus being outside of the modal,
-      // but a click on them should not close the modal
-      const el = target as HTMLElement;
-      if (el.closest('.flatpickr-calendar')) return;
-      if (el.closest('.cds--list-box__menu')) return;
-
-      // Necessary to properly close the modal when the button is clicked
-      if (anchorRef.current?.contains(target)) return;
-
-      onClose();
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [onClose, anchorRef]);
 
   const updateSearchParams = <K extends keyof ActivitySearchRequest>(
     prev: ActivitySearchRequest,
@@ -343,36 +340,8 @@ const AdvancedFilters = ({
     }));
   };
 
-  const getSidebarWidth = () => {
-    const el = document.querySelector('.spar-side-nav');
-    return el ? (el as HTMLElement).getBoundingClientRect().width : 256; // fallback razoável
-  };
-
-  const positionStyle: React.CSSProperties = React.useMemo(() => {
-    const sidebarWidth = getSidebarWidth();
-    const rightOffset = Math.max(window.innerWidth - alignTo.left, 0);
-    const spaceLeftOfAnchor = alignTo.left - sidebarWidth - SAFE_MARGIN;
-    const MIN_WIDTH = 480;
-
-    const maxWidthPx = Math.max(spaceLeftOfAnchor, MIN_WIDTH);
-
-    return {
-      position: 'absolute',
-      top: alignTo.top,
-      right: rightOffset,
-      zIndex: 1000,
-      width: 'auto',
-      maxWidth: `${maxWidthPx}px`,
-      minWidth: `${MIN_WIDTH}px`
-    };
-  }, [alignTo.left, alignTo.top, windowSize.innerWidth]);
-
-  const advSearchComponent = (
-    <div
-      ref={modalRef}
-      style={positionStyle}
-      className="consep-test-filters-modal"
-    >
+  return (
+    <div ref={popupRef} className="consep-test-filters-modal">
       <FlexGrid className="consep-test-search-content">
         {(requestTypeQuery.isError || testCategoryQuery.isError || vegCodeQuery.isError) && (
           <InlineNotification
@@ -393,11 +362,11 @@ const AdvancedFilters = ({
               orientation="horizontal"
             >
               <Checkbox
-                id="historical-tests"
-                labelText="Historical tests"
-                checked={!!searchParams.includeHistoricalTests}
+                id="family-lots-only"
+                labelText="Family lots"
+                checked={!!searchParams.familyLotsOnly}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  handleCheckboxesChanges('includeHistoricalTests', e.target.checked);
+                  handleCheckboxesChanges('familyLotsOnly', e.target.checked);
                 }}
               />
               <Checkbox
@@ -409,11 +378,11 @@ const AdvancedFilters = ({
                 }}
               />
               <Checkbox
-                id="family-lots-only"
-                labelText="Family lot # only"
-                checked={!!searchParams.familyLotsOnly}
+                id="historical-tests"
+                labelText="Historical tests"
+                checked={!!searchParams.includeHistoricalTests}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  handleCheckboxesChanges('familyLotsOnly', e.target.checked);
+                  handleCheckboxesChanges('includeHistoricalTests', e.target.checked);
                 }}
               />
             </CheckboxGroup>
@@ -730,11 +699,6 @@ const AdvancedFilters = ({
         </Row>
       </FlexGrid>
     </div>
-  );
-
-  return ReactDOM.createPortal(
-    advSearchComponent,
-    document.body
   );
 };
 
