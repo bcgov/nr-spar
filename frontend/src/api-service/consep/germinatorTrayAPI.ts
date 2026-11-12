@@ -5,6 +5,7 @@ import {
   GermTrayTestType,
   GermTrayCreateResponseType,
   GermTrayDeleteContentType,
+  GermTrayType,
   GerminatorIdAssignResponseDto
 } from '../../types/consep/GerminatorTrayType';
 
@@ -17,11 +18,21 @@ export const assignGerminatorTrays = (
     .then((res: { data: GermTrayCreateResponseType[] }) => res.data);
 };
 
+export const getGerminatorTraysByIds = (
+  germinatorTrayIds: number[]
+): Promise<GermTrayType[]> => {
+  const url = `${ApiConfig.germinatorTrays}?ids=${germinatorTrayIds.join(',')}`;
+  return api.get(url).then((res: { data: GermTrayType[] }) => res.data);
+};
+
+/** Optimistic lock on the tray's `revisionCount`: a stale one returns 409. */
 export const assignGerminatorId = (
   germinatorTrayId: number,
-  germinatorId: string
+  germinatorId: string,
+  revisionCount: number
 ) => {
-  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/germinator-id?germinatorId=${encodeURIComponent(germinatorId)}`;
+  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/germinator-id`
+    + `?germinatorId=${encodeURIComponent(germinatorId)}&revisionCount=${revisionCount}`;
 
   return api
     .patch(url, null)
@@ -48,9 +59,10 @@ export const deleteTestFromTray = (
 
 export const deleteGerminatorTray = (
   germinatorTrayId: number,
+  revisionCount: number,
   contents: GermTrayDeleteContentType[]
 ): Promise<void> => {
-  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/delete`;
+  const url = `${ApiConfig.germinatorTrays}/${germinatorTrayId}/delete?revisionCount=${revisionCount}`;
 
   return api.post(url, contents).then(() => undefined);
 };

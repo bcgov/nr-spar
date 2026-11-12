@@ -31,25 +31,34 @@ const conflict = () => Promise.reject(
   Object.assign(new Error('Conflict'), { response: { status: 409, data: { message: 'Please reselect.' } } })
 );
 const getContents = vi.fn(() => Promise.resolve([]));
+const getTrays = vi.fn(() => Promise.resolve([{
+  germinatorTrayId: 7, activityTypeCd: 'G10', germinatorId: null, revisionCount: 0
+}]));
 vi.mock('../../../api-service/consep/germinatorTrayAPI', () => ({
   assignGerminatorId: () => Promise.resolve({}),
   deleteTestFromTray: () => conflict(),
   deleteGerminatorTray: () => conflict(),
-  getGerminatorTrayContents: () => getContents()
+  getGerminatorTrayContents: () => getContents(),
+  getGerminatorTraysByIds: () => getTrays()
 }));
 
-const tray = { germinatorTrayId: 7, activityTypeCd: 'G10' };
+const tray = { germinatorTrayId: 7, activityTypeCd: 'G10', germinatorId: '' };
 const test = {
   germinatorTrayId: 7, riaSkey: 1, updateTimestamp: '2026-10-01T00:00:00', requestId: 'R1', seedlotNumber: '1'
 };
 
-const renderPage = () => render(
-  <MemoryRouter initialEntries={[{ pathname: '/', state: { germinatorTrays: [tray] } }]}>
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <MaintainGermTray />
-    </QueryClientProvider>
-  </MemoryRouter>
-);
+const renderPage = async () => {
+  render(
+    <MemoryRouter initialEntries={['/?trayIds=7']}>
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <MaintainGermTray />
+      </QueryClientProvider>
+    </MemoryRouter>
+  );
+  // Deleting a tray locks on the revision count the page loaded.
+  await waitFor(() => expect(getTrays).toHaveBeenCalled());
+  await act(async () => {});
+};
 
 describe('MaintainGermTray conflict', () => {
   let rejectionHandler: (event: PromiseRejectionEvent) => void;
@@ -65,7 +74,7 @@ describe('MaintainGermTray conflict', () => {
     ['removing a test', () => deleteTest(test), 'Delete germ test'],
     ['deleting a tray', () => deleteTray(tray), 'Delete germ tray']
   ])('shows the conflict banner, not an error toast, when %s returns 409', async (_label, open, confirm) => {
-    renderPage();
+    await renderPage();
     act(() => { open(); });
     fireEvent.click(screen.getByRole('button', { name: confirm }));
 
@@ -77,7 +86,7 @@ describe('MaintainGermTray conflict', () => {
   });
 
   it('Reload refreshes the cached contents of a tray that is not selected', async () => {
-    renderPage();
+    await renderPage();
     act(() => { deleteTray(tray); });
     fireEvent.click(screen.getByRole('button', { name: 'Delete germ tray' }));
     await screen.findByText('Conflict detected');

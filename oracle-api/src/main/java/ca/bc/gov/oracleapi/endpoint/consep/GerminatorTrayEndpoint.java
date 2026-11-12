@@ -20,7 +20,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,11 +82,38 @@ public class GerminatorTrayEndpoint {
   }
 
   /**
-   * Assigns a germinator ID to an existing germinator tray.
+   * Retrieves germinator trays by ID, so the maintain page can reload the trays it shows.
+   *
+   * @param ids the tray IDs
+   * @return the trays that exist, in ID order
+   */
+  @GetMapping("")
+  @ResponseStatus(HttpStatus.OK)
+  @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved the germinator trays.",
+      content = @Content(
+          array = @ArraySchema(
+              schema = @Schema(implementation = GerminatorTraySearchResponseDto.class)
+          )
+      )
+  )
+  @ApiAuthResponse
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  public List<GerminatorTraySearchResponseDto> getTraysByIds(
+      @RequestParam List<@NotNull @Positive Integer> ids
+  ) {
+    return germinatorTrayService.getTraysByIds(ids);
+  }
+
+  /**
+   * Assigns a germinator ID to an existing germinator tray. Uses optimistic concurrency on the
+   * tray revision count; if the tray was updated by another user, returns 409.
    *
    * @param germinatorTrayId the ID of the germinator tray
    * @param germinatorId the germinator ID to assign
-   * @return a response DTO confirming the assignment
+   * @param revisionCount the tray revision count the caller read
+   * @return the assignment and the tray's new revision count
    */
   @PatchMapping("/{germinatorTrayId}/germinator-id")
   @ResponseStatus(HttpStatus.OK)
@@ -96,6 +125,8 @@ public class GerminatorTrayEndpoint {
           schema = @Schema(implementation = GerminatorIdAssignResponseDto.class)
       )
   )
+  @ApiResponse(responseCode = "404", description = "Tray not found.")
+  @ApiResponse(responseCode = "409", description = "Data updated by another user; reselect and retry.")
   @ApiAuthResponse
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public GerminatorIdAssignResponseDto assignGerminatorIdToTray(
@@ -105,11 +136,13 @@ public class GerminatorTrayEndpoint {
           regexp = "^$|^\\d$",
           message = "Germinator ID must be a single digit (0-9) or blank"
       )
-      String germinatorId
+      String germinatorId,
+      @RequestParam @NotNull @PositiveOrZero Long revisionCount
   ) {
     return germinatorTrayService.assignGerminatorIdToTray(
         germinatorTrayId,
-        germinatorId
+        germinatorId,
+        revisionCount
     );
   }
 
@@ -147,6 +180,7 @@ public class GerminatorTrayEndpoint {
    * rolls back.
    *
    * @param germinatorTrayId the tray to delete
+   * @param revisionCount    the tray revision count the caller read (optimistic lock)
    * @param contents         the tray contents with the activity timestamps
    */
   @PostMapping("/{germinatorTrayId}/delete")
@@ -158,9 +192,10 @@ public class GerminatorTrayEndpoint {
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public void deleteTray(
     @PathVariable Integer germinatorTrayId,
+    @RequestParam @NotNull @PositiveOrZero Long revisionCount,
     @Valid @RequestBody List<@Valid GerminatorTrayDeleteContentDto> contents
   ) {
-    germinatorTrayService.deleteTray(germinatorTrayId, contents);
+    germinatorTrayService.deleteTray(germinatorTrayId, revisionCount, contents);
   }
 
   /**

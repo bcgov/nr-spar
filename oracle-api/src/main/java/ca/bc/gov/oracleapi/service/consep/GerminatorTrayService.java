@@ -7,7 +7,6 @@ import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayDeleteContentDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
-import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminationTrayContentsRepository;
@@ -39,75 +38,84 @@ public class GerminatorTrayService {
   private final ActivityRepository activityRepository;
   private final GerminationTrayContentsRepository germinationTrayContentsRepository;
 
+  /** Most tray IDs one load may ask for. */
+  public static final int MAX_TRAY_IDS = 100;
+
   /**
-   * Assign a germinator ID to an existing germinator tray.
+   * Retrieve germinator trays by ID, e.g. the trays just created, so the maintain page can
+   * reload them without navigation state.
+   *
+   * @param germinatorTrayIds the tray IDs (1 to {@link #MAX_TRAY_IDS}, duplicates ignored)
+   * @return the trays that exist, in ID order
+   * @throws ResponseStatusException 400 if no IDs or too many IDs are given
+   */
+  public List<GerminatorTraySearchResponseDto> getTraysByIds(List<Integer> germinatorTrayIds) {
+    if (germinatorTrayIds == null || germinatorTrayIds.isEmpty()) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "At least one germinator tray ID is required");
+    }
+    List<Integer> ids = germinatorTrayIds.stream().distinct().toList();
+    if (ids.size() > MAX_TRAY_IDS) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "At most " + MAX_TRAY_IDS + " germinator tray IDs are allowed");
+    }
+    SparLog.info("Loading germinator trays {}", ids);
+    return germinatorTrayRepository.findTraysByIds(ids);
+  }
+
+  /**
+   * Assign a germinator ID to an existing germinator tray. Uses optimistic concurrency on the
+   * tray's revision count: the update only applies if the revision count still matches the one
+   * the caller read, and it increments the revision count.
    *
    * @param germinatorTrayId the ID of the germinator tray
    * @param germinatorId     the germinator ID to assign, leave it blank to unassign
-   * @return a response DTO confirming the assignment
-   * @throws ResponseStatusException if the tray is not found
+   * @param revisionCount    the tray revision count the caller read
+   * @return the tray ID, the germinator ID now stored and the new revision count
+   * @throws ResponseStatusException 400 if an argument is null, 404 if the tray is not found,
+   *         409 with RESELECT_MESSAGE if the tray was changed by another user
    */
+  @Transactional(rollbackFor = ResponseStatusException.class)
   public GerminatorIdAssignResponseDto assignGerminatorIdToTray(
       Integer germinatorTrayId,
-      String germinatorId
+      String germinatorId,
+      Long revisionCount
   ) {
-    if (germinatorTrayId == null || germinatorId == null) {
+    if (germinatorTrayId == null || germinatorId == null || revisionCount == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Germinator tray ID and germinator ID cannot be null or blank");
+          "Germinator tray ID, germinator ID and revision count cannot be null");
     }
 
+    String newId = germinatorId.isBlank() ? null : germinatorId;
     SparLog.info(
-        "Assigning germinator ID {} to germinator tray ID {}",
-        germinatorId,
-        germinatorTrayId
+        "Setting germinator ID of tray {} to {} (revision {})",
+        germinatorTrayId,
+        newId,
+        revisionCount
     );
 
-    GerminatorTrayEntity tray = germinatorTrayRepository.findById(germinatorTrayId)
-        .orElseThrow(() -> new ResponseStatusException(
+    int rows = germinatorTrayRepository.updateGerminatorIdWhereRevisionMatches(
+        germinatorTrayId, newId, revisionCount);
+    if (rows == 0) {
+      if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
+        throw new ResponseStatusException(
             HttpStatus.NOT_FOUND,
-            "Germinator tray not found with ID: " + germinatorTrayId)
-        );
-
-    String previousId = tray.getGerminatorId();
-    if (germinatorId.isBlank()) {
+            "Germinator tray not found with ID: " + germinatorTrayId);
+      }
       SparLog.info(
-          "Unsetting germinator ID for tray {} (previous value: {})",
-          germinatorTrayId,
-          previousId
-      );
-    } else if (previousId == null) {
-      SparLog.info(
-          "Assigning germinator ID {} to tray {}",
-          germinatorId,
-          germinatorTrayId
-      );
-    } else {
-      SparLog.info(
-          "Updating germinator ID for tray {} from {} to {}",
-          germinatorTrayId,
-          previousId,
-          germinatorId
-      );
+          "Germinator tray {} revision {} is stale; rejecting", germinatorTrayId, revisionCount);
+      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
     }
 
-    if (germinatorId.isBlank()) {
-      tray.setGerminatorId(null); // unset
-    } else {
-      tray.setGerminatorId(germinatorId);
-    }
-    germinatorTrayRepository.save(tray);
-
+    long newRevision = revisionCount + 1;
     SparLog.info(
-        "Germinator ID for tray {} is now {}",
+        "Germinator ID for tray {} is now {} (revision {})",
         germinatorTrayId,
-        tray.getGerminatorId()
+        newId,
+        newRevision
     );
-
-    return new GerminatorIdAssignResponseDto(
-        germinatorTrayId,
-        tray.getGerminatorId()
-    );
+    return new GerminatorIdAssignResponseDto(germinatorTrayId, newId, newRevision);
   }
 
   /**
@@ -163,6 +171,7 @@ public class GerminatorTrayService {
    * throws and rolls back.
    *
    * @param germinatorTrayId the tray to delete
+   * @param revisionCount the tray revision count the caller read (optimistic lock)
    * @param contents the tray contents with the current update_timestamp of each parent activity
    * @throws ResponseStatusException 404 if tray not found, 409 with RESELECT_MESSAGE if any
    *         DML affects 0 rows
@@ -170,12 +179,13 @@ public class GerminatorTrayService {
   @Transactional(rollbackFor = ResponseStatusException.class)
   public void deleteTray(
       Integer germinatorTrayId,
+      Long revisionCount,
       List<GerminatorTrayDeleteContentDto> contents
   ) {
-    if (germinatorTrayId == null || contents == null) {
+    if (germinatorTrayId == null || revisionCount == null || contents == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "Germinator tray ID and contents are required");
+          "Germinator tray ID, revision count and contents are required");
     }
 
     if (!germinatorTrayRepository.existsById(germinatorTrayId)) {
@@ -195,7 +205,9 @@ public class GerminatorTrayService {
       detachTestAndTouchParent(riaKey, timestampsByRiaKey.get(riaKey), germinatorTrayId);
     }
 
-    int deleteRows = germinatorTrayRepository.deleteByGerminatorTrayId(germinatorTrayId);
+    // 0 rows here also means another user changed the tray (e.g. its germinator ID).
+    int deleteRows = germinatorTrayRepository.deleteByGerminatorTrayIdAndRevisionCount(
+        germinatorTrayId, revisionCount);
     if (deleteRows == 0) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
     }

@@ -30,9 +30,9 @@ const CreateGermTray = (
   const createGerminatorTrayMutation = useMutation({
     mutationFn: (payload: CreateGermTrayRequest[]) => assignGerminatorTrays(payload),
     onSuccess: (data: GermTrayCreateResponseType[]) => {
-      navigate(ROUTES.MAINTAIN_GERMINATION_TRAY_SCREEN, {
-        state: { germinatorTrays: data }
-      });
+      // The ids go in the URL, so a refresh or the back button can load the trays again.
+      const trayIds = data.map((tray) => tray.germinatorTrayId).join(',');
+      navigate(`${ROUTES.MAINTAIN_GERMINATION_TRAY_SCREEN}?trayIds=${trayIds}`);
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || error.message || 'Assign germinator trays API request failed';

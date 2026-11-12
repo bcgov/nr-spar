@@ -29,6 +29,71 @@ public interface GerminatorTrayRepository extends JpaRepository<GerminatorTrayEn
       """)
   int deleteByGerminatorTrayId(@Param("germinatorTrayId") Integer germinatorTrayId);
 
+  /**
+   * Delete the tray by ID only if its revision count still matches (optimistic lock).
+   *
+   * @param germinatorTrayId the tray ID to delete
+   * @param revisionCount    the revision count the caller read
+   * @return the number of rows deleted (0 or 1)
+   */
+  @Modifying
+  @Transactional
+  @Query(
+      """
+      DELETE FROM GerminatorTrayEntity t
+       WHERE t.germinatorTrayId = :germinatorTrayId
+         AND t.revisionCount = :revisionCount
+      """)
+  int deleteByGerminatorTrayIdAndRevisionCount(
+      @Param("germinatorTrayId") Integer germinatorTrayId,
+      @Param("revisionCount") Long revisionCount
+  );
+
+  /**
+   * Set the germinator ID and bump the revision count, only if the revision count still matches
+   * the one the caller read (optimistic lock).
+   *
+   * @param germinatorTrayId the tray ID
+   * @param germinatorId     the germinator ID, or null to unassign
+   * @param revisionCount    the revision count the caller read
+   * @return the number of rows updated (0 or 1)
+   */
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Transactional
+  @Query(
+      """
+      UPDATE GerminatorTrayEntity t
+         SET t.germinatorId = :germinatorId,
+             t.revisionCount = t.revisionCount + 1
+       WHERE t.germinatorTrayId = :germinatorTrayId
+         AND t.revisionCount = :revisionCount
+      """)
+  int updateGerminatorIdWhereRevisionMatches(
+      @Param("germinatorTrayId") Integer germinatorTrayId,
+      @Param("germinatorId") String germinatorId,
+      @Param("revisionCount") Long revisionCount
+  );
+
+  /** Trays by ID, in ID order; IDs that do not exist are left out. */
+  @Query(
+      """
+      SELECT new ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto(
+          tray.germinatorTrayId,
+          tray.activityTypeCd,
+          tray.actualStartDate,
+          tray.dateCreated,
+          tray.revisionCount,
+          tray.systemTrayNo,
+          tray.germinatorId
+      )
+      FROM GerminatorTrayEntity tray
+      WHERE tray.germinatorTrayId IN :germinatorTrayIds
+      ORDER BY tray.germinatorTrayId
+      """)
+  List<GerminatorTraySearchResponseDto> findTraysByIds(
+      @Param("germinatorTrayIds") List<Integer> germinatorTrayIds
+  );
+
   @Query(
       """
       SELECT new ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto(
