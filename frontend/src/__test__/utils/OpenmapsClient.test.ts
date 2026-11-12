@@ -93,6 +93,21 @@ describe('getOpenmapsJson', () => {
     expect(init.method).toBeUndefined();
   });
 
+  it('sends our origin as the referrer, which OpenMaps needs before it returns CORS headers', async () => {
+    // The site-wide Referrer-Policy is same-origin, which sends no Referer
+    // cross-site; without one the OpenMaps gateway omits
+    // Access-Control-Allow-Origin and the browser blocks the response.
+    // A fresh Response per call: a body can only be read once.
+    fetchMock.mockImplementation(async () => new Response('{"features":[]}', { status: 200 }));
+    await getOpenmapsJson(wfsParams());
+    await getOpenmapsJson(new URLSearchParams({ service: 'WMS', request: 'GetLegendGraphic' }));
+
+    fetchMock.mock.calls.forEach(([, init]) => {
+      expect(init.referrerPolicy).toBe('strict-origin-when-cross-origin');
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('rejects a non-2xx response', async () => {
     fetchMock.mockResolvedValue(new Response('nope', { status: 502 }));
 

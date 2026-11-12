@@ -9,6 +9,15 @@
  */
 const OPENMAPS_BASE_URL = 'https://openmaps.gov.bc.ca/geo/pub';
 
+/**
+ * The OpenMaps gateway only returns `Access-Control-Allow-Origin` when the
+ * request carries a `Referer`. The site-wide Caddy `Referrer-Policy:
+ * same-origin` sends none cross-site, so the browser would block every
+ * response. This policy sends just our origin (never the page path) to
+ * OpenMaps, and only on these calls.
+ */
+const OPENMAPS_REFERRER_POLICY: ReferrerPolicy = 'strict-origin-when-cross-origin';
+
 /** Cap applied when a WFS caller omits `count`, so no query is unbounded. */
 const DEFAULT_MAX_FEATURES = '5000';
 
@@ -44,13 +53,17 @@ export const getOpenmapsJson = async <T>(
 ): Promise<T> => {
   let response: Response;
   if (isWms(params)) {
-    response = await fetch(buildOpenmapsUrl(params), { signal });
+    response = await fetch(buildOpenmapsUrl(params), {
+      signal, referrerPolicy: OPENMAPS_REFERRER_POLICY
+    });
   } else {
     const body = new URLSearchParams(params);
     if (!body.has('count') && !body.has('maxFeatures')) {
       body.set('count', DEFAULT_MAX_FEATURES);
     }
-    response = await fetch(endpointFor(params), { method: 'POST', body, signal });
+    response = await fetch(endpointFor(params), {
+      method: 'POST', body, signal, referrerPolicy: OPENMAPS_REFERRER_POLICY
+    });
   }
   if (!response.ok) {
     throw new Error(`OpenMaps request failed with HTTP ${response.status}`);
