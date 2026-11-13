@@ -18,8 +18,7 @@ describe('Test the Create A Class component', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Create A class seedlot')).toBeInTheDocument();
-    expect(screen.getByText('Register a new A class seedlot')).toBeInTheDocument();
+    expect(screen.getByText('Create A-class seedlot')).toBeInTheDocument();
     expect(screen.getByText('Applicant agency')).toBeInTheDocument();
     expect(screen.getByText('Seedlot information')).toBeInTheDocument();
   })

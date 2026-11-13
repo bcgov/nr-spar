@@ -2,6 +2,13 @@ import ApiConfig from './ApiConfig';
 import api from './api';
 import { FavActivityType, FavActivityPostType } from '../types/FavActivityTypes';
 import FavouriteActivityMap from '../config/FavouriteActivityMap';
+import { isSeedlotBEnabled } from '../config/features';
+
+// The map entry is kept so a stored favourite for a disabled feature is hidden
+// rather than rendered as an unknown activity.
+const isActivityEnabled = (activity: string): boolean => (
+  activity === 'registerBClass' ? isSeedlotBEnabled() : true
+);
 
 export const getFavAct = () => {
   const url = ApiConfig.favouriteActivities;
@@ -11,6 +18,9 @@ export const getFavAct = () => {
       const userList: FavActivityType[] = [];
       const activityList = Object.keys(FavouriteActivityMap);
       data.forEach((item) => {
+        if (!isActivityEnabled(item.activity)) {
+          return;
+        }
         if (activityList.includes(item.activity)) {
           const activityToAdd = structuredClone(FavouriteActivityMap[item.activity]);
           activityToAdd.id = item.id;

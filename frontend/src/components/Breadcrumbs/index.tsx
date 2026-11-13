@@ -23,10 +23,6 @@ import {
 import './styles.scss';
 
 const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
-  if (!crumbs.length) {
-    return null;
-  }
-
   const navigate = useNavigate();
   const windowSize = useWindowSize();
   const [displayedCrumbs, setDisplayedCrumbs] = useState<CrumbType[]>(
@@ -60,6 +56,10 @@ const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
       setDisplayedCrumbs(crumbs);
     }
   }, [windowSize.innerWidth, crumbs]);
+
+  if (!crumbs.length) {
+    return null;
+  }
 
   if (overflowCrumbs.length === 0) {
     return (

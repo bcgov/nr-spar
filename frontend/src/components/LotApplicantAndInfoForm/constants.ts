@@ -1,5 +1,5 @@
+import { StringInputType } from '@/types/FormInputType';
 import ClientAndCodeInputTextType from '../../types/ClientAndCodeInputTextType';
-import { StringInputType } from '../../types/FormInputType';
 import { ComboBoxPropsType } from './definitions';
 
 export const clientAndCodeInputText = (
@@ -21,9 +21,9 @@ export const clientAndCodeInputText = (
 
 export const speciesFieldConfig: ComboBoxPropsType = {
   placeholder: 'Enter or choose an species for the seedlot',
-  titleText: 'Type or search for the seedlot species using the drop-down list',
+  titleText: 'Seedlot species',
   invalidText: 'Please select a species',
-  helperText: ''
+  helperText: 'Type or search for the seedlot species using the dropdown list.'
 };
 
 // Template data for vegLot:

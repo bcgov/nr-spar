@@ -1,37 +1,49 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 
 import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
-import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import { SingleOwnerForm } from '../../../SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { getOwnerAgencyTitle } from '../../../SeedlotRegistrationSteps/OwnershipStep/utils';
+import { inputText } from '../../../SeedlotRegistrationSteps/OwnershipStep/constants';
 import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { ForestClientType } from '../../../../types/ForestClientTypes/ForestClientType';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 
-const OwnershipReviewRead = () => {
-  const {
-    isFetchingData, allStepData: { ownershipStep: state }
-  } = useContext(ClassAContext);
+type OwnershipReviewReadProps = {
+  owners: SingleOwnerForm[];
+  isFetchingData: boolean;
+  idPrefix?: string;
+  fundingSourcesFailed?: boolean;
+  methodsOfPaymentFailed?: boolean;
+};
 
+const OwnershipReviewRead = ({
+  owners,
+  isFetchingData,
+  idPrefix = 'owner',
+  fundingSourcesFailed = false,
+  methodsOfPaymentFailed = false
+}: OwnershipReviewReadProps) => {
   const qc = useQueryClient();
 
   useQueries({
-    queries: state.map((curOwner) => ({
+    queries: owners.map((curOwner) => ({
       queryKey: ['forest-clients', curOwner.ownerAgency.value],
       queryFn: () => getForestClientByNumberOrAcronym(curOwner.ownerAgency.value),
       enabled: !!curOwner.ownerAgency.value
     }))
   });
 
-  const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
+  const getFcQuery = (clientNumber: string): ForestClientType | undefined => (
+    qc.getQueryData(['forest-clients', clientNumber])
+  );
 
   return (
     <FlexGrid className="sub-section-grid">
       {
-        state.map((curOwner: SingleOwnerForm, index) => (
+        owners.map((curOwner: SingleOwnerForm, index) => (
           <div key={`${curOwner.id}`}>
             <Row>
               <Column className="sub-section-title-col">
@@ -43,7 +55,7 @@ const OwnershipReviewRead = () => {
             <Row>
               <Column className="info-col" sm={4} md={4} lg={4}>
                 <ReadOnlyInput
-                  id={`owner-${curOwner.id}-agency`}
+                  id={`${idPrefix}-${curOwner.id}-agency`}
                   label="Owner agency"
                   value={
                     getFcQuery(curOwner.ownerAgency.value)
@@ -55,7 +67,7 @@ const OwnershipReviewRead = () => {
               </Column>
               <Column className="info-col" sm={4} md={4} lg={4}>
                 <ReadOnlyInput
-                  id={`owner-${curOwner.id}-loc-code`}
+                  id={`${idPrefix}-${curOwner.id}-loc-code`}
                   label="Owner location code"
                   value={curOwner.ownerCode.value}
                   showSkeleton={isFetchingData}
@@ -63,7 +75,7 @@ const OwnershipReviewRead = () => {
               </Column>
               <Column className="info-col" sm={4} md={4} lg={4}>
                 <ReadOnlyInput
-                  id={`owner-${curOwner.id}-portion`}
+                  id={`${idPrefix}-${curOwner.id}-portion`}
                   label="Owner portion (%)"
                   value={`${curOwner.ownerPortion.value}%`}
                   showSkeleton={isFetchingData}
@@ -71,7 +83,7 @@ const OwnershipReviewRead = () => {
               </Column>
               <Column className="info-col" sm={2} md={2} lg={2}>
                 <ReadOnlyInput
-                  id={`owner-${curOwner.id}-reserved`}
+                  id={`${idPrefix}-${curOwner.id}-reserved`}
                   label="Reserved (%)"
                   value={`${curOwner.reservedPerc.value}%`}
                   showSkeleton={isFetchingData}
@@ -79,7 +91,7 @@ const OwnershipReviewRead = () => {
               </Column>
               <Column className="info-col" sm={2} md={2} lg={2}>
                 <ReadOnlyInput
-                  id={`owner-${curOwner.id}-surplus`}
+                  id={`${idPrefix}-${curOwner.id}-surplus`}
                   label="Surplus (%)"
                   value={`${curOwner.surplusPerc.value}%`}
                   showSkeleton={isFetchingData}
@@ -89,23 +101,31 @@ const OwnershipReviewRead = () => {
             <Row>
               <Column className="info-col" sm={4} md={4} lg={4}>
                 <ReadOnlyInput
-                  id={`owner-${curOwner.id}-funding-source`}
+                  id={`${idPrefix}-${curOwner.id}-funding-source`}
                   label="Funding source"
-                  value={curOwner.fundingSource.value.label}
+                  value={
+                    fundingSourcesFailed
+                      ? inputText.funding.fetchError
+                      : curOwner.fundingSource.value.label
+                  }
                   showSkeleton={isFetchingData}
                 />
               </Column>
               <Column className="info-col" sm={4} md={4} lg={4}>
                 <ReadOnlyInput
-                  id={`owner-${curOwner.id}-payment`}
+                  id={`${idPrefix}-${curOwner.id}-payment`}
                   label="Method of payment"
-                  value={curOwner.methodOfPayment.value.label}
+                  value={
+                    methodsOfPaymentFailed
+                      ? inputText.payment.fetchError
+                      : curOwner.methodOfPayment.value.label
+                  }
                   showSkeleton={isFetchingData}
                 />
               </Column>
             </Row>
             {
-              state.length !== index + 1
+              owners.length !== index + 1
                 ? (
                   <Divider />
                 )

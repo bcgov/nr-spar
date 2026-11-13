@@ -40,7 +40,7 @@ class AreaOfUseEndpointTest {
     List<SpzDto> spzList = List.of(spzBv, spzCp);
 
     String vegCode = "FDC";
-    when(areaOfUseService.getSpzByVegCode(vegCode)).thenReturn(spzList);
+    when(areaOfUseService.getSpzByVegCode(vegCode, 'A')).thenReturn(spzList);
 
     mockMvc
         .perform(
@@ -63,7 +63,7 @@ class AreaOfUseEndpointTest {
   void getSpzListShouldHandleError() throws Exception {
     String vegCode = "FDC";
 
-    when(areaOfUseService.getSpzByVegCode(vegCode))
+    when(areaOfUseService.getSpzByVegCode(vegCode, 'A'))
         .thenThrow(new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT));
 
     mockMvc
@@ -73,6 +73,37 @@ class AreaOfUseEndpointTest {
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isIAmATeapot())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get a list of class B SPZ should pass the genetic class through")
+  void getListOfSpz_classB_shouldSucceed() throws Exception {
+    String vegCode = "FDC";
+    when(areaOfUseService.getSpzByVegCode(vegCode, 'B'))
+        .thenReturn(List.of(new SpzDto("M", "Maritime", null)));
+
+    mockMvc
+        .perform(
+            get("/api/area-of-use/spz-list/vegetation-code/{vegCode}", vegCode)
+                .param("geneticClass", "b")
+                .with(csrf().asHeader())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].code").value("M"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get a list of SPZ should reject an unknown genetic class")
+  void getListOfSpz_invalidGeneticClass_shouldBeBadRequest() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/area-of-use/spz-list/vegetation-code/{vegCode}", "FDC")
+                .param("geneticClass", "Z")
+                .with(csrf().asHeader())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
         .andReturn();
   }
 

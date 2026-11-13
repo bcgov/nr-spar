@@ -3,16 +3,21 @@ import { Navigate, RouteObject } from 'react-router-dom';
 
 import ROUTES from './constants';
 import { getStoredPath } from '../utils/PathUtils';
+import { isSeedlotBEnabled } from '../config/features';
 
 import Dashboard from '../views/Dashboard/dashboard';
 import SeedlotDashboard from '../views/Seedlot/SeedlotDashboard';
 import CreateAClass from '../views/Seedlot/CreateAClass';
+import CreateBClass from '../views/Seedlot/CreateBClass';
 import EditAClassApplication from '../views/Seedlot/EditAClassApplication';
 import MySeedlots from '../views/Seedlot/MySeedlots';
 import SeedlotCreatedFeedback from '../views/Seedlot/SeedlotCreatedFeedback';
 import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
 import SeedlotReview from '../views/Seedlot/SeedlotReview';
+import SeedlotReviewClassB from '../views/Seedlot/SeedlotReviewClassB';
 import SeedlotRegFormClassA from '../views/Seedlot/SeedlotRegFormClassA';
+import SeedlotRegFormClassB from '../views/Seedlot/SeedlotRegFormClassB';
+import SeedlotMap from '../views/Seedlot/SeedlotMap';
 import ReviewSeedlots from '../views/Seedlot/ReviewSeedlots';
 import FourOhThree from '../views/ErrorViews/FourOhThree';
 import FavouriteActivities from '../views/CONSEP/FavouriteActivity';
@@ -22,7 +27,48 @@ import TestSearch from '../views/CONSEP/TestingActivities/TestSearch';
 import MaintainGermTray from '../views/CONSEP/TestingActivities/GerminatorTray/MaintainGermTray';
 import GerminationContent from '../views/CONSEP/TestingActivities/GerminationContent';
 
-const BrowserRoutes: Array<RouteObject> = [
+// Dropped rather than redirected so an unmatched path yields the app's normal
+// "route not found" behaviour when B-class is turned off.
+const bClassRoutes: Array<RouteObject> = [
+  {
+    path: ROUTES.SEEDLOTS_B_CLASS_CREATION,
+    element: (
+      <CreateBClass />
+    )
+  },
+  {
+    path: ROUTES.SEEDLOT_B_CLASS_REGISTRATION,
+    element: (
+      <SeedlotRegFormClassB />
+    )
+  },
+  {
+    path: ROUTES.SEEDLOT_B_CLASS_REVIEW,
+    element: (
+      <SeedlotReviewClassB />
+    )
+  },
+  {
+    // The applicant editor is class-aware, so B-class reuses it under its own path.
+    path: ROUTES.SEEDLOT_B_CLASS_EDIT,
+    element: (
+      <EditAClassApplication />
+    )
+  },
+  {
+    // Only the B-class collection step opens the collection-area map.
+    path: ROUTES.SEEDLOT_MAP,
+    element: (
+      <SeedlotMap />
+    )
+  }
+];
+
+/**
+ * The route table for a given B-class flag value. Exported so tests can check
+ * both states without re-importing every view.
+ */
+export const buildRoutes = (seedlotBEnabled: boolean): Array<RouteObject> => [
   // Ensures that root paths get redirected to
   // dashboard, when user is logged in
   {
@@ -139,7 +185,10 @@ const BrowserRoutes: Array<RouteObject> = [
     element: (
       <MaintainGermTray />
     )
-  }
+  },
+  ...(seedlotBEnabled ? bClassRoutes : [])
 ];
+
+const BrowserRoutes = buildRoutes(isSeedlotBEnabled());
 
 export default BrowserRoutes;

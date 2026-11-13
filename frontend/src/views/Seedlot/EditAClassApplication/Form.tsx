@@ -33,6 +33,8 @@ import PageTitle from '../../../components/PageTitle';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
+import { isBClassSeedlot } from '../SeedlotDetails/utils';
+import { isSeedlotBEnabled } from '../../../config/features';
 
 import './styles.scss';
 
@@ -74,6 +76,15 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
   }, [seedlotQuery.status]);
 
   const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
+  const isBClass = isBClassSeedlot(seedlotQuery.data);
+
+  // With B-class turned off, a B lot must not be editable through the A-class
+  // URL (e.g. an old bookmark). The backend rejects the save as well.
+  useEffect(() => {
+    if (!isReview && isBClass && !isSeedlotBEnabled()) {
+      navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''), { replace: true });
+    }
+  }, [isReview, isBClass, navigate, seedlotNumber]);
 
   const convertToSeedlotForm = (
     seedlot: SeedlotType,
@@ -84,7 +95,10 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
       locationCode: getStringInputObj('edit-seedlot-location-code', seedlot.applicantLocationCode),
       email: getStringInputObj('edit-seedlot-email', seedlot.applicantEmailAddress),
       species: getOptionsInputObj('edit-seedlot-species', getSpeciesOptionByCode(seedlot.vegetationCode, vegCodes)),
-      sourceCode: getStringInputObj('edit-seedlot-source-code', seedlot.seedlotSource.seedlotSourceCode),
+      sourceCode: getStringInputObj(
+        'edit-seedlot-source-code',
+        seedlot.seedlotSource?.seedlotSourceCode ?? ''
+      ),
       willBeRegistered: getBooleanInputObj('edit-seedlot-will-be-registered', seedlot.intendedForCrownLand),
       isBcSource: getBooleanInputObj('edit-seedlot-is-bc-source', seedlot.sourceInBc)
     });
@@ -139,7 +153,10 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
       return;
     }
 
-    if (applicantData.sourceCode.isInvalid || !applicantData.sourceCode.value) {
+    if (
+      !isBClass
+      && (applicantData.sourceCode.isInvalid || !applicantData.sourceCode.value)
+    ) {
       setInputValidation('sourceCode', true);
       focusById(applicantData.sourceCode.id);
       return;
@@ -147,7 +164,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
 
     seedlotPatchMutation.mutate({
       applicantEmailAddress: applicantData.email.value,
-      seedlotSourceCode: applicantData.sourceCode.value,
+      seedlotSourceCode: isBClass ? null : applicantData.sourceCode.value,
       toBeRegistrdInd: applicantData.willBeRegistered.value,
       bcSourceInd: applicantData.isBcSource.value,
       revisionCount: seedlotQuery.data?.revisionCount
@@ -203,12 +220,13 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
       <Row>
         <Column>
           {
-            applicantData
+            seedlotQuery.isSuccess && applicantData
               ? (
                 <LotApplicantAndInfoForm
                   isSeedlot
                   isEdit
                   isReview={isReview}
+                  geneticClass={isBClass ? 'B' : 'A'}
                   seedlotFormData={applicantData}
                   setSeedlotFormData={setApplicantData}
                 />

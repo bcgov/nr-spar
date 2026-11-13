@@ -15,7 +15,7 @@ const RegForm = (
     cleanParentTables
   }: RegFormProps
 ) => {
-  const { formStep } = useContext(ClassAContext);
+  const { formStep, fundingSourcesQuery, methodsOfPaymentQuery } = useContext(ClassAContext);
 
   switch (formStep) {
     // Collection
@@ -26,7 +26,10 @@ const RegForm = (
     // Ownership
     case 1:
       return (
-        <OwnershipStep />
+        <OwnershipStep
+          fundingSourcesQuery={fundingSourcesQuery}
+          methodsOfPaymentQuery={methodsOfPaymentQuery}
+        />
       );
     // Interim Storage
     case 2:

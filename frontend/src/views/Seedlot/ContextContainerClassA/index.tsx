@@ -40,6 +40,7 @@ import { MeanGeomInfoSectionConfigType, RowItem } from '../../../components/Seed
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { StringInputType } from '../../../types/FormInputType';
 import ClassAContext, { ClassAContextType } from './context';
+import SeedlotRegWizardContext, { SeedlotRegWizardStepData } from '../../../contexts/SeedlotRegWizardContext';
 import {
   AllStepData, AreaOfUseDataType, FormPhase, ProgressIndicatorConfig, ProgressStepStatus
 } from './definitions';
@@ -318,6 +319,12 @@ const ContextContainerClassA = ({ children }: props) => {
    */
   useEffect(() => {
     if (seedlotQuery.status === 'success') {
+      // The A-class wizard must never load (or autosave a draft for) a B-class
+      // lot, e.g. from an old bookmark. Leave before the form becomes ready.
+      if (seedlotQuery.data?.seedlot.geneticClass?.geneticClassCode === 'B') {
+        navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''), { replace: true });
+        return;
+      }
       const seedlotStatusCode = seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode;
       if (seedlotStatusCode === 'PND' || seedlotStatusCode === 'INC') {
         setFormPhase('loading-draft');
@@ -501,11 +508,20 @@ const ContextContainerClassA = ({ children }: props) => {
     numOfEdit.current += 1;
   };
   const queryClient = useQueryClient();
+  // Set when a submit starts and cleared only if it fails: no draft autosave may
+  // run during the submit or on the navigation away after it succeeds.
+  const isSubmittingRef = useRef(false);
   const submitSeedlot = useMutation({
     // Payload is built here so a validation throw surfaces as submitSeedlot.error.
     mutationFn: (buildPayload: () => SeedlotAClassSubmitType) => (
       putAClassSeedlot(seedlotNumber ?? '', buildPayload())
     ),
+    onMutate: () => {
+      isSubmittingRef.current = true;
+    },
+    onError: () => {
+      isSubmittingRef.current = false;
+    },
     onSuccess: async () => {
       queryClient.removeQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
@@ -596,7 +612,12 @@ const ContextContainerClassA = ({ children }: props) => {
   });
 
   const persistDraft = useCallback((options?: { showLoading?: boolean }) => {
-    if (!canPersistDraft || saveProgress.isPending || saveStatus === 'conflict') {
+    if (
+      isSubmittingRef.current
+      || !canPersistDraft
+      || saveProgress.isPending
+      || saveStatus === 'conflict'
+    ) {
       return;
     }
     if (options?.showLoading) {
@@ -875,9 +896,36 @@ const ContextContainerClassA = ({ children }: props) => {
     ]
   );
 
+  const wizardContextValue = useMemo(
+    () => ({
+      allStepData: {
+        collectionStep: allStepData.collectionStep,
+        ownershipStep: allStepData.ownershipStep,
+        interimStep: allStepData.interimStep,
+        extractionStorageStep: allStepData.extractionStorageStep
+      } as SeedlotRegWizardStepData,
+      setStepData: (stepName: keyof SeedlotRegWizardStepData, stepData: unknown) => {
+        setStepData(stepName as keyof AllStepData, stepData);
+      },
+      defaultClientNumber: seedlotQuery.data?.seedlot.applicantClientNumber ?? '',
+      defaultCode: getDefaultLocationCode(),
+      isFormSubmitted,
+      seedlotNumber
+    }),
+    [
+      allStepData,
+      isFormSubmitted,
+      seedlotNumber,
+      seedlotQuery.data?.seedlot.applicantClientNumber,
+      seedlotQuery.data?.seedlot.applicantLocationCode
+    ]
+  );
+
   return (
     <ClassAContext.Provider value={contextData}>
-      {children}
+      <SeedlotRegWizardContext.Provider value={wizardContextValue}>
+        {children}
+      </SeedlotRegWizardContext.Provider>
     </ClassAContext.Provider>
   );
 };

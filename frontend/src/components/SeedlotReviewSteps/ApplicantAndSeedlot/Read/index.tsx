@@ -80,7 +80,7 @@ const ApplicantAndSeedlotRead = () => {
           <ReadOnlyInput
             id="applicant-and-seedlot-a-class-source"
             label="Specify A-class source"
-            value={seedlotData?.seedlotSource.description ?? ''}
+            value={seedlotData?.seedlotSource?.description ?? ''}
             showSkeleton={isFetchingData}
           />
         </Column>

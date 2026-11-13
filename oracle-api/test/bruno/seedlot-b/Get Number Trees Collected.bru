@@ -1,0 +1,19 @@
+meta {
+  name: Get Number Trees Collected
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/number-trees-collected
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token:
+}
