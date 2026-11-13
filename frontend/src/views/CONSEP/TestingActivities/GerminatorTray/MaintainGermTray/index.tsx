@@ -1,9 +1,11 @@
 import React, {
+  useEffect,
   useMemo,
+  useRef,
   useState,
   useCallback
 } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   FlexGrid,
@@ -22,12 +24,13 @@ import {
   assignGerminatorId,
   deleteTestFromTray,
   deleteGerminatorTray,
-  getGerminatorTrayContents
+  getGerminatorTrayContents,
+  getGerminatorTraysByIds
 } from '../../../../../api-service/consep/germinatorTrayAPI';
 import {
-  GermTrayCreateResponseType,
   GermTrayDeleteContentType,
-  GermTrayTestType
+  GermTrayTestType,
+  GermTrayType
 } from '../../../../../types/consep/GerminatorTrayType';
 import { getGermTrayColumns, getGermTrayTestsColumns } from './constants';
 import { GermTrayColumn } from './definitions';
@@ -38,26 +41,66 @@ import './styles.scss';
 
 const BREAD_CRUMB_ITEMS = [{ name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES }];
 
-const MaintainGermTray = () => {
-  const location = useLocation();
+/** `?trayIds=1311,1312` → [1311, 1312]; anything that is not a positive integer is dropped. */
+const parseTrayIds = (value: string | null): number[] => [...new Set(
+  (value ?? '')
+    .split(',')
+    .map((id) => Number(id.trim()))
+    .filter((id) => Number.isInteger(id) && id > 0)
+)];
+
+const toColumn = (tray: GermTrayType): GermTrayColumn => ({
+  germinatorTrayId: tray.germinatorTrayId,
+  activityTypeCd: tray.activityTypeCd,
+  actualStartDate: tray.actualStartDate,
+  germinatorId: tray.germinatorId ?? ''
+});
+
+/** What the server holds for a tray, as far as this page knows. */
+type SavedTray = { germinatorId: string; revisionCount: number };
+
+const MaintainGermTrayPage = () => {
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const germinatorTrays = location.state?.germinatorTrays?.map(
-    (tray: GermTrayCreateResponseType) => ({
-      ...tray,
-      germinatorId: ''
-    })
-  ) ?? [];
+  const trayIdsParam = searchParams.get('trayIds');
+  const trayIds = useMemo(() => parseTrayIds(trayIdsParam), [trayIdsParam]);
   const [alert, setAlert] = useState<{
     status: 'error' | 'info' | 'success' | 'warning';
     message: string;
   } | null>(null);
-  const [trays, setTrays] = useState<GermTrayColumn[]>(germinatorTrays);
+  const [trays, setTrays] = useState<GermTrayColumn[]>([]);
+  // False until the trays are loaded: nothing is saved before there is a baseline.
+  const [hydrated, setHydrated] = useState(false);
+  // Per tray, the germinator id and revision count last confirmed by the server. Updated as
+  // each PATCH succeeds, so a save that fails part way still locks the trays it already saved
+  // on their new revision (#2856), and onSaveFailed moves the autosave baseline to match.
+  const savedTraysRef = useRef(new Map<number, SavedTray>());
   const [traySearch, setTraySearch] = useState('');
   const [selectedTrayId, setSelectedTrayId] = useState<number | null>(null);
   const [pendingDeleteTray, setPendingDeleteTray] = useState<GermTrayColumn | null>(null);
   const [pendingDeleteTest, setPendingDeleteTest] = useState<GermTrayTestType | null>(null);
-  // A 409 here means a test's activity changed under us (stale updateTimestamp).
+  // A 409 here means a test's activity (stale updateTimestamp) or a tray (stale
+  // revisionCount) changed under us.
   const { isConflict, markConflict, clearConflict } = useActivityConflict();
+
+  const traysQuery = useQuery({
+    queryKey: ['germinatorTrays', trayIds],
+    queryFn: () => getGerminatorTraysByIds(trayIds),
+    enabled: trayIds.length > 0,
+    // The page edits these trays, so it hydrates once from a load made by this mount, then
+    // only on an explicit Reload. Saves and deletes do not update this cache, so it is not
+    // kept across mounts (the app default is refetchOnMount: false), and there is no
+    // background refetch to ignore.
+    refetchOnMount: 'always',
+    gcTime: 0,
+    refetchOnReconnect: false
+  });
+
+  const traysErrorMessage = traysQuery.isError
+    ? ((traysQuery.error as any)?.response?.data?.message
+      || (traysQuery.error as any)?.message
+      || 'Failed to load germination trays')
+    : null;
 
   const trayContentsQuery = useQuery({
     queryKey: ['germinatorTrayContents', selectedTrayId],
@@ -71,16 +114,107 @@ const MaintainGermTray = () => {
       || 'Failed to load tray contents')
     : null;
 
+  const assignMutation = useMutation({
+    mutationFn: ({
+      germinatorTrayId,
+      germinatorId,
+      revisionCount
+    }: {
+      germinatorTrayId: number;
+      germinatorId: string;
+      revisionCount: number;
+    }) => assignGerminatorId(germinatorTrayId, germinatorId, revisionCount),
+    // Failures show as SaveStatus "Not saved" (or the conflict state on 409), not as a toast.
+    onError: (error: any) => {
+      if (error?.response?.status === 409) {
+        markConflict();
+      }
+    }
+  });
+
+  const { status: saveStatus, flush, markSaved } = useAutosave<GermTrayColumn[]>({
+    data: trays,
+    enabled: hydrated,
+    conflict: isConflict,
+    // After a partial failure, record the trays that did save, so the baseline matches the
+    // server: reverting such a tray is then a change, and is saved.
+    onSaveFailed: (sent) => sent.map((tray) => {
+      const saved = savedTraysRef.current.get(tray.germinatorTrayId);
+      return saved ? { ...tray, germinatorId: saved.germinatorId } : tray;
+    }),
+    onSave: async (curr) => {
+      // Compare with what the server holds, not with the last snapshot: after a partial
+      // failure the trays that did save are not sent again.
+      const changed = curr.filter((tray) => {
+        const saved = savedTraysRef.current.get(tray.germinatorTrayId);
+        return saved !== undefined && tray.germinatorId !== saved.germinatorId;
+      });
+
+      // One at a time, each locked on the revision its tray is at when its turn comes.
+      await changed.reduce<Promise<void>>(
+        (promise, tray) => promise.then(async () => {
+          const saved = savedTraysRef.current.get(tray.germinatorTrayId)!;
+          const response = await assignMutation.mutateAsync({
+            germinatorTrayId: tray.germinatorTrayId,
+            germinatorId: tray.germinatorId,
+            revisionCount: saved.revisionCount
+          });
+          savedTraysRef.current.set(tray.germinatorTrayId, {
+            germinatorId: response.germinatorId ?? '',
+            revisionCount: response.revisionCount
+          });
+        }),
+        Promise.resolve()
+      );
+    }
+  });
+
+  // The loaded trays are the saved baseline, so loading them never PATCHes.
+  const hydrate = (data: GermTrayType[]) => {
+    const rows = data.map(toColumn);
+    savedTraysRef.current = new Map(data.map((tray) => [
+      tray.germinatorTrayId,
+      { germinatorId: tray.germinatorId ?? '', revisionCount: tray.revisionCount }
+    ]));
+    setTrays(rows);
+    markSaved(rows);
+    setHydrated(true);
+  };
+
+  // Hydrate once, from the first load made by this mount (never a cached copy); after that
+  // only Reload does (handleReloadOnConflict).
+  const loaded = traysQuery.isFetchedAfterMount ? traysQuery.data : undefined;
+  useEffect(() => {
+    if (!hydrated && loaded) {
+      hydrate(loaded);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, hydrated]);
+
   const handleTrayRowClick = useCallback((row: GermTrayColumn) => {
     setSelectedTrayId(row.germinatorTrayId);
   }, []);
 
   const deleteFromTrayMutation = useMutation({
-    mutationFn: (row: GermTrayTestType) => {
+    mutationFn: async (row: GermTrayTestType) => {
       if (row.riaSkey == null || row.updateTimestamp == null) {
-        return Promise.reject(new Error('Cannot delete: missing test data'));
+        throw new Error('Cannot delete: missing test data');
       }
-      return deleteTestFromTray(row.germinatorTrayId, row.riaSkey, row.updateTimestamp);
+      // Removing the last test deletes the tray, locked on its revision: save a germinator id
+      // edit first, as for a tray delete.
+      if (!await flush()) {
+        throw new Error('Germinator ID changes are not saved. Save them, or Reload, before removing the test.');
+      }
+      const saved = savedTraysRef.current.get(row.germinatorTrayId);
+      if (!saved) {
+        throw new Error('Cannot delete: tray not loaded');
+      }
+      return deleteTestFromTray(
+        row.germinatorTrayId,
+        row.riaSkey,
+        row.updateTimestamp,
+        saved.revisionCount
+      );
     },
     onSuccess: (_, row) => {
       setAlert(null);
@@ -104,6 +238,15 @@ const MaintainGermTray = () => {
 
   const deleteTrayMutation = useMutation({
     mutationFn: async (tray: GermTrayColumn) => {
+      // Save a germinator id edit first, so the delete locks on the tray's latest revision.
+      // flush() resolves false (it does not throw) if that save failed or is blocked.
+      if (!await flush()) {
+        throw new Error('Germinator ID changes are not saved. Save them, or Reload, before deleting the tray.');
+      }
+      const saved = savedTraysRef.current.get(tray.germinatorTrayId);
+      if (!saved) {
+        throw new Error('Cannot delete: tray not loaded');
+      }
       const queryKey = [
         'germinatorTrayContents',
         tray.germinatorTrayId
@@ -124,11 +267,12 @@ const MaintainGermTray = () => {
         };
       });
 
-      return deleteGerminatorTray(tray.germinatorTrayId, deleteContents);
+      return deleteGerminatorTray(tray.germinatorTrayId, saved.revisionCount, deleteContents);
     },
     onSuccess: (_, tray) => {
       setAlert(null);
       setTrays((prev) => prev.filter((t) => t.germinatorTrayId !== tray.germinatorTrayId));
+      savedTraysRef.current.delete(tray.germinatorTrayId);
       if (selectedTrayId === tray.germinatorTrayId) {
         setSelectedTrayId(null);
         queryClient.removeQueries({ queryKey: ['germinatorTrayContents', tray.germinatorTrayId] });
@@ -145,10 +289,28 @@ const MaintainGermTray = () => {
   });
 
   const handleReloadOnConflict = async () => {
-    // 'all': deleting a tray reads its contents from cache even when that tray is not the
-    // selected (active) one, so inactive entries need fresh timestamps too.
-    await queryClient.invalidateQueries({ queryKey: ['germinatorTrayContents'], refetchType: 'all' });
-    clearConflict();
+    try {
+      const [traysResult] = await Promise.all([
+        trayIds.length > 0 ? traysQuery.refetch({ throwOnError: true }) : undefined,
+        // 'all': deleting a tray reads its contents from cache even when that tray is not the
+        // selected (active) one, so inactive entries need fresh timestamps too.
+        queryClient.invalidateQueries(
+          { queryKey: ['germinatorTrayContents'], refetchType: 'all' },
+          { throwOnError: true }
+        )
+      ]);
+      // Hydrate explicitly: an unchanged response keeps its reference, and unsaved edits
+      // must be dropped either way (SaveStatus says so).
+      if (traysResult?.data) {
+        hydrate(traysResult.data);
+      }
+      setAlert(null);
+      clearConflict();
+    } catch (error: any) {
+      // Stay in conflict: nothing saves until a Reload works.
+      const message = error?.response?.data?.message || error?.message || 'Reload failed';
+      setAlert({ status: 'error', message: `Reload failed, try again. ${message}` });
+    }
   };
 
   const handleConfirmDeleteTray = useCallback(() => {
@@ -163,45 +325,7 @@ const MaintainGermTray = () => {
     setPendingDeleteTest(null);
   }, [pendingDeleteTest, deleteFromTrayMutation]);
 
-  const assignMutation = useMutation({
-    mutationFn: ({
-      germinatorTrayId,
-      germinatorId
-    }: {
-      germinatorTrayId: number;
-      germinatorId: string;
-    }) => assignGerminatorId(germinatorTrayId, germinatorId)
-    // Failures show as SaveStatus "Not saved", not as a toast.
-  });
-
-  const { status: saveStatus, flush } = useAutosave<GermTrayColumn[]>({
-    data: trays,
-    enabled: !assignMutation.isPending,
-    conflict: isConflict,
-    onSave: async (curr, prev) => {
-      const prevMap = new Map(
-        (prev ?? []).map((tray) => [tray.germinatorTrayId, tray.germinatorId])
-      );
-
-      const updates = curr
-        .filter((tray) => tray.germinatorId !== prevMap.get(tray.germinatorTrayId))
-        .map((tray) => ({
-          germinatorTrayId: tray.germinatorTrayId,
-          germinatorId: tray.germinatorId
-        }));
-
-      if (updates.length === 0) return;
-
-      await updates.reduce<Promise<void>>(
-        (promise, update) => promise.then(
-          () => assignMutation.mutateAsync(update).then(() => undefined)
-        ),
-        Promise.resolve()
-      );
-    }
-  });
-
-  const updateRow = useCallback((updatedRow: GermTrayCreateResponseType) => {
+  const updateRow = useCallback((updatedRow: GermTrayColumn) => {
     setTrays((prev) => prev.map(
       (row) => (
         row.germinatorTrayId === updatedRow.germinatorTrayId
@@ -302,13 +426,23 @@ const MaintainGermTray = () => {
         <PageTitle title="Maintain germ tray" />
         <SaveStatus status={saveStatus} onRetry={flush} onReload={handleReloadOnConflict} />
       </Row>
-      {(alert?.message || trayContentsErrorMessage) && (
+      {(alert?.message || traysErrorMessage || trayContentsErrorMessage) && (
         <Row className="consep-maintain-germ-tray-alert">
           <InlineNotification
             lowContrast
             kind={alert?.status ?? 'error'}
-            subtitle={alert?.message ?? trayContentsErrorMessage}
+            subtitle={alert?.message ?? traysErrorMessage ?? trayContentsErrorMessage}
             onClose={() => setAlert(null)}
+          />
+        </Row>
+      )}
+      {trayIds.length === 0 && (
+        <Row className="consep-maintain-germ-tray-alert">
+          <InlineNotification
+            lowContrast
+            hideCloseButton
+            kind="info"
+            subtitle="No germination trays to show. Create trays from the testing activities search."
           />
         </Row>
       )}
@@ -323,6 +457,7 @@ const MaintainGermTray = () => {
         <GenericTable
           columns={germTrayColumns}
           data={filteredTrays}
+          isLoading={traysQuery.isLoading}
           hideToolbar={false}
           renderTopToolbarCustomActions={() => (
             <div className="consep-maintain-germ-tray-search-toolbar">
@@ -425,6 +560,15 @@ const MaintainGermTray = () => {
       </Row>
     </FlexGrid>
   );
+};
+
+/**
+ * Another set of trays (`?trayIds=`) is another page: remount, so loading and auto save start
+ * over. The unmount flushes an unsaved edit of the previous trays.
+ */
+const MaintainGermTray = () => {
+  const [searchParams] = useSearchParams();
+  return <MaintainGermTrayPage key={searchParams.get('trayIds') ?? ''} />;
 };
 
 export default MaintainGermTray;

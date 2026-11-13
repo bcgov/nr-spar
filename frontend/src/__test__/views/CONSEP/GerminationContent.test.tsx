@@ -5,6 +5,8 @@ import {
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import GerminationContent from '../../../views/CONSEP/TestingActivities/GerminationContent';
+import { getGerminationTestHeader } from '../../../api-service/consep/germinationTestAPI';
+import { searchTestingActivities } from '../../../api-service/consep/searchTestingActivitiesAPI';
 
 vi.mock('../../../components/PageTitle', () => ({
   default: ({ title }: { title: string }) => <h1>{title}</h1>
@@ -12,7 +14,7 @@ vi.mock('../../../components/PageTitle', () => ({
 
 const putMock = vi.fn().mockResolvedValue({ updateTimestamp: '2026-01-02T00:00:00' });
 vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
-  getGerminationTestHeader: () => Promise.resolve({
+  getGerminationTestHeader: vi.fn().mockResolvedValue({
     riaSkey: 123,
     activityTypeCd: 'G10',
     testCategoryCd: 'QA',
@@ -28,6 +30,16 @@ vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
   ),
   getTestReplicates: () => Promise.resolve([]),
   putGermCounts: (...args: unknown[]) => putMock(...args)
+}));
+
+vi.mock('../../../api-service/consep/searchTestingActivitiesAPI', () => ({
+  searchTestingActivities: vi.fn().mockResolvedValue({
+    content: [],
+    totalElements: 0,
+    totalPages: 0,
+    pageNumber: 0,
+    pageSize: 10
+  })
 }));
 
 vi.mock('react-router-dom', async (orig) => ({
@@ -66,6 +78,56 @@ describe('GerminationContent', () => {
     await screen.findByText(/Germination test result/i);
     expect(await screen.findByText('TST20170140')).toBeInTheDocument();
     expect(screen.getByText('07080')).toBeInTheDocument();
+  });
+
+  it('opens test history filtered to the current lot and activity type', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /test history/i }));
+
+    expect(await screen.findByText('Seedlot 07080: Test history')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(searchTestingActivities).toHaveBeenCalledWith(
+        { lotNumbers: ['07080'], testTypes: ['G10'] },
+        'actualEndDtTm',
+        'asc',
+        false,
+        10,
+        0
+      );
+    });
+  });
+
+  it('uses the family lot number for family-lot test history', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce({
+      riaSkey: 123,
+      activityTypeCd: 'G10',
+      testCategoryCd: 'QA',
+      testCompleteInd: 0,
+      acceptResultInd: 0,
+      germinatorEntry: '2024-10-31',
+      requestId: 'TST20170140',
+      seedlotNumber: '00000',
+      familyLotNumber: 'F123456',
+      vegetationState: 'SX'
+    });
+    renderView();
+    await screen.findByText(/Germination test result/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /test history/i }));
+
+    expect(await screen.findByText('Familylot F123456: Test history')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(searchTestingActivities).toHaveBeenLastCalledWith(
+        { lotNumbers: ['F123456'], testTypes: ['G10'] },
+        'actualEndDtTm',
+        'asc',
+        false,
+        10,
+        0
+      );
+    });
   });
 
   it('defaults # seeds to 50 for QA category (AC4)', async () => {

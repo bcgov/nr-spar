@@ -16,6 +16,14 @@ export type UseAutosaveOptions<T, R = unknown> = {
    */
   onSaved?: (result: R, sent: T) => T;
   /**
+   * Called when a save fails, with the value that was sent and the saved snapshot it was
+   * diffed against. For a save made of several requests that failed part way, return what
+   * the server now holds (the snapshot with the parts that did save), and the hook records
+   * it as saved; return undefined to keep the snapshot. Unlike `markSaved`, this keeps any
+   * save scheduled by an edit made while the failed one was in flight.
+   */
+  onSaveFailed?: (sent: T, previous: T) => T | undefined;
+  /**
    * Caller-side gate: `hydrated && editable && valid`. Saves are serialized by the hook,
    * so there is no need to add the caller's pending flag. The hook adds
    * `!conflict` (below) and "still signed in" (AuthContext) itself. All of them block
@@ -56,6 +64,7 @@ function useAutosave<T, R = unknown>({
   data,
   onSave,
   onSaved,
+  onSaveFailed,
   enabled = true,
   conflict = false,
   isSavable,
@@ -87,6 +96,8 @@ function useAutosave<T, R = unknown>({
   isEqualRef.current = isEqual;
   const onSavedRef = useRef(onSaved);
   onSavedRef.current = onSaved;
+  const onSaveFailedRef = useRef(onSaveFailed);
+  onSaveFailedRef.current = onSaveFailed;
   const enabledRef = useRef(canSave);
   enabledRef.current = canSave;
 
@@ -147,8 +158,13 @@ function useAutosave<T, R = unknown>({
         setStatus({ state: 'saved', savedAt: new Date() });
         return true;
       } catch {
-        // Keep the previous saved snapshot so the next edit still carries this
-        // data, but remember the failure so it is not retried unchanged.
+        // Keep the previous saved snapshot (or what the caller says did save) so the
+        // next edit still carries this data, but remember the failure so it is not
+        // retried unchanged.
+        const partlySaved = onSaveFailedRef.current?.(current, previous);
+        if (partlySaved !== undefined) {
+          savedRef.current = partlySaved;
+        }
         failedRef.current = current;
         setStatus((prev) => ({ ...prev, state: 'failed' }));
         return false;
