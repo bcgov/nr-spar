@@ -857,6 +857,25 @@ class SeedlotServiceTest {
   }
 
   @Test
+  @DisplayName("Patch applicant info on a class B seedlot is blocked while B-class is turned off")
+  void patchApplicantInfo_classBWithFeatureOff_shouldFail() {
+    String seedlotNumber = "123456";
+    Seedlot testSeedlot = new Seedlot(seedlotNumber);
+    testSeedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", null, true, false, 0);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(testSeedlot));
+
+    SeedlotService disabledService = buildService(false);
+    Assertions.assertThrows(
+        FeatureDisabledException.class,
+        () -> disabledService.patchApplicantInfo(seedlotNumber, testDto));
+    verify(seedlotRepository, never()).save(any());
+  }
+
+  @Test
   @DisplayName("Patch applicant info with a null source on a class A seedlot should fail")
   void patchApplicantInfo_nullSourceClassA_shouldFail() {
     String seedlotNumber = "123456";
@@ -1394,8 +1413,7 @@ class SeedlotServiceTest {
             List.of(ownership),
             interim,
             extraction,
-            List.of(new SeedPlanZoneDto("M", "Maritime", false)),
-            List.of(new GeneticWorthTraitsDto("GVO", new BigDecimal("12"), null, null)));
+            List.of(new SeedPlanZoneDto("M", "Maritime", false)));
 
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
     doNothing().when(seedlotFormValidationService).validateBclassSeedlotForm(any(), any());
@@ -1405,12 +1423,6 @@ class SeedlotServiceTest {
         .saveConeCollectionMethods(any(), any(), anyBoolean());
     when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), anyBoolean()))
         .thenReturn(List.of());
-    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
-    when(geneticClassRepository.findById("B"))
-        .thenReturn(Optional.of(new GeneticClassEntity("B", "B class", DATE_RANGE)));
-    when(loggedUserService.createAuditCurrentUser()).thenReturn(new AuditInformation("user"));
-    when(seedlotSeedPlanZoneRepository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
-    when(seedlotGeneticWorthService.saveSeedlotGenWorth(any(), any())).thenReturn(List.of());
     when(loggedUserService.getLoggedUserId()).thenReturn("user@idir");
     doNothing().when(seedlotCollectionGeometryService).saveOrUpdate(any(), any(), anyString());
     final SeedlotStatusEntity submitted =
@@ -1427,5 +1439,9 @@ class SeedlotServiceTest {
     verify(saveSeedlotFormService).deleteForm(seedlotNumber);
     verify(seedlotCollectionGeometryService)
         .saveOrUpdate(same(seedlot), eq(geoJson), eq("user@idir"));
+    // Area-of-use SPZs in the request are not saved, and B-class has no genetic worth.
+    verify(seedlotSeedPlanZoneRepository, never()).deleteAll(any());
+    verify(seedlotSeedPlanZoneRepository, never()).saveAll(any());
+    verify(seedlotGeneticWorthService, never()).saveSeedlotGenWorth(any(), any());
   }
 }

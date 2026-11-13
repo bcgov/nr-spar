@@ -151,21 +151,16 @@ describe('SeedlotReviewClassB utils test', () => {
       expect(collectionDto.becOverrideComment).toBe('Mapped from adjacent unit');
     });
 
-    it('should preserve genetic worth values from the seedlot', () => {
+    it('should not send genetic worth, which B-class does not have', () => {
       const payload = buildBClassReviewPayload(initEmptySteps(), richSeedlot);
 
-      expect(payload.geneticWorthTraits).toEqual([
-        {
-          traitCode: 'GVO', traitValue: 10, calculatedValue: 12, testedParentTreePerc: 0.8
-        }
-      ]);
+      expect(payload).not.toHaveProperty('geneticWorthTraits');
     });
 
     it('should default to empty lists without rich seedlot data', () => {
       const payload = buildBClassReviewPayload(initEmptySteps());
 
       expect(payload.aouSpzList).toEqual([]);
-      expect(payload.geneticWorthTraits).toEqual([]);
     });
   });
 });

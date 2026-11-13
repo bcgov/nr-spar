@@ -118,10 +118,16 @@ export const assertImportFileAllowed = (file: File): void => {
   }
 };
 
+const archiveTooLargeError = (): Error => new Error(
+  `Archive expands to more than ${formatBytes(MAX_ZIP_UNCOMPRESSED_BYTES)}. `
+  + 'Compress or simplify the shapefile/KMZ and try again.'
+);
+
 /**
- * Guard against zip bombs: too many entries or too much inflated size.
- * Relies on the central-directory uncompressed sizes JSZip exposes after
- * `loadAsync` — we never inflate the whole archive first.
+ * Quick first check against zip bombs: too many entries, or too much inflated
+ * size according to the central directory JSZip exposes after `loadAsync`.
+ * Those sizes come from the archive itself and a crafted zip can fake them,
+ * so the real limit is enforced while inflating (`inflateWithinBudget`).
  */
 const assertZipArchiveSafe = (zip: JSZip): void => {
   const entries = Object.values(zip.files).filter((entry) => !entry.dir);
@@ -148,12 +154,98 @@ const assertZipArchiveSafe = (zip: JSZip): void => {
     }
     uncompressedTotal += size;
     if (uncompressedTotal > MAX_ZIP_UNCOMPRESSED_BYTES) {
-      throw new Error(
-        `Archive expands to more than ${formatBytes(MAX_ZIP_UNCOMPRESSED_BYTES)}. `
-        + 'Compress or simplify the shapefile/KMZ and try again.'
-      );
+      throw archiveTooLargeError();
     }
   });
+};
+
+/**
+ * JSZip's streaming reader. It exists at runtime but is missing from the
+ * published typings, so it is described here.
+ */
+type JSZipEntryStream = {
+  on(event: 'data', callback: (chunk: Uint8Array) => void): JSZipEntryStream;
+  on(event: 'error', callback: (err: Error) => void): JSZipEntryStream;
+  on(event: 'end', callback: () => void): JSZipEntryStream;
+  pause(): JSZipEntryStream;
+  resume(): JSZipEntryStream;
+};
+
+type StreamableJSZipObject = JSZip.JSZipObject & {
+  internalStream: (type: 'uint8array') => JSZipEntryStream
+};
+
+/**
+ * Inflate one archive entry, counting the bytes it actually produces instead
+ * of trusting the size the archive declares. Stops as soon as the count passes
+ * `budget`, so a lying zip bomb only inflates up to the limit. Returns the
+ * entry's bytes when `keep` is set.
+ */
+const inflateWithinBudget = (
+  entry: JSZip.JSZipObject,
+  budget: number,
+  keep: boolean
+): Promise<{ size: number, data: Uint8Array | null }> => new Promise((resolve, reject) => {
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  let settled = false;
+  const stream = (entry as StreamableJSZipObject).internalStream('uint8array');
+  stream
+    .on('data', (chunk: Uint8Array) => {
+      if (settled) {
+        return;
+      }
+      size += chunk.length;
+      if (size > budget) {
+        settled = true;
+        stream.pause();
+        reject(archiveTooLargeError());
+        return;
+      }
+      if (keep) {
+        chunks.push(chunk);
+      }
+    })
+    .on('error', (err: Error) => {
+      if (!settled) {
+        settled = true;
+        reject(err);
+      }
+    })
+    .on('end', () => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (!keep) {
+        resolve({ size, data: null });
+        return;
+      }
+      const data = new Uint8Array(size);
+      let offset = 0;
+      chunks.forEach((chunk) => {
+        data.set(chunk, offset);
+        offset += chunk.length;
+      });
+      resolve({ size, data });
+    })
+    .resume();
+});
+
+/**
+ * Inflate every entry once, discarding the output, to measure the archive's
+ * real size before a parser that offers no limit (shpjs) unpacks it.
+ */
+const assertZipInflatesWithinLimit = async (zip: JSZip): Promise<void> => {
+  const entries = Object.values(zip.files).filter((entry) => !entry.dir);
+  await entries.reduce<Promise<number>>(
+    async (remainingPromise, entry) => {
+      const remaining = await remainingPromise;
+      const { size } = await inflateWithinBudget(entry, remaining, false);
+      return remaining - size;
+    },
+    Promise.resolve(MAX_ZIP_UNCOMPRESSED_BYTES)
+  );
 };
 
 /**
@@ -362,7 +454,8 @@ const extractKmlFromKmz = async (file: File): Promise<string> => {
   if (!kmlEntry) {
     throw new Error('KMZ archive contained no .kml file');
   }
-  return kmlEntry.async('string');
+  const { data } = await inflateWithinBudget(kmlEntry, MAX_ZIP_UNCOMPRESSED_BYTES, true);
+  return new TextDecoder('utf-8').decode(data ?? new Uint8Array());
 };
 
 /**
@@ -375,6 +468,7 @@ const parseShapefileZip = async (file: File) => {
   // Validate archive bounds before handing the buffer to shpjs.
   const zip = await JSZip.loadAsync(buffer);
   assertZipArchiveSafe(zip);
+  await assertZipInflatesWithinLimit(zip);
   return parseZip(buffer);
 };
 

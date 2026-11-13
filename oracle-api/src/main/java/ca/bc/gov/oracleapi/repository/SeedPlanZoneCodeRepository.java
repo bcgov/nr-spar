@@ -13,7 +13,8 @@ public interface SeedPlanZoneCodeRepository extends JpaRepository<SeedPlanZoneCo
       """
       SELECT spzCode FROM SeedPlanZoneCode spzCode
       WHERE spzCode.spzCode IN :spzCodeList
-        AND CURRENT_DATE >= spzCode.effectiveDate AND CURRENT_DATE < spzCode.expiryDate
+        AND CURRENT_DATE >= spzCode.effectiveDate
+        AND (spzCode.expiryDate IS NULL OR CURRENT_DATE < spzCode.expiryDate)
       ORDER BY spzCode.spzCode
       """)
   List<SeedPlanZoneCode> findAllValidBySpzCodeIn(@Param("spzCodeList") List<String> spzCodeList);

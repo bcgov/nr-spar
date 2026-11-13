@@ -70,9 +70,51 @@ class SeedlotFormCollectionBclassMapperTest {
     assertThat(seedlot.getBgcZoneCode()).isEqualTo("CDF");
     assertThat(seedlot.getCollectionElevationMin()).isEqualTo(600);
     assertThat(seedlot.getCollectionElevationMax()).isEqualTo(1000);
-    assertThat(seedlot.getAreaOfUseComment()).isEqualTo("South-facing slope");
     assertThat(seedlot.getSeedPlanZoneCode()).isEqualTo("M");
     assertThat(seedlot.getSeedCoastAreaCode()).isEqualTo("001");
+    // Area of use is set by the server, never copied from the request.
+    assertThat(seedlot.getAreaOfUseComment()).isNull();
+    assertThat(seedlot.getElevationMin()).isNull();
+    assertThat(seedlot.getLatitudeDegMin()).isNull();
+  }
+
+  @Test
+  @DisplayName("applyToSeedlot keeps the stored area of use instead of the request's values")
+  void applyToSeedlot_keepsStoredAreaOfUse() {
+    Seedlot seedlot = sampleSeedlot();
+    seedlot.setElevationMin(100);
+    seedlot.setElevationMax(900);
+    seedlot.setLatitudeDegMin(48);
+    seedlot.setLatitudeMinMin(10);
+    seedlot.setLatitudeSecMin(5);
+    seedlot.setLatitudeDegMax(51);
+    seedlot.setLatitudeMinMax(20);
+    seedlot.setLatitudeSecMax(15);
+    seedlot.setLongitudeDegMin(120);
+    seedlot.setLongitudeMinMin(30);
+    seedlot.setLongitudeSecMin(25);
+    seedlot.setLongitudeDegMax(125);
+    seedlot.setLongitudeMinMax(40);
+    seedlot.setLongitudeSecMax(35);
+    seedlot.setAreaOfUseComment("Stored comment");
+
+    mapper.applyToSeedlot(sampleDto(), seedlot);
+
+    assertThat(seedlot.getElevationMin()).isEqualTo(100);
+    assertThat(seedlot.getElevationMax()).isEqualTo(900);
+    assertThat(seedlot.getLatitudeDegMin()).isEqualTo(48);
+    assertThat(seedlot.getLatitudeMinMin()).isEqualTo(10);
+    assertThat(seedlot.getLatitudeSecMin()).isEqualTo(5);
+    assertThat(seedlot.getLatitudeDegMax()).isEqualTo(51);
+    assertThat(seedlot.getLatitudeMinMax()).isEqualTo(20);
+    assertThat(seedlot.getLatitudeSecMax()).isEqualTo(15);
+    assertThat(seedlot.getLongitudeDegMin()).isEqualTo(120);
+    assertThat(seedlot.getLongitudeMinMin()).isEqualTo(30);
+    assertThat(seedlot.getLongitudeSecMin()).isEqualTo(25);
+    assertThat(seedlot.getLongitudeDegMax()).isEqualTo(125);
+    assertThat(seedlot.getLongitudeMinMax()).isEqualTo(40);
+    assertThat(seedlot.getLongitudeSecMax()).isEqualTo(35);
+    assertThat(seedlot.getAreaOfUseComment()).isEqualTo("Stored comment");
   }
 
   @Test

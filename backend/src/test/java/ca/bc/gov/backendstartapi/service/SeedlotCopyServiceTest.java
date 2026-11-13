@@ -798,6 +798,36 @@ class SeedlotCopyServiceTest {
   }
 
   @Test
+  @DisplayName("B copy: collection-area flags are reset because the polygon is not copied")
+  void copyB_resetsCollectionAreaFlags() {
+    Seedlot source = buildSourceSeedlot(SOURCE_B_NUM, "B");
+    source.setCollectionBgcValidatedInd(true);
+    source.setBecOverrideInd(true);
+    source.setBecOverrideComment("Spans two zones");
+
+    Seedlot[] captured = new Seedlot[1];
+    when(seedlotRepository.findById(SOURCE_B_NUM)).thenReturn(Optional.of(source));
+    when(seedlotRepository.findNextSeedlotNumber(
+            Constants.CLASS_B_COPY_MIN, Constants.CLASS_B_COPY_MAX))
+        .thenReturn(null);
+    when(seedlotStatusService.findById(Constants.PENDING_SEEDLOT_STATUS))
+        .thenReturn(Optional.of(pndStatus()));
+    when(seedlotRepository.save(any()))
+        .thenAnswer(
+            i -> {
+              captured[0] = i.getArgument(0);
+              return captured[0];
+            });
+    stubChildRepos();
+
+    service.copySeedlot(SOURCE_B_NUM, USER_ID);
+
+    assertEquals(Boolean.FALSE, captured[0].getCollectionBgcValidatedInd());
+    assertEquals(Boolean.FALSE, captured[0].getBecOverrideInd());
+    assertNull(captured[0].getBecOverrideComment());
+  }
+
+  @Test
   @DisplayName("Source with missing genetic class throws 400")
   void sourceMissingGeneticClass_throws400() {
     Seedlot source = buildSourceSeedlot();

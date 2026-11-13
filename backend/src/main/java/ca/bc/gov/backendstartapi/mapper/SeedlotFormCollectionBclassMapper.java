@@ -30,7 +30,9 @@ public interface SeedlotFormCollectionBclassMapper {
 
   /**
    * Copies renamed collection DTO fields onto an existing seedlot. Collection dates are applied in
-   * {@link #applyDatesOnlyWhenChanged} so unchanged values do not bump the revision.
+   * {@link #applyDatesOnlyWhenChanged} so unchanged values do not bump the revision. Area-of-use
+   * bounds and comment are set by the server, never by the client, so the seedlot keeps its stored
+   * values.
    */
   @Mapping(target = "collectionLocationCode", source = "collectionLocnCode")
   @Mapping(target = "numberOfContainers", source = "noOfContainers")
@@ -39,6 +41,21 @@ public interface SeedlotFormCollectionBclassMapper {
   @Mapping(target = "comment", source = "seedlotComment")
   @Mapping(target = "collectionStartDate", ignore = true)
   @Mapping(target = "collectionEndDate", ignore = true)
+  @Mapping(target = "elevationMin", ignore = true)
+  @Mapping(target = "elevationMax", ignore = true)
+  @Mapping(target = "latitudeDegMin", ignore = true)
+  @Mapping(target = "latitudeMinMin", ignore = true)
+  @Mapping(target = "latitudeSecMin", ignore = true)
+  @Mapping(target = "latitudeDegMax", ignore = true)
+  @Mapping(target = "latitudeMinMax", ignore = true)
+  @Mapping(target = "latitudeSecMax", ignore = true)
+  @Mapping(target = "longitudeDegMin", ignore = true)
+  @Mapping(target = "longitudeMinMin", ignore = true)
+  @Mapping(target = "longitudeSecMin", ignore = true)
+  @Mapping(target = "longitudeDegMax", ignore = true)
+  @Mapping(target = "longitudeMinMax", ignore = true)
+  @Mapping(target = "longitudeSecMax", ignore = true)
+  @Mapping(target = "areaOfUseComment", ignore = true)
   void applyToSeedlot(SeedlotFormCollectionDtoClassB dto, @MappingTarget Seedlot seedlot);
 
   /** Applies collection dates only when they differ from the current seedlot values. */

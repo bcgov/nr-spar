@@ -1,7 +1,11 @@
 import JSZip from 'jszip';
 import { parseZip } from 'shpjs';
 
-import { importShapeFile, MAX_ZIP_ENTRY_COUNT } from '../../views/Seedlot/SeedlotMap/AoiToolbar/importShape';
+import {
+  importShapeFile,
+  MAX_ZIP_ENTRY_COUNT,
+  MAX_ZIP_UNCOMPRESSED_BYTES
+} from '../../views/Seedlot/SeedlotMap/AoiToolbar/importShape';
 
 vi.mock('shpjs', () => ({ parseZip: vi.fn() }));
 
@@ -50,6 +54,33 @@ const zipFile = async (name: string, entries: Record<string, string>) => {
   const zip = new JSZip();
   Object.entries(entries).forEach(([entryName, contents]) => zip.file(entryName, contents));
   const bytes = await zip.generateAsync({ type: 'uint8array' });
+  return withReaders(new File([bytes], name), bytes);
+};
+
+/**
+ * Overwrite the uncompressed sizes in every local header and central-directory
+ * record, as a crafted zip bomb would, so the archive claims to be tiny.
+ */
+const forgeDeclaredSizes = (bytes: Uint8Array, fakeSize: number): Uint8Array => {
+  const out = bytes.slice();
+  const view = new DataView(out.buffer);
+  for (let i = 0; i + 4 <= out.length; i += 1) {
+    const signature = view.getUint32(i, true);
+    if (signature === 0x04034b50) {
+      view.setUint32(i + 22, fakeSize, true);
+    } else if (signature === 0x02014b50) {
+      view.setUint32(i + 24, fakeSize, true);
+    }
+  }
+  return out;
+};
+
+/** A small, highly compressible archive whose single entry inflates past the limit. */
+const lyingZipFile = async (name: string, entryName: string) => {
+  const zip = new JSZip();
+  zip.file(entryName, 'a'.repeat(MAX_ZIP_UNCOMPRESSED_BYTES + 1024));
+  const generated = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+  const bytes = forgeDeclaredSizes(generated, 100);
   return withReaders(new File([bytes], name), bytes);
 };
 
@@ -103,9 +134,20 @@ describe('importShapeFile formats', () => {
       await expect(importShapeFile(await zipFile('many.kmz', entries)))
         .rejects.toThrow(/too many files/);
     });
+
+    it('rejects an archive that lies about its size', async () => {
+      await expect(importShapeFile(await lyingZipFile('bomb.kmz', 'doc.kml')))
+        .rejects.toThrow(/expands to more than/);
+    });
   });
 
   describe('zipped shapefile', () => {
+    it('rejects an archive that lies about its size before shpjs unpacks it', async () => {
+      await expect(importShapeFile(await lyingZipFile('bomb.zip', 'shape.shp')))
+        .rejects.toThrow(/expands to more than/);
+      expect(parseZip).not.toHaveBeenCalled();
+    });
+
     it('merges every shapefile layer in the archive', async () => {
       vi.mocked(parseZip).mockResolvedValue([
         { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: POLYGON }] },

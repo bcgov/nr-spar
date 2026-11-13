@@ -32,7 +32,9 @@ public class SaveSeedlotProgressEntity {
   @Column(name = "seedlot_number")
   private String seedlotNumber;
 
-  @OneToOne(cascade = CascadeType.ALL)
+  // No REMOVE: deleting a draft (B-class submit, return to pending) must never
+  // delete the seedlot it belongs to.
+  @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @PrimaryKeyJoinColumn(name = "seedlot_number", referencedColumnName = "seedlotNumber")
   private Seedlot seedlot;
 

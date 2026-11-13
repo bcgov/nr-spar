@@ -1082,7 +1082,7 @@ class SeedlotEndpointTest {
   void getBclassFullForm_shouldSucceed() throws Exception {
     ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto dto =
         new ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto(
-            null, List.of(), null, null, null, List.of(), List.of());
+            null, List.of(), null, null, null, List.of());
     when(seedlotService.getBclassSeedlotFormInfo(any())).thenReturn(dto);
 
     mockMvc

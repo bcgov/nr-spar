@@ -12,7 +12,8 @@ VALUES ('M', 'Maritime', @last_year, @next_year),
        ('SM', 'Submaritime', @last_year, @next_year),
        ('GL', 'Georgia Lowlands', @last_year, @next_year),
        ('BV', 'Bulkley Valley', @last_year, @next_year),
-       ('OLD', 'Expired zone', @last_year, @today);
+       ('OLD', 'Expired zone', @last_year, @today),
+       ('OPEN', 'No expiry', @last_year, NULL);
 
 INSERT INTO SEED_PLAN_ZONE (SEED_PLAN_ZONE_ID, GENETIC_CLASS_CODE, SEED_PLAN_ZONE_CODE, VEGETATION_CODE)
 VALUES (1, 'B', 'M', NULL),

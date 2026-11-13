@@ -9,7 +9,6 @@ import static ca.bc.gov.backendstartapi.report.ReportFormats.numberTreesFromDesc
 import static ca.bc.gov.backendstartapi.report.ReportFormats.text;
 import static ca.bc.gov.backendstartapi.report.ReportFormats.yesNo;
 
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCollectionGeometryDto;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -79,7 +77,6 @@ public class Sprr001ReportDataAssembler {
     Sprr001MainRow row = new Sprr001MainRow();
     putSeedlotSummary(row, seedlot, collection, codes);
     putApplicant(row, seedlot, clients);
-    putGeneticWorth(row, form.geneticWorthTraits());
     putCollection(row, seedlot.getId(), collection, clients, codes);
     putCollectionSite(row, collection, form.collectionGeometry(), form.aouSpzList());
     putAreaOfUse(row, seedlot, collection, form.aouSpzList());
@@ -128,29 +125,6 @@ public class Sprr001ReportDataAssembler {
     row.setApplicantClientNumber(seedlot.getApplicantClientNumber());
     row.setApplicantClientLocn(seedlot.getApplicantLocationCode());
     row.setApplicantEmailAddress(seedlot.getApplicantEmailAddress());
-  }
-
-  private static void putGeneticWorth(Sprr001MainRow row, List<GeneticWorthTraitsDto> traits) {
-    Map<String, String> valuesByTrait = new HashMap<>();
-    for (GeneticWorthTraitsDto trait : traits) {
-      if (trait.traitCode() == null || trait.traitValue() == null) {
-        continue;
-      }
-      valuesByTrait.putIfAbsent(
-          trait.traitCode().toUpperCase(Locale.ROOT), trait.traitValue().toPlainString());
-    }
-    row.setGwAd(valuesByTrait.get("AD"));
-    row.setGwDfs(valuesByTrait.get("DFS"));
-    row.setGwDfu(valuesByTrait.get("DFU"));
-    row.setGwDfw(valuesByTrait.get("DFW"));
-    row.setGwDsb(valuesByTrait.get("DSB"));
-    row.setGwDsc(valuesByTrait.get("DSC"));
-    row.setGwDsg(valuesByTrait.get("DSG"));
-    row.setGwGvo(valuesByTrait.get("GVO"));
-    row.setGwIws(valuesByTrait.get("IWS"));
-    row.setGwWdu(valuesByTrait.get("WDU"));
-    row.setGwWve(valuesByTrait.get("WVE"));
-    row.setGwWwd(valuesByTrait.get("WWD"));
   }
 
   private void putCollection(

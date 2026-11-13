@@ -42,9 +42,14 @@ vi.mock('../../views/Seedlot/ContextContainerClassB/useBClassFormLoader', () => 
       return steps;
     });
     const [progressStatus, setProgressStatus] = useState(() => initProgressBar(formStep, initialProgressConfig));
+    const [draftUpdatedAt, setDraftUpdatedAt] = useState(1);
     return {
       seedlotQuery: { data: { seedlot: { sourceInBc: true, seedlotStatus: { seedlotStatusCode: 'PND' } } } },
-      getFormDraftQuery: {},
+      getFormDraftQuery: {
+        isSuccess: true,
+        dataUpdatedAt: draftUpdatedAt,
+        refetch: () => setDraftUpdatedAt((n) => n + 1)
+      },
       allStepData,
       setAllStepData,
       progressStatus,
@@ -82,6 +87,7 @@ const Consumer = () => {
       <button type="button" onClick={() => ctx.setStep(1)}>next</button>
       <button type="button" onClick={() => ctx.setStep(-1)}>back</button>
       <button type="button" onClick={() => ctx.handleSaveBtn()}>save</button>
+      <button type="button" onClick={() => ctx.getFormDraftQuery.refetch()}>reload draft</button>
       <button
         type="button"
         onClick={() => ctx.setStepData('collectionStep', {
@@ -218,6 +224,21 @@ describe('ContextContainerClassB saving', () => {
     await waitFor(() => expect(text('save-status')).toBe('conflict'));
     fireEvent.click(screen.getByText('save'));
     expect(putBClassSeedlotProgress).toHaveBeenCalledTimes(1);
+  });
+
+  it('can save again once the draft is reloaded after a conflict', async () => {
+    vi.mocked(putBClassSeedlotProgress).mockRejectedValueOnce(conflictError());
+    renderContainer();
+    fireEvent.click(screen.getByText('save'));
+    await waitFor(() => expect(text('save-status')).toBe('conflict'));
+
+    fireEvent.click(screen.getByText('reload draft'));
+    expect(text('save-status')).toBe('none');
+    expect(text('save-description')).toBe('Save changes');
+
+    fireEvent.click(screen.getByText('save'));
+    await waitFor(() => expect(text('save-status')).toBe('finished'));
+    expect(putBClassSeedlotProgress).toHaveBeenCalledTimes(2);
   });
 
   it('reports any other save failure', async () => {

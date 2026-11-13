@@ -17,7 +17,4 @@ public record SeedlotBclassFormDto(
         SeedlotFormExtractionDto extractionStep,
     @Schema(description = "Collection polygon geometry; null when no polygon was captured.")
         SeedlotCollectionGeometryDto collectionGeometry,
-    @Schema(description = "Area-of-use SPZ slots 1–8.")
-        List<SeedPlanZoneDto> aouSpzList,
-    @Schema(description = "User-entered genetic worth trait values.")
-        List<GeneticWorthTraitsDto> geneticWorthTraits) {}
+    @Schema(description = "Area-of-use SPZ slots 1–8.") List<SeedPlanZoneDto> aouSpzList) {}

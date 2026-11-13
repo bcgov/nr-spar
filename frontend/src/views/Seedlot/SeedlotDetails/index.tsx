@@ -326,7 +326,10 @@ const SeedlotDetails = () => {
                 />
                 {
                   (
-                    !isBClassDisabled
+                    // Wait for the seedlot: before it loads, the route would
+                    // fall back to the A-class review even for a B lot.
+                    seedlot
+                    && !isBClassDisabled
                     && isTscAdmin
                     && seedlotData?.seedlotStatus !== 'Pending'
                     && seedlotData?.seedlotStatus !== 'Incomplete'

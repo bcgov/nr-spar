@@ -417,8 +417,7 @@ export type SeedlotBClassSubmitType = {
   seedlotFormOwnershipDtoList: Array<SingleOwnerFormSubmitType>,
   seedlotFormInterimDto: InterimFormSubmitType,
   seedlotFormExtractionDto: ExtractionFormSubmitType,
-  aouSpzList?: SeedPlanZoneDto[],
-  geneticWorthTraits?: unknown[]
+  aouSpzList?: SeedPlanZoneDto[]
 }
 
 export type SeedlotBClassProgressPayloadType = {
@@ -433,6 +432,5 @@ export type SeedlotBClassFullFormType = {
   interimStep: InterimFormSubmitType,
   extractionStep: ExtractionFormSubmitType,
   collectionGeometry?: unknown,
-  aouSpzList?: SeedPlanZoneDto[],
-  geneticWorthTraits?: unknown[]
+  aouSpzList?: SeedPlanZoneDto[]
 };

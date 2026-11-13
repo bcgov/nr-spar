@@ -353,8 +353,7 @@ export const getBClassSeedlotPayload = (
   seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
   seedlotFormInterimDto: convertInterim(allStepData.interimStep),
   seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep),
-  aouSpzList: [],
-  geneticWorthTraits: []
+  aouSpzList: []
 });
 
 export const resDataToState = (

@@ -831,6 +831,12 @@ public class SeedlotService {
     Seedlot seedlotInfo =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
+    // This endpoint serves both classes, so the toggle can't be enforced by the
+    // @RequiresSeedlotB interceptor; the class comes from the stored seedlot.
+    if (isBclassSeedlot(seedlotInfo) && !featureFlagConfig.isSeedlotBclassEnabled()) {
+      throw new FeatureDisabledException(FeatureFlagConfig.SEEDLOT_B_DISABLED_MESSAGE);
+    }
+
     if (!patchDto.revisionCount().equals(seedlotInfo.getRevisionCount())) {
       SparLog.info("Seedlot number {} updated by another user", seedlotNumber);
       throw new SeedlotConflictDataException(seedlotNumber);
@@ -1385,12 +1391,10 @@ public class SeedlotService {
     SeedlotFormExtractionDto extractionStep = seedlotFormStepMapper.toExtractionDto(seedlot);
 
     List<SeedPlanZoneDto> aouSpzList = loadBclassAouSpzList(seedlotNumber);
-    List<GeneticWorthTraitsDto> geneticWorthTraits = loadGeneticWorthTraits(seedlotNumber);
 
     SparLog.info("B-class form info assembled for seedlot {}", seedlotNumber);
     return new SeedlotBclassFormDto(
-        collectionStep, ownershipStep, interimStep, extractionStep, geometryDto, aouSpzList,
-        geneticWorthTraits);
+        collectionStep, ownershipStep, interimStep, extractionStep, geometryDto, aouSpzList);
   }
 
   /**
@@ -1419,6 +1423,7 @@ public class SeedlotService {
     boolean canDelete = currentStatus.equals("PND") || currentStatus.equals("INC") || isTscAdmin;
 
     SeedlotFormCollectionDtoClassB col = form.seedlotFormCollectionDto();
+    // Area-of-use fields in the request are ignored by the mapper: the stored values are kept.
     seedlotFormCollectionBclassMapper.applyToSeedlot(col, seedlot);
 
     seedlotCollectionMethodService.saveConeCollectionMethods(
@@ -1436,8 +1441,8 @@ public class SeedlotService {
     // Extraction (step 4 for B-class – equivalent to step 6 for A-class)
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
 
-    saveBclassAouSpzList(seedlot, form.aouSpzList(), canDelete);
-    saveBclassGeneticWorth(seedlot, form.geneticWorthTraits());
+    // Area-of-use SPZs are set by the server, not taken from the request, and B-class
+    // (natural stand) seed has no genetic worth, so submit leaves both untouched.
 
     // Collection geometry (optional polygon). Null/blank GeoJSON deletes any
     // existing PostGIS row; this runs in the same transaction as deleteForm below.
@@ -1460,64 +1465,6 @@ public class SeedlotService {
     SparLog.info("B-class seedlot {} submitted successfully", seedlotNumber);
     return new SeedlotStatusResponseDto(
         seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
-  }
-
-  private void saveBclassAouSpzList(
-      Seedlot seedlot, List<SeedPlanZoneDto> spzList, boolean canDelete) {
-    if (spzList == null) {
-      spzList = List.of();
-    }
-
-    if (canDelete) {
-      List<SeedlotSeedPlanZoneEntity> existing =
-          seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlot.getId());
-      if (!existing.isEmpty()) {
-        seedlotSeedPlanZoneRepository.deleteAll(existing);
-      }
-    }
-
-    GeneticClassEntity genBclass =
-        geneticClassRepository.findById("B").orElseThrow(GeneticClassNotFoundException::new);
-    AuditInformation audit = loggedUserService.createAuditCurrentUser();
-
-    List<SeedlotSeedPlanZoneEntity> toSave = new ArrayList<>();
-    for (SeedPlanZoneDto spzDto : spzList) {
-      if (spzDto == null || spzDto.getCode() == null || spzDto.getCode().isBlank()) {
-        continue;
-      }
-      String description =
-          spzDto.getDescription() != null ? spzDto.getDescription() : spzDto.getCode();
-      SeedlotSeedPlanZoneEntity entity =
-          new SeedlotSeedPlanZoneEntity(
-              seedlot, spzDto.getCode(), genBclass, false, description);
-      entity.setAuditInformation(audit);
-      toSave.add(entity);
-    }
-
-    if (!toSave.isEmpty()) {
-      seedlotSeedPlanZoneRepository.saveAll(toSave);
-    }
-  }
-
-  private void saveBclassGeneticWorth(Seedlot seedlot, List<GeneticWorthTraitsDto> traits) {
-    if (traits == null || traits.isEmpty()) {
-      seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, List.of());
-      return;
-    }
-
-    List<GeneticWorthTraitsDto> normalized =
-        traits.stream()
-            .filter(t -> t != null && t.traitCode() != null)
-            .map(
-                t ->
-                    new GeneticWorthTraitsDto(
-                        t.traitCode(),
-                        t.traitValue(),
-                        t.calculatedValue() != null ? t.calculatedValue() : t.traitValue(),
-                        null))
-            .toList();
-
-    seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, normalized);
   }
 
   private void setSeedlotStatus(Seedlot seedlot, String newStatus) {

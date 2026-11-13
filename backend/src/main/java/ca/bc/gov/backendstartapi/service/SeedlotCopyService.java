@@ -110,6 +110,9 @@ public class SeedlotCopyService {
     applySourceFields(source, target);
     target.setAuditInformation(new AuditInformation(userId));
     applyFieldResets(source, target, pendingStatus, sourceSeedlotNumber);
+    if (isClassB) {
+      resetCollectionAreaFields(target);
+    }
     Seedlot savedTarget = seedlotRepository.save(target);
 
     SparLog.info("Copy Seedlot: target {} saved, copying child entities", targetNumber);
@@ -189,6 +192,17 @@ public class SeedlotCopyService {
     target.setApprovedTimestamp(null);
     target.setDeclarationOfTrueInformationUserId(null);
     target.setDeclarationOfTrueInformationTimestamp(null);
+  }
+
+  /**
+   * The collection polygon is not copied (matching legacy), so flags that describe it must not be
+   * either: otherwise the copy claims a validated BEC zone, or a BEC override, with no area behind
+   * it. The applicant draws a new area on the copy.
+   */
+  private void resetCollectionAreaFields(Seedlot target) {
+    target.setCollectionBgcValidatedInd(false);
+    target.setBecOverrideInd(false);
+    target.setBecOverrideComment(null);
   }
 
   private void copyChildEntities(

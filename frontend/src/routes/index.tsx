@@ -54,6 +54,13 @@ const bClassRoutes: Array<RouteObject> = [
     element: (
       <EditAClassApplication />
     )
+  },
+  {
+    // Only the B-class collection step opens the collection-area map.
+    path: ROUTES.SEEDLOT_MAP,
+    element: (
+      <SeedlotMap />
+    )
   }
 ];
 
@@ -111,12 +118,6 @@ export const buildRoutes = (seedlotBEnabled: boolean): Array<RouteObject> => [
     path: ROUTES.SEEDLOT_A_CLASS_REGISTRATION,
     element: (
       <SeedlotRegFormClassA />
-    )
-  },
-  {
-    path: ROUTES.SEEDLOT_MAP,
-    element: (
-      <SeedlotMap />
     )
   },
   {

@@ -12,7 +12,8 @@ public record SeedlotFormSubmissionDtoClassB(
     @NotNull @Valid List<@NotNull @Valid SeedlotFormOwnershipDto> seedlotFormOwnershipDtoList,
     @NotNull @Valid SeedlotFormInterimDto seedlotFormInterimDto,
     @NotNull @Valid SeedlotFormExtractionDto seedlotFormExtractionDto,
-    @Schema(description = "Area-of-use SPZ slots 1–8 (no primary slot).")
-        List<@Valid SeedPlanZoneDto> aouSpzList,
-    @Schema(description = "User-entered genetic worth trait values (B/B+).")
-        List<@Valid GeneticWorthTraitsDto> geneticWorthTraits) {}
+    @Schema(
+            description =
+                "Area-of-use SPZ slots 1–8. Not saved on submit: area of use is set by the"
+                    + " server, so the stored zones are kept.")
+        List<@Valid SeedPlanZoneDto> aouSpzList) {}

@@ -52,4 +52,13 @@ class SeedPlanZoneRepositoryTest {
 
     assertEquals(List.of("M", "SM"), codes.stream().map(SeedPlanZoneCode::getSpzCode).toList());
   }
+
+  @Test
+  @DisplayName("A zone code with no expiry date stays valid")
+  void findAllValidBySpzCodeIn_keepsCodesWithNoExpiry() {
+    List<SeedPlanZoneCode> codes =
+        seedPlanZoneCodeRepository.findAllValidBySpzCodeIn(List.of("OPEN"));
+
+    assertEquals(List.of("OPEN"), codes.stream().map(SeedPlanZoneCode::getSpzCode).toList());
+  }
 }

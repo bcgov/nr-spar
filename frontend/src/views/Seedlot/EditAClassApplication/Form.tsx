@@ -34,6 +34,7 @@ import ErrorToast from '../../../components/Toast/ErrorToast';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import { isBClassSeedlot } from '../SeedlotDetails/utils';
+import { isSeedlotBEnabled } from '../../../config/features';
 
 import './styles.scss';
 
@@ -76,6 +77,14 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
 
   const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
   const isBClass = isBClassSeedlot(seedlotQuery.data);
+
+  // With B-class turned off, a B lot must not be editable through the A-class
+  // URL (e.g. an old bookmark). The backend rejects the save as well.
+  useEffect(() => {
+    if (!isReview && isBClass && !isSeedlotBEnabled()) {
+      navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''), { replace: true });
+    }
+  }, [isReview, isBClass, navigate, seedlotNumber]);
 
   const convertToSeedlotForm = (
     seedlot: SeedlotType,

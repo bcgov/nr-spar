@@ -105,13 +105,7 @@ export const buildBClassReviewPayload = (
       ...collectionDto,
       ...preservedCollectionFields
     },
-    aouSpzList: richSeedlotData?.bClassDetail?.aouSpzList ?? [],
-    geneticWorthTraits: (richSeedlotData?.calculatedValues ?? []).map((trait) => ({
-      traitCode: trait.traitCode,
-      traitValue: trait.traitValue,
-      calculatedValue: trait.calculatedValue,
-      testedParentTreePerc: trait.testedParentTreePerc
-    }))
+    aouSpzList: richSeedlotData?.bClassDetail?.aouSpzList ?? []
   };
 };
 

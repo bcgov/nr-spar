@@ -228,8 +228,17 @@ const ContextContainerClassB = ({ children }: props) => {
     retry: 0
   });
 
+  // Set when a submit starts and cleared only if it fails: no draft autosave may
+  // run during the submit or on the navigation away after it succeeds.
+  const isSubmittingRef = useRef(false);
+
   const persistDraft = useCallback((options?: { showLoading?: boolean }) => {
-    if (!canPersistDraft || saveProgress.isPending || saveStatus === 'conflict') {
+    if (
+      isSubmittingRef.current
+      || !canPersistDraft
+      || saveProgress.isPending
+      || saveStatus === 'conflict'
+    ) {
       return;
     }
     if (options?.showLoading) {
@@ -241,6 +250,20 @@ const ContextContainerClassB = ({ children }: props) => {
 
   const persistDraftRef = useRef(persistDraft);
   persistDraftRef.current = persistDraft;
+
+  const saveStatusRef = useRef(saveStatus);
+  saveStatusRef.current = saveStatus;
+
+  // After a 409 the Reload action refetches the draft and the loader rehydrates
+  // the form from it. Clear the conflict then, as A-class does, or saving and
+  // submitting stay blocked until a full page refresh.
+  useEffect(() => {
+    if (getFormDraftQuery.isSuccess && saveStatusRef.current === 'conflict') {
+      numOfEdit.current = 0;
+      setSaveStatus(null);
+      setSaveDescription(smartSaveText.idle);
+    }
+  }, [getFormDraftQuery.isSuccess, getFormDraftQuery.dataUpdatedAt]);
 
   const handleSaveBtn = () => {
     persistDraft({ showLoading: true });
@@ -285,6 +308,12 @@ const ContextContainerClassB = ({ children }: props) => {
 
   const submitSeedlot = useMutation({
     mutationFn: (payload: SeedlotBClassSubmitType) => putBClassSeedlot(seedlotNumber ?? '', payload),
+    onMutate: () => {
+      isSubmittingRef.current = true;
+    },
+    onError: () => {
+      isSubmittingRef.current = false;
+    },
     onSuccess: async () => {
       resetEditsOnHydrate();
       await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
@@ -347,7 +376,9 @@ const ContextContainerClassB = ({ children }: props) => {
       fundingSourcesQuery,
       methodsOfPaymentQuery,
       getFormDraftQuery,
-      submitSeedlot.status
+      submitSeedlot.status,
+      becCatalogue,
+      isBcSource
     ]
   );
 
@@ -372,7 +403,9 @@ const ContextContainerClassB = ({ children }: props) => {
       isFormSubmitted,
       seedlotNumber,
       defaultClientNumber,
-      defaultLocationCode
+      defaultLocationCode,
+      becCatalogue,
+      isBcSource
     ]
   );
 

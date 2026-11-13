@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCollectionGeometryDto;
@@ -94,7 +93,7 @@ class Sprr001ReportDataAssemblerTest {
     assertEquals("ACME", master.getClientAcronym());
     assertEquals("Climbing", master.getConeCollectionMethodDesc());
     assertEquals("2", master.getConeCollectionMethod2Code());
-    assertEquals("12", master.getGwGvo());
+    assertNull(master.getGwGvo());
     assertEquals("North", master.getCollectionLatDesc());
     assertEquals("West", master.getCollectionLongDesc());
     assertEquals("M", master.getSpz());
@@ -131,8 +130,8 @@ class Sprr001ReportDataAssemblerTest {
   }
 
   @Test
-  @DisplayName("assemble skips blank genetic-worth traits and ownership without payment codes")
-  void assemble_skipsBlankTraitsAndPaymentCodes() {
+  @DisplayName("assemble leaves genetic worth blank and skips ownership without payment codes")
+  void assemble_noGeneticWorthAndBlankPaymentCodes() {
     Seedlot seedlot = baseSeedlot();
     SeedlotFormOwnershipDto ownership =
         new SeedlotFormOwnershipDto(
@@ -144,16 +143,13 @@ class Sprr001ReportDataAssemblerTest {
             bclassForm().interimStep(),
             bclassForm().extractionStep(),
             bclassForm().collectionGeometry(),
-            List.of(new SeedPlanZoneDto("M", "Maritime", false)),
-            List.of(
-                new GeneticWorthTraitsDto(null, new BigDecimal("9"), null, null),
-                new GeneticWorthTraitsDto("GVO", null, null, null),
-                new GeneticWorthTraitsDto("AD", new BigDecimal("5"), null, null)));
+            List.of(new SeedPlanZoneDto("M", "Maritime", false)));
     stubHappyPath(seedlot, form);
 
     Sprr001ReportData data = assembler.assemble(seedlot);
 
-    assertEquals("5", data.mainRow().getGwAd());
+    // B-class (natural stand) seed has no genetic worth.
+    assertNull(data.mainRow().getGwAd());
     assertNull(data.mainRow().getGwGvo());
     assertNull(data.ownershipRows().get(0).getMethodOfPaymentDesc());
   }
@@ -173,7 +169,7 @@ class Sprr001ReportDataAssemblerTest {
         new SeedlotFormExtractionDto(null, null, null, null, null, null, null, null);
     SeedlotBclassFormDto form =
         new SeedlotBclassFormDto(
-            collection, List.of(), interim, extraction, null, List.of(), List.of());
+            collection, List.of(), interim, extraction, null, List.of());
 
     when(seedlotService.buildBclassFormData(seedlot)).thenReturn(form);
     when(seedlotCollectionMethodRepository.findAllBySeedlot_id(SEEDLOT_NUMBER))
@@ -298,8 +294,7 @@ class Sprr001ReportDataAssemblerTest {
         interim,
         extraction,
         geometry,
-        List.of(new SeedPlanZoneDto("M", "Maritime", false)),
-        List.of(new GeneticWorthTraitsDto("GVO", new BigDecimal("12"), null, null)));
+        List.of(new SeedPlanZoneDto("M", "Maritime", false)));
   }
 
   private SeedlotFormCollectionDtoClassB bclassCollection() {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Checkbox,
   Button,
@@ -32,13 +32,19 @@ const SubmitModal = (
   }: SubmitModalProps
 ) => {
   const [declareTrue, setDeclareTrue] = useState<boolean>(false);
+  // A fast double click on the primary button can fire onRequestSubmit twice
+  // before the modal closes; only the first one submits.
+  const submittedRef = useRef(false);
 
   return (
     <ModalStateManager
       renderLauncher={({ setOpen }: any) => (
         <Button
           className="submit-modal-btn"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            submittedRef.current = false;
+            setOpen(true);
+          }}
           renderIcon={renderIconName ? Icons[renderIconName] : null}
           disabled={disableBtn}
         >
@@ -57,6 +63,10 @@ const SubmitModal = (
           open={open}
           onRequestClose={() => setOpen(false)}
           onRequestSubmit={() => {
+            if (submittedRef.current) {
+              return;
+            }
+            submittedRef.current = true;
             setOpen(false);
             submitFn();
           }}
