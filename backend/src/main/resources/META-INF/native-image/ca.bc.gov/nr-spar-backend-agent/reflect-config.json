@@ -1,0 +1,635 @@
+[
+  {
+    "name": "[Ljava.util.UUID;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.AutoFlushEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.DeleteEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.DirtyCheckEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.EvictEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.FlushEntityEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.FlushEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.InitializeCollectionEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.LoadEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.LockEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.MergeEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PersistEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PostDeleteEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PostInsertEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PostLoadEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PostUpdateEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PostUpsertEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PreCollectionUpdateEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PreDeleteEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PreInsertEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PreLoadEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PreUpdateEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.PreUpsertEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.RefreshEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.ReplicateEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.ResolveNaturalIdEventListener;"
+  },
+  {
+    "name": "[Lorg.hibernate.event.spi.SaveOrUpdateEventListener;"
+  },
+  {
+    "name": "com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder$FSFontUseCase",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.openhtmltopdf.outputdevice.helper.ExternalResourceControlPriority",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.openhtmltopdf.pdfboxout.PdfBoxForm$CheckboxStyle",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.openhtmltopdf.pdfboxout.PdfRendererBuilder$CacheStore",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.openhtmltopdf.render.displaylist.DisplayListCollector$CollectFlags",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "javax.imageio.spi.ImageReaderSpi"
+  },
+  {
+    "name": "javax.imageio.spi.ImageReaderWriterSpi",
+    "methods": [
+      {
+        "name": "getFileSuffixes",
+        "parameterTypes": []
+      },
+      {
+        "name": "getFormatNames",
+        "parameterTypes": []
+      },
+      {
+        "name": "getMIMETypes",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "javax.imageio.spi.ImageWriterSpi"
+  },
+  {
+    "name": "ognl.OgnlRuntime$ClassPropertyMethodCache",
+    "methods": [
+      {
+        "name": "get",
+        "parameterTypes": [
+          "java.lang.Class",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.pdfbox.pdmodel.font.Standard14Fonts$FontName",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.geolatte.geom.Complex"
+  },
+  {
+    "name": "org.geolatte.geom.Geometry"
+  },
+  {
+    "name": "org.geolatte.geom.GeometryType",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.geolatte.geom.LineString"
+  },
+  {
+    "name": "org.geolatte.geom.Linear"
+  },
+  {
+    "name": "org.geolatte.geom.LinearRing"
+  },
+  {
+    "name": "org.geolatte.geom.Polygonal"
+  },
+  {
+    "name": "org.geolatte.geom.Position"
+  },
+  {
+    "name": "org.geolatte.geom.Simple"
+  },
+  {
+    "name": "org.geolatte.geom.codec.PostgisWkbDecoder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.geolatte.geom.codec.PostgisWkbV2Encoder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.geolatte.geom.crs.CoordinateSystemAxisDirection",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.dialect.PostgreSQL95Dialect"
+  },
+  {
+    "name": "org.hibernate.dialect.PostgreSQLDialect",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.dialect.PostgreSQLInetJdbcType",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.dialect.PostgreSQLIntervalSecondJdbcType",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.dialect.PostgreSQLJsonPGObjectJsonbType",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.dialect.PostgreSQLStructPGObjectJdbcType",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.event.spi.EventType",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "org.hibernate.spatial.HSMessageLogger_$logger",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.jboss.logging.Logger"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.spatial.HSMessageLogger_$logger_en"
+  },
+  {
+    "name": "org.hibernate.spatial.HSMessageLogger_$logger_en_US"
+  },
+  {
+    "name": "org.hibernate.spatial.contributor.SpatialFunctionContributor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.spatial.contributor.SpatialTypeContributor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.spatial.criteria.internal.GeolatteSpatialCriteriaExtension",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.spatial.criteria.internal.JTSSpatialCriteriaExtension",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.hibernate.spatial.integration.SpatialInitializer",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.locationtech.jts.geom.Geometry"
+  },
+  {
+    "name": "org.locationtech.jts.geom.Point"
+  },
+  {
+    "name": "org.postgresql.Driver",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.postgresql.core.QueryExecutorCloseAction",
+    "fields": [
+      {
+        "name": "pgStream"
+      }
+    ]
+  },
+  {
+    "name": "org.postgresql.hostchooser.HostRequirement",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.postgresql.jdbc.AutoSave",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.postgresql.jdbc.PgConnection$ReadOnlyBehavior",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.postgresql.jdbc.PgStatement",
+    "fields": [
+      {
+        "name": "cancelTimerTask"
+      },
+      {
+        "name": "isClosed"
+      },
+      {
+        "name": "statementState"
+      }
+    ]
+  },
+  {
+    "name": "org.postgresql.shaded.com.ongres.stringprep.Option",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.postgresql.util.PGobject"
+  },
+  {
+    "name": "org.thymeleaf.context.AbstractEngineContext",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "org.thymeleaf.context.AbstractEngineContextBeanInfo"
+  },
+  {
+    "name": "org.thymeleaf.context.AbstractEngineContextCustomizer"
+  },
+  {
+    "name": "org.thymeleaf.context.IContext",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "org.thymeleaf.context.IEngineContext",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "org.thymeleaf.context.IExpressionContext",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "org.thymeleaf.context.ITemplateContext",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "org.thymeleaf.expression.Lists",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "isEmpty",
+        "parameterTypes": [
+          "java.util.List"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.expression.Numbers",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "sequence",
+        "parameterTypes": [
+          "java.lang.Integer",
+          "java.lang.Integer"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.expression.Strings",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "isEmpty",
+        "parameterTypes": [
+          "java.lang.Object"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.spring5.context.IThymeleafRequestContext"
+  },
+  {
+    "name": "org.thymeleaf.spring5.expression.IThymeleafEvaluationContext"
+  },
+  {
+    "name": "org.thymeleaf.spring6.SpringTemplateEngine"
+  },
+  {
+    "name": "org.thymeleaf.spring6.context.IThymeleafRequestContext"
+  },
+  {
+    "name": "org.thymeleaf.spring6.expression.IThymeleafEvaluationContext"
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.AdditionExpression",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression",
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.AdditionSubtractionExpression",
+    "methods": [
+      {
+        "name": "isLeftAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      },
+      {
+        "name": "isRightAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.AndExpression",
+    "methods": [
+      {
+        "name": "isLeftAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      },
+      {
+        "name": "isRightAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.EqualsNotEqualsExpression",
+    "methods": [
+      {
+        "name": "isLeftAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      },
+      {
+        "name": "isRightAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.GreaterLesserExpression",
+    "methods": [
+      {
+        "name": "isLeftAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      },
+      {
+        "name": "isRightAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.IStandardConversionService"
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.IStandardExpressionParser"
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.IStandardVariableExpressionEvaluator"
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.MultiplicationDivisionRemainderExpression",
+    "methods": [
+      {
+        "name": "isLeftAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      },
+      {
+        "name": "isRightAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.standard.expression.OrExpression",
+    "methods": [
+      {
+        "name": "isLeftAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      },
+      {
+        "name": "isRightAllowed",
+        "parameterTypes": [
+          "org.thymeleaf.standard.expression.IStandardExpression"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.thymeleaf.templatemode.TemplateMode",
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

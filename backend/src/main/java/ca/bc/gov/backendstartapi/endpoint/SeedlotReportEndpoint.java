@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.report.SeedlotRegistrationReportService;
+import ca.bc.gov.backendstartapi.report.html.Sprr001HtmlReportService;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.RequiresSeedlotB;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
@@ -22,16 +22,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * PDF report endpoints for seedlots. Uses embedded JasperReports with the legacy SPRR001 template.
- */
+/** PDF report endpoints for seedlots, rendered with Thymeleaf + OpenHTMLtoPDF. */
 @RestController
 @RequestMapping(path = "/api/seedlots")
 @RequiredArgsConstructor
 @Tag(name = "Seedlot Reports", description = "PDF reports for seedlot registration and detail.")
 public class SeedlotReportEndpoint {
 
-  private final SeedlotRegistrationReportService seedlotRegistrationReportService;
+  private final Sprr001HtmlReportService sprr001HtmlReportService;
   private final LoggedUserService loggedUserService;
 
   /**
@@ -47,8 +45,9 @@ public class SeedlotReportEndpoint {
       summary = "Download Class B seedlot registration report (SPRR001)",
       description =
           """
-          Generates the legacy Jasper report SPRR001-SEEDLOT_REG_DTL as PDF.
-          Matches the legacy application "Adobe PDF Version" output for Class B seedlots.
+          Generates SPRR001 (seedlot registration detail) as PDF from a Thymeleaf template
+          rendered with OpenHTMLtoPDF. Matches the legacy application "Adobe PDF Version"
+          output for Class B seedlots.
           """)
   @ApiResponses(
       value = {
@@ -74,10 +73,11 @@ public class SeedlotReportEndpoint {
           String seedlotNumber) {
 
     String userId = loggedUserService.getLoggedUserIdirOrBceId();
-    byte[] pdf =
-        seedlotRegistrationReportService.generateBclassRegistrationReport(seedlotNumber, userId);
+    byte[] pdf = sprr001HtmlReportService.generateBclassRegistrationReport(seedlotNumber, userId);
+    return pdfResponse(pdf, "SPRR001-" + seedlotNumber + ".pdf");
+  }
 
-    String filename = "SPRR001-" + seedlotNumber + ".pdf";
+  private static ResponseEntity<byte[]> pdfResponse(byte[] pdf, String filename) {
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
         .cacheControl(CacheControl.noStore())

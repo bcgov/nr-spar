@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPRR001 ownership section: the replacement for Jasper subreport
+  SPRR001-SEEDLOT_REG_DTL_SR2_OWNERSHIP.jrxml. A Thymeleaf fragment takes the place of a Jasper
+  subreport plus its separate data source; the rows are just a list parameter.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<body>
+<table class="frm own" th:fragment="ownership(lines)">
+  <colgroup>
+    <col style="width: 98pt"/><col style="width: 70pt"/><col style="width: 48pt"/>
+    <col style="width: 44pt"/><col style="width: 138pt"/><col style="width: 138pt"/>
+  </colgroup>
+  <tr class="heading"><th colspan="6">Ownership</th></tr>
+  <tr class="cols">
+    <td>Owner Agency:</td>
+    <td class="num">Owner Portion (%)</td>
+    <td class="num">Reserved (%)</td>
+    <td class="num">Surplus (%)</td>
+    <td>Funding Source</td>
+    <td>Method of Payment</td>
+  </tr>
+  <tr th:each="o : ${lines}">
+    <td th:text="${o.agency}"></td>
+    <td class="num" th:text="${o.ownerPortion}"></td>
+    <td class="num" th:text="${o.reserved}"></td>
+    <td class="num" th:text="${o.surplus}"></td>
+    <td th:text="${o.fundingSource}"></td>
+    <td th:text="${o.methodOfPayment}"></td>
+  </tr>
+  <!-- No owners: Jasper printed two rows of blank underlines to fill in by hand. -->
+  <tr th:if="${#lists.isEmpty(lines)}" th:each="i : ${#numbers.sequence(1, 2)}">
+    <td><div class="blank"></div></td>
+    <td><div class="blank"></div></td>
+    <td><div class="blank"></div></td>
+    <td><div class="blank"></div></td>
+    <td><div class="blank"></div></td>
+    <td><div class="blank"></div></td>
+  </tr>
+</table>
+</body>
+</html>

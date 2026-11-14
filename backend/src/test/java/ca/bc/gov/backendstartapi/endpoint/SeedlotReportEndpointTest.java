@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.report.SeedlotRegistrationReportService;
+import ca.bc.gov.backendstartapi.report.html.Sprr001HtmlReportService;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class SeedlotReportEndpointTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockitoBean private SeedlotRegistrationReportService seedlotRegistrationReportService;
+  @MockitoBean private Sprr001HtmlReportService sprr001HtmlReportService;
 
   @MockitoBean private LoggedUserService loggedUserService;
 
@@ -34,7 +34,7 @@ class SeedlotReportEndpointTest {
   void downloadBclassRegistrationReport_shouldReturnPdf() throws Exception {
     byte[] pdf = "%PDF-1.4".getBytes();
     when(loggedUserService.getLoggedUserIdirOrBceId()).thenReturn("SPARTest");
-    when(seedlotRegistrationReportService.generateBclassRegistrationReport("53001", "SPARTest"))
+    when(sprr001HtmlReportService.generateBclassRegistrationReport("53001", "SPARTest"))
         .thenReturn(pdf);
 
     mockMvc

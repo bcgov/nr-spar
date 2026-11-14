@@ -41,7 +41,7 @@ public class RestExceptionEndpoint {
   }
 
   /**
-   * Handle Jasper report compilation or export failures.
+   * Handle report rendering failures.
    *
    * @param ex the report generation exception
    * @return a 500 response with a generic error message
