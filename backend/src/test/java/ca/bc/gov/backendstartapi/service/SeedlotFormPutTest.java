@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.config.FeatureFlagConfig;
 import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
@@ -38,8 +39,11 @@ import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormCollectionBclassMapper;
+import ca.bc.gov.backendstartapi.mapper.SeedlotFormStepMapper;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotCollectionGeometryRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -102,6 +106,16 @@ class SeedlotFormPutTest {
 
   @Mock SeedlotFormValidationService seedlotFormValidationService;
 
+  @Mock SeedlotCollectionGeometryRepository seedlotCollectionGeometryRepository;
+
+  @Mock SeedlotCollectionGeometryService seedlotCollectionGeometryService;
+
+  @Mock SeedlotFormCollectionBclassMapper seedlotFormCollectionBclassMapper;
+
+  @Mock SeedlotFormStepMapper seedlotFormStepMapper;
+
+  @Mock SaveSeedlotFormService saveSeedlotFormService;
+
   @BeforeEach
   void setup() {
     seedlotService =
@@ -125,7 +139,13 @@ class SeedlotFormPutTest {
             parentTreeService,
             tscAdminService,
             oracleApiProvider,
-            seedlotFormValidationService);
+            seedlotFormValidationService,
+            seedlotCollectionGeometryRepository,
+            seedlotCollectionGeometryService,
+            seedlotFormCollectionBclassMapper,
+            seedlotFormStepMapper,
+            saveSeedlotFormService,
+            new FeatureFlagConfig(true));
   }
 
   private SeedlotService seedlotService;

@@ -20,6 +20,15 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     highlighted: false,
     isConsep: false
   },
+  registerBClass: {
+    id: -1,
+    type: 'registerBClass',
+    image: 'TaskAdd',
+    header: 'Create B class seedlot',
+    link: ROUTES.SEEDLOTS_B_CLASS_CREATION,
+    highlighted: false,
+    isConsep: false
+  },
   mySeedlots: {
     id: -1,
     type: 'mySeedlots',

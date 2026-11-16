@@ -101,6 +101,11 @@ objects:
                       key: vite-user-pools-web-client-id
                 - name: VITE_ZONE
                   value: ${FAM_MODDED_ZONE}
+                - name: VITE_SEEDLOT_B_ENABLED
+                  valueFrom:
+                    configMapKeyRef:
+                      name: ${NAME}-${ZONE}-features
+                      key: seedlot-b-enabled
                 - name: RANDOM_EXPRESSION
                   value: ${RANDOM_EXPRESSION}
               resources:

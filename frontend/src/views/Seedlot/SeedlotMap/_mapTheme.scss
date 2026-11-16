@@ -1,0 +1,30 @@
+@use 'sass:string';
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+// Theme tokens for the map UI. These resolve to the active Carbon theme's
+// CSS custom properties, so the map follows light and dark mode.
+@function token($name) {
+  @return var(--#{vars.$bcgov-prefix}-#{$name});
+}
+
+// A theme colour with transparency, for overlays that sit on the map.
+@function translucent($color, $percent) {
+  @return string.unquote('color-mix(in srgb, #{$color} #{$percent}, transparent)');
+}
+
+$background: token('background');
+$surface: token('layer-01');
+$surface-alt: token('layer-02');
+$surface-hover: token('layer-hover-01');
+$surface-selected: token('layer-selected-01');
+$border: token('border-subtle-01');
+$border-strong: token('border-strong-01');
+$border-interactive: token('border-interactive');
+$text: token('text-primary');
+$text-secondary: token('text-secondary');
+$text-error: token('text-error');
+$text-on-color: token('text-on-color');
+$link: token('link-primary');
+$focus: token('focus');
+$highlight: token('highlight');
+$primary: token('button-primary');
