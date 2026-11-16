@@ -6,7 +6,6 @@ import React, {
   useEffect,
   ChangeEvent
 } from 'react';
-import { type MRT_TableInstance } from 'material-react-table';
 import {
   Button,
   ComboBox,
@@ -48,17 +47,16 @@ import './styles.scss';
 const toLocalDateString = (date: Date) => date.toLocaleDateString('en-CA');
 
 const AddActivity = ({
-  table,
+  selectedRows,
   closeModal,
   onAddActivitySuccess = () => {}
 }: {
-  table: MRT_TableInstance<TestingSearchResponseType>;
+  selectedRows: TestingSearchResponseType[];
   closeModal: () => void;
   onAddActivitySuccess?: (newActivity: TestingSearchResponseType) => void;
 }) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const columns = useMemo(() => getAddActivityTableColumns(), []);
-  const selectedRows = table.getSelectedRowModel()?.rows.map((row) => row.original) ?? [];
   const requestSkey = selectedRows[0]?.requestSkey;
   const itemId = selectedRows[0]?.itemId;
   const lot = selectedRows[0]?.seedlotDisplay ?? '';

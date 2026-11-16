@@ -5,24 +5,8 @@
     margin-bottom: 0.5rem;
   }
 
-  .consep-test-search-lot-numbers-filter {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    display: block;
-    padding-left: 1rem;
-
-    .lot-inputs-label {
-      margin-block-end: 0.5rem;
-    }
-
-    .lot-inputs {
-      display: flex;
-      gap: 0.25rem;
-      align-items: flex-start;
-    }
-  }
-
   .consep-test-search-filters {
+    position: relative;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
 
@@ -59,9 +43,14 @@
       }
     }
 
+    .lot-input {
+      flex: 1 1 12rem;
+      min-width: 9rem;
+    }
+
     .test-type-input,
     .activity-type-input {
-      width: 14.5rem;
+      width: 12rem;
       min-width: 7.5rem;
     }
 
@@ -78,6 +67,15 @@
   .consep-test-search-advanced-filter-tags .#{vars.$bcgov-prefix}--tag {
     margin-left: 0;
     max-width: 21rem;
+  }
+
+  .consep-test-search-advanced-filter-tags {
+    padding-inline-start: 1rem;
+
+    .filter-tags-actions {
+      display: inline-flex;
+      align-items: center;
+    }
   }
 
   input[type='number']::-webkit-outer-spin-button,

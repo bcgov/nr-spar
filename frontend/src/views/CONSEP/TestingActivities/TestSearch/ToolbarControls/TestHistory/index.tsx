@@ -1,9 +1,7 @@
-/* eslint-disable camelcase */
 import React, {
   useState, useRef, useEffect, useMemo
 } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { type MRT_TableInstance } from 'material-react-table';
 import { InlineNotification } from '@carbon/react';
 import { searchTestingActivities } from '../../../../../../api-service/consep/searchTestingActivitiesAPI';
 import GenericTable from '../../../../../../components/GenericTable';
@@ -14,7 +12,12 @@ import type {
   PaginationInfoType
 } from '../../../../../../types/consep/TestingSearchType';
 
-const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponseType> }) => {
+type TestHistoryProps = {
+  lotNumbers: string[];
+  testTypes?: string[];
+};
+
+const TestHistory = ({ lotNumbers, testTypes }: TestHistoryProps) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const [searchResults, setSearchResults] = useState<TestingSearchResponseType[]>([]);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfoType>({
@@ -29,19 +32,18 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponse
   } | null>(null);
   const columns = useMemo(() => getTestHistoryTableColumns(), []);
 
-  const searchMutation = useMutation({
-    mutationFn: ({ page = 0, size = 10 }: { page?: number; size?: number }) => {
-      const selectedRows = table.getSelectedRowModel()?.rows ?? [];
-      const selectedSeedlots = selectedRows.map((row) => row.original.seedlotDisplay);
-      return searchTestingActivities(
-        { lotNumbers: selectedSeedlots },
-        'actualEndDtTm',
-        'asc',
-        false,
-        size,
-        page
-      );
-    },
+  const {
+    mutate: fetchHistory,
+    isPending
+  } = useMutation({
+    mutationFn: ({ page = 0, size = 10 }: { page?: number; size?: number }) => searchTestingActivities(
+      { lotNumbers, testTypes },
+      'actualEndDtTm',
+      'asc',
+      false,
+      size,
+      page
+    ),
     onMutate: () => {
       setAlert(null);
     },
@@ -63,11 +65,11 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponse
   });
 
   useEffect(() => {
-    searchMutation.mutate({ page: 0, size: paginationInfo.pageSize });
-  }, []);
+    fetchHistory({ page: 0, size: 10 });
+  }, [fetchHistory]);
 
   const handlePageChange = (pageIndex: number, pageSize: number) => {
-    searchMutation.mutate({ page: pageIndex, size: pageSize });
+    fetchHistory({ page: pageIndex, size: pageSize });
   };
 
   return (
@@ -89,7 +91,7 @@ const TestHistory = ({ table }: { table: MRT_TableInstance<TestingSearchResponse
         pageSize={paginationInfo.pageSize}
         rowCount={paginationInfo.totalElements}
         onPaginationChange={handlePageChange}
-        isLoading={searchMutation.isPending}
+        isLoading={isPending}
         tableBodyRef={tableBodyRef}
       />
     </div>

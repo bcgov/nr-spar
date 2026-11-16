@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import {
   type MRT_ColumnDef,
   type MRT_PaginationState,
+  type MRT_RowSelectionState,
   type MRT_TableInstance,
   MaterialReactTable,
   useMaterialReactTable
@@ -27,6 +28,8 @@ type Props<T extends Record<string, any>> = {
   enableFilters?: boolean;
   enableHiding?: boolean;
   enableRowSelection?: boolean;
+  rowSelection?: MRT_RowSelectionState;
+  onRowSelectionChange?: (selection: MRT_RowSelectionState) => void;
   enableRowActions?: boolean;
   enableColumnFilters?: boolean;
   enableGlobalFilter?: boolean;
@@ -65,6 +68,8 @@ const GenericTable = <T extends Record<string, any>>({
   onSortingChange,
   enableFilters = false,
   enableRowSelection = false,
+  rowSelection,
+  onRowSelectionChange,
   enableRowActions = false,
   enableColumnFilters = false,
   enableGlobalFilter = false,
@@ -136,8 +141,19 @@ const GenericTable = <T extends Record<string, any>>({
     state: {
       isLoading,
       ...(manualPagination ? { pagination: { pageIndex, pageSize } } : {}),
-      ...(manualSorting && sorting ? { sorting } : {})
+      ...(manualSorting && sorting ? { sorting } : {}),
+      ...(rowSelection ? { rowSelection } : {})
     },
+    ...(rowSelection && onRowSelectionChange
+      ? {
+        onRowSelectionChange: (
+          updaterOrValue: MRT_RowSelectionState | ((old: MRT_RowSelectionState) => MRT_RowSelectionState)
+        ) => {
+          onRowSelectionChange(
+            typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection) : updaterOrValue
+          );
+        }
+      } : {}),
     enablePagination,
     manualPagination,
     rowCount,
