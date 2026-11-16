@@ -3,8 +3,8 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
-import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
-import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
+import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.JsonParsingException;
@@ -12,7 +12,7 @@ import ca.bc.gov.backendstartapi.exception.RevisionCountMismatchException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
-import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
+import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,164 +25,197 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-/** This class contains methods to handle seedlot registration form saving requests. */
+/** Handles seedlot registration wizard draft save/load for all seedlot classes. */
 @Service
 @RequiredArgsConstructor
 @SuppressWarnings("unchecked")
 public class SaveSeedlotFormService {
 
-  private final SaveSeedlotProgressRepositoryClassA saveSeedlotProgressRepositoryClassA;
+  private final SaveSeedlotProgressRepository saveSeedlotProgressRepository;
   private final SeedlotRepository seedlotRepository;
   private final LoggedUserService loggedUserService;
   private final SeedlotStatusService seedlotStatusService;
 
-  /** Saves the {@link SaveSeedlotFormDtoClassA} to table. */
-  public RevisionCountDto saveFormClassA(
-      @NonNull String seedlotNumber, SaveSeedlotFormDtoClassA data) {
-    SparLog.info("Saving A-Class seedlot progress for seedlot number: {}", seedlotNumber);
+  /**
+   * Persists wizard draft progress for a seedlot (A-class or B-class).
+   *
+   * @param seedlotNumber the seedlot number
+   * @param data          the draft payload from the front-end
+   * @return the new optimistic-lock revision count
+   */
+  public RevisionCountDto saveForm(@NonNull String seedlotNumber, SaveSeedlotFormDto data) {
+    SparLog.info("Saving seedlot progress for seedlot number: {}", seedlotNumber);
 
-    Seedlot relatedSeedlot =
+    var relatedSeedlot =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
-    String seedlotApplicantClientNumber = relatedSeedlot.getApplicantClientNumber();
-
-    loggedUserService.verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
-
-    Optional<SaveSeedlotProgressEntityClassA> optionalEntityToSave =
-        saveSeedlotProgressRepositoryClassA.findById(seedlotNumber);
+    loggedUserService.verifySeedlotAccessPrivilege(relatedSeedlot.getApplicantClientNumber());
 
     Map<String, Object> parsedAllStepData =
         new Gson().fromJson(data.allStepData().toString(), Map.class);
     Map<String, Object> parsedProgressStatus =
         new Gson().fromJson(data.progressStatus().toString(), Map.class);
 
-    SaveSeedlotProgressEntityClassA entityToSave;
-    // If an entity exist then update the values, otherwise make a new entity.
-    // The SUB status check is to create a draft for historical Oracle seedlots.
-    if (optionalEntityToSave.isEmpty()) {
-      SparLog.info(
-          "First time saving A-class seedlot progress for seedlot number {}", seedlotNumber);
+    Optional<SaveSeedlotProgressEntity> existing =
+        saveSeedlotProgressRepository.findById(seedlotNumber);
+
+    SaveSeedlotProgressEntity entityToSave;
+    if (existing.isEmpty()) {
+      SparLog.info("First save for seedlot {}", seedlotNumber);
       entityToSave =
-          new SaveSeedlotProgressEntityClassA(
+          new SaveSeedlotProgressEntity(
               relatedSeedlot,
               parsedAllStepData,
               parsedProgressStatus,
               loggedUserService.createAuditCurrentUser());
 
-      // Update the seedlot status to pending from incomplete.
       if (relatedSeedlot
           .getSeedlotStatus()
           .getSeedlotStatusCode()
           .equals(Constants.INCOMPLETE_SEEDLOT_STATUS)) {
         SparLog.info("Updating seedlot {} status from INC to PND", seedlotNumber);
-
-        Optional<SeedlotStatusEntity> seedLotStatusEntity =
+        Optional<SeedlotStatusEntity> pndStatus =
             seedlotStatusService.findById(Constants.PENDING_SEEDLOT_STATUS);
-
-        relatedSeedlot.setSeedlotStatus(
-            seedLotStatusEntity.orElseThrow(SeedlotStatusNotFoundException::new));
+        relatedSeedlot.setSeedlotStatus(pndStatus.orElseThrow(SeedlotStatusNotFoundException::new));
       }
     } else {
-
-      // Revision Count verification only for pending seedlots
       if (relatedSeedlot
           .getSeedlotStatus()
           .getSeedlotStatusCode()
           .equals(Constants.PENDING_SEEDLOT_STATUS)) {
 
         Integer prevRevCount = data.revisionCount();
-        Integer currRevCount = optionalEntityToSave.get().getRevisionCount();
+        Integer currRevCount = existing.get().getRevisionCount();
 
         if (prevRevCount != null && !prevRevCount.equals(currRevCount)) {
-          // Conflict detected
           SparLog.info(
-              "Save progress failed due to revision count mismatch, prev revision count: {}, curr"
-                  + " revision count: {}",
-              prevRevCount,
-              currRevCount);
+              "Save failed — revision count mismatch: prev={}, curr={}",
+              prevRevCount, currRevCount);
           throw new RevisionCountMismatchException();
         }
       }
 
-      SparLog.info(
-          "A-class seedlot progress for seedlot number {} exists, replacing with new values",
-          seedlotNumber);
-      entityToSave = optionalEntityToSave.get();
+      SparLog.info("Updating existing draft for seedlot {}", seedlotNumber);
+      entityToSave = existing.get();
       entityToSave.setAllStepData(parsedAllStepData);
       entityToSave.setProgressStatus(parsedProgressStatus);
     }
 
     relatedSeedlot.setAuditInformation(loggedUserService.createAuditCurrentUser());
-
     seedlotRepository.save(relatedSeedlot);
 
-    SaveSeedlotProgressEntityClassA saved = saveSeedlotProgressRepositoryClassA.save(entityToSave);
-
-    SparLog.info("A-class seedlot progress for seedlot number {} saved!", seedlotNumber);
-
-    RevisionCountDto revCountDto = new RevisionCountDto(saved.getRevisionCount());
-
-    return revCountDto;
+    SaveSeedlotProgressEntity saved = saveSeedlotProgressRepository.save(entityToSave);
+    SparLog.info("Seedlot progress saved for seedlot {}", seedlotNumber);
+    return new RevisionCountDto(saved.getRevisionCount());
   }
 
   /**
-   * Retrieves a {@link SaveSeedlotProgressEntityClassA} then convert it to {@link
-   * SaveSeedlotFormDtoClassA} upon return.
+   * Retrieves wizard draft progress for a seedlot (A-class or B-class).
+   *
+   * @param seedlotNumber the seedlot number
+   * @return the full draft DTO
    */
-  public SaveSeedlotFormDtoClassA getFormClassA(@NonNull String seedlotNumber) {
-    SparLog.info("Retrieving A-class seedlot progress for seedlot number {}", seedlotNumber);
+  public SaveSeedlotFormDto getForm(@NonNull String seedlotNumber) {
+    SparLog.info("Retrieving seedlot progress for seedlot {}", seedlotNumber);
 
     ObjectMapper mapper = new ObjectMapper();
-
-    Optional<SaveSeedlotProgressEntityClassA> form =
-        saveSeedlotProgressRepositoryClassA.findById(seedlotNumber);
+    Optional<SaveSeedlotProgressEntity> form =
+        saveSeedlotProgressRepository.findById(seedlotNumber);
 
     if (form.isPresent()) {
-      SparLog.info("A-class seedlot progress found for seedlot number {}", seedlotNumber);
-
-      String seedlotApplicantClientNumber = form.get().getSeedlot().getApplicantClientNumber();
-      loggedUserService.verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
+      loggedUserService.verifySeedlotAccessPrivilege(
+          form.get().getSeedlot().getApplicantClientNumber());
     }
 
     return form.map(
-            savedEntity ->
-                new SaveSeedlotFormDtoClassA(
-                    mapper.convertValue(savedEntity.getAllStepData(), JsonNode.class),
-                    mapper.convertValue(savedEntity.getProgressStatus(), JsonNode.class),
-                    form.get().getRevisionCount()))
+            e ->
+                new SaveSeedlotFormDto(
+                    mapper.convertValue(e.getAllStepData(), JsonNode.class),
+                    mapper.convertValue(e.getProgressStatus(), JsonNode.class),
+                    e.getRevisionCount()))
         .orElseThrow(SeedlotFormProgressNotFoundException::new);
   }
 
-  /** Retrieves the progress_status column then return it as a json object. */
-  public JsonNode getFormStatusClassA(String seedlotNumber) {
-    SparLog.info("Retrieving A-class seedlot progress status for seedlot number {}", seedlotNumber);
+  /**
+   * Retrieves only the {@code progress_status} column for a seedlot draft.
+   *
+   * @param seedlotNumber the seedlot number
+   * @return the parsed progress-status JSON node
+   */
+  public JsonNode getFormStatus(String seedlotNumber) {
+    SparLog.info("Retrieving seedlot progress status for seedlot {}", seedlotNumber);
 
-    Seedlot relatedSeedlot =
+    var relatedSeedlot =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
-    String seedlotApplicantClientNumber = relatedSeedlot.getApplicantClientNumber();
-    loggedUserService.verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
+    loggedUserService.verifySeedlotAccessPrivilege(relatedSeedlot.getApplicantClientNumber());
 
     ObjectMapper mapper = new ObjectMapper();
+    Object progressStatus =
+        saveSeedlotProgressRepository
+            .getStatusById(seedlotNumber)
+            .orElseThrow(SeedlotFormProgressNotFoundException::new);
 
-    Optional<Object> form = saveSeedlotProgressRepositoryClassA.getStatusById(seedlotNumber);
-
-    if (form.isPresent()) {
-      SparLog.info("A-class seedlot progress status found for seedlot number {}", seedlotNumber);
-    }
-
-    Object progressStatus = form.orElseThrow(SeedlotFormProgressNotFoundException::new);
-
-    // This needs to be converted again with readTree, otherwise it'll return a string value even
-    // without doing the asText().
     String statusString = mapper.convertValue(progressStatus, JsonNode.class).asText();
 
     try {
       JsonNode json = mapper.readTree(statusString);
-      SparLog.info("A-class seedlot progress status successfully converted to json");
+      SparLog.info("Progress status successfully parsed for seedlot {}", seedlotNumber);
       return json;
     } catch (JsonProcessingException e) {
       throw new JsonParsingException();
     }
+  }
+
+  /**
+   * Removes the wizard draft row for a seedlot, if one exists.
+   *
+   * @param seedlotNumber the seedlot number
+   */
+  public void deleteForm(@NonNull String seedlotNumber) {
+    SparLog.info("Deleting seedlot registration draft for seedlot {}", seedlotNumber);
+
+    saveSeedlotProgressRepository
+        .findById(seedlotNumber)
+        .ifPresent(
+            entity -> {
+              loggedUserService.verifySeedlotAccessPrivilege(
+                  entity.getSeedlot().getApplicantClientNumber());
+              saveSeedlotProgressRepository.delete(entity);
+              SparLog.info("Seedlot registration draft deleted for seedlot {}", seedlotNumber);
+            });
+  }
+
+  /**
+   * Creates a fresh empty B-class wizard draft so the frontend can hydrate from normalized tables
+   * via {@code GET .../b-class-full-form}.
+   *
+   * @param seedlot the seedlot to attach the draft to
+   */
+  public void recreateEmptyBclassDraft(@NonNull Seedlot seedlot) {
+    SparLog.info("Recreating empty B-class draft for seedlot {}", seedlot.getId());
+
+    saveSeedlotProgressRepository
+        .findById(seedlot.getId())
+        .ifPresent(saveSeedlotProgressRepository::delete);
+
+    Map<String, Object> stepStatus =
+        Map.of("isComplete", false, "isCurrent", false, "isInvalid", false);
+    Map<String, Object> progressStatus =
+        Map.of(
+            "collection", stepStatus,
+            "ownership", stepStatus,
+            "interim", stepStatus,
+            "extraction", stepStatus);
+
+    SaveSeedlotProgressEntity draft =
+        new SaveSeedlotProgressEntity(
+            seedlot,
+            Map.of(),
+            progressStatus,
+            loggedUserService.createAuditCurrentUser());
+
+    saveSeedlotProgressRepository.save(draft);
+    SparLog.info("Empty B-class draft created for seedlot {}", seedlot.getId());
   }
 }

@@ -54,10 +54,10 @@ public class AreaOfUseServiceTest {
   @Test
   @DisplayName("Get a list of SPZ should succeed")
   void getListOfSpz_shouldSucceed() {
-    SeedPlanZoneCode spzCode1 = new SeedPlanZoneCode("BV", "Bulkley Valley");
-    SeedPlanZoneCode spzCode2 = new SeedPlanZoneCode("CP", "Central Plateau");
-    SeedPlanZoneCode spzCode3 = new SeedPlanZoneCode("DK", "Dease Klappan");
-    SeedPlanZoneCode spzCode4 = new SeedPlanZoneCode("EK", "East Kootenay");
+    SeedPlanZoneCode spzCode1 = new SeedPlanZoneCode("BV", "Bulkley Valley", null, null);
+    SeedPlanZoneCode spzCode2 = new SeedPlanZoneCode("CP", "Central Plateau", null, null);
+    SeedPlanZoneCode spzCode3 = new SeedPlanZoneCode("DK", "Dease Klappan", null, null);
+    SeedPlanZoneCode spzCode4 = new SeedPlanZoneCode("EK", "East Kootenay", null, null);
 
     String vegCode = "FDC";
     VegetationCode vegetationCode = new VegetationCode("99", vegCode, null, null, null);
@@ -69,16 +69,16 @@ public class AreaOfUseServiceTest {
 
     List<SeedPlanZone> spzList = List.of(spz1, spz2, spz3, spz4);
 
-    when(seedPlanZoneRepository.findAllByGeneticClassCode_AndVegetationCode_id('A', vegCode))
+    when(seedPlanZoneRepository.findForSpeciesOrAllSpecies('A', vegCode))
         .thenReturn(spzList);
 
     List<SeedPlanZoneCode> spzCodeEntityList = List.of(spzCode1, spzCode2, spzCode3, spzCode4);
     List<String> spzCodeList =
         spzList.stream().map(spz -> spz.getSeedPlanZoneCode().getSpzCode()).toList();
 
-    when(seedPlanZoneCodeRepository.findBySpzCodeIn(spzCodeList)).thenReturn(spzCodeEntityList);
+    when(seedPlanZoneCodeRepository.findAllValidBySpzCodeIn(spzCodeList)).thenReturn(spzCodeEntityList);
 
-    List<SpzDto> testList = areaOfUseService.getSpzByVegCode(vegCode);
+    List<SpzDto> testList = areaOfUseService.getSpzByVegCode(vegCode, 'A');
 
     for (int i = 0; i < spzCodeEntityList.size(); i++) {
       assertEquals(spzCodeEntityList.get(i).getSpzCode(), testList.get(i).getCode());
@@ -88,15 +88,34 @@ public class AreaOfUseServiceTest {
   }
 
   @Test
+  @DisplayName("Get a list of class B SPZ should include zones with no species")
+  void getListOfSpz_classB_shouldSucceed() {
+    SeedPlanZoneCode spzCode = new SeedPlanZoneCode("M", "Maritime", null, null);
+    String vegCode = "FDC";
+    SeedPlanZone spz = new SeedPlanZone(1, 'B', spzCode, null);
+
+    when(seedPlanZoneRepository.findForSpeciesOrAllSpecies('B', vegCode))
+        .thenReturn(List.of(spz));
+    when(seedPlanZoneCodeRepository.findAllValidBySpzCodeIn(List.of("M"))).thenReturn(List.of(spzCode));
+
+    List<SpzDto> testList = areaOfUseService.getSpzByVegCode(vegCode, 'B');
+
+    assertEquals(1, testList.size());
+    assertEquals("M", testList.get(0).getCode());
+    assertEquals("Maritime", testList.get(0).getDescription());
+  }
+
+  @Test
   @DisplayName("Get spz list should be able to throw encountered exception")
   void getSpzList_canThrowException() {
-    when(seedPlanZoneRepository.findAllByGeneticClassCode_AndVegetationCode_id(any(), any()))
+    when(seedPlanZoneRepository.findForSpeciesOrAllSpecies(any(), any()))
         .thenThrow(
             new JDBCConnectionException(
                 "Oracle DB is down", new SQLException("Threatened by postgres", "Scared", 0)));
 
     String vegCode = "FDC";
-    assertThrows(JDBCConnectionException.class, () -> areaOfUseService.getSpzByVegCode(vegCode));
+    assertThrows(
+        JDBCConnectionException.class, () -> areaOfUseService.getSpzByVegCode(vegCode, 'A'));
   }
 
   @Test
@@ -120,8 +139,8 @@ public class AreaOfUseServiceTest {
     when(seedPlanUnitRepository.findBySeedPlanUnitIdIn(List.of(spuId))).thenReturn(List.of(spu));
 
     // Step 4 Mock
-    SeedPlanZoneCode spzCode1 = new SeedPlanZoneCode("GL", "Georgia Lowlands");
-    SeedPlanZoneCode spzCode2 = new SeedPlanZoneCode("M", "Maritime");
+    SeedPlanZoneCode spzCode1 = new SeedPlanZoneCode("GL", "Georgia Lowlands", null, null);
+    SeedPlanZoneCode spzCode2 = new SeedPlanZoneCode("M", "Maritime", null, null);
     TestedPtAreaOfUseSpz testedSpzDto1 =
         new TestedPtAreaOfUseSpz(testedPtAreaOfUse, spzCode1, false);
     TestedPtAreaOfUseSpz testedSpzDto2 =

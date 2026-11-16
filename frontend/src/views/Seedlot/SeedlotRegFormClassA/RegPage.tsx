@@ -259,7 +259,7 @@ const RegPage = () => {
                     <SubmitModal
                       btnText="Submit Registration"
                       renderIconName="CheckmarkOutline"
-                      disableBtn={disableSubmit}
+                      disableBtn={disableSubmit || submitSeedlot.isPending}
                       submitFn={() => {
                         submitSeedlot.mutate(
                           () => getSeedlotPayload(

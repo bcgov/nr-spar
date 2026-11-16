@@ -23,7 +23,7 @@ import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
 
-import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import SeedlotRegWizardContext from '../../../contexts/SeedlotRegWizardContext';
 import {
   DATE_FORMAT, MAX_FACILITY_DESC_CHAR, clientAndCodeTextConfig, pageTexts
 } from './constants';
@@ -43,7 +43,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
     allStepData: { collectionStep: { endDate } },
     setStepData,
     isFormSubmitted
-  } = useContext(ClassAContext);
+  } = useContext(SeedlotRegWizardContext);
 
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
 

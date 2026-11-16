@@ -159,7 +159,7 @@ const TestListTable = ({
         ]}
       >
         {showTestHistory && (
-          <TestHistory selectedRows={selectedRows} />
+          <TestHistory lotNumbers={selectedRows.map((row) => row.seedlotDisplay)} />
         )}
       </Modal>
       <Modal

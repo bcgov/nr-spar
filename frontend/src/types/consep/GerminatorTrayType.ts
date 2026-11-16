@@ -4,9 +4,22 @@ export type GermTrayCreateResponseType = {
   actualStartDate: string;
 };
 
+/** A tray as stored, from `GET /api/germinator-trays?ids=` or the tray search. */
+export type GermTrayType = {
+  germinatorTrayId: number;
+  activityTypeCd: string;
+  actualStartDate: string | null;
+  dateCreated: string | null;
+  revisionCount: number;
+  systemTrayNo: number | null;
+  germinatorId: string | null;
+};
+
 export type GerminatorIdAssignResponseDto = {
   germinatorTrayId: number;
   germinatorId: string | null;
+  /** The tray's revision after the update; send it with the next change. */
+  revisionCount: number;
 };
 
 export type GermTrayTestType = {

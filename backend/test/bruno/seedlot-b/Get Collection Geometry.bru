@@ -1,0 +1,19 @@
+meta {
+  name: Get Collection Geometry
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/seedlots/{{seedlotNumber}}/collection-geometry
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Accept: application/json
+}

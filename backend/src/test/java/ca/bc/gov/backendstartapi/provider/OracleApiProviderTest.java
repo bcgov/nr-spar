@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
 import java.util.Optional;
@@ -228,5 +229,146 @@ class OracleApiProviderTest {
     assertThrows(
         ResponseStatusException.class,
         () -> oracleApiProvider.getSeedlotAndSpeciesByRequestKey(requestKey));
+  }
+
+  @Test
+  @DisplayName("getAllDistrictOrgUnits - success should return list")
+  void getAllDistrictOrgUnits_success_shouldReturnList() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/org-unit-districts";
+    String json = """
+        [{ "orgUnitNo": 73, "orgUnitName": "Cariboo-Chilcotin Natural Resource District" }]
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    var result = oracleApiProvider.getAllDistrictOrgUnits();
+
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals(73, result.get(0).orgUnitNo());
+    Assertions.assertEquals(
+        "Cariboo-Chilcotin Natural Resource District", result.get(0).orgUnitName());
+  }
+
+  @Test
+  @DisplayName("getAllValidFundingSources - success should return list")
+  void getAllValidFundingSources_success_shouldReturnList() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/funding-sources";
+    String json = """
+        [{ "code": "ITC", "description": "Incremental Tree Improvement" }]
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    var result = oracleApiProvider.getAllValidFundingSources();
+
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals("ITC", result.get(0).getCode());
+    Assertions.assertEquals("Incremental Tree Improvement", result.get(0).getDescription());
+  }
+
+  @Test
+  @DisplayName("getVegetationCode - success should return description")
+  void getVegetationCode_success_shouldReturnDescription() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/vegetation-codes/FDI";
+    String json = """
+        { "code": "FDI", "description": "Interior Douglas-fir" }
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    var result = oracleApiProvider.getVegetationCode("FDI");
+
+    Assertions.assertTrue(result.isPresent());
+    Assertions.assertEquals("FDI", result.get().getCode());
+    Assertions.assertEquals("Interior Douglas-fir", result.get().getDescription());
+  }
+
+  @Test
+  @DisplayName("getVegetationCode - not found should return empty")
+  void getVegetationCode_notFound_shouldReturnEmpty() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/vegetation-codes/ZZZ";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    Assertions.assertTrue(oracleApiProvider.getVegetationCode("ZZZ").isEmpty());
+  }
+
+  @Test
+  @DisplayName("getAllDistrictOrgUnits - error should throw")
+  void getAllDistrictOrgUnits_error_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/org-unit-districts";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    assertThrows(ResponseStatusException.class, () -> oracleApiProvider.getAllDistrictOrgUnits());
+  }
+
+  @Test
+  @DisplayName("getAllValidFundingSources - error should throw")
+  void getAllValidFundingSources_error_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/funding-sources";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    assertThrows(
+        ResponseStatusException.class, () -> oracleApiProvider.getAllValidFundingSources());
+  }
+
+  @Test
+  @DisplayName("getSpzListByVegCode returns the class list for the species")
+  void getSpzListByVegCode_shouldReturnZones() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/area-of-use/spz-list/vegetation-code/FDC?geneticClass=B";
+    String json =
+        """
+        [ { "code": "M", "description": "Maritime", "isPrimary": null } ]
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    List<SpzDto> zones = oracleApiProvider.getSpzListByVegCode("FDC", "B");
+
+    Assertions.assertEquals(1, zones.size());
+    Assertions.assertEquals("M", zones.get(0).getCode());
+    Assertions.assertEquals("Maritime", zones.get(0).getDescription());
+  }
+
+  @Test
+  @DisplayName("getSpzListByVegCode treats an empty body as no zones")
+  void getSpzListByVegCode_nullBody_shouldReturnEmpty() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/area-of-use/spz-list/vegetation-code/FDC?geneticClass=B";
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+    Assertions.assertTrue(oracleApiProvider.getSpzListByVegCode("FDC", "B").isEmpty());
+  }
+
+  @Test
+  @DisplayName("getSpzListByVegCode rethrows a client error")
+  void getSpzListByVegCode_clientError_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/area-of-use/spz-list/vegetation-code/FDC?geneticClass=Z";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.BAD_REQUEST));
+
+    assertThrows(
+        ResponseStatusException.class, () -> oracleApiProvider.getSpzListByVegCode("FDC", "Z"));
   }
 }

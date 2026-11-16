@@ -18,11 +18,11 @@ public record SeedlotApplicationPatchDto(
     @Schema(
             description =
                 """
-                A code to indicate if an orchard seedlot is from tested parent trees, untested or"
-                custom. One of `TPT`, `UPT` or `CUS`
+                A code to indicate if an orchard seedlot is from tested parent trees, untested or
+                custom. One of `TPT`, `UPT` or `CUS`. Required for class A seedlots; null for
+                class B seedlots, which have no seedlot source.
                 """,
             example = "TPT")
-        @NotNull
         String seedlotSourceCode,
     @Schema(
             description =

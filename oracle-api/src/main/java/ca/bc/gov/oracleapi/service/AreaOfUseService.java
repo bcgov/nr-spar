@@ -40,17 +40,23 @@ public class AreaOfUseService {
   private final TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
 
   /**
-   * Find all spz under a vegCode for A-Class.
+   * Find all spz under a vegCode for a genetic class.
    *
+   * @param vegCode the vegetation code
+   * @param geneticClass the genetic class code, 'A' or 'B'
    * @return a list of {@link SpzDto}
    */
-  public List<SpzDto> getSpzByVegCode(String vegCode) {
+  public List<SpzDto> getSpzByVegCode(String vegCode, Character geneticClass) {
     SparLog.info("Begin to query SEED_PLAN_ZONE table for a list of unique spz code");
 
     List<SeedPlanZone> seedPlanZoneList =
-        seedPlanZoneRepository.findAllByGeneticClassCode_AndVegetationCode_id('A', vegCode);
+        seedPlanZoneRepository.findForSpeciesOrAllSpecies(geneticClass, vegCode);
 
-    SparLog.info("Found {} spu for vegetation code {}", seedPlanZoneList.size(), vegCode);
+    SparLog.info(
+        "Found {} class {} spz for vegetation code {}",
+        seedPlanZoneList.size(),
+        geneticClass,
+        vegCode);
 
     if (seedPlanZoneList.isEmpty()) {
       return List.of();
@@ -62,7 +68,7 @@ public class AreaOfUseService {
         seedPlanZoneList.stream().map(spz -> spz.getSeedPlanZoneCode().getSpzCode()).toList();
 
     List<SeedPlanZoneCode> spzCodeEntityList =
-        seedPlanZoneCodeRepository.findBySpzCodeIn(spzCodeList);
+        seedPlanZoneCodeRepository.findAllValidBySpzCodeIn(spzCodeList);
 
     SparLog.info("Found {} SPZ code entities", spzCodeEntityList.size());
 

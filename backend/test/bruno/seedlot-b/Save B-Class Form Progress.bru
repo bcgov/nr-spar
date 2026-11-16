@@ -1,0 +1,31 @@
+meta {
+  name: Save B-Class Form Progress
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/api/seedlots/{{seedlotNumber}}/b-class-form-progress
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "allStepData": {
+      "step1": { "collectionLocationDesc": "Test location" }
+    },
+    "progressStatus": {
+      "step1": { "complete": true }
+    },
+    "revisionCount": 0
+  }
+}

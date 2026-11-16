@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.repository;
 
+import ca.bc.gov.oracleapi.dto.BecCatalogueDto;
 import ca.bc.gov.oracleapi.dto.SparBecZoneDescriptionDto;
 import ca.bc.gov.oracleapi.entity.SparBecCatalogueEntity;
 import java.util.List;
@@ -23,4 +24,20 @@ public interface SparBecCatalogueRepository extends JpaRepository<SparBecCatalog
       """,
       nativeQuery = true)
   List<SparBecZoneDescriptionDto> findAllBecZonesByCodeIn(List<String> becCodes);
+
+  @Query(
+      value =
+          """
+          SELECT new ca.bc.gov.oracleapi.dto.BecCatalogueDto(
+            sbc.becCode,
+            sbc.becZoneDescription,
+            sbc.becSubZoneCode,
+            sbc.becSubZoneDescription,
+            sbc.variant,
+            sbc.variantDescription)
+          FROM SparBecCatalogueEntity sbc
+          WHERE sbc.expiryDate > CURRENT_DATE
+          ORDER BY sbc.becCode, sbc.becSubZoneCode, sbc.variant NULLS FIRST
+          """)
+  List<BecCatalogueDto> findAllActive();
 }
