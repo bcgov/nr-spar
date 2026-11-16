@@ -2,7 +2,6 @@ package ca.bc.gov.oracleapi.config;
 
 import ca.bc.gov.oracleapi.security.JwtSecurityUtil;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +16,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimValidator;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -28,8 +33,34 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+  @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+  String issuerUri;
+
   @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
   String jwkSetUri;
+
+  @Value("${spar.keycloak.client-id}")
+  String clientId;
+
+  /**
+   * Validates signature, expiry and issuer, plus {@code azp}: the BC Gov SSO standard realm is
+   * shared by many applications that all sign with the same keys, so only {@code azp} proves the
+   * token was issued to SPAR.
+   *
+   * @return the JWT decoder
+   */
+  @Bean
+  public JwtDecoder jwtDecoder() {
+    NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+    decoder.setJwtValidator(jwtValidator());
+    return decoder;
+  }
+
+  OAuth2TokenValidator<Jwt> jwtValidator() {
+    return new DelegatingOAuth2TokenValidator<>(
+        JwtValidators.createDefaultWithIssuer(issuerUri),
+        new JwtClaimValidator<String>("azp", clientId::equals));
+  }
 
   /**
    * Filters a request to add security checks and configurations.
@@ -57,8 +88,7 @@ public class SecurityConfig {
         .formLogin(AbstractHttpConfigurer::disable)
         .oauth2ResourceServer(
             customize ->
-                customize.jwt(
-                    jwt -> jwt.jwtAuthenticationConverter(converter()).jwkSetUri(jwkSetUri)));
+                customize.jwt(jwt -> jwt.jwtAuthenticationConverter(converter())));
 
     return http.build();
   }
@@ -71,9 +101,6 @@ public class SecurityConfig {
 
   private final Converter<Jwt, Collection<GrantedAuthority>> roleConverter =
       jwt -> {
-        if (!jwt.getClaims().containsKey("cognito:groups")) {
-          return List.of();
-        }
         Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(jwt);
         return rolesSet.stream()
             .map(roleName -> "ROLE_" + roleName)

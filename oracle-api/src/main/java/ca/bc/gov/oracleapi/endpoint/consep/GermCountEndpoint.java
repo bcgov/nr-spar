@@ -34,7 +34,7 @@ public class GermCountEndpoint {
 
   private final GermCountService germCountService;
 
-  /** CNS_T_GERM_COUNT's audit columns are VARCHAR2(30); a Cognito `sub` is 36 characters. */
+  /** CNS_T_GERM_COUNT's audit columns are VARCHAR2(30); a Keycloak `sub` is a GUID plus provider. */
   private static final int AUDIT_USERID_MAX = 30;
 
   /**
@@ -45,9 +45,13 @@ public class GermCountEndpoint {
     if (principal == null) {
       return null;
     }
-    String userId = principal instanceof JwtAuthenticationToken jwtToken
-        ? jwtToken.getToken().getClaimAsString("custom:idp_username")
-        : null;
+    String userId = null;
+    if (principal instanceof JwtAuthenticationToken jwtToken) {
+      userId = jwtToken.getToken().getClaimAsString("idir_username");
+      if (userId == null) {
+        userId = jwtToken.getToken().getClaimAsString("bceid_username");
+      }
+    }
     if (userId == null || userId.isBlank()) {
       userId = principal.getName();
     }

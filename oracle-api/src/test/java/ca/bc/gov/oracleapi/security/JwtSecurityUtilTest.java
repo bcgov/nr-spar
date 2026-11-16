@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.security;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -9,80 +10,71 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 class JwtSecurityUtilTest {
 
-  @Test
-  @DisplayName("Get user roles from JWT happy path should succeed")
-  void getUserRolesFromJwt_happyPath_shouldSucceed() {
-    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
-    builder.subject("BAGGINGS");
-    builder.header("alg", "HS256");
-    builder.header("typ", "JWT");
-    builder.claim("email", "bilbo.baggings@gov.bc.ca");
-    builder.claim("custom:idp_display_name", "Baggings, Bilbo LWRS:EX");
-    builder.claim("custom:idp_username", "BAGGINGS");
-    builder.claim("custom:idp_name", "idir");
-    builder.claim("cognito:groups", List.of("ROLE1", "ROLE2"));
-
-    Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(builder.build());
-
-    Assertions.assertFalse(rolesSet.isEmpty());
-    Assertions.assertEquals(2, rolesSet.size());
-    Assertions.assertTrue(rolesSet.contains("ROLE1"));
-    Assertions.assertTrue(rolesSet.contains("ROLE2"));
+  private static Jwt jwtWithClaim(String name, Object value) {
+    return Jwt.withTokenValue("myTokenValue")
+        .header("alg", "HS256")
+        .subject("baggings@azureidir")
+        .claim("azp", "spar-client")
+        .claim(name, value)
+        .build();
   }
 
   @Test
-  @DisplayName("Get user roles from JWT no roles should succeed")
+  @DisplayName("Unscoped roles come through as-is")
+  void getUserRolesFromJwt_unscopedRoles_shouldSucceed() {
+    Jwt jwt = jwtWithClaim("client_roles", List.of("SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"));
+
+    Assertions.assertEquals(
+        Set.of("SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"),
+        JwtSecurityUtil.getUserRolesFromJwt(jwt));
+  }
+
+  @Test
+  @DisplayName("Scoped roles resolve to their base role, parsed from the right")
+  void getUserRolesFromJwt_scopedRoles_shouldStripScope() {
+    Jwt jwt =
+        jwtWithClaim(
+            "client_roles",
+            List.of(
+                "SPAR_NONMINISTRY_ORCHARD_FOREST_CLIENT-00030064",
+                "SPAR_TSC_ADMIN_DISTRICT-DCC_REGION-KOOTENAY_BOUNDARY",
+                "SOME-ROLE"));
+
+    Assertions.assertEquals(
+        Set.of("SPAR_NONMINISTRY_ORCHARD", "SPAR_TSC_ADMIN", "SOME-ROLE"),
+        JwtSecurityUtil.getUserRolesFromJwt(jwt));
+  }
+
+  @Test
+  @DisplayName("FAM sidecar roles are ignored")
+  void getUserRolesFromJwt_famSidecar_shouldBeIgnored() {
+    Jwt jwt =
+        jwtWithClaim(
+            "client_roles",
+            List.of("SPAR_TSC_SUBMITTER", "FAM:EXPIRES:2026-12-31:SPAR_TSC_SUBMITTER"));
+
+    Assertions.assertEquals(
+        Set.of("SPAR_TSC_SUBMITTER"), JwtSecurityUtil.getUserRolesFromJwt(jwt));
+  }
+
+  @Test
+  @DisplayName("Roles are read from resource_access for our own client only")
+  void getUserRolesFromJwt_resourceAccess_shouldSucceed() {
+    Jwt jwt =
+        jwtWithClaim(
+            "resource_access",
+            Map.of(
+                "spar-client", Map.of("roles", List.of("SPAR_TSC_ADMIN")),
+                "other-client", Map.of("roles", List.of("SPAR_TSC_SUPERVISOR"))));
+
+    Assertions.assertEquals(Set.of("SPAR_TSC_ADMIN"), JwtSecurityUtil.getUserRolesFromJwt(jwt));
+  }
+
+  @Test
+  @DisplayName("No roles claim should give no roles")
   void getUserRolesFromJwt_noRoles_shouldSucceed() {
-    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
-    builder.subject("BAGGINGS");
-    builder.header("alg", "HS256");
-    builder.header("typ", "JWT");
-    builder.claim("email", "bilbo.baggings@gov.bc.ca");
-    builder.claim("custom:idp_display_name", "Baggings, Bilbo LWRS:EX");
-    builder.claim("custom:idp_username", "BAGGINGS");
-    builder.claim("custom:idp_name", "idir");
+    Jwt jwt = jwtWithClaim("email", "bilbo.baggings@gov.bc.ca");
 
-    Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(builder.build());
-
-    Assertions.assertTrue(rolesSet.isEmpty());
-  }
-
-  @Test
-  @DisplayName("Get user roles from JWT no roles should succeed")
-  void getUserRolesFromJwt_bigRoles_shouldSucceed() {
-    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
-    builder.subject("BAGGINGS");
-    builder.header("alg", "HS256");
-    builder.header("typ", "JWT");
-    builder.claim("email", "bilbo.baggings@gov.bc.ca");
-    builder.claim("custom:idp_display_name", "Baggings, Bilbo LWRS:EX");
-    builder.claim("custom:idp_username", "BAGGINGS");
-    builder.claim("custom:idp_name", "idir");
-    builder.claim("cognito:groups", List.of("ROLE1_ADMIN_00112233", "ROLE2_USER_00112234"));
-
-    Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(builder.build());
-
-    Assertions.assertFalse(rolesSet.isEmpty());
-    Assertions.assertEquals(2, rolesSet.size());
-    Assertions.assertTrue(rolesSet.contains("ROLE1_ADMIN"));
-    Assertions.assertTrue(rolesSet.contains("ROLE2_USER"));
-  }
-
-  @Test
-  @DisplayName("Get user roles from JWT empty roles should succeed")
-  void getUserRolesFromJwt_emptyRoles_shouldSucceed() {
-    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
-    builder.subject("BAGGINGS");
-    builder.header("alg", "HS256");
-    builder.header("typ", "JWT");
-    builder.claim("email", "bilbo.baggings@gov.bc.ca");
-    builder.claim("custom:idp_display_name", "Baggings, Bilbo LWRS:EX");
-    builder.claim("custom:idp_username", "BAGGINGS");
-    builder.claim("custom:idp_name", "idir");
-    builder.claim("cognito:groups", new String[] {});
-
-    Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(builder.build());
-
-    Assertions.assertTrue(rolesSet.isEmpty());
+    Assertions.assertTrue(JwtSecurityUtil.getUserRolesFromJwt(jwt).isEmpty());
   }
 }

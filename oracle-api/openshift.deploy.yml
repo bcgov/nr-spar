@@ -45,8 +45,8 @@ parameters:
     value: "1543"
   - name: ORACLEDB_KEYSTORE
     description: Keystore location path
-  - name: AWS_COGNITO_ISSUER_URI
-    description: AWS Cognito JWT Server URI
+  - name: KEYCLOAK_ISSUER_URI
+    description: BC Gov SSO (Keycloak) standard realm issuer for this environment
     required: true
   - name: CERT_PVC_SIZE
     description: The amount of storage the cert PVC should have
@@ -162,8 +162,8 @@ objects:
                       key: oracle-secret
                 - name: ORACLEDB_KEYSTORE
                   value: /cert/jssecacerts
-                - name: AWS_COGNITO_ISSUER_URI
-                  value: ${AWS_COGNITO_ISSUER_URI}
+                - name: KEYCLOAK_ISSUER_URI
+                  value: ${KEYCLOAK_ISSUER_URI}
                 - name: RANDOM_EXPRESSION
                   value: ${RANDOM_EXPRESSION}
               volumeMounts:

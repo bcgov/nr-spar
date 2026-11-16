@@ -51,8 +51,8 @@ parameters:
   - name: DB_POOL_MAX_LIFETIME
     description: Maximum lifetime of a connection in the pool.
     value: "1800000"
-  - name: AWS_COGNITO_ISSUER_URI
-    description: AWS Cognito JWT Server URI
+  - name: KEYCLOAK_ISSUER_URI
+    description: BC Gov SSO (Keycloak) standard realm issuer for this environment
     required: true
   - name: RANDOM_EXPRESSION
     description: Random expression to make sure deployments update
@@ -125,8 +125,8 @@ objects:
                   value: ${DB_POOL_IDLE_TIMEOUT}
                 - name: DB_POOL_MAX_LIFETIME
                   value: ${DB_POOL_MAX_LIFETIME}
-                - name: AWS_COGNITO_ISSUER_URI
-                  value: ${AWS_COGNITO_ISSUER_URI}
+                - name: KEYCLOAK_ISSUER_URI
+                  value: ${KEYCLOAK_ISSUER_URI}
                 - name: RANDOM_EXPRESSION
                   value: ${RANDOM_EXPRESSION}
               resources:
