@@ -82,7 +82,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
   // URL (e.g. an old bookmark). The backend rejects the save as well.
   useEffect(() => {
     if (!isReview && isBClass && !isSeedlotBEnabled()) {
-      navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''), { replace: true });
+      void navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''), { replace: true });
     }
   }, [isReview, isBClass, navigate, seedlotNumber]);
 

@@ -322,7 +322,7 @@ const ContextContainerClassA = ({ children }: props) => {
       // The A-class wizard must never load (or autosave a draft for) a B-class
       // lot, e.g. from an old bookmark. Leave before the form becomes ready.
       if (seedlotQuery.data?.seedlot.geneticClass?.geneticClassCode === 'B') {
-        navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''), { replace: true });
+        void navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''), { replace: true });
         return;
       }
       const seedlotStatusCode = seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode;
