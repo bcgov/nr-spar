@@ -30,12 +30,14 @@ parameters:
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
     value: 200m
+  # Requests count against the namespace memory quota (4Gi in test), so this is
+  # set near the JVM's steady-state usage rather than the limit. It must leave
+  # room for MAX_REPLICAS pods plus one rolling-update surge pod alongside the
+  # other components; check the quota before raising it.
   - name: MEMORY_REQUEST
-    value: 1Gi
+    value: 640Mi
   # The JVM derives its max heap from the memory limit (-XX:MaxRAMPercentage=60
-  # in the Dockerfile), so raising this raises the heap. Keep it equal to
-  # MEMORY_REQUEST, and check the namespace quota against MAX_REPLICAS before
-  # raising it.
+  # in the Dockerfile), so raising this raises the heap.
   - name: MEMORY_LIMIT
     value: 1Gi
   - name: MIN_REPLICAS
