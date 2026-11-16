@@ -858,7 +858,7 @@ class SeedlotServiceTest {
 
   @Test
   @DisplayName("Patch applicant info on a class B seedlot is blocked while B-class is turned off")
-  void patchApplicantInfo_classBWithFeatureOff_shouldFail() {
+  void patchApplicantInfo_featureOffClassB_shouldFail() {
     String seedlotNumber = "123456";
     Seedlot testSeedlot = new Seedlot(seedlotNumber);
     testSeedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
