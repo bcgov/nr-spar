@@ -46,7 +46,15 @@ const completeSignInCallback = (): Promise<unknown> => {
     return Promise.resolve();
   }
   callbackExchange ??= userManager.signinRedirectCallback()
-    .finally(() => window.history.replaceState(null, '', ROUTES.ROOT));
+    .then(
+      () => window.history.replaceState(null, '', ROUTES.ROOT),
+      (err) => {
+        // replaceState would leave the router on ?code=, so Landing keeps its spinner.
+        // Reload the landing page so the user can retry.
+        window.location.replace(ROUTES.ROOT);
+        throw err;
+      }
+    );
   return callbackExchange;
 };
 
