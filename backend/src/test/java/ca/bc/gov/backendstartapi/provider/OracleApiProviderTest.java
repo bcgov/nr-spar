@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.provider;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -12,6 +13,8 @@ import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
+import ca.bc.gov.backendstartapi.exception.OracleApiProviderException;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
 import java.util.Optional;
@@ -370,5 +373,175 @@ class OracleApiProviderTest {
 
     assertThrows(
         ResponseStatusException.class, () -> oracleApiProvider.getSpzListByVegCode("FDC", "Z"));
+  }
+
+  @Test
+  @DisplayName("getSpzCoastInteriorCode returns the zone's coast/interior code")
+  void getSpzCoastInteriorCode_shouldReturnCode() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/seed-plan-zones/M/coast-interior";
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(
+            withSuccess(
+                "{ \"seedPlanZoneCode\": \"M\", \"coastInteriorCode\": \"C\" }",
+                MediaType.APPLICATION_JSON));
+
+    Assertions.assertEquals(Optional.of("C"), oracleApiProvider.getSpzCoastInteriorCode("M"));
+  }
+
+  @Test
+  @DisplayName("getSpzCoastInteriorCode rethrows a client error")
+  void getSpzCoastInteriorCode_clientError_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/seed-plan-zones/M/coast-interior";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.UNAUTHORIZED));
+
+    assertThrows(
+        ResponseStatusException.class, () -> oracleApiProvider.getSpzCoastInteriorCode("M"));
+  }
+
+  @Test
+  @DisplayName("searchTransferLimits sends every criterion and includes null matches")
+  void searchTransferLimits_shouldReturnLimits() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url =
+        "/null/api/transfer-limits?vegetationCode=FDC&geneticClassCode=B"
+            + "&superiorProvenance=false&coastInteriorCode=C&seedPlanZoneCode=M"
+            + "&latitudeDeg=49&includeNullMatches=true";
+    String json =
+        """
+        [ { "transferLimitSkey": 2, "vegetationCode": "FDC", "geneticClassCode": "B",
+            "superiorProvenance": false, "coastInteriorCode": "C", "seedPlanZoneCode": "M",
+            "siteMinLatDeg": 48, "siteMaxLatDeg": 60, "limitNorthLatDeg": 3,
+            "limitUpElevation": 350, "transferRecommendation": null } ]
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    var limits = oracleApiProvider.searchTransferLimits("FDC", "B", false, "C", "M", 49);
+
+    Assertions.assertEquals(1, limits.size());
+    Assertions.assertEquals(2L, limits.get(0).transferLimitSkey());
+    Assertions.assertEquals(3, limits.get(0).limitNorthLatDeg());
+    Assertions.assertEquals(350, limits.get(0).limitUpElevation());
+  }
+
+  @Test
+  @DisplayName("getSuperiorProvenance returns the provenance")
+  void getSuperiorProvenance_shouldReturnProvenance() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer
+        .expect(requestTo("/null/api/superior-provenances/7"))
+        .andRespond(
+            withSuccess(
+                "{ \"provenanceId\": 7, \"vegetationCode\": \"FDC\","
+                    + " \"provenanceDescription\": \"Fraser Valley\" }",
+                MediaType.APPLICATION_JSON));
+
+    Assertions.assertEquals(
+        Optional.of(new SuperiorProvenanceDto(7, "FDC", "Fraser Valley")),
+        oracleApiProvider.getSuperiorProvenance(7));
+  }
+
+  @Test
+  @DisplayName("getSuperiorProvenance is empty when oracle-api has no such provenance")
+  void getSuperiorProvenance_notFound_shouldBeEmpty() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer
+        .expect(requestTo("/null/api/superior-provenances/99"))
+        .andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    Assertions.assertEquals(Optional.empty(), oracleApiProvider.getSuperiorProvenance(99));
+  }
+
+  @Test
+  @DisplayName("getSuperiorProvenance rethrows other client errors")
+  void getSuperiorProvenance_clientError_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer
+        .expect(requestTo("/null/api/superior-provenances/7"))
+        .andRespond(withStatus(HttpStatus.UNAUTHORIZED));
+
+    assertThrows(
+        ResponseStatusException.class, () -> oracleApiProvider.getSuperiorProvenance(7));
+  }
+
+  @Test
+  @DisplayName("getSuperiorProvenance maps a server error to a failed dependency")
+  void getSuperiorProvenance_serverError_shouldThrowProviderException() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer
+        .expect(requestTo("/null/api/superior-provenances/7"))
+        .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+
+    assertThrows(
+        OracleApiProviderException.class, () -> oracleApiProvider.getSuperiorProvenance(7));
+  }
+
+  @Test
+  @DisplayName("getSpzCoastInteriorCode maps a server error to a failed dependency")
+  void getSpzCoastInteriorCode_serverError_shouldThrowProviderException() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer
+        .expect(requestTo("/null/api/seed-plan-zones/M/coast-interior"))
+        .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+
+    assertThrows(
+        OracleApiProviderException.class, () -> oracleApiProvider.getSpzCoastInteriorCode("M"));
+  }
+
+  @Test
+  @DisplayName("searchTransferLimits sends a missing criterion as empty, which applies no filter")
+  void searchTransferLimits_nullCriterion_shouldSendEmpty() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url =
+        "/null/api/transfer-limits?vegetationCode=FDC&geneticClassCode=B"
+            + "&superiorProvenance=false&coastInteriorCode=I&seedPlanZoneCode="
+            + "&latitudeDeg=49&includeNullMatches=true";
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
+
+    Assertions.assertTrue(
+        oracleApiProvider.searchTransferLimits("FDC", "B", false, "I", null, 49).isEmpty());
+  }
+
+  @Test
+  @DisplayName("searchTransferLimits maps a server error to a failed dependency")
+  void searchTransferLimits_serverError_shouldThrowProviderException() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer
+        .expect(anything())
+        .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+
+    assertThrows(
+        OracleApiProviderException.class,
+        () -> oracleApiProvider.searchTransferLimits("FDC", "B", false, "C", "M", 49));
+  }
+
+  @Test
+  @DisplayName("searchTransferLimits rethrows a client error")
+  void searchTransferLimits_clientError_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+
+    mockRestServiceServer
+        .expect(anything())
+        .andRespond(withStatus(HttpStatus.BAD_REQUEST));
+
+    assertThrows(
+        ResponseStatusException.class,
+        () -> oracleApiProvider.searchTransferLimits("FDC", "B", false, "C", "M", 49));
   }
 }

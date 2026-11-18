@@ -1,6 +1,8 @@
 package ca.bc.gov.backendstartapi.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -213,5 +215,28 @@ class SeedlotGeneticWorthServiceTest {
 
     verify(seedlotGeneticWorthRepository, times(1)).deleteAllById(any());
     verify(seedlotGeneticWorthRepository, times(0)).saveAll(any());
+  }
+
+  @Test
+  @DisplayName("deleteAllBySeedlot deletes every genetic worth row of the seedlot")
+  void deleteAllBySeedlot_deletesRows() {
+    Seedlot seedlot = new Seedlot("63001");
+    List<SeedlotGeneticWorth> rows = List.of(mock(SeedlotGeneticWorth.class));
+    when(seedlotGeneticWorthRepository.findAllBySeedlot_id("63001")).thenReturn(rows);
+
+    seedlotGeneticWorthService.deleteAllBySeedlot(seedlot);
+
+    verify(seedlotGeneticWorthRepository).deleteAll(rows);
+  }
+
+  @Test
+  @DisplayName("deleteAllBySeedlot does nothing when the seedlot has no genetic worth")
+  void deleteAllBySeedlot_noRows() {
+    Seedlot seedlot = new Seedlot("63001");
+    when(seedlotGeneticWorthRepository.findAllBySeedlot_id("63001")).thenReturn(List.of());
+
+    seedlotGeneticWorthService.deleteAllBySeedlot(seedlot);
+
+    verify(seedlotGeneticWorthRepository, never()).deleteAll(any());
   }
 }

@@ -118,6 +118,29 @@ class SeedlotFormCollectionBclassMapperTest {
   }
 
   @Test
+  @DisplayName("applyToSeedlot keeps the stored provenance id")
+  void applyToSeedlot_keepsStoredProvenanceId() {
+    Seedlot seedlot = sampleSeedlot();
+    seedlot.setProvenanceId(7);
+
+    // sampleDto sends provenanceId 42
+    mapper.applyToSeedlot(sampleDto(), seedlot);
+
+    assertThat(seedlot.getProvenanceId()).isEqualTo(7);
+  }
+
+  @Test
+  @DisplayName("applyToSeedlot keeps a stored null provenance id")
+  void applyToSeedlot_keepsStoredNullProvenanceId() {
+    Seedlot seedlot = sampleSeedlot();
+    seedlot.setProvenanceId(null);
+
+    mapper.applyToSeedlot(sampleDto(), seedlot);
+
+    assertThat(seedlot.getProvenanceId()).isNull();
+  }
+
+  @Test
   @DisplayName("applyToSeedlot skips date setters when values are unchanged")
   void applyToSeedlot_skipsUnchangedDates() {
     Seedlot seedlot = sampleSeedlot();
@@ -147,7 +170,6 @@ class SeedlotFormCollectionBclassMapperTest {
             false,
             null,
             "GT5",
-            false,
             false,
             42,
             49,
@@ -235,7 +257,6 @@ class SeedlotFormCollectionBclassMapperTest {
         false,
         null,
         "GT5",
-        false,
         false,
         42,
         49,
