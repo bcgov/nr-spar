@@ -2,14 +2,18 @@ package ca.bc.gov.backendstartapi.provider;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
+import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
+import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
@@ -21,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -370,5 +375,165 @@ class OracleApiProviderTest {
 
     assertThrows(
         ResponseStatusException.class, () -> oracleApiProvider.getSpzListByVegCode("FDC", "Z"));
+  }
+
+  @Test
+  @DisplayName("getPtGeospatialDataByIdList posts the id list and returns geospatial data")
+  void getPtGeospatialDataByIdList_shouldReturnList() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/parent-trees/geospatial-data";
+    String json =
+        """
+        [
+          { "parentTreeId": 8512, "latitudeDegree": 49, "latitudeMinute": 16,
+            "latitudeSecond": 57, "longitudeDegree": 123, "longitudeMinute": 10,
+            "longitudeSecond": 5, "elevation": 128 },
+          { "parentTreeId": 8513, "latitudeDegree": 50, "latitudeMinute": 1,
+            "latitudeSecond": 2, "longitudeDegree": 124, "longitudeMinute": 3,
+            "longitudeSecond": 4, "elevation": 300 }
+        ]
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andExpect(method(HttpMethod.POST))
+        .andExpect(content().json("[{\"parentTreeId\":8512},{\"parentTreeId\":8513}]"))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    List<GeospatialOracleResDto> result =
+        oracleApiProvider.getPtGeospatialDataByIdList(List.of(8512L, 8513L));
+
+    Assertions.assertEquals(2, result.size());
+    Assertions.assertEquals(8512L, result.get(0).parentTreeId());
+    Assertions.assertEquals(300, result.get(1).elevation());
+  }
+
+  @Test
+  @DisplayName("getPtGeospatialDataByIdList tolerates a null body")
+  void getPtGeospatialDataByIdList_nullBody_shouldReturnNull() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/parent-trees/geospatial-data";
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+    Assertions.assertNull(oracleApiProvider.getPtGeospatialDataByIdList(List.of(1L)));
+  }
+
+  @Test
+  @DisplayName("getPtGeospatialDataByIdList rethrows a client error")
+  void getPtGeospatialDataByIdList_clientError_shouldThrow() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/parent-trees/geospatial-data";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.BAD_REQUEST));
+
+    assertThrows(
+        ResponseStatusException.class,
+        () -> oracleApiProvider.getPtGeospatialDataByIdList(List.of(1L)));
+  }
+
+  @Test
+  @DisplayName("getAreaOfUseData returns the area of use for an SPU")
+  void getAreaOfUseData_shouldReturnDto() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/area-of-use/spu/7";
+    String json =
+        """
+        { "spzList": [ { "code": "M", "description": "Maritime", "isPrimary": true } ] }
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    Optional<AreaOfUseDto> result = oracleApiProvider.getAreaOfUseData(7);
+
+    Assertions.assertTrue(result.isPresent());
+    Assertions.assertEquals(1, result.get().getSpzList().size());
+    Assertions.assertEquals("M", result.get().getSpzList().get(0).getCode());
+  }
+
+  @Test
+  @DisplayName("getAreaOfUseData returns empty on a client error")
+  void getAreaOfUseData_clientError_shouldReturnEmpty() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/area-of-use/spu/7";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    Assertions.assertTrue(oracleApiProvider.getAreaOfUseData(7).isEmpty());
+  }
+
+  @Test
+  @DisplayName("findOrchardById returns the orchard")
+  void findOrchardById_shouldReturnOrchard() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/orchards/405";
+    String json =
+        """
+        { "id": "405", "name": "Primary Orchard", "vegetationCode": "FDC", "spuId": 7 }
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    Optional<OrchardDto> result = oracleApiProvider.findOrchardById("405");
+
+    Assertions.assertTrue(result.isPresent());
+    Assertions.assertEquals("Primary Orchard", result.get().getName());
+    Assertions.assertEquals(7, result.get().getSpuId());
+  }
+
+  @Test
+  @DisplayName("findOrchardById returns empty on a client error")
+  void findOrchardById_clientError_shouldReturnEmpty() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/orchards/999";
+
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    Assertions.assertTrue(oracleApiProvider.findOrchardById("999").isEmpty());
+  }
+
+  @Test
+  @DisplayName("getAllDistrictOrgUnits treats a null body as an empty list")
+  void getAllDistrictOrgUnits_nullBody_shouldReturnEmpty() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/org-unit-districts";
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+    Assertions.assertTrue(oracleApiProvider.getAllDistrictOrgUnits().isEmpty());
+  }
+
+  @Test
+  @DisplayName("getAllValidFundingSources treats a null body as an empty list")
+  void getAllValidFundingSources_nullBody_shouldReturnEmpty() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/funding-sources";
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+    Assertions.assertTrue(oracleApiProvider.getAllValidFundingSources().isEmpty());
+  }
+
+  @Test
+  @DisplayName("findOrchardsByVegCode tolerates a null body")
+  void findOrchardsByVegCode_nullBody_shouldReturnNull() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("sample-token");
+    String url = "/null/api/orchards/vegetation-codes/BV";
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+    Assertions.assertNull(oracleApiProvider.findOrchardsByVegCode("BV"));
   }
 }
