@@ -43,7 +43,7 @@ jobs:
           sonar_args:
             -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_backend
             -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml
-            -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/filter/**,**/interceptor/**,**/response/**,**/**Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
+            -Dsonar.exclusions=**/config/**,**/dto/**,**/entity/**,**/exception/**,**/filter/**,**/interceptor/**,**/response/**,**/**Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
           sonar_token: ${{ secrets.SONAR_BACKEND }}
 
   tests-oracle-api:
@@ -61,7 +61,7 @@ jobs:
           sonar_args:
             -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_oracle-api
             -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml
-            -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/filter/**,**/interceptor/**,**/response/**,**/**Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
+            -Dsonar.exclusions=**/config/**,**/dto/**,**/entity/**,**/exception/**,**/filter/**,**/interceptor/**,**/response/**,**/**Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
           sonar_token: ${{ secrets.SONAR_ORACLE_API }}
 
   trivy:
