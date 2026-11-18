@@ -301,8 +301,7 @@ export const convertBClassCollection = (
     becOverrideComment: seedlot?.becOverrideComment ?? null,
     numberTreesFromCode: collectionData.numberTreesFrom.value.code,
     isLotSplitInd: false,
-    // Preserve loaded values when re-saving; default for brand-new drafts
-    superiorProvenanceInd: seedlot ? seedlot.superiorProvenanceInd : false,
+    // Read only: the backend keeps the stored value whatever is sent.
     provenanceId: seedlot?.provenanceId ?? null,
     collectionLatitudeDeg: latDeg,
     collectionLatitudeMin: latMin,
@@ -333,7 +332,9 @@ export const convertBClassCollection = (
     latitudeSecMax: latSec,
     longitudeSecMin: longSec,
     longitudeSecMax: longSec,
-    areaOfUseComment: null,
+    // Not editable here; resend the stored comment so a TSC admin submitting through the wizard
+    // does not clear it (the backend saves it only for TSC admins).
+    areaOfUseComment: seedlot?.areaOfUseComment ?? null,
     collectionLatitudeCode: 'N',
     collectionLongitudeCode: 'W',
     bgcZoneCode: collectionData.becZone.value.code,

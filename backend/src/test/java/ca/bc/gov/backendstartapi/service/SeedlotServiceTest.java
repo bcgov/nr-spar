@@ -42,6 +42,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotValidationError;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
@@ -65,6 +66,7 @@ import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.FeatureDisabledException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.OracleApiProviderException;
 import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
@@ -153,6 +155,8 @@ class SeedlotServiceTest {
 
   @Mock SaveSeedlotFormService saveSeedlotFormService;
 
+  @Mock BclassAreaOfUseService bclassAreaOfUseService;
+
   private SeedlotService seedlotService;
 
   private static final String SEEDLOT_NOT_FOUND_STR = "404 NOT_FOUND \"Seedlot doesn't exist\"";
@@ -211,7 +215,8 @@ class SeedlotServiceTest {
         seedlotFormCollectionBclassMapper,
         seedlotFormStepMapper,
         saveSeedlotFormService,
-        new FeatureFlagConfig(seedlotBclassEnabled));
+        new FeatureFlagConfig(seedlotBclassEnabled),
+        bclassAreaOfUseService);
   }
 
   @BeforeEach
@@ -1300,13 +1305,63 @@ class SeedlotServiceTest {
     when(seedlotCollectionGeometryRepository.findBySeedlotNumber(seedlotNumber))
         .thenReturn(Optional.empty());
     when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(List.of());
+    when(oracleApiProvider.getSuperiorProvenance(42))
+        .thenReturn(Optional.of(new SuperiorProvenanceDto(42, "FDC", "Fraser Valley")));
 
     SeedlotDto dto = seedlotService.getSingleSeedlotInfo(seedlotNumber);
 
     Assertions.assertNotNull(dto.getBclassDetail());
     SeedlotBclassDetailDto detail = dto.getBclassDetail();
     Assertions.assertEquals(42, detail.provenanceId());
+    Assertions.assertEquals("Fraser Valley", detail.provenanceDescription());
     Assertions.assertTrue(detail.aouSpzList().isEmpty());
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotInfo for B-class without a provenance skips the lookup")
+  void getSingleSeedlotInfo_bclassNoProvenance_skipsLookup() {
+    String seedlotNumber = "53001";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
+    seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    doNothing().when(loggedUserService).verifySeedlotAccessPrivilege(anyString());
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(seedlotNumber))
+        .thenReturn(Optional.empty());
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(List.of());
+
+    SeedlotBclassDetailDto detail =
+        seedlotService.getSingleSeedlotInfo(seedlotNumber).getBclassDetail();
+
+    Assertions.assertNull(detail.provenanceId());
+    Assertions.assertNull(detail.provenanceDescription());
+    verify(oracleApiProvider, never()).getSuperiorProvenance(any());
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotInfo for B-class still loads when the provenance lookup fails")
+  void getSingleSeedlotInfo_bclassProvenanceLookupFails_returnsIdOnly() {
+    String seedlotNumber = "53001";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
+    seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+    seedlot.setProvenanceId(42);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    doNothing().when(loggedUserService).verifySeedlotAccessPrivilege(anyString());
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber)).thenReturn(List.of());
+    when(seedlotCollectionGeometryRepository.findBySeedlotNumber(seedlotNumber))
+        .thenReturn(Optional.empty());
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(List.of());
+    when(oracleApiProvider.getSuperiorProvenance(42)).thenThrow(new OracleApiProviderException());
+
+    SeedlotBclassDetailDto detail =
+        seedlotService.getSingleSeedlotInfo(seedlotNumber).getBclassDetail();
+
+    Assertions.assertEquals(42, detail.provenanceId());
+    Assertions.assertNull(detail.provenanceDescription());
   }
 
   @Test
@@ -1322,6 +1377,69 @@ class SeedlotServiceTest {
     seedlot.setSeedlotStatus(pending);
     seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
 
+    SeedlotFormSubmissionDtoClassB form = bclassSubmission(geoJson, null);
+
+    stubBclassSubmit(seedlot);
+
+    SeedlotStatusResponseDto response =
+        seedlotService.submitSeedlotFormClassB(seedlotNumber, form, false);
+
+    Assertions.assertEquals(seedlotNumber, response.seedlotNumber());
+    Assertions.assertEquals("SUB", response.seedlotStatusCode());
+    verify(saveSeedlotFormService).deleteForm(seedlotNumber);
+    verify(seedlotCollectionGeometryService)
+        .saveOrUpdate(same(seedlot), eq(geoJson), eq("user@idir"));
+    // Area of use is derived server-side from the previous status, never from the request.
+    verify(bclassAreaOfUseService).deriveAreaOfUse(same(seedlot), eq("PND"));
+    verify(seedlotSeedPlanZoneRepository, never()).deleteAll(any());
+    verify(seedlotSeedPlanZoneRepository, never()).saveAll(any());
+    verify(seedlotGeneticWorthService, never()).saveSeedlotGenWorth(any(), any());
+  }
+  @Test
+  @DisplayName("submitSeedlotFormClassB saves the area of use comment from a TSC admin")
+  void submitSeedlotFormClassB_tscAdmin_savesAreaOfUseComment() {
+    Seedlot seedlot = submittedBclassSeedlot("Old comment");
+    stubBclassSubmit(seedlot);
+
+    seedlotService.submitSeedlotFormClassB(
+        seedlot.getId(), bclassSubmission(null, "  New comment  "), true);
+
+    Assertions.assertEquals("New comment", seedlot.getAreaOfUseComment());
+  }
+
+  @Test
+  @DisplayName("submitSeedlotFormClassB lets a TSC admin clear the area of use comment")
+  void submitSeedlotFormClassB_tscAdminBlank_clearsAreaOfUseComment() {
+    Seedlot seedlot = submittedBclassSeedlot("Old comment");
+    stubBclassSubmit(seedlot);
+
+    seedlotService.submitSeedlotFormClassB(seedlot.getId(), bclassSubmission(null, "   "), true);
+
+    Assertions.assertNull(seedlot.getAreaOfUseComment());
+  }
+
+  @Test
+  @DisplayName("submitSeedlotFormClassB keeps the stored area of use comment for other users")
+  void submitSeedlotFormClassB_notTscAdmin_keepsAreaOfUseComment() {
+    Seedlot seedlot = submittedBclassSeedlot("Old comment");
+    stubBclassSubmit(seedlot);
+
+    seedlotService.submitSeedlotFormClassB(
+        seedlot.getId(), bclassSubmission(null, "Changed by applicant"), false);
+
+    Assertions.assertEquals("Old comment", seedlot.getAreaOfUseComment());
+  }
+
+  private Seedlot submittedBclassSeedlot(String areaOfUseComment) {
+    Seedlot seedlot = new Seedlot("53001");
+    seedlot.setSeedlotStatus(new SeedlotStatusEntity("SUB", "Submitted", DATE_RANGE));
+    seedlot.setGeneticClass(new GeneticClassEntity("B", "B class", DATE_RANGE));
+    seedlot.setAreaOfUseComment(areaOfUseComment);
+    return seedlot;
+  }
+
+  private SeedlotFormSubmissionDtoClassB bclassSubmission(
+      String geoJson, String areaOfUseComment) {
     SeedlotFormCollectionDtoClassB collection =
         new SeedlotFormCollectionDtoClassB(
             "00012797",
@@ -1345,7 +1463,6 @@ class SeedlotServiceTest {
             false,
             null,
             "GT5",
-            false,
             false,
             null,
             49,
@@ -1371,7 +1488,7 @@ class SeedlotServiceTest {
             0,
             0,
             0,
-            null,
+            areaOfUseComment,
             'N',
             'W',
             "CDF",
@@ -1414,7 +1531,11 @@ class SeedlotServiceTest {
             interim,
             extraction,
             List.of(new SeedPlanZoneDto("M", "Maritime", false)));
+    return form;
+  }
 
+  private void stubBclassSubmit(Seedlot seedlot) {
+    String seedlotNumber = seedlot.getId();
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
     doNothing().when(seedlotFormValidationService).validateBclassSeedlotForm(any(), any());
     doNothing().when(seedlotFormCollectionBclassMapper).applyToSeedlot(any(), any());
@@ -1430,18 +1551,5 @@ class SeedlotServiceTest {
     when(seedlotStatusService.getValidSeedlotStatus("SUB")).thenReturn(Optional.of(submitted));
     when(seedlotRepository.save(any())).thenAnswer(i -> i.getArgument(0));
     doNothing().when(saveSeedlotFormService).deleteForm(seedlotNumber);
-
-    SeedlotStatusResponseDto response =
-        seedlotService.submitSeedlotFormClassB(seedlotNumber, form, false);
-
-    Assertions.assertEquals(seedlotNumber, response.seedlotNumber());
-    Assertions.assertEquals("SUB", response.seedlotStatusCode());
-    verify(saveSeedlotFormService).deleteForm(seedlotNumber);
-    verify(seedlotCollectionGeometryService)
-        .saveOrUpdate(same(seedlot), eq(geoJson), eq("user@idir"));
-    // Area-of-use SPZs in the request are not saved, and B-class has no genetic worth.
-    verify(seedlotSeedPlanZoneRepository, never()).deleteAll(any());
-    verify(seedlotSeedPlanZoneRepository, never()).saveAll(any());
-    verify(seedlotGeneticWorthService, never()).saveSeedlotGenWorth(any(), any());
   }
 }

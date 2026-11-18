@@ -92,7 +92,7 @@ const ApplicantAndSeedlotRead = () => {
           <ReadOnlyInput
             id="b-review-superior-provenance"
             label="Superior provenance?"
-            value={seedlotData?.superiorProvenanceInd ? 'Yes' : 'No'}
+            value={seedlotData?.provenanceId != null ? 'Yes' : 'No'}
             showSkeleton={isFetchingData}
           />
         </Column>

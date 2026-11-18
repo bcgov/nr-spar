@@ -3,7 +3,10 @@ package ca.bc.gov.backendstartapi.report;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
@@ -17,6 +20,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
@@ -27,6 +31,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
+import ca.bc.gov.backendstartapi.exception.OracleApiProviderException;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
 import ca.bc.gov.backendstartapi.provider.Provider;
@@ -102,7 +107,36 @@ class Sprr001ReportDataAssemblerTest {
     assertEquals("Interior Douglas-fir", master.getSpeciesDesc());
     assertEquals("Cariboo-Chilcotin Natural Resource District", master.getCollectionOrgUnitDesc());
     assertNull(master.getCollectionProv());
+    assertEquals("N", master.getSuperiorPrvncInd());
     assertEquals("declarer", master.getSubmittedByUser());
+    verify(oracleApiProvider, never()).getSuperiorProvenance(any());
+  }
+
+  @Test
+  @DisplayName("assemble prints a migrated B+ seedlot's provenance name and superior provenance Y")
+  void assemble_superiorProvenance_shouldPrintProvenance() {
+    Seedlot seedlot = baseSeedlot();
+    stubHappyPath(seedlot, bclassForm(7));
+    when(oracleApiProvider.getSuperiorProvenance(7))
+        .thenReturn(Optional.of(new SuperiorProvenanceDto(7, "FDI", "Fraser Valley")));
+
+    Sprr001MainRow master = assembler.assemble(seedlot).mainRow();
+
+    assertEquals("Y", master.getSuperiorPrvncInd());
+    assertEquals("Fraser Valley", master.getCollectionProv());
+  }
+
+  @Test
+  @DisplayName("assemble prints the provenance id when its name cannot be looked up")
+  void assemble_superiorProvenanceLookupFails_shouldPrintId() {
+    Seedlot seedlot = baseSeedlot();
+    stubHappyPath(seedlot, bclassForm(7));
+    when(oracleApiProvider.getSuperiorProvenance(7)).thenThrow(new OracleApiProviderException());
+
+    Sprr001MainRow master = assembler.assemble(seedlot).mainRow();
+
+    assertEquals("Y", master.getSuperiorPrvncInd());
+    assertEquals("7", master.getCollectionProv());
   }
 
   @Test
@@ -252,6 +286,10 @@ class Sprr001ReportDataAssemblerTest {
   }
 
   private SeedlotBclassFormDto bclassForm() {
+    return bclassForm(null);
+  }
+
+  private SeedlotBclassFormDto bclassForm(Integer provenanceId) {
     SeedlotFormOwnershipDto ownership =
         new SeedlotFormOwnershipDto(
             "00012797",
@@ -289,7 +327,7 @@ class Sprr001ReportDataAssemblerTest {
             LocalDateTime.of(2024, Month.SEPTEMBER, 15, 12, 0),
             1);
     return new SeedlotBclassFormDto(
-        bclassCollection(),
+        bclassCollection(provenanceId),
         List.of(ownership),
         interim,
         extraction,
@@ -298,6 +336,10 @@ class Sprr001ReportDataAssemblerTest {
   }
 
   private SeedlotFormCollectionDtoClassB bclassCollection() {
+    return bclassCollection(null);
+  }
+
+  private SeedlotFormCollectionDtoClassB bclassCollection(Integer provenanceId) {
     return new SeedlotFormCollectionDtoClassB(
         "00012797",
         "00",
@@ -321,8 +363,7 @@ class Sprr001ReportDataAssemblerTest {
         null,
         "GT5",
         false,
-        false,
-        null,
+        provenanceId,
         49,
         30,
         0,

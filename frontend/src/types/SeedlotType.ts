@@ -163,9 +163,9 @@ export type SeedlotType = {
   areaOfUseComment: string | null,
   approvedUserId: string | null,
   approvedTimestamp: string | null,
-  superiorProvenanceInd: boolean | null,
   orgUnitNo: number | null,
   collectionLocationDesc: string | null,
+  // Superior provenance (B+) id; only migrated legacy B+ seedlots have one.
   provenanceId: number | null,
   collectionAreaRadius: number | null,
   captureMethodCode: string | null,
@@ -185,7 +185,9 @@ export type SeedlotCollectionGeometryType = {
 export type SeedlotBclassDetailType = {
   aouSpzList: SeedPlanZoneDto[],
   collectionGeometry: SeedlotCollectionGeometryType | null,
-  provenanceId: number | null
+  provenanceId: number | null,
+  // Null when there is no provenance or its oracle-api lookup failed.
+  provenanceDescription: string | null
 };
 
 export type SeedPlanZoneDto = {
@@ -262,7 +264,7 @@ export type BClassCollectionFormSubmitType = {
   becOverrideComment: string | null,
   numberTreesFromCode: string,
   isLotSplitInd: boolean,
-  superiorProvenanceInd: boolean | null,
+  // Read only: the backend keeps the stored value.
   provenanceId: number | null,
   collectionLatitudeDeg: number,
   collectionLatitudeMin: number,
