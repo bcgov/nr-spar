@@ -1,7 +1,7 @@
 ### Builder
 # Maven version matches .mvn/wrapper/maven-wrapper.properties. JDK 17 matches the
 # java.version property in pom.xml.
-FROM maven:3.9.16-eclipse-temurin-17 AS build
+FROM maven:3.10.0-eclipse-temurin-17 AS build
 WORKDIR /workspace/app
 
 COPY pom.xml .
