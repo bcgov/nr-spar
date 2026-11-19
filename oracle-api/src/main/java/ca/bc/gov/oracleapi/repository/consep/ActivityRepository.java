@@ -1,10 +1,12 @@
 package ca.bc.gov.oracleapi.repository.consep;
 
+import ca.bc.gov.oracleapi.dto.consep.DrybackSaveDto;
 import ca.bc.gov.oracleapi.dto.consep.DrybackScreenDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
@@ -199,6 +201,50 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("riaComment") String riaComment,
       @Param("commentIsCritical") Integer commentIsCritical,
       @Param("expectedUpdateTimestamp") LocalDateTime expectedUpdateTimestamp);
+
+  /**
+   * Save the G64 Dryback screen values with optimistic locking (issue #2838).
+   * Also writes the recalculated revised dates, which the spec's UPDATE statement omits.
+   *
+   * @return rows updated; 0 means either the row is missing or its updateTimestamp no longer matches.
+   */
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE ActivityEntity a
+         SET a.actualBeginDateTime = :#{#dto.actualBeginDateTime()},
+             a.actualEndDateTime = :#{#dto.actualEndDateTime()},
+             a.revisedStartDate = :revisedStartDate,
+             a.revisedEndDate = :revisedEndDate,
+             a.drybackMoist = :#{#dto.drybackMoist()},
+             a.imbibedWeight = :#{#dto.imbibedWeight()},
+             a.drybackWeight = :#{#dto.drybackWeight()},
+             a.dryWeight = :#{#dto.dryWeight()},
+             a.drybackTime = :#{#dto.drybackTime()},
+             a.targetThirtyMoist = :#{#dto.targetThirtyMoist()},
+             a.targetThirtyFiveMoist = :#{#dto.targetThirtyFiveMoist()},
+             a.stratEndWeight = :#{#dto.stratEndWeight()},
+             a.riaComment = :#{#dto.riaComment()},
+             a.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE a.riaKey = :riaKey
+         AND a.updateTimestamp = :#{#dto.updateTimestamp()}
+      """)
+  int updateDrybackActivityWithLock(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("dto") DrybackSaveDto dto,
+      @Param("revisedStartDate") LocalDate revisedStartDate,
+      @Param("revisedEndDate") LocalDate revisedEndDate);
+
+  /** Direct dependants of the given activities in CNS_T_RIA_DEPENDANCY (one level). */
+  @Query(
+      value = """
+          SELECT DEPENDANT_RIA_SKEY
+            FROM CONSEP.CNS_T_RIA_DEPENDANCY
+           WHERE PREREQ_RIA_SKEY IN (:prereqRiaKeys)
+          """,
+      nativeQuery = true)
+  List<BigDecimal> findDependantRiaKeys(
+      @Param("prereqRiaKeys") Collection<BigDecimal> prereqRiaKeys);
 
   /**
    * Retrieves dryback screen data for a given Request Item Activity key.

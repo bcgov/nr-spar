@@ -3,7 +3,11 @@ package ca.bc.gov.oracleapi.endpoint.consep;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -19,9 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -216,5 +222,59 @@ public class DrybackScreenEndpointTest {
         .andExpect(status().isBadRequest());
 
     verify(drybackScreenService).getDrybackScreenData(riaSkey);
+  }
+
+  // ==================== PUT (save) ====================
+
+  private static final String SAVE_BODY = """
+      {"actualBeginDateTime":"2026-03-04T09:00:00","drybackWeight":25.080,
+       "drybackTime":%s,"riaComment":"saved","updateTimestamp":%s}
+      """;
+
+  private ResultActions putSave(String body)
+      throws Exception {
+    return mockMvc.perform(put(BASE_URL + "/{riaSkey}", new BigDecimal("7338"))
+        .with(csrf().asHeader())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(body));
+  }
+
+  @Test
+  @DisplayName("saveDryback returns 200 with refreshed data")
+  void saveDryback_returns200() throws Exception {
+    DrybackScreenDto refreshed = new DrybackScreenDto();
+    refreshed.setRiaComment("saved");
+    when(drybackScreenService.saveDryback(eq(new BigDecimal("7338")), any()))
+        .thenReturn(refreshed);
+
+    putSave(SAVE_BODY.formatted("65", "\"2026-03-01T08:00:00\""))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.riaComment").value("saved"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"1000", "-1"})
+  @DisplayName("saveDryback returns 400 when dryback time is out of range")
+  void saveDryback_returns400_whenOutOfRange(String drybackTime) throws Exception {
+    putSave(SAVE_BODY.formatted(drybackTime, "\"2026-03-01T08:00:00\""))
+        .andExpect(status().isBadRequest());
+    verifyNoInteractions(drybackScreenService);
+  }
+
+  @Test
+  @DisplayName("saveDryback returns 400 when updateTimestamp is missing")
+  void saveDryback_returns400_whenTimestampMissing() throws Exception {
+    putSave(SAVE_BODY.formatted("65", "null")).andExpect(status().isBadRequest());
+    verifyNoInteractions(drybackScreenService);
+  }
+
+  @Test
+  @DisplayName("saveDryback returns 409 when the service reports a conflict")
+  void saveDryback_returns409_onConflict() throws Exception {
+    when(drybackScreenService.saveDryback(eq(new BigDecimal("7338")), any()))
+        .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "modified"));
+
+    putSave(SAVE_BODY.formatted("65", "\"2026-03-01T08:00:00\""))
+        .andExpect(status().isConflict());
   }
 }
