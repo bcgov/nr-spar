@@ -203,8 +203,8 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
   /**
    * Retrieves dryback screen data for a given Request Item Activity key.
    * Joins Activity with the current accepted Moisture Content test result.
-   * The MC test is found through the seedlot: finds any MC activity with the same seedlot
-   * and joins its test result. This allows MC tests from different activities.
+   * Uses EXISTS subquery to find MC activities with accepted tests,
+   * ensuring at most one result row per Dryback activity (no non-unique-result exceptions).
    * The storageMc field will be null if no accepted MC test exists for this seedlot.
    *
    * @param riaKey the Request Item Activity SKEY
@@ -235,11 +235,19 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
              a.updateTimestamp
       )
       FROM ActivityEntity a
-      LEFT JOIN ActivityEntity mcActivity ON mcActivity.seedlotNumber = a.seedlotNumber
-                                         AND mcActivity.activityTypeCode = 'MC'
-      LEFT JOIN TestResultEntity t ON t.riaKey = mcActivity.riaKey
-                                   AND t.currentTest = -1
-                                   AND t.acceptResult = -1
+      LEFT JOIN ActivityEntity mcActivity 
+        ON mcActivity.seedlotNumber = a.seedlotNumber
+        AND mcActivity.activityTypeCode = 'MC'
+        AND EXISTS (
+          SELECT 1 FROM TestResultEntity tr
+          WHERE tr.riaKey = mcActivity.riaKey
+            AND tr.currentTest = -1
+            AND tr.acceptResult = -1
+        )
+      LEFT JOIN TestResultEntity t 
+        ON t.riaKey = mcActivity.riaKey
+        AND t.currentTest = -1
+        AND t.acceptResult = -1
       WHERE a.riaKey = :riaKey
       """)
   Optional<DrybackScreenDto> findDrybackScreenDataByRiaSkey(
