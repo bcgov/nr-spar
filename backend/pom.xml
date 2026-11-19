@@ -26,6 +26,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>17</java.version>
+    <!-- 7.0.7+ fixes CVE-2025-10492 and CVE-2026-6009 (Java deserialization RCE). -->
+    <jasperreports.version>7.0.8</jasperreports.version>
     <jdk.version>17</jdk.version>
     <skip.integration.tests>true</skip.integration.tests>
     <skip.unit.tests>false</skip.unit.tests>
@@ -198,7 +200,7 @@
     <dependency>
       <groupId>net.sf.jasperreports</groupId>
       <artifactId>jasperreports</artifactId>
-      <version>6.21.5</version>
+      <version>${jasperreports.version}</version>
       <!--
         Apache commons-logging conflicts with Spring's spring-jcl and initializes
         LogFactory at GraalVM native-image build time.
@@ -212,8 +214,32 @@
     </dependency>
     <dependency>
       <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-pdf</artifactId>
+      <version>${jasperreports.version}</version>
+      <!-- PDF export moved out of the core jar in 7.x. -->
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-jdt</artifactId>
+      <version>${jasperreports.version}</version>
+      <!-- Keeps the JDT expression compiler that 6.x bundled. -->
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
       <artifactId>jasperreports-fonts</artifactId>
-      <version>6.21.5</version>
+      <version>${jasperreports.version}</version>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
@@ -579,13 +605,13 @@
         <version>42.7.12</version>
       </dependency>
       <!--
-        jasperreports pulls in commons-beanutils 1.11.0 directly and 1.8.3
-        transitively via commons-digester. Pin to converge on 1.11.0.
+        jasperreports-pdf 7.0.8 asks for openpdf 1.3.43.jaspersoft.2, which is not on Maven
+        Central. 7.0.8 supports stock OpenPDF 1.3.43 (it only loses PDF/UA link tagging).
       -->
       <dependency>
-        <groupId>commons-beanutils</groupId>
-        <artifactId>commons-beanutils</artifactId>
-        <version>1.11.0</version>
+        <groupId>com.github.librepdf</groupId>
+        <artifactId>openpdf</artifactId>
+        <version>1.3.43</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

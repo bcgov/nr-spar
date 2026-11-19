@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.report;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
@@ -19,6 +20,9 @@ import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.ReportGenerationException;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.parser.PdfTextExtractor;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -132,6 +136,39 @@ class SeedlotRegistrationReportServiceTest {
       export.when(() -> JasperExportManager.exportReportToPdf(jasperPrint)).thenReturn(pdf);
 
       assertArrayEquals(pdf, service.generateBclassRegistrationReport("53001", "user"));
+    }
+  }
+
+  @Test
+  @DisplayName("generateBclassRegistrationReport renders the real SPRR001 templates to a PDF")
+  void generate_classB_shouldRenderRealTemplates() throws Exception {
+    ReportResourceService realResources = new ReportResourceService();
+    realResources.prepareReports();
+    service =
+        new SeedlotRegistrationReportService(
+            realResources, seedlotRepository, reportDataAssembler, loggedUserService);
+    Seedlot seedlot = bclassSeedlot("53001");
+    when(seedlotRepository.findById("53001")).thenReturn(Optional.of(seedlot));
+    Sprr001MainRow mainRow = new Sprr001MainRow();
+    mainRow.setSeedlotNumber("53001");
+    mainRow.setGeneticClass("B");
+    mainRow.setCollectionElevation(new BigDecimal("1200"));
+    mainRow.setCollectionElevationMin(new BigDecimal("1100"));
+    mainRow.setCollectionElevationMax(new BigDecimal("1300"));
+    Sprr001OwnershipRow owner = new Sprr001OwnershipRow();
+    owner.setClientNumber("00012797");
+    owner.setOwnerPortionPct(new BigDecimal("100"));
+    when(reportDataAssembler.assemble(seedlot))
+        .thenReturn(new Sprr001ReportData(mainRow, List.of(owner)));
+
+    byte[] pdf = service.generateBclassRegistrationReport("53001", "user");
+
+    PdfReader reader = new PdfReader(pdf);
+    try {
+      assertTrue(reader.getNumberOfPages() >= 1);
+      assertTrue(new PdfTextExtractor(reader).getTextFromPage(1).contains("53001"));
+    } finally {
+      reader.close();
     }
   }
 
