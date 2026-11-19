@@ -298,4 +298,25 @@ class BclassAreaOfUseServiceTest {
     verify(seedlotSeedPlanZoneRepository).save(spz.capture());
     assertEquals("M", spz.getValue().getSpzDescription());
   }
+
+  @Test
+  @DisplayName("Expired zone with a null stored description uses the code")
+  void expiredZoneNullStoredDescription() {
+    Seedlot seedlot = seedlot();
+    SeedlotSeedPlanZoneEntity oldSpz = mock(SeedlotSeedPlanZoneEntity.class);
+    when(oldSpz.getSpzCode()).thenReturn("M");
+    when(oldSpz.getSpzDescription()).thenReturn(null);
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id("63001")).thenReturn(List.of(oldSpz));
+    when(geneticClassRepository.findById("B"))
+        .thenReturn(Optional.of(mock(GeneticClassEntity.class)));
+    when(oracleApiProvider.getSpzListByVegCode("FDC", "B")).thenReturn(List.of());
+    when(oracleApiProvider.getSpzCoastInteriorCode("M")).thenReturn(Optional.of("C"));
+
+    service.deriveAreaOfUse(seedlot, "PND");
+
+    ArgumentCaptor<SeedlotSeedPlanZoneEntity> spz =
+        ArgumentCaptor.forClass(SeedlotSeedPlanZoneEntity.class);
+    verify(seedlotSeedPlanZoneRepository).save(spz.capture());
+    assertEquals("M", spz.getValue().getSpzDescription());
+  }
 }

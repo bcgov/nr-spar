@@ -235,6 +235,7 @@ public class BclassAreaOfUseService {
         previousSpzs.stream()
             .filter(spz -> spzCode.equals(spz.getSpzCode()))
             .map(SeedlotSeedPlanZoneEntity::getSpzDescription)
+            .filter(Objects::nonNull)
             .findFirst();
     SparLog.warn(
         "SPZ {} is not a current class B zone for species {} (seedlot {}); using {} description",
