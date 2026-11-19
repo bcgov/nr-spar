@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.repository.consep;
 
+import ca.bc.gov.oracleapi.dto.consep.DrybackScreenDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -198,4 +199,58 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("riaComment") String riaComment,
       @Param("commentIsCritical") Integer commentIsCritical,
       @Param("expectedUpdateTimestamp") LocalDateTime expectedUpdateTimestamp);
+
+  /**
+   * Retrieves dryback screen data for a given Request Item Activity key.
+   * Joins Activity with the current accepted Moisture Content test result.
+   * Uses EXISTS subquery to find MC activities with accepted tests,
+   * ensuring at most one result row per Dryback activity (no non-unique-result exceptions).
+   * The storageMc field will be null if no accepted MC test exists for this seedlot.
+   *
+   * @param riaKey the Request Item Activity SKEY
+   * @return optional containing DrybackScreenDto with all required dryback screen data
+   */
+  @Query("""
+      SELECT new ca.bc.gov.oracleapi.dto.consep.DrybackScreenDto(
+             a.riaKey,
+             a.requestId,
+             a.itemId,
+             a.seedlotNumber,
+             a.familyLotNumber,
+             a.standardActivityId,
+             a.activityTypeCode,
+             a.actualBeginDateTime,
+             a.actualEndDateTime,
+             a.dryWeight,
+             a.priorMoist,
+             a.imbibedWeight,
+             a.drybackWeight,
+             a.drybackMoist,
+             a.drybackTime,
+             a.targetThirtyMoist,
+             a.targetThirtyFiveMoist,
+             a.stratEndWeight,
+             t.moisturePct,
+             a.riaComment,
+             a.updateTimestamp
+      )
+      FROM ActivityEntity a
+      LEFT JOIN ActivityEntity mcActivity 
+        ON mcActivity.seedlotNumber = a.seedlotNumber
+        AND mcActivity.activityTypeCode = 'MC'
+        AND EXISTS (
+          SELECT 1 FROM TestResultEntity tr
+          WHERE tr.riaKey = mcActivity.riaKey
+            AND tr.currentTest = -1
+            AND tr.acceptResult = -1
+        )
+      LEFT JOIN TestResultEntity t 
+        ON t.riaKey = mcActivity.riaKey
+        AND t.currentTest = -1
+        AND t.acceptResult = -1
+      WHERE a.riaKey = :riaKey
+      """)
+  Optional<DrybackScreenDto> findDrybackScreenDataByRiaSkey(
+      @Param("riaKey") BigDecimal riaKey
+  );
 }
