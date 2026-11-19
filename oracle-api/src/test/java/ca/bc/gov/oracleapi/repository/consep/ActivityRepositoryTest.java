@@ -180,15 +180,16 @@ class ActivityRepositoryTest {
   void findDrybackScreenDataByRiaSkey_shouldIgnoreRejectedMcTest_andReturnNullStorageMc() {
     // Given: G64 activity and MC test with rejected result
     ActivityEntity drybackActivity = persistActivityWithType("00125", "G64", "G64", BEGIN, END);
-    ActivityEntity mcActivity = persistActivityWithType("00125", "MC", "MC", BEGIN, END);
+    // Create separate MC activity for rejected test (can't reuse riaKey)
+    ActivityEntity rejectedMcActivity = persistActivityWithType("00125", "MC", "MC", BEGIN, END);
 
     entityManager.flush();
 
     BigDecimal drybackRiaKey = drybackActivity.getRiaKey();
-    BigDecimal mcRiaKey = mcActivity.getRiaKey();
+    BigDecimal rejectedMcRiaKey = rejectedMcActivity.getRiaKey();
 
     // Create MC test result that is REJECTED (acceptResult != -1)
-    persistTestResult(mcRiaKey, "MC", -1, 0, BigDecimal.valueOf(13.0));
+    persistTestResult(rejectedMcRiaKey, "MC", -1, 0, BigDecimal.valueOf(13.0));
 
     entityManager.flush();
 
@@ -204,15 +205,16 @@ class ActivityRepositoryTest {
   void findDrybackScreenDataByRiaSkey_shouldIgnoreNonCurrentMcTest_andReturnNullStorageMc() {
     // Given: G64 activity and MC test that is not current
     ActivityEntity drybackActivity = persistActivityWithType("00126", "G64", "G64", BEGIN, END);
-    ActivityEntity mcActivity = persistActivityWithType("00126", "MC", "MC", BEGIN, END);
+    // Create separate MC activity for non-current test (can't reuse riaKey)
+    ActivityEntity nonCurrentMcActivity = persistActivityWithType("00126", "MC", "MC", BEGIN, END);
 
     entityManager.flush();
 
     BigDecimal drybackRiaKey = drybackActivity.getRiaKey();
-    BigDecimal mcRiaKey = mcActivity.getRiaKey();
+    BigDecimal nonCurrentMcRiaKey = nonCurrentMcActivity.getRiaKey();
 
     // Create MC test result that is NOT CURRENT (currentTest != -1)
-    persistTestResult(mcRiaKey, "MC", 0, -1, BigDecimal.valueOf(14.0));
+    persistTestResult(nonCurrentMcRiaKey, "MC", 0, -1, BigDecimal.valueOf(14.0));
 
     entityManager.flush();
 
@@ -264,27 +266,34 @@ class ActivityRepositoryTest {
   }
 
   @Test
-  void findDrybackScreenDataByRiaSkey_shouldReturnDrybackWithCurrentAcceptedMc_whenMultipleTestsExist() {
-    // Given: G64 activity with multiple MC test results (rejected + current accepted)
+  void findDrybackScreenDataByRiaSkey_shouldReturnDrybackWithCurrentAcceptedMc_whenMultipleMcActivitiesExist() {
+    // Given: G64 activity with multiple MC activities (rejected and accepted)
+    // This tests the non-unique-result scenario where the query must only join
+    // MC activities that have an accepted test result
     ActivityEntity drybackActivity = persistActivityWithType("00129", "G64", "G64", BEGIN, END);
-    ActivityEntity mcActivity = persistActivityWithType("00129", "MC", "MC", BEGIN, END);
+    
+    // Create rejected MC activity
+    ActivityEntity rejectedMcActivity = persistActivityWithType("00129", "MC", "MC", BEGIN, END);
+    // Create accepted MC activity (must be separate to have distinct riaKey)
+    ActivityEntity acceptedMcActivity = persistActivityWithType("00129", "MC", "MC", BEGIN.plusHours(1), END.plusHours(1));
 
     entityManager.flush();
 
     BigDecimal drybackRiaKey = drybackActivity.getRiaKey();
-    BigDecimal mcRiaKey = mcActivity.getRiaKey();
+    BigDecimal rejectedMcRiaKey = rejectedMcActivity.getRiaKey();
+    BigDecimal acceptedMcRiaKey = acceptedMcActivity.getRiaKey();
 
     // Create a rejected MC test
-    persistTestResult(mcRiaKey, "MC", -1, 0, BigDecimal.valueOf(11.0));
+    persistTestResult(rejectedMcRiaKey, "MC", -1, 0, BigDecimal.valueOf(11.0));
     // Create the current accepted MC test
-    persistTestResult(mcRiaKey, "MC", -1, -1, BigDecimal.valueOf(12.3));
+    persistTestResult(acceptedMcRiaKey, "MC", -1, -1, BigDecimal.valueOf(12.3));
 
     entityManager.flush();
 
     // When: querying for dryback screen data
     Optional<DrybackScreenDto> result = activityRepository.findDrybackScreenDataByRiaSkey(drybackRiaKey);
 
-    // Then: should return the accepted test value
+    // Then: should return the accepted test value (not throw non-unique-result exception)
     assertThat(result).isPresent();
     assertThat(result.get().getStorageMc()).isEqualByComparingTo(BigDecimal.valueOf(12.3));
   }
