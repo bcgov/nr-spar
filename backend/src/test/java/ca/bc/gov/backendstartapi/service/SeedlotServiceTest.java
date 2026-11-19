@@ -1395,6 +1395,7 @@ class SeedlotServiceTest {
     verify(seedlotSeedPlanZoneRepository, never()).saveAll(any());
     verify(seedlotGeneticWorthService, never()).saveSeedlotGenWorth(any(), any());
   }
+
   @Test
   @DisplayName("submitSeedlotFormClassB saves the area of use comment from a TSC admin")
   void submitSeedlotFormClassB_tscAdmin_savesAreaOfUseComment() {

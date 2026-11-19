@@ -443,7 +443,8 @@ public class OracleApiProvider implements Provider {
       throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
     } catch (RestClientException restExc) {
       // 5xx responses and connection failures
-      SparLog.error("GET SPZ coast/interior from Oracle - Request failed: {}", restExc.getMessage());
+      SparLog.error(
+          "GET SPZ coast/interior from Oracle - Request failed: {}", restExc.getMessage());
       throw new OracleApiProviderException();
     }
   }

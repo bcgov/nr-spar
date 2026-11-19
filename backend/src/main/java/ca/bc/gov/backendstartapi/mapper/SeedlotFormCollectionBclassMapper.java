@@ -33,8 +33,8 @@ public interface SeedlotFormCollectionBclassMapper {
    * {@link #applyDatesOnlyWhenChanged} so unchanged values do not bump the revision. Area-of-use
    * bounds are set by the server, never by the client, so the seedlot keeps its stored values. The
    * area of use comment is also skipped here: only TSC admins may change it, which {@code
-   * SeedlotService} checks. The provenance id has no input in SPAR and only carries migrated legacy B+ values,
-   * which decide how area of use is derived, so it is kept too.
+   * SeedlotService} checks. The provenance id has no input in SPAR and only carries migrated
+   * legacy B+ values, which decide how area of use is derived, so it is kept too.
    */
   @Mapping(target = "collectionLocationCode", source = "collectionLocnCode")
   @Mapping(target = "numberOfContainers", source = "noOfContainers")
