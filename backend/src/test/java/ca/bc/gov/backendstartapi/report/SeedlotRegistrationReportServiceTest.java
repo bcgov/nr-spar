@@ -1,9 +1,9 @@
 package ca.bc.gov.backendstartapi.report;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
@@ -155,21 +155,39 @@ class SeedlotRegistrationReportServiceTest {
     mainRow.setCollectionElevation(new BigDecimal("1200"));
     mainRow.setCollectionElevationMin(new BigDecimal("1100"));
     mainRow.setCollectionElevationMax(new BigDecimal("1300"));
+    mainRow.setOrchardComment("Cones collected after the first frost");
     Sprr001OwnershipRow owner = new Sprr001OwnershipRow();
     owner.setClientNumber("00012797");
+    owner.setClientAcronym("WFP");
+    owner.setClientLocnCode("02");
     owner.setOwnerPortionPct(new BigDecimal("100"));
+    owner.setFundingSource("FTP");
+    owner.setSparFundSrceDesc("Forest Tenure Program");
+    owner.setMethodOfPaymentCode("ITC");
+    owner.setMethodOfPaymentDesc("Invoice to client");
     when(reportDataAssembler.assemble(seedlot))
         .thenReturn(new Sprr001ReportData(mainRow, List.of(owner)));
 
     byte[] pdf = service.generateBclassRegistrationReport("53001", "user");
 
+    StringBuilder text = new StringBuilder();
     PdfReader reader = new PdfReader(pdf);
     try {
-      assertTrue(reader.getNumberOfPages() >= 1);
-      assertTrue(new PdfTextExtractor(reader).getTextFromPage(1).contains("53001"));
+      PdfTextExtractor extractor = new PdfTextExtractor(reader);
+      for (int page = 1; page <= reader.getNumberOfPages(); page++) {
+        text.append(extractor.getTextFromPage(page)).append('\n');
+      }
     } finally {
       reader.close();
     }
+    // One value from the main report and each populated subreport (comments, ownership row).
+    assertThat(text.toString())
+        .contains(
+            "53001",
+            "Cones collected after the first frost",
+            "WFP",
+            "Forest Tenure Program",
+            "Invoice to client");
   }
 
   @Test
