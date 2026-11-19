@@ -2,6 +2,8 @@ package ca.bc.gov.oracleapi.service.consep;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,6 +103,27 @@ final class GerminationMetrics {
         BigDecimal.valueOf(lastDay), SCALE, RoundingMode.HALF_EVEN);
     return new Result(
         cint(finalCumulative), cint(mdg.multiply(peak)), cint(peakCumulative), peakDay);
+  }
+
+  /**
+   * The date test day numbers count from, per the Confluence spec: QA tests count from the
+   * germinator entry; every other category from begin + soak + strat hours.
+   *
+   * <p>shortcut: the spec's fractional-day formula is reduced to calendar days (the time of day
+   * is dropped), revisit if legacy day numbers disagree.
+   *
+   * @return the day-zero date, or null when the date it needs is not recorded yet
+   */
+  static LocalDate dayZero(String testCategoryCd, LocalDateTime actualBegin,
+      LocalDate germinatorEntry, Integer soakHours, Integer stratHours) {
+    if ("QA".equals(testCategoryCd)) {
+      return germinatorEntry;
+    }
+    if (actualBegin == null) {
+      return null;
+    }
+    long hours = (soakHours == null ? 0 : soakHours) + (stratHours == null ? 0 : stratHours);
+    return actualBegin.plusHours(hours).toLocalDate();
   }
 
   /** MS Access CInt: round half to even. */

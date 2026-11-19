@@ -212,7 +212,8 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
             a.requestId,
             a.seedlotNumber,
             a.familyLotNumber,
-            a.vegetationState
+            a.vegetationState,
+            null
     )
     FROM TestResultEntity tst
     JOIN ActivityEntity a

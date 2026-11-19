@@ -79,13 +79,13 @@ export const formatCountDateLines = (isoDate: string): [string, string] => {
 };
 
 export const calcDayNumber = (
-  germinatorEntry: string | undefined,
+  dayZero: string | undefined,
   countDt: string
 ): number | undefined => {
-  if (!germinatorEntry || !countDt) {
+  if (!dayZero || !countDt) {
     return undefined;
   }
-  const entry = Date.parse(`${germinatorEntry}T00:00:00`);
+  const entry = Date.parse(`${dayZero}T00:00:00`);
   const count = Date.parse(`${countDt}T00:00:00`);
   if (Number.isNaN(entry) || Number.isNaN(count)) {
     return undefined;
@@ -94,18 +94,19 @@ export const calcDayNumber = (
 };
 
 /**
- * The date day numbers are counted from. Normally the germinator entry date,
+ * The date day numbers are counted from. Normally the header's dayZero
+ * (germinator entry for QA tests, begin + soak + strat hours otherwise; #2756),
  * but records can carry day numbers without one; there the offset is
  * recoverable from any other slot that still has both a date and a day number.
  * Without it an edit would blank the day number it cannot recompute.
  */
 export const resolveDayZero = (
-  germinatorEntry: string | undefined,
+  headerDayZero: string | undefined,
   slots: GermCountSlotType[],
   excludeSlotIndex?: number
 ): string | undefined => {
-  if (germinatorEntry) {
-    return germinatorEntry;
+  if (headerDayZero) {
+    return headerDayZero;
   }
   const reference = slots.find((slot) => (
     slot.slotIndex !== excludeSlotIndex
@@ -291,3 +292,8 @@ export const buildUpsertPayload = (
     .map(({ dailyGermSkey, cumulativeGerm, ...rest }) => rest),
   replicates
 });
+
+/** PV as the legacy screen shows it, "peak % / peak day" (e.g. 78/7); blank until calculated. */
+export const formatPeakValue = (pct?: number | null, days?: number | null): string => (
+  pct === undefined || pct === null || !days ? '' : `${pct}/${days}`
+);

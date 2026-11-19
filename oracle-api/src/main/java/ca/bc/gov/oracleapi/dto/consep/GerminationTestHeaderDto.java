@@ -192,6 +192,13 @@ public record GerminationTestHeaderDto(
     String familyLotNumber,
 
     @Schema(description = "Vegetation (species) code", example = "SX")
-    String vegetationState
+    String vegetationState,
+
+    @Schema(
+        description = "Date test day numbers count from: germinator entry for QA tests,"
+            + " begin + soak + strat hours otherwise. Null until that date is known.",
+        example = "2026-04-16"
+    )
+    LocalDate dayZero
 ) {
 }

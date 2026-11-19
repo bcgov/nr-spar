@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalUpsertRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestUpdateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.GermCountSlotDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
@@ -16,6 +17,7 @@ import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.mapper.GermCountMapper;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
@@ -26,8 +28,10 @@ import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +61,7 @@ public class TestResultService {
   private final DailyAbnormalRepository dailyAbnormalRepository;
   private final GermCountRepository germCountRepository;
   private final TestRepGermRepository testRepGermRepository;
+  private final GermCountMapper germCountMapper;
 
   /**
    * Update the test status to "completed".
@@ -115,15 +120,19 @@ public class TestResultService {
                         HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY");
                   });
 
-      // Compute soakEndDate in service layer
+      // Compute soakEndDate and the day-number origin in service layer
       LocalDateTime soakEndDate = null;
+      Integer stratHours = null;
       if (dto.actualBeginDtTm() != null) {
         // Get soak hours from test result
         TestRegimeEntity regime = testRegimeRepository.findById(dto.activityTypeCd()).orElse(null);
         int soakHours =
             (regime != null && regime.getSoakHours() != null) ? regime.getSoakHours() : 0;
         soakEndDate = dto.actualBeginDtTm().plusHours(soakHours);
+        stratHours = regime == null ? null : regime.getStratHours();
       }
+      LocalDate dayZero = GerminationMetrics.dayZero(dto.testCategoryCd(),
+          soakEndDate, dto.germinatorEntry(), 0, stratHours);
 
       // Create new DTO with computed soakEndDate
       return new GerminationTestHeaderDto(
@@ -165,13 +174,83 @@ public class TestResultService {
           dto.requestId(),
           dto.seedlotNumber(),
           dto.familyLotNumber(),
-          dto.vegetationState());
+          dto.vegetationState(),
+          dayZero);
 
     } catch (IncorrectResultSizeDataAccessException ex) {
       SparLog.error("Data integrity issue: multiple rows found for RIA_SKEY {}", riaKey, ex);
       throw new DataIntegrityViolationException(
           "Expected exactly one germination test row for RIA_SKEY " + riaKey, ex);
     }
+  }
+
+  /**
+   * The Calc button (#2756): compute Germination %, GV and peak value from the stored daily
+   * counts and replicates, and save them on the test result.
+   *
+   * @param riaKey the test key
+   * @return the refreshed header carrying the new values
+   * @throws ResponseStatusException 404 if the test is missing, 409 if it is accepted (a completed
+   *     test can still be recalculated, #2756), 422 if there are no dated counts to calculate from
+   */
+  @Transactional
+  public GerminationTestHeaderDto calculateGerminationMetrics(BigDecimal riaKey) {
+    GerminationTestHeaderDto header = getGerminationTestHeader(riaKey);
+    TestResultEntity test = testResultRepository.findByIdForUpdate(riaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY"));
+    if (isSet(test.getAcceptResult())) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "This test is accepted and can no longer be recalculated");
+    }
+
+    Integer[] totalSeeds = new Integer[4];
+    boolean[] accepted = new boolean[4];
+    for (TestRepGermEntity rep : testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaKey)) {
+      int i = rep.getId().getReplicateNumber() - 1;
+      if (i >= 0 && i < 4) {
+        totalSeeds[i] = rep.getTotalNoSeeds();
+        // Legacy stores true as -1, the screen 1; only an explicit 0 rejects (as on save).
+        accepted[i] = rep.getRepAcceptedInd() == null || rep.getRepAcceptedInd() != 0;
+      }
+    }
+
+    List<GermCountSlotDto> days = germCountRepository.findById(riaKey)
+        .map(germCountMapper::buildSlots)
+        .orElse(List.of())
+        .stream()
+        .filter(s -> s.countDt() != null)
+        .sorted(Comparator.comparingInt(GermCountSlotDto::slotIndex))
+        .toList();
+    List<Integer[]> counts = days.stream()
+        .map(s -> new Integer[] {
+            s.rep1NoSeedsGerm(), s.rep2NoSeedsGerm(), s.rep3NoSeedsGerm(), s.rep4NoSeedsGerm()})
+        .toList();
+    List<Integer> dayNumbers = days.stream()
+        .map(s -> header.dayZero() == null
+            ? s.dayNoOfTest()
+            : (int) ChronoUnit.DAYS.between(header.dayZero(), s.countDt()))
+        .toList();
+
+    GerminationMetrics.Result result = GerminationMetrics.calculate(
+        dayNumbers, GerminationMetrics.cumulativePercents(counts, totalSeeds, accepted));
+    if (result == null) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Enter germination counts with a count date before calculating");
+    }
+
+    test.setGerminationPct(result.germinationPct());
+    test.setGerminationValue(result.germinationValue());
+    test.setPeakValueGrmPct(result.peakValueGrmPct());
+    test.setPeakValueNoDays(result.peakValueNoDays());
+    test.setUpdateTimestamp(LocalDateTime.now());
+    testResultRepository.saveAndFlush(test);
+    SparLog.info("Germination metrics calculated for RIA_SKEY: {}", riaKey);
+    return getGerminationTestHeader(riaKey);
+  }
+
+  private static boolean isSet(Integer indicator) {
+    return indicator != null && indicator != 0;
   }
 
   /**

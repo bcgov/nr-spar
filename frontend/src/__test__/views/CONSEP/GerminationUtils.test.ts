@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import {
   getDefaultSeeds, calcDayNumber, resolveDayZero, validateCountDates, formatCountDateLines,
   calcRepTotal, checkOverLimit, calcGermPct, buildUpsertPayload, parseCountInput,
-  getSlotDateBounds, calcSlotAbnormalTotal, calcRepAbnormalTotal
+  getSlotDateBounds, calcSlotAbnormalTotal, calcRepAbnormalTotal, formatPeakValue
 } from '../../../views/CONSEP/TestingActivities/GerminationContent/utils';
 
 describe('getDefaultSeeds', () => {
@@ -331,5 +331,17 @@ describe('getSlotDateBounds', () => {
       minDate: '2024/11/05',
       maxDate: undefined
     });
+  });
+});
+
+describe('formatPeakValue (#2756)', () => {
+  it('shows peak % over peak day', () => {
+    expect(formatPeakValue(78, 7)).toBe('78/7');
+  });
+
+  it('is blank until calculated, or with no peak day', () => {
+    expect(formatPeakValue(undefined, 7)).toBe('');
+    expect(formatPeakValue(null, null)).toBe('');
+    expect(formatPeakValue(78, 0)).toBe('');
   });
 });

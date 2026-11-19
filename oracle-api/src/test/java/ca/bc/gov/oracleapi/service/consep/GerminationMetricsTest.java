@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -100,5 +102,27 @@ class GerminationMetricsTest {
   @CsvSource({"75.5,76", "76.5,76", "77.5,78", "78.5,78", "79.5,80", "90.49,90", "90.51,91"})
   void cintRoundsHalfToEven(String value, int expected) {
     assertEquals(expected, GerminationMetrics.cint(new BigDecimal(value)));
+  }
+
+  @Test
+  void dayZero_qaCountsFromGerminatorEntry() {
+    LocalDate entry = LocalDate.of(2026, 5, 10);
+    assertEquals(entry, GerminationMetrics.dayZero(
+        "QA", LocalDateTime.of(2026, 5, 1, 9, 0), entry, 24, 48));
+  }
+
+  @Test
+  void dayZero_otherCategoriesCountFromBeginPlusSoakAndStrat() {
+    // 2026-05-01 20:00 + 24h soak + 48h strat = 2026-05-04 20:00
+    assertEquals(LocalDate.of(2026, 5, 4), GerminationMetrics.dayZero(
+        "STD", LocalDateTime.of(2026, 5, 1, 20, 0), LocalDate.of(2026, 5, 10), 24, 48));
+    assertEquals(LocalDate.of(2026, 5, 1), GerminationMetrics.dayZero(
+        "STD", LocalDateTime.of(2026, 5, 1, 20, 0), null, null, null));
+  }
+
+  @Test
+  void dayZero_nullUntilItsDateIsKnown() {
+    assertNull(GerminationMetrics.dayZero("STD", null, LocalDate.of(2026, 5, 10), 24, 0));
+    assertNull(GerminationMetrics.dayZero("QA", LocalDateTime.of(2026, 5, 1, 9, 0), null, 0, 0));
   }
 }

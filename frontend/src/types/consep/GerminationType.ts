@@ -69,6 +69,8 @@ export type GerminationTestHeaderType = {
   peakValueNoDays?: number;
   seedWithdrawalDate?: string;
   germinatorEntry?: string; // 'YYYY-MM-DD'
+  // Day numbers count from here (#2756): germinator entry for QA, begin + soak + strat otherwise.
+  dayZero?: string; // 'YYYY-MM-DD'
   germinatorTrayId?: number;
   germinatorId?: string;
   testResultUpdateTimestamp?: string;
