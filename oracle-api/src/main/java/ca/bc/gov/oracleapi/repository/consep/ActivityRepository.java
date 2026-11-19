@@ -235,6 +235,27 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("revisedStartDate") LocalDate revisedStartDate,
       @Param("revisedEndDate") LocalDate revisedEndDate);
 
+  /**
+   * Reschedule dependent activities to planned + dateDiff (planned NULL keeps the revised date).
+   * Touches only the scheduling columns and update_timestamp.
+   *
+   * @return rows updated
+   */
+  @Modifying
+  @Transactional
+  @Query("""
+      UPDATE ActivityEntity a
+         SET a.revisedStartDate = CASE WHEN a.plannedStartDate IS NULL THEN a.revisedStartDate
+                                       ELSE a.plannedStartDate + :dateDiff day END,
+             a.revisedEndDate = CASE WHEN a.plannedEndDate IS NULL THEN a.revisedEndDate
+                                     ELSE a.plannedEndDate + :dateDiff day END,
+             a.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE a.riaKey IN :riaKeys
+      """)
+  int shiftRevisedDates(
+      @Param("riaKeys") Collection<BigDecimal> riaKeys,
+      @Param("dateDiff") long dateDiff);
+
   /** Direct dependants of the given activities in CNS_T_RIA_DEPENDANCY (one level). */
   @Query(
       value = """

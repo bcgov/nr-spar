@@ -182,17 +182,10 @@ public class DrybackScreenService {
       return;
     }
 
-    LocalDateTime now = LocalDateTime.now();
-    for (ActivityEntity dependant : activityRepository.findAllById(seen)) {
-      if (dependant.getPlannedStartDate() != null) {
-        dependant.setRevisedStartDate(dependant.getPlannedStartDate().plusDays(dateDiff));
-      }
-      if (dependant.getPlannedEndDate() != null) {
-        dependant.setRevisedEndDate(dependant.getPlannedEndDate().plusDays(dateDiff));
-      }
-      dependant.setUpdateTimestamp(now);
-    }
+    // Scheduling-only bulk UPDATE: a loaded entity would write every column back on flush
+    // and could overwrite a concurrent save of the dependant's other fields.
+    int rows = activityRepository.shiftRevisedDates(seen, dateDiff);
     SparLog.info("Shifted {} dependent activities of riaKey: {} by {} days",
-        seen.size(), riaSkey, dateDiff);
+        rows, riaSkey, dateDiff);
   }
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -148,7 +149,7 @@ class DrybackSaveServiceTest {
   }
 
   @Test
-  void save_shiftsTransitiveDependants_toPlannedPlusDiff_andStopsOnCycle() {
+  void save_shiftsAllTransitiveDependants_andStopsOnCycle() {
     storedFound();
     refreshFound();
     DrybackSaveDto dto = dto(at(3, 4), null);
@@ -161,21 +162,24 @@ class DrybackSaveServiceTest {
     // cycle back to the root and to the child: must terminate
     when(activityRepository.findDependantRiaKeys(List.of(grandChild)))
         .thenReturn(List.of(RIA, child));
-    ActivityEntity childEntity =
-        activity(child, LocalDate.of(2026, 3, 11), LocalDate.of(2026, 3, 20));
-    ActivityEntity grandChildEntity = activity(grandChild, null, LocalDate.of(2026, 3, 25));
-    grandChildEntity.setRevisedStartDate(LocalDate.of(2026, 3, 21));
-    when(activityRepository.findAllById(Set.of(child, grandChild)))
-        .thenReturn(List.of(childEntity, grandChildEntity));
 
     service.saveDryback(RIA, dto);
 
-    assertThat(childEntity.getRevisedStartDate()).isEqualTo(LocalDate.of(2026, 3, 14));
-    assertThat(childEntity.getRevisedEndDate()).isEqualTo(LocalDate.of(2026, 3, 23));
-    assertThat(childEntity.getUpdateTimestamp()).isNotNull();
-    // planned start null: revised start kept
-    assertThat(grandChildEntity.getRevisedStartDate()).isEqualTo(LocalDate.of(2026, 3, 21));
-    assertThat(grandChildEntity.getRevisedEndDate()).isEqualTo(LocalDate.of(2026, 3, 28));
+    verify(activityRepository).shiftRevisedDates(Set.of(child, grandChild), 3L);
+  }
+
+  @Test
+  void save_noDependants_skipsShift() {
+    storedFound();
+    refreshFound();
+    DrybackSaveDto dto = dto(at(3, 4), null);
+    when(activityRepository.updateDrybackActivityWithLock(eq(RIA), eq(dto), any(), any()))
+        .thenReturn(1);
+    when(activityRepository.findDependantRiaKeys(List.of(RIA))).thenReturn(List.of());
+
+    service.saveDryback(RIA, dto);
+
+    verify(activityRepository, never()).shiftRevisedDates(anyCollection(), anyLong());
   }
 
   @Test
