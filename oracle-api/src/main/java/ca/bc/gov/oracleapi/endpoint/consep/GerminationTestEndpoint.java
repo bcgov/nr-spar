@@ -27,6 +27,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -291,5 +293,50 @@ public class GerminationTestEndpoint {
 
     SparLog.info("Received request to update germination test for key: {}", riaKey);
     return testResultService.updateGerminationTest(riaKey, updateDto);
+  }
+
+  /**
+   * Calculate and save Germination %, GV and peak value from the stored daily counts (#2756).
+   *
+   * @param riaKey identifier key for test activity related tables
+   * @return the refreshed germination test header
+   */
+  @PostMapping(value = "/{riaKey}/calculate", produces = "application/json")
+  @Operation(
+      summary = "Calculate germination metrics",
+      description = "Computes Germination %, GV and peak value from the saved daily counts"
+          + " and replicates, saves them on the test result and returns the header.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Metrics calculated and saved.",
+            content = @Content(schema = @Schema(implementation = GerminationTestHeaderDto.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "No data found for the given riaKey",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "The test is completed or accepted",
+            content = @Content(schema = @Schema(hidden = true))),
+        @ApiResponse(
+            responseCode = "422",
+            description = "No dated germination counts to calculate from",
+            content = @Content(schema = @Schema(hidden = true)))
+      })
+  @ApiAuthResponse
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  public GerminationTestHeaderDto calculateGerminationMetrics(
+      @PathVariable
+          @Positive(message = "riaKey must be a positive number")
+          @Parameter(
+              name = "riaKey",
+              in = ParameterIn.PATH,
+              description = "The ria key.",
+              required = true)
+          BigDecimal riaKey) {
+    SparLog.info("Received request to calculate germination metrics for key: {}", riaKey);
+    return testResultService.calculateGerminationMetrics(riaKey);
   }
 }

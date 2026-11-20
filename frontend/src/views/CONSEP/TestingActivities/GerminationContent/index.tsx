@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   FlexGrid, Row, Column, InlineNotification, TextInput, Button, Modal
 } from '@carbon/react';
@@ -11,7 +11,8 @@ import { CheckmarkFilled, Time } from '@carbon/icons-react';
 
 import ROUTES from '../../../../routes/constants';
 import {
-  getGerminationTestHeader, getGermCounts, getTestReplicates, putGermCounts
+  calculateGerminationMetrics, getGerminationTestHeader, getGermCounts, getTestReplicates,
+  putGermCounts, updateRepAccepted
 } from '../../../../api-service/consep/germinationTestAPI';
 import { getGerminatorTrayContents } from '../../../../api-service/consep/germinatorTrayAPI';
 import {
@@ -31,7 +32,7 @@ import DailyGermTable from './DailyGermTable';
 import AbnormalsTable, { ABNORMAL_CATEGORIES } from './AbnormalsTable';
 import {
   getDefaultSeeds, validateCountDates, checkOverLimit, buildUpsertPayload,
-  parseCountInput, ABNORMAL_MAX, REP_ABNORMAL_KEYS
+  parseCountInput, formatPeakValue, withDayNumbers, ABNORMAL_MAX, REP_ABNORMAL_KEYS
 } from './utils';
 
 import './styles.scss';
@@ -159,13 +160,14 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       return;
     }
 
-    const nextSlots = emptySlots();
+    let nextSlots = emptySlots();
     if (germCountQuery.data) {
       germCountQuery.data.slots.forEach((slot) => {
         nextSlots[slot.slotIndex - 1] = slot;
       });
       setUpdateTimestamp(germCountQuery.data.updateTimestamp);
     }
+    nextSlots = withDayNumbers(nextSlots, headerQuery.data?.dayZero);
     setSlots(nextSlots);
     slotsRef.current = nextSlots;
     if (replicatesQuery.isFetched && headerQuery.data) {
@@ -175,6 +177,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [germCountQuery.isFetched, germCountQuery.data, germCountQuery.isError, germCountQuery.error]);
 
+  const headerLoaded = !!headerQuery.data;
+  const headerCategory = headerQuery.data?.testCategoryCd;
+  const headerDayZero = headerQuery.data?.dayZero;
   // Hydrate replicates: API rows or category defaults (AC4). Same
   // set-state-then-markSaved discipline as the slots effect.
   useEffect(() => {
@@ -188,11 +193,17 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     setReplicates(nextReplicates);
     replicatesRef.current = nextReplicates;
     if (germCountQuery.isFetched) {
-      markSavedRef.current({ slots: slotsRef.current, replicates: nextReplicates });
+      // The header may land after the counts, so their day numbers are fixed here too.
+      const nextSlots = withDayNumbers(slotsRef.current, headerQuery.data.dayZero);
+      setSlots(nextSlots);
+      slotsRef.current = nextSlots;
+      markSavedRef.current({ slots: nextSlots, replicates: nextReplicates });
       setIsHydrated(true);
     }
+    // Only the header fields used here: Calc rewrites the cached header, and rerunning on that
+    // would put back the stale cached replicates over an Accept box just changed (#2756).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [replicatesQuery.isFetched, replicatesQuery.data, headerQuery.data]);
+  }, [replicatesQuery.isFetched, replicatesQuery.data, headerLoaded, headerCategory, headerDayZero]);
 
   const validationErrors = useMemo(() => ({
     ...validateCountDates(slots),
@@ -331,8 +342,55 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  const queryClient = useQueryClient();
+  const calcMutation = useMutation({
+    mutationFn: () => calculateGerminationMetrics(riaKey ?? ''),
+    onSuccess: (fresh) => {
+      queryClient.setQueryData(['germination-test-header', riaKey], fresh);
+      setAlert(null);
+    },
+    onError: (error) => {
+      const reason = ((error as AxiosError).response?.data as { message?: string } | undefined)
+        ?.message;
+      setAlert({ isSuccess: false, message: `Could not calculate: ${reason ?? (error as AxiosError).message}` });
+    }
+  });
+
+  // A completed test locks the counts, but the technician can still include or
+  // exclude a replicate and recalculate until the test is accepted (#2756).
+  const canToggleAccept = isCompleted && !isAccepted && !isConflict;
+  const acceptMutation = useMutation({
+    mutationFn: (v: { repNumber: number; checked: boolean }) => (
+      updateRepAccepted(riaKey ?? '', v.repNumber, v.checked ? 1 : 0)
+    ),
+    onSuccess: (_, v) => {
+      const next = replicatesRef.current.map((rep) => (
+        rep.replicateNumber === v.repNumber ? { ...rep, repAcceptedInd: v.checked ? 1 : 0 } : rep
+      ));
+      setReplicates(next);
+      // Already saved by the PATCH: autosave must not see it as a pending edit.
+      markSaved({ slots: slotsRef.current, replicates: next });
+    },
+    onError: (error) => {
+      if ((error as AxiosError).response?.status === 409) {
+        markConflict();
+        return;
+      }
+      setAlert({ isSuccess: false, message: `Could not update the replicate: ${(error as AxiosError).message}` });
+    }
+  });
+
+  // Calc reads the saved counts, so whatever was just typed is saved first.
+  const handleCalculate = async () => {
+    if (Object.keys(validationErrors).length > 0 || !(await flush())) {
+      setAlert({ isSuccess: false, message: 'Fix the errors on this test before calculating.' });
+      return;
+    }
+    calcMutation.mutate();
+  };
+
   const handleReloadOnConflict = async () => {
-    // Refetch the header too (I5): germinatorEntry drives day-number calc and
+    // Refetch the header too (I5): dayZero drives day-number calc and
     // testCompleteInd gates isEditable, so a stale header would leave both
     // wrong after a conflict reload.
     const [countResult] = await Promise.all([
@@ -390,7 +448,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       )}
       {/* Title (and everything below) is gated on the header having loaded:
           the header card, table hydration and day-number calculations all
-          depend on header fields (e.g. germinatorEntry), so rendering them
+          depend on header fields (e.g. dayZero), so rendering them
           before header exists would show stale/blank data and let a user
           interact with the table before day numbers can be computed. */}
       {header && (
@@ -436,6 +494,24 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               cellClassName="consep-germination-content-summary-cell"
             />
           </Row>
+          <Row className="consep-germination-content-results">
+            <Column sm={1} md={1} lg={1}>
+              <TextInput
+                id="germ-header-gv"
+                labelText="GV"
+                value={header.germinationValue ?? ''}
+                readOnly
+              />
+            </Column>
+            <Column sm={1} md={1} lg={1}>
+              <TextInput
+                id="germ-header-pv"
+                labelText="PV"
+                value={formatPeakValue(header.peakValueGrmPct, header.peakValueNoDays)}
+                readOnly
+              />
+            </Column>
+          </Row>
           <Row className="consep-germination-content-comments">
             <Column>
               <TextInput
@@ -451,7 +527,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               <DailyGermTable
                 slots={slots}
                 replicates={replicates}
-                germinatorEntry={header.germinatorEntry}
+                dayZero={header.dayZero}
                 isEditable={isEditable}
                 validationErrors={validationErrors}
                 onSlotsChange={setSlots}
@@ -459,6 +535,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
                 onSlotSelect={setSelectedSlot}
                 isHydrated={isHydrated}
                 firstAbnormalCode={ABNORMAL_CATEGORIES[0].code}
+                onAcceptToggle={canToggleAccept
+                  ? (repNumber, checked) => acceptMutation.mutate({ repNumber, checked })
+                  : undefined}
               />
             </Column>
           </Row>
@@ -473,8 +552,21 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               />
             </Column>
           </Row>
-          {/* Legacy action buttons (Final/Rank/Curve/Copy results/...) are still
-              out of scope — placeholders intentionally omitted. */}
+          {/* Other legacy action buttons (Final/Rank/Curve/Copy results/...) are
+              still out of scope — placeholders intentionally omitted. */}
+          <Row className="consep-germination-content-actions">
+            <Column>
+              <Button
+                kind="tertiary"
+                size="md"
+                // Recalculating stays open on a completed test; accepting locks it (#2756).
+                disabled={isAccepted || isConflict || calcMutation.isPending || acceptMutation.isPending}
+                onClick={handleCalculate}
+              >
+                Calc
+              </Button>
+            </Column>
+          </Row>
         </>
       )}
     </FlexGrid>

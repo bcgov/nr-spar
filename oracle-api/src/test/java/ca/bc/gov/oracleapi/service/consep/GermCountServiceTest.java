@@ -341,9 +341,9 @@ class GermCountServiceTest {
 
     assertEquals(new BigDecimal("2001"), saved.getDailyGermSkey1());
     assertEquals(new BigDecimal("2002"), saved.getDailyGermSkey2());
-    // cumulative: day1 = 10+12+11+9 = 42; day2 = 42 + (5+6+7+8=26) = 68
-    assertEquals(0, saved.getCumulativeGerm1().compareTo(new BigDecimal("42")));
-    assertEquals(0, saved.getCumulativeGerm2().compareTo(new BigDecimal("68")));
+    // cumulative % (100 seeds/rep): day1 = (10+12+11+9)/4 = 10.5; day2 = 10.5 + 26/4 = 17
+    assertEquals(new BigDecimal("10.5000"), saved.getCumulativeGerm1());
+    assertEquals(new BigDecimal("17.0000"), saved.getCumulativeGerm2());
     assertEquals("USER1", saved.getEntryUserid());
     assertEquals("USER1", saved.getUpdateUserid());
   }
@@ -443,9 +443,10 @@ class GermCountServiceTest {
     assertNull(saved.getDailyGermSkey2());
     assertNull(saved.getRep1NoSeedsGerm2());
     assertNull(saved.getCumulativeGerm2());
-    // Its 5 germinated seeds must not leak into the running total: 10 then 10+7.
-    assertEquals(0, saved.getCumulativeGerm1().compareTo(new BigDecimal("10")));
-    assertEquals(0, saved.getCumulativeGerm3().compareTo(new BigDecimal("17")));
+    // Its 5 germinated seeds must not leak into the running total, in % of 100 seeds over 4
+    // reps: 10/4 = 2.5, then 2.5 + 7/4 = 4.25.
+    assertEquals(new BigDecimal("2.5000"), saved.getCumulativeGerm1());
+    assertEquals(new BigDecimal("4.2500"), saved.getCumulativeGerm3());
 
     // Only the two dated slots get abnormal rows written.
     ArgumentCaptor<List<DailyAbnormalEntity>> abCaptor = ArgumentCaptor.forClass(List.class);

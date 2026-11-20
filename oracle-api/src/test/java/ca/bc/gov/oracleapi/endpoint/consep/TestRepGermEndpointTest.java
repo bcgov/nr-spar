@@ -1,7 +1,9 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -100,6 +103,36 @@ class TestRepGermEndpointTest {
   void getTestReplicates_shouldReturn400() throws Exception {
     mockMvc
         .perform(get("/api/test-replicates/0"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Patch replicate accept should return the updated replicate")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUBMITTER")
+  void updateRepAccepted_shouldSucceed() throws Exception {
+    BigDecimal riaKey = new BigDecimal("881191");
+    TestRepGermDto updated = new TestRepGermDto(
+        riaKey, 2, 100, 1, 2, 3, 4, 5, 6, 7, 0, "ok");
+    when(testRepGermService.updateRepAccepted(riaKey, 2, 0)).thenReturn(updated);
+
+    mockMvc
+        .perform(patch("/api/test-replicates/{riaKey}/{rep}", riaKey, 2)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"repAcceptedInd\":0}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.repAcceptedInd").value(0));
+  }
+
+  @Test
+  @DisplayName("Patch replicate accept should reject a missing flag")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUBMITTER")
+  void updateRepAccepted_shouldRejectMissingFlag() throws Exception {
+    mockMvc
+        .perform(patch("/api/test-replicates/{riaKey}/{rep}", 881191, 2)
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{}"))
         .andExpect(status().isBadRequest());
   }
 }

@@ -5,7 +5,7 @@ import {
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import GerminationContent from '../../../views/CONSEP/TestingActivities/GerminationContent';
-import { getGerminationTestHeader } from '../../../api-service/consep/germinationTestAPI';
+import { getGerminationTestHeader, getGermCounts } from '../../../api-service/consep/germinationTestAPI';
 import { searchTestingActivities } from '../../../api-service/consep/searchTestingActivitiesAPI';
 
 vi.mock('../../../components/PageTitle', () => ({
@@ -13,6 +13,23 @@ vi.mock('../../../components/PageTitle', () => ({
 }));
 
 const putMock = vi.fn().mockResolvedValue({ updateTimestamp: '2026-01-02T00:00:00' });
+const acceptMock = vi.fn().mockResolvedValue({});
+const calcMock = vi.fn().mockResolvedValue({
+  riaSkey: 123,
+  activityTypeCd: 'G10',
+  testCategoryCd: 'QA',
+  testCompleteInd: 0,
+  acceptResultInd: 0,
+  germinatorEntry: '2024-10-31',
+  dayZero: '2024-10-31',
+  requestId: 'TST20170140',
+  seedlotNumber: '07080',
+  vegetationState: 'SX',
+  germinationPct: 91,
+  germinationValue: 48,
+  peakValueGrmPct: 78,
+  peakValueNoDays: 7
+});
 vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
   getGerminationTestHeader: vi.fn().mockResolvedValue({
     riaSkey: 123,
@@ -21,15 +38,18 @@ vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
     testCompleteInd: 0,
     acceptResultInd: 0,
     germinatorEntry: '2024-10-31',
+    dayZero: '2024-10-31',
     requestId: 'TST20170140',
     seedlotNumber: '07080',
     vegetationState: 'SX'
   }),
-  getGermCounts: () => Promise.reject(
+  getGermCounts: vi.fn(() => Promise.reject(
     Object.assign(new Error('Not found'), { response: { status: 404 } })
-  ),
+  )),
   getTestReplicates: () => Promise.resolve([]),
-  putGermCounts: (...args: unknown[]) => putMock(...args)
+  putGermCounts: (...args: unknown[]) => putMock(...args),
+  calculateGerminationMetrics: (...args: unknown[]) => calcMock(...args),
+  updateRepAccepted: (...args: unknown[]) => acceptMock(...args)
 }));
 
 vi.mock('../../../api-service/consep/searchTestingActivitiesAPI', () => ({
@@ -71,6 +91,79 @@ const setCountDate = (slotIndex: number, value: string) => {
 describe('GerminationContent', () => {
   beforeEach(() => {
     putMock.mockClear();
+    calcMock.mockClear();
+    acceptMock.mockClear();
+  });
+
+  it('Calc fills GV and PV from the calculated header (#2756)', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    expect(screen.getByLabelText('GV')).toHaveValue('');
+    expect(screen.getByLabelText('PV')).toHaveValue('');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Calc' }));
+
+    await waitFor(() => expect(calcMock).toHaveBeenCalledWith('123'));
+    await waitFor(() => expect(screen.getByLabelText('GV')).toHaveValue('48'));
+    expect(screen.getByLabelText('PV')).toHaveValue('78/7');
+  });
+
+  const headerWith = (status: { testCompleteInd: number; acceptResultInd: number }) => ({
+    riaSkey: 123,
+    activityTypeCd: 'G10',
+    testCategoryCd: 'QA',
+    germinatorEntry: '2024-10-31',
+    dayZero: '2024-10-31',
+    requestId: 'TST20170140',
+    seedlotNumber: '07080',
+    vegetationState: 'SX',
+    ...status
+  });
+
+  it('a completed test still recalculates and toggles replicate Accept (#2756)', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce(
+      headerWith({ testCompleteInd: -1, acceptResultInd: 0 })
+    );
+    renderView();
+    await screen.findByText(/Germination test result/i);
+
+    const acc2 = await screen.findByTestId('germ-acc-2');
+    expect(acc2).toBeEnabled();
+    expect(screen.getByTestId('germ-date-trigger-1')).toBeDisabled();
+    fireEvent.click(acc2);
+    await waitFor(() => expect(acceptMock).toHaveBeenCalledWith('123', 2, 0));
+    await waitFor(() => expect(screen.getByTestId('germ-acc-2')).not.toBeChecked());
+
+    const calc = screen.getByRole('button', { name: 'Calc' });
+    expect(calc).toBeEnabled();
+    fireEvent.click(calc);
+    await waitFor(() => expect(calcMock).toHaveBeenCalledWith('123'));
+    await waitFor(() => expect(screen.getByLabelText('GV')).toHaveValue('48'));
+    // The new header must not rehydrate the stale cached replicates over the change.
+    expect(screen.getByTestId('germ-acc-2')).not.toBeChecked();
+    expect(putMock).not.toHaveBeenCalled();
+  });
+
+  it('shows day numbers from dayZero, not ones stored under an older rule (#2756)', async () => {
+    vi.mocked(getGermCounts).mockResolvedValueOnce({
+      updateTimestamp: '2026-01-01T00:00:00',
+      slots: [{ slotIndex: 1, countDt: '2024-11-07', dayNoOfTest: 9 }]
+    } as unknown as Awaited<ReturnType<typeof getGermCounts>>);
+    renderView();
+
+    await waitFor(() => expect(screen.getByTestId('germ-day-1')).toHaveTextContent('7'));
+    expect(putMock).not.toHaveBeenCalled();
+  });
+
+  it('an accepted test locks Calc and replicate Accept (#2756)', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce(
+      headerWith({ testCompleteInd: -1, acceptResultInd: -1 })
+    );
+    renderView();
+    await screen.findByText(/Germination test result/i);
+
+    expect(await screen.findByTestId('germ-acc-2')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Calc' })).toBeDisabled();
   });
 
   it('renders title and header card from the header API', async () => {
@@ -107,6 +200,7 @@ describe('GerminationContent', () => {
       testCompleteInd: 0,
       acceptResultInd: 0,
       germinatorEntry: '2024-10-31',
+      dayZero: '2024-10-31',
       requestId: 'TST20170140',
       seedlotNumber: '00000',
       familyLotNumber: 'F123456',
