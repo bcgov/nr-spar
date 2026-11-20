@@ -32,25 +32,20 @@ jobs:
       contents: read
       issues: write
     steps:
-      # workflow-notifier reads .github/codeowners from the workspace
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
       - name: Keep the certificate valid
         uses: bcgov/actions-openshift/cert-keeper@510a8105fdffbb718094e8a093e638132e300975 # v0.10.0
         with:
           hostname: ${{ vars.ROUTE_HOST }}
           route_name: nr-spar-prod-frontend-vanity
           target_service: nr-spar-prod-frontend
-          force: ${{ inputs.force || 'false' }}
+          force: ${{ inputs.force }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
 
       - name: Notify CODEOWNERS
         if: failure()
-        uses: bcgov/actions/workflow-notifier@6c8ac0469fcf0d826533bc526c90119b8f149884 # v0.13.0
+        uses: bcgov/actions/workflow-notifier@acc058abf85bb183dad21b839a92a40a4ff47af3 # v0.14.0
         with:
           title: "Cert Keeper failed"
           notify_author: "false"
