@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.DrybackSaveDto;
 import ca.bc.gov.oracleapi.dto.consep.DrybackScreenDto;
 import ca.bc.gov.oracleapi.response.ApiAuthResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
@@ -13,12 +14,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -86,5 +90,58 @@ public class DrybackScreenEndpoint {
   ) {
     SparLog.info("Retrieving dryback screen data for riaSkey: {}", riaSkey);
     return drybackScreenService.getDrybackScreenData(riaSkey);
+  }
+
+  /**
+   * Saves the G64 Dryback Calculation screen and reschedules dependent activities.
+   *
+   * @param riaSkey the request item activity key
+   * @param dto the values to save, with the update timestamp the client last read
+   * @return the refreshed dryback screen data, carrying the new updateTimestamp
+   */
+  @PutMapping("/{riaSkey}")
+  @Operation(
+      summary = "Save Dryback Calculation screen data",
+      description =
+          "Saves the dryback values, recalculates the activity's revised start/end dates and "
+              + "shifts all downstream dependent activities by the schedule variance, "
+              + "in a single transaction."
+  )
+  @ApiResponses({
+      @ApiResponse(
+          responseCode = "200",
+          description = "Saved; returns the refreshed dryback screen data",
+          content = @Content(schema = @Schema(implementation = DrybackScreenDto.class))
+      ),
+      @ApiResponse(
+          responseCode = "400",
+          description = "Invalid values, dates, or the activity is not a G64/G34/G44 test"
+      ),
+      @ApiResponse(
+          responseCode = "404",
+          description = "Request Item Activity with the specified riaSkey not found"
+      ),
+      @ApiResponse(
+          responseCode = "409",
+          description = "The activity was modified by another user since it was read"
+      )
+  })
+  @ApiAuthResponse
+  @RoleAccessConfig({"SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR"})
+  public DrybackScreenDto saveDryback(
+      @PathVariable
+          @Positive
+          @Parameter(
+              name = "riaSkey",
+              in = ParameterIn.PATH,
+              description = "The Request Item Activity SKEY (unique numeric identifier)",
+              example = "7338",
+              required = true
+          )
+          BigDecimal riaSkey,
+      @Valid @RequestBody DrybackSaveDto dto
+  ) {
+    SparLog.info("Saving dryback screen data for riaSkey: {}", riaSkey);
+    return drybackScreenService.saveDryback(riaSkey, dto);
   }
 }
