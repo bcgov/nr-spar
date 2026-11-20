@@ -12,9 +12,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Values saved from the G64 Dryback Calculation screen. Calculated fields (dryback MC,
- * 30%/35% targets) are computed by the UI and stored as sent. Upper bounds match the
- * column precision so oversize values get a 400 instead of an ORA-01438.
+ * Values saved from the G64 Dryback Calculation screen. The PUT replaces the whole record,
+ * so the client must send every field (a null clears it; a saved begin date cannot be
+ * cleared). Calculated fields (dryback MC, 30%/35% targets) are computed by the UI and stored
+ * as sent. Upper bounds match the column precision so oversize values get a 400 instead of
+ * an ORA-01438; extra decimals are rounded by Oracle. Date/times must include seconds.
  */
 @Schema(description = "Values to save from the G64 Dryback Calculation screen")
 public record DrybackSaveDto(

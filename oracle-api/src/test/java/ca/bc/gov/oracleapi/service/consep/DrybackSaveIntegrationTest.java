@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -104,6 +105,28 @@ class DrybackSaveIntegrationTest {
   }
 
   @Test
+  void save_correctingBackToPlanned_movesDependantsBack() {
+    ActivityEntity dryback = persist("G64", LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 10));
+    ActivityEntity child = persist("G10", LocalDate.of(2026, 3, 11), LocalDate.of(2026, 3, 20));
+    em.flush();
+    dependency(dryback, child);
+    em.clear();
+
+    DrybackScreenDto first =
+        service.saveDryback(dryback.getRiaKey(), dto(LocalDateTime.of(2026, 3, 4, 9, 0), TS));
+    em.flush();
+    em.clear();
+    service.saveDryback(dryback.getRiaKey(),
+        dto(LocalDateTime.of(2026, 3, 1, 9, 0), first.getUpdateTimestamp()));
+    em.flush();
+    em.clear();
+
+    ActivityEntity savedChild = em.find(ActivityEntity.class, child.getRiaKey());
+    assertThat(savedChild.getRevisedStartDate()).isEqualTo(LocalDate.of(2026, 3, 11));
+    assertThat(savedChild.getRevisedEndDate()).isEqualTo(LocalDate.of(2026, 3, 20));
+  }
+
+  @Test
   void save_staleTimestamp_conflicts_andChangesNothing() {
     ActivityEntity dryback = persist("G64", LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 10));
     em.flush();
@@ -111,8 +134,8 @@ class DrybackSaveIntegrationTest {
 
     assertThatThrownBy(() -> service.saveDryback(
         dryback.getRiaKey(), dto(LocalDateTime.of(2026, 3, 4, 9, 0), TS.minusSeconds(1))))
-        .isInstanceOf(ResponseStatusException.class)
-        .hasMessageContaining("409");
+        .isInstanceOfSatisfying(ResponseStatusException.class,
+            e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
 
     em.clear();
     ActivityEntity unchanged = em.find(ActivityEntity.class, dryback.getRiaKey());

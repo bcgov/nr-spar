@@ -52,6 +52,7 @@ class DrybackSaveServiceTest {
     stored.setActivityTypeCode("G64");
     stored.setRevisedStartDate(PLANNED_START);
     stored.setRevisedEndDate(PLANNED_END);
+    stored.setUpdateTimestamp(TS);
   }
 
   private static ActivityEntity activity(BigDecimal key, LocalDate start, LocalDate end) {
@@ -98,12 +99,6 @@ class DrybackSaveServiceTest {
   void beginUnchanged_endUnchanged_noChange() {
     RevisedDates d = DrybackScreenService.computeRevisedDates(stored, at(3, 1), at(3, 10));
     assertThat(d).isEqualTo(new RevisedDates(PLANNED_START, PLANNED_END, null));
-  }
-
-  @Test
-  void noBegin_endChanged_movesEndWithoutDiff() {
-    RevisedDates d = DrybackScreenService.computeRevisedDates(stored, null, at(3, 12));
-    assertThat(d).isEqualTo(new RevisedDates(PLANNED_START, LocalDate.of(2026, 3, 12), null));
   }
 
   @Test
@@ -183,7 +178,7 @@ class DrybackSaveServiceTest {
   }
 
   @Test
-  void save_zeroDiff_doesNotTouchDependants() {
+  void save_unchangedDates_doesNotTouchDependants() {
     storedFound();
     refreshFound();
     DrybackSaveDto dto = dto(at(3, 1), at(3, 10));
@@ -193,6 +188,25 @@ class DrybackSaveServiceTest {
     service.saveDryback(RIA, dto);
 
     verify(activityRepository, never()).findDependantRiaKeys(anyCollection());
+    verify(activityRepository, never()).shiftRevisedDates(anyCollection(), anyLong());
+  }
+
+  @Test
+  void save_correctBackToPlanned_shiftsDependantsByZero() {
+    // An earlier save moved begin to 3/4 and shifted dependants to planned + 3.
+    stored.setRevisedStartDate(LocalDate.of(2026, 3, 4));
+    stored.setRevisedEndDate(LocalDate.of(2026, 3, 13));
+    storedFound();
+    refreshFound();
+    DrybackSaveDto dto = dto(at(3, 1), null);
+    when(activityRepository.updateDrybackActivityWithLock(RIA, dto, PLANNED_START, PLANNED_END))
+        .thenReturn(1);
+    BigDecimal child = new BigDecimal("200");
+    when(activityRepository.findDependantRiaKeys(List.of(RIA))).thenReturn(List.of(child));
+
+    service.saveDryback(RIA, dto);
+
+    verify(activityRepository).shiftRevisedDates(Set.of(child), 0L);
   }
 
   @Test
@@ -205,6 +219,26 @@ class DrybackSaveServiceTest {
         .isInstanceOfSatisfying(ResponseStatusException.class,
             e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
     verify(activityRepository, never()).findDependantRiaKeys(anyCollection());
+  }
+
+  @Test
+  void save_staleTimestamp_returns409_beforeValidation() {
+    storedFound();
+    DrybackSaveDto staleAndInvalid = new DrybackSaveDto(at(3, 4), at(3, 3), null, null, null,
+        null, null, null, null, null, null, TS.minusSeconds(1));
+
+    assertThatThrownBy(() -> service.saveDryback(RIA, staleAndInvalid))
+        .isInstanceOfSatisfying(ResponseStatusException.class,
+            e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
+    verify(activityRepository, never()).updateDrybackActivityWithLock(any(), any(), any(), any());
+  }
+
+  @Test
+  void save_rejectsClearingSavedBeginDate() {
+    stored.setActualBeginDateTime(at(3, 4));
+    storedFound();
+    assertBadRequest(new DrybackSaveDto(
+        null, null, null, null, null, null, null, null, null, null, "note", TS));
   }
 
   @Test

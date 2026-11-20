@@ -74,6 +74,11 @@ public class DrybackScreenService {
   public DrybackScreenDto saveDryback(BigDecimal riaSkey, DrybackSaveDto dto) {
     ActivityEntity stored = activityRepository.findById(riaSkey)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
+    // Fail fast so a stale client gets 409 rather than a 400 for data it never saw;
+    // the WHERE-clause check in the UPDATE still guards the race.
+    if (!Objects.equals(stored.getUpdateTimestamp(), dto.updateTimestamp())) {
+      throw conflict(riaSkey);
+    }
     validate(stored, dto, LocalDateTime.now());
 
     RevisedDates dates = computeRevisedDates(
@@ -82,17 +87,24 @@ public class DrybackScreenService {
     int rows = activityRepository.updateDrybackActivityWithLock(
         riaSkey, dto, dates.start(), dates.end());
     if (rows == 0) {
-      SparLog.warn("Optimistic lock conflict saving dryback riaKey: {}", riaSkey);
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Activity was modified by another user; reload and retry");
+      throw conflict(riaSkey);
     }
 
-    if (dates.dateDiff() != null && dates.dateDiff() != 0) {
+    // The shift is absolute (planned + dateDiff), so a 0 diff must still run: it moves
+    // dependants back to planned after an earlier save shifted them. dateDiff is only
+    // non-null when the actual dates changed, so unchanged saves don't touch dependants.
+    if (dates.dateDiff() != null) {
       shiftDependants(riaSkey, dates.dateDiff());
     }
 
     SparLog.info("Dryback saved for riaKey: {}, dateDiff: {}", riaSkey, dates.dateDiff());
     return getDrybackScreenData(riaSkey);
+  }
+
+  private static ResponseStatusException conflict(BigDecimal riaSkey) {
+    SparLog.warn("Optimistic lock conflict saving dryback riaKey: {}", riaSkey);
+    return new ResponseStatusException(HttpStatus.CONFLICT,
+        "Activity was modified by another user; reload and retry");
   }
 
   private void validate(ActivityEntity stored, DrybackSaveDto dto, LocalDateTime now) {
@@ -102,6 +114,11 @@ public class DrybackScreenService {
     LocalDateTime begin = dto.actualBeginDateTime();
     LocalDateTime end = dto.actualEndDateTime();
     if (begin == null) {
+      // PUT replaces the whole record; clearing the begin date would leave the revised
+      // dates and dependant shifts out of step with empty actuals.
+      if (stored.getActualBeginDateTime() != null) {
+        throw badRequest("Start date/time cannot be cleared once saved");
+      }
       if (dto.hasData()) {
         throw badRequest("Start date/time is required when any dryback data is entered");
       }
@@ -125,8 +142,9 @@ public class DrybackScreenService {
   /**
    * Spec "Save Processing" (Confluence FSADT2 300882212), with deliberate deviations:
    * a null stored revised date counts as changed (the spec's NULL comparison never fires,
-   * and its NVL(revised_end, today) skipped an end date of today), and a missing planned end
-   * date keeps the stored revised end and yields no dateDiff instead of nulling them.
+   * and its NVL(revised_end, today) skipped an end date of today), a missing planned end
+   * date keeps the stored revised end and yields no dateDiff instead of nulling them, and a
+   * dateDiff of 0 is returned (not skipped) so dependants can be moved back to planned.
    */
   static RevisedDates computeRevisedDates(
       ActivityEntity stored, LocalDateTime actualBegin, LocalDateTime actualEnd) {
@@ -153,10 +171,10 @@ public class DrybackScreenService {
       return new RevisedDates(revisedStart, revisedEnd, daysBetween(plannedEnd, revisedEnd));
     }
 
-    if (end != null && !Objects.equals(end, revisedEnd)) {
-      // No actual begin: the spec moves the end date but does not shift dependants.
-      Long dateDiff = begin == null ? null : daysBetween(plannedEnd, end);
-      return new RevisedDates(revisedStart, end, dateDiff);
+    // The spec also moves the end date when there is no actual begin, without a dateDiff;
+    // validate() rejects an end date without a begin date, so that path is not reachable.
+    if (begin != null && end != null && !Objects.equals(end, revisedEnd)) {
+      return new RevisedDates(revisedStart, end, daysBetween(plannedEnd, end));
     }
     return new RevisedDates(revisedStart, revisedEnd, null);
   }

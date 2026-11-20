@@ -3,11 +3,11 @@ package ca.bc.gov.oracleapi.repository.consep;
 import ca.bc.gov.oracleapi.dto.consep.DrybackSaveDto;
 import ca.bc.gov.oracleapi.dto.consep.DrybackScreenDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import jakarta.persistence.LockModeType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -206,10 +206,9 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
    * Save the G64 Dryback screen values with optimistic locking (issue #2838).
    * Also writes the recalculated revised dates, which the spec's UPDATE statement omits.
    *
-   * @return rows updated; 0 means either the row is missing or its updateTimestamp no longer matches.
+   * @return rows updated; 0 means the row is missing or its updateTimestamp no longer matches.
    */
   @Modifying
-  @Transactional
   @Query("""
       UPDATE ActivityEntity a
          SET a.actualBeginDateTime = :#{#dto.actualBeginDateTime()},
@@ -242,7 +241,6 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
    * @return rows updated
    */
   @Modifying
-  @Transactional
   @Query("""
       UPDATE ActivityEntity a
          SET a.revisedStartDate = CASE WHEN a.plannedStartDate IS NULL THEN a.revisedStartDate
