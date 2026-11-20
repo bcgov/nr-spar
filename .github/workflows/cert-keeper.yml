@@ -53,6 +53,5 @@ jobs:
         uses: bcgov/actions/workflow-notifier@6c8ac0469fcf0d826533bc526c90119b8f149884 # v0.13.0
         with:
           title: "Cert Keeper failed"
-          labels: ""
           notify_author: "false"
           notify_codeowners: "always"
