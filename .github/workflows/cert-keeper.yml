@@ -1,0 +1,58 @@
+name: Cert Keeper
+
+# Keeps the PROD vanity host's SSL/TLS certificate valid (bcgov/actions-openshift#158).
+# Does nothing unless the repository variable ROUTE_HOST is set. Uses the prod
+# environment's OC_NAMESPACE and OC_TOKEN and the repository's OC_SERVER.
+
+on:
+  schedule:
+    # Daily 06:37 PST / 07:37 PDT (14:37 UTC). Most days it only reads the certificate and stops.
+    - cron: "37 14 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Get a new certificate even if the current one is not due
+        type: boolean
+        default: false
+
+concurrency:
+  group: cert-keeper
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  cert-keeper:
+    name: Cert Keeper (${{ vars.ROUTE_HOST }})
+    if: vars.ROUTE_HOST != ''
+    environment: prod
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      # workflow-notifier reads .github/codeowners from the workspace
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Keep the certificate valid
+        uses: bcgov/actions-openshift/cert-keeper@510a8105fdffbb718094e8a093e638132e300975 # v0.10.0
+        with:
+          hostname: ${{ vars.ROUTE_HOST }}
+          route_name: nr-spar-prod-frontend-vanity
+          target_service: nr-spar-prod-frontend
+          force: ${{ inputs.force || 'false' }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+
+      - name: Notify CODEOWNERS
+        if: failure()
+        uses: bcgov/actions/workflow-notifier@6c8ac0469fcf0d826533bc526c90119b8f149884 # v0.13.0
+        with:
+          title: "Cert Keeper failed"
+          labels: ""
+          notify_author: "false"
+          notify_codeowners: "always"
