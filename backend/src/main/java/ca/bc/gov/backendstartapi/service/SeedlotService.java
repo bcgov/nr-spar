@@ -34,6 +34,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotSaveInMemoryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
@@ -95,6 +96,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /** This class contains methods for handling Seedlots in the database. */
 @RequiredArgsConstructor
@@ -153,6 +155,8 @@ public class SeedlotService {
   private final SaveSeedlotFormService saveSeedlotFormService;
 
   private final FeatureFlagConfig featureFlagConfig;
+
+  private final BclassAreaOfUseService bclassAreaOfUseService;
 
   /**
    * Creates a Seedlot in the database.
@@ -386,7 +390,43 @@ public class SeedlotService {
 
     seedlotDto.setBclassDetail(
         new SeedlotBclassDetailDto(
-            aouSpzList, collectionGeometry, seedlot.getProvenanceId()));
+            aouSpzList,
+            collectionGeometry,
+            seedlot.getProvenanceId(),
+            findProvenanceDescription(seedlot)));
+  }
+
+  /**
+   * Display name of a migrated B+ seedlot's provenance. This only labels a read-only field, so a
+   * missing provenance or a failed lookup leaves it null (the screen then shows the id) instead of
+   * failing the whole seedlot view.
+   */
+  private String findProvenanceDescription(Seedlot seedlot) {
+    Integer provenanceId = seedlot.getProvenanceId();
+    if (provenanceId == null) {
+      return null;
+    }
+    try {
+      Optional<String> description =
+          oracleApiProvider
+              .getSuperiorProvenance(provenanceId)
+              .map(SuperiorProvenanceDto::provenanceDescription);
+      if (description.isEmpty()) {
+        SparLog.warn(
+            "Superior provenance {} of seedlot {} not found in oracle-api",
+            provenanceId,
+            seedlot.getId());
+      }
+      return description.orElse(null);
+    } catch (ResponseStatusException e) {
+      // oracle-api errors, including OracleApiProviderException for 5xx and connection failures
+      SparLog.warn(
+          "Superior provenance {} lookup failed for seedlot {}: {}",
+          provenanceId,
+          seedlot.getId(),
+          e.getMessage());
+      return null;
+    }
   }
 
   private List<SeedPlanZoneDto> loadBclassAouSpzList(String seedlotNumber) {
@@ -1425,10 +1465,19 @@ public class SeedlotService {
     SeedlotFormCollectionDtoClassB col = form.seedlotFormCollectionDto();
     // Area-of-use fields in the request are ignored by the mapper: the stored values are kept.
     seedlotFormCollectionBclassMapper.applyToSeedlot(col, seedlot);
+    // Except the area of use comment, which TSC admins may edit (legacy: tree seed centre admins
+    // only); for anyone else the stored comment is kept.
+    if (isTscAdmin) {
+      String comment = col.areaOfUseComment();
+      seedlot.setAreaOfUseComment(comment == null || comment.isBlank() ? null : comment.strip());
+    }
 
     seedlotCollectionMethodService.saveConeCollectionMethods(
         seedlot, col.coneCollectionMethodCodes(), canDelete);
 
+    // Legacy recalc_all order: derive area of use (get_area_of_use), then set the mean area of
+    // use (set_mean_area_of_use_geography).
+    bclassAreaOfUseService.deriveAreaOfUse(seedlot, currentStatus);
     SeedlotMeanGeoCalculator.applyMeanAreaOfUse(seedlot);
 
     // Ownership (step 2 – reuses A-class service)
@@ -1441,8 +1490,7 @@ public class SeedlotService {
     // Extraction (step 4 for B-class – equivalent to step 6 for A-class)
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
 
-    // Area-of-use SPZs are set by the server, not taken from the request, and B-class
-    // (natural stand) seed has no genetic worth, so submit leaves both untouched.
+    // Area-of-use SPZs and genetic worth come from deriveAreaOfUse above, never the request.
 
     // Collection geometry (optional polygon). Null/blank GeoJSON deletes any
     // existing PostGIS row; this runs in the same transaction as deleteForm below.

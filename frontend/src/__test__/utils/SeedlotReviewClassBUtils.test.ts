@@ -34,7 +34,8 @@ describe('SeedlotReviewClassB utils test', () => {
       bClassDetail: {
         aouSpzList: [{ code: 'BV', description: 'Bulkley Valley', isPrimary: true }],
         collectionGeometry: null,
-        provenanceId: null
+        provenanceId: null,
+        provenanceDescription: null
       },
       calculatedValues: [
         {
@@ -93,12 +94,31 @@ describe('SeedlotReviewClassB utils test', () => {
       expect(collectionDto.longitudeDegMax).toBeNull();
     });
 
-    it('should preserve superior provenance fields from the seedlot', () => {
+    it('should use an edited area of use comment, trimmed, over the stored one', () => {
+      const collectionDto = buildBClassReviewPayload(
+        initEmptySteps(),
+        richSeedlot,
+        '  New comment  '
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.areaOfUseComment).toBe('New comment');
+    });
+
+    it('should send a cleared area of use comment as null', () => {
+      const collectionDto = buildBClassReviewPayload(
+        initEmptySteps(),
+        richSeedlot,
+        '   '
+      ).seedlotFormCollectionDto;
+
+      expect(collectionDto.areaOfUseComment).toBeNull();
+    });
+
+    it('should preserve the provenance id from the seedlot', () => {
       const superiorSeedlot = {
         ...richSeedlot,
         seedlot: {
           ...richSeedlot.seedlot,
-          superiorProvenanceInd: true,
           provenanceId: 42
         }
       } as unknown as RichSeedlotType;
@@ -108,16 +128,15 @@ describe('SeedlotReviewClassB utils test', () => {
         superiorSeedlot
       ).seedlotFormCollectionDto;
 
-      expect(collectionDto.superiorProvenanceInd).toBe(true);
       expect(collectionDto.provenanceId).toBe(42);
+      expect(collectionDto).not.toHaveProperty('superiorProvenanceInd');
     });
 
-    it('should preserve null superior provenance indicator', () => {
+    it('should preserve a null provenance id', () => {
       const seedlotWithNullProvenance = {
         ...richSeedlot,
         seedlot: {
           ...richSeedlot.seedlot,
-          superiorProvenanceInd: null,
           provenanceId: null
         }
       } as unknown as RichSeedlotType;
@@ -127,7 +146,7 @@ describe('SeedlotReviewClassB utils test', () => {
         seedlotWithNullProvenance
       ).seedlotFormCollectionDto;
 
-      expect(collectionDto.superiorProvenanceInd).toBeNull();
+      expect(collectionDto.provenanceId).toBeNull();
     });
 
     it('should preserve bec version and override fields from the seedlot', () => {

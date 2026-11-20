@@ -14,11 +14,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /** Resources for B+ superior provenance reference data from Oracle. */
 @RestController
@@ -79,5 +82,51 @@ public class SuperiorProvenanceEndpoint {
         "{} superior provenances found for vegetation code {}", results.size(), vegetationCode);
 
     return results;
+  }
+
+  /**
+   * Gets one superior provenance by id, including expired ones, for displaying migrated B+
+   * seedlots.
+   *
+   * @param provenanceId the provenance identifier stored on the seedlot
+   * @return the provenance
+   * @throws ResponseStatusException 404 if there is no provenance with that id
+   */
+  @GetMapping("/{provenanceId}")
+  @Operation(
+      summary = "Fetch a superior provenance by id",
+      description = "Returns the B+ superior provenance with the given id, expired or not.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "The provenance.",
+            content = @Content(schema = @Schema(implementation = SuperiorProvenanceDto.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema())),
+        @ApiResponse(
+            responseCode = "404",
+            description = "No provenance with that id.",
+            content = @Content(schema = @Schema(hidden = true)))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public SuperiorProvenanceDto findById(
+      @PathVariable
+          @Parameter(
+              name = "provenanceId",
+              in = ParameterIn.PATH,
+              description = "Provenance identifier.",
+              example = "1")
+          Integer provenanceId) {
+    SparLog.info("Fetching superior provenance {}", provenanceId);
+    return superiorProvenanceRepository
+        .findDtoById(provenanceId)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    String.format("Superior provenance %d not found.", provenanceId)));
   }
 }
