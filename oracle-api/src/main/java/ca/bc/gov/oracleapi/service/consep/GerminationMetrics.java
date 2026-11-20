@@ -76,7 +76,8 @@ final class GerminationMetrics {
    * @return the integer results, or null when there is no day with a positive day number
    */
   static Result calculate(List<Integer> dayNumbers, List<BigDecimal> cumulative) {
-    BigDecimal peak = null;
+    // Ratios are compared and multiplied as fractions, dividing once at the end: rounding PV or
+    // MDG first can push an exact x.5 GV over the half-to-even boundary.
     int peakDay = 0;
     BigDecimal peakCumulative = BigDecimal.ZERO;
     int lastDay = 0;
@@ -86,23 +87,22 @@ final class GerminationMetrics {
       if (day == null || day <= 0) {
         continue;
       }
-      BigDecimal value = cumulative.get(i)
-          .divide(BigDecimal.valueOf(day), SCALE, RoundingMode.HALF_EVEN);
-      if (peak == null || value.compareTo(peak) > 0) {
-        peak = value;
+      BigDecimal value = cumulative.get(i);
+      // value / day > peakCumulative / peakDay; strict, so the earliest day wins a tie
+      if (peakDay == 0 || value.multiply(BigDecimal.valueOf(peakDay))
+          .compareTo(peakCumulative.multiply(BigDecimal.valueOf(day))) > 0) {
+        peakCumulative = value;
         peakDay = day;
-        peakCumulative = cumulative.get(i);
       }
       lastDay = day;
-      finalCumulative = cumulative.get(i);
+      finalCumulative = value;
     }
-    if (peak == null) {
+    if (peakDay == 0) {
       return null;
     }
-    BigDecimal mdg = finalCumulative.divide(
-        BigDecimal.valueOf(lastDay), SCALE, RoundingMode.HALF_EVEN);
-    return new Result(
-        cint(finalCumulative), cint(mdg.multiply(peak)), cint(peakCumulative), peakDay);
+    BigDecimal gv = finalCumulative.multiply(peakCumulative)
+        .divide(BigDecimal.valueOf((long) lastDay * peakDay), SCALE, RoundingMode.HALF_EVEN);
+    return new Result(cint(finalCumulative), cint(gv), cint(peakCumulative), peakDay);
   }
 
   /**

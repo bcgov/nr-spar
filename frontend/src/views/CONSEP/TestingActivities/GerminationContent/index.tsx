@@ -32,7 +32,7 @@ import DailyGermTable from './DailyGermTable';
 import AbnormalsTable, { ABNORMAL_CATEGORIES } from './AbnormalsTable';
 import {
   getDefaultSeeds, validateCountDates, checkOverLimit, buildUpsertPayload,
-  parseCountInput, formatPeakValue, ABNORMAL_MAX, REP_ABNORMAL_KEYS
+  parseCountInput, formatPeakValue, withDayNumbers, ABNORMAL_MAX, REP_ABNORMAL_KEYS
 } from './utils';
 
 import './styles.scss';
@@ -160,13 +160,14 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       return;
     }
 
-    const nextSlots = emptySlots();
+    let nextSlots = emptySlots();
     if (germCountQuery.data) {
       germCountQuery.data.slots.forEach((slot) => {
         nextSlots[slot.slotIndex - 1] = slot;
       });
       setUpdateTimestamp(germCountQuery.data.updateTimestamp);
     }
+    nextSlots = withDayNumbers(nextSlots, headerQuery.data?.dayZero);
     setSlots(nextSlots);
     slotsRef.current = nextSlots;
     if (replicatesQuery.isFetched && headerQuery.data) {
@@ -176,6 +177,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [germCountQuery.isFetched, germCountQuery.data, germCountQuery.isError, germCountQuery.error]);
 
+  const headerLoaded = !!headerQuery.data;
+  const headerCategory = headerQuery.data?.testCategoryCd;
+  const headerDayZero = headerQuery.data?.dayZero;
   // Hydrate replicates: API rows or category defaults (AC4). Same
   // set-state-then-markSaved discipline as the slots effect.
   useEffect(() => {
@@ -189,11 +193,17 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     setReplicates(nextReplicates);
     replicatesRef.current = nextReplicates;
     if (germCountQuery.isFetched) {
-      markSavedRef.current({ slots: slotsRef.current, replicates: nextReplicates });
+      // The header may land after the counts, so their day numbers are fixed here too.
+      const nextSlots = withDayNumbers(slotsRef.current, headerQuery.data.dayZero);
+      setSlots(nextSlots);
+      slotsRef.current = nextSlots;
+      markSavedRef.current({ slots: nextSlots, replicates: nextReplicates });
       setIsHydrated(true);
     }
+    // Only the header fields used here: Calc rewrites the cached header, and rerunning on that
+    // would put back the stale cached replicates over an Accept box just changed (#2756).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [replicatesQuery.isFetched, replicatesQuery.data, headerQuery.data]);
+  }, [replicatesQuery.isFetched, replicatesQuery.data, headerLoaded, headerCategory, headerDayZero]);
 
   const validationErrors = useMemo(() => ({
     ...validateCountDates(slots),

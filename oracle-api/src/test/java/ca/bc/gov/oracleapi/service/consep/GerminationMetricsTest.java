@@ -94,6 +94,14 @@ class GerminationMetricsTest {
   }
 
   @Test
+  void exactHalfGvRoundsToEven() {
+    // PV 63/3 = 21, MDG 75/14, GV exactly 112.5; rounding MDG first gave 112.500000000003 -> 113.
+    var result = run(List.of(3, 14), List.of(reps(63, 63, 63, 63), reps(12, 12, 12, 12)));
+
+    assertEquals(new GerminationMetrics.Result(75, 112, 63, 3), result);
+  }
+
+  @Test
   void noUsableDayNumberGivesNoResult() {
     assertNull(run(List.of(0), List.<Integer[]>of(reps(10, 10, 10, 10))));
   }

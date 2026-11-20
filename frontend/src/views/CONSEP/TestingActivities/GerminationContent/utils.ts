@@ -94,6 +94,21 @@ export const calcDayNumber = (
 };
 
 /**
+ * Day numbers recomputed from the header's dayZero, the origin Calc uses, so the
+ * table (and the next save) never shows days stored under an older rule.
+ */
+export const withDayNumbers = (
+  slots: GermCountSlotType[],
+  dayZero: string | undefined
+): GermCountSlotType[] => (
+  dayZero
+    ? slots.map((slot) => (
+      slot.countDt ? { ...slot, dayNoOfTest: calcDayNumber(dayZero, slot.countDt) } : slot
+    ))
+    : slots
+);
+
+/**
  * The date day numbers are counted from. Normally the header's dayZero
  * (germinator entry for QA tests, begin + soak + strat hours otherwise; #2756),
  * but records can carry day numbers without one; there the offset is
