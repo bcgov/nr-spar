@@ -14,12 +14,10 @@ import AoiToolbar from '../../../views/Seedlot/SeedlotMap/AoiToolbar';
 import { validateAoiPolygons, validatePolygons, buildMultiPolygonFeature } from '../../../views/Seedlot/SeedlotMap/AoiToolbar/aoiValidation';
 import { importShapeFile } from '../../../views/Seedlot/SeedlotMap/AoiToolbar/importShape';
 import { exportAois } from '../../../views/Seedlot/SeedlotMap/AoiToolbar/exportShape';
-import { printMap } from '../../../views/Seedlot/SeedlotMap/printMap';
 import { deriveCollectionAreaResult } from '../../../views/Seedlot/SeedlotMap/collectionAreaResult';
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
-import type { SparMapTheme } from '../../../types/SparMapTypes';
 
-// Every render mounts the full toolbar plus four Carbon modals; under the
+// Every render mounts the full toolbar plus two Carbon modals; under the
 // full parallel suite single tests have taken ~5s, so allow headroom.
 vi.setConfig({ testTimeout: 20_000 });
 
@@ -43,9 +41,6 @@ vi.mock('../../../views/Seedlot/SeedlotMap/AoiToolbar/importShape', () => ({
 vi.mock('../../../views/Seedlot/SeedlotMap/AoiToolbar/exportShape', () => ({
   exportAois: vi.fn()
 }));
-vi.mock('../../../views/Seedlot/SeedlotMap/printMap', () => ({
-  printMap: vi.fn()
-}));
 vi.mock('../../../views/Seedlot/SeedlotMap/collectionAreaResult', () => ({
   deriveCollectionAreaResult: vi.fn()
 }));
@@ -56,21 +51,14 @@ const resetSparMap = (overrides: Record<string, unknown> = {}) => {
   Object.keys(sparMap).forEach((k) => delete sparMap[k]);
   Object.assign(sparMap, {
     aois: [],
-    clearAois: vi.fn(),
     startDraw: vi.fn(),
     startEdit: vi.fn(),
     startRemovalMode: vi.fn(),
-    clearMapLayers: vi.fn(),
     cancelAoiMode: vi.fn(),
     addImportedLayersToMap: vi.fn(),
-    removeLastMapLayer: vi.fn(),
-    setMeasurementMode: vi.fn(),
-    startDrawPoint: vi.fn(),
-    cancelDrawPoint: vi.fn(),
     identifyActive: false,
     setIdentifyActive: vi.fn(),
-    zoomToBC: vi.fn(),
-    zoomToInitialExtent: vi.fn(),
+    setMeasurementMode: vi.fn(),
     graticuleVisible: false,
     setGraticuleVisible: vi.fn(),
     startDrawRectangle: vi.fn(),
@@ -78,14 +66,7 @@ const resetSparMap = (overrides: Record<string, unknown> = {}) => {
     startDrawLine: vi.fn(),
     zoomToAois: vi.fn(),
     setBecZones: vi.fn(),
-    goBackView: vi.fn(),
-    goForwardView: vi.fn(),
-    canGoBack: true,
-    canGoForward: true,
     liveAoiValidation: null,
-    legendData: [],
-    activeCatalogLayers: [],
-    toggleCatalogLayer: vi.fn(),
     ...overrides
   });
 };
@@ -108,7 +89,7 @@ const renderToolbar = ({
         <Routes>
           <Route
             path="/map"
-            element={<AoiToolbar seedlotNumber="60001" theme={{} as SparMapTheme} {...props} />}
+            element={<AoiToolbar seedlotNumber="60001" {...props} />}
           />
           <Route path="/seedlots/b-class-registration/:seedlotNumber" element={<RegistrationProbe />} />
           <Route path="*" element={<RegistrationProbe />} />
@@ -118,7 +99,6 @@ const renderToolbar = ({
   );
 };
 
-const openGroup = (group: string) => fireEvent.click(screen.getByTestId(`aoi-group-${group}`));
 const notification = () => screen.getByTestId('aoi-validation-notification');
 
 beforeEach(() => {
@@ -140,168 +120,104 @@ describe('AoiToolbar welcome panel', () => {
   });
 });
 
-describe('AoiToolbar groups', () => {
-  it('opens and closes a flyout group', () => {
+describe('AoiToolbar sections', () => {
+  const toolIds = (name: string) => [
+    ...screen.getByRole('toolbar', { name }).querySelectorAll('[data-testid^="aoi-"]')
+  ].map((el) => el.getAttribute('data-testid'));
+
+  it('splits the tools into a polygon box and a map box', () => {
     renderToolbar();
-    expect(screen.queryByTestId('aoi-toolbar-flyout')).not.toBeInTheDocument();
-    openGroup('aoi');
-    expect(screen.getByTestId('aoi-add-polygon')).toBeInTheDocument();
-    openGroup('aoi');
-    expect(screen.queryByTestId('aoi-toolbar-flyout')).not.toBeInTheDocument();
-    expect(sparMap.cancelDrawPoint).toHaveBeenCalled();
+    expect(toolIds('Polygon tools')).toEqual([
+      'aoi-draw', 'aoi-edit-polygon', 'aoi-delete-polygon', 'aoi-zoom-aois', 'aoi-import-shape',
+      'aoi-export', 'aoi-start-measure', 'aoi-validate', 'aoi-submit'
+    ]);
+    expect(toolIds('Map tools')).toEqual(['aoi-identify', 'aoi-cancel']);
+    expect(screen.getByTestId('aoi-cancel').closest('.cds--popover-container'))
+      .toHaveTextContent('Close the map without saving');
   });
 
-  it('starts each drawing tool and leaves identify and measure modes', () => {
-    resetSparMap({ aois: [AOI] });
+  it('shows only the map box, without Close, on a view-only theme', () => {
+    renderToolbar({ props: { drawingEnabled: false } });
+    expect(screen.queryByRole('toolbar', { name: 'Polygon tools' })).not.toBeInTheDocument();
+    expect(toolIds('Map tools')).toEqual(['aoi-identify', 'aoi-start-measure']);
+    expect(screen.queryByTestId('aoi-welcome')).not.toBeInTheDocument();
+  });
+
+  it('opens tooltips to the right of the strip so they are not cut off', () => {
     renderToolbar();
-    openGroup('aoi');
-    const tools: Array<[string, string]> = [
+    const tooltip = screen.getByTestId('aoi-draw').closest('.cds--popover-container');
+    expect(tooltip).toHaveClass('cds--popover--right');
+  });
+
+  it('starts each shape from the Draw picker and leaves identify mode', () => {
+    renderToolbar();
+    const shapes: Array<[string, string]> = [
       ['aoi-add-polygon', 'startDraw'],
       ['aoi-add-rectangle', 'startDrawRectangle'],
       ['aoi-add-circle', 'startDrawCircle'],
-      ['aoi-add-line', 'startDrawLine'],
+      ['aoi-add-line', 'startDrawLine']
+    ];
+    shapes.forEach(([testId, fn]) => {
+      expect(screen.queryByTestId('aoi-shape-picker')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('aoi-draw'));
+      fireEvent.click(screen.getByTestId(testId));
+      expect(sparMap[fn]).toHaveBeenCalled();
+    });
+    expect(screen.queryByTestId('aoi-shape-picker')).not.toBeInTheDocument();
+    expect(sparMap.setIdentifyActive).toHaveBeenCalledWith(false);
+    expect(sparMap.setBecZones).toHaveBeenCalledWith([], [], 'zone');
+  });
+
+  it('drives the polygon tools', () => {
+    resetSparMap({ aois: [AOI] });
+    renderToolbar();
+    const tools: Array<[string, string]> = [
       ['aoi-edit-polygon', 'startEdit'],
       ['aoi-delete-polygon', 'startRemovalMode'],
-      ['aoi-zoom-aois', 'zoomToAois'],
-      ['aoi-clear-last', 'removeLastMapLayer']
+      ['aoi-zoom-aois', 'zoomToAois']
     ];
     tools.forEach(([testId, fn]) => {
       fireEvent.click(screen.getByTestId(testId));
       expect(sparMap[fn]).toHaveBeenCalled();
     });
-    expect(sparMap.setIdentifyActive).toHaveBeenCalledWith(false);
-    expect(sparMap.setMeasurementMode).toHaveBeenCalledWith(null);
-    expect(sparMap.setBecZones).toHaveBeenCalledWith([], [], 'zone');
-
-    fireEvent.click(screen.getByTestId('aoi-clear-all'));
-    expect(sparMap.clearMapLayers).toHaveBeenCalled();
-    expect(sparMap.clearAois).toHaveBeenCalled();
   });
 
   it('disables AOI-dependent tools when nothing is drawn', () => {
     renderToolbar();
-    openGroup('aoi');
-    ['aoi-edit-polygon', 'aoi-delete-polygon', 'aoi-clear-last', 'aoi-clear-all', 'aoi-validate', 'aoi-submit', 'aoi-zoom-aois']
+    ['aoi-edit-polygon', 'aoi-delete-polygon', 'aoi-validate', 'aoi-submit', 'aoi-zoom-aois', 'aoi-export']
       .forEach((id) => expect(screen.getByTestId(id)).toBeDisabled());
   });
 
-  it('drives the view tools', () => {
-    const onToggleSearch = vi.fn();
-    const onToggleBookmarks = vi.fn();
-    renderToolbar({ props: { onToggleSearch, onToggleBookmarks } });
-    openGroup('view');
-    fireEvent.click(screen.getByTestId('aoi-search'));
-    fireEvent.click(screen.getByTestId('aoi-bookmarks'));
-    fireEvent.click(screen.getByTestId('aoi-zoom-bc'));
-    fireEvent.click(screen.getByTestId('aoi-zoom-extent'));
-    fireEvent.click(screen.getByTestId('aoi-graticule'));
-    fireEvent.click(screen.getByTestId('aoi-view-back'));
-    fireEvent.click(screen.getByTestId('aoi-view-forward'));
-    expect(onToggleSearch).toHaveBeenCalled();
-    expect(onToggleBookmarks).toHaveBeenCalled();
-    expect(sparMap.zoomToBC).toHaveBeenCalled();
-    expect(sparMap.zoomToInitialExtent).toHaveBeenCalled();
-    expect(sparMap.setGraticuleVisible).toHaveBeenCalledWith(true);
-    expect(sparMap.goBackView).toHaveBeenCalled();
-    expect(sparMap.goForwardView).toHaveBeenCalled();
-  });
-
-  it('opens the layer catalog and help modals', () => {
-    renderToolbar();
-    openGroup('view');
-    fireEvent.click(screen.getByTestId('aoi-layer-catalog'));
-    expect(screen.getByTestId('layer-catalog-modal')).toHaveClass('is-visible');
-    fireEvent.click(screen.getByTestId('aoi-help'));
-  });
-
-  it('enters fullscreen on the workspace, and leaves it when already fullscreen', () => {
-    const workspace = document.createElement('div');
-    workspace.className = 'seedlot-map-workspace';
-    const requestFullscreen = vi.fn().mockResolvedValue(undefined);
-    workspace.requestFullscreen = requestFullscreen;
-    document.body.appendChild(workspace);
-    renderToolbar();
-    openGroup('view');
-    fireEvent.click(screen.getByTestId('aoi-fullscreen'));
-    expect(requestFullscreen).toHaveBeenCalled();
-
-    const exitFullscreen = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(document, 'fullscreenElement', { value: workspace, configurable: true });
-    document.exitFullscreen = exitFullscreen;
-    fireEvent.click(screen.getByTestId('aoi-fullscreen'));
-    expect(exitFullscreen).toHaveBeenCalled();
-    Object.defineProperty(document, 'fullscreenElement', { value: null, configurable: true });
-    workspace.remove();
-  });
-
-  it('prints, and reports a failed print', async () => {
-    vi.mocked(printMap).mockRejectedValueOnce(new Error('canvas tainted'));
-    renderToolbar();
-    openGroup('view');
-    fireEvent.click(screen.getByTestId('aoi-print'));
-    await waitFor(() => expect(notification()).toHaveTextContent('canvas tainted'));
-    expect(printMap).toHaveBeenCalledWith(expect.objectContaining({ seedlotNumber: '60001' }));
-  });
-
   it('toggles the measurement tools panel', () => {
-    const onToggleMeasureTools = vi.fn();
-    renderToolbar({ props: { onToggleMeasureTools } });
-    openGroup('measure');
+    const onToggleMeasure = vi.fn();
+    renderToolbar({ props: { onToggleMeasure, measureOpen: true } });
+    expect(screen.getByTestId('aoi-start-measure')).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(screen.getByTestId('aoi-start-measure'));
-    expect(onToggleMeasureTools).toHaveBeenCalled();
-    expect(sparMap.cancelAoiMode).toHaveBeenCalled();
+    expect(onToggleMeasure).toHaveBeenCalled();
+  });
+
+  it('closes back to the page that opened the map', () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={['/opener', '/map']} initialIndex={1}>
+          <Routes>
+            <Route path="/map" element={<AoiToolbar seedlotNumber="60001" />} />
+            <Route path="/opener" element={<div data-testid="opener-page" />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+    fireEvent.click(screen.getByTestId('aoi-cancel'));
+    expect(screen.getByTestId('opener-page')).toBeInTheDocument();
   });
 });
 
-describe('AoiToolbar inspect tools', () => {
-  it('toggles identify mode', () => {
+describe('AoiToolbar identify', () => {
+  it('toggles identify mode and cancels any drawing', () => {
     renderToolbar();
-    openGroup('inspect');
     fireEvent.click(screen.getByTestId('aoi-identify'));
     expect(sparMap.setIdentifyActive).toHaveBeenCalledWith(true);
-  });
-
-  it('drops a pin at typed coordinates, treating a positive BC longitude as west', () => {
-    renderToolbar();
-    openGroup('inspect');
-    fireEvent.click(screen.getByTestId('aoi-draw-point'));
-    fireEvent.change(screen.getByTestId('coordinate-pin-lat'), { target: { value: '49.28' } });
-    fireEvent.change(screen.getByTestId('coordinate-pin-lng'), { target: { value: '123.12' } });
-    fireEvent.click(screen.getByText('Drop pin'));
-    expect(sparMap.startDrawPoint).toHaveBeenCalledWith({ lat: 49.28, lng: -123.12 });
-    expect(screen.queryByTestId('coordinate-pin-panel')).not.toBeInTheDocument();
-  });
-
-  it('does not drop a pin at 0°, 0° when both fields are blank', () => {
-    renderToolbar();
-    openGroup('inspect');
-    fireEvent.click(screen.getByTestId('aoi-draw-point'));
-    fireEvent.click(screen.getByText('Drop pin'));
-    expect(screen.getByRole('alert')).toHaveTextContent('Enter numeric latitude and longitude.');
-    expect(sparMap.startDrawPoint).not.toHaveBeenCalled();
-  });
-
-  it('rejects non-numeric and out-of-range coordinates', () => {
-    renderToolbar();
-    openGroup('inspect');
-    fireEvent.click(screen.getByTestId('aoi-draw-point'));
-    fireEvent.change(screen.getByTestId('coordinate-pin-lat'), { target: { value: 'abc' } });
-    fireEvent.click(screen.getByText('Drop pin'));
-    expect(screen.getByRole('alert')).toHaveTextContent('Enter numeric latitude and longitude.');
-
-    fireEvent.change(screen.getByTestId('coordinate-pin-lat'), { target: { value: '95' } });
-    fireEvent.change(screen.getByTestId('coordinate-pin-lng'), { target: { value: '-123' } });
-    fireEvent.click(screen.getByText('Drop pin'));
-    expect(screen.getByRole('alert')).toHaveTextContent('Latitude must be -90 to 90');
-    expect(sparMap.startDrawPoint).not.toHaveBeenCalled();
-  });
-
-  it('switches to click-the-map point placement', () => {
-    renderToolbar();
-    openGroup('inspect');
-    fireEvent.click(screen.getByTestId('aoi-draw-point'));
-    fireEvent.click(screen.getByText('Click map'));
-    expect(sparMap.startDrawPoint).toHaveBeenCalledWith();
+    expect(sparMap.cancelAoiMode).toHaveBeenCalled();
   });
 });
 
@@ -311,7 +227,6 @@ describe('AoiToolbar validation', () => {
   it('reports a pass and clears BEC highlights', async () => {
     vi.mocked(validateAoiPolygons).mockResolvedValue({ ok: true, message: 'All good', becZones: ['CWH'] } as never);
     renderToolbar();
-    openGroup('aoi');
     fireEvent.click(screen.getByTestId('aoi-validate'));
     await waitFor(() => expect(notification()).toHaveTextContent('Validation passed'));
     expect(sparMap.setBecZones).toHaveBeenLastCalledWith([], [], 'zone');
@@ -320,7 +235,6 @@ describe('AoiToolbar validation', () => {
   it('highlights every zone when the polygon spans more than one', async () => {
     vi.mocked(validateAoiPolygons).mockResolvedValue({ ok: false, message: 'Spans 2 zones', becZones: ['CWH', 'MH'] } as never);
     renderToolbar();
-    openGroup('aoi');
     fireEvent.click(screen.getByTestId('aoi-validate'));
     await waitFor(() => expect(notification()).toHaveTextContent('Spans 2 zones'));
     expect(sparMap.setBecZones).toHaveBeenLastCalledWith(['CWH', 'MH'], ['CWH', 'MH'], 'zone');
@@ -329,7 +243,6 @@ describe('AoiToolbar validation', () => {
   it('reports a validation that throws', async () => {
     vi.mocked(validateAoiPolygons).mockRejectedValue(new Error('WFS down'));
     renderToolbar();
-    openGroup('aoi');
     fireEvent.click(screen.getByTestId('aoi-validate'));
     await waitFor(() => expect(notification()).toHaveTextContent('WFS down'));
   });
@@ -353,7 +266,6 @@ describe('AoiToolbar submit', () => {
   it('blocks submit on a topology error', async () => {
     vi.mocked(validatePolygons).mockReturnValue({ ok: false, message: 'Polygons overlap' } as never);
     renderToolbar();
-    openGroup('aoi');
     fireEvent.click(screen.getByTestId('aoi-submit'));
     await waitFor(() => expect(notification()).toHaveTextContent('Polygons overlap'));
     expect(validateAoiPolygons).not.toHaveBeenCalled();
@@ -362,7 +274,6 @@ describe('AoiToolbar submit', () => {
   it('blocks submit when the BEC check fails and highlights the zones', async () => {
     vi.mocked(validateAoiPolygons).mockResolvedValue({ ok: false, message: 'Spans 2 zones', becZones: ['CWH', 'MH'] } as never);
     renderToolbar();
-    openGroup('aoi');
     fireEvent.click(screen.getByTestId('aoi-submit'));
     await waitFor(() => expect(notification()).toHaveTextContent('Cannot submit'));
     expect(sparMap.setBecZones).toHaveBeenLastCalledWith(['CWH', 'MH'], ['CWH', 'MH'], 'zone');
@@ -370,7 +281,6 @@ describe('AoiToolbar submit', () => {
 
   it('only validates on a standalone map', async () => {
     renderToolbar();
-    openGroup('aoi');
     fireEvent.click(screen.getByTestId('aoi-submit'));
     await waitFor(() => expect(notification()).toHaveTextContent('Polygons validated'));
     expect(deriveCollectionAreaResult).not.toHaveBeenCalled();
@@ -379,7 +289,6 @@ describe('AoiToolbar submit', () => {
   it('returns the derived collection area to the registration form', async () => {
     vi.mocked(deriveCollectionAreaResult).mockResolvedValue({ areaHectares: 12.5 } as never);
     renderToolbar({ url: '/map?returnTo=1' });
-    openGroup('aoi');
     await waitFor(() => expect(screen.getByTestId('aoi-submit')).not.toBeDisabled());
     fireEvent.click(screen.getByTestId('aoi-submit'));
     await waitFor(() => expect(screen.getByTestId('registration-page')).toBeInTheDocument());
@@ -393,7 +302,6 @@ describe('AoiToolbar submit', () => {
   it('reports a collection area that cannot be derived', async () => {
     vi.mocked(deriveCollectionAreaResult).mockRejectedValue(new Error('Elevation lookup failed'));
     renderToolbar({ url: '/map?returnTo=1' });
-    openGroup('aoi');
     await waitFor(() => expect(screen.getByTestId('aoi-submit')).not.toBeDisabled());
     fireEvent.click(screen.getByTestId('aoi-submit'));
     await waitFor(() => expect(notification()).toHaveTextContent('Elevation lookup failed'));
@@ -402,7 +310,6 @@ describe('AoiToolbar submit', () => {
   it('offers to remove a saved area when the map reopened with one and nothing is drawn', async () => {
     resetSparMap({ aois: [] });
     renderToolbar({ url: '/map?returnTo=1', state: { initialAoiGeoJson: '{}' } });
-    openGroup('aoi');
     await waitFor(() => expect(screen.getByTestId('aoi-submit')).not.toBeDisabled());
     fireEvent.click(screen.getByTestId('aoi-submit'));
     // Text lookup instead of a role query: role queries are slow on a large
@@ -424,7 +331,6 @@ describe('AoiToolbar import', () => {
     renderToolbar();
     const input = screen.getByTestId('aoi-import-shape-input') as HTMLInputElement;
     const click = vi.spyOn(input, 'click');
-    openGroup('files');
     fireEvent.click(screen.getByTestId('aoi-import-shape'));
     expect(click).toHaveBeenCalled();
   });
@@ -469,7 +375,6 @@ describe('ExportMenu', () => {
     URL.createObjectURL = vi.fn(() => 'blob:aoi');
     URL.revokeObjectURL = vi.fn();
     renderToolbar();
-    openGroup('files');
     fireEvent.click(screen.getByTestId('aoi-export'));
     expect(screen.getByText(/1 polygon will be included/)).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText(/KML \(\.kml\)/));
@@ -481,7 +386,6 @@ describe('ExportMenu', () => {
   it('keeps the modal open and shows the error when export fails', async () => {
     vi.mocked(exportAois).mockRejectedValue(new Error('No polygons to export'));
     renderToolbar();
-    openGroup('files');
     fireEvent.click(screen.getByTestId('aoi-export'));
     fireEvent.click(screen.getByText('Download'));
     await waitFor(() => expect(screen.getByTestId('aoi-export-error')).toHaveTextContent('No polygons to export'));

@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import {
@@ -9,8 +9,7 @@ import { SeedlotMapBody } from '../../../views/Seedlot/SeedlotMap';
 import LeafletMap from '../../../views/Seedlot/SeedlotMap/LeafletMap';
 
 const ctx: Record<string, unknown> = {};
-const fakeMap = { addLayer: vi.fn(), removeLayer: vi.fn(), fitBounds: vi.fn() };
-const fakeControl = { addOverlay: vi.fn(), removeLayer: vi.fn() };
+const fakeMap = { fitBounds: vi.fn() };
 let mapContainerProps: Record<string, unknown> = {};
 
 vi.mock('../../../contexts/SparMapContext', () => ({
@@ -27,32 +26,26 @@ vi.mock('react-leaflet', () => ({
   ScaleControl: () => null,
   useMap: () => fakeMap
 }));
-vi.mock('../../../config/bcgw-catalog', () => ({
-  BCGW_CATALOG: [{
-    id: 'roads', displayName: 'Roads', wmsUrl: 'https://openmaps.gov.bc.ca/geo/wms', layerName: 'ROADS', format: 'image/png', transparent: true
-  }]
-}));
-vi.mock('../../../views/Seedlot/SeedlotMap/TreeLayersControl', () => ({
-  default: forwardRef((_props, ref) => {
-    useImperativeHandle(ref, () => fakeControl);
-    return null;
-  })
-}));
 
-type ToolbarProps = {
-  onToggleSearch: () => void; onToggleBookmarks: () => void; onToggleMeasureTools: () => void
-};
+type ToolbarProps = { drawingEnabled: boolean; onToggleMeasure: () => void };
+type TopBarProps = { onToggleLegend: () => void; onToggleLayers: () => void };
 
 // vi.mock factories are hoisted, so their helpers must be too.
-const { stub, toolbarStub } = vi.hoisted(() => ({
+const { stub, toolbarStub, topBarStub } = vi.hoisted(() => ({
   // Child layers and panels have their own tests; stub them here.
   stub: (name: string) => ({ default: () => <div data-testid={`stub-${name}`} /> }),
   toolbarStub: (name: string) => ({
-    default: ({ onToggleSearch, onToggleBookmarks, onToggleMeasureTools }: ToolbarProps) => (
-      <div data-testid={`stub-${name}`}>
-        <button type="button" onClick={onToggleSearch}>toggle search</button>
-        <button type="button" onClick={onToggleBookmarks}>toggle bookmarks</button>
-        <button type="button" onClick={onToggleMeasureTools}>toggle measure</button>
+    default: ({ drawingEnabled, onToggleMeasure }: ToolbarProps) => (
+      <div data-testid={`stub-${name}`} data-drawing={String(drawingEnabled)}>
+        <button type="button" onClick={onToggleMeasure}>toggle measure</button>
+      </div>
+    )
+  }),
+  topBarStub: () => ({
+    default: ({ onToggleLegend, onToggleLayers }: TopBarProps) => (
+      <div data-testid="stub-top-bar">
+        <button type="button" onClick={onToggleLegend}>toggle legend</button>
+        <button type="button" onClick={onToggleLayers}>toggle layers</button>
       </div>
     )
   })
@@ -72,11 +65,18 @@ vi.mock('../../../views/Seedlot/SeedlotMap/GeomCalcPanel', () => stub('geomcalc'
 vi.mock('../../../views/Seedlot/SeedlotMap/LegendPanel', () => stub('legend-panel'));
 vi.mock('../../../views/Seedlot/SeedlotMap/MeasurementToolsPanel', () => stub('measure-panel'));
 vi.mock('../../../views/Seedlot/SeedlotMap/SearchControl', () => stub('search'));
-vi.mock('../../../views/Seedlot/SeedlotMap/BookmarksPanel', () => stub('bookmarks'));
 vi.mock('../../../views/Seedlot/SeedlotMap/BecZonePanel', () => stub('bec-panel'));
 
-vi.mock('../../../views/Seedlot/SeedlotMap/AoiToolbar', () => toolbarStub('aoi-toolbar'));
-vi.mock('../../../views/Seedlot/SeedlotMap/MapToolbar', () => toolbarStub('map-toolbar'));
+vi.mock('../../../views/Seedlot/SeedlotMap/AoiToolbar', () => toolbarStub('toolbar'));
+vi.mock('../../../views/Seedlot/SeedlotMap/MapTopBar', () => topBarStub());
+vi.mock('../../../views/Seedlot/SeedlotMap/LayersPanel', () => ({
+  default: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="stub-layers-panel">
+      <button type="button" onClick={onClose}>close layers</button>
+    </div>
+  )
+}));
+vi.mock('../../../views/Seedlot/SeedlotMap/MapLayers/MapLayersSync', () => stub('layers-sync'));
 
 const renderPage = (query = '') => render(
   <MemoryRouter initialEntries={[`/map/60001${query}`]}>
@@ -100,6 +100,8 @@ beforeEach(() => {
     setSpzCode: vi.fn(),
     setSpeciesCode: vi.fn(),
     extentBounds: null,
+    setIdentifyActive: vi.fn(),
+    cancelAoiMode: vi.fn(),
     activeCatalogLayers: []
   });
 });
@@ -147,24 +149,22 @@ describe('SeedlotMapBody URL parameters', () => {
 });
 
 describe('SeedlotMapBody layout', () => {
-  it('uses the map toolbar on view-only themes, with search shown', () => {
+  it('uses the toolbar without drawing on view-only themes, with search shown', () => {
     renderPage('?theme=aoua');
-    expect(screen.getByTestId('stub-map-toolbar')).toBeInTheDocument();
+    expect(screen.getByTestId('stub-toolbar')).toHaveAttribute('data-drawing', 'false');
     expect(screen.queryByTestId('stub-geomcalc')).not.toBeInTheDocument();
     expect(screen.getByTestId('stub-search')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('toggle search'));
-    expect(screen.queryByTestId('stub-search')).not.toBeInTheDocument();
   });
 
-  it('uses the AOI toolbar and polygon statistics on the collection area theme', () => {
+  it('uses the drawing toolbar and polygon statistics on the collection area theme', () => {
     renderPage('?theme=COLAREA');
-    expect(screen.getByTestId('stub-aoi-toolbar')).toBeInTheDocument();
+    expect(screen.getByTestId('stub-toolbar')).toHaveAttribute('data-drawing', 'true');
     expect(screen.getByTestId('card-polygon-statistics')).toBeInTheDocument();
   });
 
   it('falls back to the default theme for an unknown one', () => {
     renderPage('?theme=bogus');
-    expect(screen.getByTestId('stub-map-toolbar')).toBeInTheDocument();
+    expect(screen.getByTestId('stub-toolbar')).toHaveAttribute('data-drawing', 'false');
   });
 
   it('shows the BEC zone list on the CBST theme', () => {
@@ -172,27 +172,38 @@ describe('SeedlotMapBody layout', () => {
     expect(screen.getByTestId('stub-bec-panel')).toBeInTheDocument();
   });
 
-  it('keeps bookmarks and measurement tools from opening on top of each other', () => {
+  it('opens the measurement tools from the toolbar, stopping identify and drawing', () => {
     renderPage();
-    fireEvent.click(screen.getByText('toggle bookmarks'));
-    expect(screen.getByTestId('stub-bookmarks')).toBeInTheDocument();
     fireEvent.click(screen.getByText('toggle measure'));
     expect(screen.getByTestId('stub-measure-panel')).toBeInTheDocument();
-    expect(screen.queryByTestId('stub-bookmarks')).not.toBeInTheDocument();
+    expect(ctx.setIdentifyActive).toHaveBeenCalledWith(false);
+    expect(ctx.cancelAoiMode).toHaveBeenCalled();
+    fireEvent.click(screen.getByText('toggle legend'));
+    expect(screen.queryByTestId('stub-measure-panel')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('toggle measure'));
     fireEvent.click(screen.getByLabelText('Close measurement tools'));
     expect(screen.queryByTestId('stub-measure-panel')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('toggle bookmarks'));
-    fireEvent.click(screen.getByLabelText('Close bookmarks'));
-    expect(screen.queryByTestId('stub-bookmarks')).not.toBeInTheDocument();
   });
 
   it('opens and closes the legend', () => {
     renderPage();
-    fireEvent.click(screen.getByRole('button', { name: 'Map legend' }));
+    fireEvent.click(screen.getByText('toggle legend'));
     expect(screen.getByTestId('stub-legend-panel')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Close legend'));
     expect(screen.queryByTestId('stub-legend-panel')).not.toBeInTheDocument();
+  });
+
+  it('shows the layers panel and the legend one at a time', () => {
+    renderPage();
+    fireEvent.click(screen.getByText('toggle layers'));
+    expect(screen.getByTestId('stub-layers-panel')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('toggle legend'));
+    expect(screen.getByTestId('stub-legend-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('stub-layers-panel')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('toggle layers'));
+    expect(screen.queryByTestId('stub-legend-panel')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('close layers'));
+    expect(screen.queryByTestId('stub-layers-panel')).not.toBeInTheDocument();
   });
 });
 
@@ -213,22 +224,5 @@ describe('LeafletMap', () => {
     render(<LeafletMap theme="aoua" />);
     expect(mapContainerProps).toMatchObject({ bounds });
     expect(fakeMap.fitBounds).toHaveBeenCalledWith(bounds, { animate: false });
-  });
-
-  it('adds and removes DataBC catalog layers as they are toggled', () => {
-    ctx.activeCatalogLayers = ['roads', 'not-in-catalog'];
-    const { rerender, unmount } = render(<LeafletMap theme="aoua" />);
-    expect(fakeControl.addOverlay).toHaveBeenCalledWith(expect.anything(), 'Roads');
-    expect(fakeMap.addLayer).toHaveBeenCalledTimes(1);
-
-    ctx.activeCatalogLayers = [];
-    rerender(<LeafletMap theme="aoua" />);
-    expect(fakeMap.removeLayer).toHaveBeenCalledTimes(1);
-    expect(fakeControl.removeLayer).toHaveBeenCalledTimes(1);
-
-    ctx.activeCatalogLayers = ['roads'];
-    rerender(<LeafletMap theme="aoua" />);
-    unmount();
-    expect(fakeMap.removeLayer).toHaveBeenCalledTimes(2);
   });
 });

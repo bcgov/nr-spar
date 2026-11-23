@@ -23,7 +23,7 @@ interface HelpTopic {
  * structure of the legacy `assets/help.html` (1029 lines, BC Gov SPAR
  * CWM help) — one topic per tool, single-page scrollable layout with
  * a quick-jump nav at the top. Updated terminology + tools to match
- * the React/Leaflet rewrite (Geoman, Carbon, WFS-rendered points,
+ * the React/Leaflet rewrite (Geoman drawing, Carbon, WFS-rendered points,
  * elevation feature, etc.) rather than CWM-specific naming.
  */
 const TOPICS: HelpTopic[] = [
@@ -38,9 +38,13 @@ const TOPICS: HelpTopic[] = [
           point, and overlay BC Gov reference data on top of basemaps.
         </p>
         <p>
-          Most actions live in the top-left toolbar. Layer visibility is
-          controlled from the panel in the top-right. Side cards on the
-          right show legend, bookmarks, and polygon statistics. The
+          Zoom in / out sits at the top-left, with two toolbar boxes below
+          it: polygon tools (draw, edit, import / export, Measure,
+          Validate / Save — collection-area map only) and map tools
+          (Identify, plus Close on the collection-area map). Search
+          for a place in the box at the top. Help, Print, Fullscreen, the
+          legend, and the Layers panel are in the top-right bar. The
+          polygon statistics card sits bottom-right. The
           cursor position is shown bottom-right whenever the mouse is
           over the map.
         </p>
@@ -88,25 +92,31 @@ const TOPICS: HelpTopic[] = [
     title: 'Polygon AOI tools',
     body: (
       <>
-        <p>The polygon group hosts the AOI drawing workflow.</p>
+        <p>
+          The toolbar holds the AOI drawing workflow. The
+          {' '}
+          <strong>Draw</strong>
+          {' '}
+          button opens a shape picker:
+        </p>
         <ul>
           <li>
-            <strong>Add Polygon</strong>
+            <strong>Polygon</strong>
             {' '}
             — freehand: click each vertex, double-click to close.
           </li>
           <li>
-            <strong>Add Rectangle</strong>
+            <strong>Rectangle</strong>
             {' '}
             — click two opposite corners.
           </li>
           <li>
-            <strong>Add Circle</strong>
+            <strong>Circle</strong>
             {' '}
-            — click center, drag to set radius. Geoman converts it to a polygon approximation.
+            — click center, drag to set radius. It is saved as a polygon approximation.
           </li>
           <li>
-            <strong>Add Line</strong>
+            <strong>Line</strong>
             {' '}
             — non-AOI markup polyline.
           </li>
@@ -121,27 +131,31 @@ const TOPICS: HelpTopic[] = [
             — drag any vertex; insert new ones via the midpoint handles.
           </li>
           <li>
-            <strong>Clear Last</strong>
+            <strong>Delete Polygon</strong>
             {' '}
-            — undo the most recent polygon.
+            — then click the polygon to remove.
           </li>
+        </ul>
+        <p>The bottom of the polygon tools box finishes the job:</p>
+        <ul>
           <li>
-            <strong>Clear All</strong>
-            {' '}
-            — wipe the AOI list.
-          </li>
-          <li>
-            <strong>Validate Polygon</strong>
+            <strong>Validate</strong>
             {' '}
             — runs topology validity (self-intersect, degenerate ring) plus the legacy
             single-BEC-zone rule.
           </li>
           <li>
-            <strong>Submit</strong>
+            <strong>Save</strong>
             {' '}
-            — persists the AOI to the FDS backend after validation.
+            — validates, then applies the collection area to the registration form
+            (when the map was opened from it).
           </li>
         </ul>
+        <p>
+          <strong>Close</strong>
+          {' '}
+          (in the map tools box) returns to the previous page without saving.
+        </p>
         <p>
           Polygons render with the legacy SPAR red outline + light-gray fill at 30% opacity.
           Live validation runs after every vertex change; an inline warning surfaces if the
@@ -177,18 +191,16 @@ const TOPICS: HelpTopic[] = [
     body: (
       <>
         <p>
-          Click successive points on the map to lay out a measured line. Cumulative
-          distance shows next to each vertex; a final summary tooltip on the last point
-          shows total distance plus enclosed area when the geometry is polygonable.
-          Double-click to finish.
+          Opens the Measurement Tools panel. Pick Distance, Area, or Point, then
+          click the map: distance and area show next to the shape, and the panel
+          keeps a running readout. Double-click to finish a line or area.
         </p>
         <p>
-          Measure layers are kept separate from the AOI layer — they don&apos;t pollute
-          the AOI list. Use
+          Measurements are kept separate from the AOI list. Use
           {' '}
-          <em>Clear Measurement</em>
+          <em>Clear</em>
           {' '}
-          to remove them.
+          in the panel to remove them.
         </p>
       </>
     )
@@ -199,7 +211,7 @@ const TOPICS: HelpTopic[] = [
     body: (
       <>
         <p>
-          The view group consolidates everything that doesn&apos;t draw or edit geometry.
+          Tools that don&apos;t draw or edit geometry.
         </p>
         <ul>
           <li>
@@ -208,47 +220,24 @@ const TOPICS: HelpTopic[] = [
             — BC Gov geocoder. Address / place name typeahead, click a result to fly the map there.
           </li>
           <li>
-            <strong>Bookmarks</strong>
-            {' '}
-            — save the current center+zoom in memory; restore later via
-            {' '}
-            &quot;Go&quot;. Session-scoped.
-          </li>
-          <li>
             <strong>Print</strong>
             {' '}
             — opens a print window with a snapshot of the current map.
           </li>
           <li>
-            <strong>Add DataBC Layers</strong>
+            <strong>Layers</strong>
             {' '}
-            — modal listing curated additional WMS layers (parcels, roads, VRI, etc.)
-            you can toggle for this session.
-          </li>
-          <li>
-            <strong>Zoom to BC</strong>
+            — choose the base map, search and switch layers on or off, and set each
+            layer&apos;s opacity. Under User Layers,
             {' '}
-            — fits to full BC bounds.
-          </li>
-          <li>
-            <strong>Zoom to Extent</strong>
+            <em>Add DataBC layers</em>
             {' '}
-            — back to the initial extent the page was loaded with.
+            adds curated WMS layers (parcels, roads, VRI, etc.) for this session.
           </li>
           <li>
             <strong>Fullscreen</strong>
             {' '}
             — expands the map workspace to fill the window. Press Esc to exit.
-          </li>
-          <li>
-            <strong>Graticule</strong>
-            {' '}
-            — toggle lat/lng grid overlay with degree labels.
-          </li>
-          <li>
-            <strong>Previous / Next Map View</strong>
-            {' '}
-            — navigate the view-history stack like browser back/forward.
           </li>
         </ul>
       </>
@@ -272,11 +261,6 @@ const TOPICS: HelpTopic[] = [
             <strong>Legend</strong>
             {' '}
             — WMS GetLegendGraphic image per visible overlay.
-          </li>
-          <li>
-            <strong>Bookmarks</strong>
-            {' '}
-            — saved map views.
           </li>
         </ul>
         <p>
@@ -384,7 +368,7 @@ const TOPICS: HelpTopic[] = [
     body: (
       <>
         <p>
-          Submitting an AOI triggers two checks. Both must pass.
+          Validating or saving an AOI triggers two checks. Both must pass.
         </p>
         <ul>
           <li>
@@ -412,7 +396,7 @@ const TOPICS: HelpTopic[] = [
       <>
         <p>
           When you open the map for a seedlot that already has a saved collection-area
-          polygon in DataBC, that polygon is loaded automatically as a Geoman-editable
+          polygon in DataBC, that polygon is loaded automatically as an editable
           layer and the map auto-zooms to it. Edit or extend it like any drawn polygon.
         </p>
         <p>

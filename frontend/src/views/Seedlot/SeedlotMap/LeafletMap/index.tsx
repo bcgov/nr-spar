@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import {
   MapContainer,
   ZoomControl,
@@ -6,13 +6,12 @@ import {
   ScaleControl,
   useMap
 } from 'react-leaflet';
-import L from 'leaflet';
+import type L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles.scss';
 
 import type { SparMapTheme } from '../../../../types/SparMapTypes';
 import { getThemeProfile } from '../../../../config/leaflet-themes';
-import { BCGW_CATALOG, type BcgwLayer } from '../../../../config/bcgw-catalog';
 import { useSparMap } from '../../../../contexts/SparMapContext';
 import BecIdentifyLayer from '../BecIdentifyLayer';
 import BecHighlightLayer from '../BecHighlightLayer';
@@ -25,91 +24,7 @@ import ViewControl from '../ViewControl';
 import MarkupPointLayer from '../MarkupPointLayer';
 import GraticuleLayer from '../GraticuleLayer';
 import CursorPositionControl from '../CursorPositionControl';
-import TreeLayersControl from '../TreeLayersControl';
-
-interface CatalogLayersProps {
-  controlRef: React.RefObject<L.Control.Layers | null>;
-}
-
-const OPENMAPS_WMS_TILE_OPTIONS = {
-  tileSize: 512,
-  updateWhenIdle: true,
-  updateWhenZooming: false,
-  keepBuffer: 1
-} as const;
-
-/**
- * Imperatively manages BCGW catalog WMS layers on the Leaflet map AND
- * registers them with the LayersControl so users can toggle visibility
- * from the control after the catalog modal closes.
- *
- * Uses `useMap()` + `useEffect()` to call `L.tileLayer.wms()` directly
- * via the Leaflet API, then registers each layer with the LayersControl
- * via `control.addOverlay()`. This sidesteps react-leaflet's limitation
- * where dynamically-added `<LayersControl.Overlay>` children don't
- * reliably render tiles.
- *
- * Flow:
- * - User checks a layer in the catalog modal → context updates →
- *   this effect adds the WMS layer to the map + registers it in the
- *   LayersControl (checked by default since it's already on the map).
- * - User unchecks in the modal → context updates → this effect removes
- *   the layer from both the map and the control.
- * - User toggles via the LayersControl → Leaflet handles add/remove
- *   natively (the control was designed for this).
- */
-const CatalogLayers = ({ controlRef }: CatalogLayersProps) => {
-  const map = useMap();
-  const { activeCatalogLayers } = useSparMap();
-  const layerRefs = useRef<Map<string, L.TileLayer.WMS>>(new Map());
-
-  useEffect(() => {
-    const control = controlRef.current;
-    if (!control) return;
-
-    const { current } = layerRefs;
-    const activeSet = new Set(activeCatalogLayers);
-
-    // Remove layers that are no longer active
-    current.forEach((tileLayer, id) => {
-      if (!activeSet.has(id)) {
-        map.removeLayer(tileLayer);
-        control.removeLayer(tileLayer);
-        current.delete(id);
-      }
-    });
-
-    // Add newly active layers
-    activeCatalogLayers.forEach((id) => {
-      if (!current.has(id)) {
-        const entry = BCGW_CATALOG.find((l: BcgwLayer) => l.id === id);
-        if (entry) {
-          const tileLayer = L.tileLayer.wms(entry.wmsUrl, {
-            layers: entry.layerName,
-            format: entry.format,
-            transparent: entry.transparent,
-            ...OPENMAPS_WMS_TILE_OPTIONS
-          });
-          tileLayer.addTo(map);
-          control.addOverlay(tileLayer, entry.displayName);
-          current.set(id, tileLayer);
-        }
-      }
-    });
-  }, [map, activeCatalogLayers, controlRef]);
-
-  // Cleanup on unmount
-  useEffect(() => () => {
-    const control = controlRef.current;
-    layerRefs.current.forEach((tileLayer) => {
-      map.removeLayer(tileLayer);
-      if (control) control.removeLayer(tileLayer);
-    });
-    layerRefs.current.clear();
-  }, [map, controlRef]);
-
-  return null;
-};
+import MapLayersSync from '../MapLayers/MapLayersSync';
 
 /**
  * Refits the Leaflet map to the URL-driven `extent=` bounds whenever the
@@ -152,23 +67,16 @@ const getBoundsCenter = (b: L.LatLngBoundsExpression): L.LatLngExpression => {
 
 /**
  * Top-level React-Leaflet wrapper for the SPAR map viewer. Reads the theme
- * profile from the registry and renders a MapContainer with a basemap and
- * WMS overlays wired into a top-right `<LayersControl>` panel so users can
- * toggle layer visibility at runtime. All overlays are rendered regardless
- * of their initial `visible` state — the `checked` prop on each
- * `LayersControl.Overlay` controls the default, and the user can toggle.
+ * profile from the registry and renders a MapContainer. Base maps and
+ * overlays are managed by `<MapLayersSync>` from the Layers panel state
+ * (the panel itself is rendered outside the map, top-right).
  *
- * Per-theme behavior (identify, AOI drawing, side panels) stays mounted
- * outside of `LayersControl` so those features are always active.
+ * Per-theme behavior (identify, AOI drawing) is mounted directly so those
+ * features are always active.
  */
 const LeafletMap = ({ theme }: LeafletMapProps) => {
   const profile = getThemeProfile(theme);
   const { extentBounds } = useSparMap();
-  // Ref to the Leaflet L.Control.Layers instance — react-leaflet v4
-  // forwards refs on control components to the underlying Leaflet
-  // instance via useImperativeHandle. CatalogLayers uses this to
-  // imperatively register/unregister dynamic WMS overlays.
-  const controlRef = useRef<L.Control.Layers>(null);
 
   // URL-param-driven extent (legacy `extent=minX,minY,maxX,maxY` in BC
   // Albers, reprojected upstream) overrides the theme default. When no
@@ -186,7 +94,7 @@ const LeafletMap = ({ theme }: LeafletMapProps) => {
       <MapContainer
         // MapContainer accepts EITHER center+zoom OR bounds, never both, so
         // the prop set is chosen at runtime and must be spread.
-        // eslint-disable-next-line react/jsx-props-no-spreading
+
         {...(useInitialZoom
           ? { center: initialCenter, zoom: profile.initialZoom }
           : { bounds: initialBounds })}
@@ -195,11 +103,9 @@ const LeafletMap = ({ theme }: LeafletMapProps) => {
         attributionControl={false}
         preferCanvas
       >
-        {/* Zoom control in the bottom-left corner — out of the way of the
-            top-left AOI Tools strip, the top-right LayersControl, and the
-            bottom-right CollapsibleCard stack. */}
-        <ZoomControl position="bottomleft" />
-        {/* Scale bar — bottom-left, stacks above the rotated zoom control.
+        {/* Zoom +/− at the top-left, directly above the map toolbar. */}
+        <ZoomControl position="topleft" />
+        {/* Scale bar — bottom-left.
             Shows metric + imperial so collection-area operators can sanity-
             check polygon size at a glance. Legacy CWM enabled SCALE in
             map-config.json. */}
@@ -215,19 +121,9 @@ const LeafletMap = ({ theme }: LeafletMapProps) => {
             attributions (BC Gov / ESRI / OSM) still render — removing
             those would violate the providers' tile-service terms. */}
         <AttributionControl position="bottomright" prefix={false} />
-        {/*
-          TreeLayersControl replaces the flat react-leaflet `<LayersControl>`.
-          It uses `leaflet.control.layers.tree` to render the legacy CWM
-          accordion structure — grouped categories (Elevation, BEC Zones,
-          Active Seedlots, etc.) with parent-checkbox-toggles-all-children
-          and collapse/expand chevrons. Mounts the 4 basemaps + all
-          registry overlays imperatively; default-visible overlays are
-          added to the map at mount. Exposes the underlying
-          `L.Control.Layers` via ref so `CatalogLayers` can keep
-          dynamically adding DataBC catalog layers via `addOverlay()`.
-        */}
-        <TreeLayersControl theme={theme} ref={controlRef} />
-        <CatalogLayers controlRef={controlRef} />
+        {/* Base maps, theme overlays and DataBC catalog layers — applies
+            the Layers panel state (MapLayersContext) to the map. */}
+        <MapLayersSync theme={theme} />
         {profile.identifyLayer && (
           <BecIdentifyLayer layerTypeName={profile.identifyLayer} />
         )}
