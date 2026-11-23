@@ -112,6 +112,38 @@
     margin-bottom: 1rem;
   }
 
+  // The design's result panel under the summary card: a bordered box whose
+  // first section is a row of small labelled boxes, the second the comments.
+  .germ-result-panel {
+    border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #e0e0e0);
+
+    > div {
+      padding: 1rem;
+    }
+
+    > div + div {
+      border-top: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #e0e0e0);
+    }
+  }
+
+  .germ-result-fields {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  // Sized to the widest value, PV's `100/21`.
+  .germ-result-field {
+    width: 4.5rem;
+
+    // Carbon draws a read-only input as bare text over a dashed rule; the
+    // design shows these as boxes.
+    .#{vars.$bcgov-prefix}--text-input {
+      border: 1px solid var(--#{vars.$bcgov-prefix}-border-strong-01, #8d8d8d);
+      background-color: var(--#{vars.$bcgov-prefix}-background, #ffffff);
+      padding-inline: 0.5rem;
+    }
+  }
+
   .consep-germination-content-actions {
     margin-top: 1rem;
   }

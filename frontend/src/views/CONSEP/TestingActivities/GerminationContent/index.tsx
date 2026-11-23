@@ -494,32 +494,42 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               cellClassName="consep-germination-content-summary-cell"
             />
           </Row>
+          {/* The design's result panel: a row of small boxed fields over the
+              comments. Only GV and PV are in scope (#2756); Category, Rank,
+              Reps out of tolerance, Germinator ID and Accept/Complete join this
+              row in their own tickets. */}
           <Row className="consep-germination-content-results">
-            <Column sm={1} md={1} lg={1}>
-              <TextInput
-                id="germ-header-gv"
-                labelText="GV"
-                value={header.germinationValue ?? ''}
-                readOnly
-              />
-            </Column>
-            <Column sm={1} md={1} lg={1}>
-              <TextInput
-                id="germ-header-pv"
-                labelText="PV"
-                value={formatPeakValue(header.peakValueGrmPct, header.peakValueNoDays)}
-                readOnly
-              />
-            </Column>
-          </Row>
-          <Row className="consep-germination-content-comments">
             <Column>
-              <TextInput
-                id="germ-header-comments"
-                labelText="Comments"
-                value={header.riaComment ?? ''}
-                readOnly
-              />
+              <div className="germ-result-panel">
+                <div className="germ-result-fields">
+                  <div className="germ-result-field">
+                    <TextInput
+                      id="germ-header-gv"
+                      labelText="GV"
+                      size="sm"
+                      value={header.germinationValue ?? ''}
+                      readOnly
+                    />
+                  </div>
+                  <div className="germ-result-field">
+                    <TextInput
+                      id="germ-header-pv"
+                      labelText="PV"
+                      size="sm"
+                      value={formatPeakValue(header.peakValueGrmPct, header.peakValueNoDays)}
+                      readOnly
+                    />
+                  </div>
+                </div>
+                <div className="germ-result-comments">
+                  <TextInput
+                    id="germ-header-comments"
+                    labelText="Comments"
+                    value={header.riaComment ?? ''}
+                    readOnly
+                  />
+                </div>
+              </div>
             </Column>
           </Row>
           <Row className="consep-germination-content-table">

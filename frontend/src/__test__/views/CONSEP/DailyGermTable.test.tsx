@@ -414,4 +414,18 @@ describe('DailyGermTable', () => {
       await waitFor(() => expect(count(3)).toHaveFocus());
     });
   });
+
+  it('shows a legacy -1 replicate as accepted and only 0 as rejected', () => {
+    renderTable({
+      replicates: [
+        { replicateNumber: 1, totalNoSeeds: 100, repAcceptedInd: -1 },
+        { replicateNumber: 2, totalNoSeeds: 100, repAcceptedInd: 0 },
+        { replicateNumber: 3, totalNoSeeds: 100, repAcceptedInd: 1 },
+        { replicateNumber: 4, totalNoSeeds: 100, repAcceptedInd: 1 }
+      ]
+    });
+    expect(screen.getByTestId('germ-acc-1')).toBeChecked();
+    expect(screen.getByTestId('germ-acc-2')).not.toBeChecked();
+    expect(screen.getByTestId('germ-acc-3')).toBeChecked();
+  });
 });

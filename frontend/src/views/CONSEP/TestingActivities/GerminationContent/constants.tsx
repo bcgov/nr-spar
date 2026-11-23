@@ -367,7 +367,8 @@ export const getDailyGermColumns = (
     Cell: ({ row }: { row: { original: GermTableRow } }) => (
       <Checkbox
         size="small"
-        checked={row.original.repAcceptedInd === 1}
+        // Legacy rows store "accepted" as -1; only an explicit 0 rejects, as in the calculation.
+        checked={row.original.repAcceptedInd !== 0}
         disabled={!canToggleAccept || !!validationErrors[`rep-${row.original.replicateNumber}`]}
         slotProps={{
           input: {
