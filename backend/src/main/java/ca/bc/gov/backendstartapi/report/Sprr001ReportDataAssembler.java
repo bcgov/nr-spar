@@ -96,7 +96,8 @@ public class Sprr001ReportDataAssembler {
     row.setSeedlotNumber(seedlot.getId());
     row.setToBeRegistrdInd(yesNo(seedlot.getIntendedForCrownLand()));
     row.setBcSource(yesNo(seedlot.getSourceInBc()));
-    row.setSuperiorPrvncInd(yesNo(collection.superiorProvenanceInd()));
+    // B+ (superior provenance) seedlots are those with a provenance id.
+    row.setSuperiorPrvncInd(yesNo(collection.provenanceId() != null));
     row.setEffectivePopSize(seedlot.getEffectivePopulationSize());
     row.setSpecies(seedlot.getVegetationCode());
     row.setSpeciesDesc(codes.speciesDesc(seedlot.getVegetationCode()));
@@ -140,7 +141,7 @@ public class Sprr001ReportDataAssembler {
     row.setCollectionOrgUnit(decimal(orgUnit));
     row.setCollectionOrgUnitDesc(codes.orgUnitDesc(orgUnit));
     row.setCollectionLocnDesc(collection.collectionLocationDesc());
-    row.setCollectionProv(stringify(collection.provenanceId()));
+    row.setCollectionProv(codes.provenanceDesc(collection.provenanceId()));
     row.setCfsAppendix(yesNo(collection.collectionStandardMetInd()));
     row.setCollectionStartDate(date(collection.collectionStartDate()));
     row.setCollectionEndDate(date(collection.collectionEndDate()));
@@ -371,9 +372,5 @@ public class Sprr001ReportDataAssembler {
     return Optional.ofNullable(seedlot.getApprovedUserId())
         .filter(userId -> !COPIED_LOT_SENTINEL.equalsIgnoreCase(userId))
         .orElse(seedlot.getDeclarationOfTrueInformationUserId());
-  }
-
-  private static String stringify(Integer value) {
-    return value == null ? null : value.toString();
   }
 }

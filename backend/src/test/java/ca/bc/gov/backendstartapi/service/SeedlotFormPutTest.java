@@ -116,6 +116,8 @@ class SeedlotFormPutTest {
 
   @Mock SaveSeedlotFormService saveSeedlotFormService;
 
+  @Mock BclassAreaOfUseService bclassAreaOfUseService;
+
   @BeforeEach
   void setup() {
     seedlotService =
@@ -145,7 +147,8 @@ class SeedlotFormPutTest {
             seedlotFormCollectionBclassMapper,
             seedlotFormStepMapper,
             saveSeedlotFormService,
-            new FeatureFlagConfig(true));
+            new FeatureFlagConfig(true),
+            bclassAreaOfUseService);
   }
 
   private SeedlotService seedlotService;

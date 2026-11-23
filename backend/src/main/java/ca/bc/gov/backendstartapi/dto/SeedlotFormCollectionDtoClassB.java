@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -65,8 +66,6 @@ public record SeedlotFormCollectionDtoClassB(
         String numberTreesFromCode,
     @Schema(description = "Lot split indicator.", example = "false")
         Boolean isLotSplitInd,
-    @Schema(description = "Superior provenance indicator.", example = "false")
-        Boolean superiorProvenanceInd,
     @Schema(description = "Provenance ID.", example = "42")
         Integer provenanceId,
     // ─── Collection coordinates (mean of the polygon) ────────────────────────
@@ -121,6 +120,7 @@ public record SeedlotFormCollectionDtoClassB(
     @Schema(description = "Maximum longitude seconds for area of use.", example = "0")
         Integer longitudeSecMax,
     @Schema(description = "Area of use comment.", example = "South-facing slope")
+    @Size(max = 2000)
         String areaOfUseComment,
     @Schema(description = "Collection latitude hemisphere (N/S).", example = "N")
         Character collectionLatitudeCode,

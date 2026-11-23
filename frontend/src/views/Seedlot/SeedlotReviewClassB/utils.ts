@@ -56,13 +56,18 @@ export const validateBClassReviewForm = (
 
 /**
  * Builds the b-class-submission payload for a TSC review save,
- * preserving the area-of-use data (SPZ slots, comment, elevation and
- * lat/long ranges) and genetic worth values already stored on the seedlot,
- * since those are calculated at submission and not editable on this screen.
+ * preserving the area-of-use data (SPZ slots, elevation and lat/long ranges)
+ * and genetic worth values already stored on the seedlot, since those are
+ * calculated at submission and not editable on this screen.
+ *
+ * The area of use comment is the one exception: TSC admins can edit it here.
+ * Pass the edited value as areaOfUseComment; when it is undefined the stored
+ * comment is kept.
  */
 export const buildBClassReviewPayload = (
   allStepData: BClassAllStepData,
-  richSeedlotData?: RichSeedlotType
+  richSeedlotData?: RichSeedlotType,
+  areaOfUseComment?: string
 ): SeedlotBClassSubmitType => {
   const payload = getBClassSeedlotPayload(allStepData, richSeedlotData);
   const seedlot = richSeedlotData?.seedlot;
@@ -88,7 +93,6 @@ export const buildBClassReviewPayload = (
       longitudeDegMax: seedlot.longitudeDegMax,
       longitudeMinMax: seedlot.longitudeMinMax,
       longitudeSecMax: seedlot.longitudeSecMax,
-      superiorProvenanceInd: seedlot.superiorProvenanceInd,
       provenanceId: seedlot.provenanceId
         ?? richSeedlotData?.bClassDetail?.provenanceId
         ?? null,
@@ -99,11 +103,16 @@ export const buildBClassReviewPayload = (
     }
     : {};
 
+  const editedComment = areaOfUseComment === undefined
+    ? {}
+    : { areaOfUseComment: areaOfUseComment.trim() || null };
+
   return {
     ...payload,
     seedlotFormCollectionDto: {
       ...collectionDto,
-      ...preservedCollectionFields
+      ...preservedCollectionFields,
+      ...editedComment
     },
     aouSpzList: richSeedlotData?.bClassDetail?.aouSpzList ?? []
   };
