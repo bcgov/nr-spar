@@ -172,6 +172,8 @@ const ReviewContent = () => {
 
   // True if in view mode, false in edit mode.
   const [isReadMode, setIsReadMode] = useState(true);
+  // Area of use comment being edited; reset from the stored value each time edit mode starts.
+  const [areaOfUseComment, setAreaOfUseComment] = useState('');
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isSaveStatusModalOpen, setIsSaveStatusModalOpen] = useState(false);
   const [statusToUpdateTo, setStatusToUpdateTo] = useState<SeedlotStatusCode>('PND');
@@ -297,7 +299,12 @@ const ReviewContent = () => {
     if (!verifyFormData()) {
       return;
     }
-    const payload = buildBClassReviewPayload(allStepData, richSeedlotData);
+    // Only TSC admins see the area of use section; for anyone else keep the stored comment.
+    const payload = buildBClassReviewPayload(
+      allStepData,
+      richSeedlotData,
+      isTscAdmin ? areaOfUseComment : undefined
+    );
     saveEditMutation.mutate({
       payload,
       statusAfterSave: statusAfterSave ?? (isApproved ? 'APP' : null),
@@ -310,6 +317,7 @@ const ReviewContent = () => {
    */
   const handleEditSaveBtn = () => {
     if (isReadMode) {
+      setAreaOfUseComment(seedlotData?.areaOfUseComment ?? '');
       setIsReadMode(false);
       return;
     }
@@ -529,7 +537,11 @@ const ReviewContent = () => {
               </Row>
               <Row className="section-row">
                 <Column>
-                  <AreaOfUseRead />
+                  <AreaOfUseRead
+                    isReadMode={isReadMode}
+                    comment={areaOfUseComment}
+                    onCommentChange={setAreaOfUseComment}
+                  />
                 </Column>
               </Row>
 

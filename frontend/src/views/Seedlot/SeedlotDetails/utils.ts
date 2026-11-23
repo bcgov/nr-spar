@@ -15,8 +15,9 @@ export const formatYesNo = (value: boolean | undefined): string => {
   return value ? 'Yes' : 'No';
 };
 
+// Superior provenance (B+) is retired; only migrated legacy seedlots have a provenance id.
 export const isSuperiorProvenanceSeedlot = (seedlot?: SeedlotType): boolean => (
-  seedlot?.superiorProvenanceInd === true
+  seedlot?.provenanceId != null
   || seedlot?.geneticClass?.geneticClassCode === 'B+'
 );
 

@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ca.bc.gov.oracleapi.dto.SuperiorProvenanceDto;
 import ca.bc.gov.oracleapi.repository.SuperiorProvenanceRepository;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,47 @@ class SuperiorProvenanceEndpointTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isEmpty())
         .andReturn();
+  }
+
+  @Test
+  @DisplayName("findById returns the provenance")
+  void findByIdTest() throws Exception {
+    when(superiorProvenanceRepository.findDtoById(7))
+        .thenReturn(Optional.of(new SuperiorProvenanceDto(7, "FDC", "Fraser Valley Provenance")));
+
+    mockMvc
+        .perform(
+            get("/api/superior-provenances/7")
+                .with(csrf().asHeader())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.provenanceId").value(7))
+        .andExpect(jsonPath("$.vegetationCode").value("FDC"))
+        .andExpect(jsonPath("$.provenanceDescription").value("Fraser Valley Provenance"));
+  }
+
+  @Test
+  @DisplayName("findById returns 404 for an unknown id")
+  void findByIdNotFoundTest() throws Exception {
+    when(superiorProvenanceRepository.findDtoById(99)).thenReturn(Optional.empty());
+
+    mockMvc
+        .perform(
+            get("/api/superior-provenances/99")
+                .with(csrf().asHeader())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("findById rejects a non-numeric id")
+  void findByIdBadRequestTest() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/superior-provenances/abc")
+                .with(csrf().asHeader())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test

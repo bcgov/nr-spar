@@ -36,7 +36,21 @@ vi.mock('../../views/Seedlot/SeedlotReviewClassB/read/ApplicantAndSeedlotRead', 
 vi.mock('../../views/Seedlot/SeedlotReviewClassB/read/CollectionRead', () => stub('collection-read'));
 vi.mock('../../views/Seedlot/SeedlotReviewClassB/read/InterimRead', () => stub('interim-read'));
 vi.mock('../../views/Seedlot/SeedlotReviewClassB/read/ExtractionStorageRead', () => stub('extraction-read'));
-vi.mock('../../views/Seedlot/SeedlotReviewClassB/read/AreaOfUseRead', () => stub('area-of-use-read'));
+vi.mock('../../views/Seedlot/SeedlotReviewClassB/read/AreaOfUseRead', () => ({
+  default: ({ isReadMode, comment, onCommentChange }: {
+    isReadMode: boolean, comment: string, onCommentChange: (value: string) => void
+  }) => (
+    <div data-testid="stub-area-of-use-read">
+      {isReadMode ? null : (
+        <textarea
+          aria-label="area of use comment"
+          value={comment}
+          onChange={(e) => onCommentChange(e.target.value)}
+        />
+      )}
+    </div>
+  )
+}));
 vi.mock('../../components/SeedlotReviewSteps/Ownership/Read', () => stub('ownership-read'));
 vi.mock('../../components/SeedlotRegistrationSteps/BClassCollectionStep', () => stub('collection-edit'));
 vi.mock('../../components/SeedlotRegistrationSteps/OwnershipStep', () => stub('ownership-edit'));
@@ -48,6 +62,7 @@ const contextFor = (statusCode: string) => ({
   seedlotData: {
     applicantClientNumber: '00012797',
     sourceInBc: true,
+    areaOfUseComment: 'Stored comment',
     seedlotStatus: { seedlotStatusCode: statusCode, description: statusCode === 'APP' ? 'Approved' : 'Submitted' }
   },
   richSeedlotData: { seedlot: {} },
@@ -174,6 +189,22 @@ describe('ReviewContent editing', () => {
     await waitFor(() => expect(screen.getByTestId('stub-collection-read')).toBeInTheDocument());
     expect(updateSeedlotStatus).not.toHaveBeenCalled();
     expect(buildBClassReviewPayload).toHaveBeenCalled();
+  });
+
+  it('lets a TSC admin edit the area of use comment and saves it', async () => {
+    renderReview();
+    expect(screen.queryByLabelText('area of use comment')).not.toBeInTheDocument();
+    click('Edit seedlot');
+    const comment = screen.getByLabelText('area of use comment') as HTMLTextAreaElement;
+    expect(comment.value).toBe('Stored comment');
+    fireEvent.change(comment, { target: { value: 'Edited comment' } });
+    click('Save edit');
+    await waitFor(() => expect(putBClassSeedlot).toHaveBeenCalled());
+    expect(buildBClassReviewPayload).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'Edited comment'
+    );
   });
 
   it('keeps an approved seedlot approved after saving edits', async () => {

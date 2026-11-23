@@ -9,11 +9,26 @@ import ClassBContext from '../../ContextContainerClassB/context';
 import { PLACE_HOLDER } from '../../../../shared-constants/shared-constants';
 import { formatLatLong, spzListToString } from '../../../../components/SeedlotReviewSteps/AreaOfUse/utils';
 
+// Matches the seedlot.area_of_use_comment column, so migrated legacy comments stay editable.
+export const AREA_OF_USE_COMMENT_MAX_LENGTH = 2000;
+
+type AreaOfUseReadProps = {
+  // Edit mode makes the comment editable; everything else stays read only.
+  isReadMode?: boolean,
+  comment?: string,
+  onCommentChange?: (comment: string) => void
+};
+
 /**
- * Read-only area of use section, values are calculated at submission
- * and only visible to TSC admins.
+ * Area of use section, only visible to TSC admins. Zones, elevation and
+ * lat/long are calculated at submission and read only; the comment is
+ * editable in edit mode.
  */
-const AreaOfUseRead = () => {
+const AreaOfUseRead = ({
+  isReadMode = true,
+  comment = '',
+  onCommentChange
+}: AreaOfUseReadProps) => {
   const { seedlotData, richSeedlotData, isFetchingData } = useContext(ClassBContext);
 
   const aouSpzList = richSeedlotData?.bClassDetail?.aouSpzList ?? [];
@@ -122,7 +137,11 @@ const AreaOfUseRead = () => {
           {
             isFetchingData
               ? <TextAreaSkeleton />
-              : (
+              : null
+          }
+          {
+            !isFetchingData && isReadMode
+              ? (
                 <TextArea
                   id="b-review-aou-comment"
                   labelText="Area of use comment"
@@ -131,6 +150,24 @@ const AreaOfUseRead = () => {
                   rows={4}
                 />
               )
+              : null
+          }
+          {
+            !isFetchingData && !isReadMode
+              ? (
+                <TextArea
+                  id="b-review-aou-comment-edit"
+                  labelText="Area of use comment"
+                  value={comment}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => (
+                    onCommentChange?.(e.target.value)
+                  )}
+                  enableCounter
+                  maxCount={AREA_OF_USE_COMMENT_MAX_LENGTH}
+                  rows={4}
+                />
+              )
+              : null
           }
         </Column>
       </Row>

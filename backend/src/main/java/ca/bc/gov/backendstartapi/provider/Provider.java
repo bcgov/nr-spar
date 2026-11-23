@@ -11,6 +11,8 @@ import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
+import ca.bc.gov.backendstartapi.dto.oracle.TransferLimitDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +83,20 @@ public interface Provider {
   }
 
   default List<CodeDescriptionDto> getAllValidFundingSources() {
+    return List.of();
+  }
+
+  default Optional<String> getSpzCoastInteriorCode(String spzCode) {
+    return Optional.empty();
+  }
+
+  default Optional<SuperiorProvenanceDto> getSuperiorProvenance(Integer provenanceId) {
+    return Optional.empty();
+  }
+
+  default List<TransferLimitDto> searchTransferLimits(
+      String vegCode, String geneticClass, Boolean superiorProvenance, String coastInteriorCode,
+      String spzCode, Integer latitudeDeg) {
     return List.of();
   }
 

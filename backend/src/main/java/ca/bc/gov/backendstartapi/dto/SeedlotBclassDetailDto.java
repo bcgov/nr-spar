@@ -15,5 +15,14 @@ public record SeedlotBclassDetailDto(
             description =
                 "Collection area polygon when present; null when no geometry has been submitted.")
         SeedlotCollectionGeometryDto collectionGeometry,
-    @Schema(description = "Superior provenance identifier stored on the seedlot.")
-        Integer provenanceId) {}
+    @Schema(
+            description =
+                "Superior provenance (B+) id; set only on migrated legacy B+ seedlots, which are"
+                    + " exactly the seedlots that have one.")
+        Integer provenanceId,
+    @Schema(
+            description =
+                "Superior provenance description from oracle-api; null when there is no provenance"
+                    + " id or the lookup failed.",
+            example = "Fraser Valley Provenance")
+        String provenanceDescription) {}

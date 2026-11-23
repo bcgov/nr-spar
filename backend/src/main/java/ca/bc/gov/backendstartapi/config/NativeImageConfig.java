@@ -53,7 +53,10 @@ import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseSpuGeoDto;
 import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzCoastInteriorDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
+import ca.bc.gov.backendstartapi.dto.oracle.TransferLimitDto;
 import ca.bc.gov.backendstartapi.enums.DescribedEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
@@ -137,6 +140,9 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     OrgUnitDistrictDto.class,
     SpuDto.class,
     SpzDto.class,
+    SpzCoastInteriorDto.class,
+    SuperiorProvenanceDto.class,
+    TransferLimitDto.class,
     DescribedEnum.class,
     ForestClientExpiredEnum.class,
     ForestClientStatusEnum.class,
