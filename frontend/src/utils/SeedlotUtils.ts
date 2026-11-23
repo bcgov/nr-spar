@@ -90,5 +90,6 @@ export const convertToApplicantInfoObj = (
   source: seedlot.seedlotSource?.description ?? '',
   willRegister: seedlot.intendedForCrownLand,
   isBcSource: seedlot.sourceInBc,
-  superiorProvenance: seedlot.superiorProvenanceInd ?? false
+  // Superior provenance (B+) seedlots are those with a provenance id.
+  superiorProvenance: seedlot.provenanceId != null
 });

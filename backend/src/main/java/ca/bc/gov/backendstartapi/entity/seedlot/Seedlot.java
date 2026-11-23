@@ -354,15 +354,16 @@ public class Seedlot implements Serializable {
   private Point meanGeom;
 
   // region B-class natural stand
-  @Column(name = "superior_provenance_ind")
-  private Boolean superiorProvenanceInd;
-
   @Column(name = "org_unit_no")
   private Integer orgUnitNo;
 
   @Column(name = "collection_location_desc", length = 30)
   private String collectionLocationDesc;
 
+  /**
+   * Superior provenance (B+) id from Oracle {@code SUPERIOR_PROVENANCE}. B+ is retired, so this is
+   * only set on migrated legacy seedlots; a seedlot is B+ exactly when it is set.
+   */
   @Column(name = "provenance_id")
   private Integer provenanceId;
 

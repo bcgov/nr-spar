@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   getEditApplicantRoute,
   getPrintSeedlotLabel,
-  isBClassSeedlot
+  isBClassSeedlot,
+  isSuperiorProvenanceSeedlot
 } from '../../../views/Seedlot/SeedlotDetails/utils';
 import { SeedlotType } from '../../../types/SeedlotType';
 import ROUTES from '../../../routes/constants';
@@ -32,5 +33,15 @@ describe('SeedlotDetails print helpers', () => {
     expect(addParamToPath(getEditApplicantRoute(seedlotWithClass('B')), '53001'))
       .toBe('/seedlots/edit-b-class-application/53001');
     expect(getEditApplicantRoute(seedlotWithClass('B'))).not.toBe(ROUTES.SEEDLOTS_B_CLASS_CREATION);
+  });
+
+  it('isSuperiorProvenanceSeedlot is true only when the seedlot has a provenance id', () => {
+    expect(isSuperiorProvenanceSeedlot(undefined)).toBe(false);
+    expect(isSuperiorProvenanceSeedlot({
+      geneticClass: { geneticClassCode: 'B' }, provenanceId: null
+    } as SeedlotType)).toBe(false);
+    expect(isSuperiorProvenanceSeedlot({
+      geneticClass: { geneticClassCode: 'B' }, provenanceId: 7
+    } as SeedlotType)).toBe(true);
   });
 });

@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.report;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,23 @@ final class ReportOracleCodeResolver {
     } catch (RuntimeException e) {
       SparLog.warn("SPRR001 species lookup failed for " + code, e);
       return code;
+    }
+  }
+
+  String provenanceDesc(Integer provenanceId) {
+    if (provenanceId == null) {
+      return null;
+    }
+    try {
+      String description =
+          oracleApiProvider
+              .getSuperiorProvenance(provenanceId)
+              .map(SuperiorProvenanceDto::provenanceDescription)
+              .orElse(null);
+      return blankToFallback(description, provenanceId.toString());
+    } catch (RuntimeException e) {
+      SparLog.warn("SPRR001 superior provenance lookup failed for " + provenanceId, e);
+      return provenanceId.toString();
     }
   }
 

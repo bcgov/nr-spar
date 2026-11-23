@@ -33,6 +33,10 @@ const SourceInformation = ({
   isFetching
 }: SourceInformationProps) => {
   const isSuperiorProvenance = isSuperiorProvenanceSeedlot(seedlot);
+  // Migrated B+ seedlots show their provenance instead of a location (legacy clears the
+  // location on B+ lots); fall back to the id when the name could not be looked up.
+  const provenanceLabel = richSeedlot?.bClassDetail?.provenanceDescription
+    ?? (seedlot.provenanceId != null ? String(seedlot.provenanceId) : null);
   const hasCollectionGeometry = !!richSeedlot?.bClassDetail?.collectionGeometry;
 
   return (
@@ -48,7 +52,9 @@ const SourceInformation = ({
             <ReadOnlyInput
               id="b-detail-location"
               label={isSuperiorProvenance ? 'Provenance' : 'Location'}
-              value={formatOptionalString(seedlot.collectionLocationDesc)}
+              value={formatOptionalString(
+                isSuperiorProvenance ? provenanceLabel : seedlot.collectionLocationDesc
+              )}
               showSkeleton={isFetching}
             />
           </Column>
