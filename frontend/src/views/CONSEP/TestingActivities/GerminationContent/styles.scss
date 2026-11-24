@@ -73,80 +73,66 @@
 }
 
 .consep-germination-content {
-  // Kept tight: the page still has to fit the result figures above the tables
-  // and the action buttons below them.
-  padding: 1rem 2rem 2rem;
-
-  .consep-germination-content-test-history-btn {
-    margin-left: 1rem;
-  }
-  .consep-germination-content-summary {
-    margin-bottom: 1rem;
-  }
-
-  // A slimmer banner than SummaryGrid's default.
-  .activity-summary {
-    margin: 0.5rem 1rem;
-  }
-
-  // SummaryGrid defaults to a label-beside-value row; the germination summary
-  // card stacks them instead.
-  .consep-germination-content-summary-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-
-    // SummaryGrid centres the value; here it lines up under its label.
-    .activity-summary-info-value {
-      align-self: flex-start;
-    }
-  }
-
-  .consep-germination-content-table {
-    margin-top: 1rem;
-  }
-
-  .consep-germination-content-results,
-  .consep-germination-content-actions {
-    margin-bottom: 1rem;
-  }
-
-  // The design's result panel under the summary card: a bordered box whose
-  // first section is a row of small labelled boxes, the second the comments.
-  .germ-result-panel {
-    border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #e0e0e0);
-
-    > div {
-      padding: 1rem;
-    }
-
-    > div + div {
-      border-top: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #e0e0e0);
-    }
-  }
-
-  .germ-result-fields {
-    display: flex;
+  // Same layout rules as the moisture content screen.
+  .consep-germination-content-title {
+    justify-content: flex-start;
     gap: 0.5rem;
-  }
+    margin-top: 1rem;
 
-  // Sized to the widest value, PV's `100/21`.
-  .germ-result-field {
-    width: 4.5rem;
+    .title-section {
+      padding: 0rem;
+      max-inline-size: fit-content;
+    }
 
-    // Carbon draws a read-only input as bare text over a dashed rule; the
-    // design shows these as boxes.
-    .#{vars.$bcgov-prefix}--text-input {
-      border: 1px solid var(--#{vars.$bcgov-prefix}-border-strong-01, #8d8d8d);
-      background-color: var(--#{vars.$bcgov-prefix}-background, #ffffff);
-      padding-inline: 0.5rem;
+    .status-tag {
+      align-self: flex-start;
+      margin-top: 0.5rem;
     }
   }
 
-  .consep-germination-content-actions {
-    margin-top: 1rem;
+  .consep-germination-content-summary {
+    .#{vars.$bcgov-prefix}--col {
+      padding: 0rem;
+    }
   }
+
+  // Moisture gives its one result table 2rem above and below; here two tables
+  // share it.
+  .consep-germination-content-table {
+    margin: 2rem -1rem 0;
+
+    + .consep-germination-content-form {
+      margin-top: 2rem;
+    }
+  }
+
+  .consep-germination-content-form > div {
+    padding: 0rem;
+  }
+
+  .consep-germination-content-form {
+    justify-content: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .consep-germination-content-comments {
+    width: 100%;
+  }
+
+  .consep-germination-content-comments > div {
+    padding: 0rem;
+  }
+}
+
+.consep-germination-content-alert {
+  margin-bottom: 2rem;
+  position: fixed;
+  top: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 1000;
 }
 
 // The count-date modal is nothing but a calendar, so it sizes itself to one.

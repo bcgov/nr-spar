@@ -5,9 +5,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  FlexGrid, Row, Column, InlineNotification, TextInput, Button, Modal
+  FlexGrid, Row, Column, InlineNotification, TextInput, TextArea, Modal
 } from '@carbon/react';
-import { CheckmarkFilled, Time } from '@carbon/icons-react';
+import { Calculator, CheckmarkFilled, Time } from '@carbon/icons-react';
 
 import ROUTES from '../../../../routes/constants';
 import {
@@ -27,6 +27,7 @@ import StatusTag from '../../../../components/StatusTag';
 import SaveStatus from '../../../../components/CONSEP/SaveStatus';
 import SummaryGrid, { type SummaryColumn } from '../../../../components/CONSEP/SummaryGrid';
 import TestHistory from '../TestSearch/ToolbarControls/TestHistory';
+import ButtonGroup from '../ButtonGroup';
 
 import DailyGermTable from './DailyGermTable';
 import AbnormalsTable, { ABNORMAL_CATEGORIES } from './AbnormalsTable';
@@ -410,16 +411,42 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     { name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST }
   ];
 
+  // Same order and emphasis as the moisture screen's ActivitySummary.
   const summaryColumns: SummaryColumn<GerminationTestHeaderType>[] = [
-    { key: 'requestId', label: 'Request ID', renderValue: (data) => data?.requestId ?? '-' },
-    { key: 'activity', label: 'Activity', renderValue: (data) => data?.activityTypeCd ?? '-' },
     {
-      key: 'seedlotNumber',
-      label: 'Seedlot number',
-      renderValue: lotNumber
+      key: 'activity', label: 'Activity', renderValue: (data) => data?.activityTypeCd ?? '', emphasize: true
     },
-    { key: 'species', label: 'Species', renderValue: (data) => data?.vegetationState ?? '-' },
-    { key: 'germTray', label: 'Germ tray', renderValue: (data) => data?.germinatorTrayId ?? '-' }
+    { key: 'lot', label: 'Lot number', renderValue: lotNumber },
+    { key: 'requestId', label: 'Request ID', renderValue: (data) => data?.requestId ?? '' },
+    { key: 'species', label: 'Species', renderValue: (data) => data?.vegetationState ?? '' },
+    { key: 'germTray', label: 'Germ tray', renderValue: (data) => data?.germinatorTrayId ?? '' },
+    {
+      key: 'testResult',
+      label: 'Test result',
+      renderValue: (data) => (data?.germinationPct == null ? '' : Number(data.germinationPct).toFixed(1)),
+      emphasize: true
+    }
+  ];
+
+  const buttons = [
+    {
+      id: 'germination-calc',
+      text: 'Calc',
+      kind: 'primary',
+      size: 'lg',
+      icon: Calculator,
+      // Recalculating stays open on a completed test; accepting locks it (#2756).
+      disabled: isAccepted || isConflict || calcMutation.isPending || acceptMutation.isPending,
+      action: handleCalculate
+    },
+    {
+      id: 'germination-test-history',
+      text: 'Test history',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Time,
+      action: () => setShowTestHistory(true)
+    }
   ];
 
   return (
@@ -427,6 +454,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       {alert?.message && (
         <InlineNotification
           lowContrast
+          className="consep-germination-content-alert"
           kind={alert.isSuccess ? 'success' : 'error'}
           title={alert.isSuccess ? 'Success' : 'Error'}
           subtitle={alert.message}
@@ -470,20 +498,11 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
             )}
           </Modal>
           <Row className="consep-germination-content-title">
-            <PageTitle title={`Germination test result (${lotNumber(header)})`} />
+            <PageTitle title={`Germination test result for lot ${lotNumber(header)}`} />
             <>
               {isCompleted && <StatusTag type="Completed" renderIcon={CheckmarkFilled} />}
               {isAccepted && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
             </>
-            <Button
-              kind="tertiary"
-              size="lg"
-              className="consep-germination-content-test-history-btn"
-              renderIcon={Time}
-              onClick={() => setShowTestHistory(true)}
-            >
-              Test history
-            </Button>
             <SaveStatus status={saveStatus} onRetry={flush} onReload={handleReloadOnConflict} />
           </Row>
           <Row className="consep-germination-content-summary">
@@ -491,46 +510,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               item={header}
               isFetching={headerQuery.isFetching}
               columns={summaryColumns}
-              cellClassName="consep-germination-content-summary-cell"
             />
-          </Row>
-          {/* The design's result panel: a row of small boxed fields over the
-              comments. Only GV and PV are in scope (#2756); Category, Rank,
-              Reps out of tolerance, Germinator ID and Accept/Complete join this
-              row in their own tickets. */}
-          <Row className="consep-germination-content-results">
-            <Column>
-              <div className="germ-result-panel">
-                <div className="germ-result-fields">
-                  <div className="germ-result-field">
-                    <TextInput
-                      id="germ-header-gv"
-                      labelText="GV"
-                      size="sm"
-                      value={header.germinationValue ?? ''}
-                      readOnly
-                    />
-                  </div>
-                  <div className="germ-result-field">
-                    <TextInput
-                      id="germ-header-pv"
-                      labelText="PV"
-                      size="sm"
-                      value={formatPeakValue(header.peakValueGrmPct, header.peakValueNoDays)}
-                      readOnly
-                    />
-                  </div>
-                </div>
-                <div className="germ-result-comments">
-                  <TextInput
-                    id="germ-header-comments"
-                    labelText="Comments"
-                    value={header.riaComment ?? ''}
-                    readOnly
-                  />
-                </div>
-              </div>
-            </Column>
           </Row>
           <Row className="consep-germination-content-table">
             <Column>
@@ -562,21 +542,42 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               />
             </Column>
           </Row>
-          {/* Other legacy action buttons (Final/Rank/Curve/Copy results/...) are
-              still out of scope — placeholders intentionally omitted. */}
-          <Row className="consep-germination-content-actions">
-            <Column>
-              <Button
-                kind="tertiary"
-                size="md"
-                // Recalculating stays open on a completed test; accepting locks it (#2756).
-                disabled={isAccepted || isConflict || calcMutation.isPending || acceptMutation.isPending}
-                onClick={handleCalculate}
-              >
-                Calc
-              </Button>
+          {/* Laid out like the moisture screen's form row. Only GV and PV are in scope
+              (#2756); Category, Rank, Reps out of tolerance and Germinator ID join
+              this row in their own tickets. */}
+          <Row className="consep-germination-content-form">
+            <Column sm={2} md={2} lg={5} xlg={5}>
+              <TextInput
+                id="germ-header-gv"
+                labelText="GV"
+                value={header.germinationValue ?? ''}
+                readOnly
+              />
+            </Column>
+            <Column sm={2} md={2} lg={5} xlg={5}>
+              <TextInput
+                id="germ-header-pv"
+                labelText="PV"
+                value={formatPeakValue(header.peakValueGrmPct, header.peakValueNoDays)}
+                readOnly
+              />
             </Column>
           </Row>
+          <Row className="consep-germination-content-comments">
+            <Column>
+              {/* Read-only until editing comments is ticketed for this screen. */}
+              <TextArea
+                id="germ-header-comments"
+                labelText="Comments"
+                rows={2}
+                value={header.riaComment ?? ''}
+                readOnly
+              />
+            </Column>
+          </Row>
+          {/* Other legacy action buttons (Final/Rank/Curve/Copy results/...) are
+              still out of scope. */}
+          <ButtonGroup buttons={buttons} />
         </>
       )}
     </FlexGrid>
