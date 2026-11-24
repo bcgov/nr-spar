@@ -271,13 +271,18 @@ const TOPICS: HelpTopic[] = [
     body: (
       <>
         <p>
-          The bottom-right cursor readout shows the mouse position in three formats:
+          The bottom-right cursor readout shows the mouse position in four formats:
         </p>
         <ul>
           <li>
             <strong>Lat/Lng</strong>
             {' '}
             in degrees-minutes-seconds (e.g. 49° 30&apos; 12.4&quot; N)
+          </li>
+          <li>
+            <strong>Decimal</strong>
+            {' '}
+            lat/lng in decimal degrees; south and west are negative (e.g. 49.50344, -123.12345)
           </li>
           <li>
             <strong>BC Albers</strong>

@@ -109,7 +109,9 @@ $map-btn: 36px;
       // rather than main content.
       &--top-right-stack {
         top: auto;
-        bottom: 5.5rem; // clears the bottom-right zoom control + margin
+        // Sits just above the bottom-right cursor-position box (4 rows,
+        // its top is ~6.25rem up); raise this if that box gains rows.
+        bottom: 7rem;
         right: 1rem;
         background: transparent;
         border: none;
@@ -118,7 +120,7 @@ $map-btn: 36px;
         flex-direction: column-reverse;
         gap: 0.5rem;
         max-width: 220px;
-        max-height: calc(100% - 10rem); // leave room for header, zoom
+        max-height: calc(100% - 11.5rem); // leave room for the top bar and cursor box
         overflow-y: auto;
       }
 
