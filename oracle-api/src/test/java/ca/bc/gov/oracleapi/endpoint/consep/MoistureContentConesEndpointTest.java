@@ -57,6 +57,9 @@ import org.springframework.web.server.ResponseStatusException;
 @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
 class MoistureContentConesEndpointTest {
 
+  private static final LocalDateTime UPDATE_TS = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
+  private static final String UPDATE_TS_PARAM = "2024-05-01T10:15:30";
+
   @Autowired
   private MockMvc mockMvc;
 
@@ -386,11 +389,12 @@ class MoistureContentConesEndpointTest {
     );
 
     // Mock service behavior
-    when(moistureContentService.deleteMccReplicate(riaKey, replicateNumber))
+    when(moistureContentService.deleteMccReplicate(riaKey, replicateNumber, UPDATE_TS))
         .thenReturn(Optional.of(mockDto));
 
     mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}", riaKey,
-            replicateNumber).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
+            replicateNumber).param("updateTimestamp", UPDATE_TS_PARAM)
+            .with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -402,10 +406,11 @@ class MoistureContentConesEndpointTest {
 
     // Simulate resource not found scenario
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(moistureContentService)
-        .deleteMccReplicate(riaKey, replicateNumber);
+        .deleteMccReplicate(riaKey, replicateNumber, UPDATE_TS);
 
     mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/{replicateNumber}", riaKey,
-            replicateNumber).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
+            replicateNumber).param("updateTimestamp", UPDATE_TS_PARAM)
+            .with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
@@ -415,9 +420,10 @@ class MoistureContentConesEndpointTest {
     BigDecimal riaKey = new BigDecimal("1234567890");
     List<Integer> replicateNumbers = Arrays.asList(1, 2, 3);
 
-    doNothing().when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
+    doNothing().when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers, UPDATE_TS);
 
     mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+            .param("updateTimestamp", UPDATE_TS_PARAM)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
             .param("ids", replicateNumbers.stream().map(String::valueOf).collect(Collectors.joining(","))))
@@ -434,9 +440,10 @@ class MoistureContentConesEndpointTest {
     List<Integer> replicateNumbers = Arrays.asList(1, 2, 3);
 
     doThrow(new InvalidTestActivityKeyException())
-        .when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers);
+        .when(moistureContentService).deleteMccReplicates(riaKey, replicateNumbers, UPDATE_TS);
 
     mockMvc.perform(delete("/api/moisture-content-cone/{riaKey}/replicates", riaKey)
+            .param("updateTimestamp", UPDATE_TS_PARAM)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
             .param("ids", replicateNumbers.stream().map(String::valueOf).collect(Collectors.joining(","))))

@@ -60,6 +60,7 @@ class GerminatorTrayEndpointTest {
   private GerminatorTrayService germinatorTrayService;
 
   private static final String BASE_URL = "/api/germinator-trays";
+  private static final LocalDateTime UPDATE_TS = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
 
   /* ----------------------- Assign Germinator Trays ----------------------*/
   @Test
@@ -67,8 +68,8 @@ class GerminatorTrayEndpointTest {
     // Arrange - use current time for payload
     LocalDateTime now = LocalDateTime.now();
     List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), null),
-        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), now)
+        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), null, UPDATE_TS),
+        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), now, UPDATE_TS)
     );
 
     // Prepare service response
@@ -123,7 +124,7 @@ class GerminatorTrayEndpointTest {
       throws Exception {
     // Arrange - request list with one valid-looking entry
     List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), LocalDateTime.now())
+        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), LocalDateTime.now(), UPDATE_TS)
     );
     when(testResultService.assignGerminatorTrays(any()))
         .thenThrow(new ResponseStatusException(
@@ -145,7 +146,7 @@ class GerminatorTrayEndpointTest {
       throws Exception {
     // Arrange - request list with one valid-looking entry
     List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), LocalDateTime.now())
+        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), LocalDateTime.now(), UPDATE_TS)
     );
     when(testResultService.assignGerminatorTrays(any()))
         .thenThrow(new ResponseStatusException(
@@ -181,7 +182,8 @@ class GerminatorTrayEndpointTest {
         new GerminatorTrayCreateDto(
           "",
           new BigDecimal("881191"),
-          LocalDateTime.now()
+          LocalDateTime.now(),
+          UPDATE_TS
         )
     );
 
