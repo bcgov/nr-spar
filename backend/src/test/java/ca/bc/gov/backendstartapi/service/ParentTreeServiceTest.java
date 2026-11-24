@@ -330,6 +330,89 @@ class ParentTreeServiceTest {
   }
 
   @Test
+  @DisplayName("Scaled zero pollen total (0.0000) keeps the full female geospatial contribution")
+  void calculatePtVals_scaledZeroPollen_keepsFullFemaleContribution() {
+    // Scaled zeros are not equal() to BigDecimal.ZERO, so this guards against the zero-total
+    // checks regressing to equals(). Female crop proportions are 0.75 / 0.25 and, with no pollen,
+    // each tree's proportion should equal its female proportion (not be halved).
+    OrchardParentTreeValsDto ptA =
+        new OrchardParentTreeValsDto(
+            "1101", "111", new BigDecimal("30"), new BigDecimal("0.0000"), 0, 0, List.of());
+    OrchardParentTreeValsDto ptB =
+        new OrchardParentTreeValsDto(
+            "1102", "112", new BigDecimal("10"), new BigDecimal("0.0000"), 0, 0, List.of());
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(ptA, ptB), List.of(), 0, null, new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(1101L, 1102L)))
+        .thenReturn(
+            List.of(
+                new GeospatialOracleResDto(1101L, 49, 0, 0, 124, 0, 0, 400),
+                new GeospatialOracleResDto(1102L, 50, 0, 0, 120, 0, 0, 800)));
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    PtCalculationResDto result = parentTreeService.calculatePtVals(reqDto);
+
+    // lat: 0.75 * 2940' + 0.25 * 3000' = 2955' = 49°15'
+    // long: 0.75 * 7440' + 0.25 * 7200' = 7380' = 123°00'
+    // elev: 0.75 * 400 + 0.25 * 800 = 500
+    GeospatialRespondDto geo = result.calculatedPtVals().getGeospatialData();
+    assertEquals(49, geo.getMeanLatitudeDegree());
+    assertEquals(15, geo.getMeanLatitudeMinute());
+    assertEquals(0, geo.getMeanLatitudeSecond());
+    assertEquals(123, geo.getMeanLongitudeDegree());
+    assertEquals(0, geo.getMeanLongitudeMinute());
+    assertEquals(0, geo.getMeanLongitudeSecond());
+    assertEquals(500, geo.getMeanElevation());
+    assertEquals(0, new BigDecimal("49.25").compareTo(geo.getMeanLatitude()));
+    assertEquals(0, new BigDecimal("123").compareTo(geo.getMeanLongitude()));
+  }
+
+  @Test
+  @DisplayName("Scaled zero cone total (0.0000) gives zero female contribution, pollen-only geo")
+  void calculatePtVals_scaledZeroCone_usesPollenOnlyContribution() {
+    // Scaled zero cone total must hit the zero guard in calcFemaleCropPop (female crop pop = 0)
+    // rather than dividing by zero. Pollen proportions are 0.75 / 0.25, halved to 0.375 / 0.125.
+    OrchardParentTreeValsDto ptA =
+        new OrchardParentTreeValsDto(
+            "1201", "121", new BigDecimal("0.0000"), new BigDecimal("30"), 0, 0, List.of());
+    OrchardParentTreeValsDto ptB =
+        new OrchardParentTreeValsDto(
+            "1202", "122", new BigDecimal("0.0000"), new BigDecimal("10"), 0, 0, List.of());
+
+    PtValsCalReqDto reqDto =
+        new PtValsCalReqDto(
+            List.of(ptA, ptB), List.of(), 0, null, new SeedlotManagementBreedingValueDto());
+
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of())).thenReturn(List.of());
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(1201L, 1202L)))
+        .thenReturn(
+            List.of(
+                new GeospatialOracleResDto(1201L, 40, 0, 0, 120, 0, 0, 400),
+                new GeospatialOracleResDto(1202L, 48, 0, 0, 128, 0, 0, 800)));
+    when(geneticWorthService.calculateNe(any(), any(), any(), any())).thenReturn(BigDecimal.ONE);
+
+    PtCalculationResDto result = parentTreeService.calculatePtVals(reqDto);
+
+    // lat: 0.375 * 2400' + 0.125 * 2880' = 1260' = 21°00'
+    // long: 0.375 * 7200' + 0.125 * 7680' = 3660' = 61°00'
+    // elev: 0.375 * 400 + 0.125 * 800 = 250
+    GeospatialRespondDto geo = result.calculatedPtVals().getGeospatialData();
+    assertEquals(21, geo.getMeanLatitudeDegree());
+    assertEquals(0, geo.getMeanLatitudeMinute());
+    assertEquals(0, geo.getMeanLatitudeSecond());
+    assertEquals(61, geo.getMeanLongitudeDegree());
+    assertEquals(0, geo.getMeanLongitudeMinute());
+    assertEquals(0, geo.getMeanLongitudeSecond());
+    assertEquals(250, geo.getMeanElevation());
+    assertEquals(0, new BigDecimal("21").compareTo(geo.getMeanLatitude()));
+    assertEquals(0, new BigDecimal("61").compareTo(geo.getMeanLongitude()));
+  }
+
+  @Test
   @DisplayName("All twelve genetic traits above threshold should all be returned")
   void calculatePtVals_allTraitsAboveThreshold() {
     List<GeneticWorthTraitsDto> allTraits =
