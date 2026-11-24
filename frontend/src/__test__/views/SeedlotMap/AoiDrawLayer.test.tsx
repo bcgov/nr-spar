@@ -81,14 +81,13 @@ beforeEach(() => {
 });
 
 describe('AoiDrawLayer setup', () => {
-  it('hides the Geoman controls, styles drawing and registers the bridge', () => {
+  it('adds no Geoman controls, styles drawing and registers the bridge', () => {
     const { unmount } = renderLayer(undefined, '/map');
-    expect(fakeMap.pm.addControls).toHaveBeenCalledWith(expect.objectContaining({ drawPolygon: false }));
+    expect(fakeMap.pm.addControls).not.toHaveBeenCalled();
     expect(fakeMap.pm.setGlobalOptions).toHaveBeenCalledWith(expect.objectContaining({ removeVertexOn: 'contextmenu' }));
     expect(Object.keys(handlers)).toEqual(['pm:create', 'pm:edit', 'pm:remove']);
 
     unmount();
-    expect(fakeMap.pm.removeControls).toHaveBeenCalled();
     expect(Object.keys(handlers)).toEqual([]);
     expect(ctx._setMapControls).toHaveBeenLastCalledWith(expect.objectContaining({ zoomToAois: null }));
   });
