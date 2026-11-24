@@ -95,10 +95,10 @@ describe('layer definitions', () => {
     expect(groups.map((g) => g.label)).toEqual(['SPZ', 'Water', 'Active Seedlots']);
     expect(groups[0]).toEqual({ label: 'SPZ', layer: { id: 'spz', label: 'SPZ' } });
     expect(groupLayerIds(groups[1])).toEqual(['water_polys', 'water_lines']);
-    // A consolidated group acts as its "all species" layer only.
+    // A consolidated group covers its "all species" layer and every child.
     expect(groups[2].layer?.id).toBe('active_seedlots');
     expect(groups[2].children?.map((c) => c.id)).toEqual(['active_seedlots_fdc']);
-    expect(groupLayerIds(groups[2])).toEqual(['active_seedlots']);
+    expect(groupLayerIds(groups[2])).toEqual(['active_seedlots', 'active_seedlots_fdc']);
   });
 
   it('turns on the seed plan zone layer for the species in the URL only', () => {
@@ -271,6 +271,28 @@ describe('LayersPanel', () => {
     groups.flatMap(groupLayerIds).forEach((id) => expect(actions.visible[id]).toBe(true));
     fireEvent.click(screen.getByLabelText('All'));
     groups.flatMap(groupLayerIds).forEach((id) => expect(actions.visible[id]).toBe(false));
+  });
+
+  it('switches a species group and all its species layers together, like every other group', () => {
+    const species = groups.find((g) => g.layer && g.children?.length)!;
+    const everyId = [species.layer!.id, ...species.children!.map((c) => c.id)];
+    const child = species.children![0];
+    renderPanel();
+    fireEvent.click(screen.getByLabelText(species.label));
+    everyId.forEach((id) => expect(actions.visible[id]).toBe(true));
+    fireEvent.click(screen.getByLabelText(species.label));
+    everyId.forEach((id) => expect(actions.visible[id]).toBe(false));
+
+    // One species on its own leaves the group part-checked; All then turns
+    // everything off, that species included.
+    fireEvent.click(screen.getByLabelText(`Expand ${species.label}`));
+    fireEvent.click(screen.getByLabelText(child.label));
+    expect(screen.getByLabelText(species.label)).toHaveProperty('indeterminate', true);
+    fireEvent.click(screen.getByLabelText('All'));
+    everyId.forEach((id) => expect(actions.visible[id]).toBe(true));
+    fireEvent.click(screen.getByLabelText('All'));
+    everyId.forEach((id) => expect(actions.visible[id]).toBe(false));
+    expect(screen.getByLabelText('All')).not.toBeChecked();
   });
 
   it('expands and collapses every group', () => {

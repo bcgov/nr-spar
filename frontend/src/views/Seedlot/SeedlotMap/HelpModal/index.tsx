@@ -40,8 +40,8 @@ const TOPICS: HelpTopic[] = [
         <p>
           Zoom in / out sits at the top-left, with two toolbar boxes below
           it: polygon tools (draw, edit, import / export, Measure,
-          Validate / Save — collection-area map only) and map tools
-          (Identify, plus Close on the collection-area map). Search
+          Validate — collection-area map only) and map tools (Identify,
+          plus Save and Close on the collection-area map). Search
           for a place in the box at the top. Help, Print, Fullscreen, the
           legend, and the Layers panel are in the top-right bar. The
           polygon statistics card sits bottom-right. The
@@ -111,11 +111,6 @@ const TOPICS: HelpTopic[] = [
             — click two opposite corners.
           </li>
           <li>
-            <strong>Circle</strong>
-            {' '}
-            — click center, drag to set radius. It is saved as a polygon approximation.
-          </li>
-          <li>
             <strong>Line</strong>
             {' '}
             — non-AOI markup polyline.
@@ -136,26 +131,26 @@ const TOPICS: HelpTopic[] = [
             — then click the polygon to remove.
           </li>
         </ul>
-        <p>The bottom of the polygon tools box finishes the job:</p>
+        <p>
+          <strong>Validate</strong>
+          {' '}
+          (bottom of the polygon tools box) runs topology validity (self-intersect,
+          degenerate ring) plus the legacy single-BEC-zone rule.
+        </p>
+        <p>Then, in the map tools box:</p>
         <ul>
-          <li>
-            <strong>Validate</strong>
-            {' '}
-            — runs topology validity (self-intersect, degenerate ring) plus the legacy
-            single-BEC-zone rule.
-          </li>
           <li>
             <strong>Save</strong>
             {' '}
             — validates, then applies the collection area to the registration form
             (when the map was opened from it).
           </li>
+          <li>
+            <strong>Close</strong>
+            {' '}
+            — returns to the previous page without saving.
+          </li>
         </ul>
-        <p>
-          <strong>Close</strong>
-          {' '}
-          (in the map tools box) returns to the previous page without saving.
-        </p>
         <p>
           Polygons render with the legacy SPAR red outline + light-gray fill at 30% opacity.
           Live validation runs after every vertex change; an inline warning surfaces if the

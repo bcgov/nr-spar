@@ -10,7 +10,7 @@ import {
   describe, it, expect, vi, beforeEach
 } from 'vitest';
 
-import AoiToolbar from '../../../views/Seedlot/SeedlotMap/AoiToolbar';
+import AoiToolbar, { polygonToolRows } from '../../../views/Seedlot/SeedlotMap/AoiToolbar';
 import { validateAoiPolygons, validatePolygons, buildMultiPolygonFeature } from '../../../views/Seedlot/SeedlotMap/AoiToolbar/aoiValidation';
 import { importShapeFile } from '../../../views/Seedlot/SeedlotMap/AoiToolbar/importShape';
 import { exportAois } from '../../../views/Seedlot/SeedlotMap/AoiToolbar/exportShape';
@@ -62,7 +62,6 @@ const resetSparMap = (overrides: Record<string, unknown> = {}) => {
     graticuleVisible: false,
     setGraticuleVisible: vi.fn(),
     startDrawRectangle: vi.fn(),
-    startDrawCircle: vi.fn(),
     startDrawLine: vi.fn(),
     zoomToAois: vi.fn(),
     setBecZones: vi.fn(),
@@ -120,6 +119,28 @@ describe('AoiToolbar welcome panel', () => {
   });
 });
 
+describe('polygonToolRows', () => {
+  it('keeps one column when every button fits', () => {
+    expect(polygonToolRows(400, 36, 9)).toBeNull();
+    expect(polygonToolRows(324, 36, 9)).toBeNull();
+  });
+
+  it('limits the rows to what fits, so the buttons wrap into more columns', () => {
+    expect(polygonToolRows(200, 36, 9)).toBe(5);
+    expect(polygonToolRows(80, 36, 9)).toBe(2);
+  });
+
+  it('always allows at least one row', () => {
+    expect(polygonToolRows(10, 36, 9)).toBe(1);
+    expect(polygonToolRows(-50, 36, 9)).toBe(1);
+  });
+
+  it('does nothing before the buttons have a size', () => {
+    expect(polygonToolRows(200, 0, 9)).toBeNull();
+    expect(polygonToolRows(200, 36, 0)).toBeNull();
+  });
+});
+
 describe('AoiToolbar sections', () => {
   const toolIds = (name: string) => [
     ...screen.getByRole('toolbar', { name }).querySelectorAll('[data-testid^="aoi-"]')
@@ -129,9 +150,9 @@ describe('AoiToolbar sections', () => {
     renderToolbar();
     expect(toolIds('Polygon tools')).toEqual([
       'aoi-draw', 'aoi-edit-polygon', 'aoi-delete-polygon', 'aoi-zoom-aois', 'aoi-import-shape',
-      'aoi-export', 'aoi-start-measure', 'aoi-validate', 'aoi-submit'
+      'aoi-export', 'aoi-start-measure', 'aoi-validate'
     ]);
-    expect(toolIds('Map tools')).toEqual(['aoi-identify', 'aoi-cancel']);
+    expect(toolIds('Map tools')).toEqual(['aoi-identify', 'aoi-submit', 'aoi-cancel']);
     expect(screen.getByTestId('aoi-cancel').closest('.cds--popover-container'))
       .toHaveTextContent('Close the map without saving');
   });
@@ -154,7 +175,6 @@ describe('AoiToolbar sections', () => {
     const shapes: Array<[string, string]> = [
       ['aoi-add-polygon', 'startDraw'],
       ['aoi-add-rectangle', 'startDrawRectangle'],
-      ['aoi-add-circle', 'startDrawCircle'],
       ['aoi-add-line', 'startDrawLine']
     ];
     shapes.forEach(([testId, fn]) => {

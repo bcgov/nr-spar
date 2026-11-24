@@ -91,6 +91,7 @@ const LayersPanel = ({ theme, onClose }: LayersPanelProps) => {
   const isOn = (id: string) => visible[id] === true;
   const opacityOf = (id: string) => opacity[id] ?? 1;
 
+  // "All" turns every listed layer on or off, children included.
   const allIds = shownGroups.flatMap(groupLayerIds);
   const allOn = allIds.length > 0 && allIds.every(isOn);
   const someOn = allIds.some(isOn);
@@ -127,11 +128,10 @@ const LayersPanel = ({ theme, onClose }: LayersPanelProps) => {
 
     // While searching, show the matching children without extra clicks.
     const open = expanded.has(group.label) || normalizedQuery !== '';
+    // The group checkbox turns every layer in the group on or off.
     const ids = groupLayerIds(group);
     const checked = ids.every(isOn);
-    const indeterminate = !checked && (
-      ids.some(isOn) || (group.children ?? []).some((c) => isOn(c.id))
-    );
+    const indeterminate = !checked && ids.some(isOn);
     const ownLayer = group.layer;
     return (
       <div className="layers-panel__group" key={group.label}>

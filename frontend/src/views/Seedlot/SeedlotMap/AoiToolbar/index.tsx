@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { IconButton, InlineNotification, ActionableNotification } from '@carbon/react';
@@ -13,7 +13,6 @@ import {
   Ruler,
   Information,
   Crop,
-  CircleDash,
   ConnectTarget,
   ZoomIn,
   Close
@@ -100,6 +99,25 @@ const ToolButton = ({
 );
 
 /**
+ * How many rows the polygon tools box can use before it has to wrap into
+ * another column, so no button is ever cut off on a short screen (or a
+ * zoomed-in browser). Returns null when every button fits in one column.
+ *
+ * @param {number} available height the box may use, in px
+ * @param {number} buttonHeight height of one button, in px
+ * @param {number} buttonCount number of buttons in the box
+ */
+export const polygonToolRows = (
+  available: number,
+  buttonHeight: number,
+  buttonCount: number
+): number | null => {
+  if (buttonHeight <= 0 || buttonCount <= 0) return null;
+  const fit = Math.max(1, Math.floor(available / buttonHeight));
+  return fit >= buttonCount ? null : fit;
+};
+
+/**
  * localStorage key used to remember whether the user has dismissed the
  * one-time COLAREA welcome panel. Mirrors the legacy SPAR welcome text
  * from `cwmSparmap.jsp`'s `aoi_panel` — shown once for first-time
@@ -135,8 +153,8 @@ const WELCOME_DISMISSED_KEY = 'spar-map-welcome-dismissed';
  *
  * Layout: the one map toolbar for every theme — two boxes down the left
  * of the map, below the zoom control. "Polygon tools" (drawing, files,
- * Measure, Validate, Save) only appears on drawing themes; "Map tools"
- * (Identify, plus Close on drawing themes or Measure on view-only ones)
+ * Measure, Validate) only appears on drawing themes; "Map tools"
+ * (Identify, plus Save and Close on drawing themes or Measure on view-only ones)
  * is always shown. Help, Print, Fullscreen, Legend, and Layers live in
  * the top-right bar.
  */
@@ -157,7 +175,6 @@ const AoiToolbar = ({
     setIdentifyActive,
     setMeasurementMode,
     startDrawRectangle,
-    startDrawCircle,
     startDrawLine,
     zoomToAois,
     setBecZones,
@@ -188,7 +205,7 @@ const AoiToolbar = ({
     }
     setWelcomeDismissed(true);
   };
-  // Polygon / rectangle / circle / line all start from one Draw button
+  // Polygon / rectangle / line all start from one Draw button
   // that opens a small shape picker beside the rail.
   const [shapePickerOpen, setShapePickerOpen] = useState(false);
   // EXPORT modal (Batch 2) — opens a Carbon Modal with a RadioButton
@@ -200,6 +217,38 @@ const AoiToolbar = ({
   // so the import button can carry an icon and share the exact same
   // Carbon tertiary-button look as the rest of the toolbar.
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Keep every toolbar button on screen: measure the height the toolbar
+  // has (its CSS box runs from below the zoom control to above the scale
+  // bar) and, when the polygon box doesn't fit in one column, lay it out
+  // in as many rows as fit so it flows into extra columns instead.
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const polygonStripRef = useRef<HTMLDivElement>(null);
+  const [polygonRows, setPolygonRows] = useState<number | null>(null);
+  useEffect(() => {
+    const toolbar = toolbarRef.current;
+    const strip = polygonStripRef.current;
+    const rail = strip?.parentElement;
+    if (!toolbar || !strip || !rail || typeof ResizeObserver === 'undefined') return undefined;
+    const measure = () => {
+      const button = strip.firstElementChild?.getBoundingClientRect().height ?? 0;
+      const gap = parseFloat(getComputedStyle(rail).rowGap) || 0;
+      const otherBoxes = [...rail.children]
+        .filter((box) => box !== strip)
+        .reduce((total, box) => total + box.getBoundingClientRect().height + gap, 0);
+      const stripBorders = strip.offsetHeight - strip.clientHeight;
+      // If the map tools box can't also fit underneath even a one-row
+      // polygon box, the rail wraps it beside instead (see styles.scss),
+      // so the polygon box may use the full height.
+      const fitsBelow = toolbar.clientHeight - otherBoxes >= button + stripBorders;
+      const available = toolbar.clientHeight - stripBorders - (fitsBelow ? otherBoxes : 0);
+      setPolygonRows(polygonToolRows(available, button, strip.children.length));
+    };
+    // ResizeObserver reports once on observe, then on every resize.
+    const observer = new ResizeObserver(measure);
+    observer.observe(toolbar);
+    return () => observer.disconnect();
+  }, [drawingEnabled]);
 
   const hasAoi = aois.length > 0;
   // `returnTo` only signals a wizard launch; never navigate to its value.
@@ -483,17 +532,21 @@ const AoiToolbar = ({
   }
 
   return (
-    <div className="aoi-toolbar" data-testid="aoi-toolbar">
+    <div className="aoi-toolbar" data-testid="aoi-toolbar" ref={toolbarRef}>
       <div className="aoi-toolbar__rail">
         {drawingEnabled && (
           <div
-            className="aoi-toolbar__strip"
+            ref={polygonStripRef}
+            className="aoi-toolbar__strip aoi-toolbar__strip--wrap"
             role="toolbar"
             aria-label="Polygon tools"
             aria-orientation="vertical"
+            style={polygonRows
+              ? { gridAutoFlow: 'column', gridTemplateRows: `repeat(${polygonRows}, auto)` }
+              : undefined}
           >
             <ToolButton
-              label="Draw a polygon, rectangle, circle, or line"
+              label="Draw a polygon, rectangle, or line"
               onClick={onToggleShapePicker}
               active={shapePickerOpen}
               testId="aoi-draw"
@@ -555,14 +608,6 @@ const AoiToolbar = ({
             >
               <CheckmarkOutline />
             </ToolButton>
-            <ToolButton
-              label={saveLabel}
-              onClick={canRemoveSavedArea ? () => setIsRemoveAreaOpen(true) : onSubmit}
-              disabled={(!hasAoi && !canRemoveSavedArea) || isValidating || waitingForSeedlotSpecies}
-              testId="aoi-submit"
-            >
-              <Save />
-            </ToolButton>
           </div>
         )}
         <div
@@ -595,6 +640,15 @@ const AoiToolbar = ({
           )}
           {drawingEnabled && (
             <>
+              {/* Save sits with Close so the two ways to leave are together. */}
+              <ToolButton
+                label={saveLabel}
+                onClick={canRemoveSavedArea ? () => setIsRemoveAreaOpen(true) : onSubmit}
+                disabled={(!hasAoi && !canRemoveSavedArea) || isValidating || waitingForSeedlotSpecies}
+                testId="aoi-submit"
+              >
+                <Save />
+              </ToolButton>
               {/*
                 Close — legacy aoi_panel Cancel parity (cwmSparmap.jsp:407,
                 Sparmap.cancel → window.close()). The new app isn't a popup,
@@ -632,14 +686,6 @@ const AoiToolbar = ({
               testId="aoi-add-rectangle"
             >
               <Crop />
-            </ToolButton>
-            <ToolButton
-              label="Circle"
-              onClick={() => startShape(startDrawCircle)}
-              disabled={!startDrawCircle}
-              testId="aoi-add-circle"
-            >
-              <CircleDash />
             </ToolButton>
             <ToolButton
               label="Line (markup only — not saved with the collection area)"

@@ -215,11 +215,11 @@ export const buildLayerGroups = (overlays: readonly SparMapOverlayLayer[]): Laye
 };
 
 /**
- * Ids the "All" checkbox and a group checkbox act on. A consolidated
- * group counts as its single "all species" layer, so "All" doesn't
- * switch on every per-species layer (dozens of WFS requests) at once.
+ * Every layer id in a group: its own layer (if any) and all children.
+ * A group checkbox, and the "All" checkbox, turn all of these on or off
+ * together, the same way for every group (as the legacy tree did).
  */
-export const groupLayerIds = (group: LayerGroup): string[] => {
-  if (group.layer) return [group.layer.id];
-  return (group.children ?? []).map((c) => c.id);
-};
+export const groupLayerIds = (group: LayerGroup): string[] => [
+  ...(group.layer ? [group.layer.id] : []),
+  ...(group.children ?? []).map((c) => c.id)
+];

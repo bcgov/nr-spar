@@ -94,7 +94,6 @@ const LeafletMap = ({ theme }: LeafletMapProps) => {
       <MapContainer
         // MapContainer accepts EITHER center+zoom OR bounds, never both, so
         // the prop set is chosen at runtime and must be spread.
-
         {...(useInitialZoom
           ? { center: initialCenter, zoom: profile.initialZoom }
           : { bounds: initialBounds })}

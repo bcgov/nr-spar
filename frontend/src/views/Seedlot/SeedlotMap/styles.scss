@@ -90,6 +90,15 @@ $map-btn: 36px;
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        // The wrapper (and the empty space beside the toolbar) must not
+        // swallow map clicks and drags; `.aoi-toolbar` turns pointer
+        // events back on for the real controls.
+        pointer-events: none;
+        // Runs down to just above the bottom-left scale bar, giving the
+        // toolbar a fixed height to fit into: when a short screen can't
+        // fit the polygon box in one column, AoiToolbar wraps it into more
+        // columns instead of letting buttons fall off the bottom.
+        bottom: calc(1rem + 3rem);
       }
 
       // The top-right slot holds the stacking CollapsibleCard container.
@@ -663,12 +672,32 @@ $map-btn: 36px;
   align-items: flex-start;
   gap: 0.5rem;
   max-width: 100%;
+  // Fill the wrapper's height so AoiToolbar can measure the space it has.
+  flex: 1 1 auto;
+  min-height: 0;
+  // Layout boxes are click-through so the map stays usable around the
+  // toolbar (the side column keeps its width even when empty). Pointer
+  // events come back on the toolbar boxes, the side column's contents
+  // (shape picker, notifications), and everything else rendered here —
+  // modals, the loading mask.
+  pointer-events: none;
+
+  &__rail > *,
+  &__side > *,
+  > :not(.aoi-toolbar__rail, .aoi-toolbar__side) {
+    pointer-events: auto;
+  }
 
   &__rail {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     flex: 0 0 auto;
+    // On very short screens the map tools box moves beside the polygon
+    // box rather than dropping off the bottom of the map.
+    flex-wrap: wrap;
+    align-content: flex-start;
+    max-height: 100%;
   }
 
   &__side {
@@ -693,6 +722,15 @@ $map-btn: 36px;
     display: inline-flex;
     flex-direction: column;
     width: fit-content;
+
+    // Polygon tools box: a one-column grid that AoiToolbar switches to
+    // column flow with a fixed row count when the screen is too short, so
+    // the buttons wrap into more columns (the box grows to fit them).
+    &--wrap {
+      display: inline-grid;
+      grid-auto-flow: row;
+      grid-auto-columns: max-content;
+    }
     background: theme.$surface;
     border: 1px solid theme.$border-strong;
     border-radius: 0.25rem;
@@ -1055,5 +1093,39 @@ $map-btn: 36px;
     &:hover {
       background: theme.$surface-hover;
     }
+  }
+}
+
+// ── Small screens (phones, narrow windows) ────────────────────────────
+// Keep every control visible: the centred search box would otherwise sit
+// on top of the zoom / toolbar column and the top-right bar, so it drops
+// below the top-right bar and spans the space right of the toolbar.
+// Side panels shrink to fit the screen.
+@media (max-width: 760px) {
+  .seedlot-map-page .seedlot-map-workspace .map-overlay {
+    &--top-center {
+      top: calc(1rem + #{$map-btn} + 10px);
+      left: calc(1rem + #{$map-btn} + 10px);
+      right: 1rem;
+      transform: none;
+      min-width: 0;
+      max-width: none;
+    }
+
+    &--side-panel-right {
+      width: auto;
+      left: 1rem;
+      max-width: 320px;
+      margin-left: auto;
+    }
+  }
+}
+
+// Very short screens (phones in landscape): let the toolbar use the space
+// normally kept clear for the scale bar — buttons matter more than the
+// scale bar, which it may then cover.
+@media (max-height: 520px) {
+  .seedlot-map-page .seedlot-map-workspace .map-overlay--top-left-tools {
+    bottom: 0.5rem;
   }
 }
