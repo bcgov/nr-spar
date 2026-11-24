@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.MccAutosaveFormDto;
 import ca.bc.gov.oracleapi.dto.consep.MoistureContentConesDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.response.EditConflictResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.MoistureContentService;
@@ -18,8 +19,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -261,7 +264,13 @@ public class MoistureContentConesEndpoint {
           description = "The replicate entry was not found",
           content =
               @Content(
-                  schema = @Schema(implementation = Void.class)))
+                  schema = @Schema(implementation = Void.class))),
+      @ApiResponse(
+          responseCode = "409",
+          description = "Edit conflict: the record changed since updateTimestamp was read",
+          content =
+              @Content(
+                  schema = @Schema(implementation = EditConflictResponse.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public Optional<MoistureContentConesDto> deleteReplicate(
@@ -278,8 +287,16 @@ public class MoistureContentConesEndpoint {
           description = "Number of the replicate to delete",
           required = true)
       @PathVariable
-          Integer replicateNumber) {
-    return moistureContentService.deleteMccReplicate(riaKey, replicateNumber);
+          Integer replicateNumber,
+      @Parameter(
+          name = "updateTimestamp",
+          in = ParameterIn.QUERY,
+          description = "The activity updateTimestamp the client last read (optimistic lock)",
+          required = true)
+      @RequestParam(name = "updateTimestamp")
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          LocalDateTime updateTimestamp) {
+    return moistureContentService.deleteMccReplicate(riaKey, replicateNumber, updateTimestamp);
   }
 
   /**
@@ -310,7 +327,13 @@ public class MoistureContentConesEndpoint {
           description = "The replicate entry was not found",
           content =
               @Content(
-                  schema = @Schema(implementation = Void.class)))
+                  schema = @Schema(implementation = Void.class))),
+    @ApiResponse(
+          responseCode = "409",
+          description = "Edit conflict: the record changed since updateTimestamp was read",
+          content =
+              @Content(
+                  schema = @Schema(implementation = EditConflictResponse.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
     public List<Integer> deleteReplicates(
@@ -327,8 +350,16 @@ public class MoistureContentConesEndpoint {
             in = ParameterIn.QUERY,
             description = "List of replicate numbers to delete",
             required = true)
-        @RequestParam(name = "ids") List<Integer> replicateNumbers) {
-    moistureContentService.deleteMccReplicates(riaKey, replicateNumbers);
+        @RequestParam(name = "ids") List<Integer> replicateNumbers,
+        @Parameter(
+            name = "updateTimestamp",
+            in = ParameterIn.QUERY,
+            description = "The activity updateTimestamp the client last read (optimistic lock)",
+            required = true)
+        @RequestParam(name = "updateTimestamp")
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime updateTimestamp) {
+    moistureContentService.deleteMccReplicates(riaKey, replicateNumbers, updateTimestamp);
     return replicateNumbers;
   }
 
