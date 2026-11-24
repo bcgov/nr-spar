@@ -937,7 +937,7 @@ public class ParentTreeService {
      *  v_parent_prop_orch_poll := NVL(p_pt(i).pollen_count,0) / v_total_pollen_count;
      */
     BigDecimal parentPropOrchPoll = BigDecimal.ZERO;
-    if (!totalPollenCount.equals(BigDecimal.ZERO)) {
+    if (ValueUtil.hasValue(totalPollenCount)) {
       parentPropOrchPoll =
           ptValDto.pollenCount().divide(totalPollenCount, DIVISION_SCALE, RoundingMode.HALF_UP);
     }
@@ -951,7 +951,7 @@ public class ParentTreeService {
      *  varParPropContrib := (v_female_crop_pop + v_parent_prop_orch_poll) / 2;
      */
     BigDecimal parentPropContrib;
-    if (totalPollenCount.equals(BigDecimal.ZERO)) {
+    if (!ValueUtil.hasValue(totalPollenCount)) {
       parentPropContrib = femaleCropPop;
     } else {
       parentPropContrib = (femaleCropPop.add(parentPropOrchPoll)).divide(HALF_DIVISOR);
@@ -978,7 +978,7 @@ public class ParentTreeService {
      */
     BigDecimal femaleCropPop = BigDecimal.ZERO;
 
-    if (!totalConeCount.equals(BigDecimal.ZERO)) {
+    if (ValueUtil.hasValue(totalConeCount)) {
       femaleCropPop =
           ptValDto.coneCount().divide(totalConeCount, DIVISION_SCALE, RoundingMode.HALF_UP);
     }
