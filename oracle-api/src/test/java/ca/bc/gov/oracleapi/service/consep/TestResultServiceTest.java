@@ -86,9 +86,14 @@ class TestResultServiceTest {
   @Mock
   private TestRepGermRepository testRepGermRepository;
 
+  @Mock
+  private ActivityService activityService;
+
   @Autowired
   @InjectMocks
   private TestResultService testResultService;
+
+  private static final LocalDateTime UPDATE_TS = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
 
   private BigDecimal riaKey;
   private TestResultEntity testResultEntity;
@@ -169,18 +174,19 @@ class TestResultServiceTest {
     final List<GerminatorTrayCreateDto> requests =
         List.of(
             new GerminatorTrayCreateDto(
-                activityTypeCdG10, new BigDecimal("881191"), now.minusDays(2)),
-            new GerminatorTrayCreateDto(activityTypeCdG10, new BigDecimal("881192"), now),
+                activityTypeCdG10, new BigDecimal("881191"), now.minusDays(2), UPDATE_TS),
             new GerminatorTrayCreateDto(
-                activityTypeCdG10, new BigDecimal("881193"), now.minusDays(1)),
+                activityTypeCdG10, new BigDecimal("881192"), now, UPDATE_TS),
             new GerminatorTrayCreateDto(
-                activityTypeCdG10, new BigDecimal("881194"), now.minusDays(1)),
+                activityTypeCdG10, new BigDecimal("881193"), now.minusDays(1), UPDATE_TS),
             new GerminatorTrayCreateDto(
-                activityTypeCdG10, new BigDecimal("881195"), now.plusDays(2)),
+                activityTypeCdG10, new BigDecimal("881194"), now.minusDays(1), UPDATE_TS),
             new GerminatorTrayCreateDto(
-                activityTypeCdG10, new BigDecimal("881196"), now.plusDays(3)),
+                activityTypeCdG10, new BigDecimal("881195"), now.plusDays(2), UPDATE_TS),
             new GerminatorTrayCreateDto(
-                activityTypeCdRts, new BigDecimal("881197"), now.minusDays(4)));
+                activityTypeCdG10, new BigDecimal("881196"), now.plusDays(3), UPDATE_TS),
+            new GerminatorTrayCreateDto(
+                activityTypeCdRts, new BigDecimal("881197"), now.minusDays(4), UPDATE_TS));
 
     // Prepare mock trays: save() should return different tray entities sequentially
     // (3 trays expected)
@@ -304,7 +310,7 @@ class TestResultServiceTest {
     String activityTypeCd = "G20";
     BigDecimal riaSkey = new BigDecimal("881190");
     final List<GerminatorTrayCreateDto> requests =
-        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null));
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null, UPDATE_TS));
 
     // Stub tray save so service can proceed to activity lookup
     GerminatorTrayEntity savedTray = new GerminatorTrayEntity();
@@ -352,7 +358,7 @@ class TestResultServiceTest {
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime past = now.minusDays(1);
     final List<GerminatorTrayCreateDto> requests =
-        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, past));
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, past, UPDATE_TS));
 
     // Ensure validation recognises this activity type as a germ test
     when(testRegimeRepository.findAllGermTestActivityTypeCodes())
@@ -378,13 +384,39 @@ class TestResultServiceTest {
   }
 
   @Test
+  void assignGerminatorTrays_shouldThrowConflict_andCreateNothing_whenActivityIsStale() {
+    BigDecimal riaSkey = new BigDecimal("881190");
+    final List<GerminatorTrayCreateDto> requests =
+        List.of(new GerminatorTrayCreateDto("G10", riaSkey, null, UPDATE_TS));
+    // Validation runs before locking; mock a valid germ test result so the lock is reached.
+    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G10"));
+    when(testResultRepository.getGermTestResult(riaSkey))
+        .thenReturn(
+            new GermTestResultDto(
+                LocalDate.now().minusDays(1), 48, LocalDate.now(), "G10", 72, 96,
+                LocalDate.now().minusDays(1), null));
+    org.mockito.Mockito.doThrow(
+            new ca.bc.gov.oracleapi.exception.EditConflictException(
+                ca.bc.gov.oracleapi.exception.EditConflictException.DEFAULT_MESSAGE))
+        .when(activityService)
+        .touchActivityOrConflict(riaSkey, UPDATE_TS);
+
+    assertThrows(
+        ca.bc.gov.oracleapi.exception.EditConflictException.class,
+        () -> testResultService.assignGerminatorTrays(requests));
+
+    verify(germinatorTrayRepository, never()).save(any());
+  }
+
+  @Test
   void assignGerminatorTrays_shouldNotCommit_whenConflictsExist() {
     // Arrange for RTS type using riaSkey 881197
     String activityTypeCd = "RTS";
     BigDecimal riaSkey = new BigDecimal("881197");
     final List<GerminatorTrayCreateDto> requests =
         List.of(
-            new GerminatorTrayCreateDto(activityTypeCd, riaSkey, LocalDateTime.now().minusDays(1)));
+            new GerminatorTrayCreateDto(
+                activityTypeCd, riaSkey, LocalDateTime.now().minusDays(1), UPDATE_TS));
 
     ActivityEntity act = new ActivityEntity();
     act.setRiaKey(riaSkey);
@@ -456,7 +488,7 @@ class TestResultServiceTest {
     BigDecimal riaSkey = new BigDecimal("881900");
 
     List<GerminatorTrayCreateDto> requests =
-        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null));
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null, UPDATE_TS));
 
     // testRegimeRepository does NOT include the activity type -> not a germ test
     when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G10", "G20"));
@@ -487,7 +519,7 @@ class TestResultServiceTest {
     BigDecimal riaSkey = new BigDecimal("881901");
 
     List<GerminatorTrayCreateDto> requests =
-        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null));
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null, UPDATE_TS));
 
     // activity type is recognised as a germ test
     when(testRegimeRepository.findAllGermTestActivityTypeCodes())
@@ -520,7 +552,7 @@ class TestResultServiceTest {
     BigDecimal riaSkey = new BigDecimal("881902");
 
     List<GerminatorTrayCreateDto> requests =
-        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null));
+        List.of(new GerminatorTrayCreateDto(activityTypeCd, riaSkey, null, UPDATE_TS));
 
     // activity type is recognised
     when(testRegimeRepository.findAllGermTestActivityTypeCodes())
