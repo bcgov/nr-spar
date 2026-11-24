@@ -1,7 +1,9 @@
 package ca.bc.gov.oracleapi.endpoint;
 
+import ca.bc.gov.oracleapi.exception.EditConflictException;
 import ca.bc.gov.oracleapi.exception.UserExistsException;
 import ca.bc.gov.oracleapi.exception.UserNotFoundException;
+import ca.bc.gov.oracleapi.response.EditConflictResponse;
 import ca.bc.gov.oracleapi.response.ExceptionResponse;
 import ca.bc.gov.oracleapi.response.ValidationExceptionResponse;
 import jakarta.validation.ConstraintViolationException;
@@ -56,6 +58,19 @@ public class RestExceptionEndpoint {
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ValidationExceptionResponse(fieldErrors));
+  }
+
+  /**
+   * Handle an optimistic-lock conflict.
+   *
+   * @param ex EditConflictException instance
+   * @return a 409 with the EDIT_CONFLICT code and, when known, the current update timestamp
+   */
+  @ExceptionHandler(EditConflictException.class)
+  ResponseEntity<EditConflictResponse> editConflict(EditConflictException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new EditConflictResponse(
+            EditConflictException.CODE, ex.getReason(), ex.getCurrentUpdateTimestamp()));
   }
 
   /**
