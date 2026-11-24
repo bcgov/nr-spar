@@ -16,6 +16,7 @@ import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.exception.EditConflictException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
@@ -57,6 +58,7 @@ public class TestResultService {
   private final DailyAbnormalRepository dailyAbnormalRepository;
   private final GermCountRepository germCountRepository;
   private final TestRepGermRepository testRepGermRepository;
+  private final ActivityService activityService;
 
   /**
    * Update the test status to "completed".
@@ -184,7 +186,10 @@ public class TestResultService {
    *
    * @param requests the list of germinator tray creation requests to be assigned to trays
    * @return a list of responses describing the trays that were created and their assignments
+   * @throws ResponseStatusException 409 ({@link EditConflictException}) if any activity changed
+   *     since the client read it; nothing is created in that case
    */
+  @Transactional
   public List<GerminatorTrayCreateResponseDto> assignGerminatorTrays(
       List<GerminatorTrayCreateDto> requests
   ) {
@@ -197,6 +202,12 @@ public class TestResultService {
 
     // Validate selected seed tests and collect their GermTestResultDto values in one pass.
     Map<BigDecimal, GermTestResultDto> germTestCache = collectAndValidateGermTestResults(requests);
+
+    // Lock every activity before creating anything, so a stale selection creates no trays.
+    for (GerminatorTrayCreateDto request : requests) {
+      activityService.touchActivityOrConflict(
+          request.riaSkey(), request.activityUpdateTimestamp());
+    }
 
     LocalDate today = LocalDate.now();
     LocalDateTime now = LocalDateTime.now();
@@ -498,8 +509,7 @@ public class TestResultService {
         germCountRepository.touchIfTimestampMatches(
             germCount.getRiaSkey(), request.updateTimestamp());
     if (touchedRows == 0) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
+      throw new EditConflictException(EditConflictException.DEFAULT_MESSAGE);
     }
 
     DailyAbnormalEntity entity = dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey);
@@ -1044,7 +1054,7 @@ public class TestResultService {
         dto.germinatorId(), dto.seedWithdrawalDate(), category,
         dto.testResultUpdateTimestamp());
     if (testRows == 0) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
+      throw new EditConflictException(
           "Test result was modified by another user; reload and retry");
     }
 
@@ -1057,7 +1067,7 @@ public class TestResultService {
         Boolean.TRUE.equals(dto.commentIsCritical()) ? -1 : 0,
         dto.riaUpdateTimestamp());
     if (activityRows == 0) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
+      throw new EditConflictException(
           "Activity was modified by another user; reload and retry");
     }
 
