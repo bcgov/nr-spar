@@ -590,6 +590,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
                       labelText="GV"
                       value={header.germinationValue ?? ''}
                       readOnly
+                      size="sm"
                     />
                   </div>
                   <div className="germ-result-field">
@@ -598,6 +599,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
                       labelText="PV"
                       value={formatPeakValue(header.peakValueGrmPct, header.peakValueNoDays)}
                       readOnly
+                      size="sm"
                     />
                   </div>
                 </div>
@@ -606,7 +608,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
                   <TextArea
                     id="germ-header-comments"
                     labelText="Comments"
-                    rows={2}
+                    rows={1}
                     value={header.riaComment ?? ''}
                     readOnly
                   />

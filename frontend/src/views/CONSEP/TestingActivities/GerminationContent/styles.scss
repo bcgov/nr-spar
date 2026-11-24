@@ -105,15 +105,25 @@
   }
 
   // Figma's result panel: a bordered box, small fields in a row over the comments.
+  // GV, PV and Comments sit in one compact row, split by a vertical rule.
   .germ-result-panel {
+    display: flex;
     border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #c6c6c6);
 
     > div {
-      padding: 1rem;
+      padding: 0.5rem 1rem;
     }
 
     > div + div {
-      border-top: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #c6c6c6);
+      border-left: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #c6c6c6);
+    }
+
+    .germ-result-comments {
+      flex: 1;
+    }
+
+    .#{vars.$bcgov-prefix}--text-area {
+      resize: none;
     }
 
     // Carbon draws read-only fields as bare text over a dashed rule; these keep
