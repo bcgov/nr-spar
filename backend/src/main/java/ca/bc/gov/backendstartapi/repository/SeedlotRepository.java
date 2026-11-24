@@ -5,13 +5,17 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 
 /** The repository for {@link Seedlot Seedlots}. */
-public interface SeedlotRepository extends JpaRepository<Seedlot, String> {
+public interface SeedlotRepository
+    extends JpaRepository<Seedlot, String>, JpaSpecificationExecutor<Seedlot> {
   @Query(
       """
       select max(cast(s.id as int))
@@ -37,4 +41,16 @@ public interface SeedlotRepository extends JpaRepository<Seedlot, String> {
   @EntityGraph(attributePaths = {"seedlotStatus", "geneticClass", "seedlotSource"})
   @NonNull
   Optional<Seedlot> findById(@NonNull String id);
+
+  /** Specification search used by the paginated search endpoint; avoids N+1 on lookups. */
+  @Override
+  @EntityGraph(attributePaths = {"seedlotStatus", "geneticClass"})
+  @NonNull
+  Page<Seedlot> findAll(Specification<Seedlot> spec, @NonNull Pageable pageable);
+
+  /** List variant used by unpaged searches; fetches the same lookups eagerly. */
+  @Override
+  @EntityGraph(attributePaths = {"seedlotStatus", "geneticClass"})
+  @NonNull
+  List<Seedlot> findAll(Specification<Seedlot> spec, @NonNull Sort sort);
 }

@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotCollectionGeometryService;
 import ca.bc.gov.backendstartapi.service.SeedlotCopyService;
+import ca.bc.gov.backendstartapi.service.SeedlotSearchService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -43,6 +44,7 @@ class SeedlotBclassFeatureToggleTest {
   @MockitoBean private SaveSeedlotFormService saveSeedlotFormService;
   @MockitoBean private SeedlotCollectionGeometryService seedlotCollectionGeometryService;
   @MockitoBean private LoggedUserService loggedUserService;
+  @MockitoBean private SeedlotSearchService seedlotSearchService;
   @MockitoBean private SmpCalculationCsvTableParser smpCalculationCsvTableParser;
   @MockitoBean private ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
 

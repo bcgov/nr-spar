@@ -47,6 +47,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSaveInMemoryDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSearchResultDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
@@ -66,6 +67,12 @@ import ca.bc.gov.backendstartapi.enums.LongitudeCodeEnum;
 import ca.bc.gov.backendstartapi.enums.parser.ConeAndPollenCountHeader;
 import ca.bc.gov.backendstartapi.enums.parser.CsvParsingHeader;
 import ca.bc.gov.backendstartapi.enums.parser.SmpMixHeader;
+import ca.bc.gov.backendstartapi.search.Criterion;
+import ca.bc.gov.backendstartapi.search.FilterGroup;
+import ca.bc.gov.backendstartapi.search.PageResponse;
+import ca.bc.gov.backendstartapi.search.SearchOperator;
+import ca.bc.gov.backendstartapi.search.SearchRequest;
+import ca.bc.gov.backendstartapi.search.SortOrder;
 import ca.bc.gov.backendstartapi.util.ValueUtil;
 import ca.bc.gov.backendstartapi.vo.parser.ConeAndPollenCount;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
@@ -135,6 +142,15 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     SeedlotReviewSeedPlanZoneDto.class,
     SeedlotSourceDto.class,
     SeedlotStatusResponseDto.class,
+    SeedlotSearchResultDto.class,
+    SearchRequest.class,
+    FilterGroup.class,
+    FilterGroup.Logic.class,
+    SearchOperator.class,
+    Criterion.class,
+    SortOrder.class,
+    PageResponse.class,
+    PageResponse.PageMeta.class,
     AreaOfUseDto.class,
     AreaOfUseSpuGeoDto.class,
     OrgUnitDistrictDto.class,

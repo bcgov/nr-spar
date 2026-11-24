@@ -22,6 +22,7 @@ import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCollectionGeometryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSearchResultDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -32,14 +33,19 @@ import ca.bc.gov.backendstartapi.exception.SeedlotCollectionGeometryNotFoundExce
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.search.InvalidSearchException;
+import ca.bc.gov.backendstartapi.search.PageResponse.PageMeta;
+import ca.bc.gov.backendstartapi.search.PageResponse;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotCollectionGeometryService;
 import ca.bc.gov.backendstartapi.service.SeedlotCopyService;
+import ca.bc.gov.backendstartapi.service.SeedlotSearchService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -80,6 +86,8 @@ class SeedlotEndpointTest {
   @MockitoBean SeedlotCollectionGeometryService seedlotCollectionGeometryService;
 
   @MockitoBean LoggedUserService loggedUserService;
+
+  @MockitoBean SeedlotSearchService seedlotSearchService;
 
   private final WebApplicationContext webApplicationContext;
 
@@ -1128,5 +1136,105 @@ class SeedlotEndpointTest {
         .andExpect(jsonPath("$.seedlotNumber").value("53001"))
         .andExpect(jsonPath("$.seedlotStatusCode").value("SUB"))
         .andReturn();
+  }
+
+  // ------------------------------------------------------------------ search
+
+  private static final String SEARCH_PATH = "/api/seedlots/search";
+
+  private static final String SEARCH_BODY =
+      """
+      {
+        "filter": {
+          "logic": "AND",
+          "criteria": [ { "field": "status", "operator": "IN", "values": ["PND", "SUB"] } ]
+        },
+        "sort": [ { "field": "updatedAt", "direction": "DESC" } ],
+        "page": 0,
+        "size": 20
+      }
+      """;
+
+  @Test
+  @DisplayName("Returns the standard page envelope")
+  void searchReturnsPageEnvelope() throws Exception {
+    var row =
+        new SeedlotSearchResultDto(
+            "63001",
+            "PND",
+            "Pending",
+            "A",
+            "FDI",
+            "00012797",
+            "01",
+            true,
+            LocalDate.of(2026, 3, 1),
+            null,
+            null,
+            null,
+            null,
+            null);
+    when(seedlotSearchService.search(any()))
+        .thenReturn(new PageResponse<>(List.of(row), new PageMeta(0, 20, 1, 1)));
+
+    mockMvc
+        .perform(
+            post(SEARCH_PATH)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(SEARCH_BODY))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].seedlotNumber").value("63001"))
+        .andExpect(jsonPath("$.content[0].collectionStartDate").value("2026-03-01"))
+        .andExpect(jsonPath("$.page.number").value(0))
+        .andExpect(jsonPath("$.page.size").value(20))
+        .andExpect(jsonPath("$.page.totalElements").value(1))
+        .andExpect(jsonPath("$.page.totalPages").value(1));
+  }
+
+  @Test
+  @DisplayName("Page size over the max is a 400")
+  void searchSizeTooLarge() throws Exception {
+    mockMvc
+        .perform(
+            post(SEARCH_PATH)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"size\": 500}"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Unknown operator in JSON is a 400")
+  void searchUnknownOperator() throws Exception {
+    mockMvc
+        .perform(
+            post(SEARCH_PATH)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"filter": {"criteria": [
+                      {"field": "status", "operator": "LIKE", "values": ["P"]}]}}
+                    """))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("InvalidSearchException becomes a ProblemDetail 400")
+  void searchInvalidProblemDetail() throws Exception {
+    when(seedlotSearchService.search(any()))
+        .thenThrow(new InvalidSearchException("Unknown field 'foo'"));
+
+    mockMvc
+        .perform(
+            post(SEARCH_PATH)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(SEARCH_BODY))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.title").value("Invalid search request"))
+        .andExpect(jsonPath("$.detail").value("Unknown field 'foo'"))
+        .andExpect(jsonPath("$.status").value(400));
   }
 }

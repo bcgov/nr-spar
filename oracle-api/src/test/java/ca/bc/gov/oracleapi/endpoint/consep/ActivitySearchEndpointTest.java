@@ -1,120 +1,111 @@
 package ca.bc.gov.oracleapi.endpoint.consep;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.oracleapi.dto.consep.ActivitySearchPageResponseDto;
-import ca.bc.gov.oracleapi.dto.consep.ActivitySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
+import ca.bc.gov.oracleapi.search.InvalidSearchException;
+import ca.bc.gov.oracleapi.search.PageResponse;
+import ca.bc.gov.oracleapi.search.PageResponse.PageMeta;
 import ca.bc.gov.oracleapi.service.consep.ActivitySearchService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(ActivitySearchEndpoint.class)
 @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
 class ActivitySearchEndpointTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  private static final String SEARCH = "/api/testing-activities/search";
+  private static final String MISSING = "/api/testing-activities/missing-lot-numbers";
 
-  @MockBean
-  private ActivitySearchService activitySearchService;
+  private static final String BODY =
+      """
+      {
+        "filter": { "criteria": [
+          { "field": "seedlotDisplay", "operator": "IN", "values": ["00098"] },
+          { "field": "requestSkey", "operator": "NE", "values": [0] }
+        ]},
+        "sort": [ { "field": "actualEndDtTm", "direction": "DESC" } ],
+        "page": 0,
+        "size": 20
+      }
+      """;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private MockMvc mockMvc;
 
+  @MockBean private ActivitySearchService activitySearchService;
 
   @Test
-  @DisplayName("POST /search - Should return 200 and data when request is valid")
-  void searchTestingActivityData_shouldSucceed() throws Exception {
-    ActivitySearchRequestDto requestDto = createDummyRequestDto();
-    ActivitySearchResponseDto responseItem = createDummyResponseDto();
-    ActivitySearchPageResponseDto pageResponse =
-        new ActivitySearchPageResponseDto(List.of(responseItem), 1L, 1, 0, 20, List.of());
+  @DisplayName("Search returns the standard page envelope")
+  void searchOk() throws Exception {
+    when(activitySearchService.search(any()))
+        .thenReturn(new PageResponse<>(List.of(dummyRow()), new PageMeta(0, 20, 1, 1)));
 
-    when(activitySearchService.searchTestingActivities(any(), any(), any(), any())).thenReturn(
-        pageResponse);
-
-    mockMvc.perform(
-            post("/api/testing-activities/search").with(csrf()).contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto))).andExpect(status().isOk())
-        .andExpect(jsonPath("$.content", hasSize(1)))
+    mockMvc
+        .perform(
+            post(SEARCH).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON).content(BODY))
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].seedlotDisplay").value("00098"))
-        .andExpect(jsonPath("$.content[0].requestItem").value("RTS19981299A"))
-        .andExpect(jsonPath("$.totalElements").value(1))
-        .andExpect(jsonPath("$.missingLotNumbers", hasSize(0)));
+        .andExpect(jsonPath("$.content[0].riaSkey").value(448383))
+        .andExpect(jsonPath("$.page.totalElements").value(1))
+        .andExpect(jsonPath("$.page.size").value(20));
   }
 
   @Test
-  @DisplayName("POST /search - Should handle 'unpaged=true' by passing unpaged Pageable to service")
-  void searchTestingActivityData_withUnpaged_shouldPassUnpagedToService() throws Exception {
-    ActivitySearchRequestDto requestDto = createDummyRequestDto();
-
-    when(activitySearchService.searchTestingActivities(any(), any(), any(), any())).thenReturn(
-        new ActivitySearchPageResponseDto(Collections.emptyList(), 0L, 0, 0, 0, List.of()));
-
-    mockMvc.perform(post("/api/testing-activities/search").param("unpaged", "true").with(csrf())
-            .contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(requestDto)))
-        .andExpect(status().isOk());
-
-    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-
-    verify(activitySearchService).searchTestingActivities(any(ActivitySearchRequestDto.class),
-        pageableCaptor.capture(), any(), any());
-
-    Pageable capturedPageable = pageableCaptor.getValue();
-    assertThat(capturedPageable.isPaged()).isFalse();
+  @DisplayName("Page size over the max is a 400")
+  void sizeTooLarge() throws Exception {
+    mockMvc
+        .perform(
+            post(SEARCH)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"size\": 101}"))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  @DisplayName("POST /search - Should throw Exception when sortBy field is not allowed")
-  void searchTestingActivityData_invalidSortField_shouldFail() throws Exception {
-    ActivitySearchRequestDto requestDto = createDummyRequestDto();
+  @DisplayName("InvalidSearchException becomes a ProblemDetail 400")
+  void invalidSearch() throws Exception {
+    when(activitySearchService.search(any()))
+        .thenThrow(new InvalidSearchException("Unknown field 'foo'"));
 
-    mockMvc.perform(post("/api/testing-activities/search")
-        .param("sortBy", "INVALID_FIELD_SQL_INJECTION")
-        .with(csrf())
-        .contentType(APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(requestDto)))
+    mockMvc
+        .perform(
+            post(SEARCH).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON).content(BODY))
         .andExpect(status().isBadRequest())
-        .andExpect(result -> assertTrue(
-            result.getResolvedException() instanceof ResponseStatusException))
-        .andExpect(result -> assertTrue(
-            Objects.requireNonNull(result.getResolvedException())
-                .getMessage().contains("Invalid sort field")));
+        .andExpect(jsonPath("$.title").value("Invalid search request"))
+        .andExpect(jsonPath("$.detail").value("Unknown field 'foo'"));
   }
 
-  private ActivitySearchRequestDto createDummyRequestDto() {
-    return new ActivitySearchRequestDto(List.of("00098"), List.of("D1"), List.of("D1"), null,
-        LocalDate.of(1997, 10, 1), LocalDate.of(1998, 10, 31), false, true, "RTS19981299A", "RTS",
-        1998, null, "STD", "A", "PLI", null, null, null, null, null, null, null, null, -1, -1, -1,
-        "A", false);
+  @Test
+  @DisplayName("Missing lot numbers returns the list from the service")
+  void missingLots() throws Exception {
+    when(activitySearchService.findMissingLotNumbers(any())).thenReturn(List.of("99999"));
+
+    mockMvc
+        .perform(
+            post(MISSING)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[\"00098\", \"99999\"]"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0]").value("99999"));
   }
 
-  private ActivitySearchResponseDto createDummyResponseDto() {
+  private static ActivitySearchResponseDto dummyRow() {
     return new ActivitySearchResponseDto("00098", "RTS19981299A", "PLI", "D1", "A", 0, "STD", 88,
         "77//9", 0, 0, 0, 0, -1, -1, -1, LocalDate.of(1997, 10, 7).atTime(LocalTime.MAX),
         LocalDate.of(1997, 10, 10).atTime(LocalTime.MAX), LocalDate.of(1998, 10, 8).atStartOfDay(),
