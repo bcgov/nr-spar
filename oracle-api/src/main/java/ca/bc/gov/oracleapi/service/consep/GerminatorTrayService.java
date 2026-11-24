@@ -8,6 +8,7 @@ import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTraySearchResponseDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminationTrayContentsEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.exception.EditConflictException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminationTrayContentsRepository;
 import ca.bc.gov.oracleapi.repository.consep.GerminatorTrayRepository;
@@ -105,7 +106,7 @@ public class GerminatorTrayService {
       }
       SparLog.info(
           "Germinator tray {} revision {} is stale; rejecting", germinatorTrayId, revisionCount);
-      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
+      throw new EditConflictException(RESELECT_MESSAGE);
     }
 
     long newRevision = revisionCount + 1;
@@ -166,7 +167,7 @@ public class GerminatorTrayService {
       int deleteRows = germinatorTrayRepository.deleteByGerminatorTrayIdAndRevisionCount(
           germinatorTrayId, revisionCount);
       if (deleteRows == 0) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
+        throw new EditConflictException(RESELECT_MESSAGE);
       }
       SparLog.info("Tray {} had 0 tests after removal; tray deleted", germinatorTrayId);
     }
@@ -205,7 +206,7 @@ public class GerminatorTrayService {
     SparLog.info("Deleting tray {} with {} tests", germinatorTrayId, riaKeys.size());
     Map<BigDecimal, LocalDateTime> timestampsByRiaKey = getTimestampsByRiaKey(contents);
     if (!timestampsByRiaKey.keySet().equals(new HashSet<>(riaKeys))) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
+      throw new EditConflictException(RESELECT_MESSAGE);
     }
 
     for (BigDecimal riaKey : riaKeys) {
@@ -216,7 +217,7 @@ public class GerminatorTrayService {
     int deleteRows = germinatorTrayRepository.deleteByGerminatorTrayIdAndRevisionCount(
         germinatorTrayId, revisionCount);
     if (deleteRows == 0) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
+      throw new EditConflictException(RESELECT_MESSAGE);
     }
     SparLog.info("Tray {} deleted", germinatorTrayId);
   }
@@ -251,13 +252,13 @@ public class GerminatorTrayService {
   ) {
     int detachRows = testResultRepository.detachTestFromTray(riaKey);
     if (detachRows == 0) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
+      throw new EditConflictException(RESELECT_MESSAGE);
     }
     SparLog.info("Detached test {} from tray {}", riaKey, germinatorTrayId);
 
     int parentRows = activityRepository.updateTimestampWhereMatch(riaKey, activityUpdateTimestamp);
     if (parentRows == 0) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, RESELECT_MESSAGE);
+      throw new EditConflictException(RESELECT_MESSAGE);
     }
     SparLog.info("Updated activity {} update timestamp", riaKey);
   }
