@@ -144,7 +144,7 @@
   // The Activities grid (#2788): two rows under one set of date columns, sized
   // to its content like the daily germination table below it.
   .consep-germination-content-activity-dates {
-    margin-top: 1rem;
+    margin-top: 2rem;
 
     .germ-activity-table {
       border-collapse: collapse;
@@ -168,8 +168,18 @@
         white-space: nowrap;
       }
 
-      td {
-        min-inline-size: 7.5rem;
+      // Every cell is the same small box, as in Figma; Carbon's date picker is far wider by default.
+      .#{vars.$bcgov-prefix}--date-picker-container,
+      .#{vars.$bcgov-prefix}--date-picker__input,
+      .#{vars.$bcgov-prefix}--text-input {
+        inline-size: 9rem;
+        min-inline-size: 0;
+      }
+
+      // Read-only derived dates get the same field look as the editable ones (moisture style).
+      .#{vars.$bcgov-prefix}--text-input[readonly] {
+        background-color: var(--#{vars.$bcgov-prefix}-field-01, #f4f4f4);
+        border-bottom: 1px solid var(--#{vars.$bcgov-prefix}-border-strong-01, #8d8d8d);
       }
     }
   }

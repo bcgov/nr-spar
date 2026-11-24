@@ -351,6 +351,9 @@ export const validateActivityDates = (
     errors.beginDate = 'Begin date cannot be after the first count date';
   } else if (!dates.beginDate && firstCountDt) {
     errors.beginDate = 'Begin date is required once germination counts are entered';
+  } else if (!dates.beginDate && dates.endDate) {
+    // Spec: also required when accepted/complete/commented; those lock or aren't edited here.
+    errors.beginDate = 'Begin date is required when a test end date is entered';
   }
   if (dates.endDate && dates.beginDate && dates.endDate <= dates.beginDate) {
     errors.endDate = 'Test end must be after the begin date';

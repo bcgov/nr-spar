@@ -26,6 +26,11 @@ describe('validateActivityDates', () => {
       .toBe('Begin date is required once germination counts are entered');
   });
 
+  it('requires begin once a test end is entered', () => {
+    expect(validateActivityDates({ endDate: '2026-05-19' }, undefined, TODAY).beginDate)
+      .toBe('Begin date is required when a test end date is entered');
+  });
+
   it('rejects future withdrawal and begin dates', () => {
     const errors = validateActivityDates(
       { seedWithdrawalDate: '2026-05-21', beginDate: '2026-05-21' },
