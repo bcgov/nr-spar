@@ -31,8 +31,10 @@ public interface SeedlotFormCollectionBclassMapper {
   /**
    * Copies renamed collection DTO fields onto an existing seedlot. Collection dates are applied in
    * {@link #applyDatesOnlyWhenChanged} so unchanged values do not bump the revision. Area-of-use
-   * bounds and comment are set by the server, never by the client, so the seedlot keeps its stored
-   * values.
+   * bounds are set by the server, never by the client, so the seedlot keeps its stored values. The
+   * area of use comment is also skipped here: only TSC admins may change it, which {@code
+   * SeedlotService} checks. The provenance id has no input in SPAR and only carries migrated
+   * legacy B+ values, which decide how area of use is derived, so it is kept too.
    */
   @Mapping(target = "collectionLocationCode", source = "collectionLocnCode")
   @Mapping(target = "numberOfContainers", source = "noOfContainers")
@@ -56,6 +58,7 @@ public interface SeedlotFormCollectionBclassMapper {
   @Mapping(target = "longitudeMinMax", ignore = true)
   @Mapping(target = "longitudeSecMax", ignore = true)
   @Mapping(target = "areaOfUseComment", ignore = true)
+  @Mapping(target = "provenanceId", ignore = true)
   void applyToSeedlot(SeedlotFormCollectionDtoClassB dto, @MappingTarget Seedlot seedlot);
 
   /** Applies collection dates only when they differ from the current seedlot values. */

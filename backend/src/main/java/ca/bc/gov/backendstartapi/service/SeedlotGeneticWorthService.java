@@ -95,6 +95,24 @@ public class SeedlotGeneticWorthService {
   }
 
   /**
+   * Deletes all genetic worth rows of a seedlot.
+   *
+   * @param seedlot The Seedlot instance.
+   */
+  public void deleteAllBySeedlot(Seedlot seedlot) {
+    List<SeedlotGeneticWorth> sgwList =
+        seedlotGeneticWorthRepository.findAllBySeedlot_id(seedlot.getId());
+    if (sgwList.isEmpty()) {
+      return;
+    }
+    SparLog.info(
+        "Deleting {} Seedlot Genetic Worth records for seedlot number {}",
+        sgwList.size(),
+        seedlot.getId());
+    seedlotGeneticWorthRepository.deleteAll(sgwList);
+  }
+
+  /**
    * Gets all SeedlotGeneticWorth given a {@link Seedlot} id number.
    *
    * @param seedlotNumber The Seedlot id.

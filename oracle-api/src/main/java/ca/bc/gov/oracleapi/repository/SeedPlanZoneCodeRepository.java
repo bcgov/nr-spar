@@ -18,4 +18,24 @@ public interface SeedPlanZoneCodeRepository extends JpaRepository<SeedPlanZoneCo
       ORDER BY spzCode.spzCode
       """)
   List<SeedPlanZoneCode> findAllValidBySpzCodeIn(@Param("spzCodeList") List<String> spzCodeList);
+
+  /**
+   * Whether a seed plan zone is coastal, as the legacy {@code SPR_GET_SPZ_TYPE} function decides
+   * it: the zone is listed in {@code CODE_SUBSET_TBL} under {@code COASTAL_ZONE_ST}.
+   *
+   * <p>Native query reading only the two columns the legacy function uses. Like the legacy
+   *
+   * @param spzCode seed plan zone code, matched exactly
+   * @return 1 when the zone is coastal; 0 for interior or unknown zones
+   */
+  @Query(
+      value =
+          """
+          SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+          FROM CODE_SUBSET_TBL
+          WHERE CODE_SUBSET_NAME = 'COASTAL_ZONE_ST'
+            AND CODE_ARGUMENT = :spzCode
+          """,
+      nativeQuery = true)
+  int isCoastalZone(@Param("spzCode") String spzCode);
 }

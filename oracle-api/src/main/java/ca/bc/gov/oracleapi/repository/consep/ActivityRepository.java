@@ -1,10 +1,13 @@
 package ca.bc.gov.oracleapi.repository.consep;
 
+import ca.bc.gov.oracleapi.dto.consep.DrybackSaveDto;
+import ca.bc.gov.oracleapi.dto.consep.DrybackScreenDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import jakarta.persistence.LockModeType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import jakarta.persistence.LockModeType;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -205,4 +208,121 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("riaComment") String riaComment,
       @Param("commentIsCritical") Integer commentIsCritical,
       @Param("expectedUpdateTimestamp") LocalDateTime expectedUpdateTimestamp);
+
+  /**
+   * Save the G64 Dryback screen values with optimistic locking (issue #2838).
+   * Also writes the recalculated revised dates, which the spec's UPDATE statement omits.
+   *
+   * @return rows updated; 0 means the row is missing or its updateTimestamp no longer matches.
+   */
+  @Modifying
+  @Query("""
+      UPDATE ActivityEntity a
+         SET a.actualBeginDateTime = :#{#dto.actualBeginDateTime()},
+             a.actualEndDateTime = :#{#dto.actualEndDateTime()},
+             a.revisedStartDate = :revisedStartDate,
+             a.revisedEndDate = :revisedEndDate,
+             a.drybackMoist = :#{#dto.drybackMoist()},
+             a.imbibedWeight = :#{#dto.imbibedWeight()},
+             a.drybackWeight = :#{#dto.drybackWeight()},
+             a.dryWeight = :#{#dto.dryWeight()},
+             a.drybackTime = :#{#dto.drybackTime()},
+             a.targetThirtyMoist = :#{#dto.targetThirtyMoist()},
+             a.targetThirtyFiveMoist = :#{#dto.targetThirtyFiveMoist()},
+             a.stratEndWeight = :#{#dto.stratEndWeight()},
+             a.riaComment = :#{#dto.riaComment()},
+             a.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE a.riaKey = :riaKey
+         AND a.updateTimestamp = :#{#dto.updateTimestamp()}
+      """)
+  int updateDrybackActivityWithLock(
+      @Param("riaKey") BigDecimal riaKey,
+      @Param("dto") DrybackSaveDto dto,
+      @Param("revisedStartDate") LocalDate revisedStartDate,
+      @Param("revisedEndDate") LocalDate revisedEndDate);
+
+  /**
+   * Reschedule dependent activities to planned + dateDiff (planned NULL keeps the revised date).
+   * Touches only the scheduling columns and update_timestamp.
+   *
+   * @return rows updated
+   */
+  @Modifying
+  @Query("""
+      UPDATE ActivityEntity a
+         SET a.revisedStartDate = CASE WHEN a.plannedStartDate IS NULL THEN a.revisedStartDate
+                                       ELSE a.plannedStartDate + :dateDiff day END,
+             a.revisedEndDate = CASE WHEN a.plannedEndDate IS NULL THEN a.revisedEndDate
+                                     ELSE a.plannedEndDate + :dateDiff day END,
+             a.updateTimestamp = CURRENT_TIMESTAMP
+       WHERE a.riaKey IN :riaKeys
+      """)
+  int shiftRevisedDates(
+      @Param("riaKeys") Collection<BigDecimal> riaKeys,
+      @Param("dateDiff") long dateDiff);
+
+  /** Direct dependants of the given activities in CNS_T_RIA_DEPENDANCY (one level). */
+  @Query(
+      value = """
+          SELECT DEPENDANT_RIA_SKEY
+            FROM CONSEP.CNS_T_RIA_DEPENDANCY
+           WHERE PREREQ_RIA_SKEY IN (:prereqRiaKeys)
+          """,
+      nativeQuery = true)
+  List<BigDecimal> findDependantRiaKeys(
+      @Param("prereqRiaKeys") Collection<BigDecimal> prereqRiaKeys);
+
+  /**
+   * Retrieves dryback screen data for a given Request Item Activity key.
+   * Joins Activity with the current accepted Moisture Content test result.
+   * Uses EXISTS subquery to find MC activities with accepted tests,
+   * ensuring at most one result row per Dryback activity (no non-unique-result exceptions).
+   * The storageMc field will be null if no accepted MC test exists for this seedlot.
+   *
+   * @param riaKey the Request Item Activity SKEY
+   * @return optional containing DrybackScreenDto with all required dryback screen data
+   */
+  @Query("""
+      SELECT new ca.bc.gov.oracleapi.dto.consep.DrybackScreenDto(
+             a.riaKey,
+             a.requestId,
+             a.itemId,
+             a.seedlotNumber,
+             a.familyLotNumber,
+             a.standardActivityId,
+             a.activityTypeCode,
+             a.actualBeginDateTime,
+             a.actualEndDateTime,
+             a.dryWeight,
+             a.priorMoist,
+             a.imbibedWeight,
+             a.drybackWeight,
+             a.drybackMoist,
+             a.drybackTime,
+             a.targetThirtyMoist,
+             a.targetThirtyFiveMoist,
+             a.stratEndWeight,
+             t.moisturePct,
+             a.riaComment,
+             a.updateTimestamp
+      )
+      FROM ActivityEntity a
+      LEFT JOIN ActivityEntity mcActivity 
+        ON mcActivity.seedlotNumber = a.seedlotNumber
+        AND mcActivity.activityTypeCode = 'MC'
+        AND EXISTS (
+          SELECT 1 FROM TestResultEntity tr
+          WHERE tr.riaKey = mcActivity.riaKey
+            AND tr.currentTest = -1
+            AND tr.acceptResult = -1
+        )
+      LEFT JOIN TestResultEntity t 
+        ON t.riaKey = mcActivity.riaKey
+        AND t.currentTest = -1
+        AND t.acceptResult = -1
+      WHERE a.riaKey = :riaKey
+      """)
+  Optional<DrybackScreenDto> findDrybackScreenDataByRiaSkey(
+      @Param("riaKey") BigDecimal riaKey
+  );
 }
