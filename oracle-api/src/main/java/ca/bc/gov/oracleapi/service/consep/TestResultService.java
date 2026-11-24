@@ -239,10 +239,7 @@ public class TestResultService {
         dayNumbers, GerminationMetrics.cumulativePercents(counts, totalSeeds, accepted));
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          !days.isEmpty() && header.dayZero() == null
-              ? "Cannot work out test day numbers: enter the test begin date"
-                  + " (germinator entry date for QA tests) before calculating"
-              : "Enter germination counts with a count date before calculating");
+          missingDayZeroMessage(header, days.isEmpty()));
     }
 
     test.setGerminationPct(result.germinationPct());
@@ -253,6 +250,18 @@ public class TestResultService {
     testResultRepository.saveAndFlush(test);
     SparLog.info("Germination metrics calculated for RIA_SKEY: {}", riaKey);
     return getGerminationTestHeader(riaKey);
+  }
+
+  /** Says exactly which date the day numbers are waiting for (QA counts from germinator entry). */
+  private static String missingDayZeroMessage(GerminationTestHeaderDto header, boolean noDays) {
+    if (noDays || header.dayZero() != null) {
+      return "Enter germination counts with a count date before calculating";
+    }
+    if ("QA".equals(header.testCategoryCd())) {
+      return "Cannot work out test day numbers: QA test day numbers count from the"
+          + " Into germinator date, which is set when the test is put into a germinator tray";
+    }
+    return "Cannot work out test day numbers: enter the test begin date before calculating";
   }
 
   private static boolean isSet(Integer indicator) {

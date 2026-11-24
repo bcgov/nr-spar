@@ -1940,7 +1940,7 @@ class TestResultServiceTest {
   }
 
   @Test
-  void calculateGerminationMetrics_withoutDayZeroAndDayNumbers_asksForBeginDate() {
+  void calculateGerminationMetrics_qaWithoutGerminatorEntry_saysSo() {
     // QA test with no germinator entry, so no day zero; legacy rows have no stored day number.
     GerminationTestHeaderDto noEntry = new GerminationTestHeaderDto(
         RIA_KEY, "G10", null, null, "QA", null, null, 0, 0, null, -1, null,
@@ -1959,7 +1959,7 @@ class TestResultServiceTest {
         () -> testResultService.calculateGerminationMetrics(RIA_KEY));
 
     assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
-    assertTrue(ex.getReason().contains("begin date"));
+    assertTrue(ex.getReason().contains("Into germinator"));
     verify(testResultRepository, never()).saveAndFlush(any());
   }
 }
