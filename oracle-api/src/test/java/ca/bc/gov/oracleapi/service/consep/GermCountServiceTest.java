@@ -550,14 +550,18 @@ class GermCountServiceTest {
   }
 
   @Test
-  void upsert_update_missingTimestamp_throwsBadRequest() {
+  void upsert_update_nullTimestamp_isLeftToTheLock() {
+    // A null read is valid for a legacy never-stamped row; the touch query decides, and here
+    // it finds the row stamped since, so the save is a conflict rather than a bad request.
     BigDecimal riaSkey = new BigDecimal("881191");
     when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, null)).thenReturn(0);
     List<DayGermCountDto> days = List.of(day(1, LocalDate.of(2026, 4, 1), 1, 1, 1, 1, 1));
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> germCountService.upsertGermCounts(riaSkey, request(null, days), "USER2"));
-    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    verify(germCountRepository).touchIfTimestampMatches(riaSkey, null);
   }
 
   @Test

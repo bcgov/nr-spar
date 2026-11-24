@@ -176,11 +176,7 @@ public class GermCountService {
 
     GermCountEntity entity;
     if (existing != null) {
-      if (request.updateTimestamp() == null) {
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST,
-            "updateTimestamp is required to update an existing record");
-      }
+      // A null updateTimestamp is only accepted for a legacy row that has none (the touch checks).
       int rows = germCountRepository.touchIfTimestampMatches(riaSkey, request.updateTimestamp());
       if (rows == 0) {
         throw new ResponseStatusException(

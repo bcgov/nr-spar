@@ -281,6 +281,8 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
    *
    * @return rows updated; 0 means the row changed since it was read (409).
    */
+  // Legacy rows can have a null UPDATE_TIMESTAMP: a null expected value matches it, and the
+  // first save stamps the row, so a second writer holding the null still gets 0 rows (409).
   @Modifying
   @Transactional
   @Query("""
@@ -300,7 +302,8 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Bi
              t.otherTestResult = 0,
              t.updateTimestamp = CURRENT_TIMESTAMP
        WHERE t.riaKey = :riaKey
-         AND t.updateTimestamp = :expectedUpdateTimestamp
+         AND (t.updateTimestamp = :expectedUpdateTimestamp
+           OR (t.updateTimestamp IS NULL AND :expectedUpdateTimestamp IS NULL))
       """)
   int updateGerminationTestHeader(
       @Param("riaKey") BigDecimal riaKey,
