@@ -197,6 +197,31 @@ describe('MapLayersSync', () => {
     expect(wmsNamesOnMap()).not.toContain('ROADS');
   });
 
+  it('shows a re-added catalog layer on and at full opacity, whatever it was before removal', () => {
+    const key = catalogLayerKey('roads');
+    const rerenderWith = (active: string[]) => {
+      ctx.activeCatalogLayers = active;
+      return (
+        <MapLayersProvider>
+          <MapLayersSync theme="aoua" />
+          <ActionsProbe />
+        </MapLayersProvider>
+      );
+    };
+    const { rerender } = render(rerenderWith(['roads']));
+    React.act(() => {
+      actions.setLayersVisible([key], false);
+      actions.setLayerOpacity(key, 0);
+    });
+    expect(wmsNamesOnMap()).not.toContain('ROADS');
+
+    rerender(rerenderWith([]));
+    rerender(rerenderWith(['roads']));
+    expect(wmsNamesOnMap()).toContain('ROADS');
+    expect(actions.visible[key]).toBe(true);
+    expect(actions.opacity[key]).toBe(1);
+  });
+
   it('removes every layer it added on unmount', () => {
     ctx.activeCatalogLayers = ['roads'];
     const { unmount } = renderSync();
@@ -263,6 +288,24 @@ describe('LayersPanel', () => {
     expect(screen.queryByText(single.label)).not.toBeInTheDocument();
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'zzz-no-such-layer' } });
     expect(screen.getByText(/No layers match/)).toBeInTheDocument();
+  });
+
+  it('while searching for one species, group and All switch that species only, not the "all species" layer', () => {
+    const species = groups.find((g) => g.layer && g.children?.length)!;
+    const child = species.children![0];
+    expect(species.label.toLowerCase()).not.toContain(child.label.toLowerCase());
+    renderPanel();
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: child.label } });
+
+    fireEvent.click(screen.getByLabelText('All'));
+    expect(actions.visible[child.id]).toBe(true);
+    expect(actions.visible[species.layer!.id]).not.toBe(true);
+    fireEvent.click(screen.getByLabelText('All'));
+    expect(actions.visible[child.id]).toBe(false);
+
+    fireEvent.click(screen.getByLabelText(species.label));
+    expect(actions.visible[child.id]).toBe(true);
+    expect(actions.visible[species.layer!.id]).not.toBe(true);
   });
 
   it('turns everything listed on or off with All', () => {

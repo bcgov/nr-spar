@@ -811,24 +811,6 @@ $map-btn: 36px;
       border-bottom-left-radius: calc(0.25rem - 1px);
       border-bottom-right-radius: calc(0.25rem - 1px);
     }
-
-    // Horizontal shape picker opened by the Draw button.
-    &--picker {
-      flex-direction: row;
-
-      .#{vars.$bcgov-prefix}--popover-container + .#{vars.$bcgov-prefix}--popover-container .#{vars.$bcgov-prefix}--btn--icon-only {
-        border-top: none;
-        border-left: 1px solid theme.$border;
-      }
-
-      .#{vars.$bcgov-prefix}--popover-container:first-child .#{vars.$bcgov-prefix}--btn--icon-only {
-        border-radius: calc(0.25rem - 1px) 0 0 calc(0.25rem - 1px);
-      }
-
-      .#{vars.$bcgov-prefix}--popover-container:last-child .#{vars.$bcgov-prefix}--btn--icon-only {
-        border-radius: 0 calc(0.25rem - 1px) calc(0.25rem - 1px) 0;
-      }
-    }
   }
 }
 

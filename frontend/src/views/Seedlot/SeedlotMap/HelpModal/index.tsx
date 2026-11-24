@@ -93,27 +93,13 @@ const TOPICS: HelpTopic[] = [
     body: (
       <>
         <p>
-          The toolbar holds the AOI drawing workflow. The
-          {' '}
-          <strong>Draw</strong>
-          {' '}
-          button opens a shape picker:
+          The polygon tools box holds the AOI drawing workflow:
         </p>
         <ul>
           <li>
-            <strong>Polygon</strong>
+            <strong>Draw</strong>
             {' '}
-            — freehand: click each vertex, double-click to close.
-          </li>
-          <li>
-            <strong>Rectangle</strong>
-            {' '}
-            — click two opposite corners.
-          </li>
-          <li>
-            <strong>Line</strong>
-            {' '}
-            — non-AOI markup polyline.
+            — click each vertex, then click the first vertex again to close the polygon.
           </li>
           <li>
             <strong>Zoom to AOI</strong>

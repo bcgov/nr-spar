@@ -170,19 +170,12 @@ describe('AoiToolbar sections', () => {
     expect(tooltip).toHaveClass('cds--popover--right');
   });
 
-  it('starts each shape from the Draw picker and leaves identify mode', () => {
+  it('starts a polygon straight from Draw, with no shape picker, and leaves identify mode', () => {
     renderToolbar();
-    const shapes: Array<[string, string]> = [
-      ['aoi-add-polygon', 'startDraw'],
-      ['aoi-add-rectangle', 'startDrawRectangle'],
-      ['aoi-add-line', 'startDrawLine']
-    ];
-    shapes.forEach(([testId, fn]) => {
-      expect(screen.queryByTestId('aoi-shape-picker')).not.toBeInTheDocument();
-      fireEvent.click(screen.getByTestId('aoi-draw'));
-      fireEvent.click(screen.getByTestId(testId));
-      expect(sparMap[fn]).toHaveBeenCalled();
-    });
+    fireEvent.click(screen.getByTestId('aoi-draw'));
+    expect(sparMap.startDraw).toHaveBeenCalledTimes(1);
+    expect(sparMap.startDrawRectangle).not.toHaveBeenCalled();
+    expect(sparMap.startDrawLine).not.toHaveBeenCalled();
     expect(screen.queryByTestId('aoi-shape-picker')).not.toBeInTheDocument();
     expect(sparMap.setIdentifyActive).toHaveBeenCalledWith(false);
     expect(sparMap.setBecZones).toHaveBeenCalledWith([], [], 'zone');

@@ -41,7 +41,7 @@ const MapLayersSync = ({ theme }: { theme: SparMapTheme }) => {
   const map = useMap();
   const { speciesCode, activeCatalogLayers } = useSparMap();
   const {
-    baseLayerId, visible, opacity, resetLayers
+    baseLayerId, visible, opacity, resetLayers, setLayersVisible, setLayerOpacity: setSavedOpacity
   } = useMapLayers();
 
   const baseLayers = useRef(new Map<string, L.Layer>());
@@ -89,6 +89,11 @@ const MapLayersSync = ({ theme }: { theme: SparMapTheme }) => {
       if (!active.has(id)) {
         if (map.hasLayer(layer)) map.removeLayer(layer);
         layers.delete(id);
+        // Forget its panel settings, so adding it again from the catalog
+        // shows it on and at full opacity, not hidden or faded as it was.
+        const key = catalogLayerKey(id);
+        setLayersVisible([key], true);
+        setSavedOpacity(key, 1);
       }
     });
     activeCatalogLayers.forEach((id) => {
@@ -99,7 +104,7 @@ const MapLayersSync = ({ theme }: { theme: SparMapTheme }) => {
       setZIndex(layer, OVERLAY_Z_INDEX_START + 1000);
       layers.set(id, layer);
     });
-  }, [map, activeCatalogLayers]);
+  }, [map, activeCatalogLayers, setLayersVisible, setSavedOpacity]);
 
   useEffect(() => () => {
     catalogLayers.current.forEach((layer) => {

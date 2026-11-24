@@ -50,12 +50,17 @@ const OpacitySlider = ({ label, value, onChange }: OpacitySliderProps) => {
 
 const matches = (label: string, query: string) => label.toLowerCase().includes(query);
 
-/** Narrow a group to the rows matching the search, or null to hide it. */
+/**
+ * Narrow a group to the rows matching the search, or null to hide it.
+ * When only some children match, the group's own layer (e.g. the "all
+ * species" seedlot layer) is dropped too, so the group and All
+ * checkboxes switch only the matching layers.
+ */
 const filterGroup = (group: LayerGroup, query: string): LayerGroup | null => {
   if (!query || matches(group.label, query)) return group;
   const children = group.children?.filter((c) => matches(c.label, query)) ?? [];
   if (children.length === 0) return null;
-  return { ...group, children };
+  return { ...group, layer: undefined, children };
 };
 
 interface LayersPanelProps {

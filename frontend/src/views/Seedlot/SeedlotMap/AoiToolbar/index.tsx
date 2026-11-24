@@ -12,8 +12,6 @@ import {
   DocumentDownload,
   Ruler,
   Information,
-  Crop,
-  ConnectTarget,
   ZoomIn,
   Close
 } from '@carbon/icons-react';
@@ -174,8 +172,6 @@ const AoiToolbar = ({
     identifyActive,
     setIdentifyActive,
     setMeasurementMode,
-    startDrawRectangle,
-    startDrawLine,
     zoomToAois,
     setBecZones,
     liveAoiValidation
@@ -205,9 +201,6 @@ const AoiToolbar = ({
     }
     setWelcomeDismissed(true);
   };
-  // Polygon / rectangle / line all start from one Draw button
-  // that opens a small shape picker beside the rail.
-  const [shapePickerOpen, setShapePickerOpen] = useState(false);
   // EXPORT modal (Batch 2) — opens a Carbon Modal with a RadioButton
   // group so the user can pick GeoJSON, KML, or Shapefile. Disabled
   // whenever the AOI list is empty; the modal itself guards against a
@@ -285,18 +278,15 @@ const AoiToolbar = ({
   // Same for an active measurement: starting another tool stops it.
   const exitMeasure = () => setMeasurementMode?.(null);
 
-  /** Start drawing a shape from the Draw picker. */
-  const startShape = (start: (() => void) | null | undefined) => {
+  /** Draw: start a new polygon (click each vertex, click the first to close). */
+  const onDrawPolygon = () => {
     setValidation(null);
     // eslint-disable-next-line @typescript-eslint/no-use-before-define -- callback defined below
     highlightBecZones([]);
     exitIdentify();
     exitMeasure();
-    setShapePickerOpen(false);
-    start?.();
+    startDraw();
   };
-
-  const onToggleShapePicker = () => setShapePickerOpen((open) => !open);
 
   const onEditPolygon = () => {
     setValidation(null);
@@ -317,7 +307,6 @@ const AoiToolbar = ({
 
   const onToggleIdentify = () => {
     setValidation(null);
-    setShapePickerOpen(false);
     exitMeasure();
     cancelAoiMode?.();
     setIdentifyActive(!identifyActive);
@@ -546,9 +535,8 @@ const AoiToolbar = ({
               : undefined}
           >
             <ToolButton
-              label="Draw a polygon, rectangle, or line"
-              onClick={onToggleShapePicker}
-              active={shapePickerOpen}
+              label="Draw a polygon"
+              onClick={onDrawPolygon}
               testId="aoi-draw"
             >
               <Draw />
@@ -669,34 +657,6 @@ const AoiToolbar = ({
       </div>
 
       <div className="aoi-toolbar__side">
-        {shapePickerOpen && (
-          <div
-            className="aoi-toolbar__strip aoi-toolbar__strip--picker"
-            role="group"
-            aria-label="Shape to draw"
-            data-testid="aoi-shape-picker"
-          >
-            <ToolButton label="Polygon" onClick={() => startShape(startDraw)} testId="aoi-add-polygon">
-              <Draw />
-            </ToolButton>
-            <ToolButton
-              label="Rectangle"
-              onClick={() => startShape(startDrawRectangle)}
-              disabled={!startDrawRectangle}
-              testId="aoi-add-rectangle"
-            >
-              <Crop />
-            </ToolButton>
-            <ToolButton
-              label="Line (markup only — not saved with the collection area)"
-              onClick={() => startShape(startDrawLine)}
-              disabled={!startDrawLine}
-              testId="aoi-add-line"
-            >
-              <ConnectTarget />
-            </ToolButton>
-          </div>
-        )}
         {drawingEnabled && !welcomeDismissed && (
           <ActionableNotification
             kind="info"
