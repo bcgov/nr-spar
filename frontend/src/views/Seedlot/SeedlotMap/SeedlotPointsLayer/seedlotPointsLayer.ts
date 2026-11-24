@@ -35,6 +35,8 @@ export interface SeedlotPointsLayerOptions {
 
 const WEB_MERCATOR_SCALE_ZOOM_0 = 559082264.0287178;
 const FETCH_DEBOUNCE_MS = 300;
+/** Marker fill opacity at full layer opacity. */
+const MARKER_FILL_OPACITY = 0.85;
 
 /**
  * Build the marker popup as a DOM node rather than an HTML string.
@@ -96,9 +98,34 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
   // legend's "Species" key (the markers are coloured by species).
   private renderedSpecies: string[] = [];
 
+  // Layer-wide opacity (0–1) set from the layers panel slider. Scales both
+  // the marker outline and the fill (whose base value is MARKER_FILL_OPACITY).
+  private opacity = 1;
+
   constructor(options: SeedlotPointsLayerOptions) {
     super([]);
     this.wfsOptions = options;
+  }
+
+  /** Current layer-wide opacity (0–1). */
+  getOpacity(): number {
+    return this.opacity;
+  }
+
+  /** Set the layer-wide opacity (0–1) on rendered and future markers. */
+  setOpacity(opacity: number): this {
+    this.opacity = opacity;
+    this.eachLayer((layer) => {
+      if (layer instanceof L.CircleMarker) layer.setStyle(this.markerOpacityStyle());
+    });
+    return this;
+  }
+
+  private markerOpacityStyle(): L.PathOptions {
+    return {
+      opacity: this.opacity,
+      fillOpacity: MARKER_FILL_OPACITY * this.opacity
+    };
   }
 
   /** Distinct VEGETATION_CODEs currently rendered — read by the legend. */
@@ -216,7 +243,7 @@ export class SeedlotPointsLeafletLayer extends L.LayerGroup {
         color: '#212121',
         weight: 1,
         fillColor: color,
-        fillOpacity: 0.85,
+        ...this.markerOpacityStyle(),
         interactive: true,
         pmIgnore: true
       });

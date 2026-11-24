@@ -119,7 +119,13 @@ const geoJsonToAoiPolygons = (raw: string): AoiPolygon[] => {
 };
 
 /**
- * Wraps leaflet-geoman's drawing controls. Mounted inside a react-leaflet
+ * The map's polygon drawing and editing, built on Geoman
+ * (`@geoman-io/leaflet-geoman-free`), a Leaflet plugin that adds draw,
+ * edit, and delete modes to the map as `map.pm.*`. We use Geoman's
+ * drawing engine but NOT its built-in toolbar: the buttons live in our
+ * own `<AoiToolbar>`, which calls into Geoman via the callbacks below.
+ *
+ * Mounted inside a react-leaflet
  * MapContainer when the active theme has `drawingEnabled: true` (currently
  * only COLAREA). Listens for Geoman's pm:create / pm:edit / pm:remove
  * events and pushes the resulting GeoJSON into SparMapContext as a
@@ -154,26 +160,12 @@ const AoiDrawLayer = () => {
       return undefined;
     }
 
-    // The legacy SPAR UI drove draw / edit / clear entirely from the
-    // aoi_panel buttons, so we hide Geoman's built-in topright controls
-    // and expose the operations through the toolbar instead. Keeping
-    // `editMode: false` / `removalMode: false` here means users can still
-    // edit via `map.pm.enableGlobalEditMode()` but don't see Geoman's
-    // default button strip competing with our Carbon toolbar.
-    map.pm.addControls({
-      position: 'topright',
-      drawPolygon: false,
-      drawMarker: false,
-      drawPolyline: false,
-      drawCircle: false,
-      drawRectangle: false,
-      drawCircleMarker: false,
-      drawText: false,
-      editMode: false,
-      removalMode: false,
-      cutPolygon: false,
-      rotateMode: false
-    });
+    // Geoman's drawing and editing are used throughout this file, but its
+    // optional built-in toolbar (`map.pm.addControls()`) is deliberately
+    // NOT added — our own toolbar has the buttons and calls
+    // `map.pm.enableDraw()` / `enableGlobalEditMode()` etc. directly.
+    // (Adding that toolbar with every button switched off still left a
+    // stray "drag layers" button behind the top-right Layers button.)
 
     // Style Geoman draw + edit operations with the legacy red/gray AOI
     // colors. `setGlobalOptions` applies the path options to any future
@@ -306,7 +298,8 @@ const AoiDrawLayer = () => {
         });
       },
       // Clear Last — pop the most recently drawn/imported Geoman layer
-      // from the map. Geoman's pm:remove handler (handleRemove above)
+      // from the map. (No toolbar button uses this any more; Delete
+      // Polygon replaced it.) Geoman's pm:remove handler (handleRemove above)
       // will rebuild context state from the remaining layers, so we
       // don't also touch context here.
       removeLastMapLayer: () => {
@@ -430,9 +423,6 @@ const AoiDrawLayer = () => {
       map.off('pm:create', handleCreate);
       map.off('pm:edit', handleEdit);
       map.off('pm:remove', handleRemove);
-      if (map.pm) {
-        map.pm.removeControls();
-      }
       // Reset the context bridge so a stale reference doesn't outlive us.
       _setMapControls({
         startDraw: () => {},
