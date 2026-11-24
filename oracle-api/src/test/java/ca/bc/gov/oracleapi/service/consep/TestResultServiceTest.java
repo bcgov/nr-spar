@@ -1879,4 +1879,28 @@ class TestResultServiceTest {
 
     assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
   }
+
+  @Test
+  void calculateGerminationMetrics_withoutDayZeroAndDayNumbers_asksForBeginDate() {
+    // QA test with no germinator entry, so no day zero; legacy rows have no stored day number.
+    GerminationTestHeaderDto noEntry = new GerminationTestHeaderDto(
+        RIA_KEY, "G10", null, null, "QA", null, null, 0, 0, null, -1, null,
+        null, null, null, null, null, null, null, 21, "DY", null, null, null,
+        null, null, null, null, null, null, null, null, "RTS", TST_TS, RIA_TS,
+        null, null, null, null, null);
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(RIA_KEY))
+        .thenReturn(Optional.of(noEntry));
+    when(testResultRepository.findByIdForUpdate(RIA_KEY)).thenReturn(Optional.of(openTest()));
+    GermCountEntity counts = new GermCountEntity();
+    when(germCountRepository.findById(RIA_KEY)).thenReturn(Optional.of(counts));
+    when(germCountMapper.buildSlots(counts)).thenReturn(List.of(
+        new GermCountSlotDto(1, null, QA_ENTRY, null, 33, 10, 23, 40, null)));
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.calculateGerminationMetrics(RIA_KEY));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertTrue(ex.getReason().contains("begin date"));
+    verify(testResultRepository, never()).saveAndFlush(any());
+  }
 }

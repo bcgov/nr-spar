@@ -227,16 +227,20 @@ public class TestResultService {
             s.rep1NoSeedsGerm(), s.rep2NoSeedsGerm(), s.rep3NoSeedsGerm(), s.rep4NoSeedsGerm()})
         .toList();
     List<Integer> dayNumbers = days.stream()
+        // Integer.valueOf keeps the ternary boxed: a null stored day number must not unbox (NPE).
         .map(s -> header.dayZero() == null
             ? s.dayNoOfTest()
-            : (int) ChronoUnit.DAYS.between(header.dayZero(), s.countDt()))
+            : Integer.valueOf((int) ChronoUnit.DAYS.between(header.dayZero(), s.countDt())))
         .toList();
 
     GerminationMetrics.Result result = GerminationMetrics.calculate(
         dayNumbers, GerminationMetrics.cumulativePercents(counts, totalSeeds, accepted));
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "Enter germination counts with a count date before calculating");
+          !days.isEmpty() && header.dayZero() == null
+              ? "Cannot work out test day numbers: enter the test begin date"
+                  + " (germinator entry date for QA tests) before calculating"
+              : "Enter germination counts with a count date before calculating");
     }
 
     test.setGerminationPct(result.germinationPct());
