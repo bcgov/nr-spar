@@ -96,32 +96,49 @@
     }
   }
 
+  .consep-germination-content-results {
+    margin-top: 1rem;
+
+    > div {
+      padding: 0rem;
+    }
+  }
+
+  // Figma's result panel: a bordered box, small fields in a row over the comments.
+  .germ-result-panel {
+    border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #c6c6c6);
+
+    > div {
+      padding: 1rem;
+    }
+
+    > div + div {
+      border-top: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #c6c6c6);
+    }
+
+    // Carbon draws read-only fields as bare text over a dashed rule; these keep
+    // the field look of the moisture screen's inputs.
+    .#{vars.$bcgov-prefix}--text-input,
+    .#{vars.$bcgov-prefix}--text-area {
+      background-color: var(--#{vars.$bcgov-prefix}-field-01, #f4f4f4);
+      border-bottom: 1px solid var(--#{vars.$bcgov-prefix}-border-strong-01, #8d8d8d);
+    }
+  }
+
+  .germ-result-fields {
+    display: flex;
+    gap: 1rem;
+  }
+
+  // Sized to the widest value, PV's `100/21`.
+  .germ-result-field {
+    width: 6rem;
+  }
+
   // Moisture gives its one result table 2rem above and below; here two tables
   // share it.
   .consep-germination-content-table {
     margin: 2rem -1rem 0;
-
-    + .consep-germination-content-form {
-      margin-top: 2rem;
-    }
-  }
-
-  .consep-germination-content-form > div {
-    padding: 0rem;
-  }
-
-  .consep-germination-content-form {
-    justify-content: flex-start;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .consep-germination-content-comments {
-    width: 100%;
-  }
-
-  .consep-germination-content-comments > div {
-    padding: 0rem;
   }
 }
 

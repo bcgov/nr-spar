@@ -512,6 +512,44 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               columns={summaryColumns}
             />
           </Row>
+          {/* The Figma result panel, between the summary and the tables: a row of
+              small fields over the comments, drawn with the moisture screen's input
+              style. Only GV and PV are in scope (#2756); Category, Rank, Reps out of
+              tolerance and Germinator ID join this row in their own tickets. */}
+          <Row className="consep-germination-content-results">
+            <Column>
+              <div className="germ-result-panel">
+                <div className="germ-result-fields">
+                  <div className="germ-result-field">
+                    <TextInput
+                      id="germ-header-gv"
+                      labelText="GV"
+                      value={header.germinationValue ?? ''}
+                      readOnly
+                    />
+                  </div>
+                  <div className="germ-result-field">
+                    <TextInput
+                      id="germ-header-pv"
+                      labelText="PV"
+                      value={formatPeakValue(header.peakValueGrmPct, header.peakValueNoDays)}
+                      readOnly
+                    />
+                  </div>
+                </div>
+                <div className="germ-result-comments">
+                  {/* Read-only until editing comments is ticketed for this screen. */}
+                  <TextArea
+                    id="germ-header-comments"
+                    labelText="Comments"
+                    rows={2}
+                    value={header.riaComment ?? ''}
+                    readOnly
+                  />
+                </div>
+              </div>
+            </Column>
+          </Row>
           <Row className="consep-germination-content-table">
             <Column>
               <DailyGermTable
@@ -539,39 +577,6 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
                 isEditable={isEditable}
                 validationErrors={validationErrors}
                 onAbnormalChange={handleAbnormalChange}
-              />
-            </Column>
-          </Row>
-          {/* Laid out like the moisture screen's form row. Only GV and PV are in scope
-              (#2756); Category, Rank, Reps out of tolerance and Germinator ID join
-              this row in their own tickets. */}
-          <Row className="consep-germination-content-form">
-            <Column sm={2} md={2} lg={5} xlg={5}>
-              <TextInput
-                id="germ-header-gv"
-                labelText="GV"
-                value={header.germinationValue ?? ''}
-                readOnly
-              />
-            </Column>
-            <Column sm={2} md={2} lg={5} xlg={5}>
-              <TextInput
-                id="germ-header-pv"
-                labelText="PV"
-                value={formatPeakValue(header.peakValueGrmPct, header.peakValueNoDays)}
-                readOnly
-              />
-            </Column>
-          </Row>
-          <Row className="consep-germination-content-comments">
-            <Column>
-              {/* Read-only until editing comments is ticketed for this screen. */}
-              <TextArea
-                id="germ-header-comments"
-                labelText="Comments"
-                rows={2}
-                value={header.riaComment ?? ''}
-                readOnly
               />
             </Column>
           </Row>
