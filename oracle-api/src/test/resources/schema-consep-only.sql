@@ -20,3 +20,9 @@ CREATE TABLE IF NOT EXISTS CONSEP.CNS_T_SEEDLOT (
 
 -- Copy Results mints new daily germ keys from this sequence.
 CREATE SEQUENCE IF NOT EXISTS CONSEP.CNS_SEQ_COUNTER START WITH 1000 INCREMENT BY 1;
+
+-- Activity dependency graph walked by the Dryback save to reschedule downstream activities.
+CREATE TABLE IF NOT EXISTS CONSEP.CNS_T_RIA_DEPENDANCY (
+  PREREQ_RIA_SKEY    NUMBER(10) NOT NULL,
+  DEPENDANT_RIA_SKEY NUMBER(10) NOT NULL
+);
