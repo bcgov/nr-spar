@@ -167,6 +167,13 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("expectedUpdateTimestamp") LocalDateTime expectedUpdateTimestamp);
 
   /**
+   * Reads just the activity's update timestamp. A scalar query, so it bypasses the persistence
+   * context and returns what the database holds now.
+   */
+  @Query("SELECT a.updateTimestamp FROM ActivityEntity a WHERE a.riaKey = :riaKey")
+  Optional<LocalDateTime> findUpdateTimestamp(@Param("riaKey") BigDecimal riaKey);
+
+  /**
    * Update activity dates/comment with optimistic locking (issue #2447).
    *
    * <p>The INTRMDT_CLEANR_IND column ({@code intermediateCleaner}) is repurposed by the
