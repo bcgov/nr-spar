@@ -24,6 +24,12 @@ public record GerminatorTrayCreateDto(
 
     @Schema(description = "Actual begin date of the activity", example = "1994-09-22T00:00:00")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    LocalDateTime actualBeginDtTm
+    LocalDateTime actualBeginDtTm,
+
+    @Schema(
+        description = "The activity updateTimestamp the client last read (optimistic lock)",
+        example = "2024-05-01T10:15:30")
+    @NotNull
+    LocalDateTime activityUpdateTimestamp
 ) {
 }
