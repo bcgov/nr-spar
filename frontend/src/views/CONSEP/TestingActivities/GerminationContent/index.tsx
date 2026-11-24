@@ -216,6 +216,19 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [replicatesQuery.isFetched, replicatesQuery.data, headerLoaded, headerCategory, headerDayZero]);
 
+  // A begin-date save returns a new dayZero (#2756): renumber the count days so the table
+  // shows them right away; the autosave then stores the corrected day numbers.
+  const liveDayZero = header?.dayZero;
+  useEffect(() => {
+    if (!isHydrated || !liveDayZero) {
+      return;
+    }
+    const nextSlots = withDayNumbers(slotsRef.current, liveDayZero);
+    setSlots(nextSlots);
+    slotsRef.current = nextSlots;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveDayZero]);
+
   const validationErrors = useMemo(() => ({
     ...validateCountDates(slots, activityDates.beginDate),
     ...checkOverLimit(slots, replicates)

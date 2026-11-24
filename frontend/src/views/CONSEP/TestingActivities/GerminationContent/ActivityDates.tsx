@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Column, DatePicker, DatePickerInput, Row, TextInput
+  Column, DatePicker, DatePickerInput, Row
 } from '@carbon/react';
 
 import { GerminationTestHeaderType } from '../../../../types/consep/GerminationType';
@@ -18,9 +18,6 @@ type ActivityDatesProps = {
   isEditable: boolean;
   onChange: (field: EditableField, isoDate: string | undefined) => void;
 };
-
-/** 'YYYY-MM-DD…' -> 'YYYY/MM/DD', the format every other date here is shown in. */
-const displayDate = (iso?: string) => (iso ? iso.slice(0, 10).replaceAll('-', '/') : '');
 
 const DERIVED: Array<{ key: keyof GerminationTestHeaderType; label: string }> = [
   { key: 'soakEndDate', label: 'Soak end' },
@@ -98,18 +95,28 @@ const ActivityDates = ({
             <tr>
               <th scope="row">{`${header.activityTypeCd ?? ''} germination test`.trim()}</th>
               <td>{renderPicker('beginDate', 'Begin date')}</td>
-              {DERIVED.map(({ key, label }) => (
-                <td key={key}>
-                  <TextInput
-                    id={`germ-activity-${key}`}
-                    labelText={label}
-                    hideLabel
-                    value={displayDate(header[key] as string | undefined)}
-                    readOnly
-                    size="sm"
-                  />
-                </td>
-              ))}
+              {DERIVED.map(({ key, label }) => {
+                const iso = (header[key] as string | undefined)?.slice(0, 10);
+                return (
+                  <td key={key}>
+                    {/* Derived per the spec: a date picker in look only, never editable here. */}
+                    <DatePicker
+                      datePickerType="single"
+                      dateFormat={DATE_FORMAT}
+                      readOnly
+                      value={iso ? [isoToJsDate(iso)] : []}
+                    >
+                      <DatePickerInput
+                        id={`germ-activity-${key}`}
+                        labelText={label}
+                        hideLabel
+                        placeholder=""
+                        size="sm"
+                      />
+                    </DatePicker>
+                  </td>
+                );
+              })}
               <td>{renderPicker('endDate', 'Test end')}</td>
             </tr>
           </tbody>

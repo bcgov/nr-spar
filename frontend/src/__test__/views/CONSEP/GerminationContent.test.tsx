@@ -194,6 +194,27 @@ describe('GerminationContent', () => {
     });
   });
 
+  it('fills the count day numbers once a begin-date save returns a dayZero (#2756)', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce({
+      riaSkey: 123, activityTypeCd: 'G10', testCategoryCd: 'STD', testCompleteInd: 0, acceptResultInd: 0
+    });
+    vi.mocked(getGermCounts).mockResolvedValueOnce({
+      updateTimestamp: '2026-01-01T00:00:00',
+      slots: [{ slotIndex: 1, countDt: '2024-11-07' }]
+    } as unknown as Awaited<ReturnType<typeof getGermCounts>>);
+    patchMock.mockResolvedValueOnce({
+      riaSkey: 123, activityTypeCd: 'G10', testCategoryCd: 'STD', dayZero: '2024-10-31'
+    });
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    expect(await screen.findByTestId('germ-day-1')).toHaveTextContent('');
+
+    fireEvent.change(screen.getByLabelText('Begin date'), { target: { value: '2024/10/30' } });
+
+    await waitFor(() => expect(patchMock).toHaveBeenCalledTimes(1), { timeout: 5000 });
+    await waitFor(() => expect(screen.getByTestId('germ-day-1')).toHaveTextContent('7'));
+  });
+
   it('does not save an invalid date, and shows why', async () => {
     renderView();
     await screen.findByText(/Germination test result/i);

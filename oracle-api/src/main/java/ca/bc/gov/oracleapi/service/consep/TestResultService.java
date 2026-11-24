@@ -1155,10 +1155,8 @@ public class TestResultService {
           riaKey, activityType, category, seedlotNumber);
     }
 
-    GerminationTestHeaderDto refreshed = testResultRepository
-        .findGerminationTestHeaderByRiaKey(riaKey)
-        .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "No germination test found for riaKey " + riaKey));
+    // Through getGerminationTestHeader so the response carries soak end and dayZero (#2756).
+    GerminationTestHeaderDto refreshed = getGerminationTestHeader(riaKey);
 
     // Spec: "the first completed activity processes the commitment" — skip if a sibling activity
     // already has processCommitIndicator set (findConflictingActivities non-empty).

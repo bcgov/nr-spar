@@ -177,7 +177,7 @@
       }
 
       // Read-only derived dates get the same field look as the editable ones (moisture style).
-      .#{vars.$bcgov-prefix}--text-input[readonly] {
+      .#{vars.$bcgov-prefix}--date-picker__input[readonly] {
         background-color: var(--#{vars.$bcgov-prefix}-field-01, #f4f4f4);
         border-bottom: 1px solid var(--#{vars.$bcgov-prefix}-border-strong-01, #8d8d8d);
       }
