@@ -1,13 +1,23 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import ca.bc.gov.oracleapi.config.SparLog;
+import ca.bc.gov.oracleapi.dto.consep.DrybackSaveDto;
 import ca.bc.gov.oracleapi.dto.consep.DrybackScreenDto;
+import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -18,7 +28,13 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class DrybackScreenService {
 
+  /** Germination test types that have a dryback step (page title: G64, G34 and G44). */
+  static final Set<String> DRYBACK_ACTIVITY_TYPES = Set.of("G64", "G34", "G44");
+
   private final ActivityRepository activityRepository;
+
+  /** Revised dates to store on the activity and the schedule shift for its dependants. */
+  record RevisedDates(LocalDate start, LocalDate end, Long dateDiff) {}
 
   /**
    * Retrieves the dryback screen data for a given Request Item Activity key.
@@ -43,5 +59,151 @@ public class DrybackScreenService {
     }
 
     return drybackScreenData.get();
+  }
+
+  /**
+   * Saves the Dryback screen values, recalculates the activity's revised dates and shifts
+   * every downstream dependent activity by the schedule variance. All in one transaction.
+   *
+   * @param riaSkey the Request Item Activity SKEY
+   * @param dto the values to save, with the update timestamp the client last read
+   * @return the refreshed screen data, carrying the new updateTimestamp
+   * @throws ResponseStatusException 400 invalid input, 404 not found, 409 changed by another user
+   */
+  @Transactional
+  public DrybackScreenDto saveDryback(BigDecimal riaSkey, DrybackSaveDto dto) {
+    ActivityEntity stored = activityRepository.findById(riaSkey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
+    // Fail fast so a stale client gets 409 rather than a 400 for data it never saw;
+    // the WHERE-clause check in the UPDATE still guards the race.
+    if (!Objects.equals(stored.getUpdateTimestamp(), dto.updateTimestamp())) {
+      throw conflict(riaSkey);
+    }
+    validate(stored, dto, LocalDateTime.now());
+
+    RevisedDates dates = computeRevisedDates(
+        stored, dto.actualBeginDateTime(), dto.actualEndDateTime());
+
+    int rows = activityRepository.updateDrybackActivityWithLock(
+        riaSkey, dto, dates.start(), dates.end());
+    if (rows == 0) {
+      throw conflict(riaSkey);
+    }
+
+    // The shift is absolute (planned + dateDiff), so a 0 diff must still run: it moves
+    // dependants back to planned after an earlier save shifted them. dateDiff is only
+    // non-null when the actual dates changed, so unchanged saves don't touch dependants.
+    if (dates.dateDiff() != null) {
+      shiftDependants(riaSkey, dates.dateDiff());
+    }
+
+    SparLog.info("Dryback saved for riaKey: {}, dateDiff: {}", riaSkey, dates.dateDiff());
+    return getDrybackScreenData(riaSkey);
+  }
+
+  private static ResponseStatusException conflict(BigDecimal riaSkey) {
+    SparLog.warn("Optimistic lock conflict saving dryback riaKey: {}", riaSkey);
+    return new ResponseStatusException(HttpStatus.CONFLICT,
+        "Activity was modified by another user; reload and retry");
+  }
+
+  private void validate(ActivityEntity stored, DrybackSaveDto dto, LocalDateTime now) {
+    if (!DRYBACK_ACTIVITY_TYPES.contains(stored.getActivityTypeCode())) {
+      throw badRequest("Dryback can only be saved for G64, G34 or G44 activities");
+    }
+    LocalDateTime begin = dto.actualBeginDateTime();
+    LocalDateTime end = dto.actualEndDateTime();
+    if (begin == null) {
+      // PUT replaces the whole record; clearing the begin date would leave the revised
+      // dates and dependant shifts out of step with empty actuals.
+      if (stored.getActualBeginDateTime() != null) {
+        throw badRequest("Start date/time cannot be cleared once saved");
+      }
+      if (dto.hasData()) {
+        throw badRequest("Start date/time is required when any dryback data is entered");
+      }
+      return;
+    }
+    if (begin.isAfter(now)) {
+      throw badRequest("Start date/time cannot be in the future");
+    }
+    if (end != null && end.isBefore(begin)) {
+      throw badRequest("End date/time cannot be before start date/time");
+    }
+    if (end != null && end.isAfter(now)) {
+      throw badRequest("End date/time cannot be in the future");
+    }
+  }
+
+  private static ResponseStatusException badRequest(String message) {
+    return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+  }
+
+  /**
+   * Spec "Save Processing" (Confluence FSADT2 300882212), with deliberate deviations:
+   * a null stored revised date counts as changed (the spec's NULL comparison never fires,
+   * and its NVL(revised_end, today) skipped an end date of today), a missing planned end
+   * date keeps the stored revised end and yields no dateDiff instead of nulling them, and a
+   * dateDiff of 0 is returned (not skipped) so dependants can be moved back to planned.
+   */
+  static RevisedDates computeRevisedDates(
+      ActivityEntity stored, LocalDateTime actualBegin, LocalDateTime actualEnd) {
+    LocalDate plannedStart = stored.getPlannedStartDate();
+    LocalDate plannedEnd = stored.getPlannedEndDate();
+    LocalDate revisedStart = stored.getRevisedStartDate();
+    LocalDate revisedEnd = stored.getRevisedEndDate();
+    if (plannedStart == null) {
+      return new RevisedDates(revisedStart, revisedEnd, null);
+    }
+
+    LocalDate begin = actualBegin == null ? null : actualBegin.toLocalDate();
+    LocalDate end = actualEnd == null ? null : actualEnd.toLocalDate();
+
+    if (begin != null && !begin.equals(revisedStart)) {
+      revisedStart = begin;
+      if (end != null) {
+        revisedEnd = end;
+      } else {
+        revisedEnd = plannedEnd == null
+            ? revisedEnd
+            : plannedEnd.plusDays(ChronoUnit.DAYS.between(plannedStart, begin));
+      }
+      return new RevisedDates(revisedStart, revisedEnd, daysBetween(plannedEnd, revisedEnd));
+    }
+
+    // The spec also moves the end date when there is no actual begin, without a dateDiff;
+    // validate() rejects an end date without a begin date, so that path is not reachable.
+    if (begin != null && end != null && !Objects.equals(end, revisedEnd)) {
+      return new RevisedDates(revisedStart, end, daysBetween(plannedEnd, end));
+    }
+    return new RevisedDates(revisedStart, revisedEnd, null);
+  }
+
+  private static Long daysBetween(LocalDate from, LocalDate to) {
+    return from == null || to == null ? null : ChronoUnit.DAYS.between(from, to);
+  }
+
+  /**
+   * Moves every transitive dependant (CNS_T_RIA_DEPENDANCY) to planned + dateDiff. Walks the
+   * graph level by level in Java because the test database (H2) has no CONNECT BY.
+   */
+  private void shiftDependants(BigDecimal riaSkey, long dateDiff) {
+    Set<BigDecimal> seen = new LinkedHashSet<>(List.of(riaSkey));
+    List<BigDecimal> level = List.of(riaSkey);
+    while (!level.isEmpty()) {
+      level = activityRepository.findDependantRiaKeys(level).stream()
+          .filter(seen::add) // skips already visited keys, so a cycle cannot loop forever
+          .toList();
+    }
+    seen.remove(riaSkey);
+    if (seen.isEmpty()) {
+      return;
+    }
+
+    // Scheduling-only bulk UPDATE: a loaded entity would write every column back on flush
+    // and could overwrite a concurrent save of the dependant's other fields.
+    int rows = activityRepository.shiftRevisedDates(seen, dateDiff);
+    SparLog.info("Shifted {} dependent activities of riaKey: {} by {} days",
+        rows, riaSkey, dateDiff);
   }
 }
