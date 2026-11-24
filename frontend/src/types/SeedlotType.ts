@@ -54,7 +54,8 @@ export type SeedlotApplicantType = {
   species: string,
   source: string,
   willRegister: boolean,
-  isBcSource: boolean
+  isBcSource: boolean,
+  superiorProvenance?: boolean
 }
 
 /**
@@ -73,7 +74,7 @@ export type SeedlotType = {
     seedlotSourceCode: string,
     description: string,
     isDefault: boolean
-  },
+  } | null,
   intendedForCrownLand: boolean,
   sourceInBc: boolean,
   collectionClientNumber: string,
@@ -162,7 +163,32 @@ export type SeedlotType = {
   areaOfUseComment: string | null,
   approvedUserId: string | null,
   approvedTimestamp: string | null,
+  orgUnitNo: number | null,
+  collectionLocationDesc: string | null,
+  // Superior provenance (B+) id; only migrated legacy B+ seedlots have one.
+  provenanceId: number | null,
+  collectionAreaRadius: number | null,
+  captureMethodCode: string | null,
+  seedPlanZoneCode: string | null,
+  seedCoastAreaCode: string | null,
+  numberTreesFromCode: string | null,
+  becOverrideInd: boolean | null,
+  becOverrideComment: string | null,
 }
+
+export type SeedlotCollectionGeometryType = {
+  seedlotNumber: string,
+  featureArea: number | null,
+  featurePerimeter: number | null
+};
+
+export type SeedlotBclassDetailType = {
+  aouSpzList: SeedPlanZoneDto[],
+  collectionGeometry: SeedlotCollectionGeometryType | null,
+  provenanceId: number | null,
+  // Null when there is no provenance or its oracle-api lookup failed.
+  provenanceDescription: string | null
+};
 
 export type SeedPlanZoneDto = {
   isPrimary: boolean
@@ -189,7 +215,8 @@ export type RichSeedlotType = {
   primarySpu: SpuDto | null,
   primarySpz: SeedPlanZoneDto | null,
   additionalSpzList: SeedPlanZoneDto[],
-  calculatedValues: SeedlotCalculationsResultsType[]
+  calculatedValues: SeedlotCalculationsResultsType[],
+  bClassDetail?: SeedlotBclassDetailType | null
 }
 
 export type SeedlotsReturnType = {
@@ -212,6 +239,65 @@ export type CollectionFormSubmitType = {
   clctnVolume: string,
   seedlotComment: string,
   coneCollectionMethodCodes: Array<number>
+}
+
+export type BClassCollectionFormSubmitType = {
+  collectionClientNumber: string,
+  collectionLocnCode: string,
+  collectionStartDate: string,
+  collectionEndDate: string,
+  noOfContainers: number,
+  volPerContainer: number,
+  clctnVolume: number,
+  seedlotComment: string,
+  coneCollectionMethodCodes: Array<number>,
+  collectionLocationDesc: string,
+  orgUnitNo: number | null,
+  collectionStandardMetInd: boolean,
+  collectionAreaRadius: number | null,
+  captureMethodCode: string,
+  seedPlanZoneCode: string | null,
+  collectionSeedPlanZoneInd: boolean,
+  seedCoastAreaCode: string | null,
+  collectionBgcValidatedInd: boolean,
+  becOverrideInd: boolean,
+  becOverrideComment: string | null,
+  numberTreesFromCode: string,
+  isLotSplitInd: boolean,
+  // Read only: the backend keeps the stored value.
+  provenanceId: number | null,
+  collectionLatitudeDeg: number,
+  collectionLatitudeMin: number,
+  collectionLatitudeSec: number,
+  collectionLongitudeDeg: number,
+  collectionLongitudeMin: number,
+  collectionLongitudeSec: number,
+  collectionElevation: number | null,
+  collectionElevationMin: number | null,
+  collectionElevationMax: number | null,
+  elevationMin: number | null,
+  elevationMax: number | null,
+  latitudeDegMin: number | null,
+  latitudeMinMin: number | null,
+  latitudeDegMax: number | null,
+  latitudeMinMax: number | null,
+  longitudeDegMin: number | null,
+  longitudeMinMin: number | null,
+  longitudeDegMax: number | null,
+  longitudeMinMax: number | null,
+  latitudeSecMin: number | null,
+  latitudeSecMax: number | null,
+  longitudeSecMin: number | null,
+  longitudeSecMax: number | null,
+  areaOfUseComment: string | null,
+  collectionLatitudeCode: string,
+  collectionLongitudeCode: string,
+  bgcZoneCode: string,
+  bgcZoneDescription: string,
+  bgcSubzoneCode: string,
+  variant: string | null,
+  becVersionId: number | null,
+  collectionGeometryGeoJson: string | null
 }
 
 export type SingleOwnerFormSubmitType = {
@@ -327,3 +413,26 @@ export type SeedlotAClassFullResponseType = {
   meanGeomSeedlot: MeanGeomDataType | null,
   meanGeomSmpMix: MeanGeomDataType | null
 }
+
+export type SeedlotBClassSubmitType = {
+  seedlotFormCollectionDto: BClassCollectionFormSubmitType,
+  seedlotFormOwnershipDtoList: Array<SingleOwnerFormSubmitType>,
+  seedlotFormInterimDto: InterimFormSubmitType,
+  seedlotFormExtractionDto: ExtractionFormSubmitType,
+  aouSpzList?: SeedPlanZoneDto[]
+}
+
+export type SeedlotBClassProgressPayloadType = {
+  allStepData: Record<string, unknown>,
+  progressStatus: Record<string, unknown>,
+  revisionCount: number
+};
+
+export type SeedlotBClassFullFormType = {
+  collectionStep: BClassCollectionFormSubmitType,
+  ownershipStep: Array<SingleOwnerFormSubmitType>,
+  interimStep: InterimFormSubmitType,
+  extractionStep: ExtractionFormSubmitType,
+  collectionGeometry?: unknown,
+  aouSpzList?: SeedPlanZoneDto[]
+};

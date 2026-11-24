@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.provider;
 
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
@@ -7,7 +8,11 @@ import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
+import ca.bc.gov.backendstartapi.dto.oracle.TransferLimitDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +54,10 @@ public interface Provider {
     return Optional.empty();
   }
 
+  default List<SpzDto> getSpzListByVegCode(String vegCode, String geneticClass) {
+    return List.of();
+  }
+
   default Optional<OrchardDto> findOrchardById(String orchardId) {
     return Optional.empty();
   }
@@ -63,6 +72,32 @@ public interface Provider {
 
   default SeedlotSpeciesDto getSeedlotAndSpeciesByRequestKey(Long requestKey) {
     return null;
+  }
+
+  default Optional<CodeDescriptionDto> getVegetationCode(String code) {
+    return Optional.empty();
+  }
+
+  default List<OrgUnitDistrictDto> getAllDistrictOrgUnits() {
+    return List.of();
+  }
+
+  default List<CodeDescriptionDto> getAllValidFundingSources() {
+    return List.of();
+  }
+
+  default Optional<String> getSpzCoastInteriorCode(String spzCode) {
+    return Optional.empty();
+  }
+
+  default Optional<SuperiorProvenanceDto> getSuperiorProvenance(Integer provenanceId) {
+    return Optional.empty();
+  }
+
+  default List<TransferLimitDto> searchTransferLimits(
+      String vegCode, String geneticClass, Boolean superiorProvenance, String coastInteriorCode,
+      String spzCode, Integer latitudeDeg) {
+    return List.of();
   }
 
   // Common methods

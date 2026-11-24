@@ -87,7 +87,9 @@ export const convertToApplicantInfoObj = (
   locationCode: seedlot.applicantLocationCode,
   email: seedlot.applicantEmailAddress,
   species: getSpeciesLabelByCode(seedlot.vegetationCode, vegCodeData),
-  source: seedlot.seedlotSource.description,
+  source: seedlot.seedlotSource?.description ?? '',
   willRegister: seedlot.intendedForCrownLand,
-  isBcSource: seedlot.sourceInBc
+  isBcSource: seedlot.sourceInBc,
+  // Superior provenance (B+) seedlots are those with a provenance id.
+  superiorProvenance: seedlot.provenanceId != null
 });

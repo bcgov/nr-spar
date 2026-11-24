@@ -29,9 +29,17 @@ parameters:
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
-    value: 25m
+    value: 200m
+  # Requests count against the namespace memory quota (4Gi in test), so this is
+  # set near the JVM's steady-state usage rather than the limit. It must leave
+  # room for MAX_REPLICAS pods plus one rolling-update surge pod alongside the
+  # other components; check the quota before raising it.
   - name: MEMORY_REQUEST
-    value: 100Mi
+    value: 640Mi
+  # The JVM derives its max heap from the memory limit (-XX:MaxRAMPercentage=60
+  # in the Dockerfile), so raising this raises the heap.
+  - name: MEMORY_LIMIT
+    value: 1Gi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"
@@ -127,12 +135,19 @@ objects:
                   value: ${DB_POOL_MAX_LIFETIME}
                 - name: KEYCLOAK_ISSUER_URI
                   value: ${KEYCLOAK_ISSUER_URI}
+                - name: SEEDLOT_B_ENABLED
+                  valueFrom:
+                    configMapKeyRef:
+                      name: ${NAME}-${ZONE}-features
+                      key: seedlot-b-enabled
                 - name: RANDOM_EXPRESSION
                   value: ${RANDOM_EXPRESSION}
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
+                limits:
+                  memory: ${MEMORY_LIMIT}
               ports:
                 - name: container-port
                   containerPort: 8090
@@ -193,15 +208,12 @@ objects:
       minReplicas: ${{MIN_REPLICAS}}
       maxReplicas: ${{MAX_REPLICAS}}
       metrics:
+        # CPU only. A JVM holds its heap rather than returning it, so a memory
+        # utilization target sits above the threshold permanently and pins the
+        # deployment at MAX_REPLICAS.
         - type: Resource
           resource:
             name: cpu
-            target:
-              type: Utilization
-              averageUtilization: 80
-        - type: Resource
-          resource:
-            name: memory
             target:
               type: Utilization
               averageUtilization: 80

@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,6 +54,8 @@ class TscAdminServiceTest {
 
   @Mock LoggedUserService loggedUserService;
 
+  @Mock SaveSeedlotFormService saveSeedlotFormService;
+
   private TscAdminService tscAdminService;
 
   private SeedlotStatusEntity createValidStatus(String status) {
@@ -74,7 +77,8 @@ class TscAdminServiceTest {
             seedlotStatusService,
             seedlotSeedPlanZoneRepository,
             geneticClassRepository,
-            loggedUserService);
+            loggedUserService,
+            saveSeedlotFormService);
   }
 
   @Test
@@ -138,6 +142,48 @@ class TscAdminServiceTest {
     Assertions.assertNotNull(seedlotSaved);
     Assertions.assertEquals(seedlotNumber, seedlotSaved.getId());
     Assertions.assertEquals("PND", seedlotSaved.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  @Test
+  @DisplayName("Putting a B-class seedlot back to pending recreates an empty draft")
+  void updateSeedlotStatus_bclassPending_shouldRecreateDraft() {
+    String seedlotNumber = "53001";
+
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    GeneticClassEntity geneticClass = new GeneticClassEntity();
+    geneticClass.setGeneticClassCode("B");
+    seedlot.setGeneticClass(geneticClass);
+    seedlot.setSeedlotStatus(createValidStatus("SUB"));
+
+    final SeedlotStatusEntity seedlotStatus = createValidStatus("PND");
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotStatusService.getValidSeedlotStatus("PND")).thenReturn(Optional.of(seedlotStatus));
+    when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
+
+    tscAdminService.updateSeedlotStatus(seedlotNumber, "PND");
+
+    verify(saveSeedlotFormService, times(1)).recreateEmptyBclassDraft(seedlot);
+  }
+
+  @Test
+  @DisplayName("Repeating pending on an already-pending B-class seedlot keeps its draft")
+  void updateSeedlotStatus_bclassAlreadyPending_shouldNotRecreateDraft() {
+    String seedlotNumber = "53001";
+
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    GeneticClassEntity geneticClass = new GeneticClassEntity();
+    geneticClass.setGeneticClassCode("B");
+    seedlot.setGeneticClass(geneticClass);
+    seedlot.setSeedlotStatus(createValidStatus("PND"));
+
+    final SeedlotStatusEntity seedlotStatus = createValidStatus("PND");
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotStatusService.getValidSeedlotStatus("PND")).thenReturn(Optional.of(seedlotStatus));
+    when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
+
+    tscAdminService.updateSeedlotStatus(seedlotNumber, "PND");
+
+    verify(saveSeedlotFormService, never()).recreateEmptyBclassDraft(any());
   }
 
   @Test

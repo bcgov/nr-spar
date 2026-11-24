@@ -25,19 +25,24 @@ import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassDetailDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotBclassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotCollectionGeometryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
@@ -46,8 +51,12 @@ import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseSpuGeoDto;
+import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzCoastInteriorDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
+import ca.bc.gov.backendstartapi.dto.oracle.TransferLimitDto;
 import ca.bc.gov.backendstartapi.enums.DescribedEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
@@ -103,9 +112,14 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     PtValsCalReqDto.class,
     RevisionCountDto.class,
     SameSpeciesTreeDto.class,
-    SaveSeedlotFormDtoClassA.class,
+    SaveSeedlotFormDto.class,
     SeedPlanZoneDto.class,
     SeedlotAclassFormDto.class,
+    SeedlotBclassDetailDto.class,
+    SeedlotBclassFormDto.class,
+    SeedlotFormCollectionDtoClassB.class,
+    SeedlotFormSubmissionDtoClassB.class,
+    SeedlotCollectionGeometryDto.class,
     SeedlotApplicationPatchDto.class,
     SeedlotCreateDto.class,
     SeedlotDto.class,
@@ -123,8 +137,12 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     SeedlotStatusResponseDto.class,
     AreaOfUseDto.class,
     AreaOfUseSpuGeoDto.class,
+    OrgUnitDistrictDto.class,
     SpuDto.class,
     SpzDto.class,
+    SpzCoastInteriorDto.class,
+    SuperiorProvenanceDto.class,
+    TransferLimitDto.class,
     DescribedEnum.class,
     ForestClientExpiredEnum.class,
     ForestClientStatusEnum.class,

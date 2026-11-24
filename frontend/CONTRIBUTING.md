@@ -58,6 +58,8 @@ To do that, first you need to install required dependencies.
 Login works locally without extra configuration: the app signs in against the BC Gov SSO
 dev realm by default. To use another realm, set `VITE_KEYCLOAK_ISSUER` in a `.env` file.
 
+To enable Seedlot B locally, add `VITE_SEEDLOT_B_ENABLED=true` to a `.env` file.
+
 And if you want to run Cypress, please add:
 ```
 CYPRESS_USERNAME=LOAD-3-TEST

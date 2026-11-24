@@ -88,6 +88,11 @@ objects:
                   value: ${VITE_KEYCLOAK_ISSUER}
                 - name: VITE_ZONE
                   value: ${ZONE}
+                - name: VITE_SEEDLOT_B_ENABLED
+                  valueFrom:
+                    configMapKeyRef:
+                      name: ${NAME}-${ZONE}-features
+                      key: seedlot-b-enabled
                 - name: RANDOM_EXPRESSION
                   value: ${RANDOM_EXPRESSION}
               resources:

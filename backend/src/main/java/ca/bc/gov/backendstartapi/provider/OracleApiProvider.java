@@ -2,13 +2,20 @@ package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSpeciesDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.OrgUnitDistrictDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzCoastInteriorDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SuperiorProvenanceDto;
+import ca.bc.gov.backendstartapi.dto.oracle.TransferLimitDto;
+import ca.bc.gov.backendstartapi.exception.OracleApiProviderException;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
@@ -23,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -244,6 +252,43 @@ public class OracleApiProvider implements Provider {
     return Optional.empty();
   }
 
+  /**
+   * Find the seed plan zones of a genetic class that apply to a species.
+   *
+   * @param vegCode the seedlot species
+   * @param geneticClass the genetic class code, 'A' or 'B'
+   * @return A {@link List} of {@link SpzDto}
+   */
+  @Override
+  public List<SpzDto> getSpzListByVegCode(String vegCode, String geneticClass) {
+    String oracleApiUrl =
+        String.format(
+            "%s/api/area-of-use/spz-list/vegetation-code/{vegCode}?geneticClass={geneticClass}",
+            rootUri);
+
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "getSpzListByVegCode", oracleApiUrl);
+
+    try {
+      ResponseEntity<List<SpzDto>> spzResult =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<List<SpzDto>>() {},
+              createParamsMap("vegCode", vegCode, "geneticClass", geneticClass));
+      List<SpzDto> list = spzResult.getBody();
+      int size = list == null ? 0 : list.size();
+      SparLog.info("GET spz list by vegCode from Oracle - Success response with size: {}!", size);
+      return list == null ? List.of() : list;
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET spz list by vegCode from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    }
+  }
+
   @Override
   public Optional<OrchardDto> findOrchardById(String orchardId) {
     String oracleApiUrl = String.format("%s/api/orchards/{orchardId}", rootUri);
@@ -289,5 +334,208 @@ public class OracleApiProvider implements Provider {
     }
 
     return Optional.empty();
+  }
+
+  @Override
+  public Optional<CodeDescriptionDto> getVegetationCode(String code) {
+    String oracleApiUrl = String.format("%s/api/vegetation-codes/{code}", rootUri);
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "getVegetationCode", oracleApiUrl);
+    try {
+      ResponseEntity<CodeDescriptionDto> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              CodeDescriptionDto.class,
+              createParamsMap("code", code));
+      SparLog.info("GET vegetation code from Oracle - Success response!");
+      return Optional.ofNullable(response.getBody());
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET vegetation code from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+    }
+    return Optional.empty();
+  }
+
+  @Override
+  public List<OrgUnitDistrictDto> getAllDistrictOrgUnits() {
+    String oracleApiUrl = String.format("%s/api/org-unit-districts", rootUri);
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "getAllDistrictOrgUnits", oracleApiUrl);
+    try {
+      ResponseEntity<List<OrgUnitDistrictDto>> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<>() {
+              });
+      List<OrgUnitDistrictDto> list = response.getBody();
+      int size = list == null ? 0 : list.size();
+      SparLog.info("GET district org units from Oracle - Success response with size: {}!", size);
+      return list == null ? List.of() : list;
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET district org units from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    }
+  }
+
+  @Override
+  public List<CodeDescriptionDto> getAllValidFundingSources() {
+    String oracleApiUrl = String.format("%s/api/funding-sources", rootUri);
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "getAllValidFundingSources", oracleApiUrl);
+    try {
+      ResponseEntity<List<CodeDescriptionDto>> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<>() {
+              });
+      List<CodeDescriptionDto> list = response.getBody();
+      int size = list == null ? 0 : list.size();
+      SparLog.info("GET funding sources from Oracle - Success response with size: {}!", size);
+      return list == null ? List.of() : list;
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET funding sources from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    }
+  }
+
+  /**
+   * Finds whether a seed plan zone is coast (C) or interior (I), as the legacy {@code
+   * SPR_GET_SPZ_TYPE} function decides it.
+   *
+   * @param spzCode the seed plan zone code
+   * @return the coast/interior code, or empty if oracle-api returned no body
+   */
+  @Override
+  public Optional<String> getSpzCoastInteriorCode(String spzCode) {
+    String oracleApiUrl =
+        String.format("%s/api/seed-plan-zones/{code}/coast-interior", rootUri);
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "getSpzCoastInteriorCode", oracleApiUrl);
+    try {
+      ResponseEntity<SpzCoastInteriorDto> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              SpzCoastInteriorDto.class,
+              createParamsMap("code", spzCode));
+      SpzCoastInteriorDto body = response.getBody();
+      SparLog.info("GET SPZ coast/interior from Oracle - Success response!");
+      return Optional.ofNullable(body).map(SpzCoastInteriorDto::coastInteriorCode);
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET SPZ coast/interior from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    } catch (RestClientException restExc) {
+      // 5xx responses and connection failures
+      SparLog.error(
+          "GET SPZ coast/interior from Oracle - Request failed: {}", restExc.getMessage());
+      throw new OracleApiProviderException();
+    }
+  }
+
+  /**
+   * Gets a superior provenance by id, expired or not.
+   *
+   * @return the provenance, or empty when oracle-api has no provenance with that id
+   */
+  @Override
+  public Optional<SuperiorProvenanceDto> getSuperiorProvenance(Integer provenanceId) {
+    String oracleApiUrl = String.format("%s/api/superior-provenances/{provenanceId}", rootUri);
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "getSuperiorProvenance", oracleApiUrl);
+    try {
+      ResponseEntity<SuperiorProvenanceDto> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              SuperiorProvenanceDto.class,
+              createParamsMap("provenanceId", String.valueOf(provenanceId)));
+      SparLog.info("GET superior provenance from Oracle - Success response!");
+      return Optional.ofNullable(response.getBody());
+    } catch (HttpClientErrorException.NotFound notFound) {
+      SparLog.warn("GET superior provenance from Oracle - Provenance {} not found", provenanceId);
+      return Optional.empty();
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET superior provenance from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    } catch (RestClientException restExc) {
+      // 5xx responses and connection failures
+      SparLog.error(
+          "GET superior provenance from Oracle - Request failed: {}", restExc.getMessage());
+      throw new OracleApiProviderException();
+    }
+  }
+
+  /**
+   * Searches transfer limits, also returning rows whose species, superior provenance flag or seed
+   * plan zone is null ("applies to all"). Rows with values come before rows with nulls.
+   *
+   * @return matching transfer limits, possibly empty
+   */
+  @Override
+  public List<TransferLimitDto> searchTransferLimits(
+      String vegCode,
+      String geneticClass,
+      Boolean superiorProvenance,
+      String coastInteriorCode,
+      String spzCode,
+      Integer latitudeDeg) {
+    String oracleApiUrl =
+        String.format(
+            "%s/api/transfer-limits?vegetationCode={vegCode}&geneticClassCode={geneticClass}"
+                + "&superiorProvenance={superiorProvenance}"
+                + "&coastInteriorCode={coastInteriorCode}&seedPlanZoneCode={spzCode}"
+                + "&latitudeDeg={latitudeDeg}&includeNullMatches=true",
+            rootUri);
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "searchTransferLimits", oracleApiUrl);
+    try {
+      ResponseEntity<List<TransferLimitDto>> response =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<List<TransferLimitDto>>() {},
+              createParamsMap(
+                  "vegCode", vegCode,
+                  "geneticClass", geneticClass,
+                  "superiorProvenance", String.valueOf(superiorProvenance),
+                  "coastInteriorCode", coastInteriorCode,
+                  "spzCode", spzCode,
+                  "latitudeDeg", String.valueOf(latitudeDeg)));
+      List<TransferLimitDto> list = response.getBody();
+      int size = list == null ? 0 : list.size();
+      SparLog.info("GET transfer limits from Oracle - Success response with size: {}!", size);
+      return list == null ? List.of() : list;
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET transfer limits from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    } catch (RestClientException restExc) {
+      // 5xx responses and connection failures
+      SparLog.error("GET transfer limits from Oracle - Request failed: {}", restExc.getMessage());
+      throw new OracleApiProviderException();
+    }
   }
 }
