@@ -24,7 +24,10 @@ import ComboButton from '../../../components/ComboButton';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import useWindowSize from '../../../hooks/UseWindowSize';
 
-import { downloadBClassRegistrationReport, getSeedlotById } from '../../../api-service/seedlotAPI';
+import {
+  downloadBClassRegistrationReport,
+  getSeedlotById
+} from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import { isSeedlotBEnabled } from '../../../config/features';
@@ -104,14 +107,14 @@ const SeedlotDetails = () => {
   const downloadReportMutation = useMutation({
     mutationFn: () => downloadBClassRegistrationReport(seedlotNumber ?? ''),
     onMutate: () => ({ reportWindow: openBlankTab() }),
-    onSuccess: (pdfBlob, _vars, context) => {
+    onSuccess: (pdfBlob: Blob, _vars: void, context?: { reportWindow: Window | null }) => {
       openBlobInNewTab(
         pdfBlob,
         context?.reportWindow,
         `SPRR001-${seedlotNumber ?? 'seedlot'}.pdf`
       );
     },
-    onError: (err: AxiosError, _vars, context) => {
+    onError: (err: AxiosError, _vars: void, context?: { reportWindow: Window | null }) => {
       context?.reportWindow?.close();
       toast.error(
         <ErrorToast

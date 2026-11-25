@@ -1,5 +1,10 @@
 @use '@carbon/type';
 @use './mapTheme' as theme;
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+// One size for every square map button — zoom +/−, both toolbar boxes,
+// and the top-right bar — so the controls line up as a single system.
+$map-btn: 36px;
 
 // Map-first workspace layout mirroring bcgov/nr-silva's OpeningsMap.
 // `.seedlot-map-page` owns the viewport: a thin header bar on top, a
@@ -72,17 +77,28 @@
       // Leaflet-control-styled chrome, so the wrapper stays transparent.
       // The wrapper also constrains notifications and coordinate panels
       // below the strip to a readable max-width.
+      // Sits below the top-left zoom control (2 buttons + 2px border)
+      // with an 8px gap.
       &--top-left-tools {
-        top: 1rem;
+        top: calc(1rem + 2 * #{$map-btn} + 10px);
         left: 1rem;
         padding: 0;
         background: transparent;
         border: none;
         box-shadow: none;
-        max-width: min(340px, calc(100% - 2rem));
+        max-width: calc(100% - 2rem);
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        // The wrapper (and the empty space beside the toolbar) must not
+        // swallow map clicks and drags; `.aoi-toolbar` turns pointer
+        // events back on for the real controls.
+        pointer-events: none;
+        // Runs down to just above the bottom-left scale bar, giving the
+        // toolbar a fixed height to fit into: when a short screen can't
+        // fit the polygon box in one column, AoiToolbar wraps it into more
+        // columns instead of letting buttons fall off the bottom.
+        bottom: calc(1rem + 3rem);
       }
 
       // The top-right slot holds the stacking CollapsibleCard container.
@@ -93,7 +109,9 @@
       // rather than main content.
       &--top-right-stack {
         top: auto;
-        bottom: 5.5rem; // clears the bottom-right zoom control + margin
+        // Sits just above the bottom-right cursor-position box (4 rows,
+        // its top is ~6.25rem up); raise this if that box gains rows.
+        bottom: 7rem;
         right: 1rem;
         background: transparent;
         border: none;
@@ -102,36 +120,19 @@
         flex-direction: column-reverse;
         gap: 0.5rem;
         max-width: 220px;
-        max-height: calc(100% - 10rem); // leave room for header, zoom
+        max-height: calc(100% - 11.5rem); // leave room for the top bar and cursor box
         overflow-y: auto;
       }
 
-      // Side-panel overlays that anchor to their trigger (Legend → right,
-      // adjacent to the layers icon; Bookmarks → left, adjacent to the
-      // top-left toolbar). Matches the legacy CWM panel layout where
-      // each tool slides out a side panel from the edge of the map.
+      // Right-hand side panel (Layers, Legend, or Measure), anchored below the
+      // top-right map bar that opens it.
       &--side-panel-right {
-        // Aligns with the layers popover. Empirically the popover's
-        // top edge sits 64px below the map workspace top (layers
-        // toggle clickable area is 44px tall, not the full 48px of
-        // the bordered container), so 4rem matches exactly.
-        top: 4rem;
-        right: 0.5rem;
-        width: 280px;
-        max-height: calc(100% - 7rem);
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-
-      &--side-panel-left {
-        // Aligns to the right of the top-left tool stack (left: 1rem,
-        // width ~42px for a single .leaflet-bar column + gap).
-        top: 1rem;
-        left: 4rem;
-        width: 280px;
-        max-height: calc(100% - 4rem);
+        // Opens just below the top-right map bar.
+        top: 3.5rem;
+        right: 1rem;
+        width: 320px;
+        max-height: calc(100% - 5rem);
+        z-index: 1100;
         padding: 0;
         display: flex;
         flex-direction: column;
@@ -238,83 +239,10 @@
       // the popover already provides its own outer border, and the
       // per-layer-group borders + the accordion's own left/right rails
       // read as unnecessary boxes-within-a-box clutter. Project is on
-      // Carbon v10 which uses the `bx--` prefix (not `cds--`).
+      // the BC Gov `bx--` Carbon class prefix (set in App.tsx), not `cds--`.
       .legend-panel .bx--accordion,
       .legend-panel .bx--accordion__item {
         border: none;
-      }
-    }
-
-    // Icon button styled to match the LayersControl icon exactly so it
-    // reads as a sibling. The layers-tree control measures 48x48 outer
-    // (44x44 click area + 2px border) at top: 10px; right: 10px (the
-    // Leaflet topright corner uses 10px inner padding). To sit
-    // immediately to the LEFT of it with an 8px gap, this button uses
-    // the same 48x48 outer size and `right: calc(10px + 48px + 8px) =
-    // 66px ≈ 4.125rem`.
-    .map-icon-button {
-      position: absolute;
-      z-index: 1100;
-      width: 48px;
-      height: 48px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: theme.$surface;
-      border: 2px solid theme.$border-strong;
-      border-radius: 4px;
-      cursor: pointer;
-      padding: 0;
-      color: theme.$text;
-      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-
-      &:hover {
-        background: theme.$surface-hover;
-      }
-
-      &.is-active {
-        background: theme.$highlight;
-        color: theme.$link;
-        border-color: theme.$border-interactive;
-      }
-
-      &--legend {
-        top: 0.625rem; // 10px — matches Leaflet topright inner padding
-        right: 4.125rem; // 66px — layers icon (48px) + 10px Leaflet padding + 8px gap
-      }
-    }
-
-    // Layers control — click-to-toggle (wired in TreeLayersControl/index.tsx).
-    // When expanded, the container stays icon-sized at the top-right and
-    // the layer list floats BELOW the icon as a positioned popover. This
-    // (a) keeps the toggle visible so a second click can close it, and
-    // (b) avoids covering the icon with the panel.
-    .leaflet-control-layers.leaflet-control-layers-expanded {
-      width: 48px;
-      height: 48px;
-      position: relative;
-      // Cancel Leaflet's default "padding around panel" behavior on the
-      // container itself — the popover handles its own padding.
-      padding: 0;
-
-      // Restore the toggle's default appearance (Leaflet hides it when
-      // expanded; we need it clickable for the close half of the toggle).
-      .leaflet-control-layers-toggle {
-        display: block;
-      }
-
-      .leaflet-control-layers-list {
-        position: absolute;
-        top: calc(100% + 8px); // 8px gap below the icon
-        right: 0;
-        width: 320px;
-        max-height: 70vh;
-        background: theme.$surface;
-        border: 2px solid theme.$border-strong;
-        border-radius: 4px;
-        padding: 0.5rem 0.75rem;
-        overflow-y: auto;
-        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
       }
     }
 
@@ -433,303 +361,6 @@
     color: inherit;
     text-align: left;
     cursor: pointer;
-  }
-}
-
-// AOI toolbar — silva-style Leaflet control strip. The `.aoi-toolbar__strip`
-// main rail stays short; related tools open in compact slide-out strips
-// to the right. This keeps the toolbar away from the bottom-left zoom
-// control while still matching nr-silva's Leaflet-control chrome.
-//
-// Notifications stay inline below the strip but in a wider container so
-// the message text doesn't get squeezed into a 36px column.
-.aoi-toolbar {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  max-width: 100%;
-
-  &__chrome {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    max-width: 100%;
-    overflow: visible;
-  }
-
-  &__flyout {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-width: 0;
-    animation: aoi-toolbar-slide-out 120ms ease-out;
-
-    @media (prefers-reduced-motion: reduce) {
-      animation: none;
-    }
-  }
-
-  &__strip {
-    display: inline-flex;
-    flex-direction: column;
-    width: fit-content;
-    background: theme.$surface;
-    border: 2px solid theme.token('button-primary');
-    border-radius: 0.25rem;
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.18);
-    // Note: NO `overflow: hidden` here — Carbon's IconButton renders its
-    // tooltip as a Popover positioned outside the button bounds, and
-    // clipping the strip would hide tooltips. We round the first/last
-    // button corners individually instead.
-
-    // The IconButton wrapper Carbon emits is a `<span class="cds--popover-container">`
-    // around the actual `<button>`. We need to size both for the icons to
-    // line up cleanly inside the strip.
-    .cds--popover-container {
-      display: block;
-    }
-
-    // Each Carbon IconButton renders as a `<button class="cds--icon-button">`
-    // wrapping an SVG. We override the default Carbon ghost-button styling
-    // to match the silva Leaflet-control look: square 36x36, primary blue
-    // icon on white, invert on hover.
-    .cds--icon-button {
-      width: 36px;
-      height: 36px;
-      min-width: 36px;
-      min-height: 36px;
-      padding: 0;
-      border: none;
-      border-radius: 0;
-      background: theme.$surface;
-      color: theme.token('button-primary');
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      svg {
-        fill: theme.token('button-primary');
-        width: 18px;
-        height: 18px;
-      }
-
-      &:hover:not(:disabled) {
-        background: theme.token('button-primary');
-
-        svg {
-          fill: theme.$text-on-color;
-        }
-      }
-
-      &:disabled,
-      &[aria-disabled='true'] {
-        opacity: 0.4;
-        cursor: not-allowed;
-      }
-
-      // Carbon focus ring keeps accessibility intact
-      &:focus-visible {
-        outline: 2px solid theme.token('button-primary');
-        outline-offset: -2px;
-      }
-    }
-
-    // Separator between buttons in the vertical stack — drawn on every
-    // popover-container after the first.
-    .cds--popover-container + .cds--popover-container .cds--icon-button {
-      border-top: 1px solid theme.$border;
-    }
-
-    // Round the corners of the first and last button so the strip reads
-    // as a single rounded chip even without overflow:hidden on the parent.
-    .cds--popover-container:first-child .cds--icon-button {
-      border-top-left-radius: calc(0.25rem - 2px);
-      border-top-right-radius: calc(0.25rem - 2px);
-    }
-    .cds--popover-container:last-child .cds--icon-button {
-      border-bottom-left-radius: calc(0.25rem - 2px);
-      border-bottom-right-radius: calc(0.25rem - 2px);
-    }
-
-    &--flyout {
-      flex-direction: row;
-      flex-wrap: wrap;
-      max-width: min(280px, calc(100vw - 5.5rem));
-
-      .cds--popover-container + .cds--popover-container .cds--icon-button {
-        border-top: none;
-        border-left: 1px solid theme.$border;
-      }
-
-      .cds--popover-container:first-child .cds--icon-button {
-        border-top-left-radius: calc(0.25rem - 2px);
-        border-bottom-left-radius: calc(0.25rem - 2px);
-        border-top-right-radius: 0;
-      }
-
-      .cds--popover-container:last-child .cds--icon-button {
-        border-top-right-radius: calc(0.25rem - 2px);
-        border-bottom-right-radius: calc(0.25rem - 2px);
-        border-bottom-left-radius: 0;
-      }
-    }
-  }
-
-  // Notification container — wider than the icon strip so messages are
-  // readable. Sits below the strip in the same overlay slot.
-  .cds--inline-notification {
-    max-width: 280px;
-    background: theme.$surface;
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.18);
-  }
-}
-
-@keyframes aoi-toolbar-slide-out {
-  from {
-    opacity: 0;
-    transform: translateX(-0.35rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-// Theme-agnostic top-left MapToolbar — Identify / Measure / Search /
-// Bookmarks / Print buttons styled to match Leaflet's default
-// `.leaflet-bar` controls so the new chrome reads as part of the map's
-// own toolset. White background, dark border, square 30px buttons.
-.map-toolbar-shell {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-}
-
-.map-toolbar {
-  display: inline-flex;
-  flex-direction: column;
-  width: fit-content;
-  background: theme.$surface;
-  border: 2px solid theme.$border-strong;
-  border-radius: 4px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
-  // Override the default Leaflet-bar `<a>` background ruleset that ships
-  // with leaflet.css — those rules target anchor tags and don't conflict
-  // with our `<button>` children, but we re-state our values here for
-  // determinism.
-
-  &__btn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: none;
-    border-bottom: 1px solid theme.$border;
-    background: transparent;
-    color: theme.$text;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    svg {
-      // Carbon icons inherit the parent color via `currentColor` — set
-      // it on the button so hover / active states recolor in lockstep.
-      fill: currentColor;
-    }
-
-    &:hover:not(:disabled) {
-      background: theme.$surface-hover;
-    }
-
-    &:focus-visible {
-      outline: 2px solid theme.$focus;
-      outline-offset: -2px;
-    }
-
-    &:disabled,
-    &[aria-disabled='true'] {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    &--active {
-      background: theme.$surface-selected;
-
-      &:hover:not(:disabled) {
-        background: theme.$surface-hover;
-      }
-    }
-  }
-}
-
-.coordinate-pin-panel {
-  width: 248px;
-  padding: 0.75rem;
-  background: theme.$surface;
-  border: 1px solid theme.$border;
-  border-radius: 4px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28);
-  color: theme.$text;
-
-  &__field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-
-    input {
-      width: 100%;
-      height: 2rem;
-      padding: 0 0.5rem;
-      border: 1px solid theme.$border-strong;
-      border-radius: 2px;
-      background: theme.token('field-01');
-      color: theme.$text;
-      font-size: 0.875rem;
-      font-weight: 400;
-    }
-  }
-
-  &__error {
-    margin-bottom: 0.5rem;
-    color: theme.$text-error;
-    font-size: 0.75rem;
-    line-height: 1.25;
-  }
-
-  &__actions {
-    display: flex;
-    gap: 0.5rem;
-
-    button {
-      min-height: 2rem;
-      padding: 0 0.75rem;
-      border: 1px solid theme.$border-strong;
-      border-radius: 2px;
-      background: theme.$surface;
-      color: theme.$text;
-      cursor: pointer;
-      font-size: 0.75rem;
-
-      &:first-child {
-        background: theme.$primary;
-        border-color: theme.$primary;
-        color: theme.$text-on-color;
-      }
-
-      &:hover {
-        filter: brightness(0.96);
-      }
-    }
   }
 }
 
@@ -873,22 +504,6 @@
   }
 }
 
-// Active-state highlight for the Identify icon button in the AOI strip.
-// When the user toggles Identify on, the button inverts (primary bg /
-// white icon) so the mode state is obvious at a glance.
-.aoi-toolbar__strip .cds--icon-button.aoi-toolbar__icon-btn--active {
-  background: theme.token('button-primary');
-
-  svg {
-    fill: theme.$text-on-color;
-  }
-
-  &:hover:not(:disabled) {
-    background: theme.token('button-primary');
-    filter: brightness(0.85);
-  }
-}
-
 // Leaflet container cursor when the user is in Identify mode — a `help`
 // cursor signals "click for info" without requiring a custom SVG.
 .leaflet-container.identify-active {
@@ -985,23 +600,33 @@
 // Theme Leaflet controls with BC Gov tokens — borrowed from nr-silva's
 // OpeningsMap/styles.scss so the zoom + layers controls read as part of
 // the BC Gov design system rather than Leaflet's default gray chrome.
-.leaflet-container .leaflet-control-zoom.leaflet-control,
-.leaflet-container .leaflet-control-layers.leaflet-control {
-  border: 2px solid theme.token('button-primary');
+// Zoom +/− sits at the top-left, styled like the map toolbar strip below
+// it (same width, border and shadow) so the two read as one column.
+.leaflet-container .leaflet-control-zoom.leaflet-control {
+  margin: 0;
+  border: 1px solid theme.$border-strong;
   border-radius: 0.25rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
 .leaflet-container .leaflet-bar a.leaflet-control-zoom-in,
 .leaflet-container .leaflet-bar a.leaflet-control-zoom-out {
-  color: theme.token('button-primary');
-  transform: rotate(-90deg);
+  box-sizing: border-box;
+  width: $map-btn;
+  height: $map-btn;
+  line-height: $map-btn;
+  font-size: 1.25rem;
+  color: theme.$text;
+}
+
+.leaflet-top.leaflet-left {
+  top: 1rem;
+  left: 1rem;
 }
 
 // Leaflet's own chrome (zoom buttons, layers list, popups, attribution)
 // ships with hard-coded white backgrounds — route it through the theme.
 .leaflet-bar a,
-.leaflet-control-layers,
-.leaflet-control-layers-expanded .leaflet-control-layers-list,
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
   background-color: theme.$surface;
@@ -1010,10 +635,6 @@
 
 .leaflet-bar a {
   border-bottom-color: theme.$border;
-}
-
-.leaflet-control-layers-separator {
-  border-top-color: theme.$border;
 }
 
 .leaflet-container .leaflet-control-attribution {
@@ -1029,11 +650,6 @@
   color: theme.$text-secondary;
 }
 
-// Leaflet's layers toggle is a dark PNG; invert it on the dark theme.
-[data-carbon-theme='g100'] .leaflet-control-layers-toggle {
-  filter: invert(1);
-}
-
 .leaflet-container .leaflet-bar a.leaflet-control-zoom-in:hover,
 .leaflet-container .leaflet-bar a.leaflet-control-zoom-out:hover,
 .leaflet-container .leaflet-bar a:hover {
@@ -1041,32 +657,459 @@
   background-color: theme.token('button-primary');
 }
 
-// Align the bottom-left zoom control with the AOI tools strip at the
-// top-left (`left: 1rem`) — by default Leaflet offsets controls by
-// `10px`, which lands ~6px to the left of the AOI strip and looks
-// misaligned. Bumping the `.leaflet-bottom.leaflet-left` stack to
-// `1rem` keeps the two columns visually on the same vertical rail.
-// Also add a small bottom offset so the control doesn't butt right
-// up against the bottom edge of the map.
+// Line the bottom-left scale bar up with the toolbar column (`left: 1rem`)
+// rather than Leaflet's default 10px offset.
 .leaflet-bottom.leaflet-left {
   left: 1rem;
   bottom: 1rem;
 }
 
-// The top-right layers control opens a tall panel that would otherwise be
-// covered by the bottom-right info cards — the "Polygon statistics" card
-// (`.map-overlay--top-right-stack`) and the cursor-position readout
-// (`.cursor-position-control`), both z-index 1000 and rendered after the
-// map in the DOM. Lift the whole top-right Leaflet control stack above them
-// so the open layer list stays fully visible and clickable.
-.leaflet-top.leaflet-right {
-  z-index: 1100;
+// ── Map toolbar (left) ────────────────────────────────────────────────
+// One vertical strip of tools, all visible (no flyouts), below the zoom
+// control. A side column to the right holds the shape picker and
+// notifications, so they never push the strip down or get squeezed into
+// a 36px column.
+.aoi-toolbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: 100%;
+  // Fill the wrapper's height so AoiToolbar can measure the space it has.
+  flex: 1 1 auto;
+  min-height: 0;
+  // Layout boxes are click-through so the map stays usable around the
+  // toolbar (the side column keeps its width even when empty). Pointer
+  // events come back on the toolbar boxes, the side column's contents
+  // (shape picker, notifications), and everything else rendered here —
+  // modals, the loading mask.
+  pointer-events: none;
+
+  &__rail > *,
+  &__side > *,
+  > :not(.aoi-toolbar__rail, .aoi-toolbar__side) {
+    pointer-events: auto;
+  }
+
+  &__rail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+    // On very short screens the map tools box moves beside the polygon
+    // box rather than dropping off the bottom of the map.
+    flex-wrap: wrap;
+    align-content: flex-start;
+    max-height: 100%;
+  }
+
+  &__side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    // Wide enough that the welcome message's text column isn't squeezed
+    // beside its inline "Got it" action.
+    width: 360px;
+    max-width: calc(100vw - 6rem);
+
+    .#{vars.$bcgov-prefix}--inline-notification,
+    .#{vars.$bcgov-prefix}--actionable-notification {
+      max-width: 100%;
+      background: theme.$surface;
+      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.18);
+    }
+  }
+
+  &__strip {
+    display: inline-flex;
+    flex-direction: column;
+    width: fit-content;
+
+    // Polygon tools box: a one-column grid that AoiToolbar switches to
+    // column flow with a fixed row count when the screen is too short, so
+    // the buttons wrap into more columns (the box grows to fit them).
+    &--wrap {
+      display: inline-grid;
+      grid-auto-flow: row;
+      grid-auto-columns: max-content;
+    }
+    background: theme.$surface;
+    border: 1px solid theme.$border-strong;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    // No `overflow: hidden` — Carbon renders tooltips as popovers outside
+    // the button; clipping the strip would hide them.
+
+    .#{vars.$bcgov-prefix}--popover-container {
+      display: block;
+    }
+
+    .#{vars.$bcgov-prefix}--btn--icon-only {
+      box-sizing: border-box;
+      width: $map-btn;
+      height: $map-btn;
+      min-width: $map-btn;
+      min-height: $map-btn;
+      // Carbon sizes icon-only buttons with logical properties (48px by
+      // default); set them too so this size always wins.
+      inline-size: $map-btn;
+      block-size: $map-btn;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      background: theme.$surface;
+      color: theme.$text;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        fill: theme.$text;
+        width: 18px;
+        height: 18px;
+      }
+
+      &:hover:not(:disabled) {
+        background: theme.$surface-hover;
+      }
+
+      &:disabled,
+      &[aria-disabled='true'] {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      &:focus-visible {
+        outline: 2px solid theme.$focus;
+        outline-offset: -2px;
+      }
+
+      // Toggled-on tools (Identify, Search, Measure, …) read as pressed.
+      &.aoi-toolbar__icon-btn--active {
+        background: theme.token('button-primary');
+
+        svg {
+          fill: theme.$text-on-color;
+        }
+
+        &:hover:not(:disabled) {
+          background: theme.token('button-primary-hover');
+        }
+      }
+    }
+
+    .#{vars.$bcgov-prefix}--popover-container + .#{vars.$bcgov-prefix}--popover-container .#{vars.$bcgov-prefix}--btn--icon-only {
+      border-top: 1px solid theme.$border;
+    }
+
+    .#{vars.$bcgov-prefix}--popover-container:first-child .#{vars.$bcgov-prefix}--btn--icon-only {
+      border-top-left-radius: calc(0.25rem - 1px);
+      border-top-right-radius: calc(0.25rem - 1px);
+    }
+
+    .#{vars.$bcgov-prefix}--popover-container:last-child .#{vars.$bcgov-prefix}--btn--icon-only {
+      border-bottom-left-radius: calc(0.25rem - 1px);
+      border-bottom-right-radius: calc(0.25rem - 1px);
+    }
+  }
 }
 
-// Match nr-silva's distinctive horizontal zoom bar — rotate the whole
-// control 90deg, then counter-rotate the inner labels so the +/- glyphs
-// stay upright.
-.leaflet-control-zoom {
-  transform: rotate(90deg);
-  transform-origin: center;
+// ── Top-right map bar ─────────────────────────────────────────────────
+.seedlot-map-workspace .map-topbar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+
+  .map-topbar__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .map-topbar__icons {
+    display: flex;
+    background: theme.$surface;
+    border: 1px solid theme.$border-strong;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+
+    .#{vars.$bcgov-prefix}--popover-container {
+      display: block;
+    }
+
+    .#{vars.$bcgov-prefix}--btn--icon-only {
+      box-sizing: border-box;
+      width: $map-btn;
+      height: $map-btn;
+      min-width: $map-btn;
+      min-height: $map-btn;
+      inline-size: $map-btn;
+      block-size: $map-btn;
+      padding: 0;
+      border-radius: 0;
+      color: theme.$text;
+
+      svg {
+        fill: theme.$text;
+      }
+
+      &:hover {
+        background: theme.$surface-hover;
+      }
+
+      &.map-topbar__btn--active {
+        background: theme.token('button-primary');
+
+        svg {
+          fill: theme.$text-on-color;
+        }
+      }
+    }
+
+    .#{vars.$bcgov-prefix}--popover-container + .#{vars.$bcgov-prefix}--popover-container .#{vars.$bcgov-prefix}--btn--icon-only {
+      border-left: 1px solid theme.$border;
+    }
+  }
+
+  .map-topbar__layers {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    box-sizing: border-box;
+    // Matches the icon box beside it: button height + 1px border each side.
+    height: calc(#{$map-btn} + 2px);
+    padding: 0 0.75rem;
+    background: theme.$surface;
+    color: theme.$text;
+    border: 1px solid theme.$border-strong;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    svg {
+      fill: currentColor;
+    }
+
+    &:hover {
+      background: theme.$surface-hover;
+    }
+
+    &:focus-visible {
+      outline: 2px solid theme.$focus;
+      outline-offset: 1px;
+    }
+
+    &--active {
+      background: theme.token('button-primary');
+      border-color: theme.token('button-primary');
+      color: theme.$text-on-color;
+
+      &:hover {
+        background: theme.token('button-primary-hover');
+      }
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--inline-notification {
+    max-width: 280px;
+  }
+}
+
+// ── Layers panel ──────────────────────────────────────────────────────
+.seedlot-map-workspace .layers-panel {
+  .layers-panel__controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid theme.$border;
+    flex: 0 0 auto;
+  }
+
+  .layers-panel__base {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .#{vars.$bcgov-prefix}--form-item {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .#{vars.$bcgov-prefix}--select--inline,
+    .#{vars.$bcgov-prefix}--select-input__wrapper,
+    .#{vars.$bcgov-prefix}--select-input {
+      width: 100%;
+    }
+  }
+
+  .layers-panel__filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .#{vars.$bcgov-prefix}--search {
+      flex: 1 1 auto;
+    }
+
+    .#{vars.$bcgov-prefix}--form-item.#{vars.$bcgov-prefix}--checkbox-wrapper {
+      flex: 0 0 auto;
+      margin: 0;
+    }
+  }
+
+  .layers-panel__list {
+    padding: 0.25rem 0.75rem;
+  }
+
+  .layers-panel__list > * + * {
+    border-top: 1px solid theme.$border;
+  }
+
+  .layers-panel__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2rem;
+
+    .#{vars.$bcgov-prefix}--form-item.#{vars.$bcgov-prefix}--checkbox-wrapper {
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
+    }
+
+    .#{vars.$bcgov-prefix}--checkbox-label-text {
+      font-size: 0.8125rem;
+    }
+  }
+
+  // Group header rows read as section titles.
+  .layers-panel__group > .layers-panel__row .#{vars.$bcgov-prefix}--checkbox-label-text {
+    font-weight: 600;
+  }
+
+  .layers-panel__children {
+    padding: 0 0 0.25rem 1.5rem;
+  }
+
+  .layers-panel__chevron {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: theme.$text-secondary;
+    cursor: pointer;
+
+    svg {
+      fill: currentColor;
+    }
+
+    &:hover {
+      color: theme.$text;
+      background: theme.$surface-hover;
+    }
+
+    &:focus-visible {
+      outline: 2px solid theme.$focus;
+    }
+  }
+
+  .layers-panel__opacity {
+    flex: 0 0 4.5rem;
+    width: 4.5rem;
+    margin: 0;
+    cursor: pointer;
+    accent-color: theme.token('button-primary');
+  }
+
+  .layers-panel__empty {
+    margin: 0.5rem 0;
+    font-size: 0.8125rem;
+    color: theme.$text-secondary;
+  }
+
+  .layers-panel__user {
+    flex: 0 0 auto;
+    max-height: 30%;
+    overflow-y: auto;
+    padding: 0.375rem 0.75rem 0.5rem;
+    border-top: 1px solid theme.$border;
+    background: theme.$surface-alt;
+  }
+
+  .layers-panel__user-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: theme.$text;
+  }
+
+  .layers-panel__add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid theme.$border-strong;
+    border-radius: 2px;
+    background: theme.$surface;
+    color: theme.$text;
+    font-size: 0.75rem;
+    cursor: pointer;
+
+    svg {
+      fill: currentColor;
+    }
+
+    &:hover {
+      background: theme.$surface-hover;
+    }
+  }
+}
+
+// ── Small screens (phones, narrow windows) ────────────────────────────
+// Keep every control visible: the centred search box would otherwise sit
+// on top of the zoom / toolbar column and the top-right bar, so it drops
+// below the top-right bar and spans the space right of the toolbar.
+// Side panels shrink to fit the screen.
+@media (max-width: 760px) {
+  .seedlot-map-page .seedlot-map-workspace .map-overlay {
+    &--top-center {
+      top: calc(1rem + #{$map-btn} + 10px);
+      left: calc(1rem + #{$map-btn} + 10px);
+      right: 1rem;
+      transform: none;
+      min-width: 0;
+      max-width: none;
+    }
+
+    &--side-panel-right {
+      width: auto;
+      left: 1rem;
+      max-width: 320px;
+      margin-left: auto;
+    }
+  }
+}
+
+// Very short screens (phones in landscape): let the toolbar use the space
+// normally kept clear for the scale bar — buttons matter more than the
+// scale bar, which it may then cover.
+@media (max-height: 520px) {
+  .seedlot-map-page .seedlot-map-workspace .map-overlay--top-left-tools {
+    bottom: 0.5rem;
+  }
 }

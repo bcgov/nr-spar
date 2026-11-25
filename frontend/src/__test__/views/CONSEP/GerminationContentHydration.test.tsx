@@ -19,6 +19,7 @@ vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
     testCompleteInd: 0,
     acceptResultInd: 0,
     germinatorEntry: '2024-10-31',
+    dayZero: '2024-10-31',
     requestId: 'TST20170140',
     seedlotNumber: '07080',
     vegetationState: 'SX'

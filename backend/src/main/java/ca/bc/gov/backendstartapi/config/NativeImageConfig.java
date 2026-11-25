@@ -155,5 +155,10 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     SeedlotSaveInMemoryDto.class,
     ValueUtil.class,
 })
-@ImportRuntimeHints(value = {HttpServletRequestRuntimeHint.class, ValidationRuntimeHint.class})
+@ImportRuntimeHints(
+    value = {
+      HttpServletRequestRuntimeHint.class,
+      ValidationRuntimeHint.class,
+      HibernatePostgresRuntimeHints.class
+    })
 public class NativeImageConfig {}

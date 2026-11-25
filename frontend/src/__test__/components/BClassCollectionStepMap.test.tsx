@@ -147,6 +147,17 @@ describe('BClassCollectionStep collection area', () => {
     expect(latestCollectionStep?.collectionGeometry.value).not.toBe('');
   });
 
+  it('treats the radius as optional: blank is not flagged and clearing it saves blank', () => {
+    const { container } = renderStep(withCollectionArea());
+    const radius = container.querySelector<HTMLInputElement>('#b-collection-radius')!;
+    expect(radius).toHaveValue(2.3);
+
+    fireEvent.change(radius, { target: { value: '' } });
+    expect(latestCollectionStep?.collectionRadius.value).toBe('');
+    expect(radius).not.toHaveAttribute('data-invalid');
+    expect(radius).toHaveAttribute('aria-invalid', 'false');
+  });
+
   it('clears the collection area when the map sends back a removal', async () => {
     renderStep(withCollectionArea(), { collectionAreaCleared: true });
 

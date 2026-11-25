@@ -4,6 +4,7 @@ import ca.bc.gov.oracleapi.config.SparLog;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalResponseDto;
 import ca.bc.gov.oracleapi.dto.consep.DailyAbnormalUpsertRequestDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestUpdateFormDto;
+import ca.bc.gov.oracleapi.dto.consep.GermCountSlotDto;
 import ca.bc.gov.oracleapi.dto.consep.GermTestResultDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminationTestHeaderDto;
 import ca.bc.gov.oracleapi.dto.consep.GerminatorTrayCreateDto;
@@ -16,6 +17,7 @@ import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.mapper.GermCountMapper;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
@@ -26,14 +28,18 @@ import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -57,6 +63,7 @@ public class TestResultService {
   private final DailyAbnormalRepository dailyAbnormalRepository;
   private final GermCountRepository germCountRepository;
   private final TestRepGermRepository testRepGermRepository;
+  private final GermCountMapper germCountMapper;
 
   /**
    * Update the test status to "completed".
@@ -115,15 +122,19 @@ public class TestResultService {
                         HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY");
                   });
 
-      // Compute soakEndDate in service layer
+      // Compute soakEndDate and the day-number origin in service layer
       LocalDateTime soakEndDate = null;
+      Integer stratHours = null;
       if (dto.actualBeginDtTm() != null) {
         // Get soak hours from test result
         TestRegimeEntity regime = testRegimeRepository.findById(dto.activityTypeCd()).orElse(null);
         int soakHours =
             (regime != null && regime.getSoakHours() != null) ? regime.getSoakHours() : 0;
         soakEndDate = dto.actualBeginDtTm().plusHours(soakHours);
+        stratHours = regime == null ? null : regime.getStratHours();
       }
+      LocalDate dayZero = GerminationMetrics.dayZero(dto.testCategoryCd(),
+          soakEndDate, dto.germinatorEntry(), 0, stratHours);
 
       // Create new DTO with computed soakEndDate
       return new GerminationTestHeaderDto(
@@ -165,13 +176,98 @@ public class TestResultService {
           dto.requestId(),
           dto.seedlotNumber(),
           dto.familyLotNumber(),
-          dto.vegetationState());
+          dto.vegetationState(),
+          dayZero);
 
     } catch (IncorrectResultSizeDataAccessException ex) {
       SparLog.error("Data integrity issue: multiple rows found for RIA_SKEY {}", riaKey, ex);
       throw new DataIntegrityViolationException(
           "Expected exactly one germination test row for RIA_SKEY " + riaKey, ex);
     }
+  }
+
+  /**
+   * The Calc button (#2756): compute Germination %, GV and peak value from the stored daily
+   * counts and replicates, and save them on the test result.
+   *
+   * @param riaKey the test key
+   * @return the refreshed header carrying the new values
+   * @throws ResponseStatusException 404 if the test is missing, 409 if it is accepted (a completed
+   *     test can still be recalculated, #2756), 422 if there are no dated counts, no day zero
+   *     (begin date, or germinator entry for QA), or no count date after day zero
+   */
+  @Transactional
+  public GerminationTestHeaderDto calculateGerminationMetrics(BigDecimal riaKey) {
+    // Lock first: a header PATCH committing between the two reads would leave Calc on a stale
+    // dayZero while returning the new one.
+    TestResultEntity test = testResultRepository.findByIdForUpdate(riaKey)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY"));
+    if (isSet(test.getAcceptResult())) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "This test is accepted and can no longer be recalculated");
+    }
+    GerminationTestHeaderDto header = getGerminationTestHeader(riaKey);
+
+    Integer[] totalSeeds = new Integer[4];
+    boolean[] accepted = new boolean[4];
+    GermCountService.readReplicates(
+        testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaKey), totalSeeds, accepted);
+
+    List<GermCountSlotDto> days = germCountRepository.findById(riaKey)
+        .map(germCountMapper::buildSlots)
+        .orElse(List.of())
+        .stream()
+        .filter(s -> s.countDt() != null)
+        .sorted(Comparator.comparingInt(GermCountSlotDto::slotIndex))
+        .toList();
+    List<Integer[]> counts = days.stream()
+        .map(s -> new Integer[] {
+            s.rep1NoSeedsGerm(), s.rep2NoSeedsGerm(), s.rep3NoSeedsGerm(), s.rep4NoSeedsGerm()})
+        .toList();
+    if (days.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Enter germination counts with a count date before calculating");
+    }
+    // No fallback to stored day numbers: they may have been saved under the old rule, and the
+    // screen and Calc must count from the same day zero.
+    if (header.dayZero() == null) {
+      throw new ResponseStatusException(
+          HttpStatus.UNPROCESSABLE_ENTITY, missingDayZeroMessage(header));
+    }
+    List<Integer> dayNumbers = days.stream()
+        .map(s -> (int) ChronoUnit.DAYS.between(header.dayZero(), s.countDt()))
+        .toList();
+
+    GerminationMetrics.Result result =
+        GerminationMetrics.calculate(dayNumbers, counts, totalSeeds, accepted);
+    if (result == null) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Every count date is on or before test day 0: check the begin date and the soak and"
+              + " stratification hours");
+    }
+
+    test.setGerminationPct(result.germinationPct());
+    test.setGerminationValue(result.germinationValue());
+    test.setPeakValueGrmPct(result.peakValueGrmPct());
+    test.setPeakValueNoDays(result.peakValueNoDays());
+    test.setUpdateTimestamp(LocalDateTime.now());
+    testResultRepository.saveAndFlush(test);
+    SparLog.info("Germination metrics calculated for RIA_SKEY: {}", riaKey);
+    return getGerminationTestHeader(riaKey);
+  }
+
+  /** Says exactly which date the day numbers are waiting for (QA counts from germinator entry). */
+  private static String missingDayZeroMessage(GerminationTestHeaderDto header) {
+    if ("QA".equals(header.testCategoryCd())) {
+      return "Cannot work out test day numbers: QA test day numbers count from the"
+          + " Into germinator date, which is set when the test is put into a germinator tray";
+    }
+    return "Cannot work out test day numbers: enter the test begin date before calculating";
+  }
+
+  private static boolean isSet(Integer indicator) {
+    return indicator != null && indicator != 0;
   }
 
   /**
@@ -1070,10 +1166,8 @@ public class TestResultService {
           riaKey, activityType, category, seedlotNumber);
     }
 
-    GerminationTestHeaderDto refreshed = testResultRepository
-        .findGerminationTestHeaderByRiaKey(riaKey)
-        .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "No germination test found for riaKey " + riaKey));
+    // Through getGerminationTestHeader so the response carries soak end and dayZero (#2756).
+    GerminationTestHeaderDto refreshed = getGerminationTestHeader(riaKey);
 
     // Spec: "the first completed activity processes the commitment" — skip if a sibling activity
     // already has processCommitIndicator set (findConflictingActivities non-empty).
@@ -1191,13 +1285,21 @@ public class TestResultService {
           "Cannot accept a test that has not been marked as complete");
     }
 
+    LocalDate earliestCount = earliestCountDate(storedTest.getRiaKey());
     boolean beginRequired = accept || complete
         || (dto.riaComment() != null && !dto.riaComment().isBlank())
-        || dto.actualEndDateTime() != null;
+        || dto.actualEndDateTime() != null
+        || earliestCount != null;
     if (beginRequired && dto.actualBeginDateTime() == null) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Begin date is mandatory when the test is accepted or complete,"
-              + " or a comment or test end is provided");
+              + " a comment or test end is provided, or germination counts are entered");
+    }
+
+    if (dto.actualBeginDateTime() != null && earliestCount != null
+        && dto.actualBeginDateTime().toLocalDate().isAfter(earliestCount)) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Begin date cannot be after the first germination count date");
     }
 
     if (dto.actualBeginDateTime() != null && effectiveEnd != null
@@ -1224,6 +1326,19 @@ public class TestResultService {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Category cannot be updated once the test is complete");
     }
+  }
+
+  /** Earliest daily germination count date on file for the test, or null if none. */
+  private LocalDate earliestCountDate(BigDecimal riaKey) {
+    return germCountRepository.findById(riaKey)
+        .flatMap(e -> Stream.of(
+                e.getCountDt1(), e.getCountDt2(), e.getCountDt3(), e.getCountDt4(),
+                e.getCountDt5(), e.getCountDt6(), e.getCountDt7(), e.getCountDt8(),
+                e.getCountDt9(), e.getCountDt10(), e.getCountDt11(), e.getCountDt12(),
+                e.getCountDt13())
+            .filter(Objects::nonNull)
+            .min(Comparator.naturalOrder()))
+        .orElse(null);
   }
 
   /**

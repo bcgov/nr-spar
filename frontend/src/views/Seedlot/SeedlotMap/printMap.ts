@@ -54,6 +54,70 @@ export const safeCssColor = (value: string | null, fallback: string): string => 
 );
 
 /**
+ * html2canvas 1.x only understands hex / rgb() / hsl() / named colours.
+ * Browsers report any `color-mix(...)` (used by the map's `translucent()`
+ * theme helper) as `color(srgb r g b / a)` in computed styles, and
+ * html2canvas aborts the whole capture on it ("Attempting to parse an
+ * unsupported color function "color""). This rewrites each `color(...)`
+ * in a computed value as the equivalent `rgba(...)`.
+ *
+ * Channels are 0–1 floats (or percentages). Wide-gamut spaces such as
+ * display-p3 are treated as sRGB, which is close enough for a snapshot.
+ */
+const COLOR_FUNCTION = /color\(\s*[a-z0-9-]+\s+([^)]*)\)/gi;
+
+const channel = (value: string): number => {
+  const n = parseFloat(value);
+  if (Number.isNaN(n)) return 0;
+  return value.trim().endsWith('%') ? n / 100 : n;
+};
+
+export const toHtml2CanvasColor = (value: string): string => value.replace(
+  COLOR_FUNCTION,
+  (_match, args: string) => {
+    const [rgb, alpha] = args.split('/');
+    const [r, g, b] = rgb.trim().split(/\s+/).map((c) => Math.round(Math.min(1, Math.max(0, channel(c))) * 255));
+    const a = alpha === undefined ? 1 : Math.min(1, Math.max(0, channel(alpha)));
+    return `rgba(${r ?? 0}, ${g ?? 0}, ${b ?? 0}, ${a})`;
+  }
+);
+
+/** Computed-style properties html2canvas reads colours from. */
+const COLOR_PROPERTIES = [
+  'color',
+  'background-color',
+  'border-top-color',
+  'border-right-color',
+  'border-bottom-color',
+  'border-left-color',
+  'outline-color',
+  'text-decoration-color',
+  'box-shadow',
+  'text-shadow',
+  'fill',
+  'stroke'
+] as const;
+
+/**
+ * Inline an html2canvas-safe version of every `color(...)` computed colour
+ * in `root`'s subtree. Run on html2canvas's cloned document (`onclone`),
+ * so the live page is never touched.
+ */
+export const inlineSupportedColors = (root: Element): void => {
+  const view = root.ownerDocument.defaultView;
+  if (!view) return;
+  [root, ...root.querySelectorAll('*')].forEach((el) => {
+    const style = view.getComputedStyle(el);
+    COLOR_PROPERTIES.forEach((prop) => {
+      const value = style.getPropertyValue(prop);
+      if (value.includes('color(')) {
+        (el as HTMLElement).style.setProperty(prop, toHtml2CanvasColor(value), 'important');
+      }
+    });
+  });
+};
+
+/**
  * Inline swatch style for one print-legend rule. Mirrors the on-screen
  * `swatchStyle` in `<LegendPanel>`: polygons are a filled, bordered square;
  * points a filled circle; lines a coloured horizontal rule. Emitted as a
@@ -125,8 +189,10 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
   // interpolation of it below is attacker-reachable via a crafted link.
   const safeSeedlot = escapeHtml(seedlotNumber);
 
-  // Temporarily hide toolbar chrome that shouldn't appear in print.
-  const hideSelectors = '.leaflet-control-layers, .leaflet-pm-toolbar';
+  // Temporarily hide on-map controls that shouldn't appear in print.
+  // (Our toolbars sit outside the Leaflet container, so they're never
+  // captured; the zoom buttons are the only control inside it.)
+  const hideSelectors = '.leaflet-control-zoom';
   const hidden: HTMLElement[] = [];
   mapEl.querySelectorAll(hideSelectors).forEach((el) => {
     const htmlEl = el as HTMLElement;
@@ -168,13 +234,17 @@ export const printMap = async (options: PrintMapOptions): Promise<void> => {
       width: mapEl.clientWidth,
       height: mapEl.clientHeight,
       scrollX: 0,
-      scrollY: -window.scrollY
+      scrollY: -window.scrollY,
+      // Rewrite colours html2canvas can't parse in its copy of the map.
+      onclone: (clonedDoc) => {
+        const clonedMap = clonedDoc.querySelector('.leaflet-container');
+        if (clonedMap) inlineSupportedColors(clonedMap);
+      }
     });
     dataUrl = canvas.toDataURL('image/png');
   } finally {
     // Restore the hidden chrome even when the capture throws — otherwise
-    // the layers control and Geoman toolbar stay `display: none` for the
-    // rest of the session.
+    // the zoom control stays `display: none` for the rest of the session.
     hidden.forEach((el) => el.style.removeProperty('display'));
     savedStyles.forEach((saved) => {
       const { el, shadow, bg } = saved;

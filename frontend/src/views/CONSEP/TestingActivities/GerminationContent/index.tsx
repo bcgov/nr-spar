@@ -5,13 +5,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-  FlexGrid, Row, Column, InlineNotification, TextInput, Button, Modal
+  FlexGrid, Row, Column, InlineNotification, TextInput, TextArea, Modal
 } from '@carbon/react';
-import { CheckmarkFilled, Time } from '@carbon/icons-react';
+import { Calculator, CheckmarkFilled, Time } from '@carbon/icons-react';
 
 import ROUTES from '../../../../routes/constants';
 import {
-  getGerminationTestHeader, getGermCounts, getTestReplicates, putGermCounts
+  calculateGerminationMetrics, getGerminationTestHeader, getGermCounts, getTestReplicates,
+  patchGerminationTest, putGermCounts, updateRepAccepted
 } from '../../../../api-service/consep/germinationTestAPI';
 import { getGerminatorTrayContents } from '../../../../api-service/consep/germinatorTrayAPI';
 import {
@@ -26,12 +27,16 @@ import StatusTag from '../../../../components/StatusTag';
 import SaveStatus from '../../../../components/CONSEP/SaveStatus';
 import SummaryGrid, { type SummaryColumn } from '../../../../components/CONSEP/SummaryGrid';
 import TestHistory from '../TestSearch/ToolbarControls/TestHistory';
+import ButtonGroup from '../ButtonGroup';
 
+import ActivityDates from './ActivityDates';
 import DailyGermTable from './DailyGermTable';
 import AbnormalsTable, { ABNORMAL_CATEGORIES } from './AbnormalsTable';
 import {
   getDefaultSeeds, validateCountDates, checkOverLimit, buildUpsertPayload,
-  parseCountInput, ABNORMAL_MAX, REP_ABNORMAL_KEYS
+  parseCountInput, formatPeakValue, withDayNumbers, ABNORMAL_MAX, REP_ABNORMAL_KEYS,
+  ActivityDatesType, activityDatesFromHeader, buildHeaderUpdate, toLocalIsoDate,
+  validateActivityDates
 } from './utils';
 
 import './styles.scss';
@@ -62,6 +67,11 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const navigate = useNavigate();
 
   const [header, setHeader] = useState<GerminationTestHeaderType>();
+  // The newest header, readable before React rerenders: a date save queued behind one in
+  // flight must lock on the timestamps that save just returned.
+  const headerRef = useRef<GerminationTestHeaderType | undefined>(undefined);
+  // eslint-disable-next-line react-hooks/refs
+  headerRef.current = header;
   const [showTestHistory, setShowTestHistory] = useState(false);
   const [slots, setSlots] = useState<GermCountSlotType[]>(emptySlots());
   const [replicates, setReplicates] = useState<GermReplicateType[]>([]);
@@ -86,6 +96,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   // into a column of the germinants table, never cleared on the way out.
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const { isConflict, markConflict, clearConflict } = useActivityConflict();
+  const [activityDates, setActivityDates] = useState<ActivityDatesType>({});
+  const markDatesSavedRef = useRef<(v: ActivityDatesType) => void>(() => {});
+  const flushDatesRef = useRef<() => Promise<boolean>>(() => Promise.resolve(true));
 
   // Latest slots/replicates mirrored into refs so a hydration effect can hand
   // useAutosave a combined { slots, replicates } snapshot as already-saved,
@@ -133,6 +146,11 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       navigate(ROUTES.FOUR_OH_FOUR);
     } else if (headerQuery.data) {
       setHeader(headerQuery.data);
+      // Only a read rehydrates the dates: a PATCH response must not clobber
+      // whatever was typed while it was in flight.
+      const dates = activityDatesFromHeader(headerQuery.data);
+      setActivityDates(dates);
+      markDatesSavedRef.current(dates);
     }
     // headerQuery.data is included so a conflict-reload refetch (I5) that
     // returns a changed header — e.g. testCompleteInd flipping to 1 — actually
@@ -159,13 +177,14 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       return;
     }
 
-    const nextSlots = emptySlots();
+    let nextSlots = emptySlots();
     if (germCountQuery.data) {
       germCountQuery.data.slots.forEach((slot) => {
         nextSlots[slot.slotIndex - 1] = slot;
       });
       setUpdateTimestamp(germCountQuery.data.updateTimestamp);
     }
+    nextSlots = withDayNumbers(nextSlots, headerQuery.data?.dayZero);
     setSlots(nextSlots);
     slotsRef.current = nextSlots;
     if (replicatesQuery.isFetched && headerQuery.data) {
@@ -175,6 +194,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [germCountQuery.isFetched, germCountQuery.data, germCountQuery.isError, germCountQuery.error]);
 
+  const headerLoaded = !!headerQuery.data;
+  const headerCategory = headerQuery.data?.testCategoryCd;
+  const headerDayZero = headerQuery.data?.dayZero;
   // Hydrate replicates: API rows or category defaults (AC4). Same
   // set-state-then-markSaved discipline as the slots effect.
   useEffect(() => {
@@ -188,16 +210,35 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     setReplicates(nextReplicates);
     replicatesRef.current = nextReplicates;
     if (germCountQuery.isFetched) {
-      markSavedRef.current({ slots: slotsRef.current, replicates: nextReplicates });
+      // The header may land after the counts, so their day numbers are fixed here too.
+      const nextSlots = withDayNumbers(slotsRef.current, headerQuery.data.dayZero);
+      setSlots(nextSlots);
+      slotsRef.current = nextSlots;
+      markSavedRef.current({ slots: nextSlots, replicates: nextReplicates });
       setIsHydrated(true);
     }
+    // Only the header fields used here: Calc rewrites the cached header, and rerunning on that
+    // would put back the stale cached replicates over an Accept box just changed (#2756).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [replicatesQuery.isFetched, replicatesQuery.data, headerQuery.data]);
+  }, [replicatesQuery.isFetched, replicatesQuery.data, headerLoaded, headerCategory, headerDayZero]);
+
+  // A begin-date save returns a new dayZero (#2756): renumber the count days so the table
+  // shows them right away; the autosave then stores the corrected day numbers.
+  const liveDayZero = header?.dayZero;
+  useEffect(() => {
+    if (!isHydrated || !liveDayZero) {
+      return;
+    }
+    const nextSlots = withDayNumbers(slotsRef.current, liveDayZero);
+    setSlots(nextSlots);
+    slotsRef.current = nextSlots;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveDayZero]);
 
   const validationErrors = useMemo(() => ({
-    ...validateCountDates(slots),
+    ...validateCountDates(slots, activityDates.beginDate),
     ...checkOverLimit(slots, replicates)
-  }), [slots, replicates]);
+  }), [slots, replicates, activityDates.beginDate]);
 
   // Any non-zero indicator counts: legacy CONSEP and updateGerminationTest both write -1
   // (#2841, same rule as #2784).
@@ -331,8 +372,73 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  const calcMutation = useMutation({
+    mutationFn: () => calculateGerminationMetrics(riaKey ?? ''),
+    onSuccess: (fresh) => {
+      // Not via the query cache: that would rehydrate the dates and drop an unsaved edit.
+      headerRef.current = fresh;
+      setHeader(fresh);
+      setAlert(null);
+    },
+    onError: (error) => {
+      const reason = ((error as AxiosError).response?.data as { message?: string } | undefined)
+        ?.message;
+      setAlert({ isSuccess: false, message: `Could not calculate: ${reason ?? (error as AxiosError).message}` });
+    }
+  });
+
+  // A completed test locks the counts, but the technician can still include or
+  // exclude a replicate and recalculate until the test is accepted (#2756).
+  const canToggleAccept = isCompleted && !isAccepted && !isConflict;
+  const acceptMutation = useMutation({
+    mutationFn: (v: { repNumber: number; checked: boolean }) => (
+      updateRepAccepted(riaKey ?? '', v.repNumber, v.checked ? 1 : 0)
+    ),
+    onSuccess: (_, v) => {
+      const next = replicatesRef.current.map((rep) => (
+        rep.replicateNumber === v.repNumber ? { ...rep, repAcceptedInd: v.checked ? 1 : 0 } : rep
+      ));
+      setReplicates(next);
+      // Already saved by the PATCH: autosave must not see it as a pending edit.
+      markSaved({ slots: slotsRef.current, replicates: next });
+    },
+    onError: (error) => {
+      if ((error as AxiosError).response?.status === 409) {
+        markConflict();
+        return;
+      }
+      setAlert({ isSuccess: false, message: `Could not update the replicate: ${(error as AxiosError).message}` });
+    }
+  });
+
+  // Calc reads the saved counts, so whatever was just typed is saved first.
+  const firstCountDt = slots.find((slot) => slot.countDt)?.countDt;
+  const activityDateErrors = validateActivityDates(
+    activityDates,
+    firstCountDt,
+    toLocalIsoDate(new Date()),
+    header
+  );
+
+  const handleCalculate = async () => {
+    // Dates first: a begin-date edit still pending would leave Calc on the old dayZero.
+    if (
+      // Only errors the user can fix block Calc: a locked legacy test may hold a count date
+      // before its begin date and must still be recalculable.
+      (isEditable && Object.keys(validationErrors).length > 0)
+      // Unchanged dates flush as saved, so a locked test with legacy date gaps can still Calc;
+      // an edited but invalid date cannot save, and blocks Calc.
+      || !(await flushDatesRef.current())
+      || !(await flush())
+    ) {
+      setAlert({ isSuccess: false, message: 'Fix the errors on this test before calculating.' });
+      return;
+    }
+    calcMutation.mutate();
+  };
+
   const handleReloadOnConflict = async () => {
-    // Refetch the header too (I5): germinatorEntry drives day-number calc and
+    // Refetch the header too (I5): dayZero drives day-number calc and
     // testCompleteInd gates isEditable, so a stale header would leave both
     // wrong after a conflict reload.
     const [countResult] = await Promise.all([
@@ -346,22 +452,86 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     }
   };
 
+  const headerMutation = useMutation({
+    mutationFn: (dates: ActivityDatesType) => (
+      patchGerminationTest(riaKey ?? '', buildHeaderUpdate(headerRef.current!, dates))
+    ),
+    onSuccess: (response) => {
+      // Carries the new update timestamps the next PATCH must lock on.
+      headerRef.current = response;
+      setHeader(response);
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      if (axiosError.response?.status === 409) {
+        markConflict();
+        return;
+      }
+      setAlert({
+        isSuccess: false,
+        message: `Failed to save dates: ${axiosError.response?.data?.message ?? axiosError.message}`
+      });
+    }
+  });
+
+  // No pending gate: useAutosave serializes saves itself, and a gate would also block its
+  // unmount flush of an edit made while a PATCH was in flight.
+  const { markSaved: markDatesSaved, flush: flushDates } = useAutosave({
+    data: activityDates,
+    onSave: async (dates) => { await headerMutation.mutateAsync(dates); },
+    enabled:
+      !!header
+      && isEditable
+      && Object.keys(activityDateErrors).length === 0
+  });
+  // Same latest-ref pattern as markSavedRef above, for the header effect.
+  // eslint-disable-next-line react-hooks/refs
+  markDatesSavedRef.current = markDatesSaved;
+  // eslint-disable-next-line react-hooks/refs
+  flushDatesRef.current = flushDates;
+
   const crumbs = [
     { name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES },
     { name: 'Testing activities search', path: ROUTES.TESTING_REQUESTS_REPORT },
     { name: 'Testing list', path: ROUTES.TESTING_ACTIVITIES_LIST }
   ];
 
+  // Same order and emphasis as the moisture screen's ActivitySummary.
   const summaryColumns: SummaryColumn<GerminationTestHeaderType>[] = [
-    { key: 'requestId', label: 'Request ID', renderValue: (data) => data?.requestId ?? '-' },
-    { key: 'activity', label: 'Activity', renderValue: (data) => data?.activityTypeCd ?? '-' },
     {
-      key: 'seedlotNumber',
-      label: 'Seedlot number',
-      renderValue: lotNumber
+      key: 'activity', label: 'Activity', renderValue: (data) => data?.activityTypeCd ?? '', emphasize: true
     },
-    { key: 'species', label: 'Species', renderValue: (data) => data?.vegetationState ?? '-' },
-    { key: 'germTray', label: 'Germ tray', renderValue: (data) => data?.germinatorTrayId ?? '-' }
+    { key: 'lot', label: 'Lot number', renderValue: lotNumber },
+    { key: 'requestId', label: 'Request ID', renderValue: (data) => data?.requestId ?? '' },
+    { key: 'species', label: 'Species', renderValue: (data) => data?.vegetationState ?? '' },
+    { key: 'germTray', label: 'Germ tray', renderValue: (data) => data?.germinatorTrayId ?? '' },
+    {
+      key: 'testResult',
+      label: 'Test result',
+      renderValue: (data) => (data?.germinationPct == null ? '' : String(data.germinationPct)),
+      emphasize: true
+    }
+  ];
+
+  const buttons = [
+    {
+      id: 'germination-calc',
+      text: 'Calc',
+      kind: 'primary',
+      size: 'lg',
+      icon: Calculator,
+      // Recalculating stays open on a completed test; accepting locks it (#2756).
+      disabled: isAccepted || isConflict || calcMutation.isPending || acceptMutation.isPending,
+      action: handleCalculate
+    },
+    {
+      id: 'germination-test-history',
+      text: 'Test history',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Time,
+      action: () => setShowTestHistory(true)
+    }
   ];
 
   return (
@@ -369,6 +539,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       {alert?.message && (
         <InlineNotification
           lowContrast
+          className="consep-germination-content-alert"
           kind={alert.isSuccess ? 'success' : 'error'}
           title={alert.isSuccess ? 'Success' : 'Error'}
           subtitle={alert.message}
@@ -390,7 +561,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       )}
       {/* Title (and everything below) is gated on the header having loaded:
           the header card, table hydration and day-number calculations all
-          depend on header fields (e.g. germinatorEntry), so rendering them
+          depend on header fields (e.g. dayZero), so rendering them
           before header exists would show stale/blank data and let a user
           interact with the table before day numbers can be computed. */}
       {header && (
@@ -412,20 +583,11 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
             )}
           </Modal>
           <Row className="consep-germination-content-title">
-            <PageTitle title={`Germination test result (${lotNumber(header)})`} />
+            <PageTitle title={`Germination test result for lot ${lotNumber(header)}`} />
             <>
               {isCompleted && <StatusTag type="Completed" renderIcon={CheckmarkFilled} />}
               {isAccepted && <StatusTag type="Accepted" renderIcon={CheckmarkFilled} />}
             </>
-            <Button
-              kind="tertiary"
-              size="lg"
-              className="consep-germination-content-test-history-btn"
-              renderIcon={Time}
-              onClick={() => setShowTestHistory(true)}
-            >
-              Test history
-            </Button>
             <SaveStatus status={saveStatus} onRetry={flush} onReload={handleReloadOnConflict} />
           </Row>
           <Row className="consep-germination-content-summary">
@@ -433,25 +595,74 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               item={header}
               isFetching={headerQuery.isFetching}
               columns={summaryColumns}
-              cellClassName="consep-germination-content-summary-cell"
             />
           </Row>
-          <Row className="consep-germination-content-comments">
+          {/* The Figma result panel, between the summary and the tables: a row of
+              small fields over the comments, drawn with the moisture screen's input
+              style. Only GV and PV are in scope (#2756); Category, Rank, Reps out of
+              tolerance and Germinator ID join this row in their own tickets. */}
+          <Row className="consep-germination-content-results">
             <Column>
-              <TextInput
-                id="germ-header-comments"
-                labelText="Comments"
-                value={header.riaComment ?? ''}
-                readOnly
-              />
+              <div className="germ-result-panel">
+                <div className="germ-result-fields">
+                  <div className="germ-result-field">
+                    <TextInput
+                      id="germ-header-gv"
+                      labelText="GV"
+                      value={header.germinationValue ?? ''}
+                      readOnly
+                      size="sm"
+                    />
+                  </div>
+                  <div className="germ-result-field">
+                    <TextInput
+                      id="germ-header-pv"
+                      labelText="PV"
+                      value={formatPeakValue(header.peakValueGrmPct, header.peakValueNoDays)}
+                      readOnly
+                      size="sm"
+                    />
+                  </div>
+                </div>
+                <div className="germ-result-comments">
+                  {/* Read-only until editing comments is ticketed for this screen. */}
+                  <TextArea
+                    id="germ-header-comments"
+                    labelText="Comments"
+                    rows={1}
+                    value={header.riaComment ?? ''}
+                    readOnly
+                  />
+                </div>
+              </div>
             </Column>
           </Row>
+          <ActivityDates
+            header={header}
+            dates={activityDates}
+            errors={activityDateErrors}
+            isEditable={isEditable}
+            onChange={(field, isoDate) => (
+              setActivityDates((prev) => ({ ...prev, [field]: isoDate }))
+            )}
+          />
+          {/* Long soak/strat can put day zero after some counts: Calc adds those days to the
+              germination % but not to the peak value, so say so. */}
+          {slots.some((slot) => slot.countDt && slot.dayNoOfTest != null && slot.dayNoOfTest <= 0) && (
+            <InlineNotification
+              lowContrast
+              hideCloseButton
+              kind="warning"
+              title="Count dates on or before day 0"
+              subtitle="Some count dates fall on or before test day 0 (begin date plus soak and stratification hours). They count towards germination % but not towards the peak value."
+            />
+          )}
           <Row className="consep-germination-content-table">
             <Column>
               <DailyGermTable
                 slots={slots}
                 replicates={replicates}
-                germinatorEntry={header.germinatorEntry}
+                dayZero={header.dayZero}
                 isEditable={isEditable}
                 validationErrors={validationErrors}
                 onSlotsChange={setSlots}
@@ -459,6 +670,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
                 onSlotSelect={setSelectedSlot}
                 isHydrated={isHydrated}
                 firstAbnormalCode={ABNORMAL_CATEGORIES[0].code}
+                onAcceptToggle={canToggleAccept
+                  ? (repNumber, checked) => acceptMutation.mutate({ repNumber, checked })
+                  : undefined}
               />
             </Column>
           </Row>
@@ -473,8 +687,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               />
             </Column>
           </Row>
-          {/* Legacy action buttons (Final/Rank/Curve/Copy results/...) are still
-              out of scope — placeholders intentionally omitted. */}
+          {/* Other legacy action buttons (Final/Rank/Curve/Copy results/...) are
+              still out of scope. */}
+          <ButtonGroup buttons={buttons} />
         </>
       )}
     </FlexGrid>
