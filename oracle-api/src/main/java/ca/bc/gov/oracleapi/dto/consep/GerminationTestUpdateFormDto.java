@@ -47,11 +47,11 @@ public record GerminationTestUpdateFormDto(
     @Schema(
         description =
             "update_timestamp of the test result row as read (optimistic lock);"
-                + " null when the row has never been stamped"
+                + " null when the row has never been stamped (null on a stamped row gives 409)"
     )
     LocalDateTime testResultUpdateTimestamp,
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Schema(description = "update_timestamp of the activity row as read (optimistic lock);"
-        + " null when the row has never been stamped")
+        + " null when the row has never been stamped (null on a stamped row gives 409)")
     LocalDateTime riaUpdateTimestamp
 ) {}

@@ -19,7 +19,7 @@ import java.util.List;
  */
 final class GerminationMetrics {
 
-  /** Scale of the stored cumulative %; the metrics themselves are computed exactly. */
+  /** Working precision of the cumulative % before it is stored at scale 4; the metrics are exact. */
   private static final int SCALE = 12;
 
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
@@ -171,10 +171,5 @@ final class GerminationMetrics {
     }
     long hours = (soakHours == null ? 0L : soakHours) + (stratHours == null ? 0L : stratHours);
     return actualBegin.plusHours(hours).toLocalDate();
-  }
-
-  /** MS Access CInt: round half to even. */
-  static int cint(BigDecimal value) {
-    return value.setScale(0, RoundingMode.HALF_EVEN).intValueExact();
   }
 }

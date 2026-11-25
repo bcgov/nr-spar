@@ -1914,8 +1914,6 @@ class TestResultServiceTest {
 
   @Test
   void calculateGerminationMetrics_refusesAnAcceptedTest() {
-    when(testResultRepository.findGerminationTestHeaderByRiaKey(RIA_KEY))
-        .thenReturn(Optional.of(qaHeader()));
     TestResultEntity test = openTest();
     test.setAcceptResult(-1);
     when(testResultRepository.findByIdForUpdate(RIA_KEY)).thenReturn(Optional.of(test));
@@ -1941,8 +1939,25 @@ class TestResultServiceTest {
   }
 
   @Test
+  void calculateGerminationMetrics_everyCountOnOrBeforeDayZero_saysSo() {
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(RIA_KEY))
+        .thenReturn(Optional.of(qaHeader()));
+    when(testResultRepository.findByIdForUpdate(RIA_KEY)).thenReturn(Optional.of(openTest()));
+    GermCountEntity counts = new GermCountEntity();
+    when(germCountRepository.findById(RIA_KEY)).thenReturn(Optional.of(counts));
+    when(germCountMapper.buildSlots(counts)).thenReturn(List.of(slot(1, 0, 33, 10, 23, 40)));
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.calculateGerminationMetrics(RIA_KEY));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertTrue(ex.getReason().contains("day 0"));
+  }
+
+  @Test
   void calculateGerminationMetrics_qaWithoutGerminatorEntry_saysSo() {
-    // QA test with no germinator entry, so no day zero; legacy rows have no stored day number.
+    // QA test with no germinator entry, so no day zero. The stored day number (7) may come from
+    // the old rule, so Calc must not fall back to it.
     GerminationTestHeaderDto noEntry = new GerminationTestHeaderDto(
         RIA_KEY, "G10", null, null, "QA", null, null, 0, 0, null, -1, null,
         null, null, null, null, null, null, null, 21, "DY", null, null, null,
@@ -1954,7 +1969,7 @@ class TestResultServiceTest {
     GermCountEntity counts = new GermCountEntity();
     when(germCountRepository.findById(RIA_KEY)).thenReturn(Optional.of(counts));
     when(germCountMapper.buildSlots(counts)).thenReturn(List.of(
-        new GermCountSlotDto(1, null, QA_ENTRY, null, 33, 10, 23, 40, null)));
+        new GermCountSlotDto(1, null, QA_ENTRY, 7, 33, 10, 23, 40, null)));
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> testResultService.calculateGerminationMetrics(RIA_KEY));

@@ -317,11 +317,12 @@ public class GerminationTestEndpoint {
             content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(
             responseCode = "409",
-            description = "The test is completed or accepted",
+            description = "The test is accepted (a completed test can still be recalculated)",
             content = @Content(schema = @Schema(hidden = true))),
         @ApiResponse(
             responseCode = "422",
-            description = "No dated germination counts to calculate from",
+            description = "No dated counts, no day zero (begin date, or germinator entry for"
+                + " QA), or no count date after day zero",
             content = @Content(schema = @Schema(hidden = true)))
       })
   @ApiAuthResponse

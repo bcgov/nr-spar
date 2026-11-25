@@ -154,6 +154,23 @@ describe('GerminationContent', () => {
     expect(putMock).not.toHaveBeenCalled();
   });
 
+  it('a locked legacy test with a count before its begin date still calculates, and warns about day 0 (PR #2890 review)', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce({
+      ...headerWith({ testCompleteInd: -1, acceptResultInd: 0 }),
+      actualBeginDtTm: '2024-11-01T08:00:00'
+    });
+    vi.mocked(getGermCounts).mockResolvedValueOnce({
+      updateTimestamp: '2026-01-01T00:00:00',
+      slots: [{ slotIndex: 1, countDt: '2024-10-30', dayNoOfTest: -1, rep1NoSeedsGerm: 5 }]
+    } as never);
+    renderView();
+    await screen.findByText(/Germination test result/i);
+
+    expect(await screen.findByText('Count dates on or before day 0')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Calc' }));
+    await waitFor(() => expect(calcMock).toHaveBeenCalledWith('123'));
+  });
+
   it('shows day numbers from dayZero, not ones stored under an older rule (#2756)', async () => {
     vi.mocked(getGermCounts).mockResolvedValueOnce({
       updateTimestamp: '2026-01-01T00:00:00',

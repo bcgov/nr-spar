@@ -193,7 +193,8 @@ public class TestResultService {
    * @param riaKey the test key
    * @return the refreshed header carrying the new values
    * @throws ResponseStatusException 404 if the test is missing, 409 if it is accepted (a completed
-   *     test can still be recalculated, #2756), 422 if there are no dated counts to calculate from
+   *     test can still be recalculated, #2756), 422 if there are no dated counts, no day zero
+   *     (begin date, or germinator entry for QA), or no count date after day zero
    */
   @Transactional
   public GerminationTestHeaderDto calculateGerminationMetrics(BigDecimal riaKey) {
@@ -202,22 +203,16 @@ public class TestResultService {
     TestResultEntity test = testResultRepository.findByIdForUpdate(riaKey)
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY"));
-    GerminationTestHeaderDto header = getGerminationTestHeader(riaKey);
     if (isSet(test.getAcceptResult())) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "This test is accepted and can no longer be recalculated");
     }
+    GerminationTestHeaderDto header = getGerminationTestHeader(riaKey);
 
     Integer[] totalSeeds = new Integer[4];
     boolean[] accepted = new boolean[4];
-    for (TestRepGermEntity rep : testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaKey)) {
-      int i = rep.getId().getReplicateNumber() - 1;
-      if (i >= 0 && i < 4) {
-        totalSeeds[i] = rep.getTotalNoSeeds();
-        // Legacy stores true as -1, the screen 1; only an explicit 0 rejects (as on save).
-        accepted[i] = rep.getRepAcceptedInd() == null || rep.getRepAcceptedInd() != 0;
-      }
-    }
+    GermCountService.readReplicates(
+        testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaKey), totalSeeds, accepted);
 
     List<GermCountSlotDto> days = germCountRepository.findById(riaKey)
         .map(germCountMapper::buildSlots)
@@ -230,18 +225,26 @@ public class TestResultService {
         .map(s -> new Integer[] {
             s.rep1NoSeedsGerm(), s.rep2NoSeedsGerm(), s.rep3NoSeedsGerm(), s.rep4NoSeedsGerm()})
         .toList();
+    if (days.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Enter germination counts with a count date before calculating");
+    }
+    // No fallback to stored day numbers: they may have been saved under the old rule, and the
+    // screen and Calc must count from the same day zero.
+    if (header.dayZero() == null) {
+      throw new ResponseStatusException(
+          HttpStatus.UNPROCESSABLE_ENTITY, missingDayZeroMessage(header));
+    }
     List<Integer> dayNumbers = days.stream()
-        // Integer.valueOf keeps the ternary boxed: a null stored day number must not unbox (NPE).
-        .map(s -> header.dayZero() == null
-            ? s.dayNoOfTest()
-            : Integer.valueOf((int) ChronoUnit.DAYS.between(header.dayZero(), s.countDt())))
+        .map(s -> (int) ChronoUnit.DAYS.between(header.dayZero(), s.countDt()))
         .toList();
 
     GerminationMetrics.Result result =
         GerminationMetrics.calculate(dayNumbers, counts, totalSeeds, accepted);
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          missingDayZeroMessage(header, days.isEmpty()));
+          "Every count date is on or before test day 0: check the begin date and the soak and"
+              + " stratification hours");
     }
 
     test.setGerminationPct(result.germinationPct());
@@ -255,10 +258,7 @@ public class TestResultService {
   }
 
   /** Says exactly which date the day numbers are waiting for (QA counts from germinator entry). */
-  private static String missingDayZeroMessage(GerminationTestHeaderDto header, boolean noDays) {
-    if (noDays || header.dayZero() != null) {
-      return "Enter germination counts with a count date before calculating";
-    }
+  private static String missingDayZeroMessage(GerminationTestHeaderDto header) {
     if ("QA".equals(header.testCategoryCd())) {
       return "Cannot work out test day numbers: QA test day numbers count from the"
           + " Into germinator date, which is set when the test is put into a germinator tray";

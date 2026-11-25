@@ -39,6 +39,9 @@ class TestRepGermServiceTest {
   @Mock
   private TestResultRepository testResultRepository;
 
+  @Mock
+  private GermCountService germCountService;
+
   @InjectMocks
   private TestRepGermService testRepGermService;
 
@@ -136,12 +139,14 @@ class TestRepGermServiceTest {
     when(testResultRepository.findByIdForUpdate(RIA)).thenReturn(Optional.of(test(-1, 0)));
     TestRepGermEntity rep = buildEntity(RIA, 2, 100);
     when(testRepGermRepository.findById(new ReplicateId(RIA, 2))).thenReturn(Optional.of(rep));
-    when(testRepGermRepository.save(rep)).thenReturn(rep);
+    when(testRepGermRepository.saveAndFlush(rep)).thenReturn(rep);
 
     TestRepGermDto result = testRepGermService.updateRepAccepted(RIA, 2, 0);
 
     assertThat(result.repAcceptedInd()).isZero();
-    verify(testRepGermRepository).save(rep);
+    verify(testRepGermRepository).saveAndFlush(rep);
+    // The stored cumulative % follows the accept flags.
+    verify(germCountService).refreshStoredCumulative(RIA);
   }
 
   @Test
@@ -153,7 +158,7 @@ class TestRepGermServiceTest {
         () -> testRepGermService.updateRepAccepted(RIA, 2, 0));
 
     assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
-    verify(testRepGermRepository, never()).save(any());
+    verify(testRepGermRepository, never()).saveAndFlush(any());
   }
 
   @Test

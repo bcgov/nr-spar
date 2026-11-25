@@ -423,7 +423,9 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const handleCalculate = async () => {
     // Dates first: a begin-date edit still pending would leave Calc on the old dayZero.
     if (
-      Object.keys(validationErrors).length > 0
+      // Only errors the user can fix block Calc: a locked legacy test may hold a count date
+      // before its begin date and must still be recalculable.
+      (isEditable && Object.keys(validationErrors).length > 0)
       // Unchanged dates flush as saved, so a locked test with legacy date gaps can still Calc;
       // an edited but invalid date cannot save, and blocks Calc.
       || !(await flushDatesRef.current())
@@ -506,7 +508,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     {
       key: 'testResult',
       label: 'Test result',
-      renderValue: (data) => (data?.germinationPct == null ? '' : Number(data.germinationPct).toFixed(1)),
+      renderValue: (data) => (data?.germinationPct == null ? '' : String(data.germinationPct)),
       emphasize: true
     }
   ];
@@ -644,6 +646,17 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               setActivityDates((prev) => ({ ...prev, [field]: isoDate }))
             )}
           />
+          {/* Long soak/strat can put day zero after some counts: Calc adds those days to the
+              germination % but not to the peak value, so say so. */}
+          {slots.some((slot) => slot.countDt && slot.dayNoOfTest != null && slot.dayNoOfTest <= 0) && (
+            <InlineNotification
+              lowContrast
+              hideCloseButton
+              kind="warning"
+              title="Count dates on or before day 0"
+              subtitle="Some count dates fall on or before test day 0 (begin date plus soak and stratification hours). They count towards germination % but not towards the peak value."
+            />
+          )}
           <Row className="consep-germination-content-table">
             <Column>
               <DailyGermTable

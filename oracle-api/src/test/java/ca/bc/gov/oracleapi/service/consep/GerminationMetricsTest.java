@@ -8,8 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 class GerminationMetricsTest {
 
@@ -116,12 +114,6 @@ class GerminationMetricsTest {
   @Test
   void noUsableDayNumberGivesNoResult() {
     assertNull(run(List.of(0), List.<Integer[]>of(reps(10, 10, 10, 10))));
-  }
-
-  @ParameterizedTest
-  @CsvSource({"75.5,76", "76.5,76", "77.5,78", "78.5,78", "79.5,80", "90.49,90", "90.51,91"})
-  void cintRoundsHalfToEven(String value, int expected) {
-    assertEquals(expected, GerminationMetrics.cint(new BigDecimal(value)));
   }
 
   @Test

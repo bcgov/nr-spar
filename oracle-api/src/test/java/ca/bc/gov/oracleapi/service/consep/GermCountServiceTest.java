@@ -378,6 +378,40 @@ class GermCountServiceTest {
   }
 
   @Test
+  void refreshStoredCumulative_followsTheAcceptFlags() {
+    // PR #2890 review: unticking a replicate on a completed test (counts locked) must still
+    // bring the stored cumulative % in line with the accept flags.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setCountDt1(LocalDate.of(2026, 4, 1));
+    existing.setRep1NoSeedsGerm1(10);
+    existing.setRep2NoSeedsGerm1(30);
+    existing.setCumulativeGerm1(new BigDecimal("20"));
+    existing.setCountDt2(LocalDate.of(2026, 4, 2));
+    existing.setRep1NoSeedsGerm2(10);
+    existing.setRep2NoSeedsGerm2(10);
+    existing.setCumulativeGerm2(new BigDecimal("30"));
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    List<TestRepGermEntity> stored = new ArrayList<>();
+    for (int n = 1; n <= 2; n++) {
+      TestRepGermEntity rep = new TestRepGermEntity();
+      rep.setId(new ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId(riaSkey, n));
+      rep.setTotalNoSeeds(100);
+      rep.setRepAcceptedInd(n == 2 ? 0 : -1);
+      stored.add(rep);
+    }
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey)).thenReturn(stored);
+
+    germCountService.refreshStoredCumulative(riaSkey);
+
+    verify(germCountRepository).save(existing);
+    assertEquals(0, new BigDecimal("10").compareTo(existing.getCumulativeGerm1()));
+    assertEquals(0, new BigDecimal("20").compareTo(existing.getCumulativeGerm2()));
+    assertEquals(10, existing.getRep2NoSeedsGerm2());
+  }
+
+  @Test
   void upsert_clearsSlotsAbsentFromRequest_andDeletesTheirAbnormals() {
     BigDecimal riaSkey = new BigDecimal("881191");
     LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);

@@ -24,6 +24,8 @@ public class TestRepGermService {
 
   private final TestResultRepository testResultRepository;
 
+  private final GermCountService germCountService;
+
   /**
    * Get all germination test replicates for a riaKey, ordered by replicate number.
    */
@@ -63,8 +65,11 @@ public class TestRepGermService {
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND, "No replicate " + replicateNumber + " for this test"));
     rep.setRepAcceptedInd(repAcceptedInd);
+    TestRepGermEntity saved = testRepGermRepository.saveAndFlush(rep);
+    // The stored cumulative % is per accepted replicate; counts are locked here, so redo it now.
+    germCountService.refreshStoredCumulative(riaKey);
     SparLog.info("Set replicate {} accepted={} for RIA_SKEY: {}",
         replicateNumber, repAcceptedInd, riaKey);
-    return TestRepGermMapper.convertToDto(testRepGermRepository.save(rep));
+    return TestRepGermMapper.convertToDto(saved);
   }
 }
