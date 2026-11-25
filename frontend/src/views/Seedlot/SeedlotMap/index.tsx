@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { List, Close } from '@carbon/icons-react';
+import { Close } from '@carbon/icons-react';
 
 import { SPAR_MAP_THEMES } from '../../../types/SparMapTypes';
 import type { SparMapTheme } from '../../../types/SparMapTypes';
@@ -15,13 +15,14 @@ import { isCqlSafeIdentifier } from '../../../utils/CqlUtils';
 
 import LeafletMap from './LeafletMap';
 import AoiToolbar from './AoiToolbar';
-import MapToolbar from './MapToolbar';
+import MapTopBar from './MapTopBar';
+import LayersPanel from './LayersPanel';
+import { MapLayersProvider } from './MapLayers/MapLayersContext';
 import BecZonePanel from './BecZonePanel';
 import GeomCalcPanel from './GeomCalcPanel';
 import LegendPanel from './LegendPanel';
 import MeasurementToolsPanel from './MeasurementToolsPanel';
 import SearchControl from './SearchControl';
-import BookmarksPanel from './BookmarksPanel';
 import CollapsibleCard from './CollapsibleCard';
 
 import './styles.scss';
@@ -46,6 +47,8 @@ const DEFAULT_THEME: SparMapTheme = 'default';
  * so the Body/Provider split is required — `useSparMap()` can only be
  * called from a descendant of the provider.
  */
+type RightPanel = 'layers' | 'legend' | 'measure' | null;
+
 export const SeedlotMapBody = () => {
   const { seedlotNumber } = useParams<{ seedlotNumber: string }>();
   const [searchParams] = useSearchParams();
@@ -55,7 +58,9 @@ export const SeedlotMapBody = () => {
     setHighlightPoint,
     setSpzIds,
     setSpzCode,
-    setSpeciesCode
+    setSpeciesCode,
+    setIdentifyActive,
+    cancelAoiMode
   } = useSparMap();
 
   // Keep the latest setters in refs so the URL-param useEffect below
@@ -86,26 +91,27 @@ export const SeedlotMapBody = () => {
   const profile = getThemeProfile(theme);
 
   // Read UI flags from the theme profile — single source of truth.
-  const showAoiToolbar = profile.drawingEnabled;
+  const { drawingEnabled } = profile;
   const showBecZonePanel = profile.showBecPanel;
 
-  // ── Lifted UI state for the new top-left MapToolbar ──────────────
-  // The toolbar's Search button toggles the geocoder card; default is
-  // visible (legacy SPAR's geocoder was always shown). The Bookmarks
-  // button toggles the existing CollapsibleCard via its controlled-mode
-  // props so we don't duplicate the bookmarks UI.
-  const [searchVisible, setSearchVisible] = useState(true);
-  const [bookmarksOpen, setBookmarksOpen] = useState(false);
-  // Legacy CWM ships a "Map Legend" tool as a bulleted-list icon in the
-  // top-right control strip, next to the layers icon. The button
-  // toggles a side panel listing the WMS legend graphics for the
-  // active overlays. Replaces the bottom-right floating Legend card.
-  const [legendOpen, setLegendOpen] = useState(false);
-  // Legacy CWM "Measurement Tools" panel — distance / area / point
-  // modes with live readouts. The toolbar's ruler button toggles this
-  // panel; the panel writes `measurementMode` into context which
-  // `<MeasureControl>` watches.
-  const [measureToolsOpen, setMeasureToolsOpen] = useState(false);
+  // ── Right-hand side panel, opened from the top-right bar ─────────
+  // Layers, the legend (legacy CWM "Map Legend"), and the legacy CWM
+  // "Measurement Tools" panel share one slot below the bar, so only one
+  // is open at a time. The measurement panel writes `measurementMode`
+  // into context; `<MeasureControl>` watches it.
+  const [rightPanel, setRightPanel] = useState<RightPanel>(null);
+  const toggleRightPanel = (panel: Exclude<RightPanel, null>) => {
+    setRightPanel((current) => (current === panel ? null : panel));
+  };
+  const closeRightPanel = () => setRightPanel(null);
+  const onToggleMeasure = () => {
+    // One tool at a time: measuring stops Identify and any drawing.
+    if (rightPanel !== 'measure') {
+      setIdentifyActive(false);
+      cancelAoiMode?.();
+    }
+    toggleRightPanel('measure');
+  };
 
   // Parse both URL param families and feed them into the BEC zone context.
   // Lowercase `beczone=IDF,MH_,SBS` wins if both are present (legacy
@@ -195,88 +201,46 @@ export const SeedlotMapBody = () => {
   }, [searchParams]);
 
   return (
-    <div className="seedlot-map-page" data-testid="seedlot-map-page">
-      <div className="seedlot-map-header">
-        <h1 className="seedlot-map-title">
-          Seed Map
-          {' — '}
-          {seedlotNumber}
-        </h1>
-      </div>
+    <MapLayersProvider>
+      <div className="seedlot-map-page" data-testid="seedlot-map-page">
+        <div className="seedlot-map-header">
+          <h1 className="seedlot-map-title">
+            Seed Map
+            {' — '}
+            {seedlotNumber}
+          </h1>
+        </div>
 
-      <div className="seedlot-map-workspace">
-        {/* The Leaflet map fills the workspace — overlay cards float on top. */}
-        <LeafletMap theme={theme} />
+        <div className="seedlot-map-workspace">
+          {/* The Leaflet map fills the workspace — overlay cards float on top. */}
+          <LeafletMap theme={theme} />
 
-        {/*
-          SEARCH (geocoder) — Batch 3. Free-text location search via the
-          BC Gov geocoder. Visibility is now toggleable via the
-          map toolbar's Search button so operators can reclaim screen
-          real estate when they're not searching. Defaults to visible
-          to preserve legacy SPAR's always-shown geocoder behaviour.
-        */}
-        {searchVisible && (
+          {/* SEARCH (geocoder) — free-text location search via the BC Gov
+              geocoder, always shown (legacy SPAR's geocoder was too). */}
           <div className="map-overlay map-overlay--top-center">
             <SearchControl />
           </div>
-        )}
 
-        {/*
-          Top-left tool stack. Drawing-enabled themes get a single unified
-          AOI toolbar so Draw Point / Search / Bookmarks / Print live with
-          the polygon tools instead of duplicating a second control strip.
-        */}
-        <div className="map-overlay map-overlay--top-left-tools">
-          {/*
-            Bookmarks + Measurement Tools both anchor to the LEFT next
-            to the toolbar; opening one closes the other so the two
-            popovers never stack on top of each other.
-          */}
-          {showAoiToolbar ? (
+          {/* Top-left tool strip — one toolbar for every theme, below the
+              zoom control. Drawing themes also get the polygon tools box
+              and the Close button. */}
+          <div className="map-overlay map-overlay--top-left-tools">
             <AoiToolbar
               seedlotNumber={seedlotNumber ?? ''}
-              theme={theme}
-              searchVisible={searchVisible}
-              onToggleSearch={() => setSearchVisible((v) => !v)}
-              bookmarksOpen={bookmarksOpen}
-              onToggleBookmarks={() => {
-                setBookmarksOpen((v) => !v);
-                setMeasureToolsOpen(false);
-              }}
-              measureToolsOpen={measureToolsOpen}
-              onToggleMeasureTools={() => {
-                setMeasureToolsOpen((v) => !v);
-                setBookmarksOpen(false);
-              }}
+              drawingEnabled={drawingEnabled}
+              measureOpen={rightPanel === 'measure'}
+              onToggleMeasure={onToggleMeasure}
             />
-          ) : (
-            <MapToolbar
-              seedlotNumber={seedlotNumber ?? ''}
-              theme={theme}
-              searchVisible={searchVisible}
-              onToggleSearch={() => setSearchVisible((v) => !v)}
-              bookmarksOpen={bookmarksOpen}
-              onToggleBookmarks={() => {
-                setBookmarksOpen((v) => !v);
-                setMeasureToolsOpen(false);
-              }}
-              measureToolsOpen={measureToolsOpen}
-              onToggleMeasureTools={() => {
-                setMeasureToolsOpen((v) => !v);
-                setBookmarksOpen(false);
-              }}
-            />
-          )}
-        </div>
+          </div>
 
-        {/*
+          {/*
           GEOMCALC card — kept as the only bottom-right card for now,
           pending product-owner direction on whether to keep it as a
           floating panel, fold it into the AOI side panel, or remove
           it. Drawing-enabled themes only. Per-polygon area, perimeter,
           vertex count + longest-edge bearing + elevation min/max.
         */}
-        {showAoiToolbar && (
+          {drawingEnabled && (
           <div className="map-overlay map-overlay--top-right-stack">
             <CollapsibleCard title="Polygon statistics" defaultOpen={false}>
               <GeomCalcPanel />
@@ -284,110 +248,67 @@ export const SeedlotMapBody = () => {
           </div>
         )}
 
-        {/*
-          Legend icon — top-right, sits next to the layers icon in the
-          tree LayersControl. Matches the legacy CWM "Map Legend" tool
-          (bulleted-list icon in the top-right horizontal toolbar of
-          cwmSparmap.jsp). The button is `.leaflet-bar`-styled so it
-          visually reads as a sibling of the layers control.
-        */}
-        <button
-          type="button"
-          className={`map-icon-button map-icon-button--legend${legendOpen ? ' is-active' : ''}`}
-          aria-label="Map legend"
-          aria-pressed={legendOpen}
-          title="Map Legend"
-          onClick={() => setLegendOpen((v) => !v)}
-        >
-          <List size={20} aria-hidden="true" />
-        </button>
+          {/*
+            Top-right map bar — Help / Print / Fullscreen / Legend icons and
+            the labelled Layers button. Legend, Layers, and the toolbar's
+            Measure button open side panels in the same right-hand slot.
+          */}
+          <MapTopBar
+            seedlotNumber={seedlotNumber ?? ''}
+            theme={theme}
+            legendOpen={rightPanel === 'legend'}
+            onToggleLegend={() => toggleRightPanel('legend')}
+            layersOpen={rightPanel === 'layers'}
+            onToggleLayers={() => toggleRightPanel('layers')}
+          />
 
-        {/*
-          Legend side panel — slides in from the right when the Legend
-          icon is toggled on. Renders the same `LegendPanel` that used
-          to live in the bottom-right CollapsibleCard, just attached
-          to its trigger so it doesn't float in the corner.
-        */}
-        {legendOpen && (
-          <div
-            className="map-overlay map-overlay--side-panel-right"
-            aria-label="Map legend"
-          >
-            <div className="map-overlay__header">
-              <span>Legend</span>
-              <button
-                type="button"
-                className="map-overlay__close"
-                aria-label="Close legend"
-                onClick={() => setLegendOpen(false)}
-              >
-                <Close size={16} aria-hidden="true" />
-              </button>
-            </div>
-            <div className="map-overlay__body">
-              <LegendPanel />
-            </div>
-          </div>
-        )}
+          {rightPanel === 'layers' && <LayersPanel theme={theme} onClose={closeRightPanel} />}
 
-        {/*
-          Bookmarks side panel — slides in from the LEFT of the map,
-          anchored next to the top-left MapToolbar where the legacy
-          CWM Bookmarks tool lived (last button in the top-left
-          vertical strip). The toolbar's Bookmark button toggles
-          `bookmarksOpen`; the panel reads the same state.
-        */}
-        {bookmarksOpen && (
-          <div
-            className="map-overlay map-overlay--side-panel-left"
-            aria-label="Map bookmarks"
-          >
-            <div className="map-overlay__header">
-              <span>Bookmarks</span>
-              <button
-                type="button"
-                className="map-overlay__close"
-                aria-label="Close bookmarks"
-                onClick={() => setBookmarksOpen(false)}
-              >
-                <Close size={16} aria-hidden="true" />
-              </button>
+          {rightPanel === 'legend' && (
+            <div
+              className="map-overlay map-overlay--side-panel-right"
+              aria-label="Map legend"
+            >
+              <div className="map-overlay__header">
+                <span>Legend</span>
+                <button
+                  type="button"
+                  className="map-overlay__close"
+                  aria-label="Close legend"
+                  onClick={closeRightPanel}
+                >
+                  <Close size={16} aria-hidden="true" />
+                </button>
+              </div>
+              <div className="map-overlay__body">
+                <LegendPanel />
+              </div>
             </div>
-            <div className="map-overlay__body">
-              <BookmarksPanel />
-            </div>
-          </div>
-        )}
+          )}
 
-        {/*
-          Measurement Tools side panel — mirrors the legacy CWM
-          `Measurement` panel: Distance / Area / Point modes + Clear
-          + live readouts. Toolbar's Ruler button toggles the panel;
-          the panel writes the mode to context, MeasureControl reacts.
-        */}
-        {measureToolsOpen && (
-          <div
-            className="map-overlay map-overlay--side-panel-left map-overlay--side-panel-left-2"
-            aria-label="Measurement tools"
-          >
-            <div className="map-overlay__header">
-              <span>Measurement Tools</span>
-              <button
-                type="button"
-                className="map-overlay__close"
-                aria-label="Close measurement tools"
-                onClick={() => setMeasureToolsOpen(false)}
-              >
-                <Close size={16} aria-hidden="true" />
-              </button>
+          {rightPanel === 'measure' && (
+            <div
+              className="map-overlay map-overlay--side-panel-right"
+              aria-label="Measurement tools"
+            >
+              <div className="map-overlay__header">
+                <span>Measurement Tools</span>
+                <button
+                  type="button"
+                  className="map-overlay__close"
+                  aria-label="Close measurement tools"
+                  onClick={closeRightPanel}
+                >
+                  <Close size={16} aria-hidden="true" />
+                </button>
+              </div>
+              <div className="map-overlay__body">
+                <MeasurementToolsPanel />
+              </div>
             </div>
-            <div className="map-overlay__body">
-              <MeasurementToolsPanel />
-            </div>
-          </div>
-        )}
+          )}
 
-        {/*
+          {/*
           AOUCBST / PLANTSITECBST BEC zone side panel — anchored to the
           right side of the map, below the Layers/Legend icons. Restores
           the legacy `aoucbst_panel` (cwmSparmap.jsp:366-376) which was a
@@ -396,9 +317,10 @@ export const SeedlotMapBody = () => {
           via `.bec-zone-panel--side` (absolute) so it floats over the
           workspace without stealing layout space.
         */}
-        {showBecZonePanel && <BecZonePanel />}
+          {showBecZonePanel && <BecZonePanel />}
+        </div>
       </div>
-    </div>
+    </MapLayersProvider>
   );
 };
 

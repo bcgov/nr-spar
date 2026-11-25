@@ -398,8 +398,8 @@ interface SparMapContextValue {
 
   /**
    * When true, `<GraticuleLayer>` renders a lat/lng grid overlay on the
-   * map. Toggle via the AoiToolbar/MapToolbar GRATICULE button. Mirrors
-   * the legacy CWM GRATICULE tool from map-config.json.
+   * map. Mirrors the legacy CWM GRATICULE tool from map-config.json.
+   * No toolbar button sets it at the moment (the Grid button was removed).
    */
   graticuleVisible: boolean;
   /** Toggle the graticule overlay on/off. */

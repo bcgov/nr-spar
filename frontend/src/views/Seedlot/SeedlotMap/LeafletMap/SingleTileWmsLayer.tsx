@@ -60,6 +60,21 @@ export class SingleTileWmsLeafletLayer extends L.Layer {
     this.refresh();
   }
 
+  /** Current opacity (0–1); defaults to fully opaque. */
+  getOpacity(): number {
+    return this.wmsOptions.opacity ?? 1;
+  }
+
+  /**
+   * Change the opacity in place — applied to the live image overlay so the
+   * map doesn't re-request the WMS image, and kept for later refreshes.
+   */
+  setOpacity(opacity: number): this {
+    this.wmsOptions = { ...this.wmsOptions, opacity };
+    this.imageOverlay?.setOpacity(opacity);
+    return this;
+  }
+
   /**
    * Expose the WMS endpoint, layer name(s), and whether the layer is
    * currently within its scale range — for the dynamic legend, which reads
