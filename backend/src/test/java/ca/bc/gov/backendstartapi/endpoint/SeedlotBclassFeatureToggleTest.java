@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.report.SeedlotRegistrationReportService;
+import ca.bc.gov.backendstartapi.report.html.Sprr001HtmlReportService;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotCollectionGeometryService;
@@ -48,7 +48,7 @@ class SeedlotBclassFeatureToggleTest {
   @MockitoBean private SmpCalculationCsvTableParser smpCalculationCsvTableParser;
   @MockitoBean private ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
 
-  @MockitoBean private SeedlotRegistrationReportService seedlotRegistrationReportService;
+  @MockitoBean private Sprr001HtmlReportService sprr001HtmlReportService;
 
   private static final String SEEDLOT = "53001";
 
@@ -127,7 +127,7 @@ class SeedlotBclassFeatureToggleTest {
                 .accept(MediaType.APPLICATION_PDF))
         .andExpect(status().isForbidden());
 
-    verify(seedlotRegistrationReportService, never())
+    verify(sprr001HtmlReportService, never())
         .generateBclassRegistrationReport(anyString(), anyString());
   }
 
