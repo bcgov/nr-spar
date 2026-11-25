@@ -346,15 +346,26 @@ public class GermCountService {
   /**
    * Rewrites the stored cumulative % from the stored counts and the current replicate flags. The
    * stored % depends on which replicates are accepted, and an Accept box can change on a completed
-   * test whose counts are locked (#2841), so nothing else would bring it back in line. Leaves
-   * update_timestamp alone: the counts the client locks on have not changed.
+   * test whose counts are locked (#2841), so nothing else would bring it back in line.
+   *
+   * <p>Takes the same optimistic lock as a count save and advances update_timestamp: a writer
+   * that committed after our read gives 409 instead of being overwritten, and a client still
+   * holding the old timestamp (and so the old accept flags) gets 409 on its next count save.
    */
   @Transactional
   public void refreshStoredCumulative(BigDecimal riaSkey) {
-    GermCountEntity entity = germCountRepository.findById(riaSkey).orElse(null);
-    if (entity == null) {
+    GermCountEntity read = germCountRepository.findById(riaSkey).orElse(null);
+    if (read == null) {
       return;
     }
+    if (germCountRepository.touchIfTimestampMatches(riaSkey, read.getUpdateTimestamp()) == 0) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
+    }
+    // The touch holds the row lock and cleared the context: re-read the locked row.
+    GermCountEntity entity = germCountRepository.findById(riaSkey).orElseThrow(() ->
+        new ResponseStatusException(
+            HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry"));
     Integer[] totalSeeds = new Integer[4];
     boolean[] accepted = new boolean[4];
     readReplicates(

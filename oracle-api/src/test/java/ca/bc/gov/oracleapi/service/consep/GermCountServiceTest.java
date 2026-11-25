@@ -392,7 +392,10 @@ class GermCountServiceTest {
     existing.setRep1NoSeedsGerm2(10);
     existing.setRep2NoSeedsGerm2(10);
     existing.setCumulativeGerm2(new BigDecimal("30"));
+    existing.setUpdateTimestamp(LocalDateTime.of(2026, 4, 5, 14, 30));
     when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, existing.getUpdateTimestamp()))
+        .thenReturn(1);
     List<TestRepGermEntity> stored = new ArrayList<>();
     for (int n = 1; n <= 2; n++) {
       TestRepGermEntity rep = new TestRepGermEntity();
@@ -409,6 +412,24 @@ class GermCountServiceTest {
     assertEquals(0, new BigDecimal("10").compareTo(existing.getCumulativeGerm1()));
     assertEquals(0, new BigDecimal("20").compareTo(existing.getCumulativeGerm2()));
     assertEquals(10, existing.getRep2NoSeedsGerm2());
+  }
+
+  @Test
+  void refreshStoredCumulative_rowChangedSinceRead_isConflict() {
+    // PR #2890 review: a write that committed after our read must not be overwritten.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setUpdateTimestamp(LocalDateTime.of(2026, 4, 5, 14, 30));
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, existing.getUpdateTimestamp()))
+        .thenReturn(0);
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> germCountService.refreshStoredCumulative(riaSkey));
+
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    verify(germCountRepository, never()).save(any());
   }
 
   @Test
