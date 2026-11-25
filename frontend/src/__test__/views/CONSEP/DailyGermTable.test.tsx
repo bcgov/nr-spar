@@ -19,7 +19,7 @@ const renderTable = (over: Partial<React.ComponentProps<typeof DailyGermTable>> 
   const props = {
     slots: emptySlots(),
     replicates: defaultReps(),
-    germinatorEntry: '2024-10-31',
+    dayZero: '2024-10-31',
     isEditable: true,
     validationErrors: {},
     onSlotsChange: vi.fn(),
@@ -69,7 +69,7 @@ describe('DailyGermTable', () => {
   // Arriving at an empty column is the common case — recording a count today —
   // so it fills today's date outright instead of asking for the calendar.
   it('fills today on arrival at an empty column, without opening the calendar', () => {
-    const props = renderTable({ germinatorEntry: undefined });
+    const props = renderTable({ dayZero: undefined });
     fireEvent.click(screen.getByTestId('germ-date-trigger-1'));
     const today = DateTime.now().toFormat('yyyy-MM-dd');
     expect(props.onSlotsChange).toHaveBeenCalledWith(
@@ -110,7 +110,7 @@ describe('DailyGermTable', () => {
     const slots = emptySlots();
     slots[0] = { slotIndex: 1, countDt: '2026-03-09', dayNoOfTest: 3 };
     slots[1] = { slotIndex: 2, countDt: '2026-03-11', dayNoOfTest: 5 };
-    const props = renderTable({ slots, germinatorEntry: undefined });
+    const props = renderTable({ slots, dayZero: undefined });
     fireEvent.change(openDatePicker(1), { target: { value: '2026-03-10' } });
     expect(props.onSlotsChange).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -336,7 +336,7 @@ describe('DailyGermTable', () => {
     const tableProps = (validationErrors: Record<string, string>) => ({
       slots: datedSlots(),
       replicates: defaultReps(),
-      germinatorEntry: '2024-10-31',
+      dayZero: '2024-10-31',
       isEditable: true,
       validationErrors,
       onSlotsChange: vi.fn(),
@@ -413,5 +413,19 @@ describe('DailyGermTable', () => {
       pressEnter(count(2));
       await waitFor(() => expect(count(3)).toHaveFocus());
     });
+  });
+
+  it('shows a legacy -1 replicate as accepted and only 0 as rejected', () => {
+    renderTable({
+      replicates: [
+        { replicateNumber: 1, totalNoSeeds: 100, repAcceptedInd: -1 },
+        { replicateNumber: 2, totalNoSeeds: 100, repAcceptedInd: 0 },
+        { replicateNumber: 3, totalNoSeeds: 100, repAcceptedInd: 1 },
+        { replicateNumber: 4, totalNoSeeds: 100, repAcceptedInd: 1 }
+      ]
+    });
+    expect(screen.getByTestId('germ-acc-1')).toBeChecked();
+    expect(screen.getByTestId('germ-acc-2')).not.toBeChecked();
+    expect(screen.getByTestId('germ-acc-3')).toBeChecked();
   });
 });

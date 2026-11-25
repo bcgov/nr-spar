@@ -64,4 +64,24 @@ class TestResultRepositoryTest {
     assertThat(updatedEntity).isPresent();
     assertThat(updatedEntity.get().getAcceptResult()).isEqualTo(1);
   }
+
+  @Test
+  void updateGerminationTestHeader_locksOnANeverStampedRow() {
+    BigDecimal riaKey = BigDecimal.valueOf(1003);
+    TestResultEntity entity = new TestResultEntity();
+    entity.setRiaKey(riaKey);
+    entityManager.persist(entity);
+    entityManager.flush();
+
+    int first = testResultRepository.updateGerminationTestHeader(
+        riaKey, 0, 0, null, 0, 0, null, null, "STD", null);
+    // The first save stamped the row, so another writer still holding the null loses.
+    int second = testResultRepository.updateGerminationTestHeader(
+        riaKey, 0, 0, null, 0, 0, null, null, "STD", null);
+
+    assertThat(first).isEqualTo(1);
+    assertThat(second).isZero();
+    entityManager.clear();
+    assertThat(testResultRepository.findById(riaKey).get().getUpdateTimestamp()).isNotNull();
+  }
 }

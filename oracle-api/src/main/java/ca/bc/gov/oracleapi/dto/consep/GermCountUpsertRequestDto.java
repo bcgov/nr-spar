@@ -11,7 +11,8 @@ import java.util.List;
 /** Body of PUT /api/germ-counts/{riaSkey}: daily germ counts, abnormals, and replicate totals. */
 @Schema(description = "Insert/update payload for a test's daily germination counts")
 public record GermCountUpsertRequestDto(
-    @Schema(description = "update_timestamp of the germ_count row as read (optimistic lock); required on update")
+    @Schema(description = "update_timestamp of the germ_count row as read (optimistic lock); null only matches a"
+        + " row that has never been stamped, so leaving it out on a stamped row gives 409")
     LocalDateTime updateTimestamp,
 
     @Valid

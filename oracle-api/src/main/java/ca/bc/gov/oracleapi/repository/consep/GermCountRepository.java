@@ -14,6 +14,8 @@ public interface GermCountRepository extends JpaRepository<GermCountEntity, BigD
   /**
    * Optimistic-lock guard for updates: bumps update_timestamp only if it still matches
    * the value the caller read. Returns 0 when the row changed since (caller throws 409).
+   * A legacy row never stamped (null) matches a null read; this touch stamps it, so a second
+   * writer still holding the null gets 0 rows.
    */
   @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Transactional
@@ -21,7 +23,8 @@ public interface GermCountRepository extends JpaRepository<GermCountEntity, BigD
       UPDATE GermCountEntity g
          SET g.updateTimestamp = CURRENT_TIMESTAMP
        WHERE g.riaSkey = :riaSkey
-         AND g.updateTimestamp = :updateTimestamp
+         AND (g.updateTimestamp = :updateTimestamp
+           OR (g.updateTimestamp IS NULL AND :updateTimestamp IS NULL))
       """)
   int touchIfTimestampMatches(
       @Param("riaSkey") BigDecimal riaSkey,
