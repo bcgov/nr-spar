@@ -197,10 +197,12 @@ public class TestResultService {
    */
   @Transactional
   public GerminationTestHeaderDto calculateGerminationMetrics(BigDecimal riaKey) {
-    GerminationTestHeaderDto header = getGerminationTestHeader(riaKey);
+    // Lock first: a header PATCH committing between the two reads would leave Calc on a stale
+    // dayZero while returning the new one.
     TestResultEntity test = testResultRepository.findByIdForUpdate(riaKey)
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND, "No germination test data found for given RIA_SKEY"));
+    GerminationTestHeaderDto header = getGerminationTestHeader(riaKey);
     if (isSet(test.getAcceptResult())) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "This test is accepted and can no longer be recalculated");
@@ -235,8 +237,8 @@ public class TestResultService {
             : Integer.valueOf((int) ChronoUnit.DAYS.between(header.dayZero(), s.countDt())))
         .toList();
 
-    GerminationMetrics.Result result = GerminationMetrics.calculate(
-        dayNumbers, GerminationMetrics.cumulativePercents(counts, totalSeeds, accepted));
+    GerminationMetrics.Result result =
+        GerminationMetrics.calculate(dayNumbers, counts, totalSeeds, accepted);
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           missingDayZeroMessage(header, days.isEmpty()));

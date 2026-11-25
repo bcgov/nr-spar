@@ -22,8 +22,7 @@ class GerminationMetricsTest {
   }
 
   private static GerminationMetrics.Result run(List<Integer> days, List<Integer[]> counts) {
-    return GerminationMetrics.calculate(
-        days, GerminationMetrics.cumulativePercents(counts, SEEDS_100, ALL_ACCEPTED));
+    return GerminationMetrics.calculate(days, counts, SEEDS_100, ALL_ACCEPTED);
   }
 
   /** The worked example in issue #2756 (seedlot 48887, RIA_SKEY 1068771). */
@@ -51,7 +50,7 @@ class GerminationMetricsTest {
     assertEquals(0, cumulative.get(8).compareTo(new BigDecimal("93.75")));
 
     assertEquals(new GerminationMetrics.Result(94, 45, 91, 9),
-        GerminationMetrics.calculate(List.of(2, 5, 7, 9, 12, 14, 16, 19, 21), cumulative));
+        run(List.of(2, 5, 7, 9, 12, 14, 16, 19, 21), counts));
   }
 
   /** Legacy QA test for seedlot 48887 (RIA_SKEY 793686): stored 92 / 36 / 75 at day 9. */
@@ -99,6 +98,19 @@ class GerminationMetricsTest {
     var result = run(List.of(3, 14), List.of(reps(63, 63, 63, 63), reps(12, 12, 12, 12)));
 
     assertEquals(new GerminationMetrics.Result(75, 112, 63, 3), result);
+  }
+
+  @Test
+  void exactHalfGvWithThirdsRoundsToEven() {
+    // Three replicates: day 1 avg 29/3, day 2 cumulative 15; GV = 15 x 29/3 / 2 = 72.5 exactly.
+    // Rounding the thirds to 12 places gave 72.5000000000025 -> 73 (PR #2890 review).
+    Integer[] seeds = {100, 100, 100, null};
+    var result = GerminationMetrics.calculate(List.of(1, 2),
+        List.of(new Integer[] {10, 10, 9, null}, new Integer[] {6, 5, 5, null}),
+        seeds, ALL_ACCEPTED);
+
+    assertEquals(72, result.germinationValue());
+    assertEquals(15, result.germinationPct());
   }
 
   @Test

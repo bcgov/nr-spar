@@ -294,8 +294,20 @@ public class GermCountService {
       if (d.rep4NoSeedsGerm() != null) repUsed[3] = true;
     }
 
+    // Start from the stored replicates and overlay the submitted ones: the request may carry only
+    // some, and saveReplicates leaves the rest as stored, which is what Calc will read.
     Integer[] totalSeeds = new Integer[4];
     boolean[] accepted = new boolean[4];
+    if (entity.getRiaSkey() != null) {
+      for (TestRepGermEntity stored :
+          testRepGermRepository.findByRiaKeyOrderByReplicateNumber(entity.getRiaSkey())) {
+        int i = stored.getId().getReplicateNumber() - 1;
+        if (i >= 0 && i < 4) {
+          totalSeeds[i] = stored.getTotalNoSeeds();
+          accepted[i] = stored.getRepAcceptedInd() == null || stored.getRepAcceptedInd() != 0;
+        }
+      }
+    }
     for (TestRepGermFormDto r : replicates) {
       totalSeeds[r.replicateNumber() - 1] = r.totalNoSeeds();
       // Legacy stores true as -1; the screen sends 1. Only an explicit 0 rejects a replicate.

@@ -331,6 +331,14 @@ export const activityDatesFromHeader = (header: GerminationTestHeaderType): Acti
   endDate: header.actualEndDtTm?.slice(0, 10)
 });
 
+/** Keeps the stored time of day when only the date is changed. */
+const withTime = (isoDate: string | undefined, stored: string | undefined) => {
+  if (!isoDate) {
+    return undefined;
+  }
+  return `${isoDate}T${stored?.slice(11, 19) || '00:00:00'}`;
+};
+
 /**
  * Field errors for the Activities dates, mirroring what the PATCH enforces so
  * the user sees them at the field instead of as a 422 after the fact. Dates
@@ -339,7 +347,9 @@ export const activityDatesFromHeader = (header: GerminationTestHeaderType): Acti
 export const validateActivityDates = (
   dates: ActivityDatesType,
   firstCountDt: string | undefined,
-  today: string
+  today: string,
+  // The stored times buildHeaderUpdate keeps: a same-day test can end after it began.
+  header?: Pick<GerminationTestHeaderType, 'actualBeginDtTm' | 'actualEndDtTm'>
 ): Partial<Record<keyof ActivityDatesType, string>> => {
   const errors: Partial<Record<keyof ActivityDatesType, string>> = {};
   if (dates.seedWithdrawalDate && dates.seedWithdrawalDate > today) {
@@ -355,21 +365,16 @@ export const validateActivityDates = (
     // Spec: also required when accepted/complete/commented; those lock or aren't edited here.
     errors.beginDate = 'Begin date is required when a test end date is entered';
   }
-  if (dates.endDate && dates.beginDate && dates.endDate <= dates.beginDate) {
+  if (
+    dates.endDate && dates.beginDate
+    && withTime(dates.endDate, header?.actualEndDtTm)! <= withTime(dates.beginDate, header?.actualBeginDtTm)!
+  ) {
     errors.endDate = 'Test end must be after the begin date';
   }
   return errors;
 };
 
 const isSet = (ind?: number) => ind !== undefined && ind !== null && ind !== 0;
-
-/** Keeps the stored time of day when only the date is changed. */
-const withTime = (isoDate: string | undefined, stored: string | undefined) => {
-  if (!isoDate) {
-    return undefined;
-  }
-  return `${isoDate}T${stored?.slice(11, 19) || '00:00:00'}`;
-};
 
 /**
  * The PATCH replaces the whole header, so every field this screen does not

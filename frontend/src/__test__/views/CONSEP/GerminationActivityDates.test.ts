@@ -31,6 +31,16 @@ describe('validateActivityDates', () => {
       .toBe('Begin date is required when a test end date is entered');
   });
 
+  it('allows a same-day test whose stored end time is after its begin time', () => {
+    const dates = { beginDate: '2026-05-04', endDate: '2026-05-04' };
+    expect(validateActivityDates(dates, undefined, TODAY, {
+      actualBeginDtTm: '2026-05-04T08:30:00', actualEndDtTm: '2026-05-04T16:00:00'
+    }).endDate).toBeUndefined();
+    expect(validateActivityDates(dates, undefined, TODAY, {
+      actualBeginDtTm: '2026-05-04T16:00:00', actualEndDtTm: '2026-05-04T08:30:00'
+    }).endDate).toBe('Test end must be after the begin date');
+  });
+
   it('rejects future withdrawal and begin dates', () => {
     const errors = validateActivityDates(
       { seedWithdrawalDate: '2026-05-21', beginDate: '2026-05-21' },

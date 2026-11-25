@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   FlexGrid, Row, Column, InlineNotification, TextInput, TextArea, Modal
 } from '@carbon/react';
@@ -67,6 +67,11 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const navigate = useNavigate();
 
   const [header, setHeader] = useState<GerminationTestHeaderType>();
+  // The newest header, readable before React rerenders: a date save queued behind one in
+  // flight must lock on the timestamps that save just returned.
+  const headerRef = useRef<GerminationTestHeaderType | undefined>(undefined);
+  // eslint-disable-next-line react-hooks/refs
+  headerRef.current = header;
   const [showTestHistory, setShowTestHistory] = useState(false);
   const [slots, setSlots] = useState<GermCountSlotType[]>(emptySlots());
   const [replicates, setReplicates] = useState<GermReplicateType[]>([]);
@@ -93,6 +98,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   const { isConflict, markConflict, clearConflict } = useActivityConflict();
   const [activityDates, setActivityDates] = useState<ActivityDatesType>({});
   const markDatesSavedRef = useRef<(v: ActivityDatesType) => void>(() => {});
+  const flushDatesRef = useRef<() => Promise<boolean>>(() => Promise.resolve(true));
 
   // Latest slots/replicates mirrored into refs so a hydration effect can hand
   // useAutosave a combined { slots, replicates } snapshot as already-saved,
@@ -366,11 +372,12 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  const queryClient = useQueryClient();
   const calcMutation = useMutation({
     mutationFn: () => calculateGerminationMetrics(riaKey ?? ''),
     onSuccess: (fresh) => {
-      queryClient.setQueryData(['germination-test-header', riaKey], fresh);
+      // Not via the query cache: that would rehydrate the dates and drop an unsaved edit.
+      headerRef.current = fresh;
+      setHeader(fresh);
       setAlert(null);
     },
     onError: (error) => {
@@ -405,8 +412,23 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   });
 
   // Calc reads the saved counts, so whatever was just typed is saved first.
+  const firstCountDt = slots.find((slot) => slot.countDt)?.countDt;
+  const activityDateErrors = validateActivityDates(
+    activityDates,
+    firstCountDt,
+    toLocalIsoDate(new Date()),
+    header
+  );
+
   const handleCalculate = async () => {
-    if (Object.keys(validationErrors).length > 0 || !(await flush())) {
+    // Dates first: a begin-date edit still pending would leave Calc on the old dayZero.
+    if (
+      Object.keys(validationErrors).length > 0
+      // Unchanged dates flush as saved, so a locked test with legacy date gaps can still Calc;
+      // an edited but invalid date cannot save, and blocks Calc.
+      || !(await flushDatesRef.current())
+      || !(await flush())
+    ) {
       setAlert({ isSuccess: false, message: 'Fix the errors on this test before calculating.' });
       return;
     }
@@ -428,19 +450,13 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     }
   };
 
-  const firstCountDt = slots.find((slot) => slot.countDt)?.countDt;
-  const activityDateErrors = validateActivityDates(
-    activityDates,
-    firstCountDt,
-    toLocalIsoDate(new Date())
-  );
-
   const headerMutation = useMutation({
     mutationFn: (dates: ActivityDatesType) => (
-      patchGerminationTest(riaKey ?? '', buildHeaderUpdate(header!, dates))
+      patchGerminationTest(riaKey ?? '', buildHeaderUpdate(headerRef.current!, dates))
     ),
     onSuccess: (response) => {
       // Carries the new update timestamps the next PATCH must lock on.
+      headerRef.current = response;
       setHeader(response);
     },
     onError: (error) => {
@@ -456,18 +472,21 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     }
   });
 
-  const { markSaved: markDatesSaved } = useAutosave({
+  // No pending gate: useAutosave serializes saves itself, and a gate would also block its
+  // unmount flush of an edit made while a PATCH was in flight.
+  const { markSaved: markDatesSaved, flush: flushDates } = useAutosave({
     data: activityDates,
     onSave: async (dates) => { await headerMutation.mutateAsync(dates); },
     enabled:
       !!header
       && isEditable
       && Object.keys(activityDateErrors).length === 0
-      && !headerMutation.isPending
   });
   // Same latest-ref pattern as markSavedRef above, for the header effect.
   // eslint-disable-next-line react-hooks/refs
   markDatesSavedRef.current = markDatesSaved;
+  // eslint-disable-next-line react-hooks/refs
+  flushDatesRef.current = flushDates;
 
   const crumbs = [
     { name: 'CONSEP', path: ROUTES.CONSEP_FAVOURITE_ACTIVITIES },

@@ -215,6 +215,18 @@ describe('GerminationContent', () => {
     await waitFor(() => expect(screen.getByTestId('germ-day-1')).toHaveTextContent('7'));
   });
 
+  it('Calc saves a pending date edit before calculating (PR #2890 review)', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    fireEvent.change(screen.getByLabelText('Begin date'), { target: { value: '2024/10/30' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Calc' }));
+
+    await waitFor(() => expect(calcMock).toHaveBeenCalledTimes(1));
+    expect(patchMock).toHaveBeenCalledTimes(1);
+    expect(patchMock.mock.invocationCallOrder[0]).toBeLessThan(calcMock.mock.invocationCallOrder[0]);
+  });
+
   it('does not save an invalid date, and shows why', async () => {
     renderView();
     await screen.findByText(/Germination test result/i);

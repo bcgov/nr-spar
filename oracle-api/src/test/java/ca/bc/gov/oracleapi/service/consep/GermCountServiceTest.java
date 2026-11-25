@@ -349,6 +349,35 @@ class GermCountServiceTest {
   }
 
   @Test
+  void upsert_cumulativeUsesStoredReplicatesTheRequestLeavesOut() {
+    // PR #2890 review: a PUT may carry only some replicates; the rest stay as stored, and Calc
+    // reads all four, so the saved cumulative % must be built on all four as well.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    stubChildSaves();
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.empty());
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+    List<TestRepGermEntity> stored = new ArrayList<>();
+    for (int n = 1; n <= 4; n++) {
+      TestRepGermEntity rep = new TestRepGermEntity();
+      rep.setId(new ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId(riaSkey, n));
+      rep.setTotalNoSeeds(100);
+      rep.setRepAcceptedInd(-1);
+      stored.add(rep);
+    }
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey)).thenReturn(stored);
+    List<DayGermCountDto> days =
+        List.of(dayNoAbnormals(1, LocalDate.of(2026, 4, 1), 1, 10, 20, 30, 40));
+
+    germCountService.upsertGermCounts(riaSkey,
+        new GermCountUpsertRequestDto(null, days, List.of(rep(1, 100))), "USER1");
+
+    ArgumentCaptor<GermCountEntity> captor = ArgumentCaptor.forClass(GermCountEntity.class);
+    verify(germCountRepository).save(captor.capture());
+    assertEquals(0, new BigDecimal("25").compareTo(captor.getValue().getCumulativeGerm1()));
+  }
+
+  @Test
   void upsert_clearsSlotsAbsentFromRequest_andDeletesTheirAbnormals() {
     BigDecimal riaSkey = new BigDecimal("881191");
     LocalDateTime ts = LocalDateTime.of(2026, 4, 5, 14, 30);

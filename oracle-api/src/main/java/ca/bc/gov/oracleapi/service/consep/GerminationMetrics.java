@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ import java.util.List;
  */
 final class GerminationMetrics {
 
-  /** Scale for intermediate divisions; outputs are rounded only at the end. */
+  /** Scale of the stored cumulative %; the metrics themselves are computed exactly. */
   private static final int SCALE = 12;
 
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
@@ -68,41 +69,87 @@ final class GerminationMetrics {
         : sum.divide(BigDecimal.valueOf(reps), SCALE, RoundingMode.HALF_EVEN);
   }
 
+  /** An exact fraction: a day's average of 1/3 must not become 0.333...3 before rounding. */
+  private record Q(BigInteger num, BigInteger den) {
+    static final Q ZERO = new Q(BigInteger.ZERO, BigInteger.ONE);
+
+    static Q of(long num, long den) {
+      return new Q(BigInteger.valueOf(num), BigInteger.valueOf(den));
+    }
+
+    Q plus(Q o) {
+      return new Q(num.multiply(o.den).add(o.num.multiply(den)), den.multiply(o.den));
+    }
+
+    Q times(Q o) {
+      return new Q(num.multiply(o.num), den.multiply(o.den));
+    }
+
+    int compareTo(Q o) {
+      return num.multiply(o.den).compareTo(o.num.multiply(den));
+    }
+
+    /** CInt of the exact value: half-to-even, without ever dividing inexactly. */
+    int cint() {
+      BigInteger[] qr = num.divideAndRemainder(den);
+      int cmp = qr[1].shiftLeft(1).abs().compareTo(den.abs());
+      boolean up = cmp > 0 || (cmp == 0 && qr[0].testBit(0));
+      return (up ? qr[0].add(BigInteger.valueOf(num.signum() * den.signum())) : qr[0])
+          .intValueExact();
+    }
+  }
+
+  /** One day's average % as an exact fraction; same rules as {@link #dayAverage}. */
+  private static Q exactDayAverage(Integer[] counts, Integer[] totalSeeds, boolean[] accepted) {
+    Q sum = Q.ZERO;
+    int reps = 0;
+    for (int r = 0; r < 4; r++) {
+      if (!accepted[r] || totalSeeds[r] == null || totalSeeds[r] <= 0 || counts[r] == null) {
+        continue;
+      }
+      sum = sum.plus(Q.of(counts[r] * 100L, totalSeeds[r]));
+      reps++;
+    }
+    return reps == 0 ? Q.ZERO : sum.times(Q.of(1, reps));
+  }
+
   /**
-   * Germination %, GV and peak value from the cumulative series.
+   * Germination %, GV and peak value, computed on exact fractions and rounded once at the end:
+   * any intermediate rounding can push an exact x.5 result over the half-to-even boundary.
    *
-   * @param dayNumbers test day number per day (count date minus germinator entry)
-   * @param cumulative cumulative % per day, from {@link #cumulativePercents}
+   * @param dayNumbers test day number per day (count date minus day zero)
+   * @param countsPerDay per day, the four replicate counts (null = not counted that day)
+   * @param totalSeeds the four replicates' seed totals (null or 0 = replicate not in use)
+   * @param accepted the four replicates' accept flags; rejected replicates are left out
    * @return the integer results, or null when there is no day with a positive day number
    */
-  static Result calculate(List<Integer> dayNumbers, List<BigDecimal> cumulative) {
-    // Ratios are compared and multiplied as fractions, dividing once at the end: rounding PV or
-    // MDG first can push an exact x.5 GV over the half-to-even boundary.
+  static Result calculate(List<Integer> dayNumbers, List<Integer[]> countsPerDay,
+      Integer[] totalSeeds, boolean[] accepted) {
     int peakDay = 0;
-    BigDecimal peakCumulative = BigDecimal.ZERO;
+    Q peakCumulative = Q.ZERO;
     int lastDay = 0;
-    BigDecimal finalCumulative = BigDecimal.ZERO;
+    Q finalCumulative = Q.ZERO;
+    Q cumulative = Q.ZERO;
     for (int i = 0; i < dayNumbers.size(); i++) {
+      cumulative = cumulative.plus(exactDayAverage(countsPerDay.get(i), totalSeeds, accepted));
       Integer day = dayNumbers.get(i);
       if (day == null || day <= 0) {
         continue;
       }
-      BigDecimal value = cumulative.get(i);
-      // value / day > peakCumulative / peakDay; strict, so the earliest day wins a tie
-      if (peakDay == 0 || value.multiply(BigDecimal.valueOf(peakDay))
-          .compareTo(peakCumulative.multiply(BigDecimal.valueOf(day))) > 0) {
-        peakCumulative = value;
+      // cumulative / day > peakCumulative / peakDay; strict, so the earliest day wins a tie
+      if (peakDay == 0 || cumulative.times(Q.of(peakDay, 1))
+          .compareTo(peakCumulative.times(Q.of(day, 1))) > 0) {
+        peakCumulative = cumulative;
         peakDay = day;
       }
       lastDay = day;
-      finalCumulative = value;
+      finalCumulative = cumulative;
     }
     if (peakDay == 0) {
       return null;
     }
-    BigDecimal gv = finalCumulative.multiply(peakCumulative)
-        .divide(BigDecimal.valueOf((long) lastDay * peakDay), SCALE, RoundingMode.HALF_EVEN);
-    return new Result(cint(finalCumulative), cint(gv), cint(peakCumulative), peakDay);
+    Q gv = finalCumulative.times(peakCumulative).times(Q.of(1, (long) lastDay * peakDay));
+    return new Result(finalCumulative.cint(), gv.cint(), peakCumulative.cint(), peakDay);
   }
 
   /**
