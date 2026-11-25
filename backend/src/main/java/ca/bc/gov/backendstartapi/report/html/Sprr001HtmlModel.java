@@ -213,7 +213,8 @@ public class Sprr001HtmlModel {
 
   private static String pad(BigDecimal value, int digits) {
     int v = value == null ? 0 : value.intValue();
-    return String.format("%0" + digits + "d", v);
+    return new DecimalFormat("0".repeat(digits), DecimalFormatSymbols.getInstance(Locale.CANADA))
+        .format(v);
   }
 
   static String format(String pattern, BigDecimal value) {

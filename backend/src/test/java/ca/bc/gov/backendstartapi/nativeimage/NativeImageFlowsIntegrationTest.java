@@ -81,9 +81,14 @@ class NativeImageFlowsIntegrationTest {
     registry.add("spring.flyway.baseline-on-migrate", () -> "true");
   }
 
-  /** A TSC admin, with the same claims the Cognito token carries. */
   @BeforeEach
-  void loggedInAsTscAdmin() {
+  void setUp() {
+    loggedInAsTscAdmin();
+    seedlotExists();
+  }
+
+  /** A TSC admin, with the same claims the Cognito token carries. */
+  private static void loggedInAsTscAdmin() {
     Jwt jwt =
         Jwt.withTokenValue("native-flows")
             .header("alg", "none")
@@ -105,8 +110,7 @@ class NativeImageFlowsIntegrationTest {
     SecurityContextHolder.clearContext();
   }
 
-  @BeforeEach
-  void seedlotExists() {
+  private void seedlotExists() {
     jdbcTemplate.update(
         """
         insert into spar.seedlot (seedlot_number, seedlot_status_code, applicant_client_number,
