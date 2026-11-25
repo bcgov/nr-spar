@@ -1,0 +1,43 @@
+meta {
+  name: 2 Search - nested filter
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/seedlots/search
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "filter": {
+      "logic": "AND",
+      "criteria": [
+        { "field": "status", "operator": "IN", "values": ["PND", "INC", "SUB"] },
+        { "field": "updatedAt", "operator": "GTE", "values": ["2024-01-01T00:00:00"] }
+      ],
+      "groups": [
+        {
+          "logic": "OR",
+          "criteria": [
+            { "field": "species", "operator": "EQ", "values": ["FDC"] },
+            { "field": "species", "operator": "EQ", "values": ["PLI"] }
+          ]
+        }
+      ]
+    },
+    "sort": [ { "field": "updatedAt", "direction": "DESC" } ],
+    "page": 0,
+    "size": 10
+  }
+}
+
+docs {
+  status IN (PND, INC, SUB) AND updatedAt >= 2024-01-01 AND (species = FDC OR species = PLI)
+}

@@ -24,7 +24,10 @@ import { mkConfig, generateCsv, download } from 'export-to-csv';
 
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import PageTitle from '../../../../components/PageTitle';
-import { searchTestingActivities } from '../../../../api-service/consep/searchTestingActivitiesAPI';
+import {
+  searchErrorMessage,
+  searchTestingActivities
+} from '../../../../api-service/consep/searchTestingActivitiesAPI';
 import { getTestTypeCodes, getActivityIds } from '../../../../api-service/consep/testCodesAPI';
 import { getSearchCriteria, setSearchCriteria } from '../../../../api-service/consep/searchCriteriaAPI';
 import type {
@@ -222,8 +225,9 @@ const TestSearch = () => {
     },
     onError: (error: unknown) => {
       let errorMessage = 'Search failed.';
-      if (error instanceof Error && error.message) {
-        errorMessage = `Search failed with the error: ${error.message}`;
+      const detail = searchErrorMessage(error);
+      if (detail) {
+        errorMessage = `Search failed with the error: ${detail}`;
       } else if (typeof error === 'string') {
         errorMessage = `Search failed with the error: ${error}`;
       }
@@ -266,7 +270,7 @@ const TestSearch = () => {
       download(csvConfig)(csv);
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error && error.message ? error.message : 'Unknown error';
+      const message = searchErrorMessage(error) ?? 'Unknown error';
       setAlert({
         status: 'error',
         message: `Failed to export data: ${message}`
