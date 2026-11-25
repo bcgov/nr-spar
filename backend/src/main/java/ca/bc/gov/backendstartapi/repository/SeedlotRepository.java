@@ -38,10 +38,6 @@ public interface SeedlotRepository
   @NonNull
   Page<Seedlot> findAll(@NonNull Pageable pageable);
 
-  @EntityGraph(attributePaths = {"seedlotStatus", "geneticClass", "seedlotSource"})
-  @NonNull
-  Optional<Seedlot> findById(@NonNull String id);
-
   /** Specification search used by the paginated search endpoint; avoids N+1 on lookups. */
   @Override
   @EntityGraph(attributePaths = {"seedlotStatus", "geneticClass"})
@@ -53,4 +49,8 @@ public interface SeedlotRepository
   @EntityGraph(attributePaths = {"seedlotStatus", "geneticClass"})
   @NonNull
   List<Seedlot> findAll(Specification<Seedlot> spec, @NonNull Sort sort);
+
+  @EntityGraph(attributePaths = {"seedlotStatus", "geneticClass", "seedlotSource"})
+  @NonNull
+  Optional<Seedlot> findById(@NonNull String id);
 }

@@ -83,12 +83,14 @@ class SearchSchemaTest {
         .child(
             "items",
             Item.class,
-            c -> c.link("id", "parentId").field("status", "status", String.class, SearchOperator.EQ))
+            c ->
+                c.link("id", "parentId")
+                    .field("status", "status", String.class, SearchOperator.EQ))
         .defaultSort(Sort.by("name"))
         .tiebreaker("id");
   }
 
-  private static Criterion c(String field, SearchOperator op, Object... values) {
+  private static Criterion criterion(String field, SearchOperator op, Object... values) {
     return new Criterion(field, op, Arrays.asList(values));
   }
 
@@ -154,7 +156,7 @@ class SearchSchemaTest {
     }
 
     @Test
-    void childNeedsALink() {
+    void childNeedsLink() {
       var builder = SearchSchema.forEntity(Thing.class);
       assertIllegalState(
           () -> builder.child("kids", Item.class, c -> c.field("x", "x", String.class,
@@ -181,7 +183,7 @@ class SearchSchemaTest {
 
     @Test
     void tooDeep() {
-      FilterGroup group = and(c("id", SearchOperator.EQ, 1));
+      FilterGroup group = and(criterion("id", SearchOperator.EQ, 1));
       for (int i = 0; i < SearchLimits.MAX_FILTER_DEPTH; i++) {
         group = new FilterGroup(Logic.AND, null, List.of(group));
       }
@@ -192,7 +194,7 @@ class SearchSchemaTest {
     void tooManyCriteria() {
       List<Criterion> criteria = new ArrayList<>();
       for (int i = 0; i <= SearchLimits.MAX_CRITERIA; i++) {
-        criteria.add(c("id", SearchOperator.EQ, i));
+        criteria.add(criterion("id", SearchOperator.EQ, i));
       }
       assertInvalid(new FilterGroup(Logic.AND, criteria, null), "at most");
     }
@@ -200,54 +202,57 @@ class SearchSchemaTest {
     @Test
     void whereOnlyWithExists() {
       var criterion =
-          new Criterion("id", SearchOperator.EQ, List.of(1), and(c("status", SearchOperator.EQ,
-              "x")));
+          new Criterion(
+              "id",
+              SearchOperator.EQ,
+              List.of(1),
+              and(criterion("status", SearchOperator.EQ, "x")));
       assertInvalid(and(criterion), "'where' is only allowed");
     }
 
     @Test
     void unknownChild() {
-      assertInvalid(and(c("nope", SearchOperator.EXISTS)), "Unknown child collection");
+      assertInvalid(and(criterion("nope", SearchOperator.EXISTS)), "Unknown child collection");
     }
 
     @Test
     void existsTakesNoValues() {
-      assertInvalid(and(c("items", SearchOperator.EXISTS, "x")), "takes no values");
+      assertInvalid(and(criterion("items", SearchOperator.EXISTS, "x")), "takes no values");
     }
 
     @Test
     void unknownField() {
-      assertInvalid(and(c("nope", SearchOperator.EQ, 1)), "Unknown field 'nope'");
+      assertInvalid(and(criterion("nope", SearchOperator.EQ, 1)), "Unknown field 'nope'");
     }
 
     @Test
     void childUsedAsFieldGetsHint() {
-      assertInvalid(and(c("items", SearchOperator.EQ, 1)), "is a child collection");
+      assertInvalid(and(criterion("items", SearchOperator.EQ, 1)), "is a child collection");
     }
 
     @Test
     void operatorNotAllowed() {
-      assertInvalid(and(c("ownerId", SearchOperator.GT, 1)), "is not allowed");
+      assertInvalid(and(criterion("ownerId", SearchOperator.GT, 1)), "is not allowed");
     }
 
     @Test
     void wrongFixedValueCount() {
-      assertInvalid(and(c("count", SearchOperator.BETWEEN, 1)), "expects 2 value(s)");
+      assertInvalid(and(criterion("count", SearchOperator.BETWEEN, 1)), "expects 2 value(s)");
     }
 
     @Test
     void wrongRangeValueCount() {
-      assertInvalid(and(c("name", SearchOperator.IN)), "expects 1 to");
+      assertInvalid(and(criterion("name", SearchOperator.IN)), "expects 1 to");
     }
 
     @Test
     void nullValue() {
-      assertInvalid(and(c("id", SearchOperator.EQ, (Object) null)), "use IS_NULL");
+      assertInvalid(and(criterion("id", SearchOperator.EQ, (Object) null)), "use IS_NULL");
     }
 
     @Test
     void unconvertibleValue() {
-      assertInvalid(and(c("id", SearchOperator.EQ, "abc")), "Invalid value 'abc'");
+      assertInvalid(and(criterion("id", SearchOperator.EQ, "abc")), "Invalid value 'abc'");
     }
   }
 
@@ -270,7 +275,9 @@ class SearchSchemaTest {
     @Test
     void orGroup() {
       run(new FilterGroup(
-          Logic.OR, List.of(c("id", SearchOperator.EQ, 1), c("id", SearchOperator.EQ, 2)), null));
+          Logic.OR,
+          List.of(criterion("id", SearchOperator.EQ, 1), criterion("id", SearchOperator.EQ, 2)),
+          null));
       verify(cb).or(any(Predicate[].class));
       verify(cb, never()).and(any(Predicate[].class));
     }
@@ -278,13 +285,13 @@ class SearchSchemaTest {
     @Test
     void comparisonOperators() {
       run(and(
-          c("name", SearchOperator.NE, "a"),
-          c("count", SearchOperator.GT, 1),
-          c("count", SearchOperator.GTE, 2),
-          c("count", SearchOperator.LT, 3),
-          c("count", SearchOperator.LTE, 4),
-          c("count", SearchOperator.BETWEEN, 5, 6),
-          c("ownerId", SearchOperator.EQ, "7")));
+          criterion("name", SearchOperator.NE, "a"),
+          criterion("count", SearchOperator.GT, 1),
+          criterion("count", SearchOperator.GTE, 2),
+          criterion("count", SearchOperator.LT, 3),
+          criterion("count", SearchOperator.LTE, 4),
+          criterion("count", SearchOperator.BETWEEN, 5, 6),
+          criterion("ownerId", SearchOperator.EQ, "7")));
       verify(cb).notEqual(path, "a");
       verify(cb).greaterThan(path, 1);
       verify(cb).greaterThanOrEqualTo(path, 2);
@@ -298,9 +305,9 @@ class SearchSchemaTest {
     @Test
     void inAndNullChecks() {
       run(and(
-          c("name", SearchOperator.IN, "a", "b"),
-          c("name", SearchOperator.IS_NULL),
-          c("name", SearchOperator.IS_NOT_NULL)));
+          criterion("name", SearchOperator.IN, "a", "b"),
+          criterion("name", SearchOperator.IS_NULL),
+          criterion("name", SearchOperator.IS_NOT_NULL)));
       verify(path).in(List.of("a", "b"));
       verify(cb).isNull(path);
       verify(cb).isNotNull(path);
@@ -311,8 +318,8 @@ class SearchSchemaTest {
       Expression lower = mock(Expression.class);
       when(cb.lower(path)).thenReturn(lower);
       run(and(
-          c("name", SearchOperator.CONTAINS, "A%b"),
-          c("name", SearchOperator.STARTS_WITH, "x_\\")));
+          criterion("name", SearchOperator.CONTAINS, "A%b"),
+          criterion("name", SearchOperator.STARTS_WITH, "x_\\")));
       verify(cb).like(lower, "%a\\%b%", '\\');
       verify(cb).like(path, "x\\_\\\\%", '\\');
     }
@@ -323,7 +330,9 @@ class SearchSchemaTest {
       Expression lower = mock(Expression.class);
       when(cb.upper(path)).thenReturn(upper);
       when(cb.lower(path)).thenReturn(lower);
-      run(and(c("code", SearchOperator.EQ, "abc"), c("code", SearchOperator.CONTAINS, "Ab")));
+      run(and(
+          criterion("code", SearchOperator.EQ, "abc"),
+          criterion("code", SearchOperator.CONTAINS, "Ab")));
       verify(cb).equal(upper, "ABC");
       // CONTAINS lower-cases on its own rather than upper-casing.
       verify(cb).like(lower, "%ab%", '\\');
@@ -340,10 +349,10 @@ class SearchSchemaTest {
       @BeforeEach
       void setUpSubquery() {
         subquery = mock(Subquery.class, RETURNS_SELF);
-          Root childRoot = mock(Root.class);
         childPath = mock(Path.class);
         exists = mock(Predicate.class);
         when(query.subquery(Integer.class)).thenReturn(subquery);
+        Root childRoot = mock(Root.class);
         when(subquery.from(Item.class)).thenReturn(childRoot);
         when(childRoot.get(anyString())).thenReturn(childPath);
         when(cb.exists(subquery)).thenReturn(exists);
@@ -351,7 +360,7 @@ class SearchSchemaTest {
 
       @Test
       void existsWithoutWhere() {
-        run(and(c("items", SearchOperator.EXISTS)));
+        run(and(criterion("items", SearchOperator.EXISTS)));
         verify(cb).exists(subquery);
         verify(cb, never()).not(any());
         verify(cb).equal(childPath, path);
@@ -361,7 +370,7 @@ class SearchSchemaTest {
       void notExistsWithWhere() {
         var criterion =
             new Criterion(
-                "items", SearchOperator.NOT_EXISTS, null, and(c("status", SearchOperator.EQ,
+                "items", SearchOperator.NOT_EXISTS, null, and(criterion("status", SearchOperator.EQ,
                     "OPEN")));
         run(and(criterion));
         verify(cb).not(exists);

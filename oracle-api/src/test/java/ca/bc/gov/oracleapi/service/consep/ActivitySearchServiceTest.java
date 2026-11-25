@@ -75,7 +75,7 @@ class ActivitySearchServiceTest {
     em.persist(e);
   }
 
-  private static Criterion c(String field, SearchOperator op, Object... values) {
+  private static Criterion criterion(String field, SearchOperator op, Object... values) {
     return new Criterion(field, op, List.of(values));
   }
 
@@ -102,24 +102,24 @@ class ActivitySearchServiceTest {
   void lotsAndTypes() {
     var filter =
         and(
-            c("seedlotDisplay", SearchOperator.IN, "00098", "63000"),
-            c("activityTypeCd", SearchOperator.IN, "GER", "PUR"));
+            criterion("seedlotDisplay", SearchOperator.IN, "00098", "63000"),
+            criterion("activityTypeCd", SearchOperator.IN, "GER", "PUR"));
     assertEquals(List.of(1, 4), ids(service.search(req(filter, null))));
   }
 
   @Test
   @DisplayName("Lot numbers match regardless of case")
   void lotsIgnoreCase() {
-    var exact = and(c("seedlotDisplay", SearchOperator.IN, "f20082140146"));
+    var exact = and(criterion("seedlotDisplay", SearchOperator.IN, "f20082140146"));
     assertEquals(List.of(3), ids(service.search(req(exact, null))));
-    var prefix = and(c("seedlotDisplay", SearchOperator.STARTS_WITH, "f"));
+    var prefix = and(criterion("seedlotDisplay", SearchOperator.STARTS_WITH, "f"));
     assertEquals(List.of(3), ids(service.search(req(prefix, null))));
   }
 
   @Test
   @DisplayName("Exclude historical tests: requestSkey != 0")
   void excludeHistorical() {
-    var filter = and(c("requestSkey", SearchOperator.NE, 0));
+    var filter = and(criterion("requestSkey", SearchOperator.NE, 0));
     assertEquals(3, service.search(req(filter, null)).page().totalElements());
   }
 
@@ -130,12 +130,14 @@ class ActivitySearchServiceTest {
         new FilterGroup(
             Logic.OR,
             List.of(
-                c("seedlotDisplay", SearchOperator.STARTS_WITH, "F"),
-                c("seedlotDisplay", SearchOperator.STARTS_WITH, "f")),
+                criterion("seedlotDisplay", SearchOperator.STARTS_WITH, "F"),
+                criterion("seedlotDisplay", SearchOperator.STARTS_WITH, "f")),
             null);
     var filter =
         new FilterGroup(
-            Logic.AND, List.of(c("germTestInd", SearchOperator.EQ, -1)), List.of(familyLots));
+            Logic.AND,
+            List.of(criterion("germTestInd", SearchOperator.EQ, -1)),
+            List.of(familyLots));
     assertEquals(List.of(3), ids(service.search(req(filter, null))));
   }
 
@@ -144,7 +146,7 @@ class ActivitySearchServiceTest {
   void dateRange() {
     var filter =
         and(
-            c(
+            criterion(
                 "actualBeginDtTm",
                 SearchOperator.BETWEEN,
                 "2025-01-01T00:00:00",
@@ -171,7 +173,7 @@ class ActivitySearchServiceTest {
   @Test
   @DisplayName("Unpaged (export) returns every match in one response, in sort order")
   void unpagedExport() {
-    var filter = and(c("requestSkey", SearchOperator.NE, 0));
+    var filter = and(criterion("requestSkey", SearchOperator.NE, 0));
     var page = service.search(new SearchRequest(filter, null, null, null, true));
     assertEquals(List.of(2, 1, 4), ids(page));
     assertEquals(3, page.page().totalElements());
@@ -181,7 +183,7 @@ class ActivitySearchServiceTest {
   @Test
   @DisplayName("Unknown field is rejected")
   void unknownField() {
-    var request = req(and(c("germinationPct", SearchOperator.EQ, 90)), null);
+    var request = req(and(criterion("germinationPct", SearchOperator.EQ, 90)), null);
     assertThrows(InvalidSearchException.class, () -> service.search(request));
   }
 

@@ -56,7 +56,10 @@ class ActivitySearchEndpointTest {
 
     mockMvc
         .perform(
-            post(SEARCH).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON).content(BODY))
+            post(SEARCH)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(BODY))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].seedlotDisplay").value("00098"))
         .andExpect(jsonPath("$.content[0].riaSkey").value(448383))
@@ -84,7 +87,10 @@ class ActivitySearchEndpointTest {
 
     mockMvc
         .perform(
-            post(SEARCH).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON).content(BODY))
+            post(SEARCH)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(BODY))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.title").value("Invalid search request"))
         .andExpect(jsonPath("$.detail").value("Unknown field 'foo'"));

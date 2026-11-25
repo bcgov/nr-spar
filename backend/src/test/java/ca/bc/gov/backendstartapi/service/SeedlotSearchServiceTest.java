@@ -8,17 +8,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.SeedlotSearchResultDto;
+import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.mapper.SeedlotSearchMapperImpl;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.search.Criterion;
 import ca.bc.gov.backendstartapi.search.FilterGroup;
-import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.search.FilterGroup.Logic;
 import ca.bc.gov.backendstartapi.search.InvalidSearchException;
-import ca.bc.gov.backendstartapi.search.SearchSchema;
 import ca.bc.gov.backendstartapi.search.PageResponse;
 import ca.bc.gov.backendstartapi.search.SearchOperator;
 import ca.bc.gov.backendstartapi.search.SearchRequest;
+import ca.bc.gov.backendstartapi.search.SearchSchema;
 import ca.bc.gov.backendstartapi.search.SortOrder;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.TestUserInfos;
@@ -205,7 +205,11 @@ class SeedlotSearchServiceTest {
   void childExists() {
     loginAsTscAdmin();
     var filter =
-        and(exists("orchards", SearchOperator.EXISTS, criterion("orchardId", SearchOperator.EQ, "405")));
+        and(
+            exists(
+                "orchards",
+                SearchOperator.EXISTS,
+                criterion("orchardId", SearchOperator.EQ, "405")));
     var sort = List.of(new SortOrder("seedlotNumber", Direction.ASC));
 
     var response = service.search(new SearchRequest(filter, sort, null, null));
@@ -283,7 +287,10 @@ class SeedlotSearchServiceTest {
     var filter =
         and(
             criterion("status", SearchOperator.EQ, "PND"),
-            exists("orchards", SearchOperator.EXISTS, criterion("orchardId", SearchOperator.EQ, "405")));
+            exists(
+                "orchards",
+                SearchOperator.EXISTS,
+                criterion("orchardId", SearchOperator.EQ, "405")));
 
     var response = service.search(new SearchRequest(filter, null, null, null));
 

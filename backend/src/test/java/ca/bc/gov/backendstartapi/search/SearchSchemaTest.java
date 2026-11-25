@@ -265,7 +265,8 @@ class SearchSchemaTest {
   void childOperatorOnField() {
     var builder = SearchSchema.forEntity(Seedlot.class);
     assertThrows(
-        IllegalStateException.class, () -> builder.field("species", "vegetationCode", String.class, EXISTS));
+        IllegalStateException.class,
+        () -> builder.field("species", "vegetationCode", String.class, EXISTS));
   }
 
   @Test
@@ -276,13 +277,16 @@ class SearchSchemaTest {
         IllegalStateException.class,
         () ->
             builder.child(
-                "orchards", SeedlotOrchard.class, c -> c.field("orchardId", "orchardId", String.class, EQ)));
+                "orchards",
+                SeedlotOrchard.class,
+                c -> c.field("orchardId", "orchardId", String.class, EQ)));
   }
 
   @Test
   @DisplayName("Duplicate names fail at startup")
   void duplicateNames() {
-    var builder = SearchSchema.forEntity(Seedlot.class).field("species", "vegetationCode", String.class, EQ);
+    var builder =
+        SearchSchema.forEntity(Seedlot.class).field("species", "vegetationCode", String.class, EQ);
     assertThrows(
         IllegalStateException.class,
         () -> builder.field("species", "vegetationCode", String.class, IN));
@@ -308,7 +312,8 @@ class SearchSchemaTest {
   @Test
   @DisplayName("Missing tiebreaker fails at startup")
   void missingTiebreaker() {
-    var builder = SearchSchema.forEntity(Seedlot.class).field("species", "vegetationCode", String.class, EQ);
+    var builder =
+        SearchSchema.forEntity(Seedlot.class).field("species", "vegetationCode", String.class, EQ);
     assertThrows(IllegalStateException.class, () -> builder.build(MAPPER));
   }
 }
