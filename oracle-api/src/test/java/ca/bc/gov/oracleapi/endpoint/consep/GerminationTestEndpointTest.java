@@ -587,7 +587,8 @@ public class GerminationTestEndpointTest {
         "TST20170140", // requestId
         "64132", // seedlotNumber
         null, // familyLotNumber
-        "SX" // vegetationState
+        "SX", // vegetationState
+        null // dayZero
     );
   }
 }

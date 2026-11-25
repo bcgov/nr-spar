@@ -28,6 +28,8 @@ import ca.bc.gov.oracleapi.dto.consep.ReplicateAbnormalDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.DailyAbnormalEntity;
 import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
+import ca.bc.gov.oracleapi.mapper.GermCountMapper;
+import ca.bc.gov.oracleapi.dto.consep.GermCountSlotDto;
 import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
@@ -85,6 +87,9 @@ class TestResultServiceTest {
 
   @Mock
   private TestRepGermRepository testRepGermRepository;
+
+  @Mock
+  private GermCountMapper germCountMapper;
 
   @Autowired
   @InjectMocks
@@ -1309,7 +1314,8 @@ class TestResultServiceTest {
         "TST20170140", // requestId
         "64132", // seedlotNumber
         null, // familyLotNumber
-        "SX" // vegetationState
+        "SX", // vegetationState
+        null // dayZero
         );
   }
 
@@ -1480,7 +1486,7 @@ class TestResultServiceTest {
         RIA_KEY, "G23", null, null, "STD", null, null, 0, 0, null, -1, null,
         null, null, null, null, null, null, null, 21, "DY", null, null, null,
         null, null, null, null, null, null, null, null, "RTS", TST_TS, RIA_TS,
-        null, null, null, null);
+        null, null, null, null, null);
   }
 
   private void mockHappyPathRepos() {
@@ -1496,6 +1502,66 @@ class TestResultServiceTest {
         .thenReturn(1);
     when(testResultRepository.findGerminationTestHeaderByRiaKey(RIA_KEY))
         .thenReturn(Optional.of(headerDto()));
+  }
+
+  private void storeCountDates(LocalDate... dates) {
+    GermCountEntity counts = new GermCountEntity();
+    counts.setRiaSkey(RIA_KEY);
+    // Slot 1 left empty on purpose: the earliest date is not always in slot 1.
+    if (dates.length > 0) {
+      counts.setCountDt2(dates[0]);
+    }
+    if (dates.length > 1) {
+      counts.setCountDt3(dates[1]);
+    }
+    when(germCountRepository.findById(RIA_KEY)).thenReturn(Optional.of(counts));
+  }
+
+  @Test
+  void updateGerminationTest_countsEnteredWithoutBeginDate_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+    storeCountDates(LocalDate.of(2026, 5, 4));
+
+    GerminationTestUpdateFormDto dto = updateDto(false, false, null, null, null);
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(RIA_KEY, dto));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+  }
+
+  @Test
+  void updateGerminationTest_beginAfterFirstCountDate_throwsUnprocessable() {
+    when(testResultRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedTest(0, "STD")));
+    when(activityRepository.findById(RIA_KEY))
+        .thenReturn(Optional.of(storedActivity()));
+    storeCountDates(LocalDate.of(2026, 5, 4), LocalDate.of(2026, 5, 6));
+
+    GerminationTestUpdateFormDto dto =
+        updateDto(false, false, LocalDateTime.of(2026, 5, 5, 8, 0), null, null);
+    ResponseStatusException exc = assertThrows(
+        ResponseStatusException.class,
+        () -> testResultService.updateGerminationTest(RIA_KEY, dto));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
+    assertTrue(exc.getReason().contains("first germination count date"));
+  }
+
+  @Test
+  void updateGerminationTest_beginOnFirstCountDate_isAccepted() {
+    mockHappyPathRepos();
+    storeCountDates(LocalDate.of(2026, 5, 4), LocalDate.of(2026, 5, 6));
+
+    testResultService.updateGerminationTest(
+        RIA_KEY, updateDto(false, false, LocalDateTime.of(2026, 5, 4, 9, 0), null, null));
+
+    verify(testResultRepository).updateGerminationTestHeader(
+        eq(RIA_KEY), eq(0), eq(0), isNull(), eq(0), eq(0),
+        eq("A"), eq(LocalDate.of(2026, 4, 30)), eq("STD"), eq(TST_TS));
   }
 
   @Test
@@ -1784,5 +1850,132 @@ class TestResultServiceTest {
     entity.setRep4NoAbnrmWeak(0);
     entity.setRep4NoAbnrmOther(0);
     entity.setRep4NoAbnrmPrgrm(0);
+  }
+
+  /*---------------------- calculateGerminationMetrics (#2756) -------------------------------*/
+
+  private static final LocalDate QA_ENTRY = LocalDate.of(2026, 5, 1);
+
+  /** A QA test, so day numbers count from the germinator entry. */
+  private GerminationTestHeaderDto qaHeader() {
+    return new GerminationTestHeaderDto(
+        RIA_KEY, "G23", null, null, "QA", null, null, 0, 0, null, -1, null,
+        null, null, null, null, null, null, null, 21, "DY", null, null, null,
+        QA_ENTRY, null, null, null, null, null, null, null, "RTS", TST_TS, RIA_TS,
+        null, null, null, null, null);
+  }
+
+  private static GermCountSlotDto slot(int index, int day, int r1, int r2, int r3, int r4) {
+    // Stored day number is deliberately wrong: the calc must use the QA day zero instead.
+    return new GermCountSlotDto(index, null, QA_ENTRY.plusDays(day), 0, r1, r2, r3, r4, null);
+  }
+
+  private TestResultEntity openTest() {
+    TestResultEntity test = new TestResultEntity();
+    test.setRiaKey(RIA_KEY);
+    test.setTestCompleteInd(0);
+    test.setAcceptResult(0);
+    return test;
+  }
+
+  @Test
+  void calculateGerminationMetrics_savesTheIssueExample() {
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(RIA_KEY))
+        .thenReturn(Optional.of(qaHeader()));
+    TestResultEntity test = openTest();
+    // Completed but not accepted: recalculating is still allowed (#2756).
+    test.setTestCompleteInd(-1);
+    when(testResultRepository.findByIdForUpdate(RIA_KEY)).thenReturn(Optional.of(test));
+    List<TestRepGermEntity> reps = new java.util.ArrayList<>();
+    for (int n = 1; n <= 4; n++) {
+      TestRepGermEntity rep = new TestRepGermEntity();
+      rep.setId(new ReplicateId(RIA_KEY, n));
+      rep.setTotalNoSeeds(100);
+      rep.setRepAcceptedInd(-1);
+      reps.add(rep);
+    }
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(RIA_KEY)).thenReturn(reps);
+    GermCountEntity counts = new GermCountEntity();
+    when(germCountRepository.findById(RIA_KEY)).thenReturn(Optional.of(counts));
+    // RIA_SKEY 1068771 from issue #2756, test days 3..21.
+    when(germCountMapper.buildSlots(counts)).thenReturn(List.of(
+        slot(1, 3, 0, 0, 0, 0), slot(2, 5, 0, 0, 0, 0), slot(3, 7, 79, 80, 80, 75),
+        slot(4, 11, 14, 5, 11, 17), slot(5, 12, 0, 0, 0, 0), slot(6, 14, 0, 0, 0, 0),
+        slot(7, 17, 0, 0, 0, 0), slot(8, 19, 0, 1, 1, 0), slot(9, 21, 0, 0, 0, 0)));
+
+    testResultService.calculateGerminationMetrics(RIA_KEY);
+
+    assertEquals(91, test.getGerminationPct());
+    assertEquals(48, test.getGerminationValue());
+    assertEquals(78, test.getPeakValueGrmPct());
+    assertEquals(7, test.getPeakValueNoDays());
+    verify(testResultRepository).saveAndFlush(test);
+  }
+
+  @Test
+  void calculateGerminationMetrics_refusesAnAcceptedTest() {
+    TestResultEntity test = openTest();
+    test.setAcceptResult(-1);
+    when(testResultRepository.findByIdForUpdate(RIA_KEY)).thenReturn(Optional.of(test));
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.calculateGerminationMetrics(RIA_KEY));
+
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    verify(testResultRepository, never()).saveAndFlush(any());
+  }
+
+  @Test
+  void calculateGerminationMetrics_needsDatedCounts() {
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(RIA_KEY))
+        .thenReturn(Optional.of(qaHeader()));
+    when(testResultRepository.findByIdForUpdate(RIA_KEY)).thenReturn(Optional.of(openTest()));
+    when(germCountRepository.findById(RIA_KEY)).thenReturn(Optional.empty());
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.calculateGerminationMetrics(RIA_KEY));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+  }
+
+  @Test
+  void calculateGerminationMetrics_everyCountOnOrBeforeDayZero_saysSo() {
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(RIA_KEY))
+        .thenReturn(Optional.of(qaHeader()));
+    when(testResultRepository.findByIdForUpdate(RIA_KEY)).thenReturn(Optional.of(openTest()));
+    GermCountEntity counts = new GermCountEntity();
+    when(germCountRepository.findById(RIA_KEY)).thenReturn(Optional.of(counts));
+    when(germCountMapper.buildSlots(counts)).thenReturn(List.of(slot(1, 0, 33, 10, 23, 40)));
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.calculateGerminationMetrics(RIA_KEY));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertTrue(ex.getReason().contains("day 0"));
+  }
+
+  @Test
+  void calculateGerminationMetrics_qaWithoutGerminatorEntry_saysSo() {
+    // QA test with no germinator entry, so no day zero. The stored day number (7) may come from
+    // the old rule, so Calc must not fall back to it.
+    GerminationTestHeaderDto noEntry = new GerminationTestHeaderDto(
+        RIA_KEY, "G10", null, null, "QA", null, null, 0, 0, null, -1, null,
+        null, null, null, null, null, null, null, 21, "DY", null, null, null,
+        null, null, null, null, null, null, null, null, "RTS", TST_TS, RIA_TS,
+        null, null, null, null, null);
+    when(testResultRepository.findGerminationTestHeaderByRiaKey(RIA_KEY))
+        .thenReturn(Optional.of(noEntry));
+    when(testResultRepository.findByIdForUpdate(RIA_KEY)).thenReturn(Optional.of(openTest()));
+    GermCountEntity counts = new GermCountEntity();
+    when(germCountRepository.findById(RIA_KEY)).thenReturn(Optional.of(counts));
+    when(germCountMapper.buildSlots(counts)).thenReturn(List.of(
+        new GermCountSlotDto(1, null, QA_ENTRY, 7, 33, 10, 23, 40, null)));
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.calculateGerminationMetrics(RIA_KEY));
+
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, ex.getStatusCode());
+    assertTrue(ex.getReason().contains("Into germinator"));
+    verify(testResultRepository, never()).saveAndFlush(any());
   }
 }

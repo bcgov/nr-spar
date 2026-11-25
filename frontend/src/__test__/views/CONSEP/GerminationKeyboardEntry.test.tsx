@@ -20,6 +20,7 @@ vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
     testCompleteInd: 0,
     acceptResultInd: 0,
     germinatorEntry: '2024-10-31',
+    dayZero: '2024-10-31',
     germinatorTrayId: 7,
     requestId: 'TST20170140',
     seedlotNumber: '07080',
@@ -99,7 +100,7 @@ describe('Germination keyboard entry (#2681)', () => {
 
   it('titles the page with the seedlot number', async () => {
     renderView();
-    expect(await screen.findByText('Germination test result (07080)')).toBeInTheDocument();
+    expect(await screen.findByText('Germination test result for lot 07080')).toBeInTheDocument();
   });
 
   it('moves between replicates of the same abnormal category with the arrow keys', async () => {
