@@ -518,8 +518,11 @@ export const CollectionLocationSection = ({
           id={state.collectionRadius.id}
           label={fieldsConfig.collectionRadius.labelText}
           placeholder={fieldsConfig.collectionRadius.placeholder}
-          value={state.collectionRadius.value ? Number(state.collectionRadius.value) : ''}
+          value={state.collectionRadius.value === '' ? '' : Number(state.collectionRadius.value)}
           readOnly={readOnly}
+          // Optional, like the other fields: blank is fine, so it isn't
+          // flagged and clearing it saves blank rather than 0.
+          allowEmpty
           min={0}
           max={8}
           step={0.1}

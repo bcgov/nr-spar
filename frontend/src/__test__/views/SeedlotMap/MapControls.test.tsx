@@ -8,7 +8,7 @@ import {
 import ViewControl, { BC_BOUNDS } from '../../../views/Seedlot/SeedlotMap/ViewControl';
 import MarkupPointLayer from '../../../views/Seedlot/SeedlotMap/MarkupPointLayer';
 import CursorPositionControl, {
-  formatDms, formatLatLng, formatBcAlbers, formatUtm
+  formatDms, formatLatLng, formatDecimalDegrees, formatBcAlbers, formatUtm
 } from '../../../views/Seedlot/SeedlotMap/CursorPositionControl';
 
 type Handler = (e?: unknown) => void;
@@ -203,12 +203,13 @@ describe('MarkupPointLayer', () => {
 });
 
 describe('CursorPositionControl', () => {
-  it('shows the cursor position in three coordinate systems, and hides on mouseout', () => {
+  it('shows the cursor position in four coordinate formats, and hides on mouseout', () => {
     render(<CursorPositionControl />);
     expect(screen.queryByTestId('cursor-position-control')).not.toBeInTheDocument();
     act(() => mapEvents.mousemove({ latlng: L.latLng(49.5, -123.25) }));
     const panel = screen.getByTestId('cursor-position-control');
     expect(panel).toHaveTextContent('49° 30\' 0.0" N, 123° 15\' 0.0" W');
+    expect(panel).toHaveTextContent('49.50000, -123.25000');
     expect(panel).toHaveTextContent('(Zone 10)');
     act(() => mapEvents.mouseout());
     expect(screen.queryByTestId('cursor-position-control')).not.toBeInTheDocument();
@@ -219,6 +220,12 @@ describe('CursorPositionControl', () => {
     expect(formatDms(10.25, 'lng')).toBe('10° 15\' 0.0" E');
     expect(formatDms(Number.NaN, 'lat')).toBe('—');
     expect(formatLatLng(1, -1)).toBe('1° 00\' 0.0" N, 1° 00\' 0.0" W');
+  });
+
+  it('formats signed decimal degrees to 5 places', () => {
+    expect(formatDecimalDegrees(49.2827, -123.1207)).toBe('49.28270, -123.12070');
+    expect(formatDecimalDegrees(-0.123456, 0.000004)).toBe('-0.12346, 0.00000');
+    expect(formatDecimalDegrees(Number.NaN, 0)).toBe('—');
   });
 
   it('projects to UTM: the central meridian on the equator is the false origin', () => {

@@ -216,6 +216,15 @@ export const initBClassCollectionStateFromDto = (
 
 export const isCoastAreaRequired = (spzCode: string): boolean => spzCode === MARITIME_SPZ_CODE;
 
+/**
+ * True only when both collection dates are filled in and the end date is
+ * before the start date. Dates use DATE_FORMAT (Y/m/d), so comparing the
+ * strings compares the dates.
+ */
+export const isCollectionDateRangeInvalid = (startDate: string, endDate: string): boolean => (
+  !!startDate && !!endDate && endDate < startDate
+);
+
 const isCollectionSpzComplete = (
   collectionData: BClassCollectionForm,
   isBcSource: boolean
