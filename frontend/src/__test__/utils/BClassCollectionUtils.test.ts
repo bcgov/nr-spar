@@ -11,6 +11,7 @@ import {
   initBClassCollectionStateFromDto,
   isBecVariantRequired,
   isCoastAreaRequired,
+  isCollectionDateRangeInvalid,
   validateBClassCollectionStep,
   verifyBClassCollectionStepCompleteness
 } from '../../components/SeedlotRegistrationSteps/BClassCollectionStep/utils';
@@ -218,6 +219,16 @@ describe('BClassCollectionStep utils', () => {
       expect(isCoastAreaRequired('M')).toBe(true);
       expect(isCoastAreaRequired('SM')).toBe(false);
       expect(isCoastAreaRequired('')).toBe(false);
+    });
+
+    it('flags the collection dates only when the end date is before the start date', () => {
+      // Picking a start date first must not flag the still-empty end date.
+      expect(isCollectionDateRangeInvalid('2026/05/10', '')).toBe(false);
+      expect(isCollectionDateRangeInvalid('', '2026/05/10')).toBe(false);
+      expect(isCollectionDateRangeInvalid('', '')).toBe(false);
+      expect(isCollectionDateRangeInvalid('2026/05/10', '2026/05/10')).toBe(false);
+      expect(isCollectionDateRangeInvalid('2026/05/10', '2026/06/01')).toBe(false);
+      expect(isCollectionDateRangeInvalid('2026/05/10', '2026/05/09')).toBe(true);
     });
 
     it('submits the chosen zone and geographic area, not a fallback', () => {

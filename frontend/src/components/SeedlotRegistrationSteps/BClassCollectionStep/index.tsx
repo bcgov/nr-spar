@@ -35,6 +35,7 @@ import {
   getBecZoneItems,
   isBecVariantRequired,
   isCoastAreaRequired,
+  isCollectionDateRangeInvalid,
   isNumNotInRange
 } from './utils';
 import { applyCollectionAreaResult, clearCollectionAreaResult } from './mapIntegration';
@@ -189,7 +190,12 @@ const BClassCollectionStep = ({ isReview }: BClassCollectionStepProps) => {
 
     clonedState[dateType].value = value;
 
-    const isInvalid = clonedState.endDate.value < clonedState.startDate.value;
+    // Only an end date before the start date is an error; a date that
+    // isn't filled in yet is not.
+    const isInvalid = isCollectionDateRangeInvalid(
+      clonedState.startDate.value,
+      clonedState.endDate.value
+    );
 
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
