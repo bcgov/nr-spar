@@ -8,11 +8,11 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /** Realistic Class B SPRR001 data for template and model tests. */
-final class Sprr001HtmlSamples {
+public final class Sprr001HtmlSamples {
 
   private Sprr001HtmlSamples() {}
 
-  static Sprr001ReportData classB() {
+  public static Sprr001ReportData classB() {
     Sprr001MainRow r = new Sprr001MainRow();
     r.setDbName("SPAR TEST");
     r.setSeedlotNumber("63001");
