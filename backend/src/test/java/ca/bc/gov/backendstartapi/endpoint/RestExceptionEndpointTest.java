@@ -40,7 +40,7 @@ class RestExceptionEndpointTest {
     RestExceptionEndpoint endpoint = new RestExceptionEndpoint();
     ReportGenerationException ex =
         new ReportGenerationException(
-            "Failed to compile Jasper report: /tmp/spar-jasper-SPRR001/secret.jrxml", null);
+            "Failed to render HTML report: /tmp/secret/sprr001", null);
 
     ResponseEntity<String> resp = endpoint.reportGeneration(ex);
 
