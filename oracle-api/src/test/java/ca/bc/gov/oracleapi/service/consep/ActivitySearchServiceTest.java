@@ -181,8 +181,8 @@ class ActivitySearchServiceTest {
   @Test
   @DisplayName("Unknown field is rejected")
   void unknownField() {
-    var filter = and(c("germinationPct", SearchOperator.EQ, 90));
-    assertThrows(InvalidSearchException.class, () -> service.search(req(filter, null)));
+    var request = req(and(c("germinationPct", SearchOperator.EQ, 90)), null);
+    assertThrows(InvalidSearchException.class, () -> service.search(request));
   }
 
   @Test

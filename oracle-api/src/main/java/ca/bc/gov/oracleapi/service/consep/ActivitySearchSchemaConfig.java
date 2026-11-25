@@ -25,6 +25,10 @@ public class ActivitySearchSchemaConfig {
 
   private static final Class<LocalDateTime> DATE_TIME = LocalDateTime.class;
 
+  private static final String SEEDLOT_DISPLAY = "seedlotDisplay";
+  private static final String SEEDLOT_SAMPLE = "seedlotSample";
+  private static final String ACTUAL_BEGIN_DT_TM = "actualBeginDtTm";
+
   /** Most rows an unpaged (export) request may return. */
   static final int UNPAGED_LIMIT = 10_000;
 
@@ -37,8 +41,8 @@ public class ActivitySearchSchemaConfig {
       ObjectMapper objectMapper) {
     return SearchSchema.forEntity(ActivitySearchResultEntity.class)
         // Lot / request identity
-        .sortableField("seedlotDisplay", "seedlotDisplay", String.class, EQ, IN, STARTS_WITH)
-        .sortableField("seedlotSample", "seedlotSample", String.class, EQ, IN)
+        .sortableField(SEEDLOT_DISPLAY, SEEDLOT_DISPLAY, String.class, EQ, IN, STARTS_WITH)
+        .sortableField(SEEDLOT_SAMPLE, SEEDLOT_SAMPLE, String.class, EQ, IN)
         .sortableField("requestItem", "requestItem", String.class, EQ, IN)
         .field("requestSkey", "requestSkey", Integer.class, EQ, NE, IN)
         .field("reqId", "reqId", String.class, EQ, IN)
@@ -65,13 +69,13 @@ public class ActivitySearchSchemaConfig {
         .sortableField("significntStsInd", "significntStsInd", Integer.class, EQ)
         // Dates
         .sortableField("seedWithdrawalDate", "seedWithdrawalDate", DATE_TIME, GTE, LTE, BETWEEN)
-        .sortableField("actualBeginDtTm", "actualBeginDtTm", DATE_TIME, GTE, LTE, BETWEEN)
+        .sortableField(ACTUAL_BEGIN_DT_TM, ACTUAL_BEGIN_DT_TM, DATE_TIME, GTE, LTE, BETWEEN)
         .sortableField("actualEndDtTm", "actualEndDtTm", DATE_TIME, GTE, LTE, BETWEEN)
         .sortableField("revisedStartDt", "revisedStartDt", DATE_TIME, GTE, LTE, BETWEEN)
         .sortableField("revisedEndDt", "revisedEndDt", DATE_TIME, GTE, LTE, BETWEEN)
         // Lot numbers are stored in mixed case; match them the way users type them.
-        .ignoreCase("seedlotDisplay")
-        .defaultSort(Sort.by("seedlotSample", "actualBeginDtTm"))
+        .ignoreCase(SEEDLOT_DISPLAY)
+        .defaultSort(Sort.by(SEEDLOT_SAMPLE, ACTUAL_BEGIN_DT_TM))
         .tiebreaker("riaSkey")
         // CSV export asks for every match in one response.
         .allowUnpaged(UNPAGED_LIMIT)

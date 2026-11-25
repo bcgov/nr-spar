@@ -211,11 +211,11 @@ public final class SearchSchema<E> {
         case BETWEEN -> cb.between(p, values.get(0), values.get(1));
         case CONTAINS ->
             cb.like(
-                cb.lower((Expression<String>) p),
+                cb.lower(p),
                 "%" + escapeLike(values.get(0).toString().toLowerCase(Locale.ROOT)) + "%",
                 '\\');
         case STARTS_WITH ->
-            cb.like((Expression<String>) p, escapeLike(values.get(0).toString()) + "%", '\\');
+            cb.like(p, escapeLike(values.get(0).toString()) + "%", '\\');
         case IS_NULL -> cb.isNull(p);
         case IS_NOT_NULL -> cb.isNotNull(p);
         case EXISTS, NOT_EXISTS -> throw new IllegalStateException("handled elsewhere");
