@@ -1525,10 +1525,10 @@ class TestResultServiceTest {
         .thenReturn(Optional.of(storedActivity()));
     storeCountDates(LocalDate.of(2026, 5, 4));
 
+    GerminationTestUpdateFormDto dto = updateDto(false, false, null, null, null);
     ResponseStatusException exc = assertThrows(
         ResponseStatusException.class,
-        () -> testResultService.updateGerminationTest(
-            RIA_KEY, updateDto(false, false, null, null, null)));
+        () -> testResultService.updateGerminationTest(RIA_KEY, dto));
 
     assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
   }
@@ -1541,10 +1541,11 @@ class TestResultServiceTest {
         .thenReturn(Optional.of(storedActivity()));
     storeCountDates(LocalDate.of(2026, 5, 4), LocalDate.of(2026, 5, 6));
 
+    GerminationTestUpdateFormDto dto =
+        updateDto(false, false, LocalDateTime.of(2026, 5, 5, 8, 0), null, null);
     ResponseStatusException exc = assertThrows(
         ResponseStatusException.class,
-        () -> testResultService.updateGerminationTest(
-            RIA_KEY, updateDto(false, false, LocalDateTime.of(2026, 5, 5, 8, 0), null, null)));
+        () -> testResultService.updateGerminationTest(RIA_KEY, dto));
 
     assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exc.getStatusCode());
     assertTrue(exc.getReason().contains("first germination count date"));

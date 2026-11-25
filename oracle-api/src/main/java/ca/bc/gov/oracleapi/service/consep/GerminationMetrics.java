@@ -94,7 +94,7 @@ final class GerminationMetrics {
       BigInteger[] qr = num.divideAndRemainder(den);
       int cmp = qr[1].shiftLeft(1).abs().compareTo(den.abs());
       boolean up = cmp > 0 || (cmp == 0 && qr[0].testBit(0));
-      return (up ? qr[0].add(BigInteger.valueOf(num.signum() * den.signum())) : qr[0])
+      return (up ? qr[0].add(BigInteger.valueOf((long) num.signum() * den.signum())) : qr[0])
           .intValueExact();
     }
   }
@@ -169,7 +169,7 @@ final class GerminationMetrics {
     if (actualBegin == null) {
       return null;
     }
-    long hours = (soakHours == null ? 0 : soakHours) + (stratHours == null ? 0 : stratHours);
+    long hours = (soakHours == null ? 0L : soakHours) + (stratHours == null ? 0L : stratHours);
     return actualBegin.plusHours(hours).toLocalDate();
   }
 
