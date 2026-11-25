@@ -341,11 +341,95 @@ class GermCountServiceTest {
 
     assertEquals(new BigDecimal("2001"), saved.getDailyGermSkey1());
     assertEquals(new BigDecimal("2002"), saved.getDailyGermSkey2());
-    // cumulative: day1 = 10+12+11+9 = 42; day2 = 42 + (5+6+7+8=26) = 68
-    assertEquals(0, saved.getCumulativeGerm1().compareTo(new BigDecimal("42")));
-    assertEquals(0, saved.getCumulativeGerm2().compareTo(new BigDecimal("68")));
+    // cumulative % (100 seeds/rep): day1 = (10+12+11+9)/4 = 10.5; day2 = 10.5 + 26/4 = 17
+    assertEquals(new BigDecimal("10.5000"), saved.getCumulativeGerm1());
+    assertEquals(new BigDecimal("17.0000"), saved.getCumulativeGerm2());
     assertEquals("USER1", saved.getEntryUserid());
     assertEquals("USER1", saved.getUpdateUserid());
+  }
+
+  @Test
+  void upsert_cumulativeUsesStoredReplicatesTheRequestLeavesOut() {
+    // PR #2890 review: a PUT may carry only some replicates; the rest stay as stored, and Calc
+    // reads all four, so the saved cumulative % must be built on all four as well.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    stubChildSaves();
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.empty());
+    when(germCountRepository.save(any(GermCountEntity.class)))
+        .thenAnswer(inv -> inv.getArgument(0));
+    List<TestRepGermEntity> stored = new ArrayList<>();
+    for (int n = 1; n <= 4; n++) {
+      TestRepGermEntity rep = new TestRepGermEntity();
+      rep.setId(new ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId(riaSkey, n));
+      rep.setTotalNoSeeds(100);
+      rep.setRepAcceptedInd(-1);
+      stored.add(rep);
+    }
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey)).thenReturn(stored);
+    List<DayGermCountDto> days =
+        List.of(dayNoAbnormals(1, LocalDate.of(2026, 4, 1), 1, 10, 20, 30, 40));
+
+    germCountService.upsertGermCounts(riaSkey,
+        new GermCountUpsertRequestDto(null, days, List.of(rep(1, 100))), "USER1");
+
+    ArgumentCaptor<GermCountEntity> captor = ArgumentCaptor.forClass(GermCountEntity.class);
+    verify(germCountRepository).save(captor.capture());
+    assertEquals(0, new BigDecimal("25").compareTo(captor.getValue().getCumulativeGerm1()));
+  }
+
+  @Test
+  void refreshStoredCumulative_followsTheAcceptFlags() {
+    // PR #2890 review: unticking a replicate on a completed test (counts locked) must still
+    // bring the stored cumulative % in line with the accept flags.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setCountDt1(LocalDate.of(2026, 4, 1));
+    existing.setRep1NoSeedsGerm1(10);
+    existing.setRep2NoSeedsGerm1(30);
+    existing.setCumulativeGerm1(new BigDecimal("20"));
+    existing.setCountDt2(LocalDate.of(2026, 4, 2));
+    existing.setRep1NoSeedsGerm2(10);
+    existing.setRep2NoSeedsGerm2(10);
+    existing.setCumulativeGerm2(new BigDecimal("30"));
+    existing.setUpdateTimestamp(LocalDateTime.of(2026, 4, 5, 14, 30));
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, existing.getUpdateTimestamp()))
+        .thenReturn(1);
+    List<TestRepGermEntity> stored = new ArrayList<>();
+    for (int n = 1; n <= 2; n++) {
+      TestRepGermEntity rep = new TestRepGermEntity();
+      rep.setId(new ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId(riaSkey, n));
+      rep.setTotalNoSeeds(100);
+      rep.setRepAcceptedInd(n == 2 ? 0 : -1);
+      stored.add(rep);
+    }
+    when(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey)).thenReturn(stored);
+
+    germCountService.refreshStoredCumulative(riaSkey);
+
+    verify(germCountRepository).save(existing);
+    assertEquals(0, new BigDecimal("10").compareTo(existing.getCumulativeGerm1()));
+    assertEquals(0, new BigDecimal("20").compareTo(existing.getCumulativeGerm2()));
+    assertEquals(10, existing.getRep2NoSeedsGerm2());
+  }
+
+  @Test
+  void refreshStoredCumulative_rowChangedSinceRead_isConflict() {
+    // PR #2890 review: a write that committed after our read must not be overwritten.
+    BigDecimal riaSkey = new BigDecimal("881191");
+    GermCountEntity existing = new GermCountEntity();
+    existing.setRiaSkey(riaSkey);
+    existing.setUpdateTimestamp(LocalDateTime.of(2026, 4, 5, 14, 30));
+    when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(existing));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, existing.getUpdateTimestamp()))
+        .thenReturn(0);
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> germCountService.refreshStoredCumulative(riaSkey));
+
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    verify(germCountRepository, never()).save(any());
   }
 
   @Test
@@ -443,9 +527,10 @@ class GermCountServiceTest {
     assertNull(saved.getDailyGermSkey2());
     assertNull(saved.getRep1NoSeedsGerm2());
     assertNull(saved.getCumulativeGerm2());
-    // Its 5 germinated seeds must not leak into the running total: 10 then 10+7.
-    assertEquals(0, saved.getCumulativeGerm1().compareTo(new BigDecimal("10")));
-    assertEquals(0, saved.getCumulativeGerm3().compareTo(new BigDecimal("17")));
+    // Its 5 germinated seeds must not leak into the running total, in % of 100 seeds over 4
+    // reps: 10/4 = 2.5, then 2.5 + 7/4 = 4.25.
+    assertEquals(new BigDecimal("2.5000"), saved.getCumulativeGerm1());
+    assertEquals(new BigDecimal("4.2500"), saved.getCumulativeGerm3());
 
     // Only the two dated slots get abnormal rows written.
     ArgumentCaptor<List<DailyAbnormalEntity>> abCaptor = ArgumentCaptor.forClass(List.class);
@@ -549,14 +634,18 @@ class GermCountServiceTest {
   }
 
   @Test
-  void upsert_update_missingTimestamp_throwsBadRequest() {
+  void upsert_update_nullTimestamp_isLeftToTheLock() {
+    // A null read is valid for a legacy never-stamped row; the touch query decides, and here
+    // it finds the row stamped since, so the save is a conflict rather than a bad request.
     BigDecimal riaSkey = new BigDecimal("881191");
     when(germCountRepository.findById(riaSkey)).thenReturn(Optional.of(new GermCountEntity()));
+    when(germCountRepository.touchIfTimestampMatches(riaSkey, null)).thenReturn(0);
     List<DayGermCountDto> days = List.of(day(1, LocalDate.of(2026, 4, 1), 1, 1, 1, 1, 1));
 
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
         () -> germCountService.upsertGermCounts(riaSkey, request(null, days), "USER2"));
-    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    verify(germCountRepository).touchIfTimestampMatches(riaSkey, null);
   }
 
   @Test

@@ -5,7 +5,7 @@ import {
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import GerminationContent from '../../../views/CONSEP/TestingActivities/GerminationContent';
-import { getGerminationTestHeader } from '../../../api-service/consep/germinationTestAPI';
+import { getGerminationTestHeader, getGermCounts } from '../../../api-service/consep/germinationTestAPI';
 import { searchTestingActivities } from '../../../api-service/consep/searchTestingActivitiesAPI';
 
 vi.mock('../../../components/PageTitle', () => ({
@@ -13,6 +13,29 @@ vi.mock('../../../components/PageTitle', () => ({
 }));
 
 const putMock = vi.fn().mockResolvedValue({ updateTimestamp: '2026-01-02T00:00:00' });
+const acceptMock = vi.fn().mockResolvedValue({});
+const calcMock = vi.fn().mockResolvedValue({
+  riaSkey: 123,
+  activityTypeCd: 'G10',
+  testCategoryCd: 'QA',
+  testCompleteInd: 0,
+  acceptResultInd: 0,
+  germinatorEntry: '2024-10-31',
+  dayZero: '2024-10-31',
+  requestId: 'TST20170140',
+  seedlotNumber: '07080',
+  vegetationState: 'SX',
+  germinationPct: 91,
+  germinationValue: 48,
+  peakValueGrmPct: 78,
+  peakValueNoDays: 7
+});
+const patchMock = vi.fn((_riaKey: string, payload: Record<string, unknown>) => Promise.resolve({
+  riaSkey: 123,
+  activityTypeCd: 'G10',
+  testCategoryCd: 'QA',
+  actualBeginDtTm: payload.actualBeginDateTime
+}));
 vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
   getGerminationTestHeader: vi.fn().mockResolvedValue({
     riaSkey: 123,
@@ -21,15 +44,21 @@ vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
     testCompleteInd: 0,
     acceptResultInd: 0,
     germinatorEntry: '2024-10-31',
+    dayZero: '2024-10-31',
     requestId: 'TST20170140',
     seedlotNumber: '07080',
     vegetationState: 'SX'
   }),
-  getGermCounts: () => Promise.reject(
+  getGermCounts: vi.fn(() => Promise.reject(
     Object.assign(new Error('Not found'), { response: { status: 404 } })
-  ),
+  )),
   getTestReplicates: () => Promise.resolve([]),
-  putGermCounts: (...args: unknown[]) => putMock(...args)
+  putGermCounts: (...args: unknown[]) => putMock(...args),
+  calculateGerminationMetrics: (...args: unknown[]) => calcMock(...args),
+  updateRepAccepted: (...args: unknown[]) => acceptMock(...args),
+  patchGerminationTest: (riaKey: string, payload: Record<string, unknown>) => (
+    patchMock(riaKey, payload)
+  )
 }));
 
 vi.mock('../../../api-service/consep/searchTestingActivitiesAPI', () => ({
@@ -71,6 +100,158 @@ const setCountDate = (slotIndex: number, value: string) => {
 describe('GerminationContent', () => {
   beforeEach(() => {
     putMock.mockClear();
+    patchMock.mockClear();
+    calcMock.mockClear();
+    acceptMock.mockClear();
+  });
+
+  it('Calc fills GV and PV from the calculated header (#2756)', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    expect(screen.getByLabelText('GV')).toHaveValue('');
+    expect(screen.getByLabelText('PV')).toHaveValue('');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Calc' }));
+
+    await waitFor(() => expect(calcMock).toHaveBeenCalledWith('123'));
+    await waitFor(() => expect(screen.getByLabelText('GV')).toHaveValue('48'));
+    expect(screen.getByLabelText('PV')).toHaveValue('78/7');
+  });
+
+  const headerWith = (status: { testCompleteInd: number; acceptResultInd: number }) => ({
+    riaSkey: 123,
+    activityTypeCd: 'G10',
+    testCategoryCd: 'QA',
+    germinatorEntry: '2024-10-31',
+    dayZero: '2024-10-31',
+    requestId: 'TST20170140',
+    seedlotNumber: '07080',
+    vegetationState: 'SX',
+    ...status
+  });
+
+  it('a completed test still recalculates and toggles replicate Accept (#2756)', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce(
+      headerWith({ testCompleteInd: -1, acceptResultInd: 0 })
+    );
+    renderView();
+    await screen.findByText(/Germination test result/i);
+
+    const acc2 = await screen.findByTestId('germ-acc-2');
+    expect(acc2).toBeEnabled();
+    expect(screen.getByTestId('germ-date-trigger-1')).toBeDisabled();
+    fireEvent.click(acc2);
+    await waitFor(() => expect(acceptMock).toHaveBeenCalledWith('123', 2, 0));
+    await waitFor(() => expect(screen.getByTestId('germ-acc-2')).not.toBeChecked());
+
+    const calc = screen.getByRole('button', { name: 'Calc' });
+    expect(calc).toBeEnabled();
+    fireEvent.click(calc);
+    await waitFor(() => expect(calcMock).toHaveBeenCalledWith('123'));
+    await waitFor(() => expect(screen.getByLabelText('GV')).toHaveValue('48'));
+    // The new header must not rehydrate the stale cached replicates over the change.
+    expect(screen.getByTestId('germ-acc-2')).not.toBeChecked();
+    expect(putMock).not.toHaveBeenCalled();
+  });
+
+  it('a locked legacy test with a count before its begin date still calculates, and warns about day 0 (PR #2890 review)', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce({
+      ...headerWith({ testCompleteInd: -1, acceptResultInd: 0 }),
+      actualBeginDtTm: '2024-11-01T08:00:00'
+    });
+    vi.mocked(getGermCounts).mockResolvedValueOnce({
+      updateTimestamp: '2026-01-01T00:00:00',
+      slots: [{ slotIndex: 1, countDt: '2024-10-30', dayNoOfTest: -1, rep1NoSeedsGerm: 5 }]
+    } as never);
+    renderView();
+    await screen.findByText(/Germination test result/i);
+
+    expect(await screen.findByText('Count dates on or before day 0')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Calc' }));
+    await waitFor(() => expect(calcMock).toHaveBeenCalledWith('123'));
+  });
+
+  it('shows day numbers from dayZero, not ones stored under an older rule (#2756)', async () => {
+    vi.mocked(getGermCounts).mockResolvedValueOnce({
+      updateTimestamp: '2026-01-01T00:00:00',
+      slots: [{ slotIndex: 1, countDt: '2024-11-07', dayNoOfTest: 9 }]
+    } as unknown as Awaited<ReturnType<typeof getGermCounts>>);
+    renderView();
+
+    await waitFor(() => expect(screen.getByTestId('germ-day-1')).toHaveTextContent('7'));
+    expect(putMock).not.toHaveBeenCalled();
+  });
+
+  it('an accepted test locks Calc and replicate Accept (#2756)', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce(
+      headerWith({ testCompleteInd: -1, acceptResultInd: -1 })
+    );
+    renderView();
+    await screen.findByText(/Germination test result/i);
+
+    expect(await screen.findByTestId('germ-acc-2')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Calc' })).toBeDisabled();
+  });
+
+  it('shows the tray-derived dates read-only and saves an edited begin date via PATCH', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    expect(screen.getByLabelText('Into germinator')).toHaveValue('2024/10/31');
+    expect(screen.getByLabelText('Into germinator')).toHaveAttribute('readonly');
+
+    fireEvent.change(screen.getByLabelText('Begin date'), { target: { value: '2024/10/30' } });
+
+    await waitFor(() => expect(patchMock).toHaveBeenCalledTimes(1), { timeout: 5000 });
+    expect(patchMock.mock.calls[0][0]).toBe('123');
+    expect(patchMock.mock.calls[0][1]).toMatchObject({
+      testCategoryCode: 'QA',
+      acceptResultInd: false,
+      testCompleteInd: false,
+      actualBeginDateTime: '2024-10-30T00:00:00'
+    });
+  });
+
+  it('fills the count day numbers once a begin-date save returns a dayZero (#2756)', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce({
+      riaSkey: 123, activityTypeCd: 'G10', testCategoryCd: 'STD', testCompleteInd: 0, acceptResultInd: 0
+    });
+    vi.mocked(getGermCounts).mockResolvedValueOnce({
+      updateTimestamp: '2026-01-01T00:00:00',
+      slots: [{ slotIndex: 1, countDt: '2024-11-07' }]
+    } as unknown as Awaited<ReturnType<typeof getGermCounts>>);
+    patchMock.mockResolvedValueOnce({
+      riaSkey: 123, activityTypeCd: 'G10', testCategoryCd: 'STD', dayZero: '2024-10-31'
+    });
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    expect(await screen.findByTestId('germ-day-1')).toHaveTextContent('');
+
+    fireEvent.change(screen.getByLabelText('Begin date'), { target: { value: '2024/10/30' } });
+
+    await waitFor(() => expect(patchMock).toHaveBeenCalledTimes(1), { timeout: 5000 });
+    await waitFor(() => expect(screen.getByTestId('germ-day-1')).toHaveTextContent('7'));
+  });
+
+  it('Calc saves a pending date edit before calculating (PR #2890 review)', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    fireEvent.change(screen.getByLabelText('Begin date'), { target: { value: '2024/10/30' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Calc' }));
+
+    await waitFor(() => expect(calcMock).toHaveBeenCalledTimes(1));
+    expect(patchMock).toHaveBeenCalledTimes(1);
+    expect(patchMock.mock.invocationCallOrder[0]).toBeLessThan(calcMock.mock.invocationCallOrder[0]);
+  });
+
+  it('does not save an invalid date, and shows why', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    fireEvent.change(screen.getByLabelText('Withdrawal'), { target: { value: '2999/01/01' } });
+
+    expect(await screen.findByText('Withdrawal date cannot be in the future')).toBeInTheDocument();
+    await new Promise((resolve) => { setTimeout(resolve, 1200); });
+    expect(patchMock).not.toHaveBeenCalled();
   });
 
   it('renders title and header card from the header API', async () => {
@@ -107,6 +288,7 @@ describe('GerminationContent', () => {
       testCompleteInd: 0,
       acceptResultInd: 0,
       germinatorEntry: '2024-10-31',
+      dayZero: '2024-10-31',
       requestId: 'TST20170140',
       seedlotNumber: '00000',
       familyLotNumber: 'F123456',

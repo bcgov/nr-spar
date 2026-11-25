@@ -19,6 +19,7 @@ import ca.bc.gov.oracleapi.repository.consep.TestRepGermRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -175,11 +176,7 @@ public class GermCountService {
 
     GermCountEntity entity;
     if (existing != null) {
-      if (request.updateTimestamp() == null) {
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST,
-            "updateTimestamp is required to update an existing record");
-      }
+      // A null updateTimestamp is only accepted for a legacy row that has none (the touch checks).
       int rows = germCountRepository.touchIfTimestampMatches(riaSkey, request.updateTimestamp());
       if (rows == 0) {
         throw new ResponseStatusException(
@@ -200,7 +197,7 @@ public class GermCountService {
     }
 
     Set<BigDecimal> skeysBefore = referencedSkeys(entity);
-    List<GermCountSlotDto> slots = buildSlotsForSave(days, entity);
+    List<GermCountSlotDto> slots = buildSlotsForSave(days, request.replicates(), entity);
     mapper.applySlots(slots, entity);
     entity.setUpdateUserid(requestUserId);
     entity = germCountRepository.save(entity);
@@ -272,11 +269,12 @@ public class GermCountService {
    * is a true full replacement: a slot the request omits, or submits without a count date, is
    * emitted blank so its columns are cleared. Dated days keep their existing DAILY_GERM_SKEY or
    * get a freshly sequenced one (AC2), get rep null-to-zero applied for used replicates, and
-   * carry the running cumulative germination (AC4). Undated slots contribute nothing to the
+   * carry the running cumulative germination % (AC4, #2756). Undated slots contribute nothing to the
    * running total.
    */
   List<GermCountSlotDto> buildSlotsForSave(
-      List<DayGermCountDto> sortedDays, GermCountEntity entity) {
+      List<DayGermCountDto> sortedDays, List<TestRepGermFormDto> replicates,
+      GermCountEntity entity) {
     // Not Collectors.toMap: a slot present by count date alone carries a null key, which toMap
     // rejects outright.
     Map<Integer, BigDecimal> existingSkeys = new HashMap<>();
@@ -296,8 +294,23 @@ public class GermCountService {
       if (d.rep4NoSeedsGerm() != null) repUsed[3] = true;
     }
 
+    // Start from the stored replicates and overlay the submitted ones: the request may carry only
+    // some, and saveReplicates leaves the rest as stored, which is what Calc will read.
+    Integer[] totalSeeds = new Integer[4];
+    boolean[] accepted = new boolean[4];
+    if (entity.getRiaSkey() != null) {
+      readReplicates(testRepGermRepository.findByRiaKeyOrderByReplicateNumber(
+          entity.getRiaSkey()), totalSeeds, accepted);
+    }
+    for (TestRepGermFormDto r : replicates) {
+      totalSeeds[r.replicateNumber() - 1] = r.totalNoSeeds();
+      // Legacy stores true as -1; the screen sends 1. Only an explicit 0 rejects a replicate.
+      accepted[r.replicateNumber() - 1] =
+          r.repAcceptedInd() == null || r.repAcceptedInd() != 0;
+    }
+
     List<GermCountSlotDto> slots = new ArrayList<>(MAX_SLOTS);
-    long cumulative = 0;
+    BigDecimal cumulative = BigDecimal.ZERO;
     // Slots are walked in index order; validateAscendingDates guarantees that tracks date order.
     for (int slotIndex = 1; slotIndex <= MAX_SLOTS; slotIndex++) {
       DayGermCountDto d = submitted.get(slotIndex);
@@ -310,7 +323,8 @@ public class GermCountService {
       Integer r2 = normalize(d.rep2NoSeedsGerm(), repUsed[1]);
       Integer r3 = normalize(d.rep3NoSeedsGerm(), repUsed[2]);
       Integer r4 = normalize(d.rep4NoSeedsGerm(), repUsed[3]);
-      cumulative += zero(r1) + zero(r2) + zero(r3) + zero(r4);
+      cumulative = cumulative.add(
+          GerminationMetrics.dayAverage(new Integer[] {r1, r2, r3, r4}, totalSeeds, accepted));
 
       // DAILY_GERM_SKEY{n} points at this day's CNS_T_DAILY_ABNORMAL row, so it is
       // only minted when there is an abnormal row to point at. Minting one for every
@@ -324,9 +338,67 @@ public class GermCountService {
 
       slots.add(new GermCountSlotDto(
           slotIndex, skey, d.countDt(), d.dayNoOfTest(),
-          r1, r2, r3, r4, BigDecimal.valueOf(cumulative)));
+          r1, r2, r3, r4, cumulative.setScale(4, RoundingMode.HALF_EVEN)));
     }
     return slots;
+  }
+
+  /**
+   * Rewrites the stored cumulative % from the stored counts and the current replicate flags. The
+   * stored % depends on which replicates are accepted, and an Accept box can change on a completed
+   * test whose counts are locked (#2841), so nothing else would bring it back in line.
+   *
+   * <p>Takes the same optimistic lock as a count save and advances update_timestamp: a writer
+   * that committed after our read gives 409 instead of being overwritten, and a client still
+   * holding the old timestamp (and so the old accept flags) gets 409 on its next count save.
+   */
+  @Transactional
+  public void refreshStoredCumulative(BigDecimal riaSkey) {
+    GermCountEntity read = germCountRepository.findById(riaSkey).orElse(null);
+    if (read == null) {
+      return;
+    }
+    if (germCountRepository.touchIfTimestampMatches(riaSkey, read.getUpdateTimestamp()) == 0) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
+    }
+    // The touch holds the row lock and cleared the context: re-read the locked row.
+    GermCountEntity entity = germCountRepository.findById(riaSkey).orElseThrow(() ->
+        new ResponseStatusException(
+            HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry"));
+    Integer[] totalSeeds = new Integer[4];
+    boolean[] accepted = new boolean[4];
+    readReplicates(
+        testRepGermRepository.findByRiaKeyOrderByReplicateNumber(riaSkey), totalSeeds, accepted);
+    List<GermCountSlotDto> slots = new ArrayList<>();
+    BigDecimal cumulative = BigDecimal.ZERO;
+    for (GermCountSlotDto s : mapper.buildSlots(entity)) {
+      if (s.countDt() == null) {
+        continue;
+      }
+      cumulative = cumulative.add(GerminationMetrics.dayAverage(
+          new Integer[] {
+              s.rep1NoSeedsGerm(), s.rep2NoSeedsGerm(), s.rep3NoSeedsGerm(), s.rep4NoSeedsGerm()},
+          totalSeeds, accepted));
+      slots.add(new GermCountSlotDto(s.slotIndex(), s.dailyGermSkey(), s.countDt(),
+          s.dayNoOfTest(), s.rep1NoSeedsGerm(), s.rep2NoSeedsGerm(), s.rep3NoSeedsGerm(),
+          s.rep4NoSeedsGerm(), cumulative.setScale(4, RoundingMode.HALF_EVEN)));
+    }
+    mapper.applySlots(slots, entity);
+    germCountRepository.save(entity);
+  }
+
+  /** Fills the four replicates' seed totals and accept flags from the stored rows. */
+  static void readReplicates(
+      List<TestRepGermEntity> stored, Integer[] totalSeeds, boolean[] accepted) {
+    for (TestRepGermEntity rep : stored) {
+      int i = rep.getId().getReplicateNumber() - 1;
+      if (i >= 0 && i < 4) {
+        totalSeeds[i] = rep.getTotalNoSeeds();
+        // Legacy stores true as -1, the screen 1; only an explicit 0 rejects a replicate.
+        accepted[i] = rep.getRepAcceptedInd() == null || rep.getRepAcceptedInd() != 0;
+      }
+    }
   }
 
   /** An empty slot, written to clear every numbered column at that position. */

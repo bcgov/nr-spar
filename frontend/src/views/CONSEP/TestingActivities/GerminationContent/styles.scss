@@ -73,39 +73,136 @@
 }
 
 .consep-germination-content {
-  // Kept tight: the page still has to fit the result figures above the tables
-  // and the action buttons below them.
-  padding: 1rem 2rem 2rem;
+  // Same layout rules as the moisture content screen.
+  .consep-germination-content-title {
+    justify-content: flex-start;
+    gap: 0.5rem;
+    margin-top: 1rem;
 
-  .consep-germination-content-test-history-btn {
-    margin-left: 1rem;
-  }
-  .consep-germination-content-summary {
-    margin-bottom: 1rem;
-  }
+    .title-section {
+      padding: 0rem;
+      max-inline-size: fit-content;
+    }
 
-  // A slimmer banner than SummaryGrid's default.
-  .activity-summary {
-    margin: 0.5rem 1rem;
-  }
-
-  // SummaryGrid defaults to a label-beside-value row; the germination summary
-  // card stacks them instead.
-  .consep-germination-content-summary-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-
-    // SummaryGrid centres the value; here it lines up under its label.
-    .activity-summary-info-value {
+    .status-tag {
       align-self: flex-start;
+      margin-top: 0.5rem;
     }
   }
 
-  .consep-germination-content-table {
-    margin-top: 1rem;
+  .consep-germination-content-summary {
+    .#{vars.$bcgov-prefix}--col {
+      padding: 0rem;
+    }
   }
+
+  .consep-germination-content-results {
+    margin-top: 1rem;
+
+    > div {
+      padding: 0rem;
+    }
+  }
+
+  // Figma's result panel: a bordered box, small fields in a row over the comments.
+  // GV, PV and Comments sit in one compact row, split by a vertical rule.
+  .germ-result-panel {
+    display: flex;
+    border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #c6c6c6);
+
+    > div {
+      padding: 0.5rem 1rem;
+    }
+
+    > div + div {
+      border-left: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01, #c6c6c6);
+    }
+
+    .germ-result-comments {
+      flex: 1;
+    }
+
+    .#{vars.$bcgov-prefix}--text-area {
+      resize: none;
+    }
+
+    // Carbon draws read-only fields as bare text over a dashed rule; these keep
+    // the field look of the moisture screen's inputs.
+    .#{vars.$bcgov-prefix}--text-input,
+    .#{vars.$bcgov-prefix}--text-area {
+      background-color: var(--#{vars.$bcgov-prefix}-field-01, #f4f4f4);
+      border-bottom: 1px solid var(--#{vars.$bcgov-prefix}-border-strong-01, #8d8d8d);
+    }
+  }
+
+  .germ-result-fields {
+    display: flex;
+    gap: 1rem;
+  }
+
+  // Sized to the widest value, PV's `100/21`.
+  .germ-result-field {
+    width: 6rem;
+  }
+
+  // Moisture gives its one result table 2rem above and below; here two tables
+  // share it.
+  .consep-germination-content-table {
+    margin: 2rem -1rem 0;
+  }
+
+  // The Activities grid (#2788): two rows under one set of date columns, sized
+  // to its content like the daily germination table below it.
+  .consep-germination-content-activity-dates {
+    margin-top: 2rem;
+
+    .germ-activity-table {
+      border-collapse: collapse;
+
+      th,
+      td {
+        padding: 0.25rem;
+        vertical-align: middle;
+      }
+
+      thead th {
+        @include type.type-style('label-01');
+        text-align: start;
+        background-color: var(--#{vars.$bcgov-prefix}-layer-accent-01, #e0e0e0);
+      }
+
+      tbody th {
+        @include type.type-style('label-01');
+        text-align: start;
+        font-weight: normal;
+        white-space: nowrap;
+      }
+
+      // Every cell is the same small box, as in Figma; Carbon's date picker is far wider by default.
+      .#{vars.$bcgov-prefix}--date-picker-container,
+      .#{vars.$bcgov-prefix}--date-picker__input,
+      .#{vars.$bcgov-prefix}--text-input {
+        inline-size: 9rem;
+        min-inline-size: 0;
+      }
+
+      // Read-only derived dates get the same field look as the editable ones (moisture style).
+      .#{vars.$bcgov-prefix}--date-picker__input[readonly] {
+        background-color: var(--#{vars.$bcgov-prefix}-field-01, #f4f4f4);
+        border-bottom: 1px solid var(--#{vars.$bcgov-prefix}-border-strong-01, #8d8d8d);
+      }
+    }
+  }
+}
+
+.consep-germination-content-alert {
+  margin-bottom: 2rem;
+  position: fixed;
+  top: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 1000;
 }
 
 // The count-date modal is nothing but a calendar, so it sizes itself to one.
