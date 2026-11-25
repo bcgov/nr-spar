@@ -12,6 +12,7 @@ public final class Sprr001HtmlSamples {
 
   private Sprr001HtmlSamples() {}
 
+  /** Builds report data for a submitted Class B Coastal Douglas-fir seedlot. */
   public static Sprr001ReportData classB() {
     Sprr001MainRow r = new Sprr001MainRow();
     r.setDbName("SPAR TEST");

@@ -27,8 +27,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * Native-image hints for Hibernate and the PostgreSQL driver that Spring's AOT processing does not
- * cover. Recorded with the native-image tracing agent (see {@code NativeImageFlowsIntegrationTest}),
- * then written as hints.
+ * cover. Recorded with the native-image tracing agent (see
+ * {@code NativeImageFlowsIntegrationTest}), then written as hints.
  */
 public class HibernatePostgresRuntimeHints implements RuntimeHintsRegistrar {
 
