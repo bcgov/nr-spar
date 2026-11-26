@@ -32,7 +32,8 @@ const userManager = new UserManager({
   authority: env.VITE_KEYCLOAK_ISSUER || DEV_ISSUER,
   client_id: KEYCLOAK_CLIENT_ID,
   redirect_uri: `${window.location.origin}${AUTH_CALLBACK_PATH}`,
-  post_logout_redirect_uri: `${window.location.origin}/`,
+  // CSS registers the bare origin; a trailing slash fails Keycloak's exact match in test/prod.
+  post_logout_redirect_uri: window.location.origin,
   response_type: 'code',
   scope: 'openid',
   userStore: new WebStorageStateStore({ store: window.localStorage })

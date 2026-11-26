@@ -63,8 +63,9 @@ jobs:
         run: |
           case "${{ inputs.target }}" in
             prod) host=loginproxy.gov.bc.ca ;;
-            test) host=test.loginproxy.gov.bc.ca ;;
-            *) host=dev.loginproxy.gov.bc.ca ;;
+            # PRs use the test realm too: the dev realm reads the BCeID development
+            # directory, where our Business BCeID test accounts don't exist.
+            *) host=test.loginproxy.gov.bc.ca ;;
           esac
           echo "keycloak-issuer=https://${host}/auth/realms/standard" >> $GITHUB_OUTPUT
 
