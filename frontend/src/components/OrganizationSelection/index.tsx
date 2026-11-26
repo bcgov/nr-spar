@@ -34,7 +34,9 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
     setClientRolesToSet
   ] = useState<UserClientRolesType | null>(selectedClientRoles);
 
-  useQueries({
+  // Render from these results: reading them is what makes the list re-render when a
+  // name arrives (react-query v5 only notifies on tracked props).
+  const orgQueries = useQueries({
     queries: user?.clientRoles.map((clientRole) => ({
       // Not a conventional query key,
       // be we need the 'role' here to distinguish the data is for roles only,
@@ -98,10 +100,9 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
     }
   };
 
-  const renderOrgItem = (clientRole: UserClientRolesType) => {
-    const queryKey = ['role', 'forest-clients', clientRole.clientId];
-    const queryState = qc.getQueryState(queryKey);
-    const queryData: ForestClientType | undefined = qc.getQueryData(queryKey);
+  const renderOrgItem = (clientRole: UserClientRolesType, index: number) => {
+    const queryState = orgQueries[index];
+    const queryData = queryState?.data;
 
     // Render skeleton on load
     if (queryState?.status === 'pending') {
@@ -178,8 +179,8 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
         <ul aria-label="List of Organization">
           {
             user?.clientRoles
-              .map((clientRole) => (
-                renderOrgItem(clientRole)
+              .map((clientRole, index) => (
+                renderOrgItem(clientRole, index)
               ))
           }
         </ul>
