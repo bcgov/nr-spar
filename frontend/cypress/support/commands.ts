@@ -57,6 +57,8 @@ Cypress.Commands.add('login', () => cy
         cy.clearAllCookies();
         cy.clearAllLocalStorage();
         cy.clearAllSessionStorage();
+        // TEMP debug (#2847): log what the org list receives in CI. Remove before merge.
+        cy.intercept('GET', '**/api/forest-clients/*').as('fcDebug');
         cy.visit('/');
         cy.getByDataTest(loginBtnId).click();
 
@@ -107,6 +109,20 @@ Cypress.Commands.add('login', () => cy
           }
         });
 
+        // TEMP debug (#2847)
+        cy.url({ timeout: 60000 }).should('not.include', 'gov.bc.ca');
+        cy.wait(10000); // eslint-disable-line cypress/no-unnecessary-waiting
+        cy.window().then((win) => {
+          const key = Object.keys(win.localStorage).find((k) => k.startsWith('oidc.user'));
+          const token = key ? JSON.parse(win.localStorage.getItem(key)!).access_token : '';
+          const claims = token ? JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))) : {};
+          cy.task('log', [`[fc-debug] url=${win.location.href} roles=${JSON.stringify(claims.client_roles)} idp=${claims.identity_provider}`]);
+        });
+        cy.get('@fcDebug.all').then((calls) => {
+          cy.task('log', [`[fc-debug] ${calls.length} forest-client calls`]);
+          (calls as unknown as Array<{ request: { url: string }, response?: { statusCode: number, body: unknown } }>)
+            .forEach((c) => cy.task('log', [`[fc-debug] ${c.request.url} -> ${c.response?.statusCode ?? 'no response'} ${JSON.stringify(c.response?.body ?? null).slice(0, 200)}`]));
+        });
         cy.get('.bx--contained-list-item__content')
           .contains('WESTERN FOREST PRODUCTS INC.')
           .click();
