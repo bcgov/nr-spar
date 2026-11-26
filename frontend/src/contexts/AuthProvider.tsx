@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState
 } from 'react';
-import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
+import { ErrorTimeout, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import axios from 'axios';
 import { UserClientRolesType } from '../types/UserRoleType';
 import { env } from '../env';
@@ -125,6 +125,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       return famUser;
     } catch (e) {
       console.warn(e);
+      // A failed fetch (e.g. the page navigating away mid-refresh) says nothing about the
+      // session. Clearing storage here would sign out the next page and every other tab.
+      if (e instanceof TypeError || e instanceof ErrorTimeout) {
+        return null;
+      }
       // Clear stored client id and name
       localStorage.clear();
       if (pathname !== AUTH_CALLBACK_PATH) {
