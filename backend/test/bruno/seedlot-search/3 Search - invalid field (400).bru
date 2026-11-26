@@ -1,0 +1,30 @@
+meta {
+  name: 3 Search - invalid field (400)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/seedlots/search
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "filter": {
+      "criteria": [
+        { "field": "applicantEmailAddress", "operator": "EQ", "values": ["someone@example.com"] }
+      ]
+    }
+  }
+}
+
+docs {
+  Not on the whitelist, so this returns 400 ProblemDetail:
+  { "title": "Invalid search request", "detail": "Unknown field 'applicantEmailAddress'. Allowed: [...]" }
+}

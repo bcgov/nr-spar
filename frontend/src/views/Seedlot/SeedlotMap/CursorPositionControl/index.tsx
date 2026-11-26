@@ -28,6 +28,16 @@ export const formatDms = (value: number, axis: 'lat' | 'lng'): string => {
 
 export const formatLatLng = (lat: number, lng: number): string => `${formatDms(lat, 'lat')}, ${formatDms(lng, 'lng')}`;
 
+/**
+ * Signed decimal degrees ("lat, lng"; south and west are negative), the
+ * form most GIS tools accept when pasted. 5 decimal places is about 1 m,
+ * matching the precision of the BC Albers and UTM rows.
+ */
+export const formatDecimalDegrees = (lat: number, lng: number): string => {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return '—';
+  return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+};
+
 export const formatBcAlbers = (lat: number, lng: number): string => {
   try {
     const [easting, northing] = wgs84ToBcAlbers([lng, lat]);
@@ -88,9 +98,9 @@ export const formatUtm = (lat: number, lng: number): string => {
 
 /**
  * Live cursor position display. Tracks the mouse over the Leaflet map
- * and renders the current coordinates in three formats: WGS84 lat/lng
- * (DMS), BC Albers easting/northing (EPSG:3005), and UTM zone +
- * easting/northing. Mirrors the legacy CWM CURSORPOS tool from
+ * and renders the current coordinates in four formats: WGS84 lat/lng
+ * (DMS and decimal degrees), BC Albers easting/northing (EPSG:3005),
+ * and UTM zone + easting/northing. Mirrors the legacy CWM CURSORPOS tool from
  * `cwmSparmap.jsp`'s map-config.json.
  *
  * Rendered as a floating div at the bottom-right of the map workspace,
@@ -122,6 +132,12 @@ const CursorPositionControl = () => {
         <span className="cursor-position-control__label">Lat/Lng</span>
         <span className="cursor-position-control__value">
           {formatLatLng(pos.lat, pos.lng)}
+        </span>
+      </div>
+      <div className="cursor-position-control__row">
+        <span className="cursor-position-control__label">Decimal</span>
+        <span className="cursor-position-control__value">
+          {formatDecimalDegrees(pos.lat, pos.lng)}
         </span>
       </div>
       <div className="cursor-position-control__row">

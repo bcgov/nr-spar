@@ -69,4 +69,24 @@ class GermCountRepositoryTest {
 
     assertThat(rows).isZero();
   }
+
+  @Test
+  void touchIfTimestampMatches_locksOnANeverStampedRow() {
+    persistRow(BigDecimal.valueOf(881192), null);
+
+    int first = germCountRepository.touchIfTimestampMatches(BigDecimal.valueOf(881192), null);
+    // The first touch stamped the row, so another writer still holding the null loses.
+    int second = germCountRepository.touchIfTimestampMatches(BigDecimal.valueOf(881192), null);
+
+    assertThat(first).isEqualTo(1);
+    assertThat(second).isZero();
+  }
+
+  @Test
+  void touchIfTimestampMatches_updatesNoRows_whenNullReadButRowStamped() {
+    persistRow(BigDecimal.valueOf(881193), LocalDateTime.of(2026, 4, 5, 14, 30, 0));
+
+    assertThat(germCountRepository.touchIfTimestampMatches(BigDecimal.valueOf(881193), null))
+        .isZero();
+  }
 }

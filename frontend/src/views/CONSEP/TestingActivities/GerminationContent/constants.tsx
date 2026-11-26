@@ -297,7 +297,9 @@ export const getDailyGermColumns = (
   isEditable: boolean,
   validationErrors: Record<string, string>,
   handlers: DailyGermHandlers,
-  highlightedSlot: number | null
+  highlightedSlot: number | null,
+  // A completed test locks the counts but not the Accept boxes (#2756).
+  canToggleAccept: boolean = isEditable
 ): MRT_ColumnDef<GermTableRow>[] => [
   {
     accessorKey: 'replicateNumber',
@@ -365,8 +367,9 @@ export const getDailyGermColumns = (
     Cell: ({ row }: { row: { original: GermTableRow } }) => (
       <Checkbox
         size="small"
-        checked={row.original.repAcceptedInd === 1}
-        disabled={!isEditable || !!validationErrors[`rep-${row.original.replicateNumber}`]}
+        // Legacy rows store "accepted" as -1; only an explicit 0 rejects, as in the calculation.
+        checked={row.original.repAcceptedInd !== 0}
+        disabled={!canToggleAccept || !!validationErrors[`rep-${row.original.replicateNumber}`]}
         slotProps={{
           input: {
             'data-testid': `germ-acc-${row.original.replicateNumber}`,

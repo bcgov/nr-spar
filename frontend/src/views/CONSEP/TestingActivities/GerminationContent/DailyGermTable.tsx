@@ -23,7 +23,7 @@ import './styles.scss';
 type DailyGermTableProps = {
   slots: GermCountSlotType[];
   replicates: GermReplicateType[];
-  germinatorEntry?: string;
+  dayZero?: string;
   isEditable: boolean;
   validationErrors: Record<string, string>;
   onSlotsChange: (slots: GermCountSlotType[]) => void;
@@ -38,12 +38,17 @@ type DailyGermTableProps = {
   isHydrated?: boolean;
   /** Where Enter goes after replicate 4: the abnormals table's first cell. */
   firstAbnormalCode?: string;
+  /**
+   * Given on a completed (not accepted) test: its Accept boxes stay live while
+   * everything else is read-only, and a tick goes here instead of autosave (#2756).
+   */
+  onAcceptToggle?: (repNumber: number, checked: boolean) => void;
 };
 
 const DailyGermTable = ({
-  slots, replicates, germinatorEntry, isEditable,
+  slots, replicates, dayZero, isEditable,
   validationErrors, onSlotsChange, onReplicatesChange, onSlotSelect,
-  isHydrated = false, firstAbnormalCode
+  isHydrated = false, firstAbnormalCode, onAcceptToggle
 }: DailyGermTableProps) => {
   // Which column's date the modal is editing, if any.
   const [editingSlot, setEditingSlot] = useState<number | null>(null);
@@ -96,7 +101,7 @@ const DailyGermTable = ({
       // germinator entry date, so editing one column does not blank a day
       // number the record already carries.
       dayNoOfTest: isoDate
-        ? calcDayNumber(resolveDayZero(germinatorEntry, slots, slotIndex), isoDate)
+        ? calcDayNumber(resolveDayZero(dayZero, slots, slotIndex), isoDate)
         : undefined,
       ...cleared
     });
@@ -236,9 +241,9 @@ const DailyGermTable = ({
       }
       updateReplicate(repNumber, { totalNoSeeds: parsed });
     },
-    onAcceptToggle: (repNumber, checked) => {
+    onAcceptToggle: onAcceptToggle ?? ((repNumber, checked) => {
       updateReplicate(repNumber, { repAcceptedInd: checked ? 1 : 0 });
-    }
+    })
   };
 
   const rows = useMemo<GermTableRow[]>(
@@ -246,7 +251,14 @@ const DailyGermTable = ({
     [slots, replicates]
   );
 
-  const columns = getDailyGermColumns(slots, isEditable, validationErrors, handlers, highlightedSlot);
+  const columns = getDailyGermColumns(
+    slots,
+    isEditable,
+    validationErrors,
+    handlers,
+    highlightedSlot,
+    isEditable || !!onAcceptToggle
+  );
 
   const errorEntries = Object.entries(validationErrors).filter(([, message]) => Boolean(message));
 

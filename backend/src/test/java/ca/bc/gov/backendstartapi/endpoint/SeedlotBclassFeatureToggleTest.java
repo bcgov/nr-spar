@@ -9,11 +9,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.report.SeedlotRegistrationReportService;
+import ca.bc.gov.backendstartapi.report.html.Sprr001HtmlReportService;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotCollectionGeometryService;
 import ca.bc.gov.backendstartapi.service.SeedlotCopyService;
+import ca.bc.gov.backendstartapi.service.SeedlotSearchService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -43,10 +44,11 @@ class SeedlotBclassFeatureToggleTest {
   @MockitoBean private SaveSeedlotFormService saveSeedlotFormService;
   @MockitoBean private SeedlotCollectionGeometryService seedlotCollectionGeometryService;
   @MockitoBean private LoggedUserService loggedUserService;
+  @MockitoBean private SeedlotSearchService seedlotSearchService;
   @MockitoBean private SmpCalculationCsvTableParser smpCalculationCsvTableParser;
   @MockitoBean private ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
 
-  @MockitoBean private SeedlotRegistrationReportService seedlotRegistrationReportService;
+  @MockitoBean private Sprr001HtmlReportService sprr001HtmlReportService;
 
   private static final String SEEDLOT = "53001";
 
@@ -125,7 +127,7 @@ class SeedlotBclassFeatureToggleTest {
                 .accept(MediaType.APPLICATION_PDF))
         .andExpect(status().isForbidden());
 
-    verify(seedlotRegistrationReportService, never())
+    verify(sprr001HtmlReportService, never())
         .generateBclassRegistrationReport(anyString(), anyString());
   }
 

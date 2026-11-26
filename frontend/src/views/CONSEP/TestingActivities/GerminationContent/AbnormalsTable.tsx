@@ -196,7 +196,7 @@ const AbnormalsTable = ({
         Abnormal seedlings
         {slot?.countDt && (
           <span className="abnormals-table-day">
-            {` — ${slot.countDt}${slot.dayNoOfTest === undefined ? '' : ` (day ${slot.dayNoOfTest})`}`}
+            {` — ${slot.countDt}${slot.dayNoOfTest == null ? '' : ` (day ${slot.dayNoOfTest})`}`}
           </span>
         )}
       </h3>

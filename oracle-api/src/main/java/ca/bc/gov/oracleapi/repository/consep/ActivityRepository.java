@@ -185,6 +185,8 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
    *
    * @return rows updated; 0 means the row changed since it was read (409).
    */
+  // Legacy rows can have a null UPDATE_TIMESTAMP: a null expected value matches it, and the
+  // first save stamps the row, so a second writer holding the null still gets 0 rows (409).
   @Modifying
   @Transactional
   @Query("""
@@ -197,7 +199,8 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
              a.intermediateCleaner = :commentIsCritical,
              a.updateTimestamp = CURRENT_TIMESTAMP
        WHERE a.riaKey = :riaKey
-         AND a.updateTimestamp = :expectedUpdateTimestamp
+         AND (a.updateTimestamp = :expectedUpdateTimestamp
+           OR (a.updateTimestamp IS NULL AND :expectedUpdateTimestamp IS NULL))
       """)
   int updateGerminationTestActivity(
       @Param("riaKey") BigDecimal riaKey,

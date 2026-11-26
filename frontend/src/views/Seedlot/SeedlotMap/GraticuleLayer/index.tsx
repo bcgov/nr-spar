@@ -41,13 +41,13 @@ const formatLabel = (value: number, axis: 'lat' | 'lng'): string => {
  * vertical lines at sensible degree intervals, with axis labels at the
  * top/left edges.
  *
- * Self-managed L.LayerGroup added to the map directly (not registered
- * with Geoman or LayersControl) so it never interferes with the AOI
- * draw/edit flow or the layer panel state. Recomputed on every
+ * Self-managed L.LayerGroup added to the map directly (not made
+ * editable by Geoman, and not listed in the Layers panel) so it never
+ * interferes with the AOI draw/edit flow or the layer panel state. Recomputed on every
  * `moveend`/`zoomend` so the grid stays visible as the user pans/zooms.
  *
- * Visibility is driven by `graticuleVisible` in `SparMapContext` — the
- * AOI toolbar GRATICULE button flips that flag.
+ * Visibility is driven by `graticuleVisible` in `SparMapContext`. No
+ * toolbar button sets it at the moment (the Grid button was removed).
  */
 const GraticuleLayer = () => {
   const map = useMap();

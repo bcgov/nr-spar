@@ -4,7 +4,9 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.exception.ReportGenerationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSubmissionValidationException;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
+import ca.bc.gov.backendstartapi.search.InvalidSearchException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -41,7 +43,21 @@ public class RestExceptionEndpoint {
   }
 
   /**
-   * Handle Jasper report compilation or export failures.
+   * Handle invalid search requests (unknown field, disallowed operator, bad value).
+   *
+   * @param ex the search exception
+   * @return a 400 RFC 9457 problem detail
+   */
+  @ExceptionHandler(InvalidSearchException.class)
+  ProblemDetail invalidSearch(InvalidSearchException ex) {
+    ProblemDetail problem =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    problem.setTitle("Invalid search request");
+    return problem;
+  }
+
+  /**
+   * Handle report rendering failures.
    *
    * @param ex the report generation exception
    * @return a 500 response with a generic error message

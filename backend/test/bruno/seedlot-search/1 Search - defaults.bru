@@ -1,0 +1,24 @@
+meta {
+  name: 1 Search - defaults
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/seedlots/search
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {}
+}
+
+docs {
+  No filter, default sort (updatedAt DESC), page 0, size 20.
+  Non-TSC-admin users only see seedlots for their own client numbers.
+}

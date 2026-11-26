@@ -166,6 +166,8 @@ export const getTestingActivityListColumns = (): MRT_ColumnDef<TestingSearchResp
   {
     header: 'Result',
     accessorFn: (row) => getResultValue(row),
+    // Computed from several result columns, so the server cannot sort by it.
+    enableSorting: false,
     enableEditing: false,
     size: 90,
     ...tableCellProps()

@@ -17,6 +17,12 @@ import ca.bc.gov.oracleapi.dto.SpuDto;
 import ca.bc.gov.oracleapi.dto.SpzDto;
 import ca.bc.gov.oracleapi.endpoint.parameters.PaginatedViaQuery;
 import ca.bc.gov.oracleapi.endpoint.parameters.PaginationParameters;
+import ca.bc.gov.oracleapi.search.Criterion;
+import ca.bc.gov.oracleapi.search.FilterGroup;
+import ca.bc.gov.oracleapi.search.PageResponse;
+import ca.bc.gov.oracleapi.search.SearchOperator;
+import ca.bc.gov.oracleapi.search.SearchRequest;
+import ca.bc.gov.oracleapi.search.SortOrder;
 import ca.bc.gov.oracleapi.util.ModelMapper;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +48,15 @@ import org.springframework.context.annotation.ImportRuntimeHints;
   PaginatedViaQuery.class,
   PaginationParameters.class,
   ModelMapper.class,
-  ParentTreeByVegCodeDto.class
+  ParentTreeByVegCodeDto.class,
+  SearchRequest.class,
+  FilterGroup.class,
+  FilterGroup.Logic.class,
+  SearchOperator.class,
+  Criterion.class,
+  SortOrder.class,
+  PageResponse.class,
+  PageResponse.PageMeta.class
 })
 @ImportRuntimeHints(value = {HttpServletRequestRuntimeHint.class})
 public class NativeImageConfig {}
