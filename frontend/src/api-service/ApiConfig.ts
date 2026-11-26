@@ -89,6 +89,8 @@ const ApiConfig = {
 
   germCounts: `${oracleServerHost}/api/germ-counts`,
 
+  dryback: `${oracleServerHost}/api/dryback`,
+
   testReplicates: `${oracleServerHost}/api/test-replicates`
 };
 

@@ -7,7 +7,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   FlexGrid, Row, Column, InlineNotification, TextInput, TextArea, Modal
 } from '@carbon/react';
-import { Calculator, CheckmarkFilled, Time } from '@carbon/icons-react';
+import {
+  Calculator, CheckmarkFilled, Humidity, Time
+} from '@carbon/icons-react';
 
 import ROUTES from '../../../../routes/constants';
 import {
@@ -32,6 +34,7 @@ import ButtonGroup from '../ButtonGroup';
 import ActivityDates from './ActivityDates';
 import DailyGermTable from './DailyGermTable';
 import AbnormalsTable, { ABNORMAL_CATEGORIES } from './AbnormalsTable';
+import DrybackModal from './DrybackModal';
 import {
   getDefaultSeeds, validateCountDates, checkOverLimit, buildUpsertPayload,
   parseCountInput, formatPeakValue, withDayNumbers, ABNORMAL_MAX, REP_ABNORMAL_KEYS,
@@ -73,6 +76,7 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
   // eslint-disable-next-line react-hooks/refs
   headerRef.current = header;
   const [showTestHistory, setShowTestHistory] = useState(false);
+  const [showDryback, setShowDryback] = useState(false);
   const [slots, setSlots] = useState<GermCountSlotType[]>(emptySlots());
   const [replicates, setReplicates] = useState<GermReplicateType[]>([]);
   const [alert, setAlert] = useState<{ isSuccess: boolean; message: string } | null>(null);
@@ -437,6 +441,21 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
     calcMutation.mutate();
   };
 
+  // The modal saves the same RIA row (begin/end dates, update timestamp): this screen's
+  // pending saves go first, and the header is reread after, so its next PATCH is not a 409.
+  const openDryback = async () => {
+    if (!(await flushDatesRef.current()) || !(await flush())) {
+      setAlert({ isSuccess: false, message: 'Fix the errors on this test before opening Dryback.' });
+      return;
+    }
+    setShowDryback(true);
+  };
+
+  const closeDryback = () => {
+    setShowDryback(false);
+    headerQuery.refetch();
+  };
+
   const handleReloadOnConflict = async () => {
     // Refetch the header too (I5): dayZero drives day-number calc and
     // testCompleteInd gates isEditable, so a stale header would leave both
@@ -524,6 +543,17 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
       disabled: isAccepted || isConflict || calcMutation.isPending || acceptMutation.isPending,
       action: handleCalculate
     },
+    // Business rule: the dryback screen is for G64 tests only.
+    ...(header?.activityTypeCd === 'G64' ? [{
+      id: 'germination-dryback',
+      text: 'Dryback',
+      kind: 'tertiary',
+      size: 'lg',
+      icon: Humidity,
+      // Same lock as Calc: it moves the test's dates, so not once accepted.
+      disabled: isAccepted || isConflict,
+      action: openDryback
+    }] : []),
     {
       id: 'germination-test-history',
       text: 'Test history',
@@ -582,6 +612,18 @@ const GerminationTestContent = ({ riaKey }: { riaKey?: string }) => {
               />
             )}
           </Modal>
+          {showDryback && riaKey && (
+            <DrybackModal
+              riaKey={riaKey}
+              summary={{
+                activity: header.activityTypeCd,
+                lot: lotNumber(header),
+                species: header.vegetationState ?? ''
+              }}
+              stratStartDt={header.stratStartDt}
+              onClose={closeDryback}
+            />
+          )}
           <Row className="consep-germination-content-title">
             <PageTitle title={`Germination test result for lot ${lotNumber(header)}`} />
             <>

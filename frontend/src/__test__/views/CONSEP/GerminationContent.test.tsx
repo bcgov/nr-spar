@@ -61,6 +61,11 @@ vi.mock('../../../api-service/consep/germinationTestAPI', () => ({
   )
 }));
 
+vi.mock('../../../api-service/consep/drybackAPI', () => ({
+  getDryback: () => new Promise(() => {}),
+  putDryback: vi.fn()
+}));
+
 vi.mock('../../../api-service/consep/searchTestingActivitiesAPI', () => ({
   searchTestingActivities: vi.fn().mockResolvedValue({
     content: [],
@@ -191,6 +196,23 @@ describe('GerminationContent', () => {
 
     expect(await screen.findByTestId('germ-acc-2')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Calc' })).toBeDisabled();
+  });
+
+  it('does not offer Dryback on a non-G64 test (#2795)', async () => {
+    renderView();
+    await screen.findByText(/Germination test result/i);
+    expect(screen.queryByRole('button', { name: 'Dryback' })).not.toBeInTheDocument();
+  });
+
+  it('opens the Dryback modal on a G64 test (#2795)', async () => {
+    vi.mocked(getGerminationTestHeader).mockResolvedValueOnce({
+      ...headerWith({ testCompleteInd: 0, acceptResultInd: 0 }), activityTypeCd: 'G64'
+    });
+    renderView();
+    await screen.findByText(/Germination test result/i);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dryback' }));
+    expect(await screen.findByText('G64 Dryback Calculation')).toBeInTheDocument();
   });
 
   it('shows the tray-derived dates read-only and saves an edited begin date via PATCH', async () => {

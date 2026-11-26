@@ -332,7 +332,7 @@ export const activityDatesFromHeader = (header: GerminationTestHeaderType): Acti
 });
 
 /** Keeps the stored time of day when only the date is changed. */
-const withTime = (isoDate: string | undefined, stored: string | undefined) => {
+export const withTime = (isoDate: string | undefined, stored: string | undefined) => {
   if (!isoDate) {
     return undefined;
   }
