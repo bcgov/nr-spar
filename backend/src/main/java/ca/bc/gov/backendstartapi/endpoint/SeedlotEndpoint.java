@@ -11,17 +11,21 @@ import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDtoClassB;
+import ca.bc.gov.backendstartapi.dto.SeedlotSearchResultDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
+import ca.bc.gov.backendstartapi.search.PageResponse;
+import ca.bc.gov.backendstartapi.search.SearchRequest;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.RequiresSeedlotB;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotCollectionGeometryService;
 import ca.bc.gov.backendstartapi.service.SeedlotCopyService;
+import ca.bc.gov.backendstartapi.service.SeedlotSearchService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -86,6 +90,8 @@ public class SeedlotEndpoint {
   private final SeedlotCollectionGeometryService seedlotCollectionGeometryService;
 
   private final LoggedUserService loggedUserService;
+
+  private final SeedlotSearchService seedlotSearchService;
 
   /**
    * Parse the CSV table in {@code file} and return the data stored in it.
@@ -888,5 +894,39 @@ public class SeedlotEndpoint {
     long finished = Instant.now().toEpochMilli();
     SparLog.info("Time spent: {} ms - submit B-class seedlot form", (finished - started));
     return ResponseEntity.status(HttpStatus.CREATED).body(result);
+  }
+
+  /**
+   * Searches seedlots the logged user can access.
+   *
+   * @param request filter, sort and paging
+   * @return one page of results
+   */
+  @PostMapping(path = "/search", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @Operation(
+      summary = "Search seedlots",
+      description =
+          """
+          Filterable fields: seedlotNumber, status, geneticClass, species, applicantClientNumber,
+          intendedForCrownLand, collectionStartDate, createdAt, updatedAt.
+          Child collections (EXISTS / NOT_EXISTS with 'where'): orchards (orchardId, isPrimary),
+          owners (clientNumber, locationCode, fundingSource).
+          Non-TSC-admin users only see seedlots for their own client numbers.
+          Page size defaults to 20 (max 100); default sort is updatedAt DESC.
+          """,
+      responses = {
+        @ApiResponse(responseCode = "200", description = "A page of matching seedlots"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Unknown field, disallowed operator or invalid value",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public PageResponse<SeedlotSearchResultDto> search(@Valid @RequestBody SearchRequest request) {
+    return seedlotSearchService.search(request);
   }
 }
