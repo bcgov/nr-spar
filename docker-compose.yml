@@ -14,9 +14,9 @@ x-frontend: &frontend
   environment:
     VITE_SERVER_URL: http://localhost:8090
     VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
+    # The test Oracle API only accepts test-realm tokens.
+    VITE_KEYCLOAK_ISSUER: https://test.loginproxy.gov.bc.ca/auth/realms/standard
     LOG_LEVEL: debug
-    VITE_USER_POOLS_ID: ca-central-1_UpeAqsYt4
-    VITE_USER_POOLS_WEB_CLIENT_ID: 3lhqndjq897v4menht7hp1u1s2
     VITE_ZONE: TEST
     VITE_SEEDLOT_B_ENABLED: ${VITE_SEEDLOT_B_ENABLED:-true}
   healthcheck:
@@ -45,8 +45,8 @@ services:
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
+      KEYCLOAK_ISSUER_URI: https://test.loginproxy.gov.bc.ca/auth/realms/standard
       POSTGRES_HOST: database
-      AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_UpeAqsYt4"
       SEEDLOT_B_ENABLED: ${SEEDLOT_B_ENABLED:-true}
       <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
@@ -105,7 +105,6 @@ services:
       SERVER_PORT: "8091"
       ORACLEDB_KEYSTORE: /app/jssecacerts
       ORACLEDB_SECRET: changeit
-      AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_UpeAqsYt4"
     profiles: ["oracle-api"]
     network_mode: host
     image: maven:3.10.0-eclipse-temurin-17

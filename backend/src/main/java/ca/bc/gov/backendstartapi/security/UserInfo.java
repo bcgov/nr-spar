@@ -27,8 +27,8 @@ import lombok.NonNull;
  *     Business BCeID}
  * @param identityProvider the identity provider used to authenticate this user. This prop comes
  *     from the JWT {@code identity_provider} claim
- * @param roles The user's roles. This prop comes from the JWT {@code cognito:groups} claim
- * @param clientIds The user client ids. This prop comes from the JWT {@code cognito:groups} claim
+ * @param roles The user's roles. This prop comes from the JWT {@code client_roles} claim
+ * @param clientIds The user client ids. This prop comes from the JWT {@code client_roles} claim
  * @param jwtToken The user's JWT token
  */
 public record UserInfo(

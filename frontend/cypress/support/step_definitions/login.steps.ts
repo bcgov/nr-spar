@@ -9,6 +9,23 @@ When('I click the {string} login button', (provider: string) => {
   cy.getByDataTest(`landing-button__${provider}`).click();
 });
 
+Given('BC Gov SSO sign-in is stubbed', () => {
+  cy.intercept('GET', '**/auth/realms/standard/protocol/openid-connect/auth*', {
+    statusCode: 200,
+    body: '<html><body>BC Gov SSO</body></html>',
+    headers: { 'content-type': 'text/html' }
+  }).as('ssoAuthorize');
+});
+
+Then('I am sent to BC Gov SSO with the {string} identity provider', (idpHint: string) => {
+  cy.wait('@ssoAuthorize').its('request.url').should((url: string) => {
+    const params = new URL(url).searchParams;
+    expect(params.get('kc_idp_hint')).to.eq(idpHint);
+    expect(params.get('client_id')).to.eq('spar-seed-planning-and-registry-application-6734');
+    expect(params.get('code_challenge_method')).to.eq('S256');
+  });
+});
+
 Then('I should see the {string} logo', (logoId: string) => {
   cy.env(['LOGIN_SERVICE', 'idirLoginUrl', 'businessBceIdLoginUrl']).then((env) => {
     const loginUrl = env.LOGIN_SERVICE === 'BCeID'

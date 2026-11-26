@@ -107,8 +107,9 @@ Cypress.Commands.add('login', () => cy
           }
         });
 
+        // Each org name is a separate forest-clients call (8 for this user), slower than 4s.
         cy.get('.bx--contained-list-item__content')
-          .contains('WESTERN FOREST PRODUCTS INC.')
+          .contains('WESTERN FOREST PRODUCTS INC.', { timeout: THIRTY_SECONDS })
           .click();
         cy.get('.action-btn').contains('Continue').click();
 

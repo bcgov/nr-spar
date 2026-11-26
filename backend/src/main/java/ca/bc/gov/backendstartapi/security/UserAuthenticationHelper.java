@@ -24,13 +24,16 @@ public class UserAuthenticationHelper {
 
     if (authentication.isAuthenticated()) {
       if (authentication.getPrincipal() instanceof Jwt jwtPrincipal) {
-        // Provider IDIR or BCeID & username
-        String provider = jwtPrincipal.getClaimAsString("custom:idp_name");
-        boolean isIdirProvider = provider.equals("idir");
-        String idpUsername = jwtPrincipal.getClaimAsString("custom:idp_username");
+        // Provider IDIR or BCeID & username. IDIR-MFA reports itself as azureidir.
+        IdentityProvider provider =
+            IdentityProvider.fromClaim(jwtPrincipal.getClaimAsString("identity_provider"))
+                .orElseThrow();
+        boolean isIdirProvider = provider == IdentityProvider.IDIR;
+        String idpUsername =
+            jwtPrincipal.getClaimAsString(isIdirProvider ? "idir_username" : "bceid_username");
 
         // User name
-        String displayName = jwtPrincipal.getClaimAsString("custom:idp_display_name");
+        String displayName = jwtPrincipal.getClaimAsString("display_name");
         String firstName = "";
         String lastName = "";
 
@@ -56,9 +59,10 @@ public class UserAuthenticationHelper {
           lastName = displayName.substring(indexFirstSpace).trim();
         }
 
-        // User id {IDIR@USERNAME}
+        // User id {IDIR@USERNAME}. Stored in audit columns and used to find a user's own
+        // seedlots, favourites and saved searches, so it must not change with the provider alias.
         String cappedUsername = idpUsername.toUpperCase();
-        String cappedProvider = provider.toUpperCase();
+        String cappedProvider = provider.getClaimName().toUpperCase();
         String userId = String.format("%s@%s", cappedProvider, cappedUsername);
 
         // Email will be empty, until next FAM release
@@ -79,7 +83,7 @@ public class UserAuthenticationHelper {
                 displayName,
                 isIdirProvider ? idpUsername : null,
                 isIdirProvider ? null : idpUsername,
-                IdentityProvider.fromClaim(provider).orElseThrow(),
+                provider,
                 JwtSecurityUtil.getUserRolesFromJwt(jwtPrincipal),
                 JwtSecurityUtil.getClientIdsFromJwt(jwtPrincipal),
                 jwtPrincipal.getTokenValue());

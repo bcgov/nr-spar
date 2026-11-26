@@ -37,11 +37,13 @@ jobs:
       CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://nr-spar-${{ inputs.target }}-oracle-api.apps.silver.devops.gov.bc.ca
-      VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
-      VITE_USER_POOLS_WEB_CLIENT_ID: ${{ secrets.VITE_USER_POOLS_WEB_CLIENT_ID }}
+      # Must match the backend under test; PR and test deployments both use the test realm.
+      VITE_KEYCLOAK_ISSUER: https://test.loginproxy.gov.bc.ca/auth/realms/standard
       VITE_ZONE: TEST
       CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
     runs-on: ubuntu-26.04
+    # A stuck SSO login hangs cy.session with no timeout; fail fast instead of running 6 h.
+    timeout-minutes: 30
     steps:
       # Check triggers (omitted or matched)
       - uses: bcgov/action-diff-triggers@a80e4b3cf77b7e05f84e74030e3bfa08b717a574 # v1.2.1

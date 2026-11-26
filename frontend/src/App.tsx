@@ -4,11 +4,9 @@ import {
   RouteObject,
   RouterProvider
 } from 'react-router-dom';
-import { Amplify } from 'aws-amplify';
 import { ClassPrefix } from '@carbon/react';
 import { ToastContainer } from 'react-toastify';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import awsconfig from './aws-exports';
 
 import prefix from './styles/classPrefix';
 import './styles/custom.scss';
@@ -26,8 +24,6 @@ import ROUTES from './routes/constants';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { ThemePreference } from './utils/ThemePreference';
 import CustomQueryProvider from './components/CustomQueryProvider';
-
-Amplify.configure(awsconfig);
 
 /**
  * Create an app structure containing all the routes.
