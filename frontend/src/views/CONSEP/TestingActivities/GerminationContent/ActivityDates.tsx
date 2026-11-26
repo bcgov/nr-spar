@@ -4,10 +4,9 @@ import {
 } from '@carbon/react';
 
 import { GerminationTestHeaderType } from '../../../../types/consep/GerminationType';
-import { DATE_FORMAT, DATE_PLACEHOLDER } from './constants';
-import {
-  ActivityDatesType, isoToJsDate, parseCountDateInput, toLocalIsoDate
-} from './utils';
+import { DATE_FORMAT } from './constants';
+import { ActivityDatesType, isoToJsDate } from './utils';
+import GermDatePicker from './GermDatePicker';
 
 type EditableField = keyof ActivityDatesType;
 
@@ -40,40 +39,15 @@ const ActivityDates = ({
   header, dates, errors, isEditable, onChange
 }: ActivityDatesProps) => {
   const renderPicker = (field: EditableField, label: string) => (
-    <DatePicker
-      datePickerType="single"
-      allowInput
-      dateFormat={DATE_FORMAT}
-      value={dates[field] ? [isoToJsDate(dates[field] as string)] : []}
-      onChange={(picked: Array<Date>) => (
-        onChange(field, picked[0] ? toLocalIsoDate(picked[0]) : undefined)
-      )}
-    >
-      <DatePickerInput
-        id={`germ-activity-${field}`}
-        labelText={label}
-        hideLabel
-        placeholder={DATE_PLACEHOLDER}
-        autoComplete="off"
-        size="sm"
-        disabled={!isEditable}
-        invalid={!!errors[field]}
-        invalidText={errors[field]}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          // Picking fires the picker's onChange; this only catches a typed
-          // date or a cleared field. A half-typed date is ignored.
-          const raw = e.target.value;
-          if (!raw.trim()) {
-            onChange(field, undefined);
-            return;
-          }
-          const isoDate = parseCountDateInput(raw);
-          if (isoDate && isoDate !== dates[field]) {
-            onChange(field, isoDate);
-          }
-        }}
-      />
-    </DatePicker>
+    <GermDatePicker
+      id={`germ-activity-${field}`}
+      label={label}
+      hideLabel
+      value={dates[field]}
+      error={errors[field]}
+      disabled={!isEditable}
+      onChange={(isoDate) => onChange(field, isoDate)}
+    />
   );
 
   return (

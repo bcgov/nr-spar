@@ -261,3 +261,32 @@
     }
   }
 }
+
+.consep-dryback-modal {
+  .dryback-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.75rem;
+  }
+
+  .dryback-row {
+    margin-bottom: 1rem;
+  }
+
+  .dryback-targets {
+    padding: 1rem 1rem 0;
+    margin-bottom: 1rem;
+    border: 1px solid var(--cds-border-subtle);
+
+    legend {
+      padding: 0 0.25rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  .dryback-comments {
+    align-items: flex-end;
+  }
+}
