@@ -59,6 +59,14 @@ const completeSignInCallback = (): Promise<unknown> => {
   return callbackExchange;
 };
 
+// Concurrent callers (StrictMode's double effect, the refresh timer) share one refresh, as
+// Amplify's fetchAuthSession did. A second, later result re-renders App with new auth state.
+let silentRefresh: ReturnType<UserManager['signinSilent']> | null = null;
+const refreshSession = () => {
+  silentRefresh ??= userManager.signinSilent().finally(() => { silentRefresh = null; });
+  return silentRefresh;
+};
+
 const clientIdLocalStorageKey = 'selected-client-id';
 const clientNameLocalStorageKey = 'selected-client-name';
 
@@ -99,7 +107,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
         throw new Error('The user is not authenticated');
       }
       // Always refresh, like Amplify's forceRefresh: a fresh token carries revoked roles.
-      const oidcUser = await userManager.signinSilent();
+      const oidcUser = await refreshSession();
       if (!oidcUser) {
         throw new Error('The user session could not be refreshed');
       }
