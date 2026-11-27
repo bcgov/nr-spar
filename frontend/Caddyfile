@@ -22,7 +22,7 @@
 		X-Content-Type-Options "nosniff"
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		Referrer-Policy "same-origin"
-		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self)"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(self), fullscreen=(self)"
 		Content-Security-Policy "
 			base-uri 'self';
 			connect-src 'self' https://nr-forest-client-api-prod.api.gov.bc.ca https://geocoder.api.gov.bc.ca https://openmaps.gov.bc.ca {$VITE_AWS_DOMAIN} {$VITE_SERVER_URL} {$VITE_ORACLE_SERVER_URL} https://cognito-idp.ca-central-1.amazonaws.com/ https://*.execute-api.ca-central-1.amazonaws.com;

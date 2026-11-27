@@ -1,0 +1,3 @@
+# Local-only copy of the simulated balance, for debugging scale screens without hardware.
+# The original lives in src/__test__/__mocks__/MockTransport.ts (see its header).
+MockTransport.ts
