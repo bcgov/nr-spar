@@ -60,6 +60,15 @@ CYPRESS_USERNAME=LOAD-3-TEST
 CYPRESS_PASSWORD=[password-here]
 ```
 
+Optional, local development only:
+
+```sh
+# Use a simulated Tree Seed Centre balance instead of a real one on scale screens.
+# Also needs a local copy of the simulator; see src/utils/scale/createScaleTransport.ts.
+# Has no effect in deployed environments.
+VITE_SCALE_MOCK=true
+```
+
 ✅ You can export all environment variables from a .env file with this command (On Linux):
 
 ```sh
