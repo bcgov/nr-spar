@@ -6,9 +6,11 @@ import ca.bc.gov.oracleapi.exception.UserNotFoundException;
 import ca.bc.gov.oracleapi.response.EditConflictResponse;
 import ca.bc.gov.oracleapi.response.ExceptionResponse;
 import ca.bc.gov.oracleapi.response.ValidationExceptionResponse;
+import ca.bc.gov.oracleapi.search.InvalidSearchException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -95,5 +97,19 @@ public class RestExceptionEndpoint {
   ResponseEntity<ExceptionResponse> userNotFound(UserNotFoundException ex) {
     ExceptionResponse exResponse = new ExceptionResponse(ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exResponse);
+  }
+
+  /**
+   * Handle invalid search requests.
+   *
+   * @param ex the search exception
+   * @return a 400 problem detail
+   */
+  @ExceptionHandler(InvalidSearchException.class)
+  ProblemDetail invalidSearch(InvalidSearchException ex) {
+    ProblemDetail problem =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    problem.setTitle("Invalid search request");
+    return problem;
   }
 }
