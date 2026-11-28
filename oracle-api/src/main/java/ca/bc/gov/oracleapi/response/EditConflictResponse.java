@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -12,5 +13,6 @@ public record EditConflictResponse(
     String code,
     @Schema(description = "Human-readable reason")
     String errorMessage,
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "The record's current update timestamp, when known")
     LocalDateTime currentUpdateTimestamp) {}
