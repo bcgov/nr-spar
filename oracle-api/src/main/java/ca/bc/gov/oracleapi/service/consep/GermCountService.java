@@ -358,13 +358,11 @@ public class GermCountService {
       return;
     }
     if (germCountRepository.touchIfTimestampMatches(riaSkey, read.getUpdateTimestamp()) == 0) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
+      throw new EditConflictException("Record changed since last read; please reselect and retry");
     }
     // The touch holds the row lock and cleared the context: re-read the locked row.
     GermCountEntity entity = germCountRepository.findById(riaSkey).orElseThrow(() ->
-        new ResponseStatusException(
-            HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry"));
+        new EditConflictException("Record changed since last read; please reselect and retry"));
     Integer[] totalSeeds = new Integer[4];
     boolean[] accepted = new boolean[4];
     readReplicates(

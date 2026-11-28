@@ -296,14 +296,21 @@ public class TestResultService {
       );
     }
 
-    // Validate selected seed tests and collect their GermTestResultDto values in one pass.
-    Map<BigDecimal, GermTestResultDto> germTestCache = collectAndValidateGermTestResults(requests);
-
-    // Lock every activity before creating anything, so a stale selection creates no trays.
-    for (GerminatorTrayCreateDto request : requests) {
+    // Lock activities in key order before validating mutable assignment state.
+    List<GerminatorTrayCreateDto> lockOrder = requests.stream()
+        .sorted(Comparator.comparing(GerminatorTrayCreateDto::riaSkey))
+        .toList();
+    for (int i = 1; i < lockOrder.size(); i++) {
+      if (lockOrder.get(i - 1).riaSkey().compareTo(lockOrder.get(i).riaSkey()) == 0) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate activity in request");
+      }
+    }
+    for (GerminatorTrayCreateDto request : lockOrder) {
       activityService.touchActivityOrConflict(
           request.riaSkey(), request.activityUpdateTimestamp());
     }
+
+    Map<BigDecimal, GermTestResultDto> germTestCache = collectAndValidateGermTestResults(requests);
 
     LocalDate today = LocalDate.now();
     LocalDateTime now = LocalDateTime.now();
@@ -1138,6 +1145,19 @@ public class TestResultService {
     String updRank = computeRankUpdate(
         accept, category, seedlotNumber, riaKey, updOriginal, updCurrent);
 
+    int activityRows = activityRepository.updateGerminationTestActivity(
+        riaKey, dto.actualBeginDateTime(), effectiveEnd,
+        dto.actualBeginDateTime() == null ? null : dto.actualBeginDateTime().toLocalDate(),
+        computeRevisedEndDate(effectiveEnd, dto.actualBeginDateTime(),
+            storedActivity.getActivityDuration(), storedActivity.getActivityTimeUnit()),
+        dto.riaComment(),
+        Boolean.TRUE.equals(dto.commentIsCritical()) ? -1 : 0,
+        dto.riaUpdateTimestamp());
+    if (activityRows == 0) {
+      throw new EditConflictException(
+          "Activity was modified by another user; reload and retry");
+    }
+
     boolean storedComplete = storedTest.getTestCompleteInd() != null
         && storedTest.getTestCompleteInd() != 0;
     if (complete && !storedComplete) {
@@ -1152,19 +1172,6 @@ public class TestResultService {
     if (testRows == 0) {
       throw new EditConflictException(
           "Test result was modified by another user; reload and retry");
-    }
-
-    int activityRows = activityRepository.updateGerminationTestActivity(
-        riaKey, dto.actualBeginDateTime(), effectiveEnd,
-        dto.actualBeginDateTime() == null ? null : dto.actualBeginDateTime().toLocalDate(),
-        computeRevisedEndDate(effectiveEnd, dto.actualBeginDateTime(),
-            storedActivity.getActivityDuration(), storedActivity.getActivityTimeUnit()),
-        dto.riaComment(),
-        Boolean.TRUE.equals(dto.commentIsCritical()) ? -1 : 0,
-        dto.riaUpdateTimestamp());
-    if (activityRows == 0) {
-      throw new EditConflictException(
-          "Activity was modified by another user; reload and retry");
     }
 
     if (updOriginal == -1) {

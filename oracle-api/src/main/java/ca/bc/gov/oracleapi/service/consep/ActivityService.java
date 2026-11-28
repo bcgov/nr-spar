@@ -132,15 +132,11 @@ public class ActivityService {
    *
    * @param riaKey the identifier key of the test
    * @param expectedUpdateTimestamp the activity updateTimestamp the client last read
-   * @throws ResponseStatusException 400 if the timestamp is missing, 404 if the activity is
-   *     absent, 409 ({@link EditConflictException}) if it changed since it was read
+   * @throws ResponseStatusException 404 if the activity is absent, 409
+   *     ({@link EditConflictException}) if it changed since it was read
    */
   public void touchActivityOrConflict(
       @NonNull BigDecimal riaKey, LocalDateTime expectedUpdateTimestamp) {
-    if (expectedUpdateTimestamp == null) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "updateTimestamp is required to edit an existing record");
-    }
     if (activityRepository.updateTimestampWhereMatch(riaKey, expectedUpdateTimestamp) == 0) {
       throw activityLockFailure(riaKey);
     }
@@ -466,7 +462,8 @@ public class ActivityService {
         e.getRiaKey().intValue(),
         e.getActivityTypeCode(),
         isGermTest ? -1 : 0,
-        null
+        null,
+        e.getUpdateTimestamp()
     );
   }
 
