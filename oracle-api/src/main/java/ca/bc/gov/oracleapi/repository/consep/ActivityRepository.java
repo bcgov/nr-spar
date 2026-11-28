@@ -136,7 +136,8 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       UPDATE ActivityEntity a
          SET a.updateTimestamp = CURRENT_TIMESTAMP
        WHERE a.riaKey = :riaKey
-         AND a.updateTimestamp = :updateTimestamp
+         AND (a.updateTimestamp = :updateTimestamp
+              OR (a.updateTimestamp IS NULL AND :updateTimestamp IS NULL))
       """)
   int updateTimestampWhereMatch(
       @Param("riaKey") BigDecimal riaKey,
@@ -159,7 +160,8 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
              a.riaComment = :riaComment,
              a.updateTimestamp = CURRENT_TIMESTAMP
        WHERE a.riaKey = :riaKey
-         AND a.updateTimestamp = :expectedUpdateTimestamp
+         AND (a.updateTimestamp = :expectedUpdateTimestamp
+              OR (a.updateTimestamp IS NULL AND :expectedUpdateTimestamp IS NULL))
       """)
   int updateActivityFieldWithLock(
       @Param("riaKey") BigDecimal riaKey,
