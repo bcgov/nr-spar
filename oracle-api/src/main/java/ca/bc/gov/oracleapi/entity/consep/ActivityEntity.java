@@ -100,7 +100,7 @@ public class ActivityEntity {
   @Column(name = "PROCESS_COMMIT_IND")
   private Integer processCommitIndicator;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+  @JsonFormat(shape = JsonFormat.Shape.STRING)
   @Column(name = "UPDATE_TIMESTAMP")
   private LocalDateTime updateTimestamp;
 
