@@ -135,7 +135,7 @@ class PurityTestsEndpointTest {
             "Comment for this test",
             LocalDateTime.parse("2013-08-01T00:00:00"),
             LocalDateTime.parse("2013-08-01T00:00:00"),
-            LocalDateTime.parse("2013-08-01T00:00:00"),
+            LocalDateTime.parse("2013-08-01T00:00:00.123456"),
             replicatesList,
             List.of(debris1)
         ));
@@ -162,6 +162,7 @@ class PurityTestsEndpointTest {
         .andExpect(jsonPath("$.activityType").value(purityContent.get().activityType()))
         .andExpect(jsonPath("$.testCategoryCode").value(purityContent.get().testCategoryCode()))
         .andExpect(jsonPath("$.riaComment").value(purityContent.get().riaComment()))
+        .andExpect(jsonPath("$.updateTimestamp").value("2013-08-01T00:00:00.123456"))
         .andExpect(jsonPath("$.actualBeginDateTime")
             .value(purityContent.get().actualBeginDateTime().format(formatter)))
         .andExpect(jsonPath("$.actualEndDateTime")
@@ -285,8 +286,25 @@ class PurityTestsEndpointTest {
   @Test
   @DisplayName("PUT autosave returns 400 without the updateTimestamp it locks on")
   void autosave_missingTimestamp_returns400() throws Exception {
-    putAutosave(new PurityAutosaveFormDto(activity("c", null), List.of()))
+    mockMvc.perform(put("/api/purity-tests/{riaKey}", RIA_KEY)
+            .with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"activity\":{\"riaComment\":\"c\"},\"replicates\":[]}"))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void autosave_acceptsNullAndPreservesFractionalTimestamp() throws Exception {
+    PurityAutosaveFormDto legacy = new PurityAutosaveFormDto(activity("legacy", null), List.of());
+    ActivityEntity saved = new ActivityEntity();
+    saved.setUpdateTimestamp(LocalDateTime.parse("2013-08-02T00:00:00.123456"));
+    when(purityTestService.autosave(RIA_KEY, legacy)).thenReturn(saved);
+    putAutosave(legacy).andExpect(status().isOk())
+        .andExpect(jsonPath("$.updateTimestamp").value("2013-08-02T00:00:00.123456"));
+
+    PurityAutosaveFormDto next = new PurityAutosaveFormDto(
+        activity("next", saved.getUpdateTimestamp()), List.of());
+    when(purityTestService.autosave(RIA_KEY, next)).thenReturn(saved);
+    putAutosave(next).andExpect(status().isOk());
   }
 
   @Test
@@ -378,6 +396,24 @@ class PurityTestsEndpointTest {
             replicateNumber).param("updateTimestamp", UPDATE_TS_PARAM)
             .with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  void deleteReplicate_acceptsExplicitEmptyLegacyTimestamp() throws Exception {
+    mockMvc.perform(delete("/api/purity-tests/{riaKey}/{replicateNumber}", 123, 1)
+            .param("updateTimestamp", "")
+            .with(csrf().asHeader()))
+        .andExpect(status().isOk());
+    org.mockito.Mockito.verify(purityTestService)
+        .deleteSinglePurityReplicate(new BigDecimal("123"), 1, null);
+  }
+
+  @Test
+  void deleteReplicate_rejectsMalformedTimestamp() throws Exception {
+    mockMvc.perform(delete("/api/purity-tests/{riaKey}/{replicateNumber}", 123, 1)
+            .param("updateTimestamp", "not-a-date")
+            .with(csrf().asHeader()))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -517,7 +553,7 @@ class PurityTestsEndpointTest {
   @DisplayName("Stale updateTimestamp returns 409 with the EDIT_CONFLICT body")
   void deleteDebris_staleTimestamp_returnsEditConflictBody() throws Exception {
     BigDecimal riaKey = new BigDecimal("1234567890");
-    LocalDateTime current = UPDATE_TS.plusMinutes(5);
+    LocalDateTime current = UPDATE_TS.plusMinutes(5).plusNanos(123456000);
     doThrow(new ca.bc.gov.oracleapi.exception.EditConflictException(
         ca.bc.gov.oracleapi.exception.EditConflictException.DEFAULT_MESSAGE, current))
         .when(purityTestService).deletePurityDebris(riaKey, 1, 1, UPDATE_TS);
@@ -530,7 +566,7 @@ class PurityTestsEndpointTest {
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.code").value("EDIT_CONFLICT"))
         .andExpect(jsonPath("$.errorMessage").isNotEmpty())
-        .andExpect(jsonPath("$.currentUpdateTimestamp").exists());
+        .andExpect(jsonPath("$.currentUpdateTimestamp").value("2024-05-01T10:20:30.123456"));
   }
 
   @Test

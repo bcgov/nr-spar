@@ -96,7 +96,8 @@ class ActivityEndpointTest {
         12345,                                             // riaSkey (mock value)
         validActivityCreateDto.activityTypeCd(),           // activityTypeCd
         0,                                                 // germTestInd
-        null                                               // assignedTrayInd
+        null,                                              // assignedTrayInd
+        null                                               // activityUpdateTimestamp
     );
 
   }

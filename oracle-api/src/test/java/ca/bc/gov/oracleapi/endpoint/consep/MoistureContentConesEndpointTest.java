@@ -287,7 +287,9 @@ class MoistureContentConesEndpointTest {
   @Test
   @DisplayName("PUT autosave returns 400 without the updateTimestamp it locks on")
   void autosave_missingTimestamp_returns400() throws Exception {
-    putAutosave(new MccAutosaveFormDto(activity("c", null), List.of()))
+    mockMvc.perform(put("/api/moisture-content-cone/{riaKey}", RIA_KEY)
+            .with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"activity\":{\"riaComment\":\"c\"},\"replicates\":[]}"))
         .andExpect(status().isBadRequest());
   }
 

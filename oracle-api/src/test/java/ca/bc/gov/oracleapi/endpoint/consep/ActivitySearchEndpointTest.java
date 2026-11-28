@@ -13,6 +13,7 @@ import ca.bc.gov.oracleapi.search.PageResponse;
 import ca.bc.gov.oracleapi.search.PageResponse.PageMeta;
 import ca.bc.gov.oracleapi.service.consep.ActivitySearchService;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -63,6 +64,8 @@ class ActivitySearchEndpointTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].seedlotDisplay").value("00098"))
         .andExpect(jsonPath("$.content[0].riaSkey").value(448383))
+        .andExpect(jsonPath("$.content[0].activityUpdateTimestamp")
+            .value("2026-05-01T10:15:30.123456"))
         .andExpect(jsonPath("$.page.totalElements").value(1))
         .andExpect(jsonPath("$.page.size").value(20));
   }
@@ -116,6 +119,6 @@ class ActivitySearchEndpointTest {
         "77//9", 0, 0, 0, 0, -1, -1, -1, LocalDate.of(1997, 10, 7).atTime(LocalTime.MAX),
         LocalDate.of(1997, 10, 10).atTime(LocalTime.MAX), LocalDate.of(1998, 10, 8).atStartOfDay(),
         LocalDate.of(1998, 11, 6).atTime(LocalTime.MAX), "Comment", 44115, "RTS19981299", "A",
-        "00098", 448383, "D1", 0, 0);
+        "00098", 448383, "D1", 0, 0, LocalDateTime.parse("2026-05-01T10:15:30.123456"));
   }
 }

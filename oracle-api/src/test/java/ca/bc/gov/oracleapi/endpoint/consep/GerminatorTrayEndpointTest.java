@@ -98,6 +98,21 @@ class GerminatorTrayEndpointTest {
   }
 
   @Test
+  void assignGerminatorTrays_requiresTimestampFieldButAcceptsNull() throws Exception {
+    mockMvc.perform(post(BASE_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("[{\"activityTypeCd\":\"G10\",\"riaSkey\":881191}]"))
+        .andExpect(status().isBadRequest());
+
+    mockMvc.perform(post(BASE_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("[{\"activityTypeCd\":\"G10\",\"riaSkey\":881191,"
+                + "\"activityUpdateTimestamp\":null}]"))
+        .andExpect(status().isCreated());
+
+    verify(testResultService).assignGerminatorTrays(
+        List.of(new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), null, null)));
+  }
+
+  @Test
   void assignGerminatorTrays_propagatesBadRequestFromService_andCallsService() throws Exception {
     // Arrange - empty request list
     List<GerminatorTrayCreateDto> requests = List.of();
@@ -766,7 +781,7 @@ class GerminatorTrayEndpointTest {
   }
 
   @Test
-  void deleteTray_returns400_whenUpdateTimestampIsNull() throws Exception {
+  void deleteTray_acceptsNullLegacyTimestamp() throws Exception {
     String body =
         """
         [{"riaSkey":881191,"updateTimestamp":null}]
@@ -779,8 +794,20 @@ class GerminatorTrayEndpointTest {
                 .param("revisionCount", "0")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isNoContent());
 
+    verify(germinatorTrayService).deleteTray(101, 0L,
+        List.of(new GerminatorTrayDeleteContentDto(new BigDecimal("881191"), null)));
+  }
+
+  @Test
+  void deleteTray_rejectsMissingTimestampField() throws Exception {
+    mockMvc.perform(post(BASE_URL + "/101/delete")
+            .with(csrf())
+            .param("revisionCount", "0")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("[{\"riaSkey\":881191}]"))
+        .andExpect(status().isBadRequest());
     verify(germinatorTrayService, times(0)).deleteTray(any(), any(), any());
   }
 
