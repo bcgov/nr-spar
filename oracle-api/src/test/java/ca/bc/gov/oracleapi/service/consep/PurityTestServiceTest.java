@@ -56,6 +56,8 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(MockitoExtension.class)
 class PurityTestServiceTest {
 
+  private static final LocalDateTime UPDATE_TS = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
+
   @Mock
   private ActivityRepository activityRepository;
 
@@ -246,7 +248,7 @@ class PurityTestServiceTest {
         replicateNumber, debrisRank, "NEW"
     );
 
-    List<PurityDebrisDto> result = purityTestService.updateDebris(riaKey, List.of(formDto));
+    List<PurityDebrisDto> result = purityTestService.updateDebris(riaKey, List.of(formDto), UPDATE_TS);
 
     assertEquals(1, result.size());
     assertEquals("NEW", result.get(0).debrisTypeCode());
@@ -277,7 +279,7 @@ class PurityTestServiceTest {
     when(debrisRepository.findByRiaKeyAndReplicateNumbers(eq(riaKey), anyList()))
         .thenReturn(List.of(entity));
   
-    List<PurityDebrisDto> result = purityTestService.updateDebris(riaKey, List.of(formDto));
+    List<PurityDebrisDto> result = purityTestService.updateDebris(riaKey, List.of(formDto), UPDATE_TS);
   
     assertEquals(1, result.size());
     assertEquals("ABC", result.get(0).debrisTypeCode());
@@ -382,7 +384,7 @@ class PurityTestServiceTest {
 
     doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
     assertDoesNotThrow(() -> purityTestService.deleteSinglePurityReplicate(
-        riaKey, replicateNumber));
+        riaKey, replicateNumber, UPDATE_TS));
 
     verify(replicateRepository, times(1)).deleteByRiaKeyAndReplicateNumber(riaKey, replicateNumber);
   }
@@ -396,7 +398,7 @@ class PurityTestServiceTest {
         Optional.empty());
 
     assertThrows(InvalidTestActivityKeyException.class,
-        () -> purityTestService.deleteSinglePurityReplicate(riaKey, replicateNumber));
+        () -> purityTestService.deleteSinglePurityReplicate(riaKey, replicateNumber, UPDATE_TS));
 
     verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
   }
@@ -412,7 +414,7 @@ class PurityTestServiceTest {
     doNothing().when(replicateRepository).deleteByRiaKeyAndReplicateNumbers(
         riaKey, replicateNumbers);
     assertDoesNotThrow(() -> purityTestService.deletePurityReplicates(
-        riaKey, replicateNumbers));
+        riaKey, replicateNumbers, UPDATE_TS));
 
     verify(replicateRepository, times(1))
         .deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
@@ -426,7 +428,7 @@ class PurityTestServiceTest {
         .thenReturn(Collections.emptyList());
 
     assertThrows(InvalidTestActivityKeyException.class, () -> {
-      purityTestService.deletePurityReplicates(riaKey, replicateNumbers);
+      purityTestService.deletePurityReplicates(riaKey, replicateNumbers, UPDATE_TS);
     });
 
     verify(replicateRepository, never())
@@ -447,7 +449,7 @@ class PurityTestServiceTest {
     when(debrisRepository.shiftRanksDown(riaKey, replicateNumber, debrisRank)).thenReturn(1);
 
     assertDoesNotThrow(() -> purityTestService.deletePurityDebris(
-        riaKey, replicateNumber, debrisRank));
+        riaKey, replicateNumber, debrisRank, UPDATE_TS));
   }
 
   @Test
@@ -457,7 +459,7 @@ class PurityTestServiceTest {
         riaKey, replicateNumber, debrisRank)).thenReturn(Optional.empty());
 
     assertThrows(InvalidTestActivityKeyException.class, () ->
-        purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank));
+        purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank, UPDATE_TS));
   }
 
   @Test
@@ -509,9 +511,9 @@ class PurityTestServiceTest {
         .when(activityService).assertTestEditable(riaKey);
 
     assertThrows(ResponseStatusException.class,
-        () -> purityTestService.updateDebris(riaKey, List.of()));
+        () -> purityTestService.updateDebris(riaKey, List.of(), UPDATE_TS));
     assertThrows(ResponseStatusException.class,
-        () -> purityTestService.deletePurityDebris(riaKey, 1, 1));
+        () -> purityTestService.deletePurityDebris(riaKey, 1, 1, UPDATE_TS));
     verify(debrisRepository, never()).saveAll(anyList());
   }
 
@@ -523,10 +525,30 @@ class PurityTestServiceTest {
 
     // 409 specifically: without the guard these throw 404 (no replicate found) instead.
     assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
-        () -> purityTestService.deletePurityReplicates(riaKey, List.of(1, 2))).getStatusCode());
+        () -> purityTestService.deletePurityReplicates(riaKey, List.of(1, 2), UPDATE_TS)).getStatusCode());
     assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
-        () -> purityTestService.deleteSinglePurityReplicate(riaKey, 1)).getStatusCode());
+        () -> purityTestService.deleteSinglePurityReplicate(riaKey, 1, UPDATE_TS)).getStatusCode());
     verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumbers(any(), any());
     verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
+  }
+
+  @Test
+  @DisplayName("stale updateTimestamp - nothing is deleted or saved")
+  void staleTimestamp_conflict_writesNothing() {
+    doThrow(new ca.bc.gov.oracleapi.exception.EditConflictException(
+        ca.bc.gov.oracleapi.exception.EditConflictException.DEFAULT_MESSAGE))
+        .when(activityService).touchActivityOrConflict(riaKey, UPDATE_TS);
+
+    assertThrows(ca.bc.gov.oracleapi.exception.EditConflictException.class,
+        () -> purityTestService.deletePurityReplicates(riaKey, List.of(1, 2), UPDATE_TS));
+    assertThrows(ca.bc.gov.oracleapi.exception.EditConflictException.class,
+        () -> purityTestService.deleteSinglePurityReplicate(riaKey, 1, UPDATE_TS));
+    assertThrows(ca.bc.gov.oracleapi.exception.EditConflictException.class,
+        () -> purityTestService.updateDebris(riaKey, List.of(), UPDATE_TS));
+    assertThrows(ca.bc.gov.oracleapi.exception.EditConflictException.class,
+        () -> purityTestService.deletePurityDebris(riaKey, 1, 1, UPDATE_TS));
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumbers(any(), any());
+    verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
+    verify(debrisRepository, never()).saveAll(anyList());
   }
 }

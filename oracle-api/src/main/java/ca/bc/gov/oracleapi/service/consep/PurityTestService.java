@@ -23,6 +23,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -201,13 +202,16 @@ public class PurityTestService {
    *
    * @param riaKey the identifier key for all table related to test activities
    * @param debrisFormDtos an object with the values to be updated
+   * @param updateTimestamp the activity updateTimestamp the client last read (optimistic lock)
    */
   @Transactional
   public List<PurityDebrisDto> updateDebris(
       @NonNull BigDecimal riaKey,
-      @NonNull List<PurityDebrisFormDto> debrisFormDtos
+      @NonNull List<PurityDebrisFormDto> debrisFormDtos,
+      LocalDateTime updateTimestamp
   ) {
     activityService.assertTestEditable(riaKey);
+    activityService.touchActivityOrConflict(riaKey, updateTimestamp);
     SparLog.info("Updating purity debris with the riaKey: {}", riaKey);
 
     List<PurityDebrisEntity> debrisToSave = new ArrayList<>();
@@ -325,13 +329,16 @@ public class PurityTestService {
    *
    * @param riaKey           the identifier key for all table related to tests activities
    * @param replicateNumbers the replicate numbers to be deleted
+   * @param updateTimestamp  the activity updateTimestamp the client last read (optimistic lock)
    */
   @Transactional
   public void deletePurityReplicates(
       @NonNull BigDecimal riaKey,
-      @NonNull List<Integer> replicateNumbers
+      @NonNull List<Integer> replicateNumbers,
+      LocalDateTime updateTimestamp
   ) {
     activityService.assertTestEditable(riaKey);
+    activityService.touchActivityOrConflict(riaKey, updateTimestamp);
     SparLog.info("Deleting purity replicates with the riaKey: {} and replicateNumbers: {}",
         riaKey, replicateNumbers);
 
@@ -354,13 +361,16 @@ public class PurityTestService {
    *
    * @param riaKey          the identifier key for all table related to tests activities
    * @param replicateNumber the replicate number to be deleted
+   * @param updateTimestamp the activity updateTimestamp the client last read (optimistic lock)
    */
   @Transactional
   public void deleteSinglePurityReplicate(
       @NonNull BigDecimal riaKey,
-      @NonNull Integer replicateNumber
+      @NonNull Integer replicateNumber,
+      LocalDateTime updateTimestamp
   ) {
     activityService.assertTestEditable(riaKey);
+    activityService.touchActivityOrConflict(riaKey, updateTimestamp);
     SparLog.info("Deleting single purity replicate with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
 
@@ -385,14 +395,17 @@ public class PurityTestService {
    * @param riaKey          the identifier key for all table related to tests activities
    * @param replicateNumber the replicate number of the debris to be deleted
    * @param debrisRank      the rank of the debris to be deleted
+   * @param updateTimestamp the activity updateTimestamp the client last read (optimistic lock)
    */
   @Transactional
   public List<PurityDebrisDto> deletePurityDebris(
       @NonNull BigDecimal riaKey,
       @NonNull Integer replicateNumber,
-      @NonNull Integer debrisRank
+      @NonNull Integer debrisRank,
+      LocalDateTime updateTimestamp
   ) {
     activityService.assertTestEditable(riaKey);
+    activityService.touchActivityOrConflict(riaKey, updateTimestamp);
     SparLog.info("Deleting single debris with the "
         + "riaKey: {}, replicateNumber: {} and rank: {}", riaKey, replicateNumber, debrisRank);
 

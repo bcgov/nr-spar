@@ -11,6 +11,7 @@ import ca.bc.gov.oracleapi.entity.consep.DailyAbnormalEntity;
 import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
 import ca.bc.gov.oracleapi.entity.consep.idclass.ReplicateId;
+import ca.bc.gov.oracleapi.exception.EditConflictException;
 import ca.bc.gov.oracleapi.mapper.GermCountMapper;
 import ca.bc.gov.oracleapi.mapper.TestRepGermFormMapper;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
@@ -179,14 +180,12 @@ public class GermCountService {
       // A null updateTimestamp is only accepted for a legacy row that has none (the touch checks).
       int rows = germCountRepository.touchIfTimestampMatches(riaSkey, request.updateTimestamp());
       if (rows == 0) {
-        throw new ResponseStatusException(
-            HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
+        throw new EditConflictException(EditConflictException.DEFAULT_MESSAGE);
       }
       // The guard above already stamped update_timestamp with the DB clock and cleared the
       // persistence context, so this re-read carries the authoritative new lock value.
       entity = germCountRepository.findById(riaSkey).orElseThrow(() ->
-          new ResponseStatusException(
-              HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry"));
+          new EditConflictException(EditConflictException.DEFAULT_MESSAGE));
     } else {
       entity = new GermCountEntity();
       LocalDateTime now = LocalDateTime.now();
@@ -359,13 +358,11 @@ public class GermCountService {
       return;
     }
     if (germCountRepository.touchIfTimestampMatches(riaSkey, read.getUpdateTimestamp()) == 0) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
+      throw new EditConflictException("Record changed since last read; please reselect and retry");
     }
     // The touch holds the row lock and cleared the context: re-read the locked row.
     GermCountEntity entity = germCountRepository.findById(riaSkey).orElseThrow(() ->
-        new ResponseStatusException(
-            HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry"));
+        new EditConflictException("Record changed since last read; please reselect and retry"));
     Integer[] totalSeeds = new Integer[4];
     boolean[] accepted = new boolean[4];
     readReplicates(

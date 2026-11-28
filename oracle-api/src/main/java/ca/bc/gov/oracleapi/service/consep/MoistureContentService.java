@@ -15,6 +15,7 @@ import ca.bc.gov.oracleapi.repository.consep.MccReplicatesRepository;
 import ca.bc.gov.oracleapi.repository.consep.TestResultRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -259,13 +260,16 @@ public class MoistureContentService {
    *
    * @param riaKey          the identifier key for all table related to MCC
    * @param replicateNumbers the replicate numbers to be deleted
+   * @param updateTimestamp the activity updateTimestamp the client last read (optimistic lock)
    */
   @Transactional
   public void deleteMccReplicates(
       @NonNull BigDecimal riaKey,
-      @NonNull List<Integer> replicateNumbers
+      @NonNull List<Integer> replicateNumbers,
+      LocalDateTime updateTimestamp
   ) {
     activityService.assertTestEditable(riaKey);
+    activityService.touchActivityOrConflict(riaKey, updateTimestamp);
     SparLog.info("Deleting replicates with the riaKey: {} and replicateNumbers: {}",
         riaKey, replicateNumbers);
 
@@ -288,13 +292,16 @@ public class MoistureContentService {
    *
    * @param riaKey          the identifier key for all table related to MCC
    * @param replicateNumber the replicate number to be deleted
+   * @param updateTimestamp the activity updateTimestamp the client last read (optimistic lock)
    */
   @Transactional
   public Optional<MoistureContentConesDto> deleteMccReplicate(
       @NonNull BigDecimal riaKey,
-      @NonNull Integer replicateNumber
+      @NonNull Integer replicateNumber,
+      LocalDateTime updateTimestamp
   ) {
     activityService.assertTestEditable(riaKey);
+    activityService.touchActivityOrConflict(riaKey, updateTimestamp);
     SparLog.info("Deleting a replicate tables with the "
         + "riaKey: {} and replicateNumber: {}", riaKey, replicateNumber);
 

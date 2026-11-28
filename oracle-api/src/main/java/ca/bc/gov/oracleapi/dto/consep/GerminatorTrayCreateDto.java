@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +25,12 @@ public record GerminatorTrayCreateDto(
 
     @Schema(description = "Actual begin date of the activity", example = "1994-09-22T00:00:00")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    LocalDateTime actualBeginDtTm
+    LocalDateTime actualBeginDtTm,
+
+    @Schema(
+        description = "Activity timestamp last read; explicitly null for a legacy null version",
+        example = "2024-05-01T10:15:30")
+    @JsonProperty(value = "activityUpdateTimestamp", required = true)
+    LocalDateTime activityUpdateTimestamp
 ) {
 }

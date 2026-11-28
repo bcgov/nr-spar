@@ -15,6 +15,7 @@ import ca.bc.gov.oracleapi.entity.consep.GermCountEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.projection.RequestSeedlotProj;
+import ca.bc.gov.oracleapi.exception.EditConflictException;
 import ca.bc.gov.oracleapi.mapper.GermCountMapper;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.GermCountRepository;
@@ -115,18 +116,41 @@ public class ActivityService {
         activityFormDto.updateTimestamp());
 
     if (rows == 0) {
-      if (activityRepository.existsById(riaKey)) {
-        SparLog.warn("Optimistic lock conflict updating activity riaKey: {}", riaKey);
-        throw new ResponseStatusException(
-            HttpStatus.CONFLICT,
-            "Activity was modified by another user; reload and retry");
-      }
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found");
+      throw activityLockFailure(riaKey);
     }
 
     SparLog.info("Activity with riaKey: {} updated successfully.", riaKey);
     return activityRepository.findById(riaKey).orElseThrow(
         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found"));
+  }
+
+  /**
+   * Optimistic lock for edits that change child rows of a test (replicates, debris) and so have no
+   * timestamp of their own: stamps the activity's update timestamp only if it still matches the
+   * one the caller read. Run it inside the caller's write transaction, after
+   * {@link #assertTestEditable(BigDecimal)}.
+   *
+   * @param riaKey the identifier key of the test
+   * @param expectedUpdateTimestamp the activity updateTimestamp the client last read
+   * @throws ResponseStatusException 404 if the activity is absent, 409
+   *     ({@link EditConflictException}) if it changed since it was read
+   */
+  public void touchActivityOrConflict(
+      @NonNull BigDecimal riaKey, LocalDateTime expectedUpdateTimestamp) {
+    if (activityRepository.updateTimestampWhereMatch(riaKey, expectedUpdateTimestamp) == 0) {
+      throw activityLockFailure(riaKey);
+    }
+  }
+
+  /** A 404 if the activity is gone, otherwise the 409 carrying its current timestamp. */
+  private ResponseStatusException activityLockFailure(BigDecimal riaKey) {
+    Optional<LocalDateTime> current = activityRepository.findUpdateTimestamp(riaKey);
+    if (current.isEmpty() && !activityRepository.existsById(riaKey)) {
+      return new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found");
+    }
+    SparLog.warn("Optimistic lock conflict on activity riaKey: {}", riaKey);
+    return new EditConflictException(
+        EditConflictException.DEFAULT_MESSAGE, current.orElse(null));
   }
 
   /**
@@ -438,7 +462,8 @@ public class ActivityService {
         e.getRiaKey().intValue(),
         e.getActivityTypeCode(),
         isGermTest ? -1 : 0,
-        null
+        null,
+        e.getUpdateTimestamp()
     );
   }
 

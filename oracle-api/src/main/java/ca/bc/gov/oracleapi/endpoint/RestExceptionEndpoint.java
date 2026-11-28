@@ -1,7 +1,9 @@
 package ca.bc.gov.oracleapi.endpoint;
 
+import ca.bc.gov.oracleapi.exception.EditConflictException;
 import ca.bc.gov.oracleapi.exception.UserExistsException;
 import ca.bc.gov.oracleapi.exception.UserNotFoundException;
+import ca.bc.gov.oracleapi.response.EditConflictResponse;
 import ca.bc.gov.oracleapi.response.ExceptionResponse;
 import ca.bc.gov.oracleapi.response.ValidationExceptionResponse;
 import ca.bc.gov.oracleapi.search.InvalidSearchException;
@@ -61,6 +63,19 @@ public class RestExceptionEndpoint {
   }
 
   /**
+   * Handle an optimistic-lock conflict.
+   *
+   * @param ex EditConflictException instance
+   * @return a 409 with the EDIT_CONFLICT code and, when known, the current update timestamp
+   */
+  @ExceptionHandler(EditConflictException.class)
+  ResponseEntity<EditConflictResponse> editConflict(EditConflictException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new EditConflictResponse(
+            EditConflictException.CODE, ex.getReason(), ex.getCurrentUpdateTimestamp()));
+  }
+
+  /**
    * Handle a user existing exception.
    *
    * @param ex UserExistsException instance
@@ -85,10 +100,10 @@ public class RestExceptionEndpoint {
   }
 
   /**
-   * Handle invalid search requests (unknown field, disallowed operator, bad value).
+   * Handle invalid search requests.
    *
    * @param ex the search exception
-   * @return a 400 RFC 9457 problem detail
+   * @return a 400 problem detail
    */
   @ExceptionHandler(InvalidSearchException.class)
   ProblemDetail invalidSearch(InvalidSearchException ex) {

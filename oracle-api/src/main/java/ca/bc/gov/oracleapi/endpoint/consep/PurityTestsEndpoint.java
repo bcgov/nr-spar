@@ -6,6 +6,7 @@ import ca.bc.gov.oracleapi.dto.consep.PurityDebrisDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityDebrisFormDto;
 import ca.bc.gov.oracleapi.dto.consep.PurityTestDto;
 import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
+import ca.bc.gov.oracleapi.response.EditConflictResponse;
 import ca.bc.gov.oracleapi.security.RoleAccessConfig;
 import ca.bc.gov.oracleapi.service.consep.ActivityService;
 import ca.bc.gov.oracleapi.service.consep.PurityTestService;
@@ -265,7 +266,13 @@ public class PurityTestsEndpoint {
           description = "The replicate entry was not found",
           content =
               @Content(
-                  schema = @Schema(implementation = Void.class)))
+                  schema = @Schema(implementation = Void.class))),
+      @ApiResponse(
+          responseCode = "409",
+          description = "Edit conflict: the record changed since updateTimestamp was read",
+          content =
+              @Content(
+                  schema = @Schema(implementation = EditConflictResponse.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public Integer deleteReplicate(
@@ -282,8 +289,16 @@ public class PurityTestsEndpoint {
           description = "Number of the replicate to delete",
           required = true)
       @PathVariable
-          Integer replicateNumber) {
-    purityTestService.deleteSinglePurityReplicate(riaKey, replicateNumber);
+          Integer replicateNumber,
+      @Parameter(
+          name = "updateTimestamp",
+          in = ParameterIn.QUERY,
+          description = "Activity timestamp last read; use an empty value for a null timestamp",
+          required = true)
+      @RequestParam(name = "updateTimestamp")
+          String updateTimestamp) {
+    purityTestService.deleteSinglePurityReplicate(
+        riaKey, replicateNumber, ActivityVersionParameter.parse(updateTimestamp));
     return replicateNumber;
   }
 
@@ -315,7 +330,13 @@ public class PurityTestsEndpoint {
           description = "The replicate entry was not found",
           content =
               @Content(
-                  schema = @Schema(implementation = Void.class)))
+                  schema = @Schema(implementation = Void.class))),
+    @ApiResponse(
+          responseCode = "409",
+          description = "Edit conflict: the record changed since updateTimestamp was read",
+          content =
+              @Content(
+                  schema = @Schema(implementation = EditConflictResponse.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
     public List<Integer> deleteReplicates(
@@ -332,8 +353,16 @@ public class PurityTestsEndpoint {
             in = ParameterIn.QUERY,
             description = "List of replicate numbers to delete",
             required = true)
-        @RequestParam(name = "ids") List<Integer> replicateNumbers) {
-    purityTestService.deletePurityReplicates(riaKey, replicateNumbers);
+        @RequestParam(name = "ids") List<Integer> replicateNumbers,
+        @Parameter(
+            name = "updateTimestamp",
+            in = ParameterIn.QUERY,
+            description = "Activity timestamp last read; use an empty value for a null timestamp",
+            required = true)
+        @RequestParam(name = "updateTimestamp")
+            String updateTimestamp) {
+    purityTestService.deletePurityReplicates(
+        riaKey, replicateNumbers, ActivityVersionParameter.parse(updateTimestamp));
     return replicateNumbers;
   }
 
@@ -356,7 +385,11 @@ public class PurityTestsEndpoint {
       value = {
           @ApiResponse(responseCode = "200", description = "Field successfully updated"),
           @ApiResponse(responseCode = "400", description = "Invalid object"),
-          @ApiResponse(responseCode = "404", description = "Replicate not found")
+          @ApiResponse(responseCode = "404", description = "Replicate not found"),
+          @ApiResponse(
+              responseCode = "409",
+              description = "Edit conflict: the record changed since updateTimestamp was read",
+              content = @Content(schema = @Schema(implementation = EditConflictResponse.class)))
       })
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<PurityDebrisDto> updateDebrisField(
@@ -369,9 +402,17 @@ public class PurityTestsEndpoint {
       BigDecimal riaKey,
       @Valid
       @RequestBody
-      List<PurityDebrisFormDto> debrisFormDtos) {
+      List<PurityDebrisFormDto> debrisFormDtos,
+      @Parameter(
+          name = "updateTimestamp",
+          in = ParameterIn.QUERY,
+          description = "Activity timestamp last read; use an empty value for a null timestamp",
+          required = true)
+      @RequestParam(name = "updateTimestamp")
+          String updateTimestamp) {
 
-    return purityTestService.updateDebris(riaKey, debrisFormDtos);
+    return purityTestService.updateDebris(
+        riaKey, debrisFormDtos, ActivityVersionParameter.parse(updateTimestamp));
   }
 
   /**
@@ -405,7 +446,13 @@ public class PurityTestsEndpoint {
           description = "The debris entry was not found",
           content =
               @Content(
-                  schema = @Schema(implementation = Void.class)))
+                  schema = @Schema(implementation = Void.class))),
+      @ApiResponse(
+          responseCode = "409",
+          description = "Edit conflict: the record changed since updateTimestamp was read",
+          content =
+              @Content(
+                  schema = @Schema(implementation = EditConflictResponse.class)))
   })
   @RoleAccessConfig({ "SPAR_TSC_SUBMITTER", "SPAR_TSC_SUPERVISOR" })
   public List<PurityDebrisDto> deleteDebris(
@@ -429,7 +476,15 @@ public class PurityTestsEndpoint {
           description = "Rank of the debris to be deleted",
           required = true)
       @PathVariable
-          Integer debrisRank) {
-    return purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank);
+          Integer debrisRank,
+      @Parameter(
+          name = "updateTimestamp",
+          in = ParameterIn.QUERY,
+          description = "Activity timestamp last read; use an empty value for a null timestamp",
+          required = true)
+      @RequestParam(name = "updateTimestamp")
+          String updateTimestamp) {
+    return purityTestService.deletePurityDebris(
+        riaKey, replicateNumber, debrisRank, ActivityVersionParameter.parse(updateTimestamp));
   }
 }

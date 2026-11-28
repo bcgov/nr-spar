@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Formula;
 
 /**
  * This class represents the data of testing activities related to requests in CONSEP.
@@ -123,4 +124,8 @@ public class ActivitySearchResultEntity {
 
   @Column(name = "GENETIC_CLASS_CODE", length = 8)
   private String geneticClassCode;
+
+  @Formula("(select a.UPDATE_TIMESTAMP from CONSEP.CNS_T_RQST_ITM_ACTVTY a"
+      + " where a.RIA_SKEY = RIA_SKEY)")
+  private LocalDateTime activityUpdateTimestamp;
 }

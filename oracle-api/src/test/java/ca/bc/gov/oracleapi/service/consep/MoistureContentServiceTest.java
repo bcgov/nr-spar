@@ -55,6 +55,8 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(MockitoExtension.class)
 class MoistureContentServiceTest {
 
+  private static final LocalDateTime UPDATE_TS = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
+
   @Mock
   private ActivityRepository activityRepository;
 
@@ -283,7 +285,8 @@ class MoistureContentServiceTest {
         .deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
 
     // Act & Assert
-    assertDoesNotThrow(() -> moistureContentService.deleteMccReplicates(riaKey, replicateNumbers));
+    assertDoesNotThrow(
+        () -> moistureContentService.deleteMccReplicates(riaKey, replicateNumbers, UPDATE_TS));
 
     verify(replicateRepository).findByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
     verify(replicateRepository).deleteByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
@@ -301,7 +304,7 @@ class MoistureContentServiceTest {
 
     // Act & Assert
     assertThrows(InvalidTestActivityKeyException.class,
-        () -> moistureContentService.deleteMccReplicates(riaKey, replicateNumbers));
+        () -> moistureContentService.deleteMccReplicates(riaKey, replicateNumbers, UPDATE_TS));
 
     verify(replicateRepository).findByRiaKeyAndReplicateNumbers(riaKey, replicateNumbers);
     verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumbers(any(), any());
@@ -316,7 +319,7 @@ class MoistureContentServiceTest {
 
     // Act & Assert
     assertThrows(InvalidTestActivityKeyException.class,
-        () -> moistureContentService.deleteMccReplicates(riaKey, replicateNumbers));
+        () -> moistureContentService.deleteMccReplicates(riaKey, replicateNumbers, UPDATE_TS));
   }
 
   @Test
@@ -535,7 +538,7 @@ class MoistureContentServiceTest {
         .thenReturn(Collections.emptyList()); // Return empty list after deletion
 
     Optional<MoistureContentConesDto> result =
-        moistureContentService.deleteMccReplicate(riaKey, replicateNumber);
+        moistureContentService.deleteMccReplicate(riaKey, replicateNumber, UPDATE_TS);
 
     assertNotNull(result);
     assertTrue(result.isPresent());
@@ -557,7 +560,7 @@ class MoistureContentServiceTest {
         Optional.empty());
 
     assertThrows(InvalidTestActivityKeyException.class,
-        () -> moistureContentService.deleteMccReplicate(riaKey, replicateNumber));
+        () -> moistureContentService.deleteMccReplicate(riaKey, replicateNumber, UPDATE_TS));
 
     verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
   }
@@ -649,9 +652,9 @@ class MoistureContentServiceTest {
 
     // 409 specifically: without the guard these throw 404 (no replicate found) instead.
     assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
-        () -> moistureContentService.deleteMccReplicates(riaKey, List.of(1, 2))).getStatusCode());
+        () -> moistureContentService.deleteMccReplicates(riaKey, List.of(1, 2), UPDATE_TS)).getStatusCode());
     assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
-        () -> moistureContentService.deleteMccReplicate(riaKey, 1)).getStatusCode());
+        () -> moistureContentService.deleteMccReplicate(riaKey, 1, UPDATE_TS)).getStatusCode());
     verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumbers(any(), any());
     verify(replicateRepository, never()).deleteByRiaKeyAndReplicateNumber(any(), any());
   }

@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
@@ -37,7 +38,8 @@ public record ActivitySearchResponseDto(
     Integer riaSkey,
     String activityTypeCd,
     Integer germTestInd,
-    Integer assignedTrayInd
+    Integer assignedTrayInd,
+    @JsonFormat(shape = JsonFormat.Shape.STRING) LocalDateTime activityUpdateTimestamp
 ) {
 }
 

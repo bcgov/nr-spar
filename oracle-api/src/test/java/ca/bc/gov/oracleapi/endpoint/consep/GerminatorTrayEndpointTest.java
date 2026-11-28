@@ -60,6 +60,7 @@ class GerminatorTrayEndpointTest {
   private GerminatorTrayService germinatorTrayService;
 
   private static final String BASE_URL = "/api/germinator-trays";
+  private static final LocalDateTime UPDATE_TS = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
 
   /* ----------------------- Assign Germinator Trays ----------------------*/
   @Test
@@ -67,8 +68,8 @@ class GerminatorTrayEndpointTest {
     // Arrange - use current time for payload
     LocalDateTime now = LocalDateTime.now();
     List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), null),
-        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), now)
+        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), null, UPDATE_TS),
+        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), now, UPDATE_TS)
     );
 
     // Prepare service response
@@ -94,6 +95,21 @@ class GerminatorTrayEndpointTest {
 
     // Verify service was called with the same request object (record equals should match)
     verify(testResultService, times(1)).assignGerminatorTrays(requests);
+  }
+
+  @Test
+  void assignGerminatorTrays_requiresTimestampFieldButAcceptsNull() throws Exception {
+    mockMvc.perform(post(BASE_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("[{\"activityTypeCd\":\"G10\",\"riaSkey\":881191}]"))
+        .andExpect(status().isBadRequest());
+
+    mockMvc.perform(post(BASE_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+            .content("[{\"activityTypeCd\":\"G10\",\"riaSkey\":881191,"
+                + "\"activityUpdateTimestamp\":null}]"))
+        .andExpect(status().isCreated());
+
+    verify(testResultService).assignGerminatorTrays(
+        List.of(new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), null, null)));
   }
 
   @Test
@@ -123,7 +139,7 @@ class GerminatorTrayEndpointTest {
       throws Exception {
     // Arrange - request list with one valid-looking entry
     List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), LocalDateTime.now())
+        new GerminatorTrayCreateDto("G10", new BigDecimal("881191"), LocalDateTime.now(), UPDATE_TS)
     );
     when(testResultService.assignGerminatorTrays(any()))
         .thenThrow(new ResponseStatusException(
@@ -145,7 +161,7 @@ class GerminatorTrayEndpointTest {
       throws Exception {
     // Arrange - request list with one valid-looking entry
     List<GerminatorTrayCreateDto> requests = List.of(
-        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), LocalDateTime.now())
+        new GerminatorTrayCreateDto("G12", new BigDecimal("881192"), LocalDateTime.now(), UPDATE_TS)
     );
     when(testResultService.assignGerminatorTrays(any()))
         .thenThrow(new ResponseStatusException(
@@ -181,7 +197,8 @@ class GerminatorTrayEndpointTest {
         new GerminatorTrayCreateDto(
           "",
           new BigDecimal("881191"),
-          LocalDateTime.now()
+          LocalDateTime.now(),
+          UPDATE_TS
         )
     );
 
@@ -764,7 +781,7 @@ class GerminatorTrayEndpointTest {
   }
 
   @Test
-  void deleteTray_returns400_whenUpdateTimestampIsNull() throws Exception {
+  void deleteTray_acceptsNullLegacyTimestamp() throws Exception {
     String body =
         """
         [{"riaSkey":881191,"updateTimestamp":null}]
@@ -777,8 +794,20 @@ class GerminatorTrayEndpointTest {
                 .param("revisionCount", "0")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isNoContent());
 
+    verify(germinatorTrayService).deleteTray(101, 0L,
+        List.of(new GerminatorTrayDeleteContentDto(new BigDecimal("881191"), null)));
+  }
+
+  @Test
+  void deleteTray_rejectsMissingTimestampField() throws Exception {
+    mockMvc.perform(post(BASE_URL + "/101/delete")
+            .with(csrf())
+            .param("revisionCount", "0")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("[{\"riaSkey\":881191}]"))
+        .andExpect(status().isBadRequest());
     verify(germinatorTrayService, times(0)).deleteTray(any(), any(), any());
   }
 

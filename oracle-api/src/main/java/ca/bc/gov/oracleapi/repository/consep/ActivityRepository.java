@@ -136,7 +136,8 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       UPDATE ActivityEntity a
          SET a.updateTimestamp = CURRENT_TIMESTAMP
        WHERE a.riaKey = :riaKey
-         AND a.updateTimestamp = :updateTimestamp
+         AND (a.updateTimestamp = :updateTimestamp
+              OR (a.updateTimestamp IS NULL AND :updateTimestamp IS NULL))
       """)
   int updateTimestampWhereMatch(
       @Param("riaKey") BigDecimal riaKey,
@@ -159,7 +160,8 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
              a.riaComment = :riaComment,
              a.updateTimestamp = CURRENT_TIMESTAMP
        WHERE a.riaKey = :riaKey
-         AND a.updateTimestamp = :expectedUpdateTimestamp
+         AND (a.updateTimestamp = :expectedUpdateTimestamp
+              OR (a.updateTimestamp IS NULL AND :expectedUpdateTimestamp IS NULL))
       """)
   int updateActivityFieldWithLock(
       @Param("riaKey") BigDecimal riaKey,
@@ -168,6 +170,13 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, BigDec
       @Param("testCategoryCode") String testCategoryCode,
       @Param("riaComment") String riaComment,
       @Param("expectedUpdateTimestamp") LocalDateTime expectedUpdateTimestamp);
+
+  /**
+   * Reads just the activity's update timestamp. A scalar query, so it bypasses the persistence
+   * context and returns what the database holds now.
+   */
+  @Query("SELECT a.updateTimestamp FROM ActivityEntity a WHERE a.riaKey = :riaKey")
+  Optional<LocalDateTime> findUpdateTimestamp(@Param("riaKey") BigDecimal riaKey);
 
   /**
    * Update activity dates/comment with optimistic locking (issue #2447).

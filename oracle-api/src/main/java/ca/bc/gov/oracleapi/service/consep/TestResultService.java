@@ -17,6 +17,7 @@ import ca.bc.gov.oracleapi.entity.consep.GerminatorTrayEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRegimeEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestRepGermEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
+import ca.bc.gov.oracleapi.exception.EditConflictException;
 import ca.bc.gov.oracleapi.mapper.GermCountMapper;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.DailyAbnormalRepository;
@@ -63,6 +64,7 @@ public class TestResultService {
   private final DailyAbnormalRepository dailyAbnormalRepository;
   private final GermCountRepository germCountRepository;
   private final TestRepGermRepository testRepGermRepository;
+  private final ActivityService activityService;
   private final GermCountMapper germCountMapper;
 
   /**
@@ -280,7 +282,10 @@ public class TestResultService {
    *
    * @param requests the list of germinator tray creation requests to be assigned to trays
    * @return a list of responses describing the trays that were created and their assignments
+   * @throws ResponseStatusException 409 ({@link EditConflictException}) if any activity changed
+   *     since the client read it; nothing is created in that case
    */
+  @Transactional
   public List<GerminatorTrayCreateResponseDto> assignGerminatorTrays(
       List<GerminatorTrayCreateDto> requests
   ) {
@@ -291,7 +296,20 @@ public class TestResultService {
       );
     }
 
-    // Validate selected seed tests and collect their GermTestResultDto values in one pass.
+    // Lock activities in key order before validating mutable assignment state.
+    List<GerminatorTrayCreateDto> lockOrder = requests.stream()
+        .sorted(Comparator.comparing(GerminatorTrayCreateDto::riaSkey))
+        .toList();
+    for (int i = 1; i < lockOrder.size(); i++) {
+      if (lockOrder.get(i - 1).riaSkey().compareTo(lockOrder.get(i).riaSkey()) == 0) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate activity in request");
+      }
+    }
+    for (GerminatorTrayCreateDto request : lockOrder) {
+      activityService.touchActivityOrConflict(
+          request.riaSkey(), request.activityUpdateTimestamp());
+    }
+
     Map<BigDecimal, GermTestResultDto> germTestCache = collectAndValidateGermTestResults(requests);
 
     LocalDate today = LocalDate.now();
@@ -594,8 +612,7 @@ public class TestResultService {
         germCountRepository.touchIfTimestampMatches(
             germCount.getRiaSkey(), request.updateTimestamp());
     if (touchedRows == 0) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "Record changed since last read; please reselect and retry");
+      throw new EditConflictException(EditConflictException.DEFAULT_MESSAGE);
     }
 
     DailyAbnormalEntity entity = dailyAbnormalRepository.findByDailyGermSkey(dailyGermSkey);
@@ -1128,6 +1145,19 @@ public class TestResultService {
     String updRank = computeRankUpdate(
         accept, category, seedlotNumber, riaKey, updOriginal, updCurrent);
 
+    int activityRows = activityRepository.updateGerminationTestActivity(
+        riaKey, dto.actualBeginDateTime(), effectiveEnd,
+        dto.actualBeginDateTime() == null ? null : dto.actualBeginDateTime().toLocalDate(),
+        computeRevisedEndDate(effectiveEnd, dto.actualBeginDateTime(),
+            storedActivity.getActivityDuration(), storedActivity.getActivityTimeUnit()),
+        dto.riaComment(),
+        Boolean.TRUE.equals(dto.commentIsCritical()) ? -1 : 0,
+        dto.riaUpdateTimestamp());
+    if (activityRows == 0) {
+      throw new EditConflictException(
+          "Activity was modified by another user; reload and retry");
+    }
+
     boolean storedComplete = storedTest.getTestCompleteInd() != null
         && storedTest.getTestCompleteInd() != 0;
     if (complete && !storedComplete) {
@@ -1140,21 +1170,8 @@ public class TestResultService {
         dto.germinatorId(), dto.seedWithdrawalDate(), category,
         dto.testResultUpdateTimestamp());
     if (testRows == 0) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
+      throw new EditConflictException(
           "Test result was modified by another user; reload and retry");
-    }
-
-    int activityRows = activityRepository.updateGerminationTestActivity(
-        riaKey, dto.actualBeginDateTime(), effectiveEnd,
-        dto.actualBeginDateTime() == null ? null : dto.actualBeginDateTime().toLocalDate(),
-        computeRevisedEndDate(effectiveEnd, dto.actualBeginDateTime(),
-            storedActivity.getActivityDuration(), storedActivity.getActivityTimeUnit()),
-        dto.riaComment(),
-        Boolean.TRUE.equals(dto.commentIsCritical()) ? -1 : 0,
-        dto.riaUpdateTimestamp());
-    if (activityRows == 0) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Activity was modified by another user; reload and retry");
     }
 
     if (updOriginal == -1) {

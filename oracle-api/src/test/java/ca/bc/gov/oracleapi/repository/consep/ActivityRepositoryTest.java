@@ -36,6 +36,32 @@ class ActivityRepositoryTest {
   private static final LocalDateTime BEGIN = LocalDateTime.of(2026, 5, 10, 9, 0, 0);
   private static final LocalDateTime END = LocalDateTime.of(2026, 5, 10, 12, 0, 0);
 
+  @Test
+  void legacyNullTimestampCanBeTouchedOnlyOnce() {
+    ActivityEntity activity = persistActivity("00098", "G11", BEGIN, END);
+    BigDecimal key = activity.getRiaKey();
+    entityManager.flush();
+
+    assertThat(activityRepository.updateTimestampWhereMatch(key, null)).isEqualTo(1);
+    entityManager.clear();
+    assertThat(activityRepository.findById(key).orElseThrow().getUpdateTimestamp()).isNotNull();
+    assertThat(activityRepository.updateTimestampWhereMatch(key, null)).isZero();
+  }
+
+  @Test
+  void legacyNullTimestampCanBeUsedForOnlyOneActivityUpdate() {
+    ActivityEntity activity = persistActivity("00098", "G11", BEGIN, END);
+    BigDecimal key = activity.getRiaKey();
+    entityManager.flush();
+
+    assertThat(activityRepository.updateActivityFieldWithLock(key, BEGIN, END, "STD", "first",
+        null)).isEqualTo(1);
+    assertThat(activityRepository.updateActivityFieldWithLock(key, BEGIN, END, "STD", "stale",
+        null)).isZero();
+    entityManager.clear();
+    assertThat(activityRepository.findById(key).orElseThrow().getRiaComment()).isEqualTo("first");
+  }
+
   private ActivityEntity persistActivity(
       String seedlotNumber, String standardActivityId,
       LocalDateTime begin, LocalDateTime end) {

@@ -54,6 +54,9 @@ import org.springframework.web.server.ResponseStatusException;
 @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_SUPERVISOR")
 class PurityTestsEndpointTest {
 
+  private static final LocalDateTime UPDATE_TS = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
+  private static final String UPDATE_TS_PARAM = "2024-05-01T10:15:30";
+
   @Autowired
   private MockMvc mockMvc;
 
@@ -75,7 +78,9 @@ class PurityTestsEndpointTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
-    mockMvc = MockMvcBuilders.standaloneSetup(purityTestsEndpoint).build();
+    mockMvc = MockMvcBuilders.standaloneSetup(purityTestsEndpoint)
+        .setControllerAdvice(new ca.bc.gov.oracleapi.endpoint.RestExceptionEndpoint())
+        .build();
   }
 
   private final ObjectMapper mapper = new ObjectMapper()
@@ -130,7 +135,7 @@ class PurityTestsEndpointTest {
             "Comment for this test",
             LocalDateTime.parse("2013-08-01T00:00:00"),
             LocalDateTime.parse("2013-08-01T00:00:00"),
-            LocalDateTime.parse("2013-08-01T00:00:00"),
+            LocalDateTime.parse("2013-08-01T00:00:00.123456"),
             replicatesList,
             List.of(debris1)
         ));
@@ -157,6 +162,7 @@ class PurityTestsEndpointTest {
         .andExpect(jsonPath("$.activityType").value(purityContent.get().activityType()))
         .andExpect(jsonPath("$.testCategoryCode").value(purityContent.get().testCategoryCode()))
         .andExpect(jsonPath("$.riaComment").value(purityContent.get().riaComment()))
+        .andExpect(jsonPath("$.updateTimestamp").value("2013-08-01T00:00:00.123456"))
         .andExpect(jsonPath("$.actualBeginDateTime")
             .value(purityContent.get().actualBeginDateTime().format(formatter)))
         .andExpect(jsonPath("$.actualEndDateTime")
@@ -280,8 +286,25 @@ class PurityTestsEndpointTest {
   @Test
   @DisplayName("PUT autosave returns 400 without the updateTimestamp it locks on")
   void autosave_missingTimestamp_returns400() throws Exception {
-    putAutosave(new PurityAutosaveFormDto(activity("c", null), List.of()))
+    mockMvc.perform(put("/api/purity-tests/{riaKey}", RIA_KEY)
+            .with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON)
+            .content("{\"activity\":{\"riaComment\":\"c\"},\"replicates\":[]}"))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void autosave_acceptsNullAndPreservesFractionalTimestamp() throws Exception {
+    PurityAutosaveFormDto legacy = new PurityAutosaveFormDto(activity("legacy", null), List.of());
+    ActivityEntity saved = new ActivityEntity();
+    saved.setUpdateTimestamp(LocalDateTime.parse("2013-08-02T00:00:00.123456"));
+    when(purityTestService.autosave(RIA_KEY, legacy)).thenReturn(saved);
+    putAutosave(legacy).andExpect(status().isOk())
+        .andExpect(jsonPath("$.updateTimestamp").value("2013-08-02T00:00:00.123456"));
+
+    PurityAutosaveFormDto next = new PurityAutosaveFormDto(
+        activity("next", saved.getUpdateTimestamp()), List.of());
+    when(purityTestService.autosave(RIA_KEY, next)).thenReturn(saved);
+    putAutosave(next).andExpect(status().isOk());
   }
 
   @Test
@@ -366,11 +389,31 @@ class PurityTestsEndpointTest {
     BigDecimal riaKey = new BigDecimal(1234567890);
     Integer replicateNumber = 1;
 
-    doNothing().when(purityTestService).deleteSinglePurityReplicate(riaKey, replicateNumber);
+    doNothing().when(purityTestService)
+        .deleteSinglePurityReplicate(riaKey, replicateNumber, UPDATE_TS);
 
     mockMvc.perform(delete("/api/purity-tests/{riaKey}/{replicateNumber}", riaKey,
-            replicateNumber).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
+            replicateNumber).param("updateTimestamp", UPDATE_TS_PARAM)
+            .with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  void deleteReplicate_acceptsExplicitEmptyLegacyTimestamp() throws Exception {
+    mockMvc.perform(delete("/api/purity-tests/{riaKey}/{replicateNumber}", 123, 1)
+            .param("updateTimestamp", "")
+            .with(csrf().asHeader()))
+        .andExpect(status().isOk());
+    org.mockito.Mockito.verify(purityTestService)
+        .deleteSinglePurityReplicate(new BigDecimal("123"), 1, null);
+  }
+
+  @Test
+  void deleteReplicate_rejectsMalformedTimestamp() throws Exception {
+    mockMvc.perform(delete("/api/purity-tests/{riaKey}/{replicateNumber}", 123, 1)
+            .param("updateTimestamp", "not-a-date")
+            .with(csrf().asHeader()))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -380,10 +423,11 @@ class PurityTestsEndpointTest {
     Integer replicateNumber = 1;
 
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(purityTestService)
-        .deleteSinglePurityReplicate(riaKey, replicateNumber);
+        .deleteSinglePurityReplicate(riaKey, replicateNumber, UPDATE_TS);
 
     mockMvc.perform(delete("/api/purity-tests/{riaKey}/{replicateNumber}", riaKey,
-            replicateNumber).with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
+            replicateNumber).param("updateTimestamp", UPDATE_TS_PARAM)
+            .with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
@@ -401,10 +445,11 @@ class PurityTestsEndpointTest {
     List<PurityDebrisFormDto> debrisFormList = List.of(debrisForm1, debrisForm2);
     List<PurityDebrisDto> debrisDtos = List.of(dto1, dto2);
 
-    when(purityTestService.updateDebris(eq(riaKey), eq(debrisFormList)))
+    when(purityTestService.updateDebris(eq(riaKey), eq(debrisFormList), eq(UPDATE_TS)))
         .thenReturn(debrisDtos);
 
     mockMvc.perform(patch("/api/purity-tests/debris/{riaKey}", riaKey)
+          .param("updateTimestamp", UPDATE_TS_PARAM)
           .with(csrf().asHeader())
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON)
@@ -427,10 +472,11 @@ class PurityTestsEndpointTest {
 
     PurityDebrisDto updatedDto = new PurityDebrisDto(riaKey, 1, null, 1, "ABC");
 
-    when(purityTestService.updateDebris(eq(riaKey), eq(List.of(debrisForm))))
+    when(purityTestService.updateDebris(eq(riaKey), eq(List.of(debrisForm)), eq(UPDATE_TS)))
         .thenReturn(List.of(updatedDto));
 
     mockMvc.perform(patch("/api/purity-tests/debris/{riaKey}", riaKey)
+            .param("updateTimestamp", UPDATE_TS_PARAM)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
@@ -446,11 +492,12 @@ class PurityTestsEndpointTest {
   void updateDebris_shouldReturnBadRequest() throws Exception {
     BigDecimal riaKey = BigDecimal.valueOf(1234567890);
 
-    when(purityTestService.updateDebris(eq(riaKey), eq(List.of())))
+    when(purityTestService.updateDebris(eq(riaKey), eq(List.of()), eq(UPDATE_TS)))
         .thenThrow(new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Invalid debris data"));
 
     mockMvc.perform(patch("/api/purity-tests/debris/{riaKey}", riaKey)
+            .param("updateTimestamp", UPDATE_TS_PARAM)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
@@ -470,11 +517,12 @@ class PurityTestsEndpointTest {
 
     List<PurityDebrisDto> updatedList = List.of(remainingDebris);
 
-    when(purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank))
+    when(purityTestService.deletePurityDebris(riaKey, replicateNumber, debrisRank, UPDATE_TS))
         .thenReturn(updatedList);
 
     mockMvc.perform(delete("/api/purity-tests/debris/{riaKey}/{replicateNumber}/{debrisRank}",
             riaKey, replicateNumber, debrisRank)
+            .param("updateTimestamp", UPDATE_TS_PARAM)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -491,12 +539,41 @@ class PurityTestsEndpointTest {
     int debrisRank = 2;
 
     doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
-        .when(purityTestService).deletePurityDebris(riaKey, replicateNumber, debrisRank);
+        .when(purityTestService).deletePurityDebris(riaKey, replicateNumber, debrisRank, UPDATE_TS);
 
     mockMvc.perform(delete("/api/purity-tests/debris/{riaKey}/{replicateNumber}/{debrisRank}",
             riaKey, replicateNumber, debrisRank)
+            .param("updateTimestamp", UPDATE_TS_PARAM)
             .with(csrf().asHeader())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("Stale updateTimestamp returns 409 with the EDIT_CONFLICT body")
+  void deleteDebris_staleTimestamp_returnsEditConflictBody() throws Exception {
+    BigDecimal riaKey = new BigDecimal("1234567890");
+    LocalDateTime current = UPDATE_TS.plusMinutes(5).plusNanos(123456000);
+    doThrow(new ca.bc.gov.oracleapi.exception.EditConflictException(
+        ca.bc.gov.oracleapi.exception.EditConflictException.DEFAULT_MESSAGE, current))
+        .when(purityTestService).deletePurityDebris(riaKey, 1, 1, UPDATE_TS);
+
+    mockMvc.perform(delete("/api/purity-tests/debris/{riaKey}/{replicateNumber}/{debrisRank}",
+            riaKey, 1, 1)
+            .param("updateTimestamp", UPDATE_TS_PARAM)
+            .with(csrf().asHeader())
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.code").value("EDIT_CONFLICT"))
+        .andExpect(jsonPath("$.errorMessage").isNotEmpty())
+        .andExpect(jsonPath("$.currentUpdateTimestamp").value("2024-05-01T10:20:30.123456"));
+  }
+
+  @Test
+  @DisplayName("Missing updateTimestamp returns 400")
+  void deleteReplicate_missingTimestamp_returnsBadRequest() throws Exception {
+    mockMvc.perform(delete("/api/purity-tests/{riaKey}/{replicateNumber}", 1234567890, 1)
+            .with(csrf().asHeader()).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 }

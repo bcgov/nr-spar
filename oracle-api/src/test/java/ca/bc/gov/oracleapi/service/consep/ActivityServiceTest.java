@@ -23,6 +23,7 @@ import ca.bc.gov.oracleapi.entity.consep.ActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.StandardActivityEntity;
 import ca.bc.gov.oracleapi.entity.consep.TestResultEntity;
 import ca.bc.gov.oracleapi.entity.projection.RequestSeedlotProj;
+import ca.bc.gov.oracleapi.exception.EditConflictException;
 import ca.bc.gov.oracleapi.repository.consep.ActivityRepository;
 import ca.bc.gov.oracleapi.repository.consep.SparRequestRepository;
 import ca.bc.gov.oracleapi.repository.consep.StandardActivityRepository;
@@ -76,6 +77,54 @@ class ActivityServiceTest {
   private ActivityEntity activityEntity;
   private ActivityCreateDto validActivityCreateDto;
   private StandardActivityEntity standardActivity;
+
+  @Test
+  @DisplayName("touchActivityOrConflict succeeds when the timestamp matches")
+  void touchActivityOrConflict_match_succeeds() {
+    LocalDateTime ts = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
+    when(activityRepository.updateTimestampWhereMatch(new BigDecimal("123"), ts)).thenReturn(1);
+
+    assertDoesNotThrow(() -> activityService.touchActivityOrConflict(new BigDecimal("123"), ts));
+  }
+
+  @Test
+  @DisplayName("touchActivityOrConflict accepts the null version of a legacy activity")
+  void touchActivityOrConflict_nullTimestamp_matchesLegacyRow() {
+    BigDecimal key = new BigDecimal("123");
+    when(activityRepository.updateTimestampWhereMatch(key, null)).thenReturn(1);
+    assertDoesNotThrow(() -> activityService.touchActivityOrConflict(key, null));
+  }
+
+  @Test
+  @DisplayName("touchActivityOrConflict throws EditConflictException with current timestamp")
+  void touchActivityOrConflict_stale_conflict() {
+    BigDecimal key = new BigDecimal("123");
+    LocalDateTime stale = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
+    LocalDateTime current = stale.plusMinutes(5);
+    when(activityRepository.updateTimestampWhereMatch(key, stale)).thenReturn(0);
+    when(activityRepository.findUpdateTimestamp(key)).thenReturn(Optional.of(current));
+
+    EditConflictException ex = assertThrows(EditConflictException.class,
+        () -> activityService.touchActivityOrConflict(key, stale));
+
+    assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    assertEquals(current, ex.getCurrentUpdateTimestamp());
+  }
+
+  @Test
+  @DisplayName("touchActivityOrConflict returns 404 when the activity does not exist")
+  void touchActivityOrConflict_missing_notFound() {
+    BigDecimal key = new BigDecimal("123");
+    LocalDateTime ts = LocalDateTime.of(2024, 5, 1, 10, 15, 30);
+    when(activityRepository.updateTimestampWhereMatch(key, ts)).thenReturn(0);
+    when(activityRepository.findUpdateTimestamp(key)).thenReturn(Optional.empty());
+    when(activityRepository.existsById(key)).thenReturn(false);
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> activityService.touchActivityOrConflict(key, ts));
+
+    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+  }
 
   @BeforeEach
   void setUp() {

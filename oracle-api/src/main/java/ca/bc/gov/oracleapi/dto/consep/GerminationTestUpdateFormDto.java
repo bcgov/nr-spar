@@ -43,14 +43,14 @@ public record GerminationTestUpdateFormDto(
     String riaComment,
     @Schema(description = "Whether the comment is critical", example = "false")
     Boolean commentIsCritical,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(
         description =
             "update_timestamp of the test result row as read (optimistic lock);"
                 + " null when the row has never been stamped (null on a stamped row gives 409)"
     )
     LocalDateTime testResultUpdateTimestamp,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(description = "update_timestamp of the activity row as read (optimistic lock);"
         + " null when the row has never been stamped (null on a stamped row gives 409)")
     LocalDateTime riaUpdateTimestamp

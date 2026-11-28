@@ -176,6 +176,9 @@ class GerminatorTrayServiceTest {
     verify(testResultRepository).findById(riaSkey);
     verify(testResultRepository).detachTestFromTray(riaSkey);
     verify(activityRepository).updateTimestampWhereMatch(riaSkey, updateTimestamp);
+    var order = org.mockito.Mockito.inOrder(activityRepository, testResultRepository);
+    order.verify(activityRepository).updateTimestampWhereMatch(riaSkey, updateTimestamp);
+    order.verify(testResultRepository).detachTestFromTray(riaSkey);
     verify(testResultRepository).countByGerminatorTrayId(trayId);
     verify(germinatorTrayRepository, never())
         .deleteByGerminatorTrayIdAndRevisionCount(any(), any());
@@ -241,6 +244,7 @@ class GerminatorTrayServiceTest {
     testResult.setGerminatorTrayId(trayId);
 
     when(testResultRepository.findById(riaSkey)).thenReturn(Optional.of(testResult));
+    when(activityRepository.updateTimestampWhereMatch(riaSkey, updateTimestamp)).thenReturn(1);
     when(testResultRepository.detachTestFromTray(riaSkey)).thenReturn(0);
 
     ResponseStatusException ex =
@@ -251,7 +255,7 @@ class GerminatorTrayServiceTest {
     assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
     assertEquals(GerminatorTrayService.RESELECT_MESSAGE, ex.getReason());
 
-    verify(activityRepository, never()).updateTimestampWhereMatch(any(), any());
+    verify(activityRepository).updateTimestampWhereMatch(riaSkey, updateTimestamp);
   }
 
   @Test
@@ -306,7 +310,7 @@ class GerminatorTrayServiceTest {
     Integer trayId = 101;
     LocalDateTime firstUpdateTimestamp = LocalDateTime.of(2026, 4, 1, 10, 0);
     LocalDateTime secondUpdateTimestamp = LocalDateTime.of(2026, 4, 1, 11, 0);
-    List<BigDecimal> riaKeys = List.of(BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+    List<BigDecimal> riaKeys = List.of(BigDecimal.valueOf(2), BigDecimal.valueOf(1));
     List<GerminatorTrayDeleteContentDto> contents =
         List.of(
             new GerminatorTrayDeleteContentDto(BigDecimal.valueOf(1), firstUpdateTimestamp),
@@ -329,6 +333,13 @@ class GerminatorTrayServiceTest {
     verify(testResultRepository).detachTestFromTray(BigDecimal.valueOf(2));
     verify(activityRepository).updateTimestampWhereMatch(BigDecimal.valueOf(1), firstUpdateTimestamp);
     verify(activityRepository).updateTimestampWhereMatch(BigDecimal.valueOf(2), secondUpdateTimestamp);
+    var order = org.mockito.Mockito.inOrder(activityRepository, testResultRepository);
+    order.verify(activityRepository)
+        .updateTimestampWhereMatch(BigDecimal.valueOf(1), firstUpdateTimestamp);
+    order.verify(testResultRepository).detachTestFromTray(BigDecimal.valueOf(1));
+    order.verify(activityRepository)
+        .updateTimestampWhereMatch(BigDecimal.valueOf(2), secondUpdateTimestamp);
+    order.verify(testResultRepository).detachTestFromTray(BigDecimal.valueOf(2));
     verify(germinatorTrayRepository).deleteByGerminatorTrayIdAndRevisionCount(trayId, 0L);
   }
 
@@ -386,6 +397,8 @@ class GerminatorTrayServiceTest {
 
     when(germinatorTrayRepository.existsById(trayId)).thenReturn(true);
     when(testResultRepository.findRiaKeysByGerminatorTrayId(trayId)).thenReturn(riaKeys);
+    when(activityRepository.updateTimestampWhereMatch(BigDecimal.valueOf(1), updateTimestamp))
+        .thenReturn(1);
     when(testResultRepository.detachTestFromTray(BigDecimal.valueOf(1))).thenReturn(0);
 
     ResponseStatusException ex =
@@ -397,7 +410,7 @@ class GerminatorTrayServiceTest {
     assertEquals(GerminatorTrayService.RESELECT_MESSAGE, ex.getReason());
 
     verify(testResultRepository).detachTestFromTray(BigDecimal.valueOf(1));
-    verify(activityRepository, never()).updateTimestampWhereMatch(any(), any());
+    verify(activityRepository).updateTimestampWhereMatch(BigDecimal.valueOf(1), updateTimestamp);
   }
 
   @Test
@@ -410,7 +423,6 @@ class GerminatorTrayServiceTest {
 
     when(germinatorTrayRepository.existsById(trayId)).thenReturn(true);
     when(testResultRepository.findRiaKeysByGerminatorTrayId(trayId)).thenReturn(riaKeys);
-    when(testResultRepository.detachTestFromTray(BigDecimal.valueOf(1))).thenReturn(1);
     when(activityRepository.updateTimestampWhereMatch(BigDecimal.valueOf(1), updateTimestamp))
         .thenReturn(0);
 
