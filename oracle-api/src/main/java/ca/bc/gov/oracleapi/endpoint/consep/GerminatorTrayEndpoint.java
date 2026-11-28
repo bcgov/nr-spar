@@ -24,11 +24,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
@@ -167,13 +164,13 @@ public class GerminatorTrayEndpoint {
   public void deleteTestFromTray(
       @PathVariable Integer germinatorTrayId,
       @PathVariable BigDecimal riaSkey,
-      @RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime activityUpdateTimestamp,
+      @RequestParam String activityUpdateTimestamp,
       @RequestParam @NotNull @PositiveOrZero Long revisionCount
   ) {
     germinatorTrayService.deleteTestFromTray(
         germinatorTrayId,
         riaSkey,
-        activityUpdateTimestamp,
+        ActivityVersionParameter.parse(activityUpdateTimestamp),
         revisionCount
     );
   }

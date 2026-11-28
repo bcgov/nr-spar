@@ -19,10 +19,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -291,12 +289,12 @@ public class MoistureContentConesEndpoint {
       @Parameter(
           name = "updateTimestamp",
           in = ParameterIn.QUERY,
-          description = "The activity updateTimestamp the client last read (optimistic lock)",
+          description = "Activity timestamp last read; use an empty value for a null timestamp",
           required = true)
       @RequestParam(name = "updateTimestamp")
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-          LocalDateTime updateTimestamp) {
-    return moistureContentService.deleteMccReplicate(riaKey, replicateNumber, updateTimestamp);
+          String updateTimestamp) {
+    return moistureContentService.deleteMccReplicate(
+        riaKey, replicateNumber, ActivityVersionParameter.parse(updateTimestamp));
   }
 
   /**
@@ -354,12 +352,12 @@ public class MoistureContentConesEndpoint {
         @Parameter(
             name = "updateTimestamp",
             in = ParameterIn.QUERY,
-            description = "The activity updateTimestamp the client last read (optimistic lock)",
+            description = "Activity timestamp last read; use an empty value for a null timestamp",
             required = true)
         @RequestParam(name = "updateTimestamp")
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime updateTimestamp) {
-    moistureContentService.deleteMccReplicates(riaKey, replicateNumbers, updateTimestamp);
+            String updateTimestamp) {
+    moistureContentService.deleteMccReplicates(
+        riaKey, replicateNumbers, ActivityVersionParameter.parse(updateTimestamp));
     return replicateNumbers;
   }
 

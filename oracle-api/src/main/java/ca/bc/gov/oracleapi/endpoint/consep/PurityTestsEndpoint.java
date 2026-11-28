@@ -21,10 +21,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -295,12 +293,12 @@ public class PurityTestsEndpoint {
       @Parameter(
           name = "updateTimestamp",
           in = ParameterIn.QUERY,
-          description = "The activity updateTimestamp the client last read (optimistic lock)",
+          description = "Activity timestamp last read; use an empty value for a null timestamp",
           required = true)
       @RequestParam(name = "updateTimestamp")
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-          LocalDateTime updateTimestamp) {
-    purityTestService.deleteSinglePurityReplicate(riaKey, replicateNumber, updateTimestamp);
+          String updateTimestamp) {
+    purityTestService.deleteSinglePurityReplicate(
+        riaKey, replicateNumber, ActivityVersionParameter.parse(updateTimestamp));
     return replicateNumber;
   }
 
@@ -359,12 +357,12 @@ public class PurityTestsEndpoint {
         @Parameter(
             name = "updateTimestamp",
             in = ParameterIn.QUERY,
-            description = "The activity updateTimestamp the client last read (optimistic lock)",
+            description = "Activity timestamp last read; use an empty value for a null timestamp",
             required = true)
         @RequestParam(name = "updateTimestamp")
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime updateTimestamp) {
-    purityTestService.deletePurityReplicates(riaKey, replicateNumbers, updateTimestamp);
+            String updateTimestamp) {
+    purityTestService.deletePurityReplicates(
+        riaKey, replicateNumbers, ActivityVersionParameter.parse(updateTimestamp));
     return replicateNumbers;
   }
 
@@ -408,13 +406,13 @@ public class PurityTestsEndpoint {
       @Parameter(
           name = "updateTimestamp",
           in = ParameterIn.QUERY,
-          description = "The activity updateTimestamp the client last read (optimistic lock)",
+          description = "Activity timestamp last read; use an empty value for a null timestamp",
           required = true)
       @RequestParam(name = "updateTimestamp")
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-          LocalDateTime updateTimestamp) {
+          String updateTimestamp) {
 
-    return purityTestService.updateDebris(riaKey, debrisFormDtos, updateTimestamp);
+    return purityTestService.updateDebris(
+        riaKey, debrisFormDtos, ActivityVersionParameter.parse(updateTimestamp));
   }
 
   /**
@@ -482,12 +480,11 @@ public class PurityTestsEndpoint {
       @Parameter(
           name = "updateTimestamp",
           in = ParameterIn.QUERY,
-          description = "The activity updateTimestamp the client last read (optimistic lock)",
+          description = "Activity timestamp last read; use an empty value for a null timestamp",
           required = true)
       @RequestParam(name = "updateTimestamp")
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-          LocalDateTime updateTimestamp) {
+          String updateTimestamp) {
     return purityTestService.deletePurityDebris(
-        riaKey, replicateNumber, debrisRank, updateTimestamp);
+        riaKey, replicateNumber, debrisRank, ActivityVersionParameter.parse(updateTimestamp));
   }
 }
