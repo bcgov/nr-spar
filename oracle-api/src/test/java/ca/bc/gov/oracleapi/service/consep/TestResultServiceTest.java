@@ -90,6 +90,7 @@ class TestResultServiceTest {
 
   @Mock
   private ActivityService activityService;
+  @Mock
   private GermCountMapper germCountMapper;
 
   @Autowired
@@ -391,13 +392,6 @@ class TestResultServiceTest {
     BigDecimal riaSkey = new BigDecimal("881190");
     final List<GerminatorTrayCreateDto> requests =
         List.of(new GerminatorTrayCreateDto("G10", riaSkey, null, UPDATE_TS));
-    // Validation runs before locking; mock a valid germ test result so the lock is reached.
-    when(testRegimeRepository.findAllGermTestActivityTypeCodes()).thenReturn(List.of("G10"));
-    when(testResultRepository.getGermTestResult(riaSkey))
-        .thenReturn(
-            new GermTestResultDto(
-                LocalDate.now().minusDays(1), 48, LocalDate.now(), "G10", 72, 96,
-                LocalDate.now().minusDays(1), null));
     org.mockito.Mockito.doThrow(
             new ca.bc.gov.oracleapi.exception.EditConflictException(
                 ca.bc.gov.oracleapi.exception.EditConflictException.DEFAULT_MESSAGE))
@@ -409,6 +403,36 @@ class TestResultServiceTest {
         () -> testResultService.assignGerminatorTrays(requests));
 
     verify(germinatorTrayRepository, never()).save(any());
+    verify(testResultRepository, never()).getGermTestResult(any());
+  }
+
+  @Test
+  void assignGerminatorTrays_locksActivitiesInKeyOrder() {
+    BigDecimal first = new BigDecimal("1");
+    BigDecimal second = new BigDecimal("2");
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto("G10", second, null, UPDATE_TS),
+        new GerminatorTrayCreateDto("G10", first, null, UPDATE_TS));
+
+    assertThrows(ResponseStatusException.class,
+        () -> testResultService.assignGerminatorTrays(requests));
+
+    var order = org.mockito.Mockito.inOrder(activityService, testRegimeRepository);
+    order.verify(activityService).touchActivityOrConflict(first, UPDATE_TS);
+    order.verify(activityService).touchActivityOrConflict(second, UPDATE_TS);
+    order.verify(testRegimeRepository).findAllGermTestActivityTypeCodes();
+  }
+
+  @Test
+  void assignGerminatorTrays_rejectsDuplicateActivitiesBeforeLocking() {
+    List<GerminatorTrayCreateDto> requests = List.of(
+        new GerminatorTrayCreateDto("G10", new BigDecimal("1"), null, UPDATE_TS),
+        new GerminatorTrayCreateDto("G10", new BigDecimal("1.0"), null, UPDATE_TS));
+
+    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+        () -> testResultService.assignGerminatorTrays(requests));
+    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    verify(activityService, never()).touchActivityOrConflict(any(), any());
   }
 
   @Test
@@ -1601,6 +1625,11 @@ class TestResultServiceTest {
 
     testResultService.updateGerminationTest(RIA_KEY, updateDto(false, false, begin, null, null));
 
+    var order = org.mockito.Mockito.inOrder(activityRepository, testResultRepository);
+    order.verify(activityRepository).updateGerminationTestActivity(
+        any(), any(), any(), any(), any(), any(), any(), any());
+    order.verify(testResultRepository).updateGerminationTestHeader(
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
     verify(testResultRepository).updateGerminationTestHeader(
         eq(RIA_KEY), eq(0), eq(0), isNull(), eq(0), eq(0),
         eq("A"), eq(LocalDate.of(2026, 4, 30)), eq("STD"), eq(TST_TS));
@@ -1707,6 +1736,9 @@ class TestResultServiceTest {
         .thenReturn(Optional.of(storedTest(0, "STD")));
     when(activityRepository.findById(RIA_KEY))
         .thenReturn(Optional.of(storedActivity()));
+    when(activityRepository.updateGerminationTestActivity(
+        any(), any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(1);
     when(testResultRepository.updateGerminationTestHeader(
         any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
         .thenReturn(0);
@@ -1725,9 +1757,6 @@ class TestResultServiceTest {
         .thenReturn(Optional.of(storedTest(0, "STD")));
     when(activityRepository.findById(RIA_KEY))
         .thenReturn(Optional.of(storedActivity()));
-    when(testResultRepository.updateGerminationTestHeader(
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-        .thenReturn(1);
     when(activityRepository.updateGerminationTestActivity(
         any(), any(), any(), any(), any(), any(), any(), any()))
         .thenReturn(0);

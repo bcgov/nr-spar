@@ -88,13 +88,11 @@ class ActivityServiceTest {
   }
 
   @Test
-  @DisplayName("touchActivityOrConflict rejects a null timestamp with 400")
-  void touchActivityOrConflict_nullTimestamp_badRequest() {
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> activityService.touchActivityOrConflict(new BigDecimal("123"), null));
-
-    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-    verify(activityRepository, never()).updateTimestampWhereMatch(any(), any());
+  @DisplayName("touchActivityOrConflict accepts the null version of a legacy activity")
+  void touchActivityOrConflict_nullTimestamp_matchesLegacyRow() {
+    BigDecimal key = new BigDecimal("123");
+    when(activityRepository.updateTimestampWhereMatch(key, null)).thenReturn(1);
+    assertDoesNotThrow(() -> activityService.touchActivityOrConflict(key, null));
   }
 
   @Test

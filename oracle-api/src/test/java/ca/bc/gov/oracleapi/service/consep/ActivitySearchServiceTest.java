@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.service.consep;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.bc.gov.oracleapi.dto.consep.ActivitySearchResponseDto;
@@ -89,6 +90,24 @@ class ActivitySearchServiceTest {
 
   private static List<Integer> ids(PageResponse<ActivitySearchResponseDto> page) {
     return page.content().stream().map(ActivitySearchResponseDto::riaSkey).toList();
+  }
+
+  @Test
+  void searchReturnsActivityVersionAlongsideSelectedRow() {
+    LocalDateTime version = LocalDateTime.of(2026, 5, 1, 10, 15, 30, 123000000);
+    em.getEntityManager().createNativeQuery(
+        "INSERT INTO CONSEP.CNS_T_RQST_ITM_ACTVTY (RIA_SKEY, UPDATE_TIMESTAMP)"
+            + " VALUES (1, :version)")
+        .setParameter("version", version)
+        .executeUpdate();
+    em.clear();
+
+    var row = service.search(req(and(criterion("seedlotDisplay", SearchOperator.EQ, "00098")),
+        null)).content().stream().filter(result -> result.riaSkey() == 1).findFirst().orElseThrow();
+    assertEquals(version, row.activityUpdateTimestamp());
+    var other = service.search(req(and(criterion("seedlotDisplay", SearchOperator.EQ, "00098")),
+        null)).content().stream().filter(result -> result.riaSkey() == 2).findFirst().orElseThrow();
+    assertNull(other.activityUpdateTimestamp());
   }
 
   @Test
