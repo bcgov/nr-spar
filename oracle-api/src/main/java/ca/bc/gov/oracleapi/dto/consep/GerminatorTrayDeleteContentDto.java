@@ -1,5 +1,6 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -11,8 +12,8 @@ public record GerminatorTrayDeleteContentDto(
     @Schema(description = "Request item activity key", example = "12345")
     BigDecimal riaSkey,
 
-    @NotNull
-    @Schema(description = "Activity update timestamp originally fetched by the user")
+    @JsonProperty(value = "updateTimestamp", required = true)
+    @Schema(description = "Activity timestamp last read; explicitly null for a legacy null version")
     LocalDateTime updateTimestamp
 ) {
 }

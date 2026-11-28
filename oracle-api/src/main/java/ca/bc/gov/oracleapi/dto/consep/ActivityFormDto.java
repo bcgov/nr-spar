@@ -1,8 +1,8 @@
 package ca.bc.gov.oracleapi.dto.consep;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -18,8 +18,8 @@ public record ActivityFormDto(
     LocalDateTime actualBeginDateTime,
     LocalDateTime actualEndDateTime,
     @Size(max = 2000) String riaComment,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Schema(description = "The update_timestamp the client read; used for optimistic locking",
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @Schema(description = "Activity timestamp last read; explicitly null for a legacy null version",
         example = "2025-01-18T16:00:00")
-    @NotNull LocalDateTime updateTimestamp
+    @JsonProperty(value = "updateTimestamp", required = true) LocalDateTime updateTimestamp
 ) {}

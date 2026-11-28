@@ -166,7 +166,7 @@ public record GerminationTestHeaderDto(
     @Schema(description = "Request type status", example = "TSC")
     String requestTypeSt,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(
         description = "update_timestamp of the test result row;"
             + " echo back as testResultUpdateTimestamp when updating (optimistic lock)",
@@ -174,7 +174,7 @@ public record GerminationTestHeaderDto(
     )
     LocalDateTime testResultUpdateTimestamp,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Schema(
         description = "update_timestamp of the activity row;"
             + " echo back as riaUpdateTimestamp when updating (optimistic lock)",
